@@ -40,7 +40,7 @@ const tradedTokens = (views: SolInstructionSummary[]): Set<SplTokenAddress | und
  * tells them apart.
  */
 const routeTradedTokens = (views: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
-	views.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, tokenAddress, children }) => {
+	views.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
 		if (kind === 'wrap') {
 			return new Set([...acc, undefined]);
 		}
