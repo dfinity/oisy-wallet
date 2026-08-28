@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { absBigInt } from '$lib/utils/bigint.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -67,11 +68,7 @@ const routeTradedTokens = (
 const largest = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefined =>
 	changes.reduce<SolNetBalanceChange | undefined>(
 		(acc, change) =>
-			isNullish(acc) ||
-			(change.delta < ZERO ? -change.delta : change.delta) >
-				(acc.delta < ZERO ? -acc.delta : acc.delta)
-				? change
-				: acc,
+			isNullish(acc) || absBigInt(change.delta) > absBigInt(acc.delta) ? change : acc,
 		undefined
 	);
 
