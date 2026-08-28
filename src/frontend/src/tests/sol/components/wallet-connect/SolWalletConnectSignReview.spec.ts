@@ -155,6 +155,28 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 	});
 
+	// The message states almost nothing a routed swap does; the simulation is what knows.
+	it('should list what the simulated run does', () => {
+		const { getByTestId, getAllByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: mockAtaAddress, rent: 2_039_280n },
+					{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }
+				]
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
+		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
+	});
+
+	it('should show no instruction list when the simulation produced none', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+		expect(queryByTestId('sol-instructions-list')).not.toBeInTheDocument();
+	});
+
 	describe('the warnings about what the transaction does', () => {
 		it('should warn about a control change, above the fee notices', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
