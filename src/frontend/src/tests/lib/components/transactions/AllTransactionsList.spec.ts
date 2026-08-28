@@ -9,7 +9,9 @@ import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
+import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
+import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
@@ -21,8 +23,10 @@ import {
 	IntersectionObserverOnce,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
@@ -171,6 +175,46 @@ describe('AllTransactionsList', () => {
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber
 			);
+		});
+	});
+
+	describe('when a selected token is no longer selectable', () => {
+		beforeEach(() => {
+			localStorage.clear();
+			transactionsFilterStore.clear();
+		});
+
+		afterEach(() => {
+			transactionsFilterStore.clear();
+		});
+
+		it('drops the selections that the tokens panel no longer offers', async () => {
+			const selectableKey = transactionsFilterTokenKey(get(enabledFungibleNetworkTokens)[0]);
+
+			assertNonNullish(selectableKey);
+
+			transactionsFilterStore.toggleTokenId(selectableKey);
+			transactionsFilterStore.toggleTokenId('UNKNOWN-Unknown');
+
+			render(AllTransactionsList);
+			await tick();
+
+			expect(get(transactionsFilterStore).tokenIds).toEqual([selectableKey]);
+		});
+
+		it('keeps the other facets untouched', async () => {
+			transactionsFilterStore.toggleType('send');
+			transactionsFilterStore.toggleContactId('42');
+			transactionsFilterStore.toggleTokenId('UNKNOWN-Unknown');
+
+			render(AllTransactionsList);
+			await tick();
+
+			const value = get(transactionsFilterStore);
+
+			expect(value.types).toEqual(['send']);
+			expect(value.tokenIds).toEqual([]);
+			expect(value.contactIds).toEqual(['42']);
 		});
 	});
 
