@@ -186,7 +186,7 @@ describe('sol-instruction-summary.utils', () => {
 							programId: 'Tokenkeg',
 							parsed: {
 								type: 'setAuthority',
-								info: { account: ata, authorityType: 'accountOwner', newAuthority: 'sombody' }
+								info: { account: ata, authorityType: 'accountOwner', newAuthority: 'somebody' }
 							}
 						}
 					],
@@ -194,7 +194,7 @@ describe('sol-instruction-summary.utils', () => {
 				});
 
 				expect(view.kind).toBe('setAuthority');
-				expect(view.newAuthority).toBe('sombody');
+				expect(view.newAuthority).toBe('somebody');
 			});
 
 			it('should report an approval with its delegate', () => {
