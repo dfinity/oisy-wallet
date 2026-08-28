@@ -29,8 +29,32 @@
 			({ address, network: { id } }) => address === tokenAddress && id === feeToken.network.id
 		);
 
-	const symbol = (tokenAddress: SplTokenAddress): string =>
-		splToken(tokenAddress)?.symbol ?? shortenWithMiddleEllipsis({ text: tokenAddress });
+	// Mints OISY cannot name, in the order they appear. A bare address reads as noise next to the
+	// tickers around it, so an unlisted mint is named by position instead and numbered only when
+	// there is more than one to tell apart.
+	let unknownTokenAddresses = $derived(
+		tokenDeltas.reduce<SplTokenAddress[]>(
+			(acc, { tokenAddress }) =>
+				nonNullish(splToken(tokenAddress)) || acc.includes(tokenAddress)
+					? acc
+					: [...acc, tokenAddress],
+			[]
+		)
+	);
+
+	const symbol = (tokenAddress: SplTokenAddress): string => {
+		const known = splToken(tokenAddress)?.symbol;
+
+		if (nonNullish(known)) {
+			return known;
+		}
+
+		const index = unknownTokenAddresses.indexOf(tokenAddress);
+
+		return unknownTokenAddresses.length > 1
+			? `${$i18n.transaction.text.unknown_token} ${index + 1}`
+			: $i18n.transaction.text.unknown_token;
+	};
 
 	// A mint OISY does not know has no rate of its own, and no other token's rate describes it, so
 	// such a delta is left as a bare amount rather than priced against something it is not.

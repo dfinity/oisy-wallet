@@ -4,6 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -111,6 +112,65 @@ describe('SolWalletConnectSimulationPreview', () => {
 
 		expect(getByTestId('simulated-token-delta')).toHaveTextContent('+2.5');
 		expect(queryByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE)).not.toBeInTheDocument();
+	});
+
+	describe('naming a mint OISY does not know', () => {
+		// Deliberately synthetic. A real mint address would resolve the moment the default SPL
+		// tokens are seeded into the store, and this case would quietly stop exercising the
+		// unlisted path it exists to cover.
+		const otherMint = 'notAKnownMint11111111111111111111111111111';
+
+		const delta = (tokenAddress: string) => ({
+			account: mockAtaAddress,
+			tokenAddress,
+			decimals: 6,
+			delta: 2_500_000n
+		});
+
+		it('should name a lone unlisted mint without numbering it', () => {
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockSplAddress)], controlChanges: [] })
+			);
+
+			expect(getByTestId('simulated-token-delta')).toHaveTextContent(
+				en.transaction.text.unknown_token
+			);
+		});
+
+		// Two anonymous rows reading identically is worse than an address: the user cannot tell
+		// which leg is which.
+		it('should number unlisted mints when more than one appears', () => {
+			const { getAllByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockSplAddress), delta(otherMint)], controlChanges: [] })
+			);
+
+			const [first, second] = getAllByTestId('simulated-token-delta');
+
+			expect(first).toHaveTextContent(`${en.transaction.text.unknown_token} 1`);
+			expect(second).toHaveTextContent(`${en.transaction.text.unknown_token} 2`);
+		});
+
+		it('should not show the raw mint address', () => {
+			const { queryByText } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockSplAddress)], controlChanges: [] })
+			);
+
+			expect(queryByText(new RegExp(mockSplAddress.slice(0, 6)))).not.toBeInTheDocument();
+		});
+
+		it('should still prefer the ticker of a mint it knows', () => {
+			enableSplToken();
+
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockValidSplToken.address)], controlChanges: [] })
+			);
+
+			expect(getByTestId('simulated-token-delta')).toHaveTextContent(mockValidSplToken.symbol);
+		});
 	});
 
 	// An authority change moves nothing, so it has to be named in its own right or it is invisible.
