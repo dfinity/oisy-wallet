@@ -52,11 +52,13 @@ export const mapSolNetBalanceChanges = ({
 	const solDelta = feePayer === address ? rawSolDelta + (fee ?? ZERO) : rawSolDelta;
 
 	const sum = (entries: SolTokenBalanceEntry[]): Record<string, bigint> =>
-		entries.reduce<Record<string, bigint>>(
-			(acc, { mint, owner, uiTokenAmount: { amount } }) =>
-				owner === address ? { ...acc, [mint]: (acc[mint] ?? ZERO) + BigInt(amount) } : acc,
-			{}
-		);
+		entries.reduce<Record<string, bigint>>((acc, { mint, owner, uiTokenAmount: { amount } }) => {
+			if (owner === address) {
+				acc[mint] = (acc[mint] ?? ZERO) + BigInt(amount);
+			}
+
+			return acc;
+		}, {});
 
 	const pre = sum(preTokenBalances);
 	const post = sum(postTokenBalances);

@@ -973,6 +973,8 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		near_intents_quote_unverified: string;
+		near_intents_quote_expired: string;
 	};
 }
 
@@ -1338,7 +1340,7 @@ interface I18nWallet_connect {
 		wallet_connect: string;
 		token_units: string;
 	};
-	alt: { connect_input: string };
+	alt: { connect_input: string; open_address_block_explorer: string };
 	domain: {
 		title: string;
 		valid: string;
