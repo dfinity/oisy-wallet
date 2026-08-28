@@ -65,7 +65,13 @@ export const buildTipLink = ({ tipId, claimCode }: TipDraft): string =>
  * is the "link was truncated on the way here" case, not an error worth throwing
  * over.
  */
-const parseFragmentKey = (fragment: string, key: string): string | undefined => {
+const parseFragmentKey = ({
+	fragment,
+	key
+}: {
+	fragment: string;
+	key: string;
+}): string | undefined => {
 	const params = new URLSearchParams(fragment.startsWith('#') ? fragment.slice(1) : fragment);
 	const value = params.get(key);
 	return value === null || value === '' ? undefined : value;
@@ -81,13 +87,13 @@ const parseFragmentKey = (fragment: string, key: string): string | undefined => 
  * of a URL a browser never puts on the wire.
  */
 export const parseTipIdFromFragment = (fragment: string): string | undefined =>
-	parseFragmentKey(fragment, TIP_ID_FRAGMENT_KEY);
+	parseFragmentKey({ fragment, key: TIP_ID_FRAGMENT_KEY });
 
 /**
  * Reads the claim code back out of a link fragment.
  */
 export const parseClaimCodeFromFragment = (fragment: string): string | undefined =>
-	parseFragmentKey(fragment, CLAIM_CODE_FRAGMENT_KEY);
+	parseFragmentKey({ fragment, key: CLAIM_CODE_FRAGMENT_KEY });
 
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;
