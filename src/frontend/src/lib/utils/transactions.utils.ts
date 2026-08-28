@@ -46,6 +46,7 @@ import {
 } from '$lib/utils/network.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -228,21 +229,13 @@ export const mapAllTransactionsUi = ({
 				return acc;
 			}
 
-			// One record per signature lives in the store of every token the transaction touched.
-			// The merged list wants each transaction once, whichever token got there first.
-			const seenSolIds = new Set(
-				acc.filter(({ component }) => component === 'solana').map(({ transaction: { id } }) => id)
-			);
-
 			return [
 				...acc,
-				...($solTransactions[tokenId] ?? [])
-					.filter(({ data: { id } }) => !seenSolIds.has(id))
-					.map(({ data: transaction }) => ({
-						transaction,
-						token,
-						component: 'solana' as const
-					}))
+				...($solTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'solana' as const
+				}))
 			];
 		}
 
@@ -252,9 +245,67 @@ export const mapAllTransactionsUi = ({
 	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
 	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
 
-	return duplicates.size > 0
-		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
-		: allTransactions;
+	const withoutEthDuplicates =
+		duplicates.size > 0
+			? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
+			: allTransactions;
+
+	return dropDuplicateSolTransactions(withoutEthDuplicates);
+};
+
+/**
+ * One Solana record per signature lives in the store of every token the transaction touched. The
+ * merged list wants it once, under the token its main change names: that token's icon and amount
+ * are the ones that describe the transaction, where an arbitrary survivor would show a swap under
+ * whichever token happened to be listed first.
+ */
+const dropDuplicateSolTransactions = (
+	transactions: AllTransactionUiWithCmp[]
+): AllTransactionUiWithCmp[] => {
+	const groups = transactions.reduce<Map<string, AllTransactionUiWithCmp[]>>((acc, entry) => {
+		if (entry.component !== 'solana') {
+			return acc;
+		}
+
+		const key = String(entry.transaction.id);
+		acc.set(key, [...(acc.get(key) ?? []), entry]);
+		return acc;
+	}, new Map());
+
+	const drop = new Set<AllTransactionUiWithCmp>();
+
+	groups.forEach((group) => {
+		if (group.length < 2) {
+			return;
+		}
+
+		const [{ transaction }] = group;
+		const { summary } = transaction as SolTransactionUi;
+
+		const mainChange =
+			summary?.kind === 'send'
+				? summary.spent
+				: summary?.kind === 'receive'
+					? summary.received
+					: undefined;
+
+		const best =
+			(nonNullish(mainChange)
+				? group.find(({ token }) =>
+						isNullish(mainChange.tokenAddress)
+							? !isTokenSpl(token)
+							: isTokenSpl(token) && token.address === mainChange.tokenAddress
+					)
+				: undefined) ?? group[0];
+
+		group.forEach((entry) => {
+			if (entry !== best) {
+				drop.add(entry);
+			}
+		});
+	});
+
+	return drop.size > 0 ? transactions.filter((entry) => !drop.has(entry)) : transactions;
 };
 
 // When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
