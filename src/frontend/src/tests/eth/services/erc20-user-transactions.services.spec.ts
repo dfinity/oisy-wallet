@@ -344,6 +344,34 @@ describe('erc20-user-transactions.services', () => {
 			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(1);
 		});
 
+		// A page of older history sits under what the canister already holds. Keeping its resolved part
+		// and dropping the rest leaves a hole nothing ever reads back, so the whole page has to wait.
+		it('should not persist an older page at all while a verdict is unresolved', async () => {
+			mockErc20Transactions.mockResolvedValue([
+				makeTx({ hash: '0xresolved', blockNumber: 20 }),
+				makeTx({ hash: '0xspam', blockNumber: 30, value: ZERO })
+			]);
+
+			// An unresolved sender is what leaves the verdict open.
+			mockGetTransaction.mockResolvedValue(undefined);
+
+			const { hasMore } = await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			// Still shown, just not cached.
+			expect(hasMore).toBeTruthy();
+			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(2);
+
+			expect(mockSaveUserTransactions).not.toHaveBeenCalled();
+		});
+
 		it('should persist what Etherscan returned against the real chain tip', async () => {
 			mockErc20Transactions.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
 

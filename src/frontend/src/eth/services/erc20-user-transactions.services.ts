@@ -100,6 +100,11 @@ export const fetchErc20Transfers = async ({
 /**
  * Drops everything at or above the oldest unresolved spam verdict, so the stored high-water mark
  * stays below it and a later load re-examines that transfer instead of inheriting the guess.
+ *
+ * For the head load only. It works there because the next load starts from the newest stored block,
+ * so the dropped range is fetched again. Applying it to a page of older history instead leaves a
+ * permanent hole: that page sits under what the canister already holds, nothing reads between two
+ * stored entries, and the transfers would be lost to every later session. Skip the whole page there.
  */
 export const persistableErc20Transfers = ({
 	transactions,
@@ -253,9 +258,19 @@ export const loadNextErc20UserTransactions = async ({
 			}))
 		});
 
+		// Persisting only the resolved part of the page is safe at the head, where the newest stored
+		// block simply stops below the unresolved one and the next load refetches from there. It is
+		// not safe here. This page sits under history the canister already holds, so keeping its older
+		// part and dropping the newer leaves a hole between them, and nothing ever asks for that range
+		// again: cursor paging walks the stored list, which cannot represent a gap, and the fall-through
+		// below only ever looks under the oldest stored entry. Those transfers would disappear from
+		// every later session. Leave the whole page unsaved instead, so the range is refetched and the
+		// verdicts re-examined next time.
+		const verdictsAreResolved = isNullish(oldestUnresolvedBlockNumber);
+
 		// At the cap the canister trims the oldest entries on every save, so history older than what it
 		// already holds would be written and evicted in the same call.
-		if (!isEthBackendAtCapacity(tokenId)) {
+		if (verdictsAreResolved && !isEthBackendAtCapacity(tokenId)) {
 			try {
 				const { getBlockNumber } = infuraProviders(networkId);
 
@@ -264,10 +279,7 @@ export const loadNextErc20UserTransactions = async ({
 				await saveErc20FinalizedTransactions({
 					identity,
 					tokenId: transactionTokenId,
-					transactions: persistableErc20Transfers({
-						transactions: olderTransactions,
-						oldestUnresolvedBlockNumber
-					}),
+					transactions: olderTransactions,
 					currentBlockNumber: latestBlockNumber
 				});
 			} catch (_: unknown) {
