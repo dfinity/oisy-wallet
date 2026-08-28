@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "슬리피지 허용 범위는 0%이거나 $maxSlippage%를 초과할 수 없습니다",
 			"swap_button": "지금 스왑",
 			"swap_is_not_offered": "이 스왑은 현재 제공되지 않습니다.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",

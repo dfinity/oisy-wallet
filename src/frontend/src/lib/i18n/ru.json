@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "Допустимое проскальзывание не может быть 0% или превышать $maxSlippage%",
 			"swap_button": "Обменять сейчас",
 			"swap_is_not_offered": "Этот обмен в настоящее время не предлагается.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",

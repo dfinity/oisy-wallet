@@ -34,3 +34,18 @@ export class InvalidTokenUri extends NftError {}
 export class InvalidMetadataImageUrl extends NftError {}
 
 export class AuthClientNotInitializedError extends Error {}
+
+/**
+ * A swap quote provider refused the requested amount as below its minimum.
+ *
+ * `minAmount` is the provider's minimum, in the source token's smallest unit,
+ * when the provider names one.
+ */
+export class SwapAmountTooLowError extends Error {
+	constructor(
+		message: string,
+		readonly minAmount?: bigint
+	) {
+		super(message);
+	}
+}

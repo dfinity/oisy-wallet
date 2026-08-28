@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "Slippage-Toleranz darf nicht 0% sein oder $maxSlippage% überschreiten",
 			"swap_button": "Jetzt tauschen",
 			"swap_is_not_offered": "Dieser Tausch ist derzeit nicht verfügbar.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Führe Transaktion aus...",
 			"initializing": "Transaktion initialisieren...",
 			"swapping": "Tausche...",
