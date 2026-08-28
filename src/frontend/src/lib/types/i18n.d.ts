@@ -1636,6 +1636,7 @@ interface I18nTransaction {
 		block: string;
 		kind_other: string;
 		summary_swap: string;
+		summary_self: string;
 		swap_on: string;
 		summary_other: string;
 		interacted_with: string;

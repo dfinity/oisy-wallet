@@ -1963,6 +1963,7 @@
 			"block": "블록",
 			"kind_other": "",
 			"summary_swap": "",
+			"summary_self": "",
 			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "상호작용 대상",
