@@ -16,7 +16,11 @@
 	import { loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatNanosecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isTipCancellable,
@@ -204,9 +208,16 @@
 											language: $currentLanguage
 										})}
 
+										<!--
+											Shortened rather than left to `truncate`: a principal is 63 characters
+											and the row already carries a date, so CSS clipping cut it at whatever
+											width happened to be left — mid-segment, with no ending at all. The
+											middle ellipsis keeps the first and last groups, which is the part
+											anyone actually compares.
+										-->
 										{#if status === 'claimed' && nonNullish(claimer)}
 											&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
-												$principal: claimer.toText()
+												$principal: shortenWithMiddleEllipsis({ text: claimer.toText() })
 											})}
 										{:else if status === 'reserved' && nonNullish(remaining)}
 											&nbsp;|&nbsp;{remaining}
@@ -256,7 +267,7 @@
 
 									{#if status === 'claimed' && nonNullish(claimer)}
 										&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
-											$principal: claimer.toText()
+											$principal: shortenWithMiddleEllipsis({ text: claimer.toText() })
 										})}
 									{:else if status === 'reserved' && nonNullish(remaining)}
 										&nbsp;|&nbsp;{remaining}
