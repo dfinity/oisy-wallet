@@ -65,16 +65,23 @@
 				? $i18n.send.text.send
 				: summary.kind === 'receive'
 					? $i18n.receive.text.receive
-					: summary.kind === 'swap'
-						? nonNullish(summary.spent) && nonNullish(summary.received)
-							? replacePlaceholders($i18n.transaction.text.summary_swap, {
-									$spent: swapAmount(summary.spent),
-									$spent_symbol: symbolOf(summary.spent.tokenAddress),
-									$received: swapAmount(summary.received),
-									$received_symbol: symbolOf(summary.received.tokenAddress)
+					: summary.kind === 'self'
+						? nonNullish(summary.spent)
+							? replacePlaceholders($i18n.transaction.text.summary_self, {
+									$amount: swapAmount(summary.spent),
+									$symbol: symbolOf(summary.spent.tokenAddress)
 								})
-							: $i18n.swap.text.swap
-						: $i18n.transaction.text.kind_other
+							: $i18n.transaction.text.kind_other
+						: summary.kind === 'swap'
+							? nonNullish(summary.spent) && nonNullish(summary.received)
+								? replacePlaceholders($i18n.transaction.text.summary_swap, {
+										$spent: swapAmount(summary.spent),
+										$spent_symbol: symbolOf(summary.spent.tokenAddress),
+										$received: swapAmount(summary.received),
+										$received_symbol: symbolOf(summary.received.tokenAddress)
+									})
+								: $i18n.swap.text.swap
+							: $i18n.transaction.text.kind_other
 	);
 
 	// The net change of the token whose page this is: the SOL entry for the native token, the
@@ -107,14 +114,18 @@
 				: isSolNetBalanceChangeSol(mainChange))
 	);
 
+	// A self-transfer nets to nothing for the token it moved: the asset never left, so its row
+	// says zero rather than the amount. SOL still shows what the fee and any rent actually cost.
 	let displayAmount = $derived(
 		showTokenAmount
 			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : ZERO))
 			: isNullish(summary)
 				? fallbackAmount
-				: tokenMatchesMainChange
-					? mainChange?.delta
-					: undefined
+				: summary.kind === 'self'
+					? ZERO
+					: tokenMatchesMainChange
+						? mainChange?.delta
+						: undefined
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));

@@ -173,6 +173,14 @@ export const fetchSolTransactionsForSignature = async ({
 		...(nonNullish(ataAddress) ? [ataAddress] : [])
 	];
 
+	// What each account held going in, so a close can say what it hands back: the instruction
+	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
+	const accountLamports = parsedAccountKeys.reduce<Record<SolAddress, bigint>>(
+		(acc, { pubkey }, index) =>
+			index < (preBalances ?? []).length ? { ...acc, [pubkey]: (preBalances ?? [])[index] } : acc,
+		{}
+	);
+
 	const instructionSummaries = mapSolInstructionSummaries({
 		instructions: [...instructions],
 		innerInstructions: [...putativeInnerInstructions].map(({ index, instructions: inner }) => ({
@@ -180,7 +188,8 @@ export const fetchSolTransactionsForSignature = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses,
-		addressToToken
+		addressToToken,
+		accountLamports
 	});
 
 	const netChanges = mapSolNetBalanceChanges({

@@ -55,4 +55,28 @@ describe('SolTransaction', () => {
 			})} ${getTokenDisplaySymbol(SOLANA_TOKEN)}`
 		);
 	});
+
+	// The asset never left, so the token it moved shows zero rather than the amount.
+	it('should show a self-transfer with its amount and no balance change', () => {
+		const { container, getByText } = render(SolTransaction, {
+			props: {
+				transaction: {
+					...mockTrx,
+					type: 'send',
+					summary: {
+						kind: 'self' as const,
+						spent: { delta: -2_000_000_000n },
+						counterparty: 'my-other-account'
+					}
+				},
+				token: SOLANA_TOKEN
+			}
+		});
+
+		expect(getByText('Self-transfer 2 SOL')).toBeInTheDocument();
+
+		const amount = container.querySelector('div.leading-5>span.justify-end');
+
+		expect(amount?.textContent).not.toContain('-2');
+	});
 });

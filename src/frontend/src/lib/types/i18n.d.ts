@@ -1652,6 +1652,7 @@ interface I18nTransaction {
 		instruction_route: string;
 		instruction_rent: string;
 		instruction_rent_returned: string;
+		instruction_returned: string;
 		instruction_own_account: string;
 		summary_swap: string;
 		summary_self: string;

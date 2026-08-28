@@ -1979,6 +1979,7 @@
 			"instruction_route": "Swap route via",
 			"instruction_rent": "rent $amount SOL",
 			"instruction_rent_returned": "rent returned to your wallet",
+			"instruction_returned": "$amount SOL returned to your wallet",
 			"instruction_own_account": "your account",
 			"summary_swap": "Swap $spent $spent_symbol to $received $received_symbol",
 			"summary_self": "Self-transfer $amount $symbol",
