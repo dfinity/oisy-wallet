@@ -19,7 +19,7 @@ import {
 } from '$lib/services/tip.crypto';
 import { decryptClaimCode, encryptClaimCode } from '$lib/services/tip.vetkeys';
 import type { CanisterIdText } from '$lib/types/canister';
-import { consoleWarn } from '$lib/utils/console.utils';
+import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -94,6 +94,35 @@ export const parseTipIdFromFragment = (fragment: string): string | undefined =>
  */
 export const parseClaimCodeFromFragment = (fragment: string): string | undefined =>
 	parseFragmentKey({ fragment, key: CLAIM_CODE_FRAGMENT_KEY });
+
+/**
+ * The ledger's own reason for refusing an approve, dug out of the client
+ * library's error.
+ *
+ * `IcrcTransferError` carries the candid variant on `errorType` and then reports
+ * a fixed message that names none of it. This reads the variant's key back out —
+ * `InsufficientFunds`, `BadFee`, `AllowanceChanged`, `Duplicate`, `TooOld`,
+ * `CreatedInFuture`, `Expired`, `TemporarilyUnavailable`, `GenericError` — along
+ * with whatever the variant carries, since the payload is the useful half
+ * (`InsufficientFunds` reports the balance, `BadFee` the expected fee).
+ */
+const approveRefusal = (err: unknown): string => {
+	const errorType = (err as { errorType?: unknown })?.errorType;
+
+	if (isNullish(errorType) || typeof errorType !== 'object') {
+		return err instanceof Error ? err.message : `${err}`;
+	}
+
+	const [variant] = Object.entries(errorType as Record<string, unknown>);
+
+	if (isNullish(variant)) {
+		return 'unrecognised ledger error';
+	}
+
+	const [name, payload] = variant;
+
+	return `${name} ${JSON.stringify(payload, (_, value) => (typeof value === 'bigint' ? `${value}` : value))}`;
+};
 
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;
@@ -206,16 +235,39 @@ export const reserveTip = async ({
 }): Promise<{ link: string; secretStored: boolean }> => {
 	const subaccount = await tipSpenderSubaccount(draft.tipId);
 
-	await approve({
-		identity,
-		ledgerCanisterId,
-		amount: amount + fee,
-		spender: {
-			owner: Principal.fromText(BACKEND_CANISTER_ID),
-			subaccount
-		},
-		expiresAt: expiresAtNs
-	});
+	try {
+		await approve({
+			identity,
+			ledgerCanisterId,
+			amount: amount + fee,
+			spender: {
+				owner: Principal.fromText(BACKEND_CANISTER_ID),
+				subaccount
+			},
+			expiresAt: expiresAtNs
+		});
+	} catch (err: unknown) {
+		// The ledger says exactly why an approve was refused — `InsufficientFunds`
+		// with the balance, `BadFee` with the expected fee, `Duplicate`, `TooOld`,
+		// `CreatedInFuture`, `Expired` — but the client library discards all of it
+		// behind one fixed sentence, "Failed to entitle the spender to transfer the
+		// amount", and that sentence is the only thing that reached the console.
+		//
+		// Reserving is the sender's first step and the one that touches their money,
+		// so a refusal that cannot be told apart from any other refusal is the worst
+		// place in the feature to be blind. Logged, then rethrown untouched so the
+		// existing handling is unchanged.
+		consoleError('Ledger refused the tip approval', {
+			reason: approveRefusal(err),
+			ledgerCanisterId,
+			// The reservation is amount + fee; a balance that covers neither is the
+			// most common answer, and needs both numbers to be recognised as such.
+			amount: `${amount}`,
+			fee: `${fee}`
+		});
+
+		throw err;
+	}
 
 	await createTipApi({
 		identity,
