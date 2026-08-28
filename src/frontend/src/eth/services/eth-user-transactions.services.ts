@@ -187,6 +187,14 @@ export const loadNextEthUserTransactions = async ({
 			maxResults: WALLET_PAGINATION
 		});
 
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
+
 		if (nonNullish(result) && result.transactions.length > 0) {
 			const certifiedTransactions = result.transactions.map((transaction) => ({
 				data: transaction,
@@ -196,7 +204,6 @@ export const loadNextEthUserTransactions = async ({
 			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
 			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
-			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
 
 			return {
 				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
