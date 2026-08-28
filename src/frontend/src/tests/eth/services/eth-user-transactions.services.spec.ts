@@ -15,6 +15,7 @@ import {
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapUserTransactionToTransaction } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
@@ -239,6 +240,46 @@ describe('eth-user-transactions.services', () => {
 	});
 
 	describe('loadNextEthUserTransactions', () => {
+		// The read cursor is a position in the stored list, so a trim at the per-token cap shifts every
+		// entry under it and pages start repeating rows we already hold. Asking again would spin.
+		it('should fall through to Etherscan when a cursor page repeats rows we already hold', async () => {
+			const stored = createMockBackendUserTransaction({
+				hash: '0xstored',
+				blockIndex: 50n,
+				timestamp: 500n
+			});
+
+			// Already in the store, so `append` will dedupe the page away.
+			ethTransactionsStore.append({
+				tokenId: mockTokenId,
+				transactions: [{ data: mapUserTransactionToTransaction(stored), certified: false }]
+			});
+
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({ overrides: { transactions: [stored], nextStart: 32n } })
+			);
+
+			mockTransactionsProvider.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 42n,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockTransactionsProvider).toHaveBeenCalledOnce();
+
+			// The cursor is cleared, so the next intersection does not ask the canister again.
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
+		});
+
 		// An empty page is the shape a cursor invalidated by eviction comes back as, and eviction only
 		// happens because the token is at capacity. Dropping `totalStored` there re-enabled the very
 		// saves this branch exists to skip.
