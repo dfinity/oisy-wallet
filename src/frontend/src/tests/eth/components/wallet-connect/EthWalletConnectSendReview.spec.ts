@@ -490,6 +490,23 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
+		// The acknowledgement is a checkbox and a separate label bound to it by `for`. Clicking the
+		// text must toggle it exactly once: nesting the two labels, or letting both the label and the
+		// checkbox wrapper handle the click, toggles twice and leaves the box where it started.
+		it('should toggle the acknowledgement from its label text, once', async () => {
+			const { getByText, getByRole } = renderUnknownCall({
+				data: `${PERMIT2_APPROVE_HASH}deadbeef`
+			});
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unknown_call_agreement));
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unknown_call_agreement));
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
 		it('should not gate a request that carries no calldata at all', () => {
 			const { queryByTestId, getByRole } = render(EthWalletConnectSendReview, {
 				props: {
