@@ -21,6 +21,10 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  *   value == 0  AND  txSender == me       → show (self-initiated maintenance)
  *   value == 0  AND  txSender != me       → hide (spam)
  *
+ * When the sender cannot be determined the transfer is shown, but that is a fallback rather than a
+ * verdict, so its hash is reported in `unresolvedHashes`. Callers that persist the result must not
+ * cache an unresolved transfer: nothing ever re-examines a transfer once it is in the cache.
+ *
  * The "txSender" is the outer transaction's `from` (the EOA that signed the tx),
  * NOT the `Transfer` event's `from`. The only reliable way to obtain it is via
  * `eth_getTransactionByHash`.
@@ -34,7 +38,7 @@ export const filterSpamErc20Transfers = async ({
 	transactions: Transaction[];
 	userAddress: string;
 	getTransactionSender: (hash: string) => Promise<EthAddress | undefined>;
-}): Promise<Transaction[]> => {
+}): Promise<{ transactions: Transaction[]; unresolvedHashes: Set<string> }> => {
 	const { nonZero, zeroValue } = transactions.reduce<{
 		nonZero: Transaction[];
 		zeroValue: Transaction[];
@@ -54,8 +58,10 @@ export const filterSpamErc20Transfers = async ({
 		}
 	);
 
+	const unresolvedHashes = new Set<string>();
+
 	if (zeroValue.length === 0) {
-		return nonZero;
+		return { transactions: nonZero, unresolvedHashes };
 	}
 
 	// In address-poisoning attacks many Transfer logs share the same outer tx hash
@@ -81,6 +87,7 @@ export const filterSpamErc20Transfers = async ({
 		zeroValue.map(async (tx): Promise<Transaction | undefined> => {
 			if (isNullish(tx.hash)) {
 				// No hash available: we cannot look up the sender, so err on the side of showing.
+				// Nothing to report as unresolved, since a transfer without a hash is never persisted.
 				return tx;
 			}
 
@@ -90,6 +97,8 @@ export const filterSpamErc20Transfers = async ({
 				// If the sender cannot be determined (e.g. tx pruned / not found),
 				// err on the side of showing the transfer, same as the catch branch.
 				if (isNullish(sender)) {
+					unresolvedHashes.add(tx.hash);
+
 					return tx;
 				}
 				if (areAddressesEqual({ address1: sender, address2: userAddress, addressType: 'Eth' })) {
@@ -97,12 +106,14 @@ export const filterSpamErc20Transfers = async ({
 				}
 			} catch (_: unknown) {
 				// If the RPC call fails we err on the side of showing the transfer.
+				unresolvedHashes.add(tx.hash);
+
 				return tx;
 			}
 		})
 	);
 
-	return [...nonZero, ...kept.filter(nonNullish)];
+	return { transactions: [...nonZero, ...kept.filter(nonNullish)], unresolvedHashes };
 };
 
 /**
