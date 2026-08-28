@@ -43,17 +43,7 @@ describe('sol-signatures.services integration', () => {
 			mockAuthStore();
 		});
 
-		// These currently fail, and `it.fails` records that on purpose rather than hiding it behind a
-		// skip. Two mapping gaps around SPL token-account rent make the native SOL total drift:
-		//
-		// 1. A transfer out of an associated token account back to the wallet that owns it is typed
-		//    `send` instead of `receive`, because the owner match is checked before the direct one.
-		// 2. The rent that funds or is reclaimed from an associated token account is counted in the
-		//    wallet's native SOL total, even though the wallet's own balance never moves.
-		//
-		// Once the mapping is fixed these start passing, `it.fails` turns red, and it has to be
-		// flipped back to `it.each`. That is the point: unlike a skip, this cannot rot unnoticed.
-		it.fails.each(fixtureSolAddresses)(
+		it.each(fixtureSolAddresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {

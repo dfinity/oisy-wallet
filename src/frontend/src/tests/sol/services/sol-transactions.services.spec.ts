@@ -7,6 +7,7 @@ import * as solanaApi from '$sol/api/solana.api';
 import { getAccountOwner } from '$sol/api/solana.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
@@ -690,6 +691,117 @@ describe('sol-transactions.services', () => {
 
 			expect(cachedOutboundTransaction.type).toBe('send');
 			expect(cachedOutboundTransaction.fromOwner).toBe(mockSolAddress);
+		});
+
+		it('should type a transfer from an owned token account back to the wallet as a receive', async () => {
+			const rentRefund = 2039280n;
+
+			spyFetchTransactionDetailForSignature.mockResolvedValue({
+				...mockTransactionDetail,
+				transaction: {
+					...mockTransactionDetail.transaction,
+					message: {
+						...mockTransactionDetail.transaction.message,
+						instructions: [
+							{
+								parsed: {
+									info: {
+										destination: mockSolAddress,
+										lamports: rentRefund,
+										source: mockAtaAddress
+									},
+									type: 'transfer'
+								},
+								program: 'system',
+								programId: solAddress(SYSTEM_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							}
+						]
+					}
+				},
+				meta: { ...mockTransactionDetail.meta, innerInstructions: [] }
+			});
+
+			// The wallet owns the account the lamports come from, so it matches on both sides. The
+			// direct match is the one that decides the direction.
+			vi.mocked(getAccountOwner).mockResolvedValue(mockSolAddress);
+			spyMapSolParsedInstruction.mockResolvedValue({
+				value: rentRefund,
+				from: mockAtaAddress,
+				to: mockSolAddress
+			});
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
+				expect.objectContaining({
+					type: 'receive',
+					value: rentRefund,
+					from: mockAtaAddress,
+					to: mockSolAddress
+				})
+			]);
+		});
+
+		it('should ignore rent paid into an owned token account when listing native SOL', async () => {
+			const rent = 2039280n;
+
+			spyFetchTransactionDetailForSignature.mockResolvedValue({
+				...mockTransactionDetail,
+				transaction: {
+					...mockTransactionDetail.transaction,
+					message: {
+						...mockTransactionDetail.transaction.message,
+						instructions: [
+							{
+								parsed: {
+									info: {
+										account: mockAtaAddress2,
+										mint: mockSplAddress,
+										source: mockSolAddress2,
+										tokenProgram: TOKEN_PROGRAM_ADDRESS,
+										wallet: mockSolAddress
+									},
+									type: 'create'
+								},
+								program: 'spl-associated-token-account',
+								programId: solAddress(ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							},
+							{
+								parsed: {
+									info: {
+										destination: mockAtaAddress2,
+										lamports: rent,
+										source: mockSolAddress2
+									},
+									type: 'transfer'
+								},
+								program: 'system',
+								programId: solAddress(SYSTEM_PROGRAM_ADDRESS),
+								stackHeight: undefined
+							}
+						]
+					}
+				},
+				meta: { ...mockTransactionDetail.meta, innerInstructions: [] }
+			});
+
+			vi.mocked(getAccountOwner).mockResolvedValue(mockSolAddress);
+			spyMapSolParsedInstruction.mockImplementation(
+				({
+					instruction
+				}: Parameters<typeof solInstructionsUtils.mapSolParsedInstruction>[0]): Promise<
+					SolMappedTransaction | undefined
+				> =>
+					Promise.resolve(
+						'parsed' in instruction && instruction.parsed.type === 'transfer'
+							? { value: rent, from: mockSolAddress2, to: mockAtaAddress2 }
+							: undefined
+					)
+			);
+
+			// A third party funds a token account the wallet owns. The lamports stay in that account as
+			// rent, so the wallet's own SOL balance never moves and this is not its transaction.
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([]);
 		});
 	});
 

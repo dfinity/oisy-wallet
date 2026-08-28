@@ -345,15 +345,24 @@ export const fetchSolTransactionsForSignature = async ({
 			const instructionFromOwner = addressToOwner[from];
 			const instructionToOwner = addressToOwner[to];
 
+			const isDirectSource = from === address || from === ataAddress;
+			const isDirectDestination = to === address || to === ataAddress;
+
+			// Reaching the address only through the owner of a token account is meaningful for a token
+			// view, where that account holds the balance we are listing. It is not for the native SOL
+			// view: lamports paid into a token account we own sit there as rent and never move the
+			// wallet's own balance, so attributing them to the wallet invents SOL it never received.
+			const isRelatedToAddress =
+				from === address ||
+				to === address ||
+				(nonNullish(tokenAddress) &&
+					(isDirectSource ||
+						isDirectDestination ||
+						instructionFromOwner === address ||
+						instructionToOwner === address));
+
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-			if (
-				from !== address &&
-				to !== address &&
-				from !== ataAddress &&
-				to !== ataAddress &&
-				instructionFromOwner !== address &&
-				instructionToOwner !== address
-			) {
+			if (!isRelatedToAddress) {
 				return { parsedTransactions, cumulativeBalances, addressToToken, addressToOwner };
 			}
 
@@ -376,7 +385,10 @@ export const fetchSolTransactionsForSignature = async ({
 				blockNumber: Number(slot),
 				timestamp: blockTime ?? ZERO,
 				value,
-				type: address === from || ataAddress === from || address === fromOwner ? 'send' : 'receive',
+				// A direct match wins over the owner one: a transfer out of a token account back to the
+				// wallet that owns it reaches this address on both sides, and it is a receive.
+				type:
+					isDirectSource || (!isDirectDestination && address === fromOwner) ? 'send' : 'receive',
 				from,
 				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
