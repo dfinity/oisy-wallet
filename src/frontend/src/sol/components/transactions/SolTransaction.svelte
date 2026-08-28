@@ -11,10 +11,12 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
-	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -34,14 +36,26 @@
 			: undefined
 	);
 
+	// The mints this row mentions, so a placeholder is numbered against the others beside it.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
 	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (findEnabledSplToken({
-					tokens: $enabledSplTokens,
-					tokenAddress,
-					networkId: token.network.id
-				})?.symbol ?? $i18n.transaction.text.unknown_token);
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
 
 	const swapAmount = (change: SolNetBalanceChange): string =>
 		formatToken({

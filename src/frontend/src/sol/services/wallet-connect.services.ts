@@ -122,7 +122,9 @@ export const decode = async ({
 	// Name the mints the review is about to show. Best effort and awaited, since the review is
 	// synchronous and a name that landed after the modal opened would arrive too late to read.
 	await loadSplTokenMetadata({
-		tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+		tokenAddresses: (preview?.tokenDeltas ?? [])
+			.map(({ tokenAddress }) => tokenAddress)
+			.filter(nonNullish),
 		network: solNetwork
 	});
 

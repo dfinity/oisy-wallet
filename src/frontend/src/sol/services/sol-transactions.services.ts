@@ -15,6 +15,7 @@ import {
 	loadSolUserTransactions,
 	saveSolFinalizedTransactions
 } from '$sol/services/sol-user-transactions.services';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -208,6 +209,13 @@ export const fetchSolTransactionsForSignature = async ({
 	if (instructionSummaries.length === 0 && netChanges.length === 0) {
 		return [];
 	}
+
+	// Name the mints this record mentions. Best effort: an unnamed token still renders, and the
+	// loader skips mints it has already asked about, so a busy wallet does not re-ask per page.
+	await loadSplTokenMetadata({
+		tokenAddresses: netChanges.map(({ tokenAddress }) => tokenAddress).filter(nonNullish),
+		network
+	});
 
 	const summary = deriveSolTransactionSummary({
 		netChanges,

@@ -12,7 +12,9 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-const flattenInstructions = (instructions: SolInstructionSummary[]): SolInstructionSummary[] =>
+export const flattenInstructions = (
+	instructions: SolInstructionSummary[]
+): SolInstructionSummary[] =>
 	instructions.flatMap((instruction) => [
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
