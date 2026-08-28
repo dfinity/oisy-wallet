@@ -1632,6 +1632,10 @@ interface I18nTransaction {
 		to_ata: string;
 		to_ata_copied: string;
 		block: string;
+		summary_send: string;
+		summary_receive: string;
+		summary_swap: string;
+		summary_other: string;
 		interacted_with: string;
 		unknown_token: string;
 		raw_value: string;

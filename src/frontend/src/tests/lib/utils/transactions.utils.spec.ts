@@ -563,7 +563,9 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(2);
 			});
 
-			it('should not deduplicate non-ethereum component transactions', () => {
+			// One Solana record per signature lives in the store of every token the transaction
+			// touched; the merged list wants it once, whichever token got there first.
+			it('should deduplicate the same Solana transaction across token stores', () => {
 				const solTx1: SolTransactionUi = {
 					...createMockSolTransactionsUi(1)[0],
 					id: 'same-id'
@@ -590,7 +592,7 @@ describe('transactions.utils', () => {
 					$icTransactionsStore: undefined
 				});
 
-				expect(result).toHaveLength(2);
+				expect(result).toHaveLength(1);
 			});
 
 			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {

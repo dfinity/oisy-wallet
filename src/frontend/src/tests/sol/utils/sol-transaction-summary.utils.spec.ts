@@ -1,6 +1,10 @@
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
-import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+import {
+	deriveSolTransactionSummary,
+	formatSolTransactionSummary
+} from '$sol/utils/sol-transaction-summary.utils';
+import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 
@@ -87,6 +91,53 @@ describe('sol-transaction-summary.utils', () => {
 					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
+		});
+	});
+
+	describe('formatSolTransactionSummary', () => {
+		const symbolOf = (tokenAddress: string | undefined) => tokenAddress ?? 'SOL';
+		const decimalsOf = () => 6;
+
+		it('should write a send with its amount, token and recipient', () => {
+			expect(
+				formatSolTransactionSummary({
+					summary: {
+						kind: 'send',
+						spent: { tokenAddress: 'USDC', delta: -1_000_000n, decimals: 6 },
+						counterparty: 'DkngoujigUiRtizQViQPpHUSgJWMg3o3dLVAfj7eEjT2'
+					},
+					i18n: en,
+					symbolOf,
+					decimalsOf
+				})
+			).toBe('Send 1 USDC to Dkngouj...j7eEjT2');
+		});
+
+		it('should write a swap with the pair at its ends', () => {
+			expect(
+				formatSolTransactionSummary({
+					summary: {
+						kind: 'swap',
+						spent: { tokenAddress: 'USDC', delta: -1_000_000n, decimals: 6 },
+						received: { tokenAddress: 'RAY', delta: 46_099n, decimals: 6 }
+					},
+					i18n: en,
+					symbolOf,
+					decimalsOf
+				})
+			).toBe('Swap 1 USDC for 0.046099 RAY');
+		});
+
+		// A kind without the deltas it promises must not render a half sentence.
+		it('should fall back to the other line when the summary is incomplete', () => {
+			expect(
+				formatSolTransactionSummary({
+					summary: { kind: 'send' },
+					i18n: en,
+					symbolOf,
+					decimalsOf
+				})
+			).toBe(en.transaction.text.summary_other);
 		});
 	});
 });

@@ -3,7 +3,10 @@ import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/t
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
-import type { SolNetBalanceChange, SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+import type {
+	SolNetBalanceChange,
+	SolTransactionSummary
+} from '$sol/types/sol-transaction-summary';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	getBase58Decoder,

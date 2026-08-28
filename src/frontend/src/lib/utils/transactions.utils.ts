@@ -228,13 +228,21 @@ export const mapAllTransactionsUi = ({
 				return acc;
 			}
 
+			// One record per signature lives in the store of every token the transaction touched.
+			// The merged list wants each transaction once, whichever token got there first.
+			const seenSolIds = new Set(
+				acc.filter(({ component }) => component === 'solana').map(({ transaction: { id } }) => id)
+			);
+
 			return [
 				...acc,
-				...($solTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
-					transaction,
-					token,
-					component: 'solana' as const
-				}))
+				...($solTransactions[tokenId] ?? [])
+					.filter(({ data: { id } }) => !seenSolIds.has(id))
+					.map(({ data: transaction }) => ({
+						transaction,
+						token,
+						component: 'solana' as const
+					}))
 			];
 		}
 
