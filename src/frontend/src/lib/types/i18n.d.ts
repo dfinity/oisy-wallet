@@ -1311,7 +1311,6 @@ interface I18nWallet_connect {
 		unsigned_typed_data_keys: string;
 		unknown_call_title: string;
 		unknown_call: string;
-		unknown_call_agreement: string;
 		function: string;
 		allowance_increase: string;
 		allowance_decrease: string;

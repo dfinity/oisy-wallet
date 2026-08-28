@@ -1628,7 +1628,6 @@
 			"unsigned_typed_data_keys": "This app sent extra data its schema doesn't declare. That data isn't covered by the signature, so only the fields below are shown.",
 			"unknown_call_title": "Contract Call",
 			"unknown_call": "OISY can't tell what this transaction does. It calls a contract function OISY doesn't recognise, so the details below don't describe it: it may move your tokens or grant someone permission to move them, and nothing about that would appear here. Only approve it if you trust this app and know what you asked it to do.",
-			"unknown_call_agreement": "I understand OISY can't tell what this transaction does, and I approve it anyway.",
 			"function": "Function",
 			"allowance_increase": "This request raises the allowance of the spender below by the amount shown, on top of whatever it can already spend. The spender can transfer that much of this token out of your wallet, at any time, until you revoke it.",
 			"allowance_decrease": "This request lowers the allowance of the spender below by the amount shown. It moves no funds on its own.",

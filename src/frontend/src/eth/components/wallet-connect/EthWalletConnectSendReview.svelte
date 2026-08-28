@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import EthWalletConnectUnknownCallAgreement from '$eth/components/wallet-connect/EthWalletConnectUnknownCallAgreement.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -103,11 +102,6 @@
 	let unknownCall = $derived(call.type === 'unknown');
 
 	let unknownSelector = $derived(call.type === 'unknown' ? call.selector : undefined);
-
-	// The user states they understand the review cannot describe this request. Nothing else gates
-	// approval for an unknown call: blocking it outright would take every dApp OISY has never
-	// decoded, which is most of them, offline.
-	let acknowledgedUnknownCall = $state(false);
 
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
@@ -281,16 +275,9 @@
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>
 
-	{#if unknownCall}
-		<EthWalletConnectUnknownCallAgreement bind:checked={acknowledgedUnknownCall} />
-	{/if}
-
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled ||
-				unverifiableErc20 ||
-				unverifiableSetApprovalForAll ||
-				(unknownCall && !acknowledgedUnknownCall)}
+			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
 			{onApprove}
 			{onReject}
 		/>

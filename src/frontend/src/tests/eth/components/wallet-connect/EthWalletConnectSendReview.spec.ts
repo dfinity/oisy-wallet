@@ -22,7 +22,7 @@ import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import { AbiCoder } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
@@ -427,7 +427,6 @@ describe('EthWalletConnectSendReview', () => {
 		const PERMIT2_APPROVE_HASH = '0x87517c45';
 
 		const unknownTestId = 'wallet-connect-unknown-call';
-		const agreementTestId = 'wallet-connect-unknown-call-agreement';
 
 		const renderUnknownCall = ({ data, amount = ZERO }: { data: string; amount?: bigint }) =>
 			render(EthWalletConnectSendReview, {
@@ -478,36 +477,19 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByText(`1 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
 		});
 
-		it('should gate approval on the user stating they understand the review is incomplete', async () => {
+		// The warning states what OISY could not establish; it does not withhold the decision. Blocking
+		// every selector OISY has never decoded would take most dApps offline, so approval stays with
+		// the user and the review stops misdescribing what they are deciding on.
+		it('should warn without disabling approval', () => {
 			const { getByTestId, getByRole } = renderUnknownCall({
 				data: `${PERMIT2_APPROVE_HASH}deadbeef`
 			});
 
-			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
-
-			await fireEvent.click(getByTestId(agreementTestId));
-
+			expect(getByTestId(unknownTestId)).toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
-		// The acknowledgement is a checkbox and a separate label bound to it by `for`. Clicking the
-		// text must toggle it exactly once: nesting the two labels, or letting both the label and the
-		// checkbox wrapper handle the click, toggles twice and leaves the box where it started.
-		it('should toggle the acknowledgement from its label text, once', async () => {
-			const { getByText, getByRole } = renderUnknownCall({
-				data: `${PERMIT2_APPROVE_HASH}deadbeef`
-			});
-
-			await fireEvent.click(getByText(en.wallet_connect.text.unknown_call_agreement));
-
-			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
-
-			await fireEvent.click(getByText(en.wallet_connect.text.unknown_call_agreement));
-
-			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
-		});
-
-		it('should not gate a request that carries no calldata at all', () => {
+		it('should not warn about a request that carries no calldata at all', () => {
 			const { queryByTestId, getByRole } = render(EthWalletConnectSendReview, {
 				props: {
 					...props,
@@ -520,7 +502,6 @@ describe('EthWalletConnectSendReview', () => {
 			});
 
 			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
-			expect(queryByTestId(agreementTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 	});
