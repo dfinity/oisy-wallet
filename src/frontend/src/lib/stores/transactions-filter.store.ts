@@ -9,6 +9,7 @@ export interface TransactionsFilterStore extends StorageStore<TransactionsFilter
 	toggleType: (type: TransactionType) => void;
 	toggleTokenId: (tokenId: string) => void;
 	toggleContactId: (contactId: string) => void;
+	retainTokenIds: (availableTokenIds: string[]) => void;
 	clear: () => void;
 }
 
@@ -49,6 +50,20 @@ const initTransactionsFilterStore = (): TransactionsFilterStore => {
 				...current,
 				contactIds: toggle({ values: current.contactIds, value: contactId })
 			})),
+		// The tokens panel only offers the tokens of the selected network, so a selection made on
+		// another network would keep hiding transactions with no row left to untick it. Callers pass
+		// the currently selectable keys and we drop everything else.
+		retainTokenIds: (availableTokenIds) => {
+			const available = new Set(availableTokenIds);
+			const { tokenIds } = getStore(store);
+			const retained = tokenIds.filter((tokenId) => available.has(tokenId));
+
+			if (retained.length === tokenIds.length) {
+				return;
+			}
+
+			mutate((current) => ({ ...current, tokenIds: retained }));
+		},
 		clear: () => store.reset({ key: TRANSACTIONS_FILTER_STORAGE_KEY })
 	};
 };

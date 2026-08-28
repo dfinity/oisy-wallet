@@ -69,6 +69,56 @@ describe('transactionsFilterStore', () => {
 		});
 	});
 
+	describe('retainTokenIds', () => {
+		it('drops the selected token ids that are no longer selectable', () => {
+			transactionsFilterStore.toggleTokenId('ICP-ICP');
+			transactionsFilterStore.toggleTokenId('ETH-ETH');
+
+			transactionsFilterStore.retainTokenIds(['ICP-ICP', 'SOL-SOL']);
+
+			expect(get(transactionsFilterStore).tokenIds).toEqual(['ICP-ICP']);
+		});
+
+		it('keeps the other facets untouched', () => {
+			transactionsFilterStore.toggleType('send');
+			transactionsFilterStore.toggleTokenId('ETH-ETH');
+			transactionsFilterStore.toggleContactId('42');
+
+			transactionsFilterStore.retainTokenIds(['ICP-ICP']);
+
+			const value = get(transactionsFilterStore);
+
+			expect(value.types).toEqual(['send']);
+			expect(value.tokenIds).toEqual([]);
+			expect(value.contactIds).toEqual(['42']);
+		});
+
+		it('does not touch the store when every selection is still selectable', () => {
+			transactionsFilterStore.toggleTokenId('ICP-ICP');
+
+			const before = get(transactionsFilterStore);
+
+			transactionsFilterStore.retainTokenIds(['ICP-ICP', 'ETH-ETH']);
+
+			expect(get(transactionsFilterStore)).toBe(before);
+		});
+
+		it('persists the pruned value to localStorage', () => {
+			transactionsFilterStore.toggleTokenId('ICP-ICP');
+			transactionsFilterStore.toggleTokenId('ETH-ETH');
+
+			transactionsFilterStore.retainTokenIds(['ICP-ICP']);
+
+			const raw = localStorage.getItem(TRANSACTIONS_FILTER_STORAGE_KEY);
+
+			expect(JSON.parse(raw ?? '{}')).toEqual({
+				types: [],
+				tokenIds: ['ICP-ICP'],
+				contactIds: []
+			});
+		});
+	});
+
 	describe('clear', () => {
 		it('resets all facets to the empty filter', () => {
 			transactionsFilterStore.toggleType('send');
