@@ -2840,7 +2840,24 @@
 		"alt": {
 			"intro_illustration": "",
 			"claim_illustration": "",
-			"claim_failed_illustration": ""
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_yours_title": "",
+			"point_yours_text": "",
+			"point_use_title": "",
+			"point_use_text": "",
+			"point_chains_title": "",
+			"point_chains_text": "",
+			"cta": ""
 		}
 	}
 }

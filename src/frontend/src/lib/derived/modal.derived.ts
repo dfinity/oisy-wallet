@@ -268,6 +268,11 @@ export const modalTip: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'tip'
 );
+export const modalTipWelcome: Readable<boolean> = derived(
+	[modalStore],
+	([$modalStore]) => $modalStore?.type === 'tip-welcome'
+);
+
 export const modalTipClaim: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'tip-claim'
