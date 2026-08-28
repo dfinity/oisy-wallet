@@ -7,6 +7,7 @@ import {
 	cancelTip,
 	newTipDraft,
 	parseClaimCodeFromFragment,
+	parseTipIdFromFragment,
 	reserveTip
 } from '$lib/services/tip.services';
 import * as tipVetkeys from '$lib/services/tip.vetkeys';
@@ -27,23 +28,54 @@ describe('tip.services', () => {
 	});
 
 	describe('link construction', () => {
-		it('keeps the claim code in the fragment, never in the path', () => {
+		it('keeps both the id and the claim code in the fragment', () => {
 			const draft = { tipId: 'the-id', claimCode: 'the-code' };
 			const link = buildTipLink(draft);
 
-			expect(link).toBe(`${window.location.origin}/tip/the-id#c=the-code`);
-			// The fragment is the point: browsers do not send it to a server, so the
-			// code reaches the recipient without passing through any log.
-			expect(link.split('#')[0]).not.toContain('the-code');
+			expect(link).toBe(`${window.location.origin}/tip#i=the-id&c=the-code`);
+		});
+
+		it('leaves nothing identifying in the part of the URL that reaches a server', () => {
+			// The fragment is the point. Browsers never put it on the wire, so neither
+			// the code nor the id passes through a boundary node, an asset canister,
+			// or a `Referer` header — and a crawler fetching the link for a preview
+			// sees only `/tip`, which is what lets that path be prerendered with the
+			// tip's own share card.
+			const link = buildTipLink({ tipId: 'the-id', claimCode: 'the-code' });
+			const [beforeFragment] = link.split('#');
+
+			expect(beforeFragment).toBe(`${window.location.origin}/tip`);
+			expect(beforeFragment).not.toContain('the-code');
+			expect(beforeFragment).not.toContain('the-id');
 		});
 
 		it('reads the code back out of a fragment', () => {
 			expect(parseClaimCodeFromFragment('#c=abc')).toBe('abc');
 			expect(parseClaimCodeFromFragment('c=abc')).toBe('abc');
 			expect(parseClaimCodeFromFragment('#c=abc&other=1')).toBe('abc');
+			expect(parseClaimCodeFromFragment('#i=xyz&c=abc')).toBe('abc');
 			expect(parseClaimCodeFromFragment('#other=1')).toBeUndefined();
 			expect(parseClaimCodeFromFragment('#c=')).toBeUndefined();
 			expect(parseClaimCodeFromFragment('')).toBeUndefined();
+		});
+
+		it('reads the id back out of a fragment', () => {
+			expect(parseTipIdFromFragment('#i=xyz')).toBe('xyz');
+			expect(parseTipIdFromFragment('#i=xyz&c=abc')).toBe('xyz');
+			expect(parseTipIdFromFragment('i=xyz')).toBe('xyz');
+			expect(parseTipIdFromFragment('#c=abc')).toBeUndefined();
+			expect(parseTipIdFromFragment('#i=')).toBeUndefined();
+			expect(parseTipIdFromFragment('')).toBeUndefined();
+		});
+
+		it('survives a round trip through the fragment it just built', () => {
+			// The two halves are written and read in different files; this is what
+			// keeps the key names honest between them.
+			const draft = { tipId: 'round-trip-id', claimCode: 'round-trip-code' };
+			const fragment = new URL(buildTipLink(draft)).hash;
+
+			expect(parseTipIdFromFragment(fragment)).toBe(draft.tipId);
+			expect(parseClaimCodeFromFragment(fragment)).toBe(draft.claimCode);
 		});
 	});
 
@@ -90,7 +122,7 @@ describe('tip.services', () => {
 			expect(recorded.amount).toBe(AMOUNT);
 			expect(recorded.tip_id).toBe(draft.tipId);
 			expect(recorded.expires_at_ns).toBe(approved.expiresAt);
-			expect(link).toContain(`#c=${draft.claimCode}`);
+			expect(parseClaimCodeFromFragment(new URL(link).hash)).toBe(draft.claimCode);
 		});
 
 		it('never sends the claim code to the canister, only its hash', async () => {
@@ -313,7 +345,7 @@ describe('tip.services', () => {
 				expiresAtNs: EXPIRES_AT_NS
 			});
 
-			expect(link).toContain('/tip/');
+			expect(link).toContain('/tip#');
 			expect(secretStored).toBeFalsy();
 		});
 	});
