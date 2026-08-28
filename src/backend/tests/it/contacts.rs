@@ -4,9 +4,10 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
+    account::{EthAddress, TokenAccountId},
     contact::{
-        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
-        UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
+        Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
+        ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
@@ -1124,4 +1125,60 @@ fn test_image_limit_is_enforced_per_principal() {
         Some(png_image),
     )
     .expect("that a freed slot can be reused");
+}
+
+#[test]
+fn test_update_contact_rejects_an_over_long_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "Address Bound".to_string()).unwrap();
+
+    // A normal address is accepted and stored.
+    let valid_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(
+            "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+        )),
+        label: Some("main".to_string()),
+    };
+    let updated = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            addresses: vec![valid_address.clone()],
+            ..contact.clone()
+        },
+    )
+    .expect("that a normal address is accepted");
+    assert_eq!(updated.addresses, vec![valid_address.clone()]);
+
+    // An address longer than the bound is rejected before it can reach storage. Validation runs
+    // during candid deserialization, so the call is rejected outright rather than returning a
+    // typed ContactError.
+    let oversized_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(format!("0x{}", "a".repeat(200)))),
+        label: None,
+    };
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        UpdateContactRequest {
+            id: contact.id,
+            name: contact.name.clone(),
+            addresses: vec![oversized_address],
+            update_timestamp_ns: contact.update_timestamp_ns,
+            image: None,
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "an address over the length bound should be rejected"
+    );
+
+    // The rejected write left the stored contact untouched: the addresses must still be exactly
+    // what the last successful update wrote, not merely the same number of them.
+    let after =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
+    assert_eq!(after.addresses, vec![valid_address]);
+    assert_eq!(after.name, contact.name);
 }
