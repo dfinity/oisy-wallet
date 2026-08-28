@@ -27,6 +27,7 @@
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userProfileCreated } from '$lib/stores/user-profile.store';
 	import type { PendingTipClaim } from '$lib/types/tip';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -103,8 +104,14 @@
 
 		// Whether this claimer needs OISY explained to them, read before `close()`
 		// resets the modal store.
+		//
+		// Two conditions, and both are needed. `$userProfileCreated` is the canister
+		// saying it had never seen this principal before this sign-in, which is what
+		// keeps the introduction away from someone who has used OISY for months and
+		// happens to be claiming their first tip. The stored flag then keeps it to
+		// once, because a signup session can claim more than one tip.
 		const principal = $authIdentity?.getPrincipal().toText();
-		const introduce = nonNullish(principal) && !hasSeenTipWelcome(principal);
+		const introduce = $userProfileCreated && nonNullish(principal) && !hasSeenTipWelcome(principal);
 
 		close();
 
@@ -113,6 +120,7 @@
 		// already underneath with the tip in it either way.
 		if (introduce && nonNullish(principal)) {
 			rememberTipWelcomeSeen(principal);
+			trackTip({ step: 'welcome', side: 'claimer' });
 			modalStore.openTipWelcome(Symbol());
 		}
 	};
