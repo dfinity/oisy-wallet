@@ -1,3 +1,10 @@
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -7,12 +14,14 @@ import {
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import {
 	assertValidEthTypedData,
+	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
+	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
@@ -363,6 +372,95 @@ describe('wallet-connect.utils', () => {
 					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('classifyWalletConnectEthCall', () => {
+		const args = 'de'.repeat(64);
+
+		it.each([undefined, '', '0x', '0X'])('should classify %s as a native transfer', (data) => {
+			expect(classifyWalletConnectEthCall(data)).toEqual({ type: 'native' });
+		});
+
+		it.each([
+			{ selector: ERC20_APPROVE_HASH, expected: { type: 'erc20Approve' } },
+			{ selector: ERC20_TRANSFER_HASH, expected: { type: 'erc20Transfer' } },
+			{ selector: ERC_SET_APPROVAL_FOR_ALL_HASH, expected: { type: 'setApprovalForAll' } },
+			{
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: true }
+			},
+			{
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: false }
+			}
+		])('should classify the call behind selector $selector', ({ selector, expected }) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual(expected);
+		});
+
+		it('should classify a selector regardless of its casing', () => {
+			const upper = ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase().replace('0X', '0x');
+
+			expect(classifyWalletConnectEthCall(`${upper}${args}`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+
+		// The behaviour the whole change exists for. Each of these is a selector that was never
+		// considered, and each used to be reviewed as a native zero-value send.
+		it.each([
+			// Uniswap Permit2 `approve`
+			'0x87517c45',
+			// ERC-2612 `permit`
+			'0xd505accf',
+			// ERC-20 `transferFrom`
+			'0x23b872dd',
+			// a router `execute`
+			'0x3593564c',
+			// nothing at all
+			'0xdeadbeef'
+		])('should classify unrecognised selector %s as unknown', (selector) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual({
+				type: 'unknown',
+				selector
+			});
+		});
+
+		it('should classify calldata too short to carry a selector as unknown, naming none', () => {
+			expect(classifyWalletConnectEthCall('0xab')).toEqual({
+				type: 'unknown',
+				selector: undefined
+			});
+		});
+
+		// A known selector says nothing about the arguments behind it. Recognising the call is what
+		// routes it to a review that decodes those arguments and fails closed when they do not.
+		it('should classify a known selector carrying garbage arguments by its selector', () => {
+			expect(classifyWalletConnectEthCall(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+	});
+
+	describe('isWalletConnectEthApproval', () => {
+		it.each([
+			{ type: 'erc20Approve' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		])('should treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeTruthy();
+		});
+
+		// Not an approval, and not a send either: the modal titles it for what it is.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'erc20Transfer' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeFalsy();
 		});
 	});
 
