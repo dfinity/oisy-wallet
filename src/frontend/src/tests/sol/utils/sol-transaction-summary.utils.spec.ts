@@ -1,4 +1,4 @@
-import { mapSolInstructionSummarys } from '$sol/utils/sol-instruction-summary.utils';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
@@ -22,7 +22,7 @@ describe('sol-transaction-summary.utils', () => {
 		const summary = (fixture: keyof typeof MOCK_SOL_INSTRUCTIONS) =>
 			deriveSolTransactionSummary({
 				netChanges: mapSolNetBalanceChanges({ address: USER, ...MOCK_SOL_BALANCES[fixture] }),
-				views: mapSolInstructionSummarys({
+				instructions: mapSolInstructionSummaries({
 					...MOCK_SOL_INSTRUCTIONS[fixture],
 					addressToToken: addressToToken(fixture)
 				})
@@ -69,7 +69,7 @@ describe('sol-transaction-summary.utils', () => {
 		it('should call a plain incoming transfer a receive with its sender', () => {
 			const result = deriveSolTransactionSummary({
 				netChanges: [{ tokenAddress: 'mint', decimals: 6, delta: 42_000_000n }],
-				views: [
+				instructions: [
 					{ kind: 'receive', amount: 42_000_000n, tokenAddress: 'mint', counterparty: 'sender' }
 				]
 			});
@@ -84,7 +84,7 @@ describe('sol-transaction-summary.utils', () => {
 			expect(
 				deriveSolTransactionSummary({
 					netChanges: [],
-					views: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
+					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
 		});

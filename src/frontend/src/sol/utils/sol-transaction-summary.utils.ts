@@ -8,8 +8,11 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-const flattenViews = (views: SolInstructionSummary[]): SolInstructionSummary[] =>
-	views.flatMap((view) => [view, ...flattenViews(view.children ?? [])]);
+const flattenInstructions = (instructions: SolInstructionSummary[]): SolInstructionSummary[] =>
+	instructions.flatMap((instruction) => [
+		instruction,
+		...flattenInstructions(instruction.children ?? [])
+	]);
 
 /**
  * The tokens the transaction actually trades, read from its legs.
@@ -18,18 +21,21 @@ const flattenViews = (views: SolInstructionSummary[]): SolInstructionSummary[] =
  * wrap: an SPL send that opens the recipient an account also moves SOL, but that SOL is rent, and
  * counting it would turn every such send into a swap.
  */
-const tradedTokens = (views: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
-	flattenViews(views).reduce<Set<SplTokenAddress | undefined>>((acc, { kind, tokenAddress }) => {
-		if (['send', 'receive'].includes(kind)) {
-			return new Set([...acc, tokenAddress]);
-		}
+const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
+	flattenInstructions(instructions).reduce<Set<SplTokenAddress | undefined>>(
+		(acc, { kind, tokenAddress }) => {
+			if (['send', 'receive'].includes(kind)) {
+				return new Set([...acc, tokenAddress]);
+			}
 
-		if (['wrap', 'unwrap'].includes(kind)) {
-			return new Set([...acc, undefined]);
-		}
+			if (['wrap', 'unwrap'].includes(kind)) {
+				return new Set([...acc, undefined]);
+			}
 
-		return acc;
-	}, new Set());
+			return acc;
+		},
+		new Set()
+	);
 
 /**
  * The tokens that enter or leave through a route, wrap included, since wrapping is how SOL enters
@@ -39,8 +45,10 @@ const tradedTokens = (views: SolInstructionSummary[]): Set<SplTokenAddress | und
  * ORCA-for-USDC swap. Both are outs, but only one of them is the trade, and the route is what
  * tells them apart.
  */
-const routeTradedTokens = (views: SolInstructionSummary[]): Set<SplTokenAddress | undefined> =>
-	views.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
+const routeTradedTokens = (
+	instructions: SolInstructionSummary[]
+): Set<SplTokenAddress | undefined> =>
+	instructions.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
 		if (kind === 'wrap') {
 			return new Set([...acc, undefined]);
 		}
@@ -69,15 +77,15 @@ const largest = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefine
 	);
 
 const counterpartyOf = ({
-	views,
+	instructions,
 	kind,
 	tokenAddress
 }: {
-	views: SolInstructionSummary[];
+	instructions: SolInstructionSummary[];
 	kind: 'send' | 'receive';
 	tokenAddress?: SplTokenAddress;
 }): string | undefined =>
-	flattenViews(views).find(
+	flattenInstructions(instructions).find(
 		(view) =>
 			view.kind === kind &&
 			view.tokenAddress === tokenAddress &&
@@ -95,12 +103,12 @@ const counterpartyOf = ({
  */
 export const deriveSolTransactionSummary = ({
 	netChanges,
-	views
+	instructions
 }: {
 	netChanges: SolNetBalanceChange[];
-	views: SolInstructionSummary[];
+	instructions: SolInstructionSummary[];
 }): SolTransactionSummary => {
-	const traded = tradedTokens(views);
+	const traded = tradedTokens(instructions);
 
 	const considered = netChanges.filter(
 		(change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined)
@@ -115,7 +123,7 @@ export const deriveSolTransactionSummary = ({
 		return {
 			kind: 'send',
 			spent,
-			counterparty: counterpartyOf({ views, kind: 'send', tokenAddress: spent.tokenAddress })
+			counterparty: counterpartyOf({ instructions, kind: 'send', tokenAddress: spent.tokenAddress })
 		};
 	}
 
@@ -125,12 +133,16 @@ export const deriveSolTransactionSummary = ({
 		return {
 			kind: 'receive',
 			received,
-			counterparty: counterpartyOf({ views, kind: 'receive', tokenAddress: received.tokenAddress })
+			counterparty: counterpartyOf({
+				instructions,
+				kind: 'receive',
+				tokenAddress: received.tokenAddress
+			})
 		};
 	}
 
 	if (outs.length > 0 && ins.length > 0) {
-		const routeTraded = routeTradedTokens(views);
+		const routeTraded = routeTradedTokens(instructions);
 
 		const pick = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefined => {
 			const inRoute = changes.filter(({ tokenAddress }) => routeTraded.has(tokenAddress));
