@@ -258,6 +258,21 @@ pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRi
     })
 }
 
+/// Runs `f` against the tip-secrets store **only if it already exists**, and
+/// returns `None` when it does not.
+///
+/// Cleanup paths must use this rather than [`with_tip_secrets_mut`]. That one
+/// calls [`ensure_tip_secrets`], which creates the store on first access and
+/// allocates its four stable-memory regions — so an hourly sweep over a canister
+/// where nobody ever stored a claim code would allocate 32 MiB purely to discover
+/// there was nothing to delete, and on a canister short of reserved cycles it
+/// would trap instead.
+pub(crate) fn with_existing_tip_secrets_mut<R>(
+    f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R,
+) -> Option<R> {
+    mutate_state(|s| s.tip_secrets.as_mut().map(f))
+}
+
 pub(crate) fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(&cell.borrow()))
 }
