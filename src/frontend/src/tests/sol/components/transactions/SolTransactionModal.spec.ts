@@ -6,7 +6,7 @@ import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils'
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -150,14 +150,32 @@ describe('SolTransactionModal', () => {
 			]
 		};
 
-		it('should show the same summary sentence the activity row shows', () => {
+		it('should speak the summary in the hero', () => {
 			const { getByText } = render(SolTransactionModal, {
 				props: { transaction, token: SOLANA_TOKEN }
 			});
 
-			expect(
-				getByText(`Send 1 SOL to ${shortenWithMiddleEllipsis({ text: mockSolAddress2 })}`)
-			).toBeInTheDocument();
+			expect(getByText(en.send.text.send)).toBeInTheDocument();
+			expect(getByText('1 SOL')).toBeInTheDocument();
+		});
+
+		it('should show the pair at the ends of a swap in the hero', () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...transaction,
+						summary: {
+							kind: 'swap' as const,
+							spent: { delta: -1_000_000_000n },
+							received: { delta: -46_099n, tokenAddress: mockSplAddress, decimals: 6 }
+						}
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByText(en.swap.text.swap)).toBeInTheDocument();
+			expect(getByText(/1 SOL → 0\.046099/)).toBeInTheDocument();
 		});
 
 		it('should show the net changes and the fee apart on the balance changes tab', async () => {

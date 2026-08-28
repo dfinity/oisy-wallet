@@ -18,6 +18,7 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
+	import { absBigInt } from '$lib/utils/bigint.utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -29,7 +30,6 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -78,18 +78,26 @@
 			? SOLANA_TOKEN.decimals
 			: (splToken(change.tokenAddress)?.decimals ?? 0));
 
-	// The same sentence the activity row shows: the modal describes the transaction, and it does
-	// so identically wherever the list that opened it was filtered.
-	let summaryLine = $derived(
-		nonNullish(summary)
-			? formatSolTransactionSummary({
-					summary,
-					i18n: $i18n,
-					symbolOf,
-					decimalsOf
-				})
-			: undefined
+	// The hero speaks in the summary's terms: the word is the kind, the figure is the main change
+	// in its own token, and a swap shows the pair. Records without a summary keep the old rendering.
+	let kindLabel = $derived(
+		isNullish(summary)
+			? undefined
+			: summary.kind === 'send'
+				? $i18n.send.text.send
+				: summary.kind === 'receive'
+					? $i18n.receive.text.receive
+					: summary.kind === 'swap'
+						? $i18n.swap.text.swap
+						: $i18n.transaction.text.kind_other
 	);
+
+	const heroAmount = (change: SolNetBalanceChange): string =>
+		`${formatToken({
+			value: absBigInt(change.delta),
+			unitName: decimalsOf(change),
+			displayDecimals: decimalsOf(change)
+		})} ${symbolOf(change.tokenAddress)}`;
 
 	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
 		fromOwner ?? fromAddress
@@ -142,17 +150,30 @@
 	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
-		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+		<ModalHero variant={(summary?.kind ?? type) === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				{#if nonNullish(kindLabel)}
+					<span>{kindLabel}</span>
+				{:else}
+					<span class="capitalize">{type}</span>
+				{/if}
 			{/snippet}
 			{#snippet title()}
-				{#if nonNullish(token) && nonNullish(value)}
+				{#if summary?.kind === 'swap' && nonNullish(summary.spent) && nonNullish(summary.received)}
+					<output>{`${heroAmount(summary.spent)} → ${heroAmount(summary.received)}`}</output>
+				{:else if nonNullish(summary) && nonNullish(summary.spent ?? summary.received)}
+					{@const change = summary.spent ?? summary.received}
+					{#if nonNullish(change)}
+						<output class:text-success-primary={summary.kind === 'receive'}>
+							{`${summary.kind === 'receive' ? '+' : ''}${heroAmount(change)}`}
+						</output>
+					{/if}
+				{:else if nonNullish(token) && nonNullish(value) && isNullish(summary)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
 							value,
@@ -178,10 +199,6 @@
 			bind:activeTab
 		>
 			{#if activeTab === 'summary'}
-				{#if nonNullish(summaryLine)}
-					<p class="mb-4 font-normal">{summaryLine}</p>
-				{/if}
-
 				{#if nonNullish(toAddress) && nonNullish(fromAddress)}
 					<TransactionContactCard
 						{from}
