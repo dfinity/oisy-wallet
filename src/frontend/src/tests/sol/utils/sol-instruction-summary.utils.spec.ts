@@ -174,6 +174,29 @@ describe('sol-instruction-summary.utils', () => {
 			expect(view.counterparty).toBe('sender');
 		});
 
+		// The live RPC client decodes lamports as bigint; dropping them demoted a plain SOL tip
+		// into the nothing-to-say fallback on every real transaction.
+		it('should read a bigint lamports amount', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { source: owner, destination: 'tip', lamports: 415_968n }
+						}
+					}
+				],
+				ownedAddresses: [owner]
+			});
+
+			expect(view.kind).toBe('send');
+			expect(view.amount).toBe(415_968n);
+		});
+
 		describe('control changes', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';
 			const ata = 'ownerTokenAccount111111111111111111111111111';
