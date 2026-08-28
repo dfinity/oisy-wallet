@@ -29,7 +29,6 @@ const loadNextIc: LoadOlderTransactions = ({ token, identity, minTimestamp, sign
 		identity,
 		owner: identity.getPrincipal(),
 		maxResults: WALLET_PAGINATION,
-		transactions: (get(icTransactionsStore)?.[token.id] ?? []).map(({ data }) => data),
 		signalEnd,
 		...(nonNullish(minTimestamp) && { minTimestamp })
 	});
@@ -39,7 +38,6 @@ const loadNextSol: LoadOlderTransactions = ({ token, identity, minTimestamp, sig
 	loadNextSolTransactionsByOldest({
 		token,
 		identity,
-		transactions: (get(solTransactionsStore)?.[token.id] ?? []).map(({ data }) => data),
 		signalEnd,
 		...(nonNullish(minTimestamp) && { minTimestamp })
 	});
