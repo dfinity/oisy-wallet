@@ -100,6 +100,16 @@
 			displayDecimals: decimalsOf(change)
 		})} ${symbolOf(change.tokenAddress)}`;
 
+	// The rent the transaction paid to open token accounts, stated apart like the send form does:
+	// it is not part of the fee, and folded into a delta it reads as value lost to the transfer.
+	let ataFee = $derived(
+		(instructions ?? []).reduce(
+			(acc, { kind, rent }) =>
+				kind === 'createTokenAccount' && nonNullish(rent) ? acc + rent : acc,
+			ZERO
+		)
+	);
+
 	// The venue of a routed swap: the program its legs ran through.
 	let routeProgram = $derived(
 		summary?.kind === 'swap'
@@ -350,10 +360,17 @@
 							<span class="text-tertiary">{$i18n.transaction.text.no_balance_changes}</span>
 						{/each}
 
-						<!-- The fee is a fee: never folded into the deltas above, stated on its own. -->
+						<!-- The fee is a fee: never folded into the deltas above, stated on its own, and the
+						     rent of accounts the transaction opened apart from it, as the send form does. -->
 						{#if nonNullish(fee) && fee > ZERO}
 							<span class="text-tertiary">
 								{`${$i18n.fee.text.fee}: ${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+							</span>
+						{/if}
+
+						{#if ataFee > ZERO}
+							<span class="text-tertiary">
+								{`${$i18n.fee.text.ata_fee}: ${formatToken({ value: ataFee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
 							</span>
 						{/if}
 					</div>
