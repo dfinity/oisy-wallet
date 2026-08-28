@@ -1,10 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
-<<<<<<< HEAD
+import { absBigInt } from '$lib/utils/bigint.utils';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-=======
-import { absBigInt } from '$lib/utils/bigint.utils';
->>>>>>> av/sol-activity-one-row
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -177,7 +174,7 @@ export const formatSolTransactionSummary = ({
 }): string => {
 	const amount = (change: SolNetBalanceChange): string =>
 		formatToken({
-			value: change.delta < ZERO ? -change.delta : change.delta,
+			value: absBigInt(change.delta),
 			unitName: decimalsOf(change),
 			displayDecimals: decimalsOf(change)
 		});
