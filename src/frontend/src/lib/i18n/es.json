@@ -1962,6 +1962,7 @@
 			"to_ata_copied": "Cuenta de token del destinatario (ATA) copiada al portapapeles.",
 			"block": "Bloque",
 			"kind_other": "",
+			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
 			"tab_instructions": "",

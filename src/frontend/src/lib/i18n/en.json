@@ -1962,6 +1962,7 @@
 			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"kind_other": "Interaction",
+			"summary_other": "Interacted with a Solana program",
 			"tab_summary": "Summary",
 			"tab_balance_changes": "Balance changes",
 			"tab_instructions": "Instructions",

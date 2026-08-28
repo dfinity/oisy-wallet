@@ -1635,6 +1635,7 @@ interface I18nTransaction {
 		to_ata_copied: string;
 		block: string;
 		kind_other: string;
+		summary_other: string;
 		tab_summary: string;
 		tab_balance_changes: string;
 		tab_instructions: string;
