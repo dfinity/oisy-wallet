@@ -2,6 +2,8 @@
 	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import type { SolAddress } from '$sol/types/address';
 	import type { SolTransferParties, SolTransferParty } from '$sol/types/sol-transaction';
 	import {
@@ -11,12 +13,14 @@
 
 	interface Props {
 		parties: SolTransferParties;
+		// The network the addresses belong to, for the block explorer link beside each of them.
+		network: Network | undefined;
 		// The wallet the review already names as its source, which is what makes a Sources list
 		// redundant when it resolves to nothing else.
 		userAddress: SolAddress;
 	}
 
-	let { parties, userAddress }: Props = $props();
+	let { parties, userAddress, network }: Props = $props();
 
 	let { sources } = $derived(parties);
 
@@ -35,6 +39,8 @@
 	<div class="flex flex-col gap-1" data-tid="transfer-party">
 		<span class="flex flex-wrap items-center gap-2">
 			{displayed}
+
+			<SolAddressActions address={displayed} {network} testId="transfer-party-copy" />
 
 			<!-- A source displayed by an account address rather than by the wallet the review names
 			     would otherwise read as a counterparty. Marking it is what says it is still ours. -->
