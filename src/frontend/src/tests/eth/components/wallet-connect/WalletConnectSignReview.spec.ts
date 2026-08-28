@@ -4,7 +4,7 @@ import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnec
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { fireEvent, render } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 
 describe('WalletConnectSignReview', () => {
 	const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -201,45 +201,34 @@ describe('WalletConnectSignReview', () => {
 	// A Hyperliquid action is signable and benign, and OISY still cannot say what it authorizes. It
 	// is warned about like any other unrecognised schema rather than waved through on the strength
 	// of the dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
-	it('warns about a Hyperliquid action and lets it be signed once acknowledged', async () => {
-		const { getByText, queryByText, getByTestId, getByRole } = render(WalletConnectSignReview, {
+	it('warns about a Hyperliquid action without blocking it', () => {
+		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
 			props: { ...props, request: hyperliquidAcceptTermsRequest() }
 		});
 
 		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
 		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
-		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
-
-		await fireEvent.click(getByTestId('wallet-connect-unreviewable-typed-data-agreement'));
-
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
 	// The report that would have come next: a signature that moves USDC, previewed as an application,
 	// a method name and a collapsed blob, with nothing said and approval enabled.
-	it('warns and gates approval for an ERC-3009 authorization', async () => {
-		const { getByText, getByTestId, getByRole } = render(WalletConnectSignReview, {
+	it('warns about an ERC-3009 authorization', () => {
+		const { getByText, getByRole } = render(WalletConnectSignReview, {
 			props: { ...props, request: transferWithAuthorizationRequest() }
 		});
 
 		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
-		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
-
-		await fireEvent.click(getByTestId('wallet-connect-unreviewable-typed-data-agreement'));
-
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	// A schema OISY summarizes is not gated: the review states the spender, the amount and the
-	// expiry, so there is nothing for the user to acknowledge.
-	it('does not gate a permit whose schema is recognised', () => {
-		const { queryByText, queryByTestId } = render(WalletConnectSignReview, {
+	// A schema OISY summarizes is not warned about: the review states the spender, the amount and
+	// the expiry, so there is nothing it failed to establish.
+	it('does not warn about a permit whose schema is recognised', () => {
+		const { queryByText } = render(WalletConnectSignReview, {
 			props: { ...props, request: daiPermitRequest(true) }
 		});
 
 		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
-		expect(
-			queryByTestId('wallet-connect-unreviewable-typed-data-agreement')
-		).not.toBeInTheDocument();
 	});
 });

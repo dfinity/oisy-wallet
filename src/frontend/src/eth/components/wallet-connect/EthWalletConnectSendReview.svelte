@@ -18,7 +18,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import WalletConnectAcknowledgement from '$lib/components/wallet-connect/WalletConnectAcknowledgement.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -103,11 +102,6 @@
 	let unknownCall = $derived(call.type === 'unknown');
 
 	let unknownSelector = $derived(call.type === 'unknown' ? call.selector : undefined);
-
-	// The user states they understand the review cannot describe this request. Nothing else gates
-	// approval for an unknown call: blocking it outright would take every dApp OISY has never
-	// decoded, which is most of them, offline.
-	let acknowledgedUnknownCall = $state(false);
 
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
@@ -281,21 +275,9 @@
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>
 
-	{#if unknownCall}
-		<WalletConnectAcknowledgement
-			inputId="eth-wallet-connect-unknown-call-agreement"
-			testId="wallet-connect-unknown-call-agreement"
-			text={$i18n.wallet_connect.text.unknown_call_agreement}
-			bind:checked={acknowledgedUnknownCall}
-		/>
-	{/if}
-
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled ||
-				unverifiableErc20 ||
-				unverifiableSetApprovalForAll ||
-				(unknownCall && !acknowledgedUnknownCall)}
+			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
 			{onApprove}
 			{onReject}
 		/>
