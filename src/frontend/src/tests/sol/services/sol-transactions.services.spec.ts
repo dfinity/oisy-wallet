@@ -33,6 +33,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
+import { lamports } from '@solana/kit';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -131,17 +132,23 @@ describe('sol-transactions.services', () => {
 			({
 				...mockSolTransactionDetail,
 				transaction: {
-					message: { instructions, accountKeys }
+					...mockSolTransactionDetail.transaction,
+					message: {
+						...mockSolTransactionDetail.transaction.message,
+						instructions,
+						accountKeys
+					}
 				},
 				meta: {
-					fee,
-					preBalances,
-					postBalances,
+					...mockSolTransactionDetail.meta,
+					fee: lamports(fee),
+					preBalances: preBalances.map((balance) => lamports(balance)),
+					postBalances: postBalances.map((balance) => lamports(balance)),
 					innerInstructions,
 					preTokenBalances,
 					postTokenBalances
 				}
-			}) as unknown as SolRpcTransaction;
+			}) as SolRpcTransaction;
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
 

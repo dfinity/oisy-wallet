@@ -5,6 +5,7 @@ import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/deriv
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { absBigInt } from '$lib/utils/bigint.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
@@ -108,14 +109,12 @@ const extractTokenBalanceMetadata = ({
 	);
 
 export const fetchSolTransactionsForSignature = async ({
-	identity: _identity,
 	signature,
 	network,
 	address,
 	tokenAddress,
 	tokenOwnerAddress
 }: {
-	identity: NullishIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
@@ -222,7 +221,7 @@ export const fetchSolTransactionsForSignature = async ({
 		signature: signature.signature,
 		blockNumber: Number(slot),
 		timestamp: blockTime ?? ZERO,
-		...(nonNullish(amount) && { value: amount.delta < ZERO ? -amount.delta : amount.delta }),
+		...(nonNullish(amount) && { value: absBigInt(amount.delta) }),
 		type,
 		from: type === 'send' ? address : (counterparty ?? address),
 		to: type === 'send' ? (counterparty ?? address) : address,
