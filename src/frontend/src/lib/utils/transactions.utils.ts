@@ -254,10 +254,13 @@ export const mapAllTransactionsUi = ({
 };
 
 /**
- * One Solana record per signature lives in the store of every token the transaction touched. The
- * merged list wants it once, under the token its main change names: that token's icon and amount
- * are the ones that describe the transaction, where an arbitrary survivor would show a swap under
- * whichever token happened to be listed first.
+ * One Solana record per signature lives in the store of every token the transaction touched, and
+ * the merged list keeps one row per token it moved.
+ *
+ * A swap is deliberately two rows, one per side, because each carries its own token's icon and
+ * balance change and a user scanning for a token wants to find it on the row that names it. What
+ * gets dropped is the rest: the tokens a transaction merely brushed, where a send that opened an
+ * account would otherwise appear again under SOL for the rent alone.
  */
 const dropDuplicateSolTransactions = (
 	transactions: AllTransactionUiWithCmp[]
@@ -282,24 +285,28 @@ const dropDuplicateSolTransactions = (
 		const [{ transaction }] = group;
 		const { summary } = transaction as SolTransactionUi;
 
-		const mainChange =
-			summary?.kind === 'send'
-				? summary.spent
-				: summary?.kind === 'receive'
-					? summary.received
-					: undefined;
+		// The tokens the transaction is about: both sides of a swap, the single side of everything
+		// else. A token outside this set was only brushed, and its row would describe nothing.
+		const subjects = [summary?.spent, summary?.received].filter(nonNullish);
 
-		const best =
-			(nonNullish(mainChange)
-				? group.find(({ token }) =>
-						isNullish(mainChange.tokenAddress)
-							? !isTokenSpl(token)
-							: isTokenSpl(token) && token.address === mainChange.tokenAddress
-					)
-				: undefined) ?? group[0];
+		// One row per subject, matched to the token that names it. A subject the merged list has no
+		// row for simply yields none.
+		const kept = subjects.reduce<AllTransactionUiWithCmp[]>((acc, { tokenAddress }) => {
+			const match = group.find(
+				(entry) =>
+					!acc.includes(entry) &&
+					(isNullish(tokenAddress)
+						? !isTokenSpl(entry.token)
+						: isTokenSpl(entry.token) && entry.token.address === tokenAddress)
+			);
+
+			return nonNullish(match) ? [...acc, match] : acc;
+		}, []);
+
+		const survivors = kept.length > 0 ? kept : [group[0]];
 
 		group.forEach((entry) => {
-			if (entry !== best) {
+			if (!survivors.includes(entry)) {
 				drop.add(entry);
 			}
 		});

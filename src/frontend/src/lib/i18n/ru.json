@@ -1981,6 +1981,7 @@
 			"instruction_rent_returned": "",
 			"instruction_own_account": "",
 			"summary_swap": "",
+			"summary_self": "",
 			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Взаимодействовали с",

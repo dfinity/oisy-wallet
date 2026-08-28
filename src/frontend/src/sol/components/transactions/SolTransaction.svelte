@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
@@ -108,7 +109,7 @@
 
 	let displayAmount = $derived(
 		showTokenAmount
-			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : undefined))
+			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : ZERO))
 			: isNullish(summary)
 				? fallbackAmount
 				: tokenMatchesMainChange

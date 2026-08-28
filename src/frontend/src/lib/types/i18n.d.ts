@@ -1654,6 +1654,7 @@ interface I18nTransaction {
 		instruction_rent_returned: string;
 		instruction_own_account: string;
 		summary_swap: string;
+		summary_self: string;
 		swap_on: string;
 		summary_other: string;
 		interacted_with: string;
