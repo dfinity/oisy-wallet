@@ -239,6 +239,35 @@ describe('eth-user-transactions.services', () => {
 	});
 
 	describe('loadNextEthUserTransactions', () => {
+		// An empty page is the shape a cursor invalidated by eviction comes back as, and eviction only
+		// happens because the token is at capacity. Dropping `totalStored` there re-enabled the very
+		// saves this branch exists to skip.
+		it('should record the capacity signal even when the cursor page comes back empty', async () => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 5n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [],
+						totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 5n,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
 		// Case 1: Fresh user — backend empty, Etherscan has no older data
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
