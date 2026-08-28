@@ -35,6 +35,7 @@
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 
@@ -82,6 +83,7 @@
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
+	let instructions = $state<SolInstructionSummary[] | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
@@ -100,6 +102,7 @@
 				prioritizationFee,
 				prioritizationFeeEstimate,
 				preview,
+				instructions,
 				parties
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
@@ -225,6 +228,7 @@
 				{data}
 				destination={destination ?? ''}
 				feeToken={token}
+				{instructions}
 				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}

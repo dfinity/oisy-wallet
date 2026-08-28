@@ -98,7 +98,8 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
 	});
 
-	it('should render each fee row as a label above its value', () => {
+	// One heading, and the parts under it: three headings read as three unrelated costs.
+	it('should gather the costs under a single fee heading', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
@@ -106,8 +107,31 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.network_fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+	});
+
+	it('should charge the rent of the accounts the message opens as its own line', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n },
+					{ kind: 'createTokenAccount' as const, account: 'ata-two', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
+	});
+
+	it('should charge no rent when the message opens no account', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, instructions: [{ kind: 'send' as const, amount: 1n }] }
+		});
+
+		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
 	});
 
 	it('should show the fiat approximation next to a fee', () => {

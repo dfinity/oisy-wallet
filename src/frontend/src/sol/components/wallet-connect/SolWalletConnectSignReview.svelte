@@ -9,6 +9,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,6 +25,7 @@
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 
@@ -44,6 +46,9 @@
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
 		preview?: SolSimulationPreview;
+		// What the simulated run does, instruction by instruction. The rent of the accounts it opens
+		// is the only part the fee block reads; rendering the list itself comes separately.
+		instructions?: SolInstructionSummary[];
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
@@ -65,6 +70,7 @@
 		isApproval = false,
 		unreviewed = false,
 		preview,
+		instructions,
 		parties,
 		approveDisabled = false,
 		onApprove,
@@ -77,6 +83,16 @@
 	// transaction does is then told by the simulated changes alone. The rows are dropped rather
 	// than filled with a zero the decode never produced.
 	let decoded = $derived(nonNullish(amount));
+
+	// The rent of the token accounts this message opens. It is charged like a fee and is not part
+	// of the base or the bid, so it is stated as its own line rather than folded into either.
+	let ataFee = $derived(
+		(instructions ?? []).reduce(
+			(acc, { kind, rent }) =>
+				kind === 'createTokenAccount' && nonNullish(rent) ? acc + rent : acc,
+			ZERO
+		)
+	);
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -197,15 +213,31 @@
 			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
-		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
-			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
-		</WalletConnectModalValue>
+		<!-- One heading, and under it what the transaction actually charges: the base fee every
+		     message pays, what it bids on top, and the rent of any account it opens. Three headings
+		     read as three unrelated costs. -->
+		<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
+			<div class="flex flex-col gap-2">
+				<div class="flex flex-col" data-tid="network-fee">
+					<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
+					{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+				</div>
 
-		{#if nonNullish(prioritizationFee)}
-			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
-				{@render feeValue(prioritizationFee)}
-			</WalletConnectModalValue>
-		{/if}
+				{#if nonNullish(prioritizationFee)}
+					<div class="flex flex-col" data-tid="prioritization-fee">
+						<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
+						{@render feeValue(prioritizationFee)}
+					</div>
+				{/if}
+
+				{#if ataFee > ZERO}
+					<div class="flex flex-col" data-tid="ata-fee">
+						<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
+						{@render feeValue(ataFee)}
+					</div>
+				{/if}
+			</div>
+		</WalletConnectModalValue>
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
