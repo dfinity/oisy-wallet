@@ -365,14 +365,16 @@ fn a_revoked_allowance_tells_the_claimer_and_leaves_the_tip_recoverable() {
     );
     assert_eq!(env.balance(claimer), Nat::from(0u8));
 
-    // The failed claim did not consume the tip: it is still Reserved, so a
-    // sender who re-approves makes it claimable again.
+    // The failed claim did not consume the tip. It now reports `Failed` rather
+    // than `Reserved` — a live state that says "somebody tried and the payout did
+    // not go through", which is the one thing in History a sender can act on. The
+    // re-approve below is what proves it is still live: the same link works again.
     let row = env
         .my_tips(env.sender)
         .into_iter()
         .find(|tip| tip.tip_id == tip_id)
         .expect("the tip is still on record");
-    assert_eq!(row.status, TipStatus::Reserved);
+    assert_eq!(row.status, TipStatus::Failed);
 
     env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
     assert!(
@@ -547,5 +549,130 @@ fn cancelling_a_tip_drops_its_recoverable_claim_code() {
         after,
         GetTipSecretResult::Ok(None),
         "cancelling must drop the stored claim code"
+    );
+}
+
+#[test]
+fn claiming_a_tip_drops_its_recoverable_claim_code() {
+    // A spent link has nothing left to recover, so its stored copy should go with
+    // it. This is the case that used to leak: removal was addressed to whoever was
+    // calling, and a claim runs as the *recipient*, so the delete looked in the
+    // claimer's own (empty) map and silently succeeded while the sender's entry
+    // stayed put.
+    let env = setup_tips();
+    let tip_id = "tip-claim-secret";
+    let code = "claim-code-claimed";
+    env.reserve(tip_id, code, TIP_AMOUNT);
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![7u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    // Asserted before the claim so a regression cannot pass by never having
+    // stored anything in the first place.
+    let before: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query answers");
+    assert!(
+        matches!(before, GetTipSecretResult::Ok(Some(_))),
+        "the claim code should be stored before the claim"
+    );
+
+    let claimer = Principal::self_authenticating("claims-and-clears");
+    env.claim(claimer, tip_id, code)
+        .expect("the claim succeeds");
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "a claimed tip must drop the stored claim code"
+    );
+}
+
+#[test]
+fn a_swept_tip_drops_its_recoverable_claim_code() {
+    // The retention sweep removes the tip's record; without this its ciphertext
+    // stayed behind forever, pointed at by nothing. The sweep runs as the
+    // canister on a timer, which is the other reason removal cannot be scoped to
+    // the caller.
+    let env = setup_tips();
+    let tip_id = "tip-swept-secret";
+    env.reserve(tip_id, "claim-code-swept", TIP_AMOUNT);
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![5u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    // Past the one-hour expiry, then past the 30-day retention window, then far
+    // enough again for the hourly housekeeping timer to come round.
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_hours(31 * 24));
+    for _ in 0..20 {
+        env.pic_setup.pic.tick();
+    }
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "a swept tip must drop the stored claim code"
+    );
+}
+
+#[test]
+fn storing_claim_codes_is_rate_limited() {
+    // `set_tip_secret` writes to stable memory and is deliberately not gated on
+    // the tip existing, so without a limiter one registered caller could grow the
+    // store without creating a single tip. That is exactly what this loop does.
+    let env = setup_tips();
+
+    let mut limited = false;
+    for i in 0..40u32 {
+        let result: SetTipSecretResult = env
+            .pic_setup
+            .update(
+                env.sender,
+                "set_tip_secret",
+                SetTipSecretRequest {
+                    tip_id: format!("no-such-tip-{i}"),
+                    encrypted_claim_code: ByteBuf::from(vec![1u8; 32]),
+                },
+            )
+            .expect("the endpoint answers");
+
+        if matches!(result, SetTipSecretResult::Err(TipError::RateLimited(_))) {
+            limited = true;
+            break;
+        }
+    }
+
+    assert!(
+        limited,
+        "storing claim codes without limit is how the secrets store grows unbounded"
     );
 }
