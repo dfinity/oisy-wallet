@@ -1,8 +1,10 @@
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
 	ERC20_DEPOSIT_ERC20_HASH,
 	ERC20_DEPOSIT_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
@@ -54,10 +56,38 @@ export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
 export const isErcTransactionSetApprovalForAll = (data: string | undefined): boolean =>
 	nonNullish(data) && hasSelector({ data, selector: ERC_SET_APPROVAL_FOR_ALL_HASH });
 
+export const isErc20TransactionIncreaseAllowance = (data: string | undefined): boolean =>
+	nonNullish(data) && hasSelector({ data, selector: ERC20_INCREASE_ALLOWANCE_HASH });
+
+export const isErc20TransactionDecreaseAllowance = (data: string | undefined): boolean =>
+	nonNullish(data) && hasSelector({ data, selector: ERC20_DECREASE_ALLOWANCE_HASH });
+
 export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
 	nonNullish(data) &&
 	(hasSelector({ data, selector: ERC20_DEPOSIT_HASH }) ||
 		hasSelector({ data, selector: ERC20_DEPOSIT_ERC20_HASH }));
+
+/**
+ * Whether a transaction carries a call at all, rather than only moving native value.
+ *
+ * Anything past the `0x` is a call: it is read by the contract at the destination, and what it does
+ * there is not constrained by the value field. Calldata too short to hold a selector is a call too,
+ * one that names no function, and lumping it in with a plain transfer would let four bytes of
+ * nothing be reviewed as an ordinary send.
+ */
+export const hasCalldata = (data: string | undefined): boolean =>
+	nonNullish(data) && data.replace(/^0x/i, '').length > 0;
+
+/**
+ * The four-byte function selector calldata begins with, lowercased.
+ *
+ * `undefined` when there is no function to name, which is either no calldata at all or too few
+ * bytes to carry a selector.
+ */
+export const getCalldataSelector = (data: string | undefined): string | undefined =>
+	nonNullish(data) && data.length >= SELECTOR_LENGTH
+		? data.slice(0, SELECTOR_LENGTH).toLowerCase()
+		: undefined;
 
 const abiCoder = AbiCoder.defaultAbiCoder();
 
