@@ -392,21 +392,32 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	describe('the simulation note', () => {
+	describe('the notice about how the review was obtained', () => {
 		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
 
-		it('should state that the real execution can differ once a simulation ran', () => {
+		it('should state that the review is simulated once a simulation ran', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: { ...props, preview }
 			});
 
-			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+		});
+
+		// Two notices about the same thing is one too many: an undecodable message already says
+		// the review comes from a simulation, in stronger terms.
+		it('should not repeat itself when the instructions could not be decoded', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
 		it('should say nothing when no simulation was obtained', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, { props });
 
-			expect(queryByText(en.wallet_connect.text.simulation_note)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
 		it('should render the note above the transaction data', () => {
@@ -414,7 +425,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, preview }
 			});
 
-			const note = getByText(en.wallet_connect.text.simulation_note);
+			const note = getByText(en.wallet_connect.text.simulated_review);
 			const application = getByText(en.wallet_connect.text.application);
 
 			expect(note.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
@@ -462,7 +473,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
 			expect(getByTestId('simulated-sol-delta')).toHaveTextContent('-0.01 SOL');
-			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
 		});
 	});
 
