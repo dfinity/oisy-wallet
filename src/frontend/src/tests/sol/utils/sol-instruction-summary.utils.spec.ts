@@ -151,6 +151,29 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		// A plain incoming SOL payment is a system transfer whose destination is the wallet itself;
+		// reporting only the outgoing side would leave every received payment invisible.
+		it('should read a system transfer into the wallet as a receive', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { source: 'sender', destination: owner, lamports: 7 }
+						}
+					}
+				],
+				ownedAddresses: [owner]
+			});
+
+			expect(view.kind).toBe('receive');
+			expect(view.counterparty).toBe('sender');
+		});
+
 		describe('control changes', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';
 			const ata = 'ownerTokenAccount111111111111111111111111111';

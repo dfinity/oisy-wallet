@@ -265,16 +265,21 @@ const toEffect = ({
 		const source = address({ info, key: 'source' });
 		const destination = address({ info, key: 'destination' });
 
-		if (isNullish(source) || !owned.has(source)) {
+		const outgoing = nonNullish(source) && owned.has(source);
+		const incoming = nonNullish(destination) && owned.has(destination);
+
+		if (!outgoing && !incoming) {
 			return undefined;
 		}
 
+		const counterparty = outgoing ? destination : source;
+
 		return {
-			kind: 'send',
+			kind: outgoing ? 'send' : 'receive',
 			...(nonNullish(amount({ info, key: 'lamports' })) && {
 				amount: amount({ info, key: 'lamports' })
 			}),
-			...(nonNullish(destination) && { counterparty: destination, own: owned.has(destination) })
+			...(nonNullish(counterparty) && { counterparty, own: owned.has(counterparty) })
 		};
 	}
 
