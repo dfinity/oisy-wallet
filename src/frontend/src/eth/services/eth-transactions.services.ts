@@ -18,6 +18,7 @@ import {
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -215,6 +216,8 @@ const loadCachedErc20Transactions = async ({
 		setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 	}
 
+	setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
+
 	const startBlock = resolveEthIncrementalStartBlock({
 		newestStoredBlockIndex: stored?.newestBlockIndex,
 		maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
@@ -312,6 +315,8 @@ const loadEthTransactions = async ({
 		if (!hasStoredEthTransactions(tokenId)) {
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
+
+		setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
 
 		const startBlock = resolveEthIncrementalStartBlock({
 			newestStoredBlockIndex: stored?.newestBlockIndex,
