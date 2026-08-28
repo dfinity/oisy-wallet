@@ -13,9 +13,7 @@ import { loadOlderTransactionsFor } from '$lib/services/transactions-pagination.
 import type { Token } from '$lib/types/token';
 import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
@@ -88,14 +86,7 @@ describe('transactions-pagination.services', () => {
 			});
 		});
 
-		it('should hand the ICP loader the caller principal and its own store contents', async () => {
-			const transactions = createMockIcTransactionsUi(2);
-
-			icTransactionsStore.append({
-				tokenId: ICP_TOKEN.id,
-				transactions: transactions.map((data) => ({ data, certified: false }))
-			});
-
+		it('should hand the ICP loader the caller principal', async () => {
 			const loadOlder = loadOlderTransactionsFor(ICP_TOKEN);
 
 			await loadOlder?.({
@@ -105,12 +96,12 @@ describe('transactions-pagination.services', () => {
 				signalEnd
 			});
 
+			// The loader reads its own store now, so the dispatcher only supplies what it cannot.
 			expect(loadNextIcTransactionsByOldest).toHaveBeenCalledExactlyOnceWith({
 				token: ICP_TOKEN,
 				identity: mockIdentity,
 				owner: mockIdentity.getPrincipal(),
 				maxResults: WALLET_PAGINATION,
-				transactions,
 				minTimestamp: 123,
 				signalEnd
 			});
@@ -125,14 +116,7 @@ describe('transactions-pagination.services', () => {
 			expect(loadNextIcTransactionsByOldest).not.toHaveBeenCalled();
 		});
 
-		it('should hand the Solana loader its own store contents', async () => {
-			const transactions = createMockSolTransactionsUi(3);
-
-			solTransactionsStore.append({
-				tokenId: SOLANA_TOKEN.id,
-				transactions: transactions.map((data) => ({ data, certified: false }))
-			});
-
+		it('should pass the Solana loader straight through', async () => {
 			const loadOlder = loadOlderTransactionsFor(SOLANA_TOKEN);
 
 			await loadOlder?.({ token: SOLANA_TOKEN, identity: mockIdentity, signalEnd });
@@ -140,17 +124,11 @@ describe('transactions-pagination.services', () => {
 			expect(loadNextSolTransactionsByOldest).toHaveBeenCalledExactlyOnceWith({
 				token: SOLANA_TOKEN,
 				identity: mockIdentity,
-				transactions,
 				signalEnd
 			});
 		});
 
 		it('should omit the floor when the caller wants a page regardless', async () => {
-			solTransactionsStore.append({
-				tokenId: SOLANA_TOKEN.id,
-				transactions: createMockSolTransactionsUi(1).map((data) => ({ data, certified: false }))
-			});
-
 			const loadOlder = loadOlderTransactionsFor(SOLANA_TOKEN);
 
 			await loadOlder?.({ token: SOLANA_TOKEN, identity: mockIdentity, signalEnd });

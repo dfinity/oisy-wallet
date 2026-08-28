@@ -417,15 +417,18 @@ const loadSolTransactions = async ({
 
 export const loadNextSolTransactionsByOldest = async ({
 	minTimestamp,
-	transactions,
 	...rest
 }: {
 	identity: NullishIdentity;
 	minTimestamp?: number;
-	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
 }): Promise<ResultSuccess> => {
+	// Read at call time rather than taken as a parameter: callers page in a loop, and each round has
+	// to see what the previous one appended. A list handed in would be a snapshot from before the
+	// first await.
+	const transactions = (get(solTransactionsStore)?.[rest.token.id] ?? []).map(({ data }) => data);
+
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
 		return { success: false };
