@@ -131,7 +131,11 @@ describe('sol-transactions.services', () => {
 			({
 				...mockSolTransactionDetail,
 				transaction: {
-					message: { instructions, accountKeys }
+					message: {
+						...mockSolTransactionDetail.transaction.message,
+						instructions,
+						accountKeys
+					}
 				},
 				meta: {
 					fee,
@@ -141,7 +145,7 @@ describe('sol-transactions.services', () => {
 					preTokenBalances,
 					postTokenBalances
 				}
-			}) as unknown as SolRpcTransaction;
+			}) as SolRpcTransaction;
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
 
