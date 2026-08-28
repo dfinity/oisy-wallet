@@ -205,15 +205,33 @@ describe('SolTransactionModal', () => {
 			expect(getByText(/1 SOL → 0\.046099/)).toBeInTheDocument();
 		});
 
-		it('should show the net changes and the fee apart on the balance changes tab', async () => {
-			const { getByText } = render(SolTransactionModal, {
+		it('should show only what moved on the balance changes tab', async () => {
+			const { getByText, queryByTestId } = render(SolTransactionModal, {
 				props: { transaction, token: SOLANA_TOKEN }
 			});
 
 			await fireEvent.click(getByText(en.transaction.text.tab_balance_changes));
 
 			expect(getByText('-1 SOL')).toBeInTheDocument();
-			expect(getByText('Fee: 0.000005 SOL')).toBeInTheDocument();
+			// The cost belongs with the transaction's details, not among the amounts it moved.
+			expect(queryByTestId('transaction-fee')).not.toBeInTheDocument();
+		});
+
+		it('should state the cost at the foot of the summary', () => {
+			const { getByTestId } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...transaction,
+						instructions: [
+							{ kind: 'createTokenAccount' as const, account: 'ata', rent: 2_039_280n }
+						]
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(getByTestId('transaction-fee')).toHaveTextContent('0.000005 SOL');
+			expect(getByTestId('transaction-ata-fee')).toHaveTextContent('0.00203928 SOL');
 		});
 
 		it('should list the contained instructions on their tab', async () => {

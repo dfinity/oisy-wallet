@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
-import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
@@ -159,17 +159,7 @@ export const deriveSolTransactionSummary = ({
  * stays a renderer. The children of a route are the caller's to indent, not this function's.
  */
 export const formatSolInstructionSummary = ({
-	instruction: {
-		kind,
-		amount: value,
-		tokenAddress,
-		decimals,
-		counterparty,
-		own,
-		rent,
-		newAuthority,
-		program
-	},
+	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent },
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -186,16 +176,13 @@ export const formatSolInstructionSummary = ({
 			displayDecimals: decimals ?? decimalsOf(tokenAddress)
 		});
 
-	const shorten = (address: string): string => shortenWithMiddleEllipsis({ text: address });
-
 	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
 
 	if (kind === 'send' && nonNullish(value) && nonNullish(counterparty)) {
 		return {
 			text: replacePlaceholders(i18n.transaction.text.instruction_send, {
 				$amount: amount(value),
-				$symbol: symbolOf(tokenAddress),
-				$to: shorten(counterparty)
+				$symbol: symbolOf(tokenAddress)
 			}),
 			...(nonNullish(ownDetail) && { detail: ownDetail })
 		};
@@ -205,8 +192,7 @@ export const formatSolInstructionSummary = ({
 		return {
 			text: replacePlaceholders(i18n.transaction.text.instruction_receive, {
 				$amount: amount(value),
-				$symbol: symbolOf(tokenAddress),
-				$from: shorten(counterparty)
+				$symbol: symbolOf(tokenAddress)
 			}),
 			...(nonNullish(ownDetail) && { detail: ownDetail })
 		};
@@ -249,9 +235,7 @@ export const formatSolInstructionSummary = ({
 
 	if (kind === 'approve' && nonNullish(counterparty)) {
 		return {
-			text: replacePlaceholders(i18n.transaction.text.instruction_approve, {
-				$to: shorten(counterparty)
-			})
+			text: i18n.transaction.text.instruction_approve
 		};
 	}
 
@@ -261,17 +245,13 @@ export const formatSolInstructionSummary = ({
 
 	if (kind === 'setAuthority') {
 		return {
-			text: replacePlaceholders(i18n.transaction.text.instruction_set_authority, {
-				$to: nonNullish(newAuthority) ? shorten(newAuthority) : i18n.transaction.text.unknown_token
-			})
+			text: i18n.transaction.text.instruction_set_authority
 		};
 	}
 
 	if (kind === 'route') {
 		return {
-			text: replacePlaceholders(i18n.transaction.text.instruction_route, {
-				$program: nonNullish(program) ? shorten(program) : i18n.transaction.text.unknown_token
-			})
+			text: i18n.transaction.text.instruction_route
 		};
 	}
 

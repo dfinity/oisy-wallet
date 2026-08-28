@@ -345,6 +345,31 @@
 						</ListItem>
 					{/if}
 				</List>
+
+				<!-- What the transaction cost, after what it did: the base and priority fee the network
+				     charged as one figure, since an executed transaction reports only their sum, and the
+				     rent of any account it opened stated apart, as the send form does. -->
+				{#if (nonNullish(fee) && fee > ZERO) || ataFee > ZERO}
+					<List styleClass="mt-5">
+						{#if nonNullish(fee) && fee > ZERO}
+							<ListItem>
+								<span>{$i18n.fee.text.fee}</span>
+								<output data-tid="transaction-fee">
+									{`${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+								</output>
+							</ListItem>
+						{/if}
+
+						{#if ataFee > ZERO}
+							<ListItem>
+								<span>{$i18n.fee.text.ata_fee}</span>
+								<output data-tid="transaction-ata-fee">
+									{`${formatToken({ value: ataFee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+								</output>
+							</ListItem>
+						{/if}
+					</List>
+				{/if}
 			{:else if activeTab === 'changes'}
 				{#if nonNullish(netChanges)}
 					<div class="flex flex-col gap-1" data-tid="sol-balance-changes">
@@ -359,14 +384,6 @@
 						{:else}
 							<span class="text-tertiary">{$i18n.transaction.text.no_balance_changes}</span>
 						{/each}
-
-						<!-- The fee is a fee: never folded into the deltas above, stated on its own, and the
-						     rent of accounts the transaction opened apart from it, as the send form does. -->
-						{#if nonNullish(fee) && fee > ZERO}
-							<span class="text-tertiary">
-								{`${$i18n.fee.text.fee}: ${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
-							</span>
-						{/if}
 
 						{#if ataFee > ZERO}
 							<span class="text-tertiary">

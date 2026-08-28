@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
@@ -53,14 +54,24 @@
 		instruction.counterparty ?? instruction.newAuthority ?? instruction.account}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
-		<span>
-			{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span
-				>{/if}{#if nonNullish(actionAddress)}<AddressActions
+		<span class="flex flex-wrap items-center gap-x-1">
+			<span>
+				{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span>{/if}
+			</span>
+
+			<!-- A contact or a token OISY knows names the account; the address is what is left when
+			     neither does. The controls copy and open the address either way, never the name. -->
+			{#if nonNullish(actionAddress)}
+				<ContactOrToken identifier={actionAddress} showFallback />
+
+				<AddressActions
 					copyAddress={actionAddress}
 					copyAddressText={$i18n.wallet.text.address_copied}
 					externalLink={solAccountExplorerUrl({ network: token.network, address: actionAddress })}
 					externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
-				/>{/if}
+					inline
+				/>
+			{/if}
 		</span>
 
 		<!-- The legs sit under the route that produced them: flat, a four-leg swap reads as four
