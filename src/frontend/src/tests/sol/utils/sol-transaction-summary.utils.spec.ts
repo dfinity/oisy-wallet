@@ -78,6 +78,45 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.counterparty).toBe('sender');
 		});
 
+		// The asset never left, so the net is zero: without the legs this reads as a transaction
+		// that did nothing at all.
+		it('should call a transfer between the user own accounts a self-transfer', () => {
+			const result = deriveSolTransactionSummary({
+				netChanges: [],
+				instructions: [
+					{
+						kind: 'send',
+						amount: 5_000_000n,
+						tokenAddress: 'mint',
+						decimals: 6,
+						counterparty: 'my-other-ata',
+						own: true
+					}
+				]
+			});
+
+			expect(result.kind).toBe('self');
+			expect(result.spent?.delta).toBe(-5_000_000n);
+			expect(result.counterparty).toBe('my-other-ata');
+		});
+
+		it('should not call a transfer to a stranger a self-transfer', () => {
+			const result = deriveSolTransactionSummary({
+				netChanges: [{ tokenAddress: 'mint', decimals: 6, delta: -5_000_000n }],
+				instructions: [
+					{
+						kind: 'send',
+						amount: 5_000_000n,
+						tokenAddress: 'mint',
+						counterparty: 'stranger',
+						own: false
+					}
+				]
+			});
+
+			expect(result.kind).toBe('send');
+		});
+
 		// An approval moves nothing, so the net is empty; claiming a send or a receive would
 		// invent a movement the transaction never made.
 		it('should call a transaction with no net movement other', () => {

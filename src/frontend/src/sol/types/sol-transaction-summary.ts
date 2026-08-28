@@ -17,10 +17,13 @@ export interface SolNetBalanceChange {
 /**
  * What a transaction was, in the terms the activity list speaks.
  *
+ * `self` is a transfer between the user's own accounts: the asset never left, so its net is zero
+ * and only the cost of moving it shows.
+ *
  * `other` is the honest bucket: a transaction that moved nothing of the user's, or one whose
- * movements do not reduce to a single send, receive or swap.
+ * movements do not reduce to a single send, receive, swap or self-transfer.
  */
-export type SolTransactionSummaryKind = 'send' | 'receive' | 'swap' | 'other';
+export type SolTransactionSummaryKind = 'send' | 'receive' | 'swap' | 'self' | 'other';
 
 /**
  * The one-line description of a transaction, as data.
