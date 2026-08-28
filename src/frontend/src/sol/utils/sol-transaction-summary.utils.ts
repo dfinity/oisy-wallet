@@ -214,3 +214,127 @@ export const formatSolTransactionSummary = ({
 
 	return i18n.transaction.text.summary_other;
 };
+
+/**
+ * One instruction summary as a sentence with an optional detail, composed here so the component
+ * stays a renderer. The children of a route are the caller's to indent, not this function's.
+ */
+export const formatSolInstructionSummary = ({
+	instruction: {
+		kind,
+		amount: value,
+		tokenAddress,
+		decimals,
+		counterparty,
+		own,
+		rent,
+		newAuthority,
+		program
+	},
+	i18n,
+	symbolOf,
+	decimalsOf
+}: {
+	instruction: SolInstructionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
+	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+}): { text: string; detail?: string } => {
+	const amount = (raw: bigint): string =>
+		formatToken({
+			value: raw < ZERO ? -raw : raw,
+			unitName: decimals ?? decimalsOf(tokenAddress),
+			displayDecimals: decimals ?? decimalsOf(tokenAddress)
+		});
+
+	const shorten = (address: string): string => shortenWithMiddleEllipsis({ text: address });
+
+	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
+
+	if (kind === 'send' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_send, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress),
+				$to: shorten(counterparty)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'receive' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_receive, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress),
+				$from: shorten(counterparty)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'wrap' && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_wrap, {
+				$amount: formatToken({ value, unitName: 9, displayDecimals: 9 })
+			})
+		};
+	}
+
+	if (kind === 'unwrap') {
+		return {
+			text: i18n.transaction.text.instruction_unwrap,
+			detail: i18n.transaction.text.instruction_rent_returned
+		};
+	}
+
+	if (kind === 'createTokenAccount') {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_create_account, {
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(rent) && {
+				detail: replacePlaceholders(i18n.transaction.text.instruction_rent, {
+					$amount: formatToken({ value: rent, unitName: 9, displayDecimals: 9 })
+				})
+			})
+		};
+	}
+
+	if (kind === 'closeTokenAccount') {
+		return {
+			text: i18n.transaction.text.instruction_close_account,
+			detail: i18n.transaction.text.instruction_rent_returned
+		};
+	}
+
+	if (kind === 'approve' && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_approve, {
+				$to: shorten(counterparty)
+			})
+		};
+	}
+
+	if (kind === 'revoke') {
+		return { text: i18n.transaction.text.instruction_revoke };
+	}
+
+	if (kind === 'setAuthority') {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_set_authority, {
+				$to: nonNullish(newAuthority) ? shorten(newAuthority) : i18n.transaction.text.unknown_token
+			})
+		};
+	}
+
+	if (kind === 'route') {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_route, {
+				$program: nonNullish(program) ? shorten(program) : i18n.transaction.text.unknown_token
+			})
+		};
+	}
+
+	return { text: i18n.transaction.text.summary_other };
+};

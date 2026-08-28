@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -10,6 +11,8 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -22,7 +25,11 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
+	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
+	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -30,6 +37,8 @@
 	}
 
 	const { transaction, token }: Props = $props();
+
+	let activeTab = $state('summary');
 
 	let {
 		from: fromAddress,
@@ -41,8 +50,42 @@
 		to: toAddress,
 		toOwner,
 		type,
-		status
+		status,
+		fee,
+		summary,
+		netChanges,
+		instructions
 	} = $derived(transaction);
+
+	const splToken = (tokenAddress: string) =>
+		$enabledSplTokens.find(
+			({ address, network: { id: networkId } }) =>
+				address === tokenAddress && networkId === token?.network.id
+		);
+
+	const symbolOf = (tokenAddress: string | undefined): string =>
+		isNullish(tokenAddress)
+			? SOLANA_TOKEN.symbol
+			: (splToken(tokenAddress)?.symbol ?? $i18n.transaction.text.unknown_token);
+
+	const decimalsOf = (change: SolNetBalanceChange): number =>
+		change.decimals ??
+		(isNullish(change.tokenAddress)
+			? SOLANA_TOKEN.decimals
+			: (splToken(change.tokenAddress)?.decimals ?? 0));
+
+	// The same sentence the activity row shows: the modal describes the transaction, and it does
+	// so identically wherever the list that opened it was filtered.
+	let summaryLine = $derived(
+		nonNullish(summary)
+			? formatSolTransactionSummary({
+					summary,
+					i18n: $i18n,
+					symbolOf,
+					decimalsOf
+				})
+			: undefined
+	);
 
 	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
 		fromOwner ?? fromAddress
@@ -121,114 +164,157 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(toAddress) && nonNullish(fromAddress)}
-			<TransactionContactCard
-				{from}
-				{fromExplorerUrl}
-				{onSaveAddressComplete}
-				{to}
-				{toExplorerUrl}
-				type={type === 'receive' ? 'receive' : 'send'}
-			/>
-		{/if}
+		<Tabs
+			styleClass="mt-4"
+			tabs={[
+				{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
+				{ label: $i18n.transaction.text.tab_balance_changes, id: 'changes' },
+				{ label: $i18n.transaction.text.tab_instructions, id: 'instructions' }
+			]}
+			bind:activeTab
+		>
+			{#if activeTab === 'summary'}
+				{#if nonNullish(summaryLine)}
+					<p class="mb-4 font-normal">{summaryLine}</p>
+				{/if}
 
-		<List styleClass="mt-5">
-			{#if nonNullish(token?.network)}
-				<ListItem>
-					<span>
-						{$i18n.networks.network}
-					</span>
+				{#if nonNullish(toAddress) && nonNullish(fromAddress)}
+					<TransactionContactCard
+						{from}
+						{fromExplorerUrl}
+						{onSaveAddressComplete}
+						{to}
+						{toExplorerUrl}
+						type={type === 'receive' ? 'receive' : 'send'}
+					/>
+				{/if}
 
-					<NetworkWithLogo network={token.network} />
-				</ListItem>
+				<List styleClass="mt-5">
+					{#if nonNullish(token?.network)}
+						<ListItem>
+							<span>
+								{$i18n.networks.network}
+							</span>
+
+							<NetworkWithLogo network={token.network} />
+						</ListItem>
+					{/if}
+
+					{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
+						<ListItem>
+							<span>{$i18n.transaction.text.from_ata}</span>
+							<output class="flex max-w-[50%] flex-row">
+								<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
+
+								<AddressActions
+									copyAddress={fromAddress}
+									copyAddressText={$i18n.transaction.text.from_ata_copied}
+									externalLink={fromAtaExplorerUrl}
+									externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+								/>
+							</output>
+						</ListItem>
+					{/if}
+					{#if type === 'send' && nonNullish(to) && nonNullish(toAddress) && to !== toAddress}
+						<ListItem>
+							<span>{$i18n.transaction.text.to_ata}</span>
+							<output class="flex max-w-[50%] flex-row">
+								<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
+								<AddressActions
+									copyAddress={toAddress}
+									copyAddressText={$i18n.transaction.text.to_ata_copied}
+									externalLink={toAtaExplorerUrl}
+									externalLinkAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+								/>
+							</output>
+						</ListItem>
+					{/if}
+
+					{#if nonNullish(id)}
+						<ListItem>
+							<span>
+								{$i18n.transaction.text.signature}
+							</span>
+
+							<span>
+								<output>{shortenWithMiddleEllipsis({ text: id })}</output>
+								<AddressActions
+									copyAddress={id}
+									copyAddressText={replacePlaceholders($i18n.transaction.text.signature_copied, {
+										$signature: id
+									})}
+									externalLink={txExplorerUrl}
+									externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
+								/>
+							</span>
+						</ListItem>
+					{/if}
+
+					{#if nonNullish(blockNumber)}
+						<ListItem>
+							<span>
+								{$i18n.transaction.text.block}
+							</span>
+
+							<output>{blockNumber}</output>
+						</ListItem>
+					{/if}
+
+					{#if nonNullish(status)}
+						<ListItem>
+							<span>
+								{$i18n.transaction.text.status}
+							</span>
+							<span>
+								{`${$i18n.transaction.status[status]}`}
+							</span>
+						</ListItem>
+					{/if}
+
+					{#if nonNullish(timestamp)}
+						<ListItem>
+							<span>
+								{$i18n.transaction.text.timestamp}
+							</span>
+
+							<output
+								>{formatSecondsToDate({
+									seconds: Number(timestamp),
+									language: $currentLanguage
+								})}</output
+							>
+						</ListItem>
+					{/if}
+				</List>
+			{:else if activeTab === 'changes'}
+				{#if nonNullish(netChanges)}
+					<div class="flex flex-col gap-1" data-tid="sol-balance-changes">
+						{#each netChanges as change, i (i)}
+							<span class:text-success-primary={change.delta > ZERO}>
+								{`${change.delta > ZERO ? '+' : '-'}${formatToken({
+									value: change.delta > ZERO ? change.delta : -change.delta,
+									unitName: decimalsOf(change),
+									displayDecimals: decimalsOf(change)
+								})} ${symbolOf(change.tokenAddress)}`}
+							</span>
+						{:else}
+							<span class="text-tertiary">{$i18n.transaction.text.no_balance_changes}</span>
+						{/each}
+
+						<!-- The fee is a fee: never folded into the deltas above, stated on its own. -->
+						{#if nonNullish(fee) && fee > ZERO}
+							<span class="text-tertiary">
+								{`${$i18n.fee.text.fee}: ${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+							</span>
+						{/if}
+					</div>
+				{:else}
+					<span class="text-tertiary">{$i18n.transaction.text.tab_unavailable}</span>
+				{/if}
+			{:else if nonNullish(token)}
+				<SolInstructionsList instructions={instructions ?? []} {netChanges} {token} />
 			{/if}
-
-			{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
-				<ListItem>
-					<span>{$i18n.transaction.text.from_ata}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
-
-						<AddressActions
-							copyAddress={fromAddress}
-							copyAddressText={$i18n.transaction.text.from_ata_copied}
-							externalLink={fromAtaExplorerUrl}
-							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
-						/>
-					</output>
-				</ListItem>
-			{/if}
-			{#if type === 'send' && nonNullish(to) && nonNullish(toAddress) && to !== toAddress}
-				<ListItem>
-					<span>{$i18n.transaction.text.to_ata}</span>
-					<output class="flex max-w-[50%] flex-row">
-						<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
-						<AddressActions
-							copyAddress={toAddress}
-							copyAddressText={$i18n.transaction.text.to_ata_copied}
-							externalLink={toAtaExplorerUrl}
-							externalLinkAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
-						/>
-					</output>
-				</ListItem>
-			{/if}
-
-			{#if nonNullish(id)}
-				<ListItem>
-					<span>
-						{$i18n.transaction.text.signature}
-					</span>
-
-					<span>
-						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
-						<AddressActions
-							copyAddress={id}
-							copyAddressText={replacePlaceholders($i18n.transaction.text.signature_copied, {
-								$signature: id
-							})}
-							externalLink={txExplorerUrl}
-							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
-						/>
-					</span>
-				</ListItem>
-			{/if}
-
-			{#if nonNullish(blockNumber)}
-				<ListItem>
-					<span>
-						{$i18n.transaction.text.block}
-					</span>
-
-					<output>{blockNumber}</output>
-				</ListItem>
-			{/if}
-
-			{#if nonNullish(status)}
-				<ListItem>
-					<span>
-						{$i18n.transaction.text.status}
-					</span>
-					<span>
-						{`${$i18n.transaction.status[status]}`}
-					</span>
-				</ListItem>
-			{/if}
-
-			{#if nonNullish(timestamp)}
-				<ListItem>
-					<span>
-						{$i18n.transaction.text.timestamp}
-					</span>
-
-					<output
-						>{formatSecondsToDate({
-							seconds: Number(timestamp),
-							language: $currentLanguage
-						})}</output
-					>
-				</ListItem>
-			{/if}
-		</List>
+		</Tabs>
 
 		{#snippet toolbar()}
 			<ButtonCloseModal />

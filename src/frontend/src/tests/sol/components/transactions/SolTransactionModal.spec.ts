@@ -8,7 +8,7 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('SolTransactionModal', () => {
@@ -131,5 +131,66 @@ describe('SolTransactionModal', () => {
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
 		expect(getByText(BONK_TOKEN.network.name)).toBeInTheDocument();
+	});
+
+	describe('tabs', () => {
+		const [base] = createMockSolTransactionsUi(1);
+
+		const transaction = {
+			...base,
+			fee: 5000n,
+			summary: {
+				kind: 'send' as const,
+				spent: { delta: -1_000_000_000n },
+				counterparty: mockSolAddress2
+			},
+			netChanges: [{ delta: -1_000_000_000n }],
+			instructions: [
+				{ kind: 'send' as const, amount: 1_000_000_000n, counterparty: mockSolAddress2 }
+			]
+		};
+
+		it('should show the same summary sentence the activity row shows', () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: { transaction, token: SOLANA_TOKEN }
+			});
+
+			expect(
+				getByText(`Send 1 SOL to ${shortenWithMiddleEllipsis({ text: mockSolAddress2 })}`)
+			).toBeInTheDocument();
+		});
+
+		it('should show the net changes and the fee apart on the balance changes tab', async () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: { transaction, token: SOLANA_TOKEN }
+			});
+
+			await fireEvent.click(getByText(en.transaction.text.tab_balance_changes));
+
+			expect(getByText('-1 SOL')).toBeInTheDocument();
+			expect(getByText('Fee: 0.000005 SOL')).toBeInTheDocument();
+		});
+
+		it('should list the contained instructions on their tab', async () => {
+			const { getByText, getByTestId } = render(SolTransactionModal, {
+				props: { transaction, token: SOLANA_TOKEN }
+			});
+
+			await fireEvent.click(getByText(en.transaction.text.tab_instructions));
+
+			expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
+			expect(getByTestId('sol-instruction').textContent).toContain('Send 1 SOL to');
+		});
+
+		// Records cached before the redesign carry none of the derived fields.
+		it('should say the changes are unavailable for an old record', async () => {
+			const { getByText } = render(SolTransactionModal, {
+				props: { transaction: base, token: SOLANA_TOKEN }
+			});
+
+			await fireEvent.click(getByText(en.transaction.text.tab_balance_changes));
+
+			expect(getByText(en.transaction.text.tab_unavailable)).toBeInTheDocument();
+		});
 	});
 });
