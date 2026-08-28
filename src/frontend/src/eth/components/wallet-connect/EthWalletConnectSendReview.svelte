@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthWalletConnectUnknownCallAgreement from '$eth/components/wallet-connect/EthWalletConnectUnknownCallAgreement.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -10,6 +11,7 @@
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
 	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -34,9 +36,10 @@
 		destination: string;
 		application: string;
 		data?: string;
-		erc20Approve: boolean;
-		erc20Transfer?: boolean;
-		setApprovalForAll?: boolean;
+		// What the calldata says this request is. Every state below is derived from it, so a request
+		// whose calldata OISY cannot read arrives here as `unknown` and is reviewed as unknown,
+		// rather than falling through to the native summary the way it used to.
+		call: WalletConnectEthCall;
 		// The gas limit the dApp asked for, when it asked for one. It is what gets signed, so it is
 		// also what the maximum fee below is priced on.
 		requestedGas?: bigint;
@@ -52,9 +55,7 @@
 		destination,
 		application,
 		data,
-		erc20Approve,
-		erc20Transfer = false,
-		setApprovalForAll = false,
+		call,
 		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
@@ -85,7 +86,30 @@
 			requestedGas >= baselineGas * ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER
 	);
 
-	let erc20 = $derived(erc20Approve || erc20Transfer);
+	let erc20Approve = $derived(call.type === 'erc20Approve');
+
+	let erc20Transfer = $derived(call.type === 'erc20Transfer');
+
+	let setApprovalForAll = $derived(call.type === 'setApprovalForAll');
+
+	// `increaseAllowance` and `decreaseAllowance` carry `(address spender, uint256 delta)`, the same
+	// arguments as `approve`, so they resolve their token, decode their spender and fail closed
+	// through the very same path. Only the copy differs, because the amount is a change to the
+	// allowance rather than the allowance itself.
+	let allowanceDelta = $derived(call.type === 'erc20AllowanceDelta');
+
+	let allowanceIncrease = $derived(call.type === 'erc20AllowanceDelta' && call.increase);
+
+	let unknownCall = $derived(call.type === 'unknown');
+
+	let unknownSelector = $derived(call.type === 'unknown' ? call.selector : undefined);
+
+	// The user states they understand the review cannot describe this request. Nothing else gates
+	// approval for an unknown call: blocking it outright would take every dApp OISY has never
+	// decoded, which is most of them, offline.
+	let acknowledgedUnknownCall = $state(false);
+
+	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
 		if (!erc20 || isNullish(data)) {
@@ -100,7 +124,7 @@
 		}
 	});
 
-	let spender = $derived(erc20Approve ? decodedErc20Data?.to : undefined);
+	let spender = $derived(erc20Approve || allowanceDelta ? decodedErc20Data?.to : undefined);
 
 	let decodedSetApprovalForAll = $derived.by(() => {
 		if (!setApprovalForAll || isNullish(data)) {
@@ -147,13 +171,21 @@
 	// An operator grant authorizes rather than moves, so it has no amount and no balance to spend
 	// against. Native value carried alongside it is still real value leaving the wallet, and hiding
 	// that would repeat, in the other direction, the summary this review exists to prevent.
-	let noAmount = $derived(setApprovalForAll && amount === ZERO);
+	// A call OISY could not read is in the same position: the native value is all the review knows,
+	// and a zero there is not a summary of the request. Printing "0 ETH" as the amount of an
+	// unreviewed contract call is the misstatement this review exists to prevent, so the row is
+	// dropped rather than filled with a figure that describes nothing.
+	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 </script>
 
 <ContentWithToolbar>
-	{#if unverifiableErc20}
+	{#if unknownCall}
+		<MessageBox level="error" testId="wallet-connect-unknown-call">
+			{$i18n.wallet_connect.text.unknown_call}
+		</MessageBox>
+	{:else if unverifiableErc20}
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
 			{$i18n.wallet_connect.text.unverifiable_erc20_request}
 		</MessageBox>
@@ -170,6 +202,15 @@
 				? $i18n.wallet_connect.text.approval_for_all_grant
 				: $i18n.wallet_connect.text.approval_for_all_revoke}
 		</MessageBox>
+	{:else if allowanceDelta}
+		<MessageBox
+			level={allowanceIncrease ? 'warning' : 'info'}
+			testId="wallet-connect-allowance-delta"
+		>
+			{allowanceIncrease
+				? $i18n.wallet_connect.text.allowance_increase
+				: $i18n.wallet_connect.text.allowance_decrease}
+		</MessageBox>
 	{/if}
 
 	<SendData
@@ -180,7 +221,7 @@
 		showAmount={!noAmount}
 		showBalance={!noAmount}
 		showNullishAmountLabel={unverifiableErc20}
-		showUnlimitedAmountLabel={erc20Approve}
+		showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
 		source={$ethAddress ?? ''}
 		{token}
 	>
@@ -201,7 +242,7 @@
 			{/if}
 		{/snippet}
 
-		{#if erc20Approve && nonNullish(spender)}
+		{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
 			<SendDataSpender {spender} />
 		{:else if nonNullish(decodedSetApprovalForAll)}
 			<SendDataSpender
@@ -229,12 +270,27 @@
 			</MessageBox>
 		{/if}
 
+		<!-- The function a call names is the one fact the review can still state about calldata it
+		     could not decode, and it is what lets the user look the call up for themselves. -->
+		{#if nonNullish(unknownSelector)}
+			<WalletConnectModalValue label={$i18n.wallet_connect.text.function} ref="function">
+				{unknownSelector}
+			</WalletConnectModalValue>
+		{/if}
+
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>
 
+	{#if unknownCall}
+		<EthWalletConnectUnknownCallAgreement bind:checked={acknowledgedUnknownCall} />
+	{/if}
+
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
+			approveDisabled={approveDisabled ||
+				unverifiableErc20 ||
+				unverifiableSetApprovalForAll ||
+				(unknownCall && !acknowledgedUnknownCall)}
 			{onApprove}
 			{onReject}
 		/>
