@@ -50,8 +50,10 @@
 		decimalsOf
 	})}
 
-	{@const actionAddress =
-		instruction.counterparty ?? instruction.newAuthority ?? instruction.account}
+	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
+	     handover: an address the user has something to check. The account a creation or a close
+	     names is a derived token account nobody recognises, and the token already identifies it. -->
+	{@const actionAddress = instruction.counterparty ?? instruction.newAuthority}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span class="flex flex-wrap items-center gap-x-1">

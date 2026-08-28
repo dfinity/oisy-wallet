@@ -20,15 +20,11 @@
 		transaction: SolTransactionUi;
 		token: Token;
 		iconType?: 'token' | 'transaction';
-		// Whether the amount column shows this token's net change. On a token page it does; on the
-		// unfiltered activity the row shows no amount at all, since one figure out of several would
-		// misdescribe the transaction. The sentence is the same in both.
-		showTokenAmount?: boolean;
 	}
 
-	let { transaction, token, iconType = 'transaction', showTokenAmount = false }: Props = $props();
+	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges } =
+	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges, fee } =
 		$derived(transaction);
 
 	// The venue of a routed swap: the program its legs ran through.
@@ -92,40 +88,25 @@
 		)
 	);
 
-	// The single-sided move a summary reduces to. A swap moves two tokens, so it names no main
-	// change and the unfiltered list shows no figure for it: either would misdescribe the other.
-	let mainChange = $derived(
-		summary?.kind === 'send'
-			? summary.spent
-			: summary?.kind === 'receive'
-				? summary.received
-				: undefined
-	);
-
 	// Records from before the redesign carry no summary and keep their old signed value.
 	let fallbackAmount = $derived(
 		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
 	);
 
-	let tokenMatchesMainChange = $derived(
-		nonNullish(mainChange) &&
-			(isTokenSpl(token)
-				? mainChange.tokenAddress === token.address
-				: isSolNetBalanceChangeSol(mainChange))
-	);
-
-	// A self-transfer nets to nothing for the token it moved: the asset never left, so its row
-	// says zero rather than the amount. SOL still shows what the fee and any rent actually cost.
+	// Every row shows the net of the token it is about. A swap keeps a row per side, so each shows
+	// its own half; a self-transfer nets to zero, which is exactly what it did to that token.
+	//
+	// SOL is the exception: its net leaves the fee out, because the modal states the cost apart
+	// from what moved. A row has no such second line, so here it is the whole change to the
+	// wallet, transfers and rent and fee together, which is what the balance actually did.
 	let displayAmount = $derived(
-		showTokenAmount
-			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : ZERO))
+		nonNullish(tokenNetChange)
+			? isSolNetBalanceChangeSol(tokenNetChange)
+				? tokenNetChange.delta - (fee ?? ZERO)
+				: tokenNetChange.delta
 			: isNullish(summary)
 				? fallbackAmount
-				: summary.kind === 'self'
-					? ZERO
-					: tokenMatchesMainChange
-						? mainChange?.delta
-						: undefined
+				: ZERO
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));
