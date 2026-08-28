@@ -8,7 +8,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * their own, `createTokenAccount` stands for four, and the instruction set's own vocabulary
  * (`syncNative`, `initializeImmutableOwner`) names nothing a user holds or controls.
  */
-export type SolInstructionViewKind =
+export type SolInstructionSummaryKind =
 	// Not an instruction at all: the container the legs of one routed swap hang under.
 	| 'route'
 	| 'send'
@@ -27,8 +27,8 @@ export type SolInstructionViewKind =
  * Deliberately free of copy: the derivation says what happened, the component says it in the
  * user's language. Amounts stay `bigint` in their base units for the same reason.
  */
-export interface SolInstructionView {
-	kind: SolInstructionViewKind;
+export interface SolInstructionSummary {
+	kind: SolInstructionSummaryKind;
 	amount?: bigint;
 	// Absent for native SOL. A mint the wallet cannot name is still carried, so the component can
 	// mark it rather than pass it off as a ticker.
@@ -50,5 +50,5 @@ export interface SolInstructionView {
 	// The legs of a single routed swap. They hang under the route rather than sitting flat among
 	// the top-level effects, which is what keeps a four-leg route from reading as four unrelated
 	// transfers.
-	children?: SolInstructionView[];
+	children?: SolInstructionSummary[];
 }

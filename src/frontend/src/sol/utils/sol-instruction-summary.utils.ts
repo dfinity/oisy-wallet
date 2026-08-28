@@ -1,6 +1,9 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import type { SolAddress } from '$sol/types/address';
-import type { SolInstructionView, SolInstructionViewKind } from '$sol/types/sol-instruction-view';
+import type {
+	SolInstructionSummary,
+	SolInstructionSummaryKind
+} from '$sol/types/sol-instruction-summary';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -80,7 +83,7 @@ const PLUMBING_TYPES = [
 	'syncNative'
 ];
 
-interface Effect extends SolInstructionView {
+interface Effect extends SolInstructionSummary {
 	parentIndex: number;
 }
 
@@ -204,7 +207,7 @@ const transferEffect = ({
 		return undefined;
 	}
 
-	const kind: SolInstructionViewKind = outgoing ? 'send' : 'receive';
+	const kind: SolInstructionSummaryKind = outgoing ? 'send' : 'receive';
 	const counterparty = outgoing ? destination : source;
 
 	return {
@@ -400,10 +403,10 @@ const asWrap = ({
  * and would otherwise be indented under a heading that describes nothing. Runs are consecutive so
  * that an account closed midway through a swap breaks the route rather than disappearing into it.
  */
-const isLeg = ({ kind }: { kind: SolInstructionViewKind }): boolean =>
+const isLeg = ({ kind }: { kind: SolInstructionSummaryKind }): boolean =>
 	kind === 'send' || kind === 'receive';
 
-const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionView => view;
+const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
 
 const groupRoutes = ({
 	effects,
@@ -411,7 +414,7 @@ const groupRoutes = ({
 }: {
 	effects: Effect[];
 	programs: Record<number, SolAddress>;
-}): SolInstructionView[] =>
+}): SolInstructionSummary[] =>
 	effects
 		.reduce<Effect[][]>((runs, effect) => {
 			const run = runs[runs.length - 1];
@@ -453,7 +456,7 @@ const groupRoutes = ({
  * signer at all, and the rest is account plumbing and transfers between accounts that are not
  * theirs.
  */
-export const mapSolInstructionViews = ({
+export const mapSolInstructionSummarys = ({
 	instructions,
 	innerInstructions = [],
 	ownedAddresses,
@@ -463,7 +466,7 @@ export const mapSolInstructionViews = ({
 	innerInstructions?: readonly SolInstructionGroup[];
 	ownedAddresses: SolAddress[];
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
-}): SolInstructionView[] => {
+}): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
 	const accountMints = collectAccountMints({ flattened, addressToToken });

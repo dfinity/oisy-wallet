@@ -1,14 +1,14 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
-import type { SolInstructionView } from '$sol/types/sol-instruction-view';
-import { mapSolInstructionViews } from '$sol/utils/sol-instruction-view.utils';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import { mapSolInstructionSummarys } from '$sol/utils/sol-instruction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 
-describe('sol-instruction-view.utils', () => {
-	describe('mapSolInstructionViews', () => {
-		const kinds = (views: SolInstructionView[]): string[] => views.map(({ kind }) => kind);
+describe('sol-instruction-summary.utils', () => {
+	describe('mapSolInstructionSummarys', () => {
+		const kinds = (views: SolInstructionSummary[]): string[] => views.map(({ kind }) => kind);
 
 		describe('an SPL send that opens the recipient an account', () => {
-			const views = () => mapSolInstructionViews(MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA);
+			const views = () => mapSolInstructionSummarys(MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA);
 
 			// The four instructions an associated token account creation takes are one thing to a
 			// user, and the only part of it they care about is what it costs them.
@@ -34,7 +34,7 @@ describe('sol-instruction-view.utils', () => {
 		});
 
 		describe('a routed swap', () => {
-			const views = () => mapSolInstructionViews(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP);
+			const views = () => mapSolInstructionSummarys(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP);
 
 			it('should recognise a System transfer into a wrapped SOL account as wrapping', () => {
 				const wrap = views().find(({ kind }) => kind === 'wrap');
@@ -73,7 +73,7 @@ describe('sol-instruction-view.utils', () => {
 		});
 
 		describe('a swap split across several pools', () => {
-			const views = () => mapSolInstructionViews(MOCK_SOL_INSTRUCTIONS.ORCA_SPLIT_SWAP);
+			const views = () => mapSolInstructionSummarys(MOCK_SOL_INSTRUCTIONS.ORCA_SPLIT_SWAP);
 
 			// Three pools, each a top-level instruction with its own pair of legs. Merging them
 			// would claim a single route the transaction never took.
@@ -95,7 +95,7 @@ describe('sol-instruction-view.utils', () => {
 
 		describe('a transaction the user is not part of', () => {
 			it('should produce nothing at all', () => {
-				expect(mapSolInstructionViews(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY)).toStrictEqual([]);
+				expect(mapSolInstructionSummarys(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY)).toStrictEqual([]);
 			});
 		});
 
@@ -114,7 +114,7 @@ describe('sol-instruction-view.utils', () => {
 			// An SPL transfer names token accounts, not wallets. The authority is the only field
 			// that says whose transfer it is.
 			it('should read a transfer as outgoing when the user signs for it', () => {
-				const [view] = mapSolInstructionViews(
+				const [view] = mapSolInstructionSummarys(
 					transfer({ source: ata, destination: other, authority: owner, amount: '10' })
 				);
 
@@ -124,7 +124,7 @@ describe('sol-instruction-view.utils', () => {
 			});
 
 			it('should read a transfer into an account of ours as incoming', () => {
-				const [view] = mapSolInstructionViews(
+				const [view] = mapSolInstructionSummarys(
 					transfer({ source: other, destination: ata, authority: other, amount: '10' })
 				);
 
@@ -135,7 +135,7 @@ describe('sol-instruction-view.utils', () => {
 			// Our own account is the destination of every swap, since a swap is how the user
 			// receives. Unmarked it would read as paying a stranger.
 			it('should mark a counterparty that is one of our own accounts', () => {
-				const [view] = mapSolInstructionViews(
+				const [view] = mapSolInstructionSummarys(
 					transfer({ source: ata, destination: owner, authority: owner, amount: '10' })
 				);
 
@@ -144,7 +144,7 @@ describe('sol-instruction-view.utils', () => {
 
 			it('should ignore a transfer between two accounts that are not ours', () => {
 				expect(
-					mapSolInstructionViews(
+					mapSolInstructionSummarys(
 						transfer({ source: other, destination: other, authority: other, amount: '10' })
 					)
 				).toStrictEqual([]);
@@ -156,7 +156,7 @@ describe('sol-instruction-view.utils', () => {
 			const ata = 'ownerTokenAccount111111111111111111111111111';
 
 			it('should report handing an account to somebody else', () => {
-				const [view] = mapSolInstructionViews({
+				const [view] = mapSolInstructionSummarys({
 					instructions: [
 						{
 							program: 'spl-token',
@@ -175,7 +175,7 @@ describe('sol-instruction-view.utils', () => {
 			});
 
 			it('should report an approval with its delegate', () => {
-				const [view] = mapSolInstructionViews({
+				const [view] = mapSolInstructionSummarys({
 					instructions: [
 						{
 							program: 'spl-token',
@@ -226,7 +226,7 @@ describe('sol-instruction-view.utils', () => {
 			};
 
 			it('should treat it as the user’s own without being told', () => {
-				expect(kinds(mapSolInstructionViews(openThenSpend))).toStrictEqual(['wrap', 'unwrap']);
+				expect(kinds(mapSolInstructionSummarys(openThenSpend))).toStrictEqual(['wrap', 'unwrap']);
 			});
 
 			it('should not claim an account opened for somebody else', () => {
@@ -244,7 +244,7 @@ describe('sol-instruction-view.utils', () => {
 					]
 				};
 
-				const [view] = mapSolInstructionViews(stranger);
+				const [view] = mapSolInstructionSummarys(stranger);
 
 				expect(view.kind).toBe('send');
 				expect(view.own).toBeFalsy();
@@ -254,7 +254,7 @@ describe('sol-instruction-view.utils', () => {
 		describe('instructions it cannot read', () => {
 			it('should ignore an instruction the RPC did not parse', () => {
 				expect(
-					mapSolInstructionViews({
+					mapSolInstructionSummarys({
 						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
 						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111']
 					})
@@ -262,7 +262,9 @@ describe('sol-instruction-view.utils', () => {
 			});
 
 			it('should ignore a transaction with no instructions at all', () => {
-				expect(mapSolInstructionViews({ instructions: [], ownedAddresses: [] })).toStrictEqual([]);
+				expect(mapSolInstructionSummarys({ instructions: [], ownedAddresses: [] })).toStrictEqual(
+					[]
+				);
 			});
 		});
 	});
