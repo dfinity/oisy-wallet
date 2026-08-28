@@ -238,11 +238,14 @@ const toEffect = ({
 		parsed: { type, info }
 	},
 	owned,
-	accountMints
+	accountMints,
+	accountLamports
 }: {
 	instruction: SolParsedRpcInstruction;
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
+	// What each account held going in, so a close can say what it hands back.
+	accountLamports: Record<SolAddress, bigint>;
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
 		return undefined;
@@ -304,11 +307,13 @@ const toEffect = ({
 			}
 
 			const mint = accountMints[account];
+			const returned = accountLamports[account];
 
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
 				account,
-				...(nonNullish(mint) && { tokenAddress: mint })
+				...(nonNullish(mint) && { tokenAddress: mint }),
+				...(nonNullish(returned) && { returned })
 			};
 		}
 
@@ -472,12 +477,16 @@ export const mapSolInstructionSummaries = ({
 	instructions,
 	innerInstructions = [],
 	ownedAddresses,
-	addressToToken = {}
+	addressToToken = {},
+	accountLamports = {}
 }: {
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
 	ownedAddresses: SolAddress[];
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
+	// Lamports per account before the transaction ran, from its balance metadata. A close hands
+	// the destination the whole balance, which no instruction states.
+	accountLamports?: Record<SolAddress, bigint>;
 }): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
@@ -501,7 +510,7 @@ export const mapSolInstructionSummaries = ({
 	}, {});
 
 	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, instruction }) => {
-		const effect = toEffect({ instruction, owned, accountMints });
+		const effect = toEffect({ instruction, owned, accountMints, accountLamports });
 
 		if (isNullish(effect)) {
 			return acc;
