@@ -21,6 +21,7 @@ import {
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
@@ -30,6 +31,7 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Token } from '$lib/types/token';
@@ -55,9 +57,11 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 vi.mock('$eth/services/eth-user-transactions.services', () => ({
 	getEthBackendPaginationCursor: vi.fn(),
+	isEthBackendAtCapacity: vi.fn(),
 	loadEthUserTransactions: vi.fn(),
 	loadNextEthUserTransactions: vi.fn(),
 	saveEthFinalizedTransactions: vi.fn(),
+	setEthBackendAtCapacity: vi.fn(),
 	setEthBackendPaginationCursor: vi.fn()
 }));
 
@@ -455,6 +459,23 @@ describe('eth-transactions.services', () => {
 				expect(saveErc20FinalizedTransactions).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({ currentBlockNumber: 4242 })
 				);
+			});
+
+			it('should record the stored capacity so older pages can skip a doomed save', async () => {
+				vi.mocked(loadErc20UserTransactions).mockResolvedValue({
+					transactions: [],
+					newestBlockIndex: 500n,
+					oldestBlockIndex: 100n,
+					totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN),
+					nextStart: undefined
+				});
+
+				await load();
+
+				expect(setEthBackendAtCapacity).toHaveBeenCalledWith({
+					tokenId,
+					totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+				});
 			});
 
 			it('should not persist anything when Etherscan returned nothing new', async () => {

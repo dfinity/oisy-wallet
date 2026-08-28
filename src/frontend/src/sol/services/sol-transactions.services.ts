@@ -210,7 +210,14 @@ export const fetchSolTransactionsForSignature = async ({
 		? (addressToOwner[counterparty] ?? (await getAccountOwner({ address: counterparty, network })))
 		: undefined;
 
+	// The shared type only speaks send and receive, so a swap is typed by its outgoing half and an
+	// approval or authority change falls back to send too; what the transaction actually was is the
+	// summary's to say, and the UI reads the summary first.
 	const type: SolTransactionUi['type'] = summary.kind === 'receive' ? 'receive' : 'send';
+
+	// A transaction that reduces to none of the three kinds has no counterparty to name: writing
+	// the wallet into `to` would fabricate a transfer to self that never happened.
+	const directional = summary.kind !== 'other';
 
 	const amount = summary.spent ?? summary.received;
 
@@ -224,7 +231,7 @@ export const fetchSolTransactionsForSignature = async ({
 		...(nonNullish(amount) && { value: absBigInt(amount.delta) }),
 		type,
 		from: type === 'send' ? address : (counterparty ?? address),
-		to: type === 'send' ? (counterparty ?? address) : address,
+		...(directional && { to: type === 'send' ? (counterparty ?? address) : address }),
 		...(type === 'receive' && nonNullish(counterpartyOwner) && { fromOwner: counterpartyOwner }),
 		...(type === 'send' && nonNullish(counterpartyOwner) && { toOwner: counterpartyOwner }),
 		status,
