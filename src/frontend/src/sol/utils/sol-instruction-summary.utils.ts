@@ -456,7 +456,7 @@ const groupRoutes = ({
  * signer at all, and the rest is account plumbing and transfers between accounts that are not
  * theirs.
  */
-export const mapSolInstructionSummarys = ({
+export const mapSolInstructionSummaries = ({
 	instructions,
 	innerInstructions = [],
 	ownedAddresses,
