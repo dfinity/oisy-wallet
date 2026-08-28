@@ -27,11 +27,11 @@ const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddres
 	flattenInstructions(instructions).reduce<Set<SplTokenAddress | undefined>>(
 		(acc, { kind, tokenAddress }) => {
 			if (['send', 'receive'].includes(kind)) {
-				return new Set([...acc, tokenAddress]);
+				acc.add(tokenAddress);
 			}
 
 			if (['wrap', 'unwrap'].includes(kind)) {
-				return new Set([...acc, undefined]);
+				acc.add(undefined);
 			}
 
 			return acc;
@@ -52,19 +52,18 @@ const routeTradedTokens = (
 ): Set<SplTokenAddress | undefined> =>
 	instructions.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
 		if (kind === 'wrap') {
-			return new Set([...acc, undefined]);
+			acc.add(undefined);
 		}
 
 		if (kind !== 'route') {
 			return acc;
 		}
 
-		return new Set([
-			...acc,
-			...(children ?? [])
-				.filter((child) => ['send', 'receive'].includes(child.kind))
-				.map((child) => child.tokenAddress)
-		]);
+		(children ?? [])
+			.filter((child) => ['send', 'receive'].includes(child.kind))
+			.forEach((child) => acc.add(child.tokenAddress));
+
+		return acc;
 	}, new Set());
 
 const largest = (changes: SolNetBalanceChange[]): SolNetBalanceChange | undefined =>

@@ -1246,7 +1246,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1656,7 +1658,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "ex: wc:a281567bb3e4..."
+			"connect_input": "ex: wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Vérification du domaine",
