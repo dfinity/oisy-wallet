@@ -138,6 +138,19 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
+	<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
+	     theft as nothing happening. It is named first among the fund warnings for that reason. -->
+	{#if nonNullish(preview) && preview.controlChanges.length > 0}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
+	{/if}
+
+	<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+	     something visibly failed: an empty list on a transaction that clearly spends something is
+	     the single most dangerous thing this review can show. -->
+	{#if parties?.partial === true}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
+	{/if}
+
 	{#if dappPrioritizationFee}
 		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 	{:else if highPrioritizationFee}

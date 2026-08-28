@@ -131,6 +131,71 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 	});
 
+	describe('the warnings about what the transaction does', () => {
+		it('should warn about a control change, above the fee notices', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: {
+						tokenDeltas: [],
+						controlChanges: [
+							{ account: mockSolAddress2, field: 'owner' as const, to: mockSolAddress }
+						]
+					},
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const control = getByText(en.wallet_connect.text.simulation_control_change);
+			const fee = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(control.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should not warn about a control change when nothing about control changed', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+		});
+
+		it('should say that the parties are partial, above the fee notices', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: { sources: [], destinations: [], partial: true },
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const partial = getByText(en.wallet_connect.text.transfer_parties_partial);
+			const fee = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(partial.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should say nothing about partial parties when the lists are complete', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: { sources: [], destinations: [], partial: false }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		});
+	});
+
 	describe('the placement of the fees', () => {
 		it('should render the fees below the simulated changes', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {

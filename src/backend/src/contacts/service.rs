@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use ic_cdk::api::{msg_caller, time};
 use shared::types::contact::{
-    Contact, ContactError, CreateContactRequest, StoredContacts, UpdateContactRequest,
-    MAX_CONTACTS_PER_USER,
+    validate_principal_memory_limit, Contact, ContactError, CreateContactRequest, StoredContacts,
+    UpdateContactRequest, MAX_CONTACTS_PER_USER,
 };
 
 use crate::{
@@ -45,18 +45,19 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
             return Err(ContactError::TooManyContacts);
         }
 
+        validate_principal_memory_limit(&stored_contacts, request.image.is_some())?;
+
         // Check if a contact with this ID already exists
         if stored_contacts.contacts.contains_key(&new_id) {
             return Err(ContactError::RandomnessError);
         }
 
-        // Create the new contact - note that CreateContactRequest only has 'name'
         let new_contact = Contact {
             id: new_id,
             name: request.name,
             addresses: Vec::new(), // Start with an empty addresses list
             update_timestamp_ns: current_time,
-            image: None, // Start with no image
+            image: request.image,
         };
 
         // Add the contact to the stored contacts
@@ -134,10 +135,14 @@ pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, C
             return Err(ContactError::ContactNotFound);
         };
 
-        // Check if the contact exists
-        if !stored_contacts.contacts.contains_key(&request.id) {
-            return Err(ContactError::ContactNotFound);
-        }
+        // Replacing or clearing an image leaves the image count unchanged, so only a contact
+        // gaining its first image counts against the per-principal cap.
+        let is_adding_new_image = match stored_contacts.contacts.get(&request.id) {
+            Some(existing_contact) => request.image.is_some() && existing_contact.image.is_none(),
+            None => return Err(ContactError::ContactNotFound),
+        };
+
+        validate_principal_memory_limit(&stored_contacts, is_adding_new_image)?;
 
         // Create an updated contact with current timestamp
         let updated_contact = Contact {
