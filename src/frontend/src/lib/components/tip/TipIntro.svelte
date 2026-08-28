@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import tipIntroImg from '$lib/assets/tip-intro-img.webp';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
+	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -79,43 +80,64 @@
 			{#if $tipsOverview.failed > 0}
 				<!--
 					Full width and above the pair: it is the only row with something to do
-					about it, and History now opens with the failed tips at the top.
+					about it, and History now opens with the failed tips at the top. Tinted
+					and iconed rather than set in orange type like the counts below it,
+					because at a glance the shape of the row is what separates "this one
+					wants you" from two figures that are merely information.
 				-->
 				<button
-					class="mt-2 flex w-full items-center justify-between gap-2 text-left"
+					class="mt-2 flex w-full items-start gap-2 rounded-lg border border-warning-solid bg-warning-subtle-10 px-3 py-2 text-left"
 					onclick={onViewHistory}
 					type="button"
 				>
-					<span class="text-sm font-bold text-warning-primary"
-						>{$i18n.tip.text.overview_failed}</span
-					>
+					<span class="shrink-0 text-warning-primary">
+						<IconAlertTriangle size="18" />
+					</span>
 
-					<span class="text-sm font-bold text-warning-primary">{$tipsOverview.failed}</span>
+					<span class="flex-1">
+						<span class="block text-sm font-bold text-warning-primary">
+							{$i18n.tip.text.overview_failed}
+						</span>
+
+						<span class="block text-xs text-secondary">
+							{$i18n.tip.text.overview_failed_hint}
+						</span>
+					</span>
+
+					<span class="shrink-0 text-sm font-bold text-warning-primary">
+						{$tipsOverview.failed}
+					</span>
 				</button>
-
-				<p class="m-0 mt-1 text-xs text-tertiary">{$i18n.tip.text.overview_failed_hint}</p>
 			{/if}
 
-			<div class="mt-3 grid grid-cols-2 gap-3">
-				<div>
-					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
+			<!--
+				Figure first, label beside it: the count is what the sender came to see, and
+				keeping the fiat under the label answers "how much is that" without spending
+				a second row on it. A rule between the columns rather than a gap, because
+				the two are peers being compared, not two unrelated blocks.
+			-->
+			<div class="mt-3 grid grid-cols-2">
+				<div class="flex items-center gap-2 pr-3">
+					<span class="text-2xl font-bold">{$tipsOverview.open}</span>
 
-					<span class="block text-sm font-bold">
-						{$tipsOverview.open}{#if nonNullish(openFiat)}<span class="font-normal text-tertiary">
-								&middot; {openFiat}</span
-							>{/if}
+					<span class="min-w-0">
+						<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
+
+						{#if nonNullish(openFiat)}
+							<span class="block text-xs font-semibold">{openFiat}</span>
+						{/if}
 					</span>
 				</div>
 
-				<div>
-					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
+				<div class="flex items-center gap-2 border-l border-secondary pl-3">
+					<span class="text-2xl font-bold">{$tipsOverview.claimed}</span>
 
-					<span class="block text-sm font-bold">
-						{$tipsOverview.claimed}{#if nonNullish(claimedFiat)}<span
-								class="font-normal text-tertiary"
-							>
-								&middot; {claimedFiat}</span
-							>{/if}
+					<span class="min-w-0">
+						<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
+
+						{#if nonNullish(claimedFiat)}
+							<span class="block text-xs font-semibold">{claimedFiat}</span>
+						{/if}
 					</span>
 				</div>
 			</div>

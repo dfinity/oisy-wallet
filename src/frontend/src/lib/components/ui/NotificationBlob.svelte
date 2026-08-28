@@ -4,10 +4,11 @@
 	interface Props {
 		position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 		display?: boolean;
+		testId?: string;
 		children: Snippet;
 	}
 
-	let { position = 'top-left', display = true, children }: Props = $props();
+	let { position = 'top-left', display = true, testId, children }: Props = $props();
 </script>
 
 <div class="relative">
@@ -19,6 +20,7 @@
 		class:-top-1={position.indexOf('top') >= 0}
 		class:opacity-0={!display}
 		class:opacity-100={display}
+		data-tid={testId}
 	></div>
 	{@render children()}
 </div>

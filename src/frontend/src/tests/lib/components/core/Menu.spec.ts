@@ -298,12 +298,13 @@ describe('Menu', () => {
 
 		it('stays away when nothing needs attention', () => {
 			// It has to mean something when it appears. A dot that is always there is
-			// wallpaper.
+			// wallpaper. The shared blob keeps its element mounted and fades it, so
+			// "away" is the transparent state rather than an absent node.
 			tipsStore.set([tip({ Reserved: null }), tip({ Claimed: null })]);
 
 			const { queryByTestId } = render(Menu);
 
-			expect(queryByTestId(NAVIGATION_MENU_TIP_BADGE)).toBeNull();
+			expect(queryByTestId(NAVIGATION_MENU_TIP_BADGE)).toHaveClass('opacity-0');
 		});
 
 		it('marks the menu icon when a tip could not be paid', () => {
@@ -313,7 +314,7 @@ describe('Menu', () => {
 
 			const { queryByTestId } = render(Menu);
 
-			expect(queryByTestId(NAVIGATION_MENU_TIP_BADGE)).toBeInTheDocument();
+			expect(queryByTestId(NAVIGATION_MENU_TIP_BADGE)).toHaveClass('opacity-100');
 		});
 
 		it('says how many once the menu is open', async () => {
