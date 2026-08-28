@@ -24,3 +24,14 @@ export const NEAR_INTENTS_API_URL = safeParse({
  */
 export const NEAR_INTENTS_TOS_SHA256 =
 	'cd633c9be2556d7e1ed9bde2d5b959898d975dca47c006bccb5b567ba26d5d75';
+
+/**
+ * Ed25519 public key the 1Click service signs its quote responses with.
+ *
+ * Pinned from the official SDK, which hard-codes the same value:
+ * https://github.com/defuse-protocol/one-click-sdk-typescript/blob/main/src/quote-signature.ts
+ *
+ * A quote names the deposit address the wallet irreversibly sends funds to, so it is
+ * verified against this key before any transfer rather than trusted on the TLS hop alone.
+ */
+export const NEAR_INTENTS_QUOTE_PUBLIC_KEY = 'ed25519:reYaWhvwu8Jzo3WUM3zhn6VrhuMEF4eADL17qtRVifc';
