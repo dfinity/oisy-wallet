@@ -2846,7 +2846,24 @@
 		"alt": {
 			"intro_illustration": "A tip QR code being scanned",
 			"claim_illustration": "A stack of coins waiting to be claimed",
-			"claim_failed_illustration": "A tip that could not be claimed"
+			"claim_failed_illustration": "A tip that could not be claimed",
+			"welcome_illustration": "OISY Wallet open at oisy.com, surrounded by the tokens and features it supports"
+		},
+		"share": {
+			"title": "Someone sent you a tip",
+			"description": "Tap to claim it. No app to install, nothing to write down, and only you can move it."
+		},
+		"welcome": {
+			"title": "Your tip is in",
+			"heading": "Nothing to install, nothing to write down",
+			"body": "OISY runs at oisy.com. Sign in the way you just did and it is here waiting.",
+			"point_yours_title": "Only you can move it",
+			"point_yours_text": "Not OISY, and not whoever sent it.",
+			"point_use_title": "Send it, swap it, or leave it",
+			"point_use_text": "Nothing expires.",
+			"point_chains_title": "Bitcoin, Ethereum and Solana too",
+			"point_chains_text": "Same wallet, same sign-in.",
+			"cta": "See my balance"
 		}
 	}
 }
