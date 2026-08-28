@@ -59,6 +59,7 @@ export interface Modal<T> {
 		| 'vip-qr-code'
 		| 'referral-code'
 		| 'tip'
+		| 'tip-welcome'
 		| 'tip-claim'
 		| 'referral-state'
 		| 'address-book'
@@ -144,6 +145,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReferralCode: (id: symbol) => void;
 	openTip: (id: symbol) => void;
 	openTipClaim: (params: SetWithDataParams<PendingTipClaim>) => void;
+	openTipWelcome: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openNotes: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
@@ -247,6 +249,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openTip: setType('tip'),
+		openTipWelcome: setType('tip-welcome'),
 		openTipClaim: <(params: SetWithDataParams<PendingTipClaim>) => void>(
 			setTypeWithData('tip-claim')
 		),

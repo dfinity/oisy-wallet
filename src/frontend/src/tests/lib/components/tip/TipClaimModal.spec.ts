@@ -5,6 +5,7 @@ import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as consoleUtils from '$lib/utils/console.utils';
+import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
@@ -231,7 +232,7 @@ describe('TipClaimModal', () => {
 		await waitFor(() => expect(getByText(/Received!/)).toBeInTheDocument());
 	});
 
-	it('closes on acknowledgement, since the reader is already in the wallet', async () => {
+	const acknowledge = async () => {
 		mockDetails();
 		mockClaim();
 		modalStore.openTipClaim({ id: Symbol(), data: pending });
@@ -243,8 +244,29 @@ describe('TipClaimModal', () => {
 		);
 
 		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+	};
+
+	it('closes on acknowledgement for a claimer who has been here before', async () => {
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(true);
+
+		await acknowledge();
 
 		await waitFor(() => expect(get(modalStore)).toBeNull());
+	});
+
+	it('introduces OISY to a first-time claimer instead of just closing', async () => {
+		// Somebody who arrived from a QR code has no idea what they just signed into
+		// or how to get back to it. Acknowledging the payout is the one moment their
+		// attention is already on the screen.
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
+		const remember = vi.spyOn(tipUtils, 'rememberTipWelcomeSeen');
+
+		await acknowledge();
+
+		await waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
+
+		// Remembered, so the second tip does not repeat the introduction.
+		expect(remember).toHaveBeenCalledOnce();
 	});
 
 	describe('making the tokens visible', () => {

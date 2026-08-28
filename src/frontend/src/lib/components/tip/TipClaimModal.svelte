@@ -31,6 +31,7 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { hasSeenTipWelcome, rememberTipWelcomeSeen } from '$lib/utils/tip.utils';
 
 	interface Props {
 		pending: PendingTipClaim;
@@ -100,7 +101,20 @@
 	const leaveForWallet = async () => {
 		await enableClaimedToken();
 
+		// Whether this claimer needs OISY explained to them, read before `close()`
+		// resets the modal store.
+		const principal = $authIdentity?.getPrincipal().toText();
+		const introduce = nonNullish(principal) && !hasSeenTipWelcome(principal);
+
 		close();
+
+		// Opened after the close, not instead of it: the store holds one modal, so
+		// the welcome replaces the confirmation rather than racing it. The wallet is
+		// already underneath with the tip in it either way.
+		if (introduce && nonNullish(principal)) {
+			rememberTipWelcomeSeen(principal);
+			modalStore.openTipWelcome(Symbol());
+		}
 	};
 
 	// The canister wrapper throws the candid `Err` variant; a call that never
