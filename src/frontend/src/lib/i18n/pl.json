@@ -1980,6 +1980,8 @@
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_own_account": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interakcja z",
 			"unknown_token": "",

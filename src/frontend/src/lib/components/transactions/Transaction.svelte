@@ -39,6 +39,8 @@
 		iconType: 'token' | 'transaction';
 		to?: string;
 		from?: string;
+		// Overrides the type-derived To/From prefix: a swap's address is a venue, not a recipient.
+		addressPrefixLabel?: string;
 		tokenId?: number | bigint | string;
 		children: Snippet;
 		onClick?: () => void;
@@ -57,6 +59,7 @@
 		iconType = 'transaction',
 		to,
 		from,
+		addressPrefixLabel,
 		tokenId,
 		children,
 		onClick,
@@ -202,7 +205,9 @@
 				>
 					{#if nonNullish(address)}
 						<span class="inline-flex min-w-0 items-center gap-1">
-							{#if type === 'send' || type === 'deposit' || type === 'burn'}
+							{#if nonNullish(addressPrefixLabel)}
+								<span class="shrink-0">{addressPrefixLabel}</span>
+							{:else if type === 'send' || type === 'deposit' || type === 'burn'}
 								<span class="shrink-0">{$i18n.transaction.text.to}</span>
 							{:else if type === 'receive' || type === 'withdraw' || type === 'mint'}
 								<span class="shrink-0">{$i18n.transaction.text.from}</span>

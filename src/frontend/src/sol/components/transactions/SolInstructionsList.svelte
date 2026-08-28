@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
+	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { formatSolInstructionSummary } from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
@@ -47,9 +49,18 @@
 		decimalsOf
 	})}
 
+	{@const actionAddress =
+		instruction.counterparty ?? instruction.newAuthority ?? instruction.account}
+
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span>
-			{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span>{/if}
+			{text}{#if nonNullish(detail)}<span class="text-tertiary">{` · ${detail}`}</span
+				>{/if}{#if nonNullish(actionAddress)}<AddressActions
+					copyAddress={actionAddress}
+					copyAddressText={$i18n.wallet.text.address_copied}
+					externalLink={solAccountExplorerUrl({ network: token.network, address: actionAddress })}
+					externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
+				/>{/if}
 		</span>
 
 		<!-- The legs sit under the route that produced them: flat, a four-leg swap reads as four
