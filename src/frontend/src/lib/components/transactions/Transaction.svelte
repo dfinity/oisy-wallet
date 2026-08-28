@@ -200,17 +200,19 @@
 				<span
 					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
-					<span class="inline-flex min-w-0 items-center gap-1">
-						{#if type === 'send' || type === 'deposit' || type === 'burn'}
-							<span class="shrink-0">{$i18n.transaction.text.to}</span>
-						{:else if type === 'receive' || type === 'withdraw' || type === 'mint'}
-							<span class="shrink-0">{$i18n.transaction.text.from}</span>
-						{:else if type === 'approve'}
-							<span class="shrink-0">{$i18n.transaction.text.for}</span>
-						{/if}
+					{#if nonNullish(address)}
+						<span class="inline-flex min-w-0 items-center gap-1">
+							{#if type === 'send' || type === 'deposit' || type === 'burn'}
+								<span class="shrink-0">{$i18n.transaction.text.to}</span>
+							{:else if type === 'receive' || type === 'withdraw' || type === 'mint'}
+								<span class="shrink-0">{$i18n.transaction.text.from}</span>
+							{:else if type === 'approve'}
+								<span class="shrink-0">{$i18n.transaction.text.for}</span>
+							{/if}
 
-						<ContactOrToken identifier={address} showFallback />
-					</span>
+							<ContactOrToken identifier={address} showFallback />
+						</span>
+					{/if}
 					<span class="truncate text-tertiary">
 						<TransactionStatusComponent {status} />
 					</span>

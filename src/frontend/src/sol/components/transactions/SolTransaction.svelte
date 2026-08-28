@@ -58,11 +58,36 @@
 		)
 	);
 
+	// The single-sided move a summary reduces to. A swap moves two tokens, so it names no main
+	// change and the unfiltered list shows no figure for it: either would misdescribe the other.
+	let mainChange = $derived(
+		summary?.kind === 'send'
+			? summary.spent
+			: summary?.kind === 'receive'
+				? summary.received
+				: undefined
+	);
+
+	// Records from before the redesign carry no summary and keep their old signed value.
+	let fallbackAmount = $derived(
+		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
+	);
+
+	let tokenMatchesMainChange = $derived(
+		nonNullish(mainChange) &&
+			(isTokenSpl(token)
+				? mainChange.tokenAddress === token.address
+				: isSolNetBalanceChangeSol(mainChange))
+	);
+
 	let displayAmount = $derived(
 		showTokenAmount
-			? (tokenNetChange?.delta ??
-					(nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined))
-			: undefined
+			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : undefined))
+			: isNullish(summary)
+				? fallbackAmount
+				: tokenMatchesMainChange
+					? mainChange?.delta
+					: undefined
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));
@@ -74,12 +99,12 @@
 
 <Transaction
 	{displayAmount}
-	from={fromOwner ?? from}
+	from={nonNullish(summary) ? undefined : (fromOwner ?? from)}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
-	to={toOwner ?? to}
+	to={nonNullish(summary) ? undefined : (toOwner ?? to)}
 	{token}
 	{type}
 >

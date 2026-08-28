@@ -35,6 +35,7 @@ import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import {
+	requiresStoredDerivationRefresh,
 	requiresStoredSplOwnerRefresh,
 	solBackendTokenId
 } from '$sol/utils/user-transactions.utils';
@@ -337,8 +338,10 @@ const loadSolTransactions = async ({
 
 		const storedRefreshSignatures = new Set(
 			storedTransactions
-				.filter((transaction) =>
-					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				.filter(
+					(transaction) =>
+						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
+						requiresStoredDerivationRefresh({ transaction })
 				)
 				.map(({ signature }) => String(signature))
 		);
