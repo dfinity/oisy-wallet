@@ -342,6 +342,15 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
                     );
                 }
             });
+            // The payout landed, so the link is spent and the sender's
+            // recoverable copy of the claim code has nothing left to recover.
+            // Dropped here rather than left to the retention sweep because it is
+            // dead the instant the transfer succeeds. Best-effort: a tip created
+            // before this store existed has no secret, which is not an error, and
+            // failing to drop opaque bytes must never fail a claim that already
+            // moved money.
+            let _ = secrets::remove_tip_secret_for(record.sender, key.0);
+
             Ok(TipClaim {
                 ledger_canister_id: record.ledger_canister_id,
                 amount: record.amount,
@@ -451,7 +460,7 @@ pub fn cancel_tip(tip_id: String) -> Result<(), TipError> {
     // code goes with it. Best-effort: a tip with no stored secret (created before
     // the store existed) is not an error, and failing to drop opaque bytes the
     // canister cannot read must not fail a cancellation that already succeeded.
-    let _ = secrets::remove_tip_secret(key.0);
+    let _ = secrets::remove_tip_secret_for(caller, key.0);
 
     Ok(())
 }
@@ -493,7 +502,8 @@ pub fn get_my_tips() -> Result<Vec<MyTip>, TipError> {
 /// hourly sweep. Mirrors `personal_notes::share::service::prune_expired_shares`.
 pub fn prune_expired_tips() -> u64 {
     let now = time();
-    mutate_state(|s| {
+
+    let collected: Vec<(TipId, Principal)> = mutate_state(|s| {
         let collectable: Vec<(TipId, Principal)> = s
             .tips
             .iter()
@@ -505,12 +515,22 @@ pub fn prune_expired_tips() -> u64 {
             .map(|entry| (entry.key().clone(), entry.value().0.sender))
             .collect();
 
-        let removed = collectable.len() as u64;
-        for (tip_id, sender) in collectable {
-            remove_tip(s, &tip_id, sender);
+        for (tip_id, sender) in &collectable {
+            remove_tip(s, tip_id, *sender);
         }
-        removed
-    })
+        collectable
+    });
+
+    // Outside the borrow above, deliberately: dropping a secret goes through
+    // `mutate_state` itself, and calling it from inside this closure would panic
+    // on the `RefCell` rather than fail politely. Without this the store grew
+    // forever — a tip's record was swept after its retention window while its
+    // ciphertext stayed behind with nothing left to point at it.
+    for (tip_id, sender) in &collected {
+        let _ = secrets::remove_tip_secret_for(*sender, tip_id.0.clone());
+    }
+
+    collected.len() as u64
 }
 
 #[cfg(test)]
