@@ -31,6 +31,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Fetches ERC-20 transfers from Etherscan and drops address-poisoning spam.
@@ -209,6 +210,8 @@ export const loadNextErc20UserTransactions = async ({
 		}
 
 		if (nonNullish(result) && result.transactions.length > 0) {
+			const loadedBefore = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
+
 			ethTransactionsStore.append({
 				tokenId,
 				transactions: result.transactions.map((transaction) => ({
@@ -217,9 +220,13 @@ export const loadNextErc20UserTransactions = async ({
 				}))
 			});
 
-			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+			// See the native loader: a cursor that no longer lines up after a trim serves rows we
+			// already have, and the explorer is the way forward from there.
+			if ((get(ethTransactionsStore)?.[tokenId] ?? []).length > loadedBefore) {
+				setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
 
-			return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
+				return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
+			}
 		}
 	}
 

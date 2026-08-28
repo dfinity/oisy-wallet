@@ -39,7 +39,10 @@
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
+	import {
+		applyTransactionsFilter,
+		transactionsFilterTokenKey
+	} from '$lib/utils/transactions-filter.utils';
 	import {
 		filterReceivedMicroTransactions,
 		mapAllTransactionsUi,
@@ -48,6 +51,24 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+
+	// The tokens panel lists the selected network's tokens only, so a selection made on another
+	// network sticks around invisibly and keeps hiding transactions with no row left to untick it.
+	// Reconciling against the selectable set is the filter's own job, hence here rather than on a
+	// network-change trigger.
+	let selectableTokenFilterKeys = $derived(
+		$enabledFungibleNetworkTokens.map(transactionsFilterTokenKey).filter(nonNullish)
+	);
+
+	$effect(() => {
+		// While the tokens are still loading the selectable set is empty; pruning then would wipe a
+		// persisted filter before the user ever sees it.
+		if (selectableTokenFilterKeys.length === 0) {
+			return;
+		}
+
+		transactionsFilterStore.retainTokenIds(selectableTokenFilterKeys);
+	});
 
 	let allTransactions = $derived(
 		mapAllTransactionsUi({
