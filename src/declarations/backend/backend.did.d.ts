@@ -1916,9 +1916,7 @@ export interface TipClaimFailure {
 	reason: TipClaimFailureReason;
 }
 export type TipClaimFailureReason =
-	| { Uncovered: null }
-	| { InsufficientFunds: null }
-	| { TransferFailed: null };
+	{ Uncovered: null } | { InsufficientFunds: null } | { TransferFailed: null };
 export type TipStatus =
 	| {
 			/**
