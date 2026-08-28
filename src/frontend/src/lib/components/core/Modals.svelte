@@ -17,6 +17,7 @@
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
 	import TipModal from '$lib/components/tip/TipModal.svelte';
+	import TipWelcomeModal from '$lib/components/tip/TipWelcomeModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
@@ -32,6 +33,7 @@
 		modalReferralCode,
 		modalTip,
 		modalTipClaim,
+		modalTipWelcome,
 		modalTipClaimData,
 		modalAddressBook,
 		modalNotes,
@@ -82,6 +84,12 @@
 			strand a claim that is already under way.
 		-->
 		<TipClaimModal pending={$modalTipClaimData} />
+	{:else if $modalTipWelcome}
+		<!--
+			Also not behind `TIPS_ENABLED`, for the same reason as the claim above: it
+			follows a claim, and a claim stays possible while the create surface is off.
+		-->
+		<TipWelcomeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}

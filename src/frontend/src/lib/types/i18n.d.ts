@@ -2377,6 +2377,18 @@ interface I18nTip {
 		intro_illustration: string;
 		claim_illustration: string;
 		claim_failed_illustration: string;
+		welcome_illustration: string;
+	};
+	share: { title: string; description: string };
+	welcome: {
+		title: string;
+		heading: string;
+		body: string;
+		point_access_title: string;
+		point_access_text: string;
+		point_stay_title: string;
+		point_stay_text: string;
+		cta: string;
 	};
 }
 

@@ -30,6 +30,9 @@ const TIP_LINK_PATH = '/tip';
 /** The fragment key carrying the claim code, e.g. `#c=Ab3…`. */
 const CLAIM_CODE_FRAGMENT_KEY = 'c';
 
+/** The fragment key carrying the tip id, e.g. `#i=tip-7…`. */
+const TIP_ID_FRAGMENT_KEY = 'i';
+
 /**
  * The two values that identify a tip, generated before anything is sent
  * anywhere.
@@ -54,19 +57,43 @@ export const newTipDraft = (): TipDraft => ({
  * touching the canister or any log along the way.
  */
 export const buildTipLink = ({ tipId, claimCode }: TipDraft): string =>
-	`${window.location.origin}${TIP_LINK_PATH}/${tipId}#${CLAIM_CODE_FRAGMENT_KEY}=${claimCode}`;
+	`${window.location.origin}${TIP_LINK_PATH}#${TIP_ID_FRAGMENT_KEY}=${tipId}&${CLAIM_CODE_FRAGMENT_KEY}=${claimCode}`;
 
 /**
- * Reads the claim code back out of a link fragment, tolerating a leading `#`
- * and other fragment parameters. Returns `undefined` when the fragment carries
- * no code — which is the "link was truncated on the way here" case, not an
- * error worth throwing over.
+ * Reads a value back out of a link fragment, tolerating a leading `#` and other
+ * fragment parameters. Returns `undefined` for a missing or empty value — which
+ * is the "link was truncated on the way here" case, not an error worth throwing
+ * over.
  */
-export const parseClaimCodeFromFragment = (fragment: string): string | undefined => {
+const parseFragmentKey = ({
+	fragment,
+	key
+}: {
+	fragment: string;
+	key: string;
+}): string | undefined => {
 	const params = new URLSearchParams(fragment.startsWith('#') ? fragment.slice(1) : fragment);
-	const code = params.get(CLAIM_CODE_FRAGMENT_KEY);
-	return code === null || code === '' ? undefined : code;
+	const value = params.get(key);
+	return value === null || value === '' ? undefined : value;
 };
+
+/**
+ * Reads the tip id back out of a link fragment.
+ *
+ * The id lives in the fragment rather than the path so that the shared URL is
+ * plain `/tip` — a path that can be prerendered, which is the only way the link
+ * gets its own preview card. A crawler fetching `/tip` for a preview cannot see
+ * either value, and neither can the boundary node: the fragment is the one part
+ * of a URL a browser never puts on the wire.
+ */
+export const parseTipIdFromFragment = (fragment: string): string | undefined =>
+	parseFragmentKey({ fragment, key: TIP_ID_FRAGMENT_KEY });
+
+/**
+ * Reads the claim code back out of a link fragment.
+ */
+export const parseClaimCodeFromFragment = (fragment: string): string | undefined =>
+	parseFragmentKey({ fragment, key: CLAIM_CODE_FRAGMENT_KEY });
 
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;

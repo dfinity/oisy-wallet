@@ -34,6 +34,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { emit } from '$lib/utils/events.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { tippableTokens } from '$lib/utils/tip.utils';
@@ -124,6 +125,14 @@
 				symbol: selectedToken?.symbol
 			});
 			toastsShow({ text: $i18n.tip.text.cancelled_toast, level: 'success' });
+
+			// History reloads its own list on mount, but `tipsStore` — which feeds the
+			// overview on the intro screen and the dot on the menu icon — is loaded
+			// once at sign-in and never again. Cancelling a *failed* tip was the case
+			// that showed it: the sender dealt with the very thing the warning asked
+			// them to deal with, and the warning stayed up until a page reload.
+			emit({ message: 'oisyRefreshTips' });
+
 			viewingTip = undefined;
 			// Back to the list, which reloads on mount, so the cancelled row cannot
 			// linger claiming to be live.
@@ -238,6 +247,11 @@
 
 			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
+
+			// Same reason as the cancel path: the tip now exists, so it encumbers the
+			// balance and belongs in the overview's open count. Neither would have
+			// noticed until the next sign-in.
+			emit({ message: 'oisyRefreshTips' });
 		} catch (err: unknown) {
 			// Back to the form. The tip does not exist, so a share screen for it must
 			// not stay up with skeletons that will never resolve.
@@ -261,51 +275,68 @@
 	};
 </script>
 
-<TokenActionContext token={selectedToken}>
-	<WizardModal bind:this={modal} onClose={modalStore.close} {steps} bind:currentStep>
-		<!--
-			The title tracks the state, not just the step. A screen that opens on the
-			click and is still filling in should not already claim "Tip is ready" — the
-			tip is not reserved yet, and saying so is how the sender knows the wait is
-			expected rather than a stall.
-		-->
-		{#snippet title()}{generating
-				? $i18n.tip.text.preparing_title
-				: (currentStep?.title ?? '')}{/snippet}
+<!--
+	Caps the dialog at 80% of the viewport on desktop. Above `sm`, gix leaves
+	`--dialog-max-height` unset, so a long step stretched the modal to the screen
+	edges — History with a few dozen rows read as a page rather than a dialog. The
+	content area is already the scroller and the toolbar is already sticky, so
+	capping the height is the whole fix: the rows scroll and Close stays put.
 
-		{#if currentStep?.name === WizardStepsTip.TOKENS_LIST}
-			<TipTokensList onClose={() => goToStep(WizardStepsTip.INTRO)} {onSelectToken} />
-		{:else if currentStep?.name === WizardStepsTip.CREATE && nonNullish(selectedToken)}
-			<TipCreate
-				{busy}
-				onClose={modalStore.close}
-				onNext={generate}
-				onSelectToken={enterTokensList}
-				token={selectedToken}
-				bind:amount
-				bind:durationMs
-				bind:message
-			/>
-		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
-			<TipShare
-				amount={reservedAmount}
-				{cancelling}
-				{expiresAtNs}
-				{generating}
-				{link}
-				{linkMessage}
-				{linkNotSaved}
-				onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
-				onDone={nonNullish(viewingTip) ? () => goToStep(WizardStepsTip.HISTORY) : modalStore.close}
-				token={selectedToken}
-			/>
-		{:else if currentStep?.name === WizardStepsTip.HISTORY}
-			<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onOpenTip={openTip} />
-		{:else}
-			<TipIntro
-				onGetStarted={enterTokensList}
-				onViewHistory={() => goToStep(WizardStepsTip.HISTORY)}
-			/>
-		{/if}
-	</WizardModal>
-</TokenActionContext>
+	No min-height, deliberately. Each step keeps sizing to its own content, which
+	is what it does today; pinning a minimum would make the short steps taller
+	than they need to be. Below `sm` the modal is full-page by design.
+
+	Mirrors `NotesModal`, which is the modal this one is meant to feel like.
+-->
+<div class="sm:[--dialog-max-height:80dvh]">
+	<TokenActionContext token={selectedToken}>
+		<WizardModal bind:this={modal} onClose={modalStore.close} {steps} bind:currentStep>
+			<!--
+				The title tracks the state, not just the step. A screen that opens on the
+				click and is still filling in should not already claim "Tip is ready" — the
+				tip is not reserved yet, and saying so is how the sender knows the wait is
+				expected rather than a stall.
+			-->
+			{#snippet title()}{generating
+					? $i18n.tip.text.preparing_title
+					: (currentStep?.title ?? '')}{/snippet}
+
+			{#if currentStep?.name === WizardStepsTip.TOKENS_LIST}
+				<TipTokensList onClose={() => goToStep(WizardStepsTip.INTRO)} {onSelectToken} />
+			{:else if currentStep?.name === WizardStepsTip.CREATE && nonNullish(selectedToken)}
+				<TipCreate
+					{busy}
+					onClose={modalStore.close}
+					onNext={generate}
+					onSelectToken={enterTokensList}
+					token={selectedToken}
+					bind:amount
+					bind:durationMs
+					bind:message
+				/>
+			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
+				<TipShare
+					amount={reservedAmount}
+					{cancelling}
+					{expiresAtNs}
+					{generating}
+					{link}
+					{linkMessage}
+					{linkNotSaved}
+					onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
+					onDone={nonNullish(viewingTip)
+						? () => goToStep(WizardStepsTip.HISTORY)
+						: modalStore.close}
+					token={selectedToken}
+				/>
+			{:else if currentStep?.name === WizardStepsTip.HISTORY}
+				<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onOpenTip={openTip} />
+			{:else}
+				<TipIntro
+					onGetStarted={enterTokensList}
+					onViewHistory={() => goToStep(WizardStepsTip.HISTORY)}
+				/>
+			{/if}
+		</WizardModal>
+	</TokenActionContext>
+</div>

@@ -32,3 +32,39 @@ export const tipFees = (fee: bigint): { reserve: bigint; payout: bigint; total: 
 	payout: fee,
 	total: fee * 2n
 });
+
+/**
+ * Whether this principal has already been shown the post-claim welcome.
+ *
+ * Keyed by principal rather than a single flag, because one browser is shared:
+ * a waiter claiming tips on a house tablet would otherwise burn the welcome on
+ * the first person and show nobody else. Not keyed by tip — the point is to
+ * explain OISY once, not once per tip.
+ *
+ * `localStorage` is the right amount of durability here. Losing it shows a
+ * returning claimer an intro they have seen, which is mildly redundant; storing
+ * it on the canister would spend a call on something that only affects one
+ * screen. Every access is guarded because storage throws rather than returns in
+ * some privacy modes, and a modal is never worth failing a claim over.
+ */
+const TIP_WELCOME_SEEN_KEY = 'oisy-tip-welcome-seen';
+
+const welcomeSeenKey = (principal: string): string => `${TIP_WELCOME_SEEN_KEY}:${principal}`;
+
+export const hasSeenTipWelcome = (principal: string): boolean => {
+	try {
+		return localStorage.getItem(welcomeSeenKey(principal)) !== null;
+	} catch (_: unknown) {
+		// Unreadable storage is treated as "already seen": a claimer who cannot be
+		// remembered would otherwise meet the same intro on every single claim.
+		return true;
+	}
+};
+
+export const rememberTipWelcomeSeen = (principal: string): void => {
+	try {
+		localStorage.setItem(welcomeSeenKey(principal), '1');
+	} catch (_: unknown) {
+		// Nothing to do. Worst case the intro appears again next time.
+	}
+};
