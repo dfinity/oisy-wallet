@@ -271,7 +271,14 @@ const dropDuplicateSolTransactions = (
 		}
 
 		const key = String(entry.transaction.id);
-		acc.set(key, [...(acc.get(key) ?? []), entry]);
+		const group = acc.get(key);
+
+		if (nonNullish(group)) {
+			group.push(entry);
+		} else {
+			acc.set(key, [entry]);
+		}
+
 		return acc;
 	}, new Map());
 
