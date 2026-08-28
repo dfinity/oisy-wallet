@@ -1,17 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
-	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -28,26 +24,18 @@
 	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges } =
 		$derived(transaction);
 
-	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (findEnabledSplToken({
-					tokens: $enabledSplTokens,
-					tokenAddress,
-					networkId: token.network.id
-				})?.symbol ?? $i18n.transaction.text.unknown_token);
-
-	const decimalsOf = (change: SolNetBalanceChange): number =>
-		change.decimals ??
-		(isSolNetBalanceChangeSol(change) ? SOLANA_DEFAULT_DECIMALS : token.decimals);
-
-	// Records written before the summary existed fall back to the old two-word label.
 	let label = $derived(
-		nonNullish(summary)
-			? formatSolTransactionSummary({ summary, i18n: $i18n, symbolOf, decimalsOf })
-			: type === 'send'
+		isNullish(summary)
+			? type === 'send'
 				? $i18n.send.text.send
 				: $i18n.receive.text.receive
+			: summary.kind === 'send'
+				? $i18n.send.text.send
+				: summary.kind === 'receive'
+					? $i18n.receive.text.receive
+					: summary.kind === 'swap'
+						? $i18n.swap.text.swap
+						: $i18n.transaction.text.kind_other
 	);
 
 	// The net change of the token whose page this is: the SOL entry for the native token, the

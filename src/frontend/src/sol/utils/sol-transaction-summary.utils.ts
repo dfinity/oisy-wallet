@@ -1,7 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
-import { formatToken } from '$lib/utils/format.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -152,55 +150,4 @@ export const deriveSolTransactionSummary = ({
 	}
 
 	return { kind: 'other' };
-};
-
-/**
- * The one-line text of a summary, the same regardless of where the list is filtered: the sentence
- * says what the transaction was, the amount column beside it is what varies with the filter.
- *
- * `symbolOf` and `decimalsOf` are the caller's, since only the caller knows which tokens the
- * wallet lists; an unlisted mint is expected to come back named rather than as an address.
- */
-export const formatSolTransactionSummary = ({
-	summary: { kind, spent, received },
-	i18n,
-	symbolOf,
-	decimalsOf
-}: {
-	summary: SolTransactionSummary;
-	i18n: I18n;
-	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
-	decimalsOf: (change: SolNetBalanceChange) => number;
-}): string => {
-	const amount = (change: SolNetBalanceChange): string =>
-		formatToken({
-			value: absBigInt(change.delta),
-			unitName: decimalsOf(change),
-			displayDecimals: decimalsOf(change)
-		});
-
-	if (kind === 'send' && nonNullish(spent)) {
-		return replacePlaceholders(i18n.transaction.text.summary_send, {
-			$amount: amount(spent),
-			$symbol: symbolOf(spent.tokenAddress)
-		});
-	}
-
-	if (kind === 'receive' && nonNullish(received)) {
-		return replacePlaceholders(i18n.transaction.text.summary_receive, {
-			$amount: amount(received),
-			$symbol: symbolOf(received.tokenAddress)
-		});
-	}
-
-	if (kind === 'swap' && nonNullish(spent) && nonNullish(received)) {
-		return replacePlaceholders(i18n.transaction.text.summary_swap, {
-			$spent: amount(spent),
-			$spent_symbol: symbolOf(spent.tokenAddress),
-			$received: amount(received),
-			$received_symbol: symbolOf(received.tokenAddress)
-		});
-	}
-
-	return i18n.transaction.text.summary_other;
 };

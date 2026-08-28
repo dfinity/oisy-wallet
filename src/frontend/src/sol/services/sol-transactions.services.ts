@@ -394,6 +394,21 @@ const loadSolTransactions = async ({
 
 		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
 
+		// A record re-derived under its signature id supersedes the per-instruction rows the store
+		// may still hold for the same signature: same transaction, older shape, different ids.
+		const incomingSignatures = new Set(allTransactions.map(({ signature }) => String(signature)));
+		const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
+			.filter(
+				({ data }) =>
+					incomingSignatures.has(String(data.signature)) &&
+					!allTransactions.some(({ id }) => id === data.id)
+			)
+			.map(({ data: { id } }) => `${id}`);
+
+		if (staleIds.length > 0) {
+			solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
+		}
+
 		solTransactionsStore.append({
 			tokenId,
 			transactions: certifiedTransactions
