@@ -139,6 +139,26 @@ export const deriveSolTransactionSummary = ({
 		};
 	}
 
+	// A transfer to an account of the user's own nets to nothing, which would otherwise read as a
+	// transaction that did nothing at all. The legs are what tell the two apart.
+	const ownTransfer = flattenInstructions(instructions).find(
+		({ kind, counterparty, own }) => kind === 'send' && (own ?? false) && nonNullish(counterparty)
+	);
+
+	if (outs.length === 0 && ins.length === 0 && nonNullish(ownTransfer)) {
+		return {
+			kind: 'self',
+			...(nonNullish(ownTransfer.amount) && {
+				spent: {
+					delta: -ownTransfer.amount,
+					...(nonNullish(ownTransfer.tokenAddress) && { tokenAddress: ownTransfer.tokenAddress }),
+					...(nonNullish(ownTransfer.decimals) && { decimals: ownTransfer.decimals })
+				}
+			}),
+			...(nonNullish(ownTransfer.counterparty) && { counterparty: ownTransfer.counterparty })
+		};
+	}
+
 	if (outs.length > 0 && ins.length > 0) {
 		const routeTraded = routeTradedTokens(instructions);
 
