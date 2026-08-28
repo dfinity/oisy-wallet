@@ -749,6 +749,38 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
 	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
 
 /**
+ * The structs an EIP-712 payload hashes, the one it is rooted at and the ones it declares beneath.
+ *
+ * `eth_signTypedData_v4` shows `eth_signTypedData_v4` as its method, which names the RPC call and
+ * not the thing being signed. What a signature authorizes is the struct: an `ERC-2612 Permit` and a
+ * `TransferWithAuthorization` arrive through the same method and do entirely different things.
+ *
+ * The root is the primary type as the hash derives it from the type graph, never the `primaryType`
+ * the payload declares. The two need not agree, and only the derived one is hashed, so listing the
+ * declared field would name a struct the signature does not cover.
+ */
+export const getEthTypedDataMethods = ({
+	types
+}: WalletConnectEthSignTypedDataV4): { name: string; depth: number }[] => {
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	try {
+		const primaryType = TypedDataEncoder.getPrimaryType(rest);
+
+		return [
+			{ name: primaryType, depth: 0 },
+			...Object.keys(rest)
+				.filter((name) => name !== primaryType)
+				.map((name) => ({ name, depth: 1 }))
+		];
+	} catch (_err: unknown) {
+		// Typed data whose root cannot be resolved would not be signed at all, and is warned about
+		// and blocked as invalid rather than named here.
+		return [];
+	}
+};
+
+/**
  * Whether a request would be signed without OISY being able to state what it authorizes.
  *
  * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder

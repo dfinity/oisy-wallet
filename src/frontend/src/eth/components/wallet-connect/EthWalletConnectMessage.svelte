@@ -7,6 +7,7 @@
 	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
 	import {
 		getEthTypedDataApproval,
+		getEthTypedDataMethods,
 		getSignedEthTypedData,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
@@ -114,6 +115,12 @@
 				`${amount} ${$i18n.wallet_connect.text.token_units}`;
 	});
 
+	// Listed only where the summary rows are empty. A schema OISY describes states its spender, its
+	// amount and its expiry, which says more than the name of the struct they came out of.
+	let methods = $derived(
+		unreviewableTypedData && nonNullish(json) ? getEthTypedDataMethods(json) : []
+	);
+
 	let expirationDate = $derived(
 		nonNullish(expiration)
 			? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
@@ -140,6 +147,19 @@
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
 <p class="mb-4 font-normal">{method}</p>
+
+<!-- The RPC method above names how the request arrived. What it would authorize is the struct being
+     hashed, which is the only thing left to state once the summary rows come up empty. -->
+{#if methods.length > 0}
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.methods}</p>
+	<ul class="mb-4 flex list-none flex-col gap-1 font-normal">
+		{#each methods as { name, depth } (name)}
+			<li class:pl-4={depth > 0}>
+				<span class="break-all font-mono text-sm">{name}</span>
+			</li>
+		{/each}
+	</ul>
+{/if}
 
 {#if nonNullish(token)}
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>

@@ -16,6 +16,7 @@ import {
 	assertValidEthTypedData,
 	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
+	getEthTypedDataMethods,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
@@ -462,6 +463,59 @@ describe('wallet-connect.utils', () => {
 			{ type: 'unknown' as const, selector: '0xdeadbeef' }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('getEthTypedDataMethods', () => {
+		it('should name the struct an ERC-2612 permit hashes', () => {
+			expect(getEthTypedDataMethods(erc2612Permit)).toEqual([{ name: 'Permit', depth: 0 }]);
+		});
+
+		it('should name the root first and the structs it declares beneath it', () => {
+			expect(getEthTypedDataMethods(permit2)).toEqual([
+				{ name: 'PermitSingle', depth: 0 },
+				{ name: 'PermitDetails', depth: 1 }
+			]);
+		});
+
+		it('should name the ERC-3009 authorization the review could not describe', () => {
+			expect(getEthTypedDataMethods(transferWithAuthorization())).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		it('should leave the domain out, since it separates the digest rather than being hashed into it', () => {
+			expect(getEthTypedDataMethods(erc2612Permit).map(({ name }) => name)).not.toContain(
+				'EIP712Domain'
+			);
+		});
+
+		// The declared `primaryType` is not what gets hashed: ethers derives the root from the type
+		// graph. Naming the declared field would let a payload present itself as a struct its own
+		// signature does not cover.
+		it('should name the derived root, not the primaryType the payload declares', () => {
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				...transferWithAuthorization(),
+				primaryType: 'Login'
+			};
+
+			expect(getEthTypedDataMethods(typedData)).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		it('should name nothing when the root cannot be resolved', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						A: [{ name: 'b', type: 'B' }],
+						B: [{ name: 'a', type: 'A' }]
+					},
+					primaryType: 'A',
+					message: {}
+				})
+			).toEqual([]);
 		});
 	});
 
