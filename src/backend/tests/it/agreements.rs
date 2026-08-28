@@ -47,11 +47,12 @@ pub static NEW_AGREEMENTS: LazyLock<UserAgreements> = LazyLock::new(|| UserAgree
 pub static UPDATED_AGREEMENTS_ACCEPTED: LazyLock<(Option<bool>, Option<bool>, Option<bool>)> =
     LazyLock::new(|| (Some(true), Some(true), Some(false)));
 
-fn assert_invalid_sha256(
+fn assert_sha256_rejected(
     pic_setup: &impl PicCanisterTrait,
     caller: Principal,
     profile_version: Option<Version>,
     invalid_sha256: &str,
+    expected_error: &str,
 ) {
     let arg = UpdateUserAgreementsRequest {
         current_user_version: profile_version,
@@ -72,14 +73,7 @@ fn assert_invalid_sha256(
     );
 
     assert!(resp.is_err());
-    assert!(resp.unwrap_err().contains(
-        format!(
-            "Invalid SHA256 hex length: {}, expected {}",
-            invalid_sha256.len(),
-            SHA256_HEX_LENGTH
-        )
-        .as_str()
-    ));
+    assert!(resp.unwrap_err().contains(expected_error));
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
@@ -88,6 +82,40 @@ fn assert_invalid_sha256(
 
     let agreements = user_profile.agreements.unwrap().agreements;
     assert_eq!(agreements.license_agreement.text_sha256, None);
+}
+
+fn assert_invalid_sha256_length(
+    pic_setup: &impl PicCanisterTrait,
+    caller: Principal,
+    profile_version: Option<Version>,
+    invalid_sha256: &str,
+) {
+    assert_sha256_rejected(
+        pic_setup,
+        caller,
+        profile_version,
+        invalid_sha256,
+        &format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        ),
+    );
+}
+
+fn assert_non_hex_sha256(
+    pic_setup: &impl PicCanisterTrait,
+    caller: Principal,
+    profile_version: Option<Version>,
+    invalid_sha256: &str,
+) {
+    assert_sha256_rejected(
+        pic_setup,
+        caller,
+        profile_version,
+        invalid_sha256,
+        "Invalid SHA256 hex: expected hexadecimal characters only",
+    );
 }
 
 #[test]
@@ -686,21 +714,56 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         .expect("Create call failed")
         .expect("Signups should be open");
 
-    assert_invalid_sha256(
+    assert_invalid_sha256_length(
         &pic_setup,
         caller,
         profile.version,
         &"a".repeat(SHA256_HEX_LENGTH - 1),
     );
 
-    assert_invalid_sha256(
+    assert_invalid_sha256_length(
         &pic_setup,
         caller,
         profile.version,
         &"a".repeat(SHA256_HEX_LENGTH + 1),
     );
 
-    assert_invalid_sha256(&pic_setup, caller, profile.version, "");
+    assert_invalid_sha256_length(&pic_setup, caller, profile.version, "");
+}
+
+#[test]
+fn test_update_user_agreements_rejects_non_hex_sha256() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    // Correct length, but not a hash of anything.
+    assert_non_hex_sha256(
+        &pic_setup,
+        caller,
+        profile.version,
+        &"z".repeat(SHA256_HEX_LENGTH),
+    );
+
+    // A single non-hex character is enough.
+    assert_non_hex_sha256(
+        &pic_setup,
+        caller,
+        profile.version,
+        &format!("{}g", "a".repeat(SHA256_HEX_LENGTH - 1)),
+    );
+
+    // 64 bytes of multi-byte characters pass the length check, which counts bytes.
+    assert_non_hex_sha256(
+        &pic_setup,
+        caller,
+        profile.version,
+        &"\u{e9}".repeat(SHA256_HEX_LENGTH / 2),
+    );
 }
 
 // ---------------------------------------------------------------------------
