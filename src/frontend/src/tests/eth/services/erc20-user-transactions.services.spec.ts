@@ -13,6 +13,7 @@ import {
 	saveErc20FinalizedTransactions
 } from '$eth/services/erc20-user-transactions.services';
 import {
+	isEthBackendAtCapacity,
 	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
@@ -176,6 +177,34 @@ describe('erc20-user-transactions.services', () => {
 	});
 
 	describe('loadNextErc20UserTransactions', () => {
+		// An empty page is the shape a cursor invalidated by eviction comes back as, and eviction only
+		// happens because the token is at capacity. Dropping `totalStored` there re-enabled the very
+		// saves this branch exists to skip.
+		it('should record the capacity signal even when the cursor page comes back empty', async () => {
+			setEthBackendAtCapacity({ tokenId: USDC_TOKEN.id, totalStored: undefined });
+			setEthBackendPaginationCursor({ tokenId: USDC_TOKEN.id, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue({
+				transactions: [],
+				newestBlockIndex: undefined,
+				oldestBlockIndex: undefined,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN),
+				nextStart: undefined
+			});
+
+			await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(isEthBackendAtCapacity(USDC_TOKEN.id)).toBeTruthy();
+		});
+
 		it('should serve the next page from the backend without touching Etherscan', async () => {
 			setEthBackendPaginationCursor({ tokenId: USDC_TOKEN.id, nextStart: 42n });
 
