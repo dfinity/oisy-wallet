@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -11,7 +11,7 @@
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
-	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -28,20 +28,18 @@
 	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges } =
 		$derived(transaction);
 
-	const symbolOf = (tokenAddress: string | undefined): string => {
-		if (isNullish(tokenAddress)) {
-			return SOLANA_TOKEN.symbol;
-		}
-
-		return (
-			$enabledSplTokens.find(
-				({ address, network: { id } }) => address === tokenAddress && id === token.network.id
-			)?.symbol ?? $i18n.transaction.text.unknown_token
-		);
-	};
+	const symbolOf = (tokenAddress: string | undefined): string =>
+		isNullish(tokenAddress)
+			? SOLANA_TOKEN.symbol
+			: (findEnabledSplToken({
+					tokens: $enabledSplTokens,
+					tokenAddress,
+					networkId: token.network.id
+				})?.symbol ?? $i18n.transaction.text.unknown_token);
 
 	const decimalsOf = (change: SolNetBalanceChange): number =>
-		change.decimals ?? (isSolNetBalanceChangeSol(change) ? 9 : token.decimals);
+		change.decimals ??
+		(isSolNetBalanceChangeSol(change) ? SOLANA_DEFAULT_DECIMALS : token.decimals);
 
 	// Records written before the summary existed fall back to the old two-word label.
 	let label = $derived(

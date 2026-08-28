@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
@@ -10,3 +11,5 @@ export function maxBigInt(n1: Nullish<bigint>, n2: Nullish<bigint>): Nullish<big
 export function maxBigInt(n1: Nullish<bigint>, n2: Nullish<bigint>): Nullish<bigint> {
 	return nonNullish(n1) && nonNullish(n2) ? (n1 > n2 ? n1 : n2) : (n1 ?? n2);
 }
+
+export const absBigInt = (value: bigint): bigint => (value < ZERO ? -value : value);
