@@ -23,11 +23,10 @@
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
-		isErc20TransactionApprove,
-		isErc20TransactionTransfer,
-		isErcTransactionSetApprovalForAll
-	} from '$eth/utils/transactions.utils';
-	import { getSendParamsGas } from '$eth/utils/wallet-connect.utils';
+		classifyWalletConnectEthCall,
+		getSendParamsGas,
+		isWalletConnectEthApproval
+	} from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -59,15 +58,16 @@
 
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
-	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
+	let call = $derived(classifyWalletConnectEthCall(firstTransaction.data));
 
-	let erc20Transfer = $derived(isErc20TransactionTransfer(firstTransaction.data));
+	// An approval authorizes someone else to move the user's tokens. It is not a send, whatever
+	// native value the request carries alongside it.
+	let approve = $derived(isWalletConnectEthApproval(call));
 
-	let setApprovalForAll = $derived(isErcTransactionSetApprovalForAll(firstTransaction.data));
-
-	// An operator grant authorizes someone else to move the user's tokens. It is an approval, not a
-	// send, whatever native value the request carries alongside it.
-	let approve = $derived(erc20Approve || setApprovalForAll);
+	// Only a request that carries no calldata is titled a send. A contract call OISY could not read
+	// might do anything, and titling it "Send" is the misstatement that let an `increaseAllowance`
+	// granting an unlimited allowance be presented as a zero-value transfer.
+	let unknownCall = $derived(call.type === 'unknown');
 
 	/**
 	 * Send context store
@@ -199,7 +199,13 @@
 
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{approve ? $i18n.core.text.approve : $i18n.send.text.send}
+			{#if approve}
+				{$i18n.core.text.approve}
+			{:else if unknownCall}
+				{$i18n.wallet_connect.text.unknown_call_title}
+			{:else}
+				{$i18n.send.text.send}
+			{/if}
 		</WalletConnectModalTitle>
 	{/snippet}
 
@@ -225,14 +231,12 @@
 						{amount}
 						{application}
 						approveDisabled={isNullish($feeStore)}
+						{call}
 						{data}
 						{destination}
-						{erc20Approve}
-						{erc20Transfer}
 						onApprove={send}
 						onReject={reject}
 						{requestedGas}
-						{setApprovalForAll}
 						{sourceNetwork}
 						{targetNetwork}
 					/>

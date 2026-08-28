@@ -1309,6 +1309,11 @@ interface I18nWallet_connect {
 		high_gas_limit: string;
 		invalid_typed_data: string;
 		unsigned_typed_data_keys: string;
+		unknown_call_title: string;
+		unknown_call: string;
+		function: string;
+		allowance_increase: string;
+		allowance_decrease: string;
 		unverifiable_erc20_request: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
