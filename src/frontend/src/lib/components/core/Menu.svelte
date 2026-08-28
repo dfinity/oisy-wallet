@@ -34,6 +34,7 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
@@ -133,40 +134,37 @@
 </script>
 
 <!--
-	The dot is the only thing outside the menu that knows a tip needs attention, so
+	The mark is the only thing outside the menu that knows a tip needs attention, so
 	it is what makes the count inside worth opening the menu for. It costs nothing:
 	`tipsOverview` is derived from the tips the app already loaded once at sign-in,
 	with no polling and no extra call.
--->
-<span class="relative inline-flex">
-	<ButtonIcon
-		ariaLabel={$i18n.navigation.alt.menu}
-		colorStyle="tertiary-alt"
-		expanded={visible}
-		link={false}
-		onclick={() => (visible = true)}
-		testId={NAVIGATION_MENU_BUTTON}
-		bind:button
-	>
-		{#snippet icon()}
-			<IconUser size="24" />
-		{/snippet}
-		{$i18n.navigation.alt.menu}
-	</ButtonIcon>
 
-	{#if $tipsOverview.failed > 0}
-		<!--
-			`aria-hidden`, with the real information carried as text on the menu item
-			itself: a bare dot announced to a screen reader says something is wrong
-			without saying what, and the count inside says both.
-		-->
-		<span
-			class="pointer-events-none absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-warning-primary ring-2 ring-primary"
-			aria-hidden="true"
-			data-tid={NAVIGATION_MENU_TIP_BADGE}
-		></span>
-	{/if}
-</span>
+	`NotificationBlob` rather than a dot of our own: it is the same marker the token
+	and transaction-filter menus already put on a toolbar icon, so a dot up here
+	means one consistent thing instead of one thing per feature. It carries no text,
+	because a bare dot read out on its own says something is wrong without saying
+	what — the counted badge on the menu item below is what a screen reader gets.
+-->
+<ButtonIcon
+	ariaLabel={$i18n.navigation.alt.menu}
+	colorStyle="tertiary-alt"
+	expanded={visible}
+	link={false}
+	onclick={() => (visible = true)}
+	testId={NAVIGATION_MENU_BUTTON}
+	bind:button
+>
+	{#snippet icon()}
+		<NotificationBlob
+			display={$tipsOverview.failed > 0}
+			position="top-right"
+			testId={NAVIGATION_MENU_TIP_BADGE}
+		>
+			<IconUser size="24" />
+		</NotificationBlob>
+	{/snippet}
+	{$i18n.navigation.alt.menu}
+</ButtonIcon>
 
 <Popover anchor={button} direction="rtl" bind:visible>
 	<div
