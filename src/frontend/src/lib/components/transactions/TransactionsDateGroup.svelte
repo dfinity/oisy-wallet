@@ -13,12 +13,9 @@
 		formattedDate: string;
 		transactions: AllTransactionUiWithCmpNonEmptyList;
 		testId?: string;
-		// On a token page the Solana rows show that token's net change; on the unfiltered activity
-		// they show none, since one figure out of several would misdescribe the transaction.
-		showSolTokenAmount?: boolean;
 	}
 
-	let { formattedDate, transactions, testId, showSolTokenAmount = false }: Props = $props();
+	let { formattedDate, transactions, testId }: Props = $props();
 
 	let capitalizedFormattedDate = $derived(capitalizeFirstLetter(formattedDate));
 </script>
@@ -39,12 +36,7 @@
 					{:else if component === 'ethereum'}
 						<EthTransaction iconType="token" {token} {transaction} />
 					{:else if component === 'solana'}
-						<SolTransaction
-							iconType="token"
-							showTokenAmount={showSolTokenAmount}
-							{token}
-							{transaction}
-						/>
+						<SolTransaction iconType="token" {token} {transaction} />
 					{:else}
 						<IcTransaction iconType="token" {token} {transaction} />
 					{/if}

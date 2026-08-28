@@ -100,6 +100,27 @@
 			displayDecimals: decimalsOf(change)
 		})} ${symbolOf(change.tokenAddress)}`;
 
+	// The token the transaction is about, which is not always the token whose page opened the
+	// modal: a USD1 send opened from the SOL page is still a USD1 send, and showing the SOL logo
+	// over it would describe the page rather than the transaction.
+	let subjectToken = $derived(
+		(() => {
+			const change = summary?.spent ?? summary?.received;
+
+			if (isNullish(change) || isNullish(change.tokenAddress)) {
+				return isNullish(change) ? token : SOLANA_TOKEN;
+			}
+
+			return (
+				findEnabledSplToken({
+					tokens: $enabledSplTokens,
+					tokenAddress: change.tokenAddress,
+					networkId: token?.network.id ?? SOLANA_TOKEN.network.id
+				}) ?? token
+			);
+		})()
+	);
+
 	// The rent the transaction paid to open token accounts, stated apart like the send form does:
 	// it is not part of the fee, and folded into a delta it reads as value lost to the transfer.
 	let ataFee = $derived(
@@ -170,8 +191,8 @@
 	<ContentWithToolbar>
 		<ModalHero variant={(summary?.kind ?? type) === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
-				{#if nonNullish(token)}
-					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
+				{#if nonNullish(subjectToken)}
+					<TokenLogo badge={{ type: 'network' }} data={subjectToken} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
@@ -344,32 +365,26 @@
 							>
 						</ListItem>
 					{/if}
+					<!-- What it cost, among what it was: another row of the same table, as the EVM
+					     modals do it, rather than a second table set apart from the first. -->
+					{#if nonNullish(fee) && fee > ZERO}
+						<ListItem>
+							<span>{$i18n.fee.text.fee}</span>
+							<output data-tid="transaction-fee">
+								{`${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+							</output>
+						</ListItem>
+					{/if}
+
+					{#if ataFee > ZERO}
+						<ListItem>
+							<span>{$i18n.fee.text.ata_fee}</span>
+							<output data-tid="transaction-ata-fee">
+								{`${formatToken({ value: ataFee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
+							</output>
+						</ListItem>
+					{/if}
 				</List>
-
-				<!-- What the transaction cost, after what it did: the base and priority fee the network
-				     charged as one figure, since an executed transaction reports only their sum, and the
-				     rent of any account it opened stated apart, as the send form does. -->
-				{#if (nonNullish(fee) && fee > ZERO) || ataFee > ZERO}
-					<List styleClass="mt-5">
-						{#if nonNullish(fee) && fee > ZERO}
-							<ListItem>
-								<span>{$i18n.fee.text.fee}</span>
-								<output data-tid="transaction-fee">
-									{`${formatToken({ value: fee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
-								</output>
-							</ListItem>
-						{/if}
-
-						{#if ataFee > ZERO}
-							<ListItem>
-								<span>{$i18n.fee.text.ata_fee}</span>
-								<output data-tid="transaction-ata-fee">
-									{`${formatToken({ value: ataFee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
-								</output>
-							</ListItem>
-						{/if}
-					</List>
-				{/if}
 			{:else if activeTab === 'changes'}
 				{#if nonNullish(netChanges)}
 					<div class="flex flex-col gap-1" data-tid="sol-balance-changes">
@@ -384,12 +399,6 @@
 						{:else}
 							<span class="text-tertiary">{$i18n.transaction.text.no_balance_changes}</span>
 						{/each}
-
-						{#if ataFee > ZERO}
-							<span class="text-tertiary">
-								{`${$i18n.fee.text.ata_fee}: ${formatToken({ value: ataFee, unitName: SOLANA_TOKEN.decimals, displayDecimals: SOLANA_TOKEN.decimals })} ${SOLANA_TOKEN.symbol}`}
-							</span>
-						{/if}
 					</div>
 				{:else}
 					<span class="text-tertiary">{$i18n.transaction.text.tab_unavailable}</span>

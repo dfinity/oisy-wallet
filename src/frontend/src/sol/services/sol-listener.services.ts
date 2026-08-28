@@ -47,11 +47,10 @@ export const syncWallet = ({
 	const incomingSignatures = new Set(
 		transactions.map(({ data: { signature } }) => String(signature))
 	);
+	const incomingIds = new Set(transactions.map(({ data: { id } }) => `${id}`));
 	const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
 		.filter(
-			({ data }) =>
-				incomingSignatures.has(String(data.signature)) &&
-				!transactions.some(({ data: incoming }) => incoming.id === data.id)
+			({ data }) => incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
 		)
 		.map(({ data: { id } }) => `${id}`);
 
