@@ -26,7 +26,9 @@
 		request: WalletKitTypes.SessionRequest;
 		invalidTypedData?: boolean;
 		// Valid typed data whose schema OISY does not recognise, so none of the summary rows below
-		// can be filled. Resolved by the review that gates approval on it, rather than derived twice.
+		// can be filled. Resolved in the review beside `invalidTypedData`, which does gate approval,
+		// so the two states deciding what this component renders are settled in one place. Deriving
+		// it here would parse the payload a third time to reach the same answer.
 		unreviewableTypedData?: boolean;
 	}
 
