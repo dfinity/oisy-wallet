@@ -26,6 +26,8 @@ export interface SolInstructionGroup {
 const isParsed = (instruction: unknown): instruction is SolParsedRpcInstruction =>
 	nonNullish(instruction) &&
 	typeof instruction === 'object' &&
+	'programId' in instruction &&
+	typeof instruction.programId === 'string' &&
 	'parsed' in instruction &&
 	nonNullish(instruction.parsed) &&
 	typeof instruction.parsed === 'object' &&
