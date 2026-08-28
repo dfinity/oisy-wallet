@@ -98,7 +98,8 @@ describe('sol-transaction-summary.utils', () => {
 		const symbolOf = (tokenAddress: string | undefined) => tokenAddress ?? 'SOL';
 		const decimalsOf = () => 6;
 
-		it('should write a send with its amount, token and recipient', () => {
+		// The counterparty lives on the row's second line, not in the sentence.
+		it('should write a send with its amount and token only', () => {
 			expect(
 				formatSolTransactionSummary({
 					summary: {
@@ -110,7 +111,7 @@ describe('sol-transaction-summary.utils', () => {
 					symbolOf,
 					decimalsOf
 				})
-			).toBe('Send 1 USDC to Dkngouj...j7eEjT2');
+			).toBe('Send 1 USDC');
 		});
 
 		it('should write a swap with the pair at its ends', () => {

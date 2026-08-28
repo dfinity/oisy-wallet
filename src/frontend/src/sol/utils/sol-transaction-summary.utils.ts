@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
-import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
@@ -162,7 +162,7 @@ export const deriveSolTransactionSummary = ({
  * wallet lists; an unlisted mint is expected to come back named rather than as an address.
  */
 export const formatSolTransactionSummary = ({
-	summary: { kind, spent, received, counterparty },
+	summary: { kind, spent, received },
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -182,20 +182,14 @@ export const formatSolTransactionSummary = ({
 	if (kind === 'send' && nonNullish(spent)) {
 		return replacePlaceholders(i18n.transaction.text.summary_send, {
 			$amount: amount(spent),
-			$symbol: symbolOf(spent.tokenAddress),
-			$to: nonNullish(counterparty)
-				? shortenWithMiddleEllipsis({ text: counterparty })
-				: i18n.transaction.text.unknown_token
+			$symbol: symbolOf(spent.tokenAddress)
 		});
 	}
 
 	if (kind === 'receive' && nonNullish(received)) {
 		return replacePlaceholders(i18n.transaction.text.summary_receive, {
 			$amount: amount(received),
-			$symbol: symbolOf(received.tokenAddress),
-			$from: nonNullish(counterparty)
-				? shortenWithMiddleEllipsis({ text: counterparty })
-				: i18n.transaction.text.unknown_token
+			$symbol: symbolOf(received.tokenAddress)
 		});
 	}
 
