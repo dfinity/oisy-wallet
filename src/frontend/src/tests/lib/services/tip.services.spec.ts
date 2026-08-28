@@ -79,6 +79,69 @@ describe('tip.services', () => {
 		});
 	});
 
+	describe('when the ledger refuses the approval', () => {
+		beforeEach(() => {
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1]));
+			vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+		});
+
+		it('records which refusal it was, not just that there was one', async () => {
+			// The client library reports every `ApproveError` as the same sentence,
+			// "Failed to entitle the spender to transfer the amount", and drops the
+			// variant that says why. Reserving is the step that touches the sender's
+			// money, so a refusal nobody can tell apart from any other refusal is the
+			// worst place in the feature to be blind.
+			const errorSpy = vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+
+			const refusal = Object.assign(
+				new Error('Failed to entitle the spender to transfer the amount'),
+				{ errorType: { InsufficientFunds: { balance: 42n } } }
+			);
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(refusal);
+
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft: newTipDraft(),
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					expiresAtNs: EXPIRES_AT_NS
+				})
+			).rejects.toBe(refusal);
+
+			expect(errorSpy).toHaveBeenCalledOnce();
+
+			const [[, detail]] = errorSpy.mock.calls;
+
+			// The variant name and its payload both matter: the balance is what turns
+			// "it was refused" into "there was not enough to pay the fee".
+			expect((detail as { reason: string }).reason).toContain('InsufficientFunds');
+			expect((detail as { reason: string }).reason).toContain('42');
+		});
+
+		it('falls back to the error itself when there is no ledger variant', async () => {
+			const errorSpy = vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(new Error('agent exploded'));
+
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft: newTipDraft(),
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					expiresAtNs: EXPIRES_AT_NS
+				})
+			).rejects.toThrow('agent exploded');
+
+			const [[, detail]] = errorSpy.mock.calls;
+
+			expect((detail as { reason: string }).reason).toBe('agent exploded');
+		});
+	});
+
 	describe('reserveTip', () => {
 		// Reserving also stores an encrypted copy of the claim code, so that the
 		// sender can get their own link back. Stubbed in every test here: left
