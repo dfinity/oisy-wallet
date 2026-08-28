@@ -49,7 +49,12 @@ const address = ({ info, key }: { info: object; key: string }): SolAddress | und
 const amount = ({ info, key }: { info: object; key: string }): bigint | undefined => {
 	const value = field({ info, key });
 
-	return typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
+	// The RPC client hands lamports over as bigint; JSON fixtures carry strings and numbers.
+	return typeof value === 'bigint'
+		? value
+		: typeof value === 'string' || typeof value === 'number'
+			? BigInt(value)
+			: undefined;
 };
 
 /**
