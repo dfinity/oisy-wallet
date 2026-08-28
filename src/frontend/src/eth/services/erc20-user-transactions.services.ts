@@ -4,6 +4,8 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -161,6 +163,14 @@ export const loadNextErc20UserTransactions = async ({
 			maxResults: WALLET_PAGINATION
 		});
 
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
+
 		if (nonNullish(result) && result.transactions.length > 0) {
 			ethTransactionsStore.append({
 				tokenId,
@@ -203,19 +213,23 @@ export const loadNextErc20UserTransactions = async ({
 			}))
 		});
 
-		try {
-			const { getBlockNumber } = infuraProviders(networkId);
+		// At the cap the canister trims the oldest entries on every save, so history older than what it
+		// already holds would be written and evicted in the same call.
+		if (!isEthBackendAtCapacity(tokenId)) {
+			try {
+				const { getBlockNumber } = infuraProviders(networkId);
 
-			const latestBlockNumber = await getBlockNumber();
+				const latestBlockNumber = await getBlockNumber();
 
-			await saveErc20FinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: olderTransactions,
-				currentBlockNumber: latestBlockNumber
-			});
-		} catch (_: unknown) {
-			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+				await saveErc20FinalizedTransactions({
+					identity,
+					tokenId: transactionTokenId,
+					transactions: olderTransactions,
+					currentBlockNumber: latestBlockNumber
+				});
+			} catch (_: unknown) {
+				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+			}
 		}
 
 		return { hasMore: true };

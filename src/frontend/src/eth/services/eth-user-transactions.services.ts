@@ -9,6 +9,7 @@ import {
 	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
@@ -48,6 +49,35 @@ export const setEthBackendPaginationCursor = ({
 
 export const getEthBackendPaginationCursor = (tokenId: TokenId): bigint | undefined =>
 	ethBackendPaginationCursors.get(tokenId);
+
+/**
+ * Tokens whose stored history has reached the per-token cap, from the `totalStored` of the last
+ * backend read.
+ *
+ * At the cap the canister trims the oldest entries on every save, so persisting history older than
+ * what it already holds is written and evicted in the same call. Newer transactions are still worth
+ * saving, which is why this only gates the older-page path.
+ */
+const ethBackendAtCapacity = new Set<TokenId>();
+
+export const setEthBackendAtCapacity = ({
+	tokenId,
+	totalStored
+}: {
+	tokenId: TokenId;
+	totalStored: bigint | undefined;
+}) => {
+	if (nonNullish(totalStored) && totalStored >= BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)) {
+		ethBackendAtCapacity.add(tokenId);
+
+		return;
+	}
+
+	ethBackendAtCapacity.delete(tokenId);
+};
+
+export const isEthBackendAtCapacity = (tokenId: TokenId): boolean =>
+	ethBackendAtCapacity.has(tokenId);
 
 /**
  * Loads a page of stored ETH transactions from the backend, mapping each
@@ -147,6 +177,8 @@ export const loadNextEthUserTransactions = async ({
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
 }): Promise<{ hasMore: boolean }> => {
+	const atCapacity = beAtCapacity || isEthBackendAtCapacity(tokenId);
+
 	if (nonNullish(cursor)) {
 		const result = await loadEthUserTransactions({
 			identity,
@@ -154,6 +186,14 @@ export const loadNextEthUserTransactions = async ({
 			start: cursor,
 			maxResults: WALLET_PAGINATION
 		});
+
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
 
 		if (nonNullish(result) && result.transactions.length > 0) {
 			const certifiedTransactions = result.transactions.map((transaction) => ({
@@ -181,7 +221,7 @@ export const loadNextEthUserTransactions = async ({
 		tokenId,
 		networkId,
 		oldestLoadedBlockNumber,
-		skipSave: beAtCapacity
+		skipSave: atCapacity
 	});
 };
 
