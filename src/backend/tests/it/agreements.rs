@@ -266,6 +266,183 @@ fn test_update_user_agreements_preserves_untouched_acceptance_timestamp() {
     );
 }
 
+/// A client-supplied `last_accepted_at_ns` that the canister must never persist.
+const FORGED_TIMESTAMP: Timestamp = 9_999_999_999_999_999_999;
+
+#[test]
+fn test_update_user_agreements_ignores_client_supplied_acceptance_timestamp() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: UserAgreements {
+            license_agreement: UserAgreement {
+                accepted: Some(true),
+                last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    };
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_user_agreements",
+        arg1,
+    );
+    assert_eq!(resp1, Ok(Ok(())));
+
+    let user_profile_after_accept = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let license_accepted_at = user_profile_after_accept
+        .agreements
+        .clone()
+        .unwrap()
+        .agreements
+        .license_agreement
+        .last_accepted_at_ns
+        .expect("license acceptance timestamp missing");
+
+    assert_ne!(
+        license_accepted_at, FORGED_TIMESTAMP,
+        "acceptance must be stamped with the canister clock, not the caller's value"
+    );
+
+    pic_setup.pic.advance_time(Duration::from_secs(1));
+    pic_setup.pic.tick();
+
+    // Rejecting is the path that used to persist the caller's timestamp verbatim.
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile_after_accept.version,
+        agreements: UserAgreements {
+            license_agreement: UserAgreement {
+                accepted: Some(false),
+                last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    };
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_user_agreements",
+        arg2,
+    );
+    assert_eq!(resp2, Ok(Ok(())));
+
+    let agreements = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap()
+        .agreements
+        .unwrap()
+        .agreements;
+
+    assert_eq!(agreements.license_agreement.accepted, Some(false));
+    assert_eq!(
+        agreements.license_agreement.last_accepted_at_ns,
+        Some(license_accepted_at),
+        "rejection must not overwrite the server-set acceptance timestamp"
+    );
+}
+
+#[test]
+fn test_update_provider_agreements_ignores_client_supplied_acceptance_timestamp() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let provider_type = ProviderAgreementType {
+        provider: ProviderAgreementProvider::NearIntents,
+        scope: ProviderAgreementScope::Swap,
+    };
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let arg1 = UpdateProviderAgreementsRequest {
+        current_user_version: profile.version,
+        provider_agreements: provider_agreements_map(vec![(
+            provider_type.clone(),
+            UserAgreement {
+                accepted: Some(true),
+                last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                ..Default::default()
+            },
+        )]),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg1)
+        .unwrap()
+        .unwrap();
+
+    let user_profile_after_accept = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let accepted_at = user_profile_after_accept
+        .agreements
+        .clone()
+        .unwrap()
+        .provider_agreements
+        .expect("provider agreements missing")
+        .get(&provider_type)
+        .expect("provider agreement missing")
+        .last_accepted_at_ns
+        .expect("provider acceptance timestamp missing");
+
+    assert_ne!(accepted_at, FORGED_TIMESTAMP);
+
+    pic_setup.pic.advance_time(Duration::from_secs(1));
+    pic_setup.pic.tick();
+
+    let arg2 = UpdateProviderAgreementsRequest {
+        current_user_version: user_profile_after_accept.version,
+        provider_agreements: provider_agreements_map(vec![(
+            provider_type.clone(),
+            UserAgreement {
+                accepted: Some(false),
+                last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                ..Default::default()
+            },
+        )]),
+    };
+    pic_setup
+        .update::<Result<(), UpdateAgreementsError>>(caller, "update_provider_agreements", arg2)
+        .unwrap()
+        .unwrap();
+
+    let provider_agreements = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap()
+        .agreements
+        .unwrap()
+        .provider_agreements
+        .expect("provider agreements missing");
+
+    let agreement = provider_agreements
+        .get(&provider_type)
+        .expect("provider agreement missing");
+
+    assert_eq!(agreement.accepted, Some(false));
+    assert_eq!(
+        agreement.last_accepted_at_ns,
+        Some(accepted_at),
+        "rejection must not overwrite the server-set acceptance timestamp"
+    );
+}
+
 #[test]
 fn test_update_user_agreement_tracks_last_updated_time() {
     let pic_setup = setup();
