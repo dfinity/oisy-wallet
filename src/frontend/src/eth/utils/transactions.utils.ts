@@ -7,6 +7,11 @@ import {
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
+import {
+	MULTICALL_ARGUMENTS,
+	MULTICALL_MAX_DEPTH,
+	MULTICALL_MAX_METHODS
+} from '$eth/constants/multicall.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer, EthTransactionUi } from '$eth/types/eth-transaction';
@@ -90,6 +95,63 @@ export const getCalldataSelector = (data: string | undefined): string | undefine
 		: undefined;
 
 const abiCoder = AbiCoder.defaultAbiCoder();
+
+/**
+ * Every function a transaction's calldata calls, the one it is addressed to and the ones batched
+ * inside it.
+ *
+ * A dApp that batches an approve and a swap sends a single transaction whose own selector names
+ * neither, so the selector alone answers "what does this call?" with the name of the wrapper. The
+ * nested calls are complete calldata sitting in a `bytes[]`, so they are read out and listed too.
+ *
+ * Best effort by construction, and the list says which entries were read rather than implying the
+ * whole tree: a wrapper this does not know how to open contributes itself and nothing more. Naming
+ * a function is not reviewing it either. The arguments behind each selector are not decoded here,
+ * so an entry states what is being called and never what it would do.
+ */
+export const getCalldataMethods = (
+	data: string | undefined
+): { selector: string | undefined; depth: number }[] => {
+	if (!hasCalldata(data)) {
+		return [];
+	}
+
+	const methods: { selector: string | undefined; depth: number }[] = [];
+
+	const walk = ({ calldata, depth }: { calldata: string; depth: number }) => {
+		if (methods.length >= MULTICALL_MAX_METHODS) {
+			return;
+		}
+
+		const selector = getCalldataSelector(calldata);
+
+		methods.push({ selector, depth });
+
+		if (isNullish(selector) || depth >= MULTICALL_MAX_DEPTH) {
+			return;
+		}
+
+		const args = MULTICALL_ARGUMENTS[selector];
+
+		if (isNullish(args)) {
+			return;
+		}
+
+		try {
+			const decoded = abiCoder.decode(args, dataSlice(calldata, 4));
+			const nested = decoded[args.indexOf('bytes[]')];
+
+			(nested as string[]).forEach((call) => walk({ calldata: call, depth: depth + 1 }));
+		} catch (_: unknown) {
+			// A wrapper whose arguments do not decode carries nothing this can read. It stays in the
+			// list as itself rather than being described by calls that were never recovered.
+		}
+	};
+
+	walk({ calldata: data as string, depth: 0 });
+
+	return methods;
+};
 
 export const decodeErc20AbiData = ({
 	data,

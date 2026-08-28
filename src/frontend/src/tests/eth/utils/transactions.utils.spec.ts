@@ -8,6 +8,11 @@ import {
 	ERC20_INCREASE_ALLOWANCE_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
+import {
+	MULTICALL_DEADLINE_HASH,
+	MULTICALL_HASH,
+	MULTICALL_MAX_METHODS
+} from '$eth/constants/multicall.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
@@ -19,6 +24,7 @@ import {
 	findErcTransfer,
 	findErcTransfers,
 	formatErcTransferAsset,
+	getCalldataMethods,
 	getCalldataSelector,
 	groupEthTransactionsByNetworkAndHash,
 	hasCalldata,
@@ -539,6 +545,112 @@ describe('transactions.utils', () => {
 				expect(hasCalldata(data)).toBeTruthy();
 			}
 		);
+	});
+
+	describe('getCalldataMethods', () => {
+		const SPENDER = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
+		const PERMIT2_APPROVE_HASH = '0x87517c45';
+		const UNIVERSAL_ROUTER_EXECUTE_HASH = '0x3593564c';
+
+		const encode = ({ selector, value }: { selector: string; value: bigint }) =>
+			`${selector}${AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [SPENDER, value]).slice(2)}`;
+
+		const encodeMulticall = ({
+			selector = MULTICALL_HASH,
+			calls
+		}: {
+			selector?: string;
+			calls: string[];
+		}) =>
+			`${selector}${AbiCoder.defaultAbiCoder()
+				.encode(
+					selector === MULTICALL_DEADLINE_HASH ? ['uint256', 'bytes[]'] : ['bytes[]'],
+					selector === MULTICALL_DEADLINE_HASH ? [1n, calls] : [calls]
+				)
+				.slice(2)}`;
+
+		it.each([undefined, '', '0x'])('should list nothing for %s', (data) => {
+			expect(getCalldataMethods(data)).toEqual([]);
+		});
+
+		it('should list a plain call as itself', () => {
+			expect(getCalldataMethods(encode({ selector: ERC20_APPROVE_HASH, value: 1n }))).toEqual([
+				{ selector: ERC20_APPROVE_HASH, depth: 0 }
+			]);
+		});
+
+		it('should list calldata too short to name a function, without a selector', () => {
+			expect(getCalldataMethods('0xab')).toEqual([{ selector: undefined, depth: 0 }]);
+		});
+
+		it('should list the wrapper and the calls batched inside it', () => {
+			const data = encodeMulticall({
+				calls: [
+					encode({ selector: ERC20_APPROVE_HASH, value: 1n }),
+					encode({ selector: PERMIT2_APPROVE_HASH, value: 2n })
+				]
+			});
+
+			expect(getCalldataMethods(data)).toEqual([
+				{ selector: MULTICALL_HASH, depth: 0 },
+				{ selector: ERC20_APPROVE_HASH, depth: 1 },
+				{ selector: PERMIT2_APPROVE_HASH, depth: 1 }
+			]);
+		});
+
+		it('should read the batch out of the deadline variant, past its first argument', () => {
+			const data = encodeMulticall({
+				selector: MULTICALL_DEADLINE_HASH,
+				calls: [encode({ selector: ERC20_APPROVE_HASH, value: 1n })]
+			});
+
+			expect(getCalldataMethods(data)).toEqual([
+				{ selector: MULTICALL_DEADLINE_HASH, depth: 0 },
+				{ selector: ERC20_APPROVE_HASH, depth: 1 }
+			]);
+		});
+
+		it('should stop descending at the depth limit rather than walk a tree of the caller choosing', () => {
+			const data = encodeMulticall({
+				calls: [
+					encodeMulticall({
+						calls: [
+							encodeMulticall({ calls: [encode({ selector: ERC20_APPROVE_HASH, value: 1n })] })
+						]
+					})
+				]
+			});
+
+			expect(getCalldataMethods(data).map(({ depth }) => depth)).toEqual([0, 1, 2]);
+		});
+
+		it('should cap the list rather than render a batch of any length', () => {
+			const calls = Array.from({ length: MULTICALL_MAX_METHODS + 10 }, () =>
+				encode({ selector: ERC20_APPROVE_HASH, value: 1n })
+			);
+
+			expect(getCalldataMethods(encodeMulticall({ calls }))).toHaveLength(MULTICALL_MAX_METHODS);
+		});
+
+		// A wrapper whose arguments do not decode has yielded nothing, and saying so is the point:
+		// listing it alone is honest, inventing its contents would not be.
+		it('should list a wrapper whose arguments do not decode as itself', () => {
+			expect(getCalldataMethods(`${MULTICALL_HASH}deadbeef`)).toEqual([
+				{ selector: MULTICALL_HASH, depth: 0 }
+			]);
+		});
+
+		// A Universal Router `execute` carries opcodes and bare arguments, not calldata. There are
+		// no selectors in it to find, and none are claimed.
+		it('should not claim to read a wrapper it cannot open', () => {
+			const data = `${UNIVERSAL_ROUTER_EXECUTE_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes', 'bytes[]', 'uint256'], ['0x0a00', ['0xdeadbeef'], 1n])
+				.slice(2)}`;
+
+			expect(getCalldataMethods(data)).toEqual([
+				{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, depth: 0 }
+			]);
+		});
 	});
 
 	describe('getCalldataSelector', () => {
