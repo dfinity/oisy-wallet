@@ -1656,7 +1656,6 @@ interface I18nTransaction {
 		summary_swap: string;
 		summary_self: string;
 		swap_on: string;
-		summary_other: string;
 		interacted_with: string;
 		unknown_token: string;
 		raw_value: string;
