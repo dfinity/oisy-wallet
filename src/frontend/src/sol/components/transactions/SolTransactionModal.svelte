@@ -30,6 +30,7 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
+	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -98,6 +99,13 @@
 			unitName: decimalsOf(change),
 			displayDecimals: decimalsOf(change)
 		})} ${symbolOf(change.tokenAddress)}`;
+
+	// The venue of a routed swap: the program its legs ran through.
+	let routeProgram = $derived(
+		summary?.kind === 'swap'
+			? instructions?.find(({ kind }) => kind === 'route')?.program
+			: undefined
+	);
 
 	let from = $derived<SolTransactionUi['from'] | SolTransactionUi['fromOwner'] | undefined>(
 		fromOwner ?? fromAddress
@@ -199,7 +207,9 @@
 			bind:activeTab
 		>
 			{#if activeTab === 'summary'}
-				{#if nonNullish(toAddress) && nonNullish(fromAddress)}
+				<!-- The card names a counterparty, which only a send or a receive has: a swap's other
+				     side is a program, and offering to save your own wallet as a contact says nothing. -->
+				{#if nonNullish(toAddress) && nonNullish(fromAddress) && (isNullish(summary) || ['send', 'receive'].includes(summary.kind))}
 					<TransactionContactCard
 						{from}
 						{fromExplorerUrl}
@@ -218,6 +228,24 @@
 							</span>
 
 							<NetworkWithLogo network={token.network} />
+						</ListItem>
+					{/if}
+
+					{#if nonNullish(routeProgram)}
+						<ListItem>
+							<span>{$i18n.transaction.text.interacted_with}</span>
+							<output class="flex max-w-[50%] flex-row">
+								<output>{shortenWithMiddleEllipsis({ text: routeProgram })}</output>
+								<AddressActions
+									copyAddress={routeProgram}
+									copyAddressText={$i18n.wallet.text.address_copied}
+									externalLink={solAccountExplorerUrl({
+										network: token?.network,
+										address: routeProgram
+									})}
+									externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
+								/>
+							</output>
 						</ListItem>
 					{/if}
 

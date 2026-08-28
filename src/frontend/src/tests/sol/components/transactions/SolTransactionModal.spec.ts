@@ -159,6 +159,33 @@ describe('SolTransactionModal', () => {
 			expect(getByText('1 SOL')).toBeInTheDocument();
 		});
 
+		it('should trade the contact card for the venue on a swap', () => {
+			const { getByText, queryByText } = render(SolTransactionModal, {
+				props: {
+					transaction: {
+						...transaction,
+						summary: {
+							kind: 'swap' as const,
+							spent: { delta: -1_000_000_000n },
+							received: { delta: 46_099n, tokenAddress: mockSplAddress, decimals: 6 }
+						},
+						instructions: [
+							{
+								kind: 'route' as const,
+								program: mockSolAddress2,
+								children: []
+							}
+						]
+					},
+					token: SOLANA_TOKEN
+				}
+			});
+
+			expect(queryByText(en.address.save.title)).not.toBeInTheDocument();
+			expect(getByText(en.transaction.text.interacted_with)).toBeInTheDocument();
+			expect(getByText(shortenWithMiddleEllipsis({ text: mockSolAddress2 }))).toBeInTheDocument();
+		});
+
 		it('should show the pair at the ends of a swap in the hero', () => {
 			const { getByText } = render(SolTransactionModal, {
 				props: {
