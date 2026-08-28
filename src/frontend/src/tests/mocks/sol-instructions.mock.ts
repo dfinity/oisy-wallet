@@ -539,5 +539,174 @@ export const MOCK_SOL_INSTRUCTIONS = {
 			}
 		],
 		ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+	},
+	JUPITER_SWAP: {
+		instructions: [
+			{
+				programId: 'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS'
+			},
+			{
+				programId: 'ComputeBudget111111111111111111111111111111'
+			},
+			{
+				programId: 'ComputeBudget111111111111111111111111111111'
+			}
+		],
+		innerInstructions: [
+			{
+				index: 0,
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: {
+								account: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								mint: 'CH74tuRLTYcxG7qNJCsV9rghfLXJCQJbsu7i52a8F1Gn',
+								source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+								systemProgram: '11111111111111111111111111111111',
+								tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								wallet: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'getAccountDataSize',
+							info: {
+								extensionTypes: ['immutableOwner'],
+								mint: 'CH74tuRLTYcxG7qNJCsV9rghfLXJCQJbsu7i52a8F1Gn'
+							}
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								lamports: 2039280,
+								newAccount: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'initializeImmutableOwner',
+							info: {
+								account: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L'
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'initializeAccount3',
+							info: {
+								account: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								mint: 'CH74tuRLTYcxG7qNJCsV9rghfLXJCQJbsu7i52a8F1Gn',
+								owner: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+							}
+						}
+					},
+					{
+						programId: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								amount: '123000',
+								authority: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+								destination: '9GJGvbccctS6DU43mCX82eSJ4VMcq4YeJdf3s1i3M8t9',
+								source: '6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU'
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								amount: '1579578559155',
+								authority: '5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1',
+								destination: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								source: 'FrUPjQqfDbaFcRaoXFP54wcKHr3dTfTZGxjawwAVKQzG'
+							}
+						}
+					},
+					{
+						programId: 'CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK'
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transferChecked',
+							info: {
+								authority: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+								destination: 'VY7xh2Mn3m1ixSihWE73UZw7bceb1ucYfz4t17YKvbK',
+								mint: 'CH74tuRLTYcxG7qNJCsV9rghfLXJCQJbsu7i52a8F1Gn',
+								source: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								tokenAmount: {
+									amount: '1579578559155',
+									decimals: 9,
+									uiAmount: 1579.578559155,
+									uiAmountString: '1579.578559155'
+								}
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transferChecked',
+							info: {
+								authority: '5nhqGo1n4SXNxUemLcSktsD2ewhH3TDij2dUDSC67iSE',
+								destination: 'GT6GWjdd5dPXyo8tiJj28JZovtqrxhZWHj2sbAo7cHeA',
+								mint: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
+								source: 'A9Y89UEQYuiN3mZNNkKqeEfCQPj4yvNPoMyGNNmi8mBF',
+								tokenAmount: {
+									amount: '46099',
+									decimals: 6,
+									uiAmount: 0.046099,
+									uiAmountString: '0.046099'
+								}
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: {
+								account: '4paFJ5zxavLQXbFPU6j6B42abU5muxfKW9QTtJSowf6L',
+								destination: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+								owner: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+							}
+						}
+					}
+				]
+			}
+		],
+		ownedAddresses: [
+			'5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+			'6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',
+			'GT6GWjdd5dPXyo8tiJj28JZovtqrxhZWHj2sbAo7cHeA'
+		]
 	}
 };
