@@ -1308,6 +1308,8 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unreviewable_typed_data: string;
+		unreviewable_typed_data_agreement: string;
 		unsigned_typed_data_keys: string;
 		unknown_call_title: string;
 		unknown_call: string;

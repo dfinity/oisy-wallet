@@ -24,9 +24,12 @@
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
 		invalidTypedData?: boolean;
+		// Valid typed data whose schema OISY does not recognise, so none of the summary rows below
+		// can be filled. Resolved by the review that gates approval on it, rather than derived twice.
+		unreviewableTypedData?: boolean;
 	}
 
-	let { request, invalidTypedData = false }: Props = $props();
+	let { request, invalidTypedData = false, unreviewableTypedData = false }: Props = $props();
 
 	let application = $derived(request.verifyContext.verified.origin);
 
@@ -122,6 +125,10 @@
 	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
 		{$i18n.wallet_connect.text.invalid_typed_data}
 	</MessageBox>
+{:else if unreviewableTypedData}
+	<MessageBox level="error" testId="wallet-connect-unreviewable-typed-data">
+		{$i18n.wallet_connect.text.unreviewable_typed_data}
+	</MessageBox>
 {:else if hasUnsignedKeys}
 	<MessageBox level="info" testId="wallet-connect-unsigned-typed-data-info">
 		{$i18n.wallet_connect.text.unsigned_typed_data_keys}
@@ -164,8 +171,10 @@
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
 {#if nonNullish(signedJson)}
+	<!-- Collapsed while the rows above summarize the request. When they are empty because the schema
+	     was not recognised, the message is the whole of the review and is opened. -->
 	<div class="mt-4 rounded-xs bg-disabled p-4">
-		<Json _collapsed={true} json={signedJson} />
+		<Json _collapsed={!unreviewableTypedData} json={signedJson} />
 	</div>
 {:else}
 	<p class="mb-4 font-normal">

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import EthWalletConnectUnknownCallAgreement from '$eth/components/wallet-connect/EthWalletConnectUnknownCallAgreement.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -19,6 +18,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import WalletConnectAcknowledgement from '$lib/components/wallet-connect/WalletConnectAcknowledgement.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -282,7 +282,12 @@
 	</SendData>
 
 	{#if unknownCall}
-		<EthWalletConnectUnknownCallAgreement bind:checked={acknowledgedUnknownCall} />
+		<WalletConnectAcknowledgement
+			inputId="eth-wallet-connect-unknown-call-agreement"
+			testId="wallet-connect-unknown-call-agreement"
+			text={$i18n.wallet_connect.text.unknown_call_agreement}
+			bind:checked={acknowledgedUnknownCall}
+		/>
 	{/if}
 
 	{#snippet toolbar()}

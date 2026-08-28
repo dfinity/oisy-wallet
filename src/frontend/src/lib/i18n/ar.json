@@ -1625,6 +1625,8 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "",
+			"unreviewable_typed_data": "",
+			"unreviewable_typed_data_agreement": "",
 			"unsigned_typed_data_keys": "",
 			"unknown_call_title": "",
 			"unknown_call": "",
