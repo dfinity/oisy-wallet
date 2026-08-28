@@ -7,6 +7,7 @@
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { formatSolInstructionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		instructions: SolInstructionSummary[];
@@ -19,9 +20,11 @@
 	let { instructions, token, netChanges }: Props = $props();
 
 	const splToken = (tokenAddress: string) =>
-		$enabledSplTokens.find(
-			({ address, network: { id } }) => address === tokenAddress && id === token.network.id
-		);
+		findEnabledSplToken({
+			tokens: $enabledSplTokens,
+			tokenAddress,
+			networkId: token.network.id
+		});
 
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		isNullish(tokenAddress)

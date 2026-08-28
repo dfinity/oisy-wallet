@@ -30,6 +30,7 @@
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -58,10 +59,13 @@
 	} = $derived(transaction);
 
 	const splToken = (tokenAddress: string) =>
-		$enabledSplTokens.find(
-			({ address, network: { id: networkId } }) =>
-				address === tokenAddress && networkId === token?.network.id
-		);
+		nonNullish(token)
+			? findEnabledSplToken({
+					tokens: $enabledSplTokens,
+					tokenAddress,
+					networkId: token.network.id
+				})
+			: undefined;
 
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		isNullish(tokenAddress)
