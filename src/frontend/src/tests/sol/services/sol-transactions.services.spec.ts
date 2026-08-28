@@ -151,6 +151,7 @@ describe('sol-transactions.services', () => {
 			}) as SolRpcTransaction;
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
+		let spyGetAccountOwner: MockInstance;
 
 		beforeEach(() => {
 			spyFetchTransactionDetailForSignature = vi.spyOn(
@@ -159,7 +160,7 @@ describe('sol-transactions.services', () => {
 			);
 			spyFetchTransactionDetailForSignature.mockResolvedValue(detailWith());
 
-			vi.spyOn(solanaApi, 'getAccountOwner').mockResolvedValue(undefined);
+			spyGetAccountOwner = vi.spyOn(solanaApi, 'getAccountOwner').mockResolvedValue(undefined);
 		});
 
 		it('should return an empty array if transaction detail is nullish', async () => {
@@ -254,8 +255,40 @@ describe('sol-transactions.services', () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([]);
 		});
 
+		// An approval reduces to kind other: naming the wallet as its own recipient would fabricate
+		// a transfer to self that never happened.
+		it('should leave the recipient empty for a transaction that is neither send nor receive', async () => {
+			spyFetchTransactionDetailForSignature.mockResolvedValueOnce(
+				detailWith({
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'approve',
+								info: {
+									source: mockSolAddress,
+									delegate: mockSolAddress2,
+									owner: mockSolAddress,
+									amount: '5'
+								}
+							}
+						}
+					],
+					preBalances: [10_000n, ZERO],
+					postBalances: [10_000n, ZERO]
+				})
+			);
+
+			const [record] = await fetchSolTransactionsForSignature(mockParams);
+
+			expect(record.summary?.kind).toBe('other');
+			expect(record.to).toBeUndefined();
+			expect(record.from).toBe(mockSolAddress);
+		});
+
 		it('should resolve the owner of the counterparty for the record', async () => {
-			vi.spyOn(solanaApi, 'getAccountOwner').mockResolvedValue(mockSolAddress3);
+			spyGetAccountOwner.mockResolvedValueOnce(mockSolAddress3);
 
 			const [record] = await fetchSolTransactionsForSignature(mockParams);
 
