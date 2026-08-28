@@ -14,7 +14,7 @@ import type {
 	SolSignature
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	address as solAddress,
 	type Address,
@@ -437,4 +437,52 @@ export const checkIfAccountExists = async ({
 	const { value } = await getAccountInfo({ address, network });
 
 	return nonNullish(value);
+};
+
+/**
+ * The name and symbol a Token-2022 mint carries in its own account.
+ *
+ * Token-2022 can hold its metadata in the mint itself, through the `tokenMetadata` extension, so
+ * one account read names a token the wallet does not list. A legacy SPL mint keeps nothing of the
+ * sort and answers with nothing.
+ */
+export const getSplTokenMetadata = async ({
+	addresses,
+	network
+}: {
+	addresses: SplTokenAddress[];
+	network: SolanaNetworkType;
+}): Promise<Record<SplTokenAddress, { name: string; symbol: string }>> => {
+	if (addresses.length === 0) {
+		return {};
+	}
+
+	const accounts = await getMultipleAccountsInfo({ addresses, network });
+
+	return addresses.reduce<Record<SplTokenAddress, { name: string; symbol: string }>>(
+		(acc, address, index) => {
+			const data = accounts[index]?.data;
+
+			if (isNullish(data) || !('parsed' in data)) {
+				return acc;
+			}
+
+			const { extensions } = (data.parsed as { info?: { extensions?: unknown[] } })?.info ?? {};
+
+			const metadata = (extensions ?? []).find(
+				(extension): extension is { extension: string; state: { name: string; symbol: string } } =>
+					nonNullish(extension) &&
+					typeof extension === 'object' &&
+					'extension' in extension &&
+					extension.extension === 'tokenMetadata'
+			);
+
+			return nonNullish(metadata) &&
+				notEmptyString(metadata.state?.name) &&
+				notEmptyString(metadata.state?.symbol)
+				? { ...acc, [address]: { name: metadata.state.name, symbol: metadata.state.symbol } }
+				: acc;
+		},
+		{}
+	);
 };
