@@ -1658,7 +1658,8 @@
 			"token_units": "token units (decimals unknown)"
 		},
 		"alt": {
-			"connect_input": "e.g. wc:a281567bb3e4..."
+			"connect_input": "e.g. wc:a281567bb3e4...",
+			"open_address_block_explorer": "Open the address on a block explorer"
 		},
 		"domain": {
 			"title": "Domain Verification",

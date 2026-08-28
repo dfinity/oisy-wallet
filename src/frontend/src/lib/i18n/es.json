@@ -1658,7 +1658,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "ej. wc:a281567bb3e4..."
+			"connect_input": "ej. wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Verificación de Dominio",
