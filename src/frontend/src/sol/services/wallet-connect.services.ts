@@ -112,12 +112,17 @@ export const decode = async ({
 		})
 	]);
 
-	const { preview, parties: simulatedParties } = simulation ?? {};
+	const {
+		preview,
+		instructions: simulatedInstructions,
+		parties: simulatedParties
+	} = simulation ?? {};
 
 	const mapped = {
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
-		...(nonNullish(preview) && { preview })
+		...(nonNullish(preview) && { preview }),
+		...(nonNullish(simulatedInstructions) && { instructions: simulatedInstructions })
 	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
