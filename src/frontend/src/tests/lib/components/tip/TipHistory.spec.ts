@@ -77,6 +77,38 @@ describe('TipHistory', () => {
 		await waitFor(() => expect(getByText(/aaaaa-aa/)).toBeInTheDocument());
 	});
 
+	it('shortens a real principal instead of letting the row clip it', async () => {
+		// A principal is 63 characters and the row already carries a date, so
+		// `truncate` cut it wherever the width ran out — mid-segment, with no ending.
+		// The existing claimer above is `aaaaa-aa`, short enough that the helper
+		// returns it untouched, so it could never have caught this.
+		// Derived rather than written out, so it is a real 63-character principal
+		// with a valid checksum — which is also what a tip claimer actually is.
+		const longClaimer = Principal.selfAuthenticating(
+			new TextEncoder().encode('a-claimer-who-arrived-from-a-tip-link')
+		);
+
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({ tip_id: 'long', status: { Claimed: null }, claimed_by: [longClaimer] })
+		]);
+
+		const { getByText, queryByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
+
+		// Head and tail survive, which is the part anyone compares against.
+		const full = longClaimer.toText();
+		const head = full.slice(0, 7);
+		const tail = full.slice(-7);
+
+		await waitFor(() =>
+			expect(getByText(new RegExp(`${head}\\.\\.\\.${tail}`))).toBeInTheDocument()
+		);
+
+		// And the full 63 characters never reach the DOM to overflow it.
+		expect(queryByText(new RegExp(full))).toBeNull();
+	});
+
 	it('names each row by its amount rather than repeating one label', async () => {
 		// Every row used to lead with the words "Tip created", which said nothing
 		// and pushed the only distinguishing fact — the sum — off to one side.
