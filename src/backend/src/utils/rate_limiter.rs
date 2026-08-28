@@ -103,6 +103,19 @@ thread_local! {
     pub(crate) static CANCEL_TIP_RATE_LIMITER: TieredRateLimiter =
         TieredRateLimiter::with_tiers(30, 300, 400, 4000);
 
+    /// Rate-limits `set_tip_secret`. Not about cycles: the endpoint writes a
+    /// 512-byte entry to stable memory, and nothing else bounds how many a caller
+    /// may write. `MAX_TIPS_PER_USER` counts *active* tips, not stored codes, and
+    /// the endpoint is deliberately not gated on the tip existing — so before this
+    /// limiter a single registered caller could grow the store at ingress speed
+    /// without creating a single tip.
+    ///
+    /// Same tiers as `CREATE_TIP_RATE_LIMITER` because the browser calls this
+    /// exactly once per created tip: anything a legitimate sender can do here is
+    /// already bounded by what they can create.
+    pub(crate) static SET_TIP_SECRET_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
     /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
     /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
     /// global (20/min, 100/hour). See [`TieredRateLimiter`].
