@@ -4,9 +4,10 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
+    account::{EthAddress, TokenAccountId},
     contact::{
-        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
-        UpdateContactRequest,
+        Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
+        ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
@@ -27,6 +28,19 @@ pub fn call_create_contact(
 ) -> Result<Contact, ContactError> {
     pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
+    let wrapped_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+    wrapped_result.expect("that create_contact succeeds")
+}
+
+pub fn call_create_contact_with_image(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    name: String,
+    image: Option<ContactImage>,
+) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
+    let request = CreateContactRequest { name, image };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
     wrapped_result.expect("that create_contact succeeds")
@@ -1003,4 +1017,168 @@ mod tests {
         };
         assert_eq!(result, updated.image);
     }
+}
+
+#[test]
+fn test_create_contact_stores_the_requested_image() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Created With Image".to_string(),
+        Some(png_image.clone()),
+    )
+    .expect("that a contact can be created with an image");
+
+    assert_eq!(contact.image, Some(png_image.clone()));
+
+    // The image must survive the round trip, not just the create response.
+    let retrieved = call_get_contact(&pic_setup, caller, contact.id)
+        .expect("that the created contact can be read back");
+    assert_eq!(retrieved.image, Some(png_image));
+}
+
+#[test]
+fn test_image_limit_is_enforced_per_principal() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+
+    let mut first_contact_with_image = None;
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        let contact = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("With Image {index}"),
+            Some(png_image.clone()),
+        )
+        .expect("that contacts up to the image cap can be created");
+
+        if index == 0 {
+            first_contact_with_image = Some(contact);
+        }
+    }
+
+    // One more image is over the cap.
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            "One Too Many".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // The cap is on images, not on contacts: an image-less contact is still accepted.
+    let contact_without_image =
+        call_create_contact_with_image(&pic_setup, caller, "No Image".to_string(), None)
+            .expect("that an image-less contact can still be created at the image cap");
+
+    // Attaching an image to that contact would exceed the cap.
+    let jpeg_image = create_test_jpeg_image();
+    assert_eq!(
+        call_update_contact(
+            &pic_setup,
+            caller,
+            Contact {
+                image: Some(jpeg_image.clone()),
+                ..contact_without_image
+            },
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Replacing an image on a contact that already has one does not change the count, so it is
+    // allowed even at the cap.
+    let existing = first_contact_with_image.expect("that the first contact was recorded");
+    let replaced = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            image: Some(jpeg_image.clone()),
+            ..existing.clone()
+        },
+    )
+    .expect("that replacing an existing image is allowed at the cap");
+    assert_eq!(replaced.image, Some(jpeg_image));
+
+    // Clearing an image is allowed too, and frees a slot.
+    call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            image: None,
+            ..existing
+        },
+    )
+    .expect("that clearing an image is allowed at the cap");
+
+    call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Back Under The Cap".to_string(),
+        Some(png_image),
+    )
+    .expect("that a freed slot can be reused");
+}
+
+#[test]
+fn test_update_contact_rejects_an_over_long_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "Address Bound".to_string()).unwrap();
+
+    // A normal address is accepted and stored.
+    let valid_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(
+            "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+        )),
+        label: Some("main".to_string()),
+    };
+    let updated = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            addresses: vec![valid_address.clone()],
+            ..contact.clone()
+        },
+    )
+    .expect("that a normal address is accepted");
+    assert_eq!(updated.addresses, vec![valid_address.clone()]);
+
+    // An address longer than the bound is rejected before it can reach storage. Validation runs
+    // during candid deserialization, so the call is rejected outright rather than returning a
+    // typed ContactError.
+    let oversized_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(format!("0x{}", "a".repeat(200)))),
+        label: None,
+    };
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        UpdateContactRequest {
+            id: contact.id,
+            name: contact.name.clone(),
+            addresses: vec![oversized_address],
+            update_timestamp_ns: contact.update_timestamp_ns,
+            image: None,
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "an address over the length bound should be rejected"
+    );
+
+    // The rejected write left the stored contact untouched: the addresses must still be exactly
+    // what the last successful update wrote, not merely the same number of them.
+    let after =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
+    assert_eq!(after.addresses, vec![valid_address]);
+    assert_eq!(after.name, contact.name);
 }

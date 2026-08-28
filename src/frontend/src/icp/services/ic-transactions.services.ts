@@ -336,7 +336,7 @@ export const loadNextIcTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
-	minTimestamp: number;
+	minTimestamp?: number;
 	transactions: IcTransactionUi[];
 	owner: Principal;
 	identity: NullishIdentity;
@@ -353,7 +353,9 @@ export const loadNextIcTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
 
+	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
 	if (
+		nonNullish(minTimestamp) &&
 		nonNullish(minIcTimestamp) &&
 		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
 	) {
