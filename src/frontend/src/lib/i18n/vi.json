@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Tài khoản token người nhận (ATA) đã được sao chép vào khay nhớ tạm.",
 			"block": "Khối",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Đã tương tác với",
 			"unknown_token": "",

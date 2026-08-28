@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interakce s",
 			"unknown_token": "",

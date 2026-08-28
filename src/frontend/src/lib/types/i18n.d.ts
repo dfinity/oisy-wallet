@@ -1635,6 +1635,8 @@ interface I18nTransaction {
 		to_ata_copied: string;
 		block: string;
 		kind_other: string;
+		summary_swap: string;
+		swap_on: string;
 		summary_other: string;
 		interacted_with: string;
 		unknown_token: string;

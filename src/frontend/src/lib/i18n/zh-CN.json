@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "接收方代币账户 (ATA) 已复制到剪贴板。",
 			"block": "区块",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "交互对象",
 			"unknown_token": "",

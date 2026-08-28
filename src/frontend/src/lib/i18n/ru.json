@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Взаимодействовали с",
 			"unknown_token": "",

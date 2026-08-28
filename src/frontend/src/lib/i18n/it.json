@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Conto token destinatario (ATA) copiato negli appunti.",
 			"block": "Blocco",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interagito con",
 			"unknown_token": "",

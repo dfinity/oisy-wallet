@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Compte de token du destinataire (ATA) copié dans le presse-papiers.",
 			"block": "Bloc",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interagi avec",
 			"unknown_token": "",

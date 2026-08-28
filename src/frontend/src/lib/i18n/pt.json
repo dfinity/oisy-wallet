@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Conta de token do destinatário (ATA) copiada para a área de transferência.",
 			"block": "Bloco",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interagido com",
 			"unknown_token": "",

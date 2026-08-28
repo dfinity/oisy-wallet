@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "実行先コントラクト",
 			"unknown_token": "",

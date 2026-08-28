@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "수신자 토큰 계정 (ATA)이 클립보드에 복사되었습니다.",
 			"block": "블록",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "상호작용 대상",
 			"unknown_token": "",

@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Konto tokena odbiorcy (ATA) skopiowane do schowka.",
 			"block": "Blok",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interakcja z",
 			"unknown_token": "",

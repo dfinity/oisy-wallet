@@ -1962,6 +1962,8 @@
 			"to_ata_copied": "Empfänger-Token-Konto (ATA) in die Zwischenablage kopiert.",
 			"block": "Block",
 			"kind_other": "",
+			"summary_swap": "",
+			"swap_on": "",
 			"summary_other": "",
 			"interacted_with": "Interagierte mit",
 			"unknown_token": "",
