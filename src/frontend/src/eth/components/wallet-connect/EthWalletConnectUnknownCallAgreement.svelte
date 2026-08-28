@@ -15,7 +15,11 @@
 	};
 </script>
 
-<label class="my-6 flex gap-4 rounded-xl bg-secondary p-2" for={inputId}>
+<!-- `Checkbox` renders its own `<label for>`, so the text is a sibling label rather than a wrapper
+     around it: a label inside a label is invalid, and the nesting is what breaks the click that
+     assistive technology relies on. Two labels for one input is allowed and is how the swap and
+     limit-order confirmations are built. -->
+<div class="my-6 flex items-start gap-4 rounded-xl bg-secondary p-2">
 	<Checkbox
 		{checked}
 		{inputId}
@@ -23,7 +27,7 @@
 		testId="wallet-connect-unknown-call-agreement"
 	/>
 
-	<span class="text-sm text-tertiary">
+	<label class="block text-sm leading-snug text-tertiary" for={inputId}>
 		{$i18n.wallet_connect.text.unknown_call_agreement}
-	</span>
-</label>
+	</label>
+</div>
