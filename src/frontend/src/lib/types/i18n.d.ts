@@ -2364,6 +2364,7 @@ interface I18nTip {
 		view_history: string;
 		get_started: string;
 		rate_limited: string;
+		rate_limited_title: string;
 	};
 	alt: {
 		intro_illustration: string;

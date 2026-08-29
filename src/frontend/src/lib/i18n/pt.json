@@ -2834,7 +2834,8 @@
 			"learn_how_it_works": "",
 			"view_history": "",
 			"get_started": "",
-			"rate_limited": ""
+			"rate_limited": "",
+			"rate_limited_title": ""
 		},
 		"alt": {
 			"intro_illustration": "",

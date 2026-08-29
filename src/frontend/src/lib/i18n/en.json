@@ -2834,7 +2834,8 @@
 			"learn_how_it_works": "Learn how it works",
 			"view_history": "Past tips",
 			"get_started": "Get Started",
-			"rate_limited": "You have done that a few times in quick succession. Wait about $duration and it will work again."
+			"rate_limited": "You have done that a few times in quick succession. Wait about $duration and it will work again.",
+			"rate_limited_title": "Slow down a moment"
 		},
 		"alt": {
 			"intro_illustration": "A tip QR code being scanned",
