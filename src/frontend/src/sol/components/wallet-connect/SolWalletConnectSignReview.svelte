@@ -15,6 +15,7 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
@@ -43,8 +44,8 @@
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
 		preview?: SolSimulationPreview;
-		// Who the transaction spends from and who it pays, derived from the transfer instructions
-		// it contains. Absent until the decode settles.
+		// Who the transaction spends from, derived from the transfer instructions it contains. Where
+		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
 		approveDisabled?: boolean;
 		onApprove: () => void;
@@ -72,14 +73,9 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
-	// The lists replace the single destination field, which had to pick one winner out of a swap.
-	// They only replace it once they have something to say: a message that yields no destination at
-	// all would otherwise lose the field the review shows today, for nothing.
-	let showParties = $derived(nonNullish(parties) && parties.destinations.length > 0);
-
-	// Instructions OISY cannot decode yield no amount, and with it no destination and no balance
-	// worth showing: what the transaction does is then told by the simulated changes alone. The
-	// rows are dropped rather than filled with a zero the decode never produced.
+	// Instructions OISY cannot decode yield no amount and no balance worth showing: what the
+	// transaction does is then told by the simulated changes alone. The rows are dropped rather
+	// than filled with a zero the decode never produced.
 	let decoded = $derived(nonNullish(amount));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
@@ -143,22 +139,60 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
+	<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
+	     theft as nothing happening. It is named first among the fund warnings for that reason. -->
+	{#if nonNullish(preview) && preview.controlChanges.length > 0}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
+	{/if}
+
+	<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+	     something visibly failed: an empty list on a transaction that clearly spends something is
+	     the single most dangerous thing this review can show. -->
+	{#if parties?.partial === true}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
+	{/if}
+
+	{#if dappPrioritizationFee}
+		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+	{:else if highPrioritizationFee}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+	{/if}
+
+	{#if nonNullish(preview)}
+		<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>
+	{/if}
+
+	<!-- The review names no recipient of its own: a single destination had to pick one winner out
+	     of a swap, and where the value ends up is what the simulated balance changes describe. An
+	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
+	<!-- The signer is the connected account and never varies between the requests of a session, so
+	     here it costs a row without saying anything about the message in front of the user. The
+	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 	<SendData
 		{amount}
 		{application}
 		{balance}
-		destination={isApproval || !decoded || showParties ? null : destination}
+		destination={null}
 		showAmount={decoded}
 		showBalance={decoded}
+		showSigner={false}
 		{source}
 		{token}
 	>
 		{#if isApproval}
-			<SendDataSpender spender={destination} />
+			<SendDataSpender spender={destination}>
+				{#snippet actions()}
+					<SolAddressActions address={destination} network={token.network} />
+				{/snippet}
+			</SendDataSpender>
 		{/if}
 
 		{#if nonNullish(parties)}
-			<SolWalletConnectTransferParties {parties} userAddress={source} />
+			<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
+		{/if}
+
+		{#if nonNullish(preview)}
+			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
@@ -169,18 +203,6 @@
 			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
 				{@render feeValue(prioritizationFee)}
 			</WalletConnectModalValue>
-		{/if}
-
-		<!-- A steep priority fee is a legitimate choice when the network is congested, so both tiers
-		     inform instead of blocking the way invalid typed data does on Ethereum. -->
-		{#if dappPrioritizationFee}
-			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
-		{:else if highPrioritizationFee}
-			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
-		{/if}
-
-		{#if nonNullish(preview)}
-			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />

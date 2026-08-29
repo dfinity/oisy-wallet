@@ -1203,6 +1203,8 @@
 			"max_slippage_error": "滑点容忍度不能为 0% 或超过 $maxSlippage%",
 			"swap_button": "立即兑换",
 			"swap_is_not_offered": "当前不支持此兑换。",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "正在执行交易...",
 			"initializing": "正在初始化交易...",
 			"swapping": "正在兑换...",
@@ -1257,7 +1259,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1605,6 +1609,7 @@
 			"or_use_link": "或使用 WalletConnect 链接",
 			"proposer": "发起方",
 			"spender": "支出方",
+			"operator": "",
 			"application": "应用",
 			"review": "审核 $chain_name ($key) 所需的权限",
 			"method": "方法",
@@ -1626,7 +1631,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1635,7 +1639,15 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "",
@@ -1664,7 +1676,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "例如：wc:a281567bb3e4..."
+			"connect_input": "例如：wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "域名验证",
@@ -1949,6 +1962,8 @@
 			"details": "交易详情",
 			"hash": "交易哈希",
 			"hash_copied": "交易哈希 $hash 已复制到剪贴板。",
+			"signature": "",
+			"signature_copied": "",
 			"id": "交易 ID",
 			"id_copied": "交易 ID 已复制到剪贴板。",
 			"timestamp": "时间戳",
@@ -1964,6 +1979,10 @@
 			"to_ata": "接收方代币账户 (ATA)",
 			"to_ata_copied": "接收方代币账户 (ATA) 已复制到剪贴板。",
 			"block": "区块",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "交互对象",
 			"unknown_token": "",
 			"raw_value": "",

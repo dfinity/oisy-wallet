@@ -1203,6 +1203,8 @@
 			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá $maxSlippage%",
 			"swap_button": "Hoán đổi ngay",
 			"swap_is_not_offered": "Hoán đổi này hiện không được cung cấp.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Đang thực hiện giao dịch...",
 			"initializing": "Đang khởi tạo giao dịch...",
 			"swapping": "Đang hoán đổi...",
@@ -1257,7 +1259,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1605,6 +1609,7 @@
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
 			"spender": "",
+			"operator": "",
 			"application": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
@@ -1626,7 +1631,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1635,7 +1639,15 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
 			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "",
@@ -1664,7 +1676,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "ví dụ: wc:a281567bb3e4..."
+			"connect_input": "ví dụ: wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Xác minh tên miền",
@@ -1949,6 +1962,8 @@
 			"details": "Chi tiết giao dịch",
 			"hash": "Hash giao dịch",
 			"hash_copied": "Hash giao dịch $hash đã được sao chép vào khay nhớ tạm.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID giao dịch",
 			"id_copied": "ID giao dịch đã được sao chép vào khay nhớ tạm.",
 			"timestamp": "Thời gian",
@@ -1964,6 +1979,10 @@
 			"to_ata": "Tài khoản token người nhận (ATA)",
 			"to_ata_copied": "Tài khoản token người nhận (ATA) đã được sao chép vào khay nhớ tạm.",
 			"block": "Khối",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "Đã tương tác với",
 			"unknown_token": "",
 			"raw_value": "",

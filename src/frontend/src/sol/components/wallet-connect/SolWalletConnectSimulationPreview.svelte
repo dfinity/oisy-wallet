@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
@@ -29,8 +29,32 @@
 			({ address, network: { id } }) => address === tokenAddress && id === feeToken.network.id
 		);
 
-	const symbol = (tokenAddress: SplTokenAddress): string =>
-		splToken(tokenAddress)?.symbol ?? shortenWithMiddleEllipsis({ text: tokenAddress });
+	// Mints OISY cannot name, in the order they appear. A bare address reads as noise next to the
+	// tickers around it, so an unlisted mint is named by position instead and numbered only when
+	// there is more than one to tell apart.
+	let unknownTokenAddresses = $derived(
+		tokenDeltas.reduce<SplTokenAddress[]>(
+			(acc, { tokenAddress }) =>
+				nonNullish(splToken(tokenAddress)) || acc.includes(tokenAddress)
+					? acc
+					: [...acc, tokenAddress],
+			[]
+		)
+	);
+
+	const symbol = (tokenAddress: SplTokenAddress): string => {
+		const known = splToken(tokenAddress)?.symbol;
+
+		if (nonNullish(known)) {
+			return known;
+		}
+
+		const index = unknownTokenAddresses.indexOf(tokenAddress);
+
+		return unknownTokenAddresses.length > 1
+			? `${$i18n.transaction.text.unknown_token} ${index + 1}`
+			: $i18n.transaction.text.unknown_token;
+	};
 
 	// A mint OISY does not know has no rate of its own, and no other token's rate describes it, so
 	// such a delta is left as a bare amount rather than priced against something it is not.
@@ -79,12 +103,6 @@
 	{/if}
 {/snippet}
 
-<!-- An authority change moves no funds at all, so it would be invisible among the amounts. It is
-     named first, on its own, because it is the one that hands over the account itself. -->
-{#if controlChanges.length > 0}
-	<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
-{/if}
-
 <WalletConnectModalValue
 	label={$i18n.wallet_connect.text.simulated_changes}
 	ref="simulated-changes"
@@ -116,11 +134,11 @@
 			<span class="flex flex-col gap-1" data-tid="simulated-control-change">
 				<span class="text-tertiary">
 					{`${controlLabels[field]} · ${shortenWithMiddleEllipsis({ text: account })}`}
+
+					<SolAddressActions address={account} network={feeToken.network} />
 				</span>
 				{to ?? $i18n.wallet_connect.text.simulation_control_removed}
 			</span>
 		{/each}
 	</div>
 </WalletConnectModalValue>
-
-<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>

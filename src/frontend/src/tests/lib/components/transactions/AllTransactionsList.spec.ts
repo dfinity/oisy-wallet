@@ -9,10 +9,14 @@ import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
+import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
+import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
+import { getMockContactsUi } from '$tests/mocks/contacts.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
@@ -21,8 +25,10 @@ import {
 	IntersectionObserverOnce,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
@@ -171,6 +177,114 @@ describe('AllTransactionsList', () => {
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber
 			);
+		});
+	});
+
+	describe('when a selected token is no longer selectable', () => {
+		beforeEach(() => {
+			localStorage.clear();
+			transactionsFilterStore.clear();
+		});
+
+		afterEach(() => {
+			transactionsFilterStore.clear();
+		});
+
+		it('drops the selections that the tokens panel no longer offers', async () => {
+			const selectableKey = transactionsFilterTokenKey(get(enabledFungibleNetworkTokens)[0]);
+
+			assertNonNullish(selectableKey);
+
+			transactionsFilterStore.toggleTokenId(selectableKey);
+			transactionsFilterStore.toggleTokenId('UNKNOWN-Unknown');
+
+			render(AllTransactionsList);
+			await tick();
+
+			expect(get(transactionsFilterStore).tokenIds).toEqual([selectableKey]);
+		});
+
+		it('keeps the other facets untouched', async () => {
+			transactionsFilterStore.toggleType('send');
+			transactionsFilterStore.toggleContactId('42');
+			transactionsFilterStore.toggleTokenId('UNKNOWN-Unknown');
+
+			render(AllTransactionsList);
+			await tick();
+
+			const value = get(transactionsFilterStore);
+
+			expect(value.types).toEqual(['send']);
+			expect(value.tokenIds).toEqual([]);
+			expect(value.contactIds).toEqual(['42']);
+		});
+	});
+
+	describe('when a selected contact is no longer selectable', () => {
+		const [mockContact] = getMockContactsUi({ n: 1, name: 'Alice', addresses: [] });
+		const alice = { ...mockContact, id: 1n, name: 'Alice' };
+
+		beforeEach(() => {
+			localStorage.clear();
+			transactionsFilterStore.clear();
+			contactsStore.reset();
+		});
+
+		afterEach(() => {
+			transactionsFilterStore.clear();
+			contactsStore.reset();
+		});
+
+		it('drops the selections of contacts that no longer exist', async () => {
+			contactsStore.set([alice]);
+
+			transactionsFilterStore.toggleContactId('1');
+			transactionsFilterStore.toggleContactId('404');
+
+			render(AllTransactionsList);
+			await tick();
+
+			expect(get(transactionsFilterStore).contactIds).toEqual(['1']);
+		});
+
+		it('drops every selection when the last contact is deleted', async () => {
+			contactsStore.set([alice]);
+
+			transactionsFilterStore.toggleContactId('1');
+
+			render(AllTransactionsList);
+			await tick();
+
+			expect(get(transactionsFilterStore).contactIds).toEqual(['1']);
+
+			contactsStore.removeContact(1n);
+			await tick();
+
+			expect(get(transactionsFilterStore).contactIds).toEqual([]);
+		});
+
+		it('does not prune while the contacts are not initialized', async () => {
+			transactionsFilterStore.toggleContactId('1');
+
+			render(AllTransactionsList);
+			await tick();
+
+			expect(get(transactionsFilterStore).contactIds).toEqual(['1']);
+		});
+
+		it('keeps the other facets untouched', async () => {
+			contactsStore.set([]);
+
+			transactionsFilterStore.toggleType('send');
+			transactionsFilterStore.toggleContactId('404');
+
+			render(AllTransactionsList);
+			await tick();
+
+			const value = get(transactionsFilterStore);
+
+			expect(value.types).toEqual(['send']);
+			expect(value.contactIds).toEqual([]);
 		});
 	});
 

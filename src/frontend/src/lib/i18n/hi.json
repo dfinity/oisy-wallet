@@ -1203,6 +1203,8 @@
 			"max_slippage_error": "स्लिपेज टॉलरेंस 0% नहीं हो सकती या $maxSlippage% से अधिक नहीं हो सकती",
 			"swap_button": "अभी स्वैप करें",
 			"swap_is_not_offered": "यह स्वैप वर्तमान में पेश नहीं किया गया है।",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "लेनदेन निष्पादित हो रहा है...",
 			"initializing": "लेनदेन प्रारंभ कर रहा है...",
 			"swapping": "स्वैप कर रहा है...",
@@ -1257,7 +1259,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1605,6 +1609,7 @@
 			"or_use_link": "या वॉलेटकनेक्ट लिंक का उपयोग करें",
 			"proposer": "प्रस्तावक",
 			"spender": "",
+			"operator": "",
 			"application": "",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
@@ -1626,7 +1631,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1635,7 +1639,15 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "",
@@ -1664,7 +1676,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."
+			"connect_input": "उदाहरण के लिए wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "डोमेन सत्यापन",
@@ -1949,6 +1962,8 @@
 			"details": "लेनदेन विवरण",
 			"hash": "लेनदेन हैश",
 			"hash_copied": "लेनदेन हैश $hash क्लिपबोर्ड पर कॉपी किया गया।",
+			"signature": "",
+			"signature_copied": "",
 			"id": "लेनदेन आईडी",
 			"id_copied": "लेनदेन आईडी क्लिपबोर्ड पर कॉपी की गई।",
 			"timestamp": "टाइमस्टैम्प",
@@ -1964,6 +1979,10 @@
 			"to_ata": "प्राप्तकर्ता टोकन खाता (ATA)",
 			"to_ata_copied": "प्राप्तकर्ता टोकन खाता (ATA) क्लिपबोर्ड पर कॉपी किया गया।",
 			"block": "ब्लॉक",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "के साथ इंटरैक्ट किया गया",
 			"unknown_token": "",
 			"raw_value": "",

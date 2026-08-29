@@ -506,7 +506,7 @@
 				"one_liner": "Provision your own sovereign cloud. Deploy applications without managing servers, choose your infrastructure, and enable teams and AI agents to build securely.",
 				"description": "Provision Cloud Engines: a frontier cloud platform on the Internet Computer built for AI agents and humans. Tamperproof execution, safe upgrades, and horizontal auto-scaling provide the foundation for agents to create, operate, and evolve enterprise-grade applications on sovereign infrastructure.",
 				"carousel": {
-					"text": "Create frontier clouds and let your agents build",
+					"text": "Cloud for the AIware era",
 					"call_to_action": "Learn more"
 				}
 			},
@@ -1203,6 +1203,8 @@
 			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed $maxSlippage%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
+			"swap_amount_too_low": "The amount is below the provider's minimum. Please enter a higher amount.",
+			"swap_amount_too_low_minimum": "The amount is below the provider's minimum. Enter at least $amount $symbol.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
@@ -1257,7 +1259,9 @@
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
 			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
 			"swap_refunded": "The swap transaction was refunded.",
-			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed."
+			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed.",
+			"near_intents_quote_unverified": "This swap quote could not be verified as genuine, so no funds were sent. Please try again or choose a different provider.",
+			"near_intents_quote_expired": "This swap quote has expired, so no funds were sent. Please try again to get a fresh quote."
 		}
 	},
 	"buy": {
@@ -1605,6 +1609,7 @@
 			"or_use_link": "or use WalletConnect link",
 			"proposer": "Proposer",
 			"spender": "Spender",
+			"operator": "Operator",
 			"application": "Application",
 			"review": "Review $chain_name ($key) required permissions",
 			"method": "Method",
@@ -1617,7 +1622,7 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
-			"simulated_changes": "Simulated changes to your accounts",
+			"simulated_changes": "Simulated balance changes",
 			"simulation_note": "Simulated against the network's current state. What happens when the transaction actually runs can differ.",
 			"simulation_control_change": "This transaction would change who controls one or more of your accounts. Approving it can hand over an account itself, not only what is in it.",
 			"simulation_new_owner": "New account owner",
@@ -1626,7 +1631,6 @@
 			"simulation_new_program": "New owning program",
 			"simulation_control_removed": "Removed",
 			"transfer_sources": "Sources",
-			"transfer_destinations": "Destinations",
 			"transfer_party_own": "Your account",
 			"transfer_parties_partial": "OISY couldn't simulate this transaction, so the lists above only cover the instructions the message states itself. Funds moved by another program on its behalf aren't listed. Only sign if you trust this app.",
 			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
@@ -1635,7 +1639,15 @@
 			"high_gas_limit": "This request sets an unusually high gas limit, so the max fee above is far more than this transaction should cost. Check it carefully and only sign if you trust this app.",
 			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
 			"unsigned_typed_data_keys": "This app sent extra data its schema doesn't declare. That data isn't covered by the signature, so only the fields below are shown.",
+			"unknown_call_title": "Contract Call",
+			"unknown_call": "OISY can't tell what this transaction does. It calls a contract function OISY doesn't recognise, so the details below don't describe it: it may move your tokens or grant someone permission to move them, and nothing about that would appear here. Only approve it if you trust this app and know what you asked it to do.",
+			"function": "Function",
+			"allowance_increase": "This request raises the allowance of the spender below by the amount shown, on top of whatever it can already spend. The spender can transfer that much of this token out of your wallet, at any time, until you revoke it.",
+			"allowance_decrease": "This request lowers the allowance of the spender below by the amount shown. It moves no funds on its own.",
 			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
+			"unverifiable_approval_for_all_request": "This request would hand an operator control of an NFT collection, and OISY can't decode which operator. What's shown may differ from what would actually be signed, so approval is disabled.",
+			"approval_for_all_grant": "This request lets the operator below transfer any NFT in this collection that you own now or acquire later, at any time, until you revoke it. It moves no funds on its own.",
+			"approval_for_all_revoke": "This request revokes the operator below, so it can no longer transfer the NFTs you hold in this collection.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
@@ -1664,7 +1676,8 @@
 			"token_units": "token units (decimals unknown)"
 		},
 		"alt": {
-			"connect_input": "e.g. wc:a281567bb3e4..."
+			"connect_input": "e.g. wc:a281567bb3e4...",
+			"open_address_block_explorer": "Open the address on a block explorer"
 		},
 		"domain": {
 			"title": "Domain Verification",
@@ -1949,6 +1962,8 @@
 			"details": "Transaction details",
 			"hash": "Transaction hash",
 			"hash_copied": "Transaction hash $hash copied to clipboard.",
+			"signature": "Transaction signature",
+			"signature_copied": "Transaction signature $signature copied to clipboard.",
 			"id": "Transaction ID",
 			"id_copied": "Transaction ID copied to clipboard.",
 			"timestamp": "Timestamp",
@@ -1964,6 +1979,10 @@
 			"to_ata": "Recipient token account (ATA)",
 			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
+			"kind_other": "Interaction",
+			"summary_swap": "Swap $spent $spent_symbol to $received $received_symbol",
+			"summary_self": "Self-transfer $amount $symbol",
+			"swap_on": "On",
 			"interacted_with": "Interacted with",
 			"unknown_token": "Unknown token",
 			"raw_value": "Raw value",

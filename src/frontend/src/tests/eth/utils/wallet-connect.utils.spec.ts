@@ -1,3 +1,10 @@
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -7,17 +14,24 @@ import {
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import {
 	assertValidEthTypedData,
+	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
+	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+
+// The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
+// — bar the Hyperliquid one, which states Arbitrum.
+const MAINNET_SESSION = 'eip155:1';
+const ARBITRUM_SESSION = 'eip155:42161';
 
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
 const SPENDER = '0xcA11bde05977b3631167028862bE2a173976CA11';
@@ -174,15 +188,21 @@ const ethersHash = ({ domain, types, message }: WalletConnectEthSignTypedDataV4)
 describe('wallet-connect.utils', () => {
 	describe('getSignParamsMessageTypedDataV4Hash', () => {
 		it('rejects a DAI permit whose bool `allowed` is the string "false"', () => {
-			expect(() => getSignParamsMessageTypedDataV4Hash(toParams(daiPermit('false')))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it('rejects a DAI permit whose bool `allowed` is the string "true"', () => {
-			expect(() => getSignParamsMessageTypedDataV4Hash(toParams(daiPermit('true')))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit('true')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it.each([false, true])(
@@ -190,40 +210,57 @@ describe('wallet-connect.utils', () => {
 			(allowed) => {
 				const params = toParams(daiPermit(allowed));
 
-				expect(getSignParamsMessageTypedDataV4Hash(params)).toBe(ethersHash(daiPermit(allowed)));
+				expect(
+					getSignParamsMessageTypedDataV4Hash({ params, sessionChainId: MAINNET_SESSION })
+				).toBe(ethersHash(daiPermit(allowed)));
 			}
 		);
 
 		it('leaves a standard ERC-2612 permit (uint256 value) unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(erc2612Permit))).toBe(
-				ethersHash(erc2612Permit)
-			);
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(erc2612Permit),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(erc2612Permit));
 		});
 
 		it('leaves a Permit2 request with nested structs unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(permit2))).toBe(ethersHash(permit2));
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(permit2));
 		});
 
 		it('hashes an ERC-3009 authorization carrying undeclared keys exactly as ethers does', () => {
 			// The keys the schema does not declare are not encoded, so the digest is the canonical
 			// one: refusing to hash would have rejected a request that every other wallet signs.
 			expect(
-				getSignParamsMessageTypedDataV4Hash(
-					toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
-				)
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)),
+					sessionChainId: MAINNET_SESSION
+				})
 			).toBe(ethersHash(transferWithAuthorization()));
 		});
 
 		it('hashes the Hyperliquid accept-terms action exactly as ethers does', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(hyperliquidAcceptTerms))).toBe(
-				ethersHash(hyperliquidAcceptTerms)
-			);
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(hyperliquidAcceptTerms),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBe(ethersHash(hyperliquidAcceptTerms));
 		});
 
 		it('leaves a canonical ERC-3009 authorization unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(transferWithAuthorization()))).toBe(
-				ethersHash(transferWithAuthorization())
-			);
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(transferWithAuthorization()));
 		});
 
 		it('throws a non-typed-data error for a plain (non-JSON) message', () => {
@@ -231,7 +268,10 @@ describe('wallet-connect.utils', () => {
 			// and the request is rejected rather than signed.
 			let caught: unknown;
 			try {
-				getSignParamsMessageTypedDataV4Hash(['0xdeadbeef']);
+				getSignParamsMessageTypedDataV4Hash({
+					params: ['0xdeadbeef'],
+					sessionChainId: MAINNET_SESSION
+				});
 			} catch (err: unknown) {
 				caught = err;
 			}
@@ -246,7 +286,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeTruthy();
 		});
@@ -255,17 +296,23 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(daiPermit(true))
+					params: toParams(daiPermit(true)),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(erc2612Permit)
+					params: toParams(erc2612Permit),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 			expect(
-				hasInvalidTypedData({ method: SESSION_REQUEST_ETH_SIGN_V4, params: toParams(permit2) })
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
 			).toBeFalsy();
 		});
 
@@ -273,7 +320,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
+					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 		});
@@ -282,7 +330,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(hyperliquidAcceptTerms)
+					params: toParams(hyperliquidAcceptTerms),
+					sessionChainId: ARBITRUM_SESSION
 				})
 			).toBeFalsy();
 		});
@@ -291,7 +340,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(transferWithAuthorization())
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 		});
@@ -300,7 +350,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_LEGACY,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeTruthy();
 		});
@@ -308,14 +359,108 @@ describe('wallet-connect.utils', () => {
 		it('is false for a raw-message method, even with a typed-data payload', () => {
 			// personal_sign is signed as a raw message and must stay approvable.
 			expect(
-				hasInvalidTypedData({ method: SESSION_REQUEST_PERSONAL_SIGN, params: ['0xdeadbeef'] })
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_PERSONAL_SIGN,
+					params: ['0xdeadbeef'],
+					sessionChainId: MAINNET_SESSION
+				})
 			).toBeFalsy();
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_PERSONAL_SIGN,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('classifyWalletConnectEthCall', () => {
+		const args = 'de'.repeat(64);
+
+		it.each([undefined, '', '0x', '0X'])('should classify %s as a native transfer', (data) => {
+			expect(classifyWalletConnectEthCall(data)).toEqual({ type: 'native' });
+		});
+
+		it.each([
+			{ selector: ERC20_APPROVE_HASH, expected: { type: 'erc20Approve' } },
+			{ selector: ERC20_TRANSFER_HASH, expected: { type: 'erc20Transfer' } },
+			{ selector: ERC_SET_APPROVAL_FOR_ALL_HASH, expected: { type: 'setApprovalForAll' } },
+			{
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: true }
+			},
+			{
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: false }
+			}
+		])('should classify the call behind selector $selector', ({ selector, expected }) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual(expected);
+		});
+
+		it('should classify a selector regardless of its casing', () => {
+			const upper = ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase().replace('0X', '0x');
+
+			expect(classifyWalletConnectEthCall(`${upper}${args}`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+
+		// The behaviour the whole change exists for. Each of these is a selector that was never
+		// considered, and each used to be reviewed as a native zero-value send.
+		it.each([
+			// Uniswap Permit2 `approve`
+			'0x87517c45',
+			// ERC-2612 `permit`
+			'0xd505accf',
+			// ERC-20 `transferFrom`
+			'0x23b872dd',
+			// a router `execute`
+			'0x3593564c',
+			// nothing at all
+			'0xdeadbeef'
+		])('should classify unrecognised selector %s as unknown', (selector) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual({
+				type: 'unknown',
+				selector
+			});
+		});
+
+		it('should classify calldata too short to carry a selector as unknown, naming none', () => {
+			expect(classifyWalletConnectEthCall('0xab')).toEqual({
+				type: 'unknown',
+				selector: undefined
+			});
+		});
+
+		// A known selector says nothing about the arguments behind it. Recognising the call is what
+		// routes it to a review that decodes those arguments and fails closed when they do not.
+		it('should classify a known selector carrying garbage arguments by its selector', () => {
+			expect(classifyWalletConnectEthCall(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+	});
+
+	describe('isWalletConnectEthApproval', () => {
+		it.each([
+			{ type: 'erc20Approve' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		])('should treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeTruthy();
+		});
+
+		// Not an approval, and not a send either: the modal titles it for what it is.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'erc20Transfer' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeFalsy();
 		});
 	});
 
@@ -723,6 +868,80 @@ describe('wallet-connect.utils', () => {
 		it('does not throw on a value that is not a number', () => {
 			expect(() => toTypedDataDomainChainId('mainnet')).not.toThrow();
 			expect(toTypedDataDomainChainId('mainnet')).toBeUndefined();
+		});
+	});
+
+	// The reported attack: a session granted only for a testnet asking for a signature over a
+	// mainnet domain. The key is the same on every EVM chain, so nothing but this check stands
+	// between that request and a digest real mainnet DAI would accept.
+	describe('chain binding', () => {
+		const SEPOLIA_SESSION = 'eip155:11155111';
+
+		it('refuses a mainnet domain asked for by a testnet session', () => {
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
+		});
+
+		it('refuses it in the review as well, so it cannot be approved', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toBeTruthy();
+		});
+
+		// Omitting the envelope chain must not be a way around the check.
+		it.each([undefined, '', 'eip155:999999', 'not-a-chain'])(
+			'refuses when the session states %s as its chain',
+			(sessionChainId) => {
+				expect(() =>
+					getSignParamsMessageTypedDataV4Hash({ params: toParams(daiPermit(true)), sessionChainId })
+				).toThrow(WalletConnectEthTypedDataError);
+			}
+		);
+
+		// A domain with no chain is bound to none, so it is valid on all of them.
+		it('refuses a domain that states no chain at all', () => {
+			const { chainId: _chainId, ...domain } = daiPermit(true).domain;
+
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams({ ...daiPermit(true), domain }),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
+		});
+
+		// A chain is a number, not a spelling: these are all chain 1 and all hash alike.
+		it.each(['1', 1, '0x1', '01'])(
+			'accepts %s as the same chain the session granted',
+			(chainId) => {
+				const permit = daiPermit(true);
+
+				expect(
+					getSignParamsMessageTypedDataV4Hash({
+						params: toParams({ ...permit, domain: { ...permit.domain, chainId } }),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBe(ethersHash({ ...permit, domain: { ...permit.domain, chainId } }));
+			}
+		);
+
+		// Raw-message methods are signed differently and are not chain-bound.
+		it('leaves a raw-message request approvable whatever the session chain', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN,
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toBeFalsy();
 		});
 	});
 });

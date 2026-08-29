@@ -1,4 +1,5 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { UtxosFee } from '$btc/types/btc-send';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
@@ -15,6 +16,7 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
@@ -63,7 +65,9 @@ export enum SwapErrorCodes {
 	SWAP_FAILED_2ND_WITHDRAW_SUCCESS = 'swap_failed_2nd_withdraw_success',
 	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',
 	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
-	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed'
+	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
+	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
+	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -90,6 +94,17 @@ export interface FetchSwapAmountsParams {
 }
 
 export type Slippage = string | number;
+
+/**
+ * The reason no offer could be quoted, when a provider named one.
+ *
+ * `minAmount` is the provider's minimum, in the source token's smallest unit,
+ * when the provider communicated it.
+ */
+export interface SwapQuoteError {
+	type: 'amount-too-low';
+	minAmount?: bigint;
+}
 
 export type SwapMappedResult =
 	| {
@@ -256,6 +271,9 @@ export interface EvmQuoteParams {
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
+	// The user's address on the destination chain, for cross-chain providers that pay out
+	// there. Absent, such providers fall back to `userAddress`.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
@@ -388,6 +406,9 @@ export interface BtcQuoteParams {
 	amount: bigint;
 	// The user's own Bitcoin address, the source of the UTXOs a deposit spends.
 	userBtcAddress: BtcAddress;
+	// The user's address on the destination chain. Chain Fusion ignores it (a BTC → ckBTC
+	// deposit credits the user's own principal); cross-chain providers pay out to it.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
@@ -447,6 +468,14 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own Bitcoin address, the source of the UTXOs the deposit spends.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	utxosFee: UtxosFee;
 }
 
 export interface DeltaSwapResponse {

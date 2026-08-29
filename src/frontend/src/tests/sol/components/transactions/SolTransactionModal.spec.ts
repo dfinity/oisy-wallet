@@ -66,11 +66,15 @@ describe('SolTransactionModal', () => {
 		).toBeInTheDocument();
 	});
 
-	it('should display tx hash', () => {
-		const { getByText } = render(SolTransactionModal, {
+	it('should display tx signature', () => {
+		const { getByText, queryByText } = render(SolTransactionModal, {
 			transaction: mockSolTransactionUi,
 			token: SOLANA_TOKEN
 		});
+
+		expect(getByText(en.transaction.text.signature)).toBeInTheDocument();
+
+		expect(queryByText(en.transaction.text.hash)).not.toBeInTheDocument();
 
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockSolTransactionUi.signature }))

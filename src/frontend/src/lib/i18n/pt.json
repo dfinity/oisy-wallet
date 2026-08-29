@@ -1203,6 +1203,8 @@
 			"max_slippage_error": "A tolerância a deslizamento não pode ser 0% ou exceder $maxSlippage%",
 			"swap_button": "Trocar agora",
 			"swap_is_not_offered": "Esta troca não é oferecida atualmente.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Executando transação...",
 			"initializing": "Inicializando transação...",
 			"swapping": "Trocando...",
@@ -1257,7 +1259,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1605,6 +1609,7 @@
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
 			"spender": "",
+			"operator": "",
 			"application": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
@@ -1626,7 +1631,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1635,7 +1639,15 @@
 			"high_gas_limit": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"sign_psbt": "",
@@ -1664,7 +1676,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "ex: wc:a281567bb3e4..."
+			"connect_input": "ex: wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Verificação de Domínio",
@@ -1949,6 +1962,8 @@
 			"details": "Detalhes da transação",
 			"hash": "Hash da transação",
 			"hash_copied": "Hash da transação $hash copiado para a área de transferência.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID da transação",
 			"id_copied": "ID da transação copiado para a área de transferência.",
 			"timestamp": "Timestamp",
@@ -1964,6 +1979,10 @@
 			"to_ata": "Conta de token do destinatário (ATA)",
 			"to_ata_copied": "Conta de token do destinatário (ATA) copiada para a área de transferência.",
 			"block": "Bloco",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "Interagido com",
 			"unknown_token": "",
 			"raw_value": "",
