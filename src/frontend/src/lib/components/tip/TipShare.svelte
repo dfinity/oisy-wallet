@@ -72,6 +72,12 @@
 		linkNotSaved = false
 	}: Props = $props();
 
+	// Waiting for a link, as opposed to having one or having been told there will
+	// never be one. Everything on this screen that is about the link — the code to
+	// scan, the deadline to scan it by — is held back until then, so the wait shows
+	// one thing happening rather than three placeholders and a date.
+	let awaitingLink = $derived(isNullish(link) && isNullish(linkMessage));
+
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
 	// the only way to know which of the three earns its place on this screen.
@@ -191,7 +197,13 @@
 			— so the heading sat further from its own paragraph than the paragraph sat
 			from the edge, and the whole box read bottom-heavy.
 		-->
-		<p class="m-0 font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
+		<p class="m-0 font-bold">
+			{awaitingLink
+				? generating
+					? $i18n.tip.text.generating_link
+					: $i18n.tip.text.recovering_link
+				: $i18n.tip.text.no_wallet_needed_title}
+		</p>
 
 		<!--
 			Two lines, not one sentence: the first answers "can they even claim this",
@@ -208,11 +220,13 @@
 		screen that changes what the reader should do next, and inside the reassuring
 		box it read as part of the reassurance.
 	-->
-	<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
-		<IconClock size="16" />
+	{#if !awaitingLink}
+		<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
+			<IconClock size="16" />
 
-		{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
-	</div>
+			{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
+		</div>
+	{/if}
 
 	{#if nonNullish(link)}
 		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
@@ -252,18 +266,6 @@
 		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
 			<span class="h-5 w-full animate-pulse rounded bg-disabled-alt" aria-hidden="true"></span>
 		</div>
-
-		<!--
-			Says what the skeletons are for. Without it the screen arrives looking
-			finished but blank, which reads as a failure rather than as work still in
-			progress — and this screen is the sender's receipt for money they have just
-			committed, so it is the wrong thing to leave anyone guessing about.
-		-->
-		{#if generating}
-			<p class="m-0 mt-3 text-center text-sm text-tertiary">
-				{$i18n.tip.text.generating_link}
-			</p>
-		{/if}
 	{/if}
 
 	{#if nonNullish(onCancel)}

@@ -2335,6 +2335,7 @@ interface I18nTip {
 		expires_at: string;
 		done: string;
 		generating_link: string;
+		recovering_link: string;
 		link_not_saved: string;
 		reserve_failed: string;
 		status_title: string;
@@ -2391,6 +2392,8 @@ interface I18nTip {
 		learn_how_it_works: string;
 		view_history: string;
 		get_started: string;
+		rate_limited: string;
+		rate_limited_title: string;
 	};
 	alt: {
 		intro_illustration: string;

@@ -100,8 +100,8 @@ describe('TipShare', () => {
 	describe('a link that is still on its way', () => {
 		it('draws everything the row already knew while the link is missing', () => {
 			// The screen opens on the click and the link arrives after, so the amount
-			// and the deadline have to stand on their own — otherwise the transition
-			// would be to an empty box.
+			// has to stand on its own — otherwise the transition would be to an empty
+			// box.
 			const { getByText, queryByText } = render(TipShare, {
 				props: { ...props, link: undefined }
 			});
@@ -226,13 +226,41 @@ describe('TipShare', () => {
 			expect(getByText(get(i18n).tip.text.generating_link)).toBeInTheDocument();
 		});
 
-		it('still states the amount and the deadline, which are already known', () => {
-			// The whole reason the transition can happen early: nothing on this part of
-			// the screen is waiting on the canister.
+		it('still states the amount, which is already known', () => {
+			// The whole reason the transition can happen early: the sum is not waiting
+			// on the canister, and it is what the sender just committed.
 			const { getByText } = render(TipShare, { props: generatingProps });
 
 			expect(getByText('2.5 ICP')).toBeInTheDocument();
-			expect(getByText(/Claim before/)).toBeInTheDocument();
+		});
+
+		it('holds the deadline back until there is a link it applies to', () => {
+			// Known from the client clock, but a date to claim by, next to a code that
+			// does not exist yet, is one more thing on the screen and nothing to do
+			// about it.
+			const { queryByText } = render(TipShare, { props: generatingProps });
+
+			expect(queryByText(/Claim before/)).toBeNull();
+		});
+
+		it('says what is happening where the scanning instructions go', () => {
+			// One statement instead of two: the box used to head itself "Scan to claim
+			// this tip" over a grey square while a separate line at the bottom said the
+			// code was still being built.
+			const { getByText, queryByText } = render(TipShare, { props: generatingProps });
+
+			expect(getByText(get(i18n).tip.text.generating_link)).toBeInTheDocument();
+			expect(queryByText(get(i18n).tip.text.no_wallet_needed_title)).toBeNull();
+		});
+
+		it('names the wait differently when a link is being recovered, not reserved', () => {
+			// Same skeletons, different thing being waited on: this one is History
+			// decrypting a code that already exists.
+			const { getByText } = render(TipShare, {
+				props: { ...props, link: undefined, generating: false }
+			});
+
+			expect(getByText(get(i18n).tip.text.recovering_link)).toBeInTheDocument();
 		});
 
 		it('will not let the sender leave before the link arrives', () => {
@@ -244,11 +272,13 @@ describe('TipShare', () => {
 		});
 
 		it('drops the notice once the link is in', () => {
-			const { queryByText } = render(TipShare, {
+			const { getByText, queryByText } = render(TipShare, {
 				props: { ...props, generating: false }
 			});
 
 			expect(queryByText(get(i18n).tip.text.generating_link)).toBeNull();
+			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
+			expect(getByText(/Claim before/)).toBeInTheDocument();
 		});
 	});
 });

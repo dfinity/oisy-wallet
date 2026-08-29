@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import {
+		fromNullable,
+		isNullish,
+		nonNullish,
+		notEmptyString,
+		secondsToDuration
+	} from '@dfinity/utils';
 	import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
 	import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 	import type { Principal } from '@icp-sdk/core/principal';
@@ -23,7 +29,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
-	import { claimTip, loadTipDetails } from '$lib/services/tip.services';
+	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -53,6 +59,11 @@
 		'claiming' | 'received' | 'unavailable' | 'uncovered' | 'shortBalance' | 'failed';
 
 	let claimState = $state<ClaimState>('claiming');
+	// Set only when the canister turned the call away on a rate limit. Kept beside
+	// `claimState` rather than inside it: a limit is not a different outcome for
+	// the tip — the link is still good — it is the same `failed` state with an
+	// answer to "when should I try again".
+	let rateLimit = $state<ReturnType<typeof tipRateLimit>>();
 	let amountLabel = $state<string | undefined>();
 	let message = $state<string | undefined>();
 	// From the ledger itself, not the claimer's token list: whoever opens a tip
@@ -179,7 +190,9 @@
 		identity: Identity;
 		tipId: string;
 		claimCode: string;
-	}): Promise<{ details: TipDetails } | { failure: TipClaimOutcome }> => {
+	}): Promise<
+		{ details: TipDetails } | { failure: TipClaimOutcome; limit: ReturnType<typeof tipRateLimit> }
+	> => {
 		try {
 			return { details: await loadTipDetails(params) };
 		} catch (err: unknown) {
@@ -188,7 +201,10 @@
 			// was nothing anywhere to say which call had actually failed.
 			consoleWarn('Could not read the tip to claim', err);
 
-			return { failure: isUnavailable(err) ? 'unavailable' : 'failed' };
+			return {
+				failure: isUnavailable(err) ? 'unavailable' : 'failed',
+				limit: tipRateLimit(err)
+			};
 		}
 	};
 
@@ -222,6 +238,7 @@
 
 		if (!('details' in outcome)) {
 			claimState = outcome.failure;
+			rateLimit = outcome.limit;
 
 			// Tracked here too: a claim that never got past reading the tip is still a
 			// claim that failed, and leaving it out would make the funnel look better
@@ -230,7 +247,8 @@
 				step: 'claim',
 				side: 'claimer',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				outcome: outcome.failure
+				outcome: outcome.failure,
+				...(nonNullish(outcome.limit) && { rateLimited: true })
 			});
 
 			return;
@@ -283,13 +301,15 @@
 						: 'failed';
 
 			claimState = outcome;
+			rateLimit = tipRateLimit(err);
 
 			trackTip({
 				step: 'claim',
 				side: 'claimer',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				outcome,
-				symbol
+				symbol,
+				...(nonNullish(rateLimit) && { rateLimited: true })
 			});
 		}
 	};
@@ -301,6 +321,21 @@
 	// see all of it at once.
 	let failure = $derived.by(() => {
 		const { text } = $i18n.tip;
+
+		// First, because it outranks whichever call met it: "ask them for a new
+		// link" is wrong advice when the link is fine and the only problem is how
+		// fast we asked.
+		if (nonNullish(rateLimit)) {
+			return {
+				title: text.rate_limited_title,
+				description: replacePlaceholders(text.rate_limited, {
+					$duration: secondsToDuration({
+						seconds: rateLimit.windowSeconds,
+						i18n: $i18n.temporal.seconds_to_duration
+					})
+				})
+			};
+		}
 
 		if (claimState === 'uncovered') {
 			return { title: text.uncovered_title, description: text.uncovered_description };

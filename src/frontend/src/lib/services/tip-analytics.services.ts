@@ -48,6 +48,15 @@ export interface TrackTipParams {
 	symbol?: string;
 	// Sanitized error string; omitted when empty.
 	error?: string;
+	// Any step → the canister turned the call away on a rate limit.
+	//
+	// Its own field rather than an `outcome`, because a limit can be met on any
+	// step, and "how often are we turning people away" should be one query rather
+	// than five. The vetKey tiers are the ones expected to show up here: at
+	// roughly 26 billion cycles a derivation their per-caller ceiling is
+	// deliberately low, so a sender recovering several links in a row can reach it
+	// without doing anything wrong.
+	rateLimited?: boolean;
 }
 
 export const trackTip = ({
@@ -57,7 +66,8 @@ export const trackTip = ({
 	outcome,
 	expiry,
 	symbol,
-	error
+	error,
+	rateLimited
 }: TrackTipParams) => {
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.TIP,
@@ -72,7 +82,8 @@ export const trackTip = ({
 			...(notEmptyString(outcome) && { outcome }),
 			...(notEmptyString(expiry) && { expiry }),
 			...(notEmptyString(symbol) && { symbol }),
-			...(notEmptyString(error) && { result_error: error })
+			...(notEmptyString(error) && { result_error: error }),
+			...(rateLimited === true && { rate_limited: 'true' })
 		}
 	});
 };
