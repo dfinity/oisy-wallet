@@ -12,15 +12,16 @@ The spec stays the source of truth for **what** to build; this only records
 
 | #   | Branch                         | Spec PR | Head        | Contains                                                                                                                                                                       | Status |
 | --- | ------------------------------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| 1   | `feat/tips-1-backend`          | PR-1    | `ee4dcab82` | tip store, `create_tip` / `get_tip` / `get_tip_details` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiters, pruning, candid | built  |
-| 2   | `feat/tips-2-service`          | PR-2    | `7f34c4674` | `base64url.utils`, `tip.crypto`, `tip.services`, api + canister layer, pinned cross-language hash vectors                                                                      | built  |
-| 3   | `feat/tips-3-sender-ui`        | PR-3    | `3848ef5e1` | `Issue Tip` menu entry, intro, token picker + empty state, create step, expiry, share screen with QR, `tip.*` i18n, flag off                                                   | built  |
-| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `2eb4e9dbd` | `/tip/<id>` **standalone landing page**, claim review, success, **unavailable**, **uncovered**                                                                                 | built  |
-| 5   | `feat/tips-5-history`          | PR-5    | `4d607e162` | History with four stored statuses, claimer principal on claimed rows, cancel action                                                                                            | built  |
-| 6   | `feat/tips-6-reserved-balance` | PR-2b   | `d3b78adb8` | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | built  |
-| 7   | `feat/tips-7-enable`           | PR-6    | `10666311b` | flip `TIPS_ENABLED` to `true` — the release, on its own, after everything above lands                                                                                          | built  |
+| 1   | `feat/tips-1-backend`          | PR-1    | `edc500086` | tip store, `create_tip` / `get_tip` / `get_tip_details` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiters, pruning, candid | built  |
+| 2   | `feat/tips-2-service`          | PR-2    | `27da853ba` | `base64url.utils`, `tip.crypto`, `tip.services`, api + canister layer, pinned cross-language hash vectors                                                                      | built  |
+| 3   | `feat/tips-3-sender-ui`        | PR-3    | `dfc880864` | `Issue Tip` menu entry, intro, token picker + empty state, create step, expiry, share screen with QR, `tip.*` i18n, flag off                                                   | built  |
+| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `f8ece90d3` | `/tip/<id>` **standalone landing page**, claim review, success, **unavailable**, **uncovered**                                                                                 | built  |
+| 5   | `feat/tips-5-history`          | PR-5    | `1a7f6120d` | History with four stored statuses, claimer principal on claimed rows, cancel action                                                                                            | built  |
+| 6   | `feat/tips-6-reserved-balance` | PR-2b   | `6c61cea8a` | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | built  |
+| 7   | `feat/tips-7-enable`           | PR-6    | `6401abf47` | flip `TIPS_ENABLED` to `true` — the release, on its own, after everything above lands                                                                                          | built  |
 
-241 commits over `main`, none pushed. `main` here is the merged spec
+None of the seven are pushed; `test/tips-be1` is, for the shared test
+environment only. `main` here is the merged spec
 ([#13768](https://github.com/dfinity/oisy-wallet/pull/13768)).
 
 **Why the claim page is a standalone route.** It started under `(app)`, which
@@ -158,6 +159,88 @@ the only way to test
 (a brand-new principal claiming, and a fresh identity seeing the received token
 without manual setup) for real. No unit test can fake a principal with no
 profile.
+
+## Before these can become PRs
+
+Measured per branch, because that is what CI does per PR — not from the top of
+the stack, which hides everything the lower branches are missing.
+
+| #   | Branch                         | Files | lint | check | `npm run test`   |
+| --- | ------------------------------ | ----- | ---- | ----- | ---------------- |
+| 1   | `feat/tips-1-backend`          | 31    | ok   | ok    | ok               |
+| 2   | `feat/tips-2-service`          | 10    | ok   | ok    | ok               |
+| 3   | `feat/tips-3-sender-ui`        | 42    | ok   | ok    | ok               |
+| 4   | `feat/tips-4-recipient-ui`     | 42    | ok   | ok    | **fails at tsc** |
+| 5   | `feat/tips-5-history`          | 27    | ok   | ok    | **fails at tsc** |
+| 6   | `feat/tips-6-reserved-balance` | 33    | ok   | ok    | **fails at tsc** |
+| 7   | `feat/tips-7-enable`           | 1     | ok   | ok    | **fails at tsc** |
+
+Sizes are the three-dot diff against each branch's parent — what GitHub shows.
+
+### 1. Three spec type errors (blocks PRs 4-7)
+
+`npm run test` is `tsc --project tsconfig.spec.json --noEmit && vitest`, so the
+type error stops the suite before a single test runs. CI goes red having
+executed nothing.
+
+- `TipClaimModal.spec.ts` — `vi.mock` overload on the `icrc.derived` partial mock — **PR 4**
+- `tip-status.utils.spec.ts` — fixture missing `last_claim_failure` — **PR 5**
+- `Menu.spec.ts` — `vi.mock(import('$env/tips.env'))` returns `boolean` where the module's literal type is `false` — **PR 6**
+
+The third has a proven fix already in the tree: `LoaderTips.spec.ts` uses the
+string form of `vi.mock`, which never enters the typed-module overload.
+
+### 2. Merge `main` (blocks everything)
+
+Merge base is `883f2c69d` (24 Aug); main has moved ~70 commits. Four files
+conflict, all stable-memory: `state/memory.rs`, `state/mod.rs`, `types/maps.rs`,
+`types/storable.rs`.
+
+The dangerous one is settled: main took `MemoryId::new(20)` for
+`CONTACT_IMAGE_MEMORY_ID` while this branch was away, and tips had the same id.
+Two structures on one region decode into each other's data. Tips moved to 21-26
+(contacts is live on mainnet, tips is not). The remaining three conflicts are
+where main's contact-image work meets ours and have not been attempted yet.
+
+### 3. `build.backend.args.sh` needs its own PR
+
+The `test_be_*` / `test_fe_*` key-name fix still lives only on `test/tips-be1`.
+It is a shared script other teams build from, so it should reach main as its own
+reviewed change rather than riding in with tips.
+
+### Order
+
+1. Fix the three spec type errors, each on its owning branch, cascade.
+2. Merge `main` into branch 1, resolve, cascade, re-gate every branch.
+3. Open PR 1 first — 31 files, the heaviest review, and provably untouched by UI
+   testing: its diff is `src/backend`, `src/shared`, `src/declarations` plus
+   `.gitignore`, the spec doc and `test.backend.sh`.
+4. Hold 2-7 until testing settles. Branch 2 owns `tip.services.ts`, where the
+   unresolved ICP approve failure would be fixed, and there is no force-push
+   here — once pushed, every correction is a visible extra commit.
+5. Separate PR for the deploy script.
+
+## be1 is pinned to the old memory ids
+
+`test/tips-be1` now carries a **fourth** deploy-only commit, beside the canister
+ids and the vetKD key name: `state/memory.rs` pinned to tips at 20/21 and
+secrets at 26-29, the ids be1 already holds data under.
+
+Without it, deploying the renumber to be1 as an upgrade would open the
+by-sender index's region as the tips map and read one as the other. The fix for
+that is a reinstall, and a reinstall wipes **all** stable memory on a shared test
+environment — every profile, contact and note, not just tips.
+
+So the invariant to check before pushing that branch is now **four** files, not
+three:
+
+```bash
+git diff feat/tips-7-enable test/tips-be1 --stat
+```
+
+This defers the reinstall rather than removing it. The day main is merged into
+the deploy branch, main's contact images will want region 20 and be1 has tips
+records in it.
 
 ## Blocked on people, not on code
 
