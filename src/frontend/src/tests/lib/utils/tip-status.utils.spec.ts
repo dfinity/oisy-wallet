@@ -17,7 +17,10 @@ describe('tip-status.utils', () => {
 		created_at_ns: 1_700_000_000_000_000_000n,
 		status,
 		message: [],
-		claimed_by: []
+		claimed_by: [],
+		// Added to `MyTip` when a failed claim started being recorded; the fixture
+		// was never updated, which broke `tsc` for the whole spec project.
+		last_claim_failure: []
 	});
 
 	describe('tipStatusKey', () => {
