@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { onMount, setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
@@ -14,7 +14,7 @@
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
-	import { newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
+	import { newTipDraft, reserveTip, type TipDraft, tipRateLimit } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -25,6 +25,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -129,17 +130,37 @@
 			({ link } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
+			// A rate limit is the one failure where the usual advice is wrong: every
+			// other reason here is worth retrying immediately, and this one cannot
+			// succeed until the window passes. Reported as its own flag so the funnel
+			// can answer how often people are being turned away.
+			const limit = tipRateLimit(err);
+
 			trackTip({
 				step: 'create',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				expiry: expiryLabel(durationMs),
-				symbol: selectedToken?.symbol
+				symbol: selectedToken?.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
 			});
 
 			// Deliberately reassuring about the money: an approve either landed and is
 			// replaceable, or never happened. Either way nothing was transferred.
-			toastsError({ msg: { text: $i18n.tip.text.reserve_failed }, err });
+			toastsError(
+				nonNullish(limit)
+					? {
+							msg: {
+								text: replacePlaceholders($i18n.tip.text.rate_limited, {
+									$duration: secondsToDuration({
+										seconds: limit.windowSeconds,
+										i18n: $i18n.temporal.seconds_to_duration
+									})
+								})
+							}
+						}
+					: { msg: { text: $i18n.tip.text.reserve_failed }, err }
+			);
 		} finally {
 			busy = false;
 		}
