@@ -40,33 +40,41 @@ pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId:
 // Tips: one map keyed by the opaque tip id, and a by-sender index used to
 // range-scan a sender's active-tip count and their History without walking the
 // primary map. Same two-map shape as the note shares above.
-pub(crate) const TIPS_MEMORY_ID: MemoryId = MemoryId::new(20);
-pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(21);
+//
+// These were 20 and 21 while this branch was away from main. Main took 20 for
+// `CONTACT_IMAGE_MEMORY_ID` in the meantime, and two structures pointing at one
+// region decode into each other's data — so tips moved up rather than main
+// moving, since main's is already live and ours is not.
+pub(crate) const TIPS_MEMORY_ID: MemoryId = MemoryId::new(21);
+pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(22);
 
 /// The four memories an `EncryptedMaps` needs for the per-tip claim-code store.
-/// Mirrors `PERSONAL_NOTES_*` (14-17). Never renumber these: the ids are how the
-/// memory manager finds existing data across an upgrade.
+/// Mirrors `PERSONAL_NOTES_*` (14-17). Never renumber these once they hold data:
+/// the ids are how the memory manager finds it again across an upgrade.
 ///
-/// Renumbered once, from 22-25, and 22-25 must never be reused. `KeyManager`
-/// stores its vetKD key id in a `StableCell`, and `Cell::init` *loads* the stored
-/// value whenever the memory is non-empty — it only writes the value passed in
-/// when the region is fresh. So the key name a store sees is whichever one was
-/// configured the very first time it was touched, permanently, and no
-/// redeployment can change it.
+/// Contiguous with the tips maps above, following this file's convention — ids
+/// run in sequence, and a retired one is parked with a `RESERVED_` name rather
+/// than skipped, the way id 5 is.
 ///
-/// A test environment initialised this store while its backend was configured
-/// with `dfx_test_key`, a name that exists only on a local replica. Every
-/// derivation there trapped with `SignCostError(InvalidKeyName)`, and correcting
-/// the deployment argument could not help: the bad name was already frozen in
-/// memory 22. Moving to a fresh region is what lets `init` write the corrected
-/// name.
+/// These sat at 26-29 for a while, after an earlier move away from 22-25.
+/// `KeyManager` keeps its vetKD key id in a `StableCell`, and `Cell::init`
+/// *loads* the stored value whenever the region is non-empty — it writes the
+/// value passed in only when the region is fresh. So the key name a store uses
+/// is whichever was configured the first time it was ever touched, permanently,
+/// and no redeployment can change it. A test environment initialised the store
+/// under `dfx_test_key`, which exists only on a local replica, and every
+/// derivation there trapped with `SignCostError(InvalidKeyName)`.
 ///
-/// The abandoned region holds ciphertexts nobody could decrypt anyway — the key
-/// to read them was never derivable. Nothing recoverable is lost.
-pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(26);
-pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(27);
-pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(28);
-pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(29);
+/// Reusing 22-25 is safe now, and only now: that store never initialised
+/// anywhere. The message that would have written the config cell trapped on the
+/// key name and rolled back, and the later attempt trapped on the canister's
+/// reserved-cycles limit before allocating. No environment holds a byte of it.
+/// The one canister that does hold tips data, be1, is being reinstalled anyway,
+/// because moving the tips map off id 20 invalidates what it has regardless.
+pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(23);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(24);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(25);
+pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(26);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
