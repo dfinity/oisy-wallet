@@ -70,6 +70,33 @@ describe('trackTip', () => {
 		expect(Object.keys(metadata ?? {})).not.toContain('amount');
 	});
 
+	it('flags a rate limit on whichever step met it', () => {
+		// A limit is not a failure of the tip itself, and it can be met on any step,
+		// so it rides as its own field rather than an outcome on one of them.
+		trackTip({
+			step: 'reopen',
+			side: 'sender',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			rateLimited: true
+		});
+
+		const [[{ metadata }]] = track.mock.calls;
+
+		expect(metadata?.rate_limited).toBe('true');
+	});
+
+	it('leaves the rate limit flag off when the failure was something else', () => {
+		trackTip({
+			step: 'create',
+			side: 'sender',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+		});
+
+		const [[{ metadata }]] = track.mock.calls;
+
+		expect(metadata).not.toHaveProperty('rate_limited');
+	});
+
 	it('omits fields that were not supplied', () => {
 		trackTip({ step: 'copy', side: 'sender' });
 

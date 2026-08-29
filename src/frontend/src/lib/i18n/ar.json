@@ -2806,6 +2806,7 @@
 			"expires_at": "",
 			"done": "",
 			"generating_link": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2861,7 +2862,9 @@
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",
-			"get_started": ""
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
 		},
 		"alt": {
 			"intro_illustration": "",
