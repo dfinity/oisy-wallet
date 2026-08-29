@@ -21,6 +21,7 @@ import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { BlockHeight } from '@icp-sdk/canisters/ledger/icp';
@@ -31,11 +32,17 @@ import { get } from 'svelte/store';
 export const sendIc = async ({
 	progress,
 	sendCompleted,
+	onSent,
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId?: NetworkId;
 	sendCompleted: () => void;
+	// Runs the moment the transfer — for a ck withdrawal, the burn — is registered,
+	// ahead of the wallet-refresh wait below: the send is irreversible from there, so
+	// a caller that must record it (e.g. as an active user transaction) cannot sit
+	// behind a deliberate delay a refresh or tab close would cut short.
+	onSent?: (params: { result: IcCkWithdrawalResult | undefined }) => Promise<void> | void;
 }): Promise<IcCkWithdrawalResult | undefined> => {
 	const result = await send({
 		progress,
@@ -43,6 +50,14 @@ export const sendIc = async ({
 	});
 
 	sendCompleted();
+
+	// Best-effort by contract, like `onBroadcast` in `sendBtc`: a failing callback
+	// must not derail the flow's own completion.
+	try {
+		await onSent?.({ result });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
 	progress?.(ProgressStepsSendIc.RELOAD);
 

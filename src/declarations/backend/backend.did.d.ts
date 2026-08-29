@@ -53,6 +53,15 @@ export type ActiveUserTransactionData =
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
 	| {
 			/**
+			 * OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
+			 * the row is opened *before* the deposit — it is the record that tells a
+			 * later session which token to pull back out of the DEX's custody: the
+			 * destination token on a fill, the source token on a kill.
+			 */
+			OisyTrade: OisyTradeData;
+	  }
+	| {
+			/**
 			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
 			 * source/destination leg (EVM and Solana); the deposit address, its
 			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
@@ -1338,6 +1347,33 @@ export interface NetworksSettings {
 export interface NotificationSettings {
 	dismissed_notifications: Array<DismissedNotification>;
 }
+/**
+ * OISY Trade order-book swap payload. The order id, the deposit and withdrawal
+ * block indices and the submitted price/quantity all ride in `external_refs`;
+ * only the fields fixed at creation are captured here.
+ *
+ * `side` is explicit rather than left to the poll. `get_my_orders` does return
+ * the side and the pair, but only once an order exists — and the two recovery
+ * paths this row is opened early for (a deposit that landed with no order, and
+ * a row abandoned before either) have no order to read, while still needing to
+ * know which token to pull back out. It also fixes the base/quote orientation,
+ * which `source_token` / `dest_token` alone cannot express.
+ */
+export interface OisyTradeData {
+	side: OisyTradeSide;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which side of the pair a swap-placed order takes. Equivalently, which leg of
+ * the pair the source token is: `Sell` spends the base token, `Buy` spends the
+ * quote token.
+ */
+export type OisyTradeSide = { Buy: null } | { Sell: null };
 export interface OneSecEvmToIcpData {
 	recipient_principal: Principal;
 	source_token: TokenId;

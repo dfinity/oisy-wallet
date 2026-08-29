@@ -229,7 +229,12 @@ export const signMessage = ({
 						// Typed-data methods reject on any parse/validate/hash failure, never
 						// downgrading to a raw message signature.
 						return signPrehash({
-							hash: getSignParamsMessageTypedDataV4Hash(params),
+							hash: getSignParamsMessageTypedDataV4Hash({
+								params,
+								// The chain the dApp connected under. Hashing refuses a domain on any
+								// other, so a session cannot reach past the network it was granted.
+								sessionChainId: request.params.chainId
+							}),
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});

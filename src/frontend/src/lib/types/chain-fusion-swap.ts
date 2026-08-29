@@ -23,6 +23,20 @@ export const CHAIN_FUSION_EXTERNAL_REF_KEYS = {
 	// than re-read from minter info at poll time: a minter upgrade moves the
 	// address, and the log being looked for lives at the old one.
 	HELPER_CONTRACT_ADDRESS: 'chain_fusion_helper',
+	// The Bitcoin transaction the conversion turns on. For a ckBTC mint it is the
+	// user's own deposit, snapshotted at broadcast, and the poller looks for it in
+	// the minter's UTXO set; for a ckBTC withdrawal it is the transaction the
+	// minter sent on the user's behalf, learned from the withdrawal status. The two
+	// directions never share a row, so one key serves both.
+	BTC_TXID: 'chain_fusion_btc_tx',
+	// The minter's per-user deposit address the mint poller asks the Bitcoin
+	// canister about. Snapshotted for the same reason as the minter id: it is
+	// otherwise only in `btcAddressStore`, which is filled solely while the ckBTC
+	// twin is enabled.
+	BTC_DEPOSIT_ADDRESS: 'chain_fusion_btc_deposit',
+	// Withdrawal poll key: the block index `retrieve_btc_with_approval` returned.
+	// The ckBTC minter keys its withdrawal status on it.
+	RETRIEVE_BTC_BLOCK_INDEX: 'chain_fusion_retrieve_btc_index',
 	// Display + analytics metadata snapshotted at creation time. These reuse
 	// OneSec's exact key strings — `ActiveUserTransactionItem` reads *every* row's
 	// refs through `toOneSecExternalRefsMap`, so a fourth swap provider renders
