@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "Tolerance skluzu nemůže být 0 % nebo přesáhnout $maxSlippage%",
 			"swap_button": "Vyměnit nyní",
 			"swap_is_not_offered": "Tato výměna v současné době není nabízena.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Provádění transakce...",
 			"initializing": "Inicializace transakce...",
 			"swapping": "Výměna...",
@@ -1244,7 +1246,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1596,7 @@
 			"or_use_link": "nebo použít odkaz WalletConnect",
 			"proposer": "Navrhovatel",
 			"spender": "Příjemce",
+			"operator": "",
 			"application": "Aplikace",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
@@ -1613,7 +1618,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1621,7 +1625,16 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
+			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",
@@ -1650,7 +1663,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "např. wc:a281567bb3e4..."
+			"connect_input": "např. wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Ověření domény",
@@ -1935,6 +1949,8 @@
 			"details": "Podrobnosti transakce",
 			"hash": "Hash transakce",
 			"hash_copied": "Hash transakce $hash zkopírován do schránky.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID transakce",
 			"id_copied": "ID transakce zkopírováno do schránky.",
 			"timestamp": "Časové razítko",
@@ -1950,6 +1966,10 @@
 			"to_ata": "Účet tokenu příjemce (ATA)",
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "Interakce s",
 			"unknown_token": "",
 			"raw_value": "",

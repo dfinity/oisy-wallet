@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "Допустимое проскальзывание не может быть 0% или превышать $maxSlippage%",
 			"swap_button": "Обменять сейчас",
 			"swap_is_not_offered": "Этот обмен в настоящее время не предлагается.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",
@@ -1244,7 +1246,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1596,7 @@
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
 			"spender": "Спишется с",
+			"operator": "",
 			"application": "Приложение",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
@@ -1613,7 +1618,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1621,7 +1625,16 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
+			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
 			"sign_psbt": "",
@@ -1650,7 +1663,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "например, wc:a281567bb3e4..."
+			"connect_input": "например, wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Проверка домена",
@@ -1935,6 +1949,8 @@
 			"details": "Детали транзакции",
 			"hash": "Хеш транзакции",
 			"hash_copied": "Хеш транзакции $hash скопирован в буфер обмена.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID транзакции",
 			"id_copied": "ID транзакции скопирован в буфер обмена.",
 			"timestamp": "Временная метка",
@@ -1950,6 +1966,10 @@
 			"to_ata": "Счет отправителя токенов (ATA)",
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "Взаимодействовали с",
 			"unknown_token": "",
 			"raw_value": "",

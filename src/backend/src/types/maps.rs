@@ -4,18 +4,27 @@ use ic_stable_structures::{
     memory_manager::VirtualMemory, DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
 use shared::types::{
-    active_user_transaction::ActiveUserTransaction, agreement::AgreementHistoryEntry,
-    api_keys::ApiKeys, backend_config::Config, bitcoin::StoredPendingTransaction,
-    contact::StoredContacts, custom_token::CustomToken, exchange::ExchangeRate, token::UserToken,
-    user_profile::StoredUserProfile, user_transaction::UserTransaction, Timestamp,
+    active_user_transaction::ActiveUserTransaction,
+    agreement::AgreementHistoryEntry,
+    api_keys::ApiKeys,
+    backend_config::Config,
+    bitcoin::StoredPendingTransaction,
+    contact::{ContactImage, StoredContacts},
+    custom_token::CustomToken,
+    exchange::ExchangeRate,
+    token::UserToken,
+    user_profile::StoredUserProfile,
+    user_transaction::UserTransaction,
+    Timestamp,
 };
 
 use crate::{
     personal_notes::share::model::PersonalNoteShareRecord,
     tips::model::TipRecord,
     types::storable::{
-        ActiveUserTransactionKey, Candid, PersonalNoteShareCreatorKey, PersonalNoteShareToken,
-        StoredPrincipal, StoredTokenId, TipId, TipSenderKey, UserTransactionKey,
+        ActiveUserTransactionKey, Candid, ContactImageKey, PersonalNoteShareCreatorKey,
+        PersonalNoteShareToken, StoredPrincipal, StoredTokenId, TipId, TipSenderKey,
+        UserTransactionKey,
     },
 };
 
@@ -38,6 +47,10 @@ pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem
 
 // Define a new type for the contact storage
 pub type ContactMap = StableBTreeMap<StoredPrincipal, Candid<StoredContacts>, VMem>;
+
+/// Contact images, held outside [`ContactMap`] so that a contact read or write decodes only the
+/// contact metadata rather than every image the principal has stored.
+pub type ContactImageMap = StableBTreeMap<ContactImageKey, Candid<ContactImage>, VMem>;
 
 pub type PendingTransactionsMap = HashMap<String, Vec<StoredPendingTransaction>>;
 

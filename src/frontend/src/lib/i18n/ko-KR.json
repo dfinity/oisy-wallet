@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "슬리피지 허용 범위는 0%이거나 $maxSlippage%를 초과할 수 없습니다",
 			"swap_button": "지금 스왑",
 			"swap_is_not_offered": "이 스왑은 현재 제공되지 않습니다.",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",
@@ -1244,7 +1246,9 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1596,7 @@
 			"or_use_link": "또는 WalletConnect 링크 사용",
 			"proposer": "제안자",
 			"spender": "사용자",
+			"operator": "",
 			"application": "애플리케이션",
 			"review": "$chain_name ($key) 필수 권한 검토",
 			"method": "메서드",
@@ -1613,7 +1618,6 @@
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
 			"transfer_sources": "",
-			"transfer_destinations": "",
 			"transfer_party_own": "",
 			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
@@ -1621,7 +1625,16 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
+			"unsigned_typed_data_keys": "",
+			"unknown_call_title": "",
+			"unknown_call": "",
+			"function": "",
+			"allowance_increase": "",
+			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",
@@ -1650,7 +1663,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "예: wc:a281567bb3e4..."
+			"connect_input": "예: wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "도메인 검증",
@@ -1935,6 +1949,8 @@
 			"details": "트랜잭션 상세 정보",
 			"hash": "트랜잭션 해시",
 			"hash_copied": "트랜잭션 해시 $hash가 클립보드에 복사되었습니다.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "트랜잭션 ID",
 			"id_copied": "트랜잭션 ID가 클립보드에 복사되었습니다.",
 			"timestamp": "타임스탬프",
@@ -1950,6 +1966,10 @@
 			"to_ata": "수신자 토큰 계정 (ATA)",
 			"to_ata_copied": "수신자 토큰 계정 (ATA)이 클립보드에 복사되었습니다.",
 			"block": "블록",
+			"kind_other": "",
+			"summary_swap": "",
+			"summary_self": "",
+			"swap_on": "",
 			"interacted_with": "상호작용 대상",
 			"unknown_token": "",
 			"raw_value": "",

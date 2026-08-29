@@ -463,6 +463,83 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(en.wallet_connect.text.invalid_typed_data)).toBeInTheDocument();
 	});
 
+	it('should not state unsigned keys for a payload whose every key is declared', () => {
+		const { queryByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(queryByTestId('wallet-connect-unsigned-typed-data-info')).not.toBeInTheDocument();
+	});
+
+	it('should state that a key the schema does not declare is not signed', () => {
+		// Hyperliquid carries routing fields alongside the signed members of every action. They are
+		// absent from the digest, so the preview drops them and says so rather than showing them as
+		// if the signature covered them.
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				...request.params,
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+						JSON.stringify({
+							domain: {
+								name: 'HyperliquidSignTransaction',
+								version: '1',
+								chainId: 42161,
+								verifyingContract: '0x0000000000000000000000000000000000000000'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								'Hyperliquid:AcceptTerms': [
+									{ name: 'hyperliquidChain', type: 'string' },
+									{ name: 'time', type: 'uint64' }
+								]
+							},
+							primaryType: 'Hyperliquid:AcceptTerms',
+							message: {
+								type: 'acceptTerms',
+								time: 1787170393018,
+								signatureChainId: '0xa4b1',
+								hyperliquidChain: 'Mainnet'
+							}
+						})
+					]
+				}
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByTestId, getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		expect(getByTestId('wallet-connect-unsigned-typed-data-info')).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unsigned_typed_data_keys)).toBeInTheDocument();
+	});
+
+	it('should not state unsigned keys when the typed data is invalid', () => {
+		// The warning already tells the user nothing here can be signed, so a second notice about
+		// which part of it would not be would only muddy that.
+		const { queryByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request,
+				invalidTypedData: true
+			}
+		});
+
+		expect(queryByTestId('wallet-connect-unsigned-typed-data-info')).not.toBeInTheDocument();
+	});
+
 	it('should render a typed-data payload sent through personal_sign as a raw message', () => {
 		// Such a request is signed as a plain message, so previewing it as a permit
 		// would describe an authorization that is not the one being signed.
