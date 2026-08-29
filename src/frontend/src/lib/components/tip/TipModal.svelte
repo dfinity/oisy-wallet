@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { onMount, setContext } from 'svelte';
 	import type { MyTip } from '$declarations/backend/backend.did';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -22,7 +22,8 @@
 		newTipDraft,
 		recoverTipLink,
 		reserveTip,
-		type TipDraft
+		type TipDraft,
+		tipRateLimit
 	} from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -34,6 +35,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { tippableTokens } from '$lib/utils/tip.utils';
@@ -72,6 +74,17 @@
 	// can act on, and it is already the vocabulary of the form.
 	const expiryLabel = (ms: number): string =>
 		TIP_EXPIRY_OPTIONS.find((option) => option.ms === ms)?.labelKey ?? `${ms}ms`;
+
+	// The one thing worth saying about a rate limit: how long the window is. Three
+	// surfaces on this screen can meet one, and they should not each phrase the
+	// wait their own way.
+	const rateLimitedMessage = (limit: { windowSeconds: bigint }): string =>
+		replacePlaceholders($i18n.tip.text.rate_limited, {
+			$duration: secondsToDuration({
+				seconds: limit.windowSeconds,
+				i18n: $i18n.temporal.seconds_to_duration
+			})
+		});
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
@@ -129,13 +142,20 @@
 			// linger claiming to be live.
 			goToStep(WizardStepsTip.HISTORY);
 		} catch (err: unknown) {
+			const limit = tipRateLimit(err);
+
 			trackTip({
 				step: 'cancel',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				symbol: selectedToken?.symbol
+				symbol: selectedToken?.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
 			});
-			toastsError({ msg: { text: $i18n.tip.text.cancel_failed }, err });
+			toastsError(
+				nonNullish(limit)
+					? { msg: { text: rateLimitedMessage(limit) } }
+					: { msg: { text: $i18n.tip.text.cancel_failed }, err }
+			);
 		} finally {
 			cancelling = false;
 		}
@@ -177,8 +197,27 @@
 			// stored code, and no amount of retrying will conjure one.
 			linkMessage = isNullish(recovered) ? $i18n.tip.text.link_unavailable : undefined;
 			link = recovered;
-		} catch (_: unknown) {
-			linkMessage = $i18n.tip.text.link_recovery_failed;
+		} catch (err: unknown) {
+			// The likeliest failure on this path, and until now the only one it could
+			// not name. Recovery derives a vetKey, whose per-caller ceiling is
+			// deliberately low, so a sender walking back through several old tips can
+			// reach it without doing anything wrong — and trying again is the one
+			// piece of advice that cannot work until the window passes.
+			const limit = tipRateLimit(err);
+
+			linkMessage = nonNullish(limit)
+				? rateLimitedMessage(limit)
+				: $i18n.tip.text.link_recovery_failed;
+
+			// The reopen itself was already reported as a plain step. This is the
+			// separate fact that it did not produce a link.
+			trackTip({
+				step: 'reopen',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				symbol: selectedToken?.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
+			});
 		}
 	};
 
@@ -243,17 +282,28 @@
 			// not stay up with skeletons that will never resolve.
 			goToStep(WizardStepsTip.CREATE);
 
+			// A rate limit is the one failure where the usual advice is wrong: every
+			// other reason here is worth retrying immediately, and this one cannot
+			// succeed until the window passes. Reported as its own flag so the funnel
+			// can answer how often people are being turned away.
+			const limit = tipRateLimit(err);
+
 			trackTip({
 				step: 'create',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				expiry: expiryLabel(durationMs),
-				symbol: selectedToken?.symbol
+				symbol: selectedToken?.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
 			});
 
 			// Deliberately reassuring about the money: an approve either landed and is
 			// replaceable, or never happened. Either way nothing was transferred.
-			toastsError({ msg: { text: $i18n.tip.text.reserve_failed }, err });
+			toastsError(
+				nonNullish(limit)
+					? { msg: { text: rateLimitedMessage(limit) } }
+					: { msg: { text: $i18n.tip.text.reserve_failed }, err }
+			);
 		} finally {
 			busy = false;
 			generating = false;

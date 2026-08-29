@@ -2800,6 +2800,7 @@
 			"expires_at": "Claim before $date",
 			"done": "Done",
 			"generating_link": "Reserving your tip and building the link. This takes a few seconds.",
+			"recovering_link": "Recovering your link. This takes a few seconds.",
 			"link_not_saved": "Copy this link now. We could not save a copy for you, so this is the only time you will see it.",
 			"reserve_failed": "The tip could not be reserved. Nothing has left your wallet, so try again.",
 			"status_title": "Tip Status",
@@ -2855,7 +2856,9 @@
 			"message_too_long": "Keep the message to $max characters or fewer.",
 			"learn_how_it_works": "Learn how it works",
 			"view_history": "Past tips",
-			"get_started": "Get Started"
+			"get_started": "Get Started",
+			"rate_limited": "You have done that a few times in quick succession. Wait about $duration and it will work again.",
+			"rate_limited_title": "Slow down a moment"
 		},
 		"alt": {
 			"intro_illustration": "A tip QR code being scanned",
