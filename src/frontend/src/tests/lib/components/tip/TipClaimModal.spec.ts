@@ -26,11 +26,20 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
 	const { readable } = await import('svelte/store');
 
+	const { mockIcrcCustomToken } = await import('$tests/mocks/icrc-custom-tokens.mock');
+	// `TokenId` is a branded symbol, so a bare `Symbol()` does not satisfy it.
+	const { parseTokenId } = await import('$lib/validation/token.validation');
+
+	// Built from the shared fixture rather than written out field by field: the
+	// partial mock is type-checked against the real `IcrcCustomToken`, so a
+	// hand-rolled object drifts out of shape the moment a field is added — which
+	// is what made `npm run test` fail here before `vitest` could run at all.
 	return {
 		...actual,
 		icrcTokens: readable([
 			{
-				id: Symbol('ckTest'),
+				...mockIcrcCustomToken,
+				id: parseTokenId('ckTest'),
 				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
 				enabled: false,
 				symbol: 'ckTEST'
