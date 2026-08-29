@@ -2363,6 +2363,7 @@ interface I18nTip {
 		learn_how_it_works: string;
 		view_history: string;
 		get_started: string;
+		rate_limited: string;
 	};
 	alt: {
 		intro_illustration: string;

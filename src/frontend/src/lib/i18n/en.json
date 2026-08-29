@@ -2833,7 +2833,8 @@
 			"message_too_long": "Keep the message to $max characters or fewer.",
 			"learn_how_it_works": "Learn how it works",
 			"view_history": "Past tips",
-			"get_started": "Get Started"
+			"get_started": "Get Started",
+			"rate_limited": "You have done that a few times in quick succession. Wait about $duration and it will work again."
 		},
 		"alt": {
 			"intro_illustration": "A tip QR code being scanned",
