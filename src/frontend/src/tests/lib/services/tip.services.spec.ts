@@ -8,7 +8,8 @@ import {
 	newTipDraft,
 	parseClaimCodeFromFragment,
 	parseTipIdFromFragment,
-	reserveTip
+	reserveTip,
+	tipRateLimit
 } from '$lib/services/tip.services';
 import * as tipVetkeys from '$lib/services/tip.vetkeys';
 import * as consoleUtils from '$lib/utils/console.utils';
@@ -139,6 +140,24 @@ describe('tip.services', () => {
 			const [[, detail]] = errorSpy.mock.calls;
 
 			expect((detail as { reason: string }).reason).toBe('agent exploded');
+		});
+	});
+
+	describe('tipRateLimit', () => {
+		it('reads the ceiling and the window out of the canister error', () => {
+			// Being turned away used to look exactly like the call failing, so every
+			// screen said "try again" — the one thing that cannot work while the
+			// limit is still in force.
+			expect(tipRateLimit({ RateLimited: { max_calls: 5, window_ns: 60_000_000_000n } })).toEqual({
+				maxCalls: 5,
+				windowSeconds: 60n
+			});
+		});
+
+		it('is undefined for any other failure', () => {
+			expect(tipRateLimit({ Uncovered: null })).toBeUndefined();
+			expect(tipRateLimit(new Error('agent exploded'))).toBeUndefined();
+			expect(tipRateLimit(undefined)).toBeUndefined();
 		});
 	});
 
