@@ -165,42 +165,48 @@ profile.
 Measured per branch, because that is what CI does per PR — not from the top of
 the stack, which hides everything the lower branches are missing.
 
-| #   | Branch                         | Files | lint | check | `npm run test`   |
-| --- | ------------------------------ | ----- | ---- | ----- | ---------------- |
-| 1   | `feat/tips-1-backend`          | 31    | ok   | ok    | ok               |
-| 2   | `feat/tips-2-service`          | 10    | ok   | ok    | ok               |
-| 3   | `feat/tips-3-sender-ui`        | 42    | ok   | ok    | ok               |
-| 4   | `feat/tips-4-recipient-ui`     | 42    | ok   | ok    | **fails at tsc** |
-| 5   | `feat/tips-5-history`          | 27    | ok   | ok    | **fails at tsc** |
-| 6   | `feat/tips-6-reserved-balance` | 33    | ok   | ok    | **fails at tsc** |
-| 7   | `feat/tips-7-enable`           | 1     | ok   | ok    | **fails at tsc** |
+| #   | Branch                         | Files | lint | check | `npm run test` |
+| --- | ------------------------------ | ----- | ---- | ----- | -------------- |
+| 1   | `feat/tips-1-backend`          | 31    | ok   | ok    | ok             |
+| 2   | `feat/tips-2-service`          | 10    | ok   | ok    | ok             |
+| 3   | `feat/tips-3-sender-ui`        | 42    | ok   | ok    | ok             |
+| 4   | `feat/tips-4-recipient-ui`     | 42    | ok   | ok    | ok             |
+| 5   | `feat/tips-5-history`          | 27    | ok   | ok    | ok             |
+| 6   | `feat/tips-6-reserved-balance` | 33    | ok   | ok    | ok             |
+| 7   | `feat/tips-7-enable`           | 1     | ok   | ok    | ok             |
 
 Sizes are the three-dot diff against each branch's parent — what GitHub shows.
+For branch 1 that parent is `origin/main`, not the local `main`, which is 21
+commits behind. A `main` **tag** also exists in this repo, so bare `main` is an
+ambiguous refname here and every measurement above spells the ref out.
 
-### 1. Three spec type errors (blocks PRs 4-7)
+### ~~1. Three spec type errors (blocks PRs 4-7)~~ — fixed
 
-`npm run test` is `tsc --project tsconfig.spec.json --noEmit && vitest`, so the
-type error stops the suite before a single test runs. CI goes red having
-executed nothing.
+`npm run test` is `tsc --project tsconfig.spec.json --noEmit && vitest`, so a
+type error stopped the suite before a single test ran and CI went red having
+executed nothing. Each was fixed on its owning branch and cascaded; `tsc` now
+passes on all seven.
 
 - `TipClaimModal.spec.ts` — `vi.mock` overload on the `icrc.derived` partial mock — **PR 4**
 - `tip-status.utils.spec.ts` — fixture missing `last_claim_failure` — **PR 5**
 - `Menu.spec.ts` — `vi.mock(import('$env/tips.env'))` returns `boolean` where the module's literal type is `false` — **PR 6**
 
-The third has a proven fix already in the tree: `LoaderTips.spec.ts` uses the
+The third took the fix already proven in the tree: `LoaderTips.spec.ts` uses the
 string form of `vi.mock`, which never enters the typed-module overload.
 
-### 2. Merge `main` (blocks everything)
+### ~~2. Merge `main` (blocks everything)~~ — done
 
-Merge base is `883f2c69d` (24 Aug); main has moved ~70 commits. Four files
-conflict, all stable-memory: `state/memory.rs`, `state/mod.rs`, `types/maps.rs`,
-`types/storable.rs`.
+Merge base was `883f2c69d` (24 Aug); main had moved ~70 commits. Four files
+conflicted, all stable-memory: `state/memory.rs`, `state/mod.rs`, `types/maps.rs`,
+`types/storable.rs`. Resolved on branch 1 and cascaded; `origin/main` is now an
+ancestor of every branch in the stack.
 
 The dangerous one is settled: main took `MemoryId::new(20)` for
 `CONTACT_IMAGE_MEMORY_ID` while this branch was away, and tips had the same id.
 Two structures on one region decode into each other's data. Tips moved to 21-26
-(contacts is live on mainnet, tips is not). The remaining three conflicts are
-where main's contact-image work meets ours and have not been attempted yet.
+(contacts is live on mainnet, tips is not), leaving ids 0-26 contiguous with no
+duplicates. `storable.rs` was reconstructed by hand after checking that neither
+side had _removed_ lines — the conflict was two additions, not a rewrite.
 
 ### 3. `build.backend.args.sh` needs its own PR
 
@@ -210,8 +216,8 @@ reviewed change rather than riding in with tips.
 
 ### Order
 
-1. Fix the three spec type errors, each on its owning branch, cascade.
-2. Merge `main` into branch 1, resolve, cascade, re-gate every branch.
+1. ~~Fix the three spec type errors, each on its owning branch, cascade.~~ Done.
+2. ~~Merge `main` into branch 1, resolve, cascade, re-gate every branch.~~ Done.
 3. Open PR 1 first — 31 files, the heaviest review, and provably untouched by UI
    testing: its diff is `src/backend`, `src/shared`, `src/declarations` plus
    `.gitignore`, the spec doc and `test.backend.sh`.
@@ -219,6 +225,9 @@ reviewed change rather than riding in with tips.
    unresolved ICP approve failure would be fixed, and there is no force-push
    here — once pushed, every correction is a visible extra commit.
 5. Separate PR for the deploy script.
+
+Steps 1 and 2 are what the stack was waiting on; what remains is a decision
+about when to start pushing, not more work on the branches.
 
 ## be1 is pinned to the old memory ids
 
@@ -342,15 +351,38 @@ dfx parse the interface.
 
 ## Open decisions
 
-Answers change what gets built; none of them block the rest.
+**All five were answered on 29 Aug 2026.** Four confirmed the standing default
+and needed no code; the fifth did. Kept here rather than deleted so a reviewer
+asking "was this considered?" gets an answer instead of silence.
 
-| Question                                                                                                                                                          | Default if nobody answers                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `Cancelled` is a fifth status. Fold it into the Expired group, give it its own, or hide it?                                                                       | folded into Expired, row keeps its own label    |
-| Should the four History groups also appear on the wallet home screen, or only inside the tips modal?                                                              | modal only; the home screen gets just the badge |
-| Apply the II delegation guard to `claim_tip` too? It would mean turning `cancel_tip(text)` into a record.                                                         | sender-side endpoints only                      |
-| Raise the vetKey `caller_hour` (10) and global (100/hour) tiers? They are real cost ceilings at ~26B cycles a derivation, and personal notes shares the exposure. | left alone, needs whoever sized them            |
-| Reject a self-claim (spec decision 15)? Verified end to end that a self-claim currently succeeds.                                                                 | not implemented; owner's call                   |
+| Question                                                                                                                                                          | Answer                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `Cancelled` is a fifth status. Fold it into the Expired group, give it its own, or hide it?                                                                       | **Confirmed as built.** Folded into Expired; the row keeps its own label.    |
+| Should the four History groups also appear on the wallet home screen, or only inside the tips modal?                                                              | **Confirmed as built.** Modal only; the home screen gets just the badge.     |
+| Apply the II delegation guard to `claim_tip` too? It would mean turning `cancel_tip(text)` into a record.                                                         | **Confirmed as built.** Sender-side endpoints only; no candid change.        |
+| Raise the vetKey `caller_hour` (10) and global (100/hour) tiers? They are real cost ceilings at ~26B cycles a derivation, and personal notes shares the exposure. | **Tiers left alone, but the limit is no longer invisible** — see below.      |
+| Reject a self-claim (spec decision 15)? Verified end to end that a self-claim currently succeeds.                                                                 | **Confirmed as built.** Self-claim stays allowed; it is also a testing path. |
+
+### What the rate-limit answer required
+
+Leaving the tiers as they are only works if meeting one is legible, and it was
+not: a limit surfaced as an ordinary failure whose copy said "try again" — the
+one action that cannot work until the window passes. Two things now happen
+wherever a tip call can be turned away.
+
+`tipRateLimit(err)` reads `max_calls` and `window_ns` off `TipError::RateLimited`
+and converts the window to seconds, so every surface can say _how long_ rather
+than "too many requests". Wired into all five: create and cancel (toast), link
+recovery (in place of `link_recovery_failed`, and it is the likeliest one to be
+met — recovery derives a vetKey), and the claimer's read and payout, where it
+outranks the other failure copy because "ask the sender for a new link" sends
+someone to fix a link that is fine.
+
+`trackTip` gained a `rateLimited` flag emitting `rate_limited: 'true'`, kept
+separate from `outcome` so "how often are we turning people away" is one query
+across every step rather than five. Until this, a limit was indistinguishable
+from a generic failure in Plausible, which is why nobody could size the tiers
+from evidence — that is now collectable.
 
 ## Where be1 stands
 
