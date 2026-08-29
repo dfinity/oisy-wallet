@@ -492,7 +492,8 @@ describe('sol-wallet.scheduler', () => {
 		it('should load backend stored transactions and include them in the response', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				summary: { kind: 'send' as const }
 			}));
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
@@ -508,6 +509,35 @@ describe('sol-wallet.scheduler', () => {
 			const store = scheduler['store'].transactions;
 			for (const tx of storedTransactions) {
 				expect(store[tx.id]).toEqual({ data: tx, certified: false });
+			}
+		});
+
+		// A stored record without a summary predates the redesign; the worker refetches instead of
+		// short-circuiting, and the re-derived record replaces it in the worker store.
+		it('should re-derive stored records that predate the summary', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			await scheduler.trigger(startData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
+			);
+
+			const store = scheduler['store'].transactions;
+
+			for (const tx of storedTransactions) {
+				expect(store[tx.id]).toBeUndefined();
 			}
 		});
 

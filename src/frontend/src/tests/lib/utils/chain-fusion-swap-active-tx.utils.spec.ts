@@ -11,16 +11,26 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { SwapProvider } from '$lib/types/swap';
 import {
 	buildChainFusionSwapTrackingMetadata,
+	chainFusionBtcMintOutcomeError,
+	chainFusionBtcMintOutcomeToStatus,
+	chainFusionBtcWithdrawalStatusError,
 	chainFusionMintOutcomeError,
 	chainFusionMintOutcomeToStatus,
 	chainFusionWithdrawalStatusError,
 	isChainFusionActiveUserTransaction,
+	isChainFusionBtcMintDirection,
+	isChainFusionBtcWithdrawalDirection,
 	isChainFusionEthWithdrawalDirection,
 	isChainFusionMintDirection,
+	isSameUtxoTxid,
+	toChainFusionBtcMintOutcome,
+	toChainFusionBtcWithdrawalLearnedRefs,
+	toChainFusionBtcWithdrawalStatus,
 	toChainFusionData,
 	toChainFusionDepositLogTopics,
 	toChainFusionDisplayRefs,
@@ -28,14 +38,21 @@ import {
 	toChainFusionExternalRefsMap,
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
+	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 
 const CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
+
+// The transaction the ckBTC minter sends on the user's behalf, in the internal byte
+// order the minter reports it in.
+const MINTER_TXID = Uint8Array.from([4, 5, 6]);
 
 const ckEthToken = {
 	...mockValidIcCkToken,
@@ -120,6 +137,21 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 		it('should exclude ckBTC → BTC from the Ethereum withdrawal family', () => {
 			expect(isChainFusionEthWithdrawalDirection({ CkBtcToBtc: null })).toBeFalsy();
 			expect(isChainFusionMintDirection({ CkBtcToBtc: null })).toBeFalsy();
+		});
+
+		// The mutating branch — it must not be reachable from any other direction.
+		it('should classify the ckBTC mint direction alone', () => {
+			expect(isChainFusionBtcMintDirection({ BtcToCkBtc: null })).toBeTruthy();
+
+			expect(isChainFusionBtcMintDirection({ CkBtcToBtc: null })).toBeFalsy();
+			expect(isChainFusionBtcMintDirection({ EthToCkEth: null })).toBeFalsy();
+		});
+
+		it('should classify the ckBTC withdrawal direction alone', () => {
+			expect(isChainFusionBtcWithdrawalDirection({ CkBtcToBtc: null })).toBeTruthy();
+
+			expect(isChainFusionBtcWithdrawalDirection({ BtcToCkBtc: null })).toBeFalsy();
+			expect(isChainFusionBtcWithdrawalDirection({ CkEthToEth: null })).toBeFalsy();
 		});
 	});
 
@@ -396,6 +428,173 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 				null,
 				encodePrincipalToEthAddress(mockPrincipal)
 			]);
+		});
+	});
+
+	describe('toChainFusionBtcWithdrawalStatus', () => {
+		it('should succeed once the Bitcoin transaction is confirmed', () => {
+			expect(toChainFusionBtcWithdrawalStatus({ Confirmed: { txid: MINTER_TXID } })).toStrictEqual({
+				Succeeded: null
+			});
+		});
+
+		it.each<{ name: string; status: CkBtcMinterDid.RetrieveBtcStatusV2 }>([
+			{ name: 'AmountTooLow', status: { AmountTooLow: null } },
+			{
+				name: 'Reimbursed',
+				status: {
+					Reimbursed: {
+						account: { owner: mockPrincipal, subaccount: [] },
+						mint_block_index: 1n,
+						amount: 2n,
+						reason: { CallFailed: null }
+					}
+				}
+			},
+			// Terminal on purpose: the verdict is settled, and unlike the transaction list —
+			// which keeps the burn pending until the refund lands — this row is about whether
+			// the conversion is over.
+			{
+				name: 'WillReimburse',
+				status: {
+					WillReimburse: {
+						account: { owner: mockPrincipal, subaccount: [] },
+						amount: 2n,
+						reason: { CallFailed: null }
+					}
+				}
+			}
+		])('should fail on $name', ({ status }) => {
+			expect(toChainFusionBtcWithdrawalStatus(status)).toStrictEqual({ Failed: null });
+		});
+
+		it.each<{ name: string; status: CkBtcMinterDid.RetrieveBtcStatusV2 }>([
+			{ name: 'Pending', status: { Pending: null } },
+			{ name: 'Signing', status: { Signing: null } },
+			{ name: 'Sending', status: { Sending: { txid: MINTER_TXID } } },
+			{ name: 'Submitted', status: { Submitted: { txid: MINTER_TXID } } }
+		])('should keep the row executing on $name', ({ status }) => {
+			expect(toChainFusionBtcWithdrawalStatus(status)).toStrictEqual({ Executing: null });
+		});
+
+		// The ckBTC counterpart of the ckETH minter's `NotFound`: reported both before the
+		// minter indexes the burn and after it prunes an old one.
+		it('should no-op on Unknown rather than fail', () => {
+			expect(toChainFusionBtcWithdrawalStatus({ Unknown: null })).toBeUndefined();
+		});
+	});
+
+	describe('chainFusionBtcWithdrawalStatusError', () => {
+		it('should describe a reimbursed and a too-low withdrawal', () => {
+			expect(
+				chainFusionBtcWithdrawalStatusError({
+					WillReimburse: {
+						account: { owner: mockPrincipal, subaccount: [] },
+						amount: 2n,
+						reason: { CallFailed: null }
+					}
+				})
+			).toBeDefined();
+
+			expect(chainFusionBtcWithdrawalStatusError({ AmountTooLow: null })).toBeDefined();
+		});
+
+		it('should carry no error for a success or an in-flight status', () => {
+			expect(
+				chainFusionBtcWithdrawalStatusError({ Confirmed: { txid: MINTER_TXID } })
+			).toBeUndefined();
+
+			expect(chainFusionBtcWithdrawalStatusError({ Unknown: null })).toBeUndefined();
+		});
+	});
+
+	describe('toChainFusionBtcWithdrawalLearnedRefs', () => {
+		it.each<{ name: string; status: CkBtcMinterDid.RetrieveBtcStatusV2 }>([
+			{ name: 'Submitted', status: { Submitted: { txid: MINTER_TXID } } },
+			{ name: 'Sending', status: { Sending: { txid: MINTER_TXID } } },
+			{ name: 'Confirmed', status: { Confirmed: { txid: MINTER_TXID } } }
+		])('should learn the payout transaction id from $name', ({ status }) => {
+			expect(toChainFusionBtcWithdrawalLearnedRefs(status)).toStrictEqual({
+				chain_fusion_btc_tx: utxoTxIdToString(MINTER_TXID)
+			});
+		});
+
+		it('should learn nothing before the minter has built a transaction', () => {
+			expect(toChainFusionBtcWithdrawalLearnedRefs({ Pending: null })).toStrictEqual({});
+			expect(toChainFusionBtcWithdrawalLearnedRefs({ Unknown: null })).toStrictEqual({});
+		});
+	});
+
+	describe('chainFusionBtcMintOutcomeToStatus', () => {
+		it.each<{ outcome: ChainFusionBtcMintOutcome; expected: ActiveUserTransactionStatus }>([
+			{ outcome: 'minted', expected: { Succeeded: null } },
+			{ outcome: 'rejected', expected: { Failed: null } },
+			{ outcome: 'unseen', expected: { Executing: null } },
+			{ outcome: 'awaitingConfirmations', expected: { Executing: null } },
+			{ outcome: 'awaitingMint', expected: { Executing: null } }
+		])('should map $outcome', ({ outcome, expected }) => {
+			expect(chainFusionBtcMintOutcomeToStatus(outcome)).toStrictEqual(expected);
+		});
+
+		it('should describe only the failing outcome', () => {
+			expect(chainFusionBtcMintOutcomeError('rejected')).toBeDefined();
+
+			expect(chainFusionBtcMintOutcomeError('minted')).toBeUndefined();
+			expect(chainFusionBtcMintOutcomeError('awaitingMint')).toBeUndefined();
+		});
+	});
+
+	describe('toChainFusionBtcMintOutcome', () => {
+		const otherUtxo: CkBtcMinterDid.Utxo = {
+			...mockUtxo,
+			outpoint: { txid: Uint8Array.from([9, 9, 9]), vout: 0 }
+		};
+
+		const txid = utxoTxIdToString(mockUtxo.outpoint.txid);
+
+		it('should read a mint of this deposit', () => {
+			expect(
+				toChainFusionBtcMintOutcome({
+					utxosStatuses: [
+						{ Minted: { minted_amount: 1n, block_index: 2n, utxo: mockUtxo } },
+						{ Tainted: otherUtxo }
+					],
+					txid
+				})
+			).toBe('minted');
+		});
+
+		it.each<{ name: string; utxosStatuses: CkBtcMinterDid.UtxoStatus[] }>([
+			{ name: 'Tainted', utxosStatuses: [{ Tainted: mockUtxo }] },
+			{ name: 'ValueTooSmall', utxosStatuses: [{ ValueTooSmall: mockUtxo }] }
+		])('should reject a $name deposit', ({ utxosStatuses }) => {
+			expect(toChainFusionBtcMintOutcome({ utxosStatuses, txid })).toBe('rejected');
+		});
+
+		// The check passed but the ledger was unavailable, so a later `update_balance` mints
+		// it — not a verdict either way.
+		it('should keep a checked deposit waiting for its mint', () => {
+			expect(toChainFusionBtcMintOutcome({ utxosStatuses: [{ Checked: mockUtxo }], txid })).toBe(
+				'awaitingMint'
+			);
+		});
+
+		it('should read no verdict from a response about other deposits', () => {
+			expect(
+				toChainFusionBtcMintOutcome({
+					utxosStatuses: [{ Minted: { minted_amount: 1n, block_index: 2n, utxo: otherUtxo } }],
+					txid
+				})
+			).toBeUndefined();
+
+			expect(toChainFusionBtcMintOutcome({ utxosStatuses: [], txid })).toBeUndefined();
+		});
+
+		// The row snapshots the human-readable txid the signer returned; the minter reports
+		// the internal byte order.
+		it('should match the row txid against the reversed on-chain one', () => {
+			expect(isSameUtxoTxid({ utxo: mockUtxo, txid: txid.toUpperCase() })).toBeTruthy();
+			expect(isSameUtxoTxid({ utxo: otherUtxo, txid })).toBeFalsy();
 		});
 	});
 

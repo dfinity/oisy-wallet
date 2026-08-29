@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import {
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -18,6 +22,8 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
+	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
+
 	// The Bitcoin counterpart of `SwapFees`, which cannot serve this form: it reads the IC
 	// token fee context, which only the ICP-source wizard sets. Same rule as there — every
 	// fee the quote priced, so the total is the user's whole cost of the conversion.
@@ -28,6 +34,15 @@
 	);
 
 	let totalFee = $derived(fees?.reduce((acc, { fee }) => acc + fee, ZERO));
+
+	// A NEAR Intents quote already prices the provider's fees into the receive amount, so
+	// the only cost paid on top is the Bitcoin network fee of the deposit; same shape as
+	// the network fee the SOL and EVM wizards show for this provider.
+	let satoshisFee = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+			? $utxosFeeStore?.utxosFee?.feeSatoshis
+			: undefined
+	);
 </script>
 
 {#if nonNullish(fees) && nonNullish(totalFee) && nonNullish($sourceToken)}
@@ -58,4 +73,14 @@
 			{/each}
 		{/snippet}
 	</ModalExpandableValues>
+{:else if nonNullish(satoshisFee) && nonNullish($sourceToken)}
+	<FeeDisplay
+		decimals={$sourceToken.decimals}
+		exchangeRate={$sourceTokenExchangeRate}
+		feeAmount={satoshisFee}
+		symbol={$sourceToken.symbol}
+		zeroAmountLabel={$i18n.fee.text.zero_fee}
+	>
+		{#snippet label()}{$i18n.fee.text.network_fee}{/snippet}
+	</FeeDisplay>
 {/if}

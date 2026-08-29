@@ -1,4 +1,5 @@
-import { maxBigInt } from '$lib/utils/bigint.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 
 describe('bigint.utils', () => {
 	describe('maxBigInt', () => {
@@ -40,6 +41,14 @@ describe('bigint.utils', () => {
 			expect(maxBigInt(null, undefined)).toBeUndefined();
 
 			expect(maxBigInt(undefined, null)).toBeNull();
+		});
+	});
+
+	describe('absBigInt', () => {
+		it('should strip the sign and keep the magnitude', () => {
+			expect(absBigInt(-5n)).toBe(5n);
+			expect(absBigInt(5n)).toBe(5n);
+			expect(absBigInt(ZERO)).toBe(ZERO);
 		});
 	});
 });

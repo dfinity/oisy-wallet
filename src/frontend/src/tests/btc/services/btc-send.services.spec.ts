@@ -122,6 +122,10 @@ describe('btc-send.services', () => {
 	});
 
 	describe('sendBtc', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should call all required functions', async () => {
 			const addPendingBtcTransactionSpy = vi
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
@@ -173,6 +177,41 @@ describe('btc-send.services', () => {
 			const res = sendBtc(defaultParams);
 
 			await expect(res).rejects.toThrow(error);
+		});
+
+		it('should hand the txid over on broadcast, before the pending-transaction bookkeeping', async () => {
+			const addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+			vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+
+			const onBroadcast = vi.fn(() => {
+				expect(addPendingBtcTransactionSpy).not.toHaveBeenCalled();
+			});
+
+			await sendBtc({ ...defaultParams, onBroadcast });
+
+			expect(onBroadcast).toHaveBeenCalledExactlyOnceWith({ txid });
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
+		});
+
+		// The bookkeeping protects this flow's own invariants — the spent UTXOs are
+		// recorded as pending — so a failing callback must not derail it.
+		it('should not let a throwing onBroadcast skip the bookkeeping', async () => {
+			const addPendingBtcTransactionSpy = vi
+				.spyOn(backendAPI, 'addPendingBtcTransaction')
+				.mockResolvedValue({ response: true });
+			vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+
+			const result = await sendBtc({
+				...defaultParams,
+				onBroadcast: () => {
+					throw error;
+				}
+			});
+
+			expect(result).toBe(txid);
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
 		});
 
 		it('should throw if backend addPendingBtcTransaction throws', async () => {

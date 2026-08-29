@@ -119,13 +119,9 @@
 	let destinationAddress = $derived(isBitcoinDestination ? $btcAddressMainnet : $ethAddress);
 
 	// These close the modal once the funds have left the wallet and finish settling through
-	// the Active User Transactions store. A ckBTC → BTC withdrawal is deliberately excluded:
-	// it settles in the background too, but nothing is tracking it until the Bitcoin
-	// family's AUT poller lands, and promising a row that does not exist is worse than
-	// showing the plain stepper.
-	let isActiveTransactionSwap = $derived(
-		isOneSecProvider || (isChainFusionProvider && !isBitcoinDestination)
-	);
+	// the Active User Transactions store — every ck withdrawal included, whichever minter
+	// pays it out.
+	let isActiveTransactionSwap = $derived(isOneSecProvider || isChainFusionProvider);
 
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
