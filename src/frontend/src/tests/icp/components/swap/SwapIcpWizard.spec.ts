@@ -524,8 +524,10 @@ describe('SwapIcpWizard', () => {
 				expect(toasts.toastsError).toHaveBeenCalled();
 			});
 
-			// Nothing polls a ckBTC withdrawal yet, so promising a background row would be a lie.
-			it('reports the conversion as succeeded rather than submitted', async () => {
+			// The ckBTC minter settles the withdrawal in the background, tracked by the row the
+			// execution persists — so the foreground reports the burn as submitted, as every
+			// other ck withdrawal does.
+			it('reports the conversion as submitted rather than succeeded', async () => {
 				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
 
 				setChainFusionBtcContext();
@@ -534,13 +536,13 @@ describe('SwapIcpWizard', () => {
 
 				expect(trackEventSpy).toHaveBeenCalledWith(
 					expect.objectContaining({
-						name: TRACK_COUNT_SWAP_SUCCESS,
+						name: TRACK_COUNT_SWAP_SUBMITTED,
 						metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
 					})
 				);
 
 				expect(trackEventSpy).not.toHaveBeenCalledWith(
-					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 				);
 			});
 		});

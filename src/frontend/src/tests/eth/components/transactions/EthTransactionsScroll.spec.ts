@@ -2,11 +2,13 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import EthTransactionsScroll from '$eth/components/transactions/EthTransactionsScroll.svelte';
+import * as erc20UserTransactionsServices from '$eth/services/erc20-user-transactions.services';
 import * as ethUserTransactionsServices from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import {
 	IntersectionObserverActive,
@@ -30,6 +32,7 @@ describe('EthTransactionsScroll', () => {
 	const oldestLoadedBlockNumber = 100;
 
 	let loadNextSpy: MockInstance;
+	let loadNextErc20Spy: MockInstance;
 
 	const setTransactions = ({ tokenId }: { tokenId: TokenId }) => {
 		ethTransactionsStore.set({
@@ -58,6 +61,10 @@ describe('EthTransactionsScroll', () => {
 
 		loadNextSpy = vi
 			.spyOn(ethUserTransactionsServices, 'loadNextEthUserTransactions')
+			.mockResolvedValue({ hasMore: true });
+
+		loadNextErc20Spy = vi
+			.spyOn(erc20UserTransactionsServices, 'loadNextErc20UserTransactions')
 			.mockResolvedValue({ hasMore: true });
 
 		setTransactions({ tokenId: mockToken.id });
@@ -102,8 +109,7 @@ describe('EthTransactionsScroll', () => {
 		expect(loadNextSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not load anything for a token whose history is not the chain history', () => {
-		// Older ERC20 transfers come from `tokentx`, which this path does not query.
+	it('should page an ERC20 token through its own loader', () => {
 		token.set(USDC_TOKEN);
 
 		setTransactions({ tokenId: USDC_TOKEN.id });
@@ -111,5 +117,27 @@ describe('EthTransactionsScroll', () => {
 		render(EthTransactionsScroll, { token: USDC_TOKEN, children: mockSnippet });
 
 		expect(loadNextSpy).not.toHaveBeenCalled();
+
+		expect(loadNextErc20Spy).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
+				transactionTokenId: { Erc20: [USDC_TOKEN.address, USDC_TOKEN.network.chainId] },
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: USDC_TOKEN.network.id,
+				oldestLoadedBlockNumber
+			})
+		);
+	});
+
+	it('should not load anything for a token whose history is not the chain history', () => {
+		// ERC-721 history comes from `tokennfttx`, which neither of these paths queries.
+		token.set(AZUKI_ELEMENTAL_BEANS_TOKEN);
+
+		setTransactions({ tokenId: AZUKI_ELEMENTAL_BEANS_TOKEN.id });
+
+		render(EthTransactionsScroll, { token: AZUKI_ELEMENTAL_BEANS_TOKEN, children: mockSnippet });
+
+		expect(loadNextSpy).not.toHaveBeenCalled();
+		expect(loadNextErc20Spy).not.toHaveBeenCalled();
 	});
 });

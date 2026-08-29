@@ -59,6 +59,15 @@ export const mockNearIntentsTokens: NearIntentsToken[] = [
 		price: 1.0,
 		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
 		contractAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+	},
+	{
+		assetId: 'nep141:btc.omft.near',
+		decimals: 8,
+		blockchain: 'btc',
+		symbol: 'BTC',
+		price: 65000.0,
+		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+		contractAddress: null
 	}
 ];
 
