@@ -7,13 +7,17 @@ import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapUserTransactionToTransaction } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -191,7 +195,120 @@ describe('eth-user-transactions.services', () => {
 		});
 	});
 
+	describe('capacity tracking', () => {
+		beforeEach(() => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+		});
+
+		it('should not flag a token below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN - 1)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should flag a token at the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
+		it('should clear the flag once the token drops back below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: 10n });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should clear the flag when the backend said nothing about it', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+	});
+
 	describe('loadNextEthUserTransactions', () => {
+		// The read cursor is a position in the stored list, so a trim at the per-token cap shifts every
+		// entry under it and pages start repeating rows we already hold. Asking again would spin.
+		it('should fall through to Etherscan when a cursor page repeats rows we already hold', async () => {
+			const stored = createMockBackendUserTransaction({
+				hash: '0xstored',
+				blockIndex: 50n,
+				timestamp: 500n
+			});
+
+			// Already in the store, so `append` will dedupe the page away.
+			ethTransactionsStore.append({
+				tokenId: mockTokenId,
+				transactions: [{ data: mapUserTransactionToTransaction(stored), certified: false }]
+			});
+
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({ overrides: { transactions: [stored], nextStart: 32n } })
+			);
+
+			mockTransactionsProvider.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 42n,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockTransactionsProvider).toHaveBeenCalledOnce();
+
+			// The cursor is cleared, so the next intersection does not ask the canister again.
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
+		});
+
+		// An empty page is the shape a cursor invalidated by eviction comes back as, and eviction only
+		// happens because the token is at capacity. Dropping `totalStored` there re-enabled the very
+		// saves this branch exists to skip.
+		it('should record the capacity signal even when the cursor page comes back empty', async () => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 5n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [],
+						totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 5n,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
 		// Case 1: Fresh user — backend empty, Etherscan has no older data
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({

@@ -25,6 +25,7 @@ import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
+	requiresStoredDerivationRefresh,
 	requiresStoredSplOwnerRefresh,
 	solBackendTokenId
 } from '$sol/utils/user-transactions.utils';
@@ -153,8 +154,10 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		const storedRefreshSignatures = new Set(
 			storedTransactions
-				.filter(({ data: transaction }) =>
-					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				.filter(
+					({ data: transaction }) =>
+						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
+						requiresStoredDerivationRefresh({ transaction })
 				)
 				.map(({ data: { signature } }) => String(signature))
 		);

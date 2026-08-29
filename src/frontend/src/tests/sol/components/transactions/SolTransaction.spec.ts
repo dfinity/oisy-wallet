@@ -14,7 +14,8 @@ describe('SolTransaction', () => {
 		const { container } = render(SolTransaction, {
 			props: {
 				transaction: { ...mockTrx, value: 123450000000000n, type: 'send' },
-				token: SOLANA_TOKEN
+				token: SOLANA_TOKEN,
+				showTokenAmount: true
 			}
 		});
 
@@ -36,7 +37,8 @@ describe('SolTransaction', () => {
 		const { container } = render(SolTransaction, {
 			props: {
 				transaction: { ...mockTrx, value: 123450000000000n, type: 'receive' },
-				token: SOLANA_TOKEN
+				token: SOLANA_TOKEN,
+				showTokenAmount: true
 			}
 		});
 

@@ -13,6 +13,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Amount } from '$lib/types/send';
+import { consoleError } from '$lib/utils/console.utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { invalidAmount } from '$lib/utils/input.utils';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -33,6 +34,11 @@ interface CommonBtcServiceParams {
 export type SendBtcParams = CommonBtcServiceParams & {
 	amount: Amount;
 	source: BtcAddress;
+	// Runs the moment the transaction is broadcast, ahead of the pending-transaction
+	// bookkeeping and the wallet refresh: the broadcast is irreversible from there, so
+	// a caller that must record it (e.g. as an active user transaction) cannot wait
+	// behind steps whose failure would swallow the txid.
+	onBroadcast?: (params: { txid: string }) => Promise<void> | void;
 };
 
 export type SignBtcParams = CommonBtcServiceParams & {
@@ -235,9 +241,19 @@ export const sendBtc = async ({
 	source: _source,
 	identity,
 	onProgress,
+	onBroadcast,
 	...rest
 }: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
+
+	// Best-effort by contract: the bookkeeping below protects this flow's own
+	// invariants (the spent UTXOs are recorded as pending), so a failing callback
+	// must not derail it.
+	try {
+		await onBroadcast?.({ txid });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
 	await addPendingBtcTransaction({
 		identity,

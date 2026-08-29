@@ -1,7 +1,10 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+import {
+	NEAR_INTENTS_BTC_SWAP_ENABLED,
+	NEAR_INTENTS_SWAP_ENABLED
+} from '$env/rest/near-intents.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -25,9 +28,10 @@ export const crossChainSwapNetworks: Readable<Network[]> = derived(
 		...$enabledEthereumNetworks,
 		...$enabledEvmNetworks,
 		...(NEAR_INTENTS_SWAP_ENABLED ? $enabledSolanaNetworks : []),
-		// Only Chain Fusion reaches Bitcoin, so the network has nothing to offer the swap
-		// filter without it. `crossChainSwapNetworksMainnets` drops the testnets below.
-		...(CHAIN_FUSION_SWAP_ENABLED ? $enabledBitcoinNetworks : [])
+		// Bitcoin only joins the swap filter when a provider reaches it: Chain Fusion
+		// (ck conversion) or NEAR Intents (bridging). `crossChainSwapNetworksMainnets`
+		// drops the testnets below.
+		...(CHAIN_FUSION_SWAP_ENABLED || NEAR_INTENTS_BTC_SWAP_ENABLED ? $enabledBitcoinNetworks : [])
 	]
 );
 

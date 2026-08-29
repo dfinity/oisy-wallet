@@ -15,6 +15,7 @@
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
+	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
 	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
@@ -123,9 +124,11 @@
 			: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
-	const createdAgo = $derived(
+	// Time since the last status change, not since creation: a settled swap
+	// should read "1m ago" when it just turned green, however long it ran.
+	const timeAgo = $derived(
 		formatNanosecondsToShortRelativeTime({
-			nanoseconds: tx.created_at_ns,
+			nanoseconds: activeUserTransactionTimestampNs(tx),
 			language: $currentLanguage
 		})
 	);
@@ -193,7 +196,7 @@
 
 		{#snippet descriptionEnd()}
 			<div class="ml-2">
-				{createdAgo}
+				{timeAgo}
 			</div>
 		{/snippet}
 	</LogoButton>
