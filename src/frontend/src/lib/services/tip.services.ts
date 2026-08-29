@@ -124,6 +124,37 @@ const approveRefusal = (err: unknown): string => {
 	return `${name} ${JSON.stringify(payload, (_, value) => (typeof value === 'bigint' ? `${value}` : value))}`;
 };
 
+/**
+ * The rate limit a tip call ran into, if that is why it failed.
+ *
+ * Every tips endpoint answers `TipError::RateLimited(RateLimitError)` carrying
+ * the ceiling it enforces and the window it enforces it over, and nothing on
+ * this side was reading it — so being turned away looked exactly like the call
+ * failing, and every screen said "try again", which is the one thing that
+ * cannot work while a limit is still in force.
+ *
+ * The vetKey derivation is the limit most likely to be met in ordinary use: it
+ * is metered at roughly 26 billion cycles a call, so its per-caller ceiling is
+ * deliberately low and a sender recovering several links in a row can reach it
+ * without doing anything wrong.
+ */
+export const tipRateLimit = (
+	err: unknown
+): { maxCalls: number; windowSeconds: bigint } | undefined => {
+	const limit = (err as { RateLimited?: { max_calls?: number; window_ns?: bigint } })?.RateLimited;
+
+	if (isNullish(limit) || isNullish(limit.max_calls) || isNullish(limit.window_ns)) {
+		return undefined;
+	}
+
+	return {
+		maxCalls: limit.max_calls,
+		// Nanoseconds are the canister's unit, not a unit anyone can be told to
+		// wait in.
+		windowSeconds: limit.window_ns / 1_000_000_000n
+	};
+};
+
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;
 
