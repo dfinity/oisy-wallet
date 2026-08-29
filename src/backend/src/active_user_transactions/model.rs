@@ -6,9 +6,9 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest,
-        GetActiveUserTransactionsResponse, UpdateActiveUserTransactionRequest,
-        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+        GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
+        MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
@@ -217,11 +217,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -229,27 +229,40 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_chain_fusion_pair(d)?;
+        }
+        ActiveUserTransactionData::OisyTrade(d) => {
+            require_valid_amount(&d.amount)?;
+            require_oisy_trade_pair(d)?;
         }
     }
     Ok(())
 }
 
-fn require_positive_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+/// An amount is a base-unit balance, so it is positive and fits the widest
+/// integer any supported chain uses. The upper bound is what makes the encoded
+/// size of a record provable: `Nat` is variable-length, so an unbounded amount
+/// would let a single record carry megabytes into permanent stable memory.
+fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
         return Err(ActiveUserTransactionError::InvalidData(
             "amount must be greater than zero".to_string(),
+        ));
+    }
+    if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "amount is too large".to_string(),
         ));
     }
     Ok(())
@@ -295,6 +308,24 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     } else {
         Err(ActiveUserTransactionError::InvalidData(
             "token pair does not match chain-fusion direction".to_string(),
+        ))
+    }
+}
+
+/// An OISY Trade pair is two ledger principals on the Internet Computer, so a
+/// row naming an EVM or Solana token is unsatisfiable by construction. `data` is
+/// immutable after creation, so such a row could never settle and would occupy
+/// one of the user's slots forever — reject it up front. Kinds only,
+/// deliberately: any ICRC ledger stays valid, so a newly listed pair needs no
+/// change here.
+fn require_oisy_trade_pair(data: &OisyTradeData) -> Result<(), ActiveUserTransactionError> {
+    let is_ic = |t: &TokenId| matches!(t, TokenId::Icrc(_) | TokenId::IcpNative);
+
+    if is_ic(&data.source_token) && is_ic(&data.dest_token) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "oisy-trade tokens must both be Internet Computer ledgers".to_string(),
         ))
     }
 }
@@ -354,8 +385,9 @@ mod tests {
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
             ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
             CreateActiveUserTransactionRequest, LiquidiumAction, LiquidiumData, NearIntentsData,
-            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         custom_token::ErcTokenId,
         token_id::TokenId,
@@ -452,6 +484,51 @@ mod tests {
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }
 
+    /// 2^256 - 1, the widest base-unit amount any supported chain can express.
+    const MAX_WIDTH_AMOUNT: &[u8] =
+        b"115792089237316195423570985008687907853269984665640564039457584007913129639935";
+    /// 2^256, one bit too wide.
+    const OVER_WIDTH_AMOUNT: &[u8] =
+        b"115792089237316195423570985008687907853269984665640564039457584007913129639936";
+
+    fn data_with_amount(amount: Nat) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::IcpNative,
+            dest_token: TokenId::EvmNative(1),
+            amount,
+        })
+    }
+
+    #[test]
+    fn max_width_amount_accepted() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(MAX_WIDTH_AMOUNT).unwrap());
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
+    fn oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(OVER_WIDTH_AMOUNT).unwrap());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).transactions.len(), 0);
+    }
+
+    /// A `Nat` is variable-length on the wire, so the payload an attacker can
+    /// attach is bounded only by the ingress message limit, not by 256 bits.
+    #[test]
+    fn far_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(&b"9".repeat(10_000)).unwrap());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).transactions.len(), 0);
+    }
+
     #[test]
     fn malformed_eth_address_rejected() {
         let (mut map, _mm) = setup();
@@ -542,6 +619,58 @@ mod tests {
         req.data = near_intents_data(0);
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    fn near_intents_btc_source_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::BtcNativeMainnet,
+            dest_token: TokenId::EvmNative(8453),
+            amount: Nat::from(amount),
+        })
+    }
+
+    fn near_intents_btc_dest_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::SolNativeMainnet,
+            dest_token: TokenId::BtcNativeMainnet,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn near_intents_btc_create_roundtrip() {
+        // The BTC-via-NEAR-Intents swap relies on the chain-agnostic variant
+        // accepting BTC token ids in either position with no extra validation;
+        // pin both directions so a validation change cannot break it silently.
+        for (id, data) in [
+            ("near-btc-src", near_intents_btc_source_data(250_000)),
+            ("near-btc-dst", near_intents_btc_dest_data(250_000)),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req(id);
+            req.data = data.clone();
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(listed[0].data, data);
+        }
+    }
+
+    #[test]
+    fn near_intents_btc_zero_amount_rejected() {
+        for data in [
+            near_intents_btc_source_data(0),
+            near_intents_btc_dest_data(0),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("near-btc-1");
+            req.data = data;
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
     }
 
     fn velora_data(amount: u64, mode: VeloraSwapMode) -> ActiveUserTransactionData {
@@ -670,6 +799,99 @@ mod tests {
             });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    fn oisy_trade_data(
+        amount: u64,
+        side: OisyTradeSide,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::OisyTrade(OisyTradeData {
+            side,
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn oisy_trade_create_roundtrip() {
+        // The ICP ledger reaches the wallet as `IcpNative` rather than `Icrc`,
+        // so both spellings of an IC leg must survive create — and the
+        // stable-memory read path — in either position. `side` fixes the
+        // base/quote orientation the token pair alone cannot express, and the
+        // recovery paths route on it, so both sides must survive too.
+        for (side, source_token, dest_token) in [
+            (OisyTradeSide::Sell, icrc(CKBTC_LEDGER), icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), icrc(CKBTC_LEDGER)),
+            (OisyTradeSide::Sell, TokenId::IcpNative, icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), TokenId::IcpNative),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("trade-1");
+            req.data = oisy_trade_data(
+                1_000_000,
+                side.clone(),
+                source_token.clone(),
+                dest_token.clone(),
+            );
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                oisy_trade_data(1_000_000, side, source_token, dest_token)
+            );
+        }
+    }
+
+    #[test]
+    fn oisy_trade_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("trade-1");
+        req.data = oisy_trade_data(
+            0,
+            OisyTradeSide::Sell,
+            icrc(CKBTC_LEDGER),
+            icrc(CKUSDC_LEDGER),
+        );
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn oisy_trade_non_ic_token_rejected() {
+        // OISY Trade pairs are ledger principals, so a non-IC leg in either
+        // position is unsatisfiable by construction — and `data` is immutable
+        // after creation, so the row could never settle.
+        let non_ic = [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ];
+
+        for token in non_ic {
+            for (source_token, dest_token) in [
+                (token.clone(), icrc(CKUSDC_LEDGER)),
+                (icrc(CKUSDC_LEDGER), token.clone()),
+            ] {
+                let (mut map, _mm) = setup();
+                let mut req = create_req("trade-1");
+                req.data =
+                    oisy_trade_data(1_000_000, OisyTradeSide::Sell, source_token, dest_token);
+                let err = create(&mut map, principal(), req, 1).unwrap_err();
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(
+                        "oisy-trade tokens must both be Internet Computer ledgers".to_string()
+                    )
+                );
+            }
         }
     }
 

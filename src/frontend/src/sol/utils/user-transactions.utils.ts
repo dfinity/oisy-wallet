@@ -4,7 +4,7 @@ import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { signature as solSignature } from '@solana/kit';
 
 export const mapSolTransactionToUserTransaction = (tx: SolTransactionUi): UserTransaction => ({
@@ -78,6 +78,18 @@ export const mapUserTransactionToSolTransaction = ({
  */
 export const isSolTransactionFinalized = (tx: SolTransactionUi): boolean =>
 	tx.status === 'finalized';
+
+/**
+ * Whether a stored record predates the summary derivation.
+ *
+ * The backend cache cannot carry the derived fields, and the raw transaction is not kept, so a
+ * record without a summary can only be healed by fetching and deriving it again.
+ */
+export const requiresStoredDerivationRefresh = ({
+	transaction: { summary }
+}: {
+	transaction: SolTransactionUi;
+}): boolean => isNullish(summary);
 
 export const requiresStoredSplOwnerRefresh = ({
 	transaction: { from, fromOwner, to, toOwner },

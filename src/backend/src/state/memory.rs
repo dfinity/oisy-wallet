@@ -37,6 +37,11 @@ pub(crate) const PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::n
 // a by-creator index used only to range-scan a creator's active-share count.
 pub(crate) const PERSONAL_NOTE_SHARES_MEMORY_ID: MemoryId = MemoryId::new(18);
 pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId::new(19);
+// Contact images, split out of the per-principal contact blob so that reading or
+// writing a contact no longer decodes every image the user has stored. Keyed
+// `(principal, contact_id)`; see `ContactImageKey`.
+pub(crate) const CONTACT_IMAGE_MEMORY_ID: MemoryId = MemoryId::new(20);
+
 // Tips: one map keyed by the opaque tip id, and a by-sender index used to
 // range-scan a sender's active-tip count and their History without walking the
 // primary map. Same two-map shape as the note shares above.
@@ -69,8 +74,10 @@ pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(22);
 /// anywhere. The message that would have written the config cell trapped on the
 /// key name and rolled back, and the later attempt trapped on the canister's
 /// reserved-cycles limit before allocating. No environment holds a byte of it.
-/// The one canister that does hold tips data, be1, is being reinstalled anyway,
-/// because moving the tips map off id 20 invalidates what it has regardless.
+/// The one canister that does hold tips data, be1, is pinned to the old ids on
+/// the deploy branch so it can keep upgrading; it is reinstalled the day that
+/// pin is dropped, because main's contact images want the region its tips are
+/// sitting in.
 pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(23);
 pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(24);
 pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(25);

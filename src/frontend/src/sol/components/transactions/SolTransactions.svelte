@@ -66,6 +66,7 @@
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
+						showSolTokenAmount
 						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-sol-${index}`}
 						{transactions}
 					/>

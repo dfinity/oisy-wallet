@@ -16,10 +16,13 @@ import {
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
 import * as addrDerived from '$lib/derived/address.derived';
+import * as agreementsDerived from '$lib/derived/user-provider-agreements.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+import { fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
@@ -29,6 +32,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -44,7 +48,12 @@ vi.mock('$btc/services/btc-send.services', async (importOriginal) => ({
 }));
 
 vi.mock('$lib/services/swap.services', () => ({
-	enableSwapDestinationToken: vi.fn()
+	enableSwapDestinationToken: vi.fn(),
+	fetchNearIntentsBtcSwap: vi.fn()
+}));
+
+vi.mock('$lib/services/provider-agreements.services', () => ({
+	acceptProviderAgreement: vi.fn()
 }));
 
 // The loaders behind the UTXO fee are mounted above this wizard, by `SwapBtcContexts`; the
@@ -74,6 +83,13 @@ describe('SwapBtcWizard', () => {
 		}
 	};
 
+	const nearIntentsOffer: SwapMappedResult = {
+		provider: SwapProvider.NEAR_INTENTS,
+		receiveAmount: 1_000_000n,
+		swapDetails: mockNearIntentsQuoteResponse,
+		type: undefined
+	};
+
 	const baseProps = {
 		swapAmount: '0.01',
 		receiveAmount: 0.01,
@@ -89,7 +105,7 @@ describe('SwapBtcWizard', () => {
 		onStopTriggerAmount: vi.fn()
 	};
 
-	const createContext = () => {
+	const createContext = (offer: SwapMappedResult = chainFusionOffer) => {
 		const context = new Map();
 
 		context.set(SWAP_CONTEXT_KEY, {
@@ -110,9 +126,9 @@ describe('SwapBtcWizard', () => {
 
 		const swapAmountsStore = initSwapAmountsStore();
 		swapAmountsStore.setSwaps({
-			swaps: [chainFusionOffer],
+			swaps: [offer],
 			amountForSwap: 0.01,
-			selectedProvider: chainFusionOffer
+			selectedProvider: offer
 		});
 		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 
@@ -161,9 +177,40 @@ describe('SwapBtcWizard', () => {
 			expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 		});
 
-		// The deposit settles out of band, so the stepper stays a plain foreground swap until
-		// the Bitcoin family has an active-user-transaction poller.
-		it('renders the progress step without the background wording', () => {
+		it('renders the review step with the network fee for a NEAR Intents offer', () => {
+			const { context } = createContext(nearIntentsOffer);
+
+			const { getByText, queryByText } = render(SwapBtcWizard, {
+				props: { ...baseProps, currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' } },
+				context
+			});
+
+			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
+		});
+
+		// The acceptance itself happens inline on "Swap now"; the review step first has to
+		// present the terms the click will accept.
+		it('shows the ToS notice on review when the user has not acknowledged it yet', () => {
+			const { context } = createContext(nearIntentsOffer);
+
+			const { container } = render(SwapBtcWizard, {
+				props: { ...baseProps, currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' } },
+				context
+			});
+
+			// Derived from the i18n copy, parsed to its rendered text, so copy-only edits
+			// cannot break this.
+			const tosText =
+				new DOMParser().parseFromString(en.swap.text.near_intents_tos, 'text/html').body
+					.textContent ?? '';
+
+			expect(container.textContent).toContain(tosText);
+		});
+
+		// The minting is tracked as an active user transaction, so the stepper says the swap
+		// starts here and finishes in the background.
+		it('renders the progress step with the background wording', () => {
 			const { context } = createContext();
 
 			const { getByText, queryByText } = render(SwapBtcWizard, {
@@ -171,8 +218,8 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
-			expect(getByText(en.swap.text.swapping)).toBeInTheDocument();
-			expect(queryByText(en.swap.text.finishing_in_background)).not.toBeInTheDocument();
+			expect(getByText(en.swap.text.finishing_in_background)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swapping)).not.toBeInTheDocument();
 		});
 	});
 
@@ -220,7 +267,11 @@ describe('SwapBtcWizard', () => {
 					source: mockBtcAddress,
 					depositAddress,
 					network: 'mainnet',
-					utxosFee: mockUtxosFee
+					utxosFee: mockUtxosFee,
+					// Re-resolved through the pair oracle, so the row cannot disagree with the offer
+					// about which twin — and which minter — this is.
+					destinationToken: ckBtcToken,
+					swapId: expect.any(String)
 				})
 			);
 		});
@@ -235,18 +286,19 @@ describe('SwapBtcWizard', () => {
 			expect(onBack).not.toHaveBeenCalled();
 		});
 
-		// Nothing polls a ckBTC mint yet, so the foreground *is* the tracked flow.
-		it('tracks a success event rather than a submitted one', async () => {
+		// The active-user-transaction row reports the mint's own success or failure when the
+		// minter settles, so the foreground only reports what it did: broadcast the deposit.
+		it('tracks a submitted event rather than a success one', async () => {
 			const { getByText } = renderExecution();
 
 			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
-				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
 			);
 			expect(analytics.trackEvent).not.toHaveBeenCalledWith(
-				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 			);
 		});
 
@@ -330,6 +382,192 @@ describe('SwapBtcWizard', () => {
 			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
 			expect(toasts.toastsError).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: { text: en.swap.error.unexpected_missing_data } })
+			);
+		});
+
+		// Only the NEAR Intents provider moves funds through a third party; a Chain Fusion
+		// swap stays within the user's own minter accounts, so no agreement applies.
+		it('neither requires the provider agreement nor calls the NEAR Intents path', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchChainFusionBtcSwap).toHaveBeenCalledOnce();
+			expect(acceptProviderAgreement).not.toHaveBeenCalled();
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('NEAR Intents execution', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.mocked(validateBtcSend).mockResolvedValue(undefined);
+			vi.mocked(fetchNearIntentsBtcSwap).mockResolvedValue(undefined);
+			vi.mocked(acceptProviderAgreement).mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const { context } = createContext(nearIntentsOffer);
+
+			const result = render(SwapBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onStartTriggerAmount
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack, onStartTriggerAmount };
+		};
+
+		it('accepts the provider agreement before moving funds', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(acceptProviderAgreement).toHaveBeenCalledOnce();
+			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledOnce();
+
+			const [acceptOrder] = vi.mocked(acceptProviderAgreement).mock.invocationCallOrder;
+			const [swapOrder] = vi.mocked(fetchNearIntentsBtcSwap).mock.invocationCallOrder;
+
+			expect(acceptOrder).toBeLessThan(swapOrder);
+		});
+
+		it('aborts without sending when the agreement cannot be persisted', async () => {
+			vi.mocked(acceptProviderAgreement).mockRejectedValue(new Error('agreement save failed'));
+
+			const { getByText, onBack, onClose, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.swap.error.cannot_save_provider_agreement } })
+			);
+		});
+
+		it('skips the agreement step when the user already acknowledged it', async () => {
+			const acknowledgedSpy = vi
+				.spyOn(agreementsDerived, 'hasAcknowledgedNearIntentsSwap', 'get')
+				.mockReturnValue(readable(true));
+
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(acceptProviderAgreement).not.toHaveBeenCalled();
+			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledOnce();
+
+			acknowledgedSpy.mockRestore();
+		});
+
+		it('sends the deposit with the quoted details and the user own address', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchNearIntentsBtcSwap).toHaveBeenCalledWith(
+				expect.objectContaining({
+					swapAmount: '0.01',
+					userAddress: mockBtcAddress,
+					network: 'mainnet',
+					utxosFee: mockUtxosFee,
+					swapDetails: mockNearIntentsQuoteResponse,
+					// The actual destination token, not a ck twin: NEAR Intents settles on the
+					// destination chain directly.
+					destinationToken: ckBtcToken
+				})
+			);
+			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
+		});
+
+		// The UTXO race guard applies to any BTC send, whichever provider receives it.
+		it('validates the selection before broadcasting', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(validateBtcSend).toHaveBeenCalledOnce();
+		});
+
+		it('goes back without sending when the selection no longer validates', async () => {
+			vi.mocked(validateBtcSend).mockRejectedValue(BtcPrepareSendError.UtxoLocked);
+
+			const { getByText, onBack, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchNearIntentsBtcSwap).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+		});
+
+		it('closes the modal after a successful deposit', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		// Settlement is long-running and tracked by the active-user-transaction row, so the
+		// foreground only ever reports the submission.
+		it('tracks a submitted event rather than a success one', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: TRACK_COUNT_SWAP_SUBMITTED,
+					metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+				})
+			);
+			expect(analytics.trackEvent).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+			);
+		});
+
+		it('goes back and reports the error when the deposit fails', async () => {
+			vi.mocked(fetchNearIntentsBtcSwap).mockRejectedValue(new Error('signer unavailable'));
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.swap.error.unexpected } })
+			);
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
 			);
 		});
 	});
