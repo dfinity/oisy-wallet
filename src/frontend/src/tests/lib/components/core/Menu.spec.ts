@@ -41,10 +41,12 @@ vi.mock('$app/navigation', () => ({
 
 // The tips menu item is behind the rollout flag, which is still off on the branch
 // that owns this badge. The badge logic is what is under test, not the flag.
-vi.mock(import('$env/tips.env'), async (importOriginal) => ({
-	...(await importOriginal()),
-	TIPS_ENABLED: true
-}));
+// The string form, not `vi.mock(import(...))`: the typed-module overload checks
+// the factory against the module's *literal* type, and `TIPS_ENABLED` is
+// literally `false` on the branch that owns this file — so returning `true` does
+// not type-check and took the whole spec project down with it. Nothing else is
+// exported here, so there is no original to spread.
+vi.mock('$env/tips.env', () => ({ TIPS_ENABLED: true }));
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
