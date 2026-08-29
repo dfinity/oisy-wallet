@@ -29,6 +29,7 @@ import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
+import { get } from 'svelte/store';
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
@@ -333,17 +334,20 @@ export const loadNextIcTransactions = async ({
 
 export const loadNextIcTransactionsByOldest = async ({
 	minTimestamp,
-	transactions,
 	...rest
 }: {
-	minTimestamp: number;
-	transactions: IcTransactionUi[];
+	minTimestamp?: number;
 	owner: Principal;
 	identity: NullishIdentity;
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
 }): Promise<ResultSuccess> => {
+	// Read at call time rather than taken as a parameter: callers page in a loop, and each round has
+	// to see what the previous one appended. A list handed in would be a snapshot from before the
+	// first await.
+	const transactions = (get(icTransactionsStore)?.[rest.token.id] ?? []).map(({ data }) => data);
+
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
 		return { success: false };
@@ -353,7 +357,9 @@ export const loadNextIcTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
 
+	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
 	if (
+		nonNullish(minTimestamp) &&
 		nonNullish(minIcTimestamp) &&
 		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
 	) {

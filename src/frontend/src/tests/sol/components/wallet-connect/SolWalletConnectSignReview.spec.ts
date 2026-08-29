@@ -4,7 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
@@ -66,6 +66,15 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 	});
 
+	it('should not render the signer row', () => {
+		const { queryByText, container } = render(SolWalletConnectSignReview, {
+			props
+		});
+
+		expect(queryByText(en.wallet_connect.text.signer)).not.toBeInTheDocument();
+		expect(container.querySelector('#signer')).toBeNull();
+	});
+
 	it('should render the base network fee as a labelled row', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props
@@ -120,6 +129,102 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+	});
+
+	describe('the warnings about what the transaction does', () => {
+		it('should warn about a control change, above the fee notices', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: {
+						tokenDeltas: [],
+						controlChanges: [
+							{ account: mockSolAddress2, field: 'owner' as const, to: mockSolAddress }
+						]
+					},
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const control = getByText(en.wallet_connect.text.simulation_control_change);
+			const fee = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(control.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should not warn about a control change when nothing about control changed', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+		});
+
+		it('should say that the parties are partial, above the fee notices', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: { sources: [], destinations: [], partial: true },
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const partial = getByText(en.wallet_connect.text.transfer_parties_partial);
+			const fee = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(partial.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should say nothing about partial parties when the lists are complete', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: { sources: [], destinations: [], partial: false }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('the placement of the fees', () => {
+		it('should render the fees below the simulated changes', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			const changes = getByText(en.wallet_connect.text.simulated_changes);
+			const fee = getByText(en.fee.text.network_fee);
+
+			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the fees above the hex data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
+			});
+
+			const fee = getByText(en.fee.text.prioritization_fee);
+			const hex = getByText(en.wallet_connect.text.hex_data);
+
+			expect(fee.compareDocumentPosition(hex) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
 	});
 
 	describe('comparing the requested fee against the baseline', () => {
@@ -250,6 +355,72 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByText('0.000005 SOL')).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
 		});
+
+		it('should render the notice above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 3_000_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const notice = getByText(en.wallet_connect.text.dapp_prioritization_fee);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(notice.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the warning below the unreviewed instructions warning', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					unreviewed: true,
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const unreviewed = getByText(en.wallet_connect.text.unreviewed_instructions);
+			const warning = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(unreviewed.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+	});
+
+	describe('the simulation note', () => {
+		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
+
+		it('should state that the real execution can differ once a simulation ran', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+		});
+
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.simulation_note)).not.toBeInTheDocument();
+		});
+
+		it('should render the note above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			const note = getByText(en.wallet_connect.text.simulation_note);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(note.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
 	});
 
 	describe('when the decode produced no amount', () => {
@@ -276,7 +447,6 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(getByText(en.send.text.network)).toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
 			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
@@ -296,8 +466,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	// The three rows describe what will be signed, which the simulation only predicts.
-	it('should render the amount, the balance and the destination of a decoded transfer', () => {
+	// The two rows describe what will be signed, which the simulation only predicts.
+	it('should render the amount and the balance of a decoded transfer', () => {
 		balancesStore.set({ id: SOLANA_TOKEN.id, data: { data: 5_000_000_000n, certified: false } });
 
 		const { getByText, container } = render(SolWalletConnectSignReview, { props });
@@ -307,18 +477,28 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(getByText(en.send.text.balance)).toBeInTheDocument();
 		expect(container.querySelector('#balance')).toHaveTextContent('5 SOL');
-
-		expect(getByText(en.send.text.destination)).toBeInTheDocument();
-		expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
 	});
 
-	describe('sources and destinations', () => {
-		it('should replace the single destination field with the lists', () => {
-			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+	// The delegate of an approval is not a recipient, so it keeps its own row even though the
+	// review names no destination.
+	it('should render the spender of an approval', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+		expect(getByText(mockSolAddress2)).toBeInTheDocument();
+	});
+
+	describe('transfer parties', () => {
+		// Where the value ends up is described by the balance changes, so neither the lists nor the
+		// single field the lists once replaced name a recipient.
+		it('should render no destination at all', () => {
+			const { queryByText, container } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
 					parties: {
-						sources: [{ address: mockSolAddress, own: true }],
+						sources: [{ address: mockAtaAddress, own: true }],
 						destinations: [{ address: mockSolAddress2, own: false }],
 						partial: false
 					}
@@ -326,26 +506,43 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.transfer_destinations)).toBeInTheDocument();
+			expect(container.querySelector('#destination')).toBeNull();
+			expect(container.querySelector('#transfer-destinations')).toBeNull();
+			expect(queryByText(mockSolAddress2)).not.toBeInTheDocument();
 		});
 
-		it('should keep the destination field when the lists have nothing to put in its place', () => {
-			const { getByText, container } = render(SolWalletConnectSignReview, {
+		it('should render the sources of the transaction', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: {
+						sources: [{ address: mockAtaAddress, own: true }],
+						destinations: [],
+						partial: false
+					}
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.transfer_sources)).toBeInTheDocument();
+			expect(getByText(mockAtaAddress)).toBeInTheDocument();
+		});
+
+		it('should render no destination either when the lists are empty', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
 					parties: { sources: [], destinations: [], partial: true }
 				}
 			});
 
-			expect(getByText(en.send.text.destination)).toBeInTheDocument();
-			expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
 		});
 
 		it('should render no lists at all until the decode settles', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, { props });
 
-			expect(queryByText(en.wallet_connect.text.transfer_destinations)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 		});
 	});

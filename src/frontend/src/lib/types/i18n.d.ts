@@ -916,6 +916,8 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
+		swap_amount_too_low: string;
+		swap_amount_too_low_minimum: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
@@ -971,6 +973,8 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		near_intents_quote_unverified: string;
+		near_intents_quote_expired: string;
 	};
 }
 
@@ -1275,6 +1279,7 @@ interface I18nWallet_connect {
 		or_use_link: string;
 		proposer: string;
 		spender: string;
+		operator: string;
 		application: string;
 		review: string;
 		method: string;
@@ -1296,7 +1301,6 @@ interface I18nWallet_connect {
 		simulation_new_program: string;
 		simulation_control_removed: string;
 		transfer_sources: string;
-		transfer_destinations: string;
 		transfer_party_own: string;
 		transfer_parties_partial: string;
 		dapp_prioritization_fee: string;
@@ -1304,7 +1308,16 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unsigned_typed_data_keys: string;
+		unknown_call_title: string;
+		unknown_call: string;
+		function: string;
+		allowance_increase: string;
+		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unverifiable_approval_for_all_request: string;
+		approval_for_all_grant: string;
+		approval_for_all_revoke: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -1332,7 +1345,7 @@ interface I18nWallet_connect {
 		wallet_connect: string;
 		token_units: string;
 	};
-	alt: { connect_input: string };
+	alt: { connect_input: string; open_address_block_explorer: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -1609,6 +1622,8 @@ interface I18nTransaction {
 		details: string;
 		hash: string;
 		hash_copied: string;
+		signature: string;
+		signature_copied: string;
 		id: string;
 		id_copied: string;
 		timestamp: string;
@@ -1624,6 +1639,10 @@ interface I18nTransaction {
 		to_ata: string;
 		to_ata_copied: string;
 		block: string;
+		kind_other: string;
+		summary_swap: string;
+		summary_self: string;
+		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
 		raw_value: string;
