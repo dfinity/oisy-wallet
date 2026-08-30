@@ -2835,6 +2835,7 @@
 			"claim_failed": "",
 			"history_title": "",
 			"history_empty": "",
+			"history_failed": "",
 			"group_failed": "",
 			"group_failed_hint": "",
 			"group_open": "",

@@ -2364,6 +2364,7 @@ interface I18nTip {
 		claim_failed: string;
 		history_title: string;
 		history_empty: string;
+		history_failed: string;
 		group_failed: string;
 		group_failed_hint: string;
 		group_open: string;

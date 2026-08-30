@@ -2835,6 +2835,7 @@
 			"claim_failed": "The tip could not be claimed. Nothing was transferred, so try again.",
 			"history_title": "Tips History",
 			"history_empty": "You have not issued any tips yet.",
+			"history_failed": "Your past tips could not be loaded. Nothing has changed about them, so try again.",
 			"group_failed": "Needs attention",
 			"group_failed_hint": "Somebody tried to claim these and the payout did not go through. The links still work, so topping up your balance is all it takes.",
 			"group_open": "Open",
