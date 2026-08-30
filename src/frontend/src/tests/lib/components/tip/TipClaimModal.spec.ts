@@ -363,9 +363,10 @@ describe('TipClaimModal', () => {
 		);
 	});
 
-	it('names the sender being out of funds rather than blaming the claim', async () => {
+	it('says to come back later without saying why', async () => {
 		// "Nothing was transferred, so try again" was shown for this too, which told
-		// the reader nothing about who could fix it or when to come back.
+		// the reader nothing about whether coming back would help. It then went too
+		// far the other way and said the sender was out of funds.
 		mockDetails();
 		vi.spyOn(tipServices, 'claimTip').mockRejectedValue({ InsufficientFunds: null });
 		vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
@@ -377,5 +378,42 @@ describe('TipClaimModal', () => {
 		);
 
 		expect(getByText(get(i18n).tip.text.short_balance_description)).toBeInTheDocument();
+	});
+
+	describe('what the claim screen says about the sender', () => {
+		// A tip link is a bearer token: it gets forwarded, screenshotted and pasted
+		// into group chats, so whoever reads this screen may never have met the
+		// sender. The canister already refuses to distinguish an unknown id from an
+		// expired tip from a wrong code — all four answer NotFound — and this screen
+		// used to undo that by reporting which of two financial situations the
+		// sender was in.
+		//
+		// Asserted against the rendered text rather than the i18n values, because
+		// the property is "nothing on this screen discloses it", not "these two
+		// strings were edited".
+		const DISCLOSING = /balance|out of funds|set aside|taken back|topped? up/i;
+
+		it.each([
+			{
+				label: 'a revoked reservation',
+				rejection: { Uncovered: null } as unknown,
+				titleKey: 'uncovered_title' as const
+			},
+			{
+				label: 'a sender who cannot cover it',
+				rejection: { InsufficientFunds: null } as unknown,
+				titleKey: 'short_balance_title' as const
+			}
+		])('keeps the sender out of it for $label', async ({ rejection, titleKey }) => {
+			mockDetails();
+			vi.spyOn(tipServices, 'claimTip').mockRejectedValue(rejection);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { container, getByText } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByText(get(i18n).tip.text[titleKey])).toBeInTheDocument());
+
+			expect(container.textContent).not.toMatch(DISCLOSING);
+		});
 	});
 });
