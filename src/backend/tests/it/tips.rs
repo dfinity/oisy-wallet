@@ -678,6 +678,37 @@ fn storing_claim_codes_is_rate_limited() {
 }
 
 #[test]
+fn the_secrets_store_refuses_an_empty_tip_id() {
+    // The store had its own length check rather than going through
+    // `validate_tip_id`, so it matched on the upper bound and diverged on the
+    // lower one: an empty id was accepted. That key matches no tip, so claim,
+    // cancel and prune — all of which clean up by tip id — could never remove
+    // what was written under it.
+    let env = setup_tips();
+
+    let stored: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: String::new(),
+                encrypted_claim_code: ByteBuf::from(vec![7u8; 48]),
+            },
+        )
+        .expect("set_tip_secret should reach the handler");
+
+    assert_eq!(stored, SetTipSecretResult::Err(TipError::InvalidTipId));
+
+    let read: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", String::new())
+        .expect("get_tip_secret should reach the handler");
+
+    assert_eq!(read, GetTipSecretResult::Err(TipError::InvalidTipId));
+}
+
+#[test]
 fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
     // Tips live in stable memory regions of their own, and those regions were
     // renumbered late (main had taken `MemoryId::new(20)` for contact images
