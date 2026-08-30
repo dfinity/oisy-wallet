@@ -280,7 +280,54 @@ formality.
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | **The fragment surviving Internet Identity on mobile Safari and in in-app webviews** (open question 8, second half). The entire link model rests on it. Desktop is fine — II opens in a popup, so the page never unmounts — but an in-app webview may not keep it.                       | a real phone, and a link opened from a DM      |
 | **A fresh identity seeing the received token without manual setup** (open question 6). The wallet-UI half is now built — `TipClaimModal` calls `autoLoadSingleToken` on the way out, so a claimed ck-asset is enabled — but nobody has claimed on a never-before-used anchor and looked. | claim on a never-before-used anchor, then look |
-| **Claim atomicity across a canister upgrade mid-flight** (open question 4). The design answers it — `Claiming` plus a five-minute in-flight timeout — but no test upgrades the canister while a claim is in the air.                                                                     | a pocket-ic test that upgrades mid-claim       |
+| **Claim atomicity across a canister upgrade mid-flight** (open question 4). Partly closed, and the rest is blocked by the harness — see below.                                                                                                                                           | not reachable in pocket-ic 15; see below       |
+
+### What the upgrade test does and does not reach
+
+`a_tip_survives_an_upgrade_and_still_pays_exactly_once` (branch 1) upgrades the
+canister with a claim outstanding and asserts the tip, its amount and its
+deadline all come back, the claimer was paid once, and a second attempt is
+refused. That is worth having on its own account: tips took stable-memory
+regions of their own and those regions were **renumbered late**, so "the records
+still mean the same thing after an upgrade" had been an assumption. A region
+reopened as the wrong structure decodes into plausible rubbish rather than
+failing outright, which is why the fields are asserted and not just the row.
+
+What it does **not** reach is the hazard open question 4 actually names: the
+upgrade landing between the ledger call and its reply, destroying the callback.
+That is not expressible in pocket-ic 15, and the reason is worth recording so
+nobody spends another afternoon on it.
+
+The claim runs over three rounds, confirmed by ticking one at a time and
+watching the ledger:
+
+| round | what happens                                    | allowance | claimer |
+| ----- | ----------------------------------------------- | --------- | ------- |
+| 1     | `claim_tip` writes `Claiming`, calls the ledger | 510_000   | 0       |
+| 2     | the ledger executes `icrc2_transfer_from`       | 0         | 500_000 |
+| 3     | the callback lands, record becomes `Claimed`    | 0         | 500_000 |
+
+The window is after round 1 and before round 3. But `upgrade_canister` drives
+rounds to get its own `install_code` ingress answered, and it cannot while the
+claim's ingress is outstanding:
+
+```
+BadIngressMessage("Failed to answer to ingress 0x772a… after 100 rounds.")
+```
+
+Awaiting the claim first is what unblocks the upgrade — and awaiting it
+completes it. Verified both ways: with the claim awaited first the upgrade
+succeeds every time; with it outstanding past round 1 the upgrade always fails
+this way. The backend wasm is also over the chunked-install threshold, so
+hand-rolling the interleaving means reimplementing `upload_chunk` plus
+`install_chunked_code` against raw `submit_call`.
+
+So the lost-callback path, and the five-minute in-flight timeout that recovers
+from it, remain covered only by the unit tests in `tips/model.rs`. Closing it
+for real needs either a harness that can interleave `install_code` with an
+open call context, or a deliberate test-only endpoint that parks a record in
+`Claiming` — and the second is a hole in production code for a test, which is
+its own argument.
 
 ## Deploying to be1 / fe1
 
