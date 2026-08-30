@@ -1261,16 +1261,16 @@ export interface MyTip {
 	 */
 	claimed_by: [] | [Principal];
 	tip_id: string;
-	created_at_ns: bigint;
-	message: [] | [string];
-	ledger_canister_id: Principal;
-	amount: bigint;
 	/**
 	 * The most recent claim that did not pay out, if any. Present alongside
 	 * `status = Failed` for a live tip, and kept afterwards so a tip that
 	 * eventually succeeded can still show it was not first time lucky.
 	 */
 	last_claim_failure: [] | [TipClaimFailure];
+	created_at_ns: bigint;
+	message: [] | [string];
+	ledger_canister_id: Principal;
+	amount: bigint;
 	expires_at_ns: bigint;
 }
 /**
@@ -1804,6 +1804,35 @@ export interface TipClaim {
 	amount: bigint;
 }
 /**
+ * The most recent failed claim on a tip. Returned only to the tip's own sender.
+ *
+ * Deliberately not the ledger's error text: that is written for an operator, it
+ * can name balances, and it has no business being rendered to a user.
+ */
+export interface TipClaimFailure {
+	at_ns: bigint;
+	reason: TipClaimFailureReason;
+}
+/**
+ * Why a claim attempt did not pay out.
+ *
+ * Only the two outcomes the ledger lets us tell apart today. `Uncovered` is the
+ * sender having reduced or revoked the reservation; `TransferFailed` is
+ * everything else, including the sender's balance having dropped below the
+ * amount.
+ */
+export type TipClaimFailureReason =
+	| { Uncovered: null }
+	| { TransferFailed: null }
+	| {
+			/**
+			 * The sender's account no longer holds the amount. Distinct from
+			 * `Uncovered`: the reservation is still granted, the money is simply not
+			 * there, so topping up makes the same link work again.
+			 */
+			InsufficientFunds: null;
+	  };
+/**
  * Identifies a tip **and** proves the caller holds its link.
  *
  * One type for both `get_tip_details` and `claim_tip` on purpose: reading the
@@ -1840,14 +1869,7 @@ export type TipError =
 			 */
 			InvalidExpiry: null;
 	  }
-	| {
-			/**
-			 * A claim is already in flight for this tip. Resolves on its own: either
-			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
-			 * may take it over.
-			 */
-			ClaimInProgress: null;
-	  }
+	| { ClaimInProgress: null }
 	| {
 			/**
 			 * The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
@@ -1862,14 +1884,6 @@ export type TipError =
 			 * because telling the claimer "come back later" is useless.
 			 */
 			Uncovered: null;
-	  }
-	| {
-			/**
-			 * The sender's account no longer holds the amount. The reservation is still
-			 * granted and the claim code is still valid, so the same link works again
-			 * once they top up, which is why this is not folded into `TransferFailed`.
-			 */
-			InsufficientFunds: null;
 	  }
 	| {
 			/**
@@ -1933,6 +1947,17 @@ export type TipError =
 	  }
 	| {
 			/**
+			 * A claim is already in flight for this tip. Resolves on its own: either
+			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
+			 * may take it over.
+			 * The sender's account no longer holds the amount. The reservation is still
+			 * granted and the claim code is still valid, so the same link works again
+			 * once they top up — which is why this is not folded into `TransferFailed`.
+			 */
+			InsufficientFunds: null;
+	  }
+	| {
+			/**
 			 * The amount is zero, or below one ledger fee — a tip that cannot cover
 			 * its own payout is not a tip.
 			 */
@@ -1947,26 +1972,24 @@ export type TipError =
  * allowance on every History read; it surfaces on the claim path instead, as
  * [`TipError::Uncovered`].
  */
-export interface TipClaimFailure {
-	at_ns: bigint;
-	reason: TipClaimFailureReason;
-}
-export type TipClaimFailureReason =
-	{ Uncovered: null } | { InsufficientFunds: null } | { TransferFailed: null };
 export type TipStatus =
-	| {
-			/**
-			 * Funds are authorised in the sender's own account, waiting for a claimer.
-			 */
-			Reserved: null;
-	  }
 	| {
 			/**
 			 * Somebody tried to claim and the payout did not go through, and the tip is
 			 * still live. The code stays valid, so this is the one status the sender can
 			 * act on — typically by topping up the account the tip draws from.
+			 *
+			 * Distinct from `Reserved` precisely because it is actionable: without it a
+			 * tip nobody has touched and a tip that has already failed a claimer look
+			 * identical in History.
 			 */
 			Failed: null;
+	  }
+	| {
+			/**
+			 * Funds are authorised in the sender's own account, waiting for a claimer.
+			 */
+			Reserved: null;
 	  }
 	| {
 			/**
@@ -2966,7 +2989,7 @@ export interface _SERVICE {
 	 * about who can claim the tip — the canister still only holds the code's hash.
 	 *
 	 * # Errors
-	 * Errors are enumerated by `TipError` (`InvalidTipId`,
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InvalidTipId`,
 	 * `SecretCiphertextTooLarge`, `InternalError`).
 	 */
 	set_tip_secret: ActorMethod<[SetTipSecretRequest], CancelTipResult>;

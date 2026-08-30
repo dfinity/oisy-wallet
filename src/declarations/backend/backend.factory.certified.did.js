@@ -189,7 +189,6 @@ export const idlFactory = ({ IDL }) => {
 		ClaimInProgress: IDL.Null,
 		SecretCiphertextTooLarge: IDL.Null,
 		Uncovered: IDL.Null,
-		InsufficientFunds: IDL.Null,
 		NotFound: IDL.Null,
 		NotYourTip: IDL.Null,
 		InvalidClaimCodeHash: IDL.Null,
@@ -201,6 +200,7 @@ export const idlFactory = ({ IDL }) => {
 		InternalError: IDL.Record({ msg: IDL.Text }),
 		MessageTooLong: IDL.Null,
 		TooManyTips: IDL.Null,
+		InsufficientFunds: IDL.Null,
 		AmountTooSmall: IDL.Null
 	});
 	const CancelTipResult = IDL.Variant({ Ok: IDL.Null, Err: TipError });
@@ -626,16 +626,16 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ExchangeRate = IDL.Record({ usd: ExchangeData });
 	const TipStatus = IDL.Variant({
-		Reserved: IDL.Null,
 		Failed: IDL.Null,
+		Reserved: IDL.Null,
 		Claimed: IDL.Null,
 		Cancelled: IDL.Null,
 		Expired: IDL.Null
 	});
 	const TipClaimFailureReason = IDL.Variant({
 		Uncovered: IDL.Null,
-		InsufficientFunds: IDL.Null,
-		TransferFailed: IDL.Null
+		TransferFailed: IDL.Null,
+		InsufficientFunds: IDL.Null
 	});
 	const TipClaimFailure = IDL.Record({
 		at_ns: IDL.Nat64,
@@ -645,11 +645,11 @@ export const idlFactory = ({ IDL }) => {
 		status: TipStatus,
 		claimed_by: IDL.Opt(IDL.Principal),
 		tip_id: IDL.Text,
+		last_claim_failure: IDL.Opt(TipClaimFailure),
 		created_at_ns: IDL.Nat64,
 		message: IDL.Opt(IDL.Text),
 		ledger_canister_id: IDL.Principal,
 		amount: IDL.Nat,
-		last_claim_failure: IDL.Opt(TipClaimFailure),
 		expires_at_ns: IDL.Nat64
 	});
 	const GetMyTipsResult = IDL.Variant({
