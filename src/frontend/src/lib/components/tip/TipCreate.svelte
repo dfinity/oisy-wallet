@@ -86,6 +86,23 @@
 		return spendable > ZERO ? spendable : ZERO;
 	});
 
+	/**
+	 * True until the ledger balance is known.
+	 *
+	 * The ceiling on this form is the only thing standing between a sender and an
+	 * unclaimable tip. `icrc2_approve` does not require the balance to cover the
+	 * allowance — the ledger debits the approve fee and checks nothing else — so a
+	 * tip approved for more than the sender holds is created happily and then fails
+	 * at claim time as `shortBalance`, on the recipient's screen rather than the
+	 * sender's.
+	 *
+	 * That ceiling reaches `StakeForm` as `providerFee` and is applied against
+	 * `$sendBalance`, so while the balance is unknown there is no cap and no
+	 * validation, and the first thing to push back is the ledger. The form does not
+	 * run until the number it depends on exists.
+	 */
+	let balanceUnknown = $derived(isNullish($sendBalance));
+
 	// Counted in characters, matching the canister's own limit — a byte count
 	// would reject a message the user sees as well within length.
 	let messageLength = $derived([...message].length);
@@ -118,7 +135,7 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={messageTooLong || busy}
+	disabled={messageTooLong || busy || balanceUnknown}
 	isSelectable
 	{maxAmount}
 	nextLabel={$i18n.tip.text.generate}
