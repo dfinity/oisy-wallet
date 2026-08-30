@@ -46,7 +46,7 @@ describe('TipHistory', () => {
 		// Nothing was transferred, so try again." — on a read that claims nothing.
 		// A sender reading that has been told a payout went wrong when all that
 		// happened is that their own list did not arrive.
-		const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => undefined);
+		const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
 
 		vi.spyOn(tipServices, 'loadMyTips').mockRejectedValue(new Error('canister unreachable'));
 
