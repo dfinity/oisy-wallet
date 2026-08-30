@@ -20,11 +20,12 @@ use ic_cdk::api::msg_caller;
 use ic_stable_structures::storable::Blob;
 use ic_vetkeys::types::ByteBuf as VetkeysByteBuf;
 use serde_bytes::ByteBuf;
-use shared::types::tip::{
-    SetTipSecretRequest, TipError, MAX_TIP_ID_BYTES, MAX_TIP_SECRET_CIPHERTEXT_BYTES,
-};
+use shared::types::tip::{SetTipSecretRequest, TipError, MAX_TIP_SECRET_CIPHERTEXT_BYTES};
 
-use crate::state::{with_existing_tip_secrets_mut, with_tip_secrets, with_tip_secrets_mut};
+use crate::{
+    state::{with_existing_tip_secrets_mut, with_tip_secrets, with_tip_secrets_mut},
+    tips::model::validate_tip_id,
+};
 
 /// Domain separator bound into the vetKD derivation for the tip-secrets store.
 /// Never change this for a deployed canister — it is part of the key derivation,
@@ -66,9 +67,11 @@ fn internal(msg: String) -> TipError {
 /// `needless_pass_by_value` is satisfied only if something downstream consumes
 /// it. `service::cancel_tip` moves its id into `TipId` for the same reason.
 fn tip_id_to_map_key(tip_id: String) -> Result<Blob<32>, TipError> {
-    if tip_id.len() > MAX_TIP_ID_BYTES as usize {
-        return Err(TipError::InvalidTipId);
-    }
+    // Through the canonical validator rather than a length check of its own.
+    // The bound was the same, but an empty id passed — and an empty id is a key
+    // no tip can ever match, so the entry under it would outlive every cleanup
+    // path (claim, cancel and prune all remove by tip id).
+    validate_tip_id(&tip_id)?;
     Blob::try_from(tip_id.into_bytes().as_slice()).map_err(|_| TipError::InvalidTipId)
 }
 
