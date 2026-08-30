@@ -88,3 +88,63 @@ thread_local! {
         MemoryManager::init(DefaultMemoryImpl::default())
     );
 }
+
+#[cfg(test)]
+mod tests {
+    /// Every `MemoryId` in this file, read back out of the file itself.
+    ///
+    /// Parsed from the source rather than listed here on purpose: a hand-kept
+    /// list is one someone forgets to extend, and the whole point of this test
+    /// is to catch the constant that was added without checking what else holds
+    /// that id.
+    fn declared_ids() -> Vec<(u8, String)> {
+        include_str!("memory.rs")
+            .lines()
+            // Only declarations. A doc comment naming an id must not register as
+            // one, or the guard starts failing on prose.
+            .filter_map(|line| {
+                let (name, rest) = line.split_once(": MemoryId = MemoryId::new(")?;
+                let id = rest.split(')').next()?.parse().ok()?;
+                let name = name.rsplit(' ').next()?.to_string();
+
+                Some((id, name))
+            })
+            .collect()
+    }
+
+    /// Two constants on one id is the failure this exists for, and nothing else
+    /// catches it.
+    ///
+    /// Stable memory is a globally shared, append-only namespace with no
+    /// compile-time protection. Two branches can each take what looks like the
+    /// next free id — tips took 20 while `CONTACT_IMAGE_MEMORY_ID` took 20 on
+    /// main — and both compile, both lint and both pass their own tests. The
+    /// damage only appears once they meet and deploy, as two structures decoding
+    /// each other's bytes. That collision was caught by reading the diff, which
+    /// is not a control.
+    #[test]
+    fn every_memory_id_is_claimed_once() {
+        let mut seen: Vec<(u8, String)> = Vec::new();
+
+        for (id, name) in declared_ids() {
+            assert!(
+                !seen.iter().any(|(other, _)| *other == id),
+                "MemoryId {id} is claimed by both {} and {name}. Stable memory at \
+                 an id belongs to whatever wrote it first — two structures there \
+                 decode each other's data. Take the next free id instead, and park \
+                 a retired one as RESERVED_* rather than handing it out again.",
+                seen.iter()
+                    .find(|(other, _)| *other == id)
+                    .map_or("?", |(_, taken)| taken.as_str())
+            );
+            seen.push((id, name));
+        }
+
+        assert!(
+            seen.len() > 20,
+            "the parser found only {} ids, so it has stopped matching the file it \
+             is meant to guard",
+            seen.len()
+        );
+    }
+}
