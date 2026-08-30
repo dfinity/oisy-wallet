@@ -295,11 +295,11 @@ records in it.
 
 These do not block building, but they block landing. Longest lead time first.
 
-| What                                                                                                                       | Gates            | Owner                            |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------- |
-| Compliance sign-off on OISY holding a bounded, revocable authorisation over user funds for up to a week (open question 11) | branch 1         | —                                |
-| The `Uncovered` wording — it is information about the sender                                                               | branch 4         | whoever owns the privacy promise |
-| The five undrawn states, plus a light theme for every screen (the Figma page is dark-only)                                 | branches 3, 4, 5 | design                           |
+| What                                                                                                                          | Gates                | Owner                            |
+| ----------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------- |
+| Compliance sign-off on OISY holding a bounded, revocable authorisation over user funds for up to a week (open question 11)    | branch 1             | —                                |
+| The `Uncovered` wording — it is information about the sender                                                                  | branch 4             | whoever owns the privacy promise |
+| ~~The five undrawn states, plus a light theme for every screen~~ **Cleared 30 Aug** — reviewed in both themes and signed off. | ~~branches 3, 4, 5~~ | design                           |
 
 ## Still to build
 
