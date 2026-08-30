@@ -180,15 +180,29 @@ const storeClaimCode = async ({
 	identity: Identity;
 	draft: TipDraft;
 }): Promise<boolean> => {
+	// Encrypted once, outside the retry. The comment above always said the retry
+	// was "only the write", but the derivation sat inside `attempt` and went
+	// round again with it — so a vetKD failure re-spent a metered call 1.5
+	// seconds later, which is the opposite of what was intended.
+	let ciphertext: Uint8Array;
+
+	try {
+		ciphertext = await encryptClaimCode({
+			claimCode: draft.claimCode,
+			tipId: draft.tipId,
+			identity
+		});
+	} catch (err: unknown) {
+		consoleWarn('Could not encrypt the recoverable claim code for this tip', err);
+
+		return false;
+	}
+
 	const attempt = async (): Promise<void> => {
 		await setTipSecret({
 			identity,
 			tip_id: draft.tipId,
-			encrypted_claim_code: await encryptClaimCode({
-				claimCode: draft.claimCode,
-				tipId: draft.tipId,
-				identity
-			})
+			encrypted_claim_code: ciphertext
 		});
 	};
 

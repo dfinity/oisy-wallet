@@ -391,6 +391,58 @@ describe('tip.services', () => {
 			expect(secretStored).toBeFalsy();
 		});
 
+		it('does not spend a second vetKD derivation on the retry', async () => {
+			// The retry is meant to be "only the write". The derivation used to sit
+			// inside the retried closure, so a transient 503 on the write re-ran a
+			// metered vetKD call 1.5 seconds later — hammering the exact endpoint
+			// whose cost is the reason the retry is capped at one.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+
+			const encryptSpy = vi
+				.spyOn(tipVetkeys, 'encryptClaimCode')
+				.mockResolvedValue(new Uint8Array([1, 2, 3]));
+			const setSpy = vi
+				.spyOn(backendApi, 'setTipSecret')
+				.mockRejectedValueOnce(new Error('503'))
+				.mockResolvedValueOnce(undefined);
+
+			const { secretStored } = await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(secretStored).toBeTruthy();
+			expect(setSpy).toHaveBeenCalledTimes(2);
+			expect(encryptSpy).toHaveBeenCalledOnce();
+		});
+
+		it('does not retry at all when the derivation itself failed', async () => {
+			// Nothing to write, and the write is not what broke. Retrying here would
+			// be the second metered call the cap exists to prevent.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockRejectedValue(new Error('InvalidKeyName'));
+
+			const setSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+
+			const { secretStored } = await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(secretStored).toBeFalsy();
+			expect(setSpy).not.toHaveBeenCalled();
+		});
+
 		it('reports success when the retry lands', async () => {
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
