@@ -1816,10 +1816,12 @@ export interface TipClaimFailure {
 /**
  * Why a claim attempt did not pay out.
  *
- * Only the two outcomes the ledger lets us tell apart today. `Uncovered` is the
- * sender having reduced or revoked the reservation; `TransferFailed` is
- * everything else, including the sender's balance having dropped below the
- * amount.
+ * Three outcomes, and the split is by what the sender can do about it.
+ * `Uncovered` is the reservation having been reduced or revoked, so the link is
+ * dead and only a new tip fixes it. `InsufficientFunds` is the reservation
+ * standing but the money not being there, so the same link works again once
+ * they top up. `TransferFailed` is everything else — the ledger refusing or
+ * failing to answer — where retrying is the whole advice.
  */
 export type TipClaimFailureReason =
 	| { Uncovered: null }
@@ -1869,7 +1871,14 @@ export type TipError =
 			 */
 			InvalidExpiry: null;
 	  }
-	| { ClaimInProgress: null }
+	| {
+			/**
+			 * A claim is already in flight for this tip. Resolves on its own: either
+			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
+			 * may take it over.
+			 */
+			ClaimInProgress: null;
+	  }
 	| {
 			/**
 			 * The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
@@ -1947,9 +1956,6 @@ export type TipError =
 	  }
 	| {
 			/**
-			 * A claim is already in flight for this tip. Resolves on its own: either
-			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
-			 * may take it over.
 			 * The sender's account no longer holds the amount. The reservation is still
 			 * granted and the claim code is still valid, so the same link works again
 			 * once they top up — which is why this is not folded into `TransferFailed`.
