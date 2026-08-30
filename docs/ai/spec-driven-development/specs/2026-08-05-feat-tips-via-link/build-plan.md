@@ -367,26 +367,31 @@ formality.
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | **The fragment surviving Internet Identity on mobile Safari and in in-app webviews** (open question 8, second half). The entire link model rests on it. Desktop is fine — II opens in a popup, so the page never unmounts — but an in-app webview may not keep it.                       | a real phone, and a link opened from a DM      |
 | **A fresh identity seeing the received token without manual setup** (open question 6). The wallet-UI half is now built — `TipClaimModal` calls `autoLoadSingleToken` on the way out, so a claimed ck-asset is enabled — but nobody has claimed on a never-before-used anchor and looked. | claim on a never-before-used anchor, then look |
-| **Claim atomicity across a canister upgrade mid-flight** (open question 4). Partly closed, and the rest is blocked by the harness — see below.                                                                                                                                           | not reachable in pocket-ic 15; see below       |
+| ~~**Claim atomicity across a canister upgrade mid-flight** (open question 4)~~ **Closed.** Exercised on every CI run — see below.                                                                                                                                                        | done                                           |
 
-### What the upgrade test does and does not reach
+### The upgrade test, and a correction
 
-`a_tip_survives_an_upgrade_and_still_pays_exactly_once` (branch 1) upgrades the
-canister with a claim outstanding and asserts the tip, its amount and its
-deadline all come back, the claimer was paid once, and a second attempt is
-refused. That is worth having on its own account: tips took stable-memory
-regions of their own and those regions were **renumbered late**, so "the records
-still mean the same thing after an upgrade" had been an assumption. A region
-reopened as the wrong structure decodes into plausible rubbish rather than
-failing outright, which is why the fields are asserted and not just the row.
+`a_tip_survives_an_upgrade_and_still_pays_exactly_once` (branch 1) submits a
+claim, ticks once so the canister has written `Claiming` and called the ledger,
+then upgrades with that call outstanding.
 
-What it does **not** reach is the hazard open question 4 actually names: the
-upgrade landing between the ledger call and its reply, destroying the callback.
-That is not expressible in pocket-ic 15, and the reason is worth recording so
-nobody spends another afternoon on it.
+**Correction.** This section previously recorded the mid-flight case — the
+upgrade landing between the ledger call and its reply, destroying the callback —
+as _not expressible in pocket-ic 15_. That was wrong. It is reachable; it is
+simply not **controllable**, and which path you get depends on the machine:
 
-The claim runs over three rounds, confirmed by ticking one at a time and
-watching the ledger:
+| where | what happens                                                                  |
+| ----- | ----------------------------------------------------------------------------- |
+| local | the claim completes first, the upgrade lands after — call returns `Ok`        |
+| CI    | the upgrade gets in between — `CanisterTrapped`, `call_on_cleanup` also fails |
+
+The first version of the test asserted the claim still answers, so it passed
+locally and failed on CI. The local evidence behind the old claim was real —
+`upgrade_canister` does fail with `BadIngressMessage("Failed to answer to
+ingress … after 100 rounds")` when the claim's ingress is outstanding _past the
+ledger's reply_ — but that is one scheduling, not the only one.
+
+The claim runs over three rounds, confirmed by ticking one at a time:
 
 | round | what happens                                    | allowance | claimer |
 | ----- | ----------------------------------------------- | --------- | ------- |
@@ -394,27 +399,22 @@ watching the ledger:
 | 2     | the ledger executes `icrc2_transfer_from`       | 0         | 500_000 |
 | 3     | the callback lands, record becomes `Claimed`    | 0         | 500_000 |
 
-The window is after round 1 and before round 3. But `upgrade_canister` drives
-rounds to get its own `install_code` ingress answered, and it cannot while the
-claim's ingress is outstanding:
+**So the test now asserts what holds on both paths**, which is a better test than
+the one that was aimed at a single scheduling:
 
-```
-BadIngressMessage("Failed to answer to ingress 0x772a… after 100 rounds.")
-```
+- at most one payout has happened by the time the upgrade returns;
+- the record survived with its **amount and deadline** intact — the point that
+  was never measured, since the memory regions were renumbered late and a region
+  reopened as the wrong structure decodes into plausible rubbish rather than
+  failing outright;
+- and after the in-flight window, a retry leaves the claimer paid **exactly
+  once** — either the first transfer landed and the allowance is spent, or it did
+  not and the retry pays.
 
-Awaiting the claim first is what unblocks the upgrade — and awaiting it
-completes it. Verified both ways: with the claim awaited first the upgrade
-succeeds every time; with it outstanding past round 1 the upgrade always fails
-this way. The backend wasm is also over the chunked-install threshold, so
-hand-rolling the interleaving means reimplementing `upload_chunk` plus
-`install_chunked_code` against raw `submit_call`.
-
-So the lost-callback path, and the five-minute in-flight timeout that recovers
-from it, remain covered only by the unit tests in `tips/model.rs`. Closing it
-for real needs either a harness that can interleave `install_code` with an
-open call context, or a deliberate test-only endpoint that parks a record in
-`Claiming` — and the second is a hole in production code for a test, which is
-its own argument.
+That last assertion is the same on both schedulings, which is what makes it worth
+having. Open question 4 is closed by it: the lost-callback path is now exercised
+on every CI run, and the `Claiming` state plus its timeout is what recovers from
+it.
 
 ## Deploying to be1 / fe1
 
