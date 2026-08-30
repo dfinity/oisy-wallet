@@ -269,6 +269,8 @@
 				</span>
 			</ButtonMenu>
 
+			<Hr />
+
 			{#if TIPS_ENABLED}
 				<ButtonMenu
 					ariaLabel={$i18n.navigation.alt.issue_tip}
@@ -293,8 +295,6 @@
 					</span>
 				</ButtonMenu>
 			{/if}
-
-			<Hr />
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
