@@ -165,15 +165,27 @@ profile.
 Measured per branch, because that is what CI does per PR — not from the top of
 the stack, which hides everything the lower branches are missing.
 
-| #   | Branch                         | Files | lint | check | `npm run test` |
-| --- | ------------------------------ | ----- | ---- | ----- | -------------- |
-| 1   | `feat/tips-1-backend`          | 31    | ok   | ok    | ok             |
-| 2   | `feat/tips-2-service`          | 10    | ok   | ok    | ok             |
-| 3   | `feat/tips-3-sender-ui`        | 42    | ok   | ok    | ok             |
-| 4   | `feat/tips-4-recipient-ui`     | 42    | ok   | ok    | ok             |
-| 5   | `feat/tips-5-history`          | 27    | ok   | ok    | ok             |
-| 6   | `feat/tips-6-reserved-balance` | 33    | ok   | ok    | ok             |
-| 7   | `feat/tips-7-enable`           | 1     | ok   | ok    | ok             |
+Re-measured 30 Aug 2026, after the five fixes below.
+
+| #   | Branch                         | Files | lint | check | `tsc` (spec) |
+| --- | ------------------------------ | ----- | ---- | ----- | ------------ |
+| 1   | `feat/tips-1-backend`          | 32    | ok   | ok    | ok           |
+| 2   | `feat/tips-2-service`          | 10    | ok   | ok    | ok           |
+| 3   | `feat/tips-3-sender-ui`        | 42    | ok   | ok    | ok           |
+| 4   | `feat/tips-4-recipient-ui`     | 42    | ok   | ok    | ok           |
+| 5   | `feat/tips-5-history`          | 27    | ok   | ok    | ok           |
+| 6   | `feat/tips-6-reserved-balance` | 33    | ok   | ok    | ok           |
+| 7   | `feat/tips-7-enable`           | 1     | ok   | ok    | ok           |
+
+The full `npm run test` was run once from the top of the stack: **1088 files,
+18156 passed, 1 skipped, 1 todo**. Per branch only the fast half (`tsc`) was
+re-run, which is the half that actually caught something — see below.
+
+**Run `tsc` per branch, not just `check` and the targeted specs.** A spy on
+`toastsError` returning `undefined` instead of the toast's `symbol` passed
+lint, passed `svelte-check` and passed vitest, and failed only
+`tsc --project tsconfig.spec.json`. Branches 5, 6 and 7 were all red on it
+while every other gate was green.
 
 Sizes are the three-dot diff against each branch's parent — what GitHub shows.
 For branch 1 that parent is `origin/main`, not the local `main`, which is 21
@@ -208,7 +220,27 @@ Two structures on one region decode into each other's data. Tips moved to 21-26
 duplicates. `storable.rs` was reconstructed by hand after checking that neither
 side had _removed_ lines — the conflict was two additions, not a rewrite.
 
-### 3. `build.backend.args.sh` needs its own PR
+### 3. Fixed on 30 Aug, before any push
+
+Five changes, each on the branch that owns the code, cascaded by merge:
+
+| What                                                                  | Branch |
+| --------------------------------------------------------------------- | ------ |
+| Generate no longer offered before `$sendBalance` has loaded           | 6      |
+| The tips-list read failure says so, instead of reusing `claim_failed` | 5      |
+| A tip survives an upgrade and still pays exactly once                 | 1      |
+| The overview reports sums rather than a tally                         | 6      |
+| The menu entry reads "Give a tip", grouped with Refer and Support     | 3      |
+
+The first is the interesting one. `icrc2_approve` does **not** check the
+allowance against the balance — the ledger debits the approve fee and nothing
+else — so approving for more than the sender holds succeeds, and the tip then
+dies on the recipient's screen as `shortBalance`. The form's ceiling is the only
+thing preventing that, and it is derived from `$sendBalance`; while that was
+unknown there was no cap, no validation, and the ledger was the first thing to
+push back.
+
+### 4. `build.backend.args.sh` needs its own PR
 
 The `test_be_*` / `test_fe_*` key-name fix still lives only on `test/tips-be1`.
 It is a shared script other teams build from, so it should reach main as its own
@@ -246,6 +278,14 @@ three:
 ```bash
 git diff feat/tips-7-enable test/tips-be1 --stat
 ```
+
+**That check has since expired.** Branch 7 has moved a long way past the point
+be1 was cut from — main's merge plus everything since — so the diff is now
+hundreds of files and says nothing. The invariant to check before pushing a
+feature PR is the other direction: that no deploy-only content has reached the
+stack. Verified on 30 Aug and all four are clean — memory ids are 21-26 (not
+be1's 20/21 + 26-29), and `canister_ids.json`, `dfx.json` and
+`build.backend.args.sh` are all identical to `origin/main`.
 
 This defers the reinstall rather than removing it. The day main is merged into
 the deploy branch, main's contact images will want region 20 and be1 has tips
