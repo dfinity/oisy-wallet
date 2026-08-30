@@ -733,19 +733,15 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
 
     // A claim is submitted but deliberately not awaited: after one round the
     // canister has written `Claiming` and handed the transfer to the ledger, so
-    // the upgrade below lands on a canister that is mid-way through a payout
-    // rather than on a quiet one.
+    // the upgrade below lands on a canister mid-way through a payout.
     //
-    // It is worth being exact about what this does and does not reach. The
-    // hazard behind open question 4 is the upgrade landing between the ledger
-    // call and its reply, which destroys the callback. That is not expressible
-    // here: pocket-ic drives rounds to answer the `install_code` ingress, and
-    // while this claim's ingress is outstanding it cannot — the upgrade fails
-    // with "Failed to answer to ingress after 100 rounds". Awaiting the claim
-    // first is what unblocks the upgrade, and awaiting it completes it. So the
-    // lost-callback path is still unmeasured, and the five-minute in-flight
-    // timeout that recovers from it is covered only by the unit tests in
-    // `tips/model.rs`.
+    // Whether the upgrade lands *before* or *after* the ledger's reply is up to
+    // the scheduler, and both happen — locally the claim tends to complete
+    // first; on CI the upgrade gets in between and destroys the callback, so the
+    // claim call comes back as a trap. Nothing below depends on which, because
+    // the guarantee does not: the record is committed before the await, the
+    // allowance is the source of truth for whether the money moved, and neither
+    // outcome may pay twice.
     let in_flight = env
         .pic_setup
         .pic
@@ -767,38 +763,44 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
         .upgrade_latest_wasm(None)
         .expect("upgrade should succeed with a claim outstanding");
 
-    env.pic_setup
-        .pic
-        .await_call(in_flight)
-        .expect("the claim should still answer across the upgrade");
+    // Answered or trapped, both are fine. A lost callback is exactly the case
+    // the `Claiming` state and its timeout exist for.
+    let _ = env.pic_setup.pic.await_call(in_flight);
 
-    // The money and the record agree, which is the whole point of the region
-    // being read back as the structure that wrote it.
-    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
-    assert_eq!(env.tip_allowance(tip_id), Nat::from(0u64));
+    // Whatever happened to the call, at most one payout may have occurred.
+    let paid_immediately = env.balance(claimer);
 
+    assert!(
+        paid_immediately == Nat::from(0u64) || paid_immediately == Nat::from(TIP_AMOUNT),
+        "a claim across an upgrade paid something other than nothing or the tip: {paid_immediately}"
+    );
+
+    // The record survived the upgrade as itself. This is the half that was never
+    // measured: tips took stable memory regions of their own and those regions
+    // were renumbered late, and a region reopened as the wrong structure decodes
+    // into plausible rubbish rather than failing outright — so the amount and the
+    // deadline are checked, not just that a row came back.
     let tips = env.my_tips(env.sender);
 
     assert_eq!(tips.len(), 1, "the tip survived the upgrade");
     assert_eq!(tips[0].tip_id, tip_id);
-    assert_eq!(tips[0].status, TipStatus::Claimed);
-
-    // Every field the sender sees came back as itself. A region reopened as the
-    // wrong structure would decode into plausible-looking rubbish here rather
-    // than failing outright, so the amount and the deadline are checked, not
-    // just the presence of a row.
     assert_eq!(tips[0].amount, Nat::from(TIP_AMOUNT));
     assert_eq!(tips[0].expires_at_ns, expires_at_ns);
 
-    // And the second attempt is refused rather than paid, on a record that has
-    // now been through an upgrade.
-    assert_eq!(
-        env.claim(claimer, tip_id, claim_code),
-        Err(TipError::NotFound)
-    );
+    // The upgrade helper advances time well past the in-flight window, so a tip
+    // left in `Claiming` by a lost callback is claimable again by here. Retrying
+    // is what proves the design: if the first transfer did land, the allowance is
+    // spent and this fails; if it did not, this pays. Either way, once.
+    let _ = env.claim(claimer, tip_id, claim_code);
+
     assert_eq!(
         env.balance(claimer),
         Nat::from(TIP_AMOUNT),
-        "the claimer was paid exactly once across the upgrade"
+        "the claimer ends up paid exactly once, whichever side of the ledger reply the upgrade landed on"
+    );
+    assert_eq!(
+        env.tip_allowance(tip_id),
+        Nat::from(0u64),
+        "and the allowance that paid for it is spent, so nothing can draw on it again"
     );
 }
