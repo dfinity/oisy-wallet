@@ -142,7 +142,7 @@
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
 			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
 			"notes": "Notes",
-			"issue_tip": "Issue Tip"
+			"issue_tip": "Give a tip"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -167,7 +167,7 @@
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances",
 			"notes": "Open notes",
-			"issue_tip": "Issue a tip to share by link or QR code"
+			"issue_tip": "Give a tip anyone can claim with a link or QR code"
 		},
 		"short": {
 			"documentation": "Docs"
