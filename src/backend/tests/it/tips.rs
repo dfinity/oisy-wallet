@@ -10,7 +10,7 @@
 
 use std::time::Duration;
 
-use candid::{Nat, Principal};
+use candid::{encode_one, Nat, Principal};
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
@@ -674,5 +674,100 @@ fn storing_claim_codes_is_rate_limited() {
     assert!(
         limited,
         "storing claim codes without limit is how the secrets store grows unbounded"
+    );
+}
+
+#[test]
+fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
+    // Tips live in stable memory regions of their own, and those regions were
+    // renumbered late (main had taken `MemoryId::new(20)` for contact images
+    // while this branch was away). Nothing until now upgraded the canister with
+    // a tip in it, so "the records are still there and still mean the same
+    // thing afterwards" was an assumption. An upgrade that silently reopened a
+    // region as the wrong structure would show up here as a tip that vanished,
+    // or one that paid twice.
+    let env = setup_tips();
+    let tip_id = "tip-upgrade";
+    let claim_code = "code-upgrade";
+    let claimer = Principal::self_authenticating("tip-claimer-upgrade");
+
+    // Long enough to outlive the time the upgrade helper advances to dodge
+    // cycle throttling, which is far more than a tip normally sees.
+    let expires_at_ns = now_ns(&env.pic_setup) + 48 * ONE_HOUR_NS;
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(tip_id, claim_code, TIP_AMOUNT, expires_at_ns),
+        Ok(())
+    );
+
+    // A claim is submitted but deliberately not awaited: after one round the
+    // canister has written `Claiming` and handed the transfer to the ledger, so
+    // the upgrade below lands on a canister that is mid-way through a payout
+    // rather than on a quiet one.
+    //
+    // It is worth being exact about what this does and does not reach. The
+    // hazard behind open question 4 is the upgrade landing between the ledger
+    // call and its reply, which destroys the callback. That is not expressible
+    // here: pocket-ic drives rounds to answer the `install_code` ingress, and
+    // while this claim's ingress is outstanding it cannot — the upgrade fails
+    // with "Failed to answer to ingress after 100 rounds". Awaiting the claim
+    // first is what unblocks the upgrade, and awaiting it completes it. So the
+    // lost-callback path is still unmeasured, and the five-minute in-flight
+    // timeout that recovers from it is covered only by the unit tests in
+    // `tips/model.rs`.
+    let in_flight = env
+        .pic_setup
+        .pic
+        .submit_call(
+            env.pic_setup.canister_id(),
+            claimer,
+            "claim_tip",
+            encode_one(TipClaimRequest {
+                tip_id: tip_id.to_string(),
+                claim_code: claim_code.to_string(),
+            })
+            .unwrap(),
+        )
+        .expect("claim_tip should be accepted");
+
+    env.pic_setup.pic.tick();
+
+    env.pic_setup
+        .upgrade_latest_wasm(None)
+        .expect("upgrade should succeed with a claim outstanding");
+
+    env.pic_setup
+        .pic
+        .await_call(in_flight)
+        .expect("the claim should still answer across the upgrade");
+
+    // The money and the record agree, which is the whole point of the region
+    // being read back as the structure that wrote it.
+    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
+    assert_eq!(env.tip_allowance(tip_id), Nat::from(0u64));
+
+    let tips = env.my_tips(env.sender);
+
+    assert_eq!(tips.len(), 1, "the tip survived the upgrade");
+    assert_eq!(tips[0].tip_id, tip_id);
+    assert_eq!(tips[0].status, TipStatus::Claimed);
+
+    // Every field the sender sees came back as itself. A region reopened as the
+    // wrong structure would decode into plausible-looking rubbish here rather
+    // than failing outright, so the amount and the deadline are checked, not
+    // just the presence of a row.
+    assert_eq!(tips[0].amount, Nat::from(TIP_AMOUNT));
+    assert_eq!(tips[0].expires_at_ns, expires_at_ns);
+
+    // And the second attempt is refused rather than paid, on a record that has
+    // now been through an upgrade.
+    assert_eq!(
+        env.claim(claimer, tip_id, claim_code),
+        Err(TipError::NotFound)
+    );
+    assert_eq!(
+        env.balance(claimer),
+        Nat::from(TIP_AMOUNT),
+        "the claimer was paid exactly once across the upgrade"
     );
 }
