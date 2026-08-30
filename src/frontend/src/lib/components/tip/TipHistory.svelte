@@ -113,7 +113,7 @@
 		try {
 			tips = await loadMyTips({ identity: $authIdentity });
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.tip.text.claim_failed }, err });
+			toastsError({ msg: { text: $i18n.tip.text.history_failed }, err });
 		} finally {
 			loading = false;
 		}
