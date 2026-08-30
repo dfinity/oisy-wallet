@@ -250,11 +250,12 @@ reviewed change rather than riding in with tips.
 
 1. ~~Fix the three spec type errors, each on its owning branch, cascade.~~ Done.
 2. ~~Merge `main` into branch 1, resolve, cascade, re-gate every branch.~~ Done.
-3. Open PR 1 first — 31 files, the heaviest review, and provably untouched by UI
+3. Open PR 1 first — 32 files, the heaviest review, and provably untouched by UI
    testing: its diff is `src/backend`, `src/shared`, `src/declarations` plus
-   `.gitignore`, the spec doc and `test.backend.sh`.
-4. Hold 2-7 until testing settles. Branch 2 owns `tip.services.ts`, where the
-   unresolved ICP approve failure would be fixed, and there is no force-push
+   `.gitignore`, the spec doc and `test.backend.sh`. Nothing gates it any more.
+4. Hold 2-7 until testing settles. Branch 2 owns `tip.services.ts`; the ICP
+   approve failure that was open there traced to the missing balance guard,
+   fixed on branch 6, and there is no force-push
    here — once pushed, every correction is a visible extra commit.
 5. Separate PR for the deploy script.
 
@@ -293,13 +294,59 @@ records in it.
 
 ## Blocked on people, not on code
 
-These do not block building, but they block landing. Longest lead time first.
+Both of the original entries are now cleared. Nothing here gates a PR.
 
-| What                                                                                                                          | Gates                | Owner                            |
-| ----------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------- |
-| Compliance sign-off on OISY holding a bounded, revocable authorisation over user funds for up to a week (open question 11)    | branch 1             | —                                |
-| The `Uncovered` wording — it is information about the sender                                                                  | branch 4             | whoever owns the privacy promise |
-| ~~The five undrawn states, plus a light theme for every screen~~ **Cleared 30 Aug** — reviewed in both themes and signed off. | ~~branches 3, 4, 5~~ | design                           |
+| What                                                                      | Gates                | Status                                                       |
+| ------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ |
+| ~~The five undrawn states, plus a light theme for every screen~~          | ~~branches 3, 4, 5~~ | **Cleared 30 Aug** — reviewed in both themes and signed off. |
+| ~~The `Uncovered` wording — it is information about the sender~~          | ~~branch 4~~         | **Resolved 30 Aug** in code — see below.                     |
+| ~~Compliance sign-off on the week-long authorisation (open question 11)~~ | ~~branch 1~~         | **Downgraded 30 Aug** — ask in parallel, do not hold PR 1.   |
+
+### Why the compliance item was downgraded
+
+It was carried from the spec's open-questions list and repeated as the
+longest-lead blocker without anyone testing whether it deserved that weight. It
+does not, and the evidence is in this repo.
+
+**Allowances are already core OISY UX.** The frontend calls `approve` in swap
+(all three providers), ckBTC/ckETH conversions, trade deposits and crypto-pay.
+Every user who has swapped in OISY has already granted one.
+
+**Tips grants a narrower authority than any of them.** Exactly the amount plus
+one ledger fee; scoped to a spender subaccount derived from that single tip's id;
+revocable by cancelling; expired by the ledger within seven days, with
+`validate_expiry` enforcing `MAX_TIP_EXPIRY_NS` independently so a hand-rolled
+client cannot ask for more. What people routinely grant a DEX router is unlimited
+and never expires.
+
+**What is genuinely different, and worth one sentence to whoever is asked.** In
+every existing OISY flow the spender is a third-party protocol and the allowance
+is consumed inside the same user action — approve and swap, seconds apart. In
+tips the spender is OISY's own backend and it stands for days. That moves OISY
+from brokering someone else's spend authority to holding its own.
+
+**One correction to the spec.** It records that `icrc2_transfer_from` is already
+used in production by the rewards canister. That is a separate canister —
+`grep` this backend and tips is its first use. The precedent is real but
+external, so cite it that way rather than as "we already do this here."
+
+**If anyone does object**, the lever is the seven-day option, not the mechanism:
+dropping to 24 hours is one entry in `TIP_EXPIRY_OPTIONS` and the canister cap.
+
+### The `Uncovered` wording, resolved
+
+The claim screen said "The sender is out of funds" and "The sender has taken back
+the funds they set aside for it" — to whoever holds the link, which is a bearer
+token that gets forwarded and screenshotted. It also undid a decision one layer
+down, where the canister deliberately answers `NotFound` for an unknown id, an
+expired tip, a claimed tip and a wrong code alike so a prober learns nothing.
+
+The retry advice stayed, since _come back later_ versus _ask for a new link_ is
+the only part that changes what the reader does, and neither needs a word about
+anyone's balance. The guard asserts against the rendered text rather than the two
+strings, so the property survives the next edit. The sender's own screen keeps
+its financial detail — `overview_failed_hint` still says topping up is all it
+takes, because that is their money on their screen.
 
 ## Still to build
 
