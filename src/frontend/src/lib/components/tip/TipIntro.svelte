@@ -111,34 +111,27 @@
 			{/if}
 
 			<!--
-				Figure first, label beside it: the count is what the sender came to see, and
-				keeping the fiat under the label answers "how much is that" without spending
-				a second row on it. A rule between the columns rather than a gap, because
-				the two are peers being compared, not two unrelated blocks.
+				The sum, not the count. Two large figures competing at the top of the
+				intro read as the subject of the screen, and they are not — what a sender
+				wants from this box is how much is still out there. The tally is one tap
+				away in History, where each tip is a row anyway. A rule between the
+				columns rather than a gap, because the two are peers being compared.
 			-->
 			<div class="mt-3 grid grid-cols-2">
-				<div class="flex items-center gap-2 pr-3">
-					<span class="text-2xl font-bold">{$tipsOverview.open}</span>
+				<div class="min-w-0 pr-3">
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
 
-					<span class="min-w-0">
-						<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
-
-						{#if nonNullish(openFiat)}
-							<span class="block text-xs font-semibold">{openFiat}</span>
-						{/if}
-					</span>
+					{#if nonNullish(openFiat)}
+						<span class="block text-sm font-semibold">{openFiat}</span>
+					{/if}
 				</div>
 
-				<div class="flex items-center gap-2 border-l border-secondary pl-3">
-					<span class="text-2xl font-bold">{$tipsOverview.claimed}</span>
+				<div class="min-w-0 border-l border-secondary pl-3">
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
 
-					<span class="min-w-0">
-						<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
-
-						{#if nonNullish(claimedFiat)}
-							<span class="block text-xs font-semibold">{claimedFiat}</span>
-						{/if}
-					</span>
+					{#if nonNullish(claimedFiat)}
+						<span class="block text-sm font-semibold">{claimedFiat}</span>
+					{/if}
 				</div>
 			</div>
 		</div>

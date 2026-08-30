@@ -102,6 +102,23 @@ describe('TipIntro', () => {
 			expect(queryByText(get(i18n).tip.text.overview_failed)).toBeNull();
 		});
 
+		it('reports the sums, not a tally', () => {
+			// Two large figures at the top of the intro read as the subject of the
+			// screen. What a sender wants from this box is how much is still out
+			// there; the count is one tap away in History, where each tip is a row.
+			tipsStore.set([tip({ Reserved: null }), tip({ Reserved: null })]);
+
+			const { getByText, queryByText } = render(TipIntro, {
+				props: { onGetStarted: vi.fn(), onViewHistory: vi.fn() }
+			});
+
+			expect(getByText(get(i18n).tip.text.overview_open)).toBeInTheDocument();
+
+			// The count stood alone in its own element, so an exact-text match is
+			// what tells us it is gone rather than merely restyled.
+			expect(queryByText('2')).toBeNull();
+		});
+
 		it('takes the sender to History from the attention row', () => {
 			// Which now opens with the failed tips at the top.
 			tipsStore.set([tip({ Failed: null })]);
