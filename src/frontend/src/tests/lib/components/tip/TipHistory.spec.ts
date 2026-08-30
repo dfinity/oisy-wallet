@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
@@ -38,6 +39,27 @@ describe('TipHistory', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		mockAuthStore();
+	});
+
+	it('says the list failed to load, not that a claim failed', async () => {
+		// The catch reached for `claim_failed` — "The tip could not be claimed.
+		// Nothing was transferred, so try again." — on a read that claims nothing.
+		// A sender reading that has been told a payout went wrong when all that
+		// happened is that their own list did not arrive.
+		const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => undefined);
+
+		vi.spyOn(tipServices, 'loadMyTips').mockRejectedValue(new Error('canister unreachable'));
+
+		render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
+
+		const { text } = get(i18n).tip;
+
+		await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+
+		const [[{ msg }]] = toasts.mock.calls as unknown as [[{ msg: { text: string } }]];
+
+		expect(msg.text).toBe(text.history_failed);
+		expect(msg.text).not.toBe(text.claim_failed);
 	});
 
 	it('makes only a live row openable', async () => {
