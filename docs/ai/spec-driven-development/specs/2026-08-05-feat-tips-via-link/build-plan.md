@@ -248,6 +248,28 @@ reviewed change rather than riding in with tips.
 
 ### Order
 
+**Revised 31 Aug, after review.** A human reviewer asked for the rate-limiter
+rename to land as its own PR before the backend, so the stack now has an eighth
+PR at the bottom that is not tips:
+
+| PR                                                          | Branch                         | Base     | State              |
+| ----------------------------------------------------------- | ------------------------------ | -------- | ------------------ |
+| [#13862](https://github.com/dfinity/oisy-wallet/pull/13862) | `refactor/tiered-rate-limiter` | `main`   | open, review first |
+| [#13859](https://github.com/dfinity/oisy-wallet/pull/13859) | `feat/tips-1-backend`          | `main`   | open               |
+| [#13860](https://github.com/dfinity/oisy-wallet/pull/13860) | `feat/tips-2-service`          | branch 1 | open               |
+| —                                                           | branches 3-7                   | stacked  | local, in waves    |
+
+Then waves: 3 and 4 together (the two ends of one flow), 5 and 6 once those
+land, and 7 alone last since it is the switch. `TIPS_ENABLED` stays false
+through 3-6, so all four can sit on `main` invisibly — which is what makes
+staging safe rather than a race.
+
+**After each merge, merge `main` into the next branch before opening its PR.**
+This repo squash-merges, so a merged branch's commits never become ancestors of
+`main` — the content lands as one new commit. A stacked PR retargeted to `main`
+then computes its diff from the old fork point and replays everything below it.
+Merging `main` in resolves it by content, and it is a merge, not a rebase.
+
 1. ~~Fix the three spec type errors, each on its owning branch, cascade.~~ Done.
 2. ~~Merge `main` into branch 1, resolve, cascade, re-gate every branch.~~ Done.
 3. Open PR 1 first — 32 files, the heaviest review, and provably untouched by UI
@@ -261,6 +283,38 @@ reviewed change rather than riding in with tips.
 
 Steps 1 and 2 are what the stack was waiting on; what remains is a decision
 about when to start pushing, not more work on the branches.
+
+## What review has changed so far
+
+Three reviewers on #13859 and #13860: Copilot, `claude[bot]`, and Antonio. Kept
+here because most of it is about the money path, and because two findings were
+mistakes in things this doc asserted.
+
+**Sixteen findings accepted, two declined.** The ones worth remembering:
+
+| Finding                                                                                                                                                                                                                          | Where |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| A tip id of 33-64 bytes could never store or read its recovery secret — `MAX_TIP_ID_BYTES` is 64, the map key a `Blob<32>`. Creatable, claimable, cancellable, and the link silently unrecoverable. Key is now the id's SHA-256. | PR 1  |
+| `create_tip` validated the expiry against a clock read _before_ two awaited ledger calls, so a deadline could be in the past by the time it was written.                                                                         | PR 1  |
+| `cancel_tip` accepted a timed-out `Claiming` tip, contradicting its own doc. The timeout only means no reply came back; the ledger call may still pay, so cancelling returned `Ok` on a promise the canister could not keep.     | PR 1  |
+| The claim success branch wrote `Claimed` unconditionally while `release_claim` checked ownership first. A late success could erase who actually received the money. Both now share `claim_is_ours`.                              | PR 1  |
+| Five ICRC types were re-declared when the crate `signer/service.rs` imports them from already had them, identical on the wire.                                                                                                   | PR 1  |
+| The retry around `setTipSecret` re-ran the vetKD derivation it documented itself as not retrying.                                                                                                                                | PR 2  |
+
+**Declined, with reasons on the PRs:** rejecting an allowance greater than
+`amount + fee` (a fee change between approve and create would reject a good tip,
+and it is not sufficient anyway), and `LocalKey<RefCell<T>>::set` not existing
+(stable since 1.73).
+
+**Two things this doc had wrong**, both corrected above and in the PRs: the
+mid-flight upgrade case is reachable in pocket-ic, and the module comment
+justifying a separate ICRC-2 client gave a reason that was simply untrue — the
+underscore in `icrc_2_approve` is a Rust method name, not a wire string.
+
+**Deferred as its own PR:** making reserve idempotent end to end — reconciling
+`DuplicateTipId` after an ambiguous `create_tip`, and deduplicating the approve
+via `created_at_time`. Both are real, both change the money path, and neither
+belongs in a service-layer PR.
 
 ## be1 is pinned to the old memory ids
 
