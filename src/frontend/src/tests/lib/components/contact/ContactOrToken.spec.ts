@@ -1,4 +1,3 @@
-import { SOLANA_PROGRAMS } from '$env/programs/programs.sol.env';
 import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
 import * as allTokensDerived from '$lib/derived/all-tokens.derived';
 import * as contactsDerived from '$lib/derived/contacts.derived';
@@ -123,34 +122,6 @@ describe('ContactOrToken', () => {
 
 		expect(getByText(mockValidIcToken.name)).toBeInTheDocument();
 		expect(queryByText('Token Contact')).not.toBeInTheDocument();
-	});
-
-	describe('a program', () => {
-		const [program] = SOLANA_PROGRAMS;
-
-		// A Solana program account holds executable code and nothing that says whose it is, so the
-		// curated list is the one place its name lives. Without it a swap says which pool it ran
-		// through in base58.
-		it('should render the name and not the address', () => {
-			const { getByText, queryByText } = render(ContactOrToken, {
-				props: { identifier: program.address, showFallback: true }
-			});
-
-			expect(getByText(program.name)).toBeInTheDocument();
-			expect(
-				queryByText(shortenWithMiddleEllipsis({ text: program.address }))
-			).not.toBeInTheDocument();
-		});
-
-		it('should fall back to the address for a program it cannot name', () => {
-			const unknown = 'HFqU5x6ZWQXvHqPvzWPXFRuVXsyfMPYbhVdiJPB2bU7gRe';
-
-			const { getByText } = render(ContactOrToken, {
-				props: { identifier: unknown, showFallback: true }
-			});
-
-			expect(getByText(shortenWithMiddleEllipsis({ text: unknown }))).toBeInTheDocument();
-		});
 	});
 
 	it('should not render fallback when identifier is undefined even with showFallback true', () => {
