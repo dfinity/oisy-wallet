@@ -7,14 +7,13 @@
 //!
 //! The **calls** stay local, for two reasons that survive that:
 //!
-//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the
-//!   one call in this feature that must not come back "maybe": a bounded wait
-//!   that times out leaves the canister unable to say whether money moved, and
-//!   the claim state machine has nothing safe to do with that answer. These use
-//!   `unbounded_wait`.
-//! - That client is a struct bound to one canister and bundles cycles-only
-//!   methods — `deposit`, `withdraw`, `create_canister`. Tips points at whatever
-//!   ledger the sender chose, and needs three methods.
+//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the one call in this
+//!   feature that must not come back "maybe": a bounded wait that times out leaves the canister
+//!   unable to say whether money moved, and the claim state machine has nothing safe to do with
+//!   that answer. These use `unbounded_wait`.
+//! - That client is a struct bound to one canister and bundles cycles-only methods — `deposit`,
+//!   `withdraw`, `create_canister`. Tips points at whatever ledger the sender chose, and needs
+//!   three methods.
 //!
 //! An earlier version of this comment claimed the existing client "speaks the
 //! cycles ledger's dialect — `icrc_2_approve`, with underscores". That was
