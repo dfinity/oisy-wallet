@@ -134,14 +134,25 @@ fee data for that tier, still merged with ethers' `getFeeData()` via `maxBigInt`
 floored on BSC.
 
 `EthFeeContext.svelte` already owns fetching, debouncing, the mined-transaction websocket
-listener, exponential-backoff retry and visibility-change recovery. It exposes
-`triggerUpdateFee()` for imperative re-evaluation, which is exactly how a tier change forces a
-refetch. Do not build a second fetch path.
+listener, exponential-backoff retry and visibility-change recovery. Do not build a second fetch
+path.
+
+The selected tier reaches it as a **prop**, not from `SendContext`: swap, convert, stake and
+Liquidium mount `EthFeeContext` too and have no send context to read. Flows that offer no choice
+leave it at the default.
+
+The provider's own quote (`maxBigInt` against ethers) and the BSC floor are lower bounds on what
+the chain will relay, so they apply to **every** tier. Applying them once after selection would
+let a Slow choice fall below the floor.
 
 The three tiers' prices must be displayed **simultaneously** in the expanded list, so the store
-needs all three, not just the selected one. Put the full per-tier set in the fee store and let
-the selected tier derive from it, rather than refetching on every selection. This also removes
-the network round trip from the interaction.
+needs all three, not just the selected one. Keep the full per-tier set beside the fee store and
+re-price locally on selection rather than refetching, which removes the network round trip from
+the interaction.
+
+The re-pricing effect must track **the choice alone**. Tracking the fetched sample as well makes
+every fetch set the fee twice, once from the fetch and once from the effect, since a fresh fetch
+already applies the current tier itself.
 
 ### 3.4 Estimate vs ceiling
 
@@ -249,15 +260,21 @@ Two PRs. Atomic per `AGENTS.md` commandments 2 and 3.
 
 **PR1 `feat(frontend): show the estimated fee for EVM sends`**
 
-- `getSuggestedFeeData` returns all tiers plus `estimatedBaseFee`
+- `getSuggestedFeeData` returns `estimatedBaseFee` alongside the medium tier
 - estimated-cost derivation in `fee.utils.ts`, exposed via `eth-fee.store.ts`
 - send flow renders the estimate, row relabelled "Estimated fee"
 - every solvency check stays on `maxGasFee`
 - no tier UI yet; still pinned to Normal
 - `PRODUCT.md` updated in this PR
 
+> **Adjusted during implementation.** PR1 was originally specified to return all three tiers.
+> It returns only `estimatedBaseFee`, because nothing in PR1 consumes the other two and unused
+> surface is what commandment 10 forbids. The full tier set moved to PR2, which needs it.
+
 **PR2 `feat(frontend): let the user choose the priority for EVM sends`**
 
+- all three tiers returned from the Gas API, with the vendor's low / medium / high naming
+  confined to the REST layer
 - tier state in `SendContext`, default Normal
 - desktop collapsible row plus mobile bottom sheet, all three tiers priced
 - selection drives the fee data and therefore what gets signed
