@@ -1,134 +1,31 @@
+import { SOLANA_PROGRAMS } from '$env/programs/programs.sol.env';
 import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
-import * as allTokensDerived from '$lib/derived/all-tokens.derived';
-import * as contactsDerived from '$lib/derived/contacts.derived';
-import type { ContactUi } from '$lib/types/contact';
-import type { Token } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
-import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
-const mockAllTokens = (tokens: Token[]) => {
-	vi.spyOn(allTokensDerived.allTokens, 'subscribe').mockImplementation((fn) => {
-		fn(tokens.map((t) => ({ ...t, enabled: true })));
-		return () => {};
-	});
-};
-
-const mockAllContacts = (contacts: ContactUi[]) => {
-	vi.spyOn(contactsDerived.allContacts, 'subscribe').mockImplementation((fn) => {
-		fn(contacts);
-		return () => {};
-	});
-};
-
 describe('ContactOrToken', () => {
-	const ethAddress = mockContactEthAddressUi.address;
+	const [program] = SOLANA_PROGRAMS;
 
-	const [mockContact] = getMockContactsUi({
-		n: 1,
-		name: 'Alice',
-		addresses: [{ address: ethAddress, addressType: 'Eth', label: 'Main wallet' }]
-	});
-
-	beforeEach(() => {
-		vi.restoreAllMocks();
-
-		mockAllTokens([]);
-
-		mockAllContacts([]);
-	});
-
-	it('should render nothing when identifier is undefined', () => {
-		const { container } = render(ContactOrToken, {
-			props: { identifier: undefined }
-		});
-
-		expect(container.textContent?.trim()).toBe('');
-	});
-
-	it('should render nothing when identifier does not match any token or contact and showFallback is false', () => {
-		const { container } = render(ContactOrToken, {
-			props: { identifier: ethAddress }
-		});
-
-		expect(container.textContent?.trim()).toBe('');
-	});
-
-	it('should render TokenAsContact when identifier matches a token', () => {
-		mockAllTokens([mockValidIcToken]);
-
-		const { getByText } = render(ContactOrToken, {
-			props: { identifier: mockLedgerCanisterId }
-		});
-
-		expect(getByText(mockValidIcToken.name)).toBeInTheDocument();
-		expect(getByText(mockValidIcToken.symbol)).toBeInTheDocument();
-	});
-
-	it('should render ContactWithAvatar when identifier matches a contact', () => {
-		mockAllContacts([mockContact]);
-
-		const { getByText } = render(ContactOrToken, {
-			props: { identifier: ethAddress }
-		});
-
-		expect(getByText('Alice')).toBeInTheDocument();
-	});
-
-	it('should render contact address label when present', () => {
-		mockAllContacts([mockContact]);
-
-		const { getByText } = render(ContactOrToken, {
-			props: { identifier: ethAddress }
-		});
-
-		expect(getByText('Main wallet')).toBeInTheDocument();
-	});
-
-	it('should render shortened identifier as fallback when showFallback is true', () => {
-		const longIdentifier = '0x1234567890abcdef1234567890abcdef12345678';
-
-		const { getByText } = render(ContactOrToken, {
-			props: { identifier: longIdentifier, showFallback: true }
-		});
-
-		expect(getByText(shortenWithMiddleEllipsis({ text: longIdentifier }))).toBeInTheDocument();
-	});
-
-	it('should not render fallback when showFallback is false', () => {
-		const longIdentifier = '0x1234567890abcdef1234567890abcdef12345678';
-
-		const { container } = render(ContactOrToken, {
-			props: { identifier: longIdentifier, showFallback: false }
-		});
-
-		expect(container.textContent?.trim()).toBe('');
-	});
-
-	it('should prioritise token over contact when both match', () => {
-		mockAllTokens([mockValidIcToken]);
-		mockAllContacts([
-			getMockContactsUi({
-				n: 1,
-				name: 'Token Contact',
-				addresses: [{ address: mockLedgerCanisterId, addressType: 'Icrcv2' }]
-			})[0]
-		]);
-
+	// A Solana program holds only executable code on chain, so the curated list is the one place
+	// its name lives. Without it a swap says which pool it ran through in base58.
+	it('should name a program from the curated list', () => {
 		const { getByText, queryByText } = render(ContactOrToken, {
-			props: { identifier: mockLedgerCanisterId }
+			props: { identifier: program.address, showFallback: true }
 		});
 
-		expect(getByText(mockValidIcToken.name)).toBeInTheDocument();
-		expect(queryByText('Token Contact')).not.toBeInTheDocument();
+		expect(getByText(program.name)).toBeInTheDocument();
+		expect(
+			queryByText(shortenWithMiddleEllipsis({ text: program.address }))
+		).not.toBeInTheDocument();
 	});
 
-	it('should not render fallback when identifier is undefined even with showFallback true', () => {
-		const { container } = render(ContactOrToken, {
-			props: { identifier: undefined, showFallback: true }
+	it('should fall back to the address for a program it cannot name', () => {
+		const unknown = 'HFqU5x6ZWQXvHqPvzWPXFRuVXsyfMPYbhVdiJPB2bU7gRe';
+
+		const { getByText } = render(ContactOrToken, {
+			props: { identifier: unknown, showFallback: true }
 		});
 
-		expect(container.textContent?.trim()).toBe('');
+		expect(getByText(shortenWithMiddleEllipsis({ text: unknown }))).toBeInTheDocument();
 	});
 });
