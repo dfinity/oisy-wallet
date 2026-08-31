@@ -1,68 +1,35 @@
-//! Minimal ICRC-1/2 client for arbitrary token ledgers.
+//! ICRC-1/2 calls for arbitrary token ledgers.
 //!
-//! The repo's existing ledger client (`src/cycles_ledger`) speaks the cycles
-//! ledger's dialect — `icrc_2_approve`, with underscores — so it cannot be
-//! pointed at a token ledger. These are the standard `icrc2_*` methods, with
-//! only the fields tips actually needs.
+//! The **types** come from `ic_cycles_ledger_client`, which re-exports the
+//! generated ICRC shapes. They are the standard ones and identical on the wire,
+//! and `signer/service.rs` already imports `Account` and `AllowanceArgs` from
+//! there — so declaring a second copy here bought nothing.
 //!
-//! Deliberately **not** in `shared::types`: those types are exported into
-//! `backend.did`, and the ledger wire format is an implementation detail of
-//! this canister, not part of its public interface.
+//! The **calls** stay local, for two reasons that survive that:
+//!
+//! - `CyclesLedgerService` uses `Call::bounded_wait` throughout. A payout is the
+//!   one call in this feature that must not come back "maybe": a bounded wait
+//!   that times out leaves the canister unable to say whether money moved, and
+//!   the claim state machine has nothing safe to do with that answer. These use
+//!   `unbounded_wait`.
+//! - That client is a struct bound to one canister and bundles cycles-only
+//!   methods — `deposit`, `withdraw`, `create_canister`. Tips points at whatever
+//!   ledger the sender chose, and needs three methods.
+//!
+//! An earlier version of this comment claimed the existing client "speaks the
+//! cycles ledger's dialect — `icrc_2_approve`, with underscores". That was
+//! wrong: the underscore is in the Rust method name only, and the wire strings
+//! there are the standard `icrc2_*`. Recorded because it is the obvious thing to
+//! assume, and it is not a reason to write a second client.
 
-use candid::{CandidType, Deserialize, Nat, Principal};
+use candid::{Nat, Principal};
 use ic_cdk::call::Call;
-use serde_bytes::ByteBuf;
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct Account {
-    pub owner: Principal,
-    pub subaccount: Option<ByteBuf>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct AllowanceArgs {
-    pub account: Account,
-    pub spender: Account,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct Allowance {
-    pub allowance: Nat,
-    pub expires_at: Option<u64>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct TransferFromArgs {
-    /// The subaccount of *this canister* the allowance was granted to. Omitting
-    /// it addresses the bare-principal allowance, which for tips is always
-    /// empty — every tip's allowance sits under its own subaccount.
-    pub spender_subaccount: Option<ByteBuf>,
-    pub from: Account,
-    pub to: Account,
-    pub amount: Nat,
-    pub fee: Option<Nat>,
-    pub memo: Option<ByteBuf>,
-    pub created_at_time: Option<u64>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum TransferFromError {
-    BadFee { expected_fee: Nat },
-    BadBurn { min_burn_amount: Nat },
-    InsufficientFunds { balance: Nat },
-    InsufficientAllowance { allowance: Nat },
-    TooOld,
-    CreatedInFuture { ledger_time: u64 },
-    Duplicate { duplicate_of: Nat },
-    TemporarilyUnavailable,
-    GenericError { error_code: Nat, message: String },
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum TransferFromResult {
-    Ok(Nat),
-    Err(TransferFromError),
-}
+// Re-exported so callers keep importing the ledger shapes from the module that
+// speaks to the ledger, rather than reaching into a crate named for the cycles
+// ledger to talk to an arbitrary token one.
+pub use ic_cycles_ledger_client::{
+    Account, Allowance, AllowanceArgs, TransferFromArgs, TransferFromError,
+};
 
 /// Why a payout did not happen.
 ///
@@ -126,16 +93,20 @@ pub async fn transfer_from(
             TransferFromCallError::Failed(format!("icrc2_transfer_from call failed: {err:?}"))
         })?;
 
-    match response.candid::<TransferFromResult>().map_err(|err| {
-        TransferFromCallError::Failed(format!("icrc2_transfer_from decode failed: {err:?}"))
-    })? {
-        TransferFromResult::Ok(block_index) => Ok(block_index),
-        TransferFromResult::Err(TransferFromError::InsufficientAllowance { .. }) => {
+    // `Result` is what candid's `variant { Ok; Err }` decodes into, so the named
+    // wrapper enum this used to carry was a third copy of the same shape.
+    match response
+        .candid::<Result<Nat, TransferFromError>>()
+        .map_err(|err| {
+            TransferFromCallError::Failed(format!("icrc2_transfer_from decode failed: {err:?}"))
+        })? {
+        Ok(block_index) => Ok(block_index),
+        Err(TransferFromError::InsufficientAllowance { .. }) => {
             Err(TransferFromCallError::InsufficientAllowance)
         }
-        TransferFromResult::Err(TransferFromError::InsufficientFunds { .. }) => {
+        Err(TransferFromError::InsufficientFunds { .. }) => {
             Err(TransferFromCallError::InsufficientFunds)
         }
-        TransferFromResult::Err(err) => Err(TransferFromCallError::Failed(format!("{err:?}"))),
+        Err(err) => Err(TransferFromCallError::Failed(format!("{err:?}"))),
     }
 }
