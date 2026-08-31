@@ -1,5 +1,6 @@
 import type { SolAddress } from '$sol/types/address';
 import type { SolRpcTransactionRaw } from '$sol/types/sol-transaction';
+import type { ParsedAddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import type { ParsedComputeBudgetInstruction } from '@solana-program/compute-budget';
 import type { ParsedSystemInstruction } from '@solana-program/system';
 import type {
@@ -14,13 +15,15 @@ export type SolParsedSystemInstruction = ParsedSystemInstruction<SolAddress>;
 export type SolParsedTokenInstruction = ParsedTokenInstruction<SolAddress>;
 export type SolParsedToken2022Instruction = ParsedToken2022Instruction<SolAddress>;
 export type SolParsedAtaInstruction = ParsedAssociatedTokenInstruction<SolAddress>;
+export type SolParsedLookupTableInstruction = ParsedAddressLookupTableInstruction<SolAddress>;
 
 export type SolParsedInstruction =
 	| SolParsedComputeBudgetInstruction
 	| SolParsedSystemInstruction
 	| SolParsedTokenInstruction
 	| SolParsedToken2022Instruction
-	| SolParsedAtaInstruction;
+	| SolParsedAtaInstruction
+	| SolParsedLookupTableInstruction;
 
 export type SolInstruction = Instruction;
 
