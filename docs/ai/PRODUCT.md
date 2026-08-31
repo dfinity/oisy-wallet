@@ -291,6 +291,8 @@ When an Ethereum send or approval flow is open, OISY fetches the current network
 
 A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
+The fee a send quotes is what the transaction is **expected to cost**, not the most it could cost. Ethereum charges the network's own base fee plus whatever tip the sender adds, and refunds the difference between that and the ceiling the sender authorised; it also refunds gas the transaction did not use. Quoting the ceiling would overstate the price, often close to double for a token transfer, because the ceiling deliberately carries headroom for a base-fee rise and because token transfers pad their gas limit. The ceiling still decides whether a send is **affordable**: the balance checks and the "max" amount button hold the user to the worst case, so a send can never start out payable and end up short. When the network does not report a base fee, the quote falls back to the ceiling, since overstating the cost is safer than showing none. Only the send flow quotes an expected cost; swap, convert, stake and WalletConnect approvals still quote the maximum. This is currently limited to local and staging builds: beta and production still quote the maximum everywhere, unchanged.
+
 ---
 
 ## Bitcoin
