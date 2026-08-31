@@ -23,7 +23,7 @@ use shared::types::{
 };
 
 use crate::utils::{
-    icrc1_ledger::{self, Account as LedgerAccount, TRANSFER_FEE},
+    icrc1_ledger::{self, TRANSFER_FEE},
     pocketic::{controller, setup, PicBackend, PicCanisterTrait},
 };
 
@@ -43,8 +43,8 @@ fn now_ns(pic_setup: &PicBackend) -> u64 {
 /// If the backend ever changed how it derives this, the allowance the test
 /// grants would stop matching the one the backend spends from, and every claim
 /// would fail — which is the point of computing it separately.
-fn spender_subaccount(tip_id: &str) -> Vec<u8> {
-    Sha256::digest(tip_id.as_bytes()).to_vec()
+fn spender_subaccount(tip_id: &str) -> [u8; 32] {
+    Sha256::digest(tip_id.as_bytes()).into()
 }
 
 fn claim_code_hash(claim_code: &str) -> ByteBuf {
@@ -78,7 +78,7 @@ impl TipEnv {
             &self.pic_setup.pic,
             self.ledger,
             self.sender,
-            LedgerAccount::with_subaccount(
+            icrc1_ledger::account_with_subaccount(
                 self.pic_setup.canister_id(),
                 spender_subaccount(tip_id),
             ),
@@ -186,7 +186,7 @@ impl TipEnv {
             &self.pic_setup.pic,
             self.ledger,
             self.sender,
-            LedgerAccount::with_subaccount(
+            icrc1_ledger::account_with_subaccount(
                 self.pic_setup.canister_id(),
                 spender_subaccount(tip_id),
             ),
