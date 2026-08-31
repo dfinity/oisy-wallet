@@ -1552,6 +1552,7 @@
 			"estimated_inter_network": "예상 네트워크 간 수수료",
 			"estimated_eth": "예상 이더리움 수수료",
 			"max_fee_eth": "최대 수수료 <small>(보통 &lt; 30초 이내)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "전환 수수료",
 			"convert_inter_network_fee": "네트워크 간 수수료",
 			"convert_btc_network_fee": "비트코인 네트워크 수수료",

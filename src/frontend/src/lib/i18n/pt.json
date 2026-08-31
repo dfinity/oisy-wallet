@@ -1552,6 +1552,7 @@
 			"estimated_inter_network": "Taxa Inter-Rede estimada",
 			"estimated_eth": "Taxa Ethereum estimada",
 			"max_fee_eth": "Taxa máxima <small>(provavelmente em < 30 segundos)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Taxa de conversão",
 			"convert_inter_network_fee": "Taxa inter-rede de conversão",
 			"convert_btc_network_fee": "Taxa de rede Bitcoin",

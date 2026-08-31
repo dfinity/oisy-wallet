@@ -60,9 +60,9 @@
 	{/snippet}
 
 	{#snippet fee()}
-		<EthFeeDisplay>
+		<EthFeeDisplay estimated>
 			{#snippet label()}
-				<Html text={$i18n.fee.text.max_fee_eth} />
+				<Html text={$i18n.fee.text.estimated_fee_eth} />
 			{/snippet}
 		</EthFeeDisplay>
 	{/snippet}

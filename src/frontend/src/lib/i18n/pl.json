@@ -1552,6 +1552,7 @@
 			"estimated_inter_network": "Szacowana opłata między sieciami",
 			"estimated_eth": "Szacowana opłata Ethereum",
 			"max_fee_eth": "Maksymalna opłata <small>(prawdopodobnie w < 30 sekund)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Opłata za konwersję",
 			"convert_inter_network_fee": "Opłata między sieciami",
 			"convert_btc_network_fee": "Opłata sieciowa Bitcoin",

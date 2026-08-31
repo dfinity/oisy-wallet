@@ -1552,6 +1552,7 @@
 			"estimated_inter_network": "Frais inter-réseaux estimés",
 			"estimated_eth": "Frais Ethereum estimés",
 			"max_fee_eth": "Frais max <small>(probablement dans &lt; 30 secondes)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Frais de conversion",
 			"convert_inter_network_fee": "Frais inter-réseaux",
 			"convert_btc_network_fee": "Frais réseau Bitcoin",
