@@ -1553,6 +1553,13 @@
 			"estimated_eth": "Comisión de Ethereum Estimada",
 			"max_fee_eth": "Comisión máx. <small>(probablemente en &lt; 30 segundos)</small>",
 			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Comisión de conversión",
 			"convert_inter_network_fee": "Comisión inter-red",
 			"convert_btc_network_fee": "Comisión de red de Bitcoin",
@@ -1563,6 +1570,9 @@
 			"network_fee": "Comisión de red",
 			"approval_fee": "Comisión de aprobación",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cubrir las comisiones."

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 	import {
 		ETH_FEE_DATA_LISTENER_DELAY,
@@ -36,6 +37,7 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
@@ -49,6 +51,8 @@
 
 	interface Props {
 		observe: boolean;
+		// Flows that offer no choice (swap, convert, stake) simply leave this at the default.
+		priority?: EthFeePriority;
 		destination?: string;
 		amount?: OptionAmount;
 		data?: string;
@@ -67,6 +71,7 @@
 
 	let {
 		observe,
+		priority = EthFeePriority.NORMAL,
 		destination = '',
 		amount,
 		data,
@@ -83,7 +88,8 @@
 		children
 	}: Props = $props();
 
-	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+	const { feeStore, feePrioritiesStore }: EthFeeContext =
+		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -105,12 +111,15 @@
 
 			assertIsNetworkEthereum(network);
 
-			const { feeData, provider, params } = await getEthFeeDataWithProvider({
+			const { feeData, priorities, provider, params } = await getEthFeeDataWithProvider({
 				networkId: network.id,
 				chainId: network.chainId,
 				from: $ethAddress,
-				to: destination !== '' ? destination : $ethAddress
+				to: destination !== '' ? destination : $ethAddress,
+				priority
 			});
+
+			feePrioritiesStore.set(priorities);
 
 			const { safeEstimateGas, estimateGas } = provider;
 
@@ -421,6 +430,34 @@
 
 		untrack(() => obverseFeeData());
 	};
+
+	// Re-price against the sample already in hand rather than re-fetching: every priority came back
+	// from the same call, so switching between them is arithmetic, not a round trip.
+	// Tracks the choice alone: a fresh fetch already applies the current priority itself, and
+	// depending on the sample too would set the fee twice per fetch.
+	$effect(() => {
+		const selected = priority;
+
+		untrack(() => {
+			const priorities = get(feePrioritiesStore);
+
+			if (isNullish(priorities)) {
+				return;
+			}
+
+			const current = get(feeStore);
+
+			if (isNullish(current)) {
+				return;
+			}
+
+			feeStore.setFee({
+				...current,
+				...priorities.perPriority[selected],
+				baseFeePerGas: priorities.baseFeePerGas
+			});
+		});
+	});
 
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
