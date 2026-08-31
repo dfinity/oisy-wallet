@@ -182,8 +182,8 @@ describe('SolWalletConnectSignReview', () => {
 
 	// The name is a label beside the address, not a replacement for it: the address is the part
 	// the user can check.
-	it('should show the name a program publishes for itself next to its address', () => {
-		const { getAllByTestId } = render(SolWalletConnectSignReview, {
+	it('should show the name a program publishes for itself next to its address', async () => {
+		const queries = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
 				instructions: [
@@ -197,15 +197,17 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
+		await showOperations(queries);
+
 		// The legs of the route render as instructions of their own underneath it.
-		const [route] = getAllByTestId('sol-instruction');
+		const [route] = queries.getAllByTestId('sol-instruction');
 
 		expect(route).toHaveTextContent('jupiter');
 		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
 	});
 
-	it('should show only the address of a program that publishes no name', () => {
-		const { getAllByTestId } = render(SolWalletConnectSignReview, {
+	it('should show only the address of a program that publishes no name', async () => {
+		const queries = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
 				instructions: [
@@ -218,7 +220,9 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		const [route] = getAllByTestId('sol-instruction');
+		await showOperations(queries);
+
+		const [route] = queries.getAllByTestId('sol-instruction');
 
 		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
 		expect(route).not.toHaveTextContent('jupiter');
