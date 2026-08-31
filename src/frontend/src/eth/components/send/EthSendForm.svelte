@@ -62,7 +62,9 @@
 	{/snippet}
 
 	{#snippet priority()}
-		<EthFeePriority />
+		{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+			<EthFeePriority />
+		{/if}
 	{/snippet}
 
 	{#snippet fee()}
