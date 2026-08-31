@@ -183,8 +183,9 @@ export const deriveSolTransactionSummary = ({
  * One transaction summary as the sentence that names it.
  *
  * A swap says its pair, because in a day of swaps that is the only thing telling one row from
- * another. Everything else is a word: the figure belongs to the amount column, and repeating it
- * in the sentence says the same thing twice.
+ * another. Everything else is a word. No figures anywhere but the self-transfer, whose net is zero
+ * by definition: the amount column beside the sentence carries them, and saying them twice reads
+ * as two movements.
  *
  * The symbols and the formatting come from the caller, since what a mint is called depends on the
  * view asking: a list numbers its unnamed mints against the others beside them.
@@ -219,12 +220,12 @@ export const formatSolTransactionSummary = ({
 			: i18n.transaction.text.kind_other;
 	}
 
+	// The pair, without the figures: the amount column beside the sentence already carries them,
+	// and one row of a swap shows one of the two anyway.
 	if (kind === 'swap') {
 		return nonNullish(spent) && nonNullish(received)
 			? replacePlaceholders(i18n.transaction.text.summary_swap, {
-					$spent: amountOf(spent),
 					$spent_symbol: symbolOf(spent.tokenAddress),
-					$received: amountOf(received),
 					$received_symbol: symbolOf(received.tokenAddress)
 				})
 			: i18n.swap.text.swap;
