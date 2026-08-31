@@ -1,9 +1,26 @@
 import type { NetworkId } from '$lib/types/network';
-import type { SplTokenMetadata } from '$sol/stores/spl-token-metadata.store';
+import type { SplTokenMetadata, SplTokenMetadataData } from '$sol/stores/spl-token-metadata.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { findEnabledSplToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+
+/**
+ * The names known for one cluster. The same mint address exists on several of them and carries
+ * different data on each, so a name is only ever read out of the cluster it was fetched from.
+ */
+const namesOn = ({
+	metadata,
+	networkId
+}: {
+	metadata: SplTokenMetadataData;
+	networkId: NetworkId;
+}): Partial<Record<SplTokenAddress, SplTokenMetadata>> => {
+	const network = mapNetworkIdToNetwork(networkId);
+
+	return nonNullish(network) ? (metadata[network] ?? {}) : {};
+};
 
 /**
  * How a mint is named, wherever one is named.
@@ -28,7 +45,7 @@ export const solTokenSymbol = ({
 	tokenAddress: SplTokenAddress | undefined;
 	tokens: SplCustomToken[];
 	networkId: NetworkId;
-	metadata: Partial<Record<SplTokenAddress, SplTokenMetadata>>;
+	metadata: SplTokenMetadataData;
 	unknownTokenAddresses: SplTokenAddress[];
 	unknownTokenLabel: string;
 	nativeSymbol: string;
@@ -43,7 +60,7 @@ export const solTokenSymbol = ({
 		return listed;
 	}
 
-	const onChain = metadata[tokenAddress]?.symbol;
+	const onChain = namesOn({ metadata, networkId })[tokenAddress]?.symbol;
 
 	if (notEmptyString(onChain)) {
 		return onChain;
@@ -69,14 +86,16 @@ export const solUnknownTokenAddresses = ({
 	tokenAddresses: (SplTokenAddress | undefined)[];
 	tokens: SplCustomToken[];
 	networkId: NetworkId;
-	metadata: Partial<Record<SplTokenAddress, SplTokenMetadata>>;
-}): SplTokenAddress[] =>
-	tokenAddresses.reduce<SplTokenAddress[]>((acc, tokenAddress) => {
+	metadata: SplTokenMetadataData;
+}): SplTokenAddress[] => {
+	const names = namesOn({ metadata, networkId });
+
+	return tokenAddresses.reduce<SplTokenAddress[]>((acc, tokenAddress) => {
 		if (
 			isNullish(tokenAddress) ||
 			acc.includes(tokenAddress) ||
 			nonNullish(findEnabledSplToken({ tokens, tokenAddress, networkId })) ||
-			notEmptyString(metadata[tokenAddress]?.symbol)
+			notEmptyString(names[tokenAddress]?.symbol)
 		) {
 			return acc;
 		}
@@ -84,3 +103,4 @@ export const solUnknownTokenAddresses = ({
 		acc.push(tokenAddress);
 		return acc;
 	}, []);
+};
