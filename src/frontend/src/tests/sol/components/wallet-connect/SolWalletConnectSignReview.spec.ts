@@ -98,7 +98,8 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
 	});
 
-	it('should render each fee row as a label above its value', () => {
+	// One heading, and the parts under it: three headings read as three unrelated costs.
+	it('should gather the costs under a single fee heading', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
@@ -106,8 +107,31 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.network_fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+	});
+
+	it('should charge the rent of the accounts the message opens as its own line', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n },
+					{ kind: 'createTokenAccount' as const, account: 'ata-two', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
+	});
+
+	it('should charge no rent when the message opens no account', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, instructions: [{ kind: 'send' as const, amount: 1n }] }
+		});
+
+		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
 	});
 
 	it('should show the fiat approximation next to a fee', () => {
@@ -129,6 +153,103 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+	});
+
+	// The message states almost nothing a routed swap does; the simulation is what knows.
+	it('should list what the simulated run does', () => {
+		const { getByTestId, getAllByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: mockAtaAddress, rent: 2_039_280n },
+					{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }
+				]
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
+		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
+	});
+
+	// An unchecked transfer states no decimals, so without the simulated deltas the amount would
+	// be printed in raw base units: a hundredth of a token would read as ten thousand.
+	it('should scale an unlisted mint by the decimals the simulation reports', () => {
+		const tokenAddress = 'unlisted-mint';
+
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'send' as const, amount: 10_000n, tokenAddress, counterparty: mockSolAddress2 }
+				],
+				preview: {
+					tokenDeltas: [{ account: mockAtaAddress, tokenAddress, decimals: 6, delta: -10_000n }],
+					controlChanges: []
+				}
+			}
+		});
+
+		expect(getByTestId('sol-instruction')).toHaveTextContent('0.01');
+	});
+
+	describe('the line that says what the message does', () => {
+		const messageSummary = {
+			kind: 'send' as const,
+			spent: { delta: -1_000_000n },
+			counterparty: mockSolAddress2
+		};
+
+		it('should state the message when the simulated run agrees with it', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: { solDelta: -1_005_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		// A sentence the user would check the figures against, over a transaction that does
+		// something else, is worse than no sentence at all.
+		it('should say nothing when the run moves more than the message states', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: {
+						solDelta: -1_005_000n,
+						tokenDeltas: [
+							{
+								account: mockAtaAddress,
+								tokenAddress: 'unlisted-mint',
+								decimals: 6,
+								delta: -9_000_000n
+							}
+						],
+						controlChanges: []
+					}
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		// The simulation is best effort, and an unchecked reading is not worth stating.
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, messageSummary }
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+	});
+
+	it('should show no instruction list when the simulation produced none', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+		expect(queryByTestId('sol-instructions-list')).not.toBeInTheDocument();
 	});
 
 	describe('the warnings about what the transaction does', () => {
@@ -392,21 +513,47 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	describe('the simulation note', () => {
+	describe('the notice about how the review was obtained', () => {
 		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
 
-		it('should state that the real execution can differ once a simulation ran', () => {
+		it('should state that the review is simulated once a simulation ran', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: { ...props, preview }
 			});
 
-			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+		});
+
+		// Two notices about the same thing are one too many: an undecodable message already says
+		// the review comes from a simulation, in stronger terms.
+		it('should not repeat itself when the instructions could not be decoded', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true, preview }
+			});
+
+			expect(
+				getByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
+		});
+
+		// A simulation is best effort and can come back with nothing; the warning must not claim
+		// one ran when none did.
+		it('should not claim a simulation when none was obtained', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+			expect(
+				queryByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).not.toBeInTheDocument();
 		});
 
 		it('should say nothing when no simulation was obtained', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, { props });
 
-			expect(queryByText(en.wallet_connect.text.simulation_note)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
 		it('should render the note above the transaction data', () => {
@@ -414,7 +561,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, preview }
 			});
 
-			const note = getByText(en.wallet_connect.text.simulation_note);
+			const note = getByText(en.wallet_connect.text.simulated_review);
 			const application = getByText(en.wallet_connect.text.application);
 
 			expect(note.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
@@ -462,7 +609,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
 			expect(getByTestId('simulated-sol-delta')).toHaveTextContent('-0.01 SOL');
-			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
 		});
 	});
 

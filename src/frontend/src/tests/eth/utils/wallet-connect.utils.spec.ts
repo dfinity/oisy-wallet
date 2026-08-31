@@ -1,3 +1,10 @@
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -7,12 +14,16 @@ import {
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import {
 	assertValidEthTypedData,
+	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
+	getEthTypedDataMethods,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
+	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
@@ -360,6 +371,290 @@ describe('wallet-connect.utils', () => {
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_PERSONAL_SIGN,
 					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('classifyWalletConnectEthCall', () => {
+		const args = 'de'.repeat(64);
+
+		it.each([undefined, '', '0x', '0X'])('should classify %s as a native transfer', (data) => {
+			expect(classifyWalletConnectEthCall(data)).toEqual({ type: 'native' });
+		});
+
+		it.each([
+			{ selector: ERC20_APPROVE_HASH, expected: { type: 'erc20Approve' } },
+			{ selector: ERC20_TRANSFER_HASH, expected: { type: 'erc20Transfer' } },
+			{ selector: ERC_SET_APPROVAL_FOR_ALL_HASH, expected: { type: 'setApprovalForAll' } },
+			{
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: true }
+			},
+			{
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: false }
+			}
+		])('should classify the call behind selector $selector', ({ selector, expected }) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual(expected);
+		});
+
+		it('should classify a selector regardless of its casing', () => {
+			const upper = ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase().replace('0X', '0x');
+
+			expect(classifyWalletConnectEthCall(`${upper}${args}`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+
+		// The behaviour the whole change exists for. Each of these is a selector that was never
+		// considered, and each used to be reviewed as a native zero-value send.
+		it.each([
+			// Uniswap Permit2 `approve`
+			'0x87517c45',
+			// ERC-2612 `permit`
+			'0xd505accf',
+			// ERC-20 `transferFrom`
+			'0x23b872dd',
+			// a router `execute`
+			'0x3593564c',
+			// nothing at all
+			'0xdeadbeef'
+		])('should classify unrecognised selector %s as unknown', (selector) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual({
+				type: 'unknown',
+				selector
+			});
+		});
+
+		it('should classify calldata too short to carry a selector as unknown, naming none', () => {
+			expect(classifyWalletConnectEthCall('0xab')).toEqual({
+				type: 'unknown',
+				selector: undefined
+			});
+		});
+
+		// A known selector says nothing about the arguments behind it. Recognising the call is what
+		// routes it to a review that decodes those arguments and fails closed when they do not.
+		it('should classify a known selector carrying garbage arguments by its selector', () => {
+			expect(classifyWalletConnectEthCall(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+	});
+
+	describe('isWalletConnectEthApproval', () => {
+		it.each([
+			{ type: 'erc20Approve' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		])('should treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeTruthy();
+		});
+
+		// Not an approval, and not a send either: the modal titles it for what it is.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'erc20Transfer' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('getEthTypedDataMethods', () => {
+		it('should name the struct an ERC-2612 permit hashes', () => {
+			expect(getEthTypedDataMethods(erc2612Permit)).toEqual([{ name: 'Permit', depth: 0 }]);
+		});
+
+		it('should name the root first and the structs it declares beneath it', () => {
+			expect(getEthTypedDataMethods(permit2)).toEqual([
+				{ name: 'PermitSingle', depth: 0 },
+				{ name: 'PermitDetails', depth: 1 }
+			]);
+		});
+
+		it('should name the ERC-3009 authorization the review could not describe', () => {
+			expect(getEthTypedDataMethods(transferWithAuthorization())).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		it('should leave the domain out, since it separates the digest rather than being hashed into it', () => {
+			expect(getEthTypedDataMethods(erc2612Permit).map(({ name }) => name)).not.toContain(
+				'EIP712Domain'
+			);
+		});
+
+		// The declared `primaryType` is not what gets hashed: ethers derives the root from the type
+		// graph. Naming the declared field would let a payload present itself as a struct its own
+		// signature does not cover.
+		it('should name the derived root, not the primaryType the payload declares', () => {
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				...transferWithAuthorization(),
+				primaryType: 'Login'
+			};
+
+			expect(getEthTypedDataMethods(typedData)).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		// Depth is what the review indents by, so a struct two levels down must not be rendered as a
+		// member of the root.
+		it('should nest each struct beneath the one that declares it', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [{ name: 'offer', type: 'Offer' }],
+						Offer: [{ name: 'items', type: 'Item[]' }],
+						Item: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Order',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Order', depth: 0 },
+				{ name: 'Offer', depth: 1 },
+				{ name: 'Item', depth: 2 }
+			]);
+		});
+
+		// A declaration the root never reaches is not covered by the signature, so it must not be
+		// named. `getPrimaryType` rejects such a payload outright, which is why nothing is listed.
+		it('should name nothing for a payload declaring a struct the root does not reach', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Permit: [{ name: 'holder', type: 'address' }],
+						Unreferenced: [{ name: 'x', type: 'string' }]
+					},
+					primaryType: 'Permit',
+					message: {}
+				})
+			).toEqual([]);
+		});
+
+		it('should list a struct declared by two members once', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Trade: [
+							{ name: 'sold', type: 'Asset' },
+							{ name: 'bought', type: 'Asset' }
+						],
+						Asset: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Trade',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Trade', depth: 0 },
+				{ name: 'Asset', depth: 1 }
+			]);
+		});
+
+		it('should name nothing when the root cannot be resolved', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						A: [{ name: 'b', type: 'B' }],
+						B: [{ name: 'a', type: 'A' }]
+					},
+					primaryType: 'A',
+					message: {}
+				})
+			).toEqual([]);
+		});
+	});
+
+	describe('hasUnreviewableTypedData', () => {
+		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
+			hasUnreviewableTypedData({
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: toParams(typedData),
+				sessionChainId: MAINNET_SESSION
+			});
+
+		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
+		it.each([
+			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
+			{ name: 'DAI Permit', typedData: daiPermit(true) }
+		])('should not warn about a recognised $name', ({ typedData }) => {
+			expect(call(typedData)).toBeFalsy();
+		});
+
+		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
+		// signature pull the stated value out of the wallet, and the review said nothing about it.
+		it('should warn about an ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization())).toBeTruthy();
+		});
+
+		it('should warn about a struct that is nothing OISY knows', () => {
+			expect(
+				call({
+					domain: { name: 'Marketplace', version: '1', chainId: '1', verifyingContract: USDC },
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [
+							{ name: 'offerer', type: 'address' },
+							{ name: 'price', type: 'uint256' }
+						]
+					},
+					primaryType: 'Order',
+					message: { offerer: HOLDER, price: '1' }
+				})
+			).toBeTruthy();
+		});
+
+		// Already warned about and blocked by hasInvalidTypedData. Reporting it here as well would
+		// put two warnings on one request and let the acknowledgement re-enable a blocked signature.
+		it('should not warn about typed data that would not be signed at all', () => {
+			expect(call(daiPermit('true'))).toBeFalsy();
+		});
+
+		it('should not warn about typed data on a chain the session was not granted', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBeFalsy();
+		});
+
+		// A raw message carries no schema, so nothing about it can be silently missing: what is
+		// shown is what is signed.
+		it.each([SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_ETH_SIGN])(
+			'should not warn about %s',
+			(method) => {
+				expect(
+					hasUnreviewableTypedData({
+						method,
+						params: toParams(transferWithAuthorization()),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBeFalsy();
+			}
+		);
+
+		it('should not warn about a payload that is not typed data at all', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: ['0xnot-json'],
 					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();

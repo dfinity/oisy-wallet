@@ -33,6 +33,7 @@ import {
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -112,12 +113,26 @@ export const decode = async ({
 		})
 	]);
 
-	const { preview, parties: simulatedParties } = simulation ?? {};
+	const {
+		preview,
+		instructions: simulatedInstructions,
+		messageSummary,
+		parties: simulatedParties
+	} = simulation ?? {};
+
+	// Name the mints the review is about to show. Best effort and awaited, since the review is
+	// synchronous and a name that landed after the modal opened would arrive too late to read.
+	await loadSplTokenMetadata({
+		tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+		network: solNetwork
+	});
 
 	const mapped = {
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
-		...(nonNullish(preview) && { preview })
+		...(nonNullish(preview) && { preview }),
+		...(nonNullish(simulatedInstructions) && { instructions: simulatedInstructions }),
+		...(nonNullish(messageSummary) && { messageSummary })
 	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is

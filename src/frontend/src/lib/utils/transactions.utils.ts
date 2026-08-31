@@ -46,6 +46,7 @@ import {
 } from '$lib/utils/network.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -244,9 +245,84 @@ export const mapAllTransactionsUi = ({
 	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
 	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
 
-	return duplicates.size > 0
-		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
-		: allTransactions;
+	const withoutEthDuplicates =
+		duplicates.size > 0
+			? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
+			: allTransactions;
+
+	return dropDuplicateSolTransactions(withoutEthDuplicates);
+};
+
+/**
+ * One Solana record per signature lives in the store of every token the transaction touched, and
+ * the merged list keeps one row per token it moved.
+ *
+ * A swap is deliberately two rows, one per side, because each carries its own token's icon and
+ * balance change and a user scanning for a token wants to find it on the row that names it. What
+ * gets dropped is the rest: the tokens a transaction merely brushed, where a send that opened an
+ * account would otherwise appear again under SOL for the rent alone.
+ */
+const dropDuplicateSolTransactions = (
+	transactions: AllTransactionUiWithCmp[]
+): AllTransactionUiWithCmp[] => {
+	const groups = transactions.reduce<Map<string, AllTransactionUiWithCmp[]>>((acc, entry) => {
+		if (entry.component !== 'solana') {
+			return acc;
+		}
+
+		// Keyed by signature, which is what makes two rows the same transaction. The id is the
+		// signature for a record this redesign derived, but a record cached before it carries a
+		// per-instruction id, and grouping on that would leave its duplicates in place.
+		const key = String((entry.transaction as SolTransactionUi).signature ?? entry.transaction.id);
+		const group = acc.get(key);
+
+		if (nonNullish(group)) {
+			group.push(entry);
+		} else {
+			acc.set(key, [entry]);
+		}
+
+		return acc;
+	}, new Map());
+
+	const drop = new Set<AllTransactionUiWithCmp>();
+
+	groups.forEach((group) => {
+		if (group.length < 2) {
+			return;
+		}
+
+		const [{ transaction }] = group;
+		const { summary } = transaction as SolTransactionUi;
+
+		// The tokens the transaction is about: both sides of a swap, the single side of everything
+		// else. A token outside this set was only brushed, and its row would describe nothing.
+		const subjects = [summary?.spent, summary?.received].filter(nonNullish);
+
+		// One row per subject, matched to the token that names it. A subject the merged list has no
+		// row for simply yields none.
+		const kept = subjects.reduce<AllTransactionUiWithCmp[]>((acc, { tokenAddress }) => {
+			const match = group.find(
+				(entry) =>
+					!acc.includes(entry) &&
+					(isNullish(tokenAddress)
+						? !isTokenSpl(entry.token)
+						: isTokenSpl(entry.token) && entry.token.address === tokenAddress)
+			);
+
+			return nonNullish(match) ? [...acc, match] : acc;
+		}, []);
+
+		const survivors = kept.length > 0 ? kept : [group[0]];
+
+		group.forEach((entry) => {
+			if (!survivors.includes(entry)) {
+				drop.add(entry);
+			}
+		});
+	});
+
+	return drop.size > 0 ? transactions.filter((entry) => !drop.has(entry)) : transactions;
 };
 
 // When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.

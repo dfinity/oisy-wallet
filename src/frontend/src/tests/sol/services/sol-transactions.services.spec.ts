@@ -460,7 +460,8 @@ describe('sol-transactions.services', () => {
 		it('should pass exitIfFirstSignatureMatches when loading head with backend-stored transactions', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				summary: { kind: 'send' as const }
 			}));
 			const [firstStored] = storedTransactions;
 
@@ -479,6 +480,30 @@ describe('sol-transactions.services', () => {
 				expect.objectContaining({
 					exitIfFirstSignatureMatches: String(firstStored.signature)
 				})
+			);
+		});
+
+		// A stored record without a summary predates the redesign: the backend cache cannot carry
+		// the derived fields, so the short-circuit must yield and let RPC derive it again.
+		it('should not short-circuit on stored records that predate the summary', async () => {
+			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
+				...tx,
+				id: `stored-${i}`
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
 			);
 		});
 
@@ -508,7 +533,8 @@ describe('sol-transactions.services', () => {
 		it('should combine stored and new transactions in the store', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				summary: { kind: 'send' as const }
 			}));
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
@@ -538,7 +564,8 @@ describe('sol-transactions.services', () => {
 		it('should filter non-newer RPC transactions when loading head with backend-stored transactions', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				summary: { kind: 'send' as const }
 			}));
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
@@ -644,7 +671,9 @@ describe('sol-transactions.services', () => {
 		it('should keep older RPC transactions when paginating with before and backend-stored transactions', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				signature: mockSolSignature(),
+				summary: { kind: 'send' as const }
 			}));
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue({
@@ -658,6 +687,7 @@ describe('sol-transactions.services', () => {
 			const olderRpcTransaction = {
 				...createMockSolTransactionsUi(1)[0],
 				id: 'older-rpc',
+				signature: mockSolSignature(),
 				blockNumber: 40
 			};
 			const before = mockSolSignature();
@@ -686,7 +716,8 @@ describe('sol-transactions.services', () => {
 		it('should load backend pages before RPC when paginating with before', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
-				id: `stored-${i}`
+				id: `stored-${i}`,
+				summary: { kind: 'send' as const }
 			}));
 			const nextStoredTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
@@ -819,9 +850,18 @@ describe('sol-transactions.services', () => {
 		const mockParams = {
 			identity: mockIdentity,
 			minTimestamp: mockMinTimestamp,
-			transactions: mockTransactions,
 			token: mockToken,
 			signalEnd
+		};
+
+		// The loader reads the store at call time rather than taking a list, so the cases below set up
+		// what it should find there.
+		const seedStore = (transactions: SolTransactionUi[]) => {
+			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.append({
+				tokenId: mockToken.id,
+				transactions: transactions.map((data) => ({ data, certified: false }))
+			});
 		};
 
 		beforeEach(() => {
@@ -833,10 +873,14 @@ describe('sol-transactions.services', () => {
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
 			spyGetTransactions.mockResolvedValue([]);
+
+			seedStore(mockTransactions);
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+			solTransactionsStore.reset(mockToken.id);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: false });
 
@@ -877,7 +921,9 @@ describe('sol-transactions.services', () => {
 			);
 			const lastSignature = transactions[transactions.length - 1].signature;
 
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 
@@ -897,7 +943,9 @@ describe('sol-transactions.services', () => {
 			}));
 			const lastSignature = transactions[transactions.length - 1].signature;
 
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 

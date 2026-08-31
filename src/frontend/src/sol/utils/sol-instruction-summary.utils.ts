@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
@@ -101,6 +102,20 @@ interface Effect extends SolInstructionSummary {
  * A routed swap states none of its transfers at top level and makes all of them as cross-program
  * invocations, so a list built from either half alone describes a different transaction.
  */
+const programAddressOf = (instruction: unknown): SolAddress | undefined => {
+	if (isNullish(instruction) || typeof instruction !== 'object') {
+		return;
+	}
+
+	if ('programId' in instruction && typeof instruction.programId === 'string') {
+		return instruction.programId;
+	}
+
+	if ('programAddress' in instruction && typeof instruction.programAddress === 'string') {
+		return instruction.programAddress;
+	}
+};
+
 const flatten = ({
 	instructions,
 	innerInstructions
@@ -238,11 +253,16 @@ const toEffect = ({
 		parsed: { type, info }
 	},
 	owned,
-	accountMints
+	accountMints,
+	accountLamports,
+	flattened
 }: {
 	instruction: SolParsedRpcInstruction;
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
+	// What each account held going in, so a close can say what it hands back.
+	accountLamports: Partial<Record<SolAddress, bigint>>;
+	flattened: { instruction: SolParsedRpcInstruction }[];
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
 		return undefined;
@@ -305,10 +325,15 @@ const toEffect = ({
 
 			const mint = accountMints[account];
 
+			// An account the same transaction opened held nothing before it ran, so its balance
+			// going in says zero. What it hands back is the rent it was funded with moments earlier.
+			const returned = fundedInTransaction({ account, flattened }) ?? accountLamports[account];
+
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
 				account,
-				...(nonNullish(mint) && { tokenAddress: mint })
+				...(nonNullish(mint) && { tokenAddress: mint }),
+				...(nonNullish(returned) && { returned })
 			};
 		}
 
@@ -353,6 +378,49 @@ const toEffect = ({
 
 	return undefined;
 };
+
+/**
+ * What an account holds by the time it is closed, when the same transaction put it there.
+ *
+ * The System `createAccount` that opens it states the rent, and any System `transfer` into it adds
+ * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
+ * swap hands back the rent and the wrapped SOL together. No instruction states that total.
+ */
+const fundedInTransaction = ({
+	account,
+	flattened
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+}): bigint | undefined =>
+	flattened.reduce<bigint | undefined>(
+		(
+			acc,
+			{
+				instruction: {
+					program,
+					parsed: { type, info }
+				}
+			}
+		) => {
+			if (program !== 'system') {
+				return acc;
+			}
+
+			const funds =
+				(type === 'createAccount' && address({ info, key: 'newAccount' }) === account) ||
+				(type === 'transfer' && address({ info, key: 'destination' }) === account);
+
+			if (!funds) {
+				return acc;
+			}
+
+			const lamports = amount({ info, key: 'lamports' });
+
+			return nonNullish(lamports) ? (acc ?? ZERO) + lamports : acc;
+		},
+		undefined
+	);
 
 /**
  * The rent an account creation costs, from the System `createAccount` that funds it.
@@ -472,12 +540,16 @@ export const mapSolInstructionSummaries = ({
 	instructions,
 	innerInstructions = [],
 	ownedAddresses,
-	addressToToken = {}
+	addressToToken = {},
+	accountLamports = {}
 }: {
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
 	ownedAddresses: SolAddress[];
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
+	// Lamports per account before the transaction ran, from its balance metadata. A close hands
+	// the destination the whole balance, which no instruction states.
+	accountLamports?: Partial<Record<SolAddress, bigint>>;
 }): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
@@ -488,20 +560,18 @@ export const mapSolInstructionSummaries = ({
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the
 	// one the RPC cannot parse, so taking it from the flattened list would name the first inner
 	// program instead, which is always the token program and says nothing.
+	//
+	// Both spellings are read because both kinds of instruction arrive here: a confirmed
+	// transaction comes back from the RPC naming it `programId`, and an unsigned message carries
+	// kit instructions, which name it `programAddress`.
 	const programs = instructions.reduce<Record<number, SolAddress>>((acc, instruction, index) => {
-		const programId =
-			nonNullish(instruction) &&
-			typeof instruction === 'object' &&
-			'programId' in instruction &&
-			typeof instruction.programId === 'string'
-				? instruction.programId
-				: undefined;
+		const program = programAddressOf(instruction);
 
-		return nonNullish(programId) ? { ...acc, [index]: programId } : acc;
+		return nonNullish(program) ? { ...acc, [index]: program } : acc;
 	}, {});
 
 	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, instruction }) => {
-		const effect = toEffect({ instruction, owned, accountMints });
+		const effect = toEffect({ instruction, owned, accountMints, accountLamports, flattened });
 
 		if (isNullish(effect)) {
 			return acc;
