@@ -35,6 +35,7 @@ import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import {
+	requiresStoredDerivationRefresh,
 	requiresStoredSplOwnerRefresh,
 	solBackendTokenId
 } from '$sol/utils/user-transactions.utils';
@@ -337,8 +338,10 @@ const loadSolTransactions = async ({
 
 		const storedRefreshSignatures = new Set(
 			storedTransactions
-				.filter((transaction) =>
-					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				.filter(
+					(transaction) =>
+						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
+						requiresStoredDerivationRefresh({ transaction })
 				)
 				.map(({ signature }) => String(signature))
 		);
@@ -391,6 +394,21 @@ const loadSolTransactions = async ({
 
 		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
 
+		// A record re-derived under its signature id supersedes the per-instruction rows the store
+		// may still hold for the same signature: same transaction, older shape, different ids.
+		const incomingSignatures = new Set(allTransactions.map(({ signature }) => String(signature)));
+		const incomingIds = new Set(allTransactions.map(({ id }) => `${id}`));
+		const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
+			.filter(
+				({ data }) =>
+					incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
+			)
+			.map(({ data: { id } }) => `${id}`);
+
+		if (staleIds.length > 0) {
+			solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
+		}
+
 		solTransactionsStore.append({
 			tokenId,
 			transactions: certifiedTransactions
@@ -417,15 +435,18 @@ const loadSolTransactions = async ({
 
 export const loadNextSolTransactionsByOldest = async ({
 	minTimestamp,
-	transactions,
 	...rest
 }: {
 	identity: NullishIdentity;
 	minTimestamp?: number;
-	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
 }): Promise<ResultSuccess> => {
+	// Read at call time rather than taken as a parameter: callers page in a loop, and each round has
+	// to see what the previous one appended. A list handed in would be a snapshot from before the
+	// first await.
+	const transactions = (get(solTransactionsStore)?.[rest.token.id] ?? []).map(({ data }) => data);
+
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
 		return { success: false };
