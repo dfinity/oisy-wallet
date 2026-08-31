@@ -128,13 +128,13 @@
 
 	// The programs the run went through, in the order it reached them and each named once. The
 	// message names none of them itself: a routed swap performs every call inside another program.
-	let venues = $derived(
-		flattenInstructions(instructions ?? []).reduce<SolAddress[]>(
-			(acc, { program }) =>
-				nonNullish(program) && !acc.includes(program) ? [...acc, program] : acc,
-			[]
+	let venues = $derived([
+		...new Set(
+			flattenInstructions(instructions ?? [])
+				.map(({ program }) => program)
+				.filter(nonNullish)
 		)
-	);
+	]);
 
 	// The mints this line names, so an unnamed one is numbered against the others it stands with.
 	let summaryTokenAddresses = $derived(

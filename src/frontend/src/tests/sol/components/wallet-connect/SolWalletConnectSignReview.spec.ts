@@ -270,6 +270,13 @@ describe('SolWalletConnectSignReview', () => {
 			expect(venues).toHaveLength(2);
 			expect(venues[0]).toHaveTextContent(shortenWithMiddleEllipsis({ text: ORCA }));
 			expect(venues[1]).toHaveTextContent(shortenWithMiddleEllipsis({ text: JUPITER }));
+
+			// An address the user cannot copy or look up is barely worth showing: checking the
+			// program before signing is the whole reason it is here.
+			[ORCA, JUPITER].forEach((program, index) => {
+				expect(venues[index].querySelector('button')).toBeInTheDocument();
+				expect(venues[index].querySelector(`a[href*="${program}"]`)).toBeInTheDocument();
+			});
 		});
 
 		it('should show no group when the run named no program', () => {
