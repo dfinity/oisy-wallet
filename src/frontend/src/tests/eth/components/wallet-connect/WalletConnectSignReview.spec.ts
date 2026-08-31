@@ -222,6 +222,25 @@ describe('WalletConnectSignReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
+	// The RPC method is `eth_signTypedData_v4` for a permit and for a drainer alike, so it is the
+	// struct that says what is being signed.
+	it('names the struct an unrecognised signature hashes', () => {
+		const { getByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: transferWithAuthorizationRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
+		expect(getByText('TransferWithAuthorization')).toBeInTheDocument();
+	});
+
+	it('does not name structs for a schema it can describe', () => {
+		const { queryByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByText(en.wallet_connect.text.methods)).not.toBeInTheDocument();
+	});
+
 	// A schema OISY summarizes is not warned about: the review states the spender, the amount and
 	// the expiry, so there is nothing it failed to establish.
 	it('does not warn about a permit whose schema is recognised', () => {
