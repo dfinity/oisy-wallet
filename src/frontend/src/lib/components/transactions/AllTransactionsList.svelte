@@ -22,7 +22,7 @@
 	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { allContacts } from '$lib/derived/contacts.derived';
+	import { allContacts, contacts, contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
@@ -39,7 +39,10 @@
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { applyTransactionsFilter } from '$lib/utils/transactions-filter.utils';
+	import {
+		applyTransactionsFilter,
+		transactionsFilterTokenKey
+	} from '$lib/utils/transactions-filter.utils';
 	import {
 		filterReceivedMicroTransactions,
 		mapAllTransactionsUi,
@@ -48,6 +51,40 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+
+	// The tokens panel lists the selected network's tokens only, so a selection made on another
+	// network sticks around invisibly and keeps hiding transactions with no row left to untick it.
+	// Reconciling against the selectable set is the filter's own job, hence here rather than on a
+	// network-change trigger.
+	let selectableTokenFilterKeys = $derived(
+		$enabledFungibleNetworkTokens.map(transactionsFilterTokenKey).filter(nonNullish)
+	);
+
+	$effect(() => {
+		// While the tokens are still loading the selectable set is empty; pruning then would wipe a
+		// persisted filter before the user ever sees it.
+		if (selectableTokenFilterKeys.length === 0) {
+			return;
+		}
+
+		transactionsFilterStore.retainTokenIds(selectableTokenFilterKeys);
+	});
+
+	// Same reasoning for the contacts facet: a contact deleted from the address book leaves no row
+	// in the panel, so its selection would keep hiding transactions with no way to untick it. The
+	// selectable set is the user's own contacts, not `allContacts`, which also carries the built-in
+	// ck minter entries the panel never lists.
+	let selectableContactIds = $derived($contacts.map(({ id }) => id.toString()));
+
+	$effect(() => {
+		// Unlike the tokens, an empty list is a legitimate state here (the user deleted their last
+		// contact), so we gate on the store being loaded rather than on the list being non-empty.
+		if ($contactsNotInitialized) {
+			return;
+		}
+
+		transactionsFilterStore.retainContactIds(selectableContactIds);
+	});
 
 	let allTransactions = $derived(
 		mapAllTransactionsUi({

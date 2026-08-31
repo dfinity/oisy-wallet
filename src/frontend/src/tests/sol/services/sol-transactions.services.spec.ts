@@ -850,9 +850,18 @@ describe('sol-transactions.services', () => {
 		const mockParams = {
 			identity: mockIdentity,
 			minTimestamp: mockMinTimestamp,
-			transactions: mockTransactions,
 			token: mockToken,
 			signalEnd
+		};
+
+		// The loader reads the store at call time rather than taking a list, so the cases below set up
+		// what it should find there.
+		const seedStore = (transactions: SolTransactionUi[]) => {
+			solTransactionsStore.reset(mockToken.id);
+			solTransactionsStore.append({
+				tokenId: mockToken.id,
+				transactions: transactions.map((data) => ({ data, certified: false }))
+			});
 		};
 
 		beforeEach(() => {
@@ -864,10 +873,14 @@ describe('sol-transactions.services', () => {
 
 			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
 			spyGetTransactions.mockResolvedValue([]);
+
+			seedStore(mockTransactions);
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions: [] });
+			solTransactionsStore.reset(mockToken.id);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: false });
 
@@ -908,7 +921,9 @@ describe('sol-transactions.services', () => {
 			);
 			const lastSignature = transactions[transactions.length - 1].signature;
 
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 
@@ -928,7 +943,9 @@ describe('sol-transactions.services', () => {
 			}));
 			const lastSignature = transactions[transactions.length - 1].signature;
 
-			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 
