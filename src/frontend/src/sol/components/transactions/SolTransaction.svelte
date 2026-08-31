@@ -106,6 +106,7 @@
 	{displayAmount}
 	from={summary?.kind === 'swap' ? undefined : (fromOwner ?? from)}
 	icon={summary?.kind === 'swap' ? IconConvert : undefined}
+	iconAriaLabel={summary?.kind === 'swap' ? $i18n.swap.text.swap : undefined}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}
