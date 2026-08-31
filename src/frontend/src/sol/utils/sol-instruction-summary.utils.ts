@@ -102,6 +102,20 @@ interface Effect extends SolInstructionSummary {
  * A routed swap states none of its transfers at top level and makes all of them as cross-program
  * invocations, so a list built from either half alone describes a different transaction.
  */
+const programAddressOf = (instruction: unknown): SolAddress | undefined => {
+	if (isNullish(instruction) || typeof instruction !== 'object') {
+		return;
+	}
+
+	if ('programId' in instruction && typeof instruction.programId === 'string') {
+		return instruction.programId;
+	}
+
+	if ('programAddress' in instruction && typeof instruction.programAddress === 'string') {
+		return instruction.programAddress;
+	}
+};
+
 const flatten = ({
 	instructions,
 	innerInstructions
@@ -546,16 +560,14 @@ export const mapSolInstructionSummaries = ({
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the
 	// one the RPC cannot parse, so taking it from the flattened list would name the first inner
 	// program instead, which is always the token program and says nothing.
+	//
+	// Both spellings are read because both kinds of instruction arrive here: a confirmed
+	// transaction comes back from the RPC naming it `programId`, and an unsigned message carries
+	// kit instructions, which name it `programAddress`.
 	const programs = instructions.reduce<Record<number, SolAddress>>((acc, instruction, index) => {
-		const programId =
-			nonNullish(instruction) &&
-			typeof instruction === 'object' &&
-			'programId' in instruction &&
-			typeof instruction.programId === 'string'
-				? instruction.programId
-				: undefined;
+		const program = programAddressOf(instruction);
 
-		return nonNullish(programId) ? { ...acc, [index]: programId } : acc;
+		return nonNullish(program) ? { ...acc, [index]: program } : acc;
 	}, {});
 
 	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, instruction }) => {
