@@ -25,6 +25,7 @@ import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
+import type { FeeData } from 'ethers/providers';
 
 const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
 
@@ -37,6 +38,24 @@ const getGasFeeFloor = (
 				maxPriorityFeePerGas: BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 			}
 		: { maxFeePerGas: null, maxPriorityFeePerGas: null };
+
+// The Gas API is a best-effort enhancement: it does not cover every chain we support
+// (Arbitrum Sepolia answers 400 "'421614' is not a supported chain id.") and it can be down.
+// Its suggestion is only ever merged upwards with the provider's own quote, so losing it only
+// makes the estimate coarser and must never block a send.
+const getSuggestedFeeDataBestEffort = async (
+	chainId: EthereumChainId
+): Promise<Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>> => {
+	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
+
+	try {
+		return await getSuggestedFeeData();
+	} catch (err: unknown) {
+		consoleWarn(err);
+
+		return { maxFeePerGas: null, maxPriorityFeePerGas: null };
+	}
+};
 
 export const getEthFeeData = ({
 	to,
@@ -144,12 +163,10 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
-	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
-
 	const {
 		maxFeePerGas: suggestedMaxFeePerGas,
 		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-	} = await getSuggestedFeeData();
+	} = await getSuggestedFeeDataBestEffort(chainId);
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
