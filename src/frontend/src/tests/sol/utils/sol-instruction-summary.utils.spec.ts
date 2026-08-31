@@ -51,6 +51,25 @@ describe('sol-instruction-summary.utils', () => {
 				expect(unwrap?.tokenAddress).toBe(WSOL_TOKEN.address);
 			});
 
+			// A confirmed transaction comes back from the RPC naming the program `programId`; an
+			// unsigned message carries kit instructions, which name the same thing
+			// `programAddress`. Reading only the first leaves every simulated route unnamed.
+			it('should name the route program however the instruction spells the field', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP;
+
+				const asKitInstructions = instructions.map(({ programId, ...instruction }) => ({
+					...instruction,
+					programAddress: programId
+				}));
+
+				const route = mapSolInstructionSummaries({
+					...rest,
+					instructions: asKitInstructions
+				}).find(({ kind }) => kind === 'route');
+
+				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
+			});
+
 			it('should gather consecutive legs under the route that produced them', () => {
 				const route = views().find(({ kind }) => kind === 'route');
 
