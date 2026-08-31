@@ -372,6 +372,8 @@ impl TieredRateLimiter {
     const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
     const MINUTE_NS: u64 = 60 * 1_000_000_000;
 
+    /// The tiers a vetKD derivation is sized for: per-caller 2/min and 10/hour,
+    /// checked before a shared global 20/min and 100/hour.
     #[must_use]
     pub fn new() -> Self {
         Self::with_caller_burst(2)
@@ -757,9 +759,10 @@ mod tests {
 
     #[test]
     fn a_global_tier_catches_a_flood_the_per_caller_tier_cannot_see() {
-        // The reason `create_tip` and friends gained global tiers: a per-caller
-        // limit is blind to one call each from a thousand fresh principals, and
-        // identities are free to create.
+        // Why the global tiers exist at all, and why an endpoint may want them
+        // sized differently from the per-caller ones: a per-caller limit is blind
+        // to one call each from a thousand fresh principals, and identities are
+        // free to create.
         let rl = TieredRateLimiter::with_tiers(20, 200, 5, 50);
 
         for id in 1..=5u8 {
@@ -813,15 +816,78 @@ mod tests {
     }
 
     #[test]
-    fn the_default_burst_is_unchanged_for_every_other_caller_of_new() {
-        let default = TieredRateLimiter::new();
+    fn the_default_tiers_survive_the_move_into_with_tiers() {
+        // All four, because `with_tiers` takes four positional numbers and
+        // getting one pair the wrong way round is the mistake this is for.
+        // Asserting only the first tier would have passed with the hour and
+        // global limits silently swapped.
+        let caller_minute = TieredRateLimiter::new();
         let caller = test_principal(1);
 
-        assert!(default.check_at(caller, ONE_SEC).is_ok());
-        assert!(default.check_at(caller, ONE_SEC).is_ok());
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
         assert!(
-            default.check_at(caller, ONE_SEC).is_err(),
-            "personal notes must keep the tiers it was sized with"
+            caller_minute.check_at(caller, ONE_SEC).is_err(),
+            "2 per minute per caller"
+        );
+
+        // Spread one call per minute so the minute tier never bites, and the
+        // tenth is what the hour tier has to refuse.
+        let caller_hour = TieredRateLimiter::new();
+
+        for minute in 0..10 {
+            assert!(
+                caller_hour
+                    .check_at(caller, minute * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                    .is_ok(),
+                "10 per hour per caller: call {minute} should pass"
+            );
+        }
+        assert!(
+            caller_hour
+                .check_at(caller, 10 * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                .is_err(),
+            "10 per hour per caller"
+        );
+
+        // A fresh principal each time, so only the global tiers can refuse.
+        let global_minute = TieredRateLimiter::new();
+
+        for n in 0..20 {
+            assert!(
+                global_minute.check_at(test_principal(n), ONE_SEC).is_ok(),
+                "20 per minute globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_minute
+                .check_at(test_principal(200), ONE_SEC)
+                .is_err(),
+            "20 per minute globally"
+        );
+
+        // Five a minute across twenty minutes: 100 calls that all sit inside one
+        // sliding hour, and never trip the 20-per-minute tier on the way. One per
+        // minute would spread them over 100 minutes, where the hour window only
+        // ever holds the last 60 and the limit is never reached.
+        let global_hour = TieredRateLimiter::new();
+
+        for n in 0..100 {
+            let at = u64::from(n / 5) * TieredRateLimiter::MINUTE_NS + ONE_SEC;
+
+            assert!(
+                global_hour.check_at(test_principal(n), at).is_ok(),
+                "100 per hour globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_hour
+                .check_at(
+                    test_principal(200),
+                    20 * TieredRateLimiter::MINUTE_NS + ONE_SEC
+                )
+                .is_err(),
+            "100 per hour globally"
         );
     }
 
