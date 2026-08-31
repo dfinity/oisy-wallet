@@ -80,7 +80,7 @@ describe('sol-transaction-summary.utils', () => {
 
 		// The asset never left, so the net is zero: without the legs this reads as a transaction
 		// that did nothing at all.
-		it('should call a transfer between the user's own accounts a self-transfer', () => {
+		it("should call a transfer between the user's own accounts a self-transfer", () => {
 			const result = deriveSolTransactionSummary({
 				netChanges: [],
 				instructions: [
