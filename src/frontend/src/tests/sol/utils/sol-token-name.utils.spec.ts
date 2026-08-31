@@ -68,6 +68,18 @@ describe('sol-token-name.utils', () => {
 		});
 	});
 
+	// The same mint address exists on several clusters and carries different data on each.
+	it('should not lend one network name to another', () => {
+		expect(
+			solTokenSymbol({
+				...args,
+				tokenAddress: 'shared-address',
+				metadata: {},
+				unknownTokenAddresses: ['shared-address']
+			})
+		).toBe('Unknown token');
+	});
+
 	describe('solUnknownTokenAddresses', () => {
 		it('should count only the mints nothing can name, once each and in order', () => {
 			expect(
