@@ -570,17 +570,21 @@ describe('transactions.utils', () => {
 				.slice(2)}`;
 
 		it.each([undefined, '', '0x'])('should list nothing for %s', (data) => {
-			expect(getCalldataMethods(data)).toEqual([]);
+			expect(getCalldataMethods(data)).toEqual({ methods: [], capped: false });
 		});
 
 		it('should list a plain call as itself', () => {
-			expect(getCalldataMethods(encode({ selector: ERC20_APPROVE_HASH, value: 1n }))).toEqual([
-				{ selector: ERC20_APPROVE_HASH, depth: 0 }
-			]);
+			expect(getCalldataMethods(encode({ selector: ERC20_APPROVE_HASH, value: 1n }))).toEqual({
+				methods: [{ selector: ERC20_APPROVE_HASH, depth: 0 }],
+				capped: false
+			});
 		});
 
 		it('should list calldata too short to name a function, without a selector', () => {
-			expect(getCalldataMethods('0xab')).toEqual([{ selector: undefined, depth: 0 }]);
+			expect(getCalldataMethods('0xab')).toEqual({
+				methods: [{ selector: undefined, depth: 0 }],
+				capped: false
+			});
 		});
 
 		it('should list the wrapper and the calls batched inside it', () => {
@@ -591,11 +595,14 @@ describe('transactions.utils', () => {
 				]
 			});
 
-			expect(getCalldataMethods(data)).toEqual([
-				{ selector: MULTICALL_HASH, depth: 0 },
-				{ selector: ERC20_APPROVE_HASH, depth: 1 },
-				{ selector: PERMIT2_APPROVE_HASH, depth: 1 }
-			]);
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [
+					{ selector: MULTICALL_HASH, depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, depth: 1 },
+					{ selector: PERMIT2_APPROVE_HASH, depth: 1 }
+				],
+				capped: false
+			});
 		});
 
 		it('should read the batch out of the deadline variant, past its first argument', () => {
@@ -604,10 +611,13 @@ describe('transactions.utils', () => {
 				calls: [encode({ selector: ERC20_APPROVE_HASH, value: 1n })]
 			});
 
-			expect(getCalldataMethods(data)).toEqual([
-				{ selector: MULTICALL_DEADLINE_HASH, depth: 0 },
-				{ selector: ERC20_APPROVE_HASH, depth: 1 }
-			]);
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [
+					{ selector: MULTICALL_DEADLINE_HASH, depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, depth: 1 }
+				],
+				capped: false
+			});
 		});
 
 		it('should stop descending at the depth limit rather than walk a tree of the caller choosing', () => {
@@ -621,7 +631,7 @@ describe('transactions.utils', () => {
 				]
 			});
 
-			expect(getCalldataMethods(data).map(({ depth }) => depth)).toEqual([0, 1, 2]);
+			expect(getCalldataMethods(data).methods.map(({ depth }) => depth)).toEqual([0, 1, 2]);
 		});
 
 		it('should cap the list rather than render a batch of any length', () => {
@@ -629,15 +639,34 @@ describe('transactions.utils', () => {
 				encode({ selector: ERC20_APPROVE_HASH, value: 1n })
 			);
 
-			expect(getCalldataMethods(encodeMulticall({ calls }))).toHaveLength(MULTICALL_MAX_METHODS);
+			const { methods, capped } = getCalldataMethods(encodeMulticall({ calls }));
+
+			expect(methods).toHaveLength(MULTICALL_MAX_METHODS);
+			expect(capped).toBeTruthy();
+		});
+
+		// A batch that ends exactly on the cap left nothing out. Reporting it as truncated would put
+		// a "some calls are not listed" note on a list that is complete.
+		it('should not report a batch that ends exactly on the cap as capped', () => {
+			// The wrapper occupies one of the entries, so the batch that exactly fills the cap is one
+			// call shorter than it.
+			const calls = Array.from({ length: MULTICALL_MAX_METHODS - 1 }, () =>
+				encode({ selector: ERC20_APPROVE_HASH, value: 1n })
+			);
+
+			const { methods, capped } = getCalldataMethods(encodeMulticall({ calls }));
+
+			expect(methods).toHaveLength(MULTICALL_MAX_METHODS);
+			expect(capped).toBeFalsy();
 		});
 
 		// A wrapper whose arguments do not decode has yielded nothing, and saying so is the point:
 		// listing it alone is honest, inventing its contents would not be.
 		it('should list a wrapper whose arguments do not decode as itself', () => {
-			expect(getCalldataMethods(`${MULTICALL_HASH}deadbeef`)).toEqual([
-				{ selector: MULTICALL_HASH, depth: 0 }
-			]);
+			expect(getCalldataMethods(`${MULTICALL_HASH}deadbeef`)).toEqual({
+				methods: [{ selector: MULTICALL_HASH, depth: 0 }],
+				capped: false
+			});
 		});
 
 		// A Universal Router `execute` carries opcodes and bare arguments, not calldata. There are
@@ -647,9 +676,10 @@ describe('transactions.utils', () => {
 				.encode(['bytes', 'bytes[]', 'uint256'], ['0x0a00', ['0xdeadbeef'], 1n])
 				.slice(2)}`;
 
-			expect(getCalldataMethods(data)).toEqual([
-				{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, depth: 0 }
-			]);
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, depth: 0 }],
+				capped: false
+			});
 		});
 	});
 

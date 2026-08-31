@@ -111,15 +111,20 @@ const abiCoder = AbiCoder.defaultAbiCoder();
  */
 export const getCalldataMethods = (
 	data: string | undefined
-): { selector: string | undefined; depth: number }[] => {
+): { methods: { selector: string | undefined; depth: number }[]; capped: boolean } => {
 	if (!hasCalldata(data)) {
-		return [];
+		return { methods: [], capped: false };
 	}
 
 	const methods: { selector: string | undefined; depth: number }[] = [];
 
+	// Set only where a call was actually left out, so a batch that ends exactly on the cap is
+	// reported as complete. Saying calls were omitted when none were is its own misstatement.
+	let capped = false;
+
 	const walk = ({ calldata, depth }: { calldata: string; depth: number }) => {
 		if (methods.length >= MULTICALL_MAX_METHODS) {
+			capped = true;
 			return;
 		}
 
@@ -139,9 +144,18 @@ export const getCalldataMethods = (
 
 		try {
 			const decoded = abiCoder.decode(args, dataSlice(calldata, 4));
-			const nested = decoded[args.indexOf('bytes[]')];
+			const nested = decoded[args.indexOf('bytes[]')] as string[];
 
-			(nested as string[]).forEach((call) => walk({ calldata: call, depth: depth + 1 }));
+			// Stops at the cap rather than walking the remainder to discard it: the array is the
+			// dApp's to size, and a batch of any length must not buy work per element here.
+			for (const call of nested) {
+				if (methods.length >= MULTICALL_MAX_METHODS) {
+					capped = true;
+					break;
+				}
+
+				walk({ calldata: call, depth: depth + 1 });
+			}
 		} catch (_: unknown) {
 			// A wrapper whose arguments do not decode carries nothing this can read. It stays in the
 			// list as itself rather than being described by calls that were never recovered.
@@ -150,7 +164,7 @@ export const getCalldataMethods = (
 
 	walk({ calldata: data as string, depth: 0 });
 
-	return methods;
+	return { methods, capped };
 };
 
 export const decodeErc20AbiData = ({
