@@ -21,6 +21,10 @@ ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.16.0"
+# The canonical ICRC-1/2 candid shapes. A types-only crate — no client, no
+# transport — so it carries no opinion about how calls are made, which is why
+# `tips/icrc2.rs` keeps its own `unbounded_wait` wrappers over these.
+icrc-ledger-types = "0.2.0"
 ic-stable-structures = "0.7"
 # Must track ic-cdk: 0.7.0 targets ic-cdk ^0.20.1 and the same
 # ic-management-canister-types major, so the two cannot be bumped independently.

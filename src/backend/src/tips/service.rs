@@ -10,7 +10,6 @@ use std::cmp::Reverse;
 
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
-use serde_bytes::ByteBuf;
 use shared::types::tip::{
     CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
     TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
@@ -119,7 +118,7 @@ fn read_tip(tip_id: &TipId) -> Option<TipRecord> {
 fn tip_spender(tip_id: &str) -> Account {
     Account {
         owner: canister_self(),
-        subaccount: Some(ByteBuf::from(spender_subaccount(tip_id).to_vec())),
+        subaccount: Some(spender_subaccount(tip_id)),
     }
 }
 
@@ -327,7 +326,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             // tips is always empty — every tip's allowance sits under its own
             // subaccount, and that is what keeps one tip's reservation unusable
             // for another.
-            spender_subaccount: Some(ByteBuf::from(spender_subaccount(&tip_id).to_vec())),
+            spender_subaccount: Some(spender_subaccount(&tip_id)),
             from: Account {
                 owner: record.sender,
                 subaccount: None,
@@ -594,6 +593,7 @@ mod tests {
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
 
     use super::*;
 
