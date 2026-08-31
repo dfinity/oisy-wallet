@@ -7,6 +7,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import en from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -55,8 +56,7 @@ describe('EthSendForm', () => {
 
 		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
-		expect(getByText('Max fee')).toBeInTheDocument();
+		expect(getByText(en.fee.text.estimated_fee_eth)).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
