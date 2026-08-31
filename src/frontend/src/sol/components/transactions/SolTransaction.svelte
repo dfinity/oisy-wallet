@@ -45,11 +45,10 @@
 		)
 	);
 
-	// A send or a receive names the other side of the transfer, which is what the user checks.
-	// Everything else names where it happened, because there is no other side to name.
-	let showVenues = $derived(
-		nonNullish(summary) && summary.kind !== 'send' && summary.kind !== 'receive'
-	);
+	// A transfer names the other side of it, which is what the user checks, and a self-transfer
+	// has one too: the user's own other account. A swap and a transaction OISY could not reduce
+	// have no other side, so they name where they happened instead.
+	let showVenues = $derived(summary?.kind === 'swap' || summary?.kind === 'other');
 
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		isNullish(tokenAddress)
