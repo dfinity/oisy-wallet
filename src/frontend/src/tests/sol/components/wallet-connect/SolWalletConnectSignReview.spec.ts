@@ -192,6 +192,60 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByTestId('sol-instruction')).toHaveTextContent('0.01');
 	});
 
+	describe('the line that says what the message does', () => {
+		const messageSummary = {
+			kind: 'send' as const,
+			spent: { delta: -1_000_000n },
+			counterparty: mockSolAddress2
+		};
+
+		it('should state the message when the simulated run agrees with it', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: { solDelta: -1_005_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		// A sentence the user would check the figures against, over a transaction that does
+		// something else, is worse than no sentence at all.
+		it('should say nothing when the run moves more than the message states', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: {
+						solDelta: -1_005_000n,
+						tokenDeltas: [
+							{
+								account: mockAtaAddress,
+								tokenAddress: 'unlisted-mint',
+								decimals: 6,
+								delta: -9_000_000n
+							}
+						],
+						controlChanges: []
+					}
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		// The simulation is best effort, and an unchecked reading is not worth stating.
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, messageSummary }
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+	});
+
 	it('should show no instruction list when the simulation produced none', () => {
 		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
 

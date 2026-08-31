@@ -14,7 +14,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
-	import { maxBigInt } from '$lib/utils/bigint.utils';
+	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
@@ -26,9 +26,15 @@
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
+	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -50,6 +56,9 @@
 		// What the simulated run does, instruction by instruction. The rent of the accounts it opens
 		// is the only part the fee block reads; rendering the list itself comes separately.
 		instructions?: SolInstructionSummary[];
+		// What the message says it moves, read from its own instructions. Stated to the user only
+		// when the simulated run agrees with it.
+		messageSummary?: SolTransactionSummary;
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
@@ -72,6 +81,7 @@
 		unreviewed = false,
 		preview,
 		instructions,
+		messageSummary,
 		parties,
 		approveDisabled = false,
 		onApprove,
@@ -96,6 +106,58 @@
 	);
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
+
+	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
+	// and the message states none of it, so it is the room the comparison of the two allows.
+	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+
+	// The message read on its own says a plain send, receive or swap, and the run agrees that this
+	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
+	// transaction that does something else is worse than no sentence at all.
+	let statedSummary = $derived(
+		nonNullish(messageSummary) &&
+			nonNullish(preview) &&
+			solMessageMatchesSimulation({ summary: messageSummary, preview, costs })
+			? messageSummary
+			: undefined
+	);
+
+	// The mints this line names, so an unnamed one is numbered against the others it stands with.
+	let summaryTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: [statedSummary?.spent, statedSummary?.received].map(
+				(change) => change?.tokenAddress
+			),
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
+	let summaryText = $derived(
+		nonNullish(statedSummary)
+			? formatSolTransactionSummary({
+					summary: statedSummary,
+					i18n: $i18n,
+					symbolOf: (tokenAddress) =>
+						solTokenSymbol({
+							tokenAddress,
+							tokens: $enabledSplTokens,
+							networkId: token.network.id,
+							metadata: $splTokenMetadataStore,
+							unknownTokenAddresses: summaryTokenAddresses,
+							unknownTokenLabel: $i18n.transaction.text.unknown_token,
+							nativeSymbol: feeToken.symbol
+						}),
+					amountOf: ({ delta, decimals }) =>
+						formatToken({
+							value: absBigInt(delta),
+							unitName: decimals ?? feeToken.decimals,
+							displayDecimals: decimals ?? feeToken.decimals
+						})
+				})
+			: undefined
+	);
 
 	let prioritizationFeeFloor = $derived(
 		nonNullish(feeExchangeRate) && feeExchangeRate > 0
@@ -183,6 +245,13 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 	{:else if highPrioritizationFee}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+	{/if}
+
+	<!-- What the message itself says it does, in one line, before the rows that say it in detail.
+	     Stated as plain text and not as a heading: it is a reading of the transaction, and the
+	     figures under it are what the user checks it against. -->
+	{#if nonNullish(summaryText)}
+		<p class="text-primary my-4" data-tid="message-summary">{summaryText}</p>
 	{/if}
 
 	<!-- The review names no recipient of its own: a single destination had to pick one winner out
