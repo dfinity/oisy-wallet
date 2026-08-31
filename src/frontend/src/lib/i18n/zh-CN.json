@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "预计跨网络手续费",
 			"estimated_eth": "预计以太坊手续费",
 			"max_fee_eth": "最高手续费 <small>(通常少于 30 秒)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "转换手续费",
 			"convert_inter_network_fee": "跨网络手续费",
 			"convert_btc_network_fee": "比特币网络手续费",
