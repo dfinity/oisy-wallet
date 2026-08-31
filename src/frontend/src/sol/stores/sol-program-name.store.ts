@@ -16,7 +16,7 @@ interface SolProgramNameStore extends Readable<SolProgramNameData> {
 }
 
 /**
- * The name a program publishes for itself, for programs OISY does not decode.
+ * The name a program publishes for itself, read from the interface it keeps on chain.
  *
  * A program that publishes none is recorded under the empty string rather than left out, so it is
  * asked about once per session instead of once per transaction it appears in.
