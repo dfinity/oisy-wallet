@@ -252,7 +252,9 @@
 				label={$i18n.transaction.text.tab_instructions}
 				ref="contained-instructions"
 			>
-				<SolInstructionsList {instructions} {token} />
+				<!-- The simulated deltas carry the decimals of a mint the wallet does not list, which
+				     an unchecked transfer does not state and the list would otherwise read raw. -->
+				<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
 			</WalletConnectModalValue>
 		{/if}
 

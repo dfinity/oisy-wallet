@@ -171,6 +171,27 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
 	});
 
+	// An unchecked transfer states no decimals, so without the simulated deltas the amount would
+	// be printed in raw base units: a hundredth of a token would read as ten thousand.
+	it('should scale an unlisted mint by the decimals the simulation reports', () => {
+		const tokenAddress = 'unlisted-mint';
+
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'send' as const, amount: 10_000n, tokenAddress, counterparty: mockSolAddress2 }
+				],
+				preview: {
+					tokenDeltas: [{ account: mockAtaAddress, tokenAddress, decimals: 6, delta: -10_000n }],
+					controlChanges: []
+				}
+			}
+		});
+
+		expect(getByTestId('sol-instruction')).toHaveTextContent('0.01');
+	});
+
 	it('should show no instruction list when the simulation produced none', () => {
 		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
 
