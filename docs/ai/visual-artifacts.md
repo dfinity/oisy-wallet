@@ -94,7 +94,7 @@ lands in code.
 ## Lifecycle
 
 Artifacts are planning material, not a source of truth. Once the feature
-ships, the app is: the code, plus `PRODUCT.md` for behaviour, plus the
-component catalog for visual conventions. Spec asset folders are deleted
-after merge, see the workflow's
+ships, the app is: the code, plus [`docs/ai/PRODUCT.md`](./PRODUCT.md) for
+behaviour, plus the component catalog for visual conventions. Spec asset
+folders are deleted after merge, see the workflow's
 [post-merge cleanup step](./spec-driven-development/workflow.md#step-7--post-merge-cleanup-claude-code).
