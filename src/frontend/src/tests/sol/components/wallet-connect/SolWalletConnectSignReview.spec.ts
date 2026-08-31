@@ -98,7 +98,8 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
 	});
 
-	it('should render each fee row as a label above its value', () => {
+	// One heading, and the parts under it: three headings read as three unrelated costs.
+	it('should gather the costs under a single fee heading', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
@@ -106,8 +107,31 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.network_fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+	});
+
+	it('should charge the rent of the accounts the message opens as its own line', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'ata-one', rent: 2_039_280n },
+					{ kind: 'createTokenAccount' as const, account: 'ata-two', rent: 2_039_280n }
+				]
+			}
+		});
+
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
+	});
+
+	it('should charge no rent when the message opens no account', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, instructions: [{ kind: 'send' as const, amount: 1n }] }
+		});
+
+		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
 	});
 
 	it('should show the fiat approximation next to a fee', () => {
@@ -129,6 +153,49 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+	});
+
+	// The message states almost nothing a routed swap does; the simulation is what knows.
+	it('should list what the simulated run does', () => {
+		const { getByTestId, getAllByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: mockAtaAddress, rent: 2_039_280n },
+					{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }
+				]
+			}
+		});
+
+		expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
+		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
+	});
+
+	// An unchecked transfer states no decimals, so without the simulated deltas the amount would
+	// be printed in raw base units: a hundredth of a token would read as ten thousand.
+	it('should scale an unlisted mint by the decimals the simulation reports', () => {
+		const tokenAddress = 'unlisted-mint';
+
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'send' as const, amount: 10_000n, tokenAddress, counterparty: mockSolAddress2 }
+				],
+				preview: {
+					tokenDeltas: [{ account: mockAtaAddress, tokenAddress, decimals: 6, delta: -10_000n }],
+					controlChanges: []
+				}
+			}
+		});
+
+		expect(getByTestId('sol-instruction')).toHaveTextContent('0.01');
+	});
+
+	it('should show no instruction list when the simulation produced none', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+		expect(queryByTestId('sol-instructions-list')).not.toBeInTheDocument();
 	});
 
 	describe('the warnings about what the transaction does', () => {

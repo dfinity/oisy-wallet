@@ -8,6 +8,7 @@ import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import {
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
@@ -76,8 +77,21 @@ const simulate = async ({
 		addressToToken
 	});
 
+	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
+	// what attaches each simulated nested call to the instruction that made it.
+	const instructions = mapSolInstructionSummaries({
+		instructions: [...transactionMessage.instructions],
+		innerInstructions: [...innerInstructions].map(({ index, instructions: inner }) => ({
+			index: Number(index),
+			instructions: [...inner]
+		})),
+		ownedAddresses: [address, ...ownedAddresses],
+		addressToToken
+	});
+
 	return {
 		...(!isEmptySolSimulationPreview(preview) && { preview }),
+		...(instructions.length > 0 && { instructions }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,
