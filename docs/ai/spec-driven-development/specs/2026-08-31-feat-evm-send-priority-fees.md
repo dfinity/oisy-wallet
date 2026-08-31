@@ -6,6 +6,16 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 - **Design:** Figma `duPCw1leqer7ES0sBb6Uua` ("7. OISY UI"), page _Priority, nonce, memo_, section **Priority fees** (`22675:343661`)
 - **Status:** Draft for implementation in Claude Code
 
+> **This page carries two generations of the design. This ticket is the first one.**
+> The frames below sit under the **Priority fees** section (`22675:343661`) and belong to the
+> **Pro mode v1** flow. The same page also holds a **Pro mode v2** flow (section **TXN prio**,
+> `15344:65527`) where Priority is a row inside a `Details` section behind an `Expert mode`
+> toggle, the picker is a full wizard step, and the tiers are renamed Normal / Fast / Urgent.
+> **v2 is not this ticket.** The authority is the screenshot Stefan attached to OISY-3122
+> (`image-20260831-071426.png`, 2026-08-31 09:14): it is a capture of the **Priority fees**
+> section and its three frames, exactly the ones listed below. Do not re-derive the target from
+> the Figma Flows panel; check the ticket attachment.
+
 Exported frames:
 
 | Frame                        | Node           | Export                                                                                              |
@@ -56,6 +66,7 @@ need the same choice and are a separate follow-up ticket.
 
 | Layer        | Change                                                                                            |
 | ------------ | ------------------------------------------------------------------------------------------------- |
+| Feature flag | Whole feature behind a `LOCAL \|\| STAGING` flag                                                  |
 | Gas API      | Return all three tiers plus `estimatedBaseFee` instead of only `medium`                           |
 | Fee maths    | Add an estimated-cost derivation alongside the existing max-fee ceiling                           |
 | Fee display  | Send flow shows the estimate, labelled "Estimated fee"                                            |
@@ -66,6 +77,23 @@ need the same choice and are a separate follow-up ticket.
 | i18n         | New keys for the row, the three tiers, and the tooltip                                            |
 | Tests        | Unit tests for the tier mapping, the estimate util, the store, and the two UI surfaces            |
 | `PRODUCT.md` | Extend the "Transaction fees" section under `## Ethereum`                                         |
+
+### Feature flag
+
+Everything in this spec ships behind one flag, on in local and staging only, off in beta and
+production. Follow the existing pattern, e.g. `src/frontend/src/env/exchange.env.ts`:
+
+```ts
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
+
+export const SEND_TRANSACTION_PRIORITY_ENABLED = LOCAL || STAGING;
+```
+
+The flag gates the **whole** user-visible change, the estimated-fee relabelling included. With
+the flag off the send flow keeps today's "Max fee" row and no Priority row, so beta and
+production see no difference at all. That means the fee row has two states to keep working, not
+one. Do not let the flag leak past the display layer into the fee maths, which is inert until
+something renders it.
 
 ### Networks
 
@@ -316,7 +344,15 @@ New coverage worth having:
 - the bottom sheet's `Done` closes without discarding the selection
 - keyboard operability of the radio group
 
+Also add a case per flag state: with the flag off, no Priority row and the old "Max fee" label;
+with it on, the row and the "Estimated fee" label.
+
 Do not add Playwright specs: `e2e/` is maintenance-only per `AGENTS.md`.
+
+> `npm run test` currently exits non-zero locally with `Worker exited unexpectedly` even when
+> every test passes. This is **pre-existing**, reproducible on a docs-only branch off `main`.
+> Confirm with `--reporter=json --outputFile` and check `numFailedTests` before treating a red
+> run as a real failure.
 
 Run `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`, and
 `npm run check:tests` before pushing. No Rust changes in either PR.
