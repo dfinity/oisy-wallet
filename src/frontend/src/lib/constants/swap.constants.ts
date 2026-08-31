@@ -14,6 +14,10 @@ import {
 } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
+import {
+	OISY_TRADE_LEARN_MORE_URL,
+	OISY_TRADE_PROVIDER_NAME
+} from '$lib/constants/oisy-trade.constants';
 import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
 import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
@@ -92,7 +96,17 @@ export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersCon
 					logo: '/images/dapps/onesec-logo.svg'
 				}
 			}
-		: {})
+		: {}),
+	// Unconditional, unlike the flag-gated entries above: `ActiveUserTransactionItem`
+	// resolves a row's provider name through this map, and an AUT row outlives a flag
+	// rollback — a gated entry would leave historical rows nameless. `website` is the
+	// docs page rather than an external venue, because this is the one in-house
+	// provider, and it is where the Trading tab and deposit flow already point.
+	[SwapProvider.OISY_TRADE]: {
+		website: OISY_TRADE_LEARN_MORE_URL,
+		name: OISY_TRADE_PROVIDER_NAME,
+		logo: '/images/dapps/oisy-trade-logo.svg'
+	}
 };
 
 const SUPPORTED_CROSS_SWAP_EVM_NETWORK_IDS = [
