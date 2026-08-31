@@ -93,6 +93,93 @@ describe('SolTransaction', () => {
 		expect(labelOf('receive')).toBe(en.swap.text.swap);
 	});
 
+	describe('where the cost of a transaction shows', () => {
+		const swapIntoSol = {
+			...mockTrx,
+			type: 'receive' as const,
+			fee: 1_270_000n,
+			summary: {
+				kind: 'swap' as const,
+				spent: { delta: -123_000n, tokenAddress: 'USDC', decimals: 6 },
+				received: { delta: 622_070n }
+			},
+			netChanges: [{ delta: 622_070n }, { delta: -123_000n, tokenAddress: 'USDC', decimals: 6 }]
+		};
+
+		const amountOf = (singleToken: boolean): string => {
+			const { container } = render(SolTransaction, {
+				props: { transaction: swapIntoSol, token: SOLANA_TOKEN, singleToken }
+			});
+
+			const amount = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amount);
+
+			return amount.textContent ?? '';
+		};
+
+		// The fee here outweighs what the swap bought. Folded into the activity row it reads as a
+		// loss, on the row whose sentence says SOL was received.
+		it('should show what the swap moved, not the cost, in the activity', () => {
+			expect(amountOf(false)).toContain('0.00062207');
+			expect(amountOf(false)).not.toContain('-');
+		});
+
+		// The SOL page is where what the wallet spends on transactions becomes visible.
+		it('should fold the fee in on the SOL page', () => {
+			expect(amountOf(true)).toContain('-0.00064793');
+		});
+
+		// The case the whole rule exists for: sending an SPL token moves no SOL, but it still
+		// costs some, and the SOL page is the only place that shows it.
+		it('should show the fee alone for a transaction that moved no SOL', () => {
+			const splSend = {
+				...mockTrx,
+				type: 'send' as const,
+				fee: 5_000n,
+				summary: {
+					kind: 'send' as const,
+					spent: { delta: -1_000_000n, tokenAddress: 'USDC', decimals: 6 }
+				},
+				netChanges: [{ delta: -1_000_000n, tokenAddress: 'USDC', decimals: 6 }]
+			};
+
+			const { container } = render(SolTransaction, {
+				props: { transaction: splSend, token: SOLANA_TOKEN, singleToken: true }
+			});
+
+			const amount = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amount);
+
+			expect(amount.textContent).toContain('-0.000005');
+		});
+
+		// A record cached before the redesign carries no summary and no net changes, only its own
+		// signed value. Reading the SOL page off the net alone would report the fee as the whole
+		// transaction.
+		it('should keep a legacy amount on the SOL page, less the fee', () => {
+			const legacy = {
+				...mockTrx,
+				type: 'send' as const,
+				fee: 5_000n,
+				value: 1_000_000n,
+				summary: undefined,
+				netChanges: undefined
+			};
+
+			const { container } = render(SolTransaction, {
+				props: { transaction: legacy, token: SOLANA_TOKEN, singleToken: true }
+			});
+
+			const amount = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amount);
+
+			expect(amount.textContent).toContain('-0.001005');
+		});
+	});
+
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(SolTransaction, {
 			props: {
