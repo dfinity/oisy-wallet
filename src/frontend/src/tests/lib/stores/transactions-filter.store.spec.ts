@@ -119,6 +119,56 @@ describe('transactionsFilterStore', () => {
 		});
 	});
 
+	describe('retainContactIds', () => {
+		it('drops the selected contact ids that are no longer selectable', () => {
+			transactionsFilterStore.toggleContactId('1');
+			transactionsFilterStore.toggleContactId('2');
+
+			transactionsFilterStore.retainContactIds(['2', '3']);
+
+			expect(get(transactionsFilterStore).contactIds).toEqual(['2']);
+		});
+
+		it('keeps the other facets untouched', () => {
+			transactionsFilterStore.toggleType('send');
+			transactionsFilterStore.toggleTokenId('ICP-ICP');
+			transactionsFilterStore.toggleContactId('1');
+
+			transactionsFilterStore.retainContactIds([]);
+
+			const value = get(transactionsFilterStore);
+
+			expect(value.types).toEqual(['send']);
+			expect(value.tokenIds).toEqual(['ICP-ICP']);
+			expect(value.contactIds).toEqual([]);
+		});
+
+		it('does not touch the store when every selection is still selectable', () => {
+			transactionsFilterStore.toggleContactId('1');
+
+			const before = get(transactionsFilterStore);
+
+			transactionsFilterStore.retainContactIds(['1', '2']);
+
+			expect(get(transactionsFilterStore)).toBe(before);
+		});
+
+		it('persists the pruned value to localStorage', () => {
+			transactionsFilterStore.toggleContactId('1');
+			transactionsFilterStore.toggleContactId('2');
+
+			transactionsFilterStore.retainContactIds(['1']);
+
+			const raw = localStorage.getItem(TRANSACTIONS_FILTER_STORAGE_KEY);
+
+			expect(JSON.parse(raw ?? '{}')).toEqual({
+				types: [],
+				tokenIds: [],
+				contactIds: ['1']
+			});
+		});
+	});
+
 	describe('clear', () => {
 		it('resets all facets to the empty filter', () => {
 			transactionsFilterStore.toggleType('send');

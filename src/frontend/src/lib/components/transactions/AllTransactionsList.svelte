@@ -22,7 +22,7 @@
 	import TransactionsFilterToolbar from '$lib/components/transactions/filter/TransactionsFilterToolbar.svelte';
 	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { allContacts } from '$lib/derived/contacts.derived';
+	import { allContacts, contacts, contactsNotInitialized } from '$lib/derived/contacts.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		modalBtcTransaction,
@@ -68,6 +68,22 @@
 		}
 
 		transactionsFilterStore.retainTokenIds(selectableTokenFilterKeys);
+	});
+
+	// Same reasoning for the contacts facet: a contact deleted from the address book leaves no row
+	// in the panel, so its selection would keep hiding transactions with no way to untick it. The
+	// selectable set is the user's own contacts, not `allContacts`, which also carries the built-in
+	// ck minter entries the panel never lists.
+	let selectableContactIds = $derived($contacts.map(({ id }) => id.toString()));
+
+	$effect(() => {
+		// Unlike the tokens, an empty list is a legitimate state here (the user deleted their last
+		// contact), so we gate on the store being loaded rather than on the list being non-empty.
+		if ($contactsNotInitialized) {
+			return;
+		}
+
+		transactionsFilterStore.retainContactIds(selectableContactIds);
 	});
 
 	let allTransactions = $derived(

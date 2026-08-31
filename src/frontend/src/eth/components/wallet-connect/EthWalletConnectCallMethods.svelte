@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { MULTICALL_MAX_METHODS } from '$eth/constants/multicall.constants';
 	import { getCalldataMethods } from '$eth/utils/transactions.utils';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,10 +9,9 @@
 
 	let { data }: Props = $props();
 
-	let methods = $derived(getCalldataMethods(data));
-
-	// The list is capped, so a batch longer than the cap would otherwise end without saying it had.
-	let capped = $derived(methods.length >= MULTICALL_MAX_METHODS);
+	// `capped` comes from the traversal rather than from the length of what it returned: a batch that
+	// ends exactly on the cap left nothing out and must not say it did.
+	let { methods, capped } = $derived(getCalldataMethods(data));
 </script>
 
 {#if methods.length > 0}

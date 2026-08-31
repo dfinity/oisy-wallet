@@ -563,7 +563,9 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(2);
 			});
 
-			it('should not deduplicate non-ethereum component transactions', () => {
+			// A swap is deliberately two rows, one per side, each carrying its own token's icon and
+			// balance change; what gets dropped is a token the transaction merely brushed.
+			it('should keep one Solana row per token the transaction moved', () => {
 				const solTx1: SolTransactionUi = {
 					...createMockSolTransactionsUi(1)[0],
 					id: 'same-id'
@@ -578,6 +580,39 @@ describe('transactions.utils', () => {
 					$solTransactions: {
 						[SOLANA_TOKEN_ID]: [{ data: solTx1, certified: false }],
 						[BONK_TOKEN_ID]: [{ data: solTx2, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
+			// A swap moved both tokens, so both rows stay: each carries its own icon and balance
+			// change, and a user scanning for one of them finds it on the row that names it.
+			it('should keep both sides of a Solana swap as their own rows', () => {
+				const swap: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'swap-id',
+					summary: {
+						kind: 'swap',
+						spent: { delta: -100_000n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+						received: { delta: 1_000_000n }
+					}
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: swap, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: swap, certified: false }]
 					},
 					$btcTransactions: undefined,
 					$ckEthMinterInfo: {},
