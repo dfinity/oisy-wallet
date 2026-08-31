@@ -1608,6 +1608,7 @@
 			"network": "Réseau",
 			"amount": "Montant",
 			"hex_data": "Données HEX",
+			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",

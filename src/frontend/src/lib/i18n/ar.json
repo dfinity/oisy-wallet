@@ -1608,6 +1608,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
