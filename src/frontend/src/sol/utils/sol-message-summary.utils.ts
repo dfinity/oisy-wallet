@@ -103,11 +103,12 @@ const effectsOf = ({
  *
  * A message that reduces to a plain send or swap is only worth stating as one if the run agrees:
  * the danger is a message that reads as a small transfer and drains a second asset when it runs,
- * so every simulated movement must be one the message accounted for, not merely most of them.
+ * so every mint the run moves must be one the message accounted for, not merely most of them.
  *
- * SOL is compared with room for what the transaction costs, since the simulated balance carries
- * the fees and the rent the message itself never states. The room is one-sided on purpose: paying
- * more than stated is the cost of the transaction, receiving less than stated is not.
+ * SOL is the exception, and it is compared apart from the mints. Every transaction pays a fee out
+ * of it and may leave rent behind, so the run always moves SOL whether the message mentions it or
+ * not: an SPL send states one movement and produces two. What the comparison asks of SOL is that
+ * the run took no more of it than the message plus those costs account for.
  */
 export const solMessageMatchesSimulation = ({
 	summary,
@@ -127,21 +128,34 @@ export const solMessageMatchesSimulation = ({
 	const claims = claimsOf(summary);
 	const effects = effectsOf(preview);
 
-	if (claims.length !== effects.length) {
+	const isMint = ({ tokenAddress }: { tokenAddress?: SplTokenAddress }): boolean =>
+		nonNullish(tokenAddress);
+
+	const mintClaims = claims.filter(isMint);
+	const mintEffects = effects.filter(isMint);
+
+	// Both directions: a mint the run moved that the message never mentioned is the theft this
+	// guards against, and a mint the message promised that the run never moved is a broken promise.
+	if (mintClaims.length !== mintEffects.length) {
 		return false;
 	}
 
-	return effects.every((effect) => {
-		const claim = claims.find(({ tokenAddress }) => tokenAddress === effect.tokenAddress);
+	if (
+		!mintEffects.every(
+			(effect) =>
+				claims.find(({ tokenAddress }) => tokenAddress === effect.tokenAddress)?.delta ===
+				effect.delta
+		)
+	) {
+		return false;
+	}
 
-		if (isNullish(claim)) {
-			return false;
-		}
+	const solClaimed = claims.find((claim) => !isMint(claim))?.delta ?? ZERO;
+	const solMoved = effects.find((effect) => !isMint(effect))?.delta ?? ZERO;
 
-		const shortfall = claim.delta - effect.delta;
+	// What the run took beyond what the message stated. Negative means the run left the user with
+	// more SOL than the message promised, which is a disagreement like any other.
+	const unaccounted = solClaimed - solMoved;
 
-		return nonNullish(effect.tokenAddress)
-			? shortfall === ZERO
-			: shortfall >= ZERO && shortfall <= costs;
-	});
+	return unaccounted >= ZERO && unaccounted <= costs;
 };
