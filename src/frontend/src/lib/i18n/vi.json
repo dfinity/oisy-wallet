@@ -1223,6 +1223,10 @@
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
 			"chain_fusion_minimum_amount": "",
+			"oisy_trade_minimum_notional": "",
+			"oisy_trade_deposit_fee": "",
+			"oisy_trade_taker_fee": "",
+			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
 		},
@@ -1248,7 +1252,11 @@
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
-			"near_intents_quote_expired": ""
+			"near_intents_quote_expired": "",
+			"oisy_trade_order_killed": "",
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {
@@ -1619,6 +1627,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
+			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
@@ -1639,6 +1648,8 @@
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
