@@ -7,6 +7,7 @@ export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXE
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e1111111111111111111111111';
+export const STAKE_PROGRAM_ADDRESS = 'Stake11111111111111111111111111111111111111';
 
 // Where and how an Anchor program publishes its own interface. The seed is Anchor's, and so is the
 // account layout: a fixed discriminator it stamps on every IDL account (a constant, not derived
