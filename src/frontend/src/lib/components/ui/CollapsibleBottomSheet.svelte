@@ -16,6 +16,10 @@
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
 		buttonTestId?: string;
+		// Replaces the default info-icon button on mobile, for sheets whose trigger is the current
+		// value rather than a hint that details exist.
+		trigger?: Snippet<[{ open: () => void }]>;
+		sheetTitle?: string;
 	}
 
 	let {
@@ -23,7 +27,9 @@
 		contentHeader,
 		contentFooter,
 		showContentHeader = false,
-		buttonTestId
+		buttonTestId,
+		trigger,
+		sheetTitle
 	}: Props = $props();
 
 	let expanded = $state(false);
@@ -32,29 +38,36 @@
 <Responsive down="sm">
 	<div class="flex w-full items-center justify-between">
 		{@render contentHeader({ isInBottomSheet: false })}
-		<ButtonIcon
-			ariaLabel={$i18n.core.alt.open_details}
-			colorStyle="muted"
-			onclick={() => (expanded = true)}
-			styleClass="text-disabled mb-2 items-end"
-			testId={buttonTestId}
-			width="w-8"
-		>
-			{#snippet icon()}
-				<IconInfo />
-			{/snippet}
-		</ButtonIcon>
+		{#if nonNullish(trigger)}
+			{@render trigger({ open: () => (expanded = true) })}
+		{:else}
+			<ButtonIcon
+				ariaLabel={$i18n.core.alt.open_details}
+				colorStyle="muted"
+				onclick={() => (expanded = true)}
+				styleClass="text-disabled mb-2 items-end"
+				testId={buttonTestId}
+				width="w-8"
+			>
+				{#snippet icon()}
+					<IconInfo />
+				{/snippet}
+			</ButtonIcon>
+		{/if}
 	</div>
 
 	{#if expanded}
 		<div class="fixed inset-0 z-14">
 			<BottomSheetContainer transition>
 				{#snippet header()}
-					<div class="w-full p-4">
+					<div class="flex w-full items-center justify-between p-4">
+						{#if nonNullish(sheetTitle)}
+							<span class="text-lg font-bold">{sheetTitle}</span>
+						{/if}
 						<ButtonIcon
 							ariaLabel={$i18n.core.alt.close_details}
 							onclick={() => (expanded = false)}
-							styleClass="text-disabled float-right"
+							styleClass="text-disabled ml-auto"
 						>
 							{#snippet icon()}
 								<IconClose size="24" />
