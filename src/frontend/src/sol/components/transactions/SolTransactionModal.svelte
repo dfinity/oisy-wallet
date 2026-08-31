@@ -101,12 +101,15 @@
 
 	// The bare figure. The sentence appends the symbol itself, and the hero title pairs it with
 	// one below.
-	const figureOf = (change: SolNetBalanceChange): string =>
-		formatToken({
+	const figureOf = (change: SolNetBalanceChange): string => {
+		const decimals = decimalsOf(change);
+
+		return formatToken({
 			value: absBigInt(change.delta),
-			unitName: decimalsOf(change),
-			displayDecimals: decimalsOf(change)
+			unitName: decimals,
+			displayDecimals: decimals
 		});
+	};
 
 	// The same sentence the rows carry, so a transaction reads identically wherever it is met.
 	// The figure below it is the detail this view exists for. Records without a summary keep the
