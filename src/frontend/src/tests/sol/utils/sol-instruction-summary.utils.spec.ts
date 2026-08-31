@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
@@ -246,6 +247,95 @@ describe('sol-instruction-summary.utils', () => {
 
 			expect(view.kind).toBe('unwrap');
 			expect(view.returned).toBe(7_039_280n);
+		});
+
+		// Opened and closed inside one transaction, the account held nothing before the run: its
+		// balance going in says zero, and the rent it was funded with is what comes back.
+		it('should return the rent of an account the same transaction opened', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: { type: 'create', info: { account: ata, wallet: owner, mint: 'mint' } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: { newAccount: ata, source: owner, lamports: 2_039_280 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				// The account did not exist before the run, so its balance going in is zero.
+				accountLamports: { [ata]: ZERO }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(2_039_280n);
+		});
+
+		// The wrap is a System transfer into the account after its creation, so the close hands back
+		// the rent and the wrapped SOL together. Counting only the rent understates it by the wrap.
+		it('should count a wrap into what an unwrap hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'wsolAta11111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: { account: ata, wallet: owner, mint: WSOL_TOKEN.address }
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: { newAccount: ata, source: owner, lamports: 2_039_280 }
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { source: owner, destination: ata, lamports: 5_000_000 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'syncNative', info: { account: ata } }
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				accountLamports: { [ata]: ZERO }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(7_039_280n);
 		});
 
 		it('should say nothing about the amount when the balance is unknown', () => {
