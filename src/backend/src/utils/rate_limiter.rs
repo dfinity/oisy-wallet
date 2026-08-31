@@ -350,9 +350,17 @@ impl RateLimiter {
 /// rejected call leaves no state: a per-caller rejection never touches the
 /// global counters, and a call the global tier rejects never creates a
 /// per-caller `HashMap` entry. The global tiers bucket every caller under one
-/// fixed key (`Principal::anonymous()`, never a real registered caller on these
-/// endpoints), capping aggregate load against a many-principals flood the
+/// fixed key, capping aggregate load against a many-principals flood the
 /// per-caller tiers cannot see.
+///
+/// **Requires an authenticated caller.** That fixed key is
+/// `Principal::anonymous()`, so on an endpoint the anonymous principal can reach
+/// the per-caller and global tiers become the same bucket: they consume each
+/// other, and one unauthenticated client exhausts the global budget on its own.
+/// Every caller today is behind `caller_is_registered_user` or
+/// `caller_is_not_anonymous`, which is what makes the shared key safe — a
+/// property of those guards, not of this type. An anonymous endpoint wants
+/// [`RateLimiter`] against something it can actually distinguish callers by.
 pub(crate) struct TieredRateLimiter {
     caller_minute: RateLimiter,
     caller_hour: RateLimiter,
