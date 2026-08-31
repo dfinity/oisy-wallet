@@ -24,7 +24,7 @@ use shared::types::tip::{SetTipSecretRequest, TipError, MAX_TIP_SECRET_CIPHERTEX
 
 use crate::{
     state::{with_existing_tip_secrets_mut, with_tip_secrets, with_tip_secrets_mut},
-    tips::model::validate_tip_id,
+    tips::model::{sha256, validate_tip_id},
 };
 
 /// Domain separator bound into the vetKD derivation for the tip-secrets store.
@@ -68,11 +68,19 @@ fn internal(msg: String) -> TipError {
 /// it. `service::cancel_tip` moves its id into `TipId` for the same reason.
 fn tip_id_to_map_key(tip_id: String) -> Result<Blob<32>, TipError> {
     // Through the canonical validator rather than a length check of its own.
-    // The bound was the same, but an empty id passed — and an empty id is a key
-    // no tip can ever match, so the entry under it would outlive every cleanup
-    // path (claim, cancel and prune all remove by tip id).
+    // An empty id is a key no tip can ever match, so an entry under it would
+    // outlive every cleanup path — claim, cancel and prune all remove by tip id.
     validate_tip_id(&tip_id)?;
-    Blob::try_from(tip_id.into_bytes().as_slice()).map_err(|_| TipError::InvalidTipId)
+
+    // Hashed, not copied. `MAX_TIP_ID_BYTES` is 64 and this key is a `Blob<32>`,
+    // so the raw bytes made ids of 33-64 a silent dead zone: creatable,
+    // claimable and cancellable, but their recovery secret could never be stored
+    // or read, and the sender would only find out when the link they wanted back
+    // was not there. Hashing removes the coupling instead of trading one bound
+    // for the other, and it is what `spender_subaccount` already does with the
+    // same id.
+    Ok(Blob::try_from(sha256(&tip_id.into_bytes()).as_slice())
+        .expect("a 32-byte digest always fits a Blob<32>"))
 }
 
 /// Stores the encrypted claim code for one of the caller's tips.
