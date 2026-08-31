@@ -6,6 +6,7 @@
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -87,6 +88,8 @@
 		onApprove,
 		onReject
 	}: Props = $props();
+
+	let activeTab = $state('summary');
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
@@ -254,89 +257,104 @@
 		<p class="text-primary my-4" data-tid="message-summary">{summaryText}</p>
 	{/if}
 
-	<!-- The review names no recipient of its own: a single destination had to pick one winner out
+	<!-- What the transaction does, and separately what it is made of. The operations are the
+	     material a user checks the summary against, not part of the summary: on a routed swap they
+	     are a dozen lines, and above the amounts they bury the one figure that matters. -->
+	<Tabs
+		styleClass="mt-4"
+		tabs={[
+			{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
+			{ label: $i18n.wallet_connect.text.tab_operations, id: 'operations' }
+		]}
+		bind:activeTab
+	>
+		{#if activeTab === 'summary'}
+			<!-- The review names no recipient of its own: a single destination had to pick one winner out
 	     of a swap, and where the value ends up is what the simulated balance changes describe. An
 	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
-	<!-- The signer is the connected account and never varies between the requests of a session, so
+			<!-- The signer is the connected account and never varies between the requests of a session, so
 	     here it costs a row without saying anything about the message in front of the user. The
 	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
-	<SendData
-		{amount}
-		{application}
-		{balance}
-		destination={null}
-		showAmount={decoded}
-		showBalance={decoded}
-		showSigner={false}
-		{source}
-		{token}
-	>
-		{#if isApproval}
-			<SendDataSpender spender={destination}>
-				{#snippet actions()}
-					<SolAddressActions address={destination} network={token.network} />
-				{/snippet}
-			</SendDataSpender>
-		{/if}
+			<SendData
+				{amount}
+				{application}
+				{balance}
+				destination={null}
+				showAmount={decoded}
+				showBalance={decoded}
+				showSigner={false}
+				{source}
+				{token}
+			>
+				{#if isApproval}
+					<SendDataSpender spender={destination}>
+						{#snippet actions()}
+							<SolAddressActions address={destination} network={token.network} />
+						{/snippet}
+					</SendDataSpender>
+				{/if}
 
-		{#if nonNullish(parties)}
-			<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
-		{/if}
+				{#if nonNullish(parties)}
+					<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
+				{/if}
 
-		{#if nonNullish(preview)}
-			<SolWalletConnectSimulationPreview {feeToken} {preview} />
-		{/if}
+				{#if nonNullish(preview)}
+					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{/if}
 
-		<!-- One heading, and under it what the transaction actually charges: the base fee every
+				<!-- One heading, and under it what the transaction actually charges: the base fee every
 		     message pays, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
-		<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
-			<div class="flex flex-col gap-2">
-				<div class="flex flex-col" data-tid="network-fee">
-					<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
-					{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
-				</div>
+				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
+					<div class="flex flex-col gap-2">
+						<div class="flex flex-col" data-tid="network-fee">
+							<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
+							{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+						</div>
 
-				{#if nonNullish(prioritizationFee)}
-					<div class="flex flex-col" data-tid="prioritization-fee">
-						<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
-						{@render feeValue(prioritizationFee)}
+						{#if nonNullish(prioritizationFee)}
+							<div class="flex flex-col" data-tid="prioritization-fee">
+								<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
+								{@render feeValue(prioritizationFee)}
+							</div>
+						{/if}
+
+						{#if ataFee > ZERO}
+							<div class="flex flex-col" data-tid="ata-fee">
+								<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
+								{@render feeValue(ataFee)}
+							</div>
+						{/if}
 					</div>
-				{/if}
+				</WalletConnectModalValue>
 
-				{#if ataFee > ZERO}
-					<div class="flex flex-col" data-tid="ata-fee">
-						<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
-						{@render feeValue(ataFee)}
-					</div>
-				{/if}
-			</div>
-		</WalletConnectModalValue>
+				<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<!-- What the simulated run actually does, which the message itself states almost none of: a
-		     routed swap performs every transfer as a nested call. Shown here rather than left to the
-		     hex, which nobody can read. -->
-		{#if nonNullish(instructions) && instructions.length > 0}
-			<WalletConnectModalValue
-				label={$i18n.transaction.text.tab_instructions}
-				ref="contained-instructions"
-			>
-				<!-- The simulated deltas carry the decimals of a mint the wallet does not list, which
-				     an unchecked transfer does not state and the list would otherwise read raw. -->
-				<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
-			</WalletConnectModalValue>
+				{#snippet sourceNetwork()}
+					<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
+						<NetworkWithLogo network={token.network} />
+					</WalletConnectModalValue>
+				{/snippet}
+			</SendData>
+		{:else}
+			<!-- What the simulated run actually does, which the message itself states almost none of:
+			     a routed swap performs every transfer as a nested call. Shown here rather than left
+			     to the hex, which nobody can read. -->
+			{#if nonNullish(instructions) && instructions.length > 0}
+				<WalletConnectModalValue
+					label={$i18n.transaction.text.tab_instructions}
+					ref="contained-instructions"
+				>
+					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
+					     which an unchecked transfer does not state and the list would otherwise read
+					     raw. -->
+					<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+				</WalletConnectModalValue>
+			{/if}
+
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 		{/if}
-
-		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-
-		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
-
-		{#snippet sourceNetwork()}
-			<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
-				<NetworkWithLogo network={token.network} />
-			</WalletConnectModalValue>
-		{/snippet}
-	</SendData>
+	</Tabs>
 
 	{#snippet toolbar()}
 		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />

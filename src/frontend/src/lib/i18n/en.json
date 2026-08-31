@@ -1608,6 +1608,7 @@
 			"network": "Network",
 			"amount": "Amount",
 			"hex_data": "HEX Data",
+			"tab_operations": "Operations",
 			"unreviewed_instructions": "OISY can't decode some of these instructions, so the review below may be incomplete.",
 			"unreviewed_instructions_simulated": "OISY can't decode some of these instructions, so the review below is simulated rather than read from the message. What happens when it actually runs can differ.",
 			"simulated_review": "The review below is what simulating this transaction against the network's current state predicts. What happens when it actually runs can differ.",
