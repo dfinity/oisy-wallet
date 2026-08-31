@@ -124,17 +124,22 @@ describe('SolTransaction', () => {
 			).toBeInTheDocument();
 		});
 
-		// A send names the other side of the transfer, which is the thing a user checks.
-		it('should still name the counterparty of a send', () => {
-			const { queryByText } = render(SolTransaction, {
-				props: {
-					transaction: { ...interaction, summary: { kind: 'send' as const } },
-					token: SOLANA_TOKEN
-				}
-			});
+		// A transfer names the other side of it, which is the thing a user checks. A self-transfer
+		// has one too, the user's own other account, so it is a transfer in this respect and not
+		// an interaction.
+		it.each(['send', 'receive', 'self'] as const)(
+			'should still name the counterparty of a %s',
+			(kind) => {
+				const { queryByText } = render(SolTransaction, {
+					props: {
+						transaction: { ...interaction, summary: { kind } },
+						token: SOLANA_TOKEN
+					}
+				});
 
-			expect(queryByText(en.transaction.text.swap_on)).not.toBeInTheDocument();
-		});
+				expect(queryByText(en.transaction.text.swap_on)).not.toBeInTheDocument();
+			}
+		);
 	});
 
 	describe('where the cost of a transaction shows', () => {
