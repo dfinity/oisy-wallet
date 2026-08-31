@@ -1561,6 +1561,13 @@
 			"estimated_eth": "Phí Ethereum ước tính",
 			"max_fee_eth": "Phí tối đa <small>(có thể trong < 30 giây)</small>",
 			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Phí chuyển đổi",
 			"convert_inter_network_fee": "Phí chuyển đổi liên mạng",
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
@@ -1571,6 +1578,9 @@
 			"network_fee": "",
 			"approval_fee": "",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
