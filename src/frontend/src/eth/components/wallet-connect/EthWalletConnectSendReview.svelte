@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -100,8 +101,6 @@
 	let allowanceIncrease = $derived(call.type === 'erc20AllowanceDelta' && call.increase);
 
 	let unknownCall = $derived(call.type === 'unknown');
-
-	let unknownSelector = $derived(call.type === 'unknown' ? call.selector : undefined);
 
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
@@ -264,12 +263,11 @@
 			</MessageBox>
 		{/if}
 
-		<!-- The function a call names is the one fact the review can still state about calldata it
-		     could not decode, and it is what lets the user look the call up for themselves. -->
-		{#if nonNullish(unknownSelector)}
-			<WalletConnectModalValue label={$i18n.wallet_connect.text.function} ref="function">
-				{unknownSelector}
-			</WalletConnectModalValue>
+		<!-- What the transaction calls is the one thing the review can still state about calldata it
+		     could not decode, and it is what lets the user look the call up for themselves. A batch
+		     names its own wrapper and nothing else, so the calls inside it are listed too. -->
+		{#if unknownCall}
+			<EthWalletConnectCallMethods {data} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
