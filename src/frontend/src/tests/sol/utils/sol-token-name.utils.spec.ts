@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SolanaNetworks } from '$sol/types/network';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
@@ -92,6 +93,20 @@ describe('sol-token-name.utils', () => {
 		});
 	});
 
+	// A network with no Solana cluster behind it has no names of its own, and must not be handed
+	// mainnet's for want of an answer.
+	it('should name nothing for a network that is not a Solana cluster', () => {
+		expect(
+			solTokenSymbol({
+				...args,
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenAddress: 'unlisted-mint',
+				metadata: on({ 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }),
+				unknownTokenAddresses: ['unlisted-mint']
+			})
+		).toBe('Unknown token');
+	});
+
 	// The same mint address exists on several clusters and carries different data on each.
 	it('should not lend one network name to another', () => {
 		expect(
@@ -121,6 +136,19 @@ describe('sol-token-name.utils', () => {
 					metadata: on({ 'named-on-chain': { name: 'Pump', symbol: 'PUMP' } })
 				})
 			).toStrictEqual(['nameless-b', 'nameless-a']);
+		});
+
+		// The counting reads the same per-cluster map the naming does, so it counts a mint as
+		// nameless wherever no cluster of ours answers for it.
+		it('should count a mint as nameless when the network is not a Solana cluster', () => {
+			expect(
+				solUnknownTokenAddresses({
+					tokenAddresses: ['named-on-chain'],
+					tokens,
+					networkId: ETHEREUM_NETWORK_ID,
+					metadata: on({ 'named-on-chain': { name: 'Pump', symbol: 'PUMP' } })
+				})
+			).toStrictEqual(['named-on-chain']);
 		});
 	});
 });

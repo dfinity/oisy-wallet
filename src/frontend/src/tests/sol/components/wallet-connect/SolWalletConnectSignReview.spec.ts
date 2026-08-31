@@ -5,7 +5,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
@@ -17,6 +17,12 @@ describe('SolWalletConnectSignReview', () => {
 		feeToken: SOLANA_TOKEN,
 		onApprove: vi.fn(),
 		onReject: vi.fn()
+	};
+
+	// The operations are a tab of their own, so what they contain is only in the DOM once it is
+	// selected.
+	const showOperations = async (queries: { getByText: (text: string) => HTMLElement }) => {
+		await fireEvent.click(queries.getByText(en.wallet_connect.text.tab_operations));
 	};
 
 	// What OISY would pay to prioritise the same transaction: 800_000 micro-lamports per compute
@@ -186,8 +192,8 @@ describe('SolWalletConnectSignReview', () => {
 	});
 
 	// The message states almost nothing a routed swap does; the simulation is what knows.
-	it('should list what the simulated run does', () => {
-		const { getByTestId, getAllByTestId } = render(SolWalletConnectSignReview, {
+	it('should list what the simulated run does', async () => {
+		const queries = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
 				instructions: [
@@ -197,14 +203,120 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
-		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
+		await showOperations(queries);
+
+		expect(queries.getByTestId('sol-instructions-list')).toBeInTheDocument();
+		expect(queries.getAllByTestId('sol-instruction')).toHaveLength(2);
 	});
 
-	it('should show no instruction list when the simulation produced none', () => {
-		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+	// An unchecked transfer states no decimals, so without the simulated deltas the amount would
+	// be printed in raw base units: a hundredth of a token would read as ten thousand.
+	it('should scale an unlisted mint by the decimals the simulation reports', async () => {
+		const tokenAddress = 'unlisted-mint';
 
-		expect(queryByTestId('sol-instructions-list')).not.toBeInTheDocument();
+		const queries = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'send' as const, amount: 10_000n, tokenAddress, counterparty: mockSolAddress2 }
+				],
+				preview: {
+					tokenDeltas: [{ account: mockAtaAddress, tokenAddress, decimals: 6, delta: -10_000n }],
+					controlChanges: []
+				}
+			}
+		});
+
+		await showOperations(queries);
+
+		expect(queries.getByTestId('sol-instruction')).toHaveTextContent('0.01');
+	});
+
+	describe('the two tabs', () => {
+		it('should open on the summary', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, data: 'AQID' }
+			});
+
+			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
+		});
+
+		// The warnings are about the request as a whole, so they belong to neither tab: hiding one
+		// behind a tab the user never opens is how it goes unread.
+		it('should keep the warnings above both tabs', async () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...props, data: 'AQID', unreviewed: true }
+			});
+
+			expect(queries.getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+		});
+	});
+
+	describe('the line that says what the message does', () => {
+		const messageSummary = {
+			kind: 'send' as const,
+			spent: { delta: -1_000_000n },
+			counterparty: mockSolAddress2
+		};
+
+		it('should state the message when the simulated run agrees with it', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: { solDelta: -1_005_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		// A sentence the user would check the figures against, over a transaction that does
+		// something else, is worse than no sentence at all.
+		it('should say nothing when the run moves more than the message states', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: {
+						solDelta: -1_005_000n,
+						tokenDeltas: [
+							{
+								account: mockAtaAddress,
+								tokenAddress: 'unlisted-mint',
+								decimals: 6,
+								delta: -9_000_000n
+							}
+						],
+						controlChanges: []
+					}
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+
+		// The simulation is best effort, and an unchecked reading is not worth stating.
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, messageSummary }
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+	});
+
+	it('should show no instruction list when the simulation produced none', async () => {
+		const queries = render(SolWalletConnectSignReview, { props });
+
+		await showOperations(queries);
+
+		expect(queries.queryByTestId('sol-instructions-list')).not.toBeInTheDocument();
 	});
 
 	describe('the warnings about what the transaction does', () => {
@@ -289,17 +401,19 @@ describe('SolWalletConnectSignReview', () => {
 			);
 		});
 
-		it('should render the fees above the hex data', () => {
-			const { getByText } = render(SolWalletConnectSignReview, {
+		// What it costs belongs with what it does; the raw message is material to check it against.
+		it('should render the fees with the summary and the hex data with the operations', async () => {
+			const queries = render(SolWalletConnectSignReview, {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			const fee = getByText(en.fee.text.prioritization_fee);
-			const hex = getByText(en.wallet_connect.text.hex_data);
+			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 
-			expect(fee.compareDocumentPosition(hex) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
-				Node.DOCUMENT_POSITION_FOLLOWING
-			);
+			await showOperations(queries);
+
+			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 		});
 	});
 
@@ -542,16 +656,19 @@ describe('SolWalletConnectSignReview', () => {
 			expect(queryByText(en.send.error.unable_to_retrieve_amount)).not.toBeInTheDocument();
 		});
 
-		it('should still render everything that does not depend on the decode', () => {
-			const { getByText } = render(SolWalletConnectSignReview, {
+		it('should still render everything that does not depend on the decode', async () => {
+			const queries = render(SolWalletConnectSignReview, {
 				props: { ...undecodedProps, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
-			expect(getByText(en.send.text.network)).toBeInTheDocument();
-			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
-			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+			expect(queries.getByText(en.wallet_connect.text.application)).toBeInTheDocument();
+			expect(queries.getByText(en.send.text.network)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
 		});
 
 		it('should still render the simulated changes', () => {

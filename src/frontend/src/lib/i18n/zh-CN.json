@@ -1608,6 +1608,7 @@
 			"network": "网络",
 			"amount": "金额",
 			"hex_data": "HEX 数据",
+			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
