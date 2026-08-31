@@ -33,6 +33,66 @@ describe('SolTransaction', () => {
 		);
 	});
 
+	// One transaction produces a row per token it moved, and it is stored as a send or a receive
+	// of one of the two sides. Badged by that alone, one half of a swap points out and the other
+	// points in, which reads as two unrelated transfers.
+	it('should badge both sides of a swap the same way', () => {
+		const swap = {
+			...mockTrx,
+			summary: {
+				kind: 'swap' as const,
+				spent: { delta: -100n, tokenAddress: 'USDC', decimals: 6 },
+				received: { delta: 7n, tokenAddress: 'RAY', decimals: 6 }
+			}
+		};
+
+		const badgeOf = (type: 'send' | 'receive'): string => {
+			const { container } = render(SolTransaction, {
+				props: { transaction: { ...swap, type }, token: SOLANA_TOKEN, iconType: 'token' }
+			});
+
+			const badge = container.querySelector('[data-tid="icon-badge"]');
+
+			assertNonNullish(badge);
+
+			return badge.innerHTML;
+		};
+
+		const sent = badgeOf('send');
+
+		expect(sent).not.toBe('');
+		expect(badgeOf('receive')).toBe(sent);
+	});
+
+	// The glyph no longer matches the stored type, so a screen reader announcing that type would
+	// call one half of the swap a send and the other a receive.
+	it('should announce both sides of a swap as a swap', () => {
+		const swap = {
+			...mockTrx,
+			summary: {
+				kind: 'swap' as const,
+				spent: { delta: -100n, tokenAddress: 'USDC', decimals: 6 },
+				received: { delta: 7n, tokenAddress: 'RAY', decimals: 6 }
+			}
+		};
+
+		const labelOf = (type: 'send' | 'receive'): string | null => {
+			const { container } = render(SolTransaction, {
+				props: { transaction: { ...swap, type }, token: SOLANA_TOKEN, iconType: 'token' }
+			});
+
+			return (
+				container
+					.querySelector('[data-tid="icon-badge"]')
+					?.closest('[aria-label]')
+					?.getAttribute('aria-label') ?? null
+			);
+		};
+
+		expect(labelOf('send')).toBe(en.swap.text.swap);
+		expect(labelOf('receive')).toBe(en.swap.text.swap);
+	});
+
 	// Stefan: an unreduced transaction should read like a swap does, with the programs it ran
 	// through underneath, rather than a bare word.
 	describe('a transaction OISY could not reduce', () => {
@@ -189,5 +249,29 @@ describe('SolTransaction', () => {
 				showPlusSign: true
 			})} ${getTokenDisplaySymbol(SOLANA_TOKEN)}`
 		);
+	});
+
+	// The asset never left, so the token it moved shows zero rather than the amount.
+	it('should show a self-transfer with its amount and no balance change', () => {
+		const { container, getByText } = render(SolTransaction, {
+			props: {
+				transaction: {
+					...mockTrx,
+					type: 'send',
+					summary: {
+						kind: 'self' as const,
+						spent: { delta: -2_000_000_000n },
+						counterparty: 'my-other-account'
+					}
+				},
+				token: SOLANA_TOKEN
+			}
+		});
+
+		expect(getByText('Self-transfer 2 SOL')).toBeInTheDocument();
+
+		const amount = container.querySelector('div.leading-5>span.justify-end');
+
+		expect(amount?.textContent).not.toContain('-2');
 	});
 });

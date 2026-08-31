@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,15 +11,16 @@
 	import { absBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
-	import type { SolAddress } from '$sol/types/address';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary
 	} from '$sol/utils/sol-transaction-summary.utils';
-	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -37,27 +39,39 @@
 	// The programs the transaction ran through, in the order it reached them and each named once.
 	// A swap routed across two pools touches two, and an aggregator more; naming one of them would
 	// pick a winner among equals.
-	let venues = $derived(
-		flattenInstructions(transaction.instructions ?? []).reduce<SolAddress[]>(
-			(acc, { program }) =>
-				nonNullish(program) && !acc.includes(program) ? [...acc, program] : acc,
-			[]
+	let venues = $derived([
+		...new Set(
+			flattenInstructions(transaction.instructions ?? [])
+				.map(({ program }) => program)
+				.filter(nonNullish)
 		)
-	);
+	]);
 
 	// A transfer names the other side of it, which is what the user checks, and a self-transfer
 	// has one too: the user's own other account. A swap and a transaction OISY could not reduce
 	// have no other side, so they name where they happened instead.
 	let showVenues = $derived(summary?.kind === 'swap' || summary?.kind === 'other');
 
+	// The mints this row mentions, so a placeholder is numbered against the others beside it.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
 	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (findEnabledSplToken({
-					tokens: $enabledSplTokens,
-					tokenAddress,
-					networkId: token.network.id
-				})?.symbol ?? $i18n.transaction.text.unknown_token);
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
 
 	const swapAmount = (change: SolNetBalanceChange): string =>
 		formatToken({
@@ -124,6 +138,8 @@
 	addresses={showVenues ? venues : undefined}
 	{displayAmount}
 	from={showVenues ? undefined : (fromOwner ?? from)}
+	icon={summary?.kind === 'swap' ? IconConvert : undefined}
+	iconAriaLabel={summary?.kind === 'swap' ? $i18n.swap.text.swap : undefined}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}

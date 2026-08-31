@@ -41,6 +41,12 @@
 		from?: string;
 		// Overrides the type-derived To/From prefix: a swap's address is a venue, not a recipient.
 		addressPrefixLabel?: string;
+		// Overrides the icon the type would choose, which is the badge over a token logo and the
+		// icon itself in the transaction layout. A Solana swap is stored as a send or a receive of
+		// one of its two sides, so the type alone would mark half of it with an arrow out and half
+		// with an arrow in. Pass the label with it: the type no longer describes what is shown.
+		icon?: Component;
+		iconAriaLabel?: string;
 		// Replaces the single type-derived address. A Solana transaction can run through several
 		// programs, and naming one of them would pick a winner among equals.
 		addresses?: string[];
@@ -63,6 +69,8 @@
 		to,
 		from,
 		addressPrefixLabel,
+		icon: iconOverride,
+		iconAriaLabel,
 		addresses,
 		tokenId,
 		children,
@@ -72,7 +80,9 @@
 		testId
 	}: Props = $props();
 
-	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+	const cardIcon: Component = $derived(iconOverride ?? mapTransactionIcon({ type, status }));
+
+	const cardIconLabel: string = $derived(iconAriaLabel ?? type);
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
@@ -159,13 +169,13 @@
 					{#if iconType === 'token'}
 						{#if nonNullish(nft)}
 							<NftLogo
-								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: cardIconLabel }}
 								logoSize="md"
 								{nft}
 							/>
 						{:else}
 							<TokenLogo
-								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: cardIconLabel }}
 								data={token}
 								logoSize="md"
 							/>
