@@ -10,10 +10,14 @@
 	import { absBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import type { SolAddress } from '$sol/types/address';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import {
+		flattenInstructions,
+		formatSolTransactionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -30,11 +34,21 @@
 	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges, fee } =
 		$derived(transaction);
 
-	// The venue of a routed swap: the program its legs ran through.
-	let venue = $derived(
-		summary?.kind === 'swap'
-			? transaction.instructions?.find(({ kind }) => kind === 'route')?.program
-			: undefined
+	// The programs the transaction ran through, in the order it reached them and each named once.
+	// A swap routed across two pools touches two, and an aggregator more; naming one of them would
+	// pick a winner among equals.
+	let venues = $derived(
+		flattenInstructions(transaction.instructions ?? []).reduce<SolAddress[]>(
+			(acc, { program }) =>
+				nonNullish(program) && !acc.includes(program) ? [...acc, program] : acc,
+			[]
+		)
+	);
+
+	// A send or a receive names the other side of the transfer, which is what the user checks.
+	// Everything else names where it happened, because there is no other side to name.
+	let showVenues = $derived(
+		nonNullish(summary) && summary.kind !== 'send' && summary.kind !== 'receive'
 	);
 
 	const symbolOf = (tokenAddress: string | undefined): string =>
@@ -107,14 +121,15 @@
 </script>
 
 <Transaction
-	addressPrefixLabel={summary?.kind === 'swap' ? $i18n.transaction.text.swap_on : undefined}
+	addressPrefixLabel={showVenues ? $i18n.transaction.text.swap_on : undefined}
+	addresses={showVenues ? venues : undefined}
 	{displayAmount}
-	from={summary?.kind === 'swap' ? undefined : (fromOwner ?? from)}
+	from={showVenues ? undefined : (fromOwner ?? from)}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
-	to={summary?.kind === 'swap' ? venue : (toOwner ?? to)}
+	to={showVenues ? undefined : (toOwner ?? to)}
 	{token}
 	{type}
 >
