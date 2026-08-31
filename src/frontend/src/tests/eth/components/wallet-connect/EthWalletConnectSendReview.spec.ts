@@ -478,6 +478,34 @@ describe('EthWalletConnectSendReview', () => {
 
 		// A batch names its own wrapper and nothing else, so the wrapper alone answers "what does
 		// this call?" with a name that describes neither the approve nor the swap inside it.
+		// Depth is what the list indents by, so a call two levels down must not sit at the same
+		// indent as a direct member of the wrapper.
+		it('should indent a batched call by how deep it actually sits', async () => {
+			const inner = encodeCall({
+				selector: ERC20_APPROVE_HASH,
+				to: RECIPIENT,
+				value: MAX_UINT_256
+			});
+
+			const nested = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [[inner]])
+				.slice(2)}`;
+
+			const data = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [[nested]])
+				.slice(2)}`;
+
+			const { getByRole, container } = renderUnknownCall({ data });
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			const indents = [...container.querySelectorAll('#methods li')].map(
+				(li) => (li as HTMLElement).style.paddingLeft
+			);
+
+			expect(indents).toEqual(['0rem', '1rem', '2rem']);
+		});
+
 		it('should list the calls batched inside a multicall, not only the wrapper', async () => {
 			const inner = [
 				encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 }),

@@ -131,6 +131,9 @@
 	);
 
 	let activeTab = $state('summary');
+
+	// Levels of indentation the list will render before it stops widening.
+	const MAX_NESTING_INDENT = 4;
 </script>
 
 {#if invalidTypedData}
@@ -168,7 +171,10 @@
 			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.methods}</p>
 			<ul class="mb-4 flex list-none flex-col gap-1 font-normal">
 				{#each methods as { name, depth } (name)}
-					<li class:pl-4={depth > 0}>
+					<!-- Indented by how deep the struct actually sits. A single level for anything nested
+					     would render a struct two deep as a member of the root, which is the reading the
+					     depth exists to prevent. Clamped, because the type graph is the dApp's to shape. -->
+					<li style:padding-left="{Math.min(depth, MAX_NESTING_INDENT)}rem">
 						<span class="break-all font-mono text-sm">{name}</span>
 					</li>
 				{/each}
