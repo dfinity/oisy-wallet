@@ -55,9 +55,9 @@ Make the hand-off mechanical. In the artifact (a comment, a caption, or a
 short table in the spec), map each region to the real thing:
 
 ```html
-<!-- ModalHero -->
-<!-- List > ListItem × n  (see $lib/components/common/) -->
-<!-- Button variant="primary"  (ui/Button.svelte) -->
+<!-- ModalHero  ($lib/components/common/ModalHero.svelte) -->
+<!-- List > ListItem × n  ($lib/components/common/List.svelte, ListItem.svelte) -->
+<!-- Button colorStyle="primary"  ($lib/components/ui/Button.svelte) -->
 ```
 
 An implementer should be able to read the artifact and know which files to
