@@ -20,6 +20,7 @@ import {
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
@@ -461,6 +462,88 @@ describe('wallet-connect.utils', () => {
 			{ type: 'unknown' as const, selector: '0xdeadbeef' }
 		])('should not treat $type as an approval', (call) => {
 			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('hasUnreviewableTypedData', () => {
+		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
+			hasUnreviewableTypedData({
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: toParams(typedData),
+				sessionChainId: MAINNET_SESSION
+			});
+
+		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
+		it.each([
+			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
+			{ name: 'DAI Permit', typedData: daiPermit(true) }
+		])('should not warn about a recognised $name', ({ typedData }) => {
+			expect(call(typedData)).toBeFalsy();
+		});
+
+		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
+		// signature pull the stated value out of the wallet, and the review said nothing about it.
+		it('should warn about an ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization())).toBeTruthy();
+		});
+
+		it('should warn about a struct that is nothing OISY knows', () => {
+			expect(
+				call({
+					domain: { name: 'Marketplace', version: '1', chainId: '1', verifyingContract: USDC },
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [
+							{ name: 'offerer', type: 'address' },
+							{ name: 'price', type: 'uint256' }
+						]
+					},
+					primaryType: 'Order',
+					message: { offerer: HOLDER, price: '1' }
+				})
+			).toBeTruthy();
+		});
+
+		// Already warned about and blocked by hasInvalidTypedData. Reporting it here as well would
+		// put two warnings on one request and let the acknowledgement re-enable a blocked signature.
+		it('should not warn about typed data that would not be signed at all', () => {
+			expect(call(daiPermit('true'))).toBeFalsy();
+		});
+
+		it('should not warn about typed data on a chain the session was not granted', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBeFalsy();
+		});
+
+		// A raw message carries no schema, so nothing about it can be silently missing: what is
+		// shown is what is signed.
+		it.each([SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_ETH_SIGN])(
+			'should not warn about %s',
+			(method) => {
+				expect(
+					hasUnreviewableTypedData({
+						method,
+						params: toParams(transferWithAuthorization()),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBeFalsy();
+			}
+		);
+
+		it('should not warn about a payload that is not typed data at all', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: ['0xnot-json'],
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBeFalsy();
 		});
 	});
 
