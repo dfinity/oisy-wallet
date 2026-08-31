@@ -51,6 +51,9 @@ export interface SolInstructionSummary {
 	newAuthority?: SolAddress;
 	// The program that produced the legs of a route, when one is known by address.
 	program?: SolAddress;
+	// The name that program publishes for itself, when it publishes one. Its own claim about
+	// itself, attested by nobody: a label for the address, never a statement about what it does.
+	programName?: string;
 	// The legs of a single routed swap. They hang under the route rather than sitting flat among
 	// the top-level effects, which is what keeps a four-leg route from reading as four unrelated
 	// transfers.
