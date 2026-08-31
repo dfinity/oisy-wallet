@@ -213,13 +213,23 @@
 			return undefined;
 		}
 
-		const result = fetchOisyTradeQuote({
-			sourceToken: $sourceToken,
-			destinationToken: $destinationToken,
-			sourceAmount
-		});
+		// Guarded even though the quote is contractually non-throwing: it converts a
+		// human price through `toPriceUnits`, and `Number.toFixed` switches to
+		// exponential notation at 1e21, which `BigInt` refuses. The registry's
+		// `getQuote` has the same catch. Here the call sits inside a `$derived.by`,
+		// where an escaping error would take the whole form down — and the worst
+		// outcome this branch can honestly report is "no explanation".
+		try {
+			const result = fetchOisyTradeQuote({
+				sourceToken: $sourceToken,
+				destinationToken: $destinationToken,
+				sourceAmount
+			});
 
-		return result.ok ? undefined : result.errorKind;
+			return result.ok ? undefined : result.errorKind;
+		} catch (_: unknown) {
+			return undefined;
+		}
 	});
 
 	// The shipped Limit Order copy, filled from the same `toPairView` fields that

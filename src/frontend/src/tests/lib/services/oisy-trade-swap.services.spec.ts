@@ -562,6 +562,24 @@ describe('oisy-trade-swap.services', () => {
 			expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
 		});
 
+		// An unknown ledger fee says nothing about whether the balance is withdrawable, so
+		// it must not share the dust skip: skipping would report the swap settled with the
+		// funds still in DEX custody. `IcTokenSchema` requires `fee`, so reaching this at
+		// all means constructing a token without one.
+		it('fails rather than skipping the withdrawal when the ledger fee is unknown', async () => {
+			vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+			mockBalances({ source: ZERO, destination: 2_000_000n });
+			const withdrawSpy = mockWithdraw();
+
+			const feeless = { ...CKUSDC, fee: undefined } as unknown as IcToken;
+
+			await expect(
+				settleOisyTradeSwap({ ...settleParams, destinationToken: feeless })
+			).rejects.toThrow(en.trading.deposit.error.unknown_fee);
+
+			expect(withdrawSpy).not.toHaveBeenCalled();
+		});
+
 		// "Not found" has two documented spellings and the did never says whether terminal
 		// orders are retained, so both resolve from the balances instead — which is what
 		// keeps settlement correct either way.

@@ -320,10 +320,16 @@ const freeBalanceOf = ({
 /**
  * Withdraws a token's whole free balance, or nothing when that would be dust.
  *
- * `withdraw` refuses an amount at or below the ledger fee (`AmountTooSmall`), so a
+ * `withdraw` refuses an `amount` at or below the ledger fee (`AmountTooSmall`), so a
  * small enough residue is permanently unwithdrawable. Skipping it silently is the
  * point rather than an omission: treating it as a failed settlement would strand the
  * entire operation on a few base units nobody can move.
+ *
+ * An unknown fee is deliberately *not* folded into that skip — it says nothing about
+ * whether the balance is withdrawable, and skipping would let settlement report the
+ * swap `filled` or `killed` with the funds still in DEX custody. Unreachable in
+ * practice (`IcTokenSchema` requires `fee`, and the quote refuses a pair whose ledger
+ * fees it cannot read), so it throws rather than earning its own error type.
  */
 const withdrawFreeBalance = async ({
 	identity,
@@ -336,7 +342,11 @@ const withdrawFreeBalance = async ({
 }): Promise<bigint | undefined> => {
 	const fee = getTokenFee(token);
 
-	if (isNullish(fee) || free <= fee) {
+	if (isNullish(fee)) {
+		throw new Error(get(i18n).trading.deposit.error.unknown_fee);
+	}
+
+	if (free <= fee) {
 		return undefined;
 	}
 

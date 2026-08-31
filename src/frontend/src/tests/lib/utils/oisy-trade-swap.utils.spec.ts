@@ -327,6 +327,100 @@ describe('oisy-trade-swap.utils', () => {
 
 			expect(result.ok).toBeFalsy();
 		});
+
+		// An 18-decimal base token is where the human-float round-trip the shipped
+		// Limit Order form uses stops being safe: one lot is 1e15 base units, far
+		// below the 1e-6 *relative* slack `isMultipleOfStep` allows, so a float
+		// verdict can pass a quantity the canister then rejects with
+		// `InvalidQuantity` — after `deposit` has already moved the funds.
+		describe('18-decimal precision', () => {
+			// The same 18-decimal ckETH token the unpaired-token cases use, here given a
+			// pair of its own. 18 dp base, 6 dp quote; lot 0.001 ckETH, tick 0.001 ckUSDC.
+			const cketh = UNPAIRED;
+			const ckethUsdc = buildPair({
+				base: cketh,
+				quote: CKUSDC,
+				lotSize: 1_000_000_000_000_000n
+			});
+
+			const resolve = ({ sourceToken = cketh, amount }: { sourceToken?: Token; amount: bigint }) =>
+				resolveOisyTradeOrder({
+					sourceToken,
+					amount,
+					// Well above the 5 ckUSDC floor at these sizes, and on the tick grid.
+					price: 1000,
+					pair: ckethUsdc
+				});
+
+			// The exact case that regressed: 0.009 ckETH is a clean multiple of the
+			// 0.001 lot, but 9e15/1e18 has no exact binary form, so multiplying back
+			// out produced 8999999999999999 — one base unit off the grid, while the
+			// float lot check still passed. Note 9e15 is *below* `2^53`, so this is the
+			// divide-then-multiply round-trip rather than an unsafe-integer problem.
+			it('keeps an on-grid 0.009 ckETH sell exactly on the lot grid', () => {
+				const result = resolve({ amount: 9_000_000_000_000_000n });
+
+				assert(result.ok);
+
+				expect(result.order.quantity).toBe(9_000_000_000_000_000n);
+				expect(result.order.quantity % ckethUsdc.lot_size).toBe(ZERO);
+				// A Sell deposits the ordered quantity exactly — acceptance criterion 10.
+				expect(result.order.depositAmount).toBe(9_000_000_000_000_000n);
+			});
+
+			// From 5 lots up, since at this price one lot is 1 ckUSDC and the pair's
+			// floor is 5 — below that the rejection is the notional, not the grid.
+			it('round-trips every on-grid quantity without drift', () => {
+				const drifted = Array.from({ length: 200 }, (_, index) => BigInt(index + 5))
+					.map((lots) => ({ lots, amount: lots * ckethUsdc.lot_size }))
+					.filter(({ amount }) => {
+						const result = resolve({ amount });
+
+						return !result.ok || result.order.quantity !== amount;
+					});
+
+				expect(drifted).toEqual([]);
+			});
+
+			// Off the grid by 1e9 base units — a 1e-9 *relative* deviation, which the
+			// float check's 1e-6 tolerance waves through. Only an exact check rejects
+			// it, and rejecting it here is what keeps the deposit from happening.
+			it('refuses an amount off the grid by less than the float tolerance', () => {
+				const result = resolve({ amount: 9_000_000_000_000_000n + 1_000_000_000n });
+
+				assert(!result.ok);
+
+				expect(result.errorKind).toBe('lot');
+			});
+
+			// Above 1e21 base units `Number.toFixed(0)` switches to exponential
+			// notation, which `BigInt` refuses — the old conversion threw a
+			// `SyntaxError` out of a function documented as never throwing.
+			it('resolves an amount past the exponential-notation threshold', () => {
+				const amount = 1_000_007_000_000_000_000_000n;
+
+				expect(() => resolve({ amount })).not.toThrow();
+
+				const result = resolve({ amount });
+
+				assert(result.ok);
+
+				expect(result.order.quantity).toBe(amount);
+			});
+
+			// The derived side: the quantity comes out of a bigint division, so the
+			// deposit is the exact reserve with no residue left in the wallet.
+			it('derives a buy quantity into 18 decimals exactly', () => {
+				const result = resolve({ sourceToken: CKUSDC, amount: 9_000_000n });
+
+				assert(result.ok);
+
+				expect(result.order.side).toBe('buy');
+				expect(result.order.quantity).toBe(9_000_000_000_000_000n);
+				expect(result.order.quantity % ckethUsdc.lot_size).toBe(ZERO);
+				expect(result.order.depositAmount).toBe(9_000_000n);
+			});
+		});
 	});
 
 	describe('computeOisyTradeReceiveAmount', () => {
