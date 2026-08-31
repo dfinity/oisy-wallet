@@ -1,4 +1,5 @@
 import { getAccountData } from '$sol/api/solana.api';
+import { SOLANA_KNOWN_PROGRAM_NAMES } from '$sol/constants/sol-programs.constants';
 import { loadSolProgramNames } from '$sol/services/sol-program-name.services';
 import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -122,6 +123,41 @@ describe('sol-program-name.services', () => {
 			await expect(
 				loadSolProgramNames({ instructions: [route], network: 'devnet' })
 			).resolves.toStrictEqual([{ ...route, programName: 'something-else' }]);
+		});
+
+		describe('with a program OISY knows by name', () => {
+			const [[knownProgram, knownName]] = Object.entries(SOLANA_KNOWN_PROGRAM_NAMES);
+
+			const knownRoute: SolInstructionSummary = { kind: 'route', program: knownProgram };
+
+			it('should name it without asking the network', async () => {
+				await expect(
+					loadSolProgramNames({ instructions: [knownRoute], network })
+				).resolves.toStrictEqual([{ ...knownRoute, programName: knownName }]);
+
+				expect(findSolProgramIdlAddress).not.toHaveBeenCalled();
+				expect(getAccountData).not.toHaveBeenCalled();
+			});
+
+			// The vetted name is the venue's, the published one is its crate's.
+			it('should prefer it to the name the program publishes for itself', async () => {
+				vi.mocked(decodeSolProgramIdlName).mockResolvedValue('jupiter');
+
+				await expect(
+					loadSolProgramNames({ instructions: [knownRoute], network })
+				).resolves.toStrictEqual([{ ...knownRoute, programName: knownName }]);
+			});
+
+			it('should still ask about a program it does not know', async () => {
+				await expect(
+					loadSolProgramNames({ instructions: [knownRoute, route], network })
+				).resolves.toStrictEqual([
+					{ ...knownRoute, programName: knownName },
+					{ ...route, programName: 'jupiter' }
+				]);
+
+				expect(getAccountData).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('should do nothing when there are no instructions', async () => {

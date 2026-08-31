@@ -1,5 +1,6 @@
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountData } from '$sol/api/solana.api';
+import { SOLANA_KNOWN_PROGRAM_NAMES } from '$sol/constants/sol-programs.constants';
 import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -18,6 +19,14 @@ const loadName = async ({
 	programAddress: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<string> => {
+	// A name OISY vetted beats the one the program writes about itself: it is the venue's name
+	// rather than its crate's, and it covers the programs that publish no interface at all.
+	const knownName = SOLANA_KNOWN_PROGRAM_NAMES[programAddress];
+
+	if (notEmptyString(knownName)) {
+		return knownName;
+	}
+
 	const idlAddress = await findSolProgramIdlAddress({ programAddress });
 
 	const data = await getAccountData({ address: idlAddress, network });
