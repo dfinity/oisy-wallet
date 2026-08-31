@@ -949,6 +949,10 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		chain_fusion_minimum_amount: string;
+		oisy_trade_minimum_notional: string;
+		oisy_trade_deposit_fee: string;
+		oisy_trade_taker_fee: string;
+		oisy_trade_withdrawal_fee: string;
 		value_difference_error_confirmation: string;
 		value_difference_missing_price_confirmation: string;
 	};
@@ -975,6 +979,10 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		oisy_trade_order_killed: string;
+		oisy_trade_settlement_unresolved: string;
+		oisy_trade_order_not_placed: string;
+		oisy_trade_recovery_failed: string;
 	};
 }
 
@@ -1318,7 +1326,6 @@ interface I18nWallet_connect {
 		methods_capped: string;
 		unknown_call_title: string;
 		unknown_call: string;
-		function: string;
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;

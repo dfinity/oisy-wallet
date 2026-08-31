@@ -12,6 +12,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { OisyTradeQuote, OisyTradeSwapDetails } from '$lib/types/oisy-trade-swap';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
@@ -49,7 +50,8 @@ export enum SwapProvider {
 	VELORA = 'velora',
 	NEAR_INTENTS = 'nearIntents',
 	ONE_SEC = 'oneSec',
-	CHAIN_FUSION = 'chainFusion'
+	CHAIN_FUSION = 'chainFusion',
+	OISY_TRADE = 'oisyTrade'
 }
 
 export enum VeloraSwapTypes {
@@ -157,6 +159,15 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			swapDetails: ChainFusionSwapDetails;
 			type?: string;
+	  }
+	| {
+			provider: SwapProvider.OISY_TRADE;
+			receiveAmount: bigint;
+			// No `receiveOutMinimum`: a fill-or-kill order has no slippage semantics —
+			// it fills at the submitted price or is killed — so the slippage control
+			// must not affect this offer.
+			swapDetails: OisyTradeSwapDetails;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -189,7 +200,16 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
-export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
+// `getQuote` may resolve to `undefined` — an unorderable amount or an unpaired
+// token is a non-offer, not an error — so `fetchSwapAmountsICP` maps only when a
+// quote actually came back.
+type OisyTradeSwapProvider = BaseSwapProvider<
+	SwapProvider.OISY_TRADE,
+	OisyTradeQuote | undefined,
+	{ quote: OisyTradeQuote }
+>;
+
+export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider | OisyTradeSwapProvider;
 
 export interface EvmSwapProviderConfig {
 	key: SwapProvider;
