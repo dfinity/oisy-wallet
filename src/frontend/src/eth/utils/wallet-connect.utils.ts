@@ -749,6 +749,50 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
 	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
 
 /**
+ * Whether a request would be signed without OISY being able to state what it authorizes.
+ *
+ * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
+ * pull tokens out of the wallet, a Permit2 batch grants allowances over several tokens at once, and
+ * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
+ * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
+ * and nothing said about what signing it would allow.
+ *
+ * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
+ * allowlist, and everything the allowlist does not cover falls through to a preview that states
+ * nothing rather than to one that states it cannot say. Recognising one more schema improves what
+ * the user is told; it is not what stands between them and an unexplained signature.
+ *
+ * `false` for a raw-message method. Those carry no schema and OISY makes no claim about them: the
+ * message shown is the message signed, so there is no summary that could be silently absent.
+ * `false`, too, for typed data that fails to sign at all, which {@link hasInvalidTypedData} already
+ * warns about and blocks.
+ */
+export const hasUnreviewableTypedData = ({
+	method,
+	params,
+	sessionChainId
+}: {
+	method: string;
+	params: string[];
+	sessionChainId: string | undefined;
+}): boolean => {
+	if (!isEthSignTypedDataMethod(method)) {
+		return false;
+	}
+
+	if (hasInvalidTypedData({ method, params, sessionChainId })) {
+		return false;
+	}
+
+	try {
+		return isNullish(getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params)));
+	} catch (_err: unknown) {
+		// Typed data that cannot even be read is the invalid case above, not this one.
+		return false;
+	}
+};
+
+/**
  * Whether a typed-data request would fail to sign — i.e. its typed data cannot
  * be parsed, validated, and hashed. Used by the confirmation UI to warn and
  * disable approval, so the preview mirrors what the signer would do (which
