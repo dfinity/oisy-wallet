@@ -30,7 +30,11 @@ const ETH_READ_CALL_SIGNATURES = [
 // `0x` and the four bytes of a function selector, as hex.
 const SELECTOR_LENGTH = 10;
 
-export const ETH_CALL_NAMES: Record<string, string> = ETH_READ_CALL_SIGNATURES.reduce(
+// The value is optional because the point of this map is that most selectors are absent from it:
+// it is indexed with whatever a dApp sent, and an unnamed call must read as `undefined` at the type
+// level too. `Record<string, string>` would promise a name for every four bytes in existence and
+// let a missing one pass as a `string` all the way to the screen.
+export const ETH_CALL_NAMES: Record<string, string | undefined> = ETH_READ_CALL_SIGNATURES.reduce(
 	(acc, signature) => ({
 		...acc,
 		[id(signature).slice(0, SELECTOR_LENGTH)]: signature.slice(0, signature.indexOf('('))
