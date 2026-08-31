@@ -15,10 +15,10 @@
 	};
 </script>
 
-<label class="my-6 flex gap-4 rounded-xl bg-secondary p-2" for={inputId}>
+<div class="my-6 flex items-start gap-4 rounded-xl bg-secondary p-2">
 	<Checkbox {checked} {inputId} onChange={handleCheckboxChange} />
 
-	<span class="text-sm text-tertiary">
+	<label class="block text-sm leading-snug text-tertiary" for={inputId}>
 		{$i18n.liquidium.text.supply_agreement}
-	</span>
-</label>
+	</label>
+</div>
