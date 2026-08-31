@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
@@ -246,7 +247,7 @@ const toEffect = ({
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
-	accountLamports: Record<SolAddress, bigint>;
+	accountLamports: Partial<Record<SolAddress, bigint>>;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
@@ -312,7 +313,7 @@ const toEffect = ({
 
 			// An account the same transaction opened held nothing before it ran, so its balance
 			// going in says zero. What it hands back is the rent it was funded with moments earlier.
-			const returned = rentOf({ account, flattened }) ?? accountLamports[account];
+			const returned = fundedInTransaction({ account, flattened }) ?? accountLamports[account];
 
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
@@ -363,6 +364,49 @@ const toEffect = ({
 
 	return undefined;
 };
+
+/**
+ * What an account holds by the time it is closed, when the same transaction put it there.
+ *
+ * The System `createAccount` that opens it states the rent, and any System `transfer` into it adds
+ * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
+ * swap hands back the rent and the wrapped SOL together. No instruction states that total.
+ */
+const fundedInTransaction = ({
+	account,
+	flattened
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+}): bigint | undefined =>
+	flattened.reduce<bigint | undefined>(
+		(
+			acc,
+			{
+				instruction: {
+					program,
+					parsed: { type, info }
+				}
+			}
+		) => {
+			if (program !== 'system') {
+				return acc;
+			}
+
+			const funds =
+				(type === 'createAccount' && address({ info, key: 'newAccount' }) === account) ||
+				(type === 'transfer' && address({ info, key: 'destination' }) === account);
+
+			if (!funds) {
+				return acc;
+			}
+
+			const lamports = amount({ info, key: 'lamports' });
+
+			return nonNullish(lamports) ? (acc ?? ZERO) + lamports : acc;
+		},
+		undefined
+	);
 
 /**
  * The rent an account creation costs, from the System `createAccount` that funds it.
@@ -491,7 +535,7 @@ export const mapSolInstructionSummaries = ({
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
-	accountLamports?: Record<SolAddress, bigint>;
+	accountLamports?: Partial<Record<SolAddress, bigint>>;
 }): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
