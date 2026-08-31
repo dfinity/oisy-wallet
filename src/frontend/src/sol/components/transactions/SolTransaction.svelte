@@ -9,11 +9,11 @@
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { absBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
+	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -50,27 +50,18 @@
 			displayDecimals: change.decimals ?? SOLANA_DEFAULT_DECIMALS
 		});
 
-	// The word for every kind but a swap, whose pair is the only thing that tells one swap from
-	// another in a day of them.
+	// Records from before the redesign carry no summary, and their kind is all the old shape said.
 	let label = $derived(
-		isNullish(summary)
-			? type === 'send'
+		nonNullish(summary)
+			? formatSolTransactionSummary({
+					summary,
+					i18n: $i18n,
+					symbolOf,
+					amountOf: swapAmount
+				})
+			: type === 'send'
 				? $i18n.send.text.send
 				: $i18n.receive.text.receive
-			: summary.kind === 'send'
-				? $i18n.send.text.send
-				: summary.kind === 'receive'
-					? $i18n.receive.text.receive
-					: summary.kind === 'swap'
-						? nonNullish(summary.spent) && nonNullish(summary.received)
-							? replacePlaceholders($i18n.transaction.text.summary_swap, {
-									$spent: swapAmount(summary.spent),
-									$spent_symbol: symbolOf(summary.spent.tokenAddress),
-									$received: swapAmount(summary.received),
-									$received_symbol: symbolOf(summary.received.tokenAddress)
-								})
-							: $i18n.swap.text.swap
-						: $i18n.transaction.text.kind_other
 	);
 
 	// The net change of the token whose page this is: the SOL entry for the native token, the

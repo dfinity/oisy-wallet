@@ -9,6 +9,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
@@ -89,9 +90,21 @@ const simulate = async ({
 		addressToToken
 	});
 
+	// The message read on its own, without the nested calls the run reveals: a second account of
+	// the same transaction, which is what lets the review notice the two disagreeing.
+	const messageSummary = deriveSolMessageSummary({
+		instructions: mapSolInstructionSummaries({
+			instructions: [...transactionMessage.instructions],
+			innerInstructions: [],
+			ownedAddresses: [address, ...ownedAddresses],
+			addressToToken
+		})
+	});
+
 	return {
 		...(!isEmptySolSimulationPreview(preview) && { preview }),
 		...(instructions.length > 0 && { instructions }),
+		...(messageSummary.kind !== 'other' && { messageSummary }),
 		parties: {
 			...deriveSolTransferParties({
 				legs,
