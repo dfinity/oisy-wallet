@@ -1,7 +1,12 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ERC20_APPROVE_HASH, ERC20_INCREASE_ALLOWANCE_HASH } from '$eth/constants/erc20.constants';
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -9,6 +14,7 @@ import WalletConnectSend from '$lib/components/wallet-connect/WalletConnectSend.
 import { MAX_UINT_256 } from '$lib/constants/app.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import en from '$tests/mocks/i18n.mock';
+import { nonNullish } from '@dfinity/utils';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { AbiCoder } from 'ethers/abi';
@@ -20,10 +26,21 @@ import { AbiCoder } from 'ethers/abi';
 describe('an eth_sendTransaction request reaching the review', () => {
 	const SPENDER = '0x2222222222222222222222222222222222222222';
 	const UNKNOWN_SELECTOR = '0x87517c45';
+	const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
 	const UNKNOWN_TITLE = en.wallet_connect.text.unknown_call_title;
 
+	const encodeArgs = ({
+		selector,
+		types,
+		values
+	}: {
+		selector: string;
+		types: string[];
+		values: unknown[];
+	}) => `${selector}${AbiCoder.defaultAbiCoder().encode(types, values).slice(2)}`;
+
 	const encodeCall = ({ selector, value }: { selector: string; value: bigint }) =>
-		`${selector}${AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [SPENDER, value]).slice(2)}`;
+		encodeArgs({ selector, types: ['address', 'uint256'], values: [SPENDER, value] });
 
 	const request = (data: string | undefined): WalletKitTypes.SessionRequest =>
 		({
@@ -109,40 +126,116 @@ describe('an eth_sendTransaction request reaching the review', () => {
 		expect(container).toHaveTextContent(ERC20_APPROVE_HASH);
 	});
 
-	// Every selector a researcher demonstrated could move assets through this review. Four of them
-	// OISY decodes; five it does not, and those are the point: covering them is the fallback's job
-	// rather than five more decoders. What every one of them must satisfy is the same, whether
-	// decoded or not: it is never summarized as a zero-value native send.
+	// Every selector a researcher demonstrated could move assets through this review, each carrying
+	// the arguments its own ABI declares rather than filler. Filler is worse than useless here: it
+	// fails to decode for every one of these shapes, so each case would take the fail-closed path
+	// and the table would pass while proving nothing about the decoded review it claims to cover.
+	//
+	// Four are decoded, and are asserted to name the party they hand something to. Five are not,
+	// and are covered by the fallback rather than by five more decoders. What every row shares is
+	// the claim that matters: none is summarized as a zero-value native send.
 	describe.each([
-		{ name: 'approve', selector: ERC20_APPROVE_HASH, title: en.core.text.approve },
-		// A decoded ERC-20 transfer really is a send, of tokens, with its recipient and amount
-		// stated. It is titled Send because that is what it is, not because nothing was read.
-		{ name: 'transfer', selector: '0xa9059cbb', title: en.send.text.send },
-		{ name: 'setApprovalForAll', selector: '0xa22cb465', title: en.core.text.approve },
+		{
+			name: 'approve',
+			data: encodeCall({ selector: ERC20_APPROVE_HASH, value: MAX_UINT_256 }),
+			title: en.core.text.approve,
+			names: SPENDER
+		},
+		// A decoded ERC-20 transfer really is a send, of tokens, to the recipient its calldata
+		// names. It is titled Send because that is what it is, not because nothing was read.
+		{
+			name: 'transfer',
+			data: encodeCall({ selector: ERC20_TRANSFER_HASH, value: 1_000_000n }),
+			title: en.send.text.send,
+			names: SPENDER
+		},
+		{
+			name: 'setApprovalForAll',
+			data: encodeArgs({
+				selector: ERC_SET_APPROVAL_FOR_ALL_HASH,
+				types: ['address', 'bool'],
+				values: [SPENDER, true]
+			}),
+			title: en.core.text.approve,
+			names: SPENDER
+		},
 		{
 			name: 'increaseAllowance',
-			selector: ERC20_INCREASE_ALLOWANCE_HASH,
-			title: en.core.text.approve
+			data: encodeCall({ selector: ERC20_INCREASE_ALLOWANCE_HASH, value: MAX_UINT_256 }),
+			title: en.core.text.approve,
+			names: SPENDER
 		},
-		{ name: 'transferFrom', selector: '0x23b872dd', title: UNKNOWN_TITLE },
-		{ name: 'ERC-721 safeTransferFrom', selector: '0x42842e0e', title: UNKNOWN_TITLE },
-		{ name: 'ERC-721 safeTransferFrom with data', selector: '0xb88d4fde', title: UNKNOWN_TITLE },
-		{ name: 'ERC-1155 safeTransferFrom', selector: '0xf242432a', title: UNKNOWN_TITLE },
-		{ name: 'ERC-1155 safeBatchTransferFrom', selector: '0x2eb2c2d6', title: UNKNOWN_TITLE }
-	])('$name', ({ selector, title }) => {
-		const calldata = `${selector}${'de'.repeat(96)}`;
-
+		{
+			name: 'transferFrom',
+			data: encodeArgs({
+				selector: '0x23b872dd',
+				types: ['address', 'address', 'uint256'],
+				values: [HOLDER, SPENDER, 1n]
+			}),
+			title: UNKNOWN_TITLE
+		},
+		{
+			name: 'ERC-721 safeTransferFrom',
+			data: encodeArgs({
+				selector: '0x42842e0e',
+				types: ['address', 'address', 'uint256'],
+				values: [HOLDER, SPENDER, 1n]
+			}),
+			title: UNKNOWN_TITLE
+		},
+		{
+			name: 'ERC-721 safeTransferFrom with data',
+			data: encodeArgs({
+				selector: '0xb88d4fde',
+				types: ['address', 'address', 'uint256', 'bytes'],
+				values: [HOLDER, SPENDER, 1n, '0x']
+			}),
+			title: UNKNOWN_TITLE
+		},
+		{
+			name: 'ERC-1155 safeTransferFrom',
+			data: encodeArgs({
+				selector: '0xf242432a',
+				types: ['address', 'address', 'uint256', 'uint256', 'bytes'],
+				values: [HOLDER, SPENDER, 1n, 1n, '0x']
+			}),
+			title: UNKNOWN_TITLE
+		},
+		{
+			name: 'ERC-1155 safeBatchTransferFrom',
+			data: encodeArgs({
+				selector: '0x2eb2c2d6',
+				types: ['address', 'address', 'uint256[]', 'uint256[]', 'bytes'],
+				values: [HOLDER, SPENDER, [1n], [1n], '0x']
+			}),
+			title: UNKNOWN_TITLE
+		}
+	])('$name', ({ data, title, names }) => {
 		it('should never be summarized as a zero-value native send', async () => {
-			const { container } = await deliver(calldata);
+			const { container } = await deliver(data);
 
 			expect(container).not.toHaveTextContent(`0 ${ETHEREUM_TOKEN.symbol}`);
 		});
 
 		it(`should be titled ${title}`, async () => {
-			const { container } = await deliver(calldata);
+			const { container } = await deliver(data);
 
 			expect(container).toHaveTextContent(title);
 		});
+
+		if (nonNullish(names)) {
+			// Proves the arguments were read rather than the request having fallen through to the
+			// fail-closed path, which would satisfy both assertions above while stating nothing.
+			it('should name the party its calldata hands something to', async () => {
+				const { container } = await deliver(data);
+
+				expect(container).toHaveTextContent(names);
+				expect(container).not.toHaveTextContent(en.wallet_connect.text.unverifiable_erc20_request);
+				expect(container).not.toHaveTextContent(
+					en.wallet_connect.text.unverifiable_approval_for_all_request
+				);
+			});
+		}
 	});
 
 	it('should still describe a request carrying no calldata as an ordinary send', async () => {
