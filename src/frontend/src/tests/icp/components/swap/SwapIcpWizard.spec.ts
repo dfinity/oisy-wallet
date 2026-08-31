@@ -11,8 +11,9 @@ import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
+import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider, type ChainFusionSwapDetails } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -23,11 +24,12 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockChainFusionProvider,
+	mockOisyTradeProvider,
 	mockOneSecProvider,
 	mockSwapProviders
 } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$icp/services/icrc.services', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
@@ -40,6 +42,7 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 const mockSwapFn = vi.fn();
 const mockOneSecFn = vi.fn();
 const mockChainFusionFn = vi.fn();
+const mockOisyTradeFn = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchOneSecIcpToEvmSwap: (...args: unknown[]) => mockOneSecFn(...args),
@@ -51,6 +54,13 @@ vi.mock('$lib/services/swap.services', () => ({
 
 vi.mock('$lib/services/chain-fusion-swap.services', () => ({
 	fetchChainFusionIcpSwap: (...args: unknown[]) => mockChainFusionFn(...args)
+}));
+
+// A factory mock, so the real module's canister-facing dependency tree is never
+// loaded. `OisyTradeSwapError` deliberately lives in `swap-errors.services`, not
+// here, so the wizard's `instanceof` branch still sees the real class.
+vi.mock('$lib/services/oisy-trade-swap.services', () => ({
+	fetchOisyTradeSwap: (...args: unknown[]) => mockOisyTradeFn(...args)
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -357,6 +367,95 @@ describe('SwapIcpWizard', () => {
 
 				expect(mockOneSecFn).not.toHaveBeenCalled();
 				expect(toasts.toastsError).toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('OISY Trade swap', () => {
+			const setOisyTradeContext = () => {
+				const oisyTradeAmountsStore = initSwapAmountsStore();
+				oisyTradeAmountsStore.setSwaps({
+					swaps: [mockOisyTradeProvider],
+					amountForSwap: 1,
+					selectedProvider: mockOisyTradeProvider
+				});
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: oisyTradeAmountsStore });
+			};
+
+			const submit = async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+			};
+
+			const readFailedSwapError = () => {
+				const { failedSwapError } = mockContext.get(SWAP_CONTEXT_KEY) as {
+					failedSwapError: Writable<SwapError | undefined>;
+				};
+
+				return get(failedSwapError);
+			};
+
+			beforeEach(() => {
+				mockOisyTradeFn.mockResolvedValue({ status: 'filled', withdrawals: [42n] });
+				setOisyTradeContext();
+			});
+
+			it('dispatches the reviewed order and closes on success', async () => {
+				await submit();
+
+				expect(mockOisyTradeFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						sourceToken: mockToken,
+						destinationToken: mockDestToken,
+						// The order the quote resolved and the user reviewed — never re-derived.
+						order: mockOisyTradeProvider.swapDetails.order
+					})
+				);
+				expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
+				expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
+			});
+
+			// A killed fill-or-kill order is an expected market outcome whose funds are
+			// already back in the wallet, so it lands in Review as info — like
+			// slippage-exceeded — and never in the unexpected-error toast, where the
+			// reassuring copy would read as a failure detail.
+			it('presents a killed order in Review rather than as an unexpected error', async () => {
+				mockOisyTradeFn.mockRejectedValue(
+					new OisyTradeSwapError(en.swap.error.oisy_trade_order_killed, 'killed')
+				);
+
+				await submit();
+
+				expect(readFailedSwapError()).toEqual({
+					message: en.swap.error.oisy_trade_order_killed,
+					variant: 'info'
+				});
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+				expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
+			});
+
+			// An unresolved settlement asks the user to check the Trading tab, so it is a
+			// warning rather than info — but still a Review message, not a toast.
+			it('presents an unresolved settlement as a warning in Review', async () => {
+				mockOisyTradeFn.mockRejectedValue(
+					new OisyTradeSwapError(en.swap.error.oisy_trade_settlement_unresolved, 'unresolved')
+				);
+
+				await submit();
+
+				expect(readFailedSwapError()).toEqual({
+					message: en.swap.error.oisy_trade_settlement_unresolved,
+					variant: 'warning'
+				});
+				expect(toasts.toastsError).not.toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
 			});
 		});

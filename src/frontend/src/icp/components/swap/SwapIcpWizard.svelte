@@ -26,6 +26,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionIcpSwap } from '$lib/services/chain-fusion-swap.services';
+	import { fetchOisyTradeSwap } from '$lib/services/oisy-trade-swap.services';
+	import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 	import {
 		enableSwapDestinationToken,
 		fetchOneSecIcpToEvmSwap,
@@ -110,6 +112,17 @@
 
 	let isChainFusionProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	// OISY Trade settles in the foreground for now: deposit, fill-or-kill order, and the
+	// withdrawal that brings the destination token back, all inside the modal. It is
+	// deliberately absent from `isActiveTransactionSwap` below until it has an Active User
+	// Transaction row to hand the settlement to — closing the modal earlier would leave the
+	// funds in DEX custody with nothing watching them.
+	let oisyTradeDetails = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.OISY_TRADE
+			? $swapAmountsStore.selectedProvider.swapDetails
+			: undefined
 	);
 
 	// The user's own address on the destination chain, which is where the minter pays the
@@ -213,6 +226,31 @@
 					setFailedProgressStep,
 					swapId: crypto.randomUUID()
 				});
+			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.OISY_TRADE) {
+				// Dispatched explicitly rather than through `swapService`, like 1Sec and Chain
+				// Fusion above: the reviewed order — side, price, quantity, deposit amount —
+				// cannot travel through `SwapParams`, and re-deriving it here would let the book
+				// move between Review and submit.
+				if (isNullish(oisyTradeDetails) || !isIcToken($destinationToken)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+					onBack();
+					return;
+				}
+
+				await fetchOisyTradeSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as IcToken,
+					destinationToken: $destinationToken,
+					order: oisyTradeDetails.order,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
 			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
 				if (isNullish(destinationAddress)) {
 					toastsError({
@@ -306,6 +344,16 @@
 					),
 					variant: 'info'
 				});
+			} else if (err instanceof OisyTradeSwapError) {
+				// A killed fill-or-kill order is an expected market outcome — the source
+				// funds are already back in the wallet when it is thrown — so it reads as
+				// info in Review, like slippage, never as an unexpected-error toast. An
+				// unresolved settlement asks the user to check the Trading tab, hence the
+				// warning level.
+				failedSwapError.set({
+					message: err.message,
+					variant: err.kind === 'killed' ? 'info' : 'warning'
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
@@ -323,7 +371,11 @@
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
 						...swapTrackingMetadata,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err)
+							? err.code
+							: err instanceof OisyTradeSwapError
+								? err.kind
+								: ''
 					}
 				});
 			}
@@ -359,7 +411,7 @@
 				swapWithActiveTransaction={isActiveTransactionSwap}
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ICP_SWAP}
+					SwapProvider.ICP_SWAP || nonNullish(oisyTradeDetails)}
 				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}

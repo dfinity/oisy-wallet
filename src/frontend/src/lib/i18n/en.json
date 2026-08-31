@@ -1223,6 +1223,10 @@
 			"onesec_transfer_fee": "Transfer fee",
 			"onesec_protocol_fee": "Protocol fee",
 			"chain_fusion_minimum_amount": "Minimum amount",
+			"oisy_trade_minimum_notional": "Minimum order value",
+			"oisy_trade_deposit_fee": "Deposit ledger fees",
+			"oisy_trade_taker_fee": "Taker fee",
+			"oisy_trade_withdrawal_fee": "Withdrawal ledger fee",
 			"value_difference_error_confirmation": "The value difference is very high, and you would lose a significant value in this swap. Please confirm that you want to proceed.",
 			"value_difference_missing_price_confirmation": "The price for at least one of the tokens could not be retrieved. Please <strong>verify independently</strong> that this swap offer provides a fair deal.<br>Note that the slippage setting does <strong>not</strong> protect you from an offer with a much lower receive value!"
 		},
@@ -1248,7 +1252,9 @@
 			"swap_refunded": "The swap transaction was refunded.",
 			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed.",
 			"near_intents_quote_unverified": "This swap quote could not be verified as genuine, so no funds were sent. Please try again or choose a different provider.",
-			"near_intents_quote_expired": "This swap quote has expired, so no funds were sent. Please try again to get a fresh quote."
+			"near_intents_quote_expired": "This swap quote has expired, so no funds were sent. Please try again to get a fresh quote.",
+			"oisy_trade_order_killed": "The order could not be filled in full at the reviewed price, so it was canceled and your funds were returned to your wallet. You were only charged network fees.",
+			"oisy_trade_settlement_unresolved": "The order could no longer be found, and neither token is held on OISY Trade. Please check your balances in the Trading tab before trying again."
 		}
 	},
 	"buy": {
