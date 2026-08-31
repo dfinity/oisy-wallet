@@ -1254,7 +1254,9 @@
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
 			"oisy_trade_order_killed": "",
-			"oisy_trade_settlement_unresolved": ""
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {

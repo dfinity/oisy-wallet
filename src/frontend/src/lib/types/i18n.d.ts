@@ -981,6 +981,8 @@ interface I18nSwap {
 		near_intents_quote_expired: string;
 		oisy_trade_order_killed: string;
 		oisy_trade_settlement_unresolved: string;
+		oisy_trade_order_not_placed: string;
+		oisy_trade_recovery_failed: string;
 	};
 }
 

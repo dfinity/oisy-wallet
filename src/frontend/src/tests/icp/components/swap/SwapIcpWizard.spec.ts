@@ -458,6 +458,41 @@ describe('SwapIcpWizard', () => {
 				expect(toasts.toastsError).not.toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
 			});
+
+			// An order the canister refused has had its deposit recovered by the time the
+			// error is thrown — like a kill, the funds are already back — so it reads as
+			// info in Review, never as an unexpected-error toast.
+			it('presents a rejected order whose deposit was recovered as info in Review', async () => {
+				mockOisyTradeFn.mockRejectedValue(
+					new OisyTradeSwapError(en.swap.error.oisy_trade_order_not_placed, 'not_placed')
+				);
+
+				await submit();
+
+				expect(readFailedSwapError()).toEqual({
+					message: en.swap.error.oisy_trade_order_not_placed,
+					variant: 'info'
+				});
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+
+			// A failed recovery is the one case where the funds are still in DEX custody
+			// when the error surfaces, so it warns and points at the Trading tab.
+			it('presents a failed deposit recovery as a warning in Review', async () => {
+				mockOisyTradeFn.mockRejectedValue(
+					new OisyTradeSwapError(en.swap.error.oisy_trade_recovery_failed, 'recovery_failed')
+				);
+
+				await submit();
+
+				expect(readFailedSwapError()).toEqual({
+					message: en.swap.error.oisy_trade_recovery_failed,
+					variant: 'warning'
+				});
+				expect(toasts.toastsError).not.toHaveBeenCalled();
+				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
 		});
 
 		describe('Chain Fusion ICP→Ethereum withdrawal', () => {

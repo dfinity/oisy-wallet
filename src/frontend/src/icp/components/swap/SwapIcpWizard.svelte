@@ -345,14 +345,14 @@
 					variant: 'info'
 				});
 			} else if (err instanceof OisyTradeSwapError) {
-				// A killed fill-or-kill order is an expected market outcome — the source
-				// funds are already back in the wallet when it is thrown — so it reads as
-				// info in Review, like slippage, never as an unexpected-error toast. An
-				// unresolved settlement asks the user to check the Trading tab, hence the
-				// warning level.
+				// A killed fill-or-kill order — or one the canister refused — is an
+				// expected outcome whose source funds are already back in the wallet when
+				// it is thrown, so it reads as info in Review, like slippage, never as an
+				// unexpected-error toast. The other kinds ask the user to check the
+				// Trading tab, hence the warning level.
 				failedSwapError.set({
 					message: err.message,
-					variant: err.kind === 'killed' ? 'info' : 'warning'
+					variant: err.kind === 'killed' || err.kind === 'not_placed' ? 'info' : 'warning'
 				});
 			} else {
 				failedSwapError.set(undefined);
