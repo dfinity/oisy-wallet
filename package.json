@@ -84,6 +84,7 @@
 		"@plausible-analytics/tracker": "^0.4.5",
 		"@reown/walletkit": "^1.5.5",
 		"@solana-program/compute-budget": "^0.17.0",
+		"@solana-program/memo": "^0.12.0",
 		"@solana-program/system": "^0.13.0",
 		"@solana-program/token": "^0.15.0",
 		"@solana-program/token-2022": "^0.13.0",

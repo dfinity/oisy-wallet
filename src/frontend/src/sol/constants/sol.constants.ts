@@ -7,6 +7,12 @@ export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXE
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 
+// Both Memo programs are still in use: the original one is what older integrations were built
+// against, and neither is upgradeable, so nothing retires the first in favour of the second.
+// They share a data format, a bare UTF-8 string, so one decoder covers both.
+export const MEMO_LEGACY_PROGRAM_ADDRESS = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo';
+export const MEMO_PROGRAM_ADDRESS = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
+
 // Solana transaction fee
 // It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees

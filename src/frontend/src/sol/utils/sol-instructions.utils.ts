@@ -5,6 +5,8 @@ import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	MEMO_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -20,6 +22,7 @@ import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import { parseSolMemoInstruction } from '$sol/utils/sol-instructions-memo.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
@@ -389,6 +392,10 @@ const parseSolInstruction = (
 		return parseSolAtaInstruction(instruction);
 	}
 
+	if (isSolMemoProgram(programAddress)) {
+		return parseSolMemoInstruction(instruction);
+	}
+
 	consoleWarn(`Could not parse Solana instruction for program ${programAddress}`);
 
 	return instruction;
@@ -644,6 +651,15 @@ const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolT
 	}
 };
 
+const isSolMemoProgram = (programAddress: SolAddress): boolean =>
+	programAddress === MEMO_PROGRAM_ADDRESS || programAddress === MEMO_LEGACY_PROGRAM_ADDRESS;
+
+// A memo is written to the transaction log and nowhere else: the program holds no account, so no
+// memo moves value or hands over an authority. That is true of its text too, which is the dApp's
+// own words about its transaction rather than a statement the chain enforces, so the review does
+// not repeat it back to the user as if it were one.
+const mapSolMemoInstruction = (): MappedSolTransaction => ignoredInstruction();
+
 const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -690,6 +706,10 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
 		return mapSolAtaInstruction(parsedInstruction);
+	}
+
+	if (isSolMemoProgram(programAddress)) {
+		return mapSolMemoInstruction();
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
