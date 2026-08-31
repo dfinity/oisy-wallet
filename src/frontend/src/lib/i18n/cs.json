@@ -1629,6 +1629,8 @@
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
