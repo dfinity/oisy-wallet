@@ -228,7 +228,9 @@ Two gaps versus the design, both additive props rather than a fork:
 
 Extending it also serves the nonce and memo tickets on the same Figma page.
 
-**The option list is new.** There is no `type="radio"` anywhere in `src/frontend/src` today.
+**The option list is new.** No Svelte component renders an `<input type="radio">` today, though
+`src/frontend/src/lib/styles/global.scss` already styles `input[type='radio']` and
+`div[role='radio']`, so the base styling is in place.
 Build it as a keyboard-accessible radio group; `lib/components/ui/Checkbox.svelte` is the local
 precedent for input semantics (note its deliberate one-way `checked` mirroring), and
 `docs/ai/frontend/i18n-and-a11y.md` governs. No bare clickable `<div>`s.
@@ -275,7 +277,7 @@ and the tooltip. Tooltip copy is given by the designer, verbatim:
 > Priority affects speed and fees. Higher priority usually means faster processing.
 
 The fee row becomes "Estimated fee". Drop the "(likely in < 30 seconds)" hint from the send
-label, which the priority row now supersedes. `fee.text.max_fee_eth` is present in 17 locale
+label, which the priority row now supersedes. `fee.text.max_fee_eth` is present in all 15 locale
 files and is still used by `EthWalletConnectSendReview`, so it must not be deleted; add a new
 key rather than repurposing it.
 
@@ -323,11 +325,13 @@ choice does **not** apply to WalletConnect requests, nor to swap, convert or sta
 ## 6. Tests
 
 See `docs/ai/frontend/testing.md`. Existing specs that will need updating rather than replacing:
-`tests/eth/services/fee.services.spec.ts`, `tests/eth/rest/infura.rest.spec.ts`,
-`tests/eth/components/fee/EthFeeContext.spec.ts`,
-`tests/eth/components/fee/EthFeeDisplay.spec.ts`,
-`tests/eth/components/send/EthSendForm.spec.ts`,
-`tests/eth/components/send/EthSendTokenWizard.spec.ts`.
+`src/frontend/src/tests/eth/services/fee.services.spec.ts`,
+`src/frontend/src/tests/eth/rest/infura.rest.spec.ts`,
+`src/frontend/src/tests/eth/components/fee/EthFeeContext.spec.ts`,
+`src/frontend/src/tests/eth/components/fee/EthFeeDisplay.spec.ts`,
+`src/frontend/src/tests/eth/components/send/EthSendForm.spec.ts`,
+`src/frontend/src/tests/eth/components/send/EthSendTokenWizard.spec.ts`,
+`src/frontend/src/tests/eth/services/eth-open-crypto-pay.services.spec.ts`.
 
 Note `EthSendForm.spec.ts` and `EthSendReview.spec.ts` both assert on a hardcoded substring of
 `max_fee_eth` because the key contains HTML; those assertions break by design when the label
