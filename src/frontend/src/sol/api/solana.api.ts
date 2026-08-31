@@ -21,6 +21,7 @@ import {
 	type Address,
 	type Base64EncodedWireTransaction,
 	type Lamports,
+	type ReadonlyUint8Array,
 	type Signature,
 	type TransactionError
 } from '@solana/kit';
@@ -350,7 +351,7 @@ export const getAccountData = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<Uint8Array<ArrayBuffer> | undefined> => {
+}): Promise<ReadonlyUint8Array<ArrayBuffer> | undefined> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
 
 	const { value } = await getAccountInfo(solAddress(address), { encoding: 'base64' }).send();
@@ -361,7 +362,7 @@ export const getAccountData = async ({
 
 	const [data] = value.data;
 
-	return new Uint8Array(getBase64Encoder().encode(data));
+	return getBase64Encoder().encode(data);
 };
 
 // https://solana.com/docs/tokens/extensions

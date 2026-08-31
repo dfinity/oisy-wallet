@@ -9,7 +9,8 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	createAddressWithSeed,
 	getProgramDerivedAddress,
-	address as solAddress
+	address as solAddress,
+	type ReadonlyUint8Array
 } from '@solana/kit';
 
 /**
@@ -48,26 +49,34 @@ const inflate = async (bytes: Uint8Array<ArrayBuffer>): Promise<string> => {
 
 	const chunks: Uint8Array[] = [];
 
+	let length = 0;
+
 	let result = await reader.read();
 
 	while (!result.done) {
 		chunks.push(result.value);
 
+		length += result.value.length;
+
 		result = await reader.read();
 	}
 
-	const inflated = chunks.reduce<Uint8Array>((acc, chunk) => {
-		const merged = new Uint8Array(acc.length + chunk.length);
-		merged.set(acc);
-		merged.set(chunk, acc.length);
+	// Sized once from the total rather than regrown per chunk: an IDL arrives in many of them, and
+	// merging pairwise would copy what is already merged again every time.
+	const inflated = new Uint8Array(length);
 
-		return merged;
-	}, new Uint8Array());
+	let offset = 0;
+
+	for (const chunk of chunks) {
+		inflated.set(chunk, offset);
+
+		offset += chunk.length;
+	}
 
 	return new TextDecoder().decode(inflated);
 };
 
-const isIdlAccount = (data: Uint8Array<ArrayBuffer>): boolean =>
+const isIdlAccount = (data: ReadonlyUint8Array<ArrayBuffer>): boolean =>
 	data.length >= ANCHOR_IDL_ACCOUNT_HEADER_LENGTH &&
 	ANCHOR_IDL_ACCOUNT_DISCRIMINATOR.every((byte, index) => data[index] === byte);
 
@@ -86,7 +95,7 @@ const isIdlAccount = (data: Uint8Array<ArrayBuffer>): boolean =>
  * three mean the same thing to the caller: this program does not say what it is.
  */
 export const decodeSolProgramIdlName = async (
-	data: Uint8Array<ArrayBuffer>
+	data: ReadonlyUint8Array<ArrayBuffer>
 ): Promise<string | undefined> => {
 	if (!isIdlAccount(data)) {
 		return undefined;
