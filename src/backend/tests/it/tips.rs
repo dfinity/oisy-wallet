@@ -678,6 +678,74 @@ fn storing_claim_codes_is_rate_limited() {
 }
 
 #[test]
+fn a_long_tip_id_can_still_recover_its_link() {
+    // `MAX_TIP_ID_BYTES` is 64 and the secrets map key is a `Blob<32>`, so the
+    // raw bytes made ids of 33-64 a silent dead zone: creatable, claimable and
+    // cancellable, but the recovery secret could never be stored or read. The
+    // sender would only find out when the link they wanted back was not there.
+    let env = setup_tips();
+    let tip_id = "a".repeat(48);
+    let claim_code = "code-long-id";
+
+    env.reserve(&tip_id, claim_code, TIP_AMOUNT);
+
+    let ciphertext = ByteBuf::from(vec![9u8; 32]);
+    let stored: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.clone(),
+                encrypted_claim_code: ciphertext.clone(),
+            },
+        )
+        .expect("set_tip_secret should reach the handler");
+
+    assert!(matches!(stored, SetTipSecretResult::Ok));
+
+    let read: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id)
+        .expect("get_tip_secret should reach the handler");
+
+    assert_eq!(read, GetTipSecretResult::Ok(Some(ciphertext)));
+}
+
+#[test]
+fn an_expired_tip_cannot_be_rewritten_as_cancelled() {
+    // It lapsed. Calling that a cancellation puts something in the sender's
+    // history they did not do, and the allowance expired with it either way.
+    let env = setup_tips();
+    let tip_id = "tip-lapsed";
+    let expires_at_ns = now_ns(&env.pic_setup) + ONE_HOUR_NS;
+
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(tip_id, "code-lapsed", TIP_AMOUNT, expires_at_ns),
+        Ok(())
+    );
+
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_secs(60 * 60 + 1));
+    env.pic_setup.pic.tick();
+
+    assert_eq!(
+        env.cancel(env.sender, tip_id),
+        Err(TipError::NotCancellable)
+    );
+
+    let tips = env.my_tips(env.sender);
+
+    assert_eq!(
+        tips[0].status,
+        TipStatus::Expired,
+        "and it still reads as expired"
+    );
+}
+
+#[test]
 fn the_secrets_store_refuses_an_empty_tip_id() {
     // The store had its own length check rather than going through
     // `validate_tip_id`, so it matched on the upper bound and diverged on the

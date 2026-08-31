@@ -98,18 +98,52 @@ mod tests {
     /// is to catch the constant that was added without checking what else holds
     /// that id.
     fn declared_ids() -> Vec<(u8, String)> {
-        include_str!("memory.rs")
-            .lines()
-            // Only declarations. A doc comment naming an id must not register as
-            // one, or the guard starts failing on prose.
-            .filter_map(|line| {
-                let (name, rest) = line.split_once(": MemoryId = MemoryId::new(")?;
-                let id = rest.split(')').next()?.parse().ok()?;
+        declaration_chunks()
+            .filter_map(|chunk| {
+                let (name, rest) = chunk.split_once(": MemoryId = MemoryId::new(")?;
+                let id = rest.split(')').next()?.trim().parse().ok()?;
                 let name = name.rsplit(' ').next()?.to_string();
 
                 Some((id, name))
             })
             .collect()
+    }
+
+    /// The file split into `;`-terminated declarations, comments dropped and
+    /// whitespace flattened.
+    ///
+    /// Not line-by-line, which is what this started as. rustfmt wraps a
+    /// declaration once the name grows long enough, and a line-based match then
+    /// skips it in silence — leaving a guard that passes while checking less
+    /// than it claims, which is worse than no guard at all. Comments go because
+    /// prose in this file names ids, and prose must not register as a claim on
+    /// one.
+    fn declaration_chunks() -> impl Iterator<Item = String> {
+        let source = include_str!("memory.rs");
+
+        // Everything above this module. `include_str!` pulls in the whole file,
+        // test included, and the patterns below appear here as string literals —
+        // which the counting check duly reported as two declarations nobody
+        // wrote. The guard is about the constants, so it reads only them.
+        let declarations = source
+            .split_once("#[cfg(test)]")
+            .map_or(source, |(before, _)| before);
+
+        declarations
+            .split(';')
+            .map(|chunk| {
+                chunk
+                    .lines()
+                    .map(str::trim)
+                    .filter(|line| !line.starts_with("//"))
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .split_whitespace()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
     }
 
     /// Two constants on one id is the failure this exists for, and nothing else
@@ -140,10 +174,19 @@ mod tests {
             seen.push((id, name));
         }
 
-        assert!(
-            seen.len() > 20,
-            "the parser found only {} ids, so it has stopped matching the file it \
-             is meant to guard",
+        // The parser has to keep up with the file, and "more than twenty" does
+        // not prove that: one declaration silently skipped still passes it.
+        // Counting the constructor calls the parser was supposed to find is the
+        // check that actually fails when it stops matching.
+        let constructed = declaration_chunks()
+            .filter(|chunk| chunk.contains("MemoryId::new("))
+            .count();
+
+        assert_eq!(
+            seen.len(),
+            constructed,
+            "parsed {} ids out of {constructed} declarations that construct one, so the \
+             parser has stopped matching the file it is meant to guard",
             seen.len()
         );
     }

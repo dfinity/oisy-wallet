@@ -185,6 +185,14 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
     }
 
     mutate_state(|s| {
+        // Re-read the clock. `now` above was taken before two awaited ledger
+        // calls, and an expiry that was in the future when the request arrived
+        // can be in the past by the time it is written — which would store a tip
+        // that is already unclaimable and hand the sender a dead link. The same
+        // stale reading also drove the retention sweep below.
+        let now = time();
+        validate_expiry(request.expires_at_ns, now)?;
+
         // Collect the caller's own past-retention rows first, so History
         // pruning is driven by the sender who is actually using the feature
         // rather than waiting on the hourly sweep. Scoped to one sender, so it
@@ -440,7 +448,20 @@ pub fn cancel_tip(tip_id: String) -> Result<(), TipError> {
         if record.has_claim_in_flight(now) {
             return Err(TipError::ClaimInProgress);
         }
-        if !matches!(record.state, TipState::Reserved | TipState::Claiming { .. }) {
+        // `Reserved`, and not past its deadline — which is what the doc above
+        // always said and the code did not do.
+        //
+        // A timed-out `Claiming` used to qualify. The timeout only means no
+        // *reply* has come back; the ledger call may still be outstanding and
+        // may still pay, and the success branch of `claim_tip` writes `Claimed`
+        // over whatever it finds. So cancelling one returned Ok on a promise the
+        // canister could not keep. The sender's allowance is theirs to revoke
+        // either way, which is the lever that actually stops a payout.
+        //
+        // An expired tip is refused for a quieter reason: it lapsed, and
+        // rewriting that history row as `Cancelled` claims the sender did
+        // something they did not.
+        if !matches!(record.state, TipState::Reserved) || record.is_expired(now) {
             return Err(TipError::NotCancellable);
         }
 
