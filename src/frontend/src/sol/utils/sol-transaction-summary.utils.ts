@@ -1,5 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -173,4 +175,108 @@ export const deriveSolTransactionSummary = ({
 	}
 
 	return { kind: 'other' };
+};
+
+/**
+ * One instruction summary as a sentence with an optional detail, composed here so the component
+ * stays a renderer. The children of a route are the caller's to indent, not this function's.
+ */
+export const formatSolInstructionSummary = ({
+	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent },
+	i18n,
+	symbolOf,
+	decimalsOf
+}: {
+	instruction: SolInstructionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
+	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+}): { text: string; detail?: string } => {
+	const amount = (raw: bigint): string =>
+		formatToken({
+			value: raw < ZERO ? -raw : raw,
+			unitName: decimals ?? decimalsOf(tokenAddress),
+			displayDecimals: decimals ?? decimalsOf(tokenAddress)
+		});
+
+	const ownDetail = own === true ? i18n.transaction.text.instruction_own_account : undefined;
+
+	if (kind === 'send' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_send, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'receive' && nonNullish(value) && nonNullish(counterparty)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_receive, {
+				$amount: amount(value),
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(ownDetail) && { detail: ownDetail })
+		};
+	}
+
+	if (kind === 'wrap' && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_wrap, {
+				$amount: formatToken({ value, unitName: 9, displayDecimals: 9 })
+			})
+		};
+	}
+
+	if (kind === 'unwrap') {
+		return {
+			text: i18n.transaction.text.instruction_unwrap,
+			detail: i18n.transaction.text.instruction_rent_returned
+		};
+	}
+
+	if (kind === 'createTokenAccount') {
+		return {
+			text: replacePlaceholders(i18n.transaction.text.instruction_create_account, {
+				$symbol: symbolOf(tokenAddress)
+			}),
+			...(nonNullish(rent) && {
+				detail: replacePlaceholders(i18n.transaction.text.instruction_rent, {
+					$amount: formatToken({ value: rent, unitName: 9, displayDecimals: 9 })
+				})
+			})
+		};
+	}
+
+	if (kind === 'closeTokenAccount') {
+		return {
+			text: i18n.transaction.text.instruction_close_account,
+			detail: i18n.transaction.text.instruction_rent_returned
+		};
+	}
+
+	if (kind === 'approve' && nonNullish(counterparty)) {
+		return {
+			text: i18n.transaction.text.instruction_approve
+		};
+	}
+
+	if (kind === 'revoke') {
+		return { text: i18n.transaction.text.instruction_revoke };
+	}
+
+	if (kind === 'setAuthority') {
+		return {
+			text: i18n.transaction.text.instruction_set_authority
+		};
+	}
+
+	if (kind === 'route') {
+		return {
+			text: i18n.transaction.text.instruction_route
+		};
+	}
+
+	return { text: i18n.transaction.text.summary_other };
 };

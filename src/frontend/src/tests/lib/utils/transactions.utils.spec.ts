@@ -595,6 +595,31 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(1);
 			});
 
+			// Records cached before the redesign carry a per-instruction id, so grouping on the id
+			// would leave their duplicates in place; the signature is what makes them one transaction.
+			it('should deduplicate rows that share a signature but not an id', () => {
+				const [base] = createMockSolTransactionsUi(1);
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: { ...base, id: 'legacy-0-program' }, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...base, id: 'legacy-1-program' }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
 			// A swap moved both tokens, so both rows stay: each carries its own icon and balance
 			// change, and a user scanning for one of them finds it on the row that names it.
 			it('should keep both sides of a Solana swap as their own rows', () => {
