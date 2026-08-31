@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -104,6 +105,7 @@
 	addressPrefixLabel={summary?.kind === 'swap' ? $i18n.transaction.text.swap_on : undefined}
 	{displayAmount}
 	from={summary?.kind === 'swap' ? undefined : (fromOwner ?? from)}
+	icon={summary?.kind === 'swap' ? IconConvert : undefined}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}

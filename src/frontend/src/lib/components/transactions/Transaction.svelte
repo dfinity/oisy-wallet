@@ -41,6 +41,10 @@
 		from?: string;
 		// Overrides the type-derived To/From prefix: a swap's address is a venue, not a recipient.
 		addressPrefixLabel?: string;
+		// Overrides the type-derived badge. A Solana swap is stored as a send or a receive of one
+		// of its two sides, so the type alone would badge half of it with an arrow out and half
+		// with an arrow in.
+		icon?: Component;
 		tokenId?: number | bigint | string;
 		children: Snippet;
 		onClick?: () => void;
@@ -60,6 +64,7 @@
 		to,
 		from,
 		addressPrefixLabel,
+		icon: iconOverride,
 		tokenId,
 		children,
 		onClick,
@@ -68,7 +73,7 @@
 		testId
 	}: Props = $props();
 
-	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+	const cardIcon: Component = $derived(iconOverride ?? mapTransactionIcon({ type, status }));
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
