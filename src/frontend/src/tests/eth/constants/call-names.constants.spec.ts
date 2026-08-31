@@ -1,4 +1,11 @@
 import { ETH_CALL_NAMES } from '$eth/constants/call-names.constants';
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import { MULTICALL_ARGUMENTS } from '$eth/constants/multicall.constants';
 import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
 
@@ -31,6 +38,20 @@ describe('ETH_CALL_NAMES', () => {
 		// Every decoded shape has at least one named selector, so a decoder cannot be added while
 		// its call keeps rendering as bare hex.
 		decoded.forEach((type) => expect(named).toContain(type));
+	});
+
+	// The names and selectors here are derived from signatures, while the rest of the app reads the
+	// selector constants. This is what stops the two drifting: a typo in either a signature or a
+	// constant breaks it, and so does a signature that hashes to something other than the selector
+	// the app has always used for that call.
+	it.each([
+		{ name: 'approve', selector: ERC20_APPROVE_HASH },
+		{ name: 'transfer', selector: ERC20_TRANSFER_HASH },
+		{ name: 'setApprovalForAll', selector: ERC_SET_APPROVAL_FOR_ALL_HASH },
+		{ name: 'increaseAllowance', selector: ERC20_INCREASE_ALLOWANCE_HASH },
+		{ name: 'decreaseAllowance', selector: ERC20_DECREASE_ALLOWANCE_HASH }
+	])('should derive $name onto the selector the app already uses', ({ name, selector }) => {
+		expect(ETH_CALL_NAMES[selector]).toBe(name);
 	});
 
 	it('should name every batch wrapper it knows how to open', () => {

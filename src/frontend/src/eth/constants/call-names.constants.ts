@@ -1,34 +1,39 @@
-import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
-import {
-	ERC20_APPROVE_HASH,
-	ERC20_DECREASE_ALLOWANCE_HASH,
-	ERC20_INCREASE_ALLOWANCE_HASH,
-	ERC20_TRANSFER_HASH
-} from '$eth/constants/erc20.constants';
-import {
-	MULTICALL_DEADLINE_HASH,
-	MULTICALL_HASH,
-	MULTICALL_PREVIOUS_BLOCKHASH_HASH
-} from '$eth/constants/multicall.constants';
+import { id } from 'ethers/hash';
 
-// The name of a call, for the selectors whose arguments the review actually reads.
+// The calls the review reads, written as the signatures they actually are.
 //
-// The set is deliberately no larger than that. Naming a selector tells the user OISY knows what the
-// call is, and it may only say so where the review went on to decode the arguments and state what
-// they were: a name beside a call nobody read would claim a review that never happened, which is
-// the whole failure this surface exists to avoid. A selector absent from here is shown as its raw
-// four bytes, which is the honest answer.
+// Both the name and the selector are derived from the one string, so they cannot disagree: a
+// hand-written map pairing `0x095ea7b3` with a name is two things to keep true, and nothing stops
+// the wrong name being typed beside a selector. A signature is also checkable against the ABI it
+// comes from by reading it, which four bytes of hex are not.
 //
-// `eth-call-names` in the tests holds this to the classifier, so a name cannot be added here for a
-// call the review does not read.
-export const ETH_CALL_NAMES: Record<string, string> = {
-	[ERC20_APPROVE_HASH]: 'approve',
-	[ERC20_TRANSFER_HASH]: 'transfer',
-	[ERC_SET_APPROVAL_FOR_ALL_HASH]: 'setApprovalForAll',
-	[ERC20_INCREASE_ALLOWANCE_HASH]: 'increaseAllowance',
-	[ERC20_DECREASE_ALLOWANCE_HASH]: 'decreaseAllowance',
+// The set is deliberately no larger than what the review decodes. Naming a call tells the user OISY
+// knows what it is, and it may only say so where the review went on to read the arguments and state
+// what they were: a name beside a call nobody read would claim a review that never happened, which
+// is the whole failure this surface exists to avoid. A selector absent from here is shown as its
+// raw four bytes, which is the honest answer.
+//
+// `call-names.constants.spec.ts` holds this to the classifier, and to the selector constants the
+// rest of the app already uses, so neither can drift from it.
+const ETH_READ_CALL_SIGNATURES = [
+	'approve(address,uint256)',
+	'transfer(address,uint256)',
+	'setApprovalForAll(address,bool)',
+	'increaseAllowance(address,uint256)',
+	'decreaseAllowance(address,uint256)',
 	// The batch wrappers are read too: their `bytes[]` is opened and the calls inside it listed.
-	[MULTICALL_HASH]: 'multicall',
-	[MULTICALL_DEADLINE_HASH]: 'multicall',
-	[MULTICALL_PREVIOUS_BLOCKHASH_HASH]: 'multicall'
-};
+	'multicall(bytes[])',
+	'multicall(uint256,bytes[])',
+	'multicall(bytes32,bytes[])'
+];
+
+// `0x` and the four bytes of a function selector, as hex.
+const SELECTOR_LENGTH = 10;
+
+export const ETH_CALL_NAMES: Record<string, string> = ETH_READ_CALL_SIGNATURES.reduce(
+	(acc, signature) => ({
+		...acc,
+		[id(signature).slice(0, SELECTOR_LENGTH)]: signature.slice(0, signature.indexOf('('))
+	}),
+	{}
+);
