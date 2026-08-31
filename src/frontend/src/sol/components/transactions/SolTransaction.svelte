@@ -94,7 +94,9 @@
 	// The activity never shows it. A swap into SOL whose fee outweighed what it bought would read
 	// there as a loss, on the row that says what was bought.
 	let displayAmount = $derived(
-		singleToken && !isTokenSpl(token) ? movedAmount - (fee ?? ZERO) : movedAmount
+		singleToken && !isTokenSpl(token) && nonNullish(movedAmount)
+			? movedAmount - (fee ?? ZERO)
+			: movedAmount
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));
