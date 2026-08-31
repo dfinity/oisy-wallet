@@ -1609,6 +1609,7 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"unreviewed_instructions": "",
+			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",

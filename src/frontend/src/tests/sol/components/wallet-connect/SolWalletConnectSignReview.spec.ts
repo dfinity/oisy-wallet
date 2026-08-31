@@ -427,15 +427,30 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
 		});
 
-		// Two notices about the same thing is one too many: an undecodable message already says
+		// Two notices about the same thing are one too many: an undecodable message already says
 		// the review comes from a simulation, in stronger terms.
 		it('should not repeat itself when the instructions could not be decoded', () => {
 			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
 				props: { ...props, unreviewed: true, preview }
 			});
 
-			expect(getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+			expect(
+				getByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
+		});
+
+		// A simulation is best effort and can come back with nothing; the warning must not claim
+		// one ran when none did.
+		it('should not claim a simulation when none was obtained', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
+			expect(
+				queryByText(en.wallet_connect.text.unreviewed_instructions_simulated)
+			).not.toBeInTheDocument();
 		});
 
 		it('should say nothing when no simulation was obtained', () => {

@@ -1609,6 +1609,7 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"unreviewed_instructions": "",
+			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",
