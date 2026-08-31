@@ -12,7 +12,6 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
-	import type { SolAddress } from '$sol/types/address';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
@@ -40,13 +39,13 @@
 	// The programs the transaction ran through, in the order it reached them and each named once.
 	// A swap routed across two pools touches two, and an aggregator more; naming one of them would
 	// pick a winner among equals.
-	let venues = $derived(
-		flattenInstructions(transaction.instructions ?? []).reduce<SolAddress[]>(
-			(acc, { program }) =>
-				nonNullish(program) && !acc.includes(program) ? [...acc, program] : acc,
-			[]
+	let venues = $derived([
+		...new Set(
+			flattenInstructions(transaction.instructions ?? [])
+				.map(({ program }) => program)
+				.filter(nonNullish)
 		)
-	);
+	]);
 
 	// A transfer names the other side of it, which is what the user checks, and a self-transfer
 	// has one too: the user's own other account. A swap and a transaction OISY could not reduce
