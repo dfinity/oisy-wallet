@@ -20,9 +20,12 @@
 		transaction: SolTransactionUi;
 		token: Token;
 		iconType?: 'token' | 'transaction';
+		// Whether this row sits in a list filtered to one token. The activity shows what a
+		// transaction moved; a token's own page shows what it did to that token, cost included.
+		singleToken?: boolean;
 	}
 
-	let { transaction, token, iconType = 'transaction' }: Props = $props();
+	let { transaction, token, iconType = 'transaction', singleToken = false }: Props = $props();
 
 	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges, fee } =
 		$derived(transaction);
@@ -77,20 +80,23 @@
 		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
 	);
 
-	// Every row shows the net of the token it is about. A swap keeps a row per side, so each shows
-	// its own half; a self-transfer nets to zero, which is exactly what it did to that token.
+	// What the transaction moved in this row's token, with the cost left out. A swap keeps a row
+	// per side, so each shows its own half; a self-transfer nets to zero, which is exactly what it
+	// did to that token. The net already excludes the fee.
+	let movedAmount = $derived(
+		nonNullish(tokenNetChange) ? tokenNetChange.delta : isNullish(summary) ? fallbackAmount : ZERO
+	);
+
+	// A token's own page is where the cost of using it belongs. For SOL that is the fee on top of
+	// whatever the transaction moved, and for a transaction that moved no SOL at all it is the
+	// whole story: the wallet paid to send something else.
 	//
-	// SOL is the exception: its net leaves the fee out, because the modal states the cost apart
-	// from what moved. A row has no such second line, so here it is the whole change to the
-	// wallet, transfers and rent and fee together, which is what the balance actually did.
+	// The activity never shows it. A swap into SOL whose fee outweighed what it bought would read
+	// there as a loss, on the row that says what was bought.
 	let displayAmount = $derived(
-		nonNullish(tokenNetChange)
-			? isSolNetBalanceChangeSol(tokenNetChange)
-				? tokenNetChange.delta - (fee ?? ZERO)
-				: tokenNetChange.delta
-			: isNullish(summary)
-				? fallbackAmount
-				: ZERO
+		singleToken && !isTokenSpl(token)
+			? (tokenNetChange?.delta ?? ZERO) - (fee ?? ZERO)
+			: movedAmount
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));
