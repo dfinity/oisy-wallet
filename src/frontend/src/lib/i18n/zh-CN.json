@@ -1629,6 +1629,8 @@
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
