@@ -1,5 +1,6 @@
 import type { SolAddress } from '$sol/types/address';
 import type { SolRpcTransactionRaw } from '$sol/types/sol-transaction';
+import type { ParsedAddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import type { ParsedComputeBudgetInstruction } from '@solana-program/compute-budget';
 import type { ParsedStakeInstruction } from '@solana-program/stake';
 import type { ParsedSystemInstruction } from '@solana-program/system';
@@ -15,6 +16,7 @@ export type SolParsedSystemInstruction = ParsedSystemInstruction<SolAddress>;
 export type SolParsedTokenInstruction = ParsedTokenInstruction<SolAddress>;
 export type SolParsedToken2022Instruction = ParsedToken2022Instruction<SolAddress>;
 export type SolParsedAtaInstruction = ParsedAssociatedTokenInstruction<SolAddress>;
+export type SolParsedLookupTableInstruction = ParsedAddressLookupTableInstruction<SolAddress>;
 export type SolParsedStakeInstruction = ParsedStakeInstruction<SolAddress>;
 
 export type SolParsedInstruction =
@@ -23,6 +25,7 @@ export type SolParsedInstruction =
 	| SolParsedTokenInstruction
 	| SolParsedToken2022Instruction
 	| SolParsedAtaInstruction
+	| SolParsedLookupTableInstruction
 	| SolParsedStakeInstruction;
 
 export type SolInstruction = Instruction;

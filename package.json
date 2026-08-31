@@ -83,6 +83,7 @@
 		"@metamask/detect-provider": "^2.0.0",
 		"@plausible-analytics/tracker": "^0.4.5",
 		"@reown/walletkit": "^1.5.5",
+		"@solana-program/address-lookup-table": "^0.13.0",
 		"@solana-program/compute-budget": "^0.17.0",
 		"@solana-program/stake": "^0.8.0",
 		"@solana-program/system": "^0.13.0",

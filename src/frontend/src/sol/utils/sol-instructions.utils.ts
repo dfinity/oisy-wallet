@@ -3,6 +3,7 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	STAKE_PROGRAM_ADDRESS,
@@ -21,11 +22,13 @@ import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
 import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
 import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
@@ -392,6 +395,10 @@ const parseSolInstruction = (
 		return parseSolAtaInstruction(instruction);
 	}
 
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return parseSolLookupTableInstruction(instruction);
+	}
+
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
 		return parseSolStakeInstruction(instruction);
 	}
@@ -666,6 +673,35 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 	return unreviewedInstruction();
 };
 
+const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	// A lookup table is addressing, not value: it lets a message name accounts in fewer bytes and
+	// grants no one anything. Creating and extending one costs rent, which the instruction does not
+	// carry, the runtime works it out from the size; the same is already true of the token accounts
+	// a swap opens along the way.
+	if (
+		instructionType === AddressLookupTableInstruction.CreateLookupTable ||
+		instructionType === AddressLookupTableInstruction.ExtendLookupTable ||
+		instructionType === AddressLookupTableInstruction.FreezeLookupTable ||
+		instructionType === AddressLookupTableInstruction.DeactivateLookupTable
+	) {
+		return ignoredInstruction();
+	}
+
+	// Closing hands the table's whole balance to a recipient the instruction names, and only the
+	// table's own authority can ask for it, so the balance leaving is the user's. Neither the amount
+	// nor the recipient fits the single-value summary, which is what would let it ride along
+	// unseen behind whatever else the message does.
+	if (instructionType === AddressLookupTableInstruction.CloseLookupTable) {
+		return unfaithfulInstruction();
+	}
+
+	consoleWarn(`Could not map Solana Address Lookup Table instruction of type ${instructionType}`);
+
+	return unreviewedInstruction();
+};
+
 const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -742,6 +778,10 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
 		return mapSolAtaInstruction(parsedInstruction);
+	}
+
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return mapSolLookupTableInstruction(parsedInstruction);
 	}
 
 	if (programAddress === STAKE_PROGRAM_ADDRESS) {
