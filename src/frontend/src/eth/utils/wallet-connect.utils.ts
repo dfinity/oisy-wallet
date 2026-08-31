@@ -765,17 +765,41 @@ export const getEthTypedDataMethods = ({
 	const { EIP712Domain: _EIP712Domain, ...rest } = types;
 
 	try {
-		const primaryType = TypedDataEncoder.getPrimaryType(rest);
+		const root = TypedDataEncoder.getPrimaryType(rest);
 
-		return [
-			{ name: primaryType, depth: 0 },
-			...Object.keys(rest)
-				.filter((name) => name !== primaryType)
-				.map((name) => ({ name, depth: 1 }))
-		];
+		const methods: { name: string; depth: number }[] = [];
+		const walked = new Set<string>();
+
+		// Walked from the root rather than read off the keys of `types`, so each struct is listed
+		// beneath the one that declares it. Reading the keys put every struct at one level, which
+		// said a struct nested two deep was a member of the root, and would have named a declaration
+		// the root never reaches as though the signature covered it.
+		const walk = ({ name, depth }: { name: string; depth: number }) => {
+			if (walked.has(name)) {
+				return;
+			}
+
+			walked.add(name);
+
+			methods.push({ name, depth });
+
+			(rest[name] ?? []).forEach(({ type }) => {
+				// A member declared as an array is the same struct, however many dimensions deep.
+				const member = type.replace(/(\[\d*\])*$/, '');
+
+				if (member in rest) {
+					walk({ name: member, depth: depth + 1 });
+				}
+			});
+		};
+
+		walk({ name: root, depth: 0 });
+
+		return methods;
 	} catch (_err: unknown) {
 		// Typed data whose root cannot be resolved would not be signed at all, and is warned about
-		// and blocked as invalid rather than named here.
+		// and blocked as invalid rather than named here. `getPrimaryType` is what rejects a payload
+		// declaring a struct nothing reaches, so this arm covers that case too.
 		return [];
 	}
 };

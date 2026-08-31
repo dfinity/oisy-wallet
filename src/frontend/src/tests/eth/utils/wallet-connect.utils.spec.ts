@@ -504,6 +504,66 @@ describe('wallet-connect.utils', () => {
 			]);
 		});
 
+		// Depth is what the review indents by, so a struct two levels down must not be rendered as a
+		// member of the root.
+		it('should nest each struct beneath the one that declares it', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [{ name: 'offer', type: 'Offer' }],
+						Offer: [{ name: 'items', type: 'Item[]' }],
+						Item: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Order',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Order', depth: 0 },
+				{ name: 'Offer', depth: 1 },
+				{ name: 'Item', depth: 2 }
+			]);
+		});
+
+		// A declaration the root never reaches is not covered by the signature, so it must not be
+		// named. `getPrimaryType` rejects such a payload outright, which is why nothing is listed.
+		it('should name nothing for a payload declaring a struct the root does not reach', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Permit: [{ name: 'holder', type: 'address' }],
+						Unreferenced: [{ name: 'x', type: 'string' }]
+					},
+					primaryType: 'Permit',
+					message: {}
+				})
+			).toEqual([]);
+		});
+
+		it('should list a struct declared by two members once', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Trade: [
+							{ name: 'sold', type: 'Asset' },
+							{ name: 'bought', type: 'Asset' }
+						],
+						Asset: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Trade',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Trade', depth: 0 },
+				{ name: 'Asset', depth: 1 }
+			]);
+		});
+
 		it('should name nothing when the root cannot be resolved', () => {
 			expect(
 				getEthTypedDataMethods({
