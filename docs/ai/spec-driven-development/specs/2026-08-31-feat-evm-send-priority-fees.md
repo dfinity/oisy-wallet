@@ -359,16 +359,19 @@ Run `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm 
 
 ## 7. Open questions (facts to confirm)
 
-1. **Gas API coverage per chain.** Does `suggestedGasFees` answer for all ten chain IDs in
-   section 2, in particular the testnets (Sepolia, Base Sepolia, Arbitrum Sepolia, Amoy, BSC
-   testnet)? Today a non-OK response throws, is caught in `EthFeeContext.updateFeeData`, and
-   produces a `fee.error.cannot_fetch_gas_fee` toast plus backoff retry. If some chains 404, the
-   tier UI needs a defined fallback (most likely: hide the row, keep today's single-tier
-   behaviour) rather than an error toast on every send.
-2. **Do the tiers separate on L2s?** On Arbitrum and Base the priority fee is negligible and
-   cost is dominated by L1 data availability. If `low` / `medium` / `high` come back
-   near-identical there, a three-way selector showing three identical amounts is worse than no
-   selector. Needs a real API sample per chain before PR2 commits to showing the row everywhere.
+1. ~~**Gas API coverage per chain.**~~ **Answered, see section 9.** Nine of ten chains answer.
+   **Arbitrum Sepolia (`421614`) returns HTTP 400, `'421614' is not a supported chain id.`**
+   Since `getSuggestedFeeData` throws on a non-OK response and `EthFeeContext.updateFeeData`
+   treats that as fatal, this is a **pre-existing bug**: an Arbitrum Sepolia send cannot resolve
+   a fee at all today, and `PRODUCT.md` states a send never proceeds without one. The tier work
+   needs a defined fallback here regardless; repairing the underlying breakage is its own ticket.
+2. ~~**Do the tiers separate on L2s?**~~ **Answered, and the premise was wrong. See section 9.**
+   Base separates the most of any chain measured (9x), because its base fee is tiny so the tip
+   dominates rather than the reverse. **Arbitrum and both BSC chains return three identical
+   tips**, and Polygon, Amoy and Base Sepolia are within 6%. On Ethereum today `medium` and
+   `high` carry the same tip, so Normal and Fast quote an identical fee. This is not an L1/L2
+   split, it is per-chain and time-varying, so it cannot be settled with a static allowlist. It
+   becomes [Pending decision 6](#8-pending-decisions-facts-are-clear-someone-needs-to-decide).
 3. **Tooltip copy for `Estimated fee`.** The designer supplied copy for `Priority` only.
 4. **The designer's own open question**, verbatim: _"Shall we put the message that 'Fee will be
    paid in ETH' here?"_ Relevant existing behaviour:
@@ -399,3 +402,48 @@ Run `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm 
 5. **Persistence.** Does the choice reset to Normal on every send, or persist for the session or
    across sessions? The ticket states only that the default is Normal. This spec assumes
    per-send with no persistence.
+
+6. **What to show when the tiers price identically.** Section 9 shows this is the common case,
+   not the edge case. Three options, in rough order of preference:
+   - **Accept it.** The rows still differ by description, and the user is buying inclusion
+     probability rather than a different price. Simplest, and honest.
+   - **Hide the row when the three estimates are equal.** Avoids offering a choice that appears
+     to do nothing, but the row would then appear and disappear between fee refreshes within a
+     single send, which is worse.
+   - **Show wait times instead of leaning on the price difference.** The API returns
+     `minWaitTimeEstimate` / `maxWaitTimeEstimate` per tier and these **do** differ on every
+     chain measured, including the ones whose tips are identical. This is what the later Pro
+     mode v2 design does, and it is the only option that stays informative when the fees match.
+     It is also a copy change v1 does not specify, so it needs the designer.
+
+## 9. Gas API measurements
+
+Taken 2026-08-31 against `https://gas.api.infura.io/v3/{key}/networks/{chainId}/suggestedGasFees`
+with the dev key, so nobody has to re-run it to sanity-check the decisions above. "Spread" is
+`(baseFee + highTip) / (baseFee + lowTip)`, the ratio between the Fast and Slow estimates.
+
+| Chain            | Chain id | HTTP    | Base fee (gwei)          | Tip low / med / high     | Spread    | Max wait low/med/high (s) |
+| ---------------- | -------- | ------- | ------------------------ | ------------------------ | --------- | ------------------------- |
+| Ethereum         | 1        | 200     | 0.741                    | 0.0001 / 2.0 / 2.0       | 3.70x     | 48 / 24 / 12              |
+| Sepolia          | 11155111 | 200     | 0.998                    | 1.0 / 1.5 / 2.0          | 1.50x     | 48 / 36 / 24              |
+| Arbitrum         | 42161    | 200     | 0.020                    | 0 / 0 / 0                | **1.00x** | 1 / 1 / 0                 |
+| Arbitrum Sepolia | 421614   | **400** | not a supported chain id |                          |           |                           |
+| Base             | 8453     | 200     | 0.005                    | 0.0012 / 0.020 / 0.051   | **8.98x** | 8 / 6 / 4                 |
+| Base Sepolia     | 84532    | 200     | 0.005                    | 0.0009 / 0.0010 / 0.0010 | 1.01x     | 1 / 1 / 0                 |
+| BSC              | 56       | 200     | 0.000                    | 0.05 / 0.05 / 0.05       | **1.00x** | 16 / 12 / 8               |
+| BSC testnet      | 97       | 200     | 0.000                    | 1.0 / 1.0 / 1.0          | **1.00x** | 4 / 3 / 2                 |
+| Polygon          | 137      | 200     | 258.94                   | 122.2 / 143.4 / 144.8    | 1.06x     | 8 / 6 / 4                 |
+| Polygon Amoy     | 80002    | 200     | 0.000                    | 47.0 / 48.5 / 49.0       | 1.04x     | 4 / 3 / 2                 |
+
+Three things follow:
+
+- **Base is the best case, not the worst.** The assumption that L2s would flatten the tiers was
+  backwards.
+- **Identical pricing is common.** Arbitrum and both BSC chains return three identical tips right
+  now, and Ethereum returns the same tip for `medium` and `high`. Users on those chains see three
+  rows quoting the same fee.
+- **Wait times always differ**, even where the fees do not. That is the signal the choice
+  actually carries.
+
+One sample at one moment. Congestion moves these, so treat the shape as indicative and do not
+hard-code a per-chain conclusion.
