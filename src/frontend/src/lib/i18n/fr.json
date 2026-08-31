@@ -1625,6 +1625,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Cette demande contient une valeur dont le type ne correspond pas au schéma déclaré par l'application. Ce qui est affiché peut différer de ce qui serait réellement signé, la signature est donc désactivée.",
+			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
 			"unknown_call_title": "",
 			"unknown_call": "",
@@ -1967,6 +1968,7 @@
 			"to_ata_copied": "Compte de token du destinataire (ATA) copié dans le presse-papiers.",
 			"block": "Bloc",
 			"kind_other": "",
+<<<<<<< HEAD
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -1987,6 +1989,8 @@
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
 			"instruction_own_account": "",
+=======
+>>>>>>> origin/main
 			"summary_swap": "",
 			"summary_self": "",
 			"swap_on": "",

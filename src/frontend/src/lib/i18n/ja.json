@@ -1625,6 +1625,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
+			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
 			"unknown_call_title": "",
 			"unknown_call": "",
@@ -1967,6 +1968,7 @@
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
 			"kind_other": "",
+<<<<<<< HEAD
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -1987,6 +1989,8 @@
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
 			"instruction_own_account": "",
+=======
+>>>>>>> origin/main
 			"summary_swap": "",
 			"summary_self": "",
 			"swap_on": "",

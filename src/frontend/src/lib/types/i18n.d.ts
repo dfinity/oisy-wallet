@@ -1271,6 +1271,7 @@ interface I18nInfo {
 interface I18nWallet_connect {
 	text: {
 		name: string;
+		simulated_review: string;
 		session_proposal: string;
 		connect: string;
 		connecting: string;
@@ -1292,8 +1293,8 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
-		simulated_review: string;
 		simulated_changes: string;
+		simulation_note: string;
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;
@@ -1308,6 +1309,7 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unreviewable_typed_data: string;
 		unsigned_typed_data_keys: string;
 		unknown_call_title: string;
 		unknown_call: string;
@@ -1620,26 +1622,6 @@ interface I18nTrading {
 interface I18nTransaction {
 	text: {
 		details: string;
-		hash: string;
-		hash_copied: string;
-		signature: string;
-		signature_copied: string;
-		id: string;
-		id_copied: string;
-		timestamp: string;
-		type: string;
-		from: string;
-		from_copied: string;
-		received_from: string;
-		from_ata: string;
-		from_ata_copied: string;
-		to: string;
-		to_copied: string;
-		sent_to: string;
-		to_ata: string;
-		to_ata_copied: string;
-		block: string;
-		kind_other: string;
 		summary_other: string;
 		tab_summary: string;
 		tab_balance_changes: string;
@@ -1660,6 +1642,26 @@ interface I18nTransaction {
 		instruction_rent_returned: string;
 		instruction_returned: string;
 		instruction_own_account: string;
+		hash: string;
+		hash_copied: string;
+		signature: string;
+		signature_copied: string;
+		id: string;
+		id_copied: string;
+		timestamp: string;
+		type: string;
+		from: string;
+		from_copied: string;
+		received_from: string;
+		from_ata: string;
+		from_ata_copied: string;
+		to: string;
+		to_copied: string;
+		sent_to: string;
+		to_ata: string;
+		to_ata_copied: string;
+		block: string;
+		kind_other: string;
 		summary_swap: string;
 		summary_self: string;
 		swap_on: string;

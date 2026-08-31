@@ -1625,6 +1625,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
+			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
 			"unknown_call_title": "",
 			"unknown_call": "",
@@ -1967,6 +1968,7 @@
 			"to_ata_copied": "Cuenta de token del destinatario (ATA) copiada al portapapeles.",
 			"block": "Bloque",
 			"kind_other": "",
+<<<<<<< HEAD
 			"summary_other": "",
 			"tab_summary": "",
 			"tab_balance_changes": "",
@@ -1987,6 +1989,8 @@
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
 			"instruction_own_account": "",
+=======
+>>>>>>> origin/main
 			"summary_swap": "",
 			"summary_self": "",
 			"swap_on": "",
