@@ -1628,6 +1628,8 @@
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

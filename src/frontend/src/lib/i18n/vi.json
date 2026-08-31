@@ -1628,6 +1628,8 @@
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

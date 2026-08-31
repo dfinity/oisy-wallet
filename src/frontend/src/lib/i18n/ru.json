@@ -1628,6 +1628,8 @@
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

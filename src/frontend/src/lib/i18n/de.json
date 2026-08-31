@@ -1628,6 +1628,8 @@
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

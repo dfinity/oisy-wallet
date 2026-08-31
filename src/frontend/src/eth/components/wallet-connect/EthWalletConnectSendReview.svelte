@@ -19,6 +19,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -171,6 +172,8 @@
 	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
+
+	let activeTab = $state('summary');
 </script>
 
 <ContentWithToolbar>
@@ -206,72 +209,82 @@
 		</MessageBox>
 	{/if}
 
-	<SendData
-		amount={amountDisplay}
-		{application}
-		{balance}
-		destination={destinationDisplay}
-		showAmount={!noAmount}
-		showBalance={!noAmount}
-		showNullishAmountLabel={unverifiableErc20}
-		showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
-		source={$ethAddress ?? ''}
-		{token}
+	<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
+	     inform instead of blocking the way undecodable ERC20 calldata does. They sit with the other
+	     warnings rather than in a tab, since a warning behind a tab is one the user need not see. -->
+	{#if dappGasLimit}
+		<MessageBox level="info" testId="wallet-connect-dapp-gas-limit">
+			{$i18n.wallet_connect.text.dapp_gas_limit}
+		</MessageBox>
+	{:else if highGasLimit}
+		<MessageBox level="warning" testId="wallet-connect-high-gas-limit">
+			{$i18n.wallet_connect.text.high_gas_limit}
+		</MessageBox>
+	{/if}
+
+	<Tabs
+		styleClass="mt-4"
+		tabs={[
+			{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
+			{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }
+		]}
+		bind:activeTab
 	>
-		{#snippet sourceNetwork()}
-			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
-				<NetworkWithLogo network={sourceNetworkProp} />
-			</WalletConnectModalValue>
-		{/snippet}
+		{#if activeTab === 'summary'}
+			<SendData
+				amount={amountDisplay}
+				{application}
+				{balance}
+				destination={destinationDisplay}
+				showAmount={!noAmount}
+				showBalance={!noAmount}
+				showNullishAmountLabel={unverifiableErc20}
+				showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
+				source={$ethAddress ?? ''}
+				{token}
+			>
+				{#snippet sourceNetwork()}
+					<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+						<NetworkWithLogo network={sourceNetworkProp} />
+					</WalletConnectModalValue>
+				{/snippet}
 
-		{#snippet destinationNetwork()}
-			{#if nonNullish(targetNetwork)}
-				<WalletConnectModalValue
-					label={$i18n.send.text.destination_network}
-					ref="destination-network"
-				>
-					<NetworkWithLogo network={targetNetwork} />
-				</WalletConnectModalValue>
-			{/if}
-		{/snippet}
+				{#snippet destinationNetwork()}
+					{#if nonNullish(targetNetwork)}
+						<WalletConnectModalValue
+							label={$i18n.send.text.destination_network}
+							ref="destination-network"
+						>
+							<NetworkWithLogo network={targetNetwork} />
+						</WalletConnectModalValue>
+					{/if}
+				{/snippet}
 
-		{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
-			<SendDataSpender {spender} />
-		{:else if nonNullish(decodedSetApprovalForAll)}
-			<SendDataSpender
-				label={$i18n.wallet_connect.text.operator}
-				ref="operator"
-				spender={decodedSetApprovalForAll.operator}
-			/>
-		{/if}
+				{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
+					<SendDataSpender {spender} />
+				{:else if nonNullish(decodedSetApprovalForAll)}
+					<SendDataSpender
+						label={$i18n.wallet_connect.text.operator}
+						ref="operator"
+						spender={decodedSetApprovalForAll.operator}
+					/>
+				{/if}
 
-		<EthFeeDisplay gas={signedGas}>
-			{#snippet label()}
-				<Html text={$i18n.fee.text.max_fee_eth} />
-			{/snippet}
-		</EthFeeDisplay>
-
-		<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
-		     inform instead of blocking the way undecodable ERC20 calldata does. -->
-		{#if dappGasLimit}
-			<MessageBox level="info" testId="wallet-connect-dapp-gas-limit">
-				{$i18n.wallet_connect.text.dapp_gas_limit}
-			</MessageBox>
-		{:else if highGasLimit}
-			<MessageBox level="warning" testId="wallet-connect-high-gas-limit">
-				{$i18n.wallet_connect.text.high_gas_limit}
-			</MessageBox>
-		{/if}
-
-		<!-- What the transaction calls is the one thing the review can still state about calldata it
-		     could not decode, and it is what lets the user look the call up for themselves. A batch
-		     names its own wrapper and nothing else, so the calls inside it are listed too. -->
-		{#if unknownCall}
+				<EthFeeDisplay gas={signedGas}>
+					{#snippet label()}
+						<Html text={$i18n.fee.text.max_fee_eth} />
+					{/snippet}
+				</EthFeeDisplay>
+			</SendData>
+		{:else}
+			<!-- What the transaction calls is the one thing the review can still state about calldata
+			     it could not decode, and it is what lets the user look the call up for themselves. A
+			     batch names its own wrapper and nothing else, so the calls inside it are listed too. -->
 			<EthWalletConnectCallMethods {data} />
-		{/if}
 
-		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-	</SendData>
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
+		{/if}
+	</Tabs>
 
 	{#snippet toolbar()}
 		<WalletConnectActions

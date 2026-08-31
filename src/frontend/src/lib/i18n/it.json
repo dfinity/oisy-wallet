@@ -1628,6 +1628,8 @@
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
