@@ -6,6 +6,7 @@
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -15,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
@@ -34,7 +35,10 @@
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import {
+		flattenInstructions,
+		formatSolTransactionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -88,6 +92,8 @@
 		onReject
 	}: Props = $props();
 
+	let activeTab = $state('summary');
+
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
 	// Instructions OISY cannot decode yield no amount and no balance worth showing: what the
@@ -121,6 +127,16 @@
 			? messageSummary
 			: undefined
 	);
+
+	// The programs the run went through, in the order it reached them and each named once. The
+	// message names none of them itself: a routed swap performs every call inside another program.
+	let venues = $derived([
+		...new Set(
+			flattenInstructions(instructions ?? [])
+				.map(({ program }) => program)
+				.filter(nonNullish)
+		)
+	]);
 
 	// The mints this line names, so an unnamed one is numbered against the others it stands with.
 	let summaryTokenAddresses = $derived(
@@ -254,89 +270,121 @@
 		<p class="text-primary my-4" data-tid="message-summary">{summaryText}</p>
 	{/if}
 
-	<!-- The review names no recipient of its own: a single destination had to pick one winner out
+	<!-- What the transaction does, and separately what it is made of. The operations are the
+	     material a user checks the summary against, not part of the summary: on a routed swap they
+	     are a dozen lines, and above the amounts they bury the one figure that matters. -->
+	<Tabs
+		styleClass="mt-4"
+		tabs={[
+			{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
+			{ label: $i18n.wallet_connect.text.tab_operations, id: 'operations' }
+		]}
+		bind:activeTab
+	>
+		{#if activeTab === 'summary'}
+			<!-- The review names no recipient of its own: a single destination had to pick one winner out
 	     of a swap, and where the value ends up is what the simulated balance changes describe. An
 	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
-	<!-- The signer is the connected account and never varies between the requests of a session, so
+			<!-- The signer is the connected account and never varies between the requests of a session, so
 	     here it costs a row without saying anything about the message in front of the user. The
 	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
-	<SendData
-		{amount}
-		{application}
-		{balance}
-		destination={null}
-		showAmount={decoded}
-		showBalance={decoded}
-		showSigner={false}
-		{source}
-		{token}
-	>
-		{#if isApproval}
-			<SendDataSpender spender={destination}>
-				{#snippet actions()}
-					<SolAddressActions address={destination} network={token.network} />
-				{/snippet}
-			</SendDataSpender>
-		{/if}
+			<SendData
+				{amount}
+				{application}
+				{balance}
+				destination={null}
+				showAmount={decoded}
+				showBalance={decoded}
+				showSigner={false}
+				{source}
+				{token}
+			>
+				{#if isApproval}
+					<SendDataSpender spender={destination}>
+						{#snippet actions()}
+							<SolAddressActions address={destination} network={token.network} />
+						{/snippet}
+					</SendDataSpender>
+				{/if}
 
-		{#if nonNullish(parties)}
-			<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
-		{/if}
+				{#if nonNullish(parties)}
+					<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
+				{/if}
 
-		{#if nonNullish(preview)}
-			<SolWalletConnectSimulationPreview {feeToken} {preview} />
-		{/if}
+				{#if nonNullish(preview)}
+					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{/if}
 
-		<!-- One heading, and under it what the transaction actually charges: the base fee every
+				<!-- Where the transaction would run. A program is the closest thing a Solana message has to
+			     a recipient, and it is the one party the user can look up before signing, so each is
+			     listed with the actions to copy it or open it. -->
+				{#if venues.length > 0}
+					<WalletConnectModalValue label={$i18n.transaction.text.swap_on} ref="venues">
+						<div class="flex flex-col gap-1">
+							{#each venues as venue (venue)}
+								<span class="flex items-center gap-1" data-tid="venue">
+									{shortenWithMiddleEllipsis({ text: venue })}
+
+									<SolAddressActions address={venue} network={token.network} />
+								</span>
+							{/each}
+						</div>
+					</WalletConnectModalValue>
+				{/if}
+
+				<!-- One heading, and under it what the transaction actually charges: the base fee every
 		     message pays, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
-		<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
-			<div class="flex flex-col gap-2">
-				<div class="flex flex-col" data-tid="network-fee">
-					<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
-					{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
-				</div>
+				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
+					<div class="flex flex-col gap-2">
+						<div class="flex flex-col" data-tid="network-fee">
+							<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
+							{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+						</div>
 
-				{#if nonNullish(prioritizationFee)}
-					<div class="flex flex-col" data-tid="prioritization-fee">
-						<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
-						{@render feeValue(prioritizationFee)}
+						{#if nonNullish(prioritizationFee)}
+							<div class="flex flex-col" data-tid="prioritization-fee">
+								<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
+								{@render feeValue(prioritizationFee)}
+							</div>
+						{/if}
+
+						{#if ataFee > ZERO}
+							<div class="flex flex-col" data-tid="ata-fee">
+								<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
+								{@render feeValue(ataFee)}
+							</div>
+						{/if}
 					</div>
-				{/if}
+				</WalletConnectModalValue>
 
-				{#if ataFee > ZERO}
-					<div class="flex flex-col" data-tid="ata-fee">
-						<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
-						{@render feeValue(ataFee)}
-					</div>
-				{/if}
-			</div>
-		</WalletConnectModalValue>
+				<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<!-- What the simulated run actually does, which the message itself states almost none of: a
-		     routed swap performs every transfer as a nested call. Shown here rather than left to the
-		     hex, which nobody can read. -->
-		{#if nonNullish(instructions) && instructions.length > 0}
-			<WalletConnectModalValue
-				label={$i18n.transaction.text.tab_instructions}
-				ref="contained-instructions"
-			>
-				<!-- The simulated deltas carry the decimals of a mint the wallet does not list, which
-				     an unchecked transfer does not state and the list would otherwise read raw. -->
-				<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
-			</WalletConnectModalValue>
+				{#snippet sourceNetwork()}
+					<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
+						<NetworkWithLogo network={token.network} />
+					</WalletConnectModalValue>
+				{/snippet}
+			</SendData>
+		{:else}
+			<!-- What the simulated run actually does, which the message itself states almost none of:
+			     a routed swap performs every transfer as a nested call. Shown here rather than left
+			     to the hex, which nobody can read. -->
+			{#if nonNullish(instructions) && instructions.length > 0}
+				<WalletConnectModalValue
+					label={$i18n.transaction.text.tab_instructions}
+					ref="contained-instructions"
+				>
+					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
+					     which an unchecked transfer does not state and the list would otherwise read
+					     raw. -->
+					<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+				</WalletConnectModalValue>
+			{/if}
+
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 		{/if}
-
-		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-
-		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
-
-		{#snippet sourceNetwork()}
-			<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
-				<NetworkWithLogo network={token.network} />
-			</WalletConnectModalValue>
-		{/snippet}
-	</SendData>
+	</Tabs>
 
 	{#snippet toolbar()}
 		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />

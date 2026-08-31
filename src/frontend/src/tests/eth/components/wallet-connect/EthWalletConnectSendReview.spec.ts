@@ -123,8 +123,10 @@ describe('EthWalletConnectSendReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	it('should render the signer row', () => {
-		const { getByText, container } = render(EthWalletConnectSendReview, {
+	// The signer is the wallet the request was sent to, which the user opened to read this. It says
+	// nothing about the request and takes a row from the facts that do.
+	it('should not render the signer row', () => {
+		const { queryByText, container } = render(EthWalletConnectSendReview, {
 			props: {
 				...props,
 				destination: UNKNOWN_CONTRACT
@@ -132,8 +134,8 @@ describe('EthWalletConnectSendReview', () => {
 			context: mockContext
 		});
 
-		expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
-		expect(container.querySelector('#signer')).not.toBeNull();
+		expect(queryByText(en.wallet_connect.text.signer)).not.toBeInTheDocument();
+		expect(container.querySelector('#signer')).toBeNull();
 	});
 
 	it('should never summarize an ERC20 transfer as a native zero-value send', () => {
