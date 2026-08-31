@@ -135,12 +135,16 @@
 {/snippet}
 
 <ContentWithToolbar>
-	<!-- One notice about how the review was obtained, not two. What varies is whether the message
-	     could be decoded at all: an undecodable one leaves the simulation as the only account of
-	     what it does, which is a warning; a decodable one still shows simulated figures, which is
-	     a caveat and no more. -->
+	<!-- One notice about how the review was obtained, not two. What varies is what is actually
+	     known: a message that could not be decoded is a warning either way, and says the review is
+	     simulated only when a simulation was in fact obtained, since one can fail. A message that
+	     decoded still shows simulated figures, which is a caveat and no more. -->
 	{#if unreviewed}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
+		<MessageBox level="warning">
+			{nonNullish(preview)
+				? $i18n.wallet_connect.text.unreviewed_instructions_simulated
+				: $i18n.wallet_connect.text.unreviewed_instructions}
+		</MessageBox>
 	{:else if nonNullish(preview)}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}

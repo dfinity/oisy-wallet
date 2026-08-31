@@ -1609,6 +1609,7 @@
 			"amount": "数量",
 			"hex_data": "HEXデータ",
 			"unreviewed_instructions": "",
+			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",

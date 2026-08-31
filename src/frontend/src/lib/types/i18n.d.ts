@@ -1292,6 +1292,7 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		unreviewed_instructions_simulated: string;
 		simulated_review: string;
 		simulated_changes: string;
 		simulation_control_change: string;

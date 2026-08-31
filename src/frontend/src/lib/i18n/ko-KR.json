@@ -1609,6 +1609,7 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"unreviewed_instructions": "",
+			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",
