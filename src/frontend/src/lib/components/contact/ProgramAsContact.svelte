@@ -16,7 +16,9 @@
 		<Logo alt={program.name} size="xxs" src={program.icon} />
 	</span>
 
-	<span class="inline-block max-w-38 truncate">
-		{program.name}
+	<span class="flex min-w-0 flex-wrap items-center">
+		<span class="inline-block max-w-38 truncate">
+			{program.name}
+		</span>
 	</span>
 </span>
