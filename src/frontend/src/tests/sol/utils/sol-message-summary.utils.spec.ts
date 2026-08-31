@@ -97,6 +97,51 @@ describe('sol-message-summary.utils', () => {
 			).toBeTruthy();
 		});
 
+		// Every transaction pays its fee out of SOL, so a message that states one SPL movement
+		// always produces two effects. Requiring one effect per claim rejected every SPL send
+		// there is, which left the summary permanently unstated.
+		it('should agree when the only movement the message left out is the fee', () => {
+			expect(
+				solMessageMatchesSimulation({
+					summary,
+					preview: preview({
+						solDelta: -5_000n,
+						tokenDeltas: [
+							{ account: mockAtaAddress, tokenAddress: MINT, decimals: 6, delta: -1_000_000n }
+						]
+					}),
+					costs: 5_000n
+				})
+			).toBeTruthy();
+		});
+
+		it('should disagree when the run takes more SOL than the costs account for', () => {
+			expect(
+				solMessageMatchesSimulation({
+					summary,
+					preview: preview({
+						solDelta: -900_000n,
+						tokenDeltas: [
+							{ account: mockAtaAddress, tokenAddress: MINT, decimals: 6, delta: -1_000_000n }
+						]
+					}),
+					costs: 5_000n
+				})
+			).toBeFalsy();
+		});
+
+		// A mint the message promised that the run never moved is as much a disagreement as one
+		// the run moved and the message never mentioned.
+		it('should disagree when the run never moves a mint the message promised', () => {
+			expect(
+				solMessageMatchesSimulation({
+					summary,
+					preview: preview({ solDelta: -5_000n }),
+					costs: 5_000n
+				})
+			).toBeFalsy();
+		});
+
 		// The whole point of the comparison: a message that reads as one transfer and empties a
 		// second holding when it runs.
 		it('should disagree when the run moves something the message never mentioned', () => {
