@@ -16,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
@@ -29,13 +29,17 @@
 	} from '$sol/constants/sol.constants';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import type { SolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 	import { solMessageMatchesSimulation } from '$sol/utils/sol-message-summary.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import {
+		flattenInstructions,
+		formatSolTransactionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -130,6 +134,16 @@
 			solMessageMatchesSimulation({ summary: messageSummary, preview, costs })
 			? messageSummary
 			: undefined
+	);
+
+	// The programs the run went through, in the order it reached them and each named once. The
+	// message names none of them itself: a routed swap performs every call inside another program.
+	let venues = $derived(
+		flattenInstructions(instructions ?? []).reduce<SolAddress[]>(
+			(acc, { program }) =>
+				nonNullish(program) && !acc.includes(program) ? [...acc, program] : acc,
+			[]
+		)
 	);
 
 	// The mints this line names, so an unnamed one is numbered against the others it stands with.
@@ -307,6 +321,23 @@
 
 				{#if nonNullish(preview)}
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{/if}
+
+				<!-- Where the transaction would run. A program is the closest thing a Solana message has to
+			     a recipient, and it is the one party the user can look up before signing, so each is
+			     listed with the actions to copy it or open it. -->
+				{#if venues.length > 0}
+					<WalletConnectModalValue label={$i18n.transaction.text.swap_on} ref="venues">
+						<div class="flex flex-col gap-1">
+							{#each venues as venue (venue)}
+								<span class="flex items-center gap-1" data-tid="venue">
+									{shortenWithMiddleEllipsis({ text: venue })}
+
+									<SolAddressActions address={venue} network={token.network} />
+								</span>
+							{/each}
+						</div>
+					</WalletConnectModalValue>
 				{/if}
 
 				<!-- One heading, and under it what the transaction actually charges: the base fee every
