@@ -208,6 +208,17 @@ export const formatSolTransactionSummary = ({
 		return i18n.receive.text.receive;
 	}
 
+	// The asset never left the wallet, so the amount column shows the zero it netted to and the
+	// sentence is the only place the figure that moved can appear.
+	if (kind === 'self') {
+		return nonNullish(spent)
+			? replacePlaceholders(i18n.transaction.text.summary_self, {
+					$amount: amountOf(spent),
+					$symbol: symbolOf(spent.tokenAddress)
+				})
+			: i18n.transaction.text.kind_other;
+	}
+
 	if (kind === 'swap') {
 		return nonNullish(spent) && nonNullish(received)
 			? replacePlaceholders(i18n.transaction.text.summary_swap, {
