@@ -17,8 +17,8 @@ export interface SolNetBalanceChange {
 /**
  * What a transaction was, in the terms the activity list speaks.
  *
- * `self` is a transfer between the user's own accounts: the asset never left, so its net is zero
- * and only the cost of moving it shows.
+ * `self` is a transfer between the user's own accounts: the asset never left, so its net is zero,
+ * and `spent` carries the amount that moved between them rather than a change in what is held.
  *
  * `other` is the honest bucket: a transaction that moved nothing of the user's, or one whose
  * movements do not reduce to a single send, receive, swap or self-transfer.
