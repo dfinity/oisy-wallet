@@ -12,6 +12,13 @@ export const OISY_TRADE_ANALYTICS_PROVIDER_NAME = 'OISY Trade';
 // Mirrors the Liquidium polling cadence.
 export const OISY_TRADE_POLL_INTERVAL_MILLIS = 30_000;
 
+// How often the swap flow re-reads a fill-or-kill order it has just placed, while
+// the modal waits for it to settle. Deliberately much tighter than
+// `OISY_TRADE_POLL_INTERVAL_MILLIS`, which paces a background refresh of a tab the
+// user left open: a FOK order is decided in the matching round that follows it, and
+// here somebody is watching a spinner for exactly this interval.
+export const OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS = 2_000;
+
 // The oisy_trade canister caps a `get_my_orders` page (`ByPage.length`) at 100.
 export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;
 
