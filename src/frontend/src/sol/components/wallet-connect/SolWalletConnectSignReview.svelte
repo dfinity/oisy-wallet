@@ -16,6 +16,7 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
@@ -242,6 +243,20 @@
 				{/if}
 			</div>
 		</WalletConnectModalValue>
+
+		<!-- What the simulated run actually does, which the message itself states almost none of: a
+		     routed swap performs every transfer as a nested call. Shown here rather than left to the
+		     hex, which nobody can read. -->
+		{#if nonNullish(instructions) && instructions.length > 0}
+			<WalletConnectModalValue
+				label={$i18n.transaction.text.tab_instructions}
+				ref="contained-instructions"
+			>
+				<!-- The simulated deltas carry the decimals of a mint the wallet does not list, which
+				     an unchecked transfer does not state and the list would otherwise read raw. -->
+				<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+			</WalletConnectModalValue>
+		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
