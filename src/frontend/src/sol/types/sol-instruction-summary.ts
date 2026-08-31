@@ -41,8 +41,12 @@ export interface SolInstructionSummary {
 	own?: boolean;
 	// The account created, closed, approved or handed over.
 	account?: SolAddress;
-	// Lamports the user pays to open an account, or gets back on closing one.
+	// Lamports the user pays to open an account.
 	rent?: bigint;
+	// Lamports an account returns when it is closed. Closing hands the destination the account's
+	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
+	// was wrapped, not the rent alone.
+	returned?: bigint;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
 	// The program that produced the legs of a route, when one is known by address.

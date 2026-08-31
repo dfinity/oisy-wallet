@@ -24,7 +24,7 @@ import * as appConstants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { defineEnabledNetworks, getContractExplorerUrl } from '$lib/utils/networks.utils';
-import type { SolanaNetwork } from '$sol/types/network';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 describe('networks.utils', () => {
 	describe('defineEnabledNetworks', () => {
@@ -236,11 +236,13 @@ describe('networks.utils', () => {
 			{ label: 'Solana devnet', network: SOLANA_DEVNET_NETWORK }
 		];
 
-		it.each(solCases)('$label uses /account/', ({ network }) => {
-			const base = (network as SolanaNetwork)?.explorerUrl;
+		// The old expectation appended to the template and asserted the $args placeholder into the
+		// URL, which codified the bug this now guards against.
+		it.each(solCases)('$label substitutes into the explorer template', ({ network }) => {
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
 
-			expect(url).toBe(`${base}/account/${ADDR}`);
+			expect(url).not.toContain('$args');
+			expect(url).toContain(`account/${ADDR}/`);
 		});
 	});
 
@@ -251,6 +253,26 @@ describe('networks.utils', () => {
 			const url = getContractExplorerUrl({ network, contractAddress: '0xdead' });
 
 			expect(url).toBeUndefined();
+		});
+	});
+
+	describe('getContractExplorerUrl for Solana', () => {
+		// The Solana explorer URL is a $args template; appending to it used to produce
+		// https://solscan.io/$args/account/… with the placeholder left in the middle.
+		it('should substitute the account into the template instead of appending', () => {
+			expect(
+				getContractExplorerUrl({ network: SOLANA_MAINNET_NETWORK, contractAddress: mockSolAddress })
+			).toBe(`https://solscan.io/account/${mockSolAddress}/`);
+		});
+
+		it('should keep the cluster query of a non-mainnet network', () => {
+			const url = getContractExplorerUrl({
+				network: SOLANA_DEVNET_NETWORK,
+				contractAddress: mockSolAddress
+			});
+
+			expect(url).not.toContain('$args');
+			expect(url).toContain('cluster=devnet');
 		});
 	});
 });

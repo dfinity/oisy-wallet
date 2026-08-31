@@ -10,6 +10,7 @@ import {
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import {
@@ -457,15 +458,34 @@ describe('EthWalletConnectSendReview', () => {
 		it('should name the function it could not decode', () => {
 			const { getByText } = renderUnknownCall({ data: `${PERMIT2_APPROVE_HASH}deadbeef` });
 
-			expect(getByText(en.wallet_connect.text.function)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
 			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
 		});
 
-		it('should treat calldata too short to carry a selector as unreadable, and name no function', () => {
-			const { getByTestId, queryByText } = renderUnknownCall({ data: '0xab' });
+		it('should treat calldata too short to carry a selector as unreadable, and name none', () => {
+			const { getByTestId, getByText } = renderUnknownCall({ data: '0xab' });
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
-			expect(queryByText(en.wallet_connect.text.function)).not.toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.method_without_selector)).toBeInTheDocument();
+		});
+
+		// A batch names its own wrapper and nothing else, so the wrapper alone answers "what does
+		// this call?" with a name that describes neither the approve nor the swap inside it.
+		it('should list the calls batched inside a multicall, not only the wrapper', () => {
+			const inner = [
+				encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 }),
+				encodeCall({ selector: PERMIT2_APPROVE_HASH, to: RECIPIENT, value: 1n })
+			];
+
+			const data = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [inner])
+				.slice(2)}`;
+
+			const { getByText } = renderUnknownCall({ data });
+
+			expect(getByText(MULTICALL_HASH)).toBeInTheDocument();
+			expect(getByText(ERC20_APPROVE_HASH)).toBeInTheDocument();
+			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
 		});
 
 		it('should still show native value an unreadable call carries alongside it', () => {
