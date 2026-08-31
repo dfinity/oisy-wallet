@@ -23,7 +23,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -125,12 +125,19 @@
 
 	$effect(() => {
 		if (nonNullish($sourceToken) && nonNullish(swapAmount)) {
-			const parsedAmount = parseToken({
+			// Not `parseToken`: the amount outlives a source-token change, so it can carry more
+			// precision than the new token has decimals. Throwing here would abort the effect
+			// flush mid-update and leave the modal unresponsive, so an amount the token cannot
+			// represent is surfaced as a validation error instead.
+			const parsedAmount = tryParseToken({
 				value: `${swapAmount}`,
 				unitName: $sourceToken.decimals
 			});
 
-			const newErrorType = customValidate(parsedAmount);
+			const newErrorType = isNullish(parsedAmount)
+				? 'invalid-amount'
+				: customValidate(parsedAmount);
+
 			if (newErrorType !== errorType) {
 				errorType = newErrorType;
 			}
