@@ -46,9 +46,12 @@ describe('infura.rest', () => {
 			baseFeeTrend: 'down'
 		};
 
-		const expectedFeeData: Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
+		const expectedFeeData: Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
+			baseFeePerGas: bigint;
+		} = {
 			maxFeePerGas: parseToken({ value: '32.548678862', unitName: 'gwei' }),
-			maxPriorityFeePerGas: parseToken({ value: '0.1', unitName: 'gwei' })
+			maxPriorityFeePerGas: parseToken({ value: '0.1', unitName: 'gwei' }),
+			baseFeePerGas: parseToken({ value: '24.036058416', unitName: 'gwei' })
 		};
 
 		it('should fetch suggested fee data correctly', async () => {

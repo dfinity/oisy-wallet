@@ -1,4 +1,8 @@
-import { maxGasFee as maxGasFeeUtils, minGasFee as minGasFeeUtils } from '$eth/utils/fee.utils';
+import {
+	estimatedGasFee as estimatedGasFeeUtils,
+	maxGasFee as maxGasFeeUtils,
+	minGasFee as minGasFeeUtils
+} from '$eth/utils/fee.utils';
 import type { TokenId } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
@@ -29,6 +33,7 @@ export interface EthFeeContext {
 	feeDecimalsStore: Writable<number | undefined>;
 	maxGasFee: Readable<bigint | undefined>;
 	minGasFee: Readable<bigint | undefined>;
+	estimatedGasFee: Readable<bigint | undefined>;
 	feeExchangeRateStore?: Writable<number | undefined>;
 	evaluateFee?: () => void;
 }
@@ -36,18 +41,22 @@ export interface EthFeeContext {
 export const initEthFeeContext = ({
 	feeStore,
 	...rest
-}: Omit<EthFeeContext, 'maxGasFee' | 'minGasFee'>): EthFeeContext => {
+}: Omit<EthFeeContext, 'maxGasFee' | 'minGasFee' | 'estimatedGasFee'>): EthFeeContext => {
 	const maxGasFee = derived(feeStore, (feeData) =>
 		nonNullish(feeData) ? maxGasFeeUtils(feeData) : undefined
 	);
 	const minGasFee = derived(feeStore, (feeData) =>
 		nonNullish(feeData) ? minGasFeeUtils(feeData) : undefined
 	);
+	const estimatedGasFee = derived(feeStore, (feeData) =>
+		nonNullish(feeData) ? estimatedGasFeeUtils(feeData) : undefined
+	);
 
 	return {
 		feeStore,
 		maxGasFee,
 		minGasFee,
+		estimatedGasFee,
 		...rest
 	};
 };
