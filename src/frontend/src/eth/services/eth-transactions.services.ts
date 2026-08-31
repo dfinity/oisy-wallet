@@ -11,6 +11,7 @@ import {
 	fetchErc20Transfers,
 	loadErc20UserTransactions,
 	loadNextErc20UserTransactions,
+	persistableErc20Transfers,
 	saveErc20FinalizedTransactions
 } from '$eth/services/erc20-user-transactions.services';
 import {
@@ -18,6 +19,7 @@ import {
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -215,6 +217,8 @@ const loadCachedErc20Transactions = async ({
 		setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 	}
 
+	setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
+
 	const startBlock = resolveEthIncrementalStartBlock({
 		newestStoredBlockIndex: stored?.newestBlockIndex,
 		maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
@@ -228,8 +232,8 @@ const loadCachedErc20Transactions = async ({
 
 	const tipIsBehindWhatWeHold = startBlock > 0 && nonNullish(chainTip) && chainTip < startBlock;
 
-	const newTransactions = tipIsBehindWhatWeHold
-		? []
+	const { transactions: newTransactions, oldestUnresolvedBlockNumber } = tipIsBehindWhatWeHold
+		? { transactions: [], oldestUnresolvedBlockNumber: undefined }
 		: await fetchErc20Transfers({
 				networkId,
 				token,
@@ -256,8 +260,14 @@ const loadCachedErc20Transactions = async ({
 		ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 	}
 
-	if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
-		const blockNumbers = newTransactions.map(({ blockNumber }) => blockNumber).filter(nonNullish);
+	// Everything fetched is displayed; only what we persist is held back at an unresolved verdict.
+	const persistable = persistableErc20Transfers({
+		transactions: newTransactions,
+		oldestUnresolvedBlockNumber
+	});
+
+	if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && persistable.length > 0) {
+		const blockNumbers = persistable.map(({ blockNumber }) => blockNumber).filter(nonNullish);
 		const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 
 		// The batch's own newest block under-states how far behind the chain the rest of it sits, so
@@ -269,7 +279,7 @@ const loadCachedErc20Transactions = async ({
 			saveErc20FinalizedTransactions({
 				identity,
 				tokenId: transactionTokenId,
-				transactions: newTransactions,
+				transactions: persistable,
 				currentBlockNumber
 			}).catch((err) =>
 				consoleError('Background save of finalized ERC-20 transactions failed:', err)
@@ -312,6 +322,8 @@ const loadEthTransactions = async ({
 		if (!hasStoredEthTransactions(tokenId)) {
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
+
+		setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
 
 		const startBlock = resolveEthIncrementalStartBlock({
 			newestStoredBlockIndex: stored?.newestBlockIndex,
@@ -517,7 +529,7 @@ const loadErc4626Transactions = async ({
 	token: Erc4626CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
-	const transactions = await fetchErc20Transfers({ networkId, token, address });
+	const { transactions } = await fetchErc20Transfers({ networkId, token, address });
 
 	return transactions.map((tx) => {
 		const isMint = tx.from.toLowerCase() === ZERO_ETH_ADDRESS;

@@ -14,7 +14,7 @@ use shared::types::{
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, PicBackend, PicCanisterTrait},
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -1055,4 +1055,174 @@ fn test_update_contact_rejects_an_over_long_address() {
         call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
     assert_eq!(after.addresses, vec![valid_address]);
     assert_eq!(after.name, contact.name);
+}
+
+#[test]
+fn test_images_survive_in_get_contacts() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let jpeg_image = create_test_jpeg_image();
+
+    let with_png = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "PNG".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+    let with_jpeg = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "JPEG".to_string(),
+        Some(jpeg_image.clone()),
+    )
+    .unwrap();
+    let without =
+        call_create_contact_with_image(&pic_setup, caller, "None".to_string(), None).unwrap();
+
+    // Images are stored outside the contact blob, so the list endpoint has to reattach them.
+    let contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts.len(), 3);
+
+    let image_of = |id: u64| {
+        contacts
+            .iter()
+            .find(|contact| contact.id == id)
+            .expect("that the contact is listed")
+            .image
+            .clone()
+    };
+
+    assert_eq!(image_of(with_png.id), Some(png_image));
+    assert_eq!(image_of(with_jpeg.id), Some(jpeg_image));
+    assert_eq!(image_of(without.id), None);
+}
+
+#[test]
+fn test_delete_contact_frees_its_image_slot() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+
+    let mut first = None;
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        let contact = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("With Image {index}"),
+            Some(png_image.clone()),
+        )
+        .unwrap();
+        if index == 0 {
+            first = Some(contact);
+        }
+    }
+
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            "Over The Cap".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Deleting a contact must drop its image too. If the image were orphaned it would keep
+    // counting against the cap and this next create would still fail.
+    let first = first.expect("that the first contact was recorded");
+    let wrapped_result =
+        pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", first.id);
+    wrapped_result
+        .expect("that delete_contact succeeds")
+        .expect("that the contact is deleted");
+
+    call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Back Under The Cap".to_string(),
+        Some(png_image),
+    )
+    .expect("that deleting a contact with an image frees its slot");
+}
+
+#[test]
+fn test_image_cap_is_counted_per_principal_not_globally() {
+    let pic_setup = setup();
+    let users: Vec<OisyUser> = pic_setup.create_users(1..=2);
+    let (first_user, second_user) = (users[0].principal, users[1].principal);
+
+    let png_image = create_test_png_image();
+
+    // Fill the first user right up to the cap.
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        call_create_contact_with_image(
+            &pic_setup,
+            first_user,
+            format!("First User {index}"),
+            Some(png_image.clone()),
+        )
+        .unwrap();
+    }
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            first_user,
+            "Over The Cap".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Images are keyed (principal, contact_id) and counted with a prefix scan. If that scan
+    // over-ran into another principal's keys, the second user would be locked out by the first
+    // user's images.
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        second_user,
+        "Second User".to_string(),
+        Some(png_image),
+    )
+    .expect("that one principal's images do not count against another's cap");
+    assert!(contact.image.is_some());
+}
+
+#[test]
+fn test_images_survive_canister_upgrade() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let with_image = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Survives Upgrade".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+
+    // PocketIC throttles install_code based on instructions used in recent rounds; advance
+    // simulated time and drive ticks so the heavy `setup()` install rolls out of the rate-limit
+    // window. Mirrors the idiom in `tests/it/active_user_transactions.rs`.
+    pic_setup.pic.advance_time(Duration::from_mins(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    pic_setup
+        .upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
+        .expect("canister upgrade should succeed");
+
+    // Images live in their own stable memory region now, so the upgrade has to reattach it.
+    let after = call_get_contact(&pic_setup, caller, with_image.id)
+        .expect("that the contact survives the upgrade");
+    assert_eq!(after.image, Some(png_image.clone()));
+
+    // The cap scan has to see the pre-upgrade image too, or the count silently resets.
+    let listed = call_get_contacts(&pic_setup, caller);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].image, Some(png_image));
 }

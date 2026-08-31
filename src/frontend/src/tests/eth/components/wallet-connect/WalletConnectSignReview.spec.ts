@@ -67,7 +67,7 @@ describe('WalletConnectSignReview', () => {
 		}) as unknown as WalletKitTypes.SessionRequest;
 
 	// Hyperliquid asks its actions to be signed with routing fields its schema does not declare.
-	// They are absent from the digest, so the request signs like any other and stays approvable.
+	// They are absent from the digest, so the request signs like any other.
 	const hyperliquidAcceptTermsRequest = (): WalletKitTypes.SessionRequest =>
 		({
 			id: 2,
@@ -120,6 +120,64 @@ describe('WalletConnectSignReview', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	// USDC's gasless transfer. Whoever holds the signature can pull the stated value out of the
+	// wallet by submitting it to the token contract, with no allowance granted beforehand.
+	const transferWithAuthorizationRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 3,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'USD Coin',
+								version: '2',
+								chainId: '1',
+								verifyingContract: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								TransferWithAuthorization: [
+									{ name: 'from', type: 'address' },
+									{ name: 'to', type: 'address' },
+									{ name: 'value', type: 'uint256' },
+									{ name: 'validAfter', type: 'uint256' },
+									{ name: 'validBefore', type: 'uint256' },
+									{ name: 'nonce', type: 'bytes32' }
+								]
+							},
+							primaryType: 'TransferWithAuthorization',
+							message: {
+								from: HOLDER,
+								to: SPENDER,
+								value: '5000000000',
+								validAfter: '0',
+								validBefore: '1893456000',
+								nonce: `0x${'ab'.repeat(32)}`
+							}
+						})
+					]
+				},
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://dapp.example',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
 	const props = { onApprove: vi.fn(), onReject: vi.fn() };
 
 	it('warns and disables approval for a type-invalid permit', () => {
@@ -140,13 +198,37 @@ describe('WalletConnectSignReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	it('keeps approval enabled for a Hyperliquid action carrying undeclared routing fields', () => {
+	// A Hyperliquid action is signable and benign, and OISY still cannot say what it authorizes. It
+	// is warned about like any other unrecognised schema rather than waved through on the strength
+	// of the dApp it came from, which is the cost of not guessing: an acknowledgement, not a block.
+	it('warns about a Hyperliquid action without blocking it', () => {
 		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
 			props: { ...props, request: hyperliquidAcceptTermsRequest() }
 		});
 
 		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
-		expect(getByText(en.wallet_connect.text.unsigned_typed_data_keys)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// The report that would have come next: a signature that moves USDC, previewed as an application,
+	// a method name and a collapsed blob, with nothing said and approval enabled.
+	it('warns about an ERC-3009 authorization', () => {
+		const { getByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: transferWithAuthorizationRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.unreviewable_typed_data)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	// A schema OISY summarizes is not warned about: the review states the spender, the amount and
+	// the expiry, so there is nothing it failed to establish.
+	it('does not warn about a permit whose schema is recognised', () => {
+		const { queryByText } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
 	});
 });

@@ -122,9 +122,12 @@ pub enum ContactError {
     ImageExceedsMaxSize,
 }
 
-/// Counts the number of contacts with images for a specific principal
+/// Counts contacts whose image is still held inline in the contact blob.
+///
+/// Images written since they were split into their own map are not counted here; the caller adds
+/// those. See `contacts::service::count_images`.
 #[must_use]
-pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
+pub fn count_contacts_with_inline_images(stored_contacts: &StoredContacts) -> usize {
     stored_contacts
         .contacts
         .values()
@@ -132,19 +135,22 @@ pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
         .count()
 }
 
-/// Validates that adding a new image won't exceed the per-principal image limit
+/// Validates that adding a new image won't exceed the per-principal image limit.
+///
+/// Takes the count rather than the contact store because a principal's images live in two places
+/// while the inline-image format is still being phased out; assembling the count is the caller's
+/// job.
 ///
 /// # Errors
-/// Returns an error if the image limit is exceeded or other constraints are violated.
+/// Returns `TooManyContactsWithImages` if the principal is already at the cap.
 pub fn validate_principal_memory_limit(
-    stored_contacts: &StoredContacts,
+    current_image_count: usize,
     is_adding_new_image: bool,
 ) -> Result<(), ContactError> {
     if !is_adding_new_image {
         return Ok(());
     }
 
-    let current_image_count = count_contacts_with_images(stored_contacts);
     if current_image_count >= MAX_IMAGES_PER_PRINCIPAL {
         return Err(ContactError::TooManyContactsWithImages);
     }
@@ -160,7 +166,7 @@ mod tests {
     use serde_bytes::ByteBuf;
 
     use super::{
-        count_contacts_with_images, validate_principal_memory_limit, Contact, ContactError,
+        count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
         ContactImage, ImageMimeType, StoredContacts, MAX_IMAGES_PER_PRINCIPAL,
     };
 
@@ -206,35 +212,29 @@ mod tests {
             },
         );
 
-        assert_eq!(count_contacts_with_images(&stored_contacts), 3);
+        assert_eq!(count_contacts_with_inline_images(&stored_contacts), 3);
     }
 
     #[test]
     fn allows_a_new_image_below_the_cap() {
-        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL - 1);
-
         assert_eq!(
-            validate_principal_memory_limit(&stored_contacts, true),
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL - 1, true),
             Ok(())
         );
     }
 
     #[test]
     fn rejects_a_new_image_at_the_cap() {
-        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL);
-
         assert_eq!(
-            validate_principal_memory_limit(&stored_contacts, true),
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL, true),
             Err(ContactError::TooManyContactsWithImages)
         );
     }
 
     #[test]
     fn allows_writes_that_do_not_add_an_image_at_the_cap() {
-        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL);
-
         assert_eq!(
-            validate_principal_memory_limit(&stored_contacts, false),
+            validate_principal_memory_limit(MAX_IMAGES_PER_PRINCIPAL, false),
             Ok(())
         );
     }

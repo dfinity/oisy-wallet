@@ -4,6 +4,8 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -29,9 +31,14 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Fetches ERC-20 transfers from Etherscan and drops address-poisoning spam.
+ *
+ * Returns the transfers alongside the block of the oldest one whose spam verdict could not be
+ * resolved. Nothing re-examines a transfer once it is cached, so persisting past that block would
+ * fix an unresolved guess in place forever.
  *
  * `startBlock` / `endBlock` bound the window so incremental loads never refetch history the
  * backend already holds. That matters more here than for the native asset: the spam filter
@@ -50,7 +57,7 @@ export const fetchErc20Transfers = async ({
 	address: EthAddress;
 	startBlock?: number;
 	endBlock?: number;
-}): Promise<Transaction[]> => {
+}): Promise<{ transactions: Transaction[]; oldestUnresolvedBlockNumber: number | undefined }> => {
 	const { erc20Transactions } = etherscanProviders(networkId);
 
 	const transactions = await retryWithDelay({
@@ -65,7 +72,7 @@ export const fetchErc20Transfers = async ({
 
 	const { getTransaction } = alchemyProviders(networkId);
 
-	return filterSpamErc20Transfers({
+	const { transactions: filtered, unresolvedHashes } = await filterSpamErc20Transfers({
 		transactions,
 		userAddress: address,
 		// The `transaction.from` is the `Transfer` event's _from (who tokens move from), not
@@ -77,7 +84,40 @@ export const fetchErc20Transfers = async ({
 			return tx?.from;
 		}
 	});
+
+	const unresolvedBlockNumbers = filtered
+		.filter(({ hash }) => nonNullish(hash) && unresolvedHashes.has(hash))
+		.map(({ blockNumber }) => blockNumber)
+		.filter(nonNullish);
+
+	return {
+		transactions: filtered,
+		oldestUnresolvedBlockNumber:
+			unresolvedBlockNumbers.length > 0 ? Math.min(...unresolvedBlockNumbers) : undefined
+	};
 };
+
+/**
+ * Drops everything at or above the oldest unresolved spam verdict, so the stored high-water mark
+ * stays below it and a later load re-examines that transfer instead of inheriting the guess.
+ *
+ * For the head load only. It works there because the next load starts from the newest stored block,
+ * so the dropped range is fetched again. Applying it to a page of older history instead leaves a
+ * permanent hole: that page sits under what the canister already holds, nothing reads between two
+ * stored entries, and the transfers would be lost to every later session. Skip the whole page there.
+ */
+export const persistableErc20Transfers = ({
+	transactions,
+	oldestUnresolvedBlockNumber
+}: {
+	transactions: Transaction[];
+	oldestUnresolvedBlockNumber: number | undefined;
+}): Transaction[] =>
+	isNullish(oldestUnresolvedBlockNumber)
+		? transactions
+		: transactions.filter(
+				({ blockNumber }) => nonNullish(blockNumber) && blockNumber < oldestUnresolvedBlockNumber
+			);
 
 /**
  * Loads a page of stored ERC-20 transfers from the backend.
@@ -161,7 +201,17 @@ export const loadNextErc20UserTransactions = async ({
 			maxResults: WALLET_PAGINATION
 		});
 
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
+
 		if (nonNullish(result) && result.transactions.length > 0) {
+			const loadedBefore = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
+
 			ethTransactionsStore.append({
 				tokenId,
 				transactions: result.transactions.map((transaction) => ({
@@ -170,9 +220,13 @@ export const loadNextErc20UserTransactions = async ({
 				}))
 			});
 
-			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+			// See the native loader: a cursor that no longer lines up after a trim serves rows we
+			// already have, and the explorer is the way forward from there.
+			if ((get(ethTransactionsStore)?.[tokenId] ?? []).length > loadedBefore) {
+				setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
 
-			return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
+				return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
+			}
 		}
 	}
 
@@ -184,12 +238,13 @@ export const loadNextErc20UserTransactions = async ({
 	}
 
 	try {
-		const olderTransactions = await fetchErc20Transfers({
-			networkId,
-			token,
-			address,
-			endBlock: oldestLoadedBlockNumber - 1
-		});
+		const { transactions: olderTransactions, oldestUnresolvedBlockNumber } =
+			await fetchErc20Transfers({
+				networkId,
+				token,
+				address,
+				endBlock: oldestLoadedBlockNumber - 1
+			});
 
 		if (olderTransactions.length === 0) {
 			return { hasMore: false };
@@ -203,19 +258,33 @@ export const loadNextErc20UserTransactions = async ({
 			}))
 		});
 
-		try {
-			const { getBlockNumber } = infuraProviders(networkId);
+		// Persisting only the resolved part of the page is safe at the head, where the newest stored
+		// block simply stops below the unresolved one and the next load refetches from there. It is
+		// not safe here. This page sits under history the canister already holds, so keeping its older
+		// part and dropping the newer leaves a hole between them, and nothing ever asks for that range
+		// again: cursor paging walks the stored list, which cannot represent a gap, and the fall-through
+		// below only ever looks under the oldest stored entry. Those transfers would disappear from
+		// every later session. Leave the whole page unsaved instead, so the range is refetched and the
+		// verdicts re-examined next time.
+		const verdictsAreResolved = isNullish(oldestUnresolvedBlockNumber);
 
-			const latestBlockNumber = await getBlockNumber();
+		// At the cap the canister trims the oldest entries on every save, so history older than what it
+		// already holds would be written and evicted in the same call.
+		if (verdictsAreResolved && !isEthBackendAtCapacity(tokenId)) {
+			try {
+				const { getBlockNumber } = infuraProviders(networkId);
 
-			await saveErc20FinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: olderTransactions,
-				currentBlockNumber: latestBlockNumber
-			});
-		} catch (_: unknown) {
-			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+				const latestBlockNumber = await getBlockNumber();
+
+				await saveErc20FinalizedTransactions({
+					identity,
+					tokenId: transactionTokenId,
+					transactions: olderTransactions,
+					currentBlockNumber: latestBlockNumber
+				});
+			} catch (_: unknown) {
+				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+			}
 		}
 
 		return { hasMore: true };
