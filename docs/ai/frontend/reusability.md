@@ -5,6 +5,9 @@
 > [meta-update rule](../governance.md#meta-update-rule): every PR that adds
 > a reusable building block adds a row here.
 
+> Building a mockup or wireframe rather than shipping code? The same
+> catalog applies: see [`../visual-artifacts.md`](../visual-artifacts.md).
+
 ## The reuse rule
 
 1. **Search first.** Use `Grep` / `Glob` (or your tool's equivalent) for
