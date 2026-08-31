@@ -1308,7 +1308,13 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unreviewable_typed_data: string;
 		unsigned_typed_data_keys: string;
+		unknown_call_title: string;
+		unknown_call: string;
+		function: string;
+		allowance_increase: string;
+		allowance_decrease: string;
 		unverifiable_erc20_request: string;
 		unverifiable_approval_for_all_request: string;
 		approval_for_all_grant: string;
@@ -1634,6 +1640,10 @@ interface I18nTransaction {
 		to_ata: string;
 		to_ata_copied: string;
 		block: string;
+		kind_other: string;
+		summary_swap: string;
+		summary_self: string;
+		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
 		raw_value: string;

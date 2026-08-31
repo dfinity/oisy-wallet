@@ -37,7 +37,6 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
-import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
@@ -263,13 +262,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -289,13 +283,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -313,13 +302,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -408,14 +392,9 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 			solTokens.forEach(([token]) => {
-				const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -430,14 +409,9 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 			solTokens.forEach(([token]) => {
-				const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -628,13 +602,8 @@ describe('AllTransactionsLoader', () => {
 		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 		icTokens.forEach(([token]) => {
-			const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-				({ data: transaction }) => transaction
-			);
-
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 				minTimestamp: mockMinTimestamp,
-				transactions,
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,
@@ -644,14 +613,9 @@ describe('AllTransactionsLoader', () => {
 		});
 
 		solTokens.forEach(([token]) => {
-			const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-				({ data: transaction }) => transaction
-			);
-
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
-				transactions,
 				token,
 				signalEnd: expect.any(Function)
 			});

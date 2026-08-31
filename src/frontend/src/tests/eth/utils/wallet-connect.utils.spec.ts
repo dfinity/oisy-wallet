@@ -1,3 +1,10 @@
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
@@ -7,12 +14,15 @@ import {
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import {
 	assertValidEthTypedData,
+	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
+	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
@@ -360,6 +370,177 @@ describe('wallet-connect.utils', () => {
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_PERSONAL_SIGN,
 					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('classifyWalletConnectEthCall', () => {
+		const args = 'de'.repeat(64);
+
+		it.each([undefined, '', '0x', '0X'])('should classify %s as a native transfer', (data) => {
+			expect(classifyWalletConnectEthCall(data)).toEqual({ type: 'native' });
+		});
+
+		it.each([
+			{ selector: ERC20_APPROVE_HASH, expected: { type: 'erc20Approve' } },
+			{ selector: ERC20_TRANSFER_HASH, expected: { type: 'erc20Transfer' } },
+			{ selector: ERC_SET_APPROVAL_FOR_ALL_HASH, expected: { type: 'setApprovalForAll' } },
+			{
+				selector: ERC20_INCREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: true }
+			},
+			{
+				selector: ERC20_DECREASE_ALLOWANCE_HASH,
+				expected: { type: 'erc20AllowanceDelta', increase: false }
+			}
+		])('should classify the call behind selector $selector', ({ selector, expected }) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual(expected);
+		});
+
+		it('should classify a selector regardless of its casing', () => {
+			const upper = ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase().replace('0X', '0x');
+
+			expect(classifyWalletConnectEthCall(`${upper}${args}`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+
+		// The behaviour the whole change exists for. Each of these is a selector that was never
+		// considered, and each used to be reviewed as a native zero-value send.
+		it.each([
+			// Uniswap Permit2 `approve`
+			'0x87517c45',
+			// ERC-2612 `permit`
+			'0xd505accf',
+			// ERC-20 `transferFrom`
+			'0x23b872dd',
+			// a router `execute`
+			'0x3593564c',
+			// nothing at all
+			'0xdeadbeef'
+		])('should classify unrecognised selector %s as unknown', (selector) => {
+			expect(classifyWalletConnectEthCall(`${selector}${args}`)).toEqual({
+				type: 'unknown',
+				selector
+			});
+		});
+
+		it('should classify calldata too short to carry a selector as unknown, naming none', () => {
+			expect(classifyWalletConnectEthCall('0xab')).toEqual({
+				type: 'unknown',
+				selector: undefined
+			});
+		});
+
+		// A known selector says nothing about the arguments behind it. Recognising the call is what
+		// routes it to a review that decodes those arguments and fails closed when they do not.
+		it('should classify a known selector carrying garbage arguments by its selector', () => {
+			expect(classifyWalletConnectEthCall(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)).toEqual({
+				type: 'erc20AllowanceDelta',
+				increase: true
+			});
+		});
+	});
+
+	describe('isWalletConnectEthApproval', () => {
+		it.each([
+			{ type: 'erc20Approve' as const },
+			{ type: 'setApprovalForAll' as const },
+			{ type: 'erc20AllowanceDelta' as const, increase: true },
+			{ type: 'erc20AllowanceDelta' as const, increase: false }
+		])('should treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeTruthy();
+		});
+
+		// Not an approval, and not a send either: the modal titles it for what it is.
+		it.each([
+			{ type: 'native' as const },
+			{ type: 'erc20Transfer' as const },
+			{ type: 'unknown' as const, selector: '0xdeadbeef' }
+		])('should not treat $type as an approval', (call) => {
+			expect(isWalletConnectEthApproval(call)).toBeFalsy();
+		});
+	});
+
+	describe('hasUnreviewableTypedData', () => {
+		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
+			hasUnreviewableTypedData({
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: toParams(typedData),
+				sessionChainId: MAINNET_SESSION
+			});
+
+		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
+		it.each([
+			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
+			{ name: 'DAI Permit', typedData: daiPermit(true) }
+		])('should not warn about a recognised $name', ({ typedData }) => {
+			expect(call(typedData)).toBeFalsy();
+		});
+
+		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
+		// signature pull the stated value out of the wallet, and the review said nothing about it.
+		it('should warn about an ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization())).toBeTruthy();
+		});
+
+		it('should warn about a struct that is nothing OISY knows', () => {
+			expect(
+				call({
+					domain: { name: 'Marketplace', version: '1', chainId: '1', verifyingContract: USDC },
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [
+							{ name: 'offerer', type: 'address' },
+							{ name: 'price', type: 'uint256' }
+						]
+					},
+					primaryType: 'Order',
+					message: { offerer: HOLDER, price: '1' }
+				})
+			).toBeTruthy();
+		});
+
+		// Already warned about and blocked by hasInvalidTypedData. Reporting it here as well would
+		// put two warnings on one request and let the acknowledgement re-enable a blocked signature.
+		it('should not warn about typed data that would not be signed at all', () => {
+			expect(call(daiPermit('true'))).toBeFalsy();
+		});
+
+		it('should not warn about typed data on a chain the session was not granted', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBeFalsy();
+		});
+
+		// A raw message carries no schema, so nothing about it can be silently missing: what is
+		// shown is what is signed.
+		it.each([SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_ETH_SIGN])(
+			'should not warn about %s',
+			(method) => {
+				expect(
+					hasUnreviewableTypedData({
+						method,
+						params: toParams(transferWithAuthorization()),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBeFalsy();
+			}
+		);
+
+		it('should not warn about a payload that is not typed data at all', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: ['0xnot-json'],
 					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
