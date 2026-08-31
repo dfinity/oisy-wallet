@@ -11,7 +11,9 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-const flattenInstructions = (instructions: SolInstructionSummary[]): SolInstructionSummary[] =>
+export const flattenInstructions = (
+	instructions: SolInstructionSummary[]
+): SolInstructionSummary[] =>
 	instructions.flatMap((instruction) => [
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
@@ -175,6 +177,61 @@ export const deriveSolTransactionSummary = ({
 	}
 
 	return { kind: 'other' };
+};
+
+/**
+ * One transaction summary as the sentence that names it.
+ *
+ * A swap says its pair, because in a day of swaps that is the only thing telling one row from
+ * another. Everything else is a word. No figures anywhere but the self-transfer, whose net is zero
+ * by definition: the amount column beside the sentence carries them, and saying them twice reads
+ * as two movements.
+ *
+ * The symbols and the formatting come from the caller, since what a mint is called depends on the
+ * view asking: a list numbers its unnamed mints against the others beside them.
+ */
+export const formatSolTransactionSummary = ({
+	summary: { kind, spent, received },
+	i18n,
+	symbolOf,
+	amountOf
+}: {
+	summary: SolTransactionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: string | undefined) => string;
+	amountOf: (change: SolNetBalanceChange) => string;
+}): string => {
+	if (kind === 'send') {
+		return i18n.send.text.send;
+	}
+
+	if (kind === 'receive') {
+		return i18n.receive.text.receive;
+	}
+
+	// The asset never left the wallet, so the amount column shows the zero it netted to and the
+	// sentence is the only place the figure that moved can appear.
+	if (kind === 'self') {
+		return nonNullish(spent)
+			? replacePlaceholders(i18n.transaction.text.summary_self, {
+					$amount: amountOf(spent),
+					$symbol: symbolOf(spent.tokenAddress)
+				})
+			: i18n.transaction.text.kind_other;
+	}
+
+	// The pair, without the figures: the amount column beside the sentence already carries them,
+	// and one row of a swap shows one of the two anyway.
+	if (kind === 'swap') {
+		return nonNullish(spent) && nonNullish(received)
+			? replacePlaceholders(i18n.transaction.text.summary_swap, {
+					$spent_symbol: symbolOf(spent.tokenAddress),
+					$received_symbol: symbolOf(received.tokenAddress)
+				})
+			: i18n.swap.text.swap;
+	}
+
+	return i18n.transaction.text.kind_other;
 };
 
 /**
