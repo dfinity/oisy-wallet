@@ -1,6 +1,7 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
@@ -17,6 +18,8 @@ import * as solInstructionsAtaUtils from '$sol/utils/sol-instructions-ata.utils'
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import * as solInstructionsComputeBudgetUtils from '$sol/utils/sol-instructions-compute-budget.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import * as solInstructionsLookupTableUtils from '$sol/utils/sol-instructions-lookup-table.utils';
+import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
 import * as solInstructionsMemoUtils from '$sol/utils/sol-instructions-memo.utils';
 import { parseSolMemoInstruction } from '$sol/utils/sol-instructions-memo.utils';
 import * as solInstructionsSystemUtils from '$sol/utils/sol-instructions-system.utils';
@@ -30,6 +33,13 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import {
+	getCloseLookupTableInstruction,
+	getCreateLookupTableInstruction,
+	getDeactivateLookupTableInstruction,
+	getExtendLookupTableInstruction,
+	getFreezeLookupTableInstruction
+} from '@solana-program/address-lookup-table';
 import {
 	getRequestUnitsInstruction,
 	getSetLoadedAccountsDataSizeLimitInstruction
@@ -60,6 +70,7 @@ import {
 	address,
 	createNoopSigner,
 	type Base58EncodedBytes,
+	type ProgramDerivedAddress,
 	type Rpc,
 	type SolanaRpcApi
 } from '@solana/kit';
@@ -895,6 +906,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsTokenUtils, 'parseSolTokenInstruction');
 			vi.spyOn(solInstructionsToken2022Utils, 'parseSolToken2022Instruction');
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
+			vi.spyOn(solInstructionsLookupTableUtils, 'parseSolLookupTableInstruction');
 			vi.spyOn(solInstructionsMemoUtils, 'parseSolMemoInstruction');
 		});
 
@@ -1282,6 +1294,80 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		describe('with an Address Lookup Table instruction', () => {
+			const mockAuthority = createNoopSigner(address(mockSolAddress));
+
+			// Deriving the table's address needs SubtleCrypto, which the test environment does not
+			// offer; the mapping never looks at it.
+			const mockLookupTable = [address(mockSolAddress2), 254] as unknown as ProgramDerivedAddress;
+
+			it('should ignore a CreateLookupTable instruction', () => {
+				const instruction = getCreateLookupTableInstruction({
+					address: mockLookupTable,
+					authority: address(mockSolAddress),
+					payer: mockAuthority,
+					recentSlot: 123n
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+				expect(parseSolLookupTableInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should ignore an ExtendLookupTable instruction', () => {
+				const instruction = getExtendLookupTableInstruction({
+					address: address(mockSolAddress2),
+					authority: mockAuthority,
+					payer: mockAuthority,
+					addresses: [address(mockSolAddress)]
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should ignore a FreezeLookupTable instruction', () => {
+				const instruction = getFreezeLookupTableInstruction({
+					address: address(mockSolAddress2),
+					authority: mockAuthority
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should ignore a DeactivateLookupTable instruction', () => {
+				const instruction = getDeactivateLookupTableInstruction({
+					address: address(mockSolAddress2),
+					authority: mockAuthority
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// The balance it returns is the user's rent and the recipient is the instruction's own
+			// choice, neither of which the single-value summary can carry.
+			it('should fail closed on a CloseLookupTable instruction', () => {
+				const instruction = getCloseLookupTableInstruction({
+					address: address(mockSolAddress2),
+					authority: mockAuthority,
+					recipient: address(mockSolAddress)
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+		});
+
 		it('should return undefined for unrecognized instruction', () => {
 			const [mockInstruction1, mockInstruction2] = mockInstructions.filter(
 				({ programAddress }) =>
@@ -1290,6 +1376,7 @@ describe('sol-instructions.utils', () => {
 						SYSTEM_PROGRAM_ADDRESS,
 						TOKEN_PROGRAM_ADDRESS,
 						TOKEN_2022_PROGRAM_ADDRESS,
+						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 						MEMO_PROGRAM_ADDRESS,
 						MEMO_LEGACY_PROGRAM_ADDRESS
 					].includes(programAddress)
@@ -1309,6 +1396,7 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
 			expect(parseSolAtaInstruction).not.toHaveBeenCalled();
+			expect(parseSolLookupTableInstruction).not.toHaveBeenCalled();
 			expect(parseSolMemoInstruction).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
