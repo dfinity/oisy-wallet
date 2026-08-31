@@ -10,6 +10,7 @@ import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	fetchErc20Transfers,
 	loadNextErc20UserTransactions,
+	persistableErc20Transfers,
 	saveErc20FinalizedTransactions
 } from '$eth/services/erc20-user-transactions.services';
 import {
@@ -18,6 +19,7 @@ import {
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapUserTransactionToTransaction } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { Transaction } from '$lib/types/transaction';
@@ -145,13 +147,50 @@ describe('erc20-user-transactions.services', () => {
 			mockErc20Transactions.mockResolvedValue([kept, spam]);
 			mockGetTransaction.mockResolvedValue({ from: '0xattacker' });
 
-			const result = await fetchErc20Transfers({
+			const { transactions } = await fetchErc20Transfers({
 				networkId: ETHEREUM_NETWORK_ID,
 				token: USDC_TOKEN,
 				address: mockEthAddress
 			});
 
-			expect(result).toEqual([kept]);
+			expect(transactions).toEqual([kept]);
+		});
+	});
+
+	describe('persistableErc20Transfers', () => {
+		it('should keep everything when every verdict was resolved', () => {
+			const transactions = [
+				makeTx({ hash: '0xa', blockNumber: 10 }),
+				makeTx({ hash: '0xb', blockNumber: 20 })
+			];
+
+			expect(
+				persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: undefined })
+			).toEqual(transactions);
+		});
+
+		// Nothing re-examines a transfer once it is cached, so the stored high-water mark has to stay
+		// below the oldest unresolved one for a later load to get another look at it.
+		it('should drop everything at or above the oldest unresolved verdict', () => {
+			const older = makeTx({ hash: '0xolder', blockNumber: 10 });
+
+			const transactions = [
+				older,
+				makeTx({ hash: '0xunresolved', blockNumber: 20 }),
+				makeTx({ hash: '0xnewer', blockNumber: 30 })
+			];
+
+			expect(persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: 20 })).toEqual([
+				older
+			]);
+		});
+
+		it('should keep nothing when the oldest transfer is the unresolved one', () => {
+			const transactions = [makeTx({ hash: '0xunresolved', blockNumber: 10 })];
+
+			expect(persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: 10 })).toEqual(
+				[]
+			);
 		});
 	});
 
@@ -238,6 +277,47 @@ describe('erc20-user-transactions.services', () => {
 			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(1);
 		});
 
+		// The read cursor is a position in the stored list, so a trim at the per-token cap shifts every
+		// entry under it and pages start repeating rows we already hold. Asking again would spin.
+		it('should fall through to Etherscan when a cursor page repeats rows we already hold', async () => {
+			const stored = createMockBackendUserTransaction({
+				hash: '0xstored',
+				blockIndex: 50n,
+				timestamp: 500n
+			});
+
+			// Already in the store, so `append` will dedupe the page away.
+			ethTransactionsStore.append({
+				tokenId: USDC_TOKEN.id,
+				transactions: [{ data: mapUserTransactionToTransaction(stored), certified: false }]
+			});
+
+			setEthBackendPaginationCursor({ tokenId: USDC_TOKEN.id, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue({
+				transactions: [stored],
+				newestBlockIndex: 50n,
+				oldestBlockIndex: 50n,
+				totalStored: 1n,
+				nextStart: 32n
+			});
+
+			mockErc20Transactions.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+
+			const { hasMore } = await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockErc20Transactions).toHaveBeenCalledOnce();
+		});
+
 		it('should fall back to Etherscan below the oldest loaded block once the cache is drained', async () => {
 			const older = makeTx({ hash: '0xolder', blockNumber: 20 });
 
@@ -262,6 +342,34 @@ describe('erc20-user-transactions.services', () => {
 			});
 
 			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(1);
+		});
+
+		// A page of older history sits under what the canister already holds. Keeping its resolved part
+		// and dropping the rest leaves a hole nothing ever reads back, so the whole page has to wait.
+		it('should not persist an older page at all while a verdict is unresolved', async () => {
+			mockErc20Transactions.mockResolvedValue([
+				makeTx({ hash: '0xresolved', blockNumber: 20 }),
+				makeTx({ hash: '0xspam', blockNumber: 30, value: ZERO })
+			]);
+
+			// An unresolved sender is what leaves the verdict open.
+			mockGetTransaction.mockResolvedValue(undefined);
+
+			const { hasMore } = await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			// Still shown, just not cached.
+			expect(hasMore).toBeTruthy();
+			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(2);
+
+			expect(mockSaveUserTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should persist what Etherscan returned against the real chain tip', async () => {

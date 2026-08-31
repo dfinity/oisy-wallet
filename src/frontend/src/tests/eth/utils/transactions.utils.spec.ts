@@ -2,7 +2,12 @@ import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
-import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
@@ -14,9 +19,13 @@ import {
 	findErcTransfer,
 	findErcTransfers,
 	formatErcTransferAsset,
+	getCalldataSelector,
 	groupEthTransactionsByNetworkAndHash,
+	hasCalldata,
 	isErc20TransactionApprove,
+	isErc20TransactionDecreaseAllowance,
 	isErc20TransactionDeposit,
+	isErc20TransactionIncreaseAllowance,
 	isErc20TransactionTransfer,
 	isErcTransactionSetApprovalForAll,
 	isMaxUint256,
@@ -477,6 +486,70 @@ describe('transactions.utils', () => {
 
 		it('should return false for nullish calldata', () => {
 			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isErc20TransactionIncreaseAllowance', () => {
+		it('should detect the increaseAllowance selector', () => {
+			expect(
+				isErc20TransactionIncreaseAllowance(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should not detect another allowance selector', () => {
+			expect(isErc20TransactionIncreaseAllowance(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+			expect(
+				isErc20TransactionIncreaseAllowance(`${ERC20_DECREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeFalsy();
+		});
+
+		it('should not detect undefined data', () => {
+			expect(isErc20TransactionIncreaseAllowance(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isErc20TransactionDecreaseAllowance', () => {
+		it('should detect the decreaseAllowance selector', () => {
+			expect(
+				isErc20TransactionDecreaseAllowance(`${ERC20_DECREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should not detect the increaseAllowance selector', () => {
+			expect(
+				isErc20TransactionDecreaseAllowance(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeFalsy();
+		});
+
+		it('should not detect undefined data', () => {
+			expect(isErc20TransactionDecreaseAllowance(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('hasCalldata', () => {
+		it.each([undefined, '', '0x', '0X'])('should read %s as carrying no call', (data) => {
+			expect(hasCalldata(data)).toBeFalsy();
+		});
+
+		// Four bytes of nothing is still a call, and reviewing it as a plain transfer is exactly the
+		// misstatement the unknown state exists to prevent.
+		it.each(['0xab', '0xdeadbeef', `${ERC20_APPROVE_HASH}deadbeef`])(
+			'should read %s as carrying a call',
+			(data) => {
+				expect(hasCalldata(data)).toBeTruthy();
+			}
+		);
+	});
+
+	describe('getCalldataSelector', () => {
+		it('should return the selector lowercased', () => {
+			expect(getCalldataSelector(`${ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase()}deadbeef`)).toBe(
+				ERC20_INCREASE_ALLOWANCE_HASH
+			);
+		});
+
+		it.each([undefined, '0x', '0xab', '0x3950935'])('should return no selector for %s', (data) => {
+			expect(getCalldataSelector(data)).toBeUndefined();
 		});
 	});
 
