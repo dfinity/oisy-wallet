@@ -113,7 +113,11 @@ export const decode = async ({
 		})
 	]);
 
-	const { preview, parties: simulatedParties } = simulation ?? {};
+	const {
+		preview,
+		instructions: simulatedInstructions,
+		parties: simulatedParties
+	} = simulation ?? {};
 
 	// Name the mints the review is about to show. Best effort and awaited, since the review is
 	// synchronous and a name that landed after the modal opened would arrive too late to read.
@@ -125,7 +129,8 @@ export const decode = async ({
 	const mapped = {
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
-		...(nonNullish(preview) && { preview })
+		...(nonNullish(preview) && { preview }),
+		...(nonNullish(simulatedInstructions) && { instructions: simulatedInstructions })
 	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is

@@ -1,4 +1,5 @@
 import type { SolAddress } from '$sol/types/address';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransferParties } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 
@@ -47,5 +48,8 @@ export interface SolSimulationPreview {
  */
 export interface SolSimulationResult {
 	preview?: SolSimulationPreview;
+	// What the simulated run does to the user's accounts, instruction by instruction. The message
+	// states almost none of it: a routed swap performs every transfer as a nested call.
+	instructions?: SolInstructionSummary[];
 	parties: SolTransferParties;
 }
