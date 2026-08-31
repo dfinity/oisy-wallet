@@ -28,7 +28,6 @@
 	} from '$sol/constants/sol.constants';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
-	import type { SolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
