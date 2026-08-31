@@ -1,6 +1,7 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
@@ -169,6 +170,50 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(getByTestId('sol-instructions-list')).toBeInTheDocument();
 		expect(getAllByTestId('sol-instruction')).toHaveLength(2);
+	});
+
+	// The name is a label beside the address, not a replacement for it: the address is the part
+	// the user can check.
+	it('should show the name a program publishes for itself next to its address', () => {
+		const { getAllByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: mockSolAddress2,
+						programName: 'jupiter',
+						children: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+					}
+				]
+			}
+		});
+
+		// The legs of the route render as instructions of their own underneath it.
+		const [route] = getAllByTestId('sol-instruction');
+
+		expect(route).toHaveTextContent('jupiter');
+		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
+	});
+
+	it('should show only the address of a program that publishes no name', () => {
+		const { getAllByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: mockSolAddress2,
+						children: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+					}
+				]
+			}
+		});
+
+		const [route] = getAllByTestId('sol-instruction');
+
+		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
+		expect(route).not.toHaveTextContent('jupiter');
 	});
 
 	// An unchecked transfer states no decimals, so without the simulated deltas the amount would

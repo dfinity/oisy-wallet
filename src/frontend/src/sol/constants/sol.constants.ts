@@ -7,6 +7,14 @@ export const TOKEN_2022_PROGRAM_ADDRESS = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXE
 export const ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS =
 	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
 
+// Where and how an Anchor program publishes its own interface. The seed is Anchor's, and so is the
+// account layout: a fixed discriminator it stamps on every IDL account (a constant, not derived
+// from a name), the authority allowed to rewrite it, then the length of the compressed IDL.
+export const ANCHOR_IDL_SEED = 'anchor:idl';
+export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 158];
+export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
+export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
+
 // Solana transaction fee
 // It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
