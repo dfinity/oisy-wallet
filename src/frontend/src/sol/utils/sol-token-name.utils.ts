@@ -1,5 +1,5 @@
 import type { NetworkId } from '$lib/types/network';
-import type { SplTokenMetadataData } from '$sol/stores/spl-token-metadata.store';
+import type { SplTokenMetadata } from '$sol/stores/spl-token-metadata.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { findEnabledSplToken } from '$sol/utils/spl.utils';
@@ -28,7 +28,7 @@ export const solTokenSymbol = ({
 	tokenAddress: SplTokenAddress | undefined;
 	tokens: SplCustomToken[];
 	networkId: NetworkId;
-	metadata: SplTokenMetadataData;
+	metadata: Partial<Record<SplTokenAddress, SplTokenMetadata>>;
 	unknownTokenAddresses: SplTokenAddress[];
 	unknownTokenLabel: string;
 	nativeSymbol: string;
@@ -69,7 +69,7 @@ export const solUnknownTokenAddresses = ({
 	tokenAddresses: (SplTokenAddress | undefined)[];
 	tokens: SplCustomToken[];
 	networkId: NetworkId;
-	metadata: SplTokenMetadataData;
+	metadata: Partial<Record<SplTokenAddress, SplTokenMetadata>>;
 }): SplTokenAddress[] =>
 	tokenAddresses.reduce<SplTokenAddress[]>((acc, tokenAddress) => {
 		if (

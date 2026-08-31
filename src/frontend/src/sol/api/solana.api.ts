@@ -440,11 +440,11 @@ export const checkIfAccountExists = async ({
 };
 
 /**
- * The name and symbol a Token-2022 mint carries in its own account.
+ * The name and symbol each Token-2022 mint carries in its own account.
  *
  * Token-2022 can hold its metadata in the mint itself, through the `tokenMetadata` extension, so
  * one account read names a token the wallet does not list. A legacy SPL mint keeps nothing of the
- * sort and answers with nothing.
+ * sort and simply does not appear in the result.
  */
 export const getSplTokenMetadata = async ({
 	addresses,
@@ -467,21 +467,17 @@ export const getSplTokenMetadata = async ({
 				return acc;
 			}
 
-			const { extensions } = (data.parsed as { info?: { extensions?: unknown[] } })?.info ?? {};
+			const { extensions } = (data.parsed?.info ?? {}) as {
+				extensions?: Token2022ExtensionResult[];
+			};
 
-			const metadata = (extensions ?? []).find(
-				(extension): extension is { extension: string; state: { name: string; symbol: string } } =>
-					nonNullish(extension) &&
-					typeof extension === 'object' &&
-					'extension' in extension &&
-					extension.extension === 'tokenMetadata'
-			);
+			const { name, symbol } = extractTokenMetadataExtension(extensions);
 
-			return nonNullish(metadata) &&
-				notEmptyString(metadata.state?.name) &&
-				notEmptyString(metadata.state?.symbol)
-				? { ...acc, [address]: { name: metadata.state.name, symbol: metadata.state.symbol } }
-				: acc;
+			if (notEmptyString(name) && notEmptyString(symbol)) {
+				acc[address] = { name, symbol };
+			}
+
+			return acc;
 		},
 		{}
 	);
