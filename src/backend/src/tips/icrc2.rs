@@ -1,9 +1,10 @@
 //! ICRC-1/2 calls for arbitrary token ledgers.
 //!
-//! The **types** come from `ic_cycles_ledger_client`, which re-exports the
-//! generated ICRC shapes. They are the standard ones and identical on the wire,
-//! and `signer/service.rs` already imports `Account` and `AllowanceArgs` from
-//! there — so declaring a second copy here bought nothing.
+//! The **types** come from `icrc-ledger-types`, the canonical ICRC crate. It is
+//! types only — no client, no transport — so it carries no opinion about how the
+//! calls below are made. Its `Subaccount` is `[u8; 32]` rather than a `ByteBuf`,
+//! which is the same `blob` on the wire and makes a wrong-length subaccount
+//! unrepresentable.
 //!
 //! The **calls** stay local, for two reasons that survive that:
 //!
@@ -24,10 +25,13 @@
 use candid::{Nat, Principal};
 use ic_cdk::call::Call;
 // Re-exported so callers keep importing the ledger shapes from the module that
-// speaks to the ledger, rather than reaching into a crate named for the cycles
-// ledger to talk to an arbitrary token one.
-pub use ic_cycles_ledger_client::{
-    Account, Allowance, AllowanceArgs, TransferFromArgs, TransferFromError,
+// speaks to the ledger.
+pub use icrc_ledger_types::{
+    icrc1::account::Account,
+    icrc2::{
+        allowance::{Allowance, AllowanceArgs},
+        transfer_from::{TransferFromArgs, TransferFromError},
+    },
 };
 
 /// Why a payout did not happen.
