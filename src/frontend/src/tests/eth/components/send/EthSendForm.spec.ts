@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
@@ -56,7 +57,16 @@ describe('EthSendForm', () => {
 
 		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		expect(getByText(en.fee.text.estimated_fee_eth)).toBeInTheDocument();
+		// The label follows the feature flag: the estimate only replaces the ceiling where the
+		// priority work is enabled.
+		expect(
+			getByText(
+				SEND_TRANSACTION_PRIORITY_ENABLED
+					? en.fee.text.estimated_fee_eth
+					: // max_fee_eth contains HTML, so match the leading plain-text fragment only
+						'Max fee'
+			)
+		).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
