@@ -1,9 +1,18 @@
+import { SolanaNetworks } from '$sol/types/network';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 
 describe('sol-token-name.utils', () => {
 	const tokens = [{ ...mockValidSplToken, version: undefined, enabled: true }];
 	const { network } = mockValidSplToken;
+	const cluster = mapNetworkIdToNetwork(network.id);
+
+	// The store holds a map per cluster, and a name is only ever read out of the one it was
+	// fetched from.
+	const on = (metadata: Record<string, { name: string; symbol: string }>) => ({
+		[cluster ?? SolanaNetworks.mainnet]: metadata
+	});
 	const args = {
 		tokens,
 		networkId: network.id,
@@ -17,7 +26,7 @@ describe('sol-token-name.utils', () => {
 				solTokenSymbol({
 					...args,
 					tokenAddress: mockValidSplToken.address,
-					metadata: { [mockValidSplToken.address]: { name: 'Other', symbol: 'OTHER' } },
+					metadata: on({ [mockValidSplToken.address]: { name: 'Other', symbol: 'OTHER' } }),
 					unknownTokenAddresses: []
 				})
 			).toBe(mockValidSplToken.symbol);
@@ -30,10 +39,25 @@ describe('sol-token-name.utils', () => {
 				solTokenSymbol({
 					...args,
 					tokenAddress: 'unlisted-mint',
-					metadata: { 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } },
+					metadata: on({ 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }),
 					unknownTokenAddresses: []
 				})
 			).toBe('PUMP');
+		});
+
+		// The same mint address exists on several clusters and carries different data on each, so a
+		// devnet mint must not inherit the name its mainnet namesake happens to have.
+		it('should ignore a name held for another cluster', () => {
+			expect(
+				solTokenSymbol({
+					...args,
+					tokenAddress: 'unlisted-mint',
+					metadata: {
+						[SolanaNetworks.devnet]: { 'unlisted-mint': { name: 'Pump', symbol: 'PUMP' } }
+					},
+					unknownTokenAddresses: ['unlisted-mint']
+				})
+			).toBe('Unknown token');
 		});
 
 		it('should fall back to the placeholder, unnumbered when it stands alone', () => {
@@ -41,7 +65,7 @@ describe('sol-token-name.utils', () => {
 				solTokenSymbol({
 					...args,
 					tokenAddress: 'nameless',
-					metadata: {},
+					metadata: on({}),
 					unknownTokenAddresses: ['nameless']
 				})
 			).toBe('Unknown token');
@@ -52,7 +76,7 @@ describe('sol-token-name.utils', () => {
 			const unknownTokenAddresses = ['first', 'second'];
 
 			expect(
-				solTokenSymbol({ ...args, tokenAddress: 'second', metadata: {}, unknownTokenAddresses })
+				solTokenSymbol({ ...args, tokenAddress: 'second', metadata: on({}), unknownTokenAddresses })
 			).toBe('Unknown token 2');
 		});
 
@@ -61,7 +85,7 @@ describe('sol-token-name.utils', () => {
 				solTokenSymbol({
 					...args,
 					tokenAddress: undefined,
-					metadata: {},
+					metadata: on({}),
 					unknownTokenAddresses: []
 				})
 			).toBe('SOL');
@@ -74,7 +98,7 @@ describe('sol-token-name.utils', () => {
 			solTokenSymbol({
 				...args,
 				tokenAddress: 'shared-address',
-				metadata: {},
+				metadata: on({}),
 				unknownTokenAddresses: ['shared-address']
 			})
 		).toBe('Unknown token');
@@ -94,7 +118,7 @@ describe('sol-token-name.utils', () => {
 					],
 					tokens,
 					networkId: network.id,
-					metadata: { 'named-on-chain': { name: 'Pump', symbol: 'PUMP' } }
+					metadata: on({ 'named-on-chain': { name: 'Pump', symbol: 'PUMP' } })
 				})
 			).toStrictEqual(['nameless-b', 'nameless-a']);
 		});
