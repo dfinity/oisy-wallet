@@ -14,6 +14,14 @@ export const ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS = 'AddressLookupTab1e111111111
 export const MEMO_LEGACY_PROGRAM_ADDRESS = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo';
 export const MEMO_PROGRAM_ADDRESS = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 
+// Where and how an Anchor program publishes its own interface. The seed is Anchor's, and so is the
+// account layout: a fixed discriminator it stamps on every IDL account (a constant, not derived
+// from a name), the authority allowed to rewrite it, then the length of the compressed IDL.
+export const ANCHOR_IDL_SEED = 'anchor:idl';
+export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 158];
+export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
+export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
+
 // Solana transaction fee
 // It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
