@@ -32,6 +32,37 @@ describe('SolTransaction', () => {
 		);
 	});
 
+	// One transaction produces a row per token it moved, and it is stored as a send or a receive
+	// of one of the two sides. Badged by that alone, one half of a swap points out and the other
+	// points in, which reads as two unrelated transfers.
+	it('should badge both sides of a swap the same way', () => {
+		const swap = {
+			...mockTrx,
+			summary: {
+				kind: 'swap' as const,
+				spent: { delta: -100n, tokenAddress: 'USDC', decimals: 6 },
+				received: { delta: 7n, tokenAddress: 'RAY', decimals: 6 }
+			}
+		};
+
+		const badgeOf = (type: 'send' | 'receive'): string => {
+			const { container } = render(SolTransaction, {
+				props: { transaction: { ...swap, type }, token: SOLANA_TOKEN, iconType: 'token' }
+			});
+
+			const badge = container.querySelector('[data-tid="icon-badge"]');
+
+			assertNonNullish(badge);
+
+			return badge.innerHTML;
+		};
+
+		const sent = badgeOf('send');
+
+		expect(sent).not.toBe('');
+		expect(badgeOf('receive')).toBe(sent);
+	});
+
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(SolTransaction, {
 			props: {
