@@ -1271,7 +1271,6 @@ interface I18nInfo {
 interface I18nWallet_connect {
 	text: {
 		name: string;
-		simulated_review: string;
 		session_proposal: string;
 		connect: string;
 		connecting: string;
@@ -1294,6 +1293,7 @@ interface I18nWallet_connect {
 		hex_data: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		simulated_review: string;
 		simulated_changes: string;
 		simulation_note: string;
 		simulation_control_change: string;
@@ -1316,6 +1316,7 @@ interface I18nWallet_connect {
 		methods_capped: string;
 		unknown_call_title: string;
 		unknown_call: string;
+		function: string;
 		allowance_increase: string;
 		allowance_decrease: string;
 		unverifiable_erc20_request: string;

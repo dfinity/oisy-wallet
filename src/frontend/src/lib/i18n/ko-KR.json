@@ -1588,7 +1588,6 @@
 	"wallet_connect": {
 		"text": {
 			"name": "WalletConnect",
-			"simulated_review": "",
 			"session_proposal": "세션 제안",
 			"connect": "연결",
 			"connecting": "연결 중...",
@@ -1611,6 +1610,7 @@
 			"hex_data": "HEX 데이터",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_note": "",
 			"simulation_control_change": "",
@@ -1633,6 +1633,7 @@
 			"methods_capped": "",
 			"unknown_call_title": "",
 			"unknown_call": "",
+			"function": "",
 			"allowance_increase": "",
 			"allowance_decrease": "",
 			"unverifiable_erc20_request": "",
