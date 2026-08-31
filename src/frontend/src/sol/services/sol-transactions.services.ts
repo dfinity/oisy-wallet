@@ -35,6 +35,7 @@ import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import {
+	requiresStoredDerivationRefresh,
 	requiresStoredSplOwnerRefresh,
 	solBackendTokenId
 } from '$sol/utils/user-transactions.utils';
@@ -337,8 +338,10 @@ const loadSolTransactions = async ({
 
 		const storedRefreshSignatures = new Set(
 			storedTransactions
-				.filter((transaction) =>
-					requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress })
+				.filter(
+					(transaction) =>
+						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
+						requiresStoredDerivationRefresh({ transaction })
 				)
 				.map(({ signature }) => String(signature))
 		);
@@ -390,6 +393,21 @@ const loadSolTransactions = async ({
 			: freshTransactions;
 
 		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
+
+		// A record re-derived under its signature id supersedes the per-instruction rows the store
+		// may still hold for the same signature: same transaction, older shape, different ids.
+		const incomingSignatures = new Set(allTransactions.map(({ signature }) => String(signature)));
+		const incomingIds = new Set(allTransactions.map(({ id }) => `${id}`));
+		const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
+			.filter(
+				({ data }) =>
+					incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
+			)
+			.map(({ data: { id } }) => `${id}`);
+
+		if (staleIds.length > 0) {
+			solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
+		}
 
 		solTransactionsStore.append({
 			tokenId,
