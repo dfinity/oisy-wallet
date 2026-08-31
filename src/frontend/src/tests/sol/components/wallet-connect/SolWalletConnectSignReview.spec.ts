@@ -1,6 +1,7 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
@@ -278,6 +279,45 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
+		});
+	});
+
+	// A program is the closest thing a Solana message has to a recipient, and the one party the
+	// user can look up before signing.
+	describe('the programs the run goes through', () => {
+		const ORCA = 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc';
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+
+		it('should list each program once, with its actions', () => {
+			const { getAllByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					instructions: [
+						{ kind: 'route' as const, program: ORCA },
+						{ kind: 'route' as const, program: JUPITER },
+						{ kind: 'route' as const, program: ORCA }
+					]
+				}
+			});
+
+			const venues = getAllByTestId('venue');
+
+			expect(venues).toHaveLength(2);
+			expect(venues[0]).toHaveTextContent(shortenWithMiddleEllipsis({ text: ORCA }));
+			expect(venues[1]).toHaveTextContent(shortenWithMiddleEllipsis({ text: JUPITER }));
+
+			// An address the user cannot copy or look up is barely worth showing: checking the
+			// program before signing is the whole reason it is here.
+			[ORCA, JUPITER].forEach((program, index) => {
+				expect(venues[index].querySelector('button')).toBeInTheDocument();
+				expect(venues[index].querySelector(`a[href*="${program}"]`)).toBeInTheDocument();
+			});
+		});
+
+		it('should show no group when the run named no program', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByTestId('venue')).not.toBeInTheDocument();
 		});
 	});
 
