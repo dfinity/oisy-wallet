@@ -24,6 +24,7 @@ import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
@@ -51,7 +52,8 @@ describe('EthFeeContext', () => {
 		setFee: setFeeMock
 	};
 
-	const mockContext = (fs: EthFeeStore) => new Map([[ETH_FEE_CONTEXT_KEY, { feeStore: fs }]]);
+	const mockContext = (fs: EthFeeStore) =>
+		new Map([[ETH_FEE_CONTEXT_KEY, { feeStore: fs, feePrioritiesStore: writable(undefined) }]]);
 
 	const network = ETHEREUM_NETWORK;
 
@@ -102,8 +104,12 @@ describe('EthFeeContext', () => {
 		vi.useFakeTimers();
 
 		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-			maxFeePerGas: 12n,
-			maxPriorityFeePerGas: 7n
+			baseFeePerGas: 5n,
+			perPriority: {
+				[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+				[EthFeePriority.NORMAL]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+				[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
+			}
 		});
 
 		vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
