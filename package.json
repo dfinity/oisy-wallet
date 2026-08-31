@@ -86,6 +86,7 @@
 		"@solana-program/address-lookup-table": "^0.13.0",
 		"@solana-program/compute-budget": "^0.17.0",
 		"@solana-program/memo": "^0.12.0",
+		"@solana-program/stake": "^0.8.0",
 		"@solana-program/system": "^0.13.0",
 		"@solana-program/token": "^0.15.0",
 		"@solana-program/token-2022": "^0.13.0",
