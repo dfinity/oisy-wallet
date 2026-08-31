@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getCalldataMethods } from '$eth/utils/transactions.utils';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,13 +21,21 @@
 {#if methods.length > 0}
 	<WalletConnectModalValue label={$i18n.wallet_connect.text.methods} ref="methods">
 		<ul class="flex list-none flex-col gap-1">
-			{#each methods as { selector, depth }, index (index)}
+			{#each methods as { selector, name, depth }, index (index)}
 				<!-- Indented by how deep the call actually sits, so a call nested inside a batched
 				     wrapper does not read as a sibling of that wrapper. -->
 				<li style:padding-left="{Math.min(depth, MAX_NESTING_INDENT)}rem">
-					<span class="break-all font-mono text-sm">
-						{selector ?? $i18n.wallet_connect.text.method_without_selector}
-					</span>
+					<!-- A call is named only where the review read its arguments, so the selector stays
+					     beside the name rather than being replaced by it: the name says what OISY
+					     recognised, the four bytes say what was actually sent. -->
+					{#if nonNullish(name)}
+						<span class="text-sm">{name}</span>
+						<span class="break-all font-mono text-sm text-tertiary">({selector})</span>
+					{:else}
+						<span class="break-all font-mono text-sm">
+							{selector ?? $i18n.wallet_connect.text.method_without_selector}
+						</span>
+					{/if}
 				</li>
 			{/each}
 		</ul>

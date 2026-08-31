@@ -1,3 +1,4 @@
+import { ETH_CALL_NAMES } from '$eth/constants/call-names.constants';
 import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
@@ -111,12 +112,15 @@ const abiCoder = AbiCoder.defaultAbiCoder();
  */
 export const getCalldataMethods = (
 	data: string | undefined
-): { methods: { selector: string | undefined; depth: number }[]; capped: boolean } => {
+): {
+	methods: { selector: string | undefined; name: string | undefined; depth: number }[];
+	capped: boolean;
+} => {
 	if (!hasCalldata(data)) {
 		return { methods: [], capped: false };
 	}
 
-	const methods: { selector: string | undefined; depth: number }[] = [];
+	const methods: { selector: string | undefined; name: string | undefined; depth: number }[] = [];
 
 	// Set only where a call was actually left out, so a batch that ends exactly on the cap is
 	// reported as complete. Saying calls were omitted when none were is its own misstatement.
@@ -130,7 +134,12 @@ export const getCalldataMethods = (
 
 		const selector = getCalldataSelector(calldata);
 
-		methods.push({ selector, depth });
+		// Named only where the review reads the arguments behind the selector. See `ETH_CALL_NAMES`.
+		methods.push({
+			selector,
+			name: nonNullish(selector) ? ETH_CALL_NAMES[selector] : undefined,
+			depth
+		});
 
 		if (isNullish(selector) || depth >= MULTICALL_MAX_DEPTH) {
 			return;
