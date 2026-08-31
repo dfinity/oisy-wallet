@@ -150,15 +150,16 @@ describe('sol-transaction-summary.utils', () => {
 			expect(format({ kind: 'receive', received: { delta: 1n } })).toBe(en.receive.text.receive);
 		});
 
-		// In a day of swaps the pair is the only thing telling one row from another.
-		it('should say a swap as its pair', () => {
+		// In a day of swaps the pair is the only thing telling one row from another. The figures
+		// stay out: the amount column beside the sentence carries them.
+		it('should say a swap as its pair, without the figures', () => {
 			expect(
 				format({
 					kind: 'swap',
 					spent: { delta: -5n, tokenAddress: 'USDC' },
 					received: { delta: 7n, tokenAddress: 'RAY' }
 				})
-			).toBe('Swap 5 USDC to 7 RAY');
+			).toBe('Swap USDC to RAY');
 		});
 
 		// The asset never left, so the amount column shows zero and the sentence is the only place
