@@ -139,17 +139,24 @@ describe('EthFeePriority', () => {
 		});
 	});
 
-	it('opens the sheet without submitting the surrounding send form', async () => {
+	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
 		// The send form wraps this component and Button defaults to type="submit", so a submitting
 		// trigger fires HTML5 validation on the empty amount field instead of opening the sheet.
+		// Done has the same problem on the way out, so both are asserted here.
 		screensStore.set('xs');
 
 		const { context } = setup();
 
-		const { getByTestId } = render(EthFeePriority, { context });
+		const { getByTestId, getByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
 			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+
+		getByTestId(ETH_FEE_PRIORITY_TRIGGER).click();
+
+		await waitFor(() => {
+			expect(getByText(en.core.text.done).closest('button')).toHaveAttribute('type', 'button');
 		});
 	});
 
