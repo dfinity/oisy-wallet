@@ -73,8 +73,6 @@
 </script>
 
 {#if nonNullish($feePrioritiesStore) && nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
-	<!-- Sits directly above the fee row, so it carries the same block rhythm the amount and
-	     destination sections use rather than butting straight into it. -->
 	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
