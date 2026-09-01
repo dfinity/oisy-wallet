@@ -39,6 +39,10 @@ export type TransactionResponseWithBigInt = Omit<
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;
+	// The network's own base fee, which the sender does not choose. Only what the transaction is
+	// expected to cost depends on it; what the sender authorises (`maxFeePerGas`) does not.
+	// Optional because not every fee source reports it.
+	baseFeePerGas?: bigint | null;
 };
 
 export type RequiredTransactionFeeData = {

@@ -148,7 +148,8 @@ export const getEthFeeDataWithProvider = async ({
 
 	const {
 		maxFeePerGas: suggestedMaxFeePerGas,
-		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
+		baseFeePerGas
 	} = await getSuggestedFeeData();
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
@@ -162,7 +163,8 @@ export const getEthFeeDataWithProvider = async ({
 			maxBigInt(
 				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
 				floorMaxPriorityFeePerGas
-			) ?? null
+			) ?? null,
+		baseFeePerGas
 	};
 
 	return { feeData, provider, params };
