@@ -53,8 +53,6 @@
 		options.find(({ priority }) => priority === $sendEthFeePriority)?.name
 	);
 
-	// Each option is priced on the gas limit of the transaction being sent, so the amounts differ
-	// only by the tip, which is the whole point of offering the choice.
 	const feeFor = (priority: EthFeePriority): bigint | undefined => {
 		if (isNullish($feePrioritiesStore) || isNullish($feeStore)) {
 			return undefined;
