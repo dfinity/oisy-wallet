@@ -149,9 +149,13 @@ export const decode = async ({
 		mapped.tokenAddress ??
 		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
 
-	const owned = nonNullish(simulatedParties)
-		? undefined
-		: await ownSolAddresses({ address, tokenAddress });
+	// Read whenever either fallback below needs it. A run always reports its parties but only
+	// reports instructions when it produced some, so the two are not missing together, and an
+	// instruction list built without the user's own accounts cannot tell a send from a receive.
+	const owned =
+		nonNullish(simulatedParties) && nonNullish(simulatedInstructions)
+			? undefined
+			: await ownSolAddresses({ address, tokenAddress });
 
 	const parties = simulatedParties ?? {
 		...deriveSolTransferParties({
