@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "Frais inter-réseaux estimés",
 			"estimated_eth": "Frais Ethereum estimés",
 			"max_fee_eth": "Frais max <small>(probablement dans &lt; 30 secondes)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Frais de conversion",
 			"convert_inter_network_fee": "Frais inter-réseaux",
 			"convert_btc_network_fee": "Frais réseau Bitcoin",
@@ -1569,7 +1570,10 @@
 			"transaction_fees": "Frais de transaction",
 			"network_fee": "Frais de réseau",
 			"approval_fee": "Frais d'approbation",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir les frais."

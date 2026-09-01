@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "Szacowana opłata między sieciami",
 			"estimated_eth": "Szacowana opłata Ethereum",
 			"max_fee_eth": "Maksymalna opłata <small>(prawdopodobnie w < 30 sekund)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Opłata za konwersję",
 			"convert_inter_network_fee": "Opłata między sieciami",
 			"convert_btc_network_fee": "Opłata sieciowa Bitcoin",
@@ -1569,7 +1570,10 @@
 			"transaction_fees": "",
 			"network_fee": "",
 			"approval_fee": "",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Niewystarczające saldo na pokrycie opłat."

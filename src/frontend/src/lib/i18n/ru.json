@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "Примерная межсетевая комиссия",
 			"estimated_eth": "Примерная комиссия Ethereum",
 			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Комиссия за обмен",
 			"convert_inter_network_fee": "Межсетевая комиссия",
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
@@ -1569,7 +1570,10 @@
 			"transaction_fees": "Комиссии за транзакции",
 			"network_fee": "Сетевая комиссия",
 			"approval_fee": "Комиссия за одобрение",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."

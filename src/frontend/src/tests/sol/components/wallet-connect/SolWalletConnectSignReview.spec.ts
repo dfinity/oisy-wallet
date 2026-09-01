@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
-		amount: 1_000_000n,
 		application: 'https://example.com',
 		destination: mockSolAddress2,
 		source: mockSolAddress,
@@ -87,7 +86,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
@@ -99,7 +98,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 		// the ninth decimal must survive: rounding it away would alter the very number this review
 		// exists to disclose
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
@@ -115,8 +114,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.base_kind).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_kind).tagName).not.toBe('LABEL');
 	});
 
 	it('should charge the rent of the accounts the message opens as its own line', () => {
@@ -189,7 +188,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+		expect(queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 	});
 
 	// The message states almost nothing a routed swap does; the simulation is what knows.
@@ -287,7 +286,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID' }
 			});
 
-			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 		});
 
@@ -482,7 +481,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			const changes = getByText(en.wallet_connect.text.simulated_changes);
-			const fee = getByText(en.fee.text.network_fee);
+			const fee = getByText(en.fee.text.base_kind);
 
 			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
 				Node.DOCUMENT_POSITION_FOLLOWING
@@ -495,13 +494,13 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
 			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
-			expect(queries.queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
 
@@ -621,7 +620,6 @@ describe('SolWalletConnectSignReview', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
-					amount: 1n,
 					prioritizationFee: 1_000_000_001n,
 					prioritizationFeeEstimate: networkEstimate
 				}
@@ -751,8 +749,8 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queries.getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(queries.getByText(en.send.text.network)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.network_fee)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.base_kind)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 
 			await showOperations(queries);
 
@@ -773,17 +771,20 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	// The two rows describe what will be signed, which the simulation only predicts.
-	it('should render the amount and the balance of a decoded transfer', () => {
+	// A decoded amount is one movement out of however many the message makes, and on a swap it is
+	// one leg of the pair, stated as though it were the whole. The simulated changes below it say
+	// what actually moves, so the row contradicted them; the balance is the wallet's, not the
+	// message's, and says nothing about what is being signed.
+	it('should state neither an amount nor the wallet balance', () => {
 		balancesStore.set({ id: SOLANA_TOKEN.id, data: { data: 5_000_000_000n, certified: false } });
 
-		const { getByText, container } = render(SolWalletConnectSignReview, { props });
+		const { queryByText, container } = render(SolWalletConnectSignReview, { props });
 
-		expect(getByText(en.core.text.amount)).toBeInTheDocument();
-		expect(container.querySelector('#amount')).toHaveTextContent('0.001 SOL');
+		expect(queryByText(en.core.text.amount)).not.toBeInTheDocument();
+		expect(container.querySelector('#amount')).toBeNull();
 
-		expect(getByText(en.send.text.balance)).toBeInTheDocument();
-		expect(container.querySelector('#balance')).toHaveTextContent('5 SOL');
+		expect(queryByText(en.send.text.balance)).not.toBeInTheDocument();
+		expect(container.querySelector('#balance')).toBeNull();
 	});
 
 	// The delegate of an approval is not a recipient, so it keeps its own row even though the

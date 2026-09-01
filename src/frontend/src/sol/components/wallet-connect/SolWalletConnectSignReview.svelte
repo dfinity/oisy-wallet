@@ -12,7 +12,6 @@
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
@@ -41,7 +40,6 @@
 	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
-		amount?: bigint;
 		destination: string;
 		source: string;
 		application: string;
@@ -72,7 +70,6 @@
 	}
 
 	let {
-		amount,
 		destination,
 		source,
 		application,
@@ -93,13 +90,6 @@
 	}: Props = $props();
 
 	let activeTab = $state('summary');
-
-	let balance = $derived($balancesStore?.[token.id]?.data);
-
-	// Instructions OISY cannot decode yield no amount and no balance worth showing: what the
-	// transaction does is then told by the simulated changes alone. The rows are dropped rather
-	// than filled with a zero the decode never produced.
-	let decoded = $derived(nonNullish(amount));
 
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
@@ -221,19 +211,21 @@
 	);
 </script>
 
-{#snippet feeValue(feeAmount: bigint)}
+{#snippet feeValue({ kind, feeAmount }: { kind: string; feeAmount: bigint })}
 	{@const formattedFee = formatToken({
 		value: feeAmount,
 		unitName: feeToken.decimals,
 		displayDecimals: feeToken.decimals
 	})}
 
-	<div class="flex gap-4">
-		{`${formattedFee} ${feeToken.symbol}`}
+	<div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+		<span class="text-tertiary">{kind}</span>
 
-		<div class="text-tertiary">
+		<span>{`${formattedFee} ${feeToken.symbol}`}</span>
+
+		<span class="text-tertiary">
 			<ConvertAmountExchange amount={formattedFee} exchangeRate={feeExchangeRate} />
-		</div>
+		</span>
 	</div>
 {/snippet}
 
@@ -297,12 +289,10 @@
 	     here it costs a row without saying anything about the message in front of the user. The
 	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 			<SendData
-				{amount}
 				{application}
-				{balance}
 				destination={null}
-				showAmount={decoded}
-				showBalance={decoded}
+				showAmount={false}
+				showBalance={false}
 				showSigner={false}
 				{source}
 				{token}
@@ -344,23 +334,26 @@
 		     message pays, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
-					<div class="flex flex-col gap-2">
-						<div class="flex flex-col" data-tid="network-fee">
-							<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
-							{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+					<div class="flex flex-col gap-1">
+						<div data-tid="network-fee">
+							{@render feeValue({
+								kind: $i18n.fee.text.base_kind,
+								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+							})}
 						</div>
 
 						{#if nonNullish(prioritizationFee)}
-							<div class="flex flex-col" data-tid="prioritization-fee">
-								<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
-								{@render feeValue(prioritizationFee)}
+							<div data-tid="prioritization-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.prioritization_kind,
+									feeAmount: prioritizationFee
+								})}
 							</div>
 						{/if}
 
 						{#if ataFee > ZERO}
-							<div class="flex flex-col" data-tid="ata-fee">
-								<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
-								{@render feeValue(ataFee)}
+							<div data-tid="ata-fee">
+								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
 							</div>
 						{/if}
 					</div>

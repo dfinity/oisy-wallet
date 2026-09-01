@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "Geschätzte Inter-Netzwerk-Gebühr",
 			"estimated_eth": "Geschätzte Ethereum Gebühr",
 			"max_fee_eth": "Maximale Gebühr <small>(wahrscheinlich in &lt; 30 Sekunden)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Umwandlungsgebühr",
 			"convert_inter_network_fee": "Inter-Netzwerk-Gebühr",
 			"convert_btc_network_fee": "Bitcoin-Netzwerkgebühr",
@@ -1569,7 +1570,10 @@
 			"transaction_fees": "Transaktionsgebühr",
 			"network_fee": "Netzwerkgebühr",
 			"approval_fee": "",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Unzureichendes Guthaben, um die Gebühren zu decken."
