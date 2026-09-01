@@ -366,7 +366,8 @@ describe('SwapEthWizard', () => {
 				...ctx,
 				maxGasFee: readable(undefined),
 				minGasFee: readable(undefined),
-				estimatedGasFee: readable(undefined)
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
@@ -588,7 +589,8 @@ describe('SwapEthWizard', () => {
 				...ctx,
 				maxGasFee: readable(undefined),
 				minGasFee: readable(undefined),
-				estimatedGasFee: readable(undefined)
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
@@ -798,7 +800,8 @@ describe('SwapEthWizard', () => {
 				...ctx,
 				maxGasFee: readable(undefined),
 				minGasFee: readable(undefined),
-				estimatedGasFee: readable(undefined)
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
