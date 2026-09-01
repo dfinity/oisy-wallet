@@ -1,3 +1,4 @@
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -239,7 +240,7 @@ export const formatSolTransactionSummary = ({
  * stays a renderer. The children of a route are the caller's to indent, not this function's.
  */
 export const formatSolInstructionSummary = ({
-	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent },
+	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent, returned },
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -286,10 +287,22 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// Closing hands back the account's whole balance, which for a wrapped SOL account is the rent
+	// plus the SOL that was wrapped. Saying "rent" for that understates it by whatever was wrapped.
+	const returnedDetail = nonNullish(returned)
+		? replacePlaceholders(i18n.transaction.text.instruction_returned, {
+				$amount: formatToken({
+					value: returned,
+					unitName: SOLANA_DEFAULT_DECIMALS,
+					displayDecimals: SOLANA_DEFAULT_DECIMALS
+				})
+			})
+		: i18n.transaction.text.instruction_rent_returned;
+
 	if (kind === 'unwrap') {
 		return {
 			text: i18n.transaction.text.instruction_unwrap,
-			detail: i18n.transaction.text.instruction_rent_returned
+			detail: returnedDetail
 		};
 	}
 
@@ -309,7 +322,7 @@ export const formatSolInstructionSummary = ({
 	if (kind === 'closeTokenAccount') {
 		return {
 			text: i18n.transaction.text.instruction_close_account,
-			detail: i18n.transaction.text.instruction_rent_returned
+			detail: returnedDetail
 		};
 	}
 
