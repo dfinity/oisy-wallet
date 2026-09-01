@@ -129,6 +129,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
+		expect(getByTestId('ata-fee')).toHaveTextContent(en.fee.text.ata_kind);
 		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
 	});
 
