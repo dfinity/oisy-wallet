@@ -31,6 +31,7 @@
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -216,6 +217,18 @@
 
 	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
+			// The amount survives a source-token change, but the new token may not be able to
+			// represent its precision — a Max on BTC (8 decimals) followed by a switch to USDC (6)
+			// leaves an amount no ledger call could express. `tryParseToken` returning `undefined`
+			// is exactly that signal, so drop the amount here rather than carry one the forms can
+			// only reject, alongside the quote `enterTokenList` has already reset.
+			if (
+				nonNullish(swapAmount) &&
+				isNullish(tryParseToken({ value: `${swapAmount}`, unitName: token.decimals }))
+			) {
+				swapAmount = undefined;
+			}
+
 			setSourceToken(token);
 
 			setFilterNetwork(token.network);
