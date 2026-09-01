@@ -13,6 +13,7 @@ import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
@@ -135,6 +136,24 @@ describe('EthFeePriority', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.SLOW}`)).toBeInTheDocument();
+		});
+	});
+
+	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getByTestId, getByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+
+		getByTestId(ETH_FEE_PRIORITY_TRIGGER).click();
+
+		await waitFor(() => {
+			expect(getByText(en.core.text.done).closest('button')).toHaveAttribute('type', 'button');
 		});
 	});
 
