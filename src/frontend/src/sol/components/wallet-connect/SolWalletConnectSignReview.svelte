@@ -104,9 +104,16 @@
 	// The rent of the token accounts this message opens. It is charged like a fee and is not part
 	// of the base or the bid, so it is stated as its own line rather than folded into either.
 	let ataFee = $derived(
-		(instructions ?? []).reduce(
-			(acc, { kind, rent }) =>
-				kind === 'createTokenAccount' && nonNullish(rent) ? acc + rent : acc,
+		maxBigInt(
+			(instructions ?? []).reduce((acc, { kind, rent, returned }) => {
+				if (kind === 'createTokenAccount' && nonNullish(rent)) {
+					return acc + rent;
+				}
+
+				// A message that opens one account and closes another charges the difference. Netting
+				// below zero would turn a refund into a negative fee, which is not what a fee is.
+				return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+			}, ZERO),
 			ZERO
 		)
 	);
