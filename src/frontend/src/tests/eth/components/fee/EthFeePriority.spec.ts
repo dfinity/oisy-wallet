@@ -138,6 +138,20 @@ describe('EthFeePriority', () => {
 		});
 	});
 
+	it('opens the sheet without submitting the surrounding send form', async () => {
+		// The send form wraps this component and Button defaults to type="submit", so a submitting
+		// trigger fires HTML5 validation on the empty amount field instead of opening the sheet.
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getByTestId } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+	});
+
 	it('renders nothing when the network offers no choice', () => {
 		const { context } = setup({ withPriorities: false });
 

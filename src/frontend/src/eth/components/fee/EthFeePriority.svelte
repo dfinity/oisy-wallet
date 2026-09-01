@@ -84,7 +84,10 @@
 			{/snippet}
 
 			{#snippet trigger({ open })}
-				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER}>
+				<!-- Both buttons live inside the send <form>, and Button defaults to type="submit".
+				     Left as submit, opening or closing the sheet submits the form and trips HTML5
+				     validation on the still-empty amount field. -->
+				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
 					<span class="flex items-center gap-1">
 						{selectedName}
 						<IconExpandMore />
@@ -114,7 +117,7 @@
 			{/snippet}
 
 			{#snippet contentFooter(closeFn)}
-				<Button fullWidth onclick={closeFn}>{$i18n.core.text.done}</Button>
+				<Button fullWidth onclick={closeFn} type="button">{$i18n.core.text.done}</Button>
 			{/snippet}
 		</CollapsibleBottomSheet>
 	</div>
