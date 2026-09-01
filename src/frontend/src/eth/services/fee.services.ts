@@ -12,6 +12,7 @@ import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.prov
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
@@ -20,6 +21,7 @@ import {
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 } from '$evm/bsc/constants/bsc.constants';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
@@ -123,14 +125,17 @@ export const getEthFeeDataWithProvider = async ({
 	networkId,
 	chainId,
 	from,
-	to
+	to,
+	priority = EthFeePriority.NORMAL
 }: {
 	networkId: NetworkId;
 	chainId: bigint;
 	from: EthAddress;
 	to: EthAddress;
+	priority?: EthFeePriority;
 }): Promise<{
 	feeData: Omit<TransactionFeeData, 'gas'>;
+	priorities: EthFeePriorities;
 	provider: InfuraProvider;
 	params: GetFeeData;
 }> => {
@@ -146,24 +151,41 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
-	const {
-		maxFeePerGas: suggestedMaxFeePerGas,
-		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-	} = await getSuggestedFeeData();
+	const { baseFeePerGas, perPriority } = await getSuggestedFeeData();
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
 
-	const feeData = {
-		...feeDataRest,
+	// The provider's own quote and the network floor are lower bounds on what will actually be
+	// accepted, so they apply to every priority, not only the selected one. Applying them once
+	// after selection would let a slow choice fall below what the chain relays.
+	const applyFloors = ({
+		maxFeePerGas: priorityMaxFeePerGas,
+		maxPriorityFeePerGas: priorityMaxPriorityFeePerGas
+	}: EthFeePerGas): EthFeePerGas => ({
 		maxFeePerGas:
-			maxBigInt(maxBigInt(maxFeePerGas, suggestedMaxFeePerGas), floorMaxFeePerGas) ?? null,
+			maxBigInt(maxBigInt(maxFeePerGas, priorityMaxFeePerGas), floorMaxFeePerGas) ?? null,
 		maxPriorityFeePerGas:
 			maxBigInt(
-				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
+				maxBigInt(maxPriorityFeePerGas, priorityMaxPriorityFeePerGas),
 				floorMaxPriorityFeePerGas
 			) ?? null
+	});
+
+	const priorities: EthFeePriorities = {
+		baseFeePerGas,
+		perPriority: {
+			[EthFeePriority.SLOW]: applyFloors(perPriority[EthFeePriority.SLOW]),
+			[EthFeePriority.NORMAL]: applyFloors(perPriority[EthFeePriority.NORMAL]),
+			[EthFeePriority.FAST]: applyFloors(perPriority[EthFeePriority.FAST])
+		}
 	};
 
-	return { feeData, provider, params };
+	const feeData = {
+		...feeDataRest,
+		...priorities.perPriority[priority],
+		baseFeePerGas
+	};
+
+	return { feeData, priorities, provider, params };
 };

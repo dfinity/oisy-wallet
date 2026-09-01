@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "推定ネットワーク間手数料",
 			"estimated_eth": "推定Ethereum手数料",
 			"max_fee_eth": "最大手数料<small>（おそらく30秒以内）</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "変換手数料",
 			"convert_inter_network_fee": "変換ネットワーク間手数料",
 			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
@@ -1570,6 +1578,9 @@
 			"network_fee": "ネットワーク手数料",
 			"approval_fee": "承認手数料",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"

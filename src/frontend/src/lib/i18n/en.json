@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
 			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
+			"estimated_fee_eth": "Estimated fee",
+			"priority": "Priority",
+			"priority_slow": "Slow",
+			"priority_slow_description": "May take hours",
+			"priority_normal": "Normal",
+			"priority_normal_description": "Recommended",
+			"priority_fast": "Fast",
+			"priority_fast_description": "Prioritized",
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
@@ -1570,6 +1578,9 @@
 			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
 			"prioritization_fee": "Priority fee"
+		},
+		"info": {
+			"priority": "Priority affects speed and fees. Higher priority usually means faster processing."
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
