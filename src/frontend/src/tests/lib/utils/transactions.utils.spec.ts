@@ -595,6 +595,44 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(1);
 			});
 
+			// A transaction OISY could not reduce still moved what it moved. Keeping a single row,
+			// arbitrarily the first, put an amount belonging to one token under a word that named
+			// none of them.
+			it('should keep a row per token an unreduced Solana transaction moved', () => {
+				const netChanges = [
+					{ delta: -60n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+					{ delta: 5_000n }
+				];
+
+				const [base] = createMockSolTransactionsUi(1);
+
+				const solTx: SolTransactionUi = {
+					...base,
+					id: 'same-id',
+					summary: { kind: 'other' },
+					netChanges
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: solTx, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...solTx }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
 			// Records cached before the redesign carry a per-instruction id, so grouping on the id
 			// would leave their duplicates in place; the signature is what makes them one transaction.
 			it('should deduplicate rows that share a signature but not an id', () => {
