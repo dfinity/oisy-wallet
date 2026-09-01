@@ -1,6 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { BAT_TOKEN_GROUP } from '$env/tokens/groups/groups.bat.env';
-import bat from '$icp-eth/assets/bat.svg';
+import bat from '$eth/assets/bat.svg';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';

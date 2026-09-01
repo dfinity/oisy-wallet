@@ -1,4 +1,4 @@
-import bat from '$icp-eth/assets/bat.svg';
+import bat from '$eth/assets/bat.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 

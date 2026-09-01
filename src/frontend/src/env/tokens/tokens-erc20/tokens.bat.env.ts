@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BAT_TOKEN_GROUP } from '$env/tokens/groups/groups.bat.env';
+import bat from '$eth/assets/bat.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
-import bat from '$icp-eth/assets/bat.svg';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';

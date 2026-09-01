@@ -1,7 +1,7 @@
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { BAT_TOKEN_GROUP } from '$env/tokens/groups/groups.bat.env';
+import bat from '$eth/assets/bat.svg';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
-import bat from '$icp-eth/assets/bat.svg';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
