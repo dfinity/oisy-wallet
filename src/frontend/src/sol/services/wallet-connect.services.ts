@@ -137,7 +137,6 @@ export const decode = async ({
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
 		...(nonNullish(preview) && { preview }),
-
 		...(nonNullish(messageSummary) && { messageSummary })
 	};
 
