@@ -7,6 +7,7 @@
 	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import Tooltip from '$lib/components/ui/Tooltip.svelte';
 	import {
 		ETH_FEE_PRIORITY,
@@ -77,11 +78,20 @@
 	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
-				<span class="mr-1 flex items-center gap-1 text-sm text-tertiary sm:mr-2">
-					{$i18n.fee.text.priority}
-					<Tooltip text={$i18n.fee.info.priority}>
-						<span class="text-tertiary">ⓘ</span>
-					</Tooltip>
+				<span class="flex min-w-0 flex-1 items-center justify-between gap-2">
+					<span class="flex items-center gap-1 text-sm text-tertiary">
+						{$i18n.fee.text.priority}
+						<Tooltip text={$i18n.fee.info.priority}>
+							<span class="text-tertiary">ⓘ</span>
+						</Tooltip>
+					</span>
+
+					<!-- A large screen expands the options in place and has no trigger, so the collapsed
+					     row is the only place the current choice can show. A small screen renders it in
+					     the trigger instead, so showing it here too would say it twice. -->
+					<Responsive up="md">
+						<span class="text-sm font-bold text-primary">{selectedName}</span>
+					</Responsive>
 				</span>
 			{/snippet}
 
@@ -89,12 +99,16 @@
 				<!-- Both buttons live inside the send <form>, and Button defaults to type="submit".
 				     Left as submit, opening or closing the sheet submits the form and trips HTML5
 				     validation on the still-empty amount field. -->
-				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
-					<span class="flex items-center gap-1">
-						{selectedName}
-						<IconExpandMore />
-					</span>
-				</Button>
+				<!-- ml-auto rather than relying on the row's justify-between: the header beside it grows,
+				     so without this the value floats mid-row instead of lining up with the fee below. -->
+				<span class="ml-auto">
+					<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
+						<span class="flex items-center gap-1">
+							{selectedName}
+							<IconExpandMore />
+						</span>
+					</Button>
+				</span>
 			{/snippet}
 
 			{#snippet content()}

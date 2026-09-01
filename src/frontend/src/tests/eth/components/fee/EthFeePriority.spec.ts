@@ -13,6 +13,7 @@ import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
@@ -149,6 +150,30 @@ describe('EthFeePriority', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+	});
+
+	it('names the current choice in the collapsed header on a large screen', async () => {
+		const { context } = setup();
+
+		const { getByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			// Large screens have no trigger, so the header is the only place the choice can show.
+			expect(getByText(en.fee.text.priority_normal)).toBeInTheDocument();
+		});
+	});
+
+	it('names the current choice once on a small screen', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getAllByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			// The trigger carries it there, so repeating it in the header would say it twice.
+			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
 		});
 	});
 
