@@ -5,6 +5,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { CKERC20_HELPER_CONTRACT_SIGNATURE } from '$env/networks/networks.cketh.env';
 import type * as ckBtcEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import type * as ckEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
@@ -17,8 +18,10 @@ import {
 	withdrawalStatuses
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
+import { getTransactions } from '$icp/api/icrc-index-ng.api';
+import type { IcCkInterface } from '$icp/types/ic-token';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
-import { CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import {
 	pollChainFusionActiveUserTransactions,
@@ -34,6 +37,8 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { MinterNoNewUtxosError, type CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
+import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
+import { Cbor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$icp/api/cketh-minter.api', () => ({
@@ -51,11 +56,27 @@ vi.mock('$icp/api/bitcoin.api', () => ({
 	getUtxosQuery: vi.fn()
 }));
 
+vi.mock('$icp/api/icrc-index-ng.api', () => ({
+	getTransactions: vi.fn()
+}));
+
 // `BITCOIN_CANISTER_IDS` is empty under `DFX_NETWORK=local`, which would make every case
 // take the "Bitcoin canister not deployed" path and skip the confirmation gate entirely.
 vi.mock('$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env', async (importOriginal) => ({
 	...(await importOriginal<typeof ckBtcEnv>()),
 	BITCOIN_CANISTER_IDS: { [MINTER_CANISTER_ID]: BITCOIN_CANISTER_ID }
+}));
+
+// The ck token data carries no mainnet ckBTC entry under `DFX_NETWORK=local`, which would
+// leave the minter without a ledger index to settle the double-absent deposit against.
+vi.mock('$env/tokens/tokens-icrc/tokens.icrc.ck.env', async (importOriginal) => ({
+	...(await importOriginal<typeof ckEnv>()),
+	PUBLIC_ICRC_TOKENS: [
+		{
+			minterCanisterId: MINTER_CANISTER_ID,
+			indexCanisterId: INDEX_CANISTER_ID
+		} as unknown as IcCkInterface
+	]
 }));
 
 vi.mock('$icp-eth/api/cketh-minter.api', () => ({
@@ -74,10 +95,11 @@ vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn()
 }));
 
-// Hoisted: the `BITCOIN_CANISTER_IDS` factory above runs before the module body.
-const { MINTER_CANISTER_ID, BITCOIN_CANISTER_ID } = vi.hoisted(() => ({
+// Hoisted: the canister-id factory above runs before the module body.
+const { MINTER_CANISTER_ID, BITCOIN_CANISTER_ID, INDEX_CANISTER_ID } = vi.hoisted(() => ({
 	MINTER_CANISTER_ID: 'sv3dd-oaaaa-aaaar-qacoa-cai',
-	BITCOIN_CANISTER_ID: 'ghsi2-tqaaa-aaaan-aaaca-cai'
+	BITCOIN_CANISTER_ID: 'ghsi2-tqaaa-aaaan-aaaca-cai',
+	INDEX_CANISTER_ID: 'n5wcd-faaaa-aaaar-qaaea-cai'
 }));
 
 const CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
@@ -191,6 +213,41 @@ const setDepositUtxos = ({
 		next_page: []
 	});
 
+// One page of the account's mint history as the index canister returns it. `utxos` name
+// the deposits the minter credited, encoded exactly as its `Convert` mint memo does.
+// Mints are stamped after the row's creation (`created_at_ns: 1n`) unless a test dates
+// them earlier to exercise the walk's cutoff; `hasMore` leaves older history behind the
+// page instead of ending it at the account's oldest transaction.
+const ledgerMintsPage = ({
+	utxos,
+	firstId = 100n,
+	timestamp = 1n,
+	hasMore = false
+}: {
+	utxos: CkBtcMinterDid.Utxo[];
+	firstId?: bigint;
+	timestamp?: bigint;
+	hasMore?: boolean;
+}): IcrcIndexDid.GetTransactions =>
+	({
+		balance: ZERO,
+		oldest_tx_id: utxos.length === 0 ? [] : [hasMore ? ZERO : firstId - BigInt(utxos.length - 1)],
+		transactions: utxos.map(({ outpoint: { txid, vout } }, index) => ({
+			id: firstId - BigInt(index),
+			transaction: {
+				kind: 'mint',
+				mint: [{ memo: [new Uint8Array(Cbor.encode([0, [txid, vout, 100]]))] }],
+				burn: [],
+				transfer: [],
+				approve: [],
+				timestamp
+			}
+		}))
+	}) as unknown as IcrcIndexDid.GetTransactions;
+
+const setLedgerMints = (utxos: CkBtcMinterDid.Utxo[]) =>
+	vi.mocked(getTransactions).mockResolvedValue(ledgerMintsPage({ utxos }));
+
 const setLastObservedBlock = (blockNumber: number | undefined) =>
 	vi.mocked(minterInfo).mockResolvedValue({
 		...mockCkMinterInfo,
@@ -222,6 +279,7 @@ describe('chain-fusion-swap-active-tx.services', () => {
 		vi.mocked(getKnownUtxos).mockResolvedValue([]);
 		vi.mocked(updateBalance).mockResolvedValue([]);
 		setDepositUtxos();
+		setLedgerMints([]);
 	});
 
 	it('should do nothing for an empty batch', async () => {
@@ -462,6 +520,60 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			await poll([btcMintTx()]);
 
 			expect(updateBalance).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		// The minter spends a deposit once it has minted it, which erases it from both the
+		// known UTXOs and the deposit address — the same shape as a deposit that was never
+		// indexed. Without the ledger the row would sit Executing for good.
+		it('should succeed a deposit the ledger shows as minted after the minter spent it', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			setLedgerMints([mockUtxo]);
+
+			await poll([btcMintTx()]);
+
+			expect(getTransactions).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ identity: mockIdentity, indexCanisterId: INDEX_CANISTER_ID })
+			);
+			expect(updateBalance).not.toHaveBeenCalled();
+			expect(lastUpdate()).toStrictEqual({ status: { Succeeded: null } });
+		});
+
+		it('should keep a deposit executing when the ledger only shows unrelated mints', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			setLedgerMints([OTHER_UTXO]);
+
+			await poll([btcMintTx()]);
+
+			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
+		});
+
+		// `get_account_transactions` pages; a mint deeper than the first page must still
+		// settle the row.
+		it('should find the mint beyond the first page of the account history', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			vi.mocked(getTransactions)
+				.mockResolvedValueOnce(ledgerMintsPage({ utxos: [OTHER_UTXO], hasMore: true }))
+				.mockResolvedValueOnce(ledgerMintsPage({ utxos: [mockUtxo], firstId: 50n }));
+
+			await poll([btcMintTx()]);
+
+			expect(getTransactions).toHaveBeenCalledTimes(2);
+			expect(getTransactions).toHaveBeenNthCalledWith(2, expect.objectContaining({ start: 100n }));
+			expect(lastUpdate()).toStrictEqual({ status: { Succeeded: null } });
+		});
+
+		// The walk is bounded by the row's creation time: a mint cannot predate the row that
+		// initiated the deposit, so older pages are never fetched however deep the history goes.
+		it('should stop walking the account history behind the row creation time', async () => {
+			setDepositUtxos({ utxos: [OTHER_UTXO] });
+			vi.mocked(getTransactions).mockResolvedValue(
+				ledgerMintsPage({ utxos: [OTHER_UTXO], timestamp: ZERO, hasMore: true })
+			);
+
+			await poll([btcMintTx()]);
+
+			expect(getTransactions).toHaveBeenCalledOnce();
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
 		});
 
