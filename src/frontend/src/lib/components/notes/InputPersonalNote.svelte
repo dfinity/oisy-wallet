@@ -65,7 +65,7 @@
 		text inputs) so the active field is distinguishable from its resting state. -->
 	<textarea
 		bind:this={textarea}
-		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary transition-colors outline-none placeholder:text-tertiary focus:border-brand-primary md:max-h-[calc(80dvh_-_28rem)] md:flex-auto"
+		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary outline-none transition-colors placeholder:text-tertiary focus:border-brand-primary md:flex-auto md:max-h-[calc(80dvh_-_28rem)]"
 		aria-label={$i18n.notes.text.note_label}
 		data-tid={NOTES_INPUT}
 		{disabled}

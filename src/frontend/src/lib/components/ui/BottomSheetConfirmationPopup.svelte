@@ -22,7 +22,7 @@
 {#snippet body()}
 	<div class="flex w-full flex-col">
 		<div class="flex w-full items-center justify-between gap-4 px-5 pt-5 pb-2">
-			<h3 class="m-0 min-w-0 text-xl font-bold break-words" class:w-full={!showCloseButton}>
+			<h3 class="m-0 min-w-0 break-words text-xl font-bold" class:w-full={!showCloseButton}>
 				{@render title()}
 			</h3>
 

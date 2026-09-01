@@ -54,7 +54,7 @@
 
 <LogoButton hover={false}>
 	{#snippet logo()}
-		<span class="flex items-end sm:mr-2">
+		<span class="sm:mr-2 flex items-end">
 			{#if nonNullish(token)}
 				<TokenLogo color="white" data={token} logoSize={isMobile() ? 'sm' : 'lg'} />
 			{/if}

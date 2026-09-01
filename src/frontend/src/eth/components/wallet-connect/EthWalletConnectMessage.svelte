@@ -175,7 +175,7 @@
 					     would render a struct two deep as a member of the root, which is the reading the
 					     depth exists to prevent. Clamped, because the type graph is the dApp's to shape. -->
 					<li style:padding-left="{Math.min(depth, MAX_NESTING_INDENT)}rem">
-						<span class="font-mono text-sm break-all">{name}</span>
+						<span class="break-all font-mono text-sm">{name}</span>
 					</li>
 				{/each}
 			</ul>
