@@ -24,7 +24,7 @@
 				<!-- Indented by how deep the call actually sits, so a call nested inside a batched
 				     wrapper does not read as a sibling of that wrapper. -->
 				<li style:padding-left="{Math.min(depth, MAX_NESTING_INDENT)}rem">
-					<span class="break-all font-mono text-sm">
+					<span class="font-mono text-sm break-all">
 						{selector ?? $i18n.wallet_connect.text.method_without_selector}
 					</span>
 				</li>
