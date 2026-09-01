@@ -223,9 +223,9 @@
 
 		<span>{`${formattedFee} ${feeToken.symbol}`}</span>
 
-		<span class="text-tertiary">
+		<div class="text-tertiary">
 			<ConvertAmountExchange amount={formattedFee} exchangeRate={feeExchangeRate} />
-		</span>
+		</div>
 	</div>
 {/snippet}
 
