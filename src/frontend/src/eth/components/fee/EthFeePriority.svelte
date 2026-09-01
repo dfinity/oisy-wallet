@@ -84,9 +84,6 @@
 						</Tooltip>
 					</span>
 
-					<!-- A large screen expands the options in place and has no trigger, so the collapsed
-					     row is the only place the current choice can show. A small screen renders it in
-					     the trigger instead, so showing it here too would say it twice. -->
 					<Responsive up="md">
 						<span class="text-sm font-bold text-primary">{selectedName}</span>
 					</Responsive>
@@ -94,11 +91,6 @@
 			{/snippet}
 
 			{#snippet trigger({ open })}
-				<!-- Both buttons live inside the send <form>, and Button defaults to type="submit".
-				     Left as submit, opening or closing the sheet submits the form and trips HTML5
-				     validation on the still-empty amount field. -->
-				<!-- ml-auto rather than relying on the row's justify-between: the header beside it grows,
-				     so without this the value floats mid-row instead of lining up with the fee below. -->
 				<span class="ml-auto">
 					<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
 						<span class="flex items-center gap-1">

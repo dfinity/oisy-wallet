@@ -140,9 +140,6 @@ describe('EthFeePriority', () => {
 	});
 
 	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
-		// The send form wraps this component and Button defaults to type="submit", so a submitting
-		// trigger fires HTML5 validation on the empty amount field instead of opening the sheet.
-		// Done has the same problem on the way out, so both are asserted here.
 		screensStore.set('xs');
 
 		const { context } = setup();
@@ -166,7 +163,6 @@ describe('EthFeePriority', () => {
 		const { getByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
-			// Large screens have no trigger, so the header is the only place the choice can show.
 			expect(getByText(en.fee.text.priority_normal)).toBeInTheDocument();
 		});
 	});
@@ -179,7 +175,6 @@ describe('EthFeePriority', () => {
 		const { getAllByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
-			// The trigger carries it there, so repeating it in the header would say it twice.
 			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
 		});
 	});
