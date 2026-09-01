@@ -4,21 +4,33 @@ import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/st
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthSendAmount', () => {
 	const gas = 21_000n;
-	const baseFeePerGas = 20n;
-	const maxPriorityFeePerGas = 2n;
 	const maxFeePerGas = 100n;
+	const maxPriorityFeePerGas = 2n;
+	const baseFeePerGas = 20n;
 
-	// What the chain demands the sender hold: amount + maxFeePerGas * gas.
+	// What the chain demands the sender hold on top of the amount.
 	const ceiling = maxFeePerGas * gas;
-	// What the old check demanded, which omits the base fee entirely.
+	// What the previous check demanded, which omits the base fee.
 	const tipOnly = maxPriorityFeePerGas * gas;
 
-	const balance = 1_000_000n;
+	// Comfortably above the ceiling, so `balance - ceiling` stays positive: a negative amount is
+	// rejected as invalid before this validation runs.
+	const balance = 10_000_000n;
+
+	const expectedError = en.send.assertion.insufficient_funds_for_gas;
+
+	const toEther = (value: bigint): string => {
+		const padded = value.toString().padStart(ETHEREUM_TOKEN.decimals + 1, '0');
+
+		return `${padded.slice(0, -ETHEREUM_TOKEN.decimals)}.${padded.slice(-ETHEREUM_TOKEN.decimals)}`;
+	};
 
 	const setup = () => {
 		const feeStore = initEthFeeStore();
@@ -39,13 +51,7 @@ describe('EthSendAmount', () => {
 
 		balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: balance, certified: true } });
 
-		return { context };
-	};
-
-	const enter = async (value: bigint) => {
-		const { context } = setup();
-
-		const { container } = render(EthSendAmount, {
+		const { container, queryByText } = render(EthSendAmount, {
 			context,
 			props: {
 				amount: undefined,
@@ -59,38 +65,36 @@ describe('EthSendAmount', () => {
 			`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
 		);
 
-		expect(input).not.toBeNull();
+		assertNonNullish(input);
 
-		await fireEvent.input(input as HTMLInputElement, {
-			target: { value: formatWei(value) }
-		});
-
-		return { container };
+		return { input, queryByText };
 	};
 
-	const formatWei = (value: bigint): string => {
-		const asString = value.toString().padStart(ETHEREUM_TOKEN.decimals + 1, '0');
-		const whole = asString.slice(0, -ETHEREUM_TOKEN.decimals);
-		const fraction = asString.slice(-ETHEREUM_TOKEN.decimals);
+	it('rejects an amount that leaves only the tip covered', async () => {
+		const { input, queryByText } = setup();
 
-		return `${whole}.${fraction}`;
-	};
-
-	it('rejects an amount that leaves less than the authorised ceiling', async () => {
-		// Affordable under the old tip-only rule, unaffordable to the chain: the send would pass
-		// validation and then fail to cover its own base fee.
-		const { container } = await enter(balance - tipOnly);
+		await fireEvent.input(input, { target: { value: toEther(balance - tipOnly) } });
 
 		await waitFor(() => {
-			expect(container).toHaveTextContent('Insufficient');
+			expect(queryByText(expectedError)).toBeInTheDocument();
 		});
 	});
 
 	it('accepts an amount that leaves the ceiling covered', async () => {
-		const { container } = await enter(balance - ceiling);
+		const { input, queryByText } = setup();
+
+		// Start from a rejected amount so the message is on screen. Waiting for it to disappear only
+		// proves anything if it was there to begin with.
+		await fireEvent.input(input, { target: { value: toEther(balance - tipOnly) } });
 
 		await waitFor(() => {
-			expect(container).not.toHaveTextContent('Insufficient');
+			expect(queryByText(expectedError)).toBeInTheDocument();
+		});
+
+		await fireEvent.input(input, { target: { value: toEther(balance - ceiling) } });
+
+		await waitFor(() => {
+			expect(queryByText(expectedError)).not.toBeInTheDocument();
 		});
 	});
 });
