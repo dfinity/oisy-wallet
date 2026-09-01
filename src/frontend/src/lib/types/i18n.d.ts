@@ -1314,6 +1314,7 @@ interface I18nWallet_connect {
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		multiple_operations: string;
 		simulated_review: string;
 		simulated_changes: string;
 		simulation_control_change: string;

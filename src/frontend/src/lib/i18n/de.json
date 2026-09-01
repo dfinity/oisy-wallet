@@ -1633,6 +1633,7 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"multiple_operations": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",
