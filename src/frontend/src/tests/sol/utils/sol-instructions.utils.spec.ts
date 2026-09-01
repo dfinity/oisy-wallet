@@ -4,6 +4,8 @@ import {
 	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	MEMO_PROGRAM_ADDRESS,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -19,6 +21,8 @@ import * as solInstructionsComputeBudgetUtils from '$sol/utils/sol-instructions-
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import * as solInstructionsLookupTableUtils from '$sol/utils/sol-instructions-lookup-table.utils';
 import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
+import * as solInstructionsMemoUtils from '$sol/utils/sol-instructions-memo.utils';
+import { parseSolMemoInstruction } from '$sol/utils/sol-instructions-memo.utils';
 import * as solInstructionsStakeUtils from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import * as solInstructionsSystemUtils from '$sol/utils/sol-instructions-system.utils';
@@ -43,6 +47,7 @@ import {
 	getRequestUnitsInstruction,
 	getSetLoadedAccountsDataSizeLimitInstruction
 } from '@solana-program/compute-budget';
+import { getAddMemoInstruction } from '@solana-program/memo';
 import {
 	getAuthorizeInstruction,
 	getDelegateStakeInstruction,
@@ -913,6 +918,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
 			vi.spyOn(solInstructionsStakeUtils, 'parseSolStakeInstruction');
 			vi.spyOn(solInstructionsLookupTableUtils, 'parseSolLookupTableInstruction');
+			vi.spyOn(solInstructionsMemoUtils, 'parseSolMemoInstruction');
 		});
 
 		it('should surface the directives of a Compute Budget instruction', () => {
@@ -1266,6 +1272,39 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		it('should ignore a Memo instruction', () => {
+			const instruction = getAddMemoInstruction({ memo: 'Deposit 42' });
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a Memo instruction addressed to the legacy program', () => {
+			const instruction = getAddMemoInstruction(
+				{ memo: 'Deposit 42' },
+				{ programAddress: address(MEMO_LEGACY_PROGRAM_ADDRESS) }
+			);
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// A memo cannot move value whatever its bytes say, so an undecodable one is still nothing
+		// to review rather than a hole in the review.
+		it('should ignore a Memo instruction that carries no data instead of throwing', () => {
+			const instruction: SolInstruction = {
+				programAddress: address(MEMO_PROGRAM_ADDRESS)
+			};
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
 		describe('with an Address Lookup Table instruction', () => {
 			const mockAuthority = createNoopSigner(address(mockSolAddress));
 
@@ -1418,6 +1457,8 @@ describe('sol-instructions.utils', () => {
 						TOKEN_PROGRAM_ADDRESS,
 						TOKEN_2022_PROGRAM_ADDRESS,
 						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+						MEMO_PROGRAM_ADDRESS,
+						MEMO_LEGACY_PROGRAM_ADDRESS,
 						STAKE_PROGRAM_ADDRESS
 					].includes(programAddress)
 			);
@@ -1437,6 +1478,7 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
 			expect(parseSolAtaInstruction).not.toHaveBeenCalled();
 			expect(parseSolLookupTableInstruction).not.toHaveBeenCalled();
+			expect(parseSolMemoInstruction).not.toHaveBeenCalled();
 			expect(parseSolStakeInstruction).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
