@@ -1,8 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY, INFURA_GAS_REST_URL } from '$env/rest/infura.env';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
+import type { EthFeePriorities } from '$eth/types/fee';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { parseToken } from '$lib/utils/parse.utils';
-import type { FeeData } from 'ethers/providers';
 
 global.fetch = vi.fn();
 
@@ -46,12 +47,22 @@ describe('infura.rest', () => {
 			baseFeeTrend: 'down'
 		};
 
-		const expectedFeeData: Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
-			baseFeePerGas: bigint;
-		} = {
-			maxFeePerGas: parseToken({ value: '32.548678862', unitName: 'gwei' }),
-			maxPriorityFeePerGas: parseToken({ value: '0.1', unitName: 'gwei' }),
-			baseFeePerGas: parseToken({ value: '24.036058416', unitName: 'gwei' })
+		const expectedFeeData: EthFeePriorities = {
+			baseFeePerGas: parseToken({ value: '24.036058416', unitName: 'gwei' }),
+			perPriority: {
+				[EthFeePriority.SLOW]: {
+					maxFeePerGas: parseToken({ value: '24.086058416', unitName: 'gwei' }),
+					maxPriorityFeePerGas: parseToken({ value: '0.05', unitName: 'gwei' })
+				},
+				[EthFeePriority.NORMAL]: {
+					maxFeePerGas: parseToken({ value: '32.548678862', unitName: 'gwei' }),
+					maxPriorityFeePerGas: parseToken({ value: '0.1', unitName: 'gwei' })
+				},
+				[EthFeePriority.FAST]: {
+					maxFeePerGas: parseToken({ value: '41.161299308', unitName: 'gwei' }),
+					maxPriorityFeePerGas: parseToken({ value: '0.3', unitName: 'gwei' })
+				}
+			}
 		};
 
 		it('should fetch suggested fee data correctly', async () => {

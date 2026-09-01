@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "رسوم الشبكة البينية المقدرة",
 			"estimated_eth": "رسوم الإيثيريوم المقدرة",
 			"max_fee_eth": "الحد الأقصى للرسوم <small>(على الأرجح في < 30 ثانية)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "رسوم التحويل",
 			"convert_inter_network_fee": "رسوم بين الشبكات",
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",

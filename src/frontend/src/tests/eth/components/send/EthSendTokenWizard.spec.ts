@@ -96,7 +96,8 @@ describe('EthSendTokenWizard.spec', () => {
 			...ctx,
 			maxGasFee: readable(undefined),
 			minGasFee: readable(undefined),
-			estimatedGasFee: readable(undefined)
+			estimatedGasFee: readable(undefined),
+			feePrioritiesStore: writable(undefined)
 		}));
 
 		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
