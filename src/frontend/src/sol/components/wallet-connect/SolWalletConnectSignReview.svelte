@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -58,6 +58,10 @@
 		// What the simulated run does, instruction by instruction. The rent of the accounts it opens
 		// is the only part the fee block reads; rendering the list itself comes separately.
 		instructions?: SolInstructionSummary[];
+		// Whether that list came from a simulated run rather than from the message itself. The two
+		// say different things: a run reveals the calls made inside other programs, a message
+		// states only its own.
+		simulatedInstructions?: boolean;
 		// What the message says it moves, read from its own instructions. Stated to the user only
 		// when the simulated run agrees with it.
 		messageSummary?: SolTransactionSummary;
@@ -82,6 +86,7 @@
 		unreviewed = false,
 		preview,
 		instructions,
+		simulatedInstructions = false,
 		messageSummary,
 		parties,
 		approveDisabled = false,
@@ -230,16 +235,19 @@
 {/snippet}
 
 <ContentWithToolbar>
-	<!-- One notice about how the review was obtained, not two. What varies is what is actually
-	     known: a message that could not be decoded is a warning either way, and says the review is
-	     simulated only when a simulation was in fact obtained, since one can fail. A message that
-	     decoded still shows simulated figures, which is a caveat and no more. -->
+	<!-- One notice, whichever fits. A message OISY could not decode is a warning either way, and
+	     says the review is simulated only when a simulation was in fact obtained, since one can
+	     fail. A message that decoded but does not reduce to a plain transfer the run agrees with
+	     is the case the user has to read the detail for, so it says so. A message that does
+	     reduce still shows simulated figures, which is a caveat and no more. -->
 	{#if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
 				? $i18n.wallet_connect.text.unreviewed_instructions_simulated
 				: $i18n.wallet_connect.text.unreviewed_instructions}
 		</MessageBox>
+	{:else if isNullish(statedSummary)}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
 	{:else if nonNullish(preview)}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
@@ -368,12 +376,14 @@
 				{/snippet}
 			</SendData>
 		{:else}
-			<!-- What the simulated run actually does, which the message itself states almost none of:
-			     a routed swap performs every transfer as a nested call. Shown here rather than left
-			     to the hex, which nobody can read. -->
+			<!-- What the transaction is made of, shown here rather than left to the hex, which nobody
+			     can read. A simulated run reveals the calls made inside other programs, which the
+			     message states none of, so the heading says which of the two this is. -->
 			{#if nonNullish(instructions) && instructions.length > 0}
 				<WalletConnectModalValue
-					label={$i18n.transaction.text.tab_instructions}
+					label={simulatedInstructions
+						? $i18n.wallet_connect.text.simulated_instructions
+						: $i18n.transaction.text.tab_instructions}
 					ref="contained-instructions"
 				>
 					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
