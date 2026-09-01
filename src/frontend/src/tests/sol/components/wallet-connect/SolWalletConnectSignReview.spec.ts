@@ -728,6 +728,23 @@ describe('SolWalletConnectSignReview', () => {
 			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
+		// The warning tells the user to check the simulated changes, so it must not appear when
+		// there are none: the absence of a run has a warning of its own.
+		it('should not name simulated changes when no simulation ran', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
+		// The decode is asynchronous, and until it settles there is nothing to have reduced.
+		it('should wait for the decode before warning', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, approveDisabled: true, preview }
+			});
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
 		it('should render the note above the transaction data', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: { ...props, messageSummary: matched, preview }
