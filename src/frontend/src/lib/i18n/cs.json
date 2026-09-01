@@ -1561,6 +1561,13 @@
 			"estimated_eth": "Odhadovaný poplatek za Ethereum",
 			"max_fee_eth": "Maximální poplatek <small>(pravděpodobně za < 30 sekund)</small>",
 			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Poplatek za převod",
 			"convert_inter_network_fee": "Mezisíťový poplatek",
 			"convert_btc_network_fee": "Poplatek za síť Bitcoin",
@@ -1574,6 +1581,9 @@
 			"base_kind": "",
 			"prioritization_kind": "",
 			"ata_kind": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -66,9 +67,15 @@
 				})
 			: ZERO;
 
-		// If ETH, the balance should cover the user-entered amount plus the min gas fee
+		// The chain requires the balance to cover the amount plus `maxFeePerGas * gas`, so the ceiling
+		// is what decides whether a native send is affordable. `minGasFee` omits the base fee
+		// entirely and therefore bounds nothing the chain enforces.
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee ?? ZERO);
+			const gasFee = SEND_TRANSACTION_PRIORITY_ENABLED
+				? ($maxGasFee ?? ZERO)
+				: ($minGasFee ?? ZERO);
+
+			const total = userAmount + gasFee;
 
 			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
