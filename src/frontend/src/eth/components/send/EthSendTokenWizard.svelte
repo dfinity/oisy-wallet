@@ -50,7 +50,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendEthCustomNonce } =
+	const { sendTokenDecimals, sendTokenId, sendToken, sendEthCustomNonce, sendEthFeePriority } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -294,6 +294,7 @@
 		const sendTrackingEventMetadata = {
 			token: $sendToken.symbol,
 			network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+			feePriority: $sendEthFeePriority,
 			maxFeePerGas: maxFeePerGas.toString(),
 			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
 			gas: gas.toString()
@@ -349,6 +350,7 @@
 	{destination}
 	{nativeEthereumToken}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	priority={$sendEthFeePriority}
 	sendNft={nft}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}

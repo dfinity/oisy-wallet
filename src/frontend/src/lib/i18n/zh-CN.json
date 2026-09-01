@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "预计跨网络手续费",
 			"estimated_eth": "预计以太坊手续费",
 			"max_fee_eth": "最高手续费 <small>(通常少于 30 秒)</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "转换手续费",
 			"convert_inter_network_fee": "跨网络手续费",
 			"convert_btc_network_fee": "比特币网络手续费",
@@ -1570,6 +1578,9 @@
 			"network_fee": "网络手续费",
 			"approval_fee": "授权手续费",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -2004,6 +2015,7 @@
 			"instruction_route": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
+			"instruction_returned": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "状态",

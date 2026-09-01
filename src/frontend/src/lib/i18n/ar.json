@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "رسوم الشبكة البينية المقدرة",
 			"estimated_eth": "رسوم الإيثيريوم المقدرة",
 			"max_fee_eth": "الحد الأقصى للرسوم <small>(على الأرجح في < 30 ثانية)</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "رسوم التحويل",
 			"convert_inter_network_fee": "رسوم بين الشبكات",
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
@@ -1570,6 +1578,9 @@
 			"network_fee": "",
 			"approval_fee": "",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -2004,6 +2015,7 @@
 			"instruction_route": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
+			"instruction_returned": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "الحالة",

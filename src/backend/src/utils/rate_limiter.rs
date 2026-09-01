@@ -75,15 +75,15 @@ thread_local! {
 
     /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
     /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
-    /// global (20/min, 100/hour). See [`VetKeyRateLimiters`].
-    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+    /// global (20/min, 100/hour). See [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
 
     /// Rate-limits `get_personal_notes_vetkey_public_key`, with the same tiers
     /// as the encrypted endpoint but its own independent counters. See
-    /// [`VetKeyRateLimiters`].
-    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+    /// [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -270,35 +270,63 @@ impl RateLimiter {
     }
 }
 
-/// Two-tier rate limiter for a vetKey endpoint: a per-caller limit plus a
-/// shared global limit, each over a short (per-minute) and a long (per-hour)
-/// window, backed by four [`RateLimiter`]s.
+/// Two-tier rate limiter: a per-caller limit plus a shared global limit, each
+/// over a short (per-minute) and a long (per-hour) window, backed by four
+/// [`RateLimiter`]s.
+///
+/// The per-caller tiers bound one principal; the global tiers bound aggregate
+/// load, which is the only thing that stops a flood spread across many
+/// principals. Built for the vetKey endpoints, hence [`Self::new`]'s defaults,
+/// but the shape is what any endpoint wants when a single caller's budget is not
+/// the whole risk — see [`Self::with_tiers`].
 ///
 /// Every tier is peeked before any tier records (see [`Self::check_at`]), so a
 /// rejected call leaves no state: a per-caller rejection never touches the
 /// global counters, and a call the global tier rejects never creates a
 /// per-caller `HashMap` entry. The global tiers bucket every caller under one
-/// fixed key (`Principal::anonymous()`, never a real registered caller on these
-/// endpoints), capping aggregate load against a many-principals flood the
+/// fixed key, capping aggregate load against a many-principals flood the
 /// per-caller tiers cannot see.
-pub(crate) struct VetKeyRateLimiters {
+///
+/// **Requires an authenticated caller.** That fixed key is
+/// `Principal::anonymous()`, so on an endpoint the anonymous principal can reach
+/// the per-caller and global tiers become the same bucket: they consume each
+/// other, and one unauthenticated client exhausts the global budget on its own.
+/// Every caller today is behind `caller_is_registered_user` or
+/// `caller_is_not_anonymous`, which is what makes the shared key safe — a
+/// property of those guards, not of this type. An anonymous endpoint wants
+/// [`RateLimiter`] against something it can actually distinguish callers by.
+pub(crate) struct TieredRateLimiter {
     caller_minute: RateLimiter,
     caller_hour: RateLimiter,
     global_minute: RateLimiter,
     global_hour: RateLimiter,
 }
 
-impl VetKeyRateLimiters {
+impl TieredRateLimiter {
     const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
     const MINUTE_NS: u64 = 60 * 1_000_000_000;
 
+    /// The tiers a vetKD derivation is sized for: per-caller 2/min and 10/hour,
+    /// checked before a shared global 20/min and 100/hour.
     #[must_use]
     pub fn new() -> Self {
+        Self::with_tiers(2, 10, 20, 100)
+    }
+
+    /// All four tiers chosen explicitly, for endpoints that are not vetKD
+    /// derivations and so have entirely different economics.
+    #[must_use]
+    pub fn with_tiers(
+        caller_minute: u32,
+        caller_hour: u32,
+        global_minute: u32,
+        global_hour: u32,
+    ) -> Self {
         Self {
-            caller_minute: RateLimiter::new(2, Self::MINUTE_NS),
-            caller_hour: RateLimiter::new(10, Self::HOUR_NS),
-            global_minute: RateLimiter::new(20, Self::MINUTE_NS),
-            global_hour: RateLimiter::new(100, Self::HOUR_NS),
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
+            global_minute: RateLimiter::new(global_minute, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(global_hour, Self::HOUR_NS),
         }
     }
 
@@ -343,7 +371,7 @@ impl VetKeyRateLimiters {
     }
 }
 
-impl Default for VetKeyRateLimiters {
+impl Default for TieredRateLimiter {
     fn default() -> Self {
         Self::new()
     }
@@ -358,7 +386,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::{RateLimiter, VetKeyRateLimiters};
+    use super::{RateLimiter, TieredRateLimiter};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -596,7 +624,7 @@ mod tests {
 
     #[test]
     fn vetkey_per_caller_minute_limit() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let caller = test_principal(1);
 
         assert!(rl.check_at(caller, ONE_SEC).is_ok());
@@ -609,7 +637,7 @@ mod tests {
 
     #[test]
     fn vetkey_per_caller_hour_limit() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let caller = test_principal(1);
 
         // 61s apart so the per-minute tier (2/min) never trips; the per-hour
@@ -628,7 +656,7 @@ mod tests {
 
     #[test]
     fn vetkey_global_minute_limit_across_callers() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
 
         // 20 distinct callers, one call each — the global per-minute cap is 20.
         for id in 1..=20u8 {
@@ -647,8 +675,106 @@ mod tests {
     }
 
     #[test]
+    fn a_global_tier_catches_a_flood_the_per_caller_tier_cannot_see() {
+        // Why the global tiers exist at all, and why an endpoint may want them
+        // sized differently from the per-caller ones: a per-caller limit is blind
+        // to one call each from a thousand fresh principals, and identities are
+        // free to create.
+        let rl = TieredRateLimiter::with_tiers(20, 200, 5, 50);
+
+        for id in 1..=5u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id} is well inside its own budget"
+            );
+        }
+
+        let err = rl.check_at(test_principal(6), ONE_SEC).unwrap_err();
+        assert_eq!(
+            err.max_calls, 5,
+            "the sixth distinct caller is refused by the global tier, not its own"
+        );
+    }
+
+    #[test]
+    fn the_default_tiers_survive_the_move_into_with_tiers() {
+        // All four, because `with_tiers` takes four positional numbers and
+        // getting one pair the wrong way round is the mistake this is for.
+        // Asserting only the first tier would have passed with the hour and
+        // global limits silently swapped.
+        let caller_minute = TieredRateLimiter::new();
+        let caller = test_principal(1);
+
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
+        assert!(caller_minute.check_at(caller, ONE_SEC).is_ok());
+        assert!(
+            caller_minute.check_at(caller, ONE_SEC).is_err(),
+            "2 per minute per caller"
+        );
+
+        // Spread one call per minute so the minute tier never bites, and the
+        // tenth is what the hour tier has to refuse.
+        let caller_hour = TieredRateLimiter::new();
+
+        for minute in 0..10 {
+            assert!(
+                caller_hour
+                    .check_at(caller, minute * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                    .is_ok(),
+                "10 per hour per caller: call {minute} should pass"
+            );
+        }
+        assert!(
+            caller_hour
+                .check_at(caller, 10 * TieredRateLimiter::MINUTE_NS + ONE_SEC)
+                .is_err(),
+            "10 per hour per caller"
+        );
+
+        // A fresh principal each time, so only the global tiers can refuse.
+        let global_minute = TieredRateLimiter::new();
+
+        for n in 0..20 {
+            assert!(
+                global_minute.check_at(test_principal(n), ONE_SEC).is_ok(),
+                "20 per minute globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_minute
+                .check_at(test_principal(200), ONE_SEC)
+                .is_err(),
+            "20 per minute globally"
+        );
+
+        // Five a minute across twenty minutes: 100 calls that all sit inside one
+        // sliding hour, and never trip the 20-per-minute tier on the way. One per
+        // minute would spread them over 100 minutes, where the hour window only
+        // ever holds the last 60 and the limit is never reached.
+        let global_hour = TieredRateLimiter::new();
+
+        for n in 0..100 {
+            let at = u64::from(n / 5) * TieredRateLimiter::MINUTE_NS + ONE_SEC;
+
+            assert!(
+                global_hour.check_at(test_principal(n), at).is_ok(),
+                "100 per hour globally: call {n} should pass"
+            );
+        }
+        assert!(
+            global_hour
+                .check_at(
+                    test_principal(200),
+                    20 * TieredRateLimiter::MINUTE_NS + ONE_SEC
+                )
+                .is_err(),
+            "100 per hour globally"
+        );
+    }
+
+    #[test]
     fn vetkey_per_caller_rejection_does_not_consume_global() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let heavy = test_principal(1);
 
         // Heavy caller: 2 pass (2 global slots used); the 3rd is rejected by the
@@ -696,7 +822,7 @@ mod tests {
 
     #[test]
     fn vetkey_global_rejection_does_not_consume_caller_budget() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
 
         // Saturate the global minute tier with 20 distinct callers.
         for id in 1..=20u8 {

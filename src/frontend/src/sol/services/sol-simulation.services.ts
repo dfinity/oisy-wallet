@@ -78,6 +78,17 @@ const simulate = async ({
 		addressToToken
 	});
 
+	// The lamports each account holds going in, so a close can say what it hands back.
+	const accountLamports = addresses.reduce<Record<SolAddress, bigint>>((acc, account, index) => {
+		const lamports = preAccounts[index]?.lamports;
+
+		if (nonNullish(lamports)) {
+			acc[account] = lamports;
+		}
+
+		return acc;
+	}, {});
+
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
 	// what attaches each simulated nested call to the instruction that made it.
 	const instructions = mapSolInstructionSummaries({
@@ -87,7 +98,8 @@ const simulate = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses: [address, ...ownedAddresses],
-		addressToToken
+		addressToToken,
+		accountLamports
 	});
 
 	// The message read on its own, without the nested calls the run reveals: a second account of

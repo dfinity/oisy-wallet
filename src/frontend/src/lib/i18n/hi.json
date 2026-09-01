@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "अनुमानित अंतर-नेटवर्क शुल्क",
 			"estimated_eth": "अनुमानित एथेरियम शुल्क",
 			"max_fee_eth": "अधिकतम शुल्क <small>(संभवतः < 30 सेकंड में)</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "रूपांतरण शुल्क",
 			"convert_inter_network_fee": "अंतर-नेटवर्क शुल्क",
 			"convert_btc_network_fee": "बिटकॉइन नेटवर्क शुल्क",
@@ -1570,6 +1578,9 @@
 			"network_fee": "",
 			"approval_fee": "",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -2004,6 +2015,7 @@
 			"instruction_route": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
+			"instruction_returned": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "स्थिति",

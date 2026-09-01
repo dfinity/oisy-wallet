@@ -1560,6 +1560,14 @@
 			"estimated_inter_network": "Примерная межсетевая комиссия",
 			"estimated_eth": "Примерная комиссия Ethereum",
 			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Комиссия за обмен",
 			"convert_inter_network_fee": "Межсетевая комиссия",
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
@@ -1570,6 +1578,9 @@
 			"network_fee": "Сетевая комиссия",
 			"approval_fee": "Комиссия за одобрение",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."
@@ -2004,6 +2015,7 @@
 			"instruction_route": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
+			"instruction_returned": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Статус",

@@ -16,10 +16,12 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
+	getBase64Encoder,
 	address as solAddress,
 	type Address,
 	type Base64EncodedWireTransaction,
 	type Lamports,
+	type ReadonlyUint8Array,
 	type Signature,
 	type TransactionError
 } from '@solana/kit';
@@ -334,6 +336,33 @@ export const getAccountInfo = async ({
 	addressMap.set(address, info);
 
 	return info;
+};
+
+/**
+ * The raw bytes of an account, for accounts no server-side parser knows: an Anchor IDL is a
+ * program's own data, so `jsonParsed` hands back the same base64 either way.
+ *
+ * Returns `undefined` for an account that does not exist, which is the common answer here: most
+ * programs publish no IDL.
+ */
+export const getAccountData = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<ReadonlyUint8Array<ArrayBuffer> | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+
+	const { value } = await getAccountInfo(solAddress(address), { encoding: 'base64' }).send();
+
+	if (isNullish(value)) {
+		return undefined;
+	}
+
+	const [data] = value.data;
+
+	return getBase64Encoder().encode(data);
 };
 
 // https://solana.com/docs/tokens/extensions
