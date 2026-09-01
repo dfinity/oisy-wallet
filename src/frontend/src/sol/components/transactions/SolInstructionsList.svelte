@@ -66,6 +66,13 @@
 			<!-- A contact or a token OISY knows names the account; the address is what is left when
 			     neither does. The controls copy and open the address either way, never the name. -->
 			{#if nonNullish(actionAddress)}
+				<!-- A program's published name is the program's own claim about itself, so it is shown
+				     as a label beside the address rather than in place of it: the address is the part
+				     the user can check. -->
+				{#if nonNullish(instruction.programName)}
+					<span class="text-tertiary">{instruction.programName}</span>
+				{/if}
+
 				<ContactOrToken identifier={actionAddress} showFallback />
 
 				<AddressActions

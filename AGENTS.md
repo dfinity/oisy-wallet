@@ -76,6 +76,7 @@ and `Cargo.toml`. The non-obvious bits:
 | Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                           |
 | Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                         |
 | Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                       |
+| Produce a mockup, wireframe, or chat artifact | [`docs/ai/visual-artifacts.md`](./docs/ai/visual-artifacts.md)                                               |
 | Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                                   |
 | Write copy, pick a colour, or add an icon     | [`docs/ai/frontend/brand-and-copy.md`](./docs/ai/frontend/brand-and-copy.md)                                 |
 | Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)               |

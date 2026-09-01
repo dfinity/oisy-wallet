@@ -1,6 +1,6 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 import en from '$tests/mocks/i18n.mock';
@@ -91,6 +91,55 @@ describe('SolTransaction', () => {
 
 		expect(labelOf('send')).toBe(en.swap.text.swap);
 		expect(labelOf('receive')).toBe(en.swap.text.swap);
+	});
+
+	// Stefan: an unreduced transaction should read like a swap does, with the programs it ran
+	// through underneath, rather than a bare word.
+	describe('a transaction OISY could not reduce', () => {
+		const interaction = {
+			...mockTrx,
+			summary: { kind: 'other' as const },
+			instructions: [
+				{ kind: 'route' as const, program: 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc' },
+				{ kind: 'route' as const, program: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' },
+				{ kind: 'route' as const, program: 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc' }
+			]
+		};
+
+		it('should list every program it ran through, each once', () => {
+			const { getByText, getAllByText } = render(SolTransaction, {
+				props: { transaction: interaction, token: SOLANA_TOKEN }
+			});
+
+			expect(getByText(en.transaction.text.swap_on)).toBeInTheDocument();
+			expect(
+				getAllByText(
+					shortenWithMiddleEllipsis({ text: 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc' })
+				)
+			).toHaveLength(1);
+			expect(
+				getByText(
+					shortenWithMiddleEllipsis({ text: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' })
+				)
+			).toBeInTheDocument();
+		});
+
+		// A transfer names the other side of it, which is the thing a user checks. A self-transfer
+		// has one too, the user's own other account, so it is a transfer in this respect and not
+		// an interaction.
+		it.each(['send', 'receive', 'self'] as const)(
+			'should still name the counterparty of a %s',
+			(kind) => {
+				const { queryByText } = render(SolTransaction, {
+					props: {
+						transaction: { ...interaction, summary: { kind } },
+						token: SOLANA_TOKEN
+					}
+				});
+
+				expect(queryByText(en.transaction.text.swap_on)).not.toBeInTheDocument();
+			}
+		);
 	});
 
 	describe('where the cost of a transaction shows', () => {
@@ -200,5 +249,29 @@ describe('SolTransaction', () => {
 				showPlusSign: true
 			})} ${getTokenDisplaySymbol(SOLANA_TOKEN)}`
 		);
+	});
+
+	// The asset never left, so the token it moved shows zero rather than the amount.
+	it('should show a self-transfer with its amount and no balance change', () => {
+		const { container, getByText } = render(SolTransaction, {
+			props: {
+				transaction: {
+					...mockTrx,
+					type: 'send',
+					summary: {
+						kind: 'self' as const,
+						spent: { delta: -2_000_000_000n },
+						counterparty: 'my-other-account'
+					}
+				},
+				token: SOLANA_TOKEN
+			}
+		});
+
+		expect(getByText('Self-transfer 2 SOL')).toBeInTheDocument();
+
+		const amount = container.querySelector('div.leading-5>span.justify-end');
+
+		expect(amount?.textContent).not.toContain('-2');
 	});
 });

@@ -3,8 +3,10 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -20,11 +22,15 @@ import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
+import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
 import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
+import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
@@ -389,6 +395,14 @@ const parseSolInstruction = (
 		return parseSolAtaInstruction(instruction);
 	}
 
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return parseSolLookupTableInstruction(instruction);
+	}
+
+	if (programAddress === STAKE_PROGRAM_ADDRESS) {
+		return parseSolStakeInstruction(instruction);
+	}
+
 	consoleWarn(`Could not parse Solana instruction for program ${programAddress}`);
 
 	return instruction;
@@ -659,6 +673,80 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 	return unreviewedInstruction();
 };
 
+const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	// A lookup table is addressing, not value: it lets a message name accounts in fewer bytes and
+	// grants no one anything. Creating and extending one costs rent, which the instruction does not
+	// carry, the runtime works it out from the size; the same is already true of the token accounts
+	// a swap opens along the way.
+	if (
+		instructionType === AddressLookupTableInstruction.CreateLookupTable ||
+		instructionType === AddressLookupTableInstruction.ExtendLookupTable ||
+		instructionType === AddressLookupTableInstruction.FreezeLookupTable ||
+		instructionType === AddressLookupTableInstruction.DeactivateLookupTable
+	) {
+		return ignoredInstruction();
+	}
+
+	// Closing hands the table's whole balance to a recipient the instruction names, and only the
+	// table's own authority can ask for it, so the balance leaving is the user's. Neither the amount
+	// nor the recipient fits the single-value summary, which is what would let it ride along
+	// unseen behind whatever else the message does.
+	if (instructionType === AddressLookupTableInstruction.CloseLookupTable) {
+		return unfaithfulInstruction();
+	}
+
+	consoleWarn(`Could not map Solana Address Lookup Table instruction of type ${instructionType}`);
+
+	return unreviewedInstruction();
+};
+
+const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
+	// the account it leaves and the account it arrives at, exactly as a plain SOL transfer does.
+	if (instructionType === StakeInstruction.Withdraw) {
+		const {
+			data: { args: amount },
+			accounts: {
+				stake: { address: source },
+				recipient: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	// Handing over a stake authority is a transfer of everything the account holds, dressed as
+	// administration. The withdraw authority is the one that can take the stake out, and the
+	// summary has no field that would show it changing hands, so this fails closed rather than
+	// riding along behind whatever else the message does.
+	if (
+		instructionType === StakeInstruction.Authorize ||
+		instructionType === StakeInstruction.AuthorizeChecked ||
+		instructionType === StakeInstruction.AuthorizeWithSeed ||
+		instructionType === StakeInstruction.AuthorizeCheckedWithSeed
+	) {
+		return unfaithfulInstruction();
+	}
+
+	// Reading the runtime's minimum delegation changes nothing at all.
+	if (instructionType === StakeInstruction.GetMinimumDelegation) {
+		return ignoredInstruction();
+	}
+
+	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
+	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// Decoded or not, the honest answer is that this message does more than the summary shows.
+	return unreviewedInstruction();
+};
+
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
@@ -690,6 +778,14 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
 		return mapSolAtaInstruction(parsedInstruction);
+	}
+
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return mapSolLookupTableInstruction(parsedInstruction);
+	}
+
+	if (programAddress === STAKE_PROGRAM_ADDRESS) {
+		return mapSolStakeInstruction(parsedInstruction);
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
