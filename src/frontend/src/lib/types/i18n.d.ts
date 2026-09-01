@@ -1268,6 +1268,9 @@ interface I18nFee {
 		network_fee: string;
 		approval_fee: string;
 		prioritization_fee: string;
+		base_kind: string;
+		prioritization_kind: string;
+		ata_kind: string;
 	};
 	info: { priority: string };
 	assertion: { insufficient_funds_for_fee: string };
