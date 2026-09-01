@@ -76,7 +76,7 @@
 					</div>
 				{/snippet}
 
-				<div class="min-h-[35vh] w-full px-4 pb-4">
+				<div class="w-full px-4 pb-4">
 					{#if showContentHeader}
 						{@render contentHeader({ isInBottomSheet: true })}
 					{/if}
