@@ -1577,7 +1577,10 @@
 			"transaction_fees": "Transaction fees",
 			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
-			"prioritization_fee": "Priority fee"
+			"prioritization_fee": "Priority fee",
+			"base_kind": "Base",
+			"prioritization_kind": "Priority",
+			"ata_kind": "Account rent"
 		},
 		"info": {
 			"priority": "Priority affects speed and fees. Higher priority usually means faster processing."

@@ -1577,7 +1577,10 @@
 			"transaction_fees": "Comisiones de transacción",
 			"network_fee": "Comisión de red",
 			"approval_fee": "Comisión de aprobación",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"info": {
 			"priority": ""
