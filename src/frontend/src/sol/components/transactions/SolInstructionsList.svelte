@@ -6,10 +6,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
-	import { formatSolInstructionSummary } from '$sol/utils/sol-transaction-summary.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import {
+		flattenInstructions,
+		formatSolInstructionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -29,10 +34,27 @@
 			networkId: token.network.id
 		});
 
+	// The mints this list mentions, so a placeholder is numbered against the others it stands
+	// with. A list naming two mints "Unknown token" twice says less than their addresses would.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: flattenInstructions(instructions).map(({ tokenAddress }) => tokenAddress),
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
 	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (splToken(tokenAddress)?.symbol ?? $i18n.transaction.text.unknown_token);
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
 
 	const decimalsOf = (tokenAddress: string | undefined): number =>
 		isNullish(tokenAddress)
