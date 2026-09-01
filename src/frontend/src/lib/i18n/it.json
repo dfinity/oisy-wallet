@@ -1569,7 +1569,10 @@
 			"transaction_fees": "",
 			"network_fee": "",
 			"approval_fee": "",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire le fee."

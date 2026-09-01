@@ -211,19 +211,21 @@
 	);
 </script>
 
-{#snippet feeValue(feeAmount: bigint)}
+{#snippet feeValue({ kind, feeAmount }: { kind: string; feeAmount: bigint })}
 	{@const formattedFee = formatToken({
 		value: feeAmount,
 		unitName: feeToken.decimals,
 		displayDecimals: feeToken.decimals
 	})}
 
-	<div class="flex gap-4">
-		{`${formattedFee} ${feeToken.symbol}`}
+	<div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+		<span class="text-tertiary">{kind}</span>
 
-		<div class="text-tertiary">
+		<span>{`${formattedFee} ${feeToken.symbol}`}</span>
+
+		<span class="text-tertiary">
 			<ConvertAmountExchange amount={formattedFee} exchangeRate={feeExchangeRate} />
-		</div>
+		</span>
 	</div>
 {/snippet}
 
@@ -332,23 +334,26 @@
 		     message pays, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
-					<div class="flex flex-col gap-2">
-						<div class="flex flex-col" data-tid="network-fee">
-							<span class="text-tertiary">{$i18n.fee.text.network_fee}</span>
-							{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+					<div class="flex flex-col gap-1">
+						<div data-tid="network-fee">
+							{@render feeValue({
+								kind: $i18n.fee.text.base_kind,
+								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+							})}
 						</div>
 
 						{#if nonNullish(prioritizationFee)}
-							<div class="flex flex-col" data-tid="prioritization-fee">
-								<span class="text-tertiary">{$i18n.fee.text.prioritization_fee}</span>
-								{@render feeValue(prioritizationFee)}
+							<div data-tid="prioritization-fee">
+								{@render feeValue({
+									kind: $i18n.fee.text.prioritization_kind,
+									feeAmount: prioritizationFee
+								})}
 							</div>
 						{/if}
 
 						{#if ataFee > ZERO}
-							<div class="flex flex-col" data-tid="ata-fee">
-								<span class="text-tertiary">{$i18n.fee.text.ata_fee}</span>
-								{@render feeValue(ataFee)}
+							<div data-tid="ata-fee">
+								{@render feeValue({ kind: $i18n.fee.text.ata_kind, feeAmount: ataFee })}
 							</div>
 						{/if}
 					</div>

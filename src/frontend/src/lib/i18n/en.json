@@ -1569,7 +1569,10 @@
 			"transaction_fees": "Transaction fees",
 			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
-			"prioritization_fee": "Priority fee"
+			"prioritization_fee": "Priority fee",
+			"base_kind": "Base",
+			"prioritization_kind": "Priority",
+			"ata_kind": "Account rent"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."

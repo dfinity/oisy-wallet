@@ -86,7 +86,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
@@ -98,7 +98,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 		// the ninth decimal must survive: rounding it away would alter the very number this review
 		// exists to disclose
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
@@ -114,8 +114,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.base_kind).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_kind).tagName).not.toBe('LABEL');
 	});
 
 	it('should charge the rent of the accounts the message opens as its own line', () => {
@@ -188,7 +188,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+		expect(queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 	});
 
 	// The message states almost nothing a routed swap does; the simulation is what knows.
@@ -286,7 +286,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID' }
 			});
 
-			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 		});
 
@@ -481,7 +481,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			const changes = getByText(en.wallet_connect.text.simulated_changes);
-			const fee = getByText(en.fee.text.network_fee);
+			const fee = getByText(en.fee.text.base_kind);
 
 			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
 				Node.DOCUMENT_POSITION_FOLLOWING
@@ -494,13 +494,13 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
 			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
-			expect(queries.queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
 
@@ -749,8 +749,8 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queries.getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(queries.getByText(en.send.text.network)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.network_fee)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.base_kind)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 
 			await showOperations(queries);
 

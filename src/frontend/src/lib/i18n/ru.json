@@ -1569,7 +1569,10 @@
 			"transaction_fees": "Комиссии за транзакции",
 			"network_fee": "Сетевая комиссия",
 			"approval_fee": "Комиссия за одобрение",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."

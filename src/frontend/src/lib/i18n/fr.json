@@ -1569,7 +1569,10 @@
 			"transaction_fees": "Frais de transaction",
 			"network_fee": "Frais de réseau",
 			"approval_fee": "Frais d'approbation",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir les frais."
