@@ -13,6 +13,7 @@ import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
@@ -138,17 +139,24 @@ describe('EthFeePriority', () => {
 		});
 	});
 
-	it('opens the sheet without submitting the surrounding send form', async () => {
+	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
 		// The send form wraps this component and Button defaults to type="submit", so a submitting
 		// trigger fires HTML5 validation on the empty amount field instead of opening the sheet.
+		// Done has the same problem on the way out, so both are asserted here.
 		screensStore.set('xs');
 
 		const { context } = setup();
 
-		const { getByTestId } = render(EthFeePriority, { context });
+		const { getByTestId, getByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
 			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+
+		getByTestId(ETH_FEE_PRIORITY_TRIGGER).click();
+
+		await waitFor(() => {
+			expect(getByText(en.core.text.done).closest('button')).toHaveAttribute('type', 'button');
 		});
 	});
 
