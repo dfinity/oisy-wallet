@@ -1,8 +1,9 @@
 import { INFURA_API_KEY, INFURA_GAS_REST_URL } from '$env/rest/infura.env';
-import type { GasFeeEstimate } from '$eth/types/infura';
+import type { EthFeePriorities } from '$eth/types/fee';
+import type { FeeEstimateLevel, GasFeeEstimate } from '$eth/types/infura';
 import type { EthereumChainId } from '$eth/types/network';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { parseToken } from '$lib/utils/parse.utils';
-import type { FeeData } from 'ethers/providers';
 
 export class InfuraGasRest {
 	private readonly apiUrl = INFURA_GAS_REST_URL;
@@ -10,9 +11,7 @@ export class InfuraGasRest {
 	constructor(private readonly chainId: EthereumChainId) {}
 
 	// https://docs.metamask.io/services/reference/gas-api
-	getSuggestedFeeData = async (): Promise<
-		Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>
-	> => {
+	getSuggestedFeeData = async (): Promise<EthFeePriorities> => {
 		const url = new URL(
 			`${this.apiUrl}/${INFURA_API_KEY}/networks/${this.chainId.toString()}/suggestedGasFees`
 		);
@@ -23,13 +22,25 @@ export class InfuraGasRest {
 			throw new Error(`Fetching gas data with Infura Gas API failed.`);
 		}
 
-		const {
-			medium: { suggestedMaxPriorityFeePerGas, suggestedMaxFeePerGas }
-		}: GasFeeEstimate = await response.json();
+		const { low, medium, high, estimatedBaseFee }: GasFeeEstimate = await response.json();
 
-		return {
+		// The Gas API's low / medium / high vocabulary stops here: nothing above the REST layer
+		// should know the vendor's naming.
+		const mapLevel = ({
+			suggestedMaxFeePerGas,
+			suggestedMaxPriorityFeePerGas
+		}: FeeEstimateLevel) => ({
 			maxFeePerGas: parseToken({ value: suggestedMaxFeePerGas, unitName: 'gwei' }),
 			maxPriorityFeePerGas: parseToken({ value: suggestedMaxPriorityFeePerGas, unitName: 'gwei' })
+		});
+
+		return {
+			baseFeePerGas: parseToken({ value: estimatedBaseFee, unitName: 'gwei' }),
+			perPriority: {
+				[EthFeePriority.SLOW]: mapLevel(low),
+				[EthFeePriority.NORMAL]: mapLevel(medium),
+				[EthFeePriority.FAST]: mapLevel(high)
+			}
 		};
 	};
 }

@@ -30,9 +30,9 @@
 					     recognised, the four bytes say what was actually sent. -->
 					{#if nonNullish(name)}
 						<span class="text-sm">{name}</span>
-						<span class="break-all font-mono text-sm text-tertiary">({selector})</span>
+						<span class="font-mono text-sm break-all text-tertiary">({selector})</span>
 					{:else}
-						<span class="break-all font-mono text-sm">
+						<span class="font-mono text-sm break-all">
 							{selector ?? $i18n.wallet_connect.text.method_without_selector}
 						</span>
 					{/if}

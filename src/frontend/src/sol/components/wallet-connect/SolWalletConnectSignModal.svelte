@@ -76,7 +76,6 @@
 
 	let signWithSending = $derived(method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION);
 
-	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
@@ -96,7 +95,6 @@
 	const updateData = async () => {
 		try {
 			({
-				amount,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -225,7 +223,6 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				{amount}
 				{application}
 				approveDisabled={!decoded}
 				{data}

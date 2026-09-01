@@ -12,7 +12,6 @@
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
@@ -41,7 +40,6 @@
 	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
-		amount?: bigint;
 		destination: string;
 		source: string;
 		application: string;
@@ -72,7 +70,6 @@
 	}
 
 	let {
-		amount,
 		destination,
 		source,
 		application,
@@ -94,19 +91,20 @@
 
 	let activeTab = $state('summary');
 
-	let balance = $derived($balancesStore?.[token.id]?.data);
-
-	// Instructions OISY cannot decode yield no amount and no balance worth showing: what the
-	// transaction does is then told by the simulated changes alone. The rows are dropped rather
-	// than filled with a zero the decode never produced.
-	let decoded = $derived(nonNullish(amount));
-
-	// The rent of the token accounts this message opens. It is charged like a fee and is not part
-	// of the base or the bid, so it is stated as its own line rather than folded into either.
+	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
+	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
+	// stated as its own line rather than folded into either.
 	let ataFee = $derived(
-		(instructions ?? []).reduce(
-			(acc, { kind, rent }) =>
-				kind === 'createTokenAccount' && nonNullish(rent) ? acc + rent : acc,
+		maxBigInt(
+			(instructions ?? []).reduce((acc, { kind, rent, returned }) => {
+				if (kind === 'createTokenAccount' && nonNullish(rent)) {
+					return acc + rent;
+				}
+
+				// A message that opens one account and closes another charges the difference. Netting
+				// below zero would turn a refund into a negative fee, which is not what a fee is.
+				return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+			}, ZERO),
 			ZERO
 		)
 	);
@@ -289,12 +287,10 @@
 	     here it costs a row without saying anything about the message in front of the user. The
 	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 			<SendData
-				{amount}
 				{application}
-				{balance}
 				destination={null}
-				showAmount={decoded}
-				showBalance={decoded}
+				showAmount={false}
+				showBalance={false}
 				showSigner={false}
 				{source}
 				{token}

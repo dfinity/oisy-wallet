@@ -6,15 +6,29 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { getEthFeeDataWithProvider } from '$eth/services/fee.services';
+import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
 import {
 	BSC_MIN_MAX_FEE_PER_GAS,
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 } from '$evm/bsc/constants/bsc.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 
 vi.mock('$eth/rest/infura.rest', () => ({
 	InfuraGasRest: vi.fn()
 }));
+
+const mockSuggestedFeeData = ({
+	maxFeePerGas,
+	maxPriorityFeePerGas
+}: EthFeePerGas): EthFeePriorities => ({
+	baseFeePerGas: 5n,
+	perPriority: {
+		[EthFeePriority.SLOW]: { maxFeePerGas, maxPriorityFeePerGas },
+		[EthFeePriority.NORMAL]: { maxFeePerGas, maxPriorityFeePerGas },
+		[EthFeePriority.FAST]: { maxFeePerGas, maxPriorityFeePerGas }
+	}
+});
 
 describe('eth-fee-data.services', () => {
 	const network = ETHEREUM_NETWORK;
@@ -24,10 +38,9 @@ describe('eth-fee-data.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-			maxFeePerGas: 12n,
-			maxPriorityFeePerGas: 7n
-		});
+		InfuraGasRest.prototype.getSuggestedFeeData = vi
+			.fn()
+			.mockResolvedValue(mockSuggestedFeeData({ maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }));
 
 		vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
 			getFeeData: async () =>
@@ -56,8 +69,10 @@ describe('eth-fee-data.services', () => {
 				feeData: {
 					gasPrice: null,
 					maxFeePerGas: 12n,
-					maxPriorityFeePerGas: 7n
+					maxPriorityFeePerGas: 7n,
+					baseFeePerGas: 5n
 				},
+				priorities: mockSuggestedFeeData({ maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }),
 				provider: expect.any(Object),
 				params: {
 					from: fromAddr,
@@ -92,10 +107,9 @@ describe('eth-fee-data.services', () => {
 					)
 			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-				maxFeePerGas: 12n,
-				maxPriorityFeePerGas: 7n
-			});
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockResolvedValue(mockSuggestedFeeData({ maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }));
 
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
@@ -120,10 +134,9 @@ describe('eth-fee-data.services', () => {
 					)
 			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-				maxFeePerGas: 12n,
-				maxPriorityFeePerGas: 7n
-			});
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockResolvedValue(mockSuggestedFeeData({ maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }));
 
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
@@ -148,10 +161,9 @@ describe('eth-fee-data.services', () => {
 					)
 			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-				maxFeePerGas: 12n,
-				maxPriorityFeePerGas: 7n
-			});
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockResolvedValue(mockSuggestedFeeData({ maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }));
 
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
@@ -176,10 +188,11 @@ describe('eth-fee-data.services', () => {
 					)
 			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-				maxFeePerGas: null,
-				maxPriorityFeePerGas: null
-			});
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockResolvedValue(
+					mockSuggestedFeeData({ maxFeePerGas: null, maxPriorityFeePerGas: null })
+				);
 
 			const result = await getEthFeeDataWithProvider({
 				networkId: network.id,
@@ -259,6 +272,66 @@ describe('eth-fee-data.services', () => {
 			expect(result.provider).toHaveProperty('estimateGas');
 		});
 
+		describe('priority selection', () => {
+			const perPriority = {
+				[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
+				[EthFeePriority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+				[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 20n }
+			};
+
+			beforeEach(() => {
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({ gasPrice: null, maxFeePerGas: ZERO, maxPriorityFeePerGas: ZERO })
+						)
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+				InfuraGasRest.prototype.getSuggestedFeeData = vi
+					.fn()
+					.mockResolvedValue({ baseFeePerGas: 20n, perPriority });
+			});
+
+			it('defaults to normal when no priority is asked for', async () => {
+				const { feeData } = await getEthFeeDataWithProvider({
+					networkId: network.id,
+					chainId: network.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(feeData).toEqual(
+					expect.objectContaining({ ...perPriority[EthFeePriority.NORMAL], baseFeePerGas: 20n })
+				);
+			});
+
+			it.each(Object.values(EthFeePriority))(
+				'signs the values of the %s priority',
+				async (priority) => {
+					const { feeData } = await getEthFeeDataWithProvider({
+						networkId: network.id,
+						chainId: network.chainId,
+						from: fromAddr,
+						to: toAddr,
+						priority
+					});
+
+					expect(feeData).toEqual(expect.objectContaining(perPriority[priority]));
+				}
+			);
+
+			it('returns every priority so they can be priced without another call', async () => {
+				const { priorities } = await getEthFeeDataWithProvider({
+					networkId: network.id,
+					chainId: network.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(priorities).toEqual({ baseFeePerGas: 20n, perPriority });
+			});
+		});
+
 		describe('BSC gas fee floor', () => {
 			// Reproduces the staging error:
 			// "transaction underpriced: gas tip cap 100000000, minimum needed 1000000000"
@@ -279,10 +352,11 @@ describe('eth-fee-data.services', () => {
 						)
 				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-				InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-					maxFeePerGas: lowMax,
-					maxPriorityFeePerGas: lowTip
-				});
+				InfuraGasRest.prototype.getSuggestedFeeData = vi
+					.fn()
+					.mockResolvedValue(
+						mockSuggestedFeeData({ maxFeePerGas: lowMax, maxPriorityFeePerGas: lowTip })
+					);
 			});
 
 			it('should apply the BSC mainnet fee floor when both sources return values below the minimum', async () => {
@@ -324,10 +398,11 @@ describe('eth-fee-data.services', () => {
 						)
 				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
-				InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockResolvedValue({
-					maxFeePerGas: lowMax,
-					maxPriorityFeePerGas: lowTip
-				});
+				InfuraGasRest.prototype.getSuggestedFeeData = vi
+					.fn()
+					.mockResolvedValue(
+						mockSuggestedFeeData({ maxFeePerGas: lowMax, maxPriorityFeePerGas: lowTip })
+					);
 
 				const result = await getEthFeeDataWithProvider({
 					networkId: BSC_MAINNET_NETWORK.id,
