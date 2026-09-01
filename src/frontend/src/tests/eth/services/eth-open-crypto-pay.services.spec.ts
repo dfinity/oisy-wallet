@@ -5,11 +5,13 @@ import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { calculateEthFee } from '$eth/services/eth-open-crypto-pay.services';
 import * as feeServices from '$eth/services/fee.services';
 import type { OptionEthAddress } from '$eth/types/address';
+import type { EthFeePriorities } from '$eth/types/fee';
 import * as erc20Utils from '$eth/utils/erc20.utils';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import type { PayableToken } from '$lib/types/open-crypto-pay';
 import { readable } from 'svelte/store';
 
@@ -43,6 +45,15 @@ vi.mock('$eth/providers/infura-ckerc20.providers', () => ({
 vi.mock('$eth/providers/infura-cketh.providers', () => ({
 	infuraCkETHProviders: vi.fn(() => ({ getFeeData: vi.fn() }))
 }));
+
+const mockEthFeePriorities: EthFeePriorities = {
+	baseFeePerGas: 5n,
+	perPriority: {
+		[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+		[EthFeePriority.NORMAL]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+		[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
+	}
+};
 
 describe('eth-open-crypto-pay.services', () => {
 	describe('calculateEthFee', () => {
@@ -86,6 +97,7 @@ describe('eth-open-crypto-pay.services', () => {
 					maxFeePerGas: 12n,
 					maxPriorityFeePerGas: 7n
 				},
+				priorities: mockEthFeePriorities,
 				provider: mockProvider as unknown as InfuraProvider,
 				params: {
 					from: fromAddr,
@@ -123,6 +135,7 @@ describe('eth-open-crypto-pay.services', () => {
 						maxFeePerGas: null,
 						maxPriorityFeePerGas: 7n
 					},
+					priorities: mockEthFeePriorities,
 					provider: mockProvider as unknown as InfuraProvider,
 					params: {
 						from: fromAddr,
@@ -145,6 +158,7 @@ describe('eth-open-crypto-pay.services', () => {
 						maxFeePerGas: ZERO,
 						maxPriorityFeePerGas: 7n
 					},
+					priorities: mockEthFeePriorities,
 					provider: mockProvider as unknown as InfuraProvider,
 					params: {
 						from: fromAddr,

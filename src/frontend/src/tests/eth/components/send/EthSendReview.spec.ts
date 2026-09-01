@@ -1,3 +1,4 @@
+import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
@@ -45,8 +46,16 @@ describe('EthSendReview', () => {
 
 		expect(getByText(props.destination)).toBeInTheDocument();
 
-		// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
-		expect(getByText('Max fee')).toBeInTheDocument();
+		// The label follows the feature flag: the estimate only replaces the ceiling where the
+		// priority work is enabled.
+		expect(
+			getByText(
+				SEND_TRANSACTION_PRIORITY_ENABLED
+					? en.fee.text.estimated_fee_eth
+					: // max_fee_eth contains HTML, so match the leading plain-text fragment only
+						'Max fee'
+			)
+		).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 

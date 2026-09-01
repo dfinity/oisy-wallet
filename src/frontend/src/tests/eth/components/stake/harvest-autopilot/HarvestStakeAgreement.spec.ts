@@ -13,14 +13,28 @@ describe('HarvestStakeAgreement', () => {
 		expect(checkbox.checked).toBeFalsy();
 	});
 
-	it('should render the terms text', () => {
+	it('should render the terms text in a label bound to the checkbox', () => {
 		const { container } = render(HarvestStakeAgreement, {
 			props: { checked: false }
 		});
 
-		const span = container.querySelector('span.text-sm');
+		const label = container.querySelector('label.text-sm[for="harvest-stake-agreement"]');
 
-		expect(span).toBeInTheDocument();
+		expect(label).toBeInTheDocument();
+	});
+
+	it('should not nest the text label inside another label', () => {
+		const { container } = render(HarvestStakeAgreement, {
+			props: { checked: false }
+		});
+
+		const labels = container.querySelectorAll('label');
+
+		expect(labels).not.toHaveLength(0);
+
+		labels.forEach((label) => {
+			expect(label.parentElement?.closest('label')).toBeNull();
+		});
 	});
 
 	it('should render links to Risk Disclosures and Terms and Conditions', () => {

@@ -71,7 +71,9 @@ describe('eth wallet-connect.services', () => {
 			({
 				id: 1,
 				topic: 'mock-topic',
-				params: { request: { method, params } }
+				// A WalletConnect envelope states its chain in CAIP-2, which is what the signing path
+				// holds the EIP-712 domain to. Every fixture below is a chain 1 domain.
+				params: { chainId: 'eip155:1', request: { method, params } }
 			}) as unknown as WalletKitTypes.SessionRequest;
 
 		const buildParams = (request: WalletKitTypes.SessionRequest) => ({

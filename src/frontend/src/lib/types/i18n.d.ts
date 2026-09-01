@@ -916,6 +916,8 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
+		swap_amount_too_low: string;
+		swap_amount_too_low_minimum: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
@@ -947,6 +949,10 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		chain_fusion_minimum_amount: string;
+		oisy_trade_minimum_notional: string;
+		oisy_trade_deposit_fee: string;
+		oisy_trade_taker_fee: string;
+		oisy_trade_withdrawal_fee: string;
 		value_difference_error_confirmation: string;
 		value_difference_missing_price_confirmation: string;
 	};
@@ -971,6 +977,12 @@ interface I18nSwap {
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
+		near_intents_quote_unverified: string;
+		near_intents_quote_expired: string;
+		oisy_trade_order_killed: string;
+		oisy_trade_settlement_unresolved: string;
+		oisy_trade_order_not_placed: string;
+		oisy_trade_recovery_failed: string;
 	};
 }
 
@@ -1238,6 +1250,14 @@ interface I18nFee {
 		estimated_inter_network: string;
 		estimated_eth: string;
 		max_fee_eth: string;
+		estimated_fee_eth: string;
+		priority: string;
+		priority_slow: string;
+		priority_slow_description: string;
+		priority_normal: string;
+		priority_normal_description: string;
+		priority_fast: string;
+		priority_fast_description: string;
 		convert_fee: string;
 		convert_inter_network_fee: string;
 		convert_btc_network_fee: string;
@@ -1249,6 +1269,7 @@ interface I18nFee {
 		approval_fee: string;
 		prioritization_fee: string;
 	};
+	info: { priority: string };
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
 }
@@ -1275,6 +1296,7 @@ interface I18nWallet_connect {
 		or_use_link: string;
 		proposer: string;
 		spender: string;
+		operator: string;
 		application: string;
 		review: string;
 		method: string;
@@ -1286,9 +1308,11 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		tab_operations: string;
 		unreviewed_instructions: string;
+		unreviewed_instructions_simulated: string;
+		simulated_review: string;
 		simulated_changes: string;
-		simulation_note: string;
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;
@@ -1296,7 +1320,6 @@ interface I18nWallet_connect {
 		simulation_new_program: string;
 		simulation_control_removed: string;
 		transfer_sources: string;
-		transfer_destinations: string;
 		transfer_party_own: string;
 		transfer_parties_partial: string;
 		dapp_prioritization_fee: string;
@@ -1304,7 +1327,20 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unreviewable_typed_data: string;
+		unsigned_typed_data_keys: string;
+		tab_summary: string;
+		tab_raw_data: string;
+		method_without_selector: string;
+		methods_capped: string;
+		unknown_call_title: string;
+		unknown_call: string;
+		allowance_increase: string;
+		allowance_decrease: string;
 		unverifiable_erc20_request: string;
+		unverifiable_approval_for_all_request: string;
+		approval_for_all_grant: string;
+		approval_for_all_revoke: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
@@ -1332,7 +1368,7 @@ interface I18nWallet_connect {
 		wallet_connect: string;
 		token_units: string;
 	};
-	alt: { connect_input: string };
+	alt: { connect_input: string; open_address_block_explorer: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -1609,6 +1645,8 @@ interface I18nTransaction {
 		details: string;
 		hash: string;
 		hash_copied: string;
+		signature: string;
+		signature_copied: string;
 		id: string;
 		id_copied: string;
 		timestamp: string;
@@ -1624,8 +1662,32 @@ interface I18nTransaction {
 		to_ata: string;
 		to_ata_copied: string;
 		block: string;
+		kind_other: string;
+		summary_swap: string;
+		summary_self: string;
+		swap_on: string;
 		interacted_with: string;
 		unknown_token: string;
+		summary_other: string;
+		tab_summary: string;
+		tab_balance_changes: string;
+		tab_instructions: string;
+		tab_unavailable: string;
+		no_balance_changes: string;
+		instruction_send: string;
+		instruction_receive: string;
+		instruction_wrap: string;
+		instruction_unwrap: string;
+		instruction_create_account: string;
+		instruction_close_account: string;
+		instruction_approve: string;
+		instruction_revoke: string;
+		instruction_set_authority: string;
+		instruction_route: string;
+		instruction_rent: string;
+		instruction_rent_returned: string;
+		instruction_returned: string;
+		instruction_own_account: string;
 		raw_value: string;
 		status: string;
 		confirmations: string;

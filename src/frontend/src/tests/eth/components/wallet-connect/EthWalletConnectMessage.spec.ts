@@ -18,9 +18,13 @@ import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('EthWalletConnectMessage', () => {
+	// The raw message lives on its own tab. Reaching it is a click, not a scroll.
+	const openRawTab = async (getByRole: (role: string, options: { name: string }) => HTMLElement) =>
+		await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
 	const request: WalletKitTypes.SessionRequest = {
 		params: {
 			request: {
@@ -76,8 +80,8 @@ describe('EthWalletConnectMessage', () => {
 		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
 	});
 
-	it('should render the JSON parsed message', () => {
-		const { getByText } = render(EthWalletConnectMessage, {
+	it('should render the JSON parsed message', async () => {
+		const { getByText, getByRole, getByTestId } = render(EthWalletConnectMessage, {
 			props: {
 				request
 			}
@@ -87,9 +91,11 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
+		await openRawTab(getByRole);
+
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
-		expect(getByText('{ ... }')).toBeInTheDocument();
+		expect(getByTestId('json')).toBeInTheDocument();
 	});
 
 	it('should render the application', () => {
@@ -171,7 +177,7 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(expected)).toBeInTheDocument();
 	});
 
-	it('should not summarize keys the signed schema does not declare', () => {
+	it('should not summarize keys the signed schema does not declare', async () => {
 		// ERC-3009 transfer authorization: `spender` and `details` are absent from
 		// the declared type, so they are absent from the digest. Summarizing them
 		// would describe an approval of 1 USDC while 5,000 USDC is being signed away.
@@ -227,7 +233,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, getByTestId, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
@@ -242,9 +248,11 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText('0x2222222222222222222222222222222222222222')).not.toBeInTheDocument();
 
-		// The full payload stays available in the raw message viewer.
+		// The full payload stays available in the raw message viewer, one tab over.
+		await openRawTab(getByRole);
+
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
-		expect(getByText('{ ... }')).toBeInTheDocument();
+		expect(getByTestId('json')).toBeInTheDocument();
 	});
 
 	// A token OISY does not list is still the contract the allowance is over, and the allowance is
@@ -330,12 +338,12 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
 	});
 
-	it('should handle errors when getting sign parameters', () => {
+	it('should handle errors when getting sign parameters', async () => {
 		vi.spyOn(walletConnectUtils, 'getSignParamsMessageTypedDataV4').mockImplementation(() => {
 			throw new Error('Test error');
 		});
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request
 			}
@@ -344,6 +352,8 @@ describe('EthWalletConnectMessage', () => {
 		expect(getSignParamsMessageTypedDataV4).toHaveBeenCalledExactlyOnceWith(
 			request.params.request.params
 		);
+
+		await openRawTab(getByRole);
 
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
@@ -463,7 +473,84 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(en.wallet_connect.text.invalid_typed_data)).toBeInTheDocument();
 	});
 
-	it('should render a typed-data payload sent through personal_sign as a raw message', () => {
+	it('should not state unsigned keys for a payload whose every key is declared', () => {
+		const { queryByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(queryByTestId('wallet-connect-unsigned-typed-data-info')).not.toBeInTheDocument();
+	});
+
+	it('should state that a key the schema does not declare is not signed', () => {
+		// Hyperliquid carries routing fields alongside the signed members of every action. They are
+		// absent from the digest, so the preview drops them and says so rather than showing them as
+		// if the signature covered them.
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				...request.params,
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+						JSON.stringify({
+							domain: {
+								name: 'HyperliquidSignTransaction',
+								version: '1',
+								chainId: 42161,
+								verifyingContract: '0x0000000000000000000000000000000000000000'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								'Hyperliquid:AcceptTerms': [
+									{ name: 'hyperliquidChain', type: 'string' },
+									{ name: 'time', type: 'uint64' }
+								]
+							},
+							primaryType: 'Hyperliquid:AcceptTerms',
+							message: {
+								type: 'acceptTerms',
+								time: 1787170393018,
+								signatureChainId: '0xa4b1',
+								hyperliquidChain: 'Mainnet'
+							}
+						})
+					]
+				}
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByTestId, getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		expect(getByTestId('wallet-connect-unsigned-typed-data-info')).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unsigned_typed_data_keys)).toBeInTheDocument();
+	});
+
+	it('should not state unsigned keys when the typed data is invalid', () => {
+		// The warning already tells the user nothing here can be signed, so a second notice about
+		// which part of it would not be would only muddy that.
+		const { queryByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request,
+				invalidTypedData: true
+			}
+		});
+
+		expect(queryByTestId('wallet-connect-unsigned-typed-data-info')).not.toBeInTheDocument();
+	});
+
+	it('should render a typed-data payload sent through personal_sign as a raw message', async () => {
 		// Such a request is signed as a plain message, so previewing it as a permit
 		// would describe an authorization that is not the one being signed.
 		const newRequest: WalletKitTypes.SessionRequest = {
@@ -477,15 +564,19 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, queryByText, queryByTestId } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
 		});
 
-		expect(queryByText('{ ... }')).not.toBeInTheDocument();
 		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+
+		await openRawTab(getByRole);
+
+		// Signed as a plain message, so it is shown as one rather than through the JSON viewer.
+		expect(queryByTestId('json')).not.toBeInTheDocument();
 
 		expect(
 			getByText(getSignParamsMessageUtf8(newRequest.params.request.params))

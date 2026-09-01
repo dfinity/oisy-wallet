@@ -1,4 +1,5 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { UtxosFee } from '$btc/types/btc-send';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
@@ -11,10 +12,12 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import type { OisyTradeQuote, OisyTradeSwapDetails } from '$lib/types/oisy-trade-swap';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
@@ -47,7 +50,8 @@ export enum SwapProvider {
 	VELORA = 'velora',
 	NEAR_INTENTS = 'nearIntents',
 	ONE_SEC = 'oneSec',
-	CHAIN_FUSION = 'chainFusion'
+	CHAIN_FUSION = 'chainFusion',
+	OISY_TRADE = 'oisyTrade'
 }
 
 export enum VeloraSwapTypes {
@@ -63,7 +67,9 @@ export enum SwapErrorCodes {
 	SWAP_FAILED_2ND_WITHDRAW_SUCCESS = 'swap_failed_2nd_withdraw_success',
 	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',
 	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
-	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed'
+	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
+	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
+	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -90,6 +96,17 @@ export interface FetchSwapAmountsParams {
 }
 
 export type Slippage = string | number;
+
+/**
+ * The reason no offer could be quoted, when a provider named one.
+ *
+ * `minAmount` is the provider's minimum, in the source token's smallest unit,
+ * when the provider communicated it.
+ */
+export interface SwapQuoteError {
+	type: 'amount-too-low';
+	minAmount?: bigint;
+}
 
 export type SwapMappedResult =
 	| {
@@ -142,6 +159,15 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			swapDetails: ChainFusionSwapDetails;
 			type?: string;
+	  }
+	| {
+			provider: SwapProvider.OISY_TRADE;
+			receiveAmount: bigint;
+			// No `receiveOutMinimum`: a fill-or-kill order has no slippage semantics —
+			// it fills at the submitted price or is killed — so the slippage control
+			// must not affect this offer.
+			swapDetails: OisyTradeSwapDetails;
+			type?: string;
 	  };
 
 interface KongQuoteParams {
@@ -174,7 +200,16 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
-export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
+// `getQuote` may resolve to `undefined` — an unorderable amount or an unpaired
+// token is a non-offer, not an error — so `fetchSwapAmountsICP` maps only when a
+// quote actually came back.
+type OisyTradeSwapProvider = BaseSwapProvider<
+	SwapProvider.OISY_TRADE,
+	OisyTradeQuote | undefined,
+	{ quote: OisyTradeQuote }
+>;
+
+export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider | OisyTradeSwapProvider;
 
 export interface EvmSwapProviderConfig {
 	key: SwapProvider;
@@ -256,6 +291,9 @@ export interface EvmQuoteParams {
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
+	// The user's address on the destination chain, for cross-chain providers that pay out
+	// there. Absent, such providers fall back to `userAddress`.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
@@ -388,6 +426,9 @@ export interface BtcQuoteParams {
 	amount: bigint;
 	// The user's own Bitcoin address, the source of the UTXOs a deposit spends.
 	userBtcAddress: BtcAddress;
+	// The user's address on the destination chain. Chain Fusion ignores it (a BTC → ckBTC
+	// deposit credits the user's own principal); cross-chain providers pay out to it.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
@@ -447,6 +488,14 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own Bitcoin address, the source of the UTXOs the deposit spends.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	utxosFee: UtxosFee;
 }
 
 export interface DeltaSwapResponse {

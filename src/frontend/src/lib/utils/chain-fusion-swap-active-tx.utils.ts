@@ -11,6 +11,8 @@ import {
 } from '$env/networks/networks.cketh.env';
 import type { EthAddress } from '$eth/types/address';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { decodeMintMemo, MINT_MEMO_CONVERT } from '$icp/utils/ckbtc-memo.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
@@ -19,7 +21,8 @@ import {
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
-import { nonNullish } from '@dfinity/utils';
+import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
+import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
@@ -40,10 +43,22 @@ export const isChainFusionMintDirection = (direction: ChainFusionDirection): boo
  * The two directions the ckETH minter answers exactly, keyed on a ledger burn
  * index. `CkBtcToBtc` is deliberately excluded: it is also a withdrawal, but it
  * is a different minter answering a different question, and asking the ckETH
- * minter about it would be nonsense. Its arm arrives with the Bitcoin family.
+ * minter about it would be nonsense — it gets its own routing below.
  */
 export const isChainFusionEthWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
 	'CkEthToEth' in direction || 'CkErc20ToErc20' in direction;
+
+/**
+ * The one direction whose poller has to *mutate*: the ckBTC minter credits
+ * nothing until someone calls `update_balance`, so a read-only poll would leave
+ * the deposit sitting at the deposit address forever.
+ */
+export const isChainFusionBtcMintDirection = (direction: ChainFusionDirection): boolean =>
+	'BtcToCkBtc' in direction;
+
+// ckBTC → BTC: exact, query-only, keyed on the `retrieve_btc_with_approval` index.
+export const isChainFusionBtcWithdrawalDirection = (direction: ChainFusionDirection): boolean =>
+	'CkBtcToBtc' in direction;
 
 /**
  * Builds the `ChainFusion` AUT data variant: the direction discriminant plus the
@@ -150,8 +165,14 @@ export const toChainFusionWithdrawalStatus = (
 		return { Executing: null };
 	}
 
-	// `NotFound` — the minter has not indexed the burn yet. Leave the row alone.
-	return undefined;
+	if ('NotFound' in status) {
+		// The minter has not indexed the burn yet. Leave the row alone.
+		return undefined;
+	}
+
+	// As in `toChainFusionBtcWithdrawalStatus`: a status added to the SDK since this was
+	// written must not silently read as the no-op above.
+	assertNever(status, 'Unexpected ckETH withdrawal status');
 };
 
 export const chainFusionWithdrawalStatusError = (
@@ -189,6 +210,199 @@ export const toChainFusionWithdrawalLearnedRefs = (
 
 	return {};
 };
+
+/**
+ * Maps the ckBTC minter's withdrawal status to the AUT status enum.
+ *
+ * `Unknown` is the ckBTC counterpart of the ckETH minter's `NotFound`, and is
+ * treated the same way: the minter reports it in the window between the ledger
+ * burn and the minter indexing the request — and, for a long-abandoned row,
+ * after the minter has pruned its history — so mapping it to `Failed` would
+ * terminalize withdrawals wrongly, irreversibly.
+ *
+ * `WillReimburse` is terminal here even though the refund has not landed yet:
+ * the verdict is settled and there is nothing further to learn, the same call
+ * `toChainFusionWithdrawalStatus` makes for the ckETH minter's
+ * `PendingReimbursement`. It deliberately differs from the transaction list,
+ * which keeps such a burn *pending* until the reimbursement shows up — that view
+ * is about the ledger entry, this one about whether the conversion is over.
+ */
+export const toChainFusionBtcWithdrawalStatus = (
+	status: CkBtcMinterDid.RetrieveBtcStatusV2
+): ActiveUserTransactionStatus | undefined => {
+	if ('Confirmed' in status) {
+		return { Succeeded: null };
+	}
+
+	if ('AmountTooLow' in status || 'Reimbursed' in status || 'WillReimburse' in status) {
+		return { Failed: null };
+	}
+
+	if ('Pending' in status || 'Signing' in status || 'Sending' in status || 'Submitted' in status) {
+		return { Executing: null };
+	}
+
+	if ('Unknown' in status) {
+		// The minter has nothing on this withdrawal. Leave the row alone.
+		return undefined;
+	}
+
+	// A status the minter has grown since this was written must not read as the no-op above:
+	// were it terminal, the row would stay `Executing` for good. Throwing surfaces it in the
+	// poller's per-row catch, which leaves the row pending exactly as a no-op would.
+	assertNever(status, 'Unexpected ckBTC withdrawal status');
+};
+
+export const chainFusionBtcWithdrawalStatusError = (
+	status: CkBtcMinterDid.RetrieveBtcStatusV2
+): string | undefined => {
+	if ('Reimbursed' in status || 'WillReimburse' in status) {
+		return get(i18n).swap.error.swap_refunded;
+	}
+
+	if ('AmountTooLow' in status) {
+		return get(i18n).swap.error.failed_unexpectedly;
+	}
+
+	return undefined;
+};
+
+// The Bitcoin transaction the minter sent, revealed as soon as it is broadcast.
+export const toChainFusionBtcWithdrawalLearnedRefs = (
+	status: CkBtcMinterDid.RetrieveBtcStatusV2
+): Partial<Record<ChainFusionExternalRefKey, string>> => {
+	const txid =
+		'Submitted' in status
+			? status.Submitted.txid
+			: 'Sending' in status
+				? status.Sending.txid
+				: 'Confirmed' in status
+					? status.Confirmed.txid
+					: undefined;
+
+	return nonNullish(txid)
+		? { [CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: utxoTxIdToString(txid) }
+		: {};
+};
+
+/**
+ * What the Bitcoin side plus the ckBTC minter say about a deposit.
+ *
+ * `unseen` → `awaitingConfirmations` → `awaitingMint` are the in-flight shapes,
+ * in the order a deposit passes through them; `minted` and `rejected` are the
+ * verdict, and only the minter itself can produce either.
+ */
+export type ChainFusionBtcMintOutcome =
+	'unseen' | 'awaitingConfirmations' | 'awaitingMint' | 'minted' | 'rejected';
+
+/**
+ * Maps a ckBTC deposit's observed state to the AUT status enum.
+ *
+ * Unlike the Ethereum family's mints, this one is not observed from the deposit
+ * side: the minter is the only party that can turn a confirmed UTXO into ckBTC,
+ * so the poller's job is to make it, and the verdict is whatever it reports back
+ * — see `resolveChainFusionBtcMintOutcome`.
+ */
+export const chainFusionBtcMintOutcomeToStatus = (
+	outcome: ChainFusionBtcMintOutcome
+): ActiveUserTransactionStatus | undefined => {
+	switch (outcome) {
+		case 'minted':
+			return { Succeeded: null };
+		case 'rejected':
+			return { Failed: null };
+		case 'unseen':
+		case 'awaitingConfirmations':
+		case 'awaitingMint':
+			return { Executing: null };
+	}
+};
+
+export const chainFusionBtcMintOutcomeError = (
+	outcome: ChainFusionBtcMintOutcome
+): string | undefined =>
+	outcome === 'rejected' ? get(i18n).swap.error.failed_unexpectedly : undefined;
+
+/**
+ * Reads the verdict for one deposit out of an `update_balance` response, which
+ * covers *every* pending UTXO of the account and not only this row's.
+ *
+ * `Checked` is not a verdict: the UTXO passed the Bitcoin check but the ledger
+ * was unavailable, and a later `update_balance` mints it. `undefined` means the
+ * response said nothing about this deposit — another of the user's UTXOs was
+ * what the minter had to process — which must leave the row pending.
+ */
+export const toChainFusionBtcMintOutcome = ({
+	utxosStatuses,
+	txid
+}: {
+	utxosStatuses: CkBtcMinterDid.UtxoStatus[];
+	txid: string;
+}): ChainFusionBtcMintOutcome | undefined => {
+	const status = utxosStatuses.find((utxosStatus) =>
+		isSameUtxoTxid({ utxo: toUtxoStatusUtxo(utxosStatus), txid })
+	);
+
+	if (isNullish(status)) {
+		return undefined;
+	}
+
+	if ('Minted' in status) {
+		return 'minted';
+	}
+
+	return 'Checked' in status ? 'awaitingMint' : 'rejected';
+};
+
+const toUtxoStatusUtxo = (utxosStatus: CkBtcMinterDid.UtxoStatus): CkBtcMinterDid.Utxo =>
+	'Minted' in utxosStatus
+		? utxosStatus.Minted.utxo
+		: 'Checked' in utxosStatus
+			? utxosStatus.Checked
+			: 'Tainted' in utxosStatus
+				? utxosStatus.Tainted
+				: utxosStatus.ValueTooSmall;
+
+/**
+ * The deposit a ckBTC mint credited, as the human-readable txid the row snapshots.
+ *
+ * The minter stamps every deposit it converts with a memo naming the outpoint it consumed,
+ * which is the only *durable* record that a deposit was credited: `get_known_utxos` and the
+ * deposit address both stop mentioning a UTXO the moment the minter spends it to fund a
+ * withdrawal — see `resolveChainFusionBtcMintOutcome`.
+ *
+ * `undefined` for anything that is not a deposit credit: a KYT-fee mint, a legacy 0- or
+ * 32-byte memo, a `Convert` memo without the outpoint, or a memo the decoder rejects. The
+ * throw is swallowed rather than logged because a foreign memo shape is not this row's
+ * problem — the account's whole mint history is scanned, most of it unrelated.
+ */
+export const toCkBtcMintDepositTxid = (memo: Uint8Array): string | undefined => {
+	try {
+		const decoded = decodeMintMemo(memo);
+
+		if (decoded[0] !== MINT_MEMO_CONVERT) {
+			return undefined;
+		}
+
+		const [, [txid]] = decoded;
+
+		return nonNullish(txid) ? utxoTxIdToString(txid) : undefined;
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
+// Minter and Bitcoin-canister UTXOs carry the txid in internal byte order; the
+// row snapshots the human-readable one the signer returned.
+export const isSameUtxoTxid = ({
+	utxo: {
+		outpoint: { txid: utxoTxid }
+	},
+	txid
+}: {
+	utxo: { outpoint: { txid: Uint8Array } };
+	txid: string;
+}): boolean => utxoTxIdToString(utxoTxid).toLowerCase() === txid.toLowerCase();
 
 /**
  * What the Ethereum side plus the minter's scan progress say about a ck deposit.

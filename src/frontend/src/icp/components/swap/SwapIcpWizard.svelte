@@ -26,6 +26,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionIcpSwap } from '$lib/services/chain-fusion-swap.services';
+	import { fetchOisyTradeSwap } from '$lib/services/oisy-trade-swap.services';
+	import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 	import {
 		enableSwapDestinationToken,
 		fetchOneSecIcpToEvmSwap,
@@ -112,6 +114,17 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
 	);
 
+	// OISY Trade settles in the foreground for now: deposit, fill-or-kill order, and the
+	// withdrawal that brings the destination token back, all inside the modal. It is
+	// deliberately absent from `isActiveTransactionSwap` below until it has an Active User
+	// Transaction row to hand the settlement to — closing the modal earlier would leave the
+	// funds in DEX custody with nothing watching them.
+	let oisyTradeDetails = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.OISY_TRADE
+			? $swapAmountsStore.selectedProvider.swapDetails
+			: undefined
+	);
+
 	// The user's own address on the destination chain, which is where the minter pays the
 	// withdrawal out. Bitcoin and Ethereum are the only ck destinations.
 	let isBitcoinDestination = $derived(isNetworkIdBitcoin($destinationToken?.network.id));
@@ -119,13 +132,9 @@
 	let destinationAddress = $derived(isBitcoinDestination ? $btcAddressMainnet : $ethAddress);
 
 	// These close the modal once the funds have left the wallet and finish settling through
-	// the Active User Transactions store. A ckBTC → BTC withdrawal is deliberately excluded:
-	// it settles in the background too, but nothing is tracking it until the Bitcoin
-	// family's AUT poller lands, and promising a row that does not exist is worse than
-	// showing the plain stepper.
-	let isActiveTransactionSwap = $derived(
-		isOneSecProvider || (isChainFusionProvider && !isBitcoinDestination)
-	);
+	// the Active User Transactions store — every ck withdrawal included, whichever minter
+	// pays it out.
+	let isActiveTransactionSwap = $derived(isOneSecProvider || isChainFusionProvider);
 
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
@@ -216,6 +225,31 @@
 					userEthAddress: $ethAddress,
 					setFailedProgressStep,
 					swapId: crypto.randomUUID()
+				});
+			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.OISY_TRADE) {
+				// Dispatched explicitly rather than through `swapService`, like 1Sec and Chain
+				// Fusion above: the reviewed order — side, price, quantity, deposit amount —
+				// cannot travel through `SwapParams`, and re-deriving it here would let the book
+				// move between Review and submit.
+				if (isNullish(oisyTradeDetails) || !isIcToken($destinationToken)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+					onBack();
+					return;
+				}
+
+				await fetchOisyTradeSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as IcToken,
+					destinationToken: $destinationToken,
+					order: oisyTradeDetails.order,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
 				});
 			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
 				if (isNullish(destinationAddress)) {
@@ -310,6 +344,16 @@
 					),
 					variant: 'info'
 				});
+			} else if (err instanceof OisyTradeSwapError) {
+				// A killed fill-or-kill order — or one the canister refused — is an
+				// expected outcome whose source funds are already back in the wallet when
+				// it is thrown, so it reads as info in Review, like slippage, never as an
+				// unexpected-error toast. The other kinds ask the user to check the
+				// Trading tab, hence the warning level.
+				failedSwapError.set({
+					message: err.message,
+					variant: err.kind === 'killed' || err.kind === 'not_placed' ? 'info' : 'warning'
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
@@ -327,7 +371,11 @@
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
 						...swapTrackingMetadata,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err)
+							? err.code
+							: err instanceof OisyTradeSwapError
+								? err.kind
+								: ''
 					}
 				});
 			}
@@ -363,7 +411,7 @@
 				swapWithActiveTransaction={isActiveTransactionSwap}
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ICP_SWAP}
+					SwapProvider.ICP_SWAP || nonNullish(oisyTradeDetails)}
 				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}

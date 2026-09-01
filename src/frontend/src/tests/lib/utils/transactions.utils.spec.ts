@@ -563,7 +563,9 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(2);
 			});
 
-			it('should not deduplicate non-ethereum component transactions', () => {
+			// A swap is deliberately two rows, one per side, each carrying its own token's icon and
+			// balance change; what gets dropped is a token the transaction merely brushed.
+			it('should keep one Solana row per token the transaction moved', () => {
 				const solTx1: SolTransactionUi = {
 					...createMockSolTransactionsUi(1)[0],
 					id: 'same-id'
@@ -578,6 +580,102 @@ describe('transactions.utils', () => {
 					$solTransactions: {
 						[SOLANA_TOKEN_ID]: [{ data: solTx1, certified: false }],
 						[BONK_TOKEN_ID]: [{ data: solTx2, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
+			// A transaction OISY could not reduce still moved what it moved. Keeping a single row,
+			// arbitrarily the first, put an amount belonging to one token under a word that named
+			// none of them.
+			it('should keep a row per token an unreduced Solana transaction moved', () => {
+				const netChanges = [
+					{ delta: -60n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+					{ delta: 5_000n }
+				];
+
+				const [base] = createMockSolTransactionsUi(1);
+
+				const solTx: SolTransactionUi = {
+					...base,
+					id: 'same-id',
+					summary: { kind: 'other' },
+					netChanges
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: solTx, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...solTx }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			// Records cached before the redesign carry a per-instruction id, so grouping on the id
+			// would leave their duplicates in place; the signature is what makes them one transaction.
+			it('should deduplicate rows that share a signature but not an id', () => {
+				const [base] = createMockSolTransactionsUi(1);
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: { ...base, id: 'legacy-0-program' }, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...base, id: 'legacy-1-program' }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
+			// A swap moved both tokens, so both rows stay: each carries its own icon and balance
+			// change, and a user scanning for one of them finds it on the row that names it.
+			it('should keep both sides of a Solana swap as their own rows', () => {
+				const swap: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'swap-id',
+					summary: {
+						kind: 'swap',
+						spent: { delta: -100_000n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+						received: { delta: 1_000_000n }
+					}
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: swap, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: swap, certified: false }]
 					},
 					$btcTransactions: undefined,
 					$ckEthMinterInfo: {},

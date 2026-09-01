@@ -95,7 +95,9 @@ describe('EthSendTokenWizard.spec', () => {
 		vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 			...ctx,
 			maxGasFee: readable(undefined),
-			minGasFee: readable(undefined)
+			minGasFee: readable(undefined),
+			estimatedGasFee: readable(undefined),
+			feePrioritiesStore: writable(undefined)
 		}));
 
 		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);

@@ -192,6 +192,16 @@ export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 sec
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `update_balance` calls for the same pending
+// BTC → ckBTC row. Same reasoning as above — minting is an update call, polling is
+// 5s — and it is the outer bound on top of the query gate that skips the call
+// entirely while the deposit is still gathering confirmations.
+export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+
+// Page size for a pending ckBTC deposit's walk over the account's ledger history looking
+// for its own mint. The walk itself is bounded by the row's creation time, not by a page
+// count — see `hasCkBtcMintForDeposit`.
+export const CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE = 100n;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds
