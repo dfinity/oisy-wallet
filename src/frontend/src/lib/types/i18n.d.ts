@@ -1251,6 +1251,13 @@ interface I18nFee {
 		estimated_eth: string;
 		max_fee_eth: string;
 		estimated_fee_eth: string;
+		priority: string;
+		priority_slow: string;
+		priority_slow_description: string;
+		priority_normal: string;
+		priority_normal_description: string;
+		priority_fast: string;
+		priority_fast_description: string;
 		convert_fee: string;
 		convert_inter_network_fee: string;
 		convert_btc_network_fee: string;
@@ -1265,6 +1272,7 @@ interface I18nFee {
 		prioritization_kind: string;
 		ata_kind: string;
 	};
+	info: { priority: string };
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
 }

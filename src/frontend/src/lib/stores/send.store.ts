@@ -1,5 +1,6 @@
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
@@ -69,6 +70,10 @@ export const initSendContext = ({
 	// To persist the value between components, we need to put it in a context outside the WizardModal
 	const sendEthCustomNonce = writable<number | undefined>();
 
+	// Same reason as `sendEthCustomNonce` above: the choice has to outlive the wizard's step
+	// re-render, so it cannot be a prop.
+	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.NORMAL);
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -80,7 +85,8 @@ export const initSendContext = ({
 		sendBalance,
 		sendDestination,
 		isIcBurning,
-		sendEthCustomNonce
+		sendEthCustomNonce,
+		sendEthFeePriority
 	};
 };
 
@@ -96,6 +102,7 @@ export interface SendContext {
 	sendDestination: Writable<Address>;
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
+	sendEthFeePriority: Writable<EthFeePriority>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

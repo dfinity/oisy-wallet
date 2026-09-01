@@ -3,6 +3,7 @@
 	import { getContext, type Snippet } from 'svelte';
 	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isEthAddress } from '$eth/utils/account.utils';
@@ -58,6 +59,12 @@
 >
 	{#snippet sendAmount()}
 		<EthSendAmount {nativeEthereumToken} {onTokensList} bind:amount bind:insufficientFunds />
+	{/snippet}
+
+	{#snippet priority()}
+		{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+			<EthFeePriority />
+		{/if}
 	{/snippet}
 
 	{#snippet fee()}
