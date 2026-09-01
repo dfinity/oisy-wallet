@@ -291,10 +291,12 @@ describe('eth-fee-data.services', () => {
 					to: toAddr
 				});
 
+				// No base fee either, so `estimatedGasFee` falls back to the max fee.
 				expect(result.feeData).toEqual({
 					gasPrice: null,
 					maxFeePerGas: 10n,
-					maxPriorityFeePerGas: 5n
+					maxPriorityFeePerGas: 5n,
+					baseFeePerGas: null
 				});
 			});
 

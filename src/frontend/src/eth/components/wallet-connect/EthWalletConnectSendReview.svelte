@@ -239,6 +239,7 @@
 				showAmount={!noAmount}
 				showBalance={!noAmount}
 				showNullishAmountLabel={unverifiableErc20}
+				showSigner={false}
 				showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
 				source={$ethAddress ?? ''}
 				{token}

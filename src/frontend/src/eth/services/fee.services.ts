@@ -42,10 +42,13 @@ const getGasFeeFloor = (
 // The Gas API is a best-effort enhancement: it does not cover every chain we support
 // (Arbitrum Sepolia answers 400 "'421614' is not a supported chain id.") and it can be down.
 // Its suggestion is only ever merged upwards with the provider's own quote, so losing it only
-// makes the estimate coarser and must never block a send.
+// makes the estimate coarser and must never block a send. Without the base fee, `estimatedGasFee`
+// falls back to the max fee, which overstates the cost rather than hiding it.
 const getSuggestedFeeDataBestEffort = async (
 	chainId: EthereumChainId
-): Promise<Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>> => {
+): Promise<
+	Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & { baseFeePerGas: bigint | null }
+> => {
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
 	try {
@@ -53,7 +56,7 @@ const getSuggestedFeeDataBestEffort = async (
 	} catch (err: unknown) {
 		consoleWarn(err);
 
-		return { maxFeePerGas: null, maxPriorityFeePerGas: null };
+		return { maxFeePerGas: null, maxPriorityFeePerGas: null, baseFeePerGas: null };
 	}
 };
 
@@ -165,7 +168,8 @@ export const getEthFeeDataWithProvider = async ({
 
 	const {
 		maxFeePerGas: suggestedMaxFeePerGas,
-		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
+		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
+		baseFeePerGas
 	} = await getSuggestedFeeDataBestEffort(chainId);
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
@@ -179,7 +183,8 @@ export const getEthFeeDataWithProvider = async ({
 			maxBigInt(
 				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
 				floorMaxPriorityFeePerGas
-			) ?? null
+			) ?? null,
+		baseFeePerGas
 	};
 
 	return { feeData, provider, params };
