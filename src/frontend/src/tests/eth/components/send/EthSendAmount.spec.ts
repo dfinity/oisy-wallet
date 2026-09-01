@@ -32,9 +32,14 @@ describe('EthSendAmount', () => {
 		return `${padded.slice(0, -ETHEREUM_TOKEN.decimals)}.${padded.slice(-ETHEREUM_TOKEN.decimals)}`;
 	};
 
-	const setup = () => {
+	const setup = ({ ceilingKnown = true }: { ceilingKnown?: boolean } = {}) => {
 		const feeStore = initEthFeeStore();
-		feeStore.setFee({ maxFeePerGas, maxPriorityFeePerGas, baseFeePerGas, gas });
+		feeStore.setFee({
+			maxFeePerGas: ceilingKnown ? maxFeePerGas : null,
+			maxPriorityFeePerGas,
+			baseFeePerGas,
+			gas
+		});
 
 		const context = new Map<symbol, unknown>();
 		context.set(
@@ -70,10 +75,25 @@ describe('EthSendAmount', () => {
 		return { input, queryByText };
 	};
 
+	const setupWithoutCeiling = () => setup({ ceilingKnown: false });
+
 	it('rejects an amount that leaves only the tip covered', async () => {
 		const { input, queryByText } = setup();
 
 		await fireEvent.input(input, { target: { value: toEther(balance - tipOnly) } });
+
+		await waitFor(() => {
+			expect(queryByText(expectedError)).toBeInTheDocument();
+		});
+	});
+
+	it('still demands the tip when the ceiling is unknown', async () => {
+		// `maxFeePerGas` can come back null, which leaves `maxGasFee` undefined. Falling through to
+		// zero there would accept an amount that cannot even cover the tip, making the check weaker
+		// than the one it replaced.
+		const { input, queryByText } = setupWithoutCeiling();
+
+		await fireEvent.input(input, { target: { value: toEther(balance - 1n) } });
 
 		await waitFor(() => {
 			expect(queryByText(expectedError)).toBeInTheDocument();
