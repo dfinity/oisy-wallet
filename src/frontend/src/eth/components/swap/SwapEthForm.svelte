@@ -23,7 +23,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -124,16 +124,29 @@
 	};
 
 	$effect(() => {
-		if (nonNullish($sourceToken) && nonNullish(swapAmount)) {
-			const parsedAmount = parseToken({
-				value: `${swapAmount}`,
-				unitName: $sourceToken.decimals
-			});
+		// The error has to go when the amount does: `selectToken` drops `swapAmount` on a
+		// source-token change, and the user can empty the input. `errorType` is passed to
+		// `SwapForm` one-way here — unlike `SwapIcpForm`, which binds it — so nothing downstream
+		// can clear it, and a stale error would hold the form invalid against a blank amount.
+		if (isNullish($sourceToken) || isNullish(swapAmount)) {
+			errorType = undefined;
 
-			const newErrorType = customValidate(parsedAmount);
-			if (newErrorType !== errorType) {
-				errorType = newErrorType;
-			}
+			return;
+		}
+
+		// Not `parseToken`: the amount outlives a source-token change, so it can carry more
+		// precision than the new token has decimals. Throwing here would abort the effect
+		// flush mid-update and leave the modal unresponsive, so an amount the token cannot
+		// represent is surfaced as a validation error instead.
+		const parsedAmount = tryParseToken({
+			value: `${swapAmount}`,
+			unitName: $sourceToken.decimals
+		});
+
+		const newErrorType = isNullish(parsedAmount) ? 'invalid-amount' : customValidate(parsedAmount);
+
+		if (newErrorType !== errorType) {
+			errorType = newErrorType;
 		}
 	});
 </script>
