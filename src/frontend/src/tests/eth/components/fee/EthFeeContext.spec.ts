@@ -64,6 +64,7 @@ describe('EthFeeContext', () => {
 
 	const baseProps: {
 		observe: boolean;
+		priority: EthFeePriority;
 		destination: string;
 		amount: OptionAmount;
 		data: string | undefined;
@@ -80,6 +81,7 @@ describe('EthFeeContext', () => {
 		children: Snippet;
 	} = {
 		observe: true,
+		priority: EthFeePriority.NORMAL,
 		destination,
 		amount: 1,
 		data: undefined,
@@ -95,6 +97,46 @@ describe('EthFeeContext', () => {
 		sendNft: undefined,
 		children: mockSnippet
 	};
+
+	it('prices the tier chosen while the request was in flight, not the one it started with', async () => {
+		// Distinct tips per tier so the resolved fee identifies which one was applied.
+		const perPriority = {
+			[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
+			[EthFeePriority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+			[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 30n }
+		};
+
+		let release: () => void = () => undefined;
+		const inFlight = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+
+		InfuraGasRest.prototype.getSuggestedFeeData = vi
+			.fn()
+			.mockImplementation(
+				async () => await inFlight.then(() => ({ baseFeePerGas: 5n, perPriority }))
+			);
+
+		const { rerender } = renderWith({ priority: EthFeePriority.SLOW });
+
+		// Let the debounce fire so the request is genuinely in flight before the choice changes.
+		// Without this the fetch would only start afterwards and there would be no race to test.
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(InfuraGasRest.prototype.getSuggestedFeeData).toHaveBeenCalled();
+		expect(setFeeMock).not.toHaveBeenCalled();
+
+		await rerender({ ...baseProps, priority: EthFeePriority.FAST });
+
+		release();
+		await vi.runAllTimersAsync();
+
+		// Assert the FIRST write, not the last: a later refetch happens to correct the value, which
+		// would hide the bug. The window in between is what the user would see and could sign.
+		expect(setFeeMock.mock.calls[0][0]).toEqual(
+			expect.objectContaining({ maxPriorityFeePerGas: 30n })
+		);
+	});
 
 	const renderWith = (props: Partial<typeof baseProps> = {}) =>
 		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });

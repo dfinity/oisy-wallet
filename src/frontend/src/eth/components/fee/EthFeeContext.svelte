@@ -111,7 +111,12 @@
 
 			assertIsNetworkEthereum(network);
 
-			const { feeData, priorities, provider, params } = await getEthFeeDataWithProvider({
+			const {
+				feeData: fetchedFeeData,
+				priorities,
+				provider,
+				params
+			} = await getEthFeeDataWithProvider({
 				networkId: network.id,
 				chainId: network.chainId,
 				from: $ethAddress,
@@ -120,6 +125,16 @@
 			});
 
 			feePrioritiesStore.set(priorities);
+
+			// The user can pick a different priority while this request is in flight, in which case
+			// `fetchedFeeData` prices the tier they have already moved away from. Re-read the choice
+			// now and take that tier out of the sample we just received. The re-pricing effect cannot
+			// rescue this: it tracks the choice alone, and the choice has not changed since it ran.
+			const feeData = {
+				...fetchedFeeData,
+				...priorities.perPriority[priority],
+				baseFeePerGas: priorities.baseFeePerGas
+			};
 
 			const { safeEstimateGas, estimateGas } = provider;
 
