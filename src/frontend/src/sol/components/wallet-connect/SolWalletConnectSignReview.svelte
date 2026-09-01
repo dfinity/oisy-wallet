@@ -267,7 +267,7 @@
 	     Stated as plain text and not as a heading: it is a reading of the transaction, and the
 	     figures under it are what the user checks it against. -->
 	{#if nonNullish(summaryText)}
-		<p class="text-primary my-4" data-tid="message-summary">{summaryText}</p>
+		<p class="my-4 text-primary" data-tid="message-summary">{summaryText}</p>
 	{/if}
 
 	<!-- What the transaction does, and separately what it is made of. The operations are the
