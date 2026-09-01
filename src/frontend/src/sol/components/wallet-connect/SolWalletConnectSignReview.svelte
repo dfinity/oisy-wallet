@@ -58,6 +58,10 @@
 		// What the simulated run does, instruction by instruction. The rent of the accounts it opens
 		// is the only part the fee block reads; rendering the list itself comes separately.
 		instructions?: SolInstructionSummary[];
+		// Whether that list came from a simulated run rather than from the message itself. The two
+		// say different things: a run reveals the calls made inside other programs, a message
+		// states only its own.
+		simulatedInstructions?: boolean;
 		// What the message says it moves, read from its own instructions. Stated to the user only
 		// when the simulated run agrees with it.
 		messageSummary?: SolTransactionSummary;
@@ -82,6 +86,7 @@
 		unreviewed = false,
 		preview,
 		instructions,
+		simulatedInstructions = false,
 		messageSummary,
 		parties,
 		approveDisabled = false,
@@ -373,12 +378,14 @@
 				{/snippet}
 			</SendData>
 		{:else}
-			<!-- What the simulated run actually does, which the message itself states almost none of:
-			     a routed swap performs every transfer as a nested call. Shown here rather than left
-			     to the hex, which nobody can read. -->
+			<!-- What the transaction is made of, shown here rather than left to the hex, which nobody
+			     can read. A simulated run reveals the calls made inside other programs, which the
+			     message states none of, so the heading says which of the two this is. -->
 			{#if nonNullish(instructions) && instructions.length > 0}
 				<WalletConnectModalValue
-					label={$i18n.transaction.text.tab_instructions}
+					label={simulatedInstructions
+						? $i18n.wallet_connect.text.simulated_instructions
+						: $i18n.transaction.text.tab_instructions}
 					ref="contained-instructions"
 				>
 					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
