@@ -1577,7 +1577,10 @@
 			"transaction_fees": "交易手续费",
 			"network_fee": "网络手续费",
 			"approval_fee": "授权手续费",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"info": {
 			"priority": ""
@@ -1630,6 +1633,7 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"multiple_operations": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",

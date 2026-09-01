@@ -1577,7 +1577,10 @@
 			"transaction_fees": "トランザクション手数料",
 			"network_fee": "ネットワーク手数料",
 			"approval_fee": "承認手数料",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"info": {
 			"priority": ""
@@ -1630,6 +1633,7 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"multiple_operations": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",

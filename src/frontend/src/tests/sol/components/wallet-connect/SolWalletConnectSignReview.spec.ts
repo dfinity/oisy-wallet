@@ -86,7 +86,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
@@ -98,7 +98,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 		// the ninth decimal must survive: rounding it away would alter the very number this review
 		// exists to disclose
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
@@ -114,8 +114,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.base_kind).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_kind).tagName).not.toBe('LABEL');
 	});
 
 	it('should charge the rent of the accounts the message opens as its own line', () => {
@@ -129,6 +129,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
+		expect(getByTestId('ata-fee')).toHaveTextContent(en.fee.text.ata_kind);
 		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
 	});
 
@@ -188,7 +189,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+		expect(queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 	});
 
 	// The message states almost nothing a routed swap does; the simulation is what knows.
@@ -286,7 +287,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID' }
 			});
 
-			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 		});
 
@@ -481,7 +482,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			const changes = getByText(en.wallet_connect.text.simulated_changes);
-			const fee = getByText(en.fee.text.network_fee);
+			const fee = getByText(en.fee.text.base_kind);
 
 			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
 				Node.DOCUMENT_POSITION_FOLLOWING
@@ -494,13 +495,13 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
 			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
-			expect(queries.queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
 
@@ -671,12 +672,28 @@ describe('SolWalletConnectSignReview', () => {
 	describe('the notice about how the review was obtained', () => {
 		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
 
-		it('should state that the review is simulated once a simulation ran', () => {
-			const { getByText } = render(SolWalletConnectSignReview, {
-				props: { ...props, preview }
+		// A message that reduces to a plain transfer the run agrees with needs no warning: the
+		// figures above say what it does, and the only caveat left is that they are predicted.
+		const matched = { kind: 'send' as const, spent: { delta: -5_000n } };
+
+		it('should call a matched review simulated, and no more than that', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, messageSummary: matched, preview }
 			});
 
 			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
+		// The case the ticket names: the message does not reduce to a plain send or swap the run
+		// agrees with, so the detail below is the only account of what will be signed.
+		it('should warn when the message does not reduce to a transfer the run agrees with', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
 		// Two notices about the same thing are one too many: an undecodable message already says
@@ -711,9 +728,26 @@ describe('SolWalletConnectSignReview', () => {
 			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
+		// The warning tells the user to check the simulated changes, so it must not appear when
+		// there are none: the absence of a run has a warning of its own.
+		it('should not name simulated changes when no simulation ran', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
+		// The decode is asynchronous, and until it settles there is nothing to have reduced.
+		it('should wait for the decode before warning', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, approveDisabled: true, preview }
+			});
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
 		it('should render the note above the transaction data', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
-				props: { ...props, preview }
+				props: { ...props, messageSummary: matched, preview }
 			});
 
 			const note = getByText(en.wallet_connect.text.simulated_review);
@@ -749,8 +783,8 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queries.getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(queries.getByText(en.send.text.network)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.network_fee)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.base_kind)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 
 			await showOperations(queries);
 
@@ -767,7 +801,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
 			expect(getByTestId('simulated-sol-delta')).toHaveTextContent('-0.01 SOL');
-			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
 		});
 	});
 
