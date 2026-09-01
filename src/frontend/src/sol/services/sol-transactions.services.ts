@@ -176,9 +176,18 @@ export const fetchSolTransactionsForSignature = async ({
 
 	// What each account held going in, so a close can say what it hands back: the instruction
 	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
+	const balances = preBalances ?? [];
+
 	const accountLamports = parsedAccountKeys.reduce<Record<SolAddress, bigint>>(
-		(acc, { pubkey }, index) =>
-			index < (preBalances ?? []).length ? { ...acc, [pubkey]: (preBalances ?? [])[index] } : acc,
+		(acc, { pubkey }, index) => {
+			const lamports = balances[index];
+
+			if (nonNullish(lamports)) {
+				acc[pubkey] = lamports;
+			}
+
+			return acc;
+		},
 		{}
 	);
 

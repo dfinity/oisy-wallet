@@ -133,6 +133,36 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
 	});
 
+	// A message that opens one account and closes another charges the difference, and a refund
+	// larger than the rent must not read as a negative fee.
+	it('should net the rent against what the message closes', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'opened', rent: 2_039_280n },
+					{ kind: 'closeTokenAccount' as const, account: 'closed', returned: 1_000_000n }
+				]
+			}
+		});
+
+		expect(getByTestId('ata-fee')).toHaveTextContent('0.00103928');
+	});
+
+	it('should charge nothing when the message closes more than it opens', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{ kind: 'createTokenAccount' as const, account: 'opened', rent: 2_039_280n },
+					{ kind: 'closeTokenAccount' as const, account: 'closed', returned: 9_000_000n }
+				]
+			}
+		});
+
+		expect(queryByTestId('ata-fee')).not.toBeInTheDocument();
+	});
+
 	it('should charge no rent when the message opens no account', () => {
 		const { queryByTestId } = render(SolWalletConnectSignReview, {
 			props: { ...props, instructions: [{ kind: 'send' as const, amount: 1n }] }
