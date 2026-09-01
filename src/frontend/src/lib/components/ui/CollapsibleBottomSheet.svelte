@@ -62,7 +62,7 @@
 				{#snippet header()}
 					<div class="flex w-full items-center justify-between p-4">
 						{#if nonNullish(sheetTitle)}
-							<span class="text-lg font-bold">{sheetTitle}</span>
+							<h3 class="m-0 min-w-0 break-words text-xl font-bold">{sheetTitle}</h3>
 						{/if}
 						<ButtonIcon
 							ariaLabel={$i18n.core.alt.close_details}
