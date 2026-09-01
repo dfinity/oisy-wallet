@@ -82,7 +82,11 @@ const simulate = async ({
 	const accountLamports = addresses.reduce<Record<SolAddress, bigint>>((acc, account, index) => {
 		const lamports = preAccounts[index]?.lamports;
 
-		return nonNullish(lamports) ? { ...acc, [account]: lamports } : acc;
+		if (nonNullish(lamports)) {
+			acc[account] = lamports;
+		}
+
+		return acc;
 	}, {});
 
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
