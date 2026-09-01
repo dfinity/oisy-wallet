@@ -297,7 +297,19 @@ const dropDuplicateSolTransactions = (
 
 		// The tokens the transaction is about: both sides of a swap, the single side of everything
 		// else. A token outside this set was only brushed, and its row would describe nothing.
-		const subjects = [summary?.spent, summary?.received].filter(nonNullish);
+		const stated = [summary?.spent, summary?.received].filter(nonNullish);
+
+		// A transaction OISY could not reduce still moved what it moved, and it earns a row per
+		// token exactly as a swap does. Without this it kept one row, arbitrarily the first, which
+		// said "Interaction" over an amount belonging to whichever token happened to come first.
+		//
+		// The net of a token that only paid the fee is zero, so the fee alone never earns a row.
+		const subjects =
+			stated.length > 0
+				? stated
+				: ((transaction as SolTransactionUi).netChanges ?? []).filter(
+						({ delta }) => delta !== ZERO
+					);
 
 		// One row per subject, matched to the token that names it. A subject the merged list has no
 		// row for simply yields none.

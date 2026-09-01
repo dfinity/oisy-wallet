@@ -42,8 +42,8 @@
 </script>
 
 <!--
-  UTXO selection for a Bitcoin-source swap, mounted *above* the quote fan-out rather than
-  inside the wizard. Two reasons:
+  UTXO selection for a Bitcoin-source swap, mounted in `SwapModalWizardSteps` — above both
+  the quote fan-out and the per-step `{#key}`, rather than inside the wizard. Three reasons:
 
   - The BTC → ckBTC quote prices the Bitcoin network fee from `allUtxosStore`,
     `feeRatePercentilesStore` and `btcPendingSentTransactionsStore`, and it reads them
@@ -52,6 +52,10 @@
     quote coming back empty and the form briefly claiming no swap is offered.
   - The form needs a fee before any offer exists, for the Max button and the amount
     validation. `UtxosFeeLoader` prices a default amount on mount, so it has one.
+  - The teardown below, and the `UtxosFeeContexts` store, must outlive a step change. Below
+    the `{#key}` they did not: walking from the form to Review cleared all three stores and
+    handed Review a fresh empty fee store, so a confirmation before the refill landed failed
+    on a missing fee.
 
   The loader is rendered beside the content, not around it, so that switching the source
   token away from Bitcoin unmounts the loader without also remounting the swap flow.

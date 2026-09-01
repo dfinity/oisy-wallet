@@ -1,6 +1,15 @@
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
-import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+import {
+	deriveSolTransactionSummary,
+	formatSolInstructionSummary,
+	formatSolTransactionSummary
+} from '$sol/utils/sol-transaction-summary.utils';
+import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 
@@ -126,6 +135,76 @@ describe('sol-transaction-summary.utils', () => {
 					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
+		});
+	});
+
+	describe('formatSolTransactionSummary', () => {
+		const format = (summary: SolTransactionSummary): string =>
+			formatSolTransactionSummary({
+				summary,
+				i18n: en,
+				symbolOf: (tokenAddress) => tokenAddress ?? 'SOL',
+				amountOf: ({ delta }) => `${delta < ZERO ? -delta : delta}`
+			});
+
+		// The figure is in the amount column beside it, and saying it twice reads as two movements.
+		it('should say a send and a receive as a word', () => {
+			expect(format({ kind: 'send', spent: { delta: -1n } })).toBe(en.send.text.send);
+			expect(format({ kind: 'receive', received: { delta: 1n } })).toBe(en.receive.text.receive);
+		});
+
+		// In a day of swaps the pair is the only thing telling one row from another. The figures
+		// stay out: the amount column beside the sentence carries them.
+		it('should say a swap as its pair, without the figures', () => {
+			expect(
+				format({
+					kind: 'swap',
+					spent: { delta: -5n, tokenAddress: 'USDC' },
+					received: { delta: 7n, tokenAddress: 'RAY' }
+				})
+			).toBe('Swap USDC to RAY');
+		});
+
+		// The asset never left, so the amount column shows zero and the sentence is the only place
+		// the figure that moved can appear.
+		it('should say a self-transfer with its amount', () => {
+			expect(format({ kind: 'self', spent: { delta: -3n, tokenAddress: 'USDC' } })).toBe(
+				'Self-transfer 3 USDC'
+			);
+		});
+
+		it('should fall back to a word for a transaction it cannot reduce', () => {
+			expect(format({ kind: 'other' })).toBe(en.transaction.text.kind_other);
+		});
+	});
+
+	describe('formatSolInstructionSummary', () => {
+		const detailOf = (instruction: SolInstructionSummary): string | undefined =>
+			formatSolInstructionSummary({
+				instruction,
+				i18n: en,
+				symbolOf: (tokenAddress) => tokenAddress ?? 'SOL',
+				decimalsOf: () => SOLANA_DEFAULT_DECIMALS
+			}).detail;
+
+		// Closing hands back the account's whole balance. For a wrapped SOL account that is the
+		// rent plus the SOL that was wrapped, so calling it rent understates it by the wrapping.
+		it('should say what a close hands back when the amount is known', () => {
+			expect(detailOf({ kind: 'closeTokenAccount', returned: 5_002_039_280n })).toBe(
+				'5.00203928 SOL returned to your wallet'
+			);
+		});
+
+		it('should fall back to naming the rent when the amount is not known', () => {
+			expect(detailOf({ kind: 'closeTokenAccount' })).toBe(
+				en.transaction.text.instruction_rent_returned
+			);
+		});
+
+		it('should say the same of an unwrap, which is a close', () => {
+			expect(detailOf({ kind: 'unwrap', returned: 2_039_280n })).toBe(
+				'0.00203928 SOL returned to your wallet'
+			);
 		});
 	});
 });

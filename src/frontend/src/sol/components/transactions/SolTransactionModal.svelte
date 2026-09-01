@@ -28,9 +28,12 @@
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 	import { findEnabledSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -68,10 +71,27 @@
 				})
 			: undefined;
 
+	// The mints this modal mentions, so a placeholder is numbered against the others beside it and
+	// against the same list the instruction tab counts off.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokens: $enabledSplTokens,
+			networkId: token?.network.id ?? SOLANA_TOKEN.network.id,
+			metadata: $splTokenMetadataStore
+		})
+	);
+
 	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (splToken(tokenAddress)?.symbol ?? $i18n.transaction.text.unknown_token);
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $enabledSplTokens,
+			networkId: token?.network.id ?? SOLANA_TOKEN.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
 
 	const decimalsOf = (change: SolNetBalanceChange): number =>
 		change.decimals ??
@@ -79,26 +99,34 @@
 			? SOLANA_TOKEN.decimals
 			: (splToken(change.tokenAddress)?.decimals ?? 0));
 
-	// The hero speaks in the summary's terms: the word is the kind, the figure is the main change
-	// in its own token, and a swap shows the pair. Records without a summary keep the old rendering.
+	// The bare figure. The sentence appends the symbol itself, and the hero title pairs it with
+	// one below.
+	const figureOf = (change: SolNetBalanceChange): string => {
+		const decimals = decimalsOf(change);
+
+		return formatToken({
+			value: absBigInt(change.delta),
+			unitName: decimals,
+			displayDecimals: decimals
+		});
+	};
+
+	// The same sentence the rows carry, so a transaction reads identically wherever it is met.
+	// The figure below it is the detail this view exists for. Records without a summary keep the
+	// old rendering.
 	let kindLabel = $derived(
-		isNullish(summary)
-			? undefined
-			: summary.kind === 'send'
-				? $i18n.send.text.send
-				: summary.kind === 'receive'
-					? $i18n.receive.text.receive
-					: summary.kind === 'swap'
-						? $i18n.swap.text.swap
-						: $i18n.transaction.text.kind_other
+		nonNullish(summary)
+			? formatSolTransactionSummary({
+					summary,
+					i18n: $i18n,
+					symbolOf,
+					amountOf: figureOf
+				})
+			: undefined
 	);
 
 	const heroAmount = (change: SolNetBalanceChange): string =>
-		`${formatToken({
-			value: absBigInt(change.delta),
-			unitName: decimalsOf(change),
-			displayDecimals: decimalsOf(change)
-		})} ${symbolOf(change.tokenAddress)}`;
+		`${figureOf(change)} ${symbolOf(change.tokenAddress)}`;
 
 	// The token the transaction is about, which is not always the token whose page opened the
 	// modal: a USD1 send opened from the SOL page is still a USD1 send, and showing the SOL logo

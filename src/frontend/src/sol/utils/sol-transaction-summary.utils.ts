@@ -1,3 +1,4 @@
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -11,7 +12,9 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-const flattenInstructions = (instructions: SolInstructionSummary[]): SolInstructionSummary[] =>
+export const flattenInstructions = (
+	instructions: SolInstructionSummary[]
+): SolInstructionSummary[] =>
 	instructions.flatMap((instruction) => [
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
@@ -178,11 +181,66 @@ export const deriveSolTransactionSummary = ({
 };
 
 /**
+ * One transaction summary as the sentence that names it.
+ *
+ * A swap says its pair, because in a day of swaps that is the only thing telling one row from
+ * another. Everything else is a word. No figures anywhere but the self-transfer, whose net is zero
+ * by definition: the amount column beside the sentence carries them, and saying them twice reads
+ * as two movements.
+ *
+ * The symbols and the formatting come from the caller, since what a mint is called depends on the
+ * view asking: a list numbers its unnamed mints against the others beside them.
+ */
+export const formatSolTransactionSummary = ({
+	summary: { kind, spent, received },
+	i18n,
+	symbolOf,
+	amountOf
+}: {
+	summary: SolTransactionSummary;
+	i18n: I18n;
+	symbolOf: (tokenAddress: string | undefined) => string;
+	amountOf: (change: SolNetBalanceChange) => string;
+}): string => {
+	if (kind === 'send') {
+		return i18n.send.text.send;
+	}
+
+	if (kind === 'receive') {
+		return i18n.receive.text.receive;
+	}
+
+	// The asset never left the wallet, so the amount column shows the zero it netted to and the
+	// sentence is the only place the figure that moved can appear.
+	if (kind === 'self') {
+		return nonNullish(spent)
+			? replacePlaceholders(i18n.transaction.text.summary_self, {
+					$amount: amountOf(spent),
+					$symbol: symbolOf(spent.tokenAddress)
+				})
+			: i18n.transaction.text.kind_other;
+	}
+
+	// The pair, without the figures: the amount column beside the sentence already carries them,
+	// and one row of a swap shows one of the two anyway.
+	if (kind === 'swap') {
+		return nonNullish(spent) && nonNullish(received)
+			? replacePlaceholders(i18n.transaction.text.summary_swap, {
+					$spent_symbol: symbolOf(spent.tokenAddress),
+					$received_symbol: symbolOf(received.tokenAddress)
+				})
+			: i18n.swap.text.swap;
+	}
+
+	return i18n.transaction.text.kind_other;
+};
+
+/**
  * One instruction summary as a sentence with an optional detail, composed here so the component
  * stays a renderer. The children of a route are the caller's to indent, not this function's.
  */
 export const formatSolInstructionSummary = ({
-	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent },
+	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent, returned },
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -229,10 +287,22 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// Closing hands back the account's whole balance, which for a wrapped SOL account is the rent
+	// plus the SOL that was wrapped. Saying "rent" for that understates it by whatever was wrapped.
+	const returnedDetail = nonNullish(returned)
+		? replacePlaceholders(i18n.transaction.text.instruction_returned, {
+				$amount: formatToken({
+					value: returned,
+					unitName: SOLANA_DEFAULT_DECIMALS,
+					displayDecimals: SOLANA_DEFAULT_DECIMALS
+				})
+			})
+		: i18n.transaction.text.instruction_rent_returned;
+
 	if (kind === 'unwrap') {
 		return {
 			text: i18n.transaction.text.instruction_unwrap,
-			detail: i18n.transaction.text.instruction_rent_returned
+			detail: returnedDetail
 		};
 	}
 
@@ -252,7 +322,7 @@ export const formatSolInstructionSummary = ({
 	if (kind === 'closeTokenAccount') {
 		return {
 			text: i18n.transaction.text.instruction_close_account,
-			detail: i18n.transaction.text.instruction_rent_returned
+			detail: returnedDetail
 		};
 	}
 

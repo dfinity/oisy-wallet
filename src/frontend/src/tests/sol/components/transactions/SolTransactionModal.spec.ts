@@ -186,7 +186,8 @@ describe('SolTransactionModal', () => {
 			expect(getByText(shortenWithMiddleEllipsis({ text: mockSolAddress2 }))).toBeInTheDocument();
 		});
 
-		it('should show the pair at the ends of a swap in the hero', () => {
+		// The sentence the rows carry, over the figures this view exists to show.
+		it('should show the same sentence as the rows, over the pair, in the hero', () => {
 			const { getByText } = render(SolTransactionModal, {
 				props: {
 					transaction: {
@@ -201,7 +202,7 @@ describe('SolTransactionModal', () => {
 				}
 			});
 
-			expect(getByText(en.swap.text.swap)).toBeInTheDocument();
+			expect(getByText(`Swap SOL to ${en.transaction.text.unknown_token}`)).toBeInTheDocument();
 			expect(getByText(/1 SOL → 0\.046099/)).toBeInTheDocument();
 		});
 
@@ -255,5 +256,33 @@ describe('SolTransactionModal', () => {
 
 			expect(getByText(en.transaction.text.tab_unavailable)).toBeInTheDocument();
 		});
+	});
+
+	// Two rows both reading "Unknown token" are worse than an address: nothing tells them apart.
+	// The numbering counts off the mints this modal shows, in the order it shows them.
+	it('should number the mints it cannot name', () => {
+		const { getByText } = render(SolTransactionModal, {
+			props: {
+				transaction: {
+					...mockSolTransactionUi,
+					summary: {
+						kind: 'swap' as const,
+						spent: { delta: -5n, tokenAddress: 'first-unnamed', decimals: 0 },
+						received: { delta: 7n, tokenAddress: 'second-unnamed', decimals: 0 }
+					},
+					netChanges: [
+						{ delta: -5n, tokenAddress: 'first-unnamed', decimals: 0 },
+						{ delta: 7n, tokenAddress: 'second-unnamed', decimals: 0 }
+					]
+				},
+				token: SOLANA_TOKEN
+			}
+		});
+
+		expect(
+			getByText(
+				`Swap ${en.transaction.text.unknown_token} 1 to ${en.transaction.text.unknown_token} 2`
+			)
+		).toBeInTheDocument();
 	});
 });

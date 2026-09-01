@@ -35,8 +35,10 @@
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
+	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -74,7 +76,6 @@
 
 	let signWithSending = $derived(method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION);
 
-	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
@@ -82,6 +83,8 @@
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
+	let instructions = $state<SolInstructionSummary[] | undefined>();
+	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
@@ -92,7 +95,6 @@
 	const updateData = async () => {
 		try {
 			({
-				amount,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -100,6 +102,8 @@
 				prioritizationFee,
 				prioritizationFeeEstimate,
 				preview,
+				instructions,
+				messageSummary,
 				parties
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
@@ -219,13 +223,14 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				{amount}
 				{application}
 				approveDisabled={!decoded}
 				{data}
 				destination={destination ?? ''}
 				feeToken={token}
+				{instructions}
 				isApproval={isApproval ?? false}
+				{messageSummary}
 				onApprove={sign}
 				onReject={reject}
 				{parties}

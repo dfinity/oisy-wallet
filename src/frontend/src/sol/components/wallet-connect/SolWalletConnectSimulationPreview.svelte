@@ -10,11 +10,9 @@
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
-	import { SolanaNetworks } from '$sol/types/network';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 
 	interface Props {
@@ -36,17 +34,12 @@
 	// Mints nothing can name, in the order they appear. The wallet's own list answers first, then
 	// the name a Token-2022 mint carries in its own account; the numbered placeholder is what is
 	// left when neither does.
-	let networkMetadata = $derived(
-		$splTokenMetadataStore[mapNetworkIdToNetwork(feeToken.network.id) ?? SolanaNetworks.mainnet] ??
-			{}
-	);
-
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: tokenDeltas.map(({ tokenAddress }) => tokenAddress),
 			tokens: $enabledSplTokens,
 			networkId: feeToken.network.id,
-			metadata: networkMetadata
+			metadata: $splTokenMetadataStore
 		})
 	);
 
@@ -55,7 +48,7 @@
 			tokenAddress,
 			tokens: $enabledSplTokens,
 			networkId: feeToken.network.id,
-			metadata: networkMetadata,
+			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
 			unknownTokenLabel: $i18n.transaction.text.unknown_token,
 			nativeSymbol: feeToken.symbol

@@ -26,6 +26,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import { loadSolProgramNames } from '$sol/services/sol-program-name.services';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
@@ -113,19 +114,30 @@ export const decode = async ({
 		})
 	]);
 
-	const { preview, parties: simulatedParties } = simulation ?? {};
+	const {
+		preview,
+		instructions: simulatedInstructions,
+		messageSummary,
+		parties: simulatedParties
+	} = simulation ?? {};
 
-	// Name the mints the review is about to show. Best effort and awaited, since the review is
-	// synchronous and a name that landed after the modal opened would arrive too late to read.
-	await loadSplTokenMetadata({
-		tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
-		network: solNetwork
-	});
+	// Name the mints and the programs the review is about to show. Best effort and awaited, since
+	// the review is synchronous and a name that landed after the modal opened would arrive too late
+	// to read.
+	const [namedInstructions] = await Promise.all([
+		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
+		loadSplTokenMetadata({
+			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			network: solNetwork
+		})
+	]);
 
 	const mapped = {
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
-		...(nonNullish(preview) && { preview })
+		...(nonNullish(preview) && { preview }),
+		...(nonNullish(simulatedInstructions) && { instructions: namedInstructions }),
+		...(nonNullish(messageSummary) && { messageSummary })
 	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is

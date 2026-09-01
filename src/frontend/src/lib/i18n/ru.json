@@ -1223,6 +1223,10 @@
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
 			"chain_fusion_minimum_amount": "",
+			"oisy_trade_minimum_notional": "",
+			"oisy_trade_deposit_fee": "",
+			"oisy_trade_taker_fee": "",
+			"oisy_trade_withdrawal_fee": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
@@ -1248,7 +1252,11 @@
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
-			"near_intents_quote_expired": ""
+			"near_intents_quote_expired": "",
+			"oisy_trade_order_killed": "",
+			"oisy_trade_settlement_unresolved": "",
+			"oisy_trade_order_not_placed": "",
+			"oisy_trade_recovery_failed": ""
 		}
 	},
 	"buy": {
@@ -1552,6 +1560,14 @@
 			"estimated_inter_network": "Примерная межсетевая комиссия",
 			"estimated_eth": "Примерная комиссия Ethereum",
 			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
+			"estimated_fee_eth": "",
+			"priority": "",
+			"priority_slow": "",
+			"priority_slow_description": "",
+			"priority_normal": "",
+			"priority_normal_description": "",
+			"priority_fast": "",
+			"priority_fast_description": "",
 			"convert_fee": "Комиссия за обмен",
 			"convert_inter_network_fee": "Межсетевая комиссия",
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
@@ -1562,6 +1578,9 @@
 			"network_fee": "Сетевая комиссия",
 			"approval_fee": "Комиссия за одобрение",
 			"prioritization_fee": ""
+		},
+		"info": {
+			"priority": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."
@@ -1608,6 +1627,7 @@
 			"network": "Сеть",
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
+			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"simulated_review": "",
@@ -1628,6 +1648,8 @@
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
@@ -1993,6 +2015,7 @@
 			"instruction_route": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
+			"instruction_returned": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Статус",
