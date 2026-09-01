@@ -84,9 +84,6 @@
 			{/snippet}
 
 			{#snippet trigger({ open })}
-				<!-- Both buttons live inside the send <form>, and Button defaults to type="submit".
-				     Left as submit, opening or closing the sheet submits the form and trips HTML5
-				     validation on the still-empty amount field. -->
 				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
 					<span class="flex items-center gap-1">
 						{selectedName}
