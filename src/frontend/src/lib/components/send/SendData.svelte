@@ -13,7 +13,8 @@
 		amount?: bigint;
 		token: OptionToken;
 		exchangeRate?: number;
-		balance: OptionBalance;
+		// Only read where the balance row is shown, so a caller that hides it need not have one.
+		balance?: OptionBalance;
 		source: string;
 		application: string;
 		// A caller whose decode produced no amount has nothing to say in the amount and balance rows,
