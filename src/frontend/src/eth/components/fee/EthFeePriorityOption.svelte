@@ -49,8 +49,6 @@
 
 	<span class="flex min-w-0 items-baseline gap-2">
 		<span class="font-bold whitespace-nowrap text-primary">{name} {emoji}</span>
-		<!-- The descriptor yields before the fee does: it is the only part that can be cut without
-		     losing what the row costs or which tier it is. -->
 		<span class="min-w-0 truncate text-sm text-tertiary">{description}</span>
 	</span>
 
