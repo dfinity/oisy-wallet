@@ -1,9 +1,12 @@
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import {
 	deriveSolTransactionSummary,
+	formatSolInstructionSummary,
 	formatSolTransactionSummary
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -172,6 +175,36 @@ describe('sol-transaction-summary.utils', () => {
 
 		it('should fall back to a word for a transaction it cannot reduce', () => {
 			expect(format({ kind: 'other' })).toBe(en.transaction.text.kind_other);
+		});
+	});
+
+	describe('formatSolInstructionSummary', () => {
+		const detailOf = (instruction: SolInstructionSummary): string | undefined =>
+			formatSolInstructionSummary({
+				instruction,
+				i18n: en,
+				symbolOf: (tokenAddress) => tokenAddress ?? 'SOL',
+				decimalsOf: () => SOLANA_DEFAULT_DECIMALS
+			}).detail;
+
+		// Closing hands back the account's whole balance. For a wrapped SOL account that is the
+		// rent plus the SOL that was wrapped, so calling it rent understates it by the wrapping.
+		it('should say what a close hands back when the amount is known', () => {
+			expect(detailOf({ kind: 'closeTokenAccount', returned: 5_002_039_280n })).toBe(
+				'5.00203928 SOL returned to your wallet'
+			);
+		});
+
+		it('should fall back to naming the rent when the amount is not known', () => {
+			expect(detailOf({ kind: 'closeTokenAccount' })).toBe(
+				en.transaction.text.instruction_rent_returned
+			);
+		});
+
+		it('should say the same of an unwrap, which is a close', () => {
+			expect(detailOf({ kind: 'unwrap', returned: 2_039_280n })).toBe(
+				'0.00203928 SOL returned to your wallet'
+			);
 		});
 	});
 });
