@@ -72,7 +72,7 @@
 </script>
 
 {#if nonNullish($feePrioritiesStore) && nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
-	<div data-tid={ETH_FEE_PRIORITY}>
+	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
 				<span class="mr-1 flex items-center gap-1 text-sm text-tertiary sm:mr-2">
