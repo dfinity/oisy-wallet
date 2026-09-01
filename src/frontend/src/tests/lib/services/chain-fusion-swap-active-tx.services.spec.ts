@@ -69,13 +69,16 @@ vi.mock('$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env', async (importOriginal)
 
 // The ck token data carries no mainnet ckBTC entry under `DFX_NETWORK=local`, which would
 // leave the minter without a ledger index to settle the double-absent deposit against.
+// Typed rather than cast, so a change to the required `IcCkInterface` fields breaks here
+// instead of letting the lookup read a shape the env can no longer produce.
 vi.mock('$env/tokens/tokens-icrc/tokens.icrc.ck.env', async (importOriginal) => ({
 	...(await importOriginal<typeof ckEnv>()),
 	PUBLIC_ICRC_TOKENS: [
 		{
-			minterCanisterId: MINTER_CANISTER_ID,
-			indexCanisterId: INDEX_CANISTER_ID
-		} as unknown as IcCkInterface
+			ledgerCanisterId: IC_CKBTC_LEDGER,
+			indexCanisterId: INDEX_CANISTER_ID,
+			minterCanisterId: MINTER_CANISTER_ID
+		} satisfies IcCkInterface
 	]
 }));
 
@@ -95,15 +98,17 @@ vi.mock('$lib/services/active-user-transactions.services', () => ({
 	applyActiveUserTransactionPollUpdate: vi.fn()
 }));
 
-// Hoisted: the canister-id factory above runs before the module body.
-const { MINTER_CANISTER_ID, BITCOIN_CANISTER_ID, INDEX_CANISTER_ID } = vi.hoisted(() => ({
-	MINTER_CANISTER_ID: 'sv3dd-oaaaa-aaaar-qacoa-cai',
-	BITCOIN_CANISTER_ID: 'ghsi2-tqaaa-aaaan-aaaca-cai',
-	INDEX_CANISTER_ID: 'n5wcd-faaaa-aaaar-qaaea-cai'
-}));
+// Hoisted: the canister-id factories above run before the module body.
+const { MINTER_CANISTER_ID, BITCOIN_CANISTER_ID, INDEX_CANISTER_ID, IC_CKBTC_LEDGER } = vi.hoisted(
+	() => ({
+		MINTER_CANISTER_ID: 'sv3dd-oaaaa-aaaar-qacoa-cai',
+		BITCOIN_CANISTER_ID: 'ghsi2-tqaaa-aaaan-aaaca-cai',
+		INDEX_CANISTER_ID: 'n5wcd-faaaa-aaaar-qaaea-cai',
+		IC_CKBTC_LEDGER: 'mxzaz-hqaaa-aaaar-qaada-cai'
+	})
+);
 
 const CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
-const IC_CKBTC_LEDGER = 'mxzaz-hqaaa-aaaar-qaada-cai';
 
 // `mockUtxo` sits at height 1 000; the ckBTC minter's floor is six confirmations.
 const DEPOSIT_TXID = utxoTxIdToString(mockUtxo.outpoint.txid);
