@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -230,16 +230,19 @@
 {/snippet}
 
 <ContentWithToolbar>
-	<!-- One notice about how the review was obtained, not two. What varies is what is actually
-	     known: a message that could not be decoded is a warning either way, and says the review is
-	     simulated only when a simulation was in fact obtained, since one can fail. A message that
-	     decoded still shows simulated figures, which is a caveat and no more. -->
+	<!-- One notice, whichever fits. A message OISY could not decode is a warning either way, and
+	     says the review is simulated only when a simulation was in fact obtained, since one can
+	     fail. A message that decoded but does not reduce to a plain transfer the run agrees with
+	     is the case the user has to read the detail for, so it says so. A message that does
+	     reduce still shows simulated figures, which is a caveat and no more. -->
 	{#if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
 				? $i18n.wallet_connect.text.unreviewed_instructions_simulated
 				: $i18n.wallet_connect.text.unreviewed_instructions}
 		</MessageBox>
+	{:else if isNullish(statedSummary)}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
 	{:else if nonNullish(preview)}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
