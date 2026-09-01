@@ -1560,6 +1560,7 @@
 			"estimated_inter_network": "Comisión Inter-red Estimada",
 			"estimated_eth": "Comisión de Ethereum Estimada",
 			"max_fee_eth": "Comisión máx. <small>(probablemente en &lt; 30 segundos)</small>",
+			"estimated_fee_eth": "",
 			"convert_fee": "Comisión de conversión",
 			"convert_inter_network_fee": "Comisión inter-red",
 			"convert_btc_network_fee": "Comisión de red de Bitcoin",
