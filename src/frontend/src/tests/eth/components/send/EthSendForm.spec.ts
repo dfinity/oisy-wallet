@@ -35,7 +35,8 @@ describe('EthSendForm', () => {
 		feeStore,
 		feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 		feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-		feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+		feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+		feeExchangeRateStore: writable(undefined)
 	});
 
 	// The priority row only renders once the network has offered tiers, so seed them: otherwise

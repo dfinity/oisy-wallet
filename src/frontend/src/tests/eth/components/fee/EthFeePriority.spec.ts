@@ -11,7 +11,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
-import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
@@ -38,7 +38,10 @@ describe('EthFeePriority', () => {
 			gas
 		});
 
-		const sendEthFeePriority = writable(Priority.NORMAL);
+		// A real send context rather than a cast partial: the component only reads
+		// `sendEthFeePriority`, but casting would hide it if that ever changed.
+		const sendContext = initSendContext({ token: ETHEREUM_TOKEN });
+		const { sendEthFeePriority } = sendContext;
 
 		const feeContext = initEthFeeContext({
 			feeStore,
@@ -54,7 +57,7 @@ describe('EthFeePriority', () => {
 
 		const context = new Map<symbol, unknown>();
 		context.set(ETH_FEE_CONTEXT_KEY, feeContext);
-		context.set(SEND_CONTEXT_KEY, { sendEthFeePriority } as unknown as SendContext);
+		context.set(SEND_CONTEXT_KEY, sendContext);
 
 		return { context, sendEthFeePriority };
 	};
