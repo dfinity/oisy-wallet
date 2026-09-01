@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
-		amount: 1_000_000n,
 		application: 'https://example.com',
 		destination: mockSolAddress2,
 		source: mockSolAddress,
@@ -621,7 +620,6 @@ describe('SolWalletConnectSignReview', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
-					amount: 1n,
 					prioritizationFee: 1_000_000_001n,
 					prioritizationFeeEstimate: networkEstimate
 				}
@@ -773,17 +771,20 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	// The two rows describe what will be signed, which the simulation only predicts.
-	it('should render the amount and the balance of a decoded transfer', () => {
+	// A decoded amount is one movement out of however many the message makes, and on a swap it is
+	// one leg of the pair, stated as though it were the whole. The simulated changes below it say
+	// what actually moves, so the row contradicted them; the balance is the wallet's, not the
+	// message's, and says nothing about what is being signed.
+	it('should state neither an amount nor the wallet balance', () => {
 		balancesStore.set({ id: SOLANA_TOKEN.id, data: { data: 5_000_000_000n, certified: false } });
 
-		const { getByText, container } = render(SolWalletConnectSignReview, { props });
+		const { queryByText, container } = render(SolWalletConnectSignReview, { props });
 
-		expect(getByText(en.core.text.amount)).toBeInTheDocument();
-		expect(container.querySelector('#amount')).toHaveTextContent('0.001 SOL');
+		expect(queryByText(en.core.text.amount)).not.toBeInTheDocument();
+		expect(container.querySelector('#amount')).toBeNull();
 
-		expect(getByText(en.send.text.balance)).toBeInTheDocument();
-		expect(container.querySelector('#balance')).toHaveTextContent('5 SOL');
+		expect(queryByText(en.send.text.balance)).not.toBeInTheDocument();
+		expect(container.querySelector('#balance')).toBeNull();
 	});
 
 	// The delegate of an approval is not a recipient, so it keeps its own row even though the
