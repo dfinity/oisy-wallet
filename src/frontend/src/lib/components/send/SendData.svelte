@@ -13,7 +13,6 @@
 		amount?: bigint;
 		token: OptionToken;
 		exchangeRate?: number;
-		// Only read where the balance row is shown, so a caller that hides it need not have one.
 		balance?: OptionBalance;
 		source: string;
 		application: string;
