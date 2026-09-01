@@ -399,6 +399,36 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
+	// Where the list came from changes what it can claim: a run reveals the calls made inside
+	// other programs, a message states only its own.
+	describe('what the list is called', () => {
+		const withInstructions = {
+			...props,
+			instructions: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+		};
+
+		it('should call it simulated when it came from a run', async () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...withInstructions, simulatedInstructions: true }
+			});
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.wallet_connect.text.simulated_instructions)).toBeInTheDocument();
+		});
+
+		it('should call it plain when it came from the message', async () => {
+			const queries = render(SolWalletConnectSignReview, { props: withInstructions });
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.transaction.text.tab_instructions)).toBeInTheDocument();
+			expect(
+				queries.queryByText(en.wallet_connect.text.simulated_instructions)
+			).not.toBeInTheDocument();
+		});
+	});
+
 	it('should show no instruction list when the simulation produced none', async () => {
 		const queries = render(SolWalletConnectSignReview, { props });
 
