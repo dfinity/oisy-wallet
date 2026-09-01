@@ -237,16 +237,18 @@
 <ContentWithToolbar>
 	<!-- One notice, whichever fits. A message OISY could not decode is a warning either way, and
 	     says the review is simulated only when a simulation was in fact obtained, since one can
-	     fail. A message that decoded but does not reduce to a plain transfer the run agrees with
-	     is the case the user has to read the detail for, so it says so. A message that does
-	     reduce still shows simulated figures, which is a caveat and no more. -->
+	     fail. A message that decoded but does not reduce to a send, a receive or a swap the run
+	     agrees with is the case the user has to read the detail for, so it says so; it names the
+	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
+	     absence of a run has a warning of its own. A message that does reduce still shows
+	     simulated figures, which is a caveat and no more. -->
 	{#if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
 				? $i18n.wallet_connect.text.unreviewed_instructions_simulated
 				: $i18n.wallet_connect.text.unreviewed_instructions}
 		</MessageBox>
-	{:else if isNullish(statedSummary)}
+	{:else if nonNullish(preview) && !approveDisabled && isNullish(statedSummary)}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
 	{:else if nonNullish(preview)}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>

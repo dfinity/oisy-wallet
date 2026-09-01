@@ -47,12 +47,12 @@
 		value={priority}
 	/>
 
-	<span class="flex flex-col">
-		<span class="font-bold text-primary">{name} {emoji}</span>
-		<span class="text-sm text-tertiary">{description}</span>
+	<span class="flex min-w-0 items-baseline gap-2">
+		<span class="font-bold whitespace-nowrap text-primary">{name} {emoji}</span>
+		<span class="min-w-0 truncate text-sm text-tertiary">{description}</span>
 	</span>
 
-	<span class="ml-auto text-right">
+	<span class="ml-auto shrink-0 pl-2 text-right">
 		{#if nonNullish(fee)}
 			<FeeDisplay {decimals} {exchangeRate} feeAmount={fee} {symbol} />
 		{/if}

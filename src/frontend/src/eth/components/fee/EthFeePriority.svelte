@@ -72,7 +72,7 @@
 </script>
 
 {#if nonNullish($feePrioritiesStore) && nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
-	<div data-tid={ETH_FEE_PRIORITY}>
+	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
 				<span class="mr-1 flex items-center gap-1 text-sm text-tertiary sm:mr-2">
@@ -84,7 +84,7 @@
 			{/snippet}
 
 			{#snippet trigger({ open })}
-				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER}>
+				<Button link onclick={open} testId={ETH_FEE_PRIORITY_TRIGGER} type="button">
 					<span class="flex items-center gap-1">
 						{selectedName}
 						<IconExpandMore />
@@ -114,7 +114,7 @@
 			{/snippet}
 
 			{#snippet contentFooter(closeFn)}
-				<Button fullWidth onclick={closeFn}>{$i18n.core.text.done}</Button>
+				<Button fullWidth onclick={closeFn} type="button">{$i18n.core.text.done}</Button>
 			{/snippet}
 		</CollapsibleBottomSheet>
 	</div>
