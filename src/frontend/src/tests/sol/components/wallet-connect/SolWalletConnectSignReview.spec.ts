@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
-		amount: 1_000_000n,
 		application: 'https://example.com',
 		destination: mockSolAddress2,
 		source: mockSolAddress,
@@ -621,7 +620,6 @@ describe('SolWalletConnectSignReview', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
-					amount: 1n,
 					prioritizationFee: 1_000_000_001n,
 					prioritizationFeeEstimate: networkEstimate
 				}
