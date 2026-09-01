@@ -4,6 +4,9 @@ import {
 	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	MEMO_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -18,6 +21,10 @@ import * as solInstructionsComputeBudgetUtils from '$sol/utils/sol-instructions-
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import * as solInstructionsLookupTableUtils from '$sol/utils/sol-instructions-lookup-table.utils';
 import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
+import * as solInstructionsMemoUtils from '$sol/utils/sol-instructions-memo.utils';
+import { parseSolMemoInstruction } from '$sol/utils/sol-instructions-memo.utils';
+import * as solInstructionsStakeUtils from '$sol/utils/sol-instructions-stake.utils';
+import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import * as solInstructionsSystemUtils from '$sol/utils/sol-instructions-system.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import * as solInstructionsToken2022Utils from '$sol/utils/sol-instructions-token-2022.utils';
@@ -40,6 +47,14 @@ import {
 	getRequestUnitsInstruction,
 	getSetLoadedAccountsDataSizeLimitInstruction
 } from '@solana-program/compute-budget';
+import { getAddMemoInstruction } from '@solana-program/memo';
+import {
+	getAuthorizeInstruction,
+	getDelegateStakeInstruction,
+	getGetMinimumDelegationInstruction,
+	getWithdrawInstruction,
+	StakeAuthorize
+} from '@solana-program/stake';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -901,7 +916,9 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsTokenUtils, 'parseSolTokenInstruction');
 			vi.spyOn(solInstructionsToken2022Utils, 'parseSolToken2022Instruction');
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
+			vi.spyOn(solInstructionsStakeUtils, 'parseSolStakeInstruction');
 			vi.spyOn(solInstructionsLookupTableUtils, 'parseSolLookupTableInstruction');
+			vi.spyOn(solInstructionsMemoUtils, 'parseSolMemoInstruction');
 		});
 
 		it('should surface the directives of a Compute Budget instruction', () => {
@@ -1255,6 +1272,39 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		it('should ignore a Memo instruction', () => {
+			const instruction = getAddMemoInstruction({ memo: 'Deposit 42' });
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a Memo instruction addressed to the legacy program', () => {
+			const instruction = getAddMemoInstruction(
+				{ memo: 'Deposit 42' },
+				{ programAddress: address(MEMO_LEGACY_PROGRAM_ADDRESS) }
+			);
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// A memo cannot move value whatever its bytes say, so an undecodable one is still nothing
+		// to review rather than a hole in the review.
+		it('should ignore a Memo instruction that carries no data instead of throwing', () => {
+			const instruction: SolInstruction = {
+				programAddress: address(MEMO_PROGRAM_ADDRESS)
+			};
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
 		describe('with an Address Lookup Table instruction', () => {
 			const mockAuthority = createNoopSigner(address(mockSolAddress));
 
@@ -1329,6 +1379,75 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
+		describe('with a Stake instruction', () => {
+			const mockStakeAuthority = createNoopSigner(address(mockSolAddress));
+
+			it('should state a Withdraw instruction in full', () => {
+				const instruction = getWithdrawInstruction({
+					stake: address(mockSolAddress2),
+					recipient: address(mockSolAddress),
+					withdrawAuthority: mockStakeAuthority,
+					args: 5_000_000n
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({
+					amount: 5_000_000n,
+					source: mockSolAddress2,
+					destination: mockSolAddress
+				});
+
+				expect(parseSolStakeInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// Handing over the withdraw authority hands over everything the account holds, and the
+			// summary has no field that would show it.
+			it.each([StakeAuthorize.Staker, StakeAuthorize.Withdrawer])(
+				'should fail closed on an Authorize instruction (%s)',
+				(stakeAuthorize) => {
+					const instruction = getAuthorizeInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						arg0: address(mockSolAddress),
+						arg1: stakeAuthorize
+					});
+
+					expect(mapSolInstruction(instruction)).toStrictEqual({
+						amount: undefined,
+						ambiguous: true
+					});
+
+					expect(console.warn).not.toHaveBeenCalled();
+				}
+			);
+
+			it('should ignore a GetMinimumDelegation instruction', () => {
+				const instruction = getGetMinimumDelegationInstruction();
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			// Decoded, but with no vocabulary to state it, so the review says it is incomplete
+			// rather than showing a message that delegates stake as one that does nothing.
+			it('should mark a DelegateStake instruction unreviewed', () => {
+				const instruction = getDelegateStakeInstruction({
+					stake: address(mockSolAddress2),
+					vote: address(mockSolAddress),
+					unused: address(mockSolAddress),
+					stakeAuthority: mockStakeAuthority
+				});
+
+				expect(mapSolInstruction(instruction)).toStrictEqual({
+					amount: undefined,
+					unreviewed: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+		});
+
 		it('should return undefined for unrecognized instruction', () => {
 			const [mockInstruction1, mockInstruction2] = mockInstructions.filter(
 				({ programAddress }) =>
@@ -1337,7 +1456,10 @@ describe('sol-instructions.utils', () => {
 						SYSTEM_PROGRAM_ADDRESS,
 						TOKEN_PROGRAM_ADDRESS,
 						TOKEN_2022_PROGRAM_ADDRESS,
-						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS
+						ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
+						MEMO_PROGRAM_ADDRESS,
+						MEMO_LEGACY_PROGRAM_ADDRESS,
+						STAKE_PROGRAM_ADDRESS
 					].includes(programAddress)
 			);
 
@@ -1356,6 +1478,8 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
 			expect(parseSolAtaInstruction).not.toHaveBeenCalled();
 			expect(parseSolLookupTableInstruction).not.toHaveBeenCalled();
+			expect(parseSolMemoInstruction).not.toHaveBeenCalled();
+			expect(parseSolStakeInstruction).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`

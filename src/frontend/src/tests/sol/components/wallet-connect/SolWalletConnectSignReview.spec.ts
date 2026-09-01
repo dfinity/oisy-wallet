@@ -210,6 +210,54 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queries.getAllByTestId('sol-instruction')).toHaveLength(2);
 	});
 
+	// The name is a label beside the address, not a replacement for it: the address is the part
+	// the user can check.
+	it('should show the name a program publishes for itself next to its address', async () => {
+		const queries = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: mockSolAddress2,
+						programName: 'jupiter',
+						children: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+					}
+				]
+			}
+		});
+
+		await showOperations(queries);
+
+		// The legs of the route render as instructions of their own underneath it.
+		const [route] = queries.getAllByTestId('sol-instruction');
+
+		expect(route).toHaveTextContent('jupiter');
+		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
+	});
+
+	it('should show only the address of a program that publishes no name', async () => {
+		const queries = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				instructions: [
+					{
+						kind: 'route' as const,
+						program: mockSolAddress2,
+						children: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+					}
+				]
+			}
+		});
+
+		await showOperations(queries);
+
+		const [route] = queries.getAllByTestId('sol-instruction');
+
+		expect(route).toHaveTextContent(shortenWithMiddleEllipsis({ text: mockSolAddress2 }));
+		expect(route).not.toHaveTextContent('jupiter');
+	});
+
 	// An unchecked transfer states no decimals, so without the simulated deltas the amount would
 	// be printed in raw base units: a hundredth of a token would read as ten thousand.
 	it('should scale an unlisted mint by the decimals the simulation reports', async () => {
