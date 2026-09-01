@@ -12,6 +12,7 @@ import {
 import type { EthAddress } from '$eth/types/address';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { decodeMintMemo, MINT_MEMO_CONVERT } from '$icp/utils/ckbtc-memo.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
@@ -361,6 +362,35 @@ const toUtxoStatusUtxo = (utxosStatus: CkBtcMinterDid.UtxoStatus): CkBtcMinterDi
 			: 'Tainted' in utxosStatus
 				? utxosStatus.Tainted
 				: utxosStatus.ValueTooSmall;
+
+/**
+ * The deposit a ckBTC mint credited, as the human-readable txid the row snapshots.
+ *
+ * The minter stamps every deposit it converts with a memo naming the outpoint it consumed,
+ * which is the only *durable* record that a deposit was credited: `get_known_utxos` and the
+ * deposit address both stop mentioning a UTXO the moment the minter spends it to fund a
+ * withdrawal — see `resolveChainFusionBtcMintOutcome`.
+ *
+ * `undefined` for anything that is not a deposit credit: a KYT-fee mint, a legacy 0- or
+ * 32-byte memo, a `Convert` memo without the outpoint, or a memo the decoder rejects. The
+ * throw is swallowed rather than logged because a foreign memo shape is not this row's
+ * problem — the account's whole mint history is scanned, most of it unrelated.
+ */
+export const toCkBtcMintDepositTxid = (memo: Uint8Array): string | undefined => {
+	try {
+		const decoded = decodeMintMemo(memo);
+
+		if (decoded[0] !== MINT_MEMO_CONVERT) {
+			return undefined;
+		}
+
+		const [, [txid]] = decoded;
+
+		return nonNullish(txid) ? utxoTxIdToString(txid) : undefined;
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
 
 // Minter and Bitcoin-canister UTXOs carry the txid in internal byte order; the
 // row snapshots the human-readable one the signer returned.

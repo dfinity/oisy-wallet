@@ -12,6 +12,7 @@ import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.prov
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
@@ -20,12 +21,13 @@ import {
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 } from '$evm/bsc/constants/bsc.constants';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-import type { FeeData } from 'ethers/providers';
+import { nonNullish } from '@dfinity/utils';
 
 const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
 
@@ -41,22 +43,18 @@ const getGasFeeFloor = (
 
 // The Gas API is a best-effort enhancement: it does not cover every chain we support
 // (Arbitrum Sepolia answers 400 "'421614' is not a supported chain id.") and it can be down.
-// Its suggestion is only ever merged upwards with the provider's own quote, so losing it only
-// makes the estimate coarser and must never block a send. Without the base fee, `estimatedGasFee`
-// falls back to the max fee, which overstates the cost rather than hiding it.
+// Everything it adds sits on top of the provider's own quote, so losing it only makes the estimate
+// coarser and must never block a send. Without the base fee, `estimatedGasFee` falls back to the
+// max fee, which overstates the cost rather than hiding it.
 const getSuggestedFeeDataBestEffort = async (
 	chainId: EthereumChainId
-): Promise<
-	Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & { baseFeePerGas: bigint | null }
-> => {
+): Promise<EthFeePriorities | undefined> => {
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
 	try {
 		return await getSuggestedFeeData();
 	} catch (err: unknown) {
 		consoleWarn(err);
-
-		return { maxFeePerGas: null, maxPriorityFeePerGas: null, baseFeePerGas: null };
 	}
 };
 
@@ -145,14 +143,19 @@ export const getEthFeeDataWithProvider = async ({
 	networkId,
 	chainId,
 	from,
-	to
+	to,
+	priority = EthFeePriority.NORMAL
 }: {
 	networkId: NetworkId;
 	chainId: bigint;
 	from: EthAddress;
 	to: EthAddress;
+	priority?: EthFeePriority;
 }): Promise<{
 	feeData: Omit<TransactionFeeData, 'gas'>;
+	// Undefined where the Gas API does not cover the chain: the provider's quote is then the only
+	// sample there is, so there are no priorities to choose between.
+	priorities: EthFeePriorities | undefined;
 	provider: InfuraProvider;
 	params: GetFeeData;
 }> => {
@@ -166,26 +169,46 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
-	const {
-		maxFeePerGas: suggestedMaxFeePerGas,
-		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas,
-		baseFeePerGas
-	} = await getSuggestedFeeDataBestEffort(chainId);
+	const suggested = await getSuggestedFeeDataBestEffort(chainId);
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
 
-	const feeData = {
-		...feeDataRest,
+	// The provider's own quote and the network floor are lower bounds on what will actually be
+	// accepted, so they apply to every priority, not only the selected one. Applying them once
+	// after selection would let a slow choice fall below what the chain relays.
+	const applyFloors = ({
+		maxFeePerGas: priorityMaxFeePerGas,
+		maxPriorityFeePerGas: priorityMaxPriorityFeePerGas
+	}: EthFeePerGas): EthFeePerGas => ({
 		maxFeePerGas:
-			maxBigInt(maxBigInt(maxFeePerGas, suggestedMaxFeePerGas), floorMaxFeePerGas) ?? null,
+			maxBigInt(maxBigInt(maxFeePerGas, priorityMaxFeePerGas), floorMaxFeePerGas) ?? null,
 		maxPriorityFeePerGas:
 			maxBigInt(
-				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
+				maxBigInt(maxPriorityFeePerGas, priorityMaxPriorityFeePerGas),
 				floorMaxPriorityFeePerGas
-			) ?? null,
-		baseFeePerGas
+			) ?? null
+	});
+
+	const priorities: EthFeePriorities | undefined = nonNullish(suggested)
+		? {
+				baseFeePerGas: suggested.baseFeePerGas,
+				perPriority: {
+					[EthFeePriority.SLOW]: applyFloors(suggested.perPriority[EthFeePriority.SLOW]),
+					[EthFeePriority.NORMAL]: applyFloors(suggested.perPriority[EthFeePriority.NORMAL]),
+					[EthFeePriority.FAST]: applyFloors(suggested.perPriority[EthFeePriority.FAST])
+				}
+			}
+		: undefined;
+
+	// With no sample to price the tiers against, the floors still apply: they are what the chain
+	// accepts, not what the Gas API suggested.
+	const feeData = {
+		...feeDataRest,
+		...(priorities?.perPriority[priority] ??
+			applyFloors({ maxFeePerGas: null, maxPriorityFeePerGas: null })),
+		baseFeePerGas: priorities?.baseFeePerGas ?? null
 	};
 
-	return { feeData, provider, params };
+	return { feeData, priorities, provider, params };
 };

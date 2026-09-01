@@ -168,7 +168,8 @@ describe('HarvestUnstakeWizard', () => {
 				...ctx,
 				maxGasFee: readable(undefined),
 				minGasFee: readable(undefined),
-				estimatedGasFee: readable(undefined)
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 		});
 
@@ -283,7 +284,8 @@ describe('HarvestUnstakeWizard', () => {
 				...ctx,
 				maxGasFee: readable(undefined),
 				minGasFee: readable(undefined),
-				estimatedGasFee: readable(undefined)
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 		});
 
