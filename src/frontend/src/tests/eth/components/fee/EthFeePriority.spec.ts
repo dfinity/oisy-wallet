@@ -14,7 +14,7 @@ import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { render, waitFor, within } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
 describe('EthFeePriority', () => {
@@ -160,10 +160,14 @@ describe('EthFeePriority', () => {
 	it('names the current choice in the collapsed header on a large screen', async () => {
 		const { context } = setup();
 
-		const { getByText } = render(EthFeePriority, { context });
+		const { getByTestId } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
-			expect(getByText(en.fee.text.priority_normal)).toBeInTheDocument();
+			// Scoped to the header: the options stay mounted while collapsed, so a document-wide
+			// query would keep passing if the header stopped naming the choice.
+			expect(
+				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_normal)
+			).toBeInTheDocument();
 		});
 	});
 
