@@ -133,9 +133,14 @@
 
 	// The programs the run went through, in the order it reached them and each named once. The
 	// message names none of them itself: a routed swap performs every call inside another program.
+	//
+	// Only the programs that moved something. An instruction the wallet could not read names its
+	// program too, and most transactions carry a couple that change nothing the user holds, so
+	// counting those here would bury the program that did the work among its housekeeping.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
+				.filter(({ kind }) => kind !== 'unknown')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
