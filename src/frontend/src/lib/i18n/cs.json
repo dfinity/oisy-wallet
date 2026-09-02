@@ -1577,7 +1577,10 @@
 			"transaction_fees": "Poplatky za transakci",
 			"network_fee": "Síťový poplatek",
 			"approval_fee": "Poplatek za schválení",
-			"prioritization_fee": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"info": {
 			"priority": ""
@@ -1630,6 +1633,8 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"simulated_instructions": "",
+			"multiple_operations": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",

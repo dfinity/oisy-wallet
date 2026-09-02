@@ -13,7 +13,8 @@ import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
-import { render, waitFor } from '@testing-library/svelte';
+import en from '$tests/mocks/i18n.mock';
+import { render, waitFor, within } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
 describe('EthFeePriority', () => {
@@ -135,6 +136,50 @@ describe('EthFeePriority', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.SLOW}`)).toBeInTheDocument();
+		});
+	});
+
+	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getByTestId, getByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+
+		getByTestId(ETH_FEE_PRIORITY_TRIGGER).click();
+
+		await waitFor(() => {
+			expect(getByText(en.core.text.done).closest('button')).toHaveAttribute('type', 'button');
+		});
+	});
+
+	it('names the current choice in the collapsed header on a large screen', async () => {
+		const { context } = setup();
+
+		const { getByTestId } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			// Scoped to the header: the options stay mounted while collapsed, so a document-wide
+			// query would keep passing if the header stopped naming the choice.
+			expect(
+				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_normal)
+			).toBeInTheDocument();
+		});
+	});
+
+	it('names the current choice once on a small screen', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getAllByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
 		});
 	});
 
