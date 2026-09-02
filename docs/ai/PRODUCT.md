@@ -358,7 +358,7 @@ A price that **crosses the book** (a sell at or below the best bid, a buy at or 
 
 The price field's own label follows the same line. "When 1 ICP reaches" / "drops to" holds only while the price is still ahead of the market; a crossing price and a resting price past current value both read as the immediate sale or purchase they effectively are ("Sell now, while 1 ICP ≥"), because a resting order priced past current value is what the bots monitoring the venue take first.
 
-The review step repeats the distinction. Beyond a **5% give-up — crossing or resting** — "Place order" stays disabled until the user ticks a confirmation checkbox. Each case gets its own copy: the crossing one acknowledges an immediate fill at a price worse than market, the resting one that the order may fill very soon at such a price, restated in full because nothing else on the review screen says an order priced to rest is likely to fill soon. Between 1% and 5% the form warns and the review does not block.
+The review step repeats the distinction. Beyond a **5% give-up — crossing or resting** — "Place order" stays disabled until the user ticks a confirmation checkbox. Each case gets its own one-line acknowledgement: the crossing one an immediate fill at a price worse than market, the resting one that the order may fill very soon at such a price. The side-specific warning itself stays on the form. Between 1% and 5% the form warns and the review does not block.
 
 A **fill-or-kill** order is the exception to all of this: it can only execute by crossing, so a FOK price that cannot cross is a blocking error ("it would be canceled") that disables Review and takes precedence over both warnings above.
 

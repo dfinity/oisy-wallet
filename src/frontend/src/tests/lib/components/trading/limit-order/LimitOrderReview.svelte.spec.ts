@@ -116,22 +116,21 @@ describe('LimitOrderReview', () => {
 	// yet gives up 10% versus current value.
 	const restingAgainstValue = { bid: 8, ask: 11, price: 9 };
 
-	it('renders the resting-below-value warning and confirmation for a severe resting sell', () => {
+	it('renders the resting confirmation, not the crossing one, for a severe resting sell', () => {
 		const { getByText, queryByText } = render(LimitOrderReview, {
 			props: { ...baseProps, ...restingAgainstValue }
 		});
 
-		expect(getByText(en.trading.limit_order.warning_resting_below_value_sell)).toBeInTheDocument();
 		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
 		expect(queryByText(en.trading.limit_order.give_up_confirm)).toBeNull();
 	});
 
-	it('renders the resting-above-value warning for a severe resting buy', () => {
+	it('renders the resting confirmation for a severe resting buy', () => {
 		const { getByText } = render(LimitOrderReview, {
 			props: { ...baseProps, side: 'buy' as LimitOrderSide, bid: 8, ask: 12, price: 11 }
 		});
 
-		expect(getByText(en.trading.limit_order.warning_resting_above_value_buy)).toBeInTheDocument();
+		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
 	});
 
 	it('renders no confirmation for a resting order within the give-up threshold', () => {

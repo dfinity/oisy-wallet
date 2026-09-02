@@ -1968,7 +1968,7 @@
 			"fee_taker": "Fee (taker)",
 			"fee_maker_taker_value": "$maker / $taker",
 			"give_up_confirm": "I understand this order will fill immediately at a price worse than market.",
-			"rests_against_value_confirm": "I understand this order may fill very soon at a price worse than current value.",
+			"rests_against_value_confirm": "I understand this order may fill very soon at a price worse than market.",
 			"market_moved_sell": "Market moved: best bid is now $price. At this price your fill-or-kill order would be canceled. Go back and lower your price.",
 			"market_moved_buy": "Market moved: best ask is now $price. At this price your fill-or-kill order would be canceled. Go back and raise your price.",
 			"placing_initializing": "Submitting order",

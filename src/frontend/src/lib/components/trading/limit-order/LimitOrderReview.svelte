@@ -181,20 +181,10 @@
 					/>
 				{/snippet}
 
+				<!-- One line either way, as the crossing case has always been: the price
+					 rows above already carry the give-up, so the box only has to be
+					 acknowledged. The two differ in how certain the fill is. -->
 				<label class="block text-sm leading-snug" for="limit-order-giveup">
-					<!-- A crossing order's give-up is already spelled out on the form and
-						 in the price rows above, so it needs only the acknowledgement. A
-						 resting order against current value repeats the form's warning
-						 first: nothing else on this screen says the order is likely to
-						 fill soon. -->
-					{#if severeResting}
-						<span class="mb-1 block">
-							{side === 'sell'
-								? $i18n.trading.limit_order.warning_resting_below_value_sell
-								: $i18n.trading.limit_order.warning_resting_above_value_buy}
-						</span>
-					{/if}
-
 					<Html
 						text={severeResting
 							? $i18n.trading.limit_order.rests_against_value_confirm
