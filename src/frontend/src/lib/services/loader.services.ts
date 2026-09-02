@@ -11,10 +11,11 @@ import {
 } from '$lib/derived/networks.derived';
 import { loadAddresses } from '$lib/services/addresses.services';
 import { trackRateLimited } from '$lib/services/analytics.services';
-import { errorSignOut, infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
+import { infoSignOut, nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -81,8 +82,14 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	} catch (err: unknown) {
 		debugDump('allow_signing', err);
 
-		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
-		await errorSignOut(get(i18n).init.error.allow_signing);
+		// DEBUG BUILD (fe2 only): the original behaviour signs the user out here via
+		// `errorSignOut(get(i18n).init.error.allow_signing)`. This build keeps the session alive,
+		// surfaces the failure as a toast and lets the loader continue, so the outcome of the rest of
+		// the boot sequence can be observed. Restore the sign-out before this reaches main.
+		toastsError({
+			msg: { text: '[debug] allow_signing failed, session kept alive on purpose' },
+			err
+		});
 
 		return { success: false };
 	}
@@ -155,8 +162,9 @@ export const initLoader = async ({
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
+			// DEBUG BUILD (fe2 only): the original code returns here because the service signed the
+			// user out. This build continues loading regardless. Restore the early return with the sign-out.
+			debugDump('initLoader:allow_signing-failed-continuing', { initSignerAllowanceSuccess });
 		}
 	}
 
