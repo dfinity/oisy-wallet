@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { SOLANA_DEFAULT_DECIMALS, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,43 +10,68 @@
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { absBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
-	import { findEnabledSplToken, isTokenSpl } from '$sol/utils/spl.utils';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import {
+		flattenInstructions,
+		formatSolTransactionSummary
+	} from '$sol/utils/sol-transaction-summary.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
 		token: Token;
 		iconType?: 'token' | 'transaction';
-		// Whether the amount column shows this token's net change. On a token page it does; on the
-		// unfiltered activity the row shows no amount at all, since one figure out of several would
-		// misdescribe the transaction. The sentence is the same in both.
-		showTokenAmount?: boolean;
+		// Whether this row sits in a list filtered to one token. The activity shows what a
+		// transaction moved; a token's own page shows what it did to that token, cost included.
+		singleToken?: boolean;
 	}
 
-	let { transaction, token, iconType = 'transaction', showTokenAmount = false }: Props = $props();
+	let { transaction, token, iconType = 'transaction', singleToken = false }: Props = $props();
 
-	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges } =
+	let { type, value, timestamp, status, to, from, toOwner, fromOwner, summary, netChanges, fee } =
 		$derived(transaction);
 
-	// The venue of a routed swap: the program its legs ran through.
-	let venue = $derived(
-		summary?.kind === 'swap'
-			? transaction.instructions?.find(({ kind }) => kind === 'route')?.program
-			: undefined
+	// The programs the transaction ran through, in the order it reached them and each named once.
+	// A swap routed across two pools touches two, and an aggregator more; naming one of them would
+	// pick a winner among equals.
+	let venues = $derived([
+		...new Set(
+			flattenInstructions(transaction.instructions ?? [])
+				.map(({ program }) => program)
+				.filter(nonNullish)
+		)
+	]);
+
+	// A transfer names the other side of it, which is what the user checks, and a self-transfer
+	// has one too: the user's own other account. A swap and a transaction OISY could not reduce
+	// have no other side, so they name where they happened instead.
+	let showVenues = $derived(summary?.kind === 'swap' || summary?.kind === 'other');
+
+	// The mints this row mentions, so a placeholder is numbered against the others beside it.
+	let unknownTokenAddresses = $derived(
+		solUnknownTokenAddresses({
+			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore
+		})
 	);
 
 	const symbolOf = (tokenAddress: string | undefined): string =>
-		isNullish(tokenAddress)
-			? SOLANA_TOKEN.symbol
-			: (findEnabledSplToken({
-					tokens: $enabledSplTokens,
-					tokenAddress,
-					networkId: token.network.id
-				})?.symbol ?? $i18n.transaction.text.unknown_token);
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $enabledSplTokens,
+			networkId: token.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: SOLANA_TOKEN.symbol
+		});
 
 	const swapAmount = (change: SolNetBalanceChange): string =>
 		formatToken({
@@ -54,27 +80,18 @@
 			displayDecimals: change.decimals ?? SOLANA_DEFAULT_DECIMALS
 		});
 
-	// The word for every kind but a swap, whose pair is the only thing that tells one swap from
-	// another in a day of them.
+	// Records from before the redesign carry no summary, and their kind is all the old shape said.
 	let label = $derived(
-		isNullish(summary)
-			? type === 'send'
+		nonNullish(summary)
+			? formatSolTransactionSummary({
+					summary,
+					i18n: $i18n,
+					symbolOf,
+					amountOf: swapAmount
+				})
+			: type === 'send'
 				? $i18n.send.text.send
 				: $i18n.receive.text.receive
-			: summary.kind === 'send'
-				? $i18n.send.text.send
-				: summary.kind === 'receive'
-					? $i18n.receive.text.receive
-					: summary.kind === 'swap'
-						? nonNullish(summary.spent) && nonNullish(summary.received)
-							? replacePlaceholders($i18n.transaction.text.summary_swap, {
-									$spent: swapAmount(summary.spent),
-									$spent_symbol: symbolOf(summary.spent.tokenAddress),
-									$received: swapAmount(summary.received),
-									$received_symbol: symbolOf(summary.received.tokenAddress)
-								})
-							: $i18n.swap.text.swap
-						: $i18n.transaction.text.kind_other
 	);
 
 	// The net change of the token whose page this is: the SOL entry for the native token, the
@@ -85,36 +102,28 @@
 		)
 	);
 
-	// The single-sided move a summary reduces to. A swap moves two tokens, so it names no main
-	// change and the unfiltered list shows no figure for it: either would misdescribe the other.
-	let mainChange = $derived(
-		summary?.kind === 'send'
-			? summary.spent
-			: summary?.kind === 'receive'
-				? summary.received
-				: undefined
-	);
-
 	// Records from before the redesign carry no summary and keep their old signed value.
 	let fallbackAmount = $derived(
 		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
 	);
 
-	let tokenMatchesMainChange = $derived(
-		nonNullish(mainChange) &&
-			(isTokenSpl(token)
-				? mainChange.tokenAddress === token.address
-				: isSolNetBalanceChangeSol(mainChange))
+	// What the transaction moved in this row's token, with the cost left out. A swap keeps a row
+	// per side, so each shows its own half; a self-transfer nets to zero, which is exactly what it
+	// did to that token. The net already excludes the fee.
+	let movedAmount = $derived(
+		nonNullish(tokenNetChange) ? tokenNetChange.delta : isNullish(summary) ? fallbackAmount : ZERO
 	);
 
+	// A token's own page is where the cost of using it belongs. For SOL that is the fee on top of
+	// whatever the transaction moved, and for a transaction that moved no SOL at all it is the
+	// whole story: the wallet paid to send something else.
+	//
+	// The activity never shows it. A swap into SOL whose fee outweighed what it bought would read
+	// there as a loss, on the row that says what was bought.
 	let displayAmount = $derived(
-		showTokenAmount
-			? (tokenNetChange?.delta ?? (isNullish(summary) ? fallbackAmount : ZERO))
-			: isNullish(summary)
-				? fallbackAmount
-				: tokenMatchesMainChange
-					? mainChange?.delta
-					: undefined
+		singleToken && !isTokenSpl(token) && nonNullish(movedAmount)
+			? movedAmount - (fee ?? ZERO)
+			: movedAmount
 	);
 
 	let pending = $derived(status === 'processed' || isNullish(status));
@@ -125,14 +134,17 @@
 </script>
 
 <Transaction
-	addressPrefixLabel={summary?.kind === 'swap' ? $i18n.transaction.text.swap_on : undefined}
+	addressPrefixLabel={showVenues ? $i18n.transaction.text.swap_on : undefined}
+	addresses={showVenues ? venues : undefined}
 	{displayAmount}
-	from={summary?.kind === 'swap' ? undefined : (fromOwner ?? from)}
+	from={showVenues ? undefined : (fromOwner ?? from)}
+	icon={summary?.kind === 'swap' ? IconConvert : undefined}
+	iconAriaLabel={summary?.kind === 'swap' ? $i18n.swap.text.swap : undefined}
 	{iconType}
 	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	status={transactionStatus}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
-	to={summary?.kind === 'swap' ? venue : (toOwner ?? to)}
+	to={showVenues ? undefined : (toOwner ?? to)}
 	{token}
 	{type}
 >

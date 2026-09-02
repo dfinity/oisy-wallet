@@ -1,4 +1,5 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
@@ -48,6 +49,25 @@ describe('sol-instruction-summary.utils', () => {
 				const unwrap = views().find(({ kind }) => kind === 'unwrap');
 
 				expect(unwrap?.tokenAddress).toBe(WSOL_TOKEN.address);
+			});
+
+			// A confirmed transaction comes back from the RPC naming the program `programId`; an
+			// unsigned message carries kit instructions, which name the same thing
+			// `programAddress`. Reading only the first leaves every simulated route unnamed.
+			it('should name the route program however the instruction spells the field', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP;
+
+				const asKitInstructions = instructions.map(({ programId, ...instruction }) => ({
+					...instruction,
+					programAddress: programId
+				}));
+
+				const route = mapSolInstructionSummaries({
+					...rest,
+					instructions: asKitInstructions
+				}).find(({ kind }) => kind === 'route');
+
+				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
 			});
 
 			it('should gather consecutive legs under the route that produced them', () => {
@@ -197,6 +217,168 @@ describe('sol-instruction-summary.utils', () => {
 			expect(view.amount).toBe(415_968n);
 		});
 
+		// Closing hands the destination the account's whole balance. For a wrapped SOL account that
+		// is the rent-exempt reserve plus the SOL that was wrapped, which is why the amount is worth
+		// stating rather than calling it rent.
+		it('should say what a closed account hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.returned).toBe(2_039_280n);
+		});
+
+		it('should count the wrapped SOL in what an unwrap hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'wsolAta11111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				addressToToken: { [ata]: WSOL_TOKEN.address },
+				// rent plus the wrapped SOL still sitting in the account
+				accountLamports: { [ata]: 2_039_280n + 5_000_000n }
+			});
+
+			expect(view.kind).toBe('unwrap');
+			expect(view.returned).toBe(7_039_280n);
+		});
+
+		// Opened and closed inside one transaction, the account held nothing before the run: its
+		// balance going in says zero, and the rent it was funded with is what comes back.
+		it('should return the rent of an account the same transaction opened', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: { type: 'create', info: { account: ata, wallet: owner, mint: 'mint' } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: { newAccount: ata, source: owner, lamports: 2_039_280 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				// The account did not exist before the run, so its balance going in is zero.
+				accountLamports: { [ata]: ZERO }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(2_039_280n);
+		});
+
+		// The wrap is a System transfer into the account after its creation, so the close hands back
+		// the rent and the wrapped SOL together. Counting only the rent understates it by the wrap.
+		it('should count a wrap into what an unwrap hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'wsolAta11111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: { account: ata, wallet: owner, mint: WSOL_TOKEN.address }
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: { newAccount: ata, source: owner, lamports: 2_039_280 }
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { source: owner, destination: ata, lamports: 5_000_000 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'syncNative', info: { account: ata } }
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				accountLamports: { [ata]: ZERO }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(7_039_280n);
+		});
+
+		it('should say nothing about the amount when the balance is unknown', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata]
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.returned).toBeUndefined();
+		});
+
 		describe('control changes', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';
 			const ata = 'ownerTokenAccount111111111111111111111111111';
@@ -311,6 +493,112 @@ describe('sol-instruction-summary.utils', () => {
 				expect(mapSolInstructionSummaries({ instructions: [], ownedAddresses: [] })).toStrictEqual(
 					[]
 				);
+			});
+
+			it('should keep a line naming the program when asked to list what it cannot read', () => {
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						includeUnrecognised: true
+					})
+				).toStrictEqual([{ kind: 'unknown', program: 'SomeUnknownProgram' }]);
+			});
+
+			// The regression this exists for. A WalletConnect request carries kit instructions,
+			// whose data is raw bytes rather than the parsed form the RPC returns, so not one of
+			// them yields an effect. Without a line each, the review listed nothing whatsoever for
+			// a transaction the user was being asked to sign.
+			it('should list the instructions of an unsigned message, which are never parsed', () => {
+				const message = [
+					{ programAddress: '11111111111111111111111111111111', accounts: [], data: 'AQID' },
+					{
+						programAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						accounts: [],
+						data: 'BAUG'
+					}
+				];
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: message,
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						includeUnrecognised: true
+					})
+				).toStrictEqual([
+					{ kind: 'unknown', program: '11111111111111111111111111111111' },
+					{ kind: 'unknown', program: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' }
+				]);
+			});
+
+			// The list is read as the order the run takes, so an instruction that says nothing
+			// still holds its place among the ones that do.
+			it('should leave the instructions it can read where they were', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA;
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...rest,
+							instructions: [
+								...instructions,
+								{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }
+							],
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['createTokenAccount', 'send', 'unknown']);
+			});
+
+			// The review states these as the priority fee it charges for, so calling them
+			// unreadable is untrue, and doing it on every transaction that sets a compute budget
+			// buries the instructions that moved something under two lines of housekeeping.
+			it('should not add a line for a compute budget instruction', () => {
+				const withFlag = (
+					mock: Parameters<typeof mapSolInstructionSummaries>[0]
+				): SolInstructionSummary[] =>
+					mapSolInstructionSummaries({ ...mock, includeUnrecognised: true });
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))
+				);
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))
+				);
+			});
+
+			// The case the flag exists for: a transaction whose every call sits inside programs the
+			// wallet cannot read listed nothing whatsoever before.
+			it('should list a transaction it could read nothing of', () => {
+				expect(kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY))).toStrictEqual(
+					[]
+				);
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...MOCK_SOL_INSTRUCTIONS.THIRD_PARTY,
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['unknown', 'unknown', 'unknown', 'unknown']);
+			});
+
+			it('should drop them by default, so the activity keeps the list it had', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA;
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...rest,
+							instructions: [
+								...instructions,
+								{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }
+							]
+						})
+					)
+				).toStrictEqual(['createTokenAccount', 'send']);
 			});
 		});
 	});
