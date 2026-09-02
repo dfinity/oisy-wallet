@@ -1,5 +1,6 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
@@ -541,7 +542,8 @@ export const mapSolInstructionSummaries = ({
 	innerInstructions = [],
 	ownedAddresses,
 	addressToToken = {},
-	accountLamports = {}
+	accountLamports = {},
+	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
@@ -550,6 +552,10 @@ export const mapSolInstructionSummaries = ({
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	// Whether to keep a line for each top-level instruction that produced no effect of its own.
+	// Off where the list stands beside the balance changes that vouch for it, on where it is the
+	// only account of the transaction there is.
+	includeUnrecognised?: boolean;
 }): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
@@ -587,5 +593,40 @@ export const mapSolInstructionSummaries = ({
 		return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
 	}, []);
 
-	return groupRoutes({ effects, programs });
+	// A top-level instruction none of the effects came from is one the wallet could not read: a
+	// program it does not know, or a message whose instructions carry raw bytes rather than the
+	// parsed form. Kept in the position it holds in the transaction, so the list reads in the
+	// order the run would take rather than as the recognised instructions with the gaps closed up.
+	const covered = new Set(effects.map(({ parentIndex }) => parentIndex));
+
+	const listed = includeUnrecognised
+		? [
+				...effects,
+				...instructions.reduce<Effect[]>((acc, _, index) => {
+					if (covered.has(index)) {
+						return acc;
+					}
+
+					const program = programs[index];
+
+					// The review already states what these do, as the priority fee it charges for.
+					// Listing them here as instructions nothing could read would be noise on every
+					// transaction that sets a compute budget, and untrue besides.
+					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+						return acc;
+					}
+
+					return [
+						...acc,
+						{
+							kind: 'unknown' as const,
+							...(nonNullish(program) && { program }),
+							parentIndex: index
+						}
+					];
+				}, [])
+			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
+		: effects;
+
+	return groupRoutes({ effects: listed, programs });
 };
