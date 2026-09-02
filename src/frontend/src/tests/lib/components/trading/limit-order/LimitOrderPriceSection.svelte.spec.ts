@@ -83,12 +83,42 @@ describe('LimitOrderPriceSection', () => {
 		expect(container).toHaveTextContent(en.trading.limit_order.warning_resting_below_value_sell);
 	});
 
+	it('reads as an immediate sale for a resting sell priced under current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '9' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_crossing.split(' $')[0]
+		);
+	});
+
+	it('keeps the resting label for a sell priced within the threshold of current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '10.45' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_resting.split(' $')[0]
+		);
+	});
+
 	it('shows the resting-above-value warning for a buy priced over current value', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, ...wideBook, side: 'buy' as LimitOrderSide, price: '10.9' }
 		});
 
 		expect(container).toHaveTextContent(en.trading.limit_order.warning_resting_above_value_buy);
+	});
+
+	it('reads as an immediate purchase for a resting buy priced over current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, side: 'buy' as LimitOrderSide, price: '10.9' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_buy_crossing.split(' $')[0]
+		);
 	});
 
 	it('shows no resting warning for a sell priced within the threshold of current value', () => {

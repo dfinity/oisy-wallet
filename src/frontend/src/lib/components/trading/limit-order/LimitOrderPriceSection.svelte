@@ -110,7 +110,12 @@
 				$base: base
 			});
 		}
-		if (crossing) {
+		// The "reaches" / "drops to" wording only holds while the price is still
+		// ahead of the market. Once it is behind — crossing, or resting past
+		// current value — the market has already got there, and a resting order
+		// past current value is what monitoring bots take first, so it reads as
+		// the immediate sale/purchase it effectively is.
+		if (crossing || restingAgainstValue) {
 			return replacePlaceholders(
 				side === 'sell' ? t.price_label_sell_crossing : t.price_label_buy_crossing,
 				{ $base: base }
