@@ -995,19 +995,17 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		// Only the fee the minter pays out of what it withdraws reduces the receive amount —
-		// the same one `IcTokenFees` reports as a destination-token fee.
-		it('should deduct only the Bitcoin network and minter fees', async () => {
+		// the same one `IcTokenFees` reports as a destination-token fee. Verified against
+		// finalized withdrawals: they pay out exactly `amount - bitcoin_fee - minter_fee`. The
+		// KYT fee `IcTokenFees` also lists is not charged to the user on a withdrawal, so it
+		// is not quoted at all — neither deducted nor on top.
+		it('should deduct only the Bitcoin network and minter fees, and not quote the KYT fee', async () => {
 			await expect(icpQuote()).resolves.toStrictEqual({
 				provider: SwapProvider.CHAIN_FUSION,
 				receiveAmount: AMOUNT - (BITCOIN_FEE + MINTER_FEE),
 				swapDetails: {
 					sourceFees: [
 						{ labelPath: 'fee.text.fee', fee: CK_LEDGER_FEE, token: ckBtcSource },
-						{
-							labelPath: 'fee.text.estimated_inter_network',
-							fee: mockCkBtcMinterInfo.kyt_fee,
-							token: ckBtcSource
-						},
 						{
 							labelPath: 'fee.text.estimated_btc',
 							fee: BITCOIN_FEE + MINTER_FEE,
