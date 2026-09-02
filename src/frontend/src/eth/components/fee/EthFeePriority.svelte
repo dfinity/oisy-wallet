@@ -83,7 +83,7 @@
 					</span>
 
 					<Responsive up="md">
-						<span class="text-sm font-bold text-primary">{selectedName}</span>
+						<span class="text-sm font-bold text-brand-primary-alt">{selectedName}</span>
 					</Responsive>
 				</span>
 			{/snippet}
@@ -126,3 +126,9 @@
 		</CollapsibleBottomSheet>
 	</div>
 {/if}
+
+<style lang="scss">
+	:global([data-tid='eth-fee-priority'] button.collapsible-expand-icon) {
+		color: var(--color-foreground-brand-primary-alt);
+	}
+</style>
