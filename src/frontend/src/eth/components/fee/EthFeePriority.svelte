@@ -8,7 +8,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import Tooltip from '$lib/components/ui/Tooltip.svelte';
 	import {
 		ETH_FEE_PRIORITY,
 		ETH_FEE_PRIORITY_OPTION,
@@ -75,12 +74,7 @@
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
 				<span class="flex min-w-0 flex-1 items-center justify-between gap-2">
-					<span class="flex items-center gap-1 text-sm text-tertiary">
-						{$i18n.fee.text.priority}
-						<Tooltip text={$i18n.fee.info.priority}>
-							<span class="text-tertiary">ⓘ</span>
-						</Tooltip>
-					</span>
+					<span class="text-sm text-tertiary">{$i18n.fee.text.priority}</span>
 
 					<Responsive up="md">
 						<span class="text-sm font-bold text-brand-primary-alt">{selectedName}</span>

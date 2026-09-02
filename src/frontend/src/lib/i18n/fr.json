@@ -1582,9 +1582,6 @@
 			"prioritization_kind": "",
 			"ata_kind": ""
 		},
-		"info": {
-			"priority": ""
-		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir les frais."
 		},
