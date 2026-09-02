@@ -1,5 +1,6 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
@@ -607,6 +608,13 @@ export const mapSolInstructionSummaries = ({
 					}
 
 					const program = programs[index];
+
+					// The review already states what these do, as the priority fee it charges for.
+					// Listing them here as instructions nothing could read would be noise on every
+					// transaction that sets a compute budget, and untrue besides.
+					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+						return acc;
+					}
 
 					return [
 						...acc,

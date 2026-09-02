@@ -550,6 +550,41 @@ describe('sol-instruction-summary.utils', () => {
 				).toStrictEqual(['createTokenAccount', 'send', 'unknown']);
 			});
 
+			// The review states these as the priority fee it charges for, so calling them
+			// unreadable is untrue, and doing it on every transaction that sets a compute budget
+			// buries the instructions that moved something under two lines of housekeeping.
+			it('should not add a line for a compute budget instruction', () => {
+				const withFlag = (
+					mock: Parameters<typeof mapSolInstructionSummaries>[0]
+				): SolInstructionSummary[] =>
+					mapSolInstructionSummaries({ ...mock, includeUnrecognised: true });
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))
+				);
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))
+				);
+			});
+
+			// The case the flag exists for: a transaction whose every call sits inside programs the
+			// wallet cannot read listed nothing whatsoever before.
+			it('should list a transaction it could read nothing of', () => {
+				expect(kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY))).toStrictEqual(
+					[]
+				);
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...MOCK_SOL_INSTRUCTIONS.THIRD_PARTY,
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['unknown', 'unknown', 'unknown', 'unknown']);
+			});
+
 			it('should drop them by default, so the activity keeps the list it had', () => {
 				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA;
 
