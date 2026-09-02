@@ -12,6 +12,8 @@ import type { Token } from '$lib/types/token';
 import {
 	asCkTwinOf,
 	chainFusionCompatibleDestinations,
+	chainFusionFeeSectionFees,
+	chainFusionProviderDetailsFees,
 	chainFusionSupportedSourceTokens,
 	computeChainFusionReceiveAmount,
 	toChainFusionPairs
@@ -304,6 +306,31 @@ describe('chain-fusion-swap.utils', () => {
 
 		it('should reject a non-IC token on the ck side', () => {
 			expect(asCkTwinOf({ ckToken: USDC_TOKEN, nativeToken: ETHEREUM_TOKEN })).toBeUndefined();
+		});
+	});
+
+	describe('fee disclosure split', () => {
+		const fees = [makeOnTopFee(10n), makeFee(5n), makeOnTopFee(1n), makeFee(20n)];
+
+		it('should keep every fee charged on top of the amount in the fee section', () => {
+			expect(chainFusionFeeSectionFees(fees)).toStrictEqual([makeOnTopFee(10n), makeOnTopFee(1n)]);
+		});
+
+		it('should hand the provider sheet only the fees deducted from the amount', () => {
+			expect(chainFusionProviderDetailsFees(fees)).toStrictEqual([makeFee(5n), makeFee(20n)]);
+		});
+
+		it('should split an empty list into two empty lists', () => {
+			expect(chainFusionFeeSectionFees([])).toStrictEqual([]);
+			expect(chainFusionProviderDetailsFees([])).toStrictEqual([]);
+		});
+
+		// Together they have to be the whole list, or a fee the quote priced is disclosed nowhere.
+		it('should account for every fee exactly once', () => {
+			expect([
+				...chainFusionFeeSectionFees(fees),
+				...chainFusionProviderDetailsFees(fees)
+			]).toHaveLength(fees.length);
 		});
 	});
 
