@@ -291,8 +291,18 @@ const logout = async ({
 	// Preferences: We do not clear local storage as well. It contains anonymous information such as the selected theme.
 	// Information the user wants to preserve across sign-in. e.g. if I select the light theme, logout and sign-in again, I am happy if the dapp still uses the light theme.
 
-	// We reload the page to make sure all the states are cleared
-	window.location.reload();
+	// DEBUG BUILD (fe2 only): the reload is removed on purpose so that the console output and the
+	// toast survive the sign-out, keeping the underlying failure readable. The busy overlay is
+	// stopped instead, since nothing else clears it without the reload.
+	// Restore `window.location.reload();` before this reaches main.
+	consoleError('[debug] logout completed, reload suppressed', {
+		msg,
+		resetUrl,
+		clearIdbStorages,
+		href: window.location.href
+	});
+
+	busy.stop();
 };
 
 /**

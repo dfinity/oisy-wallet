@@ -56,6 +56,7 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
@@ -294,6 +295,13 @@ export class BackendCanister extends Canister<BackendService> {
 				}
 			};
 		}
+
+		// DEBUG BUILD (fe2 only): surface the raw candid variant, which the mapping below flattens
+		// into a message. Remove together with the suppressed reload in `auth.services`.
+		consoleError('[debug] allow_signing returned Err', response.Err, {
+			variants: Object.keys(response.Err),
+			json: JSON.stringify(response.Err, (_k, v: unknown) => (typeof v === 'bigint' ? `${v}n` : v))
+		});
 
 		throw mapAllowSigningError(response.Err);
 	};

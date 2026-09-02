@@ -18,9 +18,37 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+// DEBUG BUILD (fe2 only): dumps everything we know about a failure that would otherwise be
+// swallowed before the sign-out. Remove together with the suppressed reload in `auth.services`.
+const debugDump = (stage: string, err: unknown) => {
+	const raw: Record<string, unknown> = { stage, type: Object.prototype.toString.call(err) };
+
+	if (err instanceof Error) {
+		raw.name = err.name;
+		raw.message = err.message;
+		raw.stack = err.stack;
+		raw.cause = (err as Error & { cause?: unknown }).cause;
+	}
+
+	if (nonNullish(err) && typeof err === 'object') {
+		for (const key of Object.getOwnPropertyNames(err)) {
+			raw[`own.${key}`] = (err as Record<string, unknown>)[key];
+		}
+	}
+
+	try {
+		raw.json = JSON.stringify(err, (_k, v: unknown) => (typeof v === 'bigint' ? `${v}n` : v));
+	} catch (_e: unknown) {
+		raw.json = '<not serializable>';
+	}
+
+	consoleError(`[debug] ${stage} failed`, err, raw);
+};
 
 /**
  * Initializes the signer allowance by calling `allow_signing`.
@@ -50,7 +78,9 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 		if (nonNullish(rateLimitInfo)) {
 			trackRateLimited(rateLimitInfo);
 		}
-	} catch (_err: unknown) {
+	} catch (err: unknown) {
+		debugDump('allow_signing', err);
+
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
 
@@ -80,6 +110,7 @@ export const initLoader = async ({
 	progressAndLoad: () => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
+		debugDump('initLoader:nullish-identity', { identity });
 		await nullishSignOut();
 		return;
 	}
@@ -96,6 +127,7 @@ export const initLoader = async ({
 
 	if (!userProfileSuccess) {
 		if (userProfileError === 'signups-closed') {
+			debugDump('initLoader:signups-closed', { userProfileError });
 			await infoSignOut({
 				text: get(i18n).auth.info.signups_closed,
 				source: 'signups-closed'
@@ -104,6 +136,11 @@ export const initLoader = async ({
 			return;
 		}
 
+		debugDump('initLoader:load-user-profile', {
+			userProfileSuccess,
+			userProfileError,
+			profileCreated
+		});
 		await signOut({});
 		return;
 	}
@@ -133,6 +170,7 @@ export const initLoader = async ({
 	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);
 
 	if (!addressSuccess) {
+		debugDump('initLoader:load-addresses', { addressSuccess, enabledNetworkIds });
 		await signOut({});
 		return;
 	}
