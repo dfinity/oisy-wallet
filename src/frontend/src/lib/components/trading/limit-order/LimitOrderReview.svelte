@@ -11,6 +11,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT } from '$lib/constants/oisy-trade.constants';
 	import { oisyTradeIcTokenBySymbol } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -23,6 +24,7 @@
 		type LimitOrderSide,
 		queuePositionDisplay,
 		queuePositionFraction,
+		restsAgainstValue,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
 
@@ -91,7 +93,26 @@
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
-	const severe = $derived(crossing && valueDiff < -5);
+	const severe = $derived(crossing && valueDiff < LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
+
+	// The resting counterpart of `severe`: the order does not fill now, but it is
+	// priced more than 5% against current value, so it is the one the market
+	// reaches first and it would fill at that give-up. Same treatment as a severe
+	// crossing order — its own copy, and the confirmation is required before
+	// placing. The two are mutually exclusive (`restsAgainstValue` excludes
+	// crossing prices), so at most one box shows and they share one confirmation.
+	const severeResting = $derived(
+		restsAgainstValue({
+			side,
+			price,
+			currentValue,
+			bid,
+			ask,
+			threshold: LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
+		})
+	);
+
+	const confirmationRequired = $derived(severe || severeResting);
 
 	const orderType = $derived(
 		fillOrKill ? $i18n.trading.limit_order.order_type_fok : $i18n.trading.limit_order.order_type_gtc
@@ -126,7 +147,7 @@
 	});
 
 	// >5% give-up requires the confirmation; FOK shows the taker fee only.
-	const placeDisabled = $derived(severe && !giveUpConfirmed);
+	const placeDisabled = $derived(confirmationRequired && !giveUpConfirmed);
 </script>
 
 <ContentWithToolbar>
@@ -149,7 +170,7 @@
 
 	<LimitOrderTermsList {makerFee} orderTypeLabel={orderType} {takerFee} takerOnly={fillOrKill} />
 
-	{#if severe}
+	{#if confirmationRequired}
 		<div class="mt-4" transition:slide>
 			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
@@ -161,7 +182,24 @@
 				{/snippet}
 
 				<label class="block text-sm leading-snug" for="limit-order-giveup">
-					<Html text={$i18n.trading.limit_order.give_up_confirm} />
+					<!-- A crossing order's give-up is already spelled out on the form and
+						 in the price rows above, so it needs only the acknowledgement. A
+						 resting order against current value repeats the form's warning
+						 first: nothing else on this screen says the order is likely to
+						 fill soon. -->
+					{#if severeResting}
+						<span class="mb-1 block">
+							{side === 'sell'
+								? $i18n.trading.limit_order.warning_resting_below_value_sell
+								: $i18n.trading.limit_order.warning_resting_above_value_buy}
+						</span>
+					{/if}
+
+					<Html
+						text={severeResting
+							? $i18n.trading.limit_order.rests_against_value_confirm
+							: $i18n.trading.limit_order.give_up_confirm}
+					/>
 				</label>
 			</MessageBox>
 		</div>
