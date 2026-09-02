@@ -71,8 +71,10 @@
 		// is what decides whether a native send is affordable. `minGasFee` omits the base fee
 		// entirely and therefore bounds nothing the chain enforces.
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
+			// Falling back to the tip rather than to zero: an unknown ceiling must not weaken the check
+			// below what it was before the flag.
 			const gasFee = SEND_TRANSACTION_PRIORITY_ENABLED
-				? ($maxGasFee ?? ZERO)
+				? ($maxGasFee ?? $minGasFee ?? ZERO)
 				: ($minGasFee ?? ZERO);
 
 			const total = userAmount + gasFee;
