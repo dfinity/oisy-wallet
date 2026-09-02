@@ -107,7 +107,6 @@
 							{onSelect}
 							{priority}
 							selected={priority === $sendEthFeePriority}
-							symbol={$feeSymbolStore}
 							testId={`${ETH_FEE_PRIORITY_OPTION}-${priority}`}
 						/>
 					{/each}

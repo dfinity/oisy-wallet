@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import type { EthFeePriority } from '$lib/enums/eth-fee-priority';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		priority: EthFeePriority;
@@ -10,7 +11,6 @@
 		emoji: string;
 		selected: boolean;
 		fee?: bigint;
-		symbol: string;
 		decimals: number;
 		exchangeRate?: number;
 		groupName: string;
@@ -25,7 +25,6 @@
 		emoji,
 		selected,
 		fee,
-		symbol,
 		decimals,
 		exchangeRate,
 		groupName,
@@ -54,7 +53,10 @@
 
 	<span class="ml-auto shrink-0 pl-2 text-right">
 		{#if nonNullish(fee)}
-			<FeeDisplay {decimals} {exchangeRate} feeAmount={fee} {symbol} />
+			<ConvertAmountExchange
+				amount={formatToken({ value: fee, displayDecimals: decimals, unitName: decimals })}
+				{exchangeRate}
+			/>
 		{/if}
 	</span>
 </label>
