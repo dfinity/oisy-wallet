@@ -2018,6 +2018,8 @@
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",

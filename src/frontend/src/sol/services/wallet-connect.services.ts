@@ -172,12 +172,20 @@ export const decode = async ({
 	// The list the Operations tab shows. A simulated run reveals the calls made inside other
 	// programs, which the message states none of; without one, the message's own top-level
 	// instructions are still worth listing, and the review says which of the two it got.
+	//
+	// The message carries its instructions as raw bytes, so none of them can be read into an
+	// effect and every line here is an unrecognised one naming its program. That is the whole
+	// point of listing them: without it this fallback produced nothing at all.
 	const instructions = nonNullish(simulatedInstructions)
 		? namedInstructions
-		: mapSolInstructionSummaries({
-				instructions: [...parsedTransactionMessage.instructions],
-				innerInstructions: [],
-				ownedAddresses: owned?.ownedAddresses ?? []
+		: await loadSolProgramNames({
+				instructions: mapSolInstructionSummaries({
+					instructions: [...parsedTransactionMessage.instructions],
+					innerInstructions: [],
+					ownedAddresses: owned?.ownedAddresses ?? [],
+					includeUnrecognised: true
+				}),
+				network: solNetwork
 			});
 
 	return {

@@ -19,7 +19,11 @@ export type SolInstructionSummaryKind =
 	| 'closeTokenAccount'
 	| 'approve'
 	| 'revoke'
-	| 'setAuthority';
+	| 'setAuthority'
+	// An instruction the wallet cannot read. It names the program and says nothing about what the
+	// call does, which is still worth a line: an instruction left out of the list is one the user
+	// has no way of knowing is there.
+	| 'unknown';
 
 /**
  * One line of the review's instruction list.
