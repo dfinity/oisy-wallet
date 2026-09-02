@@ -117,6 +117,49 @@ export const oneSecEvmSupportedTokens = ({
 };
 
 /**
+ * Whether `token` is the *wrapped* side of a OneSec pair — the side a holder should move back
+ * to the chain its token is native to.
+ *
+ * Mirrors {@link isWrappingDirection} from the holder's point of view: the ICRC ledger is the
+ * wrapped side of an EVM-native (`locker`) token, and the ERC-20 is the wrapped side of an
+ * ICP-native (`minter`) token. A token OneSec bridges but whose wrapped side OISY does not
+ * carry never matches, and neither does a token absent from the OneSec config altogether.
+ *
+ * `networkIds` bounds the EVM check to the chains OneSec bridges: a `minter` token reuses one
+ * contract address across all of them, so without it an unrelated token deployed at the same
+ * address on another chain would match.
+ */
+export const isOneSecWrappedToken = ({
+	token,
+	networkIds
+}: {
+	token: AppToken;
+	networkIds: NetworkId[];
+}): boolean => {
+	if (isIcToken(token)) {
+		const entry = ICP_LEDGER_TO_TOKEN[token.ledgerCanisterId];
+
+		return nonNullish(entry) && entry.config.evmMode === 'locker';
+	}
+
+	const { address } = token as Erc20Token;
+
+	if (isNullish(address) || !networkIds.includes(token.network.id)) {
+		return false;
+	}
+
+	return [...DEFAULT_CONFIG.tokens].some(([, config]) => {
+		if (config.evmMode !== 'minter') {
+			return false;
+		}
+
+		const configured = getEvmAddressForNetwork({ config, networkId: token.network.id });
+
+		return nonNullish(configured) && configured.toLowerCase() === address.toLowerCase();
+	});
+};
+
+/**
  * Returns per-category token identifiers that OneSec can bridge TO from the given source token.
  * - ICP source → { evm: Set<ERC20 address lowercased> } for the given EVM network IDs
  * - EVM source → { icp: Set<ICP ledger canister ID> }
