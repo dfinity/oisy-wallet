@@ -6,7 +6,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
-import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+import { ONESEC_SWAP_ENABLED, ONESEC_UNWRAP_ONLY } from '$env/rest/onesec.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -71,6 +71,23 @@ const getEvmAddressForNetwork = ({
 			: (config.erc20MainnetEthereum ?? config.erc20Mainnet ?? config.erc20);
 
 /**
+ * Whether bridging *out of* `sourceCategory` would mint a wrapped position rather than
+ * redeem one.
+ *
+ * OneSec's `evmMode` records which chain a token is native to: a `minter` token is
+ * ICP-native and is wrapped as an ERC-20 on EVM, a `locker` token is EVM-native and is
+ * wrapped as an ICRC ledger on ICP. Leaving a token's native chain therefore wraps, and
+ * returning to it unwraps.
+ */
+const isWrappingDirection = ({
+	config,
+	sourceCategory
+}: {
+	config: TokenConfig;
+	sourceCategory: 'icp' | 'evm';
+}): boolean => (config.evmMode === 'minter' ? sourceCategory === 'icp' : sourceCategory === 'evm');
+
+/**
  * Returns ICP ledger canister IDs of tokens supported by OneSec on the ICP side.
  */
 export const oneSecIcpSupportedTokens = (): Promise<Set<string>> =>
@@ -104,6 +121,10 @@ export const oneSecEvmSupportedTokens = ({
  * - ICP source → { evm: Set<ERC20 address lowercased> } for the given EVM network IDs
  * - EVM source → { icp: Set<ICP ledger canister ID> }
  * - Unknown → undefined (no OneSec restriction applied)
+ *
+ * While {@link ONESEC_UNWRAP_ONLY} is set, only the unwrapping direction is offered: a pair
+ * whose source is the token's *native* chain contributes no destinations, so the wallet can
+ * no longer route a user into a bridged position. See {@link isWrappingDirection}.
  */
 export const oneSecCompatibleDestinations = ({
 	sourceToken,
@@ -119,6 +140,13 @@ export const oneSecCompatibleDestinations = ({
 	if (isIcToken(sourceToken)) {
 		const entry = ICP_LEDGER_TO_TOKEN[sourceToken.ledgerCanisterId];
 		if (isNullish(entry)) {
+			return;
+		}
+
+		if (
+			ONESEC_UNWRAP_ONLY &&
+			isWrappingDirection({ config: entry.config, sourceCategory: 'icp' })
+		) {
 			return;
 		}
 
@@ -142,6 +170,10 @@ export const oneSecCompatibleDestinations = ({
 	for (const [, config] of DEFAULT_CONFIG.tokens) {
 		const address = getEvmAddressForNetwork({ config, networkId: sourceToken.network.id });
 		if (nonNullish(address) && address.toLowerCase() === srcAddress.toLowerCase()) {
+			if (ONESEC_UNWRAP_ONLY && isWrappingDirection({ config, sourceCategory: 'evm' })) {
+				return;
+			}
+
 			const ledger = config.ledgerMainnet ?? config.ledger;
 			return nonNullish(ledger) ? { icp: new Set([ledger]) } : { icp: new Set() };
 		}
