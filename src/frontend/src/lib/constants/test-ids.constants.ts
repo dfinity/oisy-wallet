@@ -387,6 +387,8 @@ export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-token
 
 // Agreements
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
+
+export const ONESEC_BRIDGED_BALANCE_WARNING = 'onesec-bridged-balance-warning';
 export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 
 // UI components

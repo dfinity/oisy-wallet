@@ -1442,6 +1442,7 @@
 			"search_token": "토큰 검색"
 		},
 		"warning": {
+			"onesec_bridged_balance": "브리지된 토큰을 보유하고 있습니다: $token_list. 원래 네트워크로 다시 스왑하는 것을 권장합니다.",
 			"trust_token": "추가하려는 토큰을 신뢰할 수 있는지 확인하세요. 추가하려는 토큰이 악의적인 주체에 의해 통제되는 경우, 상당한 양의 토큰을 받은 것처럼 속여 토큰을 보내도록 유도하거나 기타 원치 않는 행동을 유발하는 등의 사기 시도가 있을 수 있습니다. 사기 및 보안 위험에 대해 자세히 알아보려면 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">여기</a>를 참고하세요."
 		},
 		"error": {

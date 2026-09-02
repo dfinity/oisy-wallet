@@ -353,6 +353,12 @@ What this deliberately does not do: it does not hide, disable or remove a token,
 
 The restriction is a code-level kill switch — `ONESEC_UNWRAP_ONLY` in `src/frontend/src/env/rest/onesec.env.ts`, in the same style as the price-provider flags. Setting it to `false` restores both directions unchanged.
 
+**Holders are told to take the exit.** A user carrying a non-zero balance in a bridged token sees a dismissible warning at the top of the page, naming the tokens and recommending they swap them back to their native network. It is the wrapped side that is named — the ERC-20s on the EVM chains and the 1Sec ICRC ledgers on ICP — never the native token, which is where the user should end up.
+
+Each token is named **with its network** ("ICP (Base)", not "ICP"), because a wrapped token carries the same symbol as the native one it stands for: a bare "ICP" would name precisely the token the user should be holding instead. Dismissal lasts for the session only and is not stored in the user's profile — the warning is about the balance in front of them, and it returns on the next load while that balance is still there. It disappears on its own once the balance reaches zero, and it never appears while 1Sec swaps are disabled, since then there is no swap to point the user at.
+
+CHAT is deliberately left out of the warning: it has never been routable through OISY, so no user could have acquired a wrapped CHAT balance here, and naming it would be advice with nothing behind it.
+
 ### Cross-session settlement
 
 Every ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
