@@ -89,6 +89,7 @@
 				data-tid="collapsible-expand-button"
 				tabindex="-1"
 				title={expanded ? $i18n.core.text.collapse : $i18n.core.text.expand}
+				type="button"
 			>
 				<IconExpandMore />
 			</button>

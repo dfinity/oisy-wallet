@@ -1582,9 +1582,6 @@
 			"prioritization_kind": "",
 			"ata_kind": ""
 		},
-		"info": {
-			"priority": ""
-		},
 		"assertion": {
 			"insufficient_funds_for_fee": "수수료를 충당할 잔액이 부족합니다."
 		},
@@ -2018,6 +2015,8 @@
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",

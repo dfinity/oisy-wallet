@@ -1582,9 +1582,6 @@
 			"prioritization_kind": "Priority",
 			"ata_kind": "Account rent"
 		},
-		"info": {
-			"priority": "Priority affects speed and fees. Higher priority usually means faster processing."
-		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
 		},
@@ -2018,6 +2015,8 @@
 			"instruction_revoke": "Revoke spender",
 			"instruction_set_authority": "Change account authority to",
 			"instruction_route": "Swap route via",
+			"instruction_unknown": "Unrecognised instruction",
+			"instruction_unknown_via": "Unrecognised instruction via",
 			"instruction_rent": "rent $amount SOL",
 			"instruction_rent_returned": "rent returned to your wallet",
 			"instruction_returned": "$amount SOL returned to your wallet",
