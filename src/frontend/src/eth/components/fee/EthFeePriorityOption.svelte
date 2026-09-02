@@ -47,8 +47,8 @@
 		value={priority}
 	/>
 
-	<span class="flex min-w-0 items-baseline gap-2">
-		<span class="font-bold whitespace-nowrap text-primary">{name} {emoji}</span>
+	<span class="flex min-w-0 items-baseline gap-1.5">
+		<span class="font-bold whitespace-nowrap text-primary">{name}{emoji}</span>
 		<span class="min-w-0 truncate text-sm text-tertiary">{description}</span>
 	</span>
 
