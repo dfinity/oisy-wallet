@@ -348,6 +348,20 @@ When a row reaches a terminal state it refreshes the wallet and reports into the
 
 ---
 
+## Trade (OISY Trade)
+
+### Price warnings on a limit order
+
+A limit order is priced against two independent references: **current value** — the cross of the two legs' USD prices from the wallet's own price feed — and the venue's **order book** (best bid / best ask). The price section warns whenever those two together say the order is likely to cost the user value, and the wording says which of the situations they are in.
+
+A price that **crosses the book** (a sell at or below the best bid, a buy at or above the best ask) fills almost immediately, and the form says exactly that. A price that does **not** cross rests — but if it sits more than **1% on the wrong side of current value** (a sell below it, a buy above it), it is the price the market reaches first, and it would fill at a value the feed already calls worse than the tokens are worth. That case carries its own warning ("This price is below current value. Your order rests for now, but it may fill very soon, at a loss versus current value."), amber up to a 5% give-up and red beyond it, and the value-difference figure beside the price is coloured with it rather than staying neutral. Inside the 1% band nothing is said and the figure stays neutral: the feed and the book drift against each other continuously, so a sub-1% gap carries no signal. A resting price on the _favourable_ side of current value is never warned about, however far out it sits.
+
+The review step repeats the distinction. Beyond a **5% give-up — crossing or resting** — "Place order" stays disabled until the user ticks a confirmation checkbox. Each case gets its own copy: the crossing one acknowledges an immediate fill at a price worse than market, the resting one that the order may fill very soon at such a price, restated in full because nothing else on the review screen says an order priced to rest is likely to fill soon. Between 1% and 5% the form warns and the review does not block.
+
+A **fill-or-kill** order is the exception to all of this: it can only execute by crossing, so a FOK price that cannot cross is a blocking error ("it would be canceled") that disables Review and takes precedence over both warnings above.
+
+---
+
 ## Buy (OnRamper)
 
 Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
