@@ -51,7 +51,7 @@
 		<span class="min-w-0 truncate text-sm text-tertiary">{description}</span>
 	</span>
 
-	<span class="ml-auto shrink-0 pl-2 text-right">
+	<span class="ml-auto shrink-0 pl-2 text-right text-sm text-tertiary">
 		{#if nonNullish(fee)}
 			<ConvertAmountExchange
 				amount={formatToken({ value: fee, displayDecimals: decimals, unitName: decimals })}
