@@ -26,6 +26,11 @@ describe('EthFeePriority', () => {
 			[Priority.SLOW]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 1_000_000_000n },
 			[Priority.NORMAL]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
 			[Priority.FAST]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 20_000_000_000n }
+		},
+		waitTimeMs: {
+			[Priority.SLOW]: 48_000,
+			[Priority.NORMAL]: 24_000,
+			[Priority.FAST]: 12_000
 		}
 	};
 

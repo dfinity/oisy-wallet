@@ -103,6 +103,7 @@
 							{priority}
 							selected={priority === $sendEthFeePriority}
 							testId={`${ETH_FEE_PRIORITY_OPTION}-${priority}`}
+							waitTimeMs={$feePrioritiesStore.waitTimeMs[priority]}
 						/>
 					{/each}
 				</div>

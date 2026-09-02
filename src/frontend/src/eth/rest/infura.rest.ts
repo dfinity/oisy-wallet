@@ -40,6 +40,11 @@ export class InfuraGasRest {
 				[EthFeePriority.SLOW]: mapLevel(low),
 				[EthFeePriority.NORMAL]: mapLevel(medium),
 				[EthFeePriority.FAST]: mapLevel(high)
+			},
+			waitTimeMs: {
+				[EthFeePriority.SLOW]: low.maxWaitTimeEstimate,
+				[EthFeePriority.NORMAL]: medium.maxWaitTimeEstimate,
+				[EthFeePriority.FAST]: high.maxWaitTimeEstimate
 			}
 		};
 	};

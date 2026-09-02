@@ -151,7 +151,7 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
-	const { baseFeePerGas, perPriority } = await getSuggestedFeeData();
+	const { baseFeePerGas, perPriority, waitTimeMs } = await getSuggestedFeeData();
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
@@ -174,6 +174,7 @@ export const getEthFeeDataWithProvider = async ({
 
 	const priorities: EthFeePriorities = {
 		baseFeePerGas,
+		waitTimeMs,
 		perPriority: {
 			[EthFeePriority.SLOW]: applyFloors(perPriority[EthFeePriority.SLOW]),
 			[EthFeePriority.NORMAL]: applyFloors(perPriority[EthFeePriority.NORMAL]),
