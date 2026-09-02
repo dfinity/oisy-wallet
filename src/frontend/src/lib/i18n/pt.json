@@ -1442,6 +1442,7 @@
 			"search_token": "Pesquisar o token"
 		},
 		"warning": {
+			"onesec_bridged_balance": "Você detém tokens transferidos por ponte: $token_list. Recomendamos trocá-los de volta para a rede nativa.",
 			"trust_token": "Certifique-se de que você confia no token que está adicionando. Se o token que você está adicionando for controlado por uma parte maliciosa, eles podem tentar enganá-lo, por exemplo, fazendo-o acreditar que recebeu uma quantidade significativa de tokens para que você os envie de volta ou execute outras ações indesejadas. Saiba mais sobre scams e riscos de segurança, por exemplo, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">aqui</a>."
 		},
 		"error": {

@@ -1144,7 +1144,7 @@ interface I18nTokens {
 		enter_token_address: string;
 		search_token: string;
 	};
-	warning: { trust_token: string };
+	warning: { onesec_bridged_balance: string; trust_token: string };
 	error: {
 		invalid_contract_address: string;
 		invalid_token_address: string;

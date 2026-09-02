@@ -79,6 +79,13 @@ three EVM chains, and the 1Sec ICRC USDC (`53nhb-haaaa-aaaar-qbn5q-cai`) and USD
 (`ij33n-oiaaa-aaaar-qbooa-cai`) on ICP. **CHAT is excluded**: no user could ever have acquired
 wrapped CHAT through OISY, so warning about it would be noise.
 
+It names the tokens, reusing the `$token_list` / `formatList` pattern the Activity page's
+index-canister warnings already use. Each entry is qualified by its network ("ICP (Base)"),
+which those warnings do not do: they name ICP-only tokens whose symbols are unambiguous,
+whereas a wrapped token here shares its symbol with the native token the user should hold, so a
+bare "ICP" would name the wrong thing. The set itself is derived from the same OneSec config as
+the direction rule, so CHAT — absent from that config — falls out without a special case.
+
 ## 4. PR split
 
 | PR   | Contents                                                                     |
