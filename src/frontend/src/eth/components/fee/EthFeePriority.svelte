@@ -19,13 +19,8 @@
 
 	const { sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const {
-		feeStore,
-		feePrioritiesStore,
-		feeSymbolStore,
-		feeDecimalsStore,
-		feeExchangeRateStore
-	}: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+	const { feeStore, feePrioritiesStore, feeDecimalsStore, feeExchangeRateStore }: EthFeeContext =
+		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	const options = $derived([
 		{
@@ -69,7 +64,7 @@
 	const onSelect = (priority: EthFeePriority) => sendEthFeePriority.set(priority);
 </script>
 
-{#if nonNullish($feePrioritiesStore) && nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
+{#if nonNullish($feePrioritiesStore) && nonNullish($feeDecimalsStore)}
 	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}

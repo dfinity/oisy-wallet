@@ -32,7 +32,10 @@ describe('EthFeePriority', () => {
 	// The rows quote fiat only, so an exchange rate is required for them to render at all.
 	const exchangeRate = 3_000;
 
-	const setup = ({ withPriorities = true }: { withPriorities?: boolean } = {}) => {
+	const setup = ({
+		withPriorities = true,
+		withSymbol = true
+	}: { withPriorities?: boolean; withSymbol?: boolean } = {}) => {
 		const feeStore = initEthFeeStore();
 		feeStore.setFee({
 			...priorities.perPriority[Priority.NORMAL],
@@ -47,7 +50,7 @@ describe('EthFeePriority', () => {
 
 		const feeContext = initEthFeeContext({
 			feeStore,
-			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+			feeSymbolStore: writable(withSymbol ? ETHEREUM_TOKEN.symbol : undefined),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
 			feeExchangeRateStore: writable(exchangeRate)
@@ -172,6 +175,16 @@ describe('EthFeePriority', () => {
 
 		await waitFor(() => {
 			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
+		});
+	});
+
+	it('renders without a fee symbol, which it no longer displays', async () => {
+		const { context } = setup({ withSymbol: false });
+
+		const { getByTestId } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
 		});
 	});
 
