@@ -81,6 +81,14 @@
 			})
 	);
 
+	// The label turns on the sign alone, not the warning threshold: "reaches"
+	// describes a price the market has yet to hit, and that stops being true the
+	// moment the price is past current value at all — a full percent earlier than
+	// there is anything worth warning about.
+	const restingPastValue = $derived(
+		active && restsAgainstValue({ side, price: priceNum, currentValue, bid, ask, threshold: 0 })
+	);
+
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));
 
 	const showValueDifference = $derived(priceNum > 0 && currentValue > 0);
@@ -115,7 +123,7 @@
 		// current value — the market has already got there, and a resting order
 		// past current value is what monitoring bots take first, so it reads as
 		// the immediate sale/purchase it effectively is.
-		if (crossing || restingAgainstValue) {
+		if (crossing || restingPastValue) {
 			return replacePlaceholders(
 				side === 'sell' ? t.price_label_sell_crossing : t.price_label_buy_crossing,
 				{ $base: base }

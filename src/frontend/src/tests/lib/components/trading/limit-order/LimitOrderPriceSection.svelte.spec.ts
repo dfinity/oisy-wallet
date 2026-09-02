@@ -93,9 +93,24 @@ describe('LimitOrderPriceSection', () => {
 		);
 	});
 
-	it('keeps the resting label for a sell priced within the threshold of current value', () => {
+	// The label switches on the sign alone, the warning at -1%: a price a hair
+	// under current value has already been met, but is nothing to warn about.
+	it('reads as an immediate sale for a sell a hair under current value, without warning', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, ...wideBook, price: '10.45' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_crossing.split(' $')[0]
+		);
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+	});
+
+	it('keeps the resting label for a sell priced above current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '10.55' }
 		});
 
 		expect(container).toHaveTextContent(
