@@ -13,6 +13,27 @@ describe('fee.utils', () => {
 		it('returns undefined when the ceiling is unknown', () => {
 			expect(maxGasFee({ maxFeePerGas: null, maxPriorityFeePerGas: 2n, gas })).toBeUndefined();
 		});
+
+		it('adds the L1 data fee, which no amount of gas headroom pays for', () => {
+			expect(maxGasFee({ maxFeePerGas: 50n, maxPriorityFeePerGas: 2n, gas, l1Fee: 875n })).toBe(
+				50n * gas + 875n
+			);
+		});
+
+		// The defect this guards: "Max" spends `balance - maxGasFee`, so a balance that covers exactly
+		// `maxGasFee` has to cover the L1 data fee too, or an OP-stack chain can never include the
+		// transaction.
+		it('leaves an OP-stack balance able to cover the whole transaction', () => {
+			const maxFeePerGas = 26_000_000n;
+			const l1Fee = 875_004_002n;
+			const balance = 2_453_785_811_356_486n;
+
+			const maxAmount =
+				balance -
+				(maxGasFee({ maxFeePerGas, maxPriorityFeePerGas: 4_000_000n, gas, l1Fee }) ?? ZERO);
+
+			expect(maxAmount + maxFeePerGas * gas + l1Fee).toBeLessThanOrEqual(balance);
+		});
 	});
 
 	describe('minGasFee', () => {
@@ -64,6 +85,16 @@ describe('fee.utils', () => {
 
 		it('returns undefined when the ceiling is unknown', () => {
 			expect(estimatedGasFee({ ...feeData, maxFeePerGas: null })).toBeUndefined();
+		});
+
+		it('adds the L1 data fee in full, since none of it is refunded', () => {
+			expect(estimatedGasFee({ ...feeData, l1Fee: 875n })).toBe(22n * gas + 875n);
+		});
+
+		it('adds the L1 data fee to the fallback ceiling too', () => {
+			expect(estimatedGasFee({ ...feeData, baseFeePerGas: null, l1Fee: 875n })).toBe(
+				50n * gas + 875n
+			);
 		});
 	});
 });
