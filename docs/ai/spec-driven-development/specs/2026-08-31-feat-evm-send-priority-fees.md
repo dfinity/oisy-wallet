@@ -2,7 +2,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Spec — Transaction priority for EVM sends
 
-- **Feature:** Let the user choose Slow / Normal / Fast for an ETH or ERC-20 send, and show a fee that reflects the choice
+- **Feature:** Let the user choose Slow / Normal / Fast for an ETH or ERC-20 send, and show a fee that reflects the choice. Section 10 extends the same choice to WalletConnect transaction requests
 - **Design:** Figma `duPCw1leqer7ES0sBb6Uua` ("7. OISY UI"), page _Priority, nonce, memo_, section **Priority fees** (`22675:343661`)
 - **Status:** Draft for implementation in Claude Code
 
@@ -59,8 +59,9 @@ subject to the identical constraint.
 **But the fee OISY displays today cannot price the tiers.** See section 3.1. Fixing that is a
 prerequisite, not a nicety, which is why this spec ships in two PRs.
 
-Scope note from the ticket: this covers the OISY send flow only. WalletConnect send requests
-need the same choice and are a separate follow-up ticket.
+Scope note: sections 1 to 9 cover the OISY send flow only, which is how the work shipped.
+WalletConnect transaction requests were the named follow-up and are specified in
+[section 10](#10-walletconnect).
 
 ## 2. Scope
 
@@ -110,7 +111,8 @@ for whether tiers separate meaningfully on Arbitrum and Base.
 
 ### Out of scope
 
-- **WalletConnect.** `EthWalletConnectSendReview.svelte` keeps today's behaviour. Its own ticket.
+- **WalletConnect.** Out of scope for sections 1 to 9, which is what shipped first.
+  `EthWalletConnectSendReview.svelte` is brought in by [section 10](#10-walletconnect).
 - **Expert mode.** The Figma frames beside these (raw `maxFeePerGas` / `maxPriorityFeePerGas` /
   nonce editing) are a separate ticket, as is the nonce UI that would finally set
   `sendEthCustomNonce`.
@@ -451,3 +453,158 @@ Three things follow:
 
 One sample at one moment. Congestion moves these, so treat the shape as indicative and do not
 hard-code a per-chain conclusion.
+
+---
+
+## 10. WalletConnect
+
+The follow-up named in section 1. Same choice, same tiers, same default, on the confirmation
+modal a dApp's transaction request opens instead of on the send form.
+
+### 10.1 What already carries over for free
+
+The machinery from sections 3.1 to 3.7 was built on the fee context, not on the send form, so
+most of it reaches WalletConnect without modification:
+
+- `EthWalletConnectSendTokenModal.svelte` already mounts `EthFeeContext`, so the three tiers
+  and the base fee are already fetched and sitting in `feePrioritiesStore` on every request.
+- It is already wrapped in `TokenActionContext`, so `SendContext.sendEthFeePriority` already
+  exists and already survives the `WizardModal` step change, for the same reason it had to in
+  the send flow.
+- `EthFeePriority.svelte` reads the choice off `SendContext` itself rather than taking it as a
+  prop, so it needs no wiring to be told what is selected.
+- Re-pricing on selection is the `$effect` in `EthFeeContext`, which is mounted here too.
+- Signing needs nothing: `wallet-connect.services.ts` reads `maxFeePerGas`,
+  `maxPriorityFeePerGas` and `gas` off the fee store it is handed, and the re-pricing effect has
+  already put the selected tier there.
+
+Three things do not carry over: the modal never passes `priority` to `EthFeeContext`, the row's
+visual style is wrong for this modal, and the gas the row prices against is wrong. The rest of
+this section is those three.
+
+### 10.2 The gas is different here, and it matters
+
+This is the one substantive difference, and getting it wrong would make the row lie.
+
+A WalletConnect request may carry its own `gas`. `EthWalletConnectSendReview.svelte` already
+derives `signedGas = requestedGas ?? $feeStore?.gas` and prices its fee row on it, precisely
+because unused gas is refunded but a contract that burns the whole limit burns the limit that
+was **signed**, not the one OISY estimated. `wallet-connect.services.ts` agrees: it signs
+`getSendParamsGas(gasWC) ?? gas`.
+
+`EthFeePriority.svelte` prices its options on `$feeStore.gas`, OISY's own estimate. On a
+request carrying a dApp gas limit those two numbers differ, often by a lot, so the option rows
+would quote one set of amounts and the fee row directly beneath them another. Both would be
+computed correctly and the pair would still be nonsense.
+
+**Give `EthFeePriority` the same `gas` override `EthFeeDisplay` already has**, defaulting to the
+fee store's gas, and pass `signedGas` in the WalletConnect review. The two rows then price the
+same transaction by construction rather than by coincidence.
+
+### 10.3 The row looks different here
+
+The send form and this modal do not share a row idiom, and forcing one onto the other is the
+wrong kind of reuse.
+
+|           | Send form                                                 | WalletConnect review                                  |
+| --------- | --------------------------------------------------------- | ----------------------------------------------------- |
+| Row shape | Label and value on one line                               | `Value.svelte`: bold label, content on the line below |
+| Label     | `text-sm text-tertiary`                                   | `font-bold`                                           |
+| Value     | `text-sm font-bold text-brand-primary-alt`, right-aligned | `font-normal`                                         |
+
+What is worth reusing is everything below the header: the three options, their pricing, the
+radio-group semantics, the desktop collapsible and the mobile sheet with its `Done` button. What
+is not worth reusing is the header markup itself.
+
+**Give `EthFeePriority` an optional `header` snippet**, receiving the selected tier's name, and
+keep today's send-form markup as the default when no snippet is passed. The WalletConnect review
+then supplies a header matching the rows around it, and neither call site carries the other's
+styling. This is a pure refactor of an existing component and ships ahead of the feature, so the
+feature diff is only the WalletConnect side.
+
+### 10.4 Which requests get the row
+
+Every request that reaches this modal is an `eth_sendTransaction` and every one of them pays
+gas: a plain send, an ERC-20 `approve`, a `setApprovalForAll`, and a call whose calldata OISY
+could not decode. The tier is a property of the transaction, not of what the transaction does,
+so **all of them get the row**. Withholding it from, say, approvals would be an arbitrary split
+that the user would experience as the setting randomly disappearing.
+
+Note the interaction with the fail-closed reviews: an unverifiable ERC-20 or `setApprovalForAll`
+request already disables Approve. The row still renders, which is correct: it is inert because
+the whole modal is inert, not because the row has its own opinion.
+
+### 10.5 Estimate vs ceiling here
+
+Section 3.4's split stands: the ceiling is what the user authorises, the estimate is what they
+will pay. The send form moved to the estimate because quoting a ceiling makes the tiers look
+almost identical, since the ceiling carries headroom that swamps the tip.
+
+The same argument applies here, so **the WalletConnect fee row moves to the estimate with the
+row, behind the same flag**, using the `estimated` prop already on `EthFeeDisplay` and the
+existing `fee.text.estimated_fee_eth` key. With the flag off it keeps `fee.text.max_fee_eth`
+and today's ceiling, exactly as now.
+
+One caveat worth stating rather than discovering: the high gas limit warnings
+(`ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER` and `_NOTICE_MULTIPLIER`) compare gas limits, not
+fees, so they are unaffected by this and must stay unaffected. They warn about the ceiling being
+padded, which is exactly the thing the estimate stops displaying.
+
+### 10.6 Placement
+
+Between the last summary row and the fee row, mirroring the send form, which puts Priority
+between the destination and the fee. In `EthWalletConnectSendReview.svelte` that is inside the
+`SendData` children, immediately before `EthFeeDisplay`, after the spender and operator rows.
+
+It belongs in the `summary` tab, not the `raw` tab: it is a control, and the raw tab is for
+inspecting what was requested.
+
+### 10.7 `PRODUCT.md`
+
+Two sentences currently state the opposite of what this section builds and must change in the
+same PR as the behaviour:
+
+- Under **Transaction fees**: _"Only the send flow quotes an expected cost; swap, convert, stake
+  and WalletConnect approvals still quote the maximum."_
+- Under **Transaction priority**: _"The choice is offered on the send flow only: WalletConnect
+  requests, swaps, conversions and staking still use the normal speed."_
+
+Keep the remaining negative statements about swap, convert and stake, which stay true.
+
+### 10.8 PR split
+
+**PR1 `refactor(frontend): let the caller style and price the priority row`**
+
+- optional `header` snippet on `EthFeePriority`, defaulting to today's send-form markup
+- optional `gas` override, defaulting to the fee store's gas
+- no behaviour change, no new call site, send form untouched in output
+
+**PR2 `feat(frontend): offer the priority choice on WalletConnect EVM requests`**, stacked on PR1
+
+- `priority={$sendEthFeePriority}` passed to `EthFeeContext` in the modal
+- priority row in the review, WalletConnect header styling, priced on `signedGas`
+- fee row switches to the estimate behind the flag
+- `PRODUCT.md` updated here
+
+### 10.9 Tests
+
+- the modal passes the selected tier to `EthFeeContext`, so a selection re-prices the fee
+- the row prices its options on a request's own gas limit when it carries one, and on the fee
+  store's gas when it does not, and the option rows agree with the fee row in both cases
+- the row renders for a plain send, an approval and an undecodable call
+- with the flag off there is no row and the label is still `max_fee_eth`
+- the header snippet is what renders when one is passed, and the default when none is
+- the gas limit warnings are unchanged by the estimate switch
+
+`src/frontend/src/tests/eth/components/wallet-connect/EthWalletConnectSendReview.spec.ts` exists
+and asserts on the `max_fee_eth` substring, so it changes by design.
+
+### 10.10 Open questions
+
+1. **Does the designer want the tier descriptors here too?** The rows carry a name, an emoji and
+   a descriptor on the send form. The WalletConnect modal is denser, and the descriptors were
+   drawn for the send form. Assumed identical for now, since a divergence would be a second
+   design to maintain.
+2. **Other WalletConnect chains.** Solana and Bitcoin requests have unrelated fee models and are
+   untouched. The ticket's parenthetical "others too?" is read as covering the EVM request types
+   listed in 10.4, not other chains.
