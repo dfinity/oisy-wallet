@@ -1809,6 +1809,10 @@ service : (Arg) -> {
 	// Returns the caller's own tips, newest first, for History. Bounded by
 	// `MAX_TIPS_RETURNED`.
 	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path. The row cap is what bounds the work
+	// here, and a caller can only ever read their own tips.
+	//
 	// # Errors
 	// Errors are enumerated by `TipError`.
 	get_my_tips : () -> (GetMyTipsResult) query;
@@ -1879,6 +1883,11 @@ service : (Arg) -> {
 	// the sender's message. Requires the claim code, so the message is visible only
 	// to someone holding the full link.
 	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path, because state changes during a
+	// query are not persisted. The abuse surface is one O(log n) lookup that also
+	// has to guess a 128-bit claim code.
+	//
 	// # Errors
 	// `TipError::NotFound` for an unclaimable tip or a wrong claim code.
 	get_tip_details : (TipClaimRequest) -> (GetTipDetailsResult) query;
@@ -1892,6 +1901,10 @@ service : (Arg) -> {
 	//
 	// `EncryptedMaps` keys every map by its owner, so this can only ever return
 	// the caller's own ciphertext.
+	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path. The work is one keyed lookup
+	// scoped to the caller.
 	//
 	// # Errors
 	// Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
