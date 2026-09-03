@@ -1,10 +1,8 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
-	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -17,14 +15,10 @@ import type {
 import type { SolInstruction, SolParsedInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
-import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
-import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
-import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
@@ -219,17 +213,9 @@ const vocabularyOf = (
 		};
 	}
 
-	if (programId === STAKE_PROGRAM_ADDRESS) {
-		return { program: 'stake', names: StakeInstruction, parse: parseSolStakeInstruction };
-	}
-
-	if (programId === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
-		return {
-			program: 'address-lookup-table',
-			names: AddressLookupTableInstruction,
-			parse: parseSolLookupTableInstruction
-		};
-	}
+	// Stake and address lookup table are deliberately absent. No effect is derived from either, so
+	// decoding them changes not one line of what the review shows, and reaching for their packages
+	// here pulls both into the chunk the activity loads: 132KB for an identical screen.
 };
 
 const lowerFirst = (value: string): string => `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
