@@ -1,13 +1,31 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
+import type {
+	SolInstruction,
+	SolParsedToken2022Instruction,
+	SolParsedTokenInstruction
+} from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
+import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
+import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
+import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { SystemInstruction } from '@solana-program/system';
+import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
+import { Token2022Instruction } from '@solana-program/token-2022';
 
 /**
  * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
@@ -117,6 +135,180 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 	}
 };
 
+const isKitInstruction = (instruction: unknown): instruction is SolInstruction =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'programAddress' in instruction &&
+	'data' in instruction &&
+	'accounts' in instruction;
+
+/**
+ * What a token instruction does, in the RPC's vocabulary.
+ *
+ * Both token programs speak the same instructions and carry their own enum for them, so each is
+ * read against its own and reported under its own program name.
+ */
+const tokenInstructionInfo = (
+	decoded: SolParsedTokenInstruction | SolParsedToken2022Instruction
+): { type: string; info: object } | undefined => {
+	const { instructionType } = decoded;
+
+	if (
+		instructionType === TokenInstruction.Transfer ||
+		instructionType === Token2022Instruction.Transfer
+	) {
+		const { accounts, data } = decoded;
+
+		return {
+			type: 'transfer',
+			info: {
+				source: accounts.source.address,
+				destination: accounts.destination.address,
+				authority: accounts.authority.address,
+				amount: data.amount
+			}
+		};
+	}
+
+	if (
+		instructionType === TokenInstruction.TransferChecked ||
+		instructionType === Token2022Instruction.TransferChecked
+	) {
+		const { accounts, data } = decoded;
+
+		return {
+			type: 'transferChecked',
+			info: {
+				source: accounts.source.address,
+				destination: accounts.destination.address,
+				authority: accounts.authority.address,
+				mint: accounts.mint.address,
+				tokenAmount: { amount: String(data.amount), decimals: data.decimals }
+			}
+		};
+	}
+
+	if (
+		instructionType === TokenInstruction.CloseAccount ||
+		instructionType === Token2022Instruction.CloseAccount
+	) {
+		const { accounts } = decoded;
+
+		return {
+			type: 'closeAccount',
+			info: {
+				account: accounts.account.address,
+				destination: accounts.destination.address,
+				owner: accounts.owner.address
+			}
+		};
+	}
+
+	// Named so the plumbing filter recognises it. A wrap is a transfer plus this, and reporting it
+	// as an instruction of its own would put a line under every wrapped SOL account there is.
+	if (
+		instructionType === TokenInstruction.SyncNative ||
+		instructionType === Token2022Instruction.SyncNative
+	) {
+		return { type: 'syncNative', info: {} };
+	}
+};
+
+/**
+ * A kit instruction read into the shape the RPC reports.
+ *
+ * An unsigned message carries its instructions as raw bytes, so nothing below recognises them:
+ * every WalletConnect request derived an empty effect list from the message itself, which left the
+ * summary permanently unstated and, once the review started listing what it could not read, put
+ * "unrecognised" against a plain SOL transfer. The wallet already decodes those bytes to name the
+ * parties; this puts the same decoding in front of the effects, so what a message says it does is
+ * read exactly as what a run did.
+ *
+ * Guarded, because the decoders assert on their input: a malformed or not yet supported variant
+ * must leave the instruction unread, never throw into the signing flow.
+ */
+const asRpcInstruction = (instruction: unknown): SolParsedRpcInstruction | undefined => {
+	const programId = programAddressOf(instruction);
+
+	if (isNullish(programId) || !isKitInstruction(instruction)) {
+		return;
+	}
+
+	try {
+		if (programId === SYSTEM_PROGRAM_ADDRESS) {
+			const decoded = parseSolSystemInstruction(instruction);
+
+			if (decoded.instructionType !== SystemInstruction.TransferSol) {
+				return;
+			}
+
+			const { accounts, data } = decoded;
+
+			return {
+				program: 'system',
+				programId,
+				parsed: {
+					type: 'transfer',
+					info: {
+						source: accounts.source.address,
+						destination: accounts.destination.address,
+						lamports: data.amount
+					}
+				}
+			};
+		}
+
+		if (programId === TOKEN_PROGRAM_ADDRESS || programId === TOKEN_2022_PROGRAM_ADDRESS) {
+			const isLegacy = programId === TOKEN_PROGRAM_ADDRESS;
+
+			const info = tokenInstructionInfo(
+				isLegacy ? parseSolTokenInstruction(instruction) : parseSolToken2022Instruction(instruction)
+			);
+
+			return nonNullish(info)
+				? {
+						program: isLegacy ? 'spl-token' : 'spl-token-2022',
+						programId,
+						parsed: info
+					}
+				: undefined;
+		}
+
+		if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+			const decoded = parseSolAtaInstruction(instruction);
+
+			if (
+				decoded.instructionType !== AssociatedTokenInstruction.CreateAssociatedToken &&
+				decoded.instructionType !== AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
+			) {
+				return;
+			}
+
+			const { accounts } = decoded;
+
+			return {
+				program: 'spl-associated-token-account',
+				programId,
+				parsed: {
+					type:
+						decoded.instructionType === AssociatedTokenInstruction.CreateAssociatedToken
+							? 'create'
+							: 'createIdempotent',
+					info: {
+						account: accounts.ata.address,
+						wallet: accounts.owner.address,
+						source: accounts.payer.address,
+						mint: accounts.mint.address
+					}
+				}
+			};
+		}
+	} catch (_err: unknown) {
+		// An instruction the decoders cannot read stays unread, which is the same outcome an
+		// unknown program gets and the honest one.
+	}
+};
+
 const flatten = ({
 	instructions,
 	innerInstructions
@@ -127,8 +319,11 @@ const flatten = ({
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
+		// The inner calls a run reveals arrive parsed. The message's own instructions do not, and
+		// are decoded here into the same shape rather than dropped.
 		return [instruction, ...inner]
-			.filter(isParsed)
+			.map((candidate) => (isParsed(candidate) ? candidate : asRpcInstruction(candidate)))
+			.filter(nonNullish)
 			.map((parsed) => ({ parentIndex, instruction: parsed }));
 	});
 

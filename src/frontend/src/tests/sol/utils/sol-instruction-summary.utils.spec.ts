@@ -3,6 +3,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
+import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { getTransferSolInstruction } from '@solana-program/system';
+import { getTransferCheckedInstruction } from '@solana-program/token';
+import { address as toAddress } from '@solana/kit';
 
 describe('sol-instruction-summary.utils', () => {
 	describe('mapSolInstructionSummaries', () => {
@@ -476,6 +480,93 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(view.kind).toBe('send');
 				expect(view.own).toBeFalsy();
+			});
+		});
+
+		// A WalletConnect request carries its instructions as raw bytes rather than the parsed form
+		// the RPC returns. Read on their own they yielded nothing, which left the summary unstated
+		// and put "unrecognised" against the commonest transaction on Solana.
+		describe('the instructions of an unsigned message', () => {
+			const me = 'FzjDPHxrEUUuVMcMSGjNMjPGmXWqoUgqYuP5MunKzKNn';
+			const them = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const signer = (address: string) => ({ address }) as never;
+
+			it('should read a plain SOL transfer as the send it is', () => {
+				const [transfer] = mapSolInstructionSummaries({
+					instructions: [
+						getTransferSolInstruction({
+							source: signer(me),
+							destination: toAddress(them),
+							amount: 10_000_000n
+						})
+					],
+					ownedAddresses: [me]
+				});
+
+				expect(transfer).toStrictEqual({
+					kind: 'send',
+					amount: 10_000_000n,
+					counterparty: them,
+					own: false
+				});
+			});
+
+			it('should not call a transfer it can read unrecognised', () => {
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							instructions: [
+								getTransferSolInstruction({
+									source: signer(me),
+									destination: toAddress(them),
+									amount: 10_000_000n
+								})
+							],
+							ownedAddresses: [me],
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['send']);
+			});
+
+			it('should read a checked SPL transfer with its mint and decimals', () => {
+				const [transfer] = mapSolInstructionSummaries({
+					instructions: [
+						getTransferCheckedInstruction({
+							source: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							destination: toAddress(mockSolAddress2),
+							authority: signer(me),
+							amount: 5_000_000n,
+							decimals: 6
+						})
+					],
+					ownedAddresses: [me]
+				});
+
+				expect(transfer?.kind).toBe('send');
+				expect(transfer?.amount).toBe(5_000_000n);
+				expect(transfer?.decimals).toBe(6);
+				expect(transfer?.tokenAddress).toBe(mint);
+			});
+
+			// The decoders assert on their input, and a signing flow must not be taken down by a
+			// variant they do not cover.
+			it('should leave an instruction it cannot decode unread rather than throwing', () => {
+				expect(() =>
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								programAddress: '11111111111111111111111111111111',
+								accounts: [],
+								data: new Uint8Array([255, 255, 255, 255])
+							}
+						],
+						ownedAddresses: [me]
+					})
+				).not.toThrow();
 			});
 		});
 
