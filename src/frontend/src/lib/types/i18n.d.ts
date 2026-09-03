@@ -1688,6 +1688,10 @@ interface I18nTransaction {
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;
+		instruction_burn: string;
+		instruction_mint: string;
+		instruction_freeze: string;
+		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
 		instruction_rent: string;
