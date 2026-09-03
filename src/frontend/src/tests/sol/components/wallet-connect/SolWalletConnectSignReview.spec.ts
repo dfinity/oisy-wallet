@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
-		amount: 1_000_000n,
 		application: 'https://example.com',
 		destination: mockSolAddress2,
 		source: mockSolAddress,
@@ -87,7 +86,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
@@ -99,7 +98,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
-		expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 		// the ninth decimal must survive: rounding it away would alter the very number this review
 		// exists to disclose
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
@@ -115,8 +114,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByText(en.fee.text.fee).tagName).toBe('LABEL');
-		expect(getByText(en.fee.text.network_fee).tagName).not.toBe('LABEL');
-		expect(getByText(en.fee.text.prioritization_fee).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.base_kind).tagName).not.toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_kind).tagName).not.toBe('LABEL');
 	});
 
 	it('should charge the rent of the accounts the message opens as its own line', () => {
@@ -130,6 +129,7 @@ describe('SolWalletConnectSignReview', () => {
 			}
 		});
 
+		expect(getByTestId('ata-fee')).toHaveTextContent(en.fee.text.ata_kind);
 		expect(getByTestId('ata-fee')).toHaveTextContent('0.00407856');
 	});
 
@@ -189,7 +189,7 @@ describe('SolWalletConnectSignReview', () => {
 			props
 		});
 
-		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+		expect(queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 	});
 
 	// The message states almost nothing a routed swap does; the simulation is what knows.
@@ -287,7 +287,7 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID' }
 			});
 
-			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.base_kind)).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 		});
 
@@ -399,6 +399,36 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
+	// Where the list came from changes what it can claim: a run reveals the calls made inside
+	// other programs, a message states only its own.
+	describe('what the list is called', () => {
+		const withInstructions = {
+			...props,
+			instructions: [{ kind: 'send' as const, amount: 1_000_000n, counterparty: mockSolAddress2 }]
+		};
+
+		it('should call it simulated when it came from a run', async () => {
+			const queries = render(SolWalletConnectSignReview, {
+				props: { ...withInstructions, simulatedInstructions: true }
+			});
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.wallet_connect.text.simulated_instructions)).toBeInTheDocument();
+		});
+
+		it('should call it plain when it came from the message', async () => {
+			const queries = render(SolWalletConnectSignReview, { props: withInstructions });
+
+			await showOperations(queries);
+
+			expect(queries.getByText(en.transaction.text.tab_instructions)).toBeInTheDocument();
+			expect(
+				queries.queryByText(en.wallet_connect.text.simulated_instructions)
+			).not.toBeInTheDocument();
+		});
+	});
+
 	it('should show no instruction list when the simulation produced none', async () => {
 		const queries = render(SolWalletConnectSignReview, { props });
 
@@ -482,7 +512,7 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			const changes = getByText(en.wallet_connect.text.simulated_changes);
-			const fee = getByText(en.fee.text.network_fee);
+			const fee = getByText(en.fee.text.base_kind);
 
 			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
 				Node.DOCUMENT_POSITION_FOLLOWING
@@ -495,13 +525,13 @@ describe('SolWalletConnectSignReview', () => {
 				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
 			});
 
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 			expect(queries.queryByText(en.wallet_connect.text.hex_data)).not.toBeInTheDocument();
 
 			await showOperations(queries);
 
 			expect(queries.getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
-			expect(queries.queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
+			expect(queries.queryByText(en.fee.text.prioritization_kind)).not.toBeInTheDocument();
 		});
 	});
 
@@ -621,7 +651,6 @@ describe('SolWalletConnectSignReview', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
-					amount: 1n,
 					prioritizationFee: 1_000_000_001n,
 					prioritizationFeeEstimate: networkEstimate
 				}
@@ -673,12 +702,28 @@ describe('SolWalletConnectSignReview', () => {
 	describe('the notice about how the review was obtained', () => {
 		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
 
-		it('should state that the review is simulated once a simulation ran', () => {
-			const { getByText } = render(SolWalletConnectSignReview, {
-				props: { ...props, preview }
+		// A message that reduces to a plain transfer the run agrees with needs no warning: the
+		// figures above say what it does, and the only caveat left is that they are predicted.
+		const matched = { kind: 'send' as const, spent: { delta: -5_000n } };
+
+		it('should call a matched review simulated, and no more than that', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, messageSummary: matched, preview }
 			});
 
 			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
+		// The case the ticket names: the message does not reduce to a plain send or swap the run
+		// agrees with, so the detail below is the only account of what will be signed.
+		it('should warn when the message does not reduce to a transfer the run agrees with', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
 		// Two notices about the same thing are one too many: an undecodable message already says
@@ -713,9 +758,26 @@ describe('SolWalletConnectSignReview', () => {
 			expect(queryByText(en.wallet_connect.text.simulated_review)).not.toBeInTheDocument();
 		});
 
+		// The warning tells the user to check the simulated changes, so it must not appear when
+		// there are none: the absence of a run has a warning of its own.
+		it('should not name simulated changes when no simulation ran', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
+		// The decode is asynchronous, and until it settles there is nothing to have reduced.
+		it('should wait for the decode before warning', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, approveDisabled: true, preview }
+			});
+
+			expect(queryByText(en.wallet_connect.text.multiple_operations)).not.toBeInTheDocument();
+		});
+
 		it('should render the note above the transaction data', () => {
 			const { getByText } = render(SolWalletConnectSignReview, {
-				props: { ...props, preview }
+				props: { ...props, messageSummary: matched, preview }
 			});
 
 			const note = getByText(en.wallet_connect.text.simulated_review);
@@ -751,8 +813,8 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queries.getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(queries.getByText(en.send.text.network)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.network_fee)).toBeInTheDocument();
-			expect(queries.getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.base_kind)).toBeInTheDocument();
+			expect(queries.getByText(en.fee.text.prioritization_kind)).toBeInTheDocument();
 
 			await showOperations(queries);
 
@@ -769,21 +831,24 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
 			expect(getByTestId('simulated-sol-delta')).toHaveTextContent('-0.01 SOL');
-			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.multiple_operations)).toBeInTheDocument();
 		});
 	});
 
-	// The two rows describe what will be signed, which the simulation only predicts.
-	it('should render the amount and the balance of a decoded transfer', () => {
+	// A decoded amount is one movement out of however many the message makes, and on a swap it is
+	// one leg of the pair, stated as though it were the whole. The simulated changes below it say
+	// what actually moves, so the row contradicted them; the balance is the wallet's, not the
+	// message's, and says nothing about what is being signed.
+	it('should state neither an amount nor the wallet balance', () => {
 		balancesStore.set({ id: SOLANA_TOKEN.id, data: { data: 5_000_000_000n, certified: false } });
 
-		const { getByText, container } = render(SolWalletConnectSignReview, { props });
+		const { queryByText, container } = render(SolWalletConnectSignReview, { props });
 
-		expect(getByText(en.core.text.amount)).toBeInTheDocument();
-		expect(container.querySelector('#amount')).toHaveTextContent('0.001 SOL');
+		expect(queryByText(en.core.text.amount)).not.toBeInTheDocument();
+		expect(container.querySelector('#amount')).toBeNull();
 
-		expect(getByText(en.send.text.balance)).toBeInTheDocument();
-		expect(container.querySelector('#balance')).toHaveTextContent('5 SOL');
+		expect(queryByText(en.send.text.balance)).not.toBeInTheDocument();
+		expect(container.querySelector('#balance')).toBeNull();
 	});
 
 	// The delegate of an approval is not a recipient, so it keeps its own row even though the

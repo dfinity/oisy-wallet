@@ -99,7 +99,11 @@ const simulate = async ({
 		})),
 		ownedAddresses: [address, ...ownedAddresses],
 		addressToToken,
-		accountLamports
+		accountLamports,
+		// A run whose calls all happen inside a program the wallet cannot read produces no effects
+		// at all, and the review then listed nothing for a transaction that plainly does something.
+		// Saying which programs it hands the instructions to is worth more than an empty list.
+		includeUnrecognised: true
 	});
 
 	// The message read on its own, without the nested calls the run reveals: a second account of

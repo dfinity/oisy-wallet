@@ -40,6 +40,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import {
 	createSigner,
 	signMessage as signMessageBytes,
@@ -136,7 +137,6 @@ export const decode = async ({
 		...mappedTransaction,
 		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
 		...(nonNullish(preview) && { preview }),
-		...(nonNullish(simulatedInstructions) && { instructions: namedInstructions }),
 		...(nonNullish(messageSummary) && { messageSummary })
 	};
 
@@ -149,10 +149,18 @@ export const decode = async ({
 		mapped.tokenAddress ??
 		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
 
+	// Read whenever either fallback below needs it. A run always reports its parties but only
+	// reports instructions when it produced some, so the two are not missing together, and an
+	// instruction list built without the user's own accounts cannot tell a send from a receive.
+	const owned =
+		nonNullish(simulatedParties) && nonNullish(simulatedInstructions)
+			? undefined
+			: await ownSolAddresses({ address, tokenAddress });
+
 	const parties = simulatedParties ?? {
 		...deriveSolTransferParties({
 			legs: mapSolTransferLegs(parsedTransactionMessage.instructions),
-			...(await ownSolAddresses({ address, tokenAddress }))
+			...(owned ?? { ownedAddresses: [], addressToOwner: {} })
 		}),
 		// Without a simulation the legs are whatever the message states itself, and a routed swap
 		// states none of them. The lists stay, because losing the destination the review shows
@@ -161,8 +169,31 @@ export const decode = async ({
 		partial: true
 	};
 
+	// The list the Operations tab shows. A simulated run reveals the calls made inside other
+	// programs, which the message states none of; without one, the message's own top-level
+	// instructions are still worth listing, and the review says which of the two it got.
+	//
+	// The message carries its instructions as raw bytes, so none of them can be read into an
+	// effect and every line here is an unrecognised one naming its program. That is the whole
+	// point of listing them: without it this fallback produced nothing at all.
+	const instructions = nonNullish(simulatedInstructions)
+		? namedInstructions
+		: await loadSolProgramNames({
+				instructions: mapSolInstructionSummaries({
+					instructions: [...parsedTransactionMessage.instructions],
+					innerInstructions: [],
+					ownedAddresses: owned?.ownedAddresses ?? [],
+					includeUnrecognised: true
+				}),
+				network: solNetwork
+			});
+
 	return {
 		...mapped,
+		...(instructions.length > 0 && {
+			instructions,
+			simulatedInstructions: nonNullish(simulatedInstructions)
+		}),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
 		parties
 	};

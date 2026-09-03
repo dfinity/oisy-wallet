@@ -76,7 +76,6 @@
 
 	let signWithSending = $derived(method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION);
 
-	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
@@ -85,6 +84,7 @@
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
+	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
@@ -96,7 +96,6 @@
 	const updateData = async () => {
 		try {
 			({
-				amount,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -105,6 +104,7 @@
 				prioritizationFeeEstimate,
 				preview,
 				instructions,
+				simulatedInstructions,
 				messageSummary,
 				parties
 			} = await decodeService({
@@ -225,7 +225,6 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
-				{amount}
 				{application}
 				approveDisabled={!decoded}
 				{data}
@@ -240,6 +239,7 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				unreviewed={unreviewed ?? false}

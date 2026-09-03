@@ -240,7 +240,17 @@ export const formatSolTransactionSummary = ({
  * stays a renderer. The children of a route are the caller's to indent, not this function's.
  */
 export const formatSolInstructionSummary = ({
-	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent, returned },
+	instruction: {
+		kind,
+		amount: value,
+		tokenAddress,
+		decimals,
+		counterparty,
+		own,
+		rent,
+		returned,
+		program
+	},
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -342,9 +352,39 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	if ((kind === 'burn' || kind === 'mint') && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(
+				kind === 'burn'
+					? i18n.transaction.text.instruction_burn
+					: i18n.transaction.text.instruction_mint,
+				{ $amount: amount(value), $symbol: symbolOf(tokenAddress) }
+			)
+		};
+	}
+
+	if (kind === 'freeze' || kind === 'thaw') {
+		return {
+			text:
+				kind === 'freeze'
+					? i18n.transaction.text.instruction_freeze
+					: i18n.transaction.text.instruction_thaw
+		};
+	}
+
 	if (kind === 'route') {
 		return {
 			text: i18n.transaction.text.instruction_route
+		};
+	}
+
+	// Says only that the wallet could not read it. The program beside it is the whole of what is
+	// known, so the line names that program rather than guessing at what the call does.
+	if (kind === 'unknown') {
+		return {
+			text: nonNullish(program)
+				? i18n.transaction.text.instruction_unknown_via
+				: i18n.transaction.text.instruction_unknown
 		};
 	}
 

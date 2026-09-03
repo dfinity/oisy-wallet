@@ -1,4 +1,8 @@
 import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -16,6 +20,7 @@ import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
+import { OP_STACK_UNSIGNED_TX_SIZE } from '$evm/base/constants/base.constants';
 import {
 	BSC_MIN_MAX_FEE_PER_GAS,
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
@@ -30,6 +35,27 @@ import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
 
 const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
+
+// Every OP-stack chain OISY supports. Arbitrum is not one of them: its own L1 cost is folded into
+// the gas the transaction reports, so `gasLimit * maxFeePerGas` already covers it.
+const OP_STACK_CHAIN_IDS: EthereumChainId[] = [BASE_NETWORK.chainId, BASE_SEPOLIA_NETWORK.chainId];
+
+// Deliberately not best-effort. Swallowing a failure here would leave the ceiling at
+// `maxFeePerGas * gas` on a chain that charges more than that, which is precisely what let "Max"
+// offer an unminable amount, and it would do so silently: the quote would look affordable and the
+// transaction would never be included. Letting it throw surfaces the problem and retries it, and
+// the call shares a provider with the rest of the fee data, so there is little for it to fail on
+// alone. `undefined` here means the chain has no such fee, never that we failed to read it.
+const getL1DataFee = async ({
+	chainId,
+	provider
+}: {
+	chainId: EthereumChainId;
+	provider: InfuraProvider;
+}): Promise<bigint | undefined> =>
+	OP_STACK_CHAIN_IDS.includes(chainId)
+		? await provider.getL1FeeUpperBound(OP_STACK_UNSIGNED_TX_SIZE)
+		: undefined;
 
 const getGasFeeFloor = (
 	chainId: EthereumChainId
@@ -171,6 +197,9 @@ export const getEthFeeDataWithProvider = async ({
 
 	const suggested = await getSuggestedFeeDataBestEffort(chainId);
 
+	// Flat, priority-independent and not refunded: it belongs to the transaction, not to a tier.
+	const l1Fee = await getL1DataFee({ chainId, provider });
+
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
 
@@ -207,7 +236,8 @@ export const getEthFeeDataWithProvider = async ({
 		...feeDataRest,
 		...(priorities?.perPriority[priority] ??
 			applyFloors({ maxFeePerGas: null, maxPriorityFeePerGas: null })),
-		baseFeePerGas: priorities?.baseFeePerGas ?? null
+		baseFeePerGas: priorities?.baseFeePerGas ?? null,
+		l1Fee
 	};
 
 	return { feeData, priorities, provider, params };

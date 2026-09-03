@@ -16,6 +16,7 @@
 		onBack: () => void;
 		onNext: () => void;
 		sendAmount: Snippet;
+		priority?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
 		cancel: Snippet;
@@ -30,6 +31,7 @@
 		onBack,
 		onNext,
 		sendAmount,
+		priority,
 		fee,
 		info,
 		cancel,
@@ -51,6 +53,8 @@
 			onSendDestinationStep={back}
 			{selectedContact}
 		/>
+
+		{@render priority?.()}
 
 		{@render fee?.()}
 
