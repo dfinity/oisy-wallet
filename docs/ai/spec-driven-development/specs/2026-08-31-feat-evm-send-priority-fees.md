@@ -522,6 +522,15 @@ then supplies a header matching the rows around it, and neither call site carrie
 styling. This is a pure refactor of an existing component and ships ahead of the feature, so the
 feature diff is only the WalletConnect side.
 
+> **Wrong, and dropped during implementation.** The table above compares the priority row against
+> the wrong neighbours. The summary rows do use `Value.svelte`, but the fee row does not: it
+> renders through `EthFeeDisplay` to `ConvertAmountDisplay`, which uses **`ModalValue.svelte`**,
+> the same inline idiom the send form uses. The priority row sits with the fee row, not with the
+> summary rows, so it already matches and no snippet is needed. Reuse here is total: the component
+> ships into the second call site with no styling change at all. The lesson is the ordinary one,
+> that the idiom of the row you sit next to is a fact to check rather than infer from the
+> component's neighbours further up the page.
+
 ### 10.4 Which requests get the row
 
 Every request that reaches this modal is an `eth_sendTransaction` and every one of them pays
@@ -573,18 +582,18 @@ Keep the remaining negative statements about swap, convert and stake, which stay
 
 ### 10.8 PR split
 
-**PR1 `refactor(frontend): let the caller style and price the priority row`**
-
-- optional `header` snippet on `EthFeePriority`, defaulting to today's send-form markup
-- optional `gas` override, defaulting to the fee store's gas
-- no behaviour change, no new call site, send form untouched in output
-
-**PR2 `feat(frontend): offer the priority choice on WalletConnect EVM requests`**, stacked on PR1
+One PR, `feat(frontend): offer the priority choice on WalletConnect EVM requests`.
 
 - `priority={$sendEthFeePriority}` passed to `EthFeeContext` in the modal
-- priority row in the review, WalletConnect header styling, priced on `signedGas`
+- optional `gas` override on `EthFeePriority`, defaulting to the fee store's gas
+- priority row in the review, priced on `signedGas`
 - fee row switches to the estimate behind the flag
 - `PRODUCT.md` updated here
+
+> **Adjusted during implementation.** This was specified as two PRs, a refactor adding the props
+> and a feature consuming them. With 10.3 corrected the refactor is down to a single optional
+> prop, and shipping it alone would add surface nothing consumes, which commandment 10 forbids.
+> The same reasoning shortened PR1 of the send-flow split in [section 4](#4-pr-split).
 
 ### 10.9 Tests
 
@@ -593,7 +602,6 @@ Keep the remaining negative statements about swap, convert and stake, which stay
   store's gas when it does not, and the option rows agree with the fee row in both cases
 - the row renders for a plain send, an approval and an undecodable call
 - with the flag off there is no row and the label is still `max_fee_eth`
-- the header snippet is what renders when one is passed, and the default when none is
 - the gas limit warnings are unchanged by the estimate switch
 
 `src/frontend/src/tests/eth/components/wallet-connect/EthWalletConnectSendReview.spec.ts` exists
