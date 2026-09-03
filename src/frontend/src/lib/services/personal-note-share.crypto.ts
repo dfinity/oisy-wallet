@@ -1,4 +1,10 @@
 import type { PersonalNoteShareContentEnvelope } from '$lib/types/personal-note-share';
+import {
+	fromBase64Url,
+	randomBase64Url,
+	randomBytes,
+	toBase64Url
+} from '$lib/utils/base64url.utils';
 
 /**
  * Per-share symmetric crypto for note sharing. Each share gets a fresh random
@@ -26,35 +32,11 @@ const TOKEN_LENGTH_BYTES = 16;
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
-// All byte arrays are typed `Uint8Array<ArrayBuffer>` (not the default
-// `Uint8Array<ArrayBufferLike>`, which also admits `SharedArrayBuffer`) so they
-// satisfy WebCrypto's `BufferSource` parameters under TypeScript 5.7+.
-const randomBytes = (length: number): Uint8Array<ArrayBuffer> =>
-	crypto.getRandomValues(new Uint8Array(length));
-
 const encodeUtf8 = (value: string): Uint8Array<ArrayBuffer> =>
 	new Uint8Array(textEncoder.encode(value));
 
-// base64url (RFC 4648 §5, no padding) — URL-fragment-safe. The repo has no
-// shared base64url helper (only `btoa`/`atob` for data URLs), so these small
-// converters live here with the only code that needs them.
-const toBase64Url = (bytes: Uint8Array): string => {
-	let binary = '';
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-	return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
-};
-
-const fromBase64Url = (value: string): Uint8Array<ArrayBuffer> => {
-	const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
-	const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
-	const binary = atob(padded);
-	return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-};
-
 /** A fresh, opaque 128-bit token (base64url), unrelated to the note id. */
-export const generateShareToken = (): string => toBase64Url(randomBytes(TOKEN_LENGTH_BYTES));
+export const generateShareToken = (): string => randomBase64Url(TOKEN_LENGTH_BYTES);
 
 /**
  * A fresh random AES-GCM-256 key. Extractable so it can be serialized into the
