@@ -1,4 +1,8 @@
 import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -7,12 +11,14 @@ import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { getEthFeeDataWithProvider } from '$eth/services/fee.services';
 import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
+import { OP_STACK_UNSIGNED_TX_SIZE } from '$evm/base/constants/base.constants';
 import {
 	BSC_MIN_MAX_FEE_PER_GAS,
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 } from '$evm/bsc/constants/bsc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/rest/infura.rest', () => ({
 	InfuraGasRest: vi.fn()
@@ -425,6 +431,72 @@ describe('eth-fee-data.services', () => {
 
 				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
 				expect(result.feeData.maxFeePerGas).toBe(lowMax);
+			});
+		});
+
+		describe('OP-stack L1 data fee', () => {
+			const l1Fee = 875_004_002n;
+
+			let getL1FeeUpperBound: MockInstance;
+
+			beforeEach(() => {
+				getL1FeeUpperBound = vi.fn().mockResolvedValue(l1Fee);
+
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({ gasPrice: null, maxFeePerGas: 10n, maxPriorityFeePerGas: 5n })
+						),
+					getL1FeeUpperBound
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+			});
+
+			it.each([BASE_NETWORK, BASE_SEPOLIA_NETWORK])(
+				'quotes the L1 data fee on $name',
+				async ({ id, chainId }) => {
+					const result = await getEthFeeDataWithProvider({
+						networkId: id,
+						chainId,
+						from: fromAddr,
+						to: toAddr
+					});
+
+					expect(getL1FeeUpperBound).toHaveBeenCalledExactlyOnceWith(OP_STACK_UNSIGNED_TX_SIZE);
+					expect(result.feeData.l1Fee).toBe(l1Fee);
+				}
+			);
+
+			it.each([ETHEREUM_NETWORK, BSC_MAINNET_NETWORK])(
+				'leaves it unquoted on $name, which has no such fee',
+				async ({ id, chainId }) => {
+					const result = await getEthFeeDataWithProvider({
+						networkId: id,
+						chainId,
+						from: fromAddr,
+						to: toAddr
+					});
+
+					expect(getL1FeeUpperBound).not.toHaveBeenCalled();
+					expect(result.feeData.l1Fee).toBeUndefined();
+				}
+			);
+
+			it('is the same on every priority, being a flat cost rather than a tip', async () => {
+				const l1Fees = await Promise.all(
+					Object.values(EthFeePriority).map(async (priority) => {
+						const { feeData } = await getEthFeeDataWithProvider({
+							networkId: BASE_NETWORK.id,
+							chainId: BASE_NETWORK.chainId,
+							from: fromAddr,
+							to: toAddr,
+							priority
+						});
+
+						return feeData.l1Fee;
+					})
+				);
+
+				expect(l1Fees).toEqual([l1Fee, l1Fee, l1Fee]);
 			});
 		});
 	});
