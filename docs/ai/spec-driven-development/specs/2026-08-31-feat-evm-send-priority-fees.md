@@ -2,7 +2,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Spec — Transaction priority for EVM sends
 
-- **Feature:** Let the user choose Slow / Normal / Fast for an ETH or ERC-20 send, and show a fee that reflects the choice. Section 10 extends the same choice to WalletConnect transaction requests
+- **Feature:** Let the user choose Slow / Normal / Fast for an ETH or ERC-20 send and, per [section 10](#10-walletconnect), for a WalletConnect transaction request, and show a fee that reflects the choice
 - **Design:** Figma `duPCw1leqer7ES0sBb6Uua` ("7. OISY UI"), page _Priority, nonce, memo_, section **Priority fees** (`22675:343661`)
 - **Status:** Draft for implementation in Claude Code
 
@@ -478,9 +478,10 @@ most of it reaches WalletConnect without modification:
   `maxPriorityFeePerGas` and `gas` off the fee store it is handed, and the re-pricing effect has
   already put the selected tier there.
 
-Three things do not carry over: the modal never passes `priority` to `EthFeeContext`, the row's
-visual style is wrong for this modal, and the gas the row prices against is wrong. The rest of
-this section is those three.
+Two things do not carry over: the modal never passes `priority` to `EthFeeContext`, and the gas
+the row prices against is wrong. A third was expected, the row's visual style, and turned out not
+to be a difference at all; [10.3](#103-the-rows-styling-and-why-it-needed-no-change) keeps that section as the
+record of the wrong assumption rather than deleting it.
 
 ### 10.2 The gas is different here, and it matters
 
@@ -501,7 +502,10 @@ computed correctly and the pair would still be nonsense.
 fee store's gas, and pass `signedGas` in the WalletConnect review. The two rows then price the
 same transaction by construction rather than by coincidence.
 
-### 10.3 The row looks different here
+### 10.3 The row's styling, and why it needed no change
+
+The reasoning below is preserved as written, and the note at the end of the section records why
+it was wrong. The short version is that no styling change was needed.
 
 The send form and this modal do not share a row idiom, and forcing one onto the other is the
 wrong kind of reuse.
