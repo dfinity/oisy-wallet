@@ -6,7 +6,7 @@ import type {
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { OisyTradeError } from '$lib/canisters/oisy-trade.errors';
-import { OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS } from '$lib/constants/oisy-trade.constants';
+import { OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS } from '$lib/constants/oisy-trade.constants';
 import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 import {
 	applyActiveUserTransactionPollUpdate,
@@ -35,20 +35,40 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
-const NANOSECONDS_IN_MILLISECOND = 1_000_000n;
-
 /**
- * Whether the foreground has had long enough to finish placing the order.
+ * How many consecutive ticks each order-less row has been seen for.
  *
- * Only ever asked of a row with no order id, and load-bearing rather than a
+ * Only ever consulted for a row with no order id, and load-bearing rather than a
  * nicety: every healthy swap passes through exactly that signature in the window
  * between the row's creation and `add_limit_order` returning, so a tick landing
- * inside it would withdraw the deposit out from under an order placement still in
- * flight.
+ * inside it would act while the foreground still owns the flow — deleting the
+ * recovery record mid-deposit, or withdrawing the deposit out from under an order
+ * placement about to reserve it.
+ *
+ * Counted rather than clocked, which is the whole point. The row's timestamps come
+ * from the backend canister's clock and `Date.now()` from the browser's, so
+ * subtracting one from the other makes the window depend on the difference between
+ * them: a device five minutes fast has no window at all. Ticks are the poller's own
+ * cadence and need neither clock.
+ *
+ * Deliberately in-memory, as in `velora-active-tx.services` and
+ * `chain-fusion-swap-active-tx.services`: a refresh restarts the count, which at
+ * worst delays recovering an abandoned deposit and can never act early. Ticks do
+ * not accrue while the tab is hidden, for the same reason.
  */
-const isPastGracePeriod = ({ created_at_ns }: ActiveUserTransaction): boolean =>
-	BigInt(Date.now()) - created_at_ns / NANOSECONDS_IN_MILLISECOND >
-	BigInt(OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS);
+const orderlessObservations = new Map<string, number>();
+
+// Test seam — module-level state would otherwise leak between cases.
+export const resetOisyTradeOrderlessObservations = (): void => {
+	orderlessObservations.clear();
+};
+
+const recordOrderlessObservation = (id: string): number => {
+	const count = (orderlessObservations.get(id) ?? 0) + 1;
+	orderlessObservations.set(id, count);
+
+	return count;
+};
 
 /**
  * The two legs of a row, resolved back to the wallet's own tokens.
@@ -100,6 +120,9 @@ const applyTerminalUpdate = async ({
 		return;
 	}
 
+	// A terminal row leaves the pending set, so its tick count has no reader left.
+	orderlessObservations.delete(tx.id);
+
 	// Both legs can pay out — a Buy that crossed below its limit has its unspent
 	// reserve released alongside the fill — so the ref records every block index this
 	// settlement produced, not just the primary one.
@@ -149,10 +172,15 @@ const pollOisyTradeTransaction = async ({
 	const hasDeposited = nonNullish(refs[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]);
 
 	// Without an order id the foreground may still be mid-flow, so the row is its
-	// business until the grace period is up. With one there is nothing to wait for:
-	// settlement is this poller's job from the moment the order exists.
-	if (isNullish(orderIdRef) && !isPastGracePeriod(tx)) {
-		return;
+	// business until it has been seen for the whole tick budget. With one there is
+	// nothing to wait for — settlement is this poller's job from the moment the order
+	// exists — and the count has no reader left.
+	if (isNullish(orderIdRef)) {
+		if (recordOrderlessObservation(tx.id) < OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS) {
+			return;
+		}
+	} else {
+		orderlessObservations.delete(tx.id);
 	}
 
 	const { error: swapError } = get(i18n).swap;
@@ -189,6 +217,17 @@ const pollOisyTradeTransaction = async ({
 		// why the reason is recorded on the row: the Trading tab is where the user can act
 		// on it.
 		if (err instanceof OisyTradeError) {
+			// …but only once an order exists to have been refused about. With no order id,
+			// the likeliest way a withdrawal gets definitively refused is that
+			// `add_limit_order` landed between the balance read and the withdraw and
+			// reserved the very funds it was about to move — `InsufficientBalance`, which is
+			// not retryable. Terminalizing there would mark the row failed while the order
+			// goes on to fill into DEX custody with nothing polling for it. The row is left
+			// alone and the next tick re-derives from what the canister then holds.
+			if (isNullish(orderIdRef)) {
+				return;
+			}
+
 			await applyActiveUserTransactionPollUpdate({
 				identity,
 				tx,
@@ -209,34 +248,41 @@ const pollOisyTradeTransaction = async ({
 	}
 
 	if (settlement.status === 'unresolved') {
-		// With an order id, "unresolved" is final: the canister no longer knows the order
-		// and neither leg holds anything attributable, so an earlier attempt already paid
-		// the withdrawal out and only the terminal write was lost. Nothing says which way
-		// it went, so it closes as a failure that points at the Trading tab rather than
-		// claiming a success it cannot evidence.
-		if (nonNullish(orderIdRef)) {
-			await applyTerminalUpdate({
-				identity,
-				tx,
-				refs,
-				settlement,
-				error: swapError.oisy_trade_settlement_unresolved
-			});
+		// A row still `Pending` that holds neither pointer never reached the canister —
+		// the user closed the modal at the approve prompt, or the approve failed — so it
+		// is *deleted* rather than failed: nothing happened, and a `Failed` row would
+		// invite the user to worry about funds that never moved.
+		if ('Pending' in tx.status && !hasDeposited) {
+			await deleteActiveUserTransaction({ identity, id: tx.id });
+			orderlessObservations.delete(tx.id);
 
 			return;
 		}
 
-		// Without one it is ambiguous, and the two readings are told apart by what the row
-		// itself records. A row still `Pending` that holds neither pointer never reached
-		// the canister — the user closed the modal at the approve prompt, or the approve
-		// failed — so it is *deleted* rather than failed: nothing happened, and a `Failed`
-		// row would invite the user to worry about funds that never moved. Anything else
-		// is a deposit whose order id was lost while the order itself may still be live,
-		// holding its reserve where no free balance can see it. That row is left to keep
-		// polling; terminalizing it would be the one unrecoverable mistake here.
-		if ('Pending' in tx.status && !hasDeposited) {
-			await deleteActiveUserTransaction({ identity, id: tx.id });
-		}
+		// Otherwise "unresolved" is final, whether or not an order id was ever recorded:
+		// nothing attributable is left on either leg, so the funds are already out of DEX
+		// custody. Either an earlier attempt paid the withdrawal out and only its reply or
+		// its terminal write was lost, or the user swept the balance from the Trading tab.
+		//
+		// The reading this does *not* have to fear is a live order hiding the funds behind
+		// its reserve. This branch is only reachable once the row has gone unwritten for
+		// the whole tick budget, and the order is fill-or-kill: it is decided in the
+		// matching round that follows its acceptance, so minutes later it has either
+		// filled, which shows as a destination delta, or been killed, which returns the
+		// source. Both are non-zero. Zero on both legs therefore cannot be an order still
+		// in flight.
+		//
+		// It closes as a failure with copy that points at the Trading tab rather than
+		// naming an outcome: a fill whose withdrawal reply was lost looks identical from
+		// here, so this cannot claim the success it has no evidence for — nor blame a
+		// placement that may well have happened.
+		await applyTerminalUpdate({
+			identity,
+			tx,
+			refs,
+			settlement,
+			error: swapError.oisy_trade_settlement_unresolved
+		});
 
 		return;
 	}

@@ -439,9 +439,12 @@ const withdrawFreeBalance = async ({
  * `add_limit_order` never returned an id — because it was never reached, or because
  * its reply was lost. There is nothing to poll, so the balances answer instead,
  * exactly as they do for an order the canister no longer knows. Both deltas at zero
- * then reads as `unresolved`, which is also what a *live* order looks like from the
- * outside (its reserve is locked, so neither leg holds anything free) — so the caller
- * must treat `unresolved` as "ask again later", never as "nothing happened".
+ * then reads as `unresolved`, which says only that nothing attributable is in custody
+ * — not how it got that way, and not that nothing happened. A *live* order looks
+ * identical from the outside, since its reserve holds no free balance, so a caller
+ * that can still be racing a placement must not read `unresolved` as terminal; the
+ * poller waits out its tick budget first, by which point a fill-or-kill order has
+ * necessarily resolved and left a non-zero delta on one leg.
  *
  * Everything it acts on is **the difference from that baseline**, never the
  * account-wide free balance. A user can arrive at a swap with either leg already

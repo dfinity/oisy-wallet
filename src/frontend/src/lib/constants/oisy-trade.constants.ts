@@ -1,3 +1,5 @@
+import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+
 // Display name for the OISY Trade provider, shown on the Trading tab venue tag,
 // order rows, and deposit/withdraw flows.
 export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
@@ -27,6 +29,19 @@ export const OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS = 2_000;
 // under an order placement still in flight. Comfortably longer than approve +
 // deposit + place, and well short of the deposit's 5-minute approve expiry.
 export const OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS = 5 * 60 * 1000;
+
+// That grace period as a count of the poller's own ticks, which is how it is
+// actually measured.
+//
+// Not as elapsed wall time: the row's `created_at_ns` comes from the backend
+// canister's clock while `Date.now()` comes from the browser's, and subtracting one
+// from the other makes the window depend on the difference between them. A device
+// clock five minutes fast collapses the budget to nothing, which would let a tick
+// act while approve and deposit are still in flight; one behind holds recovery off
+// for as long as it is behind. Counting the poller's own ticks needs neither clock.
+export const OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS = Math.ceil(
+	OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS / ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS
+);
 
 // The oisy_trade canister caps a `get_my_orders` page (`ByPage.length`) at 100.
 export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;

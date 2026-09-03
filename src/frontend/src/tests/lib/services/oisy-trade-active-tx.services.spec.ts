@@ -4,9 +4,12 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
 import { OisyTradeRequestError, OisyTradeTemporaryError } from '$lib/canisters/oisy-trade.errors';
 import { ZERO } from '$lib/constants/app.constants';
-import { OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS } from '$lib/constants/oisy-trade.constants';
+import { OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS } from '$lib/constants/oisy-trade.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
-import { pollOisyTradeActiveUserTransactions } from '$lib/services/oisy-trade-active-tx.services';
+import {
+	pollOisyTradeActiveUserTransactions,
+	resetOisyTradeOrderlessObservations
+} from '$lib/services/oisy-trade-active-tx.services';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { toOisyTradeExternalRefs } from '$lib/utils/oisy-trade-active-tx.utils';
@@ -44,11 +47,6 @@ vi.mock(import('$lib/derived/all-tokens.derived'), async (importOriginal) => {
 
 const CKUSDC_LEDGER = ckUsdcFields.ledgerCanisterId;
 
-const nowNs = (): bigint => BigInt(Date.now()) * 1_000_000n;
-
-const beforeGraceNs = (): bigint =>
-	BigInt(Date.now() - OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS - 1_000) * 1_000_000n;
-
 const balance = ({ ledger, free }: { ledger: string; free: bigint }) =>
 	({
 		token: { id: { ledger_id: Principal.fromText(ledger) } },
@@ -61,7 +59,7 @@ const order = (status: object): UserOrder[] =>
 const row = ({
 	refs = {},
 	status = { Executing: null },
-	createdAtNs = beforeGraceNs()
+	createdAtNs = ZERO
 }: {
 	refs?: Partial<Record<string, string>>;
 	status?: ActiveUserTransaction['status'];
@@ -103,8 +101,17 @@ describe('oisy-trade-active-tx.services', () => {
 		const poll = (transactions: ActiveUserTransaction[]) =>
 			pollOisyTradeActiveUserTransactions({ identity: mockIdentity, transactions });
 
+		// An order-less row's wait is measured in the poller's own ticks rather than in
+		// elapsed wall time, so a test that wants the budget spent has to spend it.
+		const pollPastGrace = async (transactions: ActiveUserTransaction[]) => {
+			for (let i = 0; i < OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS; i++) {
+				await poll(transactions);
+			}
+		};
+
 		beforeEach(() => {
 			vi.restoreAllMocks();
+			resetOisyTradeOrderlessObservations();
 
 			applySpy = vi
 				.spyOn(activeUserTransactionsServices, 'applyActiveUserTransactionPollUpdate')
@@ -275,15 +282,27 @@ describe('oisy-trade-active-tx.services', () => {
 		describe('a row with no order id', () => {
 			const DEPOSITED = { [OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]: '7' };
 
-			// The grace period is load-bearing rather than a nicety: every healthy swap
-			// passes through exactly this signature between the row's creation and
-			// `add_limit_order` returning, and a tick landing inside it would withdraw the
-			// deposit out from under an order placement still in flight.
-			it('leaves a row younger than the grace period to the foreground', async () => {
-				await poll([
-					row({ refs: DEPOSITED, createdAtNs: nowNs() }),
-					row({ status: { Pending: null }, createdAtNs: nowNs() })
-				]);
+			// The budget is load-bearing rather than a nicety: every healthy swap passes
+			// through exactly this signature between the row's creation and
+			// `add_limit_order` returning, and a tick landing inside it would act while the
+			// foreground still owns the flow.
+			//
+			// Measured in ticks, never in elapsed wall time. The row's timestamps come from
+			// the backend canister's clock and `Date.now()` from the browser's, so
+			// subtracting one from the other would make this window depend on the difference
+			// between them — a device five minutes fast would have no window at all. Hence
+			// the deliberately absurd `created_at_ns` of zero throughout this file: an epoch
+			// timestamp would read as ancient on any wall-clock comparison, so these tests
+			// fail loudly if one is ever reintroduced.
+			it('leaves a row inside the tick budget to the foreground', async () => {
+				const transactions = [
+					row({ refs: DEPOSITED }),
+					{ ...row({ status: { Pending: null } }), id: 'row-2' }
+				];
+
+				for (let i = 0; i < OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS - 1; i++) {
+					await poll(transactions);
+				}
 
 				expect(getBalancesSpy).not.toHaveBeenCalled();
 				expect(withdrawSpy).not.toHaveBeenCalled();
@@ -294,7 +313,7 @@ describe('oisy-trade-active-tx.services', () => {
 			// Nothing happened, so there is nothing to report — and a `Failed` row would
 			// invite the user to worry about funds that never left their wallet.
 			it('deletes an abandoned row that never reached the canister', async () => {
-				await poll([row({ status: { Pending: null } })]);
+				await pollPastGrace([row({ status: { Pending: null } })]);
 
 				expect(deleteSpy).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: 'row-1' }));
 				expect(applySpy).not.toHaveBeenCalled();
@@ -307,7 +326,7 @@ describe('oisy-trade-active-tx.services', () => {
 					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 300_000_000n })
 				]);
 
-				await poll([row({ refs: DEPOSITED })]);
+				await pollPastGrace([row({ refs: DEPOSITED })]);
 
 				// Never polled: there is no order id to poll by.
 				expect(getMyOrdersSpy).not.toHaveBeenCalled();
@@ -327,16 +346,56 @@ describe('oisy-trade-active-tx.services', () => {
 			// A deposit whose order id was lost looks identical to one that is still live,
 			// because a live order's reserve holds no free balance. Deleting or failing it
 			// would be the one unrecoverable mistake here, so it keeps polling.
+			// Past the budget, nothing attributable on either leg means the funds are already
+			// out of DEX custody: an earlier attempt's withdrawal landed and its reply or its
+			// terminal write was lost, or the user swept the balance from the Trading tab.
+			//
+			// The reading this no longer fears is a live order hiding the funds behind its
+			// reserve. The order is fill-or-kill, decided in the matching round after it is
+			// accepted, so by the time the budget is spent it has filled — a destination
+			// delta — or been killed — a source one. Zero on both cannot be an order in
+			// flight. Leaving the row alone here is what used to strand it non-terminal
+			// forever: undismissable, still polling, and never firing its analytics.
 			it.each([{ Executing: null }, { Pending: null }])(
-				'keeps polling a %s deposit whose order may still be live',
+				'closes a %s deposit that left nothing behind',
 				async (status) => {
-					await poll([row({ refs: DEPOSITED, status })]);
+					await pollPastGrace([row({ refs: DEPOSITED, status })]);
 
 					expect(withdrawSpy).not.toHaveBeenCalled();
-					expect(applySpy).not.toHaveBeenCalled();
 					expect(deleteSpy).not.toHaveBeenCalled();
+					// Copy that names no outcome: a fill whose withdrawal reply was lost looks
+					// identical from here, so it can claim neither success nor a failed placement.
+					expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+						expect.objectContaining({
+							update: expect.objectContaining({
+								status: { Failed: null },
+								error: en.swap.error.oisy_trade_settlement_unresolved
+							})
+						})
+					);
 				}
 			);
+
+			// The race the tick budget exists to avoid, taken at the one ordering the budget
+			// cannot rule out: the recovery withdrawal is refused because `add_limit_order`
+			// reserved the deposit between the balance read and the withdraw.
+			// `InsufficientBalance` is not retryable, so terminalizing here would mark the
+			// row failed while the order goes on to fill into DEX custody with nothing
+			// polling for it. The row has to survive so the next tick can re-derive.
+			it('leaves the row alone when the recovery withdrawal was outrun by the order', async () => {
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 300_000_000n })
+				]);
+				withdrawSpy.mockRejectedValue(
+					new OisyTradeRequestError({ message: 'nope', reason: 'InsufficientBalance' })
+				);
+
+				await pollPastGrace([row({ refs: DEPOSITED })]);
+
+				expect(withdrawSpy).toHaveBeenCalled();
+				expect(applySpy).not.toHaveBeenCalled();
+				expect(deleteSpy).not.toHaveBeenCalled();
+			});
 		});
 
 		// Sequential rather than concurrent — the canister rejects a second withdrawal
