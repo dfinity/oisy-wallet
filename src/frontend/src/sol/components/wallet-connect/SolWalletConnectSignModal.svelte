@@ -84,6 +84,7 @@
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
+	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
@@ -103,6 +104,7 @@
 				prioritizationFeeEstimate,
 				preview,
 				instructions,
+				simulatedInstructions,
 				messageSummary,
 				parties
 			} = await decodeService({
@@ -237,6 +239,7 @@
 				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
+				simulatedInstructions={simulatedInstructions ?? false}
 				source={address ?? ''}
 				token={reviewToken}
 				unreviewed={unreviewed ?? false}

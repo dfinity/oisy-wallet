@@ -43,15 +43,14 @@ describe('SwapDetailsChainFusion', () => {
 		swapDetails
 	});
 
-	// The fee breakdown belongs to the form's fee section, which carries every component and
-	// their total. This sheet is the provider's identity and the constraints it imposes, so a
-	// fee row here would either duplicate that list or leave both surfaces incomplete.
-	it('renders no fee rows at all', () => {
-		const { queryByText } = render(SwapDetailsChainFusion, {
+	// The fee section itemizes what the user pays out of balance and totals it. A fee the
+	// minter instead withholds from the amount it converts is already priced into the receive
+	// amount, so it is disclosed here and nowhere else — the Velora division.
+	it('renders the fees deducted from the receive amount, with their value', () => {
+		const { getByText } = render(SwapDetailsChainFusion, {
 			props: {
 				provider: makeProvider({
 					sourceFees: [
-						{ labelPath: 'fee.text.fee', fee: 10_000n, token: sourceToken },
 						{
 							labelPath: 'fee.text.convert_inter_network_fee',
 							fee: 5_000n,
@@ -59,6 +58,31 @@ describe('SwapDetailsChainFusion', () => {
 							deductedFromAmount: true
 						}
 					],
+					externalFees: [
+						{
+							labelPath: 'fee.text.estimated_eth',
+							fee: 2_000_000_000_000n,
+							token: ckEthToken,
+							deductedFromAmount: true
+						}
+					]
+				})
+			},
+			context: makeContext()
+		});
+
+		expect(getByText(en.fee.text.convert_inter_network_fee)).toBeInTheDocument();
+		expect(getByText('0.005 ckUSDC')).toBeInTheDocument();
+		expect(getByText(en.fee.text.estimated_eth)).toBeInTheDocument();
+		expect(getByText('0.000002 ckETH')).toBeInTheDocument();
+	});
+
+	// A fee paid on top of the amount is the fee section's, total included.
+	it('renders no row for a fee charged on top of the amount', () => {
+		const { queryByText } = render(SwapDetailsChainFusion, {
+			props: {
+				provider: makeProvider({
+					sourceFees: [{ labelPath: 'fee.text.fee', fee: 10_000n, token: sourceToken }],
 					externalFees: [
 						{ labelPath: 'fee.text.estimated_eth', fee: 2_000_000_000_000n, token: ckEthToken }
 					]
@@ -68,10 +92,8 @@ describe('SwapDetailsChainFusion', () => {
 		});
 
 		expect(queryByText(en.fee.text.fee)).not.toBeInTheDocument();
-		expect(queryByText(en.fee.text.convert_inter_network_fee)).not.toBeInTheDocument();
 		expect(queryByText(en.fee.text.estimated_eth)).not.toBeInTheDocument();
 		expect(queryByText('0.01 ckUSDC')).not.toBeInTheDocument();
-		expect(queryByText('0.005 ckUSDC')).not.toBeInTheDocument();
 		expect(queryByText('0.000002 ckETH')).not.toBeInTheDocument();
 	});
 

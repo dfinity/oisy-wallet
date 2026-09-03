@@ -1577,10 +1577,10 @@
 			"transaction_fees": "",
 			"network_fee": "",
 			"approval_fee": "",
-			"prioritization_fee": ""
-		},
-		"info": {
-			"priority": ""
+			"prioritization_fee": "",
+			"base_kind": "",
+			"prioritization_kind": "",
+			"ata_kind": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire le fee."
@@ -1630,6 +1630,8 @@
 			"tab_operations": "",
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
+			"simulated_instructions": "",
+			"multiple_operations": "",
 			"simulated_review": "",
 			"simulated_changes": "",
 			"simulation_control_change": "",
@@ -2013,6 +2015,12 @@
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
 			"instruction_route": "",
+			"instruction_burn": "",
+			"instruction_mint": "",
+			"instruction_freeze": "",
+			"instruction_thaw": "",
+			"instruction_unknown": "",
+			"instruction_unknown_via": "",
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",

@@ -3,6 +3,20 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
+import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { getTransferSolInstruction } from '@solana-program/system';
+import {
+	AuthorityType,
+	getApproveCheckedInstruction,
+	getApproveInstruction,
+	getBurnInstruction,
+	getFreezeAccountInstruction,
+	getMintToInstruction,
+	getRevokeInstruction,
+	getSetAuthorityInstruction,
+	getTransferCheckedInstruction
+} from '@solana-program/token';
+import { address as toAddress } from '@solana/kit';
 
 describe('sol-instruction-summary.utils', () => {
 	describe('mapSolInstructionSummaries', () => {
@@ -479,6 +493,220 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		// A WalletConnect request carries its instructions as raw bytes rather than the parsed form
+		// the RPC returns. Read on their own they yielded nothing, which left the summary unstated
+		// and put "unrecognised" against the commonest transaction on Solana.
+		describe('the instructions of an unsigned message', () => {
+			const me = 'FzjDPHxrEUUuVMcMSGjNMjPGmXWqoUgqYuP5MunKzKNn';
+			const them = '9zsjmwXjZzuKfArqhLDpvcvLKUxLZfCzeMcqhAcPr8Jm';
+			const mint = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const signer = (address: string) => ({ address }) as never;
+
+			it('should read a plain SOL transfer as the send it is', () => {
+				const [transfer] = mapSolInstructionSummaries({
+					instructions: [
+						getTransferSolInstruction({
+							source: signer(me),
+							destination: toAddress(them),
+							amount: 10_000_000n
+						})
+					],
+					ownedAddresses: [me]
+				});
+
+				expect(transfer).toStrictEqual({
+					kind: 'send',
+					amount: 10_000_000n,
+					counterparty: them,
+					own: false
+				});
+			});
+
+			it('should not call a transfer it can read unrecognised', () => {
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							instructions: [
+								getTransferSolInstruction({
+									source: signer(me),
+									destination: toAddress(them),
+									amount: 10_000_000n
+								})
+							],
+							ownedAddresses: [me],
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['send']);
+			});
+
+			it('should read a checked SPL transfer with its mint and decimals', () => {
+				const [transfer] = mapSolInstructionSummaries({
+					instructions: [
+						getTransferCheckedInstruction({
+							source: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							destination: toAddress(mockSolAddress2),
+							authority: signer(me),
+							amount: 5_000_000n,
+							decimals: 6
+						})
+					],
+					ownedAddresses: [me]
+				});
+
+				expect(transfer?.kind).toBe('send');
+				expect(transfer?.amount).toBe(5_000_000n);
+				expect(transfer?.decimals).toBe(6);
+				expect(transfer?.tokenAddress).toBe(mint);
+			});
+
+			// Granting a spender is the instruction behind most drains, so a message that carries one
+			// must not read as something the wallet could not make out.
+			it('should read an approval with its delegate', () => {
+				const [approval] = mapSolInstructionSummaries({
+					instructions: [
+						getApproveInstruction({
+							source: toAddress(mockAtaAddress),
+							delegate: toAddress(them),
+							owner: toAddress(me),
+							amount: 5_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(approval?.kind).toBe('approve');
+				expect(approval?.amount).toBe(5_000_000n);
+				expect(approval?.counterparty).toBe(them);
+				expect(approval?.account).toBe(mockAtaAddress);
+			});
+
+			it('should read a checked approval the same way', () => {
+				const [approval] = mapSolInstructionSummaries({
+					instructions: [
+						getApproveCheckedInstruction({
+							source: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							delegate: toAddress(them),
+							owner: toAddress(me),
+							amount: 5_000_000n,
+							decimals: 6
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(approval?.kind).toBe('approve');
+				expect(approval?.amount).toBe(5_000_000n);
+				expect(approval?.counterparty).toBe(them);
+			});
+
+			it('should read a revocation', () => {
+				const [revocation] = mapSolInstructionSummaries({
+					instructions: [
+						getRevokeInstruction({ source: toAddress(mockAtaAddress), owner: toAddress(me) })
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(revocation?.kind).toBe('revoke');
+				expect(revocation?.account).toBe(mockAtaAddress);
+			});
+
+			// Handing an account to someone else moves nothing, so no amount and no balance change
+			// reports it. Naming the new authority is the only way the review can show it happening.
+			it('should read an authority handover with the authority it names', () => {
+				const [handover] = mapSolInstructionSummaries({
+					instructions: [
+						getSetAuthorityInstruction({
+							owned: toAddress(mockAtaAddress),
+							owner: toAddress(me),
+							authorityType: AuthorityType.AccountOwner,
+							newAuthority: toAddress(them)
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(handover?.kind).toBe('setAuthority');
+				expect(handover?.account).toBe(mockAtaAddress);
+				expect(handover?.newAuthority).toBe(them);
+			});
+
+			// Neither is a transfer, so no counterparty names either and nothing but the instruction
+			// says which way the balance went.
+			it('should read a burn as the tokens it destroys', () => {
+				const [burn] = mapSolInstructionSummaries({
+					instructions: [
+						getBurnInstruction({
+							account: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							authority: toAddress(me),
+							amount: 7_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(burn?.kind).toBe('burn');
+				expect(burn?.amount).toBe(7_000_000n);
+				expect(burn?.tokenAddress).toBe(mint);
+			});
+
+			it('should read a mint as the tokens it creates', () => {
+				const [minted] = mapSolInstructionSummaries({
+					instructions: [
+						getMintToInstruction({
+							mint: toAddress(mint),
+							token: toAddress(mockAtaAddress),
+							mintAuthority: toAddress(me),
+							amount: 9_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(minted?.kind).toBe('mint');
+				expect(minted?.amount).toBe(9_000_000n);
+			});
+
+			// A frozen account holds exactly what it held, so no balance anywhere reports it.
+			it('should read a freeze, which no balance change can show', () => {
+				const [frozen] = mapSolInstructionSummaries({
+					instructions: [
+						getFreezeAccountInstruction({
+							account: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							owner: toAddress(me)
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(frozen?.kind).toBe('freeze');
+				expect(frozen?.account).toBe(mockAtaAddress);
+			});
+
+			// The decoders assert on their input, and a signing flow must not be taken down by a
+			// variant they do not cover.
+			it('should leave an instruction it cannot decode unread rather than throwing', () => {
+				expect(() =>
+					mapSolInstructionSummaries({
+						instructions: [
+							{
+								programAddress: '11111111111111111111111111111111',
+								accounts: [],
+								data: new Uint8Array([255, 255, 255, 255])
+							}
+						],
+						ownedAddresses: [me]
+					})
+				).not.toThrow();
+			});
+		});
+
 		describe('instructions it cannot read', () => {
 			it('should ignore an instruction the RPC did not parse', () => {
 				expect(
@@ -493,6 +721,112 @@ describe('sol-instruction-summary.utils', () => {
 				expect(mapSolInstructionSummaries({ instructions: [], ownedAddresses: [] })).toStrictEqual(
 					[]
 				);
+			});
+
+			it('should keep a line naming the program when asked to list what it cannot read', () => {
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						includeUnrecognised: true
+					})
+				).toStrictEqual([{ kind: 'unknown', program: 'SomeUnknownProgram' }]);
+			});
+
+			// The regression this exists for. A WalletConnect request carries kit instructions,
+			// whose data is raw bytes rather than the parsed form the RPC returns, so not one of
+			// them yields an effect. Without a line each, the review listed nothing whatsoever for
+			// a transaction the user was being asked to sign.
+			it('should list the instructions of an unsigned message, which are never parsed', () => {
+				const message = [
+					{ programAddress: '11111111111111111111111111111111', accounts: [], data: 'AQID' },
+					{
+						programAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						accounts: [],
+						data: 'BAUG'
+					}
+				];
+
+				expect(
+					mapSolInstructionSummaries({
+						instructions: message,
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						includeUnrecognised: true
+					})
+				).toStrictEqual([
+					{ kind: 'unknown', program: '11111111111111111111111111111111' },
+					{ kind: 'unknown', program: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' }
+				]);
+			});
+
+			// The list is read as the order the run takes, so an instruction that says nothing
+			// still holds its place among the ones that do.
+			it('should leave the instructions it can read where they were', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA;
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...rest,
+							instructions: [
+								...instructions,
+								{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }
+							],
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['createTokenAccount', 'send', 'unknown']);
+			});
+
+			// The review states these as the priority fee it charges for, so calling them
+			// unreadable is untrue, and doing it on every transaction that sets a compute budget
+			// buries the instructions that moved something under two lines of housekeeping.
+			it('should not add a line for a compute budget instruction', () => {
+				const withFlag = (
+					mock: Parameters<typeof mapSolInstructionSummaries>[0]
+				): SolInstructionSummary[] =>
+					mapSolInstructionSummaries({ ...mock, includeUnrecognised: true });
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP))
+				);
+
+				expect(kinds(withFlag(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))).toStrictEqual(
+					kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.JUPITER_SWAP))
+				);
+			});
+
+			// The case the flag exists for: a transaction whose every call sits inside programs the
+			// wallet cannot read listed nothing whatsoever before.
+			it('should list a transaction it could read nothing of', () => {
+				expect(kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY))).toStrictEqual(
+					[]
+				);
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...MOCK_SOL_INSTRUCTIONS.THIRD_PARTY,
+							includeUnrecognised: true
+						})
+					)
+				).toStrictEqual(['unknown', 'unknown', 'unknown', 'unknown']);
+			});
+
+			it('should drop them by default, so the activity keeps the list it had', () => {
+				const { instructions, ...rest } = MOCK_SOL_INSTRUCTIONS.SPL_SEND_WITH_ATA;
+
+				expect(
+					kinds(
+						mapSolInstructionSummaries({
+							...rest,
+							instructions: [
+								...instructions,
+								{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }
+							]
+						})
+					)
+				).toStrictEqual(['createTokenAccount', 'send']);
 			});
 		});
 	});

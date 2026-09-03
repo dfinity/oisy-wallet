@@ -2,9 +2,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { EthFeePriorities } from '$eth/types/fee';
-import { estimatedGasFee } from '$eth/utils/fee.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import {
+	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	ETH_FEE_PRIORITY,
 	ETH_FEE_PRIORITY_OPTION,
 	ETH_FEE_PRIORITY_TRIGGER
@@ -12,8 +11,8 @@ import {
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
-import { formatToken } from '$lib/utils/format.utils';
-import { render, waitFor } from '@testing-library/svelte';
+import en from '$tests/mocks/i18n.mock';
+import { render, waitFor, within } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
 
 describe('EthFeePriority', () => {
@@ -22,15 +21,21 @@ describe('EthFeePriority', () => {
 	// The ceiling is identical across priorities on purpose: it is dominated by the shared base fee,
 	// so only the tip may move the displayed amounts apart.
 	const priorities: EthFeePriorities = {
-		baseFeePerGas: 20n,
+		baseFeePerGas: 20_000_000_000n,
 		perPriority: {
-			[Priority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
-			[Priority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
-			[Priority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 20n }
+			[Priority.SLOW]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 1_000_000_000n },
+			[Priority.NORMAL]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
+			[Priority.FAST]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 20_000_000_000n }
 		}
 	};
 
-	const setup = ({ withPriorities = true }: { withPriorities?: boolean } = {}) => {
+	// The rows quote fiat only, so an exchange rate is required for them to render at all.
+	const exchangeRate = 3_000;
+
+	const setup = ({
+		withPriorities = true,
+		withSymbol = true
+	}: { withPriorities?: boolean; withSymbol?: boolean } = {}) => {
 		const feeStore = initEthFeeStore();
 		feeStore.setFee({
 			...priorities.perPriority[Priority.NORMAL],
@@ -45,10 +50,10 @@ describe('EthFeePriority', () => {
 
 		const feeContext = initEthFeeContext({
 			feeStore,
-			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+			feeSymbolStore: writable(withSymbol ? ETHEREUM_TOKEN.symbol : undefined),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
-			feeExchangeRateStore: writable(undefined)
+			feeExchangeRateStore: writable(exchangeRate)
 		});
 
 		if (withPriorities) {
@@ -82,25 +87,16 @@ describe('EthFeePriority', () => {
 	it('prices each option on the same gas limit, so only the tip separates them', async () => {
 		const { context } = setup();
 
-		const { container } = render(EthFeePriority, { context });
+		const { findAllByTestId } = render(EthFeePriority, { context });
 
-		await waitFor(() => {
-			Object.values(Priority).forEach((priority) => {
-				const expected = estimatedGasFee({
-					...priorities.perPriority[priority],
-					baseFeePerGas: priorities.baseFeePerGas,
-					gas
-				});
+		const values = await findAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE);
 
-				expect(container).toHaveTextContent(
-					formatToken({
-						value: expected ?? ZERO,
-						displayDecimals: ETHEREUM_TOKEN.decimals,
-						unitName: ETHEREUM_TOKEN.decimals
-					})
-				);
-			});
-		});
+		expect(values).toHaveLength(Object.values(Priority).length);
+
+		// Asserting distinctness rather than exact strings: the point is that the shared base fee and
+		// gas limit cancel out and only the tip moves the amounts, and the formatted currency string
+		// depends on locale and currency stores that are not what this test is about.
+		expect(new Set(values.map(({ textContent }) => textContent)).size).toBe(values.length);
 	});
 
 	it('records the choice in the send context', async () => {
@@ -135,6 +131,60 @@ describe('EthFeePriority', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.SLOW}`)).toBeInTheDocument();
+		});
+	});
+
+	it('neither opens nor closes the sheet by submitting the surrounding send form', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getByTestId, getByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY_TRIGGER)).toHaveAttribute('type', 'button');
+		});
+
+		getByTestId(ETH_FEE_PRIORITY_TRIGGER).click();
+
+		await waitFor(() => {
+			expect(getByText(en.core.text.done).closest('button')).toHaveAttribute('type', 'button');
+		});
+	});
+
+	it('names the current choice in the collapsed header on a large screen', async () => {
+		const { context } = setup();
+
+		const { getByTestId } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			// Scoped to the header: the options stay mounted while collapsed, so a document-wide
+			// query would keep passing if the header stopped naming the choice.
+			expect(
+				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_normal)
+			).toBeInTheDocument();
+		});
+	});
+
+	it('names the current choice once on a small screen', async () => {
+		screensStore.set('xs');
+
+		const { context } = setup();
+
+		const { getAllByText } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
+		});
+	});
+
+	it('renders without a fee symbol, which it no longer displays', async () => {
+		const { context } = setup({ withSymbol: false });
+
+		const { getByTestId } = render(EthFeePriority, { context });
+
+		await waitFor(() => {
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
 		});
 	});
 
