@@ -20,6 +20,7 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		insufficientFunds: boolean;
 		nativeEthereumToken: Token;
 		onTokensList: () => void;
@@ -27,6 +28,7 @@
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		insufficientFunds = $bindable(),
 		nativeEthereumToken,
 		onTokensList
@@ -99,11 +101,6 @@
 			);
 		}
 	};
-
-	/**
-	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
-	 */
-	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
