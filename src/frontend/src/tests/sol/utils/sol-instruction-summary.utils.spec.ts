@@ -2,6 +2,7 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { getTransferSolInstruction } from '@solana-program/system';
@@ -503,8 +504,23 @@ describe('sol-instruction-summary.utils', () => {
 
 			const signer = (address: string) => ({ address }) as never;
 
+			// A message delivers kit instructions; the review decodes them before the effects are
+			// read. Going straight to the mapper would test a path no caller takes.
+			const summariesFromMessage = ({
+				instructions,
+				...rest
+			}: {
+				instructions: unknown[];
+				ownedAddresses: string[];
+				includeUnrecognised?: boolean;
+			}): SolInstructionSummary[] =>
+				mapSolInstructionSummaries({
+					...rest,
+					instructions: instructions.map(asSolParsedRpcInstructionOrSelf)
+				});
+
 			it('should read a plain SOL transfer as the send it is', () => {
-				const [transfer] = mapSolInstructionSummaries({
+				const [transfer] = summariesFromMessage({
 					instructions: [
 						getTransferSolInstruction({
 							source: signer(me),
@@ -526,7 +542,7 @@ describe('sol-instruction-summary.utils', () => {
 			it('should not call a transfer it can read unrecognised', () => {
 				expect(
 					kinds(
-						mapSolInstructionSummaries({
+						summariesFromMessage({
 							instructions: [
 								getTransferSolInstruction({
 									source: signer(me),
@@ -542,7 +558,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read a checked SPL transfer with its mint and decimals', () => {
-				const [transfer] = mapSolInstructionSummaries({
+				const [transfer] = summariesFromMessage({
 					instructions: [
 						getTransferCheckedInstruction({
 							source: toAddress(mockAtaAddress),
@@ -565,7 +581,7 @@ describe('sol-instruction-summary.utils', () => {
 			// Granting a spender is the instruction behind most drains, so a message that carries one
 			// must not read as something the wallet could not make out.
 			it('should read an approval with its delegate', () => {
-				const [approval] = mapSolInstructionSummaries({
+				const [approval] = summariesFromMessage({
 					instructions: [
 						getApproveInstruction({
 							source: toAddress(mockAtaAddress),
@@ -584,7 +600,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read a checked approval the same way', () => {
-				const [approval] = mapSolInstructionSummaries({
+				const [approval] = summariesFromMessage({
 					instructions: [
 						getApproveCheckedInstruction({
 							source: toAddress(mockAtaAddress),
@@ -604,7 +620,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read a revocation', () => {
-				const [revocation] = mapSolInstructionSummaries({
+				const [revocation] = summariesFromMessage({
 					instructions: [
 						getRevokeInstruction({ source: toAddress(mockAtaAddress), owner: toAddress(me) })
 					],
@@ -618,7 +634,7 @@ describe('sol-instruction-summary.utils', () => {
 			// Handing an account to someone else moves nothing, so no amount and no balance change
 			// reports it. Naming the new authority is the only way the review can show it happening.
 			it('should read an authority handover with the authority it names', () => {
-				const [handover] = mapSolInstructionSummaries({
+				const [handover] = summariesFromMessage({
 					instructions: [
 						getSetAuthorityInstruction({
 							owned: toAddress(mockAtaAddress),
@@ -638,7 +654,7 @@ describe('sol-instruction-summary.utils', () => {
 			// Neither is a transfer, so no counterparty names either and nothing but the instruction
 			// says which way the balance went.
 			it('should read a burn as the tokens it destroys', () => {
-				const [burn] = mapSolInstructionSummaries({
+				const [burn] = summariesFromMessage({
 					instructions: [
 						getBurnInstruction({
 							account: toAddress(mockAtaAddress),
@@ -656,7 +672,7 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			it('should read a mint as the tokens it creates', () => {
-				const [minted] = mapSolInstructionSummaries({
+				const [minted] = summariesFromMessage({
 					instructions: [
 						getMintToInstruction({
 							mint: toAddress(mint),
@@ -674,7 +690,7 @@ describe('sol-instruction-summary.utils', () => {
 
 			// A frozen account holds exactly what it held, so no balance anywhere reports it.
 			it('should read a freeze, which no balance change can show', () => {
-				const [frozen] = mapSolInstructionSummaries({
+				const [frozen] = summariesFromMessage({
 					instructions: [
 						getFreezeAccountInstruction({
 							account: toAddress(mockAtaAddress),
@@ -693,7 +709,7 @@ describe('sol-instruction-summary.utils', () => {
 			// variant they do not cover.
 			it('should leave an instruction it cannot decode unread rather than throwing', () => {
 				expect(() =>
-					mapSolInstructionSummaries({
+					summariesFromMessage({
 						instructions: [
 							{
 								programAddress: '11111111111111111111111111111111',
