@@ -43,6 +43,11 @@ export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeeP
 	// expected to cost depends on it; what the sender authorises (`maxFeePerGas`) does not.
 	// Optional because not every fee source reports it.
 	baseFeePerGas?: bigint | null;
+	// What an OP-stack chain charges on top of L2 gas to publish the transaction to L1. It is a
+	// flat amount rather than a price per gas, the sender must be able to cover it alongside
+	// `maxFeePerGas * gas`, and unlike gas it is never refunded. Undefined on chains that have no
+	// such fee.
+	l1Fee?: bigint;
 };
 
 export type RequiredTransactionFeeData = {
