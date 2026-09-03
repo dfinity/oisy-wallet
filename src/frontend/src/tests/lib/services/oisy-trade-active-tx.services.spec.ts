@@ -166,6 +166,43 @@ describe('oisy-trade-active-tx.services', () => {
 			expect(consoleErrorSpy).toHaveBeenCalled();
 		});
 
+		// Every amount this poller withdraws is a delta from the baselines, so an
+		// unreadable one is left strictly alone for the same reason as an unresolvable
+		// token. Substituting zero is the destructive guess: it credits the order with the
+		// caller's entire free balance, so settlement would withdraw a balance the user
+		// parked from the Trading tab, and — on the path where status is inferred from the
+		// deltas — let a held destination balance make a killed order read as filled.
+		//
+		// Both baselines are written in the call that creates the row, so a row missing or
+		// mangling one is malformed rather than early.
+		it.each([
+			{ label: 'a missing baseline', [OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: '' },
+			{
+				label: 'a malformed baseline',
+				[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]: 'garbage'
+			},
+			{ label: 'a negative baseline', [OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: '-1' }
+		])('leaves a row with $label alone, without withdrawing anything', async (override) => {
+			const consoleErrorSpy = vi
+				.spyOn(consoleUtils, 'consoleError')
+				.mockImplementation(() => undefined);
+
+			// The balance a naive zero baseline would have attributed to this order and paid
+			// out — the user's own, parked from the Trading tab.
+			getBalancesSpy.mockResolvedValue([
+				balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 500_000_000n }),
+				balance({ ledger: CKUSDC_LEDGER, free: 9_000_000n })
+			]);
+
+			await poll([row({ refs: { ...PLACED, ...override } })]);
+
+			expect(getMyOrdersSpy).not.toHaveBeenCalled();
+			expect(withdrawSpy).not.toHaveBeenCalled();
+			expect(applySpy).not.toHaveBeenCalled();
+			expect(deleteSpy).not.toHaveBeenCalled();
+			expect(consoleErrorSpy).toHaveBeenCalled();
+		});
+
 		describe('a row with a placed order', () => {
 			it('withdraws the destination and succeeds on a filled order', async () => {
 				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
@@ -245,6 +282,59 @@ describe('oisy-trade-active-tx.services', () => {
 							status: { Failed: null },
 							error: en.swap.error.oisy_trade_settlement_unresolved
 						})
+					})
+				);
+			});
+
+			// The order resolved, but a non-dust leg of it is still at the venue because
+			// withdrawing it was refused definitively. Succeeding the row on the order's
+			// outcome alone would drop it from the pending set and tell the user the swap
+			// worked with their funds still in DEX custody. It stays non-terminal so the
+			// next tick retries, which is idempotent: settlement re-derives from the
+			// baseline, so the withdrawn primary reads as dust and only the residue is
+			// attempted.
+			it('leaves the row non-terminal while a leg is still stranded at the venue', async () => {
+				const consoleErrorSpy = vi
+					.spyOn(consoleUtils, 'consoleError')
+					.mockImplementation(() => undefined);
+
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				// A filled Buy that crossed below its limit: the destination is credited and
+				// the unspent source reserve is released alongside it.
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: CKUSDC_LEDGER, free: 2_000_000n }),
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 300_000_000n })
+				]);
+				const residueError = new OisyTradeRequestError({
+					message: 'ledger blew up',
+					reason: 'InternalError'
+				});
+				withdrawSpy.mockResolvedValueOnce({ block_index: 42n }).mockRejectedValueOnce(residueError);
+
+				await poll([row({ refs: PLACED })]);
+
+				// The primary landed, so the destination did reach the wallet.
+				expect(withdrawSpy).toHaveBeenCalledTimes(2);
+				expect(applySpy).not.toHaveBeenCalled();
+				expect(deleteSpy).not.toHaveBeenCalled();
+				expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
+			});
+
+			// Dust is not owed — `withdraw` refuses an amount at or below the ledger fee —
+			// so a settlement whose residue leg held only dust is complete and closes.
+			it('succeeds the row when the only leg left behind was dust', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: CKUSDC_LEDGER, free: 2_000_000n }),
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 1_000n })
+				]);
+
+				await poll([row({ refs: PLACED })]);
+
+				expect(withdrawSpy).toHaveBeenCalledOnce();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: expect.objectContaining({ status: { Succeeded: null } })
 					})
 				);
 			});

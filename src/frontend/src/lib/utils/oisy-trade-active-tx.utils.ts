@@ -115,20 +115,44 @@ export const toOisyTradeDisplayRefs = ({
 /**
  * A base-unit amount snapshotted as a ref, read back.
  *
- * A missing or unparsable ref reads as zero, which is the conservative direction:
- * a zero baseline attributes the whole current free balance to this order, and the
- * settlement it feeds withdraws it. That is only reachable if a ref was dropped,
- * and leaving the funds in custody would be the worse failure.
+ * Returns `undefined` for a ref that is missing, unparsable or negative, and the
+ * caller must decline to act rather than substitute a value. Zero is the one guess
+ * that must not be made here: it is not a neutral default but the most destructive
+ * reading available, because `attributable` then credits this order with the whole
+ * of the caller's current free balance. Settlement would withdraw a balance the user
+ * deliberately parked from the Trading tab, charging them a ledger fee to do it, and
+ * on the path where the order is no longer known it would let a pre-existing
+ * destination balance make a killed order read as filled — succeeding a row, and
+ * firing a success event, for a swap that never happened. Those are precisely the
+ * two harms the baseline exists to prevent.
+ *
+ * Leaving the funds in custody instead is recoverable: the row stays visible and
+ * keeps polling, and the Trading tab shows the balance. Moving someone's money on a
+ * guess is not. Same rule, and the same reasoning, as the unknown ledger fee in
+ * `withdrawFreeBalance` — not knowing a figure says nothing about what it would have
+ * been, so it is never treated as an answer.
+ *
+ * Unreachable in practice: creation writes both baselines in the same call that
+ * creates the row, so a row is never merely early in acquiring them, and no shipped
+ * version of the flow wrote rows without them. A row missing one is malformed.
  */
-export const toOisyTradeRefAmount = (value: string | undefined): bigint => {
-	if (isNullish(value)) {
-		return ZERO;
+export const toOisyTradeRefAmount = (value: string | undefined): bigint | undefined => {
+	// An empty string is the one input that would slip past the parse as a *real* zero:
+	// `BigInt('')` is `0n`, not an error. `toOisyTradeExternalRefs` drops empty values,
+	// so a written ref never comes back this way, but the reader must not depend on the
+	// writer to keep the destructive reading unreachable.
+	if (isNullish(value) || value.trim() === '') {
+		return undefined;
 	}
 
 	try {
-		return BigInt(value);
+		const amount = BigInt(value);
+
+		// A free balance cannot be negative, and a negative baseline would inflate the
+		// delta rather than merely mis-state it.
+		return amount < ZERO ? undefined : amount;
 	} catch (_: unknown) {
-		return ZERO;
+		return undefined;
 	}
 };
 

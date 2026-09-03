@@ -245,6 +245,16 @@ export interface OisyTradeSettlement {
 	// Ledger block indices of the withdrawals this attempt paid out. Empty while
 	// pending, and on a terminal outcome whose free balances were all dust.
 	withdrawals: bigint[];
+	// A non-dust leg this attempt could not move, because withdrawing it was refused
+	// definitively rather than transiently. `status` still reports the order's true
+	// outcome, so this is what tells a caller that outcome is not the whole story:
+	// funds attributable to this order are still in DEX custody. Distinct from a leg
+	// that held only dust, which is unwithdrawable by construction and is not owed.
+	//
+	// A caller that can retry must not treat the outcome as final while this is set —
+	// succeeding the operation would report a swap that worked with the user's money
+	// still at the venue.
+	residueStranded: boolean;
 }
 
 /**
@@ -374,6 +384,10 @@ export const readOisyTradeFreeBalances = async ({
  * of what remains is ours. Under-counting leaves funds in DEX custody where the
  * Trading tab still shows them; over-counting would withdraw someone else's
  * deposit. Erring toward the former is the whole point of the baseline.
+ *
+ * This is about a baseline that is merely *stale*. One that cannot be read at all
+ * never reaches here: the caller declines to settle rather than passing a figure it
+ * does not trust, since a substituted zero would make the delta the whole balance.
  */
 const attributable = ({ current, baseline }: { current: bigint; baseline: bigint }): bigint =>
 	current > baseline ? current - baseline : ZERO;
@@ -479,7 +493,7 @@ export const settleOisyTradeSwap = async ({
 	// withdrawable until the order fills or is canceled" — so there is nothing to
 	// withdraw here, and asking would only fail.
 	if (nonNullish(order) && !isTerminalOrderStatus(order.status)) {
-		return { status: 'pending', withdrawals: [] };
+		return { status: 'pending', withdrawals: [], residueStranded: false };
 	}
 
 	const current = await readOisyTradeFreeBalances({ identity, sourceToken, destinationToken });
@@ -508,7 +522,7 @@ export const settleOisyTradeSwap = async ({
 				: 'unresolved';
 
 	if (status === 'unresolved') {
-		return { status, withdrawals: [] };
+		return { status, withdrawals: [], residueStranded: false };
 	}
 
 	// The leg the funds came back in, and the leg that may hold a residue. A Buy that
@@ -534,15 +548,18 @@ export const settleOisyTradeSwap = async ({
 	// propagates too, because the caller's retry loop re-enters this function, where the
 	// withdrawn primary's delta reads zero (dust-skipped) and only the residue is left —
 	// the baseline arithmetic is what makes the retry idempotent. A *definitive* failure
-	// is swallowed and logged instead: the smaller amount must not fail an operation
-	// whose funds have already arrived, and the outcome it reports — a fill or a kill —
-	// is true regardless. Surfacing that stranded residue to the user is deferred to
-	// step 2, where the AUT row is the right home for it.
+	// is not allowed to fail the whole operation either — the smaller amount must not
+	// discard a primary withdrawal that has already arrived, and the outcome it reports
+	// is true regardless — but it *is* reported, through `residueStranded`. Swallowing
+	// it outright, as an earlier cut did, let a caller succeed an operation with the
+	// user's funds still at the venue.
 	const primaryBlockIndex = await withdrawFreeBalance({
 		identity,
 		token: primary[0],
 		amount: primary[1]
 	});
+
+	let residueStranded = false;
 
 	const residueBlockIndex = await withdrawFreeBalance({
 		identity,
@@ -554,13 +571,15 @@ export const settleOisyTradeSwap = async ({
 		}
 
 		consoleError(err);
+		residueStranded = true;
 
 		return undefined;
 	});
 
 	return {
 		status,
-		withdrawals: [primaryBlockIndex, residueBlockIndex].filter(nonNullish)
+		withdrawals: [primaryBlockIndex, residueBlockIndex].filter(nonNullish),
+		residueStranded
 	};
 };
 

@@ -171,6 +171,22 @@ const pollOisyTradeTransaction = async ({
 	const orderIdRef = refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID];
 	const hasDeposited = nonNullish(refs[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]);
 
+	// Everything this poller withdraws is a delta from these, so a row whose baselines
+	// cannot be read is left strictly alone — logged, non-terminal, still visible —
+	// exactly like one whose tokens cannot be resolved. Substituting zero would be the
+	// destructive guess: it credits this order with the caller's whole free balance,
+	// which is how the swap ends up withdrawing a balance the user parked from the
+	// Trading tab, and how a held destination balance makes a killed order read as
+	// filled. Both baselines are written in the same call that creates the row, so this
+	// is a malformed row rather than an early one.
+	const source = toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]);
+	const destination = toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]);
+
+	if (isNullish(source) || isNullish(destination)) {
+		consoleError('Unreadable balance baseline on an OISY Trade active user transaction', tx.id);
+		return;
+	}
+
 	// Without an order id the foreground may still be mid-flow, so the row is its
 	// business until it has been seen for the whole tick budget. With one there is
 	// nothing to wait for — settlement is this poller's job from the moment the order
@@ -193,10 +209,7 @@ const pollOisyTradeTransaction = async ({
 			orderId: orderIdRef,
 			sourceToken,
 			destinationToken,
-			baseline: {
-				source: toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]),
-				destination: toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE])
-			}
+			baseline: { source, destination }
 		});
 	} catch (err: unknown) {
 		// The retry policy, and the reason this branch exists at all. `retryable` covers
@@ -284,6 +297,27 @@ const pollOisyTradeTransaction = async ({
 			error: swapError.oisy_trade_settlement_unresolved
 		});
 
+		return;
+	}
+
+	// The order has resolved, but a non-dust leg of it is still at the venue: the
+	// withdrawal was refused definitively rather than transiently, which for a filled
+	// Buy is most often the reserve released by crossing below its limit. Terminalizing
+	// on the order's outcome alone would drop the row from the pending set and tell the
+	// user the swap succeeded, with their funds still in DEX custody and nothing left
+	// watching them — the accumulation this provider is most exposed to.
+	//
+	// Left non-terminal so the next tick tries again. Re-entry is idempotent because
+	// everything is re-derived from the baseline deltas, so the primary this attempt
+	// already withdrew reads as dust and only the residue is attempted. "Definitive"
+	// here means the canister's refusal was not classed transient, not that it can never
+	// clear, so retrying is the right response — and a row that keeps polling is visible
+	// and self-healing where a wrongly-succeeded one is neither.
+	//
+	// The primary's block index goes unrecorded until an attempt completes, which is a
+	// traceability loss on a rare path rather than a correctness one, and is the reason
+	// this returns rather than writing refs on every tick.
+	if (settlement.residueStranded) {
 		return;
 	}
 

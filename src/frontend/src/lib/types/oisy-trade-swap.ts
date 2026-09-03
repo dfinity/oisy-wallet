@@ -24,6 +24,11 @@ export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	// Trading tab, and those balances are neither this swap's to withdraw nor
 	// evidence of how its order resolved. Written at creation, which is already
 	// before the first canister call, so they cost no extra ordering.
+	//
+	// Both are written in that one call, so a row never holds only one of them. A row
+	// whose baselines cannot be read is therefore malformed, not early, and the poller
+	// declines to settle it rather than substituting zero — which would credit this
+	// order with the caller's entire free balance and re-create both harms above.
 	BASELINE_SOURCE_FREE: 'baseline_source_free',
 	BASELINE_DEST_FREE: 'baseline_dest_free',
 	// Display + analytics metadata snapshotted at creation. These reuse OneSec's

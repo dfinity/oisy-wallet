@@ -175,11 +175,27 @@ describe('oisy-trade-active-tx.utils', () => {
 			expect(toOisyTradeRefAmount('300000000')).toBe(300_000_000n);
 		});
 
-		// Conservative on purpose: a zero baseline attributes the whole current balance to
-		// this order and settlement withdraws it. Leaving the funds in DEX custody because
-		// a ref was dropped would be the worse failure.
-		it.each([undefined, '', 'not a number'])('reads %s as zero', (value) => {
-			expect(toOisyTradeRefAmount(value)).toBe(ZERO);
+		it('reads a zero baseline, which is a real figure rather than an absent one', () => {
+			expect(toOisyTradeRefAmount('0')).toBe(ZERO);
+		});
+
+		// Never zero. A substituted zero credits the order with the caller's entire free
+		// balance, so settlement would withdraw a balance the user parked from the Trading
+		// tab and could read a killed order as filled. The caller declines to settle
+		// instead, which leaves the funds recoverable rather than moving them on a guess.
+		// `''` earns its place here: `BigInt('')` is `0n` rather than an error, so it is
+		// the one input that would slip past the parse as a real zero.
+		it.each([undefined, '', '   ', 'not a number', '12.5'])(
+			'refuses to read %s as an amount',
+			(value) => {
+				expect(toOisyTradeRefAmount(value)).toBeUndefined();
+			}
+		);
+
+		// A free balance cannot be negative, and a negative baseline would inflate the
+		// delta rather than merely mis-state it.
+		it('refuses a negative baseline', () => {
+			expect(toOisyTradeRefAmount('-1')).toBeUndefined();
 		});
 	});
 

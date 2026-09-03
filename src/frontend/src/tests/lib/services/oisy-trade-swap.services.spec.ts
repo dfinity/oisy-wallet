@@ -491,7 +491,7 @@ describe('oisy-trade-swap.services', () => {
 
 				const settlement = await settleOisyTradeSwap(settleParams);
 
-				expect(settlement).toEqual({ status: 'pending', withdrawals: [] });
+				expect(settlement).toEqual({ status: 'pending', withdrawals: [], residueStranded: false });
 				expect(withdrawSpy).not.toHaveBeenCalled();
 				// Not even read: a pending order settles nothing, so the balances are moot.
 				expect(balances).not.toHaveBeenCalled();
@@ -580,8 +580,30 @@ describe('oisy-trade-swap.services', () => {
 
 			expect(settlement.status).toBe('filled');
 			expect(settlement.withdrawals).toEqual([42n]);
-			// Swallowed, but not silently: the residue is still owed to the user.
+			// Reported, not merely logged. The order's outcome is true, but it is not the
+			// whole story: a leg of it is still at the venue, and a caller that succeeded
+			// the operation on `status` alone would tell the user their swap worked with
+			// their funds still there.
+			expect(settlement.residueStranded).toBeTruthy();
 			expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
+		});
+
+		// Dust is not owed: `withdraw` refuses an amount at or below the ledger fee, so a
+		// small enough residue is unwithdrawable by construction. Conflating it with a
+		// refused withdrawal would leave every dusty settlement permanently unfinished.
+		it('does not report dust as a stranded residue', async () => {
+			vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+			// A source residue at the ledger fee exactly, so it is skipped rather than moved.
+			mockBalances({ source: ICP.fee, destination: 2_000_000n });
+			const withdrawSpy = vi
+				.spyOn(oisyTradeApi, 'withdraw')
+				.mockResolvedValue({ block_index: 42n });
+
+			const settlement = await settleOisyTradeSwap(settleParams);
+
+			expect(settlement.status).toBe('filled');
+			expect(settlement.residueStranded).toBeFalsy();
+			expect(withdrawSpy).toHaveBeenCalledOnce();
 		});
 
 		// A transient residue failure propagates instead: the caller's retry loop
@@ -660,7 +682,11 @@ describe('oisy-trade-swap.services', () => {
 					baseline: { source: 50_000_000n, destination: 100_000_000n }
 				});
 
-				expect(settlement).toEqual({ status: 'unresolved', withdrawals: [] });
+				expect(settlement).toEqual({
+					status: 'unresolved',
+					withdrawals: [],
+					residueStranded: false
+				});
 				expect(withdrawSpy).not.toHaveBeenCalled();
 			});
 
@@ -679,7 +705,7 @@ describe('oisy-trade-swap.services', () => {
 					baseline: { source: ZERO, destination: 100_000_000n }
 				});
 
-				expect(settlement).toEqual({ status: 'filled', withdrawals: [] });
+				expect(settlement).toEqual({ status: 'filled', withdrawals: [], residueStranded: false });
 				expect(withdrawSpy).not.toHaveBeenCalled();
 			});
 		});
@@ -750,7 +776,7 @@ describe('oisy-trade-swap.services', () => {
 
 			const settlement = await settleOisyTradeSwap(settleParams);
 
-			expect(settlement).toEqual({ status: 'unresolved', withdrawals: [] });
+			expect(settlement).toEqual({ status: 'unresolved', withdrawals: [], residueStranded: false });
 			expect(withdrawSpy).not.toHaveBeenCalled();
 		});
 
