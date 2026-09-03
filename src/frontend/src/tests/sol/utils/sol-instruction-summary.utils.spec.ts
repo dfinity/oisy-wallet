@@ -9,6 +9,9 @@ import {
 	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBurnInstruction,
+	getFreezeAccountInstruction,
+	getMintToInstruction,
 	getRevokeInstruction,
 	getSetAuthorityInstruction,
 	getTransferCheckedInstruction
@@ -630,6 +633,60 @@ describe('sol-instruction-summary.utils', () => {
 				expect(handover?.kind).toBe('setAuthority');
 				expect(handover?.account).toBe(mockAtaAddress);
 				expect(handover?.newAuthority).toBe(them);
+			});
+
+			// Neither is a transfer, so no counterparty names either and nothing but the instruction
+			// says which way the balance went.
+			it('should read a burn as the tokens it destroys', () => {
+				const [burn] = mapSolInstructionSummaries({
+					instructions: [
+						getBurnInstruction({
+							account: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							authority: toAddress(me),
+							amount: 7_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(burn?.kind).toBe('burn');
+				expect(burn?.amount).toBe(7_000_000n);
+				expect(burn?.tokenAddress).toBe(mint);
+			});
+
+			it('should read a mint as the tokens it creates', () => {
+				const [minted] = mapSolInstructionSummaries({
+					instructions: [
+						getMintToInstruction({
+							mint: toAddress(mint),
+							token: toAddress(mockAtaAddress),
+							mintAuthority: toAddress(me),
+							amount: 9_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(minted?.kind).toBe('mint');
+				expect(minted?.amount).toBe(9_000_000n);
+			});
+
+			// A frozen account holds exactly what it held, so no balance anywhere reports it.
+			it('should read a freeze, which no balance change can show', () => {
+				const [frozen] = mapSolInstructionSummaries({
+					instructions: [
+						getFreezeAccountInstruction({
+							account: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							owner: toAddress(me)
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(frozen?.kind).toBe('freeze');
+				expect(frozen?.account).toBe(mockAtaAddress);
 			});
 
 			// The decoders assert on their input, and a signing flow must not be taken down by a

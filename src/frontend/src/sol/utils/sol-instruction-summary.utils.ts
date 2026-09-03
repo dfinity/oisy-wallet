@@ -1,8 +1,10 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -12,21 +14,21 @@ import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
-import type {
-	SolInstruction,
-	SolParsedToken2022Instruction,
-	SolParsedTokenInstruction
-} from '$sol/types/sol-instructions';
+import type { SolInstruction, SolParsedInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
+import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
+import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
+import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
-import { unwrapOption } from '@solana/kit';
+import { type Option, unwrapOption } from '@solana/kit';
 
 /**
  * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
@@ -144,149 +146,145 @@ const isKitInstruction = (instruction: unknown): instruction is SolInstruction =
 	'accounts' in instruction;
 
 /**
- * What a token instruction does, in the RPC's vocabulary.
+ * How one program's decoded instructions are spelled in the RPC's vocabulary.
  *
- * Both token programs speak the same instructions and carry their own enum for them, so each is
- * read against its own and reported under its own program name.
+ * The decoders name an instruction by an enum member and its accounts by role, which is almost
+ * exactly what the RPC reports: `TransferChecked` against `transferChecked`, `source` against
+ * `source`. Where the two genuinely disagree, the difference is written down here rather than
+ * handled by a branch per instruction, so a program's whole instruction set is covered at once
+ * and a variant nobody thought about still arrives named.
  */
-const tokenInstructionInfo = (
-	decoded: SolParsedTokenInstruction | SolParsedToken2022Instruction
-): { type: string; info: object } | undefined => {
-	const { instructionType } = decoded;
+interface ProgramVocabulary {
+	program: string;
+	names: Record<number, string>;
+	types?: Record<string, string>;
+	accounts?: Record<string, string>;
+	fields?: Record<string, string>;
+}
 
-	if (
-		instructionType === TokenInstruction.Transfer ||
-		instructionType === Token2022Instruction.Transfer
-	) {
-		const { accounts, data } = decoded;
-
+/**
+ * Built per call rather than held in a table, so that merely importing this module does not read
+ * every program's enum. Consumers that mock a program package would otherwise fail to load over a
+ * decoding path they never take.
+ */
+const vocabularyOf = (
+	programId: SolAddress
+):
+	| (ProgramVocabulary & { parse: (instruction: SolInstruction) => SolParsedInstruction })
+	| undefined => {
+	if (programId === SYSTEM_PROGRAM_ADDRESS) {
 		return {
-			type: 'transfer',
-			info: {
-				source: accounts.source.address,
-				destination: accounts.destination.address,
-				authority: accounts.authority.address,
-				amount: data.amount
-			}
+			program: 'system',
+			names: SystemInstruction,
+			parse: parseSolSystemInstruction,
+			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
+			// below are written against those.
+			types: { transferSol: 'transfer' },
+			fields: { amount: 'lamports' }
 		};
 	}
 
-	if (
-		instructionType === TokenInstruction.TransferChecked ||
-		instructionType === Token2022Instruction.TransferChecked
-	) {
-		const { accounts, data } = decoded;
-
+	// `setAuthority` is the only instruction naming the account it acts on `owned`, and `mintTo`
+	// the only one naming it `token`. The RPC calls both `account`, as everything else does.
+	if (programId === TOKEN_PROGRAM_ADDRESS) {
 		return {
-			type: 'transferChecked',
-			info: {
-				source: accounts.source.address,
-				destination: accounts.destination.address,
-				authority: accounts.authority.address,
-				mint: accounts.mint.address,
-				tokenAmount: { amount: String(data.amount), decimals: data.decimals }
-			}
+			program: 'spl-token',
+			names: TokenInstruction,
+			parse: parseSolTokenInstruction,
+			accounts: { owned: 'account', token: 'account' }
 		};
 	}
 
-	if (
-		instructionType === TokenInstruction.CloseAccount ||
-		instructionType === Token2022Instruction.CloseAccount
-	) {
-		const { accounts } = decoded;
-
+	if (programId === TOKEN_2022_PROGRAM_ADDRESS) {
 		return {
-			type: 'closeAccount',
-			info: {
-				account: accounts.account.address,
-				destination: accounts.destination.address,
-				owner: accounts.owner.address
-			}
+			program: 'spl-token-2022',
+			names: Token2022Instruction,
+			parse: parseSolToken2022Instruction,
+			accounts: { owned: 'account', token: 'account' }
 		};
 	}
 
-	if (
-		instructionType === TokenInstruction.Approve ||
-		instructionType === Token2022Instruction.Approve
-	) {
-		const { accounts, data } = decoded;
-
+	if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
 		return {
-			type: 'approve',
-			info: {
-				source: accounts.source.address,
-				delegate: accounts.delegate.address,
-				owner: accounts.owner.address,
-				amount: data.amount
-			}
+			program: 'spl-associated-token-account',
+			names: AssociatedTokenInstruction,
+			parse: parseSolAtaInstruction,
+			types: {
+				createAssociatedToken: 'create',
+				createAssociatedTokenIdempotent: 'createIdempotent'
+			},
+			// The RPC names the new account `account`, the wallet it belongs to `wallet` and
+			// whoever funds it `source`. Only the mint is called the same thing by both.
+			accounts: { ata: 'account', owner: 'wallet', payer: 'source' }
 		};
 	}
 
-	if (
-		instructionType === TokenInstruction.ApproveChecked ||
-		instructionType === Token2022Instruction.ApproveChecked
-	) {
-		const { accounts, data } = decoded;
-
-		return {
-			type: 'approveChecked',
-			info: {
-				source: accounts.source.address,
-				delegate: accounts.delegate.address,
-				owner: accounts.owner.address,
-				mint: accounts.mint.address,
-				tokenAmount: { amount: String(data.amount), decimals: data.decimals }
-			}
-		};
+	if (programId === STAKE_PROGRAM_ADDRESS) {
+		return { program: 'stake', names: StakeInstruction, parse: parseSolStakeInstruction };
 	}
 
-	if (
-		instructionType === TokenInstruction.Revoke ||
-		instructionType === Token2022Instruction.Revoke
-	) {
-		const { accounts } = decoded;
-
+	if (programId === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
 		return {
-			type: 'revoke',
-			info: { source: accounts.source.address, owner: accounts.owner.address }
+			program: 'address-lookup-table',
+			names: AddressLookupTableInstruction,
+			parse: parseSolLookupTableInstruction
 		};
-	}
-
-	// The account handed over is `owned` here and `account` in the RPC's vocabulary. The new
-	// authority is optional, since clearing it is how an authority is given up rather than passed
-	// on, and that is the case worth showing without a name beside it.
-	if (
-		instructionType === TokenInstruction.SetAuthority ||
-		instructionType === Token2022Instruction.SetAuthority
-	) {
-		const { accounts, data } = decoded;
-
-		const newAuthority = unwrapOption(data.newAuthority);
-
-		return {
-			type: 'setAuthority',
-			info: {
-				account: accounts.owned.address,
-				owner: accounts.owner.address,
-				...(nonNullish(newAuthority) && { newAuthority })
-			}
-		};
-	}
-
-	// Named so the plumbing filter recognises it. A wrap is a transfer plus this, and reporting it
-	// as an instruction of its own would put a line under every wrapped SOL account there is.
-	if (
-		instructionType === TokenInstruction.SyncNative ||
-		instructionType === Token2022Instruction.SyncNative
-	) {
-		return { type: 'syncNative', info: {} };
 	}
 };
+
+const lowerFirst = (value: string): string => `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
+
+const addressOfMeta = (meta: unknown): SolAddress | undefined =>
+	nonNullish(meta) &&
+	typeof meta === 'object' &&
+	'address' in meta &&
+	typeof meta.address === 'string'
+		? meta.address
+		: undefined;
+
+/**
+ * A decoded instruction's accounts and data, flattened the way the RPC reports them.
+ *
+ * The discriminator is dropped, since it says only which instruction this is, and an optional
+ * field that carries nothing is dropped rather than reported as empty: an authority given up is
+ * an authority with no name, not one named nothing.
+ */
+const infoOf = ({
+	accounts,
+	data,
+	vocabulary: { accounts: renames = {}, fields = {} }
+}: {
+	accounts: Record<string, unknown>;
+	data: Record<string, unknown>;
+	vocabulary: ProgramVocabulary;
+}): object => {
+	const named = Object.entries(accounts).reduce<Record<string, unknown>>((acc, [role, meta]) => {
+		const value = addressOfMeta(meta);
+
+		return nonNullish(value) ? { ...acc, [renames[role] ?? role]: value } : acc;
+	}, {});
+
+	return Object.entries(data).reduce<Record<string, unknown>>((acc, [key, raw]) => {
+		if (key === 'discriminator') {
+			return acc;
+		}
+
+		const value = isSolOption(raw) ? unwrapOption(raw) : raw;
+
+		return nonNullish(value) ? { ...acc, [fields[key] ?? key]: value } : acc;
+	}, named);
+};
+
+const isSolOption = (value: unknown): value is Option<SolAddress> =>
+	nonNullish(value) && typeof value === 'object' && '__option' in value;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	nonNullish(value) && typeof value === 'object';
 
 /**
  * A kit instruction read into the shape the RPC reports.
  *
- * An unsigned message carries its instructions as raw bytes, so nothing below recognises them:
+ * An unsigned message carries its instructions as raw bytes, so nothing below recognised them:
  * every WalletConnect request derived an empty effect list from the message itself, which left the
  * summary permanently unstated and, once the review started listing what it could not read, put
  * "unrecognised" against a plain SOL transfer. The wallet already decodes those bytes to name the
@@ -303,75 +301,55 @@ const asRpcInstruction = (instruction: unknown): SolParsedRpcInstruction | undef
 		return;
 	}
 
+	const vocabulary = vocabularyOf(programId);
+
+	if (isNullish(vocabulary)) {
+		return;
+	}
+
 	try {
-		if (programId === SYSTEM_PROGRAM_ADDRESS) {
-			const decoded = parseSolSystemInstruction(instruction);
+		const decoded = vocabulary.parse(instruction);
 
-			if (decoded.instructionType !== SystemInstruction.TransferSol) {
-				return;
+		if (!('instructionType' in decoded)) {
+			return;
+		}
+
+		const { instructionType } = decoded;
+
+		const name = vocabulary.names[Number(instructionType)];
+
+		if (isNullish(name)) {
+			return;
+		}
+
+		const spelled = lowerFirst(name);
+		const type = vocabulary.types?.[spelled] ?? spelled;
+
+		const accounts = 'accounts' in decoded && isRecord(decoded.accounts) ? decoded.accounts : {};
+		const data = 'data' in decoded && isRecord(decoded.data) ? decoded.data : {};
+
+		const info = infoOf({ accounts, data, vocabulary });
+
+		return {
+			program: vocabulary.program,
+			programId,
+			parsed: {
+				type,
+				// A checked transfer or approval states the decimals alongside the amount, and the
+				// RPC reports the pair nested. Both spellings are carried so neither reader has to
+				// know which side produced the instruction.
+				info:
+					'decimals' in info && 'amount' in info
+						? {
+								...info,
+								tokenAmount: {
+									amount: String(field({ info, key: 'amount' })),
+									decimals: field({ info, key: 'decimals' })
+								}
+							}
+						: info
 			}
-
-			const { accounts, data } = decoded;
-
-			return {
-				program: 'system',
-				programId,
-				parsed: {
-					type: 'transfer',
-					info: {
-						source: accounts.source.address,
-						destination: accounts.destination.address,
-						lamports: data.amount
-					}
-				}
-			};
-		}
-
-		if (programId === TOKEN_PROGRAM_ADDRESS || programId === TOKEN_2022_PROGRAM_ADDRESS) {
-			const isLegacy = programId === TOKEN_PROGRAM_ADDRESS;
-
-			const info = tokenInstructionInfo(
-				isLegacy ? parseSolTokenInstruction(instruction) : parseSolToken2022Instruction(instruction)
-			);
-
-			return nonNullish(info)
-				? {
-						program: isLegacy ? 'spl-token' : 'spl-token-2022',
-						programId,
-						parsed: info
-					}
-				: undefined;
-		}
-
-		if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
-			const decoded = parseSolAtaInstruction(instruction);
-
-			if (
-				decoded.instructionType !== AssociatedTokenInstruction.CreateAssociatedToken &&
-				decoded.instructionType !== AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
-			) {
-				return;
-			}
-
-			const { accounts } = decoded;
-
-			return {
-				program: 'spl-associated-token-account',
-				programId,
-				parsed: {
-					type:
-						decoded.instructionType === AssociatedTokenInstruction.CreateAssociatedToken
-							? 'create'
-							: 'createIdempotent',
-					info: {
-						account: accounts.ata.address,
-						wallet: accounts.owner.address,
-						source: accounts.payer.address,
-						mint: accounts.mint.address
-					}
-				}
-			};
-		}
+		};
 	} catch (_err: unknown) {
 		// An instruction the decoders cannot read stays unread, which is the same outcome an
 		// unknown program gets and the honest one.
@@ -621,6 +599,51 @@ const toEffect = ({
 				}),
 				...(nonNullish(delegate) && { counterparty: delegate, own: owned.has(delegate) }),
 				...(nonNullish(accountMints[source]) && { tokenAddress: accountMints[source] })
+			};
+		}
+
+		// Burning destroys what the account held, and minting creates into it. Neither is a
+		// transfer, so no counterparty names either, and the balance is the whole of what changed.
+		if (['burn', 'burnChecked', 'mintTo', 'mintToChecked'].includes(type)) {
+			const account = address({ info, key: 'account' });
+			const authority =
+				address({ info, key: 'authority' }) ?? address({ info, key: 'mintAuthority' });
+
+			if (
+				isNullish(account) ||
+				!(owned.has(account) || (nonNullish(authority) && owned.has(authority)))
+			) {
+				return undefined;
+			}
+
+			const { amount: checked, decimals } = tokenAmount(info);
+			const value = checked ?? amount({ info, key: 'amount' });
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type.startsWith('burn') ? 'burn' : 'mint',
+				account,
+				...(nonNullish(value) && { amount: value }),
+				...(nonNullish(decimals) && { decimals }),
+				...(nonNullish(mint) && { tokenAddress: mint })
+			};
+		}
+
+		// A frozen account holds exactly what it held and can do nothing with it, so no balance
+		// anywhere reports this happening.
+		if (['freezeAccount', 'thawAccount'].includes(type)) {
+			const account = address({ info, key: 'account' });
+
+			if (isNullish(account) || !owned.has(account)) {
+				return undefined;
+			}
+
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type === 'freezeAccount' ? 'freeze' : 'thaw',
+				account,
+				...(nonNullish(mint) && { tokenAddress: mint })
 			};
 		}
 
