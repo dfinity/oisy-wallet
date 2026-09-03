@@ -481,6 +481,22 @@ describe('eth-fee-data.services', () => {
 				}
 			);
 
+			// Quoting a ceiling we know is short is the defect this PR fixes, so a failed quote has to
+			// fail the fetch: `EthFeeContext` surfaces it and retries with backoff.
+			it('fails the fetch rather than quoting a ceiling it knows is short', async () => {
+				const err = new Error('rate limited');
+				getL1FeeUpperBound.mockRejectedValue(err);
+
+				await expect(
+					getEthFeeDataWithProvider({
+						networkId: BASE_NETWORK.id,
+						chainId: BASE_NETWORK.chainId,
+						from: fromAddr,
+						to: toAddr
+					})
+				).rejects.toThrow(err);
+			});
+
 			it('is the same on every priority, being a flat cost rather than a tip', async () => {
 				const l1Fees = await Promise.all(
 					Object.values(EthFeePriority).map(async (priority) => {

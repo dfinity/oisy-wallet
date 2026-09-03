@@ -39,6 +39,12 @@ const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTN
 // the gas the transaction reports, so `gasLimit * maxFeePerGas` already covers it.
 const OP_STACK_CHAIN_IDS: EthereumChainId[] = [BASE_NETWORK.chainId, BASE_SEPOLIA_NETWORK.chainId];
 
+// Deliberately not best-effort. Swallowing a failure here would leave the ceiling at
+// `maxFeePerGas * gas` on a chain that charges more than that, which is precisely what let "Max"
+// offer an unminable amount, and it would do so silently: the quote would look affordable and the
+// transaction would never be included. Letting it throw surfaces the problem and retries it, and
+// the call shares a provider with the rest of the fee data, so there is little for it to fail on
+// alone. `undefined` here means the chain has no such fee, never that we failed to read it.
 const getL1DataFee = async ({
 	chainId,
 	provider
