@@ -37,11 +37,23 @@ of persisted data is a migration and must be done deliberately.
    check what has landed on `main` before picking a number, and re-check after
    a long-lived branch merges `main` in.
 
-   Each id also claims a whole **bucket** on first write — 128 pages, 8 MiB —
-   not at install. So a new collection's cost lands the first time anyone uses
-   it, and it lands as a memory grow that needs _reserved cycles_. On a canister
-   with a tight `reserved_cycles_limit` that fails at first use, long after
-   deployment looked fine.
+   Each id also claims a whole **bucket** — 128 pages, 8 MiB — the first time
+   its structure is initialised, and _when_ that happens depends on how the
+   store is held:
+
+   - **Eagerly**, for a structure built inside the `STATE` thread_local (`tips`,
+     `tips_by_sender`). `#[init]` calls `set_config`, which calls
+     `mutate_state`, which forces the whole of `STATE` to build — so
+     `StableBTreeMap::init` writes its header and the bucket is claimed **at
+     install**, before anyone calls anything.
+   - **Lazily**, for a store held as an `Option` and attached on first use (the
+     vetKeys `EncryptedMaps`: `personal_notes`, `tip_secrets`). Those claim
+     their bucket the first time the feature is actually used.
+
+   The distinction matters because a bucket is claimed by growing stable memory,
+   which needs _reserved cycles_. On a canister with a tight
+   `reserved_cycles_limit`, the eager case fails the install outright, while the
+   lazy case fails at first use — long after deployment looked fine.
 
 2. **Define the type alias** in
    [`types/maps.rs`](../../../../src/backend/src/types/maps.rs):
