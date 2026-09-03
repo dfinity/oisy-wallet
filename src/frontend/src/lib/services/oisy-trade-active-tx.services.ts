@@ -1,0 +1,296 @@
+import type {
+	ActiveUserTransaction,
+	OisyTradeData,
+	TokenId
+} from '$declarations/backend/backend.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { IcToken } from '$icp/types/ic-token';
+import { OisyTradeError } from '$lib/canisters/oisy-trade.errors';
+import { OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS } from '$lib/constants/oisy-trade.constants';
+import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
+import {
+	applyActiveUserTransactionPollUpdate,
+	deleteActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
+import {
+	isRetryableOisyTradeError,
+	settleOisyTradeSwap,
+	type OisyTradeSettlement
+} from '$lib/services/oisy-trade-swap.services';
+import { i18n } from '$lib/stores/i18n.store';
+import {
+	OISY_TRADE_EXTERNAL_REF_KEYS,
+	type OisyTradeExternalRefKey
+} from '$lib/types/oisy-trade-swap';
+import type { Token } from '$lib/types/token';
+import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
+import { consoleError } from '$lib/utils/console.utils';
+import {
+	findOisyTradeRowToken,
+	toOisyTradeExternalRefs,
+	toOisyTradeExternalRefsMap,
+	toOisyTradeRefAmount
+} from '$lib/utils/oisy-trade-active-tx.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { get } from 'svelte/store';
+
+const NANOSECONDS_IN_MILLISECOND = 1_000_000n;
+
+/**
+ * Whether the foreground has had long enough to finish placing the order.
+ *
+ * Only ever asked of a row with no order id, and load-bearing rather than a
+ * nicety: every healthy swap passes through exactly that signature in the window
+ * between the row's creation and `add_limit_order` returning, so a tick landing
+ * inside it would withdraw the deposit out from under an order placement still in
+ * flight.
+ */
+const isPastGracePeriod = ({ created_at_ns }: ActiveUserTransaction): boolean =>
+	BigInt(Date.now()) - created_at_ns / NANOSECONDS_IN_MILLISECOND >
+	BigInt(OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS);
+
+/**
+ * The two legs of a row, resolved back to the wallet's own tokens.
+ *
+ * A pair leg the wallet does not know is unreachable by construction — the quote
+ * that opened the row drew both tokens from the swap universe this reads — but a
+ * row that cannot be resolved is left strictly alone rather than guessed at:
+ * settlement needs each token's ledger fee to tell a withdrawable balance from
+ * permanently unwithdrawable dust.
+ */
+const resolveRowTokens = ({
+	data,
+	tokens
+}: {
+	data: OisyTradeData;
+	tokens: Token[];
+}): { sourceToken: IcToken; destinationToken: IcToken } | undefined => {
+	const resolve = (tokenId: TokenId) => findOisyTradeRowToken({ tokenId, tokens });
+
+	const sourceToken = resolve(data.source_token);
+	const destinationToken = resolve(data.dest_token);
+
+	if (isNullish(sourceToken) || isNullish(destinationToken)) {
+		return undefined;
+	}
+
+	return { sourceToken, destinationToken };
+};
+
+const applyTerminalUpdate = async ({
+	identity,
+	tx,
+	refs,
+	settlement,
+	error
+}: {
+	identity: Identity;
+	tx: ActiveUserTransaction;
+	refs: Partial<Record<OisyTradeExternalRefKey, string>>;
+	settlement: OisyTradeSettlement;
+	error?: string;
+}): Promise<void> => {
+	const status = advanceStatus({
+		current: tx.status,
+		candidate: settlement.status === 'filled' ? { Succeeded: null } : { Failed: null }
+	});
+
+	if (isNullish(status)) {
+		return;
+	}
+
+	// Both legs can pay out — a Buy that crossed below its limit has its unspent
+	// reserve released alongside the fill — so the ref records every block index this
+	// settlement produced, not just the primary one.
+	const withdrawn = settlement.withdrawals.join(',');
+
+	await applyActiveUserTransactionPollUpdate({
+		identity,
+		tx,
+		update: {
+			status,
+			...(nonNullish(error) ? { error } : {}),
+			externalRefs: toOisyTradeExternalRefs({
+				...refs,
+				...(withdrawn !== ''
+					? { [OISY_TRADE_EXTERNAL_REF_KEYS.WITHDRAW_BLOCK_INDEX]: withdrawn }
+					: {})
+			})
+		}
+	});
+};
+
+const pollOisyTradeTransaction = async ({
+	identity,
+	tx,
+	tokens
+}: {
+	identity: Identity;
+	tx: ActiveUserTransaction;
+	tokens: Token[];
+}): Promise<void> => {
+	if (!('OisyTrade' in tx.data)) {
+		return;
+	}
+
+	const resolved = resolveRowTokens({ data: tx.data.OisyTrade, tokens });
+
+	if (isNullish(resolved)) {
+		consoleError('Unresolvable token on an OISY Trade active user transaction', tx.id);
+		return;
+	}
+
+	const { sourceToken, destinationToken } = resolved;
+
+	const refs = toOisyTradeExternalRefsMap(tx.external_refs);
+
+	const orderIdRef = refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID];
+	const hasDeposited = nonNullish(refs[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]);
+
+	// Without an order id the foreground may still be mid-flow, so the row is its
+	// business until the grace period is up. With one there is nothing to wait for:
+	// settlement is this poller's job from the moment the order exists.
+	if (isNullish(orderIdRef) && !isPastGracePeriod(tx)) {
+		return;
+	}
+
+	const { error: swapError } = get(i18n).swap;
+
+	let settlement: OisyTradeSettlement;
+
+	try {
+		settlement = await settleOisyTradeSwap({
+			identity,
+			orderId: orderIdRef,
+			sourceToken,
+			destinationToken,
+			baseline: {
+				source: toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]),
+				destination: toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE])
+			}
+		});
+	} catch (err: unknown) {
+		// The retry policy, and the reason this branch exists at all. `retryable` covers
+		// `LedgerTemporarilyUnavailable`, `OperationInProgress` and `CallFailed` — all
+		// transient, and `OperationInProgress` the likeliest, since it fires whenever
+		// another deposit or withdrawal is already in flight for the same
+		// `(caller, token)`. Terminalizing on one of those would mark the swap failed,
+		// stop the poller and leave the funds in DEX custody with nothing watching them.
+		// The row is left untouched instead — `advanceStatus` is forward-only, so an
+		// `Executing` row cannot fall back and does not need to — and the next tick asks
+		// again.
+		if (isRetryableOisyTradeError(err)) {
+			return;
+		}
+
+		// A definitive refusal from the canister ends the operation, with its own message
+		// rather than a hand-written one. The funds may still be in DEX custody, which is
+		// why the reason is recorded on the row: the Trading tab is where the user can act
+		// on it.
+		if (err instanceof OisyTradeError) {
+			await applyActiveUserTransactionPollUpdate({
+				identity,
+				tx,
+				update: {
+					status: advanceStatus({ current: tx.status, candidate: { Failed: null } }),
+					error: err.message
+				}
+			});
+
+			return;
+		}
+
+		throw err;
+	}
+
+	if (settlement.status === 'pending') {
+		return;
+	}
+
+	if (settlement.status === 'unresolved') {
+		// With an order id, "unresolved" is final: the canister no longer knows the order
+		// and neither leg holds anything attributable, so an earlier attempt already paid
+		// the withdrawal out and only the terminal write was lost. Nothing says which way
+		// it went, so it closes as a failure that points at the Trading tab rather than
+		// claiming a success it cannot evidence.
+		if (nonNullish(orderIdRef)) {
+			await applyTerminalUpdate({
+				identity,
+				tx,
+				refs,
+				settlement,
+				error: swapError.oisy_trade_settlement_unresolved
+			});
+
+			return;
+		}
+
+		// Without one it is ambiguous, and the two readings are told apart by what the row
+		// itself records. A row still `Pending` that holds neither pointer never reached
+		// the canister — the user closed the modal at the approve prompt, or the approve
+		// failed — so it is *deleted* rather than failed: nothing happened, and a `Failed`
+		// row would invite the user to worry about funds that never moved. Anything else
+		// is a deposit whose order id was lost while the order itself may still be live,
+		// holding its reserve where no free balance can see it. That row is left to keep
+		// polling; terminalizing it would be the one unrecoverable mistake here.
+		if ('Pending' in tx.status && !hasDeposited) {
+			await deleteActiveUserTransaction({ identity, id: tx.id });
+		}
+
+		return;
+	}
+
+	await applyTerminalUpdate({
+		identity,
+		tx,
+		refs,
+		settlement,
+		error:
+			settlement.status === 'filled'
+				? undefined
+				: // A kill and an order that was never placed both come home as the source
+					// token and both fail the row; only the reason differs, and the absence of
+					// an order id is what says which happened.
+					nonNullish(orderIdRef)
+					? swapError.oisy_trade_order_killed
+					: swapError.oisy_trade_order_not_placed
+	});
+};
+
+/**
+ * Advances the non-terminal OISY Trade rows: polls each one's order and, once it
+ * has resolved, withdraws what it added to both legs and closes the row.
+ *
+ * The settlement itself is `settleOisyTradeSwap`, shared verbatim with the swap
+ * flow that opened the row — this only decides what the outcome means for the row.
+ * Sequential rather than concurrent: the canister rejects a second withdrawal while
+ * one is already in flight for the same caller (`OperationInProgress`), so two rows
+ * settling together would race each other straight into it.
+ */
+export const pollOisyTradeActiveUserTransactions = async ({
+	identity,
+	transactions
+}: {
+	identity: Identity;
+	transactions: ActiveUserTransaction[];
+}): Promise<void> => {
+	if (transactions.length === 0) {
+		return;
+	}
+
+	// ICP is a pair leg like any other and is not in the ICRC list, which is the one
+	// place the two representations differ.
+	const tokens: Token[] = [ICP_TOKEN, ...get(allSortedIcrcTokens)];
+
+	for (const tx of transactions) {
+		try {
+			await pollOisyTradeTransaction({ identity, tx, tokens });
+		} catch (err: unknown) {
+			// Whatever reaches here is not the canister's verdict on this swap — a backend
+			// write that failed, a network blip — so the row is left exactly as it is and
+			// the next tick asks again. One failing row never poisons the batch.
+			consoleError(err);
+		}
+	}
+};

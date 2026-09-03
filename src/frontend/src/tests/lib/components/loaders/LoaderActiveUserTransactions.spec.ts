@@ -15,6 +15,7 @@ import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.se
 import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
+import * as oisyTradePoller from '$lib/services/oisy-trade-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
 import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -25,6 +26,7 @@ import {
 	mockChainFusionActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
+	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -95,6 +97,27 @@ const succeededChainFusion = (id: string) =>
 		id,
 		status: { Succeeded: null } as const
 	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const pendingOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Executing: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
+
+const succeededOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
+
+const failedOisyTrade = (id: string) =>
+	({
+		...mockOisyTradeActiveUserTransaction,
+		id,
+		status: { Failed: null } as const
+	}) satisfies typeof mockOisyTradeActiveUserTransaction;
 
 const pendingLiquidium = (id: string) =>
 	({
@@ -300,6 +323,32 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		it('polls OISY Trade rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const oisyTradeSpy = vi
+				.spyOn(oisyTradePoller, 'pollOisyTradeActiveUserTransactions')
+				.mockResolvedValue();
+			// `Executing`, not `Pending`: every OISY Trade row is `Executing` from the
+			// deposit onwards, so a partition matching on the `Pending` *status* rather than
+			// on non-terminal would never see a real settlement.
+			const tx = pendingOisyTrade('oisy-trade-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(oisyTradeSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -433,6 +482,46 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
 			});
 			expect(appliedFlags()).toEqual({ 'chain-fusion-a': true });
+		});
+
+		it('fires a swap_success event with the OISY Trade dApp when an order settles', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingOisyTrade('oisy-trade-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededOisyTrade('oisy-trade-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+			});
+			expect(appliedFlags()).toEqual({ 'oisy-trade-a': true });
+		});
+
+		// Unlike every other provider: a failed OISY Trade swap is a killed fill-or-kill
+		// order whose *source* token has just been withdrawn back to the wallet, so the
+		// balance changed and the refresh has to fire on failure too.
+		it('refreshes the wallet even when an OISY Trade row fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingOisyTrade('oisy-trade-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({ transaction: failedOisyTrade('oisy-trade-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+			});
 		});
 
 		it('fires a swap_error event without a wallet refresh when a ck row fails', async () => {

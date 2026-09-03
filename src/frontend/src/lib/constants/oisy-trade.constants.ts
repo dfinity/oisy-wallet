@@ -19,6 +19,15 @@ export const OISY_TRADE_POLL_INTERVAL_MILLIS = 30_000;
 // here somebody is watching a spinner for exactly this interval.
 export const OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS = 2_000;
 
+// How long the background poller leaves a swap row that has no order id alone.
+//
+// Load-bearing rather than a nicety: every healthy swap passes through exactly
+// that signature in the window between the row's creation and `add_limit_order`
+// returning, so a tick landing inside it would withdraw the deposit out from
+// under an order placement still in flight. Comfortably longer than approve +
+// deposit + place, and well short of the deposit's 5-minute approve expiry.
+export const OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS = 5 * 60 * 1000;
+
 // The oisy_trade canister caps a `get_my_orders` page (`ByPage.length`) at 100.
 export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;
 

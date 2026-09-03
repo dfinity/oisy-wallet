@@ -4,6 +4,7 @@ import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import {
+	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUBMITTED,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
@@ -403,11 +404,11 @@ describe('SwapIcpWizard', () => {
 			};
 
 			beforeEach(() => {
-				mockOisyTradeFn.mockResolvedValue({ status: 'filled', withdrawals: [42n] });
+				mockOisyTradeFn.mockResolvedValue(undefined);
 				setOisyTradeContext();
 			});
 
-			it('dispatches the reviewed order and closes on success', async () => {
+			it('dispatches the reviewed order and closes on submission', async () => {
 				await submit();
 
 				expect(mockOisyTradeFn).toHaveBeenCalledExactlyOnceWith(
@@ -415,48 +416,51 @@ describe('SwapIcpWizard', () => {
 						sourceToken: mockToken,
 						destinationToken: mockDestToken,
 						// The order the quote resolved and the user reviewed — never re-derived.
-						order: mockOisyTradeProvider.swapDetails.order
+						order: mockOisyTradeProvider.swapDetails.order,
+						// The row's id, so the poller can be handed an operation to finish.
+						swapId: expect.any(String)
 					})
 				);
 				expect(BASE_PROPS.onClose).toHaveBeenCalledOnce();
 				expect(BASE_PROPS.onBack).not.toHaveBeenCalled();
 			});
 
-			// A killed fill-or-kill order is an expected market outcome whose funds are
-			// already back in the wallet, so it lands in Review as info — like
-			// slippage-exceeded — and never in the unexpected-error toast, where the
-			// reassuring copy would read as a failure detail.
-			it('presents a killed order in Review rather than as an unexpected error', async () => {
+			// The modal now closes once the order is placed: the withdrawal that brings
+			// either leg back out of DEX custody is the Active User Transaction poller's, and
+			// it is what reports success or failure.
+			it('reports the swap as submitted rather than succeeded', async () => {
+				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+				await submit();
+
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_SWAP_SUBMITTED,
+						metadata: expect.objectContaining({ dApp: SwapProvider.OISY_TRADE })
+					})
+				);
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+				);
+			});
+
+			// The row is the recovery record, so a swap that cannot open one never starts —
+			// and because nothing moved, it reads as info in Review rather than as an
+			// unexpected-error toast.
+			it('presents an untrackable swap in Review rather than as an unexpected error', async () => {
 				mockOisyTradeFn.mockRejectedValue(
-					new OisyTradeSwapError(en.swap.error.oisy_trade_order_killed, 'killed')
+					new OisyTradeSwapError(en.swap.error.oisy_trade_not_trackable, 'not_trackable')
 				);
 
 				await submit();
 
 				expect(readFailedSwapError()).toEqual({
-					message: en.swap.error.oisy_trade_order_killed,
+					message: en.swap.error.oisy_trade_not_trackable,
 					variant: 'info'
 				});
 				expect(toasts.toastsError).not.toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
 				expect(BASE_PROPS.onClose).not.toHaveBeenCalled();
-			});
-
-			// An unresolved settlement asks the user to check the Trading tab, so it is a
-			// warning rather than info — but still a Review message, not a toast.
-			it('presents an unresolved settlement as a warning in Review', async () => {
-				mockOisyTradeFn.mockRejectedValue(
-					new OisyTradeSwapError(en.swap.error.oisy_trade_settlement_unresolved, 'unresolved')
-				);
-
-				await submit();
-
-				expect(readFailedSwapError()).toEqual({
-					message: en.swap.error.oisy_trade_settlement_unresolved,
-					variant: 'warning'
-				});
-				expect(toasts.toastsError).not.toHaveBeenCalled();
-				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
 			});
 
 			// An order the canister refused has had its deposit recovered by the time the
@@ -492,6 +496,41 @@ describe('SwapIcpWizard', () => {
 				});
 				expect(toasts.toastsError).not.toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+
+			// Both kinds end with a `Failed` row — closed by the flow on `not_placed`, by the
+			// poller on `recovery_failed` — and the loader fires the swap's single error event
+			// off that row, as for every background-settling provider. Firing here too would
+			// count the same swap twice.
+			it.each(['not_placed', 'recovery_failed'] as const)(
+				'leaves the swap_error event to the row on %s',
+				async (kind) => {
+					const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+					mockOisyTradeFn.mockRejectedValue(new OisyTradeSwapError('refused', kind));
+
+					await submit();
+
+					expect(trackEventSpy).not.toHaveBeenCalledWith(
+						expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+					);
+				}
+			);
+
+			// No row exists for an untrackable swap, so nothing else can report it.
+			it('still fires swap_error itself for an untrackable swap', async () => {
+				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+				mockOisyTradeFn.mockRejectedValue(
+					new OisyTradeSwapError(en.swap.error.oisy_trade_not_trackable, 'not_trackable')
+				);
+
+				await submit();
+
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_SWAP_ERROR,
+						metadata: expect.objectContaining({ errorKey: 'not_trackable' })
+					})
+				);
 			});
 		});
 

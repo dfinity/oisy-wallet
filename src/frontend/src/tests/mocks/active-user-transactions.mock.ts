@@ -6,6 +6,7 @@ import type {
 	ChainFusionData,
 	LiquidiumData,
 	NearIntentsData,
+	OisyTradeData,
 	OneSecIcpToEvmData,
 	VeloraData
 } from '$declarations/backend/backend.did';
@@ -17,8 +18,10 @@ import type {
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
+import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const mockActiveUserTransactionId = '11111111-1111-4111-8111-111111111111';
 
@@ -110,6 +113,35 @@ export const mockChainFusionActiveUserTransaction: ActiveUserTransaction = {
 		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
 		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'ETH' },
 		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockOisyTradeData: OisyTradeData = {
+	side: { Sell: null },
+	source_token: { Icrc: mockPrincipal },
+	dest_token: { Icrc: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai') },
+	amount: 300_000_000n
+};
+
+export const mockOisyTradeActiveUserTransaction: ActiveUserTransaction = {
+	id: '55555555-5555-4555-8555-555555555555',
+	status: { Executing: null },
+	data: { OisyTrade: mockOisyTradeData },
+	progress_step: [],
+	// OneSec's exact display-ref key strings, which is what lets an OISY Trade row
+	// render through the shared layout.
+	external_refs: [
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX, value: '7' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID, value: 'order-1' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.AMOUNT, value: '3' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '36.5' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ICP' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'ckUSDC' },
+		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Internet Computer' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

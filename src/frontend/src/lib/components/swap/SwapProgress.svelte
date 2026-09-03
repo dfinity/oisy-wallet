@@ -7,6 +7,13 @@
 	interface Props {
 		swapProgressStep?: string;
 		sendWithApproval?: boolean;
+		// The approve row without the two signing rows `sendWithApproval` also brings,
+		// for a flow that approves a ledger allowance and signs nothing the user sees —
+		// OISY Trade, whose deposit leg is `icrc2_approve` then `deposit`. On the ICP
+		// wizard an approve is a plain canister call, so there is no signature to show;
+		// and a step driven into a list that does not render it matches nothing, which
+		// leaves every row unhighlighted until the next step that does exist.
+		sendWithApprovalOnly?: boolean;
 		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
 		swapWithActiveTransaction?: boolean;
@@ -20,6 +27,7 @@
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION,
 		failedSteps = $bindable([]),
 		sendWithApproval = false,
+		sendWithApprovalOnly = false,
 		sendWithTransfer = false,
 		swapWithWithdrawing = false,
 		swapWithActiveTransaction = false,
@@ -51,6 +59,19 @@
 					{
 						step: ProgressStepsSwap.SIGN_TRANSFER,
 						text: $i18n.send.text.signing_transaction,
+						state: 'next'
+					}
+				] as ProgressSteps)
+			: []),
+		// Guarded against `sendWithApproval`, which already contributes an `APPROVE`
+		// row: two rows sharing one step id would break the in-progress lookup, which
+		// matches steps by id. The two props serve different wizards, so this is an
+		// invariant rather than a case that arises.
+		...(sendWithApprovalOnly && !sendWithApproval
+			? ([
+					{
+						step: ProgressStepsSwap.APPROVE,
+						text: $i18n.send.text.approving,
 						state: 'next'
 					}
 				] as ProgressSteps)

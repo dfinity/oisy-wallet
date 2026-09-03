@@ -1,3 +1,4 @@
+import type { ActiveUserTransactionStatus } from '$declarations/backend/backend.did';
 import type {
 	OrderId,
 	OrderRecord,
@@ -14,21 +15,32 @@ import { OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import {
+	createActiveUserTransaction,
+	updateActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import { approveAndDepositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
 import { placeLimitOrder } from '$lib/services/oisy-trade.services';
 import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 import { trackDepositWithdraw, trackLimitOrder } from '$lib/services/trading-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type {
-	OisyTradeFee,
-	OisyTradeQuote,
-	OisyTradeQuoteResult,
-	OisyTradeResolvedOrder
+import {
+	OISY_TRADE_EXTERNAL_REF_KEYS,
+	type OisyTradeExternalRefKey,
+	type OisyTradeFee,
+	type OisyTradeQuote,
+	type OisyTradeQuoteResult,
+	type OisyTradeResolvedOrder
 } from '$lib/types/oisy-trade-swap';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
+import {
+	toOisyTradeData,
+	toOisyTradeDisplayRefs,
+	toOisyTradeExternalRefs
+} from '$lib/utils/oisy-trade-active-tx.utils';
 import {
 	computeOisyTradeReceiveAmount,
 	findOisyTradePair,
@@ -423,6 +435,14 @@ const withdrawFreeBalance = async ({
  * rather than reading them from anywhere, so that poller can pass them straight out
  * of an Active User Transaction's refs.
  *
+ * A **nullish** `orderId` is the poller's case, not the wizard's: a row whose
+ * `add_limit_order` never returned an id — because it was never reached, or because
+ * its reply was lost. There is nothing to poll, so the balances answer instead,
+ * exactly as they do for an order the canister no longer knows. Both deltas at zero
+ * then reads as `unresolved`, which is also what a *live* order looks like from the
+ * outside (its reserve is locked, so neither leg holds anything free) — so the caller
+ * must treat `unresolved` as "ask again later", never as "nothing happened".
+ *
  * Everything it acts on is **the difference from that baseline**, never the
  * account-wide free balance. A user can arrive at a swap with either leg already
  * funded from the Trading tab, and withdrawing the account-wide total would evacuate
@@ -443,13 +463,14 @@ export const settleOisyTradeSwap = async ({
 	baseline
 }: {
 	identity: Identity;
-	orderId: OrderId;
+	// Absent only when no order was ever placed, or its id never came back.
+	orderId?: OrderId;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	// Both legs' free balance as it stood before the deposit.
 	baseline: OisyTradeFreeBalances;
 }): Promise<OisyTradeSettlement> => {
-	const order = await readOisyTradeOrder({ identity, orderId });
+	const order = nonNullish(orderId) ? await readOisyTradeOrder({ identity, orderId }) : undefined;
 
 	// A live order's reserve is locked — "funds reserved by open orders are not
 	// withdrawable until the order fills or is canceled" — so there is nothing to
@@ -466,12 +487,13 @@ export const settleOisyTradeSwap = async ({
 		baseline: baseline.destination
 	});
 
-	// With the order still known, its status is the answer. Without it, what this order
-	// *added* is — which is what makes this correct however long the canister retains a
-	// terminal order: destination added means it filled, source added means it did not,
-	// and neither means the withdrawal already happened in an earlier attempt. Reading
-	// the account-wide balance here instead would call a killed order filled for any user
-	// who already held the destination token on the DEX.
+	// With the order still known, its status is the answer. Without it — never placed,
+	// its id lost, or evicted by the canister — what this order *added* is, which is what
+	// makes this correct however long a terminal order is retained: destination added
+	// means it filled, source added means it did not, and neither means either the
+	// withdrawal already happened or an order is still holding the reserve. Reading the
+	// account-wide balance here instead would call a killed order filled for any user who
+	// already held the destination token on the DEX.
 	const status: OisyTradeSettlementStatus = nonNullish(order)
 		? 'Filled' in order.status
 			? 'filled'
@@ -540,41 +562,6 @@ export const settleOisyTradeSwap = async ({
 };
 
 /**
- * Settles in the foreground, retrying until the order reaches a terminal state.
- *
- * Unbounded on purpose: the modal stays open until the user's funds are back in
- * their wallet, because until the next step's Active User Transaction row exists
- * there is nothing else watching them. A retryable failure — a ledger having a bad
- * minute, or a concurrent operation on the same token — is a reason to ask again,
- * never a reason to stop; anything else ends the swap.
- */
-const settleUntilTerminal = async (params: {
-	identity: Identity;
-	orderId: OrderId;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
-	baseline: OisyTradeFreeBalances;
-}): Promise<OisyTradeSettlement> => {
-	for (;;) {
-		try {
-			const settlement = await settleOisyTradeSwap(params);
-
-			if (settlement.status !== 'pending') {
-				return settlement;
-			}
-		} catch (err: unknown) {
-			if (!isRetryableOisyTradeError(err)) {
-				throw err;
-			}
-		}
-
-		await new Promise((resolve) =>
-			setTimeout(resolve, OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS)
-		);
-	}
-};
-
-/**
  * Recovers a deposit whose order the canister refused to accept.
  *
  * Only the source leg: no order ever existed, so nothing has touched the
@@ -619,24 +606,28 @@ const recoverOisyTradeDeposit = async (params: {
 };
 
 /**
- * Executes a reviewed OISY Trade offer: approve → deposit → fill-or-kill order →
- * settle → withdraw.
+ * Executes a reviewed OISY Trade offer: open the recovery record, approve, deposit,
+ * place the fill-or-kill order — and stop there.
  *
  * The price and quantity come from the reviewed quote and are never re-derived. The
  * book moves, and re-resolving them here would silently change what the user agreed
  * to between Review and submit.
  *
- * Throws an `OisyTradeSwapError` on a killed order — and on one the canister
- * refused to accept. That is unlike every other provider, where a failed swap means
- * nothing moved: here the funds have been to the DEX and back, so in both cases the
- * error is raised only *after* the source token has been withdrawn — the user is
- * never told the swap failed while their money is still in someone else's custody.
- * The typed error is what lets the wizard present either as the expected outcome it
- * is, rather than as an unexpected failure.
+ * Settlement is deliberately **not** part of this: once the order is placed the
+ * operation belongs to its Active User Transaction row, which
+ * `pollOisyTradeActiveUserTransactions` drives to a fill or a kill with the modal
+ * closed, across a refresh and across a re-login. What this function still owns is
+ * everything that happens before there is an order to settle.
+ *
+ * Throws an `OisyTradeSwapError` when the row cannot be opened (before anything
+ * moves) and when the canister refuses the order (after the deposit has been
+ * recovered). The typed error is what lets the wizard present either as the
+ * expected outcome it is, rather than as an unexpected failure.
  */
 export const fetchOisyTradeSwap = async ({
 	identity,
 	progress,
+	swapId,
 	sourceToken,
 	destinationToken,
 	order,
@@ -644,12 +635,14 @@ export const fetchOisyTradeSwap = async ({
 }: {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
+	// The row's id, generated by the caller like every other tracked swap's.
+	swapId: string;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	// The order the quote resolved and the user reviewed.
 	order: OisyTradeResolvedOrder;
 	enableDestinationToken?: () => Promise<void>;
-}): Promise<OisyTradeSettlement> => {
+}): Promise<void> => {
 	const { swap: swapI18n } = get(i18n);
 
 	// A swap-placed order genuinely *is* a deposit and a limit order, so both Trading
@@ -680,13 +673,100 @@ export const fetchOisyTradeSwap = async ({
 	// whatever the user already had on the DEX. It has to precede the deposit
 	// specifically: the deposit itself credits the source leg, and a baseline taken
 	// after it would make a killed order's returned reserve look like someone else's
-	// balance and be left behind. Step 2 captures this into the row's refs at creation,
-	// which is the same point in the flow.
+	// balance and be left behind. It goes into the row below, which is where the poller
+	// reads it back from in a later session.
 	const baseline = await readOisyTradeFreeBalances({
 		identity,
 		sourceToken,
 		destinationToken
 	});
+
+	const data = toOisyTradeData({
+		side: order.side,
+		sourceToken,
+		destinationToken,
+		amount: order.depositAmount
+	});
+
+	if (isNullish(data)) {
+		throw new OisyTradeSwapError(swapI18n.error.oisy_trade_not_trackable, 'not_trackable');
+	}
+
+	// Everything fixed at creation, so the row already describes the operation before
+	// the first canister call can fail halfway through it.
+	let refs: Partial<Record<OisyTradeExternalRefKey, string>> = {
+		...toOisyTradeDisplayRefs({
+			sourceToken,
+			destinationToken,
+			amount: depositAnalytics.amount,
+			usdSourceValue: nonNullish(depositAnalytics.usdValue)
+				? `${depositAnalytics.usdValue}`
+				: undefined
+		}),
+		[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_PRICE]: `${order.price}`,
+		[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]: `${order.quantity}`,
+		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: `${baseline.source}`,
+		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]: `${baseline.destination}`
+	};
+
+	// **This inverts every other provider's rule.** OneSec, Velora, NEAR Intents and
+	// Chain Fusion all open their row best-effort and never let a failure here surface
+	// as a swap failure, because for them the row only *observes* a settlement that will
+	// happen anyway. Here it is the recovery record: an OISY Trade swap parks the user's
+	// funds in the DEX's custody mid-flow, and the row is what tells a later session
+	// which token to pull back out. Proceeding without one is exactly the stranded-funds
+	// case it exists to prevent — so this is not caught, and nothing has moved yet when
+	// it throws.
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id: swapId,
+			data,
+			externalRefs: toOisyTradeExternalRefs(refs)
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+
+		throw new OisyTradeSwapError(swapI18n.error.oisy_trade_not_trackable, 'not_trackable');
+	}
+
+	// Learned-mid-flow refs are written with the status they belong to, and swallowed on
+	// failure: the funds have already moved, so ending the swap over a bookkeeping write
+	// would be the worse outcome. The poller re-derives every fact it acts on from the
+	// canister's own balances, so a lost ref costs precision, never correctness — with
+	// one exception, guarded in `pollOisyTradeActiveUserTransactions`: a row is only ever
+	// *deleted* when it is still `Pending` and holds neither pointer.
+	//
+	// That exception is why every write carries the highest status reached so far, not
+	// just the one it advances to. A lost `Executing` write would otherwise leave a
+	// funded row `Pending` with no deposit ref — exactly the delete signature — and the
+	// backend accepts a same-status update, so re-sending it repairs the loss for free.
+	let rowStatus: ActiveUserTransactionStatus | undefined;
+
+	const advanceRow = async ({
+		status,
+		error,
+		learned = {}
+	}: {
+		status?: ActiveUserTransactionStatus;
+		error?: string;
+		learned?: Partial<Record<OisyTradeExternalRefKey, string>>;
+	}): Promise<void> => {
+		refs = { ...refs, ...learned };
+		rowStatus = status ?? rowStatus;
+
+		try {
+			await updateActiveUserTransaction({
+				identity,
+				id: swapId,
+				...(nonNullish(rowStatus) ? { status: rowStatus } : {}),
+				...(nonNullish(error) ? { error } : {}),
+				externalRefs: toOisyTradeExternalRefs(refs)
+			});
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+	};
 
 	trackDepositWithdraw({
 		direction: 'deposit',
@@ -694,8 +774,10 @@ export const fetchOisyTradeSwap = async ({
 		...depositAnalytics
 	});
 
+	let depositBlockIndex: bigint;
+
 	try {
-		await approveAndDepositOisyTrade({
+		depositBlockIndex = await approveAndDepositOisyTrade({
 			identity,
 			token: sourceToken,
 			amount: order.depositAmount,
@@ -709,6 +791,9 @@ export const fetchOisyTradeSwap = async ({
 			error: replaceIcErrorFields(err)
 		});
 
+		// The row stays `Pending` with no deposit ref, which is what the poller reads as
+		// "never started" — nothing moved, so it deletes the row rather than reporting a
+		// failure about funds that never left the wallet.
 		throw err;
 	}
 
@@ -716,6 +801,14 @@ export const fetchOisyTradeSwap = async ({
 		direction: 'deposit',
 		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 		...depositAnalytics
+	});
+
+	// The funds are in DEX custody from here on, which is what `Executing` records.
+	await advanceRow({
+		status: { Executing: null },
+		learned: {
+			[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]: `${depositBlockIndex}`
+		}
 	});
 
 	trackLimitOrder({
@@ -759,24 +852,32 @@ export const fetchOisyTradeSwap = async ({
 		// Anything else is ambiguous — the call may have reached the canister and
 		// only the reply been lost, so an order may exist with the reserve locked
 		// and no id to poll it by. Withdrawing here could race that live order, so
-		// the error is rethrown and the case belongs to the durable recovery record
-		// (the AUT row's "deposit landed, order never placed" path, step 2).
+		// the error is rethrown and the row is left as it is: `Executing`, with a
+		// deposit ref and no order id, which is precisely the signature the poller
+		// resolves once the grace period has passed.
 		if (err instanceof OisyTradeError) {
-			progress(ProgressStepsSwap.WITHDRAW);
-
 			try {
 				await recoverOisyTradeDeposit({ identity, sourceToken, destinationToken, baseline });
 			} catch (recoveryErr: unknown) {
 				consoleError(recoveryErr);
 
-				// The one error raised while funds are still in DEX custody, which is
-				// why its message points at the Trading tab, where the balance shows.
+				// The one error raised while funds are still in DEX custody, which is why
+				// its message points at the Trading tab, where the balance shows. The row
+				// is deliberately left non-terminal: it now carries a deposit ref and no
+				// order id, so the poller retries this same withdrawal for as long as the
+				// balance is there. That is exactly what opening the row early bought.
 				throw new OisyTradeSwapError(swapI18n.error.oisy_trade_recovery_failed, 'recovery_failed');
 			}
 
-			// Like a kill: the funds came back as the source token — refresh the
-			// wallet so the recovered balance is visible, and never enable — or
-			// reach the UPDATE_UI step for — a destination token that never arrived.
+			// The funds came back as the source token and there is nothing left to settle,
+			// so the row is closed here rather than left for the poller to re-derive.
+			await advanceRow({
+				status: { Failed: null },
+				error: swapI18n.error.oisy_trade_order_not_placed
+			});
+
+			// Never enable — or reach the UPDATE_UI step for — a destination token that
+			// never arrived; refresh so the recovered balance is visible.
 			await waitAndTriggerWallet();
 
 			throw new OisyTradeSwapError(swapI18n.error.oisy_trade_order_not_placed, 'not_placed');
@@ -790,35 +891,20 @@ export const fetchOisyTradeSwap = async ({
 		...orderAnalytics
 	});
 
-	progress(ProgressStepsSwap.WITHDRAW);
-
-	const settlement = await settleUntilTerminal({
-		identity,
-		orderId,
-		sourceToken,
-		destinationToken,
-		baseline
+	await advanceRow({
+		learned: { [OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]: orderId }
 	});
-
-	// Nothing was withdrawn and nothing says how the order ended, so there is no
-	// wallet change to refresh and no destination token to enable.
-	if (settlement.status === 'unresolved') {
-		throw new OisyTradeSwapError(swapI18n.error.oisy_trade_settlement_unresolved, 'unresolved');
-	}
-
-	// A killed order's funds came back as the *source* token: refresh the wallet
-	// so the recovered balance is visible, but never enable — and never reach the
-	// UPDATE_UI step for — a destination token the user did not receive.
-	if (settlement.status === 'killed') {
-		await waitAndTriggerWallet();
-
-		throw new OisyTradeSwapError(swapI18n.error.oisy_trade_order_killed, 'killed');
-	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// Enabled on submission rather than on arrival, as every background-settling
+	// provider does: the modal is about to close, and the destination token has to be
+	// visible for the balance the poller's withdrawal will deliver to land somewhere the
+	// user can see. A killed order leaves it enabled and empty, which is the same
+	// trade-off 1Sec and Chain Fusion already make.
 	await enableDestinationToken?.();
-	await waitAndTriggerWallet();
 
-	return settlement;
+	// The deposit has left the wallet; the withdrawal that brings the other leg back is
+	// the poller's, and the loader refreshes again when the row terminalizes.
+	await waitAndTriggerWallet();
 };

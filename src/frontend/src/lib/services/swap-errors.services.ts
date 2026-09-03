@@ -33,17 +33,19 @@ export class SwapError extends Error {
 }
 
 /**
- * How an OISY Trade swap ended when the destination token did not arrive.
+ * How an OISY Trade swap ended before it could hand settlement to its Active User
+ * Transaction row. Everything after that hand-off — a fill, a kill, a stalled
+ * withdrawal — is reported by the row, not by an exception.
  *
- * `killed` is a fill-or-kill order the book could not fill — an expected market
- * outcome, and the source funds have already been withdrawn back to the wallet
- * when this is thrown. `not_placed` is an order the canister refused to accept —
- * likewise thrown only once the deposit has been recovered to the wallet.
- * `unresolved` means the settlement found neither the order nor any balance in
- * DEX custody, so there is nothing left to recover and nothing that says how the
- * order ended. `recovery_failed` is the one kind raised while funds are still in
- * DEX custody: the order was refused and withdrawing the deposit back failed, so
- * the message points the user at the Trading tab, where the balance is visible.
+ * `not_trackable` is the row itself failing to open. Unlike every other provider,
+ * whose tracking is best-effort, that aborts the swap before anything moves: the
+ * row is the recovery record, and a swap without one is precisely the
+ * stranded-funds case it exists to prevent. `not_placed` is an order the canister
+ * refused to accept, thrown only once the deposit has been recovered to the wallet.
+ * `recovery_failed` is the one kind raised while funds are still in DEX custody:
+ * the order was refused and withdrawing the deposit back failed, so the message
+ * points the user at the Trading tab, where the balance is visible — and the row is
+ * deliberately left non-terminal so the poller keeps trying.
  *
  * A dedicated class, and defined here rather than next to its thrower, so
  * `SwapIcpWizard` can recognize all of them by `instanceof` and present them in
@@ -54,7 +56,7 @@ export class SwapError extends Error {
 export class OisyTradeSwapError extends Error {
 	constructor(
 		message: string,
-		public readonly kind: 'killed' | 'not_placed' | 'unresolved' | 'recovery_failed'
+		public readonly kind: 'not_trackable' | 'not_placed' | 'recovery_failed'
 	) {
 		super(message);
 		this.name = 'OisyTradeSwapError';

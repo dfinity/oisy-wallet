@@ -18,6 +18,14 @@ export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	ORDER_QUANTITY: 'order_quantity',
 	// The destination (or recovered source) withdrawal that closes the row.
 	WITHDRAW_BLOCK_INDEX: 'withdraw_block_index',
+	// Both legs' free DEX balance as it stood *before* the deposit, in base units.
+	// Settlement acts on the difference from these, never on the account-wide
+	// total: a user can arrive at a swap with either leg already funded from the
+	// Trading tab, and those balances are neither this swap's to withdraw nor
+	// evidence of how its order resolved. Written at creation, which is already
+	// before the first canister call, so they cost no extra ordering.
+	BASELINE_SOURCE_FREE: 'baseline_source_free',
+	BASELINE_DEST_FREE: 'baseline_dest_free',
 	// Display + analytics metadata snapshotted at creation. These reuse OneSec's
 	// exact key strings — `ActiveUserTransactionItem` reads *every* row's refs
 	// through `toOneSecExternalRefsMap`, so a fifth swap provider renders for free
