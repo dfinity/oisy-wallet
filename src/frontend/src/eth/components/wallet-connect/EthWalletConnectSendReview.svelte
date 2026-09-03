@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
@@ -271,9 +273,17 @@
 					/>
 				{/if}
 
-				<EthFeeDisplay gas={signedGas}>
+				{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+					<EthFeePriority gas={signedGas} />
+				{/if}
+
+				<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
 					{#snippet label()}
-						<Html text={$i18n.fee.text.max_fee_eth} />
+						<Html
+							text={SEND_TRANSACTION_PRIORITY_ENABLED
+								? $i18n.fee.text.estimated_fee_eth
+								: $i18n.fee.text.max_fee_eth}
+						/>
 					{/snippet}
 				</EthFeeDisplay>
 			</SendData>

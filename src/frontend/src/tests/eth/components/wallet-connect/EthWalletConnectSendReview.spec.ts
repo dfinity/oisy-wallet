@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
@@ -19,11 +20,21 @@ import {
 	initEthFeeStore,
 	type EthFeeStore
 } from '$eth/stores/eth-fee.store';
+import type { EthFeePriorities } from '$eth/types/fee';
+import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
 import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import {
+	CONVERT_AMOUNT_EXCHANGE_VALUE,
+	ETH_FEE_PRIORITY,
+	ETH_FEE_PRIORITY_OPTION
+} from '$lib/constants/test-ids.constants';
+import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
+import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { isNullish } from '@dfinity/utils';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import { AbiCoder } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
@@ -579,6 +590,139 @@ describe('EthWalletConnectSendReview', () => {
 		});
 	});
 
+	describe('transaction priority', () => {
+		// No base fee, so each option prices at exactly its own tip times the gas limit. That keeps
+		// the arithmetic below legible without depending on how a currency is formatted. The ceiling
+		// has to clear every tip, or all three collapse onto it and stop being distinguishable.
+		const CEILING_PER_GAS = 100_000_000_000n;
+
+		const priorities: EthFeePriorities = {
+			baseFeePerGas: ZERO,
+			perPriority: {
+				[Priority.SLOW]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 1_000_000_000n },
+				[Priority.NORMAL]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 2_000_000_000n },
+				[Priority.FAST]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 4_000_000_000n }
+			}
+		};
+
+		// The option rows quote fiat only, so without a rate they render empty and prove nothing.
+		const exchangeRate = 2_000;
+
+		const renderRow = ({
+			requestedGas,
+			gas = estimatedGas,
+			call = props.call
+		}: {
+			requestedGas?: bigint;
+			gas?: bigint;
+			call?: WalletConnectEthCall;
+		}) => {
+			const feeStore = initEthFeeStore();
+
+			// Mirror what `EthFeeContext` puts in the store once a tier is selected, so the fee row and
+			// the option rows are pricing the same thing and can be compared.
+			feeStore.setFee({
+				...priorities.perPriority[Priority.NORMAL],
+				baseFeePerGas: priorities.baseFeePerGas,
+				gas
+			});
+
+			const feeContext = initEthFeeContext({
+				feeStore,
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+				feeExchangeRateStore: writable(exchangeRate)
+			});
+
+			feeContext.feePrioritiesStore.set(priorities);
+
+			return render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					amount: 1_000_000_000_000_000_000n,
+					call,
+					destination: RECIPIENT,
+					requestedGas
+				},
+				context: new Map<symbol, unknown>([
+					[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })],
+					[ETH_FEE_CONTEXT_KEY, feeContext]
+				])
+			});
+		};
+
+		// Two renders coexist in the document when a test compares them, so every query below is
+		// scoped to its own render rather than to the shared body.
+		const normalOptionFiat = ({ container }: ReturnType<typeof renderRow>): string => {
+			const row = within(container)
+				.getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.NORMAL}`)
+				.closest('label');
+
+			expect(row).not.toBeNull();
+
+			return within(row as HTMLLabelElement).getByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE)
+				.textContent as string;
+		};
+
+		beforeEach(() => {
+			// Large screens expand the options in place, so they are in the DOM without opening a sheet.
+			screensStore.set('lg');
+		});
+
+		it('should offer the choice when the network reports one', () => {
+			const { getByTestId } = renderRow({});
+
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
+		});
+
+		it('should price the options on the gas limit the dApp requested', () => {
+			// Same limit, reached two different ways: once because the dApp asked for it, once because
+			// it is what OISY resolved. Priced on the signed limit, both render the same amount.
+			expect(normalOptionFiat(renderRow({ requestedGas: 2_000_000n }))).toBe(
+				normalOptionFiat(renderRow({ gas: 2_000_000n }))
+			);
+		});
+
+		it('should not price the options on the estimate when the request carries its own limit', () => {
+			expect(normalOptionFiat(renderRow({ requestedGas: 2_000_000n }))).not.toBe(
+				normalOptionFiat(renderRow({}))
+			);
+		});
+
+		it('should quote the selected tier at the same amount as the fee row beneath it', () => {
+			// The fee row prices the signed limit through `EthFeeDisplay`; the option prices it through
+			// the priority row. A disagreement between the two is the bug this pairing exists to catch.
+			const result = renderRow({ requestedGas: 2_000_000n });
+
+			expect(
+				within(result.container).getByText(`0.004 ${ETHEREUM_TOKEN.symbol}`)
+			).toBeInTheDocument();
+
+			// Every option quotes fiat inside its own label, so the one outside them all is the fee
+			// row's. Matching on that rather than on a class keeps the test off the styling.
+			const outsideAnOption = within(result.container)
+				.getAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE)
+				.filter((element) => isNullish(element.closest('label')));
+
+			expect(outsideAnOption).toHaveLength(1);
+
+			expect(normalOptionFiat(result)).toBe(outsideAnOption[0].textContent);
+		});
+
+		it.each([
+			{
+				request: 'an approval',
+				data: encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 })
+			},
+			{ request: 'a call it could not decode', data: `${MULTICALL_HASH}dead` }
+		])('should offer the choice on $request, which pays gas like any other', ({ data }) => {
+			const { getByTestId } = renderRow({ call: classifyWalletConnectEthCall(data) });
+
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
+		});
+	});
+
 	describe('maximum fee', () => {
 		const noticeTestId = 'wallet-connect-dapp-gas-limit';
 		const warningTestId = 'wallet-connect-high-gas-limit';
@@ -603,8 +747,11 @@ describe('EthWalletConnectSendReview', () => {
 		it('should price the maximum fee on the gas limit the dApp requested, not on the estimate', () => {
 			const { getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
 
-			// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
-			expect(getByText('Max fee')).toBeInTheDocument();
+			// The label follows the feature flag: the request quotes an expected cost only where the
+			// priority work is enabled. max_fee_eth contains HTML, so match its plain-text fragment.
+			expect(
+				getByText(SEND_TRANSACTION_PRIORITY_ENABLED ? en.fee.text.estimated_fee_eth : 'Max fee')
+			).toBeInTheDocument();
 
 			// 2_000_000 gas at 1 gwei, against the 250_000 gas OISY resolved for the same transaction
 			expect(getByText(`0.002 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();
