@@ -26,6 +26,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
+import { unwrapOption } from '@solana/kit';
 
 /**
  * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
@@ -200,6 +201,74 @@ const tokenInstructionInfo = (
 				account: accounts.account.address,
 				destination: accounts.destination.address,
 				owner: accounts.owner.address
+			}
+		};
+	}
+
+	if (
+		instructionType === TokenInstruction.Approve ||
+		instructionType === Token2022Instruction.Approve
+	) {
+		const { accounts, data } = decoded;
+
+		return {
+			type: 'approve',
+			info: {
+				source: accounts.source.address,
+				delegate: accounts.delegate.address,
+				owner: accounts.owner.address,
+				amount: data.amount
+			}
+		};
+	}
+
+	if (
+		instructionType === TokenInstruction.ApproveChecked ||
+		instructionType === Token2022Instruction.ApproveChecked
+	) {
+		const { accounts, data } = decoded;
+
+		return {
+			type: 'approveChecked',
+			info: {
+				source: accounts.source.address,
+				delegate: accounts.delegate.address,
+				owner: accounts.owner.address,
+				mint: accounts.mint.address,
+				tokenAmount: { amount: String(data.amount), decimals: data.decimals }
+			}
+		};
+	}
+
+	if (
+		instructionType === TokenInstruction.Revoke ||
+		instructionType === Token2022Instruction.Revoke
+	) {
+		const { accounts } = decoded;
+
+		return {
+			type: 'revoke',
+			info: { source: accounts.source.address, owner: accounts.owner.address }
+		};
+	}
+
+	// The account handed over is `owned` here and `account` in the RPC's vocabulary. The new
+	// authority is optional, since clearing it is how an authority is given up rather than passed
+	// on, and that is the case worth showing without a name beside it.
+	if (
+		instructionType === TokenInstruction.SetAuthority ||
+		instructionType === Token2022Instruction.SetAuthority
+	) {
+		const { accounts, data } = decoded;
+
+		const newAuthority = unwrapOption(data.newAuthority);
+
+		return {
+			type: 'setAuthority',
+			info: {
+				account: accounts.owned.address,
+				owner: accounts.owner.address,
+				...(nonNullish(newAuthority) && { newAuthority })
 			}
 		};
 	}

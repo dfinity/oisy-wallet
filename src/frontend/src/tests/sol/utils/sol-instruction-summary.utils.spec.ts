@@ -5,7 +5,14 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { getTransferCheckedInstruction } from '@solana-program/token';
+import {
+	AuthorityType,
+	getApproveCheckedInstruction,
+	getApproveInstruction,
+	getRevokeInstruction,
+	getSetAuthorityInstruction,
+	getTransferCheckedInstruction
+} from '@solana-program/token';
 import { address as toAddress } from '@solana/kit';
 
 describe('sol-instruction-summary.utils', () => {
@@ -550,6 +557,79 @@ describe('sol-instruction-summary.utils', () => {
 				expect(transfer?.amount).toBe(5_000_000n);
 				expect(transfer?.decimals).toBe(6);
 				expect(transfer?.tokenAddress).toBe(mint);
+			});
+
+			// Granting a spender is the instruction behind most drains, so a message that carries one
+			// must not read as something the wallet could not make out.
+			it('should read an approval with its delegate', () => {
+				const [approval] = mapSolInstructionSummaries({
+					instructions: [
+						getApproveInstruction({
+							source: toAddress(mockAtaAddress),
+							delegate: toAddress(them),
+							owner: toAddress(me),
+							amount: 5_000_000n
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(approval?.kind).toBe('approve');
+				expect(approval?.amount).toBe(5_000_000n);
+				expect(approval?.counterparty).toBe(them);
+				expect(approval?.account).toBe(mockAtaAddress);
+			});
+
+			it('should read a checked approval the same way', () => {
+				const [approval] = mapSolInstructionSummaries({
+					instructions: [
+						getApproveCheckedInstruction({
+							source: toAddress(mockAtaAddress),
+							mint: toAddress(mint),
+							delegate: toAddress(them),
+							owner: toAddress(me),
+							amount: 5_000_000n,
+							decimals: 6
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(approval?.kind).toBe('approve');
+				expect(approval?.amount).toBe(5_000_000n);
+				expect(approval?.counterparty).toBe(them);
+			});
+
+			it('should read a revocation', () => {
+				const [revocation] = mapSolInstructionSummaries({
+					instructions: [
+						getRevokeInstruction({ source: toAddress(mockAtaAddress), owner: toAddress(me) })
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(revocation?.kind).toBe('revoke');
+				expect(revocation?.account).toBe(mockAtaAddress);
+			});
+
+			// Handing an account to someone else moves nothing, so no amount and no balance change
+			// reports it. Naming the new authority is the only way the review can show it happening.
+			it('should read an authority handover with the authority it names', () => {
+				const [handover] = mapSolInstructionSummaries({
+					instructions: [
+						getSetAuthorityInstruction({
+							owned: toAddress(mockAtaAddress),
+							owner: toAddress(me),
+							authorityType: AuthorityType.AccountOwner,
+							newAuthority: toAddress(them)
+						})
+					],
+					ownedAddresses: [me, mockAtaAddress]
+				});
+
+				expect(handover?.kind).toBe('setAuthority');
+				expect(handover?.account).toBe(mockAtaAddress);
+				expect(handover?.newAuthority).toBe(them);
 			});
 
 			// The decoders assert on their input, and a signing flow must not be taken down by a
