@@ -600,7 +600,10 @@ describe('EthWalletConnectSendReview', () => {
 			baseFeePerGas: ZERO,
 			perPriority: {
 				[Priority.SLOW]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 1_000_000_000n },
-				[Priority.NORMAL]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 2_000_000_000n },
+				[Priority.STANDARD]: {
+					maxFeePerGas: CEILING_PER_GAS,
+					maxPriorityFeePerGas: 2_000_000_000n
+				},
 				[Priority.FAST]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 4_000_000_000n }
 			}
 		};
@@ -622,7 +625,7 @@ describe('EthWalletConnectSendReview', () => {
 			// Mirror what `EthFeeContext` puts in the store once a tier is selected, so the fee row and
 			// the option rows are pricing the same thing and can be compared.
 			feeStore.setFee({
-				...priorities.perPriority[Priority.NORMAL],
+				...priorities.perPriority[Priority.STANDARD],
 				baseFeePerGas: priorities.baseFeePerGas,
 				gas
 			});
@@ -656,7 +659,7 @@ describe('EthWalletConnectSendReview', () => {
 		// scoped to its own render rather than to the shared body.
 		const normalOptionFiat = ({ container }: ReturnType<typeof renderRow>): string => {
 			const row = within(container)
-				.getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.NORMAL}`)
+				.getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.STANDARD}`)
 				.closest('label');
 
 			expect(row).not.toBeNull();
