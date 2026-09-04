@@ -1,6 +1,8 @@
-import { estimatedGasFee, maxGasFee, minGasFee } from '$eth/utils/fee.utils';
+import { estimatedGasFee, formatGasFeeInGwei, maxGasFee, minGasFee } from '$eth/utils/fee.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { Languages } from '$lib/enums/languages';
 import type { TransactionFeeData } from '$lib/types/transaction';
+import { parseToken } from '$lib/utils/parse.utils';
 
 describe('fee.utils', () => {
 	const gas = 21_000n;
@@ -95,6 +97,32 @@ describe('fee.utils', () => {
 			expect(estimatedGasFee({ ...feeData, baseFeePerGas: null, l1Fee: 875n })).toBe(
 				50n * gas + 875n
 			);
+		});
+	});
+
+	describe('formatGasFeeInGwei', () => {
+		const format = (value: string): string =>
+			formatGasFeeInGwei({
+				value: parseToken({ value, unitName: 'gwei' }),
+				language: Languages.ENGLISH
+			});
+
+		it.each([
+			// The digits go to the leading figures: a fee this size gains nothing from a fraction.
+			{ value: '44185.0944', expected: '44,185' },
+			{ value: '21000', expected: '21,000' },
+			// Three leading figures leave room for one more.
+			{ value: '429.5888', expected: '429.6' },
+			{ value: '126', expected: '126' },
+			// A fee that is nothing but its decimals keeps them.
+			{ value: '1.234', expected: '1.234' }
+		])('should quote $value gwei as $expected', ({ value, expected }) => {
+			expect(format(value)).toBe(expected);
+		});
+
+		it('should not round a fee below one gwei down to zero', () => {
+			// A fixed number of decimals would print `0` here, quoting a free transaction.
+			expect(format('0.0001234')).toBe('0.000123');
 		});
 	});
 });

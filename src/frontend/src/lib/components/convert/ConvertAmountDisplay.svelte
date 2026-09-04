@@ -13,9 +13,6 @@
 
 	interface Props {
 		amount?: OptionAmount;
-		// What the fiat value is computed from, when it is not what is displayed. A fee quoted in
-		// gwei still converts from the token amount, since that is the amount the rate prices.
-		exchangeAmount?: OptionAmount;
 		symbol: string;
 		exchangeRate?: number;
 		displayExchangeRate?: boolean;
@@ -25,7 +22,6 @@
 
 	let {
 		amount,
-		exchangeAmount,
 		symbol,
 		exchangeRate,
 		displayExchangeRate = true,
@@ -51,7 +47,7 @@
 
 	{#snippet secondaryValue()}
 		{#if displayExchangeRate}
-			<ConvertAmountExchange amount={exchangeAmount ?? amount} {exchangeRate} />
+			<ConvertAmountExchange {amount} {exchangeRate} />
 		{/if}
 	{/snippet}
 </ModalValue>

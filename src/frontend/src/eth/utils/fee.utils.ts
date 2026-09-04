@@ -1,9 +1,9 @@
-import { GWEI_DISPLAY_DECIMALS } from '$eth/constants/eth.constants';
+import { GWEI_SIGNIFICANT_DIGITS } from '$eth/constants/eth.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Languages } from '$lib/enums/languages';
 import type { TransactionFeeData } from '$lib/types/transaction';
-import { formatToken } from '$lib/utils/format.utils';
 import { isNullish } from '@dfinity/utils';
+import { formatUnits } from 'ethers/utils';
 
 /**
  * The most the transaction can cost its sender, and therefore what the balance has to cover.
@@ -55,15 +55,18 @@ export const estimatedGasFee = ({
 };
 
 /**
- * A gas fee quoted in gwei rather than in the native token.
+ * A gas fee quoted in gwei rather than in the native token, for the priority options.
  *
  * A whole fee is a few millionths of an ETH, so in the token's own units the priority tiers
  * separate only in the eighth decimal and read as the same number. In gwei they are ordinary
- * integers, grouped because they run to six or seven digits.
+ * integers, grouped because they run to six or seven digits. Only the options need this: the fee
+ * row quotes one amount with nothing beside it to compare, so it stays in the token.
  *
- * The fraction is kept rather than rounded away: a realistic fee is thousands of gwei and needs
- * none, but a cheap chain or a small gas limit can produce a fraction, and rounding that to a
- * flat `0` would quote a free transaction.
+ * The precision follows the magnitude, because a fixed number of decimals is wrong at both ends:
+ * `44,185.0944` carries four digits nobody can act on, while a fee of `1.234` is nothing but its
+ * decimals. Digits are spent on the leading figures and whatever is left goes to the fraction,
+ * so the integer part is never rounded away. Below one gwei there is no integer part to protect,
+ * so significant digits take over and a small fee cannot collapse to a flat `0`.
  */
 export const formatGasFeeInGwei = ({
 	value,
@@ -71,7 +74,20 @@ export const formatGasFeeInGwei = ({
 }: {
 	value: bigint;
 	language: Languages;
-}): string =>
-	new Intl.NumberFormat(language, { maximumFractionDigits: GWEI_DISPLAY_DECIMALS }).format(
-		Number(formatToken({ value, unitName: 'gwei' }))
-	);
+}): string => {
+	// `formatUnits` rather than `formatToken`: the latter is a display formatter and clips small
+	// values before this rounding gets to see them, which would drop digits that still matter.
+	const gwei = Number(formatUnits(value, 'gwei'));
+
+	const options =
+		gwei >= 1
+			? {
+					maximumFractionDigits: Math.max(
+						0,
+						GWEI_SIGNIFICANT_DIGITS - (Math.floor(Math.log10(gwei)) + 1)
+					)
+				}
+			: { maximumSignificantDigits: GWEI_SIGNIFICANT_DIGITS - 1 };
+
+	return new Intl.NumberFormat(language, options).format(gwei);
+};

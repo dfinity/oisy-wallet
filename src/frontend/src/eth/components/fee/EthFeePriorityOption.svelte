@@ -38,8 +38,9 @@
 
 	const inputId = $derived(`${groupName}-${priority}`);
 
-	// The same helper the fee row below uses, so an option and the fee it produces cannot end up
-	// formatted differently.
+	// Quoted in gwei, not in the token: a whole fee is a few millionths of an ETH, so in the token's
+	// own units the three tiers separate in the eighth decimal and read as the same number. The fee
+	// row below keeps the token, where there is nothing to compare against.
 	const gweiFee = $derived(
 		nonNullish(fee) ? formatGasFeeInGwei({ value: fee, language: $currentLanguage }) : undefined
 	);

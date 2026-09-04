@@ -22,6 +22,6 @@ export const ETH_FEE_RETRY_BASE_DELAY = 2_000;
 export const ETH_FEE_RETRY_MAX_DELAY = 30_000;
 export const ETH_FEE_RETRY_MAX_ATTEMPTS = 5;
 
-// Enough for a fee small enough to have a fraction at all, without printing noise on the ordinary
-// case, where a gwei total runs to thousands and its fraction says nothing.
-export const GWEI_DISPLAY_DECIMALS = 4;
+// How many digits of a gwei fee actually carry information. Four keeps `1.234` intact and drops
+// the fraction of `44,185.0944`, which says nothing about a fee that size.
+export const GWEI_SIGNIFICANT_DIGITS = 4;
