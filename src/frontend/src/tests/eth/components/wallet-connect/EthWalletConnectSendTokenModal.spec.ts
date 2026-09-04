@@ -4,7 +4,7 @@ import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWa
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-import { observedPriority } from '$tests/eth/components/wallet-connect/EthFeeContextStub.svelte';
+import { observedPriority } from '$tests/eth/components/wallet-connect/eth-fee-context-stub.store';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
