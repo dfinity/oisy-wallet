@@ -1562,6 +1562,7 @@
 			"estimated_eth": "Estimated Ethereum Fee",
 			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"estimated_fee_eth": "Estimated fee",
+			"estimated": "Estimated",
 			"priority": "Priority",
 			"gwei": "gwei",
 			"priority_slow": "Slow",

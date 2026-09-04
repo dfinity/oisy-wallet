@@ -751,10 +751,14 @@ describe('EthWalletConnectSendReview', () => {
 			const { getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
 
 			// The label follows the feature flag: the request quotes an expected cost only where the
-			// priority work is enabled. max_fee_eth contains HTML, so match its plain-text fragment.
+			// priority work is enabled, and says "Estimated" rather than repeating the "Fee" heading
+			// above it. max_fee_eth contains HTML, so match its plain-text fragment.
 			expect(
-				getByText(SEND_TRANSACTION_PRIORITY_ENABLED ? en.fee.text.estimated_fee_eth : 'Max fee')
+				getByText(SEND_TRANSACTION_PRIORITY_ENABLED ? en.fee.text.estimated : 'Max fee')
 			).toBeInTheDocument();
+
+			// The heading names the block, so it is there whichever label the row carries.
+			expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 
 			// 2_000_000 gas at 1 gwei, against the 250_000 gas OISY resolved for the same transaction
 			expect(getByText(`0.002 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();

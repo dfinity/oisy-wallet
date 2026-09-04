@@ -1562,6 +1562,7 @@
 			"estimated_eth": "अनुमानित एथेरियम शुल्क",
 			"max_fee_eth": "अधिकतम शुल्क <small>(संभवतः < 30 सेकंड में)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"gwei": "",
 			"priority_slow": "",
