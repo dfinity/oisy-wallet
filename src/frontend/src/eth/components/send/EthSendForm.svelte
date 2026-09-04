@@ -18,6 +18,7 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		destination?: string;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
@@ -29,6 +30,7 @@
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		destination = $bindable(''),
 		nativeEthereumToken,
 		selectedContact,
@@ -58,7 +60,13 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<EthSendAmount {nativeEthereumToken} {onTokensList} bind:amount bind:insufficientFunds />
+		<EthSendAmount
+			{nativeEthereumToken}
+			{onTokensList}
+			bind:amount
+			bind:amountSetToMax
+			bind:insufficientFunds
+		/>
 	{/snippet}
 
 	{#snippet priority()}
