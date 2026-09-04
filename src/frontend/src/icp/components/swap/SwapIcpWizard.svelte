@@ -114,11 +114,14 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
 	);
 
-	// OISY Trade settles in the foreground for now: deposit, fill-or-kill order, and the
-	// withdrawal that brings the destination token back, all inside the modal. It is
-	// deliberately absent from `isActiveTransactionSwap` below until it has an Active User
-	// Transaction row to hand the settlement to — closing the modal earlier would leave the
-	// funds in DEX custody with nothing watching them.
+	// OISY Trade settles in the foreground: deposit, fill-or-kill order, and the
+	// withdrawal that brings either leg back out of DEX custody, all inside the modal.
+	// A fill-or-kill order is decided in the matching round after acceptance, so this is
+	// seconds rather than the minutes a bridge takes — and staying in one session is
+	// what keeps two OISY Trade swaps from overlapping, which their shared free balance
+	// on the venue cannot tell apart. It is deliberately absent from
+	// `isActiveTransactionSwap` below; its row is a recovery record for a session that
+	// dies mid-flow, not a hand-off.
 	let oisyTradeDetails = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.OISY_TRADE
 			? $swapAmountsStore.selectedProvider.swapDetails
@@ -242,9 +245,11 @@
 				await fetchOisyTradeSwap({
 					identity: $authIdentity,
 					progress,
+					swapId: crypto.randomUUID(),
 					sourceToken: $sourceToken as IcToken,
 					destinationToken: $destinationToken,
 					order: oisyTradeDetails.order,
+					usdSourceValue: sourceTokenUsdValue,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
 							destinationToken: $destinationToken,
@@ -345,14 +350,15 @@
 					variant: 'info'
 				});
 			} else if (err instanceof OisyTradeSwapError) {
-				// A killed fill-or-kill order — or one the canister refused — is an
-				// expected outcome whose source funds are already back in the wallet when
-				// it is thrown, so it reads as info in Review, like slippage, never as an
-				// unexpected-error toast. The other kinds ask the user to check the
-				// Trading tab, hence the warning level.
+				// A killed fill-or-kill order, one the canister refused, and a swap that
+				// could not be tracked at all are all expected outcomes with the user's
+				// funds in their wallet by the time they are thrown — so they read as info
+				// in Review, like slippage, never as an unexpected-error toast. The two
+				// kinds that leave something unaccounted for at the venue ask the user to
+				// check the Trading tab, hence the warning level.
 				failedSwapError.set({
 					message: err.message,
-					variant: err.kind === 'killed' || err.kind === 'not_placed' ? 'info' : 'warning'
+					variant: err.kind === 'recovery_failed' || err.kind === 'unresolved' ? 'warning' : 'info'
 				});
 			} else {
 				failedSwapError.set(undefined);
@@ -362,11 +368,24 @@
 				});
 			}
 
-			if (!(
-				isSwapError(err) &&
-				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-			)) {
+			// `not_placed` is the one OISY Trade outcome the row reports instead of this
+			// wizard: the flow terminalizes that row `Failed` itself, and the loader fires
+			// the swap's single error event off it, so firing here too would count the same
+			// swap twice. Every other kind reports from here — including `recovery_failed`,
+			// which deliberately leaves its row non-terminal so the poller keeps trying:
+			// nothing would report it until a later session finished the row, or ever if
+			// none did, and it is the one kind raised with the user's funds still at the
+			// venue.
+			const isReportedByRow = err instanceof OisyTradeSwapError && err.kind === 'not_placed';
+
+			if (
+				!(
+					isSwapError(err) &&
+					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+				) &&
+				!isReportedByRow
+			) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
@@ -412,6 +431,7 @@
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP || nonNullish(oisyTradeDetails)}
+				withApproveStep={nonNullish(oisyTradeDetails)}
 				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}
