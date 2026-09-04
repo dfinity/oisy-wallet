@@ -158,9 +158,23 @@ export const deriveSolTransactionSummary = ({
 }): SolTransactionSummary => {
 	const traded = tradedTokens(instructions);
 
-	const considered = netChanges.filter(
-		(change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined)
-	);
+	// Rent leaves the wallet address but is not traded, and the balance the chain reports cannot
+	// tell the two apart. A swap of 0.001 SOL that opens an account on the way spends 0.00310888
+	// of it, and stating that as the amount traded overstates the trade by the rent every time.
+	//
+	// The account is still the user's and closing it hands the rent back, so what it costs the
+	// transaction is stated as a fee of its own, beside this line rather than inside it. The
+	// balance changes keep the figure the chain reports: this is what the transaction did, not
+	// what the address holds.
+	const rent = solAtaFee(instructions);
+
+	const considered = netChanges
+		.filter((change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined))
+		.map((change) =>
+			isSolNetBalanceChangeSol(change) && rent !== ZERO
+				? { ...change, delta: change.delta + rent }
+				: change
+		);
 
 	const outs = considered.filter(({ delta }) => delta < ZERO);
 	const ins = considered.filter(({ delta }) => delta > ZERO);
