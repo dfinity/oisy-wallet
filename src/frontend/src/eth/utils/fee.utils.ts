@@ -1,5 +1,8 @@
+import { GWEI_DISPLAY_DECIMALS } from '$eth/constants/eth.constants';
 import { ZERO } from '$lib/constants/app.constants';
+import type { Languages } from '$lib/enums/languages';
 import type { TransactionFeeData } from '$lib/types/transaction';
+import { formatToken } from '$lib/utils/format.utils';
 import { isNullish } from '@dfinity/utils';
 
 /**
@@ -50,3 +53,25 @@ export const estimatedGasFee = ({
 		(effectiveFeePerGas > maxFeePerGas ? maxFeePerGas : effectiveFeePerGas) * gas + (l1Fee ?? ZERO)
 	);
 };
+
+/**
+ * A gas fee quoted in gwei rather than in the native token.
+ *
+ * A whole fee is a few millionths of an ETH, so in the token's own units the priority tiers
+ * separate only in the eighth decimal and read as the same number. In gwei they are ordinary
+ * integers, grouped because they run to six or seven digits.
+ *
+ * The fraction is kept rather than rounded away: a realistic fee is thousands of gwei and needs
+ * none, but a cheap chain or a small gas limit can produce a fraction, and rounding that to a
+ * flat `0` would quote a free transaction.
+ */
+export const formatGasFeeInGwei = ({
+	value,
+	language
+}: {
+	value: bigint;
+	language: Languages;
+}): string =>
+	new Intl.NumberFormat(language, { maximumFractionDigits: GWEI_DISPLAY_DECIMALS }).format(
+		Number(formatToken({ value, unitName: 'gwei' }))
+	);

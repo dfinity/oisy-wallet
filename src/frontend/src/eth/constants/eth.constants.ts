@@ -21,3 +21,7 @@ export const ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER = 10n;
 export const ETH_FEE_RETRY_BASE_DELAY = 2_000;
 export const ETH_FEE_RETRY_MAX_DELAY = 30_000;
 export const ETH_FEE_RETRY_MAX_ATTEMPTS = 5;
+
+// Enough for a fee small enough to have a fraction at all, without printing noise on the ordinary
+// case, where a gwei total runs to thousands and its fraction says nothing.
+export const GWEI_DISPLAY_DECIMALS = 4;

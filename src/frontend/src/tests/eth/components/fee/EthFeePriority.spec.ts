@@ -2,6 +2,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { EthFeePriorities } from '$eth/types/fee';
+import { formatGasFeeInGwei } from '$eth/utils/fee.utils';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	ETH_FEE_PRIORITY,
@@ -114,9 +115,9 @@ describe('EthFeePriority', () => {
 		// native token that difference sits in the eighth decimal, which is the reason for gwei.
 		expect(new Set(amounts.map(({ textContent }) => textContent)).size).toBe(amounts.length);
 
-		// Grouped and whole: 21_000 gas at 21 gwei effective, and no fractional gwei on a fee.
+		// Grouped: 21_000 gas at 21 gwei effective is 441_000 gwei, which needs a separator to read.
 		expect(amounts[0]).toHaveTextContent(
-			`${new Intl.NumberFormat(get(currentLanguage)).format(441_000)} ${en.fee.text.gwei}`
+			`${formatGasFeeInGwei({ value: 441_000_000_000_000n, language: get(currentLanguage) })} ${en.fee.text.gwei}`
 		);
 	});
 
