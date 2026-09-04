@@ -130,11 +130,13 @@
 			// `fetchedFeeData` prices the tier they have already moved away from. Re-read the choice
 			// now and take that tier out of the sample we just received. The re-pricing effect cannot
 			// rescue this: it tracks the choice alone, and the choice has not changed since it ran.
-			const feeData = {
-				...fetchedFeeData,
-				...priorities.perPriority[priority],
-				baseFeePerGas: priorities.baseFeePerGas
-			};
+			const feeData = nonNullish(priorities)
+				? {
+						...fetchedFeeData,
+						...priorities.perPriority[priority],
+						baseFeePerGas: priorities.baseFeePerGas
+					}
+				: fetchedFeeData;
 
 			const { safeEstimateGas, estimateGas } = provider;
 

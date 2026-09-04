@@ -1,3 +1,4 @@
+import { ARBITRUM_SEPOLIA_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
@@ -8,6 +9,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as infuraMod from '$eth/providers/infura.providers';
+import type * as InfuraRestModule from '$eth/rest/infura.rest';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { getEthFeeDataWithProvider } from '$eth/services/fee.services';
 import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
@@ -276,6 +278,80 @@ describe('eth-fee-data.services', () => {
 			expect(result.provider).toHaveProperty('getFeeData');
 			expect(result.provider).toHaveProperty('safeEstimateGas');
 			expect(result.provider).toHaveProperty('estimateGas');
+		});
+
+		describe('when the Gas API answers with a non-OK response', () => {
+			// The MetaMask Gas API does not cover every chain we support: Arbitrum Sepolia
+			// (chain id 421614) answers 400 "'421614' is not a supported chain id.".
+			// Everything it adds sits on top of the provider's own quote, so losing it has to
+			// degrade the estimate rather than block the send.
+			const { chainId } = ARBITRUM_SEPOLIA_NETWORK;
+
+			beforeEach(async () => {
+				vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false } as unknown as Response));
+
+				const { InfuraGasRest: ActualInfuraGasRest } =
+					await vi.importActual<typeof InfuraRestModule>('$eth/rest/infura.rest');
+
+				InfuraGasRest.prototype.getSuggestedFeeData = new ActualInfuraGasRest(
+					chainId
+				).getSuggestedFeeData;
+			});
+
+			afterEach(() => {
+				vi.unstubAllGlobals();
+			});
+
+			it('should fall back to the provider fee data instead of throwing', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: ARBITRUM_SEPOLIA_NETWORK.id,
+					chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				// No base fee either, so `estimatedGasFee` falls back to the max fee.
+				expect(result.feeData).toEqual({
+					gasPrice: null,
+					maxFeePerGas: 10n,
+					maxPriorityFeePerGas: 5n,
+					baseFeePerGas: null
+				});
+			});
+
+			it('should offer no priorities to choose between', async () => {
+				const { priorities } = await getEthFeeDataWithProvider({
+					networkId: ARBITRUM_SEPOLIA_NETWORK.id,
+					chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(priorities).toBeUndefined();
+			});
+
+			it('should still apply the BSC fee floor', async () => {
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({
+								gasPrice: null,
+								maxFeePerGas: 500_000_000n,
+								maxPriorityFeePerGas: 100_000_000n
+							})
+						)
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+				const result = await getEthFeeDataWithProvider({
+					networkId: BSC_MAINNET_NETWORK.id,
+					chainId: BSC_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxFeePerGas).toBe(BSC_MIN_MAX_FEE_PER_GAS);
+				expect(result.feeData.maxPriorityFeePerGas).toBe(BSC_MIN_MAX_PRIORITY_FEE_PER_GAS);
+			});
 		});
 
 		describe('priority selection', () => {
