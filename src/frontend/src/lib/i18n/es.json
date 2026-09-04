@@ -1253,6 +1253,7 @@
 			"swap_replaced_or_dropped": "",
 			"near_intents_quote_unverified": "",
 			"near_intents_quote_expired": "",
+			"oisy_trade_not_trackable": "",
 			"oisy_trade_order_killed": "",
 			"oisy_trade_settlement_unresolved": "",
 			"oisy_trade_order_not_placed": "",

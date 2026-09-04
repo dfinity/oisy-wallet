@@ -13,6 +13,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import { OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import {
+	createActiveUserTransaction,
+	updateActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import * as oisyTradeSwapServices from '$lib/services/oisy-trade-swap.services';
 import {
 	fetchOisyTradeQuote,
@@ -24,14 +28,20 @@ import {
 } from '$lib/services/oisy-trade-swap.services';
 import { fetchSwapAmounts } from '$lib/services/swap.services';
 import * as tradingAnalytics from '$lib/services/trading-analytics.services';
+import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type { OisyTradeResolvedOrder } from '$lib/types/oisy-trade-swap';
+import {
+	OISY_TRADE_EXTERNAL_REF_KEYS,
+	type OisyTradeResolvedOrder
+} from '$lib/types/oisy-trade-swap';
 import { SwapProvider } from '$lib/types/swap';
 import * as consoleUtils from '$lib/utils/console.utils';
+import { toOisyTradeExternalRefsMap } from '$lib/utils/oisy-trade-active-tx.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -58,6 +68,14 @@ vi.mock('$lib/api/kong_backend.api', () => ({
 vi.mock('$lib/services/icp-swap.services', () => ({
 	icpSwapAmounts: () => Promise.reject(new Error('icpSwap unavailable in test')),
 	icpSwapSupportedTokens: () => Promise.resolve(new Set<string>())
+}));
+
+// The recovery record the swap opens before it touches the canister. Mocked rather
+// than driven through the backend so the assertions can be about *when* it is
+// written, which is the whole point of it existing.
+vi.mock('$lib/services/active-user-transactions.services', () => ({
+	createActiveUserTransaction: vi.fn(),
+	updateActiveUserTransaction: vi.fn()
 }));
 
 const ICP_LEDGER = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
@@ -474,7 +492,7 @@ describe('oisy-trade-swap.services', () => {
 
 				const settlement = await settleOisyTradeSwap(settleParams);
 
-				expect(settlement).toEqual({ status: 'pending', withdrawals: [] });
+				expect(settlement).toEqual({ status: 'pending', withdrawals: [], residueStranded: false });
 				expect(withdrawSpy).not.toHaveBeenCalled();
 				// Not even read: a pending order settles nothing, so the balances are moot.
 				expect(balances).not.toHaveBeenCalled();
@@ -563,8 +581,30 @@ describe('oisy-trade-swap.services', () => {
 
 			expect(settlement.status).toBe('filled');
 			expect(settlement.withdrawals).toEqual([42n]);
-			// Swallowed, but not silently: the residue is still owed to the user.
+			// Reported, not merely logged. The order's outcome is true, but it is not the
+			// whole story: a leg of it is still at the venue, and a caller that succeeded
+			// the operation on `status` alone would tell the user their swap worked with
+			// their funds still there.
+			expect(settlement.residueStranded).toBeTruthy();
 			expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
+		});
+
+		// Dust is not owed: `withdraw` refuses an amount at or below the ledger fee, so a
+		// small enough residue is unwithdrawable by construction. Conflating it with a
+		// refused withdrawal would leave every dusty settlement permanently unfinished.
+		it('does not report dust as a stranded residue', async () => {
+			vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+			// A source residue at the ledger fee exactly, so it is skipped rather than moved.
+			mockBalances({ source: ICP.fee, destination: 2_000_000n });
+			const withdrawSpy = vi
+				.spyOn(oisyTradeApi, 'withdraw')
+				.mockResolvedValue({ block_index: 42n });
+
+			const settlement = await settleOisyTradeSwap(settleParams);
+
+			expect(settlement.status).toBe('filled');
+			expect(settlement.residueStranded).toBeFalsy();
+			expect(withdrawSpy).toHaveBeenCalledOnce();
 		});
 
 		// A transient residue failure propagates instead: the caller's retry loop
@@ -643,7 +683,11 @@ describe('oisy-trade-swap.services', () => {
 					baseline: { source: 50_000_000n, destination: 100_000_000n }
 				});
 
-				expect(settlement).toEqual({ status: 'unresolved', withdrawals: [] });
+				expect(settlement).toEqual({
+					status: 'unresolved',
+					withdrawals: [],
+					residueStranded: false
+				});
 				expect(withdrawSpy).not.toHaveBeenCalled();
 			});
 
@@ -662,7 +706,7 @@ describe('oisy-trade-swap.services', () => {
 					baseline: { source: ZERO, destination: 100_000_000n }
 				});
 
-				expect(settlement).toEqual({ status: 'filled', withdrawals: [] });
+				expect(settlement).toEqual({ status: 'filled', withdrawals: [], residueStranded: false });
 				expect(withdrawSpy).not.toHaveBeenCalled();
 			});
 		});
@@ -733,7 +777,7 @@ describe('oisy-trade-swap.services', () => {
 
 			const settlement = await settleOisyTradeSwap(settleParams);
 
-			expect(settlement).toEqual({ status: 'unresolved', withdrawals: [] });
+			expect(settlement).toEqual({ status: 'unresolved', withdrawals: [], residueStranded: false });
 			expect(withdrawSpy).not.toHaveBeenCalled();
 		});
 
@@ -772,6 +816,7 @@ describe('oisy-trade-swap.services', () => {
 
 		const swapParams = {
 			identity: mockIdentity,
+			swapId: 'swap-1',
 			sourceToken: ICP,
 			destinationToken: CKUSDC,
 			order: sellOrder
@@ -781,7 +826,18 @@ describe('oisy-trade-swap.services', () => {
 		let depositSpy: MockInstance;
 		let addLimitOrderSpy: MockInstance;
 
+		// The refs of the nth row write, keyed — `updateActiveUserTransaction` replaces the
+		// whole array each time, so a write is only correct if it carries everything learned
+		// so far, not just what it added.
+		const rowRefs = (index: number): Partial<Record<string, string>> =>
+			toOisyTradeExternalRefsMap(
+				vi.mocked(updateActiveUserTransaction).mock.calls[index]?.[0].externalRefs ?? []
+			);
+
 		beforeEach(() => {
+			vi.mocked(createActiveUserTransaction).mockReset();
+			vi.mocked(updateActiveUserTransaction).mockReset();
+
 			vi.spyOn(appConstants, 'OISY_TRADE_CANISTER_ID', 'get').mockImplementation(() => 'aaaaa-aa');
 
 			approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
@@ -821,6 +877,205 @@ describe('oisy-trade-swap.services', () => {
 
 			return spy;
 		};
+
+		// Ordering, not just presence. Every other provider opens its row once the funds
+		// have irreversibly left the wallet, because for them the only thing left to do is
+		// watch. Here the row *is* the recovery record: it is what tells a later session
+		// which token to pull back out of DEX custody, so it has to exist before the
+		// deposit that puts it there.
+		it('opens the recovery record before the first canister call', async () => {
+			const calls: string[] = [];
+
+			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
+				calls.push('createRow');
+
+				return Promise.resolve();
+			});
+			approveSpy.mockImplementation(() => {
+				calls.push('approve');
+
+				return Promise.resolve(1n);
+			});
+			depositSpy.mockImplementation(() => {
+				calls.push('deposit');
+
+				return Promise.resolve({ block_index: 7n });
+			});
+
+			await run();
+
+			expect(calls).toEqual(['createRow', 'approve', 'deposit']);
+		});
+
+		// The one place this integration inverts every other provider's rule, which open
+		// their rows best-effort and never surface a tracking failure as a swap failure.
+		// Proceeding without the record is exactly the stranded-funds case it prevents.
+		it('aborts without depositing when the recovery record cannot be opened', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
+
+			await expect(run()).rejects.toMatchObject({
+				name: 'OisyTradeSwapError',
+				kind: 'not_trackable',
+				message: en.swap.error.oisy_trade_not_trackable
+			});
+
+			expect(approveSpy).not.toHaveBeenCalled();
+			expect(depositSpy).not.toHaveBeenCalled();
+		});
+
+		// The order parameters and the baseline are fixed at creation: the poller reads
+		// them back in a later session, where the book has moved and the account-wide
+		// balance no longer says what this order put there.
+		it('snapshots the reviewed order and the pre-deposit baseline onto the row', async () => {
+			resetBalanceReads().mockResolvedValue([
+				{
+					token: { id: { ledger_id: Principal.fromText(ICP_LEDGER) } },
+					balance: { free: 50_000_000n, reserved: ZERO }
+				}
+			] as unknown as UserTokenBalance[]);
+
+			await run();
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					id: 'swap-1',
+					data: {
+						OisyTrade: {
+							side: { Sell: null },
+							source_token: { Icrc: Principal.fromText(ICP_LEDGER) },
+							dest_token: { Icrc: Principal.fromText(CKUSDC_LEDGER) },
+							amount: sellOrder.depositAmount
+						}
+					}
+				})
+			);
+
+			const refs = toOisyTradeExternalRefsMap(
+				vi.mocked(createActiveUserTransaction).mock.calls[0][0].externalRefs
+			);
+
+			expect(refs).toEqual(
+				expect.objectContaining({
+					[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_PRICE]: `${sellOrder.price}`,
+					[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]: `${sellOrder.quantity}`,
+					[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: '50000000',
+					[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]: '0',
+					[OISY_TRADE_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: ICP.symbol,
+					[OISY_TRADE_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: CKUSDC.symbol
+				})
+			);
+			// No settlement pointer exists yet, and the poller tells an abandoned row from a
+			// stalled one by exactly their absence.
+			expect(refs[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]).toBeUndefined();
+			expect(refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]).toBeUndefined();
+		});
+
+		// Taken from the caller rather than re-derived here, as Chain Fusion's is, so the
+		// row's USD snapshot is the same figure the wizard sent with `swap_submitted` for
+		// this swap. Deriving it twice made the two disagree.
+		it('snapshots the USD value the caller passed in', async () => {
+			await fetchOisyTradeSwap({
+				...swapParams,
+				progress: () => undefined,
+				usdSourceValue: '42.5'
+			});
+
+			expect(
+				toOisyTradeExternalRefsMap(
+					vi.mocked(createActiveUserTransaction).mock.calls[0][0].externalRefs
+				)[OISY_TRADE_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE]
+			).toBe('42.5');
+		});
+
+		it('records the deposit and then the order id as it learns them', async () => {
+			await run();
+
+			// The funds are in DEX custody from the deposit onwards, which is what
+			// `Executing` records — and the poller matches on non-terminal, not on `Pending`.
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls[0][0]).toEqual(
+				expect.objectContaining({ id: 'swap-1', status: { Executing: null } })
+			);
+			expect(rowRefs(0)[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]).toBe('7');
+			expect(rowRefs(0)[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]).toBeUndefined();
+
+			expect(rowRefs(1)[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]).toBe('order-1');
+			// Carried forward, not replaced: the update writes the whole ref array.
+			expect(rowRefs(1)[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]).toBe('7');
+		});
+
+		// This session settles the swap, so it closes its own row rather than leaving a
+		// resolved one for the poller to rediscover — and claims the row's terminal side
+		// effects, because the wizard fires the swap funnel's event itself. Without that
+		// claim the Active User Transactions loader would report the same swap a second
+		// time.
+		it('closes its own row and claims its terminal side effects', async () => {
+			const markSpy = vi.spyOn(activeUserTransactionsStore, 'markTerminalSideEffectsApplied');
+
+			await run();
+
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls.at(-1)?.[0]).toEqual(
+				expect.objectContaining({ id: 'swap-1', status: { Succeeded: null } })
+			);
+			expect(markSpy).toHaveBeenCalledExactlyOnceWith({ ids: ['swap-1'] });
+		});
+
+		// The claim has to land *before* the terminal write, not after it.
+		// `updateActiveUserTransaction` upserts the row into the store before it resolves,
+		// and the loader's terminal-side-effects `$effect` flushes on that upsert — so a
+		// claim made afterwards loses the race and the loader reports the swap a second
+		// time. Asserted on ordering rather than on the claim's presence, because the bug
+		// this guards is invisible to a presence check.
+		it('claims the row before the write that closes it', async () => {
+			const order: string[] = [];
+
+			vi.spyOn(activeUserTransactionsStore, 'markTerminalSideEffectsApplied').mockImplementation(
+				() => {
+					order.push('claim');
+				}
+			);
+			vi.mocked(updateActiveUserTransaction).mockImplementation(({ status }) => {
+				order.push(nonNullish(status) && 'Succeeded' in status ? 'close' : 'write');
+
+				return Promise.resolve();
+			});
+
+			await run();
+
+			expect(order.indexOf('claim')).toBeLessThan(order.indexOf('close'));
+		});
+
+		// A row is only ever *deleted* when it is still `Pending` and holds no deposit ref.
+		// A lost `Executing` write would leave a funded row in exactly that state, so every
+		// later write re-sends the highest status reached and repairs it — the backend
+		// accepts a same-status update.
+		it('repairs a lost Executing write with the next one', async () => {
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
+			vi.mocked(updateActiveUserTransaction)
+				.mockRejectedValueOnce(new Error('backend blip'))
+				.mockResolvedValue();
+
+			await run();
+
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls[1][0]).toEqual(
+				expect.objectContaining({ id: 'swap-1', status: { Executing: null } })
+			);
+			expect(rowRefs(1)[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]).toBe('7');
+			expect(rowRefs(1)[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]).toBe('order-1');
+		});
+
+		// Settlement stays in this session, which is what a fill-or-kill order affords and
+		// what keeps two OISY Trade swaps from overlapping on the venue's shared free
+		// balance. The modal is open until the funds are back in the wallet.
+		it('settles in session rather than handing off to the row', async () => {
+			const getMyOrdersSpy = vi.spyOn(oisyTradeApi, 'getMyOrders');
+			const withdrawSpy = vi.spyOn(oisyTradeApi, 'withdraw');
+
+			await run();
+
+			expect(getMyOrdersSpy).toHaveBeenCalled();
+			expect(withdrawSpy).toHaveBeenCalled();
+		});
 
 		it('submits a fill-or-kill order at the reviewed price and quantity', async () => {
 			await run();
@@ -870,12 +1125,15 @@ describe('oisy-trade-swap.services', () => {
 
 			await run({ progress, enableDestinationToken });
 
+			// The withdraw step is the flow's own: settlement runs in session, with the modal
+			// open until the destination token is back in the wallet.
 			expect(progress.mock.calls.flat()).toEqual([
 				ProgressStepsSwap.APPROVE,
 				ProgressStepsSwap.SWAP,
 				ProgressStepsSwap.WITHDRAW,
 				ProgressStepsSwap.UPDATE_UI
 			]);
+			// Enabled on arrival, since the balance is already there by the time this runs.
 			expect(enableDestinationToken).toHaveBeenCalledOnce();
 		});
 
@@ -932,24 +1190,29 @@ describe('oisy-trade-swap.services', () => {
 			expect(calls.indexOf('deposit')).toBeGreaterThan(0);
 		});
 
-		it('never places an order when the deposit fails', async () => {
+		// The row is left `Pending` with neither pointer, which is precisely what the poller
+		// reads as "never started": nothing moved, so it deletes the row rather than
+		// reporting a failure about funds that never left the wallet.
+		it('never places an order when the deposit fails, and marks the row with nothing', async () => {
 			depositSpy.mockRejectedValue(new Error('deposit failed'));
 
 			await expect(run()).rejects.toThrow('deposit failed');
 
 			expect(addLimitOrderSpy).not.toHaveBeenCalled();
+			expect(updateActiveUserTransaction).not.toHaveBeenCalled();
 		});
 
-		// The one case unlike every other provider: the swap failed, but the funds came back.
-		// The error is raised only *after* the source token has been withdrawn, so the user is
-		// never told the swap failed while their money is still in someone else's custody.
+		// The one case unlike every other provider: the swap failed, but the funds came
+		// back. The error is raised only *after* the source token has been withdrawn, so
+		// the user is never told the swap failed while their money is still in someone
+		// else's custody.
 		it('withdraws the source back before reporting a killed order', async () => {
 			vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue([
 				{ id: 'order-1', order: { status: { Expired: null } }, pair: {} }
 			] as unknown as UserOrder[]);
-			const withdrawSpy = vi.spyOn(oisyTradeApi, 'withdraw').mockResolvedValue({
-				block_index: 42n
-			});
+			const withdrawSpy = vi
+				.spyOn(oisyTradeApi, 'withdraw')
+				.mockResolvedValue({ block_index: 42n });
 			// Baseline first (nothing held), then the source the kill released back.
 			resetBalanceReads()
 				.mockResolvedValueOnce([])
@@ -964,8 +1227,6 @@ describe('oisy-trade-swap.services', () => {
 			const enableDestinationToken = vi.fn();
 			const walletSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet');
 
-			// The typed error, with `kind`, is what the wizard branches on to present a
-			// kill as the expected market outcome it is rather than an unexpected failure.
 			await expect(run({ progress, enableDestinationToken })).rejects.toMatchObject({
 				name: 'OisyTradeSwapError',
 				kind: 'killed',
@@ -974,20 +1235,26 @@ describe('oisy-trade-swap.services', () => {
 
 			expect(withdrawSpy).toHaveBeenCalledOnce();
 			expect(withdrawSpy.mock.calls[0][0].request.token_id.ledger_id.toText()).toBe(ICP_LEDGER);
-			// The recovered source balance is refreshed, but the user never received the
-			// destination token: nothing enables it, and the progress bar never reaches
-			// the final step.
+			// The recovered balance is refreshed, but the destination token never arrived:
+			// nothing enables it and the progress bar never reaches the final step.
 			expect(walletSpy).toHaveBeenCalledOnce();
 			expect(enableDestinationToken).not.toHaveBeenCalled();
 			expect(progress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			// And this session closes its own row, so the loader reports nothing twice.
+			expect(vi.mocked(updateActiveUserTransaction).mock.calls.at(-1)?.[0]).toEqual(
+				expect.objectContaining({
+					status: { Failed: null },
+					error: en.swap.error.oisy_trade_order_killed
+				})
+			);
 		});
 
-		// Nothing left in custody and nothing that says how the order ended: the error
-		// asks the user to check the Trading tab, and since nothing was withdrawn there
-		// is no wallet change to refresh and no destination token to enable.
+		// Nothing left in custody and nothing that says how the order ended: the error asks
+		// the user to check the Trading tab, and since nothing was withdrawn there is no
+		// wallet change to refresh and no destination token to enable.
 		it('reports an unresolved settlement without refreshing or enabling anything', async () => {
 			vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue([]);
-			vi.spyOn(oisyTradeApi, 'getBalances').mockResolvedValue([]);
+			resetBalanceReads().mockResolvedValue([]);
 			const walletSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet');
 			const enableDestinationToken = vi.fn();
 
@@ -999,6 +1266,59 @@ describe('oisy-trade-swap.services', () => {
 
 			expect(walletSpy).not.toHaveBeenCalled();
 			expect(enableDestinationToken).not.toHaveBeenCalled();
+		});
+
+		// The hybrid seam. The primary arrived, so the user is done waiting and the modal
+		// reports success — but a leg this attempt could not move is still owed, so the row
+		// stays non-terminal and unclaimed for the poller to finish. That is the only thing
+		// the Active User Transaction row still settles.
+		it('leaves the row to the poller when a leg is still owed', async () => {
+			const consoleErrorSpy = vi
+				.spyOn(consoleUtils, 'consoleError')
+				.mockImplementation(() => undefined);
+			const markSpy = vi.spyOn(activeUserTransactionsStore, 'markTerminalSideEffectsApplied');
+
+			// A filled Buy whose price improvement released part of the source reserve.
+			resetBalanceReads()
+				.mockResolvedValueOnce([])
+				.mockResolvedValue([
+					{
+						token: { id: { ledger_id: Principal.fromText(CKUSDC_LEDGER) } },
+						balance: { free: 2_000_000n, reserved: ZERO }
+					},
+					{
+						token: { id: { ledger_id: Principal.fromText(ICP_LEDGER) } },
+						balance: { free: 100_000_000n, reserved: ZERO }
+					}
+				] as unknown as UserTokenBalance[]);
+			const residueError = new OisyTradeRequestError({
+				message: 'ledger blew up',
+				reason: 'InternalError'
+			});
+			vi.spyOn(oisyTradeApi, 'withdraw')
+				.mockResolvedValueOnce({ block_index: 42n })
+				.mockRejectedValue(residueError);
+
+			// The destination arrived, so the swap itself succeeded.
+			await expect(run()).resolves.toBeUndefined();
+
+			expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
+			// No terminal write: the row is the poller's to finish, because retrying the
+			// residue is the only thing that will bring it home. Every write this flow made
+			// stayed `Executing` — each one re-sends the highest status reached, so there
+			// are several, and none of them closed the row.
+			expect(
+				vi
+					.mocked(updateActiveUserTransaction)
+					.mock.calls.map(([{ status }]) => status)
+					.filter(nonNullish)
+					.every((status) => 'Executing' in status)
+			).toBeTruthy();
+			// Claimed all the same. This session has already reported the outcome — the
+			// destination arrived and the wizard fires its own success event — so the loader
+			// must stay quiet when the poller eventually closes the row, or the same swap is
+			// counted twice.
+			expect(markSpy).toHaveBeenCalledWith({ ids: ['swap-1'] });
 		});
 
 		// The canister replying with an `Err` means the order was definitively not
@@ -1059,9 +1379,23 @@ describe('oisy-trade-swap.services', () => {
 				expect(enableDestinationToken).not.toHaveBeenCalled();
 				expect(progress.mock.calls.flat()).toEqual([
 					ProgressStepsSwap.APPROVE,
-					ProgressStepsSwap.SWAP,
-					ProgressStepsSwap.WITHDRAW
+					ProgressStepsSwap.SWAP
 				]);
+			});
+
+			// Nothing is left to settle once the deposit is back, so the row is closed here
+			// rather than left for the poller to re-derive from balances that no longer
+			// hold anything.
+			it('closes the row as failed once the deposit is recovered', async () => {
+				await expect(run()).rejects.toMatchObject({ kind: 'not_placed' });
+
+				expect(vi.mocked(updateActiveUserTransaction).mock.calls.at(-1)?.[0]).toEqual(
+					expect.objectContaining({
+						id: 'swap-1',
+						status: { Failed: null },
+						error: en.swap.error.oisy_trade_order_not_placed
+					})
+				);
 			});
 
 			it('reports a failed recovery pointing at the Trading tab', async () => {
@@ -1074,6 +1408,7 @@ describe('oisy-trade-swap.services', () => {
 					.spyOn(consoleUtils, 'consoleError')
 					.mockImplementation(() => undefined);
 				const walletSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet');
+				const markSpy = vi.spyOn(activeUserTransactionsStore, 'markTerminalSideEffectsApplied');
 
 				await expect(run()).rejects.toMatchObject({
 					name: 'OisyTradeSwapError',
@@ -1084,13 +1419,27 @@ describe('oisy-trade-swap.services', () => {
 				// The funds are still in DEX custody, so there is no wallet change to show.
 				expect(walletSpy).not.toHaveBeenCalled();
 				expect(consoleErrorSpy).toHaveBeenCalledWith(recoveryError);
+				// The wizard has reported this outcome, so the row's side effects are claimed
+				// even though it stays open — otherwise the loader would count the same swap
+				// again when the poller eventually closes it.
+				expect(markSpy).toHaveBeenCalledExactlyOnceWith({ ids: ['swap-1'] });
+				// And the row is deliberately left non-terminal — a deposit ref, no order id
+				// — which is the signature the poller retries this same withdrawal from.
+				// Terminalizing it here would strand the balance with nothing watching it.
+				expect(
+					vi
+						.mocked(updateActiveUserTransaction)
+						.mock.calls.map(([{ status }]) => status)
+						.filter(nonNullish)
+				).toEqual([{ Executing: null }]);
 			});
 		});
 
 		// A failure that is not the canister's `Err` reply is ambiguous — the call may
 		// have landed and only the reply been lost, so an order may exist with the
 		// reserve locked. Withdrawing here could race that live order, so the error
-		// propagates untouched and the case belongs to step 2's durable recovery record.
+		// propagates untouched and the row is left as the poller's stalled-deposit case:
+		// `Executing`, with a deposit ref and no order id.
 		it('rethrows an ambiguous placement failure without touching the deposit', async () => {
 			addLimitOrderSpy.mockRejectedValue(new Error('reply lost'));
 			const withdrawSpy = vi.spyOn(oisyTradeApi, 'withdraw');
@@ -1100,107 +1449,22 @@ describe('oisy-trade-swap.services', () => {
 
 			expect(withdrawSpy).not.toHaveBeenCalled();
 			expect(walletSpy).not.toHaveBeenCalled();
+
+			expect(updateActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(rowRefs(0)[OISY_TRADE_EXTERNAL_REF_KEYS.DEPOSIT_BLOCK_INDEX]).toBe('7');
+			expect(rowRefs(0)[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_ID]).toBeUndefined();
 		});
 
-		describe('retrying', () => {
+		// The only loop left in the foreground: settlement's belongs to the poller now, but
+		// the deposit recovery has no row driving it — it has to finish inside the flow
+		// that started it, or the wizard reports a rejection with the funds still out.
+		describe('retrying the deposit recovery', () => {
 			beforeEach(() => {
 				vi.useFakeTimers();
 			});
 
 			afterEach(() => {
 				vi.useRealTimers();
-			});
-
-			const settleWithFakeTimers = async (promise: Promise<unknown>) => {
-				// One tick of the settle interval is all the mocks below need; the assertion
-				// is that the flow asked a second time rather than giving up on the first.
-				await vi.advanceTimersByTimeAsync(OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS);
-
-				return await promise;
-			};
-
-			it('keeps polling while the order has not settled yet', async () => {
-				const getMyOrdersSpy = vi
-					.spyOn(oisyTradeApi, 'getMyOrders')
-					.mockResolvedValueOnce([
-						{ id: 'order-1', order: { status: { Pending: null } }, pair: {} }
-					] as unknown as UserOrder[])
-					.mockResolvedValue([
-						{ id: 'order-1', order: { status: { Filled: null } }, pair: {} }
-					] as unknown as UserOrder[]);
-
-				await settleWithFakeTimers(run());
-
-				expect(getMyOrdersSpy).toHaveBeenCalledTimes(2);
-			});
-
-			// The most damaging bug this integration can ship is ending the operation on a
-			// transient failure, with the funds still in DEX custody and nothing watching them.
-			it('retries a retryable withdrawal failure rather than failing the swap', async () => {
-				const withdrawSpy = vi
-					.spyOn(oisyTradeApi, 'withdraw')
-					.mockRejectedValueOnce(
-						new OisyTradeTemporaryError({ message: 'busy', reason: 'OperationInProgress' })
-					)
-					.mockResolvedValue({ block_index: 42n });
-
-				const settlement = await settleWithFakeTimers(run());
-
-				expect(settlement).toEqual({ status: 'filled', withdrawals: [42n] });
-				expect(withdrawSpy).toHaveBeenCalledTimes(2);
-			});
-
-			// A filled Buy whose price-improved fill released unspent reserve: the primary
-			// (destination) withdrawal lands, the residue (source) withdrawal fails
-			// transiently, and the retry re-enters the settlement — where the withdrawn
-			// primary's delta reads zero and only the residue is left to take. The swap
-			// still succeeds, with no funds left behind.
-			it('retries a retryable residue withdrawal failure and still succeeds', async () => {
-				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue([
-					{ id: 'order-1', order: { status: { Filled: null } }, pair: {} }
-				] as unknown as UserOrder[]);
-				resetBalanceReads()
-					// Baseline: nothing on the DEX.
-					.mockResolvedValueOnce([])
-					// After the fill: the credited destination plus the released source reserve.
-					.mockResolvedValueOnce([
-						{
-							token: { id: { ledger_id: Principal.fromText(CKUSDC_LEDGER) } },
-							balance: { free: 2_000_000n, reserved: ZERO }
-						},
-						{
-							token: { id: { ledger_id: Principal.fromText(ICP_LEDGER) } },
-							balance: { free: 100_000_000n, reserved: ZERO }
-						}
-					] as unknown as UserTokenBalance[])
-					// After the primary withdrawal: only the residue remains.
-					.mockResolvedValue([
-						{
-							token: { id: { ledger_id: Principal.fromText(ICP_LEDGER) } },
-							balance: { free: 100_000_000n, reserved: ZERO }
-						}
-					] as unknown as UserTokenBalance[]);
-				const withdrawSpy = vi
-					.spyOn(oisyTradeApi, 'withdraw')
-					.mockResolvedValueOnce({ block_index: 42n })
-					.mockRejectedValueOnce(
-						new OisyTradeTemporaryError({ message: 'busy', reason: 'OperationInProgress' })
-					)
-					.mockResolvedValue({ block_index: 43n });
-
-				const promise = run();
-
-				// The retry's sleep is scheduled deep in a promise chain, so a single
-				// advance can complete before the timer even exists — `vi.waitFor`
-				// advances the fake timers by `interval` on every check instead.
-				await vi.waitFor(() => expect(withdrawSpy).toHaveBeenCalledTimes(3), {
-					interval: OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS,
-					timeout: 4 * OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS
-				});
-
-				// The second attempt's outcome: the primary is dust-skipped (already
-				// withdrawn) and the residue's block index is the one reported.
-				await expect(promise).resolves.toEqual({ status: 'filled', withdrawals: [43n] });
 			});
 
 			// The recovery withdrawal honours the same retry policy as settlement, and for
@@ -1245,16 +1509,28 @@ describe('oisy-trade-swap.services', () => {
 				});
 			});
 
-			// No timer advance: a non-retryable failure ends the swap on the first attempt,
-			// which is exactly the difference from the test above.
-			it('fails the swap on a withdrawal failure that is not retryable', async () => {
+			// No timer advance: a non-retryable failure ends the recovery on the first
+			// attempt, which is exactly the difference from the test above.
+			it('gives up on a recovery failure that is not retryable', async () => {
+				addLimitOrderSpy.mockRejectedValue(
+					new OisyTradeRequestError({ message: 'off grid', reason: 'InvalidQuantity' })
+				);
+				vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
+				resetBalanceReads()
+					.mockResolvedValueOnce([])
+					.mockResolvedValue([
+						{
+							token: { id: { ledger_id: Principal.fromText(ICP_LEDGER) } },
+							balance: { free: 300_000_000n, reserved: ZERO }
+						}
+					] as unknown as UserTokenBalance[]);
 				const withdrawSpy = vi
 					.spyOn(oisyTradeApi, 'withdraw')
 					.mockRejectedValue(
 						new OisyTradeRequestError({ message: 'nope', reason: 'InsufficientBalance' })
 					);
 
-				await expect(run()).rejects.toThrow('nope');
+				await expect(run()).rejects.toMatchObject({ kind: 'recovery_failed' });
 
 				expect(withdrawSpy).toHaveBeenCalledOnce();
 			});

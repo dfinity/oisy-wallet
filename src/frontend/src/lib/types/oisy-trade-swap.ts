@@ -18,6 +18,26 @@ export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	ORDER_QUANTITY: 'order_quantity',
 	// The destination (or recovered source) withdrawal that closes the row.
 	WITHDRAW_BLOCK_INDEX: 'withdraw_block_index',
+	// Set when the order has resolved but a non-dust leg is still at the venue because
+	// withdrawing it was refused definitively. The row does *not* close on it — it
+	// stays non-terminal and the poller keeps retrying — so this is the record that the
+	// order's outcome was not the whole story, and it is also what tells the poller the
+	// record has already been written, so the write happens once per row rather than
+	// once per attempt.
+	RESIDUE_STRANDED: 'residue_stranded',
+	// Both legs' free DEX balance as it stood *before* the deposit, in base units.
+	// Settlement acts on the difference from these, never on the account-wide
+	// total: a user can arrive at a swap with either leg already funded from the
+	// Trading tab, and those balances are neither this swap's to withdraw nor
+	// evidence of how its order resolved. Written at creation, which is already
+	// before the first canister call, so they cost no extra ordering.
+	//
+	// Both are written in that one call, so a row never holds only one of them. A row
+	// whose baselines cannot be read is therefore malformed, not early, and the poller
+	// declines to settle it rather than substituting zero — which would credit this
+	// order with the caller's entire free balance and re-create both harms above.
+	BASELINE_SOURCE_FREE: 'baseline_source_free',
+	BASELINE_DEST_FREE: 'baseline_dest_free',
 	// Display + analytics metadata snapshotted at creation. These reuse OneSec's
 	// exact key strings — `ActiveUserTransactionItem` reads *every* row's refs
 	// through `toOneSecExternalRefsMap`, so a fifth swap provider renders for free

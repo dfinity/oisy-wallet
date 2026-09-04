@@ -1,9 +1,11 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import { MAX_BUTTON, TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import type { Token } from '$lib/types/token';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -32,14 +34,21 @@ describe('EthSendAmount', () => {
 		return `${padded.slice(0, -ETHEREUM_TOKEN.decimals)}.${padded.slice(-ETHEREUM_TOKEN.decimals)}`;
 	};
 
-	const setup = ({ ceilingKnown = true }: { ceilingKnown?: boolean } = {}) => {
+	const setup = ({
+		ceilingKnown = true,
+		feeResolved = true,
+		token = ETHEREUM_TOKEN
+	}: { ceilingKnown?: boolean; feeResolved?: boolean; token?: Token } = {}) => {
 		const feeStore = initEthFeeStore();
-		feeStore.setFee({
-			maxFeePerGas: ceilingKnown ? maxFeePerGas : null,
-			maxPriorityFeePerGas,
-			baseFeePerGas,
-			gas
-		});
+
+		if (feeResolved) {
+			feeStore.setFee({
+				maxFeePerGas: ceilingKnown ? maxFeePerGas : null,
+				maxPriorityFeePerGas,
+				baseFeePerGas,
+				gas
+			});
+		}
 
 		const context = new Map<symbol, unknown>();
 		context.set(
@@ -52,7 +61,7 @@ describe('EthSendAmount', () => {
 				feeExchangeRateStore: writable(undefined)
 			})
 		);
-		context.set(SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN }));
+		context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
 
 		balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: balance, certified: true } });
 
@@ -72,7 +81,9 @@ describe('EthSendAmount', () => {
 
 		assertNonNullish(input);
 
-		return { input, queryByText };
+		const maxButton = () => container.querySelector(`[data-tid="${MAX_BUTTON}"]`);
+
+		return { input, queryByText, maxButton };
 	};
 
 	const setupWithoutCeiling = () => setup({ ceilingKnown: false });
@@ -115,6 +126,36 @@ describe('EthSendAmount', () => {
 
 		await waitFor(() => {
 			expect(queryByText(expectedError)).not.toBeInTheDocument();
+		});
+	});
+
+	// A "Max" offered before the fee arrives would be the whole balance: `getMaxTransactionAmount`
+	// treats a missing fee as zero, and nothing downstream re-checks it before the amount is
+	// submitted. The button has to wait for a fee it can actually subtract.
+	describe('the Max button', () => {
+		it('is offered once the fee is known', () => {
+			const { maxButton } = setup();
+
+			expect(maxButton()).toBeInTheDocument();
+		});
+
+		it('is withheld while no fee has arrived yet', () => {
+			const { maxButton } = setup({ feeResolved: false });
+
+			expect(maxButton()).not.toBeInTheDocument();
+		});
+
+		it('is withheld when the ceiling comes back unknown', () => {
+			const { maxButton } = setup({ ceilingKnown: false });
+
+			expect(maxButton()).not.toBeInTheDocument();
+		});
+
+		it('is offered for an ERC-20 send, whose maximum is its own balance', () => {
+			// The fee is settled in ETH, so an ERC-20 maximum does not wait on it.
+			const { maxButton } = setup({ feeResolved: false, token: mockValidErc20Token });
+
+			expect(maxButton()).toBeInTheDocument();
 		});
 	});
 });
