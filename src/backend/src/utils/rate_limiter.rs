@@ -73,6 +73,49 @@ thread_local! {
     pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(600, 60 * 1_000_000_000);
 
+    /// Rate-limits `create_tip`. The sender is an authenticated principal, so the
+    /// per-caller tiers (20/min, 200/hour) carry most of the weight; the global
+    /// tiers (300/min, 3000/hour) are what a per-caller limit cannot see, namely
+    /// a flood spread across many principals.
+    ///
+    /// The global numbers are generous on purpose. Each call makes two ledger
+    /// *queries* — a few million cycles, three orders of magnitude below a vetKD
+    /// derivation — so the ceiling is here to stop a runaway, not to ration
+    /// ordinary use. Any value is stricter than what this had before, which was
+    /// no global ceiling at all.
+    pub(crate) static CREATE_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
+    /// Rate-limits `claim_tip`. Per-caller (20/min, 200/hour) is what makes
+    /// brute-forcing a claim code expensive — a wrong code is rejected from state
+    /// alone, before any ledger call — and unlike `consume_personal_note_share` a
+    /// claim always has a real principal to charge it to, since the payout needs
+    /// a destination.
+    ///
+    /// The global tiers (300/min, 3000/hour) bound what that cannot: a guessing
+    /// campaign spread over many fresh identities, which are free to create.
+    pub(crate) static CLAIM_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
+    /// Rate-limits `cancel_tip`. Cheap state-only work, so the tiers exist to
+    /// keep a loop from writing to stable memory without limit rather than to
+    /// bound cycles.
+    pub(crate) static CANCEL_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(30, 300, 400, 4000);
+
+    /// Rate-limits `set_tip_secret`. Not about cycles: the endpoint writes a
+    /// 512-byte entry to stable memory, and nothing else bounds how many a caller
+    /// may write. `MAX_TIPS_PER_USER` counts *active* tips, not stored codes, and
+    /// the endpoint is deliberately not gated on the tip existing — so before this
+    /// limiter a single registered caller could grow the store at ingress speed
+    /// without creating a single tip.
+    ///
+    /// Same tiers as `CREATE_TIP_RATE_LIMITER` because the browser calls this
+    /// exactly once per created tip: anything a legitimate sender can do here is
+    /// already bounded by what they can create.
+    pub(crate) static SET_TIP_SECRET_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
+
     /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
     /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
     /// global (20/min, 100/hour). See [`TieredRateLimiter`].
@@ -84,6 +127,29 @@ thread_local! {
     /// [`TieredRateLimiter`].
     pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: TieredRateLimiter =
         TieredRateLimiter::new();
+
+    /// vetKD derivation for the tip-secrets store. Its own limiter rather than a
+    /// shared one, so a sender recovering tip links cannot exhaust the budget for
+    /// reading their notes, or the reverse.
+    ///
+    /// A raised burst cap (5/min instead of 2), because unlike notes this
+    /// derivation sits on the *create* path: a sender spends one per page load,
+    /// and at 2/min a third reload inside a minute failed — which silently cost
+    /// that tip its recoverable link. The hourly tiers are untouched, so
+    /// worst-case cycle spend is unchanged.
+    pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_caller_burst(5);
+
+    /// Verification-key reads for the tip-secrets store.
+    ///
+    /// Deliberately an ordinary limiter, not [`TieredRateLimiter`]: this
+    /// endpoint returns a caller-independent constant that the canister now
+    /// caches after the first call, so it costs no vetKD derivation and metering
+    /// it like one was actively harmful. The browser fetches it alongside the
+    /// derivation, so a rejection here used to discard a derivation that had
+    /// already been paid for.
+    pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -327,6 +393,23 @@ impl TieredRateLimiter {
             caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
             global_minute: RateLimiter::new(global_minute, Self::MINUTE_NS),
             global_hour: RateLimiter::new(global_hour, Self::HOUR_NS),
+        }
+    }
+
+    /// Same tiers as [`Self::new`] but with a chosen per-caller **burst** cap.
+    ///
+    /// Only the per-minute caller tier moves. That tier is a burst damper, not a
+    /// cost control — the per-hour caller tier is, and it still binds at 10 — so
+    /// raising this cannot increase worst-case hourly cycle spend for a caller.
+    /// It exists because 2/min throttles ordinary use: one derivation is spent
+    /// per page load, so two reloads inside a minute made the third fail.
+    #[must_use]
+    pub fn with_caller_burst(caller_minute: u32) -> Self {
+        Self {
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(10, Self::HOUR_NS),
+            global_minute: RateLimiter::new(20, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(100, Self::HOUR_NS),
         }
     }
 
@@ -693,6 +776,42 @@ mod tests {
         assert_eq!(
             err.max_calls, 5,
             "the sixth distinct caller is refused by the global tier, not its own"
+        );
+    }
+
+    #[test]
+    fn a_raised_burst_lifts_the_minute_tier_and_leaves_the_hour_tier_binding() {
+        let burst = TieredRateLimiter::with_caller_burst(5);
+        let caller = test_principal(1);
+
+        // Five inside one minute, where the default would have stopped at two.
+        for call in 1..=5 {
+            assert!(
+                burst.check_at(caller, ONE_SEC).is_ok(),
+                "call {call} of the raised burst"
+            );
+        }
+        assert!(
+            burst.check_at(caller, ONE_SEC).is_err(),
+            "six is still too many"
+        );
+
+        // The point of the change: worst-case hourly spend is unmoved, because
+        // the hour tier binds at 10 regardless of how the bursts are shaped.
+        // Five more across later minutes reach that cap, and the eleventh fails.
+        for call in 6..=10u64 {
+            let minute_later = ONE_SEC + call * 60 * ONE_SEC;
+            assert!(
+                burst.check_at(caller, minute_later).is_ok(),
+                "call {call} within the hour"
+            );
+        }
+        let err = burst
+            .check_at(caller, ONE_SEC + 11 * 60 * ONE_SEC)
+            .unwrap_err();
+        assert_eq!(
+            err.max_calls, 10,
+            "the hour tier is what refused, so the cost ceiling is unchanged"
         );
     }
 

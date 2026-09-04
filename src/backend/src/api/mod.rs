@@ -9,5 +9,6 @@ pub mod onramper;
 pub mod personal_note_shares;
 pub mod personal_notes;
 pub mod signer;
+pub mod tips;
 pub mod transactions;
 pub mod user_profile;

@@ -20,9 +20,11 @@ use shared::types::{
 
 use crate::{
     personal_notes::share::model::PersonalNoteShareRecord,
+    tips::model::TipRecord,
     types::storable::{
         ActiveUserTransactionKey, Candid, ContactImageKey, PersonalNoteShareCreatorKey,
-        PersonalNoteShareToken, StoredPrincipal, StoredTokenId, UserTransactionKey,
+        PersonalNoteShareToken, StoredPrincipal, StoredTokenId, TipId, TipSenderKey,
+        UserTransactionKey,
     },
 };
 
@@ -84,3 +86,12 @@ pub type PersonalNoteShareMap =
 /// [`PersonalNoteShareMap`].
 pub type PersonalNoteSharesByCreatorMap =
     StableBTreeMap<PersonalNoteShareCreatorKey, Timestamp, VMem>;
+
+/// Primary tip store: tip id → record. Readable anonymously through
+/// `get_tip`, which returns only the amount, token and deadline — see
+/// `tips::service`.
+pub type TipMap = StableBTreeMap<TipId, Candid<TipRecord>, VMem>;
+
+/// By-sender index for the active-tip cap and History: `(sender, tip_id) → expires_at_ns`.
+/// Lets both range-scan one sender's tips without touching [`TipMap`].
+pub type TipsBySenderMap = StableBTreeMap<TipSenderKey, Timestamp, VMem>;
