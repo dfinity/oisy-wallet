@@ -50,7 +50,7 @@ const mockEthFeePriorities: EthFeePriorities = {
 	baseFeePerGas: 5n,
 	perPriority: {
 		[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
-		[EthFeePriority.MEDIUM]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+		[EthFeePriority.STANDARD]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
 		[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
 	}
 };

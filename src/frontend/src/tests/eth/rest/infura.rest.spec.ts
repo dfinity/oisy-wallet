@@ -54,7 +54,7 @@ describe('infura.rest', () => {
 					maxFeePerGas: parseToken({ value: '24.086058416', unitName: 'gwei' }),
 					maxPriorityFeePerGas: parseToken({ value: '0.05', unitName: 'gwei' })
 				},
-				[EthFeePriority.MEDIUM]: {
+				[EthFeePriority.STANDARD]: {
 					maxFeePerGas: parseToken({ value: '32.548678862', unitName: 'gwei' }),
 					maxPriorityFeePerGas: parseToken({ value: '0.1', unitName: 'gwei' })
 				},

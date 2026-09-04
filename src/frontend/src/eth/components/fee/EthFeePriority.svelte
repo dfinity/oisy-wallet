@@ -30,9 +30,9 @@
 			emoji: '🐢'
 		},
 		{
-			priority: EthFeePriority.MEDIUM,
-			name: $i18n.fee.text.priority_medium,
-			description: $i18n.fee.text.priority_medium_description,
+			priority: EthFeePriority.STANDARD,
+			name: $i18n.fee.text.priority_standard,
+			description: $i18n.fee.text.priority_standard_description,
 			emoji: '⚡'
 		},
 		{

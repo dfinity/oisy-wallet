@@ -72,7 +72,7 @@ export const initSendContext = ({
 
 	// Same reason as `sendEthCustomNonce` above: the choice has to outlive the wizard's step
 	// re-render, so it cannot be a prop.
-	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.MEDIUM);
+	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.STANDARD);
 
 	return {
 		sendToken,

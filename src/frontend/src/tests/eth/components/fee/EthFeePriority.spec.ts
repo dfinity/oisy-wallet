@@ -24,7 +24,7 @@ describe('EthFeePriority', () => {
 		baseFeePerGas: 20_000_000_000n,
 		perPriority: {
 			[Priority.SLOW]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 1_000_000_000n },
-			[Priority.MEDIUM]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
+			[Priority.STANDARD]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
 			[Priority.FAST]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 20_000_000_000n }
 		}
 	};
@@ -38,7 +38,7 @@ describe('EthFeePriority', () => {
 	}: { withPriorities?: boolean; withSymbol?: boolean } = {}) => {
 		const feeStore = initEthFeeStore();
 		feeStore.setFee({
-			...priorities.perPriority[Priority.MEDIUM],
+			...priorities.perPriority[Priority.STANDARD],
 			baseFeePerGas: priorities.baseFeePerGas,
 			gas
 		});
@@ -80,7 +80,7 @@ describe('EthFeePriority', () => {
 		await waitFor(() => {
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.SLOW}`)).toBeInTheDocument();
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.FAST}`)).toBeInTheDocument();
-			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.MEDIUM}`)).toBeChecked();
+			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.STANDARD}`)).toBeChecked();
 		});
 	});
 
@@ -161,7 +161,7 @@ describe('EthFeePriority', () => {
 			// Scoped to the header: the options stay mounted while collapsed, so a document-wide
 			// query would keep passing if the header stopped naming the choice.
 			expect(
-				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_medium)
+				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_standard)
 			).toBeInTheDocument();
 		});
 	});
@@ -174,7 +174,7 @@ describe('EthFeePriority', () => {
 		const { getAllByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
-			expect(getAllByText(en.fee.text.priority_medium)).toHaveLength(1);
+			expect(getAllByText(en.fee.text.priority_standard)).toHaveLength(1);
 		});
 	});
 

@@ -152,7 +152,7 @@ export const getEthFeeDataWithProvider = async ({
 	chainId,
 	from,
 	to,
-	priority = EthFeePriority.MEDIUM
+	priority = EthFeePriority.STANDARD
 }: {
 	networkId: NetworkId;
 	chainId: bigint;
@@ -205,7 +205,7 @@ export const getEthFeeDataWithProvider = async ({
 		baseFeePerGas,
 		perPriority: {
 			[EthFeePriority.SLOW]: applyFloors(perPriority[EthFeePriority.SLOW]),
-			[EthFeePriority.MEDIUM]: applyFloors(perPriority[EthFeePriority.MEDIUM]),
+			[EthFeePriority.STANDARD]: applyFloors(perPriority[EthFeePriority.STANDARD]),
 			[EthFeePriority.FAST]: applyFloors(perPriority[EthFeePriority.FAST])
 		}
 	};
