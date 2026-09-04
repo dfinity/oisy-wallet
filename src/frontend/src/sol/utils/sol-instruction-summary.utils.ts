@@ -1,39 +1,14 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
-	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	SYSTEM_PROGRAM_ADDRESS,
-	TOKEN_2022_PROGRAM_ADDRESS,
-	TOKEN_PROGRAM_ADDRESS
-} from '$sol/constants/sol.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
-import type { SolInstruction, SolParsedInstruction } from '$sol/types/sol-instructions';
+import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
-import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
-import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
-import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { SystemInstruction } from '@solana-program/system';
-import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
-import { Token2022Instruction } from '@solana-program/token-2022';
-import { type Option, unwrapOption } from '@solana/kit';
-
-/**
- * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
- * `getTransaction` report them. The RPC picks the parsed arm per instruction, so the unparsed one
- * survives in the union and contributes nothing here.
- */
-interface SolParsedRpcInstruction {
-	program?: string;
-	programId: SolAddress;
-	parsed: { type: string; info: object };
-}
 
 export interface SolInstructionGroup {
 	index: number;
@@ -132,216 +107,6 @@ const programAddressOf = (instruction: unknown): SolAddress | undefined => {
 	}
 };
 
-const isKitInstruction = (instruction: unknown): instruction is SolInstruction =>
-	nonNullish(instruction) &&
-	typeof instruction === 'object' &&
-	'programAddress' in instruction &&
-	'data' in instruction &&
-	'accounts' in instruction;
-
-/**
- * How one program's decoded instructions are spelled in the RPC's vocabulary.
- *
- * The decoders name an instruction by an enum member and its accounts by role, which is almost
- * exactly what the RPC reports: `TransferChecked` against `transferChecked`, `source` against
- * `source`. Where the two genuinely disagree, the difference is written down here rather than
- * handled by a branch per instruction, so a program's whole instruction set is covered at once
- * and a variant nobody thought about still arrives named.
- */
-interface ProgramVocabulary {
-	program: string;
-	names: Record<number, string>;
-	types?: Record<string, string>;
-	accounts?: Record<string, string>;
-	fields?: Record<string, string>;
-}
-
-/**
- * Built per call rather than held in a table, so that merely importing this module does not read
- * every program's enum. Consumers that mock a program package would otherwise fail to load over a
- * decoding path they never take.
- */
-const vocabularyOf = (
-	programId: SolAddress
-):
-	| (ProgramVocabulary & { parse: (instruction: SolInstruction) => SolParsedInstruction })
-	| undefined => {
-	if (programId === SYSTEM_PROGRAM_ADDRESS) {
-		return {
-			program: 'system',
-			names: SystemInstruction,
-			parse: parseSolSystemInstruction,
-			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
-			// below are written against those.
-			types: { transferSol: 'transfer' },
-			fields: { amount: 'lamports' }
-		};
-	}
-
-	// `setAuthority` is the only instruction naming the account it acts on `owned`, and `mintTo`
-	// the only one naming it `token`. The RPC calls both `account`, as everything else does.
-	if (programId === TOKEN_PROGRAM_ADDRESS) {
-		return {
-			program: 'spl-token',
-			names: TokenInstruction,
-			parse: parseSolTokenInstruction,
-			accounts: { owned: 'account', token: 'account' }
-		};
-	}
-
-	if (programId === TOKEN_2022_PROGRAM_ADDRESS) {
-		return {
-			program: 'spl-token-2022',
-			names: Token2022Instruction,
-			parse: parseSolToken2022Instruction,
-			accounts: { owned: 'account', token: 'account' }
-		};
-	}
-
-	if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
-		return {
-			program: 'spl-associated-token-account',
-			names: AssociatedTokenInstruction,
-			parse: parseSolAtaInstruction,
-			types: {
-				createAssociatedToken: 'create',
-				createAssociatedTokenIdempotent: 'createIdempotent'
-			},
-			// The RPC names the new account `account`, the wallet it belongs to `wallet` and
-			// whoever funds it `source`. Only the mint is called the same thing by both.
-			accounts: { ata: 'account', owner: 'wallet', payer: 'source' }
-		};
-	}
-
-	// Stake and address lookup table are deliberately absent. No effect is derived from either, so
-	// decoding them changes not one line of what the review shows, and reaching for their packages
-	// here pulls both into the chunk the activity loads: 132KB for an identical screen.
-};
-
-const lowerFirst = (value: string): string => `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
-
-const addressOfMeta = (meta: unknown): SolAddress | undefined =>
-	nonNullish(meta) &&
-	typeof meta === 'object' &&
-	'address' in meta &&
-	typeof meta.address === 'string'
-		? meta.address
-		: undefined;
-
-/**
- * A decoded instruction's accounts and data, flattened the way the RPC reports them.
- *
- * The discriminator is dropped, since it says only which instruction this is, and an optional
- * field that carries nothing is dropped rather than reported as empty: an authority given up is
- * an authority with no name, not one named nothing.
- */
-const infoOf = ({
-	accounts,
-	data,
-	vocabulary: { accounts: renames = {}, fields = {} }
-}: {
-	accounts: Record<string, unknown>;
-	data: Record<string, unknown>;
-	vocabulary: ProgramVocabulary;
-}): object => {
-	const named = Object.entries(accounts).reduce<Record<string, unknown>>((acc, [role, meta]) => {
-		const value = addressOfMeta(meta);
-
-		return nonNullish(value) ? { ...acc, [renames[role] ?? role]: value } : acc;
-	}, {});
-
-	return Object.entries(data).reduce<Record<string, unknown>>((acc, [key, raw]) => {
-		if (key === 'discriminator') {
-			return acc;
-		}
-
-		const value = isSolOption(raw) ? unwrapOption(raw) : raw;
-
-		return nonNullish(value) ? { ...acc, [fields[key] ?? key]: value } : acc;
-	}, named);
-};
-
-const isSolOption = (value: unknown): value is Option<SolAddress> =>
-	nonNullish(value) && typeof value === 'object' && '__option' in value;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-	nonNullish(value) && typeof value === 'object';
-
-/**
- * A kit instruction read into the shape the RPC reports.
- *
- * An unsigned message carries its instructions as raw bytes, so nothing below recognised them:
- * every WalletConnect request derived an empty effect list from the message itself, which left the
- * summary permanently unstated and, once the review started listing what it could not read, put
- * "unrecognised" against a plain SOL transfer. The wallet already decodes those bytes to name the
- * parties; this puts the same decoding in front of the effects, so what a message says it does is
- * read exactly as what a run did.
- *
- * Guarded, because the decoders assert on their input: a malformed or not yet supported variant
- * must leave the instruction unread, never throw into the signing flow.
- */
-const asRpcInstruction = (instruction: unknown): SolParsedRpcInstruction | undefined => {
-	const programId = programAddressOf(instruction);
-
-	if (isNullish(programId) || !isKitInstruction(instruction)) {
-		return;
-	}
-
-	const vocabulary = vocabularyOf(programId);
-
-	if (isNullish(vocabulary)) {
-		return;
-	}
-
-	try {
-		const decoded = vocabulary.parse(instruction);
-
-		if (!('instructionType' in decoded)) {
-			return;
-		}
-
-		const { instructionType } = decoded;
-
-		const name = vocabulary.names[Number(instructionType)];
-
-		if (isNullish(name)) {
-			return;
-		}
-
-		const spelled = lowerFirst(name);
-		const type = vocabulary.types?.[spelled] ?? spelled;
-
-		const accounts = 'accounts' in decoded && isRecord(decoded.accounts) ? decoded.accounts : {};
-		const data = 'data' in decoded && isRecord(decoded.data) ? decoded.data : {};
-
-		const info = infoOf({ accounts, data, vocabulary });
-
-		return {
-			program: vocabulary.program,
-			programId,
-			parsed: {
-				type,
-				// A checked transfer or approval states the decimals alongside the amount, and the
-				// RPC reports the pair nested. Both spellings are carried so neither reader has to
-				// know which side produced the instruction.
-				info:
-					'decimals' in info && 'amount' in info
-						? {
-								...info,
-								tokenAmount: {
-									amount: String(field({ info, key: 'amount' })),
-									decimals: field({ info, key: 'decimals' })
-								}
-							}
-						: info
-			}
-		};
-	} catch (_err: unknown) {
-		// An instruction the decoders cannot read stays unread, which is the same outcome an
-		// unknown program gets and the honest one.
-	}
-};
-
 const flatten = ({
 	instructions,
 	innerInstructions
@@ -352,11 +117,8 @@ const flatten = ({
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
-		// The inner calls a run reveals arrive parsed. The message's own instructions do not, and
-		// are decoded here into the same shape rather than dropped.
 		return [instruction, ...inner]
-			.map((candidate) => (isParsed(candidate) ? candidate : asRpcInstruction(candidate)))
-			.filter(nonNullish)
+			.filter(isParsed)
 			.map((parsed) => ({ parentIndex, instruction: parsed }));
 	});
 

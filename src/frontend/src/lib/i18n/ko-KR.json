@@ -1564,6 +1564,7 @@
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_standard": "",
