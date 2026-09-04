@@ -1562,6 +1562,7 @@
 			"estimated_eth": "Geschätzte Ethereum Gebühr",
 			"max_fee_eth": "Maximale Gebühr <small>(wahrscheinlich in &lt; 30 Sekunden)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"priority_slow": "",
 			"priority_slow_description": "",

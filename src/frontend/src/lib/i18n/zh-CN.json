@@ -1562,6 +1562,7 @@
 			"estimated_eth": "预计以太坊手续费",
 			"max_fee_eth": "最高手续费 <small>(通常少于 30 秒)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"priority_slow": "",
 			"priority_slow_description": "",

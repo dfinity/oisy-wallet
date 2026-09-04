@@ -175,6 +175,9 @@
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 
+	// Mirrors how `Value` ties its label to its content, so the heading names the two fee rows.
+	const FEE_SECTION = 'fee';
+
 	let activeTab = $state('summary');
 </script>
 
@@ -273,19 +276,26 @@
 					/>
 				{/if}
 
-				{#if SEND_TRANSACTION_PRIORITY_ENABLED}
-					<EthFeePriority gas={signedGas} />
-				{/if}
+				<!-- The fee is two rows that belong together, so it takes a heading like every other
+				     block in this summary rather than trailing loose off the end of it. -->
+				<label class="font-bold" for={FEE_SECTION}>{$i18n.fee.text.fee}</label>
 
-				<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
-					{#snippet label()}
-						<Html
-							text={SEND_TRANSACTION_PRIORITY_ENABLED
-								? $i18n.fee.text.estimated_fee_eth
-								: $i18n.fee.text.max_fee_eth}
-						/>
-					{/snippet}
-				</EthFeeDisplay>
+				<div id={FEE_SECTION} class="mb-4">
+					{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+						<EthFeePriority gas={signedGas} styleClass="mb-2" />
+					{/if}
+
+					<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
+						{#snippet label()}
+							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+							{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+								{$i18n.fee.text.estimated}
+							{:else}
+								<Html text={$i18n.fee.text.max_fee_eth} />
+							{/if}
+						{/snippet}
+					</EthFeeDisplay>
+				</div>
 			</SendData>
 		{:else}
 			<!-- What the transaction calls is the one thing the review can still state about calldata

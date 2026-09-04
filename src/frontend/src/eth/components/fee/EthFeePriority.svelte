@@ -21,9 +21,11 @@
 		// A WalletConnect request may carry its own gas limit, and that limit is the one signed.
 		// Options priced on anything else would disagree with the fee row directly beneath them.
 		gas?: bigint;
+		// The row sits among differently spaced neighbours depending on where it is mounted.
+		styleClass?: string;
 	}
 
-	let { gas }: Props = $props();
+	let { gas, styleClass = 'mb-4' }: Props = $props();
 
 	const { sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -73,7 +75,7 @@
 </script>
 
 {#if nonNullish($feePrioritiesStore) && nonNullish($feeDecimalsStore)}
-	<div class="mb-4" data-tid={ETH_FEE_PRIORITY}>
+	<div class={styleClass} data-tid={ETH_FEE_PRIORITY}>
 		<CollapsibleBottomSheet sheetTitle={$i18n.fee.text.priority}>
 			{#snippet contentHeader()}
 				<span class="flex min-w-0 flex-1 items-center justify-between gap-2">
