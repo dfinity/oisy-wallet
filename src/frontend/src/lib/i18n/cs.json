@@ -1562,6 +1562,7 @@
 			"max_fee_eth": "Maximální poplatek <small>(pravděpodobně za < 30 sekund)</small>",
 			"estimated_fee_eth": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_normal": "",

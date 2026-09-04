@@ -6,8 +6,10 @@ import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	ETH_FEE_PRIORITY,
 	ETH_FEE_PRIORITY_OPTION,
+	ETH_FEE_PRIORITY_OPTION_AMOUNT,
 	ETH_FEE_PRIORITY_TRIGGER
 } from '$lib/constants/test-ids.constants';
+import { currentLanguage } from '$lib/derived/i18n.derived';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
@@ -29,7 +31,7 @@ describe('EthFeePriority', () => {
 		}
 	};
 
-	// The rows quote fiat only, so an exchange rate is required for them to render at all.
+	// The exchange rate is what the fiat line under each gwei amount needs to render.
 	const exchangeRate = 3_000;
 
 	const setup = ({
@@ -97,6 +99,25 @@ describe('EthFeePriority', () => {
 		// gas limit cancel out and only the tip moves the amounts, and the formatted currency string
 		// depends on locale and currency stores that are not what this test is about.
 		expect(new Set(values.map(({ textContent }) => textContent)).size).toBe(values.length);
+	});
+
+	it('quotes each option in gwei as well as fiat', async () => {
+		const { context } = setup();
+
+		const { findAllByTestId } = render(EthFeePriority, { context });
+
+		const amounts = await findAllByTestId(ETH_FEE_PRIORITY_OPTION_AMOUNT);
+
+		expect(amounts).toHaveLength(Object.values(Priority).length);
+
+		// The same gas limit and base fee price every row, so only the tip moves them apart. In the
+		// native token that difference sits in the eighth decimal, which is the reason for gwei.
+		expect(new Set(amounts.map(({ textContent }) => textContent)).size).toBe(amounts.length);
+
+		// Grouped and whole: 21_000 gas at 21 gwei effective, and no fractional gwei on a fee.
+		expect(amounts[0]).toHaveTextContent(
+			`${new Intl.NumberFormat(get(currentLanguage)).format(441_000)} ${en.fee.text.gwei}`
+		);
 	});
 
 	it('records the choice in the send context', async () => {
