@@ -3,12 +3,17 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
+import {
+	OP_STACK_GAS_PRICE_ORACLE_ABI,
+	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
+} from '$evm/base/constants/base.constants';
 import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
+import { Contract } from 'ethers/contract';
 import {
 	InfuraProvider as InfuraProviderLib,
 	type FeeData,
@@ -46,6 +51,18 @@ export class InfuraProvider {
 
 			return undefined;
 		}
+	};
+
+	// The `GasPriceOracle` predeploy exists only on OP-stack chains, so this reverts anywhere else.
+	// `getEthFeeDataWithProvider` gates the call on the chain id.
+	getL1FeeUpperBound = (unsignedTxSize: bigint): Promise<bigint> => {
+		const gasPriceOracle = new Contract(
+			OP_STACK_GAS_PRICE_ORACLE_ADDRESS,
+			OP_STACK_GAS_PRICE_ORACLE_ABI,
+			this.provider
+		);
+
+		return gasPriceOracle.getL1FeeUpperBound(unsignedTxSize);
 	};
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
