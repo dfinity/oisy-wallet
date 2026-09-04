@@ -1253,6 +1253,7 @@ interface I18nFee {
 		max_fee_eth: string;
 		estimated_fee_eth: string;
 		priority: string;
+		gwei: string;
 		priority_slow: string;
 		priority_slow_description: string;
 		priority_standard: string;

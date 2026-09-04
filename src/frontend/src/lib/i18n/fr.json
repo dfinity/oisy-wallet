@@ -1563,6 +1563,7 @@
 			"max_fee_eth": "Frais max <small>(probablement dans &lt; 30 secondes)</small>",
 			"estimated_fee_eth": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_standard": "",

@@ -1563,6 +1563,7 @@
 			"max_fee_eth": "Fee massima <small>(probabilmente in < 30 secondi)</small>",
 			"estimated_fee_eth": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_standard": "",

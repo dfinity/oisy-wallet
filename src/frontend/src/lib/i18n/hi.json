@@ -1563,6 +1563,7 @@
 			"max_fee_eth": "अधिकतम शुल्क <small>(संभवतः < 30 सेकंड में)</small>",
 			"estimated_fee_eth": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_standard": "",
