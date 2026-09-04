@@ -518,13 +518,15 @@ describe('EthWalletConnectSendReview', () => {
 				.encode(['bytes[]'], [inner])
 				.slice(2)}`;
 
-			const { getByText, getByRole } = renderUnknownCall({ data });
+			const { container, getByRole } = renderUnknownCall({ data });
 
 			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
 
-			expect(getByText(MULTICALL_HASH)).toBeInTheDocument();
-			expect(getByText(ERC20_APPROVE_HASH)).toBeInTheDocument();
-			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
+			// A call the review reads is named beside its selector; one it does not is bare hex.
+			expect(container).toHaveTextContent(`multicall (${MULTICALL_HASH})`);
+			expect(container).toHaveTextContent(`approve (${ERC20_APPROVE_HASH})`);
+			expect(container).toHaveTextContent(PERMIT2_APPROVE_HASH);
+			expect(container).not.toHaveTextContent(`approve (${PERMIT2_APPROVE_HASH})`);
 		});
 
 		it('should still show native value an unreadable call carries alongside it', () => {

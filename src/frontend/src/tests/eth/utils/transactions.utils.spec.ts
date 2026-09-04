@@ -575,14 +575,14 @@ describe('transactions.utils', () => {
 
 		it('should list a plain call as itself', () => {
 			expect(getCalldataMethods(encode({ selector: ERC20_APPROVE_HASH, value: 1n }))).toEqual({
-				methods: [{ selector: ERC20_APPROVE_HASH, depth: 0 }],
+				methods: [{ selector: ERC20_APPROVE_HASH, name: 'approve', depth: 0 }],
 				capped: false
 			});
 		});
 
 		it('should list calldata too short to name a function, without a selector', () => {
 			expect(getCalldataMethods('0xab')).toEqual({
-				methods: [{ selector: undefined, depth: 0 }],
+				methods: [{ selector: undefined, name: undefined, depth: 0 }],
 				capped: false
 			});
 		});
@@ -597,9 +597,9 @@ describe('transactions.utils', () => {
 
 			expect(getCalldataMethods(data)).toEqual({
 				methods: [
-					{ selector: MULTICALL_HASH, depth: 0 },
-					{ selector: ERC20_APPROVE_HASH, depth: 1 },
-					{ selector: PERMIT2_APPROVE_HASH, depth: 1 }
+					{ selector: MULTICALL_HASH, name: 'multicall', depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, name: 'approve', depth: 1 },
+					{ selector: PERMIT2_APPROVE_HASH, name: undefined, depth: 1 }
 				],
 				capped: false
 			});
@@ -613,8 +613,8 @@ describe('transactions.utils', () => {
 
 			expect(getCalldataMethods(data)).toEqual({
 				methods: [
-					{ selector: MULTICALL_DEADLINE_HASH, depth: 0 },
-					{ selector: ERC20_APPROVE_HASH, depth: 1 }
+					{ selector: MULTICALL_DEADLINE_HASH, name: 'multicall', depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, name: 'approve', depth: 1 }
 				],
 				capped: false
 			});
@@ -664,7 +664,7 @@ describe('transactions.utils', () => {
 		// listing it alone is honest, inventing its contents would not be.
 		it('should list a wrapper whose arguments do not decode as itself', () => {
 			expect(getCalldataMethods(`${MULTICALL_HASH}deadbeef`)).toEqual({
-				methods: [{ selector: MULTICALL_HASH, depth: 0 }],
+				methods: [{ selector: MULTICALL_HASH, name: 'multicall', depth: 0 }],
 				capped: false
 			});
 		});
@@ -677,7 +677,7 @@ describe('transactions.utils', () => {
 				.slice(2)}`;
 
 			expect(getCalldataMethods(data)).toEqual({
-				methods: [{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, depth: 0 }],
+				methods: [{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, name: undefined, depth: 0 }],
 				capped: false
 			});
 		});
