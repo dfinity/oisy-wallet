@@ -1620,6 +1620,7 @@
 			"application": "",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
+			"type": "",
 			"methods": "विधियाँ",
 			"events": "घटनाएँ",
 			"message": "संदेश",

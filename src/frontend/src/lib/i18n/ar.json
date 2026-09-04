@@ -1620,6 +1620,7 @@
 			"application": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
+			"type": "",
 			"methods": "الطرق",
 			"events": "الأحداث",
 			"message": "الرسالة",

@@ -1303,6 +1303,7 @@ interface I18nWallet_connect {
 		application: string;
 		review: string;
 		method: string;
+		type: string;
 		methods: string;
 		events: string;
 		message: string;

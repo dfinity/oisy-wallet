@@ -1620,6 +1620,7 @@
 			"application": "Aplikace",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
+			"type": "",
 			"methods": "Metody",
 			"events": "Události",
 			"message": "Zpráva",

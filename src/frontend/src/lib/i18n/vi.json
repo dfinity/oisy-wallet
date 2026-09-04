@@ -1620,6 +1620,7 @@
 			"application": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
+			"type": "",
 			"methods": "Hàm",
 			"events": "Sự kiện",
 			"message": "Tin nhắn",

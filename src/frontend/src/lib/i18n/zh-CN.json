@@ -1620,6 +1620,7 @@
 			"application": "应用",
 			"review": "审核 $chain_name ($key) 所需的权限",
 			"method": "方法",
+			"type": "",
 			"methods": "方法",
 			"events": "事件",
 			"message": "消息",

@@ -1620,6 +1620,7 @@
 			"application": "Application",
 			"review": "Review $chain_name ($key) required permissions",
 			"method": "Method",
+			"type": "Type",
 			"methods": "Methods",
 			"events": "Events",
 			"message": "Message",
