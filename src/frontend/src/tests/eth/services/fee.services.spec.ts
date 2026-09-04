@@ -33,7 +33,7 @@ const mockSuggestedFeeData = ({
 	baseFeePerGas: 5n,
 	perPriority: {
 		[EthFeePriority.SLOW]: { maxFeePerGas, maxPriorityFeePerGas },
-		[EthFeePriority.NORMAL]: { maxFeePerGas, maxPriorityFeePerGas },
+		[EthFeePriority.STANDARD]: { maxFeePerGas, maxPriorityFeePerGas },
 		[EthFeePriority.FAST]: { maxFeePerGas, maxPriorityFeePerGas }
 	}
 });
@@ -357,7 +357,7 @@ describe('eth-fee-data.services', () => {
 		describe('priority selection', () => {
 			const perPriority = {
 				[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
-				[EthFeePriority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+				[EthFeePriority.STANDARD]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
 				[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 20n }
 			};
 
@@ -383,7 +383,7 @@ describe('eth-fee-data.services', () => {
 				});
 
 				expect(feeData).toEqual(
-					expect.objectContaining({ ...perPriority[EthFeePriority.NORMAL], baseFeePerGas: 20n })
+					expect.objectContaining({ ...perPriority[EthFeePriority.STANDARD], baseFeePerGas: 20n })
 				);
 			});
 

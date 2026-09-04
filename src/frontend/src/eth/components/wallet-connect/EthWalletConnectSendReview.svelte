@@ -223,7 +223,7 @@
 	{/if}
 
 	<Tabs
-		styleClass="mt-4"
+		contentStyleClass="mt-4"
 		tabs={[
 			{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
 			{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }

@@ -8,6 +8,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,6 +21,7 @@
 
 	interface Props {
 		amount: OptionAmount;
+		amountSetToMax?: boolean;
 		insufficientFunds: boolean;
 		nativeEthereumToken: Token;
 		onTokensList: () => void;
@@ -27,6 +29,7 @@
 
 	let {
 		amount = $bindable(),
+		amountSetToMax = $bindable(false),
 		insufficientFunds = $bindable(),
 		nativeEthereumToken,
 		onTokensList
@@ -50,6 +53,12 @@
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	// The gas comes out of the amount only when the token being sent is the one that pays for it.
+	// An ERC-20 send spends its own balance in full and settles the fee in ETH separately.
+	let feeIsPaidFromAmount = $derived(
+		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
+	);
+
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish($storeFeeData)) {
 			return;
@@ -71,7 +80,7 @@
 		// OP-stack chain, the L1 data fee, so the ceiling is what decides whether a native send is
 		// affordable. `minGasFee` omits the base fee entirely and therefore bounds nothing the chain
 		// enforces.
-		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
+		if (feeIsPaidFromAmount) {
 			// Falling back to the tip rather than to zero: an unknown ceiling must not weaken the check
 			// below what it was before the flag.
 			const gasFee = SEND_TRANSACTION_PRIORITY_ENABLED
@@ -100,11 +109,6 @@
 			);
 		}
 	};
-
-	/**
-	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
-	 */
-	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
@@ -136,14 +140,24 @@
 
 		{#snippet balance()}
 			{#if nonNullish($sendToken)}
-				<MaxBalanceButton
-					balance={$sendBalance}
-					error={nonNullish(insufficientFundsError)}
-					fee={$maxGasFee}
-					token={$sendToken}
-					bind:amount
-					bind:amountSetToMax
-				/>
+				<!-- Until the fee is known, "Max" for a native send would offer the entire balance:
+				     `getMaxTransactionAmount` treats a missing fee as zero, so the amount could not
+				     cover its own gas. Wait for the fee rather than offer an unspendable maximum,
+				     the same way the swap form does. An ERC-20 max does not depend on the fee. -->
+				{#if !feeIsPaidFromAmount || nonNullish($maxGasFee)}
+					<MaxBalanceButton
+						balance={$sendBalance}
+						error={nonNullish(insufficientFundsError)}
+						fee={$maxGasFee}
+						token={$sendToken}
+						bind:amount
+						bind:amountSetToMax
+					/>
+				{:else}
+					<div class="w-14 sm:w-16">
+						<SkeletonText />
+					</div>
+				{/if}
 			{/if}
 		{/snippet}
 	</TokenInput>
