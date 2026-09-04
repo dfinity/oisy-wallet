@@ -177,7 +177,7 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
-	const { baseFeePerGas, perPriority } = await getSuggestedFeeData();
+	const { baseFeePerGas, perPriority, waitTimeMs } = await getSuggestedFeeData();
 
 	// Flat, priority-independent and not refunded: it belongs to the transaction, not to a tier.
 	const l1Fee = await getL1DataFee({ chainId, provider });
@@ -203,6 +203,7 @@ export const getEthFeeDataWithProvider = async ({
 
 	const priorities: EthFeePriorities = {
 		baseFeePerGas,
+		waitTimeMs,
 		perPriority: {
 			[EthFeePriority.SLOW]: applyFloors(perPriority[EthFeePriority.SLOW]),
 			[EthFeePriority.NORMAL]: applyFloors(perPriority[EthFeePriority.NORMAL]),

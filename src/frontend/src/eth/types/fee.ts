@@ -13,4 +13,7 @@ export type EthFeePerGas = Pick<TransactionFeeData, 'maxFeePerGas' | 'maxPriorit
 export interface EthFeePriorities {
 	baseFeePerGas: bigint;
 	perPriority: Record<EthFeePriority, EthFeePerGas>;
+	// Kept beside `perPriority` rather than inside it: those entries are spread straight into
+	// `TransactionFeeData`, which has no place for a wait estimate.
+	waitTimeMs: Record<EthFeePriority, number>;
 }

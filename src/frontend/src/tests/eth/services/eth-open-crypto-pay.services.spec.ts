@@ -48,6 +48,11 @@ vi.mock('$eth/providers/infura-cketh.providers', () => ({
 
 const mockEthFeePriorities: EthFeePriorities = {
 	baseFeePerGas: 5n,
+	waitTimeMs: {
+		[EthFeePriority.SLOW]: 48_000,
+		[EthFeePriority.NORMAL]: 24_000,
+		[EthFeePriority.FAST]: 12_000
+	},
 	perPriority: {
 		[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
 		[EthFeePriority.NORMAL]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },

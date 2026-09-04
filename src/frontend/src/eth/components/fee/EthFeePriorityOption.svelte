@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import type { EthFeePriority } from '$lib/enums/eth-fee-priority';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -13,6 +14,7 @@
 		fee?: bigint;
 		decimals: number;
 		exchangeRate?: number;
+		waitTimeMs?: number;
 		groupName: string;
 		testId?: string;
 		onSelect: (priority: EthFeePriority) => void;
@@ -27,12 +29,24 @@
 		fee,
 		decimals,
 		exchangeRate,
+		waitTimeMs,
 		groupName,
 		testId,
 		onSelect
 	}: Props = $props();
 
 	const inputId = $derived(`${groupName}-${priority}`);
+
+	// Sub-second estimates round up rather than to zero: a chain that confirms in 500ms is better
+	// described as a second than as nothing.
+	const formattedWaitTime = $derived(
+		nonNullish(waitTimeMs)
+			? secondsToDuration({
+					seconds: BigInt(Math.max(1, Math.round(waitTimeMs / 1000))),
+					i18n: $i18n.temporal.seconds_to_duration
+				})
+			: undefined
+	);
 </script>
 
 <label class="flex w-full cursor-pointer items-center gap-3 py-2" for={inputId}>
@@ -57,6 +71,10 @@
 				amount={formatToken({ value: fee, displayDecimals: decimals, unitName: decimals })}
 				{exchangeRate}
 			/>
+		{/if}
+
+		{#if nonNullish(waitTimeMs)}
+			<div>~{formattedWaitTime}</div>
 		{/if}
 	</span>
 </label>

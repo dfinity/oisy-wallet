@@ -29,6 +29,11 @@ const mockSuggestedFeeData = ({
 	maxPriorityFeePerGas
 }: EthFeePerGas): EthFeePriorities => ({
 	baseFeePerGas: 5n,
+	waitTimeMs: {
+		[EthFeePriority.SLOW]: 48_000,
+		[EthFeePriority.NORMAL]: 24_000,
+		[EthFeePriority.FAST]: 12_000
+	},
 	perPriority: {
 		[EthFeePriority.SLOW]: { maxFeePerGas, maxPriorityFeePerGas },
 		[EthFeePriority.NORMAL]: { maxFeePerGas, maxPriorityFeePerGas },

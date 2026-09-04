@@ -47,6 +47,11 @@ describe('EthSendForm', () => {
 			[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
 			[EthFeePriority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
 			[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 20n }
+		},
+		waitTimeMs: {
+			[EthFeePriority.SLOW]: 48_000,
+			[EthFeePriority.NORMAL]: 24_000,
+			[EthFeePriority.FAST]: 12_000
 		}
 	});
 
