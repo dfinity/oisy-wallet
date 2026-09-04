@@ -13,7 +13,7 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
-import { mockAtaAddress } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockAtaAddress2 } from '$tests/mocks/sol.mock';
 
 const USER = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 
@@ -178,11 +178,32 @@ describe('sol-transaction-summary.utils', () => {
 			expect(solAtaFee([close(), close()])).toBe(ZERO);
 		});
 
-		// An unwrap hands back the wrapped SOL along with the rent. Netting the whole balance would
-		// cancel rent the user genuinely paid, on every swap that wraps.
-		it('should leave an unwrap out of the netting', () => {
+		// A wrap opens an account and the unwrap closes it, so its rent comes back like any other.
+		// What must not come back is the wrapped SOL the close hands over with it.
+		it('should net an unwrap by the rent alone, not by the SOL it unwrapped', () => {
 			expect(
 				solAtaFee([create(), { kind: 'unwrap', account: mockAtaAddress, returned: 5_000_000_000n }])
+			).toBe(ZERO);
+		});
+
+		it('should still charge an account it opens beside a wrap it unwraps', () => {
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+				])
+			).toBe(RENT);
+		});
+
+		// Its rent was paid by whatever transaction opened it, so this one has nothing to refund.
+		// Crediting the balance would report a fee of zero for rent this transaction did pay.
+		it('should net nothing for an unwrap of an account it did not open', () => {
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+				])
 			).toBe(RENT);
 		});
 

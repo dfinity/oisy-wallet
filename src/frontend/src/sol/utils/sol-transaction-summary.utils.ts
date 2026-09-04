@@ -32,21 +32,40 @@ export const flattenInstructions = (
  * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
  * a caller shows nothing.
  *
- * Only `closeTokenAccount` is netted. An unwrap closes an account too, but hands back the SOL that
- * was wrapped along with the rent, and subtracting a whole swap's worth of SOL here would cancel
- * rent the user genuinely paid.
+ * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
+ * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
+ * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
+ * account, which the opening instruction states exactly, so the account is what ties the two
+ * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
+ * never this transaction's to charge.
  */
-export const solAtaFee = (instructions: SolInstructionSummary[]): bigint =>
-	maxBigInt(
-		flattenInstructions(instructions).reduce((acc, { kind, rent, returned }) => {
+export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
+	const flattened = flattenInstructions(instructions);
+
+	const rentPaidFor = flattened.reduce<Record<string, bigint>>((acc, { kind, account, rent }) => {
+		if (kind !== 'createTokenAccount' || isNullish(account) || isNullish(rent)) {
+			return acc;
+		}
+
+		return { ...acc, [account]: rent };
+	}, {});
+
+	return maxBigInt(
+		flattened.reduce((acc, { kind, account, rent, returned }) => {
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
 			}
 
+			if (kind === 'unwrap') {
+				return acc - (nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO);
+			}
+
+			// A plain token account holds nothing but its rent, so what it hands back is the rent.
 			return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
 		}, ZERO),
 		ZERO
 	);
+};
 
 /**
  * The tokens the transaction actually trades, read from its legs.
