@@ -120,6 +120,12 @@ describe('fee.utils', () => {
 			expect(format(value)).toBe(expected);
 		});
 
+		it('should keep every integer digit of a fee too large for a JS number', () => {
+			// Above 2^53 gwei a `Number` starts dropping integer digits, which would silently change
+			// the amount shown. Absurd as a fee, but the formatter should not be the thing that lies.
+			expect(format('12345678901234567')).toBe('12,345,678,901,234,567');
+		});
+
 		it('should not round a fee below one gwei down to zero', () => {
 			// A fixed number of decimals would print `0` here, quoting a free transaction.
 			expect(format('0.0001234')).toBe('0.000123');

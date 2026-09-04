@@ -1,4 +1,4 @@
-import { GWEI_SIGNIFICANT_DIGITS } from '$eth/constants/eth.constants';
+import { GWEI_SIGNIFICANT_DIGITS, WEI_PER_GWEI } from '$eth/constants/eth.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Languages } from '$lib/enums/languages';
 import type { TransactionFeeData } from '$lib/types/transaction';
@@ -75,19 +75,24 @@ export const formatGasFeeInGwei = ({
 	value: bigint;
 	language: Languages;
 }): string => {
+	const wholeGwei = value / WEI_PER_GWEI;
+
 	// `formatUnits` rather than `formatToken`: the latter is a display formatter and clips small
 	// values before this rounding gets to see them, which would drop digits that still matter.
-	const gwei = Number(formatUnits(value, 'gwei'));
+	const asNumber = () => Number(formatUnits(value, 'gwei'));
 
-	const options =
-		gwei >= 1
-			? {
-					maximumFractionDigits: Math.max(
-						0,
-						GWEI_SIGNIFICANT_DIGITS - (Math.floor(Math.log10(gwei)) + 1)
-					)
-				}
-			: { maximumSignificantDigits: GWEI_SIGNIFICANT_DIGITS - 1 };
+	if (wholeGwei === ZERO) {
+		return new Intl.NumberFormat(language, {
+			maximumSignificantDigits: GWEI_SIGNIFICANT_DIGITS - 1
+		}).format(asNumber());
+	}
 
-	return new Intl.NumberFormat(language, options).format(gwei);
+	const maximumFractionDigits = Math.max(0, GWEI_SIGNIFICANT_DIGITS - wholeGwei.toString().length);
+
+	// A fee with digits to spare is rounded and grouped as a bigint. `Number` drops integer digits
+	// above 2^53, which would quietly break the promise above that the integer part survives; the
+	// remaining branch is under ten thousand gwei, where it cannot.
+	return maximumFractionDigits === 0
+		? new Intl.NumberFormat(language).format((value + WEI_PER_GWEI / 2n) / WEI_PER_GWEI)
+		: new Intl.NumberFormat(language, { maximumFractionDigits }).format(asNumber());
 };
