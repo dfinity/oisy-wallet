@@ -109,7 +109,11 @@ export default [
 			'src/frontend/src/env/tokens/tokens.sns.json',
 			'**/playwright-report',
 			'**/coverage',
-			'**/.vitest-reports'
+			'**/.vitest-reports',
+			// `cap sync` copies the built web assets into the native projects.
+			'mobile/ios/App/App/public',
+			'mobile/android/app/src/main/assets/public',
+			'mobile/ios/App/Pods'
 		]
 	}
 ];

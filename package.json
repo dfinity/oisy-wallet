@@ -17,8 +17,9 @@
 		"build:seo": "node scripts/build.seo.mjs",
 		"build:style": "node scripts/build.style.mjs",
 		"build:ic-domains": "node scripts/build.ic-domains.mjs",
+		"build:mobile-auth": "node scripts/build.mobile-auth.mjs",
 		"build:ii-alternative-origins": "node scripts/build.ii-alternative-origins.mjs",
-		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
+		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:seo && npm run build:ic-domains && npm run build:mobile-auth && npm run build:ii-alternative-origins && npm run build:csp && npm run build:compress",
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.sns.json",
 		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.ckerc20.json",
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
@@ -70,6 +71,9 @@
 		"perf:memory": "node scripts/perf.memory.mjs"
 	},
 	"dependencies": {
+		"@capacitor/app": "7.1.0",
+		"@capacitor/browser": "7.0.3",
+		"@capacitor/core": "7.4.4",
 		"@dfinity/ic-pub-key": "^1.0.2",
 		"@dfinity/oisy-wallet-signer": "^6.0.0",
 		"@dfinity/utils": "~4.0.3",
@@ -109,6 +113,9 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
+		"@capacitor/android": "7.4.4",
+		"@capacitor/cli": "7.4.4",
+		"@capacitor/ios": "7.4.4",
 		"@dfinity/eslint-config-oisy-wallet": "^0.5.0",
 		"@dfinity/internet-identity-playwright": "^3.0.0",
 		"@icp-sdk/bindgen": "^0.2.0",

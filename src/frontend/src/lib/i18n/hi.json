@@ -246,6 +246,19 @@
 			"learn_more": "और जानें"
 		}
 	},
+	"mobile_auth": {
+		"text": {
+			"title": "",
+			"description": "",
+			"continue": "",
+			"redirecting": "",
+			"return_to_app": ""
+		},
+		"error": {
+			"invalid_request": "",
+			"error_while_signing_in": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "सभी ऐप्स",
