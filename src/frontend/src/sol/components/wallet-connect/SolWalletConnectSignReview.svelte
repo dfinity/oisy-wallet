@@ -289,7 +289,7 @@
 	     material a user checks the summary against, not part of the summary: on a routed swap they
 	     are a dozen lines, and above the amounts they bury the one figure that matters. -->
 	<Tabs
-		styleClass="mt-4"
+		contentStyleClass="mt-4"
 		tabs={[
 			{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
 			{ label: $i18n.wallet_connect.text.tab_operations, id: 'operations' }
