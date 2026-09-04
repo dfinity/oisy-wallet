@@ -1,6 +1,6 @@
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { absBigInt } from '$lib/utils/bigint.utils';
+import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -19,6 +19,53 @@ export const flattenInstructions = (
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
 	]);
+
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
+ * it closes hand back.
+ *
+ * A transaction that opens one account and closes another charges only the difference, and one
+ * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
+ * bills the user for accounts they no longer have.
+ *
+ * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
+ * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
+ * a caller shows nothing.
+ *
+ * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
+ * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
+ * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
+ * account, which the opening instruction states exactly, so the account is what ties the two
+ * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
+ * never this transaction's to charge.
+ */
+export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
+	const flattened = flattenInstructions(instructions);
+
+	const rentPaidFor = flattened.reduce<Record<string, bigint>>((acc, { kind, account, rent }) => {
+		if (kind !== 'createTokenAccount' || isNullish(account) || isNullish(rent)) {
+			return acc;
+		}
+
+		return { ...acc, [account]: rent };
+	}, {});
+
+	return maxBigInt(
+		flattened.reduce((acc, { kind, account, rent, returned }) => {
+			if (kind === 'createTokenAccount' && nonNullish(rent)) {
+				return acc + rent;
+			}
+
+			if (kind === 'unwrap') {
+				return acc - (nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO);
+			}
+
+			// A plain token account holds nothing but its rent, so what it hands back is the rent.
+			return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+		}, ZERO),
+		ZERO
+	);
+};
 
 /**
  * The tokens the transaction actually trades, read from its legs.

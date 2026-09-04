@@ -40,11 +40,11 @@ describe('EthWalletConnectSendTokenModal', () => {
 		observedPriority.set(undefined);
 	});
 
-	it('should price a request at the normal tier until the user says otherwise', async () => {
+	it('should price a request at the standard tier until the user says otherwise', async () => {
 		setup();
 
 		await waitFor(() => {
-			expect(get(observedPriority)).toBe(EthFeePriority.NORMAL);
+			expect(get(observedPriority)).toBe(EthFeePriority.STANDARD);
 		});
 	});
 
@@ -54,7 +54,7 @@ describe('EthWalletConnectSendTokenModal', () => {
 		const { sendEthFeePriority } = setup();
 
 		await waitFor(() => {
-			expect(get(observedPriority)).toBe(EthFeePriority.NORMAL);
+			expect(get(observedPriority)).toBe(EthFeePriority.STANDARD);
 		});
 
 		sendEthFeePriority.set(EthFeePriority.FAST);
