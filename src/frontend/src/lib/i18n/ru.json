@@ -1563,6 +1563,7 @@
 			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
 			"estimated_fee_eth": "",
 			"priority": "",
+			"gwei": "",
 			"priority_slow": "",
 			"priority_slow_description": "",
 			"priority_standard": "",
