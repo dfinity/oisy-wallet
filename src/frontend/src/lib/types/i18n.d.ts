@@ -1254,8 +1254,8 @@ interface I18nFee {
 		priority: string;
 		priority_slow: string;
 		priority_slow_description: string;
-		priority_normal: string;
-		priority_normal_description: string;
+		priority_medium: string;
+		priority_medium_description: string;
 		priority_fast: string;
 		priority_fast_description: string;
 		convert_fee: string;

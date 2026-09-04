@@ -1,5 +1,5 @@
 export enum EthFeePriority {
 	SLOW = 'slow',
-	NORMAL = 'normal',
+	MEDIUM = 'medium',
 	FAST = 'fast'
 }

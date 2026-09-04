@@ -81,7 +81,7 @@ describe('EthFeeContext', () => {
 		children: Snippet;
 	} = {
 		observe: true,
-		priority: EthFeePriority.NORMAL,
+		priority: EthFeePriority.MEDIUM,
 		destination,
 		amount: 1,
 		data: undefined,
@@ -109,7 +109,7 @@ describe('EthFeeContext', () => {
 			baseFeePerGas: 5n,
 			perPriority: {
 				[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
-				[EthFeePriority.NORMAL]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+				[EthFeePriority.MEDIUM]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
 				[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
 			}
 		});
@@ -179,7 +179,7 @@ describe('EthFeeContext', () => {
 		// Distinct tips per tier so the resolved fee identifies which one was applied.
 		const perPriority = {
 			[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
-			[EthFeePriority.NORMAL]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+			[EthFeePriority.MEDIUM]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
 			[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 30n }
 		};
 

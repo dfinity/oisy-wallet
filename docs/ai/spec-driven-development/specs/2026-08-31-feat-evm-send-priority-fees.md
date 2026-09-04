@@ -2,7 +2,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Spec — Transaction priority for EVM sends
 
-- **Feature:** Let the user choose Slow / Normal / Fast for an ETH or ERC-20 send and, per [section 10](#10-walletconnect), for a WalletConnect transaction request, and show a fee that reflects the choice
+- **Feature:** Let the user choose Slow / Medium / Fast for an ETH or ERC-20 send and, per [section 10](#10-walletconnect), for a WalletConnect transaction request, and show a fee that reflects the choice
 - **Design:** Figma `duPCw1leqer7ES0sBb6Uua` ("7. OISY UI"), page _Priority, nonce, memo_, section **Priority fees** (`22675:343661`)
 - **Status:** Draft for implementation in Claude Code
 
@@ -46,7 +46,7 @@ calls the MetaMask Gas API (`/networks/{chainId}/suggestedGasFees`). Its respons
 `GasFeeEstimate` in `src/frontend/src/eth/types/infura.ts` already declares `low`, `medium`,
 `high` and `estimatedBaseFee`, each level carrying `suggestedMaxPriorityFeePerGas`,
 `suggestedMaxFeePerGas`, `minWaitTimeEstimate` and `maxWaitTimeEstimate`. `getSuggestedFeeData`
-destructures **only `medium`** and discards the rest. Slow / Normal / Fast maps 1:1 onto
+destructures **only `medium`** and discards the rest. Slow / Medium / Fast maps 1:1 onto
 low / medium / high with no new API integration.
 
 **The per-send-setting precedent exists.** `src/frontend/src/lib/stores/send.store.ts` already
@@ -71,7 +71,7 @@ WalletConnect transaction requests were the named follow-up and are specified in
 | Gas API      | Return all three tiers plus `estimatedBaseFee` instead of only `medium`                           |
 | Fee maths    | Add an estimated-cost derivation alongside the existing max-fee ceiling                           |
 | Fee display  | Send flow shows the estimate, labelled "Estimated fee"                                            |
-| Fee state    | Selected tier lives in `SendContext`, defaults to Normal                                          |
+| Fee state    | Selected tier lives in `SendContext`, defaults to Medium                                          |
 | UI           | Desktop: collapsible `Priority` row with three options. Mobile: bottom sheet with a `Done` button |
 | Signing      | The selected tier's `maxFeePerGas` / `maxPriorityFeePerGas` are what get signed                   |
 | Networks     | All EVM networks                                                                                  |
@@ -153,7 +153,7 @@ levels plus `estimatedBaseFee` rather than collapsing to `medium`. Keep the exis
 describes the payload, so no type work beyond a new return shape.
 
 Introduce the tier as a typed enum in `src/frontend/src/eth/types/` (name at the implementer's
-discretion, e.g. `EthFeePriority` with `SLOW` / `NORMAL` / `FAST`) and keep the Gas API's
+discretion, e.g. `EthFeePriority` with `SLOW` / `MEDIUM` / `FAST`) and keep the Gas API's
 `low` / `medium` / `high` naming confined to the REST layer. The rest of the app should not know
 the vendor's vocabulary.
 
@@ -243,8 +243,14 @@ both native and fiat:
 | Tier      | Descriptor     |
 | --------- | -------------- |
 | Slow 🐢   | May take hours |
-| Normal ⚡ | Recommended    |
+| Medium ⚡ | Recommended    |
 | Fast 🔥   | Prioritized    |
+
+> **Renamed after implementation.** The middle tier was called **Normal**, in the design frames
+> and in the code. "Normal" is an opinion about the other two: it implies that choosing Slow or
+> Fast is an unusual thing to do, when the whole point of the row is that all three are ordinary
+> choices with different trade-offs. It is **Medium** everywhere now, in the enum, the i18n keys
+> and the copy. The Figma frames above still read Normal and have not been re-exported.
 
 The `Priority` row sits between the destination and the fee row, which in
 `lib/components/send/SendForm.svelte` means between the `SendDestination` component and the
@@ -296,7 +302,7 @@ Two PRs. Atomic per `AGENTS.md` commandments 2 and 3.
 - estimated-cost derivation in `fee.utils.ts`, exposed via `eth-fee.store.ts`
 - send flow renders the estimate, row relabelled "Estimated fee"
 - every solvency check stays on `maxGasFee`
-- no tier UI yet; still pinned to Normal
+- no tier UI yet; still pinned to Medium
 - `PRODUCT.md` updated in this PR
 
 > **Adjusted during implementation.** PR1 was originally specified to return all three tiers.
@@ -307,7 +313,7 @@ Two PRs. Atomic per `AGENTS.md` commandments 2 and 3.
 
 - all three tiers returned from the Gas API, with the vendor's low / medium / high naming
   confined to the REST layer
-- tier state in `SendContext`, default Normal
+- tier state in `SendContext`, default Medium
 - desktop collapsible row plus mobile bottom sheet, all three tiers priced
 - selection drives the fee data and therefore what gets signed
 - tier added to send analytics metadata
@@ -346,7 +352,7 @@ New coverage worth having:
 - the estimate util, particularly that it is strictly below `maxGasFee` for the same input
 - BSC floor and the ethers `maxBigInt` merge applied per tier, not once
 - selecting a tier changes what `EthSendTokenWizard` passes to `executeSend`
-- the default is Normal on open
+- the default is Medium on open
 - the bottom sheet's `Done` closes without discarding the selection
 - keyboard operability of the radio group
 
@@ -375,7 +381,7 @@ Run `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm 
    Base separates the most of any chain measured (9x), because its base fee is tiny so the tip
    dominates rather than the reverse. **Arbitrum and both BSC chains return three identical
    tips**, and Polygon, Amoy and Base Sepolia are within 6%. On Ethereum today `medium` and
-   `high` carry the same tip, so Normal and Fast quote an identical fee. This is not an L1/L2
+   `high` carry the same tip, so Medium and Fast quote an identical fee. This is not an L1/L2
    split, it is per-chain and time-varying, so it cannot be settled with a static allowlist. It
    becomes [Pending decision 6](#8-pending-decisions-facts-are-clear-someone-needs-to-decide).
 3. **Tooltip copy for `Estimated fee`.** The designer supplied copy for `Priority` only.
@@ -405,8 +411,8 @@ Run `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm 
 4. **Where the tier lives**: `SendContext` (mirroring `sendEthCustomNonce`, same `WizardModal`
    remount constraint) or `EthFeeContext` (closer to the data it drives). This spec assumes
    `SendContext` for consistency with the established precedent.
-5. **Persistence.** Does the choice reset to Normal on every send, or persist for the session or
-   across sessions? The ticket states only that the default is Normal. This spec assumes
+5. **Persistence.** Does the choice reset to Medium on every send, or persist for the session or
+   across sessions? The ticket states only that the default is the middle tier. This spec assumes
    per-send with no persistence.
 
 6. **What to show when the tiers price identically.** Section 9 shows this is the common case,
@@ -580,7 +586,7 @@ same PR as the behaviour:
 - Under **Transaction fees**: _"Only the send flow quotes an expected cost; swap, convert, stake
   and WalletConnect approvals still quote the maximum."_
 - Under **Transaction priority**: _"The choice is offered on the send flow only: WalletConnect
-  requests, swaps, conversions and staking still use the normal speed."_
+  requests, swaps, conversions and staking still use the medium speed."_
 
 Keep the remaining negative statements about swap, convert and stake, which stay true.
 
