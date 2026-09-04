@@ -71,7 +71,7 @@
 
 	let {
 		observe,
-		priority = EthFeePriority.NORMAL,
+		priority = EthFeePriority.STANDARD,
 		destination = '',
 		amount,
 		data,
