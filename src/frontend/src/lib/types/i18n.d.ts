@@ -1255,8 +1255,8 @@ interface I18nFee {
 		priority: string;
 		priority_slow: string;
 		priority_slow_description: string;
-		priority_normal: string;
-		priority_normal_description: string;
+		priority_standard: string;
+		priority_standard_description: string;
 		priority_fast: string;
 		priority_fast_description: string;
 		convert_fee: string;
@@ -1303,6 +1303,7 @@ interface I18nWallet_connect {
 		application: string;
 		review: string;
 		method: string;
+		type: string;
 		methods: string;
 		events: string;
 		message: string;

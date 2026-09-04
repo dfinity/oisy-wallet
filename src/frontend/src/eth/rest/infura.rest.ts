@@ -38,7 +38,7 @@ export class InfuraGasRest {
 			baseFeePerGas: parseToken({ value: estimatedBaseFee, unitName: 'gwei' }),
 			perPriority: {
 				[EthFeePriority.SLOW]: mapLevel(low),
-				[EthFeePriority.NORMAL]: mapLevel(medium),
+				[EthFeePriority.STANDARD]: mapLevel(medium),
 				[EthFeePriority.FAST]: mapLevel(high)
 			}
 		};
