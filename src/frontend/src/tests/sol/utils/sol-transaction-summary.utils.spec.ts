@@ -7,11 +7,13 @@ import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import {
 	deriveSolTransactionSummary,
 	formatSolInstructionSummary,
-	formatSolTransactionSummary
+	formatSolTransactionSummary,
+	solAtaFee
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
+import { mockAtaAddress } from '$tests/mocks/sol.mock';
 
 const USER = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 
@@ -135,6 +137,61 @@ describe('sol-transaction-summary.utils', () => {
 					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
+		});
+	});
+
+	describe('solAtaFee', () => {
+		const RENT = 2_039_280n;
+
+		const create = (rent = RENT): SolInstructionSummary => ({
+			kind: 'createTokenAccount',
+			account: mockAtaAddress,
+			rent
+		});
+
+		const close = (returned = RENT): SolInstructionSummary => ({
+			kind: 'closeTokenAccount',
+			account: mockAtaAddress,
+			returned
+		});
+
+		it('should charge the rent of an account it only opens', () => {
+			expect(solAtaFee([create()])).toBe(RENT);
+		});
+
+		it('should charge the rent of each of several accounts', () => {
+			expect(solAtaFee([create(), create()])).toBe(RENT * 2n);
+		});
+
+		// The account is gone by the end of the transaction, so its rent is back in the wallet.
+		// Billing the open alone charges the user for something they no longer have.
+		it('should charge nothing when it closes what it opened', () => {
+			expect(solAtaFee([create(), close()])).toBe(ZERO);
+		});
+
+		it('should charge only the difference when it opens more than it closes', () => {
+			expect(solAtaFee([create(), create(), close()])).toBe(RENT);
+		});
+
+		// A refund is not a negative fee. It nets to nothing, and the caller shows nothing.
+		it('should never go below zero when it closes more than it opens', () => {
+			expect(solAtaFee([close(), close()])).toBe(ZERO);
+		});
+
+		// An unwrap hands back the wrapped SOL along with the rent. Netting the whole balance would
+		// cancel rent the user genuinely paid, on every swap that wraps.
+		it('should leave an unwrap out of the netting', () => {
+			expect(
+				solAtaFee([create(), { kind: 'unwrap', account: mockAtaAddress, returned: 5_000_000_000n }])
+			).toBe(RENT);
+		});
+
+		it('should read the accounts a route opened under it', () => {
+			expect(solAtaFee([{ kind: 'route', children: [create(), close()] }])).toBe(ZERO);
+		});
+
+		it('should charge nothing for a transaction that touches no account', () => {
+			expect(solAtaFee([])).toBe(ZERO);
 		});
 	});
 

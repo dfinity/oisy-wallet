@@ -1,6 +1,6 @@
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { absBigInt } from '$lib/utils/bigint.utils';
+import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -19,6 +19,34 @@ export const flattenInstructions = (
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
 	]);
+
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
+ * it closes hand back.
+ *
+ * A transaction that opens one account and closes another charges only the difference, and one
+ * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
+ * bills the user for accounts they no longer have.
+ *
+ * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
+ * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
+ * a caller shows nothing.
+ *
+ * Only `closeTokenAccount` is netted. An unwrap closes an account too, but hands back the SOL that
+ * was wrapped along with the rent, and subtracting a whole swap's worth of SOL here would cancel
+ * rent the user genuinely paid.
+ */
+export const solAtaFee = (instructions: SolInstructionSummary[]): bigint =>
+	maxBigInt(
+		flattenInstructions(instructions).reduce((acc, { kind, rent, returned }) => {
+			if (kind === 'createTokenAccount' && nonNullish(rent)) {
+				return acc + rent;
+			}
+
+			return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+		}, ZERO),
+		ZERO
+	);
 
 /**
  * The tokens the transaction actually trades, read from its legs.
