@@ -1620,6 +1620,7 @@
 			"application": "アプリケーション",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
+			"type": "",
 			"methods": "方法",
 			"events": "イベント",
 			"message": "メッセージ",

@@ -54,6 +54,10 @@
 		}
 	});
 
+	// The struct EIP-712 hashes. The RPC method above says how the request arrived; this says what
+	// it is, which is the difference between "a typed-data signature" and "an unlimited allowance".
+	let primaryType = $derived(json?.primaryType);
+
 	// Only the members the schema declares are previewed: EIP-712 hashes those and nothing else, so
 	// a key the schema leaves out is not part of what the user would sign and is not shown as if it
 	// were. That the request carried such keys is stated instead.
@@ -164,6 +168,15 @@
 
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
 		<p class="mb-4 font-normal">{method}</p>
+
+		{#if nonNullish(primaryType)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.type}</p>
+			<!-- Monospaced like the struct names below it: this is the dApp's own text, not OISY's
+			     copy, and it should not read as though the wallet vouched for the wording. -->
+			<p class="mb-4 font-normal">
+				<span class="font-mono text-sm break-all">{primaryType}</span>
+			</p>
+		{/if}
 
 		<!-- The RPC method above names how the request arrived. What it would authorize is the struct being
      hashed, which is the only thing left to state once the summary rows come up empty. -->

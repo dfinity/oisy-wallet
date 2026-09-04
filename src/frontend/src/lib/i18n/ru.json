@@ -1620,6 +1620,7 @@
 			"application": "Приложение",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
+			"type": "",
 			"methods": "Методы",
 			"events": "События",
 			"message": "Сообщение",

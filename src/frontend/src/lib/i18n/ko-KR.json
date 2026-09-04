@@ -1620,6 +1620,7 @@
 			"application": "애플리케이션",
 			"review": "$chain_name ($key) 필수 권한 검토",
 			"method": "메서드",
+			"type": "",
 			"methods": "메서드",
 			"events": "이벤트",
 			"message": "메시지",
