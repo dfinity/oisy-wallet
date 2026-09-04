@@ -69,9 +69,10 @@
 				})
 			: ZERO;
 
-		// The chain requires the balance to cover the amount plus `maxFeePerGas * gas`, so the ceiling
-		// is what decides whether a native send is affordable. `minGasFee` omits the base fee
-		// entirely and therefore bounds nothing the chain enforces.
+		// The chain requires the balance to cover the amount plus `maxFeePerGas * gas` plus, on an
+		// OP-stack chain, the L1 data fee, so the ceiling is what decides whether a native send is
+		// affordable. `minGasFee` omits the base fee entirely and therefore bounds nothing the chain
+		// enforces.
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
 			// Falling back to the tip rather than to zero: an unknown ceiling must not weaken the check
 			// below what it was before the flag.
