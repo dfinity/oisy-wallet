@@ -286,8 +286,13 @@
 			return;
 		}
 
+		// One snapshot for both the signature and the cap below. Rebuilding a literal from parts of it
+		// would let any term the rebuild omits - such as the OP-stack `l1Fee` - drop out of the ceiling
+		// the cap enforces, which is the very shortfall the cap exists to prevent.
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
+		const feeData = $feeStore;
+
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = feeData;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit
@@ -322,7 +327,7 @@
 				? capSendAmountToFee({
 						amount: parsedAmount,
 						balance: $sendBalance,
-						feeData: { maxFeePerGas, maxPriorityFeePerGas, gas }
+						feeData
 					})
 				: parsedAmount;
 

@@ -31,6 +31,19 @@ describe('capSendAmountToFee', () => {
 		expect(capSendAmountToFee({ amount: maxAmount, balance, feeData: fallen })).toBe(maxAmount);
 	});
 
+	// The cap is only as complete as the snapshot it is handed. On an OP-stack chain the ceiling
+	// includes the L1 data fee, so a caller that rebuilds the fee object from parts and omits it
+	// would cap against a ceiling lower than the chain's and reopen the shortfall.
+	it('counts the OP-stack L1 data fee in the ceiling it caps against', () => {
+		const l1Fee = 1_583_231_633n;
+		const withL1 = { ...quoted, l1Fee };
+
+		const capped = capSendAmountToFee({ amount: maxAmount, balance, feeData: withL1 });
+
+		expect(capped).toBe(maxAmount - l1Fee);
+		expect(capped + (maxGasFee(withL1) ?? ZERO)).toBeLessThanOrEqual(balance);
+	});
+
 	it('goes non-positive when the fee alone exceeds the balance, so the caller can refuse', () => {
 		const unaffordable = { ...quoted, maxFeePerGas: balance };
 
