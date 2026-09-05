@@ -35,12 +35,14 @@ export const loadActiveUserTransactions = async ({
 		return;
 	}
 
-	activeUserTransactionsStore.init(identity.getPrincipal());
+	const principal = identity.getPrincipal();
+
+	activeUserTransactionsStore.init(principal);
 
 	try {
 		const transactions = await getActiveUserTransactions({ identity });
 
-		activeUserTransactionsStore.set({ transactions });
+		activeUserTransactionsStore.set({ principal, transactions });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
@@ -50,18 +52,20 @@ export const createActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & CreateActiveUserTransactionParams): Promise<void> => {
+	const principal = identity.getPrincipal();
 	const transaction = await createActiveUserTransactionApi({ identity, ...params });
 
-	activeUserTransactionsStore.upsert({ transaction });
+	activeUserTransactionsStore.upsert({ principal, transaction });
 };
 
 export const updateActiveUserTransaction = async ({
 	identity,
 	...params
 }: { identity: Identity } & UpdateActiveUserTransactionParams): Promise<void> => {
+	const principal = identity.getPrincipal();
 	const transaction = await updateActiveUserTransactionApi({ identity, ...params });
 
-	activeUserTransactionsStore.upsert({ transaction });
+	activeUserTransactionsStore.upsert({ principal, transaction });
 };
 
 export const deleteActiveUserTransaction = async ({
@@ -71,9 +75,11 @@ export const deleteActiveUserTransaction = async ({
 	identity: Identity;
 	id: UpdateActiveUserTransactionParams['id'];
 }): Promise<void> => {
+	const principal = identity.getPrincipal();
+
 	await deleteActiveUserTransactionApi({ identity, id });
 
-	activeUserTransactionsStore.remove({ id });
+	activeUserTransactionsStore.remove({ principal, id });
 };
 
 export const applyActiveUserTransactionPollUpdate = async ({
