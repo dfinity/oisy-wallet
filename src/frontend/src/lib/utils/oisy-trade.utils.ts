@@ -342,6 +342,37 @@ export const valueDifferencePercent = ({
 		: ((currentValue - price) / currentValue) * 100;
 };
 
+// A limit price that does NOT cross the book but still gives value up versus
+// the current-value feed — a Sell below it, a Buy above it — by more than
+// `threshold` percent (a negative figure, e.g. -1). Such an order rests, so it
+// carries none of the crossing warnings, yet it sits on the side of the spread
+// the market reaches first: it is the likeliest to fill, and it fills at a price
+// worse than what the feed says the tokens are worth. Crossing prices are
+// excluded — they fill immediately and have their own warning.
+export const restsAgainstValue = ({
+	side,
+	price,
+	currentValue,
+	bid,
+	ask,
+	threshold
+}: {
+	side: LimitOrderSide;
+	price: number;
+	currentValue: number;
+	bid: number | null;
+	ask: number | null;
+	threshold: number;
+}): boolean => {
+	if (!(price > 0) || !(currentValue > 0)) {
+		return false;
+	}
+	if (crossesBook({ side, price, bid, ask })) {
+		return false;
+	}
+	return valueDifferencePercent({ side, price, currentValue }) < threshold;
+};
+
 export type FieldErrorKind = 'balance' | 'lot' | 'min_notional' | 'max_notional';
 
 export interface AmountValidation {

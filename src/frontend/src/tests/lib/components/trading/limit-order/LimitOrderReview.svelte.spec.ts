@@ -112,6 +112,54 @@ describe('LimitOrderReview', () => {
 		expect(getByText(en.trading.limit_order.give_up_confirm)).toBeInTheDocument();
 	});
 
+	// A wide book (bid 8 / ask 11) around a current value of 10: a sell at 9 rests,
+	// yet gives up 10% versus current value.
+	const restingAgainstValue = { bid: 8, ask: 11, price: 9 };
+
+	it('renders the resting confirmation, not the crossing one, for a severe resting sell', () => {
+		const { getByText, queryByText } = render(LimitOrderReview, {
+			props: { ...baseProps, ...restingAgainstValue }
+		});
+
+		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
+		expect(queryByText(en.trading.limit_order.give_up_confirm)).toBeNull();
+	});
+
+	it('renders the resting confirmation for a severe resting buy', () => {
+		const { getByText } = render(LimitOrderReview, {
+			props: { ...baseProps, side: 'buy' as LimitOrderSide, bid: 8, ask: 12, price: 11 }
+		});
+
+		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
+	});
+
+	it('renders no confirmation for a resting order within the give-up threshold', () => {
+		// -3% versus current value: warned on the form, but not blocking here.
+		const { queryByText } = render(LimitOrderReview, {
+			props: { ...baseProps, bid: 8, ask: 11, price: 9.7 }
+		});
+
+		expect(queryByText(en.trading.limit_order.rests_against_value_confirm)).toBeNull();
+		expect(queryByText(en.trading.limit_order.give_up_confirm)).toBeNull();
+	});
+
+	it('disables the place button on a severe resting order until it is confirmed', async () => {
+		const props = $state({ ...baseProps, ...restingAgainstValue });
+
+		const { getByText } = render(LimitOrderReview, { props });
+
+		const placeButton = getByText(en.trading.limit_order.place_order_button).closest(
+			'button'
+		) as HTMLButtonElement;
+
+		expect(placeButton).toBeDisabled();
+
+		props.giveUpConfirmed = true;
+		await Promise.resolve();
+
+		expect(placeButton).not.toBeDisabled();
+	});
+
 	it('invokes onBack when the back button is clicked', async () => {
 		const onBack = vi.fn();
 

@@ -5,6 +5,7 @@
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import { LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT } from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -17,6 +18,7 @@
 		type PricePreset,
 		queuePositionDisplay,
 		queuePositionFraction,
+		restsAgainstValue,
 		validatePrice,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
@@ -64,6 +66,29 @@
 
 	const crossing = $derived(active && crossesBook({ side, price: priceNum, bid, ask }));
 
+	// Priced against the user while still resting: no immediate fill, so none of
+	// the crossing warnings apply, yet the order is the one the market reaches
+	// first and it would fill below (Sell) / above (Buy) current value.
+	const restingAgainstValue = $derived(
+		active &&
+			restsAgainstValue({
+				side,
+				price: priceNum,
+				currentValue,
+				bid,
+				ask,
+				threshold: LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT
+			})
+	);
+
+	// The label turns on the sign alone, not the warning threshold: "reaches"
+	// describes a price the market has yet to hit, and that stops being true the
+	// moment the price is past current value at all — a full percent earlier than
+	// there is anything worth warning about.
+	const restingPastValue = $derived(
+		active && restsAgainstValue({ side, price: priceNum, currentValue, bid, ask, threshold: 0 })
+	);
+
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));
 
 	const showValueDifference = $derived(priceNum > 0 && currentValue > 0);
@@ -93,7 +118,12 @@
 				$base: base
 			});
 		}
-		if (crossing) {
+		// The "reaches" / "drops to" wording only holds while the price is still
+		// ahead of the market. Once it is behind — crossing, or resting past
+		// current value — the market has already got there, and a resting order
+		// past current value is what monitoring bots take first, so it reads as
+		// the immediate sale/purchase it effectively is.
+		if (crossing || restingPastValue) {
 			return replacePlaceholders(
 				side === 'sell' ? t.price_label_sell_crossing : t.price_label_buy_crossing,
 				{ $base: base }
@@ -179,6 +209,13 @@
 			}
 			return {
 				text: side === 'sell' ? t.warning_crossing_sell : t.warning_crossing_buy,
+				danger: valueDiff < -5
+			};
+		}
+		if (restingAgainstValue) {
+			return {
+				text:
+					side === 'sell' ? t.warning_resting_below_value_sell : t.warning_resting_above_value_buy,
 				danger: valueDiff < -5
 			};
 		}
@@ -322,12 +359,15 @@
 
 		{#if showValueDifference}
 			<!-- `ValueDifference` sets no size of its own; without `text-sm` it
-				 inherits the base 16px and ends up the largest text in the box. -->
+				 inherits the base 16px and ends up the largest text in the box.
+				 Coloured whenever a warning is shown below — crossing, fill-or-kill, or
+				 a resting price against current value — so the figure and the warning
+				 always agree; neutral otherwise. -->
 			<span class="shrink-0 text-sm">
 				<ValueDifference
 					errorLevel={-5}
 					iconPosition="left"
-					muted={!(crossing || fillOrKill)}
+					muted={!(crossing || fillOrKill || restingAgainstValue)}
 					successNeutral
 					value={valueDiff}
 					warningLevel={0}

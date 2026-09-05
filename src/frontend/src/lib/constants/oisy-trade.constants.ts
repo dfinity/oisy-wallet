@@ -72,3 +72,11 @@ export const OISY_TRADE_LEARN_MORE_URL = 'https://docs.oisy.com/using-oisy-walle
 // Value-difference (%) of a crossing limit order at/below which the give-up is
 // "severe" — rendered red rather than amber (a >5% give-up vs current value).
 export const LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT = -5;
+
+// Value-difference (%) below which a RESTING limit order (one that does not
+// cross the book) is flagged as priced against the user — a Sell below current
+// value, a Buy above it. Such an order still rests, but it sits on the side the
+// market reaches first, so it is likely to fill soon at a worse price than the
+// feed's. Matches the threshold at which the Review's value difference already
+// turns amber, so the figure and the warning appear together.
+export const LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT = -1;

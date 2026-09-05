@@ -1602,6 +1602,8 @@ interface I18nTrading {
 		are_ahead: string;
 		warning_crossing_sell: string;
 		warning_crossing_buy: string;
+		warning_resting_below_value_sell: string;
+		warning_resting_above_value_buy: string;
 		warning_fok_sell: string;
 		warning_fok_buy: string;
 		warning_fok_blocked_sell: string;
@@ -1638,6 +1640,7 @@ interface I18nTrading {
 		fee_taker: string;
 		fee_maker_taker_value: string;
 		give_up_confirm: string;
+		rests_against_value_confirm: string;
 		market_moved_sell: string;
 		market_moved_buy: string;
 		placing_initializing: string;
