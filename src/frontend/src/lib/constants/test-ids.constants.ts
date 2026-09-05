@@ -31,6 +31,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const MODAL_TITLE = 'modal-title';
+export const MODAL_BACKDROP = 'backdrop';
 
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
