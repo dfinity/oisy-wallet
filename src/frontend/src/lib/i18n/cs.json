@@ -842,6 +842,7 @@
 		"title": "Aktuální síť. Přístup k výběru.",
 		"test_networks": "Testovací sítě",
 		"chain_fusion": "Všechny sítě",
+		"evm_networks": "Sítě EVM",
 		"network": "Síť",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal povoleno",
@@ -987,7 +988,8 @@
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
 			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
-			"scanned_address_only_destination_single_token": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!"
+			"scanned_address_only_destination_single_token": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
+			"scanned_address_only_destination_multi_network": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správnou síť a správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",

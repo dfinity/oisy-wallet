@@ -14,6 +14,7 @@
 
 	interface Props {
 		allNetworksEnabled?: boolean;
+		allNetworksLabel?: string;
 		filteredNetworks?: Network[];
 		showStakeBalance?: boolean;
 		onNetworkFilter: () => void;
@@ -21,6 +22,7 @@
 
 	let {
 		allNetworksEnabled,
+		allNetworksLabel,
 		filteredNetworks,
 		showStakeBalance = true,
 		onNetworkFilter
@@ -44,6 +46,7 @@
 <ContentWithToolbar testId={MODAL_FILTER_NETWORKS}>
 	<NetworkSwitcherList
 		{allNetworksEnabled}
+		{allNetworksLabel}
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}

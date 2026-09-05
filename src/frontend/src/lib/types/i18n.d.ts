@@ -589,6 +589,7 @@ interface I18nNetworks {
 	title: string;
 	test_networks: string;
 	chain_fusion: string;
+	evm_networks: string;
 	network: string;
 	testnet: string;
 	number_of_enabled: string;
@@ -726,6 +727,7 @@ interface I18nSend {
 		fee_info: string;
 		scanned_address_only_destination: string;
 		scanned_address_only_destination_single_token: string;
+		scanned_address_only_destination_multi_network: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
