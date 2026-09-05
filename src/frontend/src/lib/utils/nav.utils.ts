@@ -51,6 +51,9 @@ export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
+// Testing harness - DO NOT MERGE.
+export const isTestingPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Testing}`;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -79,6 +82,9 @@ export const isRouteBorrowings = ({ route: { id } }: Page): boolean => isBorrowi
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
 export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
+
+// Testing harness - DO NOT MERGE.
+export const isRouteTesting = ({ route: { id } }: Page): boolean => isTestingPath(id);
 
 const tokenUrl = ({
 	token,

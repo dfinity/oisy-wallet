@@ -15,6 +15,7 @@
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconCoins from '$lib/components/icons/lucide/IconCoins.svelte';
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
+	import IconFlaskConical from '$lib/components/icons/lucide/IconFlaskConical.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
@@ -39,6 +40,7 @@
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_TESTING,
 		NAVIGATION_ITEM_TOKENS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
@@ -62,6 +64,7 @@
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
+		isRouteTesting,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -278,6 +281,16 @@
 				icon: IconGift,
 				href: url(AppPath.Rewards),
 				selected: isRouteRewards(page)
+			},
+			// Testing harness - DO NOT MERGE. Unconditional, like the harness banner: on this branch
+			// the entry is meant to be there in every build. Deliberately not translated.
+			testing: {
+				label: 'Testing',
+				ariaLabel: 'Testing harness',
+				testId: prefixedTestId(NAVIGATION_ITEM_TESTING),
+				icon: IconFlaskConical,
+				href: url(AppPath.Testing),
+				selected: isRouteTesting(page)
 			}
 		})
 	);
