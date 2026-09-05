@@ -334,6 +334,25 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
 
+### 1Sec restricted to the unwrapping direction
+
+1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
+
+Which leg that is depends on the token, because 1Sec wraps in both directions. Its config records the chain each token is native to, and OISY offers only the leg that returns a token to that chain:
+
+- **ICP-native tokens** — ICP, BOB, GLDT, ckBTC — are wrapped as ERC-20s on the EVM chains. Only **EVM → ICP** is offered, so selecting native ICP (or ICRC BOB / GLDT) as the pay token no longer lists any Ethereum, Base or Arbitrum receive option.
+- **EVM-native tokens** — USDC, USDT, cbBTC — are wrapped as ICRC ledgers on ICP. Only **ICP → EVM** is offered, so selecting native USDC on Ethereum no longer lists the 1Sec-bridged USDC on ICP as a receive option.
+
+The rule is enforced once, on the directed pair, so the destination **network** filter narrows with it: a pay token with no reachable 1Sec destination drops the networks it could only have reached through 1Sec, rather than offering a network whose token list is then empty.
+
+Only 1Sec is affected. Chain Fusion still converts ck twins both ways (ckUSDC stays reachable from Ethereum USDC), the IC DEXes still quote ICP-side pairs, and Velora still quotes EVM-side pairs — no token loses a non-1Sec route.
+
+Three tokens in 1Sec's config have no practical effect in OISY: **CHAT** is bridged by 1Sec's canister but is absent from the `onesec-bridge` package's token config, so OISY has never routed it in either direction; and **ckBTC**'s wrapped ERC-20 and **cbBTC**'s wrapped ICRC ledger are not OISY tokens, so the surviving leg of each has no pay token to start from.
+
+What this deliberately does not do: it does not hide, disable or remove a token, and it does not change which tokens 1Sec accepts as a pay token — only which destinations it offers for them. In particular the wrapped ERC-20 of ICP stays a curated, [suggested](#curated-tokens-vs-metadata-only-tokens) token on all three EVM chains, precisely so that a holder's balance stays visible: it was never in most users' custom-token list, so dropping it from the curated set would hide the very balance they need to swap back.
+
+The restriction is a code-level kill switch — `ONESEC_UNWRAP_ONLY` in `src/frontend/src/env/rest/onesec.env.ts`, in the same style as the price-provider flags. Setting it to `false` restores both directions unchanged.
+
 ### Cross-session settlement
 
 Every ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
