@@ -1158,7 +1158,6 @@ interface I18nTokens {
 		already_available: string;
 		not_toggleable: string;
 		incomplete_metadata: string;
-		duplicate_metadata: string;
 		unexpected_undefined: string;
 		unexpected_error_on_token_delete: string;
 		unexpected_error_on_token_update: string;
