@@ -14,6 +14,30 @@ export interface WalletConnectEthSendTransactionParams {
 	nonce?: string;
 }
 
+/**
+ * What an `eth_sendTransaction` request asks OISY to do, as far as OISY can tell from its calldata.
+ *
+ * The review renders one of these and nothing else, which is what keeps it honest: a request only
+ * reaches a variant that names a call once its selector has been recognised, so the default is
+ * `unknown` rather than the native summary. A request carrying calldata nobody here decoded used to
+ * fall through to `native` and be presented as a zero-value send to the contract address, which is
+ * how an `increaseAllowance` granting an attacker an unlimited allowance came to be reviewed as
+ * "Send 0 ETH". Any selector OISY does not decode belongs in `unknown`, and adding a variant is
+ * therefore a change to what OISY can describe, never to what it will approve.
+ */
+export type WalletConnectEthCall =
+	// No calldata: the transaction moves native value and does nothing else.
+	| { type: 'native' }
+	| { type: 'erc20Approve' }
+	| { type: 'erc20Transfer' }
+	| { type: 'setApprovalForAll' }
+	// `increaseAllowance` / `decreaseAllowance`: an allowance granted or reduced by a delta rather
+	// than set to an absolute amount.
+	| { type: 'erc20AllowanceDelta'; increase: boolean }
+	// The selector is carried so the review can name the call it could not decode. It is `undefined`
+	// when the calldata is too short to hold one.
+	| { type: 'unknown'; selector: string | undefined };
+
 export interface WalletConnectEthSignTypedDataV4 {
 	domain: TypedDataDomain;
 	types: Record<string, Array<TypedDataField>>;

@@ -51,7 +51,10 @@ updates:
     groups:
       solana-kit:
         patterns:
+          - '@solana-program/address-lookup-table'
           - '@solana-program/compute-budget'
+          - '@solana-program/memo'
+          - '@solana-program/stake'
           - '@solana-program/system'
           - '@solana-program/token'
           - '@solana-program/token-2022'

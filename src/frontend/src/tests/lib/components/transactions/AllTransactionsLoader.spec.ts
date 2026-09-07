@@ -36,8 +36,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
-import { get } from 'svelte/store';
+import { createRawSnippet, tick } from 'svelte';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
@@ -263,13 +262,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -289,13 +283,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -313,13 +302,8 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 
 			icTokens.forEach(([token]) => {
-				const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
 					maxResults: WALLET_PAGINATION,
@@ -408,14 +392,9 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 			solTokens.forEach(([token]) => {
-				const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -430,14 +409,9 @@ describe('AllTransactionsLoader', () => {
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 			solTokens.forEach(([token]) => {
-				const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-					({ data: transaction }) => transaction
-				);
-
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
-					transactions,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -516,6 +490,111 @@ describe('AllTransactionsLoader', () => {
 		});
 	});
 
+	describe('load more', () => {
+		interface LoaderControls {
+			loadMore: () => Promise<boolean>;
+			exhausted: boolean;
+		}
+
+		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
+			let captured: LoaderControls | undefined;
+
+			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
+				render: () => {
+					captured = getControls();
+
+					return '<span></span>';
+				}
+			}));
+
+			render(AllTransactionsLoader, { props: { ...props, children } });
+
+			return { controls: () => captured };
+		};
+
+		beforeEach(() => {
+			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+		});
+
+		it('should hand the children a way to page further back', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.loadMore).toBeInstanceOf(Function);
+			});
+		});
+
+		it('should not report exhausted while tokens still have history', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.exhausted).toBeFalsy();
+			});
+		});
+
+		it('should report that nothing loaded when no store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeFalsy();
+		});
+
+		// The scroll decides whether to keep paging from this result, so it has to reflect the stores
+		// rather than any filtered view of them.
+		it('should report that history loaded when a store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextSolTransactions.mockImplementation(async () => {
+				solTransactionsStore.append({
+					tokenId: SOLANA_TOKEN.id,
+					transactions: [
+						{
+							data: {
+								...createMockSolTransactionsUi(1)[0],
+								id: `older-${Math.random()}`,
+								timestamp: mockMinTimestampStart - 1n
+							} as SolTransactionUi,
+							certified: false
+						}
+					]
+				});
+
+				return await Promise.resolve({ success: false });
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeTruthy();
+		});
+
+		it('should page every token once regardless of the floor', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextIcTransactions.mockClear();
+			spyLoadNextSolTransactions.mockClear();
+
+			await controls()?.loadMore();
+
+			// No `minTimestamp`: the floor itself is what this call is pushing deeper.
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
+		});
+	});
+
 	it('should handle all types of tokens', () => {
 		render(AllTransactionsLoader, { props });
 
@@ -523,13 +602,8 @@ describe('AllTransactionsLoader', () => {
 		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 
 		icTokens.forEach(([token]) => {
-			const transactions = (get(icTransactionsStore)?.[token.id] ?? []).map(
-				({ data: transaction }) => transaction
-			);
-
 			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
 				minTimestamp: mockMinTimestamp,
-				transactions,
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,
@@ -539,14 +613,9 @@ describe('AllTransactionsLoader', () => {
 		});
 
 		solTokens.forEach(([token]) => {
-			const transactions = (get(solTransactionsStore)?.[token.id] ?? []).map(
-				({ data: transaction }) => transaction
-			);
-
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
-				transactions,
 				token,
 				signalEnd: expect.any(Function)
 			});

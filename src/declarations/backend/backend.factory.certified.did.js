@@ -246,6 +246,13 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const OisyTradeSide = IDL.Variant({ Buy: IDL.Null, Sell: IDL.Null });
+	const OisyTradeData = IDL.Record({
+		side: OisyTradeSide,
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const NearIntentsData = IDL.Record({
 		source_token: TokenId,
 		amount: IDL.Nat,
@@ -290,6 +297,7 @@ export const idlFactory = ({ IDL }) => {
 	const ActiveUserTransactionData = IDL.Variant({
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
+		OisyTrade: OisyTradeData,
 		NearIntents: NearIntentsData,
 		ChainFusion: ChainFusionData,
 		Velora: VeloraData,

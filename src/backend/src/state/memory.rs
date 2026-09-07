@@ -37,6 +37,10 @@ pub(crate) const PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::n
 // a by-creator index used only to range-scan a creator's active-share count.
 pub(crate) const PERSONAL_NOTE_SHARES_MEMORY_ID: MemoryId = MemoryId::new(18);
 pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId::new(19);
+// Contact images, split out of the per-principal contact blob so that reading or
+// writing a contact no longer decodes every image the user has stored. Keyed
+// `(principal, contact_id)`; see `ContactImageKey`.
+pub(crate) const CONTACT_IMAGE_MEMORY_ID: MemoryId = MemoryId::new(20);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

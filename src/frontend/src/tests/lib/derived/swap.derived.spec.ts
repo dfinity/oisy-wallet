@@ -1,3 +1,4 @@
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -57,10 +58,11 @@ describe('swap.derived', () => {
 			expect(get(isPageTokenSwappable)).toBeTruthy();
 		});
 
-		it('should return false for Bitcoin token', () => {
+		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag opens Bitcoin.
+		it('should return true for Bitcoin token', () => {
 			mockPage.mockToken(BTC_MAINNET_TOKEN);
 
-			expect(get(isPageTokenSwappable)).toBeFalsy();
+			expect(get(isPageTokenSwappable)).toBeTruthy();
 		});
 
 		it('should update reactively when switching between swappable and non-swappable tokens', () => {
@@ -68,9 +70,13 @@ describe('swap.derived', () => {
 
 			expect(get(isPageTokenSwappable)).toBeTruthy();
 
-			mockPage.mockToken(BTC_MAINNET_TOKEN);
+			mockPage.reset();
 
 			expect(get(isPageTokenSwappable)).toBeFalsy();
+
+			mockPage.mockToken(BTC_MAINNET_TOKEN);
+
+			expect(get(isPageTokenSwappable)).toBeTruthy();
 		});
 
 		it('should return false after resetting the page', () => {
@@ -334,23 +340,64 @@ describe('swap.derived', () => {
 		});
 	});
 
-	// Bitcoin joins the swap universe only with Chain Fusion, which is the sole provider
-	// that can move it. It is kept out of `allCrossChainSwapTokens`, which is typed around
+	// Bitcoin joins the swap universe only when a provider can move it: Chain Fusion or
+	// NEAR Intents. It is kept out of `allCrossChainSwapTokens`, which is typed around
 	// the EVM / SOL custom-token unions.
 	describe('allSwapUniverseTokens', () => {
 		beforeEach(() => {
 			setupUserNetworksStore('allEnabled');
 		});
 
-		it('should exclude Bitcoin while Chain Fusion is off', () => {
+		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag is on while
+		// Chain Fusion (STAGING-gated) is off.
+		it('should include the enabled mainnet Bitcoin token via the NEAR Intents BTC flag', () => {
 			const result = get(allSwapUniverseTokens);
 
-			expect(result.find(({ id }) => id === BTC_MAINNET_TOKEN.id)).toBeUndefined();
+			expect(result.find(({ id }) => id === BTC_MAINNET_TOKEN.id)).toEqual({
+				...BTC_MAINNET_TOKEN,
+				enabled: true
+			});
 		});
 
-		it('should include the enabled mainnet Bitcoin token when Chain Fusion is on', async () => {
+		it('should exclude Bitcoin while no provider reaches it', async () => {
+			vi.resetModules();
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
+
+			try {
+				const [
+					{ allSwapUniverseTokens: universe },
+					{ setupUserNetworksStore: setupNetworks },
+					{ setupTestnetsStore: setupTestnets },
+					{ BTC_MAINNET_TOKEN: bitcoin }
+				] = await Promise.all([
+					import('$lib/derived/swap.derived'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$env/tokens/tokens.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				const result = get(universe);
+
+				expect(result.find(({ id }) => id === bitcoin.id)).toBeUndefined();
+			} finally {
+				vi.doUnmock('$env/rest/near-intents.env');
+				vi.resetModules();
+			}
+		});
+
+		it('should include the enabled mainnet Bitcoin token when only Chain Fusion is on', async () => {
 			vi.resetModules();
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
 
 			try {
 				const [
@@ -377,6 +424,7 @@ describe('swap.derived', () => {
 				expect(result.find(({ id }) => id === bitcoinTestnet.id)).toBeUndefined();
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}
 		});

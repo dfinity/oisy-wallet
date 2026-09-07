@@ -37,7 +37,7 @@ describe('eth-transactions-spam.utils', () => {
 				makeTx({ hash: '0xspam', value: ZERO, from: userAddress, to: attackerAddress })
 			];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -53,7 +53,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: '0xa', value: 100n }), makeTx({ hash: '0xself', value: ZERO })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -69,7 +69,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: '0xself', value: ZERO })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress: userAddress.toLowerCase(),
 				getTransactionSender
@@ -83,7 +83,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: '0xnullsender', value: ZERO })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -97,7 +97,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: '0xfail', value: ZERO })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -111,7 +111,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: undefined, value: ZERO })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -127,7 +127,7 @@ describe('eth-transactions-spam.utils', () => {
 
 			const txs = [makeTx({ hash: '0xa', value: 1n }), makeTx({ hash: '0xb', value: 2n })];
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -155,7 +155,7 @@ describe('eth-transactions-spam.utils', () => {
 				})
 			);
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: [...legitimateTxs, ...spamTxs],
 				userAddress,
 				getTransactionSender
@@ -177,7 +177,7 @@ describe('eth-transactions-spam.utils', () => {
 				})
 			);
 
-			const result = await filterSpamErc20Transfers({
+			const { transactions: result } = await filterSpamErc20Transfers({
 				transactions: txs,
 				userAddress,
 				getTransactionSender
@@ -209,6 +209,39 @@ describe('eth-transactions-spam.utils', () => {
 			expect(getTransactionSender).toHaveBeenCalledWith('0xbatchA');
 			expect(getTransactionSender).toHaveBeenCalledWith('0xbatchB');
 			expect(getTransactionSender).toHaveBeenCalledWith('0xsingle');
+		});
+
+		// Showing an unresolved transfer is a fallback, not a verdict. Callers that cache the result
+		// need to know the difference, since nothing re-examines a transfer once it is stored.
+		it('should report a transfer kept only because the sender could not be read', async () => {
+			const { transactions, unresolvedHashes } = await filterSpamErc20Transfers({
+				transactions: [makeTx({ hash: '0xunresolved', value: ZERO })],
+				userAddress,
+				getTransactionSender: () => Promise.resolve(undefined)
+			});
+
+			expect(transactions).toHaveLength(1);
+			expect(unresolvedHashes.has('0xunresolved')).toBeTruthy();
+		});
+
+		it('should report a transfer kept only because the lookup threw', async () => {
+			const { unresolvedHashes } = await filterSpamErc20Transfers({
+				transactions: [makeTx({ hash: '0xthrew', value: ZERO })],
+				userAddress,
+				getTransactionSender: () => Promise.reject(new Error('rpc down'))
+			});
+
+			expect(unresolvedHashes.has('0xthrew')).toBeTruthy();
+		});
+
+		it('should report nothing unresolved when every verdict was reached', async () => {
+			const { unresolvedHashes } = await filterSpamErc20Transfers({
+				transactions: [makeTx({ hash: '0xmine', value: ZERO })],
+				userAddress,
+				getTransactionSender: () => Promise.resolve(userAddress as EthAddress)
+			});
+
+			expect(unresolvedHashes.size).toBe(0);
 		});
 	});
 

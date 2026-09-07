@@ -70,6 +70,7 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
+	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -532,7 +533,7 @@
 				});
 			} else {
 				failedSwapError.set({
-					message: $i18n.swap.error.failed_unexpectedly,
+					message: nearIntentsQuoteRejectedMessage(err) ?? $i18n.swap.error.failed_unexpectedly,
 					variant: 'error'
 				});
 			}

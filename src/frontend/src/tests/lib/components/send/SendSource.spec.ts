@@ -52,6 +52,14 @@ describe('SendSource', () => {
 		expect(container).toHaveTextContent(en.wallet_connect.text.signer);
 	});
 
+	it('should render the balance but not the signer when the signer is opted out', () => {
+		const { container } = render(SendSource, { ...props, showSigner: false });
+
+		expect(container.querySelector(signerSelector)).toBeNull();
+		expect(container).not.toHaveTextContent(en.wallet_connect.text.signer);
+		expect(container.querySelector(balanceSelector)?.textContent).toContain('BTC');
+	});
+
 	it('should render all field but balance without value', () => {
 		const { container } = render(SendSource, { ...props, token: undefined });
 

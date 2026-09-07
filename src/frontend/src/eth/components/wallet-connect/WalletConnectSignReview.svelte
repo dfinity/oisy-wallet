@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
-	import { hasInvalidTypedData } from '$eth/utils/wallet-connect.utils';
+	import { hasInvalidTypedData, hasUnreviewableTypedData } from '$eth/utils/wallet-connect.utils';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 
@@ -23,10 +23,20 @@
 			sessionChainId: request.params.chainId
 		})
 	);
+
+	// Signable, but not describable: the struct is valid and would be signed, and OISY cannot say
+	// what signing it would authorize.
+	let unreviewableTypedData = $derived(
+		hasUnreviewableTypedData({
+			method: request.params.request.method,
+			params: request.params.request.params,
+			sessionChainId: request.params.chainId
+		})
+	);
 </script>
 
 <ContentWithToolbar>
-	<EthWalletConnectMessage {invalidTypedData} {request} />
+	<EthWalletConnectMessage {invalidTypedData} {request} {unreviewableTypedData} />
 
 	{#snippet toolbar()}
 		<WalletConnectActions approveDisabled={invalidTypedData} {onApprove} {onReject} />

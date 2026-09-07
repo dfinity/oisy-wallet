@@ -29,6 +29,7 @@ import type {
 import type { NetworkId } from '$lib/types/network';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import {
+	SwapErrorCodes,
 	SwapProvider,
 	VeloraSwapTypes,
 	type DeltaSwapResponse,
@@ -333,6 +334,19 @@ export const geSwapEthTokenAddress = (token: ErcFungibleToken) => {
 };
 
 export const isSwapError = (err: unknown): err is SwapError => err instanceof SwapError;
+
+// The NEAR Intents pre-send gates abort before any funds move, so their message explains a
+// safe outcome rather than a failure. The wizards surface it verbatim instead of collapsing
+// it into their generic "something went wrong" text.
+const NEAR_INTENTS_QUOTE_REJECTED_CODES: SwapErrorCodes[] = [
+	SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
+	SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED
+];
+
+export const nearIntentsQuoteRejectedMessage = (err: unknown): string | undefined =>
+	isSwapError(err) && NEAR_INTENTS_QUOTE_REJECTED_CODES.includes(err.code)
+		? err.message
+		: undefined;
 
 export const getWithdrawableToken = ({
 	tokenAddress,

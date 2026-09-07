@@ -1080,6 +1080,31 @@ describe('swap utils', () => {
 			expect(result.refundTo).toBe(mockEthAddress);
 		});
 
+		// Regression: threading a recipient equal to the user's own address is a no-op at
+		// the request level, so pre-existing same-address-space pairs keep their exact
+		// payload now that the fan-out always resolves a recipient.
+		it('should build the same request whether the user address is passed as recipient or omitted', () => {
+			const params = {
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				deadlineMs: 180_000
+			};
+
+			const withoutRecipient = buildNearIntentsQuoteRequest(params);
+			const withRecipient = buildNearIntentsQuoteRequest({
+				...params,
+				recipientAddress: mockEthAddress
+			});
+
+			// The deadline is clock-dependent, so it is pinned before comparing.
+			expect({ ...withRecipient, deadline: withoutRecipient.deadline }).toStrictEqual(
+				withoutRecipient
+			);
+		});
+
 		it('should set deadline as ISO string in the future', () => {
 			const before = Date.now();
 

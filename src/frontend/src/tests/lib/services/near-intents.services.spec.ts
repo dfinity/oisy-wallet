@@ -2,9 +2,15 @@ import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import {
+	NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS,
+	NEAR_INTENTS_QUOTE_DEADLINE_MS
+} from '$lib/constants/swap.constants';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
 import {
 	clearNearIntentsTokensCache,
@@ -15,9 +21,15 @@ import {
 } from '$lib/services/near-intents.services';
 import type { NearIntentsToken } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
+import {
+	findNearIntentsQuoteRequestMismatch,
+	isNearIntentsQuoteExpired,
+	verifyNearIntentsQuoteSignature
+} from '$lib/utils/near-intents-quote.utils';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -30,7 +42,16 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
+	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
 	NEAR_INTENTS_API_KEY: 'mock-api-key'
+}));
+
+// The real implementation is covered against a captured 1Click response in
+// near-intents-quote.utils.spec.ts; here the quotes are fixtures with no genuine signature.
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn(),
+	findNearIntentsQuoteRequestMismatch: vi.fn(),
+	isNearIntentsQuoteExpired: vi.fn()
 }));
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
@@ -43,6 +64,10 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 describe('near-intents.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+		vi.mocked(findNearIntentsQuoteRequestMismatch).mockReturnValue(undefined);
+		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
 
 		clearNearIntentsTokensCache();
 	});
@@ -123,6 +148,78 @@ describe('near-intents.services', () => {
 
 		beforeEach(() => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+		});
+
+		it('should reject a quote whose signature does not verify', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('signature verification failed');
+		});
+
+		// A replayed quote carries a genuine signature, so only the echoed request reveals
+		// that it was issued to someone else.
+		it('should reject a genuinely signed quote issued for another request', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(findNearIntentsQuoteRequestMismatch).mockReturnValue('recipient');
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('does not match the request: recipient');
+		});
+
+		it('should reject a captured quote whose signed window has lapsed', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(true);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('past the window it was signed for');
+		});
+
+		it('should verify the quote against the request it sent', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+
+			await fetchNearIntentsSwapQuote({
+				sourceToken,
+				destinationToken,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				slippage
+			});
+
+			expect(findNearIntentsQuoteRequestMismatch).toHaveBeenCalledWith({
+				sent: vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mock.calls[0][0],
+				echoed: mockNearIntentsQuoteResponse.quoteRequest
+			});
 		});
 
 		it('should return a SwapMappedResult on successful quote', async () => {
@@ -237,6 +334,76 @@ describe('near-intents.services', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+
+		describe('quote deadline per origin chain', () => {
+			const now = new Date('2026-03-16T00:00:00.000Z');
+
+			const solSourceToken: SplToken = {
+				...mockValidSplToken,
+				address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+			};
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+				vi.setSystemTime(now);
+
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const requestedDeadline = (): string => {
+				const [[request]] = vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mock.calls;
+
+				return request.deadline;
+			};
+
+			it('should use the extended deadline for a BTC origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken: BTC_MAINNET_TOKEN,
+					destinationToken,
+					amount: 100_000n,
+					userAddress: mockBtcAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
+
+			it('should keep the short deadline for an EVM origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
+
+			it('should keep the short deadline for a SOL origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken: solSourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockSolAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
 		});
 
 		describe('with Solana tokens', () => {
@@ -449,6 +616,33 @@ describe('near-intents.services', () => {
 
 			expect(result.has('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')).toBeTruthy();
 			expect(result.has('0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48')).toBeFalsy();
+		});
+
+		it('should use lowercased symbol for native BTC when filtering by BTC mainnet network', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [BTC_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(new Set(['btc']));
+		});
+
+		it('should not treat the btc blockchain as EVM when a contract address is present', async () => {
+			const btcTokenWithAddress: NearIntentsToken = {
+				assetId: 'nep141:btc-MixedCaseAddress.omft.near',
+				decimals: 8,
+				blockchain: 'btc',
+				symbol: 'WBTC',
+				price: 65000.0,
+				priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+				contractAddress: 'MixedCaseAddress'
+			};
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([btcTokenWithAddress]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [BTC_MAINNET_NETWORK_ID] });
+
+			expect(result.has('MixedCaseAddress')).toBeTruthy();
+			expect(result.has('mixedcaseaddress')).toBeFalsy();
 		});
 
 		it('should keep Solana contract addresses case-sensitive (Base58)', async () => {

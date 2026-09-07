@@ -18,9 +18,13 @@ import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('EthWalletConnectMessage', () => {
+	// The raw message lives on its own tab. Reaching it is a click, not a scroll.
+	const openRawTab = async (getByRole: (role: string, options: { name: string }) => HTMLElement) =>
+		await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
 	const request: WalletKitTypes.SessionRequest = {
 		params: {
 			request: {
@@ -76,8 +80,8 @@ describe('EthWalletConnectMessage', () => {
 		erc20CustomTokensStore.setAll([{ data: { ...USDC_TOKEN, enabled: true }, certified: false }]);
 	});
 
-	it('should render the JSON parsed message', () => {
-		const { getByText } = render(EthWalletConnectMessage, {
+	it('should render the JSON parsed message', async () => {
+		const { getByText, getByRole, getByTestId } = render(EthWalletConnectMessage, {
 			props: {
 				request
 			}
@@ -87,9 +91,11 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
+		await openRawTab(getByRole);
+
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
-		expect(getByText('{ ... }')).toBeInTheDocument();
+		expect(getByTestId('json')).toBeInTheDocument();
 	});
 
 	it('should render the application', () => {
@@ -114,6 +120,34 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(en.wallet_connect.text.method)).toBeInTheDocument();
 
 		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
+	});
+
+	it('should name the struct being signed, not just how the request arrived', () => {
+		// The RPC method says a typed-data signature; only the primary type says it is an allowance.
+		const { getByText } = render(EthWalletConnectMessage, { props: { request } });
+
+		expect(getByText(en.wallet_connect.text.type)).toBeInTheDocument();
+
+		expect(getByText('PermitSingle')).toBeInTheDocument();
+	});
+
+	it('should say nothing about a type for a request that is not typed data', () => {
+		const { queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: {
+					...request,
+					params: {
+						...request.params,
+						request: {
+							method: 'personal_sign',
+							params: ['0xdeadbeef', '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95']
+						}
+					}
+				} as WalletKitTypes.SessionRequest
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.type)).not.toBeInTheDocument();
 	});
 
 	it('should render the token if it is enabled', () => {
@@ -171,7 +205,7 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(expected)).toBeInTheDocument();
 	});
 
-	it('should not summarize keys the signed schema does not declare', () => {
+	it('should not summarize keys the signed schema does not declare', async () => {
 		// ERC-3009 transfer authorization: `spender` and `details` are absent from
 		// the declared type, so they are absent from the digest. Summarizing them
 		// would describe an approval of 1 USDC while 5,000 USDC is being signed away.
@@ -227,7 +261,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, getByTestId, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
@@ -242,9 +276,11 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText('0x2222222222222222222222222222222222222222')).not.toBeInTheDocument();
 
-		// The full payload stays available in the raw message viewer.
+		// The full payload stays available in the raw message viewer, one tab over.
+		await openRawTab(getByRole);
+
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
-		expect(getByText('{ ... }')).toBeInTheDocument();
+		expect(getByTestId('json')).toBeInTheDocument();
 	});
 
 	// A token OISY does not list is still the contract the allowance is over, and the allowance is
@@ -330,12 +366,12 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
 	});
 
-	it('should handle errors when getting sign parameters', () => {
+	it('should handle errors when getting sign parameters', async () => {
 		vi.spyOn(walletConnectUtils, 'getSignParamsMessageTypedDataV4').mockImplementation(() => {
 			throw new Error('Test error');
 		});
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request
 			}
@@ -344,6 +380,8 @@ describe('EthWalletConnectMessage', () => {
 		expect(getSignParamsMessageTypedDataV4).toHaveBeenCalledExactlyOnceWith(
 			request.params.request.params
 		);
+
+		await openRawTab(getByRole);
 
 		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
@@ -540,7 +578,7 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByTestId('wallet-connect-unsigned-typed-data-info')).not.toBeInTheDocument();
 	});
 
-	it('should render a typed-data payload sent through personal_sign as a raw message', () => {
+	it('should render a typed-data payload sent through personal_sign as a raw message', async () => {
 		// Such a request is signed as a plain message, so previewing it as a permit
 		// would describe an authorization that is not the one being signed.
 		const newRequest: WalletKitTypes.SessionRequest = {
@@ -554,15 +592,19 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+		const { getByText, getByRole, queryByText, queryByTestId } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
 		});
 
-		expect(queryByText('{ ... }')).not.toBeInTheDocument();
 		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+
+		await openRawTab(getByRole);
+
+		// Signed as a plain message, so it is shown as one rather than through the JSON viewer.
+		expect(queryByTestId('json')).not.toBeInTheDocument();
 
 		expect(
 			getByText(getSignParamsMessageUtf8(newRequest.params.request.params))

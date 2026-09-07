@@ -26,6 +26,8 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionIcpSwap } from '$lib/services/chain-fusion-swap.services';
+	import { fetchOisyTradeSwap } from '$lib/services/oisy-trade-swap.services';
+	import { OisyTradeSwapError } from '$lib/services/swap-errors.services';
 	import {
 		enableSwapDestinationToken,
 		fetchOneSecIcpToEvmSwap,
@@ -110,6 +112,20 @@
 
 	let isChainFusionProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	// OISY Trade settles in the foreground: deposit, fill-or-kill order, and the
+	// withdrawal that brings either leg back out of DEX custody, all inside the modal.
+	// A fill-or-kill order is decided in the matching round after acceptance, so this is
+	// seconds rather than the minutes a bridge takes — and staying in one session is
+	// what keeps two OISY Trade swaps from overlapping, which their shared free balance
+	// on the venue cannot tell apart. It is deliberately absent from
+	// `isActiveTransactionSwap` below; its row is a recovery record for a session that
+	// dies mid-flow, not a hand-off.
+	let oisyTradeDetails = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.OISY_TRADE
+			? $swapAmountsStore.selectedProvider.swapDetails
+			: undefined
 	);
 
 	// The user's own address on the destination chain, which is where the minter pays the
@@ -213,6 +229,33 @@
 					setFailedProgressStep,
 					swapId: crypto.randomUUID()
 				});
+			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.OISY_TRADE) {
+				// Dispatched explicitly rather than through `swapService`, like 1Sec and Chain
+				// Fusion above: the reviewed order — side, price, quantity, deposit amount —
+				// cannot travel through `SwapParams`, and re-deriving it here would let the book
+				// move between Review and submit.
+				if (isNullish(oisyTradeDetails) || !isIcToken($destinationToken)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+					onBack();
+					return;
+				}
+
+				await fetchOisyTradeSwap({
+					identity: $authIdentity,
+					progress,
+					swapId: crypto.randomUUID(),
+					sourceToken: $sourceToken as IcToken,
+					destinationToken: $destinationToken,
+					order: oisyTradeDetails.order,
+					usdSourceValue: sourceTokenUsdValue,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
 			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
 				if (isNullish(destinationAddress)) {
 					toastsError({
@@ -306,6 +349,17 @@
 					),
 					variant: 'info'
 				});
+			} else if (err instanceof OisyTradeSwapError) {
+				// A killed fill-or-kill order, one the canister refused, and a swap that
+				// could not be tracked at all are all expected outcomes with the user's
+				// funds in their wallet by the time they are thrown — so they read as info
+				// in Review, like slippage, never as an unexpected-error toast. The two
+				// kinds that leave something unaccounted for at the venue ask the user to
+				// check the Trading tab, hence the warning level.
+				failedSwapError.set({
+					message: err.message,
+					variant: err.kind === 'recovery_failed' || err.kind === 'unresolved' ? 'warning' : 'info'
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
@@ -314,16 +368,33 @@
 				});
 			}
 
-			if (!(
-				isSwapError(err) &&
-				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-			)) {
+			// `not_placed` is the one OISY Trade outcome the row reports instead of this
+			// wizard: the flow terminalizes that row `Failed` itself, and the loader fires
+			// the swap's single error event off it, so firing here too would count the same
+			// swap twice. Every other kind reports from here — including `recovery_failed`,
+			// which deliberately leaves its row non-terminal so the poller keeps trying:
+			// nothing would report it until a later session finished the row, or ever if
+			// none did, and it is the one kind raised with the user's funds still at the
+			// venue.
+			const isReportedByRow = err instanceof OisyTradeSwapError && err.kind === 'not_placed';
+
+			if (
+				!(
+					isSwapError(err) &&
+					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+				) &&
+				!isReportedByRow
+			) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
 						...swapTrackingMetadata,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err)
+							? err.code
+							: err instanceof OisyTradeSwapError
+								? err.kind
+								: ''
 					}
 				});
 			}
@@ -359,7 +430,8 @@
 				swapWithActiveTransaction={isActiveTransactionSwap}
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ICP_SWAP}
+					SwapProvider.ICP_SWAP || nonNullish(oisyTradeDetails)}
+				withApproveStep={nonNullish(oisyTradeDetails)}
 				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}

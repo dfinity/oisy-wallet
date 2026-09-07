@@ -187,7 +187,8 @@ fn collect_history_entries(request: &UserAgreements, now: Timestamp) -> Vec<Agre
 /// entry for every agreement that was actually changed.
 ///
 /// Only fields provided in `agreements` (i.e., where `accepted` is `Some(_)`) will be updated.
-/// If an agreement is newly accepted (`Some(true)`), `last_accepted_at_ns` is set to `now`.
+/// `last_accepted_at_ns` is server-owned: it is set to `now` on acceptance and otherwise keeps its
+/// stored value; a client-supplied value is always ignored.
 ///
 /// # Arguments
 /// * `principal` - The principal of the user.
@@ -249,8 +250,9 @@ fn collect_provider_history_entries(
 /// Updates the user's provider agreements, merging with any existing ones, and records an
 /// audit-trail entry for every provider agreement that was actually changed.
 ///
-/// Only entries where `accepted` is `Some(_)` are applied. If `Some(true)`,
-/// `last_accepted_at_ns` is set to `now`.
+/// Only entries where `accepted` is `Some(_)` are applied. `last_accepted_at_ns` is server-owned:
+/// it is set to `now` on acceptance and otherwise keeps its stored value; a client-supplied value
+/// is always ignored.
 ///
 /// # Arguments
 /// * `principal` - The principal of the user.

@@ -9,6 +9,7 @@ import {
 	mapUserTransactionToTransaction
 } from '$eth/utils/user-transactions.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
@@ -20,6 +21,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Where paging through the backend's stored history has got to, per token.
@@ -48,6 +50,35 @@ export const setEthBackendPaginationCursor = ({
 
 export const getEthBackendPaginationCursor = (tokenId: TokenId): bigint | undefined =>
 	ethBackendPaginationCursors.get(tokenId);
+
+/**
+ * Tokens whose stored history has reached the per-token cap, from the `totalStored` of the last
+ * backend read.
+ *
+ * At the cap the canister trims the oldest entries on every save, so persisting history older than
+ * what it already holds is written and evicted in the same call. Newer transactions are still worth
+ * saving, which is why this only gates the older-page path.
+ */
+const ethBackendAtCapacity = new Set<TokenId>();
+
+export const setEthBackendAtCapacity = ({
+	tokenId,
+	totalStored
+}: {
+	tokenId: TokenId;
+	totalStored: bigint | undefined;
+}) => {
+	if (nonNullish(totalStored) && totalStored >= BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)) {
+		ethBackendAtCapacity.add(tokenId);
+
+		return;
+	}
+
+	ethBackendAtCapacity.delete(tokenId);
+};
+
+export const isEthBackendAtCapacity = (tokenId: TokenId): boolean =>
+	ethBackendAtCapacity.has(tokenId);
 
 /**
  * Loads a page of stored ETH transactions from the backend, mapping each
@@ -147,6 +178,8 @@ export const loadNextEthUserTransactions = async ({
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
 }): Promise<{ hasMore: boolean }> => {
+	const atCapacity = beAtCapacity || isEthBackendAtCapacity(tokenId);
+
 	if (nonNullish(cursor)) {
 		const result = await loadEthUserTransactions({
 			identity,
@@ -155,19 +188,38 @@ export const loadNextEthUserTransactions = async ({
 			maxResults: WALLET_PAGINATION
 		});
 
+		// Record the capacity signal from any successful read, not only one that returned a page. An
+		// empty page still carries `totalStored`, and it is the shape a cursor invalidated by eviction
+		// comes back as, so dropping it leaves the tracker stale exactly as the fall-through below is
+		// about to save.
+		if (nonNullish(result)) {
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+		}
+
 		if (nonNullish(result) && result.transactions.length > 0) {
-			const certifiedTransactions = result.transactions.map((transaction) => ({
-				data: transaction,
-				certified: false
-			}));
+			const loadedBefore = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
 
-			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+			ethTransactionsStore.append({
+				tokenId,
+				transactions: result.transactions.map((transaction) => ({
+					data: transaction,
+					certified: false
+				}))
+			});
 
-			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+			const loadedAfter = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
 
-			return {
-				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
-			};
+			// The cursor is a position in the stored list, so trimming at the per-token cap shifts every
+			// entry under it and the cursor stops lining up. Pages then come back full of transactions
+			// we already have, which `append` dedupes away. Treat that like an empty page and fall
+			// through to the explorer rather than asking the canister for the same rows again.
+			if (loadedAfter > loadedBefore) {
+				setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+
+				return {
+					hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
+				};
+			}
 		}
 	}
 
@@ -181,7 +233,7 @@ export const loadNextEthUserTransactions = async ({
 		tokenId,
 		networkId,
 		oldestLoadedBlockNumber,
-		skipSave: beAtCapacity
+		skipSave: atCapacity
 	});
 };
 

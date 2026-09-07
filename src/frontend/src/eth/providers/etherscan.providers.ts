@@ -151,8 +151,11 @@ export class EtherscanProvider {
 	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
 	erc20Transactions = async ({
 		address,
-		contract: { address: contractAddress }
-	}: {
+		contract: { address: contractAddress },
+		startBlock,
+		endBlock,
+		sort
+	}: Omit<TransactionsParams, 'address'> & {
 		address: EthAddress;
 		contract: Erc20Token | Erc4626Token;
 	}): Promise<Transaction[]> => {
@@ -160,8 +163,9 @@ export class EtherscanProvider {
 			action: 'tokentx',
 			contractAddress,
 			address,
-			startblock: 0,
-			sort: 'desc'
+			startblock: startBlock ?? 0,
+			...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
+			sort: sort ?? 'desc'
 		};
 
 		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch(

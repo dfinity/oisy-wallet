@@ -47,7 +47,7 @@
 
 <LogoButton hover={false}>
 	{#snippet logo()}
-		<span class="sm:mr-2 flex">
+		<span class="flex sm:mr-2">
 			{#if nonNullish(token)}
 				<TokenLogo
 					badge={{ type: 'network' }}

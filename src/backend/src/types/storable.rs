@@ -229,3 +229,112 @@ impl Storable for PersonalNoteShareCreatorKey {
         Self(principal, token)
     }
 }
+
+/// Composite key for per-contact image storage: `(principal, contact_id)`.
+///
+/// Encoding mirrors [`ActiveUserTransactionKey`]: `[u32 BE principal_len][principal_bytes][u64 BE
+/// contact_id]`. The length-prefixed principal groups a principal's images together, so the
+/// per-principal image cap can be counted with a key-only range scan instead of loading the image
+/// bytes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ContactImageKey(pub StoredPrincipal, pub u64);
+
+impl Storable for ContactImageKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + 8);
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(&self.1.to_be_bytes());
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let contact_id = u64::from_be_bytes(
+            bytes[4 + principal_len..]
+                .try_into()
+                .expect("failed to decode contact id"),
+        );
+        Self(principal, contact_id)
+    }
+}
+
+#[cfg(test)]
+mod contact_image_key_tests {
+    use std::borrow::Cow;
+
+    use candid::Principal;
+    use ic_stable_structures::storable::Storable;
+
+    use super::{ContactImageKey, StoredPrincipal};
+
+    fn principal(byte: u8) -> StoredPrincipal {
+        StoredPrincipal(Principal::from_slice(&[byte; 29]))
+    }
+
+    fn encoded(key: &ContactImageKey) -> Vec<u8> {
+        key.to_bytes().into_owned()
+    }
+
+    #[test]
+    fn round_trips_through_bytes() {
+        for id in [0u64, 1, 42, u64::MAX] {
+            let key = ContactImageKey(principal(7), id);
+            let decoded = ContactImageKey::from_bytes(Cow::Owned(encoded(&key)));
+
+            assert_eq!(decoded, key);
+        }
+    }
+
+    #[test]
+    fn orders_a_principals_images_by_contact_id() {
+        // The map ranges on the encoded bytes, so that is the ordering the cap scan depends on.
+        let low = encoded(&ContactImageKey(principal(7), 1));
+        let high = encoded(&ContactImageKey(principal(7), 2));
+
+        assert!(low < high);
+    }
+
+    #[test]
+    fn keeps_each_principals_images_contiguous() {
+        // The cap scan starts at (principal, 0) and take_whiles on the principal, so no other
+        // principal's key may sort between two of this principal's keys.
+        let target = principal(7);
+        let other = principal(8);
+
+        let start = encoded(&ContactImageKey(target, 0));
+        let end = encoded(&ContactImageKey(target, u64::MAX));
+
+        for id in [0u64, 1, u64::MAX] {
+            let intruder = encoded(&ContactImageKey(other, id));
+            assert!(
+                intruder < start || intruder > end,
+                "a different principal's key sorted inside the target principal's range"
+            );
+        }
+    }
+
+    #[test]
+    fn scan_start_sorts_at_or_below_every_key_for_that_principal() {
+        let target = principal(7);
+        let start = encoded(&ContactImageKey(target, 0));
+
+        for id in [0u64, 1, 500, u64::MAX] {
+            assert!(start <= encoded(&ContactImageKey(target, id)));
+        }
+    }
+}

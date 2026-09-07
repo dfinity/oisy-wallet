@@ -14,9 +14,17 @@
 		source: string;
 		exchangeRate?: number;
 		showBalance?: boolean;
+		showSigner?: boolean;
 	}
 
-	let { token, balance, source, exchangeRate, showBalance = true }: Props = $props();
+	let {
+		token,
+		balance,
+		source,
+		exchangeRate,
+		showBalance = true,
+		showSigner = true
+	}: Props = $props();
 </script>
 
 {#if showBalance}
@@ -34,9 +42,11 @@
 	</WalletConnectModalValue>
 {/if}
 
-<WalletConnectModalValue label={$i18n.wallet_connect.text.signer} ref="signer">
-	<div class="flex flex-col gap-1">
-		{source}
-		<ContactOrToken identifier={source} />
-	</div>
-</WalletConnectModalValue>
+{#if showSigner}
+	<WalletConnectModalValue label={$i18n.wallet_connect.text.signer} ref="signer">
+		<div class="flex flex-col gap-1">
+			{source}
+			<ContactOrToken identifier={source} />
+		</div>
+	</WalletConnectModalValue>
+{/if}
