@@ -104,8 +104,14 @@
 	// consumer that stopped observing has frozen the fee (the send review step, for one), and what
 	// it derived from that fee is not re-derived there. So a sample that comes back late must be
 	// dropped, or the frozen fee would drift underneath the amount it was priced against.
+	//
+	// A fee that was never set is not a frozen one. No consumer stopped observing to hold on to it,
+	// and nothing was derived from it, while a review step reached before the first sample landed
+	// would otherwise sit with its send button disabled and no fetch left to enable it.
+	const isFrozen = (): boolean => !observe && nonNullish(get(feeStore));
+
 	const setFee = (data: TransactionFeeData) => {
-		if (!observe) {
+		if (isFrozen()) {
 			return;
 		}
 
@@ -137,7 +143,7 @@
 				priority
 			});
 
-			if (!observe) {
+			if (isFrozen()) {
 				return;
 			}
 
