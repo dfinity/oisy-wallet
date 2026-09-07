@@ -191,8 +191,10 @@ Once a subnet holds more than 450 GiB of storage, every new memory allocation ma
 
 #### How it is applied
 
-- **Staging, beta, test and audit backends:** the `deploy-to-environment` workflow runs `dfx canister update-settings --reserved-cycles-limit` on every backend deployment run, whether or not the wasm changed. The value lives in `BACKEND_RESERVED_CYCLES_LIMIT` in [`.github/workflows/deploy-to-environment.yml`](.github/workflows/deploy-to-environment.yml).
-- **Production:** the production backend is controlled by the Orbit station, and `dfx-orbit request canister update-settings` only manages controllers. Raise the limit with an Orbit request that configures the external canister's native settings (`reserved_cycles_limit`), then have it approved through the station.
+A reserved cycles limit is a canister setting: it survives upgrades, and `dfx deploy` never resets it. `initialization_values` in `dfx.json` is not enough either, because dfx only applies those when it _creates_ a canister and every backend canister already exists. The limit therefore has to be set explicitly, once per canister.
+
+- **Staging, beta, test and audit backends:** the `deploy-to-environment` workflow runs `dfx canister update-settings --reserved-cycles-limit` on every backend deployment run, whether or not the wasm changed. The value lives in `BACKEND_RESERVED_CYCLES_LIMIT` in [`.github/workflows/deploy-to-environment.yml`](.github/workflows/deploy-to-environment.yml). Staging is covered on the next push to `main`, beta on the next release tag.
+- **Production:** no workflow deploys the production backend, so CI never touches its settings. The canister is controlled by the Orbit station, and the `dfx-orbit` CLI cannot set this field (`request canister update-settings` only adds and removes controllers). It takes a `ConfigureExternalCanister` request whose operation kind is `NativeSettings`, carrying `reserved_cycles_limit`, submitted and approved through the station.
 
 To check the current limit and the reserve in use:
 
