@@ -99,6 +99,7 @@ export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-not
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+export const REVIEW_FORM_FEE_EXPIRED = 'review-form-fee-expired';
 
 export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 

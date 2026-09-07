@@ -1,29 +1,49 @@
 import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendReview from '$eth/components/send/EthSendReview.svelte';
+import { ETH_FEE_REVIEW_EXPIRY_DELAY } from '$eth/constants/eth.constants';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
+import {
+	REVIEW_FORM_FEE_EXPIRED,
+	REVIEW_FORM_SEND_BUTTON
+} from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthSendReview', () => {
-	const mockContext = new Map([]);
-	mockContext.set(
-		SEND_CONTEXT_KEY,
-		initSendContext({
-			token: ETHEREUM_TOKEN
-		})
-	);
-	mockContext.set(
-		ETH_FEE_CONTEXT_KEY,
-		initEthFeeContext({
-			feeStore: initEthFeeStore(),
-			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
-		})
-	);
+	const mockContext = () => {
+		const context = new Map([]);
+		context.set(
+			SEND_CONTEXT_KEY,
+			initSendContext({
+				token: ETHEREUM_TOKEN
+			})
+		);
+
+		const feeStore = initEthFeeStore();
+		// Without a fee the send button is disabled anyway, which would make the expiry assertions
+		// pass for the wrong reason.
+		feeStore.setFee({
+			maxFeePerGas: 100n,
+			maxPriorityFeePerGas: 5n,
+			baseFeePerGas: 20n,
+			gas: 21_000n
+		});
+
+		context.set(
+			ETH_FEE_CONTEXT_KEY,
+			initEthFeeContext({
+				feeStore,
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+			})
+		);
+
+		return context;
+	};
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
@@ -37,7 +57,7 @@ describe('EthSendReview', () => {
 	it('should render all fields', () => {
 		const { container, getByText } = render(EthSendReview, {
 			props,
-			context: mockContext
+			context: mockContext()
 		});
 
 		expect(container).toHaveTextContent(`${props.amount} ${ETHEREUM_TOKEN.symbol}`);
@@ -60,5 +80,39 @@ describe('EthSendReview', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
 		expect(toolbar).not.toBeNull();
+	});
+
+	describe('fee expiry', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('leaves the send available while the fee is still fresh', async () => {
+			const { getByTestId, queryByTestId } = render(EthSendReview, {
+				props,
+				context: mockContext()
+			});
+
+			await vi.advanceTimersByTimeAsync(ETH_FEE_REVIEW_EXPIRY_DELAY - 1_000);
+
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).not.toBeDisabled();
+			expect(queryByTestId(REVIEW_FORM_FEE_EXPIRED)).toBeNull();
+		});
+
+		it('blocks the send and explains why once the fee has expired', async () => {
+			const { getByTestId } = render(EthSendReview, {
+				props,
+				context: mockContext()
+			});
+
+			await vi.advanceTimersByTimeAsync(ETH_FEE_REVIEW_EXPIRY_DELAY);
+
+			expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
+			expect(getByTestId(REVIEW_FORM_FEE_EXPIRED)).toHaveTextContent(en.send.info.fee_expired);
+		});
 	});
 });
