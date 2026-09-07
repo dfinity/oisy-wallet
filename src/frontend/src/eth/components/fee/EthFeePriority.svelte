@@ -17,6 +17,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
+	interface Props {
+		// A WalletConnect request may carry its own gas limit, and that limit is the one signed.
+		// Options priced on anything else would disagree with the fee row directly beneath them.
+		gas?: bigint;
+	}
+
+	let { gas }: Props = $props();
+
 	const { sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore, feePrioritiesStore, feeDecimalsStore, feeExchangeRateStore }: EthFeeContext =
@@ -57,7 +65,7 @@
 		return estimatedGasFee({
 			...perPriority[priority],
 			baseFeePerGas,
-			gas: $feeStore.gas
+			gas: gas ?? $feeStore.gas
 		});
 	};
 
