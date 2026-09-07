@@ -200,6 +200,34 @@ describe('EthSendForm', () => {
 			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 		});
 
+		it('shows the orange fee box again after the amount is cleared and retyped', async () => {
+			const { input, queryByTestId } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: ZERO,
+				tokenBalance: 100_00000000n
+			});
+
+			await fireEvent.input(input, { target: { value: '1' } });
+
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+			});
+
+			await fireEvent.input(input, { target: { value: '' } });
+
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+			});
+
+			// A different, still-insufficient amount: the box must be re-evaluated from scratch, not
+			// left stuck at whatever the cleared field last resolved to.
+			await fireEvent.input(input, { target: { value: '2' } });
+
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+			});
+		});
+
 		it('blocks Next without the orange fee box when an ERC-20 amount exceeds its own balance', async () => {
 			const { input, queryByTestId, getByTestId } = setup({
 				token: mockValidErc20Token,
@@ -302,6 +330,60 @@ describe('EthSendForm', () => {
 				amount: '1',
 				nativeEthereumBalance: ZERO
 			});
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+	});
+
+	// The gas fee arrives asynchronously (a network round trip), so it can still be unresolved the
+	// instant this step (re)mounts - e.g. right after "Back" from Review, with the amount already
+	// filled in from before. Reading an unresolved fee as "no issue" let "Next" through before the
+	// check it depends on had actually settled - this is the async check itself, not a race around it.
+	describe('gating while the gas fee has not resolved yet', () => {
+		const setup = ({ token, tokenBalance }: { token: Token; tokenBalance?: bigint }) => {
+			const context = new Map<symbol, unknown>();
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
+
+			// The fee store is created but `setFee` is never called: the gas fee has not arrived yet.
+			const feeStore = initEthFeeStore();
+			context.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+					feeExchangeRateStore: writable(undefined)
+				})
+			);
+
+			balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: ZERO, certified: true } });
+
+			if (nonNullish(tokenBalance)) {
+				balancesStore.set({ id: token.id, data: { data: tokenBalance, certified: true } });
+			}
+
+			return render(EthSendForm, {
+				props: { ...props, amount: '1' },
+				context
+			});
+		};
+
+		it('keeps Next blocked for an ERC-20 amount while the fee is still pending', () => {
+			const { getByTestId } = setup({ token: mockValidErc20Token, tokenBalance: 100_00000000n });
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('does not show the orange fee box while the fee is still pending', () => {
+			const { queryByTestId } = setup({ token: mockValidErc20Token, tokenBalance: 100_00000000n });
+
+			// Nothing is confirmed insufficient yet, so no decoration is painted - only "Next" blocks.
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
+
+		it('keeps Next blocked for a native amount while the fee is still pending', () => {
+			const { getByTestId } = setup({ token: ETHEREUM_TOKEN });
 
 			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 		});

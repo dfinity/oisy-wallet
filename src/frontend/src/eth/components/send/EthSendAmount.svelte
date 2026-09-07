@@ -70,16 +70,29 @@
 		insufficientTokenBalance: boolean;
 		// ERC-20 only: the native coin can't cover the fee.
 		insufficientFundsForFee: boolean;
+		// True while sufficiency cannot be confirmed yet - the gas fee hasn't arrived. Gating
+		// must treat this like a shortfall (block "Next"): an unresolved fee is not a confirmed
+		// "no issue", and treating it as one let a fast "Next" through before the fee it depends
+		// on had actually loaded. Neither decoration is shown for it - there is nothing wrong to
+		// report yet, only nothing settled.
+		pending: boolean;
 	}
 
 	const NO_ISSUE: AmountValidation = {
 		insufficientTokenBalance: false,
-		insufficientFundsForFee: false
+		insufficientFundsForFee: false,
+		pending: false
+	};
+
+	const FEE_PENDING: AmountValidation = {
+		insufficientTokenBalance: false,
+		insufficientFundsForFee: false,
+		pending: true
 	};
 
 	const evaluateAmount = (userAmount: bigint): AmountValidation => {
 		if (isNullish($storeFeeData)) {
-			return NO_ISSUE;
+			return FEE_PENDING;
 		}
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
@@ -111,7 +124,8 @@
 				? {
 						fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas),
 						insufficientTokenBalance: false,
-						insufficientFundsForFee: false
+						insufficientFundsForFee: false,
+						pending: false
 					}
 				: NO_ISSUE;
 		}
@@ -122,7 +136,7 @@
 		// and there is nothing left for the user to fix on this field for either shortfall - see
 		// `EthSendForm`'s dedicated fee box instead.
 		if (userAmount > parsedSendBalance) {
-			return { insufficientTokenBalance: true, insufficientFundsForFee: false };
+			return { insufficientTokenBalance: true, insufficientFundsForFee: false, pending: false };
 		}
 
 		// Finally, if ERC20, the ETH balance should cover the max gas fee.
@@ -130,7 +144,8 @@
 
 		return {
 			insufficientTokenBalance: false,
-			insufficientFundsForFee: nonNullish($maxGasFee) && ethBalance < $maxGasFee
+			insufficientFundsForFee: nonNullish($maxGasFee) && ethBalance < $maxGasFee,
+			pending: false
 		};
 	};
 
@@ -143,24 +158,30 @@
 			: tryParseToken({ value: `${amount}`, unitName: $sendTokenDecimals })
 	);
 
-	let validation = $derived.by(() =>
-		nonNullish(parsedAmount) ? evaluateAmount(parsedAmount) : undefined
+	// Always a concrete result, never a bare `undefined`: an empty/unparsed field is "pending"
+	// exactly like a fee still in flight, so the two effects below read one consistent shape
+	// instead of re-deriving "nothing to evaluate yet" from `parsedAmount` a second time - and a
+	// value that was cleared and retyped is re-evaluated from this same single source every time.
+	let validation = $derived.by((): AmountValidation =>
+		nonNullish(parsedAmount) ? evaluateAmount(parsedAmount) : FEE_PENDING
 	);
 
 	$effect(() => {
-		insufficientFundsForFee = validation?.insufficientFundsForFee ?? false;
+		({ insufficientFundsForFee } = validation);
 	});
 
 	// Synchronous and independent of `TokenInput`'s own debounced validation cycle: recomputed the
 	// instant `amount` (or a balance/fee it depends on) changes, so a fast "Next" click - or a
 	// wizard step remounted right after "Back" - can never navigate past a check that has not caught
-	// up yet.
+	// up yet. `validation.pending` keeps this blocked while the gas fee itself is still loading,
+	// rather than reading an unconfirmed fee as "no issue".
 	$effect(() => {
 		insufficientFunds =
 			(!invalidAmount(amount) && isNullish(parsedAmount)) ||
-			nonNullish(validation?.fieldError) ||
-			(validation?.insufficientTokenBalance ?? false) ||
-			(validation?.insufficientFundsForFee ?? false);
+			validation.pending ||
+			nonNullish(validation.fieldError) ||
+			validation.insufficientTokenBalance ||
+			validation.insufficientFundsForFee;
 	});
 
 	const customValidate = (userAmount: bigint): Error | undefined =>
