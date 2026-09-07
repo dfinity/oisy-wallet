@@ -6,6 +6,10 @@
 	interface Props {
 		json?: unknown;
 		defaultExpandedLevel?: number;
+		// Entries of this node that start folded. Deliberately not handed down to the children: the
+		// caller chooses the entries it can name, and a key deeper in the tree that happens to carry
+		// the same name is somebody else's data, which must not be hidden by a rule meant for this level.
+		collapsedKeys?: string[];
 		_key?: string;
 		_level?: number;
 		_collapsed?: boolean;
@@ -14,6 +18,7 @@
 	let {
 		json,
 		defaultExpandedLevel = Infinity,
+		collapsedKeys = [],
 		_key = '',
 		_level = 1,
 		_collapsed
@@ -101,7 +106,13 @@
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<Self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
+					<Self
+						_collapsed={collapsedKeys.includes(key) ? true : undefined}
+						_key={key}
+						_level={_level + 1}
+						{defaultExpandedLevel}
+						json={value}
+					/>
 				</li>
 			{/each}
 		</ul>
