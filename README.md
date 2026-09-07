@@ -198,45 +198,39 @@ A reserved cycles limit is a canister setting: it survives upgrades, and `dfx de
 
 #### Raising the limit on production
 
-The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station (`7hkwe-3qaaa-aaaal-amhvq-cai`). This follows the usual developer-requests / reviewers-approve flow from the internal OISY to Orbit guide, with one difference: there is nothing to rebuild, so reviewers read the request instead of reproducing a Wasm with `dfx-orbit verify`.
+The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station, so this follows the usual developer-requests / reviewers-approve flow.
 
-Everyone involved first points at the right station:
+`dfx-orbit request canister update-settings` only adds and removes controllers, so the limit is set by having the station call the management canister for the backend. The station is a controller, so the call is accepted. Every settings field other than `reserved_cycles_limit` is omitted, which the management canister reads as unchanged, so the controller list is untouched.
+
+Point at the station first:
 
 ```
 dfx-orbit station use oisy-prod
 dfx-orbit me
 ```
 
-**Developer.** `dfx-orbit request canister update-settings` only adds and removes controllers, so this request is submitted as a direct station call:
+The **developer** submits the request:
 
 ```
-dfx canister call 7hkwe-3qaaa-aaaal-amhvq-cai create_request --network ic '(record { operation = variant { ConfigureExternalCanister = record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; kind = variant { NativeSettings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } } } }; title = opt "Raise backend reserved cycles limit to 20 TC" })'
+dfx-orbit --station oisy-prod \
+  request canister call aaaaa-aa update_settings \
+  '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; settings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } })'
 ```
 
-Take the request id out of the reply and share it with the reviewers.
-
-**Reviewers.** Find it and approve it:
+The resulting request id goes to the **reviewers**. There is no Wasm to rebuild here, but the argument is checksummed, so they verify it rather than approving blind:
 
 ```
-dfx-orbit review list --only-approvable
-dfx-orbit review id "$REQUEST_ID" --approve
+dfx-orbit --station oisy-prod \
+  verify $REQUEST_ID --and-approve \
+  canister call aaaaa-aa update_settings \
+  '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; settings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } })'
 ```
 
-Before approving, check the printed request targets `doked-biaaa-aaaar-qag2a-cai`, sets `reserved_cycles_limit` to `20_000_000_000_000`, and leaves every other field null. Null means unchanged, so the controller list must not be listed there.
-
-**Afterwards.** A non-controller cannot call `dfx canister status` on the production backend, so read it back through the station:
+Once it has executed, the request shows the call and its reply:
 
 ```
-dfx canister call 7hkwe-3qaaa-aaaal-amhvq-cai canister_status --network ic '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai" })'
+dfx-orbit --station oisy-prod review id $REQUEST_ID
 ```
-
-To check the current limit and the reserve in use:
-
-```
-dfx canister status backend --network <network>
-```
-
-The output reports both `Reserved cycles limit` and `Reserved`.
 
 ## Dependencies
 
