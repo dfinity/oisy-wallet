@@ -1562,6 +1562,7 @@
 			"estimated_eth": "Comisión de Ethereum Estimada",
 			"max_fee_eth": "Comisión máx. <small>(probablemente en &lt; 30 segundos)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"gwei": "",
 			"priority_slow": "",

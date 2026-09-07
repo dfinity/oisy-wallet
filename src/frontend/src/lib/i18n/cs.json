@@ -1562,6 +1562,7 @@
 			"estimated_eth": "Odhadovaný poplatek za Ethereum",
 			"max_fee_eth": "Maximální poplatek <small>(pravděpodobně za < 30 sekund)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"gwei": "",
 			"priority_slow": "",

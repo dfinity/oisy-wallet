@@ -1562,6 +1562,7 @@
 			"estimated_eth": "Frais Ethereum estimés",
 			"max_fee_eth": "Frais max <small>(probablement dans &lt; 30 secondes)</small>",
 			"estimated_fee_eth": "",
+			"estimated": "",
 			"priority": "",
 			"gwei": "",
 			"priority_slow": "",
