@@ -110,6 +110,7 @@ describe('BtcSendTokenWizard', () => {
 
 		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
+			feeRateMiliSatoshisPerVByte: mockUtxosFee.feeRateMiliSatoshisPerVByte,
 			utxos: mockUtxosFee.utxos
 		});
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
@@ -140,6 +141,7 @@ describe('BtcSendTokenWizard', () => {
 			network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 			utxosToSpend: mockUtxosFee.utxos,
 			feeSatoshis: toNullable(mockUtxosFee.feeSatoshis),
+			feeRateMiliSatoshisPerVByte: 4000n,
 			outputs: [
 				{
 					destination_address: mockBtcAddress,

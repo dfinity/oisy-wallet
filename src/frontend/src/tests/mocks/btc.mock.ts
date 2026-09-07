@@ -16,5 +16,6 @@ export const mockUtxo: CkBtcMinterDid.Utxo = {
 
 export const mockUtxosFee: UtxosFee = {
 	feeSatoshis: 1000n,
+	feeRateMiliSatoshisPerVByte: 4000n,
 	utxos: [mockUtxo]
 };
