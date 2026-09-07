@@ -138,6 +138,11 @@ permissions: {}
 
 env:
   DFX_WARNING: '-mainnet_plaintext_identity'
+  # Upper bound on the cycles the subnet may set aside for the backend's storage (20 TC).
+  # The IC default is 5 TC. Once a subnet passes 450 GiB of storage every new memory
+  # allocation reserves cycles, and a canister whose reserve has hit its limit can no
+  # longer grow. The test backend already had to reserve 11 TC on a subnet past 750 GiB.
+  BACKEND_RESERVED_CYCLES_LIMIT: '20000000000000'
 
 jobs:
   deployment:
@@ -516,3 +521,14 @@ jobs:
           FORCE_BACKEND: ${{ github.event.inputs.force-backend }}
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
           BASE_REF: ${{ github.base_ref }}
+
+      # Applied on every backend run, not only when the wasm changed, so that the limit
+      # cannot drift away from the value above. Production is controlled by the Orbit
+      # station and is set through an Orbit request instead (see README.md, "Ops").
+      - name: Apply Backend Canister Settings
+        run: |
+          if [ "$deploy_backend" == "true" ]; then
+            dfx canister update-settings backend --network "$NETWORK" --reserved-cycles-limit "$BACKEND_RESERVED_CYCLES_LIMIT"
+          fi
+        env:
+          DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}

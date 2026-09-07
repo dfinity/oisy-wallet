@@ -185,6 +185,23 @@ dfx canister call backend set_new_user_signups_allowed '(true)'
 - **New users (no existing profile):** sign-up is rejected with `SignupsClosed`. They cannot create a profile or use the wallet until the flag is flipped back to `true`.
 - **Existing users (profile already created):** unaffected. They can keep signing in and using the wallet exactly as before.
 
+### Backend reserved cycles limit
+
+Once a subnet holds more than 450 GiB of storage, every new memory allocation makes the IC set aside cycles from the canister's main balance as a reserve for that storage. The reserve is capped by the canister's `reserved_cycles_limit` (5 TC by default). A canister whose reserve has reached the limit can no longer allocate memory, so the backend runs with a limit of **20 TC** on every environment.
+
+#### How it is applied
+
+- **Staging, beta, test and audit backends:** the `deploy-to-environment` workflow runs `dfx canister update-settings --reserved-cycles-limit` on every backend deployment run, whether or not the wasm changed. The value lives in `BACKEND_RESERVED_CYCLES_LIMIT` in [`.github/workflows/deploy-to-environment.yml`](.github/workflows/deploy-to-environment.yml).
+- **Production:** the production backend is controlled by the Orbit station, and `dfx-orbit request canister update-settings` only manages controllers. Raise the limit with an Orbit request that configures the external canister's native settings (`reserved_cycles_limit`), then have it approved through the station.
+
+To check the current limit and the reserve in use:
+
+```
+dfx canister status backend --network <network>
+```
+
+The output reports both `Reserved cycles limit` and `Reserved`.
+
 ## Dependencies
 
 [//]: # 'TODO: Add fonts that are bought and owned by DFINITY too.'
