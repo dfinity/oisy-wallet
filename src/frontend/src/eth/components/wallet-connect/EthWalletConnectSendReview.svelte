@@ -175,8 +175,9 @@
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 
-	// Mirrors how `Value` ties its label to its content, so the heading names the two fee rows.
-	const FEE_SECTION = 'fee';
+	// Names the fee rows for a screen reader. A `label` cannot do it: it only labels form controls,
+	// so its `for` would be ignored here and the group would be announced without a name.
+	const FEE_SECTION_LABEL = 'fee-label';
 
 	let activeTab = $state('summary');
 </script>
@@ -278,9 +279,9 @@
 
 				<!-- The fee is two rows that belong together, so it takes a heading like every other
 				     block in this summary rather than trailing loose off the end of it. -->
-				<label class="font-bold" for={FEE_SECTION}>{$i18n.fee.text.fee}</label>
+				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
 
-				<div id={FEE_SECTION} class="mb-4">
+				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
 					{#if SEND_TRANSACTION_PRIORITY_ENABLED}
 						<EthFeePriority gas={signedGas} styleClass="mb-2" />
 					{/if}
