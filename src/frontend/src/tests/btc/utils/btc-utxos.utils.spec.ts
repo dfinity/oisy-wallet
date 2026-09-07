@@ -90,21 +90,21 @@ describe('btc-utxos.utils', () => {
 	describe('calculateFeeSatoshis', () => {
 		it('should price the recipient and change outputs at the given rate', () => {
 			// 1 input + 2 outputs = 141 vB, at 4 sat/vByte
-			expect(
-				calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 4000n })
-			).toEqual(564n);
+			expect(calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 4000n })).toEqual(
+				564n
+			);
 
 			// 2 inputs + 2 outputs = 209 vB, at 3 sat/vByte
-			expect(
-				calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte: 3000n })
-			).toEqual(627n);
+			expect(calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte: 3000n })).toEqual(
+				627n
+			);
 		});
 
 		it('should round up so the transaction is never priced below the rate', () => {
 			// 141 vB at 1.234 sat/vByte = 173.9 satoshis
-			expect(
-				calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1234n })
-			).toEqual(174n);
+			expect(calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1234n })).toEqual(
+				174n
+			);
 		});
 
 		it('should agree with the fee the selection reports', () => {

@@ -14,8 +14,10 @@ export const mockUtxo: CkBtcMinterDid.Utxo = {
 	}
 };
 
+// The fee and the rate must stay consistent: the pre-broadcast validation reprices this
+// single-input selection (141 vB) at the rate below and rejects a fee more than 10% off it.
 export const mockUtxosFee: UtxosFee = {
 	feeSatoshis: 1000n,
-	feeRateMiliSatoshisPerVByte: 4000n,
+	feeRateMiliSatoshisPerVByte: 7000n,
 	utxos: [mockUtxo]
 };

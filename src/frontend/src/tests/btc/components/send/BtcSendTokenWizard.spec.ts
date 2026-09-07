@@ -141,7 +141,6 @@ describe('BtcSendTokenWizard', () => {
 			network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 			utxosToSpend: mockUtxosFee.utxos,
 			feeSatoshis: toNullable(mockUtxosFee.feeSatoshis),
-			feeRateMiliSatoshisPerVByte: 4000n,
 			outputs: [
 				{
 					destination_address: mockBtcAddress,
