@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
+import * as feeServices from '$eth/services/fee.services';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
 import {
 	ETH_FEE_CONTEXT_KEY,
@@ -167,6 +168,48 @@ describe('SwapEthWizard', () => {
 			},
 			context
 		});
+
+	describe('fee observation', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			// The fee fetch bails out before the request without an address of its own.
+			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(
+				readable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+			);
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderAt = (step: WizardStepsSwap) => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			return renderWithStep({ step, context: mockContext });
+		};
+
+		it('keeps fetching the fee on the swap step', async () => {
+			renderAt(WizardStepsSwap.SWAP);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalled();
+		});
+
+		it('freezes the fee on the review step', async () => {
+			renderAt(WizardStepsSwap.REVIEW);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			// The swap was quoted against the fee in hand; a fresh sample would move the total the
+			// user is looking at, and a spike right before "Swap now" would be signed as is.
+			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+	});
 
 	describe('basic rendering', () => {
 		it('renders SwapEthForm on SWAP step', () => {
@@ -823,10 +866,13 @@ describe('SwapEthWizard', () => {
 
 			const ctx = new Map();
 
+			// A failed swap surfaces here, in the form's own error area, rather than as a toast.
+			const failedSwapError: Writable<SwapError | undefined> = writable(undefined);
+
 			ctx.set(SWAP_CONTEXT_KEY, {
 				sourceToken: readable(mockToken),
 				destinationToken: readable(destinationToken),
-				failedSwapError: writable(undefined),
+				failedSwapError,
 				sourceTokenExchangeRate: readable(10),
 				sourceTokenBalance: readable(undefined),
 				destinationTokenBalance: readable(undefined),
@@ -851,7 +897,7 @@ describe('SwapEthWizard', () => {
 				})
 			);
 
-			return ctx;
+			return { ctx, failedSwapError };
 		};
 
 		it('calls fetchOneSecEvmToIcpSwap and closes on success', async () => {
@@ -868,7 +914,7 @@ describe('SwapEthWizard', () => {
 					onStartTriggerAmount: vi.fn(),
 					onStopTriggerAmount: vi.fn()
 				},
-				context: createOneSecExecutionContext()
+				context: createOneSecExecutionContext().ctx
 			});
 
 			const valueDifferenceCheckbox = queryByRole('checkbox');
@@ -890,6 +936,8 @@ describe('SwapEthWizard', () => {
 			const onClose = vi.fn();
 			const onBack = vi.fn();
 
+			const { ctx, failedSwapError } = createOneSecExecutionContext();
+
 			const { getByText, queryByRole } = render(SwapEthWizard, {
 				props: {
 					...BASE_PROPS,
@@ -900,7 +948,7 @@ describe('SwapEthWizard', () => {
 					onStartTriggerAmount: vi.fn(),
 					onStopTriggerAmount: vi.fn()
 				},
-				context: createOneSecExecutionContext()
+				context: ctx
 			});
 
 			const valueDifferenceCheckbox = queryByRole('checkbox');
@@ -913,7 +961,7 @@ describe('SwapEthWizard', () => {
 
 			expect(onBack).toHaveBeenCalledOnce();
 			expect(onClose).not.toHaveBeenCalled();
-			expect(toasts.toastsError).toHaveBeenCalled();
+			expect(get(failedSwapError)?.message).toBe(en.swap.error.failed_unexpectedly);
 		});
 
 		it('shows error and calls onBack when destination is not an ICP token', async () => {
@@ -929,7 +977,7 @@ describe('SwapEthWizard', () => {
 					onStartTriggerAmount,
 					onStopTriggerAmount: vi.fn()
 				},
-				context: createOneSecExecutionContext(mockDestToken)
+				context: createOneSecExecutionContext(mockDestToken).ctx
 			});
 
 			const valueDifferenceCheckbox = queryByRole('checkbox');

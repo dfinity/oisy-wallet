@@ -341,10 +341,14 @@
 		}
 	};
 
-	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed.
+	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed,
+	// or once the consumer has stopped observing. The latter is the single choke point every fetch
+	// goes through, including the imperative `triggerUpdateFee` a consumer calls when its own inputs
+	// change, and the throttled listener callback whose timer can outlive the listener itself.
+	// Without it a frozen step would still pay for a fetch whose result it must discard.
 	const debouncedFn = debounce(updateFeeData);
 	const debounceUpdateFeeData = (...args: unknown[]) => {
-		if (!isDestroyed) {
+		if (!isDestroyed && observe) {
 			debouncedFn(...args);
 		}
 	};
