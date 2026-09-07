@@ -705,3 +705,75 @@ mod user_profile {
         }]
     );
 }
+
+mod agreement {
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::agreement::{UpdateUserAgreementsRequest, UserAgreement, UserAgreements},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    fn request(text_sha256: &str) -> UpdateUserAgreementsRequest {
+        UpdateUserAgreementsRequest {
+            current_user_version: None,
+            agreements: UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    text_sha256: Some(text_sha256.to_string()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        }
+    }
+
+    test_validate_on_deserialize!(
+        UpdateUserAgreementsRequest,
+        [
+            TestVector {
+                description: "No hash provided",
+                input: UpdateUserAgreementsRequest {
+                    current_user_version: None,
+                    agreements: UserAgreements::default(),
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "Lowercase hex hash of the expected length",
+                input: request(&"0123456789abcdef".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Uppercase hex hash of the expected length",
+                input: request(&"0123456789ABCDEF".repeat(4)),
+                valid: true,
+            },
+            TestVector {
+                description: "Right length, but not hexadecimal",
+                input: request(&"z".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but a single non-hex character",
+                input: request(&format!("{}g", "a".repeat(63))),
+                valid: false,
+            },
+            TestVector {
+                description: "Right length, but punctuation rather than hex",
+                input: request(&"-".repeat(64)),
+                valid: false,
+            },
+            TestVector {
+                description: "64 bytes of multi-byte characters rather than 64 hex digits",
+                input: request(&"\u{e9}".repeat(32)),
+                valid: false,
+            },
+            TestVector {
+                description: "Hexadecimal, but too short",
+                input: request("abc123"),
+                valid: false,
+            },
+        ]
+    );
+}

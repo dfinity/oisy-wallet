@@ -26,7 +26,7 @@
 	{:else if filteredAssets.length === 0}
 		<p class="py-2 text-tertiary">{$i18n.core.text.no_results}</p>
 	{:else}
-		<ul class="flex flex-col list-none">
+		<ul class="flex list-none flex-col">
 			{#each filteredAssets as asset (asset.token.id)}
 				<li transition:slide={SLIDE_PARAMS}>
 					<OisyTradePositionRow {asset} variant="holdings" />

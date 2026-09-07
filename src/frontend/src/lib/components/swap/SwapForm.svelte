@@ -31,7 +31,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -103,6 +104,26 @@
 			!notOfferedExplained &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
+	);
+
+	// A provider that refused the amount as below its minimum names the reason no offer
+	// exists, so the specific message replaces the generic "swap is not offered".
+	let quoteError = $derived(
+		nonNullish($swapAmountsStore) && $swapAmountsStore.swaps.length === 0
+			? $swapAmountsStore.quoteError
+			: undefined
+	);
+
+	let quoteErrorMinAmount = $derived(
+		quoteError?.type === 'amount-too-low' &&
+			nonNullish(quoteError.minAmount) &&
+			nonNullish($sourceToken)
+			? formatToken({
+					value: quoteError.minAmount,
+					unitName: $sourceToken.decimals,
+					displayDecimals: $sourceToken.decimals
+				})
+			: undefined
 	);
 
 	let isSwitchTokensButtonDisabled = $derived(() => {
@@ -243,7 +264,18 @@
 							{#if nonNullish($destinationToken)}
 								{#if showSwapNotOfferedError}
 									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
-										>{$i18n.swap.text.swap_is_not_offered}</div
+										>{#if quoteError?.type === 'amount-too-low'}
+											{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+												{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
+													$amount: quoteErrorMinAmount,
+													$symbol: $sourceToken.symbol
+												})}
+											{:else}
+												{$i18n.swap.text.swap_amount_too_low}
+											{/if}
+										{:else}
+											{$i18n.swap.text.swap_is_not_offered}
+										{/if}</div
 									>
 								{:else}
 									<div class="flex gap-3 text-tertiary">

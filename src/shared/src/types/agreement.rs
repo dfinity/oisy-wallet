@@ -85,6 +85,13 @@ impl Validate for UserAgreement {
                     SHA256_HEX_LENGTH
                 )));
             }
+            // Length alone lets 64 arbitrary characters through, which would be stored and
+            // replayed in the agreement history as if it identified a real document version.
+            if !hash.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+                return Err(candid::Error::msg(
+                    "Invalid SHA256 hex: expected hexadecimal characters only",
+                ));
+            }
         }
         Ok(())
     }

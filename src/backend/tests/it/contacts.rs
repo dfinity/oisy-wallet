@@ -4,16 +4,17 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
+    account::{EthAddress, TokenAccountId},
     contact::{
-        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
-        UpdateContactRequest,
+        Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
+        ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
 
 use crate::utils::{
     mock::CALLER,
-    pocketic::{setup, PicBackend, PicCanisterTrait},
+    pocketic::{setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -27,6 +28,19 @@ pub fn call_create_contact(
 ) -> Result<Contact, ContactError> {
     pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
+    let wrapped_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+    wrapped_result.expect("that create_contact succeeds")
+}
+
+pub fn call_create_contact_with_image(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    name: String,
+    image: Option<ContactImage>,
+) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
+    let request = CreateContactRequest { name, image };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
     wrapped_result.expect("that create_contact succeeds")
@@ -80,13 +94,6 @@ fn create_test_jpeg_image() -> ContactImage {
         mime_type: ImageMimeType::Jpeg,
     }
 }
-fn create_empty_contacts() -> shared::types::contact::StoredContacts {
-    shared::types::contact::StoredContacts {
-        contacts: std::collections::BTreeMap::new(),
-        update_timestamp_ns: 0,
-    }
-}
-
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the contact management functionality
 // -------------------------------------------------------------------------------------------------
@@ -886,121 +893,336 @@ fn test_update_contact_image_jpeg() {
     assert_eq!(contact_with_image.image, Some(jpeg_image));
 }
 
-#[cfg(test)]
-mod tests {
-    use pretty_assertions::assert_eq;
-    use serde_bytes::ByteBuf;
-    use shared::types::contact::{Contact, ContactImage, ImageMimeType, UpdateContactRequest};
+#[test]
+fn test_create_contact_stores_the_requested_image() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
 
-    use super::create_empty_contacts;
+    let png_image = create_test_png_image();
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Created With Image".to_string(),
+        Some(png_image.clone()),
+    )
+    .expect("that a contact can be created with an image");
 
-    #[test]
-    fn test_update_contact_image_png() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        stored_contacts.contacts.insert(1, contact.clone());
-        let png_image = ContactImage {
-            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
-            mime_type: ImageMimeType::Png,
-        };
-        let request = UpdateContactRequest {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(png_image.clone()),
-        };
-        let updated = Contact {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(png_image),
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
+    assert_eq!(contact.image, Some(png_image.clone()));
+
+    // The image must survive the round trip, not just the create response.
+    let retrieved = call_get_contact(&pic_setup, caller, contact.id)
+        .expect("that the created contact can be read back");
+    assert_eq!(retrieved.image, Some(png_image));
+}
+
+#[test]
+fn test_image_limit_is_enforced_per_principal() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+
+    let mut first_contact_with_image = None;
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        let contact = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("With Image {index}"),
+            Some(png_image.clone()),
+        )
+        .expect("that contacts up to the image cap can be created");
+
+        if index == 0 {
+            first_contact_with_image = Some(contact);
+        }
     }
 
-    #[test]
-    fn test_update_contact_image_remove() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(ContactImage {
-                data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF]),
-                mime_type: ImageMimeType::Jpeg,
-            }),
-        };
-        stored_contacts.contacts.insert(2, contact.clone());
-        let request = UpdateContactRequest {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        let updated = Contact {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
-    }
+    // One more image is over the cap.
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            "One Too Many".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
 
-    #[test]
-    fn test_update_contact_image_jpeg() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        stored_contacts.contacts.insert(3, contact.clone());
-        let jpeg_image = ContactImage {
-            data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
-            mime_type: ImageMimeType::Jpeg,
-        };
-        let request = UpdateContactRequest {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
+    // The cap is on images, not on contacts: an image-less contact is still accepted.
+    let contact_without_image =
+        call_create_contact_with_image(&pic_setup, caller, "No Image".to_string(), None)
+            .expect("that an image-less contact can still be created at the image cap");
+
+    // Attaching an image to that contact would exceed the cap.
+    let jpeg_image = create_test_jpeg_image();
+    assert_eq!(
+        call_update_contact(
+            &pic_setup,
+            caller,
+            Contact {
+                image: Some(jpeg_image.clone()),
+                ..contact_without_image
+            },
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Replacing an image on a contact that already has one does not change the count, so it is
+    // allowed even at the cap.
+    let existing = first_contact_with_image.expect("that the first contact was recorded");
+    let replaced = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
             image: Some(jpeg_image.clone()),
-        };
-        let updated = Contact {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(jpeg_image),
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
+            ..existing.clone()
+        },
+    )
+    .expect("that replacing an existing image is allowed at the cap");
+    assert_eq!(replaced.image, Some(jpeg_image));
+
+    // Clearing an image is allowed too, and frees a slot.
+    call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            image: None,
+            ..existing
+        },
+    )
+    .expect("that clearing an image is allowed at the cap");
+
+    call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Back Under The Cap".to_string(),
+        Some(png_image),
+    )
+    .expect("that a freed slot can be reused");
+}
+
+#[test]
+fn test_update_contact_rejects_an_over_long_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "Address Bound".to_string()).unwrap();
+
+    // A normal address is accepted and stored.
+    let valid_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(
+            "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+        )),
+        label: Some("main".to_string()),
+    };
+    let updated = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            addresses: vec![valid_address.clone()],
+            ..contact.clone()
+        },
+    )
+    .expect("that a normal address is accepted");
+    assert_eq!(updated.addresses, vec![valid_address.clone()]);
+
+    // An address longer than the bound is rejected before it can reach storage. Validation runs
+    // during candid deserialization, so the call is rejected outright rather than returning a
+    // typed ContactError.
+    let oversized_address = ContactAddressData {
+        token_account_id: TokenAccountId::Eth(EthAddress::Public(format!("0x{}", "a".repeat(200)))),
+        label: None,
+    };
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        UpdateContactRequest {
+            id: contact.id,
+            name: contact.name.clone(),
+            addresses: vec![oversized_address],
+            update_timestamp_ns: contact.update_timestamp_ns,
+            image: None,
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "an address over the length bound should be rejected"
+    );
+
+    // The rejected write left the stored contact untouched: the addresses must still be exactly
+    // what the last successful update wrote, not merely the same number of them.
+    let after =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
+    assert_eq!(after.addresses, vec![valid_address]);
+    assert_eq!(after.name, contact.name);
+}
+
+#[test]
+fn test_images_survive_in_get_contacts() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let jpeg_image = create_test_jpeg_image();
+
+    let with_png = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "PNG".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+    let with_jpeg = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "JPEG".to_string(),
+        Some(jpeg_image.clone()),
+    )
+    .unwrap();
+    let without =
+        call_create_contact_with_image(&pic_setup, caller, "None".to_string(), None).unwrap();
+
+    // Images are stored outside the contact blob, so the list endpoint has to reattach them.
+    let contacts = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts.len(), 3);
+
+    let image_of = |id: u64| {
+        contacts
+            .iter()
+            .find(|contact| contact.id == id)
+            .expect("that the contact is listed")
+            .image
+            .clone()
+    };
+
+    assert_eq!(image_of(with_png.id), Some(png_image));
+    assert_eq!(image_of(with_jpeg.id), Some(jpeg_image));
+    assert_eq!(image_of(without.id), None);
+}
+
+#[test]
+fn test_delete_contact_frees_its_image_slot() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+
+    let mut first = None;
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        let contact = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("With Image {index}"),
+            Some(png_image.clone()),
+        )
+        .unwrap();
+        if index == 0 {
+            first = Some(contact);
+        }
     }
+
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            "Over The Cap".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Deleting a contact must drop its image too. If the image were orphaned it would keep
+    // counting against the cap and this next create would still fail.
+    let first = first.expect("that the first contact was recorded");
+    let wrapped_result =
+        pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", first.id);
+    wrapped_result
+        .expect("that delete_contact succeeds")
+        .expect("that the contact is deleted");
+
+    call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Back Under The Cap".to_string(),
+        Some(png_image),
+    )
+    .expect("that deleting a contact with an image frees its slot");
+}
+
+#[test]
+fn test_image_cap_is_counted_per_principal_not_globally() {
+    let pic_setup = setup();
+    let users: Vec<OisyUser> = pic_setup.create_users(1..=2);
+    let (first_user, second_user) = (users[0].principal, users[1].principal);
+
+    let png_image = create_test_png_image();
+
+    // Fill the first user right up to the cap.
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        call_create_contact_with_image(
+            &pic_setup,
+            first_user,
+            format!("First User {index}"),
+            Some(png_image.clone()),
+        )
+        .unwrap();
+    }
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            first_user,
+            "Over The Cap".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Images are keyed (principal, contact_id) and counted with a prefix scan. If that scan
+    // over-ran into another principal's keys, the second user would be locked out by the first
+    // user's images.
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        second_user,
+        "Second User".to_string(),
+        Some(png_image),
+    )
+    .expect("that one principal's images do not count against another's cap");
+    assert!(contact.image.is_some());
+}
+
+#[test]
+fn test_images_survive_canister_upgrade() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let with_image = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Survives Upgrade".to_string(),
+        Some(png_image.clone()),
+    )
+    .unwrap();
+
+    // PocketIC throttles install_code based on instructions used in recent rounds; advance
+    // simulated time and drive ticks so the heavy `setup()` install rolls out of the rate-limit
+    // window. Mirrors the idiom in `tests/it/active_user_transactions.rs`.
+    pic_setup.pic.advance_time(Duration::from_mins(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    pic_setup
+        .upgrade_with_wasm(&BackendBuilder::default_wasm_path(), None)
+        .expect("canister upgrade should succeed");
+
+    // Images live in their own stable memory region now, so the upgrade has to reattach it.
+    let after = call_get_contact(&pic_setup, caller, with_image.id)
+        .expect("that the contact survives the upgrade");
+    assert_eq!(after.image, Some(png_image.clone()));
+
+    // The cap scan has to see the pre-upgrade image too, or the count silently resets.
+    let listed = call_get_contacts(&pic_setup, caller);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].image, Some(png_image));
 }

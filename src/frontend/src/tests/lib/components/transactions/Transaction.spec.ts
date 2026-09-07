@@ -351,6 +351,7 @@ describe('Transaction', () => {
 		const { container, getByText } = render(Transaction, {
 			displayAmount: 42n,
 			type: 'receive',
+			from: '0xfeedface',
 			status: 'confirmed',
 			timestamp: 1_690_000_000,
 			token: ICP_TOKEN,
@@ -359,6 +360,7 @@ describe('Transaction', () => {
 			timeOnly: false
 		});
 
+		// The prefix renders only beside an actual address: without one it dangled alone.
 		expect(getByText(/From/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(
 			formatSecondsToDate({
