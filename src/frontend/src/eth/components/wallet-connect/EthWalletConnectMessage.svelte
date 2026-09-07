@@ -229,8 +229,6 @@
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
 		{#if nonNullish(signedJson)}
-			<!-- Opened rather than collapsed: the tab exists to be read, and a reader who switched to
-			     it has already said the summary was not enough. The schema is the one exception. -->
 			<div class="mt-4 rounded-xs bg-disabled p-4">
 				<Json _collapsed={false} collapsedKeys={RAW_DATA_COLLAPSED_KEYS} json={signedJson} />
 			</div>
