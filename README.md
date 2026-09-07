@@ -198,39 +198,18 @@ A reserved cycles limit is a canister setting: it survives upgrades, and `dfx de
 
 #### Raising the limit on production
 
-The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station, so this follows the usual developer-requests / reviewers-approve flow.
+The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station, so the limit is set through a station request that reviewers approve.
 
-`dfx-orbit request canister update-settings` only adds and removes controllers, so the limit is set by having the station call the management canister for the backend. The station is a controller, so the call is accepted. Every settings field other than `reserved_cycles_limit` is omitted, which the management canister reads as unchanged, so the controller list is untouched.
+There is currently no `dfx-orbit` command for it. `request canister update-settings` only builds a controller list and leaves every other field unset, and routing it as a `request canister call` to the management canister is rejected by the station at request creation. So today this is done from the Orbit web UI, by configuring the backend canister's native settings and setting `reserved_cycles_limit` to `20_000_000_000_000`. Leave every other field untouched.
 
-Point at the station first:
-
-```
-dfx-orbit station use oisy-prod
-dfx-orbit me
-```
-
-The **developer** submits the request:
+Once submitted, the request is reviewed and approved the same way as any other:
 
 ```
-dfx-orbit --station oisy-prod \
-  request canister call aaaaa-aa update_settings \
-  '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; settings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } })'
+dfx-orbit --station oisy-prod review list --only-approvable
+dfx-orbit --station oisy-prod review id $REQUEST_ID --approve
 ```
 
-The resulting request id goes to the **reviewers**. There is no Wasm to rebuild here, but the argument is checksummed, so they verify it rather than approving blind:
-
-```
-dfx-orbit --station oisy-prod \
-  verify $REQUEST_ID --and-approve \
-  canister call aaaaa-aa update_settings \
-  '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; settings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } })'
-```
-
-Once it has executed, the request shows the call and its reply:
-
-```
-dfx-orbit --station oisy-prod review id $REQUEST_ID
-```
+Note that `dfx-orbit` reports station rejections as `The station API returned an error: 0`, which is a formatting bug in the tool rather than the real reason.
 
 ## Dependencies
 
