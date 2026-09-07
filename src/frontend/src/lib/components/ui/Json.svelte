@@ -69,36 +69,53 @@
 	const toggle = () => {
 		collapsed = !collapsed;
 	};
+
+	// A span carrying role="button" is activated by a pointer only, so a folded node would be
+	// unreachable without a mouse.
+	const toggleOnKey = (event: KeyboardEvent) => {
+		const { key } = event;
+
+		if (key !== 'Enter' && key !== ' ') {
+			return;
+		}
+
+		// Space scrolls the page on anything that is not a real button.
+		event.preventDefault();
+
+		toggle();
+	};
 </script>
 
 {#if isExpandable && hasChildren}
 	{#if collapsed}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
 			class:collapsed
 			class:expanded={!collapsed}
 			class:root
+			aria-expanded={!collapsed}
 			aria-label="Toggle"
 			data-tid={testId}
 			onclick={stopPropagation(toggle)}
+			onkeydown={toggleOnKey}
 			role="button"
 			tabindex="0"
 			>{keyLabel}
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
 	{:else}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
 			class:collapsed
 			class:expanded={!collapsed}
 			class:root
+			aria-expanded={!collapsed}
 			aria-label="Toggle"
 			data-tid={testId}
 			onclick={stopPropagation(toggle)}
+			onkeydown={toggleOnKey}
 			role="button"
 			tabindex="0">{keyLabel}<span class="bracket open">{openBracket}</span></span
 		>

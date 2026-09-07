@@ -123,6 +123,27 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('"uint160"')).toBeInTheDocument();
 	});
 
+	it.each(['Enter', ' '])(
+		'should open the folded type schema on %s, not by pointer alone',
+		async (key) => {
+			// Folding it makes opening it a required interaction, so it has to be one a keyboard can
+			// perform: the node is a span carrying role="button", which activates on a pointer only.
+			const { getByRole, getByText, queryByText } = render(EthWalletConnectMessage, {
+				props: {
+					request
+				}
+			});
+
+			await openRawTab(getByRole);
+
+			expect(queryByText('"uint160"')).not.toBeInTheDocument();
+
+			await fireEvent.keyDown(getByRole('button', { name: 'Toggle', expanded: false }), { key });
+
+			expect(getByText('"uint160"')).toBeInTheDocument();
+		}
+	);
+
 	it('should render the application', () => {
 		const { getByText } = render(EthWalletConnectMessage, {
 			props: {
