@@ -215,6 +215,43 @@ describe('EthFeeContext', () => {
 		);
 	});
 
+	it('drops a sample that comes back after observing stopped', async () => {
+		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+		let release: () => void = () => undefined;
+		const inFlight = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+
+		InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockImplementation(
+			async () =>
+				await inFlight.then(() => ({
+					baseFeePerGas: 5n,
+					perPriority: {
+						[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+						[EthFeePriority.STANDARD]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+						[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
+					}
+				}))
+		);
+
+		const { rerender } = renderWith();
+
+		// Let the debounce fire so the request is genuinely in flight before observing stops.
+		await vi.advanceTimersByTimeAsync(1000);
+
+		expect(InfuraGasRest.prototype.getSuggestedFeeData).toHaveBeenCalled();
+		expect(setFeeMock).not.toHaveBeenCalled();
+
+		await rerender({ ...baseProps, observe: false });
+
+		release();
+		await vi.runAllTimersAsync();
+
+		// The consumer froze the fee when it stopped observing; a late sample must not move it.
+		expect(setFeeMock).not.toHaveBeenCalled();
+	});
+
 	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 

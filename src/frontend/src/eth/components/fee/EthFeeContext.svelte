@@ -45,6 +45,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -99,6 +100,18 @@
 
 	const errorMsgs: symbol[] = [];
 
+	// A fetch outlives a flip of `observe`: it is a chain of awaits, and nothing cancels it. A
+	// consumer that stopped observing has frozen the fee (the send review step, for one), and what
+	// it derived from that fee is not re-derived there. So a sample that comes back late must be
+	// dropped, or the frozen fee would drift underneath the amount it was priced against.
+	const setFee = (data: TransactionFeeData) => {
+		if (!observe) {
+			return;
+		}
+
+		feeStore.setFee(data);
+	};
+
 	const updateFeeData = async () => {
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
@@ -123,6 +136,10 @@
 				to: destination !== '' ? destination : $ethAddress,
 				priority
 			});
+
+			if (!observe) {
+				return;
+			}
 
 			feePrioritiesStore.set(priorities);
 
@@ -158,7 +175,7 @@
 							data
 						});
 
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
@@ -186,7 +203,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -210,7 +227,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -233,7 +250,7 @@
 				// Deposit gas cannot be estimated before approval is on-chain, so we use a
 				// conservative fallback here. The actual deposit transaction re-estimates gas
 				// after the approval step succeeds (see depositErc4626 in erc4626.services.ts).
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: (approveGas ?? ERC20_FALLBACK_FEE) + ERC20_FALLBACK_FEE
 				});
@@ -249,7 +266,7 @@
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
@@ -284,14 +301,14 @@
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: estimatedGasNft
 				});
 				return;
 			}
 
-			feeStore.setFee({
+			setFee({
 				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
