@@ -36,7 +36,9 @@ const SKIP_CANISTER_IDS_LOGOS: LedgerCanisterIdText[] = [
 	// ckEURC
 	'pe5t5-diaaa-aaaar-qahwa-cai',
 	// ckXAUT
-	'nza5v-qaaaa-aaaar-qahzq-cai'
+	'nza5v-qaaaa-aaaar-qahzq-cai',
+	// ckBAT
+	'j7x7x-syaaa-aaaar-qcbea-cai'
 ];
 
 const orchestratorInfo = async ({
