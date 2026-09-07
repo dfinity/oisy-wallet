@@ -200,16 +200,24 @@ A reserved cycles limit is a canister setting: it survives upgrades, and `dfx de
 
 The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station, so the limit is set through a station request that reviewers approve.
 
-There is currently no `dfx-orbit` command for it. `request canister update-settings` only builds a controller list and leaves every other field unset, and routing it as a `request canister call` to the management canister is rejected by the station at request creation. So today this is done from the Orbit web UI, by configuring the backend canister's native settings and setting `reserved_cycles_limit` to `20_000_000_000_000`. Leave every other field untouched.
+There is no `dfx-orbit` command that can submit it. `request canister update-settings` only ever builds a controller list and leaves every other setting unset. Routing it as a `request canister call` to the management canister does not work either: the station has exactly one external canister registered, the backend itself, so a call request against `aaaaa-aa` is refused whatever permissions the caller holds.
 
-Once submitted, the request is reviewed and approved the same way as any other:
+The operation that does work is `ConfigureExternalCanister` with the `NativeSettings` kind, against the registered backend, which needs the `Change` permission on that canister. Submit it either from the Orbit web UI or with a direct station call:
+
+```
+dfx canister call 7hkwe-3qaaa-aaaal-amhvq-cai create_request --network ic '(record { operation = variant { ConfigureExternalCanister = record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; kind = variant { NativeSettings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } } } }; title = opt "Raise backend reserved cycles limit to 20 TC"; summary = null; execution_plan = null; expiration_dt = null; deduplication_key = null; tags = null })'
+```
+
+Every settings field other than `reserved_cycles_limit` is omitted, which the management canister reads as unchanged, so the controller list is untouched.
+
+From there it is the normal review flow. Reviewers approve rather than verify, since `dfx-orbit verify canister update-settings` only compares controller sets and would report a mismatch:
 
 ```
 dfx-orbit --station oisy-prod review list --only-approvable
 dfx-orbit --station oisy-prod review id $REQUEST_ID --approve
 ```
 
-Note that `dfx-orbit` reports station rejections as `The station API returned an error: 0`, which is a formatting bug in the tool rather than the real reason.
+Note that `dfx-orbit` prints every station rejection as `The station API returned an error: 0`. That is a formatting bug in the tool, not the real reason, so do not read anything into the number.
 
 ## Dependencies
 
