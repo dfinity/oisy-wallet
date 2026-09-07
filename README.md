@@ -194,7 +194,41 @@ Once a subnet holds more than 450 GiB of storage, every new memory allocation ma
 A reserved cycles limit is a canister setting: it survives upgrades, and `dfx deploy` never resets it. `initialization_values` in `dfx.json` is not enough either, because dfx only applies those when it _creates_ a canister and every backend canister already exists. The limit therefore has to be set explicitly, once per canister.
 
 - **Staging, beta, test and audit backends:** the `deploy-to-environment` workflow runs `dfx canister update-settings --reserved-cycles-limit` on every backend deployment run, whether or not the wasm changed. The value lives in `BACKEND_RESERVED_CYCLES_LIMIT` in [`.github/workflows/deploy-to-environment.yml`](.github/workflows/deploy-to-environment.yml). Staging is covered on the next push to `main`, beta on the next release tag.
-- **Production:** no workflow deploys the production backend, so CI never touches its settings. The canister is controlled by the Orbit station, and the `dfx-orbit` CLI cannot set this field (`request canister update-settings` only adds and removes controllers). It takes a `ConfigureExternalCanister` request whose operation kind is `NativeSettings`, carrying `reserved_cycles_limit`, submitted and approved through the station.
+- **Production:** no workflow deploys the production backend, so CI never touches its settings. It goes through the Orbit station — see below.
+
+#### Raising the limit on production
+
+The production backend (`doked-biaaa-aaaar-qag2a-cai`) is controlled by the `oisy-prod` Orbit station (`7hkwe-3qaaa-aaaal-amhvq-cai`). This follows the usual developer-requests / reviewers-approve flow from the internal OISY to Orbit guide, with one difference: there is nothing to rebuild, so reviewers read the request instead of reproducing a Wasm with `dfx-orbit verify`.
+
+Everyone involved first points at the right station:
+
+```
+dfx-orbit station use oisy-prod
+dfx-orbit me
+```
+
+**Developer.** `dfx-orbit request canister update-settings` only adds and removes controllers, so this request is submitted as a direct station call:
+
+```
+dfx canister call 7hkwe-3qaaa-aaaal-amhvq-cai create_request --network ic '(record { operation = variant { ConfigureExternalCanister = record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai"; kind = variant { NativeSettings = record { reserved_cycles_limit = opt (20_000_000_000_000 : nat) } } } }; title = opt "Raise backend reserved cycles limit to 20 TC" })'
+```
+
+Take the request id out of the reply and share it with the reviewers.
+
+**Reviewers.** Find it and approve it:
+
+```
+dfx-orbit review list --only-approvable
+dfx-orbit review id "$REQUEST_ID" --approve
+```
+
+Before approving, check the printed request targets `doked-biaaa-aaaar-qag2a-cai`, sets `reserved_cycles_limit` to `20_000_000_000_000`, and leaves every other field null. Null means unchanged, so the controller list must not be listed there.
+
+**Afterwards.** A non-controller cannot call `dfx canister status` on the production backend, so read it back through the station:
+
+```
+dfx canister call 7hkwe-3qaaa-aaaal-amhvq-cai canister_status --network ic '(record { canister_id = principal "doked-biaaa-aaaar-qag2a-cai" })'
+```
 
 To check the current limit and the reserve in use:
 
