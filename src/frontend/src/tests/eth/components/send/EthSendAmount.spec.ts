@@ -1,13 +1,14 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
+import { ZERO } from '$lib/constants/app.constants';
 import { MAX_BUTTON, TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -37,8 +38,20 @@ describe('EthSendAmount', () => {
 	const setup = ({
 		ceilingKnown = true,
 		feeResolved = true,
-		token = ETHEREUM_TOKEN
-	}: { ceilingKnown?: boolean; feeResolved?: boolean; token?: Token } = {}) => {
+		token = ETHEREUM_TOKEN,
+		nativeEthereumBalance = balance,
+		tokenBalance
+	}: {
+		ceilingKnown?: boolean;
+		feeResolved?: boolean;
+		token?: Token;
+		// Balance of the native coin that pays the gas - defaults to a comfortable amount so
+		// existing (native-send) tests keep exercising only the amount-vs-ceiling math.
+		nativeEthereumBalance?: bigint;
+		// Balance of `token` itself. Only meaningful for an ERC-20 `token`, whose balance lives at
+		// a different store key than the native coin's.
+		tokenBalance?: bigint;
+	} = {}) => {
 		const feeStore = initEthFeeStore();
 
 		if (feeResolved) {
@@ -63,7 +76,14 @@ describe('EthSendAmount', () => {
 		);
 		context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
 
-		balancesStore.set({ id: ETHEREUM_TOKEN.id, data: { data: balance, certified: true } });
+		balancesStore.set({
+			id: ETHEREUM_TOKEN.id,
+			data: { data: nativeEthereumBalance, certified: true }
+		});
+
+		if (nonNullish(tokenBalance)) {
+			balancesStore.set({ id: token.id, data: { data: tokenBalance, certified: true } });
+		}
 
 		const { container, queryByText } = render(EthSendAmount, {
 			context,
@@ -156,6 +176,48 @@ describe('EthSendAmount', () => {
 			const { maxButton } = setup({ feeResolved: false, token: mockValidErc20Token });
 
 			expect(maxButton()).toBeInTheDocument();
+		});
+	});
+
+	// The fee for an ERC-20 send is paid in a different token than the one in this field, so
+	// neither of its own failure modes belongs on the field itself - only a native send's still
+	// does. See `EthSendForm` for the dedicated fee box that reports the second case instead.
+	describe('an ERC-20 shortfall', () => {
+		const erc20Balance = 100_00000000n; // 100 tokens at the mock's 8 decimals
+
+		it('blocks without decorating the field when the amount exceeds the token balance', async () => {
+			const { input, queryByText, maxButton } = setup({
+				token: mockValidErc20Token,
+				tokenBalance: erc20Balance
+			});
+
+			await fireEvent.input(input, { target: { value: '150' } });
+
+			await waitFor(() => {
+				expect(
+					queryByText(en.send.assertion.insufficient_funds_for_amount)
+				).not.toBeInTheDocument();
+			});
+
+			expect(maxButton()).not.toHaveClass('text-error-primary');
+		});
+
+		it('blocks without decorating the field when the native coin can not cover the fee', async () => {
+			const { input, queryByText, maxButton } = setup({
+				token: mockValidErc20Token,
+				tokenBalance: erc20Balance,
+				nativeEthereumBalance: ZERO
+			});
+
+			await fireEvent.input(input, { target: { value: '1' } });
+
+			await waitFor(() => {
+				expect(
+					queryByText(en.send.assertion.insufficient_ethereum_funds_to_cover_the_fees)
+				).not.toBeInTheDocument();
+			});
+
+			expect(maxButton()).not.toHaveClass('text-error-primary');
 		});
 	});
 });

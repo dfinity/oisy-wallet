@@ -17,12 +17,14 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import { parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
 		insufficientFunds: boolean;
+		insufficientFundsForFee?: boolean;
 		nativeEthereumToken: Token;
 		onTokensList: () => void;
 	}
@@ -31,6 +33,7 @@
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
 		insufficientFunds = $bindable(),
+		insufficientFundsForFee = $bindable(false),
 		nativeEthereumToken,
 		onTokensList
 	}: Props = $props();
@@ -39,11 +42,12 @@
 
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
+	// Drives the field's own red decoration (border, message, "Max" turning red) via `TokenInput`,
+	// which also populates this itself for a plain invalid-amount error regardless of token type.
+	// An ERC-20 balance/fee shortfall never lands here - see `validation` below - because the fee is
+	// paid in a different token, so painting the amount field red would misattribute the problem,
+	// and neither shortfall is something editing this field can fix.
 	let insufficientFundsError = $state<InsufficientFundsError | undefined>();
-
-	$effect(() => {
-		insufficientFunds = nonNullish(insufficientFundsError);
-	});
 
 	const {
 		feeStore: storeFeeData,
@@ -59,9 +63,23 @@
 		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
 	);
 
-	const customValidate = (userAmount: bigint): Error | undefined => {
+	interface AmountValidation {
+		// Native only: shown as this field's own red decoration.
+		fieldError?: InsufficientFundsError;
+		// ERC-20 only: the typed amount exceeds the token's own balance.
+		insufficientTokenBalance: boolean;
+		// ERC-20 only: the native coin can't cover the fee.
+		insufficientFundsForFee: boolean;
+	}
+
+	const NO_ISSUE: AmountValidation = {
+		insufficientTokenBalance: false,
+		insufficientFundsForFee: false
+	};
+
+	const evaluateAmount = (userAmount: bigint): AmountValidation => {
 		if (isNullish($storeFeeData)) {
-			return;
+			return NO_ISSUE;
 		}
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
@@ -89,26 +107,64 @@
 
 			const total = userAmount + gasFee;
 
-			if (total > parsedSendBalance) {
-				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
-			}
-
-			return;
+			return total > parsedSendBalance
+				? {
+						fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas),
+						insufficientTokenBalance: false,
+						insufficientFundsForFee: false
+					}
+				: NO_ISSUE;
 		}
 
-		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
+		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the
+		// user. Neither this nor the fee check below is surfaced as this field's `Error`: the fee is
+		// paid in a different token, so painting the amount field red would misattribute the problem,
+		// and there is nothing left for the user to fix on this field for either shortfall - see
+		// `EthSendForm`'s dedicated fee box instead.
 		if (userAmount > parsedSendBalance) {
-			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
+			return { insufficientTokenBalance: true, insufficientFundsForFee: false };
 		}
 
-		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
+		// Finally, if ERC20, the ETH balance should cover the max gas fee.
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
-			return new InsufficientFundsError(
-				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
-			);
-		}
+
+		return {
+			insufficientTokenBalance: false,
+			insufficientFundsForFee: nonNullish($maxGasFee) && ethBalance < $maxGasFee
+		};
 	};
+
+	// `TokenInput` parses and (in)validates the raw amount itself before calling this, but only on
+	// its own debounced schedule - fine for the field's decoration, not for gating navigation. This
+	// mirrors that same parsing so the check below never has to wait on it.
+	let parsedAmount = $derived.by(() =>
+		invalidAmount(amount) || isNullish($sendToken)
+			? undefined
+			: tryParseToken({ value: `${amount}`, unitName: $sendTokenDecimals })
+	);
+
+	let validation = $derived.by(() =>
+		nonNullish(parsedAmount) ? evaluateAmount(parsedAmount) : undefined
+	);
+
+	$effect(() => {
+		insufficientFundsForFee = validation?.insufficientFundsForFee ?? false;
+	});
+
+	// Synchronous and independent of `TokenInput`'s own debounced validation cycle: recomputed the
+	// instant `amount` (or a balance/fee it depends on) changes, so a fast "Next" click - or a
+	// wizard step remounted right after "Back" - can never navigate past a check that has not caught
+	// up yet.
+	$effect(() => {
+		insufficientFunds =
+			(!invalidAmount(amount) && isNullish(parsedAmount)) ||
+			nonNullish(validation?.fieldError) ||
+			(validation?.insufficientTokenBalance ?? false) ||
+			(validation?.insufficientFundsForFee ?? false);
+	});
+
+	const customValidate = (userAmount: bigint): Error | undefined =>
+		evaluateAmount(userAmount).fieldError;
 </script>
 
 <div class="mb-4">

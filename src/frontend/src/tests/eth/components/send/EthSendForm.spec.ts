@@ -3,16 +3,26 @@ import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priorit
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	ETH_FEE_PRIORITY,
 	SEND_DESTINATION_SECTION,
+	SEND_FEE_INFO,
+	SEND_FORM_NEXT_BUTTON,
+	SEND_INSUFFICIENT_FEE_INFO,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { EthFeePriority } from '$lib/enums/eth-fee-priority';
+import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthSendForm', () => {
@@ -97,5 +107,203 @@ describe('EthSendForm', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 
 		expect(toolbar).not.toBeNull();
+	});
+
+	describe('the fee box', () => {
+		const setup = ({
+			token,
+			nativeEthereumBalance,
+			tokenBalance
+		}: {
+			token: Token;
+			nativeEthereumBalance: bigint;
+			tokenBalance?: bigint;
+		}) => {
+			const context = new Map<symbol, unknown>();
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
+
+			const feeStore = initEthFeeStore();
+			feeStore.setFee({
+				maxFeePerGas: 100n,
+				maxPriorityFeePerGas: 5n,
+				baseFeePerGas: 20n,
+				gas: 21_000n
+			});
+			context.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+					feeExchangeRateStore: writable(undefined)
+				})
+			);
+
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: nativeEthereumBalance, certified: true }
+			});
+
+			if (nonNullish(tokenBalance)) {
+				balancesStore.set({ id: token.id, data: { data: tokenBalance, certified: true } });
+			}
+
+			const rendered = render(EthSendForm, {
+				props: { ...props, amount: undefined },
+				context
+			});
+
+			const input: HTMLInputElement | null = rendered.container.querySelector(amountSelector);
+
+			assertNonNullish(input);
+
+			return { ...rendered, input };
+		};
+
+		it('never shows the old blue "fee paid in" box for an ERC-20 send', () => {
+			const { queryByTestId } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: 10_000_000n,
+				tokenBalance: 100_00000000n
+			});
+
+			expect(queryByTestId(SEND_FEE_INFO)).not.toBeInTheDocument();
+		});
+
+		it('shows the orange fee box, and blocks Next, when ETH cannot cover an ERC-20 fee', async () => {
+			const { input, queryByTestId, getByText, getByTestId } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: ZERO,
+				tokenBalance: 100_00000000n
+			});
+
+			await fireEvent.input(input, { target: { value: '1' } });
+
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.send.assertion.not_enough_tokens_for_gas, {
+						$symbol: ETHEREUM_TOKEN.symbol,
+						$balance: formatToken({
+							value: ZERO,
+							unitName: ETHEREUM_TOKEN.decimals,
+							displayDecimals: ETHEREUM_TOKEN.decimals
+						})
+					})
+				)
+			).toBeInTheDocument();
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('blocks Next without the orange fee box when an ERC-20 amount exceeds its own balance', async () => {
+			const { input, queryByTestId, getByTestId } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: 10_000_000n,
+				tokenBalance: 1n
+			});
+
+			await fireEvent.input(input, { target: { value: '5' } });
+
+			await waitFor(() => {
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
+
+		it('does not show the orange fee box for a native ETH send short on gas', async () => {
+			const { input, queryByTestId, getByTestId } = setup({
+				token: ETHEREUM_TOKEN,
+				nativeEthereumBalance: ZERO
+			});
+
+			await fireEvent.input(input, { target: { value: '1' } });
+
+			await waitFor(() => {
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
+	});
+
+	// The amount step is fully remounted every time the wizard leaves and returns to it (e.g.
+	// "Back" from Review), while the typed amount itself is preserved across that remount. A stale
+	// default here would let "Next" be clicked once more before validation caught up - these mount
+	// with an already-insufficient amount and assert "Next" is blocked immediately, with no input
+	// event and no `waitFor`, which only passes if validation is not still racing an async check.
+	describe('revalidating a (re)mounted step', () => {
+		const setup = ({
+			token,
+			amount,
+			nativeEthereumBalance,
+			tokenBalance
+		}: {
+			token: Token;
+			amount: string;
+			nativeEthereumBalance: bigint;
+			tokenBalance?: bigint;
+		}) => {
+			const context = new Map<symbol, unknown>();
+			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
+
+			const feeStore = initEthFeeStore();
+			feeStore.setFee({
+				maxFeePerGas: 100n,
+				maxPriorityFeePerGas: 5n,
+				baseFeePerGas: 20n,
+				gas: 21_000n
+			});
+			context.set(
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+					feeExchangeRateStore: writable(undefined)
+				})
+			);
+
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: nativeEthereumBalance, certified: true }
+			});
+
+			if (nonNullish(tokenBalance)) {
+				balancesStore.set({ id: token.id, data: { data: tokenBalance, certified: true } });
+			}
+
+			return render(EthSendForm, {
+				props: { ...props, amount },
+				context
+			});
+		};
+
+		it('keeps Next blocked for an ERC-20 amount already over balance', () => {
+			const { getByTestId } = setup({
+				token: mockValidErc20Token,
+				amount: '5',
+				nativeEthereumBalance: 10_000_000n,
+				tokenBalance: 1n
+			});
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('keeps Next blocked for a native amount already short on gas', () => {
+			const { getByTestId } = setup({
+				token: ETHEREUM_TOKEN,
+				amount: '1',
+				nativeEthereumBalance: ZERO
+			});
+
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
 	});
 });
