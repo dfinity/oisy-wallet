@@ -2,8 +2,12 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { last } from '$lib/utils/array.utils';
 import * as solanaApi from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	SOLANA_MAX_SKIPPED_SIGNATURE_PAGES,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -358,6 +362,75 @@ describe('sol-signatures.services', () => {
 			});
 
 			expect(transactions).toHaveLength(0);
+		});
+
+		it('should step over a page of signatures that map to nothing visible', async () => {
+			const invisiblePage: SolSignature[] = mockSolSignatureResponses(3);
+
+			spyFetchSignatures.mockReturnValueOnce(invisiblePage).mockReturnValueOnce(mockSignatures);
+			spyFetchTransactionsForSignature.mockResolvedValueOnce([]);
+			spyFetchTransactionsForSignature.mockResolvedValueOnce([]);
+			spyFetchTransactionsForSignature.mockResolvedValueOnce([]);
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(transactions).toHaveLength(mockSignatures.length * mockSolTransactions.length);
+
+			// The page behind the invisible one is asked for by its oldest signature, which is the only
+			// cursor that actually moves the caller past it.
+			expect(spyFetchSignatures).toHaveBeenCalledTimes(2);
+			expect(spyFetchSignatures).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({ before: last(invisiblePage)?.signature })
+			);
+		});
+
+		it('should stop at the end of the history rather than at an invisible page', async () => {
+			spyFetchSignatures.mockReturnValueOnce(mockSignatures).mockReturnValueOnce([]);
+			spyFetchTransactionsForSignature.mockResolvedValue([]);
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(transactions).toHaveLength(0);
+			expect(spyFetchSignatures).toHaveBeenCalledTimes(2);
+		});
+
+		it('should give up after a bounded run of invisible pages', async () => {
+			spyFetchSignatures.mockReturnValue(mockSolSignatureResponses(2));
+			spyFetchTransactionsForSignature.mockResolvedValue([]);
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(transactions).toHaveLength(0);
+			expect(spyFetchSignatures).toHaveBeenCalledTimes(SOLANA_MAX_SKIPPED_SIGNATURE_PAGES + 1);
+		});
+
+		it('should not step over an invisible page when the head short-circuits', async () => {
+			const [head] = mockSignatures;
+
+			spyFetchTransactionsForSignature.mockResolvedValue([]);
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				exitIfFirstSignatureMatches: String(head.signature)
+			});
+
+			expect(transactions).toEqual([]);
+			expect(spyFetchSignatures).toHaveBeenCalledOnce();
 		});
 
 		it('should handle RPC errors gracefully', async () => {
