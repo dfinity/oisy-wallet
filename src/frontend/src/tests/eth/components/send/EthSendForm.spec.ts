@@ -6,6 +6,7 @@ import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/st
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ETH_FEE_PRIORITY,
+	MAX_BUTTON,
 	SEND_DESTINATION_SECTION,
 	SEND_FEE_INFO,
 	SEND_FORM_NEXT_BUTTON,
@@ -228,8 +229,8 @@ describe('EthSendForm', () => {
 			});
 		});
 
-		it('blocks Next without the orange fee box when an ERC-20 amount exceeds its own balance', async () => {
-			const { input, queryByTestId, getByTestId } = setup({
+		it('decorates the field and blocks Next, without the orange fee box, when an ERC-20 amount exceeds its own balance', async () => {
+			const { input, queryByTestId, queryByText, getByTestId, container } = setup({
 				token: mockValidErc20Token,
 				nativeEthereumBalance: 10_000_000n,
 				tokenBalance: 1n
@@ -241,6 +242,40 @@ describe('EthSendForm', () => {
 				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 			});
 
+			await waitFor(() => {
+				expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			});
+
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
+
+		// The chain check is one comparison (`amount + gas > balance`), but the two ways it can fail
+		// are different problems for the user: an amount that alone already exceeds the balance is
+		// an amount problem, while gas tipping an otherwise-affordable amount over the balance is a
+		// gas problem. Only the latter should still read as "for gas".
+		it('reads as an amount problem, not a gas one, when the native amount alone exceeds the balance', async () => {
+			const { input, queryByTestId, queryByText, getByTestId, container } = setup({
+				token: ETHEREUM_TOKEN,
+				nativeEthereumBalance: 10_000_000n
+			});
+
+			await fireEvent.input(input, { target: { value: '11000000' } });
+
+			await waitFor(() => {
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			await waitFor(() => {
+				expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			});
+
+			expect(queryByText(en.send.assertion.insufficient_funds_for_gas)).not.toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
 		});
 

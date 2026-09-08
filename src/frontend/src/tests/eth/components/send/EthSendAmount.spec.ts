@@ -131,6 +131,20 @@ describe('EthSendAmount', () => {
 		});
 	});
 
+	it('reads as an amount problem, not a gas one, when the amount alone exceeds the balance', async () => {
+		// Unlike the tip-only case above, the amount itself - ignoring gas entirely - is already
+		// more than the balance can cover, so the message must say so rather than blame gas.
+		const { input, queryByText } = setup();
+
+		await fireEvent.input(input, { target: { value: toEther(balance + 1n) } });
+
+		await waitFor(() => {
+			expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+		});
+
+		expect(queryByText(expectedError)).not.toBeInTheDocument();
+	});
+
 	it('accepts an amount that leaves the ceiling covered', async () => {
 		const { input, queryByText } = setup();
 
@@ -179,13 +193,14 @@ describe('EthSendAmount', () => {
 		});
 	});
 
-	// The fee for an ERC-20 send is paid in a different token than the one in this field, so
-	// neither of its own failure modes belongs on the field itself - only a native send's still
-	// does. See `EthSendForm` for the dedicated fee box that reports the second case instead.
+	// The ERC-20 fee is paid in a different token than the one in this field, so that shortfall
+	// alone stays off the field - see `EthSendForm` for the dedicated fee box that reports it
+	// instead. An amount exceeding the token's own balance is this field's own problem, though, and
+	// decorates it exactly like a native shortfall does.
 	describe('an ERC-20 shortfall', () => {
 		const erc20Balance = 100_00000000n; // 100 tokens at the mock's 8 decimals
 
-		it('blocks without decorating the field when the amount exceeds the token balance', async () => {
+		it('decorates the field when the amount exceeds the token balance', async () => {
 			const { input, queryByText, maxButton } = setup({
 				token: mockValidErc20Token,
 				tokenBalance: erc20Balance
@@ -194,12 +209,10 @@ describe('EthSendAmount', () => {
 			await fireEvent.input(input, { target: { value: '150' } });
 
 			await waitFor(() => {
-				expect(
-					queryByText(en.send.assertion.insufficient_funds_for_amount)
-				).not.toBeInTheDocument();
+				expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
 			});
 
-			expect(maxButton()).not.toHaveClass('text-error-primary');
+			expect(maxButton()).toHaveClass('text-error-primary');
 		});
 
 		it('blocks without decorating the field when the native coin can not cover the fee', async () => {

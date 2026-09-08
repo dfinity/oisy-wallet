@@ -44,9 +44,9 @@
 
 	// Drives the field's own red decoration (border, message, "Max" turning red) via `TokenInput`,
 	// which also populates this itself for a plain invalid-amount error regardless of token type.
-	// An ERC-20 balance/fee shortfall never lands here - see `validation` below - because the fee is
-	// paid in a different token, so painting the amount field red would misattribute the problem,
-	// and neither shortfall is something editing this field can fix.
+	// An ERC-20 amount exceeding its own token balance lands here too, same as a native shortfall -
+	// it is this field's own problem to fix. Only the fee shortfall (the native coin can't cover
+	// gas, paid in a different token) stays off the field - see `EthSendForm`'s dedicated fee box.
 	let insufficientFundsError = $state<InsufficientFundsError | undefined>();
 
 	const {
@@ -64,7 +64,8 @@
 	);
 
 	interface AmountValidation {
-		// Native only: shown as this field's own red decoration.
+		// Shown as this field's own red decoration. Set for a native shortfall and for an ERC-20
+		// amount exceeding its own balance - never for the ERC-20 fee shortfall, paid in another token.
 		fieldError?: InsufficientFundsError;
 		// ERC-20 only: the typed amount exceeds the token's own balance.
 		insufficientTokenBalance: boolean;
@@ -120,23 +121,37 @@
 
 			const total = userAmount + gasFee;
 
-			return total > parsedSendBalance
-				? {
-						fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas),
-						insufficientTokenBalance: false,
-						insufficientFundsForFee: false,
-						pending: false
-					}
-				: NO_ISSUE;
+			if (total <= parsedSendBalance) {
+				return NO_ISSUE;
+			}
+
+			// The amount alone, ignoring gas, can already exceed the balance - that is an amount
+			// problem, not a gas one, and must read as such even though both fail the same ceiling
+			// check. Only when the amount by itself would fit, and it is reserving gas that tips the
+			// total over, is the shortfall actually about gas.
+			return {
+				fieldError: new InsufficientFundsError(
+					userAmount > parsedSendBalance
+						? $i18n.send.assertion.insufficient_funds_for_amount
+						: $i18n.send.assertion.insufficient_funds_for_gas
+				),
+				insufficientTokenBalance: false,
+				insufficientFundsForFee: false,
+				pending: false
+			};
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the
-		// user. Neither this nor the fee check below is surfaced as this field's `Error`: the fee is
-		// paid in a different token, so painting the amount field red would misattribute the problem,
-		// and there is nothing left for the user to fix on this field for either shortfall - see
+		// user. This is the field's own problem, same as a native shortfall, so it gets the same red
+		// decoration. Only the fee check below - paid in a different token - stays off the field; see
 		// `EthSendForm`'s dedicated fee box instead.
 		if (userAmount > parsedSendBalance) {
-			return { insufficientTokenBalance: true, insufficientFundsForFee: false, pending: false };
+			return {
+				fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount),
+				insufficientTokenBalance: true,
+				insufficientFundsForFee: false,
+				pending: false
+			};
 		}
 
 		// Finally, if ERC20, the ETH balance should cover the max gas fee.
