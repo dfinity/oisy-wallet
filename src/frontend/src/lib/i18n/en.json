@@ -1669,6 +1669,7 @@
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
+			"sign_transaction_with_type": "Sign Transaction: $type",
 			"sign_transaction": "Sign Transaction",
 			"sign_and_send_transaction": "Sign and Send Transaction",
 			"signing_address": "Signing address",
