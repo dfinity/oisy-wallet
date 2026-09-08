@@ -126,6 +126,16 @@
 		feeIsPaidFromAmount && nonNullish($storeFeeData) && parsedSendBalance < gasFee
 	);
 
+	// ERC-20 only: the native coin cannot cover the gas, settled in it rather than in the token
+	// being sent. Derived independently of the amount for the same reason the native rule above is:
+	// the shortfall holds while the field is still empty, and no amount would fix it. Gated on the
+	// fee alone - nothing is reported before it has resolved.
+	let insufficientNativeBalanceForErc20Fee = $derived(
+		!feeIsPaidFromAmount &&
+			nonNullish($maxGasFee) &&
+			($balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO) < $maxGasFee
+	);
+
 	const evaluateAmount = (userAmount: bigint): AmountValidation => {
 		if (isNullish($storeFeeData)) {
 			return FEE_PENDING;
@@ -168,14 +178,12 @@
 		// stays off the field, reported by `EthSendForm`'s dedicated fee box instead.
 		const insufficientTokenBalance = userAmount > parsedSendBalance;
 
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-
 		return {
 			fieldError: insufficientTokenBalance
 				? new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount)
 				: undefined,
 			insufficientTokenBalance,
-			insufficientFundsForFee: nonNullish($maxGasFee) && ethBalance < $maxGasFee,
+			insufficientFundsForFee: insufficientNativeBalanceForErc20Fee,
 			pending: false
 		};
 	};
@@ -197,11 +205,12 @@
 		nonNullish(parsedAmount) ? evaluateAmount(parsedAmount) : FEE_PENDING
 	);
 
-	// The native fee shortfall does not wait on an amount: an empty field is still a balance that
-	// cannot cover its own gas, and the box has to say so before anything is typed. The ERC-20 one
-	// comes from the amount validation, unchanged.
+	// Neither fee shortfall waits on an amount: an empty field is still a balance that cannot cover
+	// the gas, and the box has to say so before anything is typed - identically for a native send,
+	// whose gas comes out of the amount, and for an ERC-20 one, whose gas is settled in ETH.
 	$effect(() => {
-		insufficientFundsForFee = insufficientNativeBalanceForFee || validation.insufficientFundsForFee;
+		insufficientFundsForFee =
+			insufficientNativeBalanceForFee || insufficientNativeBalanceForErc20Fee;
 	});
 
 	// `TokenInput` writes this too, but only from its own debounced pass, which is triggered by a

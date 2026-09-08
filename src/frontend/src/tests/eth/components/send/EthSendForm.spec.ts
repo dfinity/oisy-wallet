@@ -223,24 +223,85 @@ describe('EthSendForm', () => {
 			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 		});
 
-		it('shows the orange fee box again after the amount is cleared and retyped', async () => {
-			const { input, queryByTestId } = setup({
+		// An ERC-20 gas shortfall is settled in ETH, so no value in this field changes whether the
+		// gas can be paid: the box has to say so before anything is typed, exactly as it does for a
+		// native balance that cannot cover its own gas. The field itself stays undecorated - the
+		// token's own balance is untouched by the problem.
+		it('shows the orange fee box for an ERC-20 send with the amount field still empty', async () => {
+			const { queryByTestId, queryByText, getByText, getByTestId, container } = setup({
 				token: mockValidErc20Token,
 				nativeEthereumBalance: ZERO,
 				tokenBalance: 100_00000000n
 			});
 
-			await fireEvent.input(input, { target: { value: '1' } });
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.send.assertion.not_enough_tokens_for_gas, {
+						$symbol: ETHEREUM_TOKEN.symbol,
+						$balance: formatToken({
+							value: ZERO,
+							unitName: ETHEREUM_TOKEN.decimals,
+							displayDecimals: ETHEREUM_TOKEN.decimals
+						})
+					})
+				)
+			).toBeInTheDocument();
+
+			expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).not.toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+				'text-error-primary'
+			);
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('shows the orange fee box for an ERC-20 send with an explicit 0 amount', async () => {
+			const { input, queryByTestId, queryByText, getByTestId } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: ZERO,
+				tokenBalance: 100_00000000n
+			});
+
+			await fireEvent.input(input, { target: { value: '0' } });
 
 			await waitFor(() => {
 				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
 			});
 
-			await fireEvent.input(input, { target: { value: '' } });
+			expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).not.toBeInTheDocument();
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('keeps the orange fee box while the amount is cleared and retyped', async () => {
+			const { input, queryByTestId, queryByText } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: ZERO,
+				tokenBalance: 2_00000000n
+			});
+
+			await fireEvent.input(input, { target: { value: '10' } });
 
 			await waitFor(() => {
-				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+				expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
 			});
+
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+
+			await fireEvent.input(input, { target: { value: '' } });
+
+			// Clearing the amount does not put ETH in the wallet, so the shortfall is still there to
+			// report: only the field's own error goes away, which is also what proves the debounced
+			// pass has actually run on the empty value.
+			await waitFor(() => {
+				expect(
+					queryByText(en.send.assertion.insufficient_funds_for_amount)
+				).not.toBeInTheDocument();
+			});
+
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
 
 			// A different, still-insufficient amount: the box must be re-evaluated from scratch, not
 			// left stuck at whatever the cleared field last resolved to.
@@ -582,7 +643,15 @@ describe('EthSendForm', () => {
 	// filled in from before. Reading an unresolved fee as "no issue" let "Next" through before the
 	// check it depends on had actually settled - this is the async check itself, not a race around it.
 	describe('gating while the gas fee has not resolved yet', () => {
-		const setup = ({ token, tokenBalance }: { token: Token; tokenBalance?: bigint }) => {
+		const setup = ({
+			token,
+			tokenBalance,
+			amount = '1'
+		}: {
+			token: Token;
+			tokenBalance?: bigint;
+			amount?: string;
+		}) => {
 			const context = new Map<symbol, unknown>();
 			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
 
@@ -606,7 +675,7 @@ describe('EthSendForm', () => {
 			}
 
 			return render(EthSendForm, {
-				props: { ...props, amount: '1' },
+				props: { ...props, amount },
 				context
 			});
 		};
@@ -621,6 +690,18 @@ describe('EthSendForm', () => {
 			const { queryByTestId } = setup({ token: mockValidErc20Token, tokenBalance: 100_00000000n });
 
 			// Nothing is confirmed insufficient yet, so no decoration is painted - only "Next" blocks.
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
+
+		// The empty field is the case that no longer waits on an amount, so it is also the one that
+		// could flash a warning before the fee it depends on has resolved.
+		it('does not show the orange fee box for an empty ERC-20 amount while the fee is still pending', () => {
+			const { queryByTestId } = setup({
+				token: mockValidErc20Token,
+				tokenBalance: 100_00000000n,
+				amount: ''
+			});
+
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
 		});
 
