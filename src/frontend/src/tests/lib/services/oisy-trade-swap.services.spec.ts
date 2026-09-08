@@ -291,21 +291,32 @@ describe('oisy-trade-swap.services', () => {
 
 		// The displayed amount is a floor the user is entitled to, so a fee that does
 		// not divide evenly rounds against us rather than for us.
+		//
+		// Reaching the remainder takes a deliberately chosen price. On the shipped grid
+		// a price is a multiple of `tick_size` and a quantity a multiple of `lot_size`,
+		// which forces the gross to a round figure whose fee usually divides exactly —
+		// so most plausible-looking numbers here would pass under a floor too, and
+		// assert nothing. This price carries a trailing tick to leave a remainder.
 		it('rounds the taker fee up so the offer is never a base unit optimistic', async () => {
-			// 0.15 ICP at 10 → 1_500_000 gross; 10 bps of that is 1_500 exactly, so
-			// nudge the rate to 7 bps: 1_500_000 × 7 / 10_000 = 1_050.
-			oisyTradeStore.setPairs([buildPair({ base: ICP, quote: CKUSDC, takerFeeBps: 7 })]);
+			// One lot of ICP at a tick-aligned 100.001 ckUSDC grosses 1_000_010, and the
+			// pair's 10 bps of that is 1000.01 exactly — the fraction a floor would drop.
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue({
+				bids: [{ price: 100_001_000n, quantity: 500_000_000n }],
+				asks: []
+			});
 
 			const result = await quote({
 				sourceToken: ICP,
 				destinationToken: CKUSDC,
-				sourceAmount: 15_000_000n
+				sourceAmount: 1_000_000n
 			});
 
 			assert(result.ok);
 
-			// 1_499_999 / 10_000 × 7 would floor to 1_049; the ceiling keeps the extra unit.
-			expect(result.quote.swapDetails.fees[1].fee).toBe(1_050n);
+			// A floor would charge 1_000 and hand the user a base unit the venue keeps.
+			expect(result.quote.swapDetails.fees[1].fee).toBe(1_001n);
+			// And the extra unit reaches the offer, rather than stopping at the fee list.
+			expect(result.quote.receiveAmount).toBe(1_000_010n - 1_001n - 10_000n);
 		});
 
 		it('carries the taker rate and the pair floor for the sheet', async () => {

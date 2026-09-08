@@ -24,13 +24,16 @@ and the shapes in `types.ts` already describe what that endpoint returns.
 
 This module may import **only**:
 
-- `$declarations/oisy_trade/oisy_trade.did` — the venue's own types;
-- `@dfinity/utils`, and `ZERO` from `$lib/constants/app.constants` (the `0n` literal
-  is banned repo-wide).
+- `$declarations/oisy_trade/*` — the venue's own generated types;
+- `@dfinity/*`;
+- `ZERO` from `$lib/constants/app.constants` (the `0n` literal is banned repo-wide);
+- its own files.
 
-Nothing about swaps, tokens, stores, i18n or the wallet. A `no-restricted-imports`
-override in `eslint.config.mjs` enforces it, so the boundary fails the build rather
-than eroding.
+Nothing else — no swaps, tokens, stores, i18n or wallet code, and equally no other
+canister's declarations, no Svelte and no third-party package. The
+`no-restricted-imports` override in `eslint.config.mjs` states that set as an
+allow-list: it denies every specifier and re-admits those four, so anything new
+fails the build instead of eroding the boundary quietly.
 
 Consequences worth knowing before editing:
 
