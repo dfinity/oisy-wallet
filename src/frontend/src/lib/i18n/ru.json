@@ -1622,6 +1622,7 @@
 			"application": "Приложение",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
+			"interacting_with": "",
 			"type": "Тип",
 			"methods": "Методы",
 			"events": "События",

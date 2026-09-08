@@ -1622,6 +1622,7 @@
 			"application": "Aplikace",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
+			"interacting_with": "",
 			"type": "Typ",
 			"methods": "Metody",
 			"events": "Události",

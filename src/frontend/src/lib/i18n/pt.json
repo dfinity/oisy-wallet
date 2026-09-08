@@ -1622,6 +1622,7 @@
 			"application": "Aplicação",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
+			"interacting_with": "",
 			"type": "Tipo",
 			"methods": "Métodos",
 			"events": "Eventos",
