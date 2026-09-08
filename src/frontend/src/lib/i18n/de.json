@@ -1622,6 +1622,7 @@
 			"application": "",
 			"review": "Erforderliche Berechtigungen für $chain_name ($key) prüfen",
 			"method": "Methode",
+			"interacting_with": "",
 			"type": "",
 			"methods": "Methoden",
 			"events": "Ereignisse",

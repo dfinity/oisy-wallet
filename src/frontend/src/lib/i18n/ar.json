@@ -1622,6 +1622,7 @@
 			"application": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
+			"interacting_with": "",
 			"type": "",
 			"methods": "الطرق",
 			"events": "الأحداث",

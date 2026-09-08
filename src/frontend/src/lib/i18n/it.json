@@ -1622,6 +1622,7 @@
 			"application": "",
 			"review": "Rivedi i permessi richiesti per $chain_name ($key)",
 			"method": "Metodo",
+			"interacting_with": "",
 			"type": "",
 			"methods": "Metodi",
 			"events": "Eventi",

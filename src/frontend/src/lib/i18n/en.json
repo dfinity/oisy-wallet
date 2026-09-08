@@ -1622,6 +1622,7 @@
 			"application": "Application",
 			"review": "Review $chain_name ($key) required permissions",
 			"method": "Method",
+			"interacting_with": "Interacting with",
 			"type": "Type",
 			"methods": "Methods",
 			"events": "Events",

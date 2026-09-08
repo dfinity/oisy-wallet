@@ -1622,6 +1622,7 @@
 			"application": "Aplicación",
 			"review": "Revisar los permisos requeridos de $chain_name ($key)",
 			"method": "Método",
+			"interacting_with": "",
 			"type": "",
 			"methods": "Métodos",
 			"events": "Eventos",
