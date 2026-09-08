@@ -1,6 +1,7 @@
 import type { ActiveUserTransactionRef } from '$declarations/backend/backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
@@ -14,6 +15,7 @@ import {
 	findMatchingOneSecTransfer,
 	ICP_LEDGER_TO_TOKEN,
 	isOneSecActiveUserTransaction,
+	isOneSecWrappedToken,
 	oneSecCompatibleDestinations,
 	oneSecEvmSupportedTokens,
 	oneSecIcpSupportedTokens,
@@ -50,6 +52,8 @@ const BOB_LEDGER = '7pail-xaaaa-aaaas-aabmq-cai';
 const BOB_ETHEREUM = '0xecc5f868AdD75F4ff9FD00bbBDE12C35BA2C9C89';
 const GLDT_LEDGER = '6c7su-kiaaa-aaaar-qaira-cai';
 const GLDT_ETHEREUM = '0x86856814e74456893Cfc8946BedcBb472b5fA856';
+// Bridged by 1Sec's canister but absent from the onesec-bridge config OISY reads.
+const CHAT_ETHEREUM = '0xDb95092C454235E7e666c4E226dBBbCdeb499d25';
 
 let mockEnabled = true;
 let mockUnwrapOnly = true;
@@ -456,6 +460,83 @@ describe('onesec-swap.utils', () => {
 
 				expect(result?.icp).toContain(USDC_LEDGER);
 			});
+		});
+	});
+
+	describe('isOneSecWrappedToken', () => {
+		const networkIds = [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id, BASE_NETWORK.id];
+
+		// `locker` tokens are EVM-native, so their ICRC ledger on ICP is the wrapped side.
+		it.each([
+			{ token: 'USDC', ledger: USDC_LEDGER },
+			{ token: 'USDT', ledger: USDT_LEDGER }
+		])('is true for the ICRC ledger of the EVM-native token $token', ({ ledger }) => {
+			expect(isOneSecWrappedToken({ token: makeIcToken(ledger), networkIds })).toBeTruthy();
+		});
+
+		// `minter` tokens are ICP-native, so their ICRC ledger is the native side, not wrapped.
+		it.each([
+			{ token: 'ICP', ledger: ICP_LEDGER },
+			{ token: 'BOB', ledger: BOB_LEDGER },
+			{ token: 'GLDT', ledger: GLDT_LEDGER }
+		])('is false for the ICRC ledger of the ICP-native token $token', ({ ledger }) => {
+			expect(isOneSecWrappedToken({ token: makeIcToken(ledger), networkIds })).toBeFalsy();
+		});
+
+		it.each([
+			{ token: 'ICP', address: ICP_ETHEREUM },
+			{ token: 'BOB', address: BOB_ETHEREUM },
+			{ token: 'GLDT', address: GLDT_ETHEREUM }
+		])('is true for the wrapped ERC-20 of the ICP-native token $token', ({ address }) => {
+			expect(isOneSecWrappedToken({ token: makeErc20Token({ address }), networkIds })).toBeTruthy();
+		});
+
+		it.each([
+			{ token: 'USDC', address: USDC_ETHEREUM },
+			{ token: 'USDT', address: USDT_ETHEREUM }
+		])('is false for the EVM-native ERC-20 of $token', ({ address }) => {
+			expect(isOneSecWrappedToken({ token: makeErc20Token({ address }), networkIds })).toBeFalsy();
+		});
+
+		it('is false for an unknown ICP ledger', () => {
+			expect(
+				isOneSecWrappedToken({ token: makeIcToken('unknown-canister-id'), networkIds })
+			).toBeFalsy();
+		});
+
+		it('is false for an unknown ERC-20 address', () => {
+			expect(
+				isOneSecWrappedToken({
+					token: makeErc20Token({ address: '0x0000000000000000000000000000000000000001' }),
+					networkIds
+				})
+			).toBeFalsy();
+		});
+
+		it('is false for CHAT, which the onesec-bridge config does not carry', () => {
+			expect(
+				isOneSecWrappedToken({ token: makeErc20Token({ address: CHAT_ETHEREUM }), networkIds })
+			).toBeFalsy();
+		});
+
+		it('is false on a network OneSec does not bridge, even at a wrapped address', () => {
+			// A `minter` token reuses one contract address across every chain, so without the
+			// network bound an unrelated token at the same address elsewhere would match.
+			expect(
+				isOneSecWrappedToken({
+					token: makeErc20Token({ address: ICP_ETHEREUM, network: POLYGON_MAINNET_NETWORK }),
+					networkIds
+				})
+			).toBeFalsy();
+		});
+
+		it('is case-insensitive on the ERC-20 address', () => {
+			expect(
+				isOneSecWrappedToken({
+					token: makeErc20Token({ address: ICP_ETHEREUM.toUpperCase().replace('0X', '0x') }),
+					networkIds
+				})
+			).toBeTruthy();
 		});
 	});
 

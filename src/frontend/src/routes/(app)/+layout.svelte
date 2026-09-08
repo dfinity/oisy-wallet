@@ -19,6 +19,7 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import OneSecBridgedBalanceWarning from '$lib/components/tokens/OneSecBridgedBalanceWarning.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn, authIdentity } from '$lib/derived/auth.derived';
@@ -136,6 +137,8 @@
 						{#if assetsRoute}
 							<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
 						{/if}
+
+						<OneSecBridgedBalanceWarning />
 
 						{@render children()}
 					</Loaders>
