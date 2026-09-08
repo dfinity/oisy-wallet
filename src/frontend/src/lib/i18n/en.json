@@ -1652,7 +1652,7 @@
 			"dapp_gas_limit": "Gas limit set by the app, not by OISY. The max fee above is the most this transaction can spend.",
 			"high_gas_limit": "This request sets an unusually high gas limit, so the max fee above is far more than this transaction should cost. Check it carefully and only sign if you trust this app.",
 			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
-			"unreviewable_typed_data": "OISY doesn't recognise the transaction this app asks you to sign, so the summary can't describe it. Be sure you trust the application and review its raw data before signing.",
+			"unreviewable_typed_data": "OISY doesn't recognise the content this app asks you to sign, so the summary can't describe it. Be sure you trust the application and review its raw data before signing.",
 			"unsigned_typed_data_keys": "This app sent extra data its schema doesn't declare. That data isn't covered by the signature, so only the fields below are shown.",
 			"tab_summary": "Summary",
 			"tab_raw_data": "Raw data",
