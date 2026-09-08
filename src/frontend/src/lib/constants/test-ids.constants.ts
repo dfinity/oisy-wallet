@@ -346,6 +346,7 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SEND_INSUFFICIENT_FEE_INFO = 'send-insufficient-fee-info';
 
 export const ETH_FEE_PRIORITY = 'eth-fee-priority';
 export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
