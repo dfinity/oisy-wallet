@@ -334,6 +334,25 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
 
+### 1Sec restricted to the unwrapping direction
+
+1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
+
+Which leg that is depends on the token, because 1Sec wraps in both directions. Its config records the chain each token is native to, and OISY offers only the leg that returns a token to that chain:
+
+- **ICP-native tokens** — ICP, BOB, GLDT, ckBTC — are wrapped as ERC-20s on the EVM chains. Only **EVM → ICP** is offered, so selecting native ICP (or ICRC BOB / GLDT) as the pay token no longer lists any Ethereum, Base or Arbitrum receive option.
+- **EVM-native tokens** — USDC, USDT, cbBTC — are wrapped as ICRC ledgers on ICP. Only **ICP → EVM** is offered, so selecting native USDC on Ethereum no longer lists the 1Sec-bridged USDC on ICP as a receive option.
+
+The rule is enforced once, on the directed pair, so the destination **network** filter narrows with it: a pay token with no reachable 1Sec destination drops the networks it could only have reached through 1Sec, rather than offering a network whose token list is then empty.
+
+Only 1Sec is affected. Chain Fusion still converts ck twins both ways (ckUSDC stays reachable from Ethereum USDC), the IC DEXes still quote ICP-side pairs, and Velora still quotes EVM-side pairs — no token loses a non-1Sec route.
+
+Three tokens in 1Sec's config have no practical effect in OISY: **CHAT** is bridged by 1Sec's canister but is absent from the `onesec-bridge` package's token config, so OISY has never routed it in either direction; and **ckBTC**'s wrapped ERC-20 and **cbBTC**'s wrapped ICRC ledger are not OISY tokens, so the surviving leg of each has no pay token to start from.
+
+What this deliberately does not do: it does not hide, disable or remove a token, and it does not change which tokens 1Sec accepts as a pay token — only which destinations it offers for them. In particular the wrapped ERC-20 of ICP stays a curated, [suggested](#curated-tokens-vs-metadata-only-tokens) token on all three EVM chains, precisely so that a holder's balance stays visible: it was never in most users' custom-token list, so dropping it from the curated set would hide the very balance they need to swap back.
+
+The restriction is a code-level kill switch — `ONESEC_UNWRAP_ONLY` in `src/frontend/src/env/rest/onesec.env.ts`, in the same style as the price-provider flags. Setting it to `false` restores both directions unchanged.
+
 ### Cross-session settlement
 
 Every ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
@@ -345,6 +364,22 @@ How settlement is observed differs by direction, because the minters answer diff
 - A **Bitcoin deposit** (BTC → ckBTC) is the one conversion the app has to _finish_, not merely watch: the ckBTC minter credits nothing until someone asks it to look at the deposit address, so a deposit whose tab was closed before its confirmations landed would otherwise sit there indefinitely. The row therefore asks the minter to mint once the deposit has enough confirmations — sparingly, since OISY already does this for every enabled ckBTC wallet, and the request is harmless to repeat — and takes the minter's own answer as the verdict: minted, or rejected because the Bitcoin checker flagged the coins or they were too small to cover the check fee. A deposit that is confirmed but not yet minted, and any failure to reach the minter, leave the conversion in flight so the next attempt retries.
 
 When a row reaches a terminal state it refreshes the wallet and reports into the **swap** analytics funnel — not the convert one — exactly once, including when it finalizes across a page refresh.
+
+---
+
+## Trade (OISY Trade)
+
+### Price warnings on a limit order
+
+A limit order is priced against two independent references: **current value** — the cross of the two legs' USD prices from the wallet's own price feed — and the venue's **order book** (best bid / best ask). The price section warns whenever those two together say the order is likely to cost the user value, and the wording says which of the situations they are in.
+
+A price that **crosses the book** (a sell at or below the best bid, a buy at or above the best ask) fills almost immediately, and the form says exactly that. A price that does **not** cross rests — but if it sits more than **1% on the wrong side of current value** (a sell below it, a buy above it), it is the price the market reaches first, and it would fill at a value the feed already calls worse than the tokens are worth. That case carries its own warning ("This price is below current value. Your order rests for now, but it may fill very soon, at a loss versus current value."), amber while the give-up is under 5% and red at or beyond it, and the value-difference figure beside the price is coloured with it rather than staying neutral. Inside the 1% band nothing is said and the figure stays neutral: the feed and the book drift against each other continuously, so a sub-1% gap carries no signal. A resting price on the _favourable_ side of current value is never warned about, however far out it sits.
+
+The price field's own label follows the same line, but turns on the **sign alone** rather than the 1% point: "When 1 ICP reaches" / "drops to" describes a price the market has yet to hit, so it holds only while the price is still ahead of current value. A crossing price and a resting price past current value by any amount both read as the immediate sale or purchase they effectively are ("Sell now, while 1 ICP ≥"), because a resting order priced past current value is what the bots monitoring the venue take first. A price a hair past current value therefore relabels without being warned about.
+
+The review step repeats the distinction. At or beyond a **5% give-up — crossing or resting** — "Place order" stays disabled until the user ticks a confirmation checkbox. Each case gets its own one-line acknowledgement: the crossing one an immediate fill at a price worse than market, the resting one that the order may fill very soon at such a price. The side-specific warning itself stays on the form. In between — past 1% but under 5% — the form warns and the review does not block. The boundary is inclusive on both surfaces, so an exact 5% give-up is red and does require the confirmation.
+
+A **fill-or-kill** order is the exception to all of this: it can only execute by crossing, so a FOK price that cannot cross is a blocking error ("it would be canceled") that disables Review and takes precedence over both warnings above.
 
 ---
 

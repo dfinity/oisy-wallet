@@ -52,6 +52,56 @@ export default [
 		}
 	},
 
+	// `$lib/oisy-trade/` implements what belongs in the oisy_trade canister and is
+	// hosted here only until that canister can answer it. Keeping the dependency
+	// arrow one-way is what makes the eventual migration a deletion rather than an
+	// extraction, so the boundary is a build failure, not a convention. Only two
+	// things are conceded beyond the venue's own types: the module's own files, and
+	// the shared `ZERO` (the repo bans the `0n` literal, so it is the only way to
+	// write zero). See src/frontend/src/lib/oisy-trade/README.md.
+	//
+	// Written as an allow-list — deny everything, then re-admit that set — because
+	// the README states the boundary as one. Enumerating the wallet's aliases
+	// instead leaves everything outside them unmatched: `$declarations/backend`,
+	// `svelte`, and any npm package would import cleanly, so the boundary would
+	// erode in silence rather than fail. Measured before this was changed: of
+	// `$lib/types/token`, `$declarations/backend/backend.did`, `svelte/store` and
+	// `ethers/utils`, only the first was refused.
+	//
+	// The patterns follow gitignore semantics, where a path cannot be re-included
+	// once an ancestor is excluded, so every ancestor is negated alongside the leaf
+	// it exists to admit. Verified by probe both ways: the five specifiers the
+	// module actually imports pass, and those same four intruders are now refused.
+	{
+		files: ['src/frontend/src/lib/oisy-trade/**/*'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: [
+								'**',
+								'!$declarations',
+								'!$declarations/oisy_trade',
+								'!$declarations/oisy_trade/**',
+								'!@dfinity',
+								'!@dfinity/**',
+								'!$lib',
+								'!$lib/oisy-trade',
+								'!$lib/oisy-trade/**',
+								'!$lib/constants',
+								'!$lib/constants/app.constants'
+							],
+							message:
+								'$lib/oisy-trade must not depend on wallet code — it speaks only the oisy_trade declarations. Allowed: $declarations/oisy_trade/*, @dfinity/*, ZERO from $lib/constants/app.constants, and the module’s own files.'
+						}
+					]
+				}
+			]
+		}
+	},
+
 	{
 		rules: {
 			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION, ...NULLISH_NEGATION_RESTRICTIONS]
