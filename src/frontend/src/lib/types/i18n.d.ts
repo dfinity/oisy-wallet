@@ -1352,6 +1352,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
+		sign_transaction_with_type: string;
 		sign_transaction: string;
 		sign_and_send_transaction: string;
 		signing_address: string;

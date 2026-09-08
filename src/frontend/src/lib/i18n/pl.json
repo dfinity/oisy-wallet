@@ -1669,6 +1669,7 @@
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
