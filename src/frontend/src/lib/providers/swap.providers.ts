@@ -36,28 +36,24 @@ export const swapProviders: SwapProviderConfig[] = [
 	},
 	{
 		key: SwapProvider.OISY_TRADE,
-		// The quote itself is synchronous — it reads the cached pair table — so the
-		// registry's async contract is satisfied here rather than inside it. The
-		// fan-out only carries offers, so a rejection collapses to `undefined` at
-		// this boundary; its `errorKind` stays on the service for the form's
-		// empty-offer-list explanation.
+		// The fan-out only carries offers, so a rejection collapses to `undefined`
+		// here — which is why the service names no reason for one: nothing past this
+		// boundary could read it, and the form explains an empty offer list from the
+		// pair instead. A thrown failure — the depth query — is left to propagate, so
+		// it lands in the per-provider `SWAP_OFFER` error analytics where an empty
+		// result would hide it.
 		//
-		// The catch is load-bearing rather than defensive. `fetchSwapAmountsICP`
-		// calls every `getQuote` inside a `.map()` and only hands the resulting
-		// array to `Promise.allSettled` afterwards, so a *synchronous* throw here
-		// would escape the settling and reject the whole fan-out — taking ICPSwap's
-		// and KongSwap's offers down with it. Those two are async functions, which
-		// gives them this containment for free; a sync quote has to ask for it.
-		// Rejecting rather than swallowing keeps a genuine failure in the per-provider
-		// `SWAP_OFFER` error analytics, where an empty result would hide it.
-		getQuote: (params) => {
-			try {
-				const result = fetchOisyTradeQuote(params);
+		// This used to wrap the call in a `try/catch` that re-threw as a rejection,
+		// because `fetchSwapAmountsICP` calls every `getQuote` inside a `.map()` and
+		// only hands the resulting array to `Promise.allSettled` afterwards — so a
+		// *synchronous* throw escaped the settling and rejected the whole fan-out,
+		// taking ICPSwap's and KongSwap's offers with it. Now that the quote awaits
+		// the order book it is an async function like its two siblings, which gives
+		// it that containment for free.
+		getQuote: async (params) => {
+			const result = await fetchOisyTradeQuote(params);
 
-				return Promise.resolve(result.ok ? result.quote : undefined);
-			} catch (err: unknown) {
-				return Promise.reject(err);
-			}
+			return result.ok ? result.quote : undefined;
 		},
 		mapQuoteResult: mapOisyTradeQuoteResult,
 		isEnabled: oisyTradeSwapEnabled,

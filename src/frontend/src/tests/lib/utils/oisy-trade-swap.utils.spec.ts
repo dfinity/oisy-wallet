@@ -3,9 +3,9 @@ import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import {
-	computeOisyTradeReceiveAmount,
 	findOisyTradePair,
 	isOisyTradePair,
+	oisyTradeAmountObjection,
 	oisyTradeCompatibleDestinations,
 	oisyTradeSupportedSourceTokens,
 	resolveOisyTradeOrder,
@@ -174,13 +174,21 @@ describe('oisy-trade-swap.utils', () => {
 	});
 
 	describe('resolveOisyTradeOrder', () => {
+		// 10 ckUSDC/ICP on both sides. The bids hold 5 ICP, which every Sell below stays
+		// inside except the one testing a book too thin; the asks hold 50 ICP, since a
+		// Buy is covered by the levels' *value* and 5 ICP is only 50 ckUSDC of it. These
+		// cases are about the adaptation rather than the walk, which has its own suite
+		// over the shared fixtures in `oisy-trade/offer.spec.ts`.
+		const depth = {
+			bids: [{ price: 10_000_000n, quantity: 500_000_000n }],
+			asks: [{ price: 10_000_000n, quantity: 5_000_000_000n }]
+		};
+
 		it('deposits exactly the ordered quantity on a sell', () => {
-			// 2 ICP at 10 ckUSDC — already a lot multiple, so nothing is floored away.
 			const result = resolveOisyTradeOrder({
 				sourceToken: ICP,
 				amount: 200_000_000n,
-				price: 10,
-				freeBalance: 5,
+				depth,
 				pair: icpUsdc
 			});
 
@@ -189,8 +197,10 @@ describe('oisy-trade-swap.utils', () => {
 			expect(result.order.side).toBe('sell');
 			expect(result.order.quantity).toBe(200_000_000n);
 			expect(result.order.depositAmount).toBe(200_000_000n);
-			// 10 ckUSDC (6 dp) per whole base.
+			// 10 ckUSDC (6 dp) per whole base, straight off the book.
 			expect(result.order.price).toBe(10_000_000n);
+			// 2 ICP at 10 → 20 ckUSDC, before the taker and ledger fees the caller nets.
+			expect(result.gross).toBe(20_000_000n);
 		});
 
 		it('deposits the order reserve on a buy, computed exactly in bigint', () => {
@@ -199,8 +209,7 @@ describe('oisy-trade-swap.utils', () => {
 			const result = resolveOisyTradeOrder({
 				sourceToken: CKUSDC,
 				amount: 50_000_000n,
-				price: 10,
-				freeBalance: 100,
+				depth,
 				pair: icpUsdc
 			});
 
@@ -209,24 +218,28 @@ describe('oisy-trade-swap.utils', () => {
 			expect(result.order.side).toBe('buy');
 			expect(result.order.quantity).toBe(500_000_000n);
 			expect(result.order.depositAmount).toBe(50_000_000n);
+			// A buy is paid in the base token, so the gross *is* the quantity.
+			expect(result.gross).toBe(500_000_000n);
 		});
 
-		it('refuses a sell amount off the lot grid rather than rounding it, like the Limit Order form', () => {
-			// 2.005 ICP against a 0.01 ICP lot is not a lot multiple. The form never
-			// lets such an amount through (it validates, and floors only in the Max
-			// link), so the swap contributes no offer instead of silently selling less
-			// than the user typed.
+		// Reverses what this file previously locked: a Sell is floored onto the lot grid
+		// instead of refused. At a realistic lot almost every amount a person types is
+		// off-grid, so validating meant OISY Trade contributed no Sell offer at all,
+		// while the Buy side had been spending less than typed since the provider
+		// shipped. The residue never leaves the wallet.
+		it('floors a sell amount onto the lot grid rather than refusing it', () => {
+			// 2.005 ICP against a 0.01 ICP lot floors to 2.00.
 			const result = resolveOisyTradeOrder({
 				sourceToken: ICP,
 				amount: 200_500_000n,
-				price: 10,
-				freeBalance: 5,
+				depth,
 				pair: icpUsdc
 			});
 
-			assert(!result.ok);
+			assert(result.ok);
 
-			expect(result.errorKind).toBe('lot');
+			expect(result.order.quantity).toBe(200_000_000n);
+			expect(result.order.depositAmount).toBe(200_000_000n);
 		});
 
 		it('floors the derived buy quantity to the lot grid, shrinking the deposit to the reserve', () => {
@@ -237,8 +250,7 @@ describe('oisy-trade-swap.utils', () => {
 			const result = resolveOisyTradeOrder({
 				sourceToken: CKUSDC,
 				amount: 50_050_000n,
-				price: 10,
-				freeBalance: 100,
+				depth,
 				pair: icpUsdc
 			});
 
@@ -248,94 +260,95 @@ describe('oisy-trade-swap.utils', () => {
 			expect(result.order.depositAmount).toBe(50_000_000n);
 		});
 
-		it('snaps the price down to the tick grid', () => {
+		it('prices at the level that absorbs the whole order, not at the top of book', () => {
+			// 3 ICP against 2 ICP at 10 and 2 ICP at 9: only the second level completes
+			// the order, so 9 is the highest price the whole quantity can still fill at.
 			const result = resolveOisyTradeOrder({
 				sourceToken: ICP,
-				amount: 200_000_000n,
-				price: 10.00099,
-				freeBalance: 5,
+				amount: 300_000_000n,
+				depth: {
+					bids: [
+						{ price: 10_000_000n, quantity: 200_000_000n },
+						{ price: 9_000_000n, quantity: 200_000_000n }
+					],
+					asks: []
+				},
 				pair: icpUsdc
 			});
 
 			assert(result.ok);
 
-			// tick is 0.001 ckUSDC, so 10.00099 → 10.000.
-			expect(result.order.price).toBe(10_000_000n);
+			expect(result.order.price).toBe(9_000_000n);
+			expect(result.gross).toBe(27_000_000n);
 		});
 
+		// Every rejection is bare: the fan-out transports offers only, so a reason would
+		// have no reader. Which reason applies is the module's own concern and is
+		// asserted over the shared fixtures in `oisy-trade/offer.spec.ts`.
 		it('refuses an amount below one lot', () => {
-			const result = resolveOisyTradeOrder({
-				sourceToken: ICP,
-				amount: 100_000n,
-				price: 10,
-				freeBalance: 5,
-				pair: icpUsdc
-			});
-
-			expect(result.ok).toBeFalsy();
+			expect(
+				resolveOisyTradeOrder({
+					sourceToken: ICP,
+					amount: 100_000n,
+					depth,
+					pair: icpUsdc
+				})
+			).toEqual({ ok: false });
 		});
 
-		it('refuses a notional below the pair floor, naming the reason', () => {
+		it('refuses a notional below the pair floor', () => {
 			// 0.01 ICP at 10 ckUSDC is a 0.1 ckUSDC notional, under the 5 ckUSDC floor.
-			const result = resolveOisyTradeOrder({
-				sourceToken: ICP,
-				amount: 1_000_000n,
-				price: 10,
-				freeBalance: 5,
-				pair: icpUsdc
-			});
-
-			assert(!result.ok);
-
-			expect(result.errorKind).toBe('min_notional');
+			expect(
+				resolveOisyTradeOrder({
+					sourceToken: ICP,
+					amount: 1_000_000n,
+					depth,
+					pair: icpUsdc
+				})
+			).toEqual({ ok: false });
 		});
 
-		it('refuses an order the wallet balance cannot cover', () => {
-			const result = resolveOisyTradeOrder({
-				sourceToken: ICP,
-				amount: 200_000_000n,
-				price: 10,
-				freeBalance: 1,
-				pair: icpUsdc
-			});
+		it('refuses an order the book cannot absorb', () => {
+			expect(
+				resolveOisyTradeOrder({
+					sourceToken: ICP,
+					amount: 600_000_000n,
+					depth,
+					pair: icpUsdc
+				})
+			).toEqual({ ok: false });
+		});
 
-			assert(!result.ok);
-
-			expect(result.errorKind).toBe('balance');
+		it('refuses an order when the opposite side is empty', () => {
+			expect(
+				resolveOisyTradeOrder({
+					sourceToken: ICP,
+					amount: 200_000_000n,
+					depth: { bids: [], asks: depth.asks },
+					pair: icpUsdc
+				})
+			).toEqual({ ok: false });
 		});
 
 		it('refuses a token that is not a leg of the pair', () => {
 			const result = resolveOisyTradeOrder({
 				sourceToken: CKBTC,
 				amount: 200_000_000n,
-				price: 10,
-				freeBalance: 5,
+				depth,
 				pair: icpUsdc
 			});
 
 			expect(result.ok).toBeFalsy();
 		});
 
-		it('refuses a price that floors to zero on the tick grid', () => {
-			const result = resolveOisyTradeOrder({
-				sourceToken: ICP,
-				amount: 200_000_000n,
-				price: 0.0001,
-				freeBalance: 5,
-				pair: icpUsdc
-			});
-
-			expect(result.ok).toBeFalsy();
-		});
-
-		// An 18-decimal base token is where the human-float round-trip the shipped
-		// Limit Order form uses stops being safe: one lot is 1e15 base units, far
-		// below the 1e-6 *relative* slack `isMultipleOfStep` allows, so a float
-		// verdict can pass a quantity the canister then rejects with
-		// `InvalidQuantity` — after `deposit` has already moved the funds.
+		// An 18-decimal base token is where a human-float round-trip stops being safe:
+		// one lot is 1e15 base units, far below the 1e-6 *relative* slack the float
+		// helpers allow, so a float verdict could pass a quantity the canister then
+		// rejects with `InvalidQuantity` — after `deposit` has already moved the funds.
+		// The path is now bigint end to end, and these cases keep it that way.
 		describe('18-decimal precision', () => {
 			// The same 18-decimal ckETH token the unpaired-token cases use, here given a
-			// pair of its own. 18 dp base, 6 dp quote; lot 0.001 ckETH, tick 0.001 ckUSDC.
+			// pair of its own. 18 dp base, 6 dp quote; lot 0.001 ckETH.
 			const cketh = UNPAIRED;
 			const ckethUsdc = buildPair({
 				base: cketh,
@@ -343,20 +356,23 @@ describe('oisy-trade-swap.utils', () => {
 				lotSize: 1_000_000_000_000_000n
 			});
 
+			// 1000 ckUSDC per whole ckETH, deep enough for every order below. Well above
+			// the 5 ckUSDC floor at these sizes.
+			const level = { price: 1_000_000_000n, quantity: 10_000_000_000_000_000_000_000n };
+
 			const resolve = ({ sourceToken = cketh, amount }: { sourceToken?: Token; amount: bigint }) =>
 				resolveOisyTradeOrder({
 					sourceToken,
 					amount,
-					// Well above the 5 ckUSDC floor at these sizes, and on the tick grid.
-					price: 1000,
+					depth: { bids: [level], asks: [level] },
 					pair: ckethUsdc
 				});
 
-			// The exact case that regressed: 0.009 ckETH is a clean multiple of the
-			// 0.001 lot, but 9e15/1e18 has no exact binary form, so multiplying back
-			// out produced 8999999999999999 — one base unit off the grid, while the
-			// float lot check still passed. Note 9e15 is *below* `2^53`, so this is the
-			// divide-then-multiply round-trip rather than an unsafe-integer problem.
+			// 0.009 ckETH is a clean multiple of the 0.001 lot, but 9e15/1e18 has no
+			// exact binary form: a divide-then-multiply round-trip produced
+			// 8999999999999999, one base unit off the grid, while a float lot check
+			// still passed. Note 9e15 is *below* `2^53`, so this is the round-trip
+			// rather than an unsafe-integer problem.
 			it('keeps an on-grid 0.009 ckETH sell exactly on the lot grid', () => {
 				const result = resolve({ amount: 9_000_000_000_000_000n });
 
@@ -364,8 +380,9 @@ describe('oisy-trade-swap.utils', () => {
 
 				expect(result.order.quantity).toBe(9_000_000_000_000_000n);
 				expect(result.order.quantity % ckethUsdc.lot_size).toBe(ZERO);
-				// A Sell deposits the ordered quantity exactly — acceptance criterion 10.
 				expect(result.order.depositAmount).toBe(9_000_000_000_000_000n);
+				// 0.009 ckETH at 1000 → 9 ckUSDC, exactly.
+				expect(result.gross).toBe(9_000_000n);
 			});
 
 			// From 5 lots up, since at this price one lot is 1 ckUSDC and the pair's
@@ -382,20 +399,23 @@ describe('oisy-trade-swap.utils', () => {
 				expect(drifted).toEqual([]);
 			});
 
-			// Off the grid by 1e9 base units — a 1e-9 *relative* deviation, which the
-			// float check's 1e-6 tolerance waves through. Only an exact check rejects
-			// it, and rejecting it here is what keeps the deposit from happening.
-			it('refuses an amount off the grid by less than the float tolerance', () => {
+			// Off the grid by 1e9 base units — a 1e-9 *relative* deviation, which a
+			// float check's 1e-6 tolerance waves through. Flooring has to land on the
+			// exact multiple, not near it: the canister rejects anything else after the
+			// deposit has moved.
+			it('floors an off-grid amount onto the exact lot multiple', () => {
 				const result = resolve({ amount: 9_000_000_000_000_000n + 1_000_000_000n });
 
-				assert(!result.ok);
+				assert(result.ok);
 
-				expect(result.errorKind).toBe('lot');
+				expect(result.order.quantity).toBe(9_000_000_000_000_000n);
+				expect(result.order.quantity % ckethUsdc.lot_size).toBe(ZERO);
 			});
 
 			// Above 1e21 base units `Number.toFixed(0)` switches to exponential
-			// notation, which `BigInt` refuses — the old conversion threw a
-			// `SyntaxError` out of a function documented as never throwing.
+			// notation, which `BigInt` refuses — an earlier conversion threw a
+			// `SyntaxError` out of a function documented as never throwing. Nothing on
+			// this path converts any more, and this is what would notice a relapse.
 			it('resolves an amount past the exponential-notation threshold', () => {
 				const amount = 1_000_007_000_000_000_000_000n;
 
@@ -423,47 +443,39 @@ describe('oisy-trade-swap.utils', () => {
 		});
 	});
 
-	describe('computeOisyTradeReceiveAmount', () => {
-		it('rescales down across a decimals mismatch', () => {
-			// 1 ICP (8 dp) at 1:1 is 1 ckUSDC (6 dp) — a plain bigint copy is 100× wrong.
-			expect(
-				computeOisyTradeReceiveAmount({
-					amount: 100_000_000n,
-					sourceDecimals: 8,
-					destinationDecimals: 6
-				})
-			).toBe(1_000_000n);
+	// The form's empty-offer-list explanation. Book-free by construction: it runs in a
+	// `$derived.by`, which cannot await the depth query the quote now makes.
+	describe('oisyTradeAmountObjection', () => {
+		it('names the lot when a sell is below one lot', () => {
+			expect(oisyTradeAmountObjection({ sourceToken: ICP, amount: 100_000n, pair: icpUsdc })).toBe(
+				'lot'
+			);
 		});
 
-		it('rescales up in the other direction', () => {
+		it('names the floor when a buy spends less than min_notional', () => {
+			// The reserve never exceeds the spend, so this cannot clear the floor
+			// whatever price the walk finds.
 			expect(
-				computeOisyTradeReceiveAmount({
-					amount: 1_000_000n,
-					sourceDecimals: 6,
-					destinationDecimals: 8
-				})
-			).toBe(100_000_000n);
+				oisyTradeAmountObjection({ sourceToken: CKUSDC, amount: 4_000_000n, pair: icpUsdc })
+			).toBe('min_notional');
 		});
 
-		it('passes the amount through when the decimals match', () => {
+		it('says nothing about an orderable sell, whose absence would be the book', () => {
 			expect(
-				computeOisyTradeReceiveAmount({
-					amount: 12_345n,
-					sourceDecimals: 8,
-					destinationDecimals: 8
-				})
-			).toBe(12_345n);
+				oisyTradeAmountObjection({ sourceToken: ICP, amount: 200_000_000n, pair: icpUsdc })
+			).toBeUndefined();
 		});
 
-		it('floors rather than rounding, so it never over-quotes', () => {
-			// 0.000000019 ICP has no representation at 6 dp; the fraction is dropped.
+		it('says nothing about an orderable buy', () => {
 			expect(
-				computeOisyTradeReceiveAmount({
-					amount: 19n,
-					sourceDecimals: 8,
-					destinationDecimals: 6
-				})
-			).toBe(ZERO);
+				oisyTradeAmountObjection({ sourceToken: CKUSDC, amount: 50_000_000n, pair: icpUsdc })
+			).toBeUndefined();
+		});
+
+		it('says nothing for a token that is not a leg of the pair', () => {
+			expect(
+				oisyTradeAmountObjection({ sourceToken: CKBTC, amount: 100_000n, pair: icpUsdc })
+			).toBeUndefined();
 		});
 	});
 });
