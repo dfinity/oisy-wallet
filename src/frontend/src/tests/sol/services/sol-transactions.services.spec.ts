@@ -425,10 +425,26 @@ describe('sol-transactions.services', () => {
 			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 			spyGetTransactions.mockRejectedValue(error);
 
-			await loadNextSolTransactions({ ...mockParams, before });
+			const result = await loadNextSolTransactions({ ...mockParams, before });
 
 			expect(get(solTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+
+			// A failed page is not the end of the history: signalling the end would retire the token
+			// from the Activity list until the page is re-entered.
+			expect(signalEnd).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false });
+		});
+
+		it('should signal end only when a page that loaded holds no transaction', async () => {
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			const result = await loadNextSolTransactions({
+				...mockParams,
+				before: mockSolSignature()
+			});
+
 			expect(signalEnd).toHaveBeenCalledOnce();
+			expect(result).toEqual({ success: true });
 		});
 
 		it('should work with different networks', async () => {
@@ -896,6 +912,19 @@ describe('sol-transactions.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should not signal the end when the page fails to load', async () => {
+			spyGetTransactions.mockRejectedValueOnce(new Error('Failed to load transactions'));
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			// The Activity list stops paginating a token for good once the end is signalled, so a
+			// failed page has to leave it open for the next attempt.
+			expect(signalEnd).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false });
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toHaveLength(mockTransactions.length);
 		});
 
 		it('should load transactions with the correct parameters', async () => {
