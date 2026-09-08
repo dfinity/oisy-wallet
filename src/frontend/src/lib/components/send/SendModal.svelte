@@ -58,6 +58,7 @@
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
 		isNetworkIdBTCMainnet,
@@ -96,8 +97,14 @@
 	// Keyed by value, not by identity: reloading a custom token re-creates the token object and
 	// its `TokenId` symbol, so an identity comparison would drop a valid amount on an unrelated
 	// store refresh.
-	const tokenKey = ({ id, network }: Token): string =>
-		`${id.description}#${network.id.description}`;
+	//
+	// The value is the stable asset identifier - contract address / ledger or collection canister
+	// ID - and never the symbol: `TokenId` is minted from the symbol (`mapErc20Token`,
+	// `mapIcrcToken`), and two distinct assets on the same network may legitimately share one.
+	// Native tokens have no such identifier and a network has exactly one of them, so for those the
+	// standard code plus the network is already unique.
+	const tokenKey = (token: Token): string =>
+		`${getTokenIdentifier(token) ?? token.standard.code}#${token.network.id.description}`;
 
 	let selectedTokenKey: string | undefined = nonNullish($token) ? tokenKey($token) : undefined;
 

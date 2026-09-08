@@ -2,7 +2,7 @@ import SendModal from '$lib/components/send/SendModal.svelte';
 import { token } from '$lib/stores/token.store';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	createSelectedNftHarness,
 	createStepsHarness
@@ -248,13 +248,28 @@ describe('SendModal', () => {
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
 		});
 
+		it('clears the amount when another token with the same symbol is selected', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-same-symbol-a' });
+			await enterAmount({ getByTestId });
+
+			await backToTokensList({ getByTestId });
+			await selectToken({ getByTestId, testId: 'stub-select-token-same-symbol-b' });
+
+			expect(getByTestId('stub-amount').textContent).toBe('');
+		});
+
 		it('keeps the amount when the token store re-emits the selected token as a fresh object', async () => {
 			const { getByTestId } = await renderModal();
 
 			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
 			await enterAmount({ getByTestId });
 
-			const reloadedToken: Token = { ...mockValidToken, id: parseTokenId('TokenId') };
+			const reloadedToken: Token = {
+				...mockValidIcrcToken,
+				id: parseTokenId(mockValidIcrcToken.symbol)
+			};
 
 			token.set(reloadedToken);
 
