@@ -941,6 +941,28 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
+		it('should page from the oldest transaction even when the store is not in order', async () => {
+			// What the wallet worker delivers on a cold start: the transactions it read over RPC,
+			// followed by the shorter page the backend had stored. The newest entries end up last,
+			// so the position in the array is not the order.
+			const [newest, ...older] = mockTransactions;
+
+			seedStore([...older, newest]);
+
+			const { signature: oldestSignature } = older[older.length - 1];
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: oldestSignature
+			});
+		});
+
 		it('should load transactions if the transactions have undefined timestamp', async () => {
 			const transactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
 				(transaction) => ({
