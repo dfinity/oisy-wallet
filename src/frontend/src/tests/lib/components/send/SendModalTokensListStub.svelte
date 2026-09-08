@@ -2,8 +2,9 @@
 	Stubs the store-heavy `SendTokensList` when unit-testing `SendModal`'s amount handling.
 	Exposes the token selections the modal reacts to:
 	- two distinct assets,
-	- a re-created instance of the same logical token (fresh object and fresh `TokenId` symbol),
-	  which is what a custom token reload produces,
+	- a re-created instance of the same logical token, which is what a custom token reload
+	  produces: a fresh object that keeps the `TokenId` symbol the store already held for that
+	  identifier,
 	- two distinct assets that share a symbol, hence share a `TokenId` description, because
 	  `mapIcrcToken` / `mapErc20Token` mint the `TokenId` from the symbol.
 -->
@@ -29,9 +30,12 @@
 		ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
 	};
 
+	// `certified-icrc.store` / `custom-tokens.store` reuse the `TokenId` already held for the same
+	// identifier, so a reloaded token is a new object carrying the very same symbol.
 	const recreatedTokenA: IcToken = {
 		...mockValidIcrcToken,
-		id: parseTokenId(mockValidIcrcToken.symbol)
+		name: `${mockValidIcrcToken.name} (reloaded)`,
+		id: mockValidIcrcToken.id
 	};
 
 	// Same symbol, same network, different ledgers: the two `TokenId` symbols carry the very same

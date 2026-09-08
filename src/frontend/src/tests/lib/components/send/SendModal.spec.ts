@@ -236,7 +236,21 @@ describe('SendModal', () => {
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
 		});
 
-		it('keeps the amount when the same token is re-selected as a re-created object', async () => {
+		it('keeps the amount when the very same token is re-selected from the list', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+			await enterAmount({ getByTestId });
+
+			await backToTokensList({ getByTestId });
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+
+			expect(getByTestId('stub-amount')).toHaveTextContent('5');
+		});
+
+		// The token stores reuse the `TokenId` they already hold for a given identifier, so a
+		// reloaded token is a new object with the very same symbol - and must not count as a change.
+		it('keeps the amount when the same token is re-selected as a reloaded object', async () => {
 			const { getByTestId } = await renderModal();
 
 			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
@@ -248,6 +262,8 @@ describe('SendModal', () => {
 			expect(getByTestId('stub-amount')).toHaveTextContent('5');
 		});
 
+		// Two distinct assets can share a ticker, hence share a `TokenId` description, but never the
+		// symbol itself.
 		it('clears the amount when another token with the same symbol is selected', async () => {
 			const { getByTestId } = await renderModal();
 

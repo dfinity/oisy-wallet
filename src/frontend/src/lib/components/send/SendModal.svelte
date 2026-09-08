@@ -56,9 +56,8 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
-	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
 		isNetworkIdBTCMainnet,
@@ -94,19 +93,12 @@
 	let amount = $state<number | undefined>();
 	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
 
-	// Keyed by value, not by identity: reloading a custom token re-creates the token object and
-	// its `TokenId` symbol, so an identity comparison would drop a valid amount on an unrelated
-	// store refresh.
-	//
-	// The value is the stable asset identifier - contract address / ledger or collection canister
-	// ID - and never the symbol: `TokenId` is minted from the symbol (`mapErc20Token`,
-	// `mapIcrcToken`), and two distinct assets on the same network may legitimately share one.
-	// Native tokens have no such identifier and a network has exactly one of them, so for those the
-	// standard code plus the network is already unique.
-	const tokenKey = (token: Token): string =>
-		`${getTokenIdentifier(token) ?? token.standard.code}#${token.network.id.description}`;
-
-	let selectedTokenKey: string | undefined = nonNullish($token) ? tokenKey($token) : undefined;
+	// Compared by identity, not by the symbol's description: `TokenId` is minted from the token
+	// symbol (`mapErc20Token`, `mapIcrcToken`), which two distinct assets may legitimately share.
+	// Identity is safe here because the stores reuse the existing `TokenId` when re-setting an entry
+	// with the same identifier - a reload of the selected token keeps it, and only a full
+	// `resetAll()` mints a new one.
+	let selectedTokenId: TokenId | undefined = $token?.id;
 
 	let burning = $derived(
 		notEmptyString(destination) &&
@@ -178,7 +170,7 @@
 		activeSendDestinationTab = 'recentlyUsed';
 		selectedContact = undefined;
 		amount = undefined;
-		selectedTokenKey = undefined;
+		selectedTokenId = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -241,13 +233,11 @@
 		// An amount entered for the previous token is meaningless for the new one - and, when the
 		// two tokens have different decimals, it is not even a representable value, which surfaces
 		// as an invalid amount and a failing gas fee estimation.
-		const key = tokenKey(token);
-
-		if (selectedTokenKey !== key) {
+		if (selectedTokenId !== token.id) {
 			amount = undefined;
 		}
 
-		selectedTokenKey = key;
+		selectedTokenId = token.id;
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 
