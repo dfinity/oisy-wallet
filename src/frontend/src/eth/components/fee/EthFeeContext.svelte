@@ -473,6 +473,8 @@
 	// from the same call, so switching between them is arithmetic, not a round trip.
 	// Tracks the choice alone: a fresh fetch already applies the current priority itself, and
 	// depending on the sample too would set the fee twice per fetch.
+	// Goes through `setFee` like every other write, so re-pricing respects the freeze too: arithmetic
+	// on a sample already in hand still moves the fee a frozen step has priced its amount against.
 	$effect(() => {
 		const selected = priority;
 
@@ -489,7 +491,7 @@
 				return;
 			}
 
-			feeStore.setFee({
+			setFee({
 				...current,
 				...priorities.perPriority[selected],
 				baseFeePerGas: priorities.baseFeePerGas

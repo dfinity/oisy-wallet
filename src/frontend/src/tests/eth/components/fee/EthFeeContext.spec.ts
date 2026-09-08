@@ -215,6 +215,68 @@ describe('EthFeeContext', () => {
 		);
 	});
 
+	describe('re-pricing to another priority', () => {
+		// Every tier from one sample, so switching between them is arithmetic on what is already
+		// held rather than a fetch. This is the write path that does not go through a request.
+		const renderWithPriorities = (props: Partial<typeof baseProps> = {}) => {
+			// Hangs so no fetched sample can land and overwrite the tiers seeded below: the only
+			// writes left are the ones the re-pricing effect makes.
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockImplementation(async () => await new Promise(() => {}));
+
+			const feePrioritiesStore = writable({
+				baseFeePerGas: 5n,
+				perPriority: {
+					[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
+					[EthFeePriority.STANDARD]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+					[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 30n }
+				}
+			});
+
+			return render(EthFeeContext, {
+				props: { ...baseProps, priority: EthFeePriority.STANDARD, ...props },
+				context: new Map([[ETH_FEE_CONTEXT_KEY, { feeStore, feePrioritiesStore }]])
+			});
+		};
+
+		// The fee the consumer holds and has priced its amount against.
+		const held = { gas: 21n, maxFeePerGas: 100n, maxPriorityFeePerGas: 5n };
+
+		it('re-prices while observing', async () => {
+			const { rerender } = renderWithPriorities();
+
+			await vi.runAllTimersAsync();
+
+			feeState.set(held);
+			setFeeMock.mockClear();
+
+			await rerender({ ...baseProps, priority: EthFeePriority.FAST });
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 30n })
+			);
+		});
+
+		it('does not re-price a frozen fee', async () => {
+			const { rerender } = renderWithPriorities();
+
+			await vi.runAllTimersAsync();
+
+			feeState.set(held);
+			setFeeMock.mockClear();
+
+			// A tier change reaching a step that has stopped observing would re-price the very fee
+			// that step froze, without a fetch and without the user seeing it.
+			await rerender({ ...baseProps, observe: false, priority: EthFeePriority.FAST });
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).not.toHaveBeenCalled();
+			expect(get(feeState)).toStrictEqual(held);
+		});
+	});
+
 	describe('a sample that comes back after observing stopped', () => {
 		// A hanging fetch that is still in flight when `observe` flips, which is the only way a
 		// sample can reach a consumer that has stopped observing.
