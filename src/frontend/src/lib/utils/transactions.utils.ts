@@ -504,11 +504,23 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction in a newest-first transaction store.
+ * Finds the oldest of a list of transactions.
+ *
+ * A transaction store is assembled from several sources at once: a page the wallet worker
+ * delivers, the local cache, and the pages loaded on demand as the user scrolls. Nothing keeps
+ * the result sorted, so the last entry is not necessarily the oldest one. Callers page from
+ * whatever this returns, and a cursor that is not the oldest asks again for history the store
+ * already holds, which leaves everything behind it out of reach.
  *
  * @param transactions - The list of transactions to search through.
- * @returns The last transaction or undefined if no transactions are provided.
+ * @returns The oldest transaction, by the same ordering the lists render with, or undefined when
+ *   there is none.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined => last(transactions);
+): T | undefined =>
+	last(
+		[...transactions].sort((transactionA, transactionB) =>
+			sortTransactions({ transactionA, transactionB })
+		)
+	);
