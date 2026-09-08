@@ -83,10 +83,10 @@ describe('EthWalletConnectSignModal', () => {
 		).toBeInTheDocument();
 	});
 
-	it('should not title a request by the name its own domain supplies', () => {
-		// The domain name is the request's own text. In the wallet's chrome it reads as a name OISY
-		// vouched for, which is exactly the claim the title must not make on the request's behalf.
-		const { queryByText } = render(EthWalletConnectSignModal, {
+	it('should state the name its own domain supplies in the summary, never in the title', () => {
+		// The domain name is the request's text. In the wallet's chrome it reads as a name OISY
+		// vouched for, which is why it belongs in the summary beside the contract it claims to be.
+		const { getAllByText, getByTestId } = render(EthWalletConnectSignModal, {
 			props: props(
 				mockRequest({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
@@ -95,7 +95,7 @@ describe('EthWalletConnectSignModal', () => {
 			)
 		});
 
-		expect(queryByText('USD Coin')).not.toBeInTheDocument();
+		expect(getAllByText('USD Coin')).toEqual([getByTestId('wallet-connect-domain-name')]);
 	});
 
 	it('should fall back to the plain transaction title when the payload names no struct', () => {

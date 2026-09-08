@@ -1622,6 +1622,7 @@
 			"application": "एप्लिकेशन",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
+			"interacting_with": "",
 			"type": "प्रकार",
 			"methods": "विधियाँ",
 			"events": "घटनाएँ",
