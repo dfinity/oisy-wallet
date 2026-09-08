@@ -98,6 +98,52 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByTestId('json')).toBeInTheDocument();
 	});
 
+	it('should fold the type schema and leave the rest of the payload open', async () => {
+		const { getByRole, getByText, queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		await openRawTab(getByRole);
+
+		// The schema declares the shape of the message without stating any of it, and it is longer
+		// than everything that does, so it starts folded.
+		expect(queryByText('"uint160"')).not.toBeInTheDocument();
+
+		// What the signature covers is what the tab opens on: the domain, the type and the message.
+		expect(getByText('"Permit2"')).toBeInTheDocument();
+		expect(getByText('"PermitSingle"')).toBeInTheDocument();
+		expect(getByText('sigDeadline:')).toBeInTheDocument();
+		expect(getByText('"0x66a9893cc07d91d95644aedd05d03f95e1dba8af"')).toBeInTheDocument();
+
+		// Folded, not dropped. The schema is one click away from reading as it did before.
+		await fireEvent.click(getByText('{ ... }'));
+
+		expect(getByText('"uint160"')).toBeInTheDocument();
+	});
+
+	it.each(['Enter', ' '])(
+		'should open the folded type schema on %s, not by pointer alone',
+		async (key) => {
+			// Folding it makes opening it a required interaction, so it has to be one a keyboard can
+			// perform: the node is a span carrying role="button", which activates on a pointer only.
+			const { getByRole, getByText, queryByText } = render(EthWalletConnectMessage, {
+				props: {
+					request
+				}
+			});
+
+			await openRawTab(getByRole);
+
+			expect(queryByText('"uint160"')).not.toBeInTheDocument();
+
+			await fireEvent.keyDown(getByRole('button', { name: 'Toggle', expanded: false }), { key });
+
+			expect(getByText('"uint160"')).toBeInTheDocument();
+		}
+	);
+
 	it('should render the application', () => {
 		const { getByText } = render(EthWalletConnectMessage, {
 			props: {

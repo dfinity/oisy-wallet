@@ -1939,6 +1939,7 @@
 			"error_balance_sell": "",
 			"error_balance_buy": "",
 			"error_lot_multiple": "",
+			"error_lot_minimum": "",
 			"error_tick_multiple": "",
 			"error_min_notional": "",
 			"error_max_notional": "",

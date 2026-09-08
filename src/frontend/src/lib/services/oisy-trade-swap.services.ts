@@ -8,7 +8,13 @@ import type {
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { getTokenFee } from '$icp/utils/token.utils';
-import { getBalances, getMyOrders, getTradingPairs, withdraw } from '$lib/api/oisy-trade.api';
+import {
+	getBalances,
+	getMyOrders,
+	getOrderBookDepth,
+	getTradingPairs,
+	withdraw
+} from '$lib/api/oisy-trade.api';
 import { OisyTradeError } from '$lib/canisters/oisy-trade.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
@@ -43,31 +49,20 @@ import {
 	toOisyTradeExternalRefs
 } from '$lib/utils/oisy-trade-active-tx.utils';
 import {
-	computeOisyTradeReceiveAmount,
 	findOisyTradePair,
+	oisyTradeAmountObjection,
 	oisyTradeSupportedSourceTokens,
 	resolveOisyTradeOrder,
 	toOisyTradeCandidSide,
 	toOisyTradePairTable
 } from '$lib/utils/oisy-trade-swap.utils';
-import { toPairView } from '$lib/utils/oisy-trade.utils';
+import { toPairView, toTradingPair } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
-
-/**
- * The placeholder rate: one whole quote token per one whole base token.
- *
- * Replaced by the real order-book walk in its own spec. Everything downstream —
- * the quantity, the reserve, the notional gate, the receive amount — is derived
- * from the price, so that follow-up changes where this number comes from and
- * nothing else. See the spec's "The 1:1 placeholder" section for why the flag
- * must stay `false` until then.
- */
-const OISY_TRADE_PLACEHOLDER_PRICE = 1;
 
 const BASIS_POINTS = 10_000n;
 
@@ -103,51 +98,46 @@ export const loadOisyTradeSwapPairs = async ({
 export const oisyTradeSwapPairTable = (): TradingPairInfo[] =>
 	toOisyTradePairTable(get(oisyTradeStore).pairs ?? []);
 
+// Rounded **up**, so the offer is never a base unit more than the venue will pay.
+// The displayed amount is a floor the user is entitled to, and every rounding on
+// the way to it has to lean the same way.
 const takerFeeAmount = ({ gross, takerFeeBps }: { gross: bigint; takerFeeBps: number }): bigint =>
-	(gross * BigInt(takerFeeBps)) / BASIS_POINTS;
+	(gross * BigInt(takerFeeBps) + BASIS_POINTS - 1n) / BASIS_POINTS;
 
 /**
- * Quotes a fill-or-kill order, or the reason there is none.
+ * Quotes a fill-or-kill order against the live book, or the reason there is none.
  *
  * Returns `ok: false` rather than throwing on every "cannot quote" case — no
- * pair, a halted pair, an unorderable amount, a missing ledger fee. The fan-out
- * discards rejections anyway, but a rejection keeps a non-offer out of the error
- * analytics, where it would read as a broken provider rather than an absent one,
- * and `errorKind` is what the form's empty-offer-list explanation names.
+ * pair, a halted pair, an unorderable amount, a book too thin, a missing ledger
+ * fee. The fan-out discards rejections anyway, but a rejection keeps a non-offer
+ * out of the error analytics, where it would read as a broken provider rather than
+ * an absent one.
  *
- * Synchronous: `getSupportedTokens` has already cached the pair table by the
- * time any quote runs, so there is nothing to await. The registry's `getQuote`
- * contract is async, and the adaptation happens at that boundary rather than by
- * making this function pretend to be asynchronous.
+ * A depth query that *fails*, by contrast, is allowed to throw: that is a broken
+ * provider and belongs in the per-provider `SWAP_OFFER` analytics, where an empty
+ * result would hide it. `fetchSwapAmountsICP` settles every provider's promise
+ * independently, so it costs no sibling its offer.
+ *
+ * The book is fetched last, after every disqualification that does not need it, so
+ * neither an unquotable pair nor an unorderable amount costs a canister call.
  */
-export const fetchOisyTradeQuote = ({
+export const fetchOisyTradeQuote = async ({
+	identity,
 	sourceToken,
 	destinationToken,
 	sourceAmount
 }: {
+	identity: Identity;
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	sourceAmount: bigint;
-}): OisyTradeQuoteResult => {
+}): Promise<OisyTradeQuoteResult> => {
 	const table = oisyTradeSwapPairTable();
 	const pair = findOisyTradePair({ sourceToken, destinationToken, table });
 
 	if (isNullish(pair)) {
 		return { ok: false };
 	}
-
-	const resolution = resolveOisyTradeOrder({
-		sourceToken,
-		amount: sourceAmount,
-		price: OISY_TRADE_PLACEHOLDER_PRICE,
-		pair
-	});
-
-	if (!resolution.ok) {
-		return { ok: false, errorKind: resolution.errorKind };
-	}
-
-	const { order } = resolution;
 
 	const sourceLedgerFee = getTokenFee(sourceToken);
 	const destinationLedgerFee = getTokenFee(destinationToken);
@@ -156,24 +146,38 @@ export const fetchOisyTradeQuote = ({
 		return { ok: false };
 	}
 
-	const pairView = toPairView(pair);
+	// The two objections the pair settles on its own — a Sell below one lot, a Buy
+	// spending less than `min_notional`. Both are certain, so asking before the
+	// fetch spares a canister query on every keystroke and every 5s re-quote tick
+	// for an amount no book could rescue. The same function answers the form's
+	// empty-offer-list message, which is why the two cannot come to disagree.
+	if (nonNullish(oisyTradeAmountObjection({ sourceToken, amount: sourceAmount, pair }))) {
+		return { ok: false };
+	}
 
-	// What the order fills for, before the venue and the ledger take their cuts.
-	// At the placeholder price this is the deposited amount rescaled to the
-	// destination's decimals; the real calculation replaces the price it derives
-	// from, not this step.
-	//
-	// `depositAmount` was derived from the *pair's* decimals (`toPairView` reads
-	// them off the canister's leg metadata) and is rescaled here with the *token's*
-	// — two records describing the same two ledgers. They agree by construction, and
-	// nothing enforces it: a disagreement would move the receive amount by a power
-	// of ten silently, so the pair is the authority for anything the canister will
-	// check and the token only ever formats what the wallet displays.
-	const gross = computeOisyTradeReceiveAmount({
-		amount: order.depositAmount,
-		sourceDecimals: sourceToken.decimals,
-		destinationDecimals: destinationToken.decimals
+	// `limit` unset takes the canister's 100 levels per side. A walk that runs out
+	// of levels reports a book too thin, which is pessimistic rather than wrong on a
+	// book deeper than that — and no real pair is expected to be.
+	const depth = await getOrderBookDepth({
+		identity,
+		request: { trading_pair: toTradingPair(pair), limit: [] },
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
+
+	const resolution = resolveOisyTradeOrder({
+		sourceToken,
+		amount: sourceAmount,
+		depth,
+		pair
+	});
+
+	if (!resolution.ok) {
+		return { ok: false };
+	}
+
+	const { order, gross } = resolution;
+
+	const pairView = toPairView(pair);
 
 	const takerFee = takerFeeAmount({ gross, takerFeeBps: pairView.takerFeeBps });
 
