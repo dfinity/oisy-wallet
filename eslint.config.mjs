@@ -52,6 +52,53 @@ export default [
 		}
 	},
 
+	// `$lib/oisy-trade/` implements what belongs in the oisy_trade canister and is
+	// hosted here only until that canister can answer it. Keeping the dependency
+	// arrow one-way is what makes the eventual migration a deletion rather than an
+	// extraction, so the boundary is a build failure, not a convention. Only two
+	// things are conceded: the module's own files, and the shared `ZERO` (the repo
+	// bans the `0n` literal, so it is the only way to write zero).
+	// See src/frontend/src/lib/oisy-trade/README.md.
+	//
+	// The patterns follow gitignore semantics, where a path cannot be re-included
+	// once a parent directory is excluded. Hence `/**` rather than `/*`, and hence
+	// the bare `!$lib/oisy-trade` and `!$lib/constants` alongside the specific
+	// negations — without those directory re-inclusions the two allowed imports are
+	// rejected as well. Verified by probe: `$lib/constants/app.constants` passes
+	// while `$lib/constants/tokens.constants` is still refused.
+	{
+		files: ['src/frontend/src/lib/oisy-trade/**/*'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: [
+								'$lib/**',
+								'$btc/**',
+								'$eth/**',
+								'$evm/**',
+								'$icp/**',
+								'$sol/**',
+								'$icp-eth/**',
+								'$env/**',
+								'$routes/**',
+								'$app/**',
+								'!$lib/oisy-trade',
+								'!$lib/oisy-trade/**',
+								'!$lib/constants',
+								'!$lib/constants/app.constants'
+							],
+							message:
+								'$lib/oisy-trade must not depend on wallet code — it speaks only the oisy_trade declarations. Allowed: $declarations/oisy_trade/*, @dfinity/*, and ZERO from $lib/constants/app.constants.'
+						}
+					]
+				}
+			]
+		}
+	},
+
 	{
 		rules: {
 			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION, ...NULLISH_NEGATION_RESTRICTIONS]
