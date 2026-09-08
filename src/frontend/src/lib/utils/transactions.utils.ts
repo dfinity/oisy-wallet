@@ -34,7 +34,6 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
-import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -519,8 +518,14 @@ export const getKnownDestinations = (
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
 ): T | undefined =>
-	last(
-		[...transactions].sort((transactionA, transactionB) =>
-			sortTransactions({ transactionA, transactionB })
-		)
+	// One pass rather than a sorted copy: this runs on every page of every chain, and the lists it
+	// walks are the whole loaded history. Taking the entry that would sort last, ties included,
+	// keeps it identical to sorting.
+	transactions.reduce<T | undefined>(
+		(oldest, transaction) =>
+			isNullish(oldest) ||
+			sortTransactions({ transactionA: transaction, transactionB: oldest }) >= 0
+				? transaction
+				: oldest,
+		undefined
 	);
