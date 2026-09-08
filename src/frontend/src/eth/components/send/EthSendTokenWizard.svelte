@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
@@ -59,7 +59,8 @@
 		sendToken,
 		sendBalance,
 		sendEthCustomNonce,
-		sendEthFeePriority
+		sendEthFeePriority,
+		sendEthAmountTokenKey
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -115,6 +116,34 @@
 	// Set by the amount step's "Max" button, and read again at send time: only a "Max" amount stands
 	// for "whatever is left" rather than a figure the user typed.
 	let amountSetToMax = $state(false);
+
+	// The amount is held by the send modal, above this wizard, so it outlives stepping out of the
+	// flow and coming back with another token selected - and a figure typed for an 18-decimal coin
+	// is no amount at all for a 6-decimal ERC-20: it fails the amount validation and makes the gas
+	// estimation underflow. So drop it whenever the token changes. Only the token: a new destination
+	// leaves a perfectly valid amount alone.
+	//
+	// Keyed by value rather than by the token object or its `TokenId` symbol, both of which a
+	// custom-token reload re-creates for the very same token (`mapErc20Token` mints a fresh symbol
+	// per call) - that must not wipe an amount the user is in the middle of typing. The key is kept
+	// in the send context because this wizard is remounted on every wizard step: a record that did
+	// not outlive the mount could not tell a fresh mount from an actual token switch.
+	let amountTokenKey = $derived(
+		`${$sendToken.id.description}#${$sendToken.network.id.description}`
+	);
+
+	$effect(() => {
+		const tokenKey = amountTokenKey;
+
+		const previousTokenKey = get(sendEthAmountTokenKey);
+
+		if (nonNullish(previousTokenKey) && previousTokenKey !== tokenKey) {
+			amount = undefined;
+			amountSetToMax = false;
+		}
+
+		sendEthAmountTokenKey.set(tokenKey);
+	});
 
 	let feeIsPaidFromAmount = $derived(
 		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)

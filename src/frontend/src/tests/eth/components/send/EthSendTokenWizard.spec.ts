@@ -24,12 +24,15 @@ import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { WizardStep } from '$lib/types/wizard';
 import * as inputUtils from '$lib/utils/input.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
+import { tick } from 'svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -55,7 +58,8 @@ describe('EthSendTokenWizard.spec', () => {
 		sendToken: writable(sendToken),
 		sendTokenId: writable(sendToken.id),
 		sendTokenDecimals: writable(sendTokenDecimals),
-		sendEthCustomNonce: writable(undefined)
+		sendEthCustomNonce: writable(undefined),
+		sendEthAmountTokenKey: writable<string | undefined>(undefined)
 	});
 
 	const mockContext = (params: {
@@ -262,5 +266,149 @@ describe('EthSendTokenWizard.spec', () => {
 		expect(sendServices.send).not.toHaveBeenCalled();
 
 		expect(nftSendServices.sendNft).not.toHaveBeenCalled();
+	});
+
+	describe('amount cached above the wizard', () => {
+		// 18 decimals: a valid ETH amount, and no amount at all for a 6-decimal ERC-20.
+		const cachedAmount = '0.00022959576218371';
+
+		const erc20Token: Token = { ...mockValidErc20Token, decimals: 6 };
+
+		const renderWizardHost = ({
+			sendContext,
+			destination: hostDestination = destination,
+			amount = cachedAmount,
+			onAmountChange
+		}: {
+			sendContext: ReturnType<typeof mockSendContext>;
+			destination?: string;
+			amount?: string;
+			onAmountChange: (amount: unknown) => void;
+		}) =>
+			render(EthSendTokenWizardTestHost, {
+				props: {
+					currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+					destination: hostDestination,
+					sendContext,
+					sourceNetwork: ETHEREUM_NETWORK,
+					nativeEthereumToken: ETHEREUM_TOKEN,
+					amount,
+					onCloseStep: vi.fn(),
+					onAmountChange
+				}
+			});
+
+		it('clears the amount when the selected token changes', async () => {
+			const sendContext = mockSendContext({
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals
+			});
+			const onAmountChange = vi.fn();
+
+			renderWizardHost({ sendContext, onAmountChange });
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(cachedAmount);
+
+			sendContext.sendToken.set(erc20Token);
+			sendContext.sendTokenId.set(erc20Token.id);
+			sendContext.sendTokenDecimals.set(erc20Token.decimals);
+
+			await tick();
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(undefined);
+		});
+
+		it('clears the amount cached while the wizard was unmounted when the token changed', async () => {
+			const sendContext = mockSendContext({
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals
+			});
+
+			// The user types an amount for ETH, then steps back out of the flow.
+			const { unmount } = renderWizardHost({ sendContext, onAmountChange: vi.fn() });
+
+			unmount();
+
+			// ... picks another token from the list and walks back into the flow. The amount is held by
+			// the send modal, so it is still there when the wizard mounts again.
+			sendContext.sendToken.set(erc20Token);
+			sendContext.sendTokenId.set(erc20Token.id);
+			sendContext.sendTokenDecimals.set(erc20Token.decimals);
+
+			const onAmountChange = vi.fn();
+
+			renderWizardHost({ sendContext, onAmountChange });
+
+			await tick();
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(undefined);
+		});
+
+		it('keeps the amount when the wizard is remounted for the same token', async () => {
+			const sendContext = mockSendContext({
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals
+			});
+
+			const { unmount } = renderWizardHost({ sendContext, onAmountChange: vi.fn() });
+
+			unmount();
+
+			const onAmountChange = vi.fn();
+
+			renderWizardHost({ sendContext, onAmountChange });
+
+			await tick();
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(cachedAmount);
+		});
+
+		it('keeps the amount when only the destination changes', async () => {
+			const sendContext = mockSendContext({
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals
+			});
+			const onAmountChange = vi.fn();
+
+			const { rerender } = renderWizardHost({ sendContext, onAmountChange });
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+				destination: '0x2222222222222222222222222222222222222222',
+				sendContext,
+				sourceNetwork: ETHEREUM_NETWORK,
+				nativeEthereumToken: ETHEREUM_TOKEN,
+				amount: cachedAmount,
+				onCloseStep: vi.fn(),
+				onAmountChange
+			});
+
+			await tick();
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(cachedAmount);
+		});
+
+		it('keeps the amount when the store re-emits the same token as a fresh object', async () => {
+			const sendContext = mockSendContext({
+				sendToken: ETHEREUM_TOKEN,
+				sendTokenDecimals: ETHEREUM_TOKEN.decimals
+			});
+			const onAmountChange = vi.fn();
+
+			renderWizardHost({ sendContext, onAmountChange });
+
+			// A custom-token reload rebuilds the token - and mints a fresh `TokenId` symbol for it.
+			const reloadedToken: Token = {
+				...ETHEREUM_TOKEN,
+				id: parseTokenId(`${ETHEREUM_TOKEN.id.description}`)
+			};
+
+			sendContext.sendToken.set(reloadedToken);
+			sendContext.sendTokenId.set(reloadedToken.id);
+
+			await tick();
+
+			expect(onAmountChange).toHaveBeenLastCalledWith(cachedAmount);
+		});
 	});
 });
