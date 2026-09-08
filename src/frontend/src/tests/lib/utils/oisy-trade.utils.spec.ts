@@ -43,6 +43,7 @@ import {
 	queuePositionDisplay,
 	queuePositionFraction,
 	referenceRate,
+	restsAgainstValue,
 	spendAmount,
 	sumOisyTradeAssetsFreeUsd,
 	sumOisyTradeAssetsUsd,
@@ -356,6 +357,47 @@ describe('oisy-trade.utils — limit order', () => {
 
 		it('cannot cross an empty book side', () => {
 			expect(crossesBook({ side: 'sell', price: 1, bid: null, ask: 2.7 })).toBeFalsy();
+		});
+	});
+
+	describe('restsAgainstValue', () => {
+		// Book 8 / 11 around a current value of 10: prices between the bid and the
+		// ask rest, and the ones on the wrong side of 10 give value up.
+		const book = { bid: 8, ask: 11, currentValue: 10, threshold: -1 };
+
+		it('is true for a resting sell priced below current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9 })).toBeTruthy();
+		});
+
+		it('is true for a resting buy priced above current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 10.5 })).toBeTruthy();
+		});
+
+		it('is false within the threshold', () => {
+			// -0.5% give-up, above the -1% threshold.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9.95 })).toBeFalsy();
+		});
+
+		it('is false for a price at or better than current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 10.5 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 9.5 })).toBeFalsy();
+		});
+
+		it('is false for a crossing price, whose own warning applies', () => {
+			// Sell at the bid crosses, however far below current value it sits.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 8 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 11 })).toBeFalsy();
+		});
+
+		it('is false without a price or a current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 0 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, currentValue: 0 })).toBeFalsy();
+		});
+
+		it('honours the caller threshold', () => {
+			// -10% give-up: flagged at -5, not at -20.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, threshold: -5 })).toBeTruthy();
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, threshold: -20 })).toBeFalsy();
 		});
 	});
 
