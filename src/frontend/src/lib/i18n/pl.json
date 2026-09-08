@@ -1669,6 +1669,7 @@
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "Podpisz transakcję",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Podpisz transakcję",
 			"sign_and_send_transaction": "Podpisz i wyślij transakcję",
 			"signing_address": "Adres podpisujący",

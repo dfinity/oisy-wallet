@@ -1669,6 +1669,7 @@
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",
 			"sign_psbt": "Firma transazione",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Firma transazione",
 			"sign_and_send_transaction": "Firma e invia transazione",
 			"signing_address": "Indirizzo firmatario",

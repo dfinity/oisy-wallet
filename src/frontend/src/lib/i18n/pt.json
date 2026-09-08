@@ -1669,6 +1669,7 @@
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"sign_psbt": "Assinar transação",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Assinar transação",
 			"sign_and_send_transaction": "Assinar e enviar transação",
 			"signing_address": "Endereço assinante",

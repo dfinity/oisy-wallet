@@ -1669,6 +1669,7 @@
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "トランザクションに署名",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "トランザクションに署名",
 			"sign_and_send_transaction": "トランザクションに署名して送信",
 			"signing_address": "署名アドレス",

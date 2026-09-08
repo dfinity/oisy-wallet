@@ -1669,6 +1669,7 @@
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "Firmar transacción",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Firmar transacción",
 			"sign_and_send_transaction": "Firmar y enviar transacción",
 			"signing_address": "Dirección que firma",

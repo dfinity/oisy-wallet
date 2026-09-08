@@ -1669,6 +1669,7 @@
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "Ký giao dịch",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Ký giao dịch",
 			"sign_and_send_transaction": "Ký và gửi giao dịch",
 			"signing_address": "Địa chỉ ký",

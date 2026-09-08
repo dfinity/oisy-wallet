@@ -1669,6 +1669,7 @@
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "签署交易",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "签署交易",
 			"sign_and_send_transaction": "签署并发送交易",
 			"signing_address": "签名地址",

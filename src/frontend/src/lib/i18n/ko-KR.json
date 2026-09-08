@@ -1669,6 +1669,7 @@
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "트랜잭션 서명",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "트랜잭션 서명",
 			"sign_and_send_transaction": "트랜잭션 서명 및 전송",
 			"signing_address": "서명 주소",

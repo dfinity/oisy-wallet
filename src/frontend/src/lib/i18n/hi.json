@@ -1669,6 +1669,7 @@
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "लेनदेन पर हस्ताक्षर करें",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "लेनदेन पर हस्ताक्षर करें",
 			"sign_and_send_transaction": "लेनदेन पर हस्ताक्षर करें और भेजें",
 			"signing_address": "हस्ताक्षर करने वाला पता",

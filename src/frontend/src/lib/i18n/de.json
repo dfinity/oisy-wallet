@@ -1669,6 +1669,7 @@
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",
 			"sign_psbt": "Transaktion signieren",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Transaktion signieren",
 			"sign_and_send_transaction": "Transaktion signieren und senden",
 			"signing_address": "Signierende Adresse",

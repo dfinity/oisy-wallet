@@ -1669,6 +1669,7 @@
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "Podepsat transakci",
+			"sign_transaction_with_type": "",
 			"sign_transaction": "Podepsat transakci",
 			"sign_and_send_transaction": "Podepsat a odeslat transakci",
 			"signing_address": "Podepisující adresa",
