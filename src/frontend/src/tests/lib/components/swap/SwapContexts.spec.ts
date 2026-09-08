@@ -1,4 +1,5 @@
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
@@ -138,7 +139,9 @@ describe('SwapContexts', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				// The vitest env maps to LOCAL, where the NEAR Intents BTC flag opens Bitcoin.
+				BTC_MAINNET_NETWORK
 			]);
 		});
 

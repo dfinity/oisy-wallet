@@ -1,8 +1,9 @@
 <script lang="ts">
 	import ContactOrToken from '$lib/components/contact/ContactOrToken.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import type { SolAddress } from '$sol/types/address';
 	import type { SolTransferParties, SolTransferParty } from '$sol/types/sol-transaction';
 	import {
@@ -12,18 +13,20 @@
 
 	interface Props {
 		parties: SolTransferParties;
+		// The network the addresses belong to, for the block explorer link beside each of them.
+		network: Network | undefined;
 		// The wallet the review already names as its source, which is what makes a Sources list
 		// redundant when it resolves to nothing else.
 		userAddress: SolAddress;
 	}
 
-	let { parties, userAddress }: Props = $props();
+	let { parties, userAddress, network }: Props = $props();
 
-	let { sources, partial } = $derived(parties);
+	let { sources } = $derived(parties);
 
 	// Every source is one of the user's own accounts by the rule itself, so a list that resolves to
 	// the wallet the review already displays only repeats it. Suppressing it is safe only because
-	// the partial notice below says when a list could not be built, which is the other thing an
+	// the review's partial notice says when a list could not be built, which is the other thing an
 	// absent section could otherwise mean.
 	let showSources = $derived(
 		sources.length > 0 && !isSolTransferSourcesRedundant({ sources, userAddress })
@@ -36,6 +39,8 @@
 	<div class="flex flex-col gap-1" data-tid="transfer-party">
 		<span class="flex flex-wrap items-center gap-2">
 			{displayed}
+
+			<SolAddressActions address={displayed} {network} testId="transfer-party-copy" />
 
 			<!-- A source displayed by an account address rather than by the wallet the review names
 			     would otherwise read as a counterparty. Marking it is what says it is still ours. -->
@@ -61,11 +66,4 @@
 			{/each}
 		</div>
 	</WalletConnectModalValue>
-{/if}
-
-<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
-     something visibly failed: an empty list on a transaction that clearly spends something is the
-     single most dangerous thing this section can show. -->
-{#if partial}
-	<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
 {/if}

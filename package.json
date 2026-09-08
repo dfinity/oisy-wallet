@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.5.4",
+	"version": "2.5.5",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -34,6 +34,7 @@
 		"test": "tsc --project tsconfig.spec.json --noEmit && vitest",
 		"test:coverage": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage",
 		"test:debug": "ALLOW_LOGGING_FOR_DEBUGGING=true npm run test",
+		"test:record:sol-fixtures": "SOL_RPC_FIXTURES_RECORD=true vitest run src/frontend/src/tests/sol/services/sol-signatures.services.integration.spec.ts",
 		"test:merge": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage --merge-reports",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
@@ -82,10 +83,13 @@
 		"@metamask/detect-provider": "^2.0.0",
 		"@plausible-analytics/tracker": "^0.4.5",
 		"@reown/walletkit": "^1.5.5",
+		"@solana-program/address-lookup-table": "^0.13.0",
 		"@solana-program/compute-budget": "^0.17.0",
+		"@solana-program/memo": "^0.12.0",
+		"@solana-program/stake": "^0.8.0",
 		"@solana-program/system": "^0.13.0",
 		"@solana-program/token": "^0.15.0",
-		"@solana-program/token-2022": "^0.13.0",
+		"@solana-program/token-2022": "^0.14.1",
 		"@solana/kit": "^7.0.0",
 		"@velora-dex/sdk": "^10.2.2",
 		"barcode-detector": "^3.2.1",
@@ -101,7 +105,7 @@
 		"onesec-bridge": "^0.13.0",
 		"qr-creator": "^1.0.0",
 		"svelte-confetti": "^2.3.2",
-		"viem": "^2.55.8",
+		"viem": "^2.55.11",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
@@ -130,7 +134,7 @@
 		"prettier-plugin-motoko": "^0.13.0",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"prettier-plugin-svelte": "^4.1.0",
-		"prettier-plugin-tailwindcss": "^0.8.0",
+		"prettier-plugin-tailwindcss": "^0.8.1",
 		"sass": "^1.98.0",
 		"svelte": "^5.56.6",
 		"svelte-check": "^4.6.0",

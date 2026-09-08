@@ -126,6 +126,68 @@ describe('SwapProgress', () => {
 		});
 	});
 
+	describe('withApproveStep', () => {
+		// The row's own state, not merely its presence: the bug this flag fixes was a
+		// step driven into a list that did not render it, which matches nothing and
+		// leaves every row unhighlighted until the next step that does exist.
+		const inProgressText = (container: HTMLElement): string | undefined =>
+			container.querySelector('.step.in_progress .text')?.textContent?.trim();
+
+		it('renders the approve step without either signing step', () => {
+			const { container } = render(SwapProgress, {
+				props: { withApproveStep: true }
+			});
+
+			expect(container).toHaveTextContent(baseStepTexts.approving);
+			expect(container).not.toHaveTextContent(baseStepTexts.signingApproval);
+			expect(container).not.toHaveTextContent(baseStepTexts.signingTransaction);
+		});
+
+		it('still renders base steps', () => {
+			const { container } = render(SwapProgress, {
+				props: { withApproveStep: true }
+			});
+
+			expect(container).toHaveTextContent(baseStepTexts.initializing);
+			expect(container).toHaveTextContent(baseStepTexts.swapping);
+			expect(container).toHaveTextContent(baseStepTexts.refreshingUi);
+		});
+
+		it('highlights the approve step it renders', () => {
+			const { container } = render(SwapProgress, {
+				props: { withApproveStep: true, swapProgressStep: ProgressStepsSwap.APPROVE }
+			});
+
+			expect(inProgressText(container)).toBe(baseStepTexts.approving);
+		});
+
+		// The regression. Without the flag the approve step exists nowhere in the list,
+		// so the whole progress list renders unhighlighted — which is what a user saw as
+		// an empty list for as long as the approve leg took.
+		it('leaves every row unhighlighted on the approve step without the flag', () => {
+			const { container } = render(SwapProgress, {
+				props: { swapProgressStep: ProgressStepsSwap.APPROVE }
+			});
+
+			expect(container.querySelector('.step.in_progress')).toBeNull();
+		});
+
+		// Two rows sharing one step id would break the in-progress lookup, which matches
+		// by id, so the two props contribute the one row between them.
+		it('adds no second approve row when sendWithApproval already contributes one', () => {
+			const { container } = render(SwapProgress, {
+				props: { sendWithApproval: true, withApproveStep: true }
+			});
+
+			expect(
+				[...container.querySelectorAll('.step .text')].filter(
+					(el) => el.textContent?.trim() === baseStepTexts.approving
+				)
+			).toHaveLength(1);
+			expect(container).toHaveTextContent(baseStepTexts.signingApproval);
+		});
+	});
+
 	describe('swapWithActiveTransaction', () => {
 		it('replaces the swapping and refreshing copy with the background-settlement copy', () => {
 			const { container } = render(SwapProgress, {

@@ -119,17 +119,19 @@ describe('SwapFees', () => {
 
 			expect(getByText(en.fee.text.estimated_eth)).toBeInTheDocument();
 			expect(getByText('0.000002 ckETH')).toBeInTheDocument();
+			// Two rows, so the collapsible total stays.
+			expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 		});
 
-		// The total has to be the user's whole cost, so a fee the minter withholds is disclosed
-		// here too — otherwise nothing on the form accounts for the gap between the pay and
-		// receive amounts. `deductedFromAmount` decides the receive amount, not the disclosure.
-		it('lists a fee the minter takes out of the converted amount', () => {
-			const { getByText } = renderChainFusion({
+		// A fee the minter withholds from the converted amount is already the gap between the pay
+		// and receive amounts, and the provider sheet states it. Counting it here as well would
+		// read as a second charge, so the total is what the user pays out of balance alone.
+		it('leaves out a fee deducted from the receive amount, total included', () => {
+			const { getAllByText, queryByText } = renderChainFusion({
 				sourceFees: [
 					{ labelPath: 'fee.text.fee', fee: LEDGER_FEE, token: sourceToken },
 					{
-						labelPath: 'fee.text.estimated_eth',
+						labelPath: 'fee.text.estimated_btc',
 						fee: 5_000n,
 						token: sourceToken,
 						deductedFromAmount: true
@@ -138,9 +140,12 @@ describe('SwapFees', () => {
 				externalFees: []
 			});
 
-			expect(getByText(en.fee.text.fee)).toBeInTheDocument();
-			expect(getByText(en.fee.text.estimated_eth)).toBeInTheDocument();
-			expect(getByText('0.005 ckUSDC')).toBeInTheDocument();
+			expect(queryByText(en.fee.text.estimated_btc)).not.toBeInTheDocument();
+			expect(queryByText('0.005 ckUSDC')).not.toBeInTheDocument();
+			// The ledger fee is left alone, so it stands as a single row — no "Total fee" header
+			// to repeat it under.
+			expect(getAllByText('0.01 ckUSDC')).toHaveLength(1);
+			expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
 		});
 
 		it('totals only the source-token rows when a fee token has no exchange rate', () => {

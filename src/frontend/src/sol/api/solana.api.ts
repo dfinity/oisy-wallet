@@ -14,12 +14,14 @@ import type {
 	SolSignature
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
+	getBase64Encoder,
 	address as solAddress,
 	type Address,
 	type Base64EncodedWireTransaction,
 	type Lamports,
+	type ReadonlyUint8Array,
 	type Signature,
 	type TransactionError
 } from '@solana/kit';
@@ -336,6 +338,33 @@ export const getAccountInfo = async ({
 	return info;
 };
 
+/**
+ * The raw bytes of an account, for accounts no server-side parser knows: an Anchor IDL is a
+ * program's own data, so `jsonParsed` hands back the same base64 either way.
+ *
+ * Returns `undefined` for an account that does not exist, which is the common answer here: most
+ * programs publish no IDL.
+ */
+export const getAccountData = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<ReadonlyUint8Array<ArrayBuffer> | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+
+	const { value } = await getAccountInfo(solAddress(address), { encoding: 'base64' }).send();
+
+	if (isNullish(value)) {
+		return undefined;
+	}
+
+	const [data] = value.data;
+
+	return getBase64Encoder().encode(data);
+};
+
 // https://solana.com/docs/tokens/extensions
 interface Token2022ExtensionResult {
 	extension: string;
@@ -437,4 +466,48 @@ export const checkIfAccountExists = async ({
 	const { value } = await getAccountInfo({ address, network });
 
 	return nonNullish(value);
+};
+
+/**
+ * The name and symbol each Token-2022 mint carries in its own account.
+ *
+ * Token-2022 can hold its metadata in the mint itself, through the `tokenMetadata` extension, so
+ * one account read names a token the wallet does not list. A legacy SPL mint keeps nothing of the
+ * sort and simply does not appear in the result.
+ */
+export const getSplTokenMetadata = async ({
+	addresses,
+	network
+}: {
+	addresses: SplTokenAddress[];
+	network: SolanaNetworkType;
+}): Promise<Record<SplTokenAddress, { name: string; symbol: string }>> => {
+	if (addresses.length === 0) {
+		return {};
+	}
+
+	const accounts = await getMultipleAccountsInfo({ addresses, network });
+
+	return addresses.reduce<Record<SplTokenAddress, { name: string; symbol: string }>>(
+		(acc, address, index) => {
+			const data = accounts[index]?.data;
+
+			if (isNullish(data) || !('parsed' in data)) {
+				return acc;
+			}
+
+			const { extensions } = (data.parsed?.info ?? {}) as {
+				extensions?: Token2022ExtensionResult[];
+			};
+
+			const { name, symbol } = extractTokenMetadataExtension(extensions);
+
+			if (notEmptyString(name) && notEmptyString(symbol)) {
+				acc[address] = { name, symbol };
+			}
+
+			return acc;
+		},
+		{}
+	);
 };

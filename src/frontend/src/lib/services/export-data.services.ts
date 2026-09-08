@@ -1,5 +1,4 @@
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENT_VALUES } from '$lib/enums/plausible';
@@ -25,7 +24,6 @@ import {
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
-import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -131,10 +129,8 @@ const loadAllTransactionsHistory = async ({
 		}
 
 		if (isNetworkIdICP(networkId)) {
-			const current = (get(icTransactionsStore)?.[tokenId] ?? []).map(({ data }) => data);
 			const { success } = await loadNextIcTransactionsByOldest({
 				minTimestamp: 0,
-				transactions: current,
 				owner: identity.getPrincipal(),
 				identity,
 				maxResults: WALLET_PAGINATION,
@@ -151,11 +147,9 @@ const loadAllTransactionsHistory = async ({
 		}
 
 		if (isNetworkIdSolana(networkId)) {
-			const current = (get(solTransactionsStore)?.[tokenId] ?? []).map(({ data }) => data);
 			const { success } = await loadNextSolTransactionsByOldest({
 				identity,
 				minTimestamp: 0,
-				transactions: current,
 				token,
 				signalEnd: () => {
 					disableLoader[key] = true;

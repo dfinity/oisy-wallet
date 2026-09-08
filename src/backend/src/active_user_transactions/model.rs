@@ -7,8 +7,8 @@ use shared::types::{
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
-        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
+        MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
@@ -217,11 +217,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -229,31 +229,40 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_chain_fusion_pair(d)?;
         }
         ActiveUserTransactionData::OisyTrade(d) => {
-            require_positive_amount(&d.amount)?;
+            require_valid_amount(&d.amount)?;
             require_oisy_trade_pair(d)?;
         }
     }
     Ok(())
 }
 
-fn require_positive_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+/// An amount is a base-unit balance, so it is positive and fits the widest
+/// integer any supported chain uses. The upper bound is what makes the encoded
+/// size of a record provable: `Nat` is variable-length, so an unbounded amount
+/// would let a single record carry megabytes into permanent stable memory.
+fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
         return Err(ActiveUserTransactionError::InvalidData(
             "amount must be greater than zero".to_string(),
+        ));
+    }
+    if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "amount is too large".to_string(),
         ));
     }
     Ok(())
@@ -473,6 +482,51 @@ mod tests {
         });
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    /// 2^256 - 1, the widest base-unit amount any supported chain can express.
+    const MAX_WIDTH_AMOUNT: &[u8] =
+        b"115792089237316195423570985008687907853269984665640564039457584007913129639935";
+    /// 2^256, one bit too wide.
+    const OVER_WIDTH_AMOUNT: &[u8] =
+        b"115792089237316195423570985008687907853269984665640564039457584007913129639936";
+
+    fn data_with_amount(amount: Nat) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::IcpNative,
+            dest_token: TokenId::EvmNative(1),
+            amount,
+        })
+    }
+
+    #[test]
+    fn max_width_amount_accepted() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(MAX_WIDTH_AMOUNT).unwrap());
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
+    fn oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(OVER_WIDTH_AMOUNT).unwrap());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).transactions.len(), 0);
+    }
+
+    /// A `Nat` is variable-length on the wire, so the payload an attacker can
+    /// attach is bounded only by the ingress message limit, not by 256 bits.
+    #[test]
+    fn far_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = data_with_amount(Nat::parse(&b"9".repeat(10_000)).unwrap());
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).transactions.len(), 0);
     }
 
     #[test]

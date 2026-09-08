@@ -1,5 +1,6 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+import { NEAR_INTENTS_BTC_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -24,7 +25,7 @@ export interface SwappableTokens {
 
 /**
  * Bitcoin's contribution to the swap universe: the enabled mainnet BTC token, and only
- * when Chain Fusion is on, since ck conversion is the sole route out of Bitcoin.
+ * when a provider can move it: Chain Fusion (ck conversion) or NEAR Intents (bridging).
  *
  * Kept out of `allCrossChainSwapTokens`, which is typed around the EVM / SOL custom-token
  * unions that BTC does not belong to.
@@ -32,7 +33,8 @@ export interface SwappableTokens {
 const swapUniverseBitcoinTokens: Readable<TokenToggleable<Token>[]> = derived(
 	[enabledMainnetBitcoinToken],
 	([$enabledMainnetBitcoinToken]) =>
-		CHAIN_FUSION_SWAP_ENABLED && nonNullish($enabledMainnetBitcoinToken)
+		(CHAIN_FUSION_SWAP_ENABLED || NEAR_INTENTS_BTC_SWAP_ENABLED) &&
+		nonNullish($enabledMainnetBitcoinToken)
 			? [{ ...$enabledMainnetBitcoinToken, enabled: true }]
 			: []
 );

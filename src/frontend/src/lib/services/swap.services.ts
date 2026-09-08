@@ -63,10 +63,12 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
@@ -100,6 +102,10 @@ import {
 	toNearIntentsDisplayRefs,
 	toNearIntentsExternalRefs
 } from '$lib/utils/near-intents-active-tx.utils';
+import {
+	isNearIntentsQuoteExpired,
+	verifyNearIntentsQuoteSignature
+} from '$lib/utils/near-intents-quote.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
@@ -579,6 +585,12 @@ const fetchSwapAmountsICP = async ({
 					slippage,
 					destToken: destinationToken as IcToken
 				});
+			} else if (provider.key === SwapProvider.OISY_TRADE && isSourceTokenIcrc2) {
+				// Gated on ICRC-2 like ICPSwap: the deposit leg is `icrc2_approve` plus
+				// `icrc2_transfer_from`, so a source ledger without ICRC-2 cannot be
+				// deposited at all.
+				const quote = result.value as OisyTradeQuote | undefined;
+				mapped = nonNullish(quote) ? provider.mapQuoteResult({ quote }) : undefined;
 			}
 
 			if (nonNullish(mapped)) {
@@ -865,6 +877,26 @@ const executeNearIntentsSwap = async ({
 		unitName: sourceToken.decimals
 	});
 
+	// Last gate before the funds leave the wallet. The quote reached here through the
+	// provider fan-out, so it was already verified once at quote time; re-checking binds
+	// the signature to the exact response this send reads its deposit address from, and
+	// covers any caller that assembles a quote by another route.
+	if (!(await verifyNearIntentsQuoteSignature(swapDetails))) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
+			message: get(i18n).swap.error.near_intents_quote_unverified
+		});
+	}
+
+	// Re-checked here rather than only at quote time: the review screen can sit open long
+	// enough for the window the service signed to lapse before the user confirms.
+	if (isNearIntentsQuoteExpired(swapDetails)) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			message: get(i18n).swap.error.near_intents_quote_expired
+		});
+	}
+
 	const { depositAddress, depositMemo } = swapDetails.quote;
 
 	// Registers the swap as an Active User Transaction so settlement is tracked by
@@ -891,6 +923,9 @@ const executeNearIntentsSwap = async ({
 					externalRefs: toNearIntentsExternalRefs({
 						...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
 						[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
+						// 1Click documents the signature as the client's receipt for disputing a
+						// deposit, so it is kept next to the address it authenticates.
+						[NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE]: swapDetails.signature,
 						...(nonNullish(depositMemo)
 							? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
 							: {})
@@ -1107,6 +1142,12 @@ export const swapService = {
 	// 1Sec above.
 	[SwapProvider.CHAIN_FUSION]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// OISY Trade needs the resolved order parameters — side, price, quantity —
+	// which `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly
+	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
+	[SwapProvider.OISY_TRADE]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
 
@@ -1202,6 +1243,36 @@ export const performManualWithdraw = async ({
 	}
 };
 
+// Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
+// provider quoted at all but one refused the amount as below its minimum, rethrow that
+// refusal so the UI can name the reason instead of the generic "swap is not offered".
+const reduceSettledSwapResults = (
+	settledResults: PromiseSettledResult<SwapMappedResult | undefined>[]
+): SwapMappedResult[] => {
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	if (results.length === 0) {
+		const amountTooLow = settledResults.find(
+			(result): result is PromiseRejectedResult =>
+				result.status === 'rejected' && result.reason instanceof SwapAmountTooLowError
+		);
+
+		if (nonNullish(amountTooLow)) {
+			throw amountTooLow.reason;
+		}
+	}
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
 const fetchSwapAmountsICPBridge = async ({
 	sourceToken,
 	destinationToken,
@@ -1217,17 +1288,7 @@ const fetchSwapAmountsICPBridge = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
@@ -1253,17 +1314,7 @@ export const fetchSwapAmountsEVM = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // Fan-out for a Bitcoin source; Chain Fusion and NEAR Intents register here. The shape
@@ -1291,17 +1342,7 @@ export const fetchSwapAmountsBTC = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
@@ -1327,17 +1368,7 @@ export const fetchSwapAmountsSOL = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 export const withdrawUserUnusedBalance = async ({

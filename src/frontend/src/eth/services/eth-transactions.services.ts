@@ -10,11 +10,16 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	fetchErc20Transfers,
 	loadErc20UserTransactions,
+	loadNextErc20UserTransactions,
+	persistableErc20Transfers,
 	saveErc20FinalizedTransactions
 } from '$eth/services/erc20-user-transactions.services';
 import {
+	getEthBackendPaginationCursor,
 	loadEthUserTransactions,
+	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -29,8 +34,10 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { erc20BackendTokenId } from '$eth/utils/user-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -42,9 +49,12 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import type { LoadOlderTransactions } from '$lib/types/transactions-pagination';
 import type { ResultSuccess } from '$lib/types/utils';
+import { last } from '$lib/utils/array.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -243,9 +253,11 @@ const loadCachedErc20Transactions = async ({
 		setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 	}
 
-	// One read serves every decision below: discarding a stored boundary the chain has not reached,
-	// skipping a fetch that cannot return anything, and giving the finality check a real reference
-	// point rather than the batch's own newest block.
+	setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
+
+	// One read serves every decision below: discarding a stored boundary too far above the tip to be
+	// believable, skipping a fetch that cannot return anything, and giving the finality check a real
+	// reference point rather than the batch's own newest block.
 	const chainTip = await readChainTip({ networkId });
 
 	const startBlock = resolveEthIncrementalStartBlock({
@@ -256,8 +268,8 @@ const loadCachedErc20Transactions = async ({
 
 	const tipIsBehindWhatWeHold = startBlock > 0 && nonNullish(chainTip) && chainTip < startBlock;
 
-	const newTransactions = tipIsBehindWhatWeHold
-		? []
+	const { transactions: newTransactions, oldestUnresolvedBlockNumber } = tipIsBehindWhatWeHold
+		? { transactions: [], oldestUnresolvedBlockNumber: undefined }
 		: await fetchErc20Transfers({
 				networkId,
 				token,
@@ -284,18 +296,24 @@ const loadCachedErc20Transactions = async ({
 		ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 	}
 
+	// Everything fetched is displayed; only what we persist is held back at an unresolved verdict.
+	const persistable = persistableErc20Transfers({
+		transactions: newTransactions,
+		oldestUnresolvedBlockNumber
+	});
+
 	// Finality is measured against the tip Infura reports, never against the batch's own newest
 	// block: a response that supplied both the transfers and the height certifying them could mark
 	// anything final. Without a tip we skip the save and let a later load persist them.
 	if (
 		USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
-		newTransactions.some(({ blockNumber }) => nonNullish(blockNumber)) &&
+		persistable.some(({ blockNumber }) => nonNullish(blockNumber)) &&
 		nonNullish(chainTip)
 	) {
 		saveErc20FinalizedTransactions({
 			identity,
 			tokenId: transactionTokenId,
-			transactions: newTransactions,
+			transactions: persistable,
 			currentBlockNumber: chainTip
 		}).catch((err) =>
 			consoleError('Background save of finalized ERC-20 transactions failed:', err)
@@ -338,9 +356,11 @@ const loadEthTransactions = async ({
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
 
-		// One read serves every decision below: discarding a stored boundary the chain has not
-		// reached, skipping a fetch that cannot return anything, and giving the finality check a real
-		// reference point rather than the batch's own newest block.
+		setEthBackendAtCapacity({ tokenId, totalStored: stored?.totalStored });
+
+		// One read serves every decision below: discarding a stored boundary too far above the tip to
+		// be believable, skipping a fetch that cannot return anything, and giving the finality check a
+		// real reference point rather than the batch's own newest block.
 		const chainTip = await readChainTip({ networkId });
 
 		const startBlock = resolveEthIncrementalStartBlock({
@@ -549,7 +569,7 @@ const loadErc4626Transactions = async ({
 	token: Erc4626CustomToken;
 	address: Address;
 }): Promise<Transaction[]> => {
-	const transactions = await fetchErc20Transfers({ networkId, token, address });
+	const { transactions } = await fetchErc20Transfers({ networkId, token, address });
 
 	return transactions.map((tx) => {
 		const isMint = tx.from.toLowerCase() === ZERO_ETH_ADDRESS;
@@ -591,4 +611,84 @@ const loadErc1155Transactions = async ({
 	return await retryWithDelay({
 		request: async () => await erc1155Transactions({ contract: token, address })
 	});
+};
+
+/**
+ * Loads a page of ETH history older than what the token already has on screen.
+ *
+ * The ETH loaders page by block rather than by timestamp, so the floor is compared against the
+ * oldest loaded transaction's own timestamp before deciding whether another page is wanted.
+ */
+export const loadNextEthTransactionsByOldest: LoadOlderTransactions = async ({
+	token,
+	identity,
+	minTimestamp,
+	signalEnd
+}) => {
+	const transactions = get(ethTransactionsStore)?.[token.id] ?? [];
+
+	// If there are no transactions, we let the loader fetch the first ones
+	if (transactions.length === 0) {
+		return { success: false };
+	}
+
+	const oldest = last(transactions)?.data;
+
+	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
+	if (
+		nonNullish(minTimestamp) &&
+		nonNullish(oldest?.timestamp) &&
+		normalizeTimestampToSeconds(oldest.timestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
+	}
+
+	const oldestLoadedBlockNumber = oldest?.blockNumber;
+
+	if (isNullish(oldestLoadedBlockNumber)) {
+		return { success: false };
+	}
+
+	const address = get(addressStore);
+
+	const { hasMore } = isTokenErc20(token)
+		? await loadNextErc20UserTransactions({
+				identity,
+				address,
+				transactionTokenId: erc20BackendTokenId(token),
+				token,
+				tokenId: token.id,
+				networkId: token.network.id,
+				oldestLoadedBlockNumber
+			})
+		: isTokenEthereumNative(token) && isNetworkEthereum(token.network)
+			? await loadNextEthUserTransactions({
+					identity,
+					address,
+					transactionTokenId: { EvmNative: token.network.chainId },
+					tokenId: token.id,
+					networkId: token.network.id,
+					cursor: getEthBackendPaginationCursor(token.id),
+					oldestLoadedBlockNumber
+				})
+			: { hasMore: false };
+
+	if (!hasMore) {
+		signalEnd();
+
+		return { success: false };
+	}
+
+	// Unlike the ICP and Solana loaders these page by block and have no floor of their own, so the
+	// only reliable stop is the store itself: a page that did not reach further back is the end,
+	// whatever `hasMore` claims. Without this a repeated page would loop forever.
+	const oldestAfter = last(get(ethTransactionsStore)?.[token.id] ?? [])?.data.blockNumber;
+
+	if (isNullish(oldestAfter) || oldestAfter >= oldestLoadedBlockNumber) {
+		signalEnd();
+
+		return { success: false };
+	}
+
+	return { success: true };
 };

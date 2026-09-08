@@ -2,7 +2,11 @@ import {
 	SUPPORTED_EVM_MAINNET_NETWORKS,
 	SUPPORTED_EVM_TESTNET_NETWORKS
 } from '$env/networks/networks-evm/networks.evm.env';
-import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import {
+	BTC_MAINNET_NETWORK,
+	BTC_REGTEST_NETWORK,
+	BTC_TESTNET_NETWORK
+} from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
@@ -11,6 +15,7 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SUPPORTED_SOLANA_MAINNET_NETWORKS
 } from '$env/networks/networks.sol.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	crossChainSwapNetwoksEnvs,
 	crossChainSwapNetworks,
@@ -28,14 +33,15 @@ describe('cross-chain-swap derived stores', () => {
 	});
 
 	describe('crossChainSwapNetworks', () => {
-		it('should combine ICP, enabled Ethereum, EVM, and Solana networks', () => {
+		it('should combine ICP, enabled Ethereum, EVM, Solana, and Bitcoin networks', () => {
 			const result = get(crossChainSwapNetworks);
 
 			expect(result).toEqual([
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				BTC_MAINNET_NETWORK
 			]);
 		});
 
@@ -77,17 +83,48 @@ describe('cross-chain-swap derived stores', () => {
 			expect(result).not.toContain(SOLANA_DEVNET_NETWORK);
 		});
 
-		// Chain Fusion is the only provider that reaches Bitcoin, so the network has nothing
-		// to contribute to the swap filter without it.
-		it('should not include Bitcoin networks while Chain Fusion is off', () => {
-			const result = get(crossChainSwapNetworks);
+		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag is on, so the
+		// default assertions above already cover the NEAR-Intents-only combination
+		// (Chain Fusion is STAGING-gated and off here).
+		it('should not include Bitcoin networks while no provider reaches Bitcoin', async () => {
+			vi.resetModules();
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
 
-			expect(result).not.toContain(BTC_MAINNET_NETWORK);
+			try {
+				const [
+					{ crossChainSwapNetworks: networks },
+					{ setupTestnetsStore: setupTestnets },
+					{ setupUserNetworksStore: setupNetworks },
+					{ BTC_MAINNET_NETWORK: bitcoinMainnet }
+				] = await Promise.all([
+					import('$lib/derived/cross-chain-networks.derived'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$env/networks/networks.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				const result = get(networks);
+
+				expect(result).not.toContain(bitcoinMainnet);
+			} finally {
+				vi.doUnmock('$env/rest/near-intents.env');
+				vi.resetModules();
+			}
 		});
 
-		it('should include the enabled Bitcoin mainnet network when Chain Fusion is on', async () => {
+		it('should include the enabled Bitcoin mainnet network when only Chain Fusion is on', async () => {
 			vi.resetModules();
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: false
+			}));
 
 			try {
 				const [
@@ -113,6 +150,7 @@ describe('cross-chain-swap derived stores', () => {
 				expect(result).not.toContain(bitcoinTestnet);
 			} finally {
 				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}
 		});
@@ -128,14 +166,17 @@ describe('cross-chain-swap derived stores', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				BTC_MAINNET_NETWORK
 			]);
 
 			expect(testnets).toEqual([
 				SEPOLIA_NETWORK,
 				...SUPPORTED_EVM_TESTNET_NETWORKS,
 				SOLANA_DEVNET_NETWORK,
-				SOLANA_LOCAL_NETWORK
+				SOLANA_LOCAL_NETWORK,
+				BTC_TESTNET_NETWORK,
+				BTC_REGTEST_NETWORK
 			]);
 		});
 
@@ -146,7 +187,8 @@ describe('cross-chain-swap derived stores', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				BTC_MAINNET_NETWORK
 			]);
 
 			expect(testnets).toEqual([]);
@@ -161,7 +203,8 @@ describe('cross-chain-swap derived stores', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				BTC_MAINNET_NETWORK
 			]);
 		});
 	});
@@ -174,7 +217,8 @@ describe('cross-chain-swap derived stores', () => {
 				ICP_NETWORK.id,
 				ETHEREUM_NETWORK.id,
 				...SUPPORTED_EVM_MAINNET_NETWORKS.map((network) => network.id),
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS.map((network) => network.id)
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS.map((network) => network.id),
+				BTC_MAINNET_NETWORK.id
 			]);
 		});
 	});

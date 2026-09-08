@@ -73,7 +73,8 @@ vi.mock('$lib/services/provider-agreements.services', () => ({
 }));
 
 vi.mock('$env/rest/near-intents.env', () => ({
-	NEAR_INTENTS_SWAP_ENABLED: true
+	NEAR_INTENTS_SWAP_ENABLED: true,
+	NEAR_INTENTS_BTC_SWAP_ENABLED: true
 }));
 
 const mockToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };
@@ -364,7 +365,9 @@ describe('SwapEthWizard', () => {
 			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 				...ctx,
 				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
@@ -585,7 +588,9 @@ describe('SwapEthWizard', () => {
 			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 				...ctx,
 				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
@@ -794,7 +799,9 @@ describe('SwapEthWizard', () => {
 			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 				...ctx,
 				maxGasFee: readable(undefined),
-				minGasFee: readable(undefined)
+				minGasFee: readable(undefined),
+				estimatedGasFee: readable(undefined),
+				feePrioritiesStore: writable(undefined)
 			}));
 			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
 			vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);

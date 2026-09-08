@@ -1,3 +1,4 @@
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 import type { SolTransferParties } from '$sol/types/sol-transaction';
 import en from '$tests/mocks/i18n.mock';
@@ -14,7 +15,8 @@ describe('SolWalletConnectTransferParties', () => {
 
 	const props = (overrides: Partial<SolTransferParties> = {}) => ({
 		parties: parties(overrides),
-		userAddress: mockSolAddress
+		userAddress: mockSolAddress,
+		network: SOLANA_MAINNET_NETWORK
 	});
 
 	// Where the value ends up is described by the balance changes, so no list of recipients is
@@ -26,6 +28,20 @@ describe('SolWalletConnectTransferParties', () => {
 
 		expect(container.querySelector('#transfer-destinations')).toBeNull();
 		expect(queryByText(mockSolAddress2)).not.toBeInTheDocument();
+	});
+
+	describe('address controls', () => {
+		it('should offer copy and a block explorer link beside a source', () => {
+			const { getByTestId, getByLabelText } = render(SolWalletConnectTransferParties, {
+				props: props({ sources: [{ address: mockAtaAddress, own: false }] })
+			});
+
+			expect(getByTestId('transfer-party-copy')).toBeInTheDocument();
+			expect(getByLabelText(en.wallet_connect.alt.open_address_block_explorer)).toHaveAttribute(
+				'href',
+				`https://solscan.io/account/${mockAtaAddress}/`
+			);
+		});
 	});
 
 	describe('sources', () => {
@@ -70,31 +86,14 @@ describe('SolWalletConnectTransferParties', () => {
 		});
 	});
 
-	describe('partial lists', () => {
-		it('should say that the lists are partial whenever they were built without inner instructions', () => {
-			const { getByText } = render(SolWalletConnectTransferParties, {
-				props: props({ partial: true })
-			});
-
-			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
+	// The review states the partial case now, above the fee notices. Saying it here as well would
+	// put the same warning on screen twice, so this pins that the component stays silent about it.
+	it('should leave the partial notice to the review', () => {
+		const { queryByText } = render(SolWalletConnectTransferParties, {
+			props: props({ partial: true, sources: [{ address: mockAtaAddress, own: false }] })
 		});
 
-		// A hidden Sources list and one that could not be derived must not render identically.
-		it('should say so even when the list it produced is empty', () => {
-			const { getByText, queryByText } = render(SolWalletConnectTransferParties, {
-				props: props({ partial: true })
-			});
-
-			expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
-		});
-
-		it('should say nothing when the lists are complete', () => {
-			const { queryByText } = render(SolWalletConnectTransferParties, {
-				props: props({ sources: [{ address: mockAtaAddress, own: true }] })
-			});
-
-			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
-		});
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_sources)).toBeInTheDocument();
 	});
 });
