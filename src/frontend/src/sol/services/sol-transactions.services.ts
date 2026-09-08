@@ -15,6 +15,7 @@ import {
 	loadSolUserTransactions,
 	saveSolFinalizedTransactions
 } from '$sol/services/sol-user-transactions.services';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -173,6 +174,23 @@ export const fetchSolTransactionsForSignature = async ({
 		...(nonNullish(ataAddress) ? [ataAddress] : [])
 	];
 
+	// What each account held going in, so a close can say what it hands back: the instruction
+	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
+	const balances = preBalances ?? [];
+
+	const accountLamports = parsedAccountKeys.reduce<Record<SolAddress, bigint>>(
+		(acc, { pubkey }, index) => {
+			const lamports = balances[index];
+
+			if (nonNullish(lamports)) {
+				acc[pubkey] = lamports;
+			}
+
+			return acc;
+		},
+		{}
+	);
+
 	const instructionSummaries = mapSolInstructionSummaries({
 		instructions: [...instructions],
 		innerInstructions: [...putativeInnerInstructions].map(({ index, instructions: inner }) => ({
@@ -180,7 +198,8 @@ export const fetchSolTransactionsForSignature = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses,
-		addressToToken
+		addressToToken,
+		accountLamports
 	});
 
 	const netChanges = mapSolNetBalanceChanges({
@@ -199,6 +218,13 @@ export const fetchSolTransactionsForSignature = async ({
 	if (instructionSummaries.length === 0 && netChanges.length === 0) {
 		return [];
 	}
+
+	// Name the mints this record mentions. Best effort: an unnamed token still renders, and the
+	// loader skips mints it has already asked about, so a busy wallet does not re-ask per page.
+	await loadSplTokenMetadata({
+		tokenAddresses: netChanges.map(({ tokenAddress }) => tokenAddress).filter(nonNullish),
+		network
+	});
 
 	const summary = deriveSolTransactionSummary({
 		netChanges,
@@ -249,7 +275,7 @@ export const loadNextSolTransactions = async ({
 	token,
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<void> => {
+}: LoadNextSolTransactionsParams): Promise<ResultSuccess> => {
 	const {
 		network: { id: networkId }
 	} = token;
@@ -263,7 +289,7 @@ export const loadNextSolTransactions = async ({
 	const network = mapNetworkIdToNetwork(token.network.id);
 
 	if (isNullish(network) || isNullish(address)) {
-		return;
+		return { success: false };
 	}
 
 	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
@@ -279,9 +305,18 @@ export const loadNextSolTransactions = async ({
 		...rest
 	});
 
+	// A page that could not be fetched is not the end of the history. Signalling the end here would
+	// retire the token from the Activity list for as long as it stays mounted, which is why a
+	// transient RPC failure used to hide transactions until the user re-entered the page.
+	if (isNullish(transactions)) {
+		return { success: false };
+	}
+
 	if (transactions.length === 0) {
 		signalEnd();
 	}
+
+	return { success: true };
 };
 
 const loadSolTransactions = async ({
@@ -292,7 +327,7 @@ const loadSolTransactions = async ({
 	tokenAddress,
 	before,
 	...rest
-}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[] | undefined> => {
 	const isHeadLoad = isNullish(before);
 
 	try {
@@ -429,7 +464,9 @@ const loadSolTransactions = async ({
 		}
 
 		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
-		return [];
+
+		// Distinct from an empty page: the caller must not read a failure as the end of the history.
+		return undefined;
 	}
 };
 
@@ -465,10 +502,8 @@ export const loadNextSolTransactionsByOldest = async ({
 		return { success: false };
 	}
 
-	await loadNextSolTransactions({
+	return await loadNextSolTransactions({
 		...rest,
 		before: lastSignature
 	});
-
-	return { success: true };
 };

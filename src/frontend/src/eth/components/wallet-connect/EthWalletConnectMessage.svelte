@@ -1,32 +1,48 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import type { TypedDataDomain } from 'ethers/hash';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
 		getEthTypedDataApproval,
+		getEthTypedDataMethods,
 		getSignedEthTypedData,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
 		isEthSignTypedDataMethod,
 		toTypedDataDomainChainId
 	} from '$eth/utils/wallet-connect.utils';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatSecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
 		invalidTypedData?: boolean;
+		// Valid typed data whose schema OISY does not recognise, so none of the summary rows below
+		// can be filled. Resolved in the review beside `invalidTypedData`, which does gate approval,
+		// so the two states deciding what this component renders are settled in one place. Deriving
+		// it here would parse the payload a third time to reach the same answer.
+		unreviewableTypedData?: boolean;
 	}
 
-	let { request, invalidTypedData = false }: Props = $props();
+	let { request, invalidTypedData = false, unreviewableTypedData = false }: Props = $props();
 
 	let application = $derived(request.verifyContext.verified.origin);
 
@@ -47,6 +63,10 @@
 		}
 	});
 
+	// The struct EIP-712 hashes. The RPC method above says how the request arrived; this says what
+	// it is, which is the difference between "a typed-data signature" and "an unlimited allowance".
+	let primaryType = $derived(json?.primaryType);
+
 	// Only the members the schema declares are previewed: EIP-712 hashes those and nothing else, so
 	// a key the schema leaves out is not part of what the user would sign and is not shown as if it
 	// were. That the request carried such keys is stated instead.
@@ -56,9 +76,27 @@
 			: { typedData: undefined, hasUnsignedKeys: false }
 	);
 
-	let {
-		domain: { chainId }
-	} = $derived(json ?? { domain: { chainId: undefined } });
+	// The domain is filtered by presence, not by declaration: `TypedDataEncoder.hash` discards
+	// `types.EIP712Domain` and separates the signature with whichever members the domain object
+	// carries. That is the opposite of the rule the message follows above, so a member is stated
+	// because the request populated it, and every member stated here is one the digest covers.
+	let domain: TypedDataDomain = $derived(json?.domain ?? {});
+
+	let { chainId } = $derived(domain);
+
+	// The dApp's own label for what it is asking to sign. It is the request's claim, not a name OISY
+	// resolved, which is why the contract it claims to be sits right under it rather than out of view.
+	let domainName = $derived(
+		typeof domain.name === 'string' && notEmptyString(domain.name) ? domain.name : undefined
+	);
+
+	// The contract that will check this signature, and the verifiable half of the pair above. It
+	// carries the copy and explorer controls, since it is the part a user can hold the name to.
+	let verifyingContract = $derived(
+		typeof domain.verifyingContract === 'string' && notEmptyString(domain.verifyingContract)
+			? domain.verifyingContract
+			: undefined
+	);
 
 	// The summary is derived from the signed schema, never from the shape of the
 	// message: a key the schema does not declare is absent from the digest, so
@@ -72,6 +110,23 @@
 	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
 	// all the same chain and all hash alike. Comparing the text matched one form only.
 	let domainChainId = $derived(toTypedDataDomainChainId(chainId));
+
+	let domainNetwork = $derived(
+		nonNullish(domainChainId)
+			? [...$enabledEthereumNetworks, ...$enabledEvmNetworks].find(
+					({ chainId: networkChainId }) => networkChainId === domainChainId
+				)
+			: undefined
+	);
+
+	// Linked only where the chain is known. `getExplorerUrl` falls back to Ethereum, and a Polygon
+	// contract looked up on Etherscan reads as an address that does not exist. The address itself is
+	// still shown and still copyable, which is the part that does not depend on resolving the chain.
+	let verifyingContractExplorerUrl = $derived(
+		nonNullish(verifyingContract) && nonNullish(domainNetwork)
+			? `${getExplorerUrl({ network: domainNetwork })}/address/${verifyingContract}`
+			: undefined
+	);
 
 	let token = $derived.by(() => {
 		if (isNullish(address) || isNullish(domainChainId)) {
@@ -111,16 +166,36 @@
 				`${amount} ${$i18n.wallet_connect.text.token_units}`;
 	});
 
+	// Listed only where the summary rows are empty. A schema OISY describes states its spender, its
+	// amount and its expiry, which says more than the name of the struct they came out of.
+	let methods = $derived(
+		unreviewableTypedData && nonNullish(json) ? getEthTypedDataMethods(json) : []
+	);
+
 	let expirationDate = $derived(
 		nonNullish(expiration)
 			? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
 			: undefined
 	);
+
+	let activeTab = $state('summary');
+
+	// Levels of indentation the list will render before it stops widening.
+	const MAX_NESTING_INDENT = 4;
+
+	// The type schema is usually longer than the rest of the payload put together, and it declares the
+	// shape of what is signed rather than stating any of it. Folded, the domain, the primary type and
+	// the message all fit on screen; open, they were pushed below a wall of field declarations.
+	const RAW_DATA_COLLAPSED_KEYS = ['types'];
 </script>
 
 {#if invalidTypedData}
 	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
 		{$i18n.wallet_connect.text.invalid_typed_data}
+	</MessageBox>
+{:else if unreviewableTypedData}
+	<MessageBox level="error" testId="wallet-connect-unreviewable-typed-data">
+		{$i18n.wallet_connect.text.unreviewable_typed_data}
 	</MessageBox>
 {:else if hasUnsignedKeys}
 	<MessageBox level="info" testId="wallet-connect-unsigned-typed-data-info">
@@ -128,47 +203,110 @@
 	</MessageBox>
 {/if}
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
-<p class="mb-4 font-normal">{application}</p>
+<Tabs
+	contentStyleClass="mt-4"
+	tabs={[
+		{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
+		{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }
+	]}
+	bind:activeTab
+>
+	{#if activeTab === 'summary'}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
+		<p class="mb-4 font-normal">{application}</p>
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
-<p class="mb-4 font-normal">{method}</p>
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
+		<p class="mb-4 font-normal">{method}</p>
 
-{#if nonNullish(token)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-	<p class="mb-4 font-normal">{token.symbol}</p>
+		<!-- The domain's two halves read as one party: the name it goes by, and the contract that will
+		     actually check the signature. The name is the request's own claim and nothing binds it to
+		     the address, so the address is stated under it rather than replaced by it. -->
+		{#if nonNullish(domainName) || nonNullish(verifyingContract)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.interacting_with}</p>
 
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
-	<p class="mb-4 font-normal">{token.network.name}</p>
-{:else if nonNullish(address)}
-	<!-- A token OISY does not list is still the contract the allowance is over, so the address is
+			<div class="mb-4 flex flex-col gap-0.5 font-normal">
+				{#if nonNullish(domainName)}
+					<span data-tid="wallet-connect-domain-name">{domainName}</span>
+				{/if}
+
+				{#if nonNullish(verifyingContract)}
+					<span class="flex flex-wrap items-center" data-tid="wallet-connect-verifying-contract">
+						<output>{shortenWithMiddleEllipsis({ text: verifyingContract })}</output>
+
+						<AddressActions
+							copyAddress={verifyingContract}
+							copyAddressText={$i18n.wallet.text.address_copied}
+							externalLink={verifyingContractExplorerUrl}
+							externalLinkAriaLabel={$i18n.wallet_connect.alt.open_address_block_explorer}
+							inline
+						/>
+					</span>
+				{/if}
+			</div>
+		{/if}
+
+		{#if nonNullish(primaryType)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.type}</p>
+			<!-- Monospaced like the struct names below it: this is the dApp's own text, not OISY's
+			     copy, and it should not read as though the wallet vouched for the wording. -->
+			<p class="mb-4 font-normal">
+				<span class="font-mono text-sm break-all">{primaryType}</span>
+			</p>
+		{/if}
+
+		<!-- The RPC method above names how the request arrived. What it would authorize is the struct being
+     hashed, which is the only thing left to state once the summary rows come up empty. -->
+		{#if methods.length > 0}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.methods}</p>
+			<ul class="mb-4 flex list-none flex-col gap-1 font-normal">
+				{#each methods as { name, depth } (name)}
+					<!-- Indented by how deep the struct actually sits. A single level for anything nested
+					     would render a struct two deep as a member of the root, which is the reading the
+					     depth exists to prevent. Clamped, because the type graph is the dApp's to shape. -->
+					<li style:padding-left="{Math.min(depth, MAX_NESTING_INDENT)}rem">
+						<span class="font-mono text-sm break-all">{name}</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		{#if nonNullish(token)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+			<p class="mb-4 font-normal">{token.symbol}</p>
+
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
+			<p class="mb-4 font-normal">{token.network.name}</p>
+		{:else if nonNullish(address)}
+			<!-- A token OISY does not list is still the contract the allowance is over, so the address is
 	     shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-	<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
-{/if}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+			<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
+		{/if}
 
-{#if nonNullish(amountText)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
-	<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
-{/if}
+		{#if nonNullish(amountText)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
+			<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
+		{/if}
 
-{#if nonNullish(spender)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
-	<p class="mb-4 font-normal">{spender}</p>
-{/if}
+		{#if nonNullish(spender)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
+			<p class="mb-4 font-normal">{spender}</p>
+		{/if}
 
-{#if nonNullish(expirationDate)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
-	<p class="mb-4 font-normal">{expirationDate}</p>
-{/if}
-
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
-{#if nonNullish(signedJson)}
-	<div class="mt-4 rounded-xs bg-disabled p-4">
-		<Json _collapsed={true} json={signedJson} />
-	</div>
-{:else}
-	<p class="mb-4 font-normal">
-		<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
-	</p>
-{/if}
+		{#if nonNullish(expirationDate)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
+			<p class="mb-4 font-normal">{expirationDate}</p>
+		{/if}
+	{:else}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
+		{#if nonNullish(signedJson)}
+			<div class="mt-4 rounded-xs bg-disabled p-4">
+				<Json _collapsed={false} collapsedKeys={RAW_DATA_COLLAPSED_KEYS} json={signedJson} />
+			</div>
+		{:else}
+			<p class="mb-4 font-normal">
+				<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+			</p>
+		{/if}
+	{/if}
+</Tabs>

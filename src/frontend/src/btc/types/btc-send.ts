@@ -35,6 +35,10 @@ export enum BtcSendValidationError {
 
 export interface UtxosFee {
 	feeSatoshis: bigint;
+	// The rate `feeSatoshis` was priced at. Carried with the fee rather than re-sampled by
+	// the consumer: the median percentile it comes from moves between the preview and the
+	// confirmation, so a second sample cannot be used to check the first.
+	feeRateMiliSatoshisPerVByte: bigint;
 	utxos: CkBtcMinterDid.Utxo[];
 	error?: BtcPrepareSendError | BtcSendValidationError;
 }

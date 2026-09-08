@@ -165,16 +165,19 @@ describe('SwapBtcWizard', () => {
 			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
 		});
 
-		it('renders the review step with the fee breakdown', () => {
+		// The offer prices a single fee, which stands as its own row rather than under a
+		// "Total fee" header it would only repeat.
+		it('renders the review step with the fee row', () => {
 			const { context } = createContext();
 
-			const { getByText } = render(SwapBtcWizard, {
+			const { getByText, queryByText } = render(SwapBtcWizard, {
 				props: { ...baseProps, currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' } },
 				context
 			});
 
 			expect(getByText(en.swap.text.swap_button)).toBeInTheDocument();
-			expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
 		});
 
 		it('renders the review step with the network fee for a NEAR Intents offer', () => {

@@ -16,10 +16,12 @@ import {
 	assertValidEthTypedData,
 	classifyWalletConnectEthCall,
 	getEthTypedDataApproval,
+	getEthTypedDataMethods,
 	getSendParamsGas,
 	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
+	hasUnreviewableTypedData,
 	isEthSignTypedDataMethod,
 	isWalletConnectEthApproval,
 	toTypedDataDomainChainId,
@@ -464,6 +466,201 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('getEthTypedDataMethods', () => {
+		it('should name the struct an ERC-2612 permit hashes', () => {
+			expect(getEthTypedDataMethods(erc2612Permit)).toEqual([{ name: 'Permit', depth: 0 }]);
+		});
+
+		it('should name the root first and the structs it declares beneath it', () => {
+			expect(getEthTypedDataMethods(permit2)).toEqual([
+				{ name: 'PermitSingle', depth: 0 },
+				{ name: 'PermitDetails', depth: 1 }
+			]);
+		});
+
+		it('should name the ERC-3009 authorization the review could not describe', () => {
+			expect(getEthTypedDataMethods(transferWithAuthorization())).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		it('should leave the domain out, since it separates the digest rather than being hashed into it', () => {
+			expect(getEthTypedDataMethods(erc2612Permit).map(({ name }) => name)).not.toContain(
+				'EIP712Domain'
+			);
+		});
+
+		// The declared `primaryType` is not what gets hashed: ethers derives the root from the type
+		// graph. Naming the declared field would let a payload present itself as a struct its own
+		// signature does not cover.
+		it('should name the derived root, not the primaryType the payload declares', () => {
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				...transferWithAuthorization(),
+				primaryType: 'Login'
+			};
+
+			expect(getEthTypedDataMethods(typedData)).toEqual([
+				{ name: 'TransferWithAuthorization', depth: 0 }
+			]);
+		});
+
+		// Depth is what the review indents by, so a struct two levels down must not be rendered as a
+		// member of the root.
+		it('should nest each struct beneath the one that declares it', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [{ name: 'offer', type: 'Offer' }],
+						Offer: [{ name: 'items', type: 'Item[]' }],
+						Item: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Order',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Order', depth: 0 },
+				{ name: 'Offer', depth: 1 },
+				{ name: 'Item', depth: 2 }
+			]);
+		});
+
+		// A declaration the root never reaches is not covered by the signature, so it must not be
+		// named. `getPrimaryType` rejects such a payload outright, which is why nothing is listed.
+		it('should name nothing for a payload declaring a struct the root does not reach', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Permit: [{ name: 'holder', type: 'address' }],
+						Unreferenced: [{ name: 'x', type: 'string' }]
+					},
+					primaryType: 'Permit',
+					message: {}
+				})
+			).toEqual([]);
+		});
+
+		it('should list a struct declared by two members once', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Trade: [
+							{ name: 'sold', type: 'Asset' },
+							{ name: 'bought', type: 'Asset' }
+						],
+						Asset: [{ name: 'token', type: 'address' }]
+					},
+					primaryType: 'Trade',
+					message: {}
+				})
+			).toEqual([
+				{ name: 'Trade', depth: 0 },
+				{ name: 'Asset', depth: 1 }
+			]);
+		});
+
+		it('should name nothing when the root cannot be resolved', () => {
+			expect(
+				getEthTypedDataMethods({
+					domain: {},
+					types: {
+						A: [{ name: 'b', type: 'B' }],
+						B: [{ name: 'a', type: 'A' }]
+					},
+					primaryType: 'A',
+					message: {}
+				})
+			).toEqual([]);
+		});
+	});
+
+	describe('hasUnreviewableTypedData', () => {
+		const call = (typedData: WalletConnectEthSignTypedDataV4) =>
+			hasUnreviewableTypedData({
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: toParams(typedData),
+				sessionChainId: MAINNET_SESSION
+			});
+
+		// The schemas OISY can summarize. These are the only ones that must not reach the warning.
+		it.each([
+			{ name: 'Permit2 PermitSingle', typedData: permit2 },
+			{ name: 'ERC-2612 Permit', typedData: erc2612Permit },
+			{ name: 'DAI Permit', typedData: daiPermit(true) }
+		])('should not warn about a recognised $name', ({ typedData }) => {
+			expect(call(typedData)).toBeFalsy();
+		});
+
+		// The report that would have come next. An ERC-3009 authorization lets whoever holds the
+		// signature pull the stated value out of the wallet, and the review said nothing about it.
+		it('should warn about an ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization())).toBeTruthy();
+		});
+
+		it('should warn about a struct that is nothing OISY knows', () => {
+			expect(
+				call({
+					domain: { name: 'Marketplace', version: '1', chainId: '1', verifyingContract: USDC },
+					types: {
+						EIP712Domain: EIP712_DOMAIN,
+						Order: [
+							{ name: 'offerer', type: 'address' },
+							{ name: 'price', type: 'uint256' }
+						]
+					},
+					primaryType: 'Order',
+					message: { offerer: HOLDER, price: '1' }
+				})
+			).toBeTruthy();
+		});
+
+		// Already warned about and blocked by hasInvalidTypedData. Reporting it here as well would
+		// put two warnings on one request and let the acknowledgement re-enable a blocked signature.
+		it('should not warn about typed data that would not be signed at all', () => {
+			expect(call(daiPermit('true'))).toBeFalsy();
+		});
+
+		it('should not warn about typed data on a chain the session was not granted', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBeFalsy();
+		});
+
+		// A raw message carries no schema, so nothing about it can be silently missing: what is
+		// shown is what is signed.
+		it.each([SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_ETH_SIGN])(
+			'should not warn about %s',
+			(method) => {
+				expect(
+					hasUnreviewableTypedData({
+						method,
+						params: toParams(transferWithAuthorization()),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBeFalsy();
+			}
+		);
+
+		it('should not warn about a payload that is not typed data at all', () => {
+			expect(
+				hasUnreviewableTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: ['0xnot-json'],
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBeFalsy();
+		});
+	});
+
 	describe('getSendParamsGas', () => {
 		it('reads the hex quantity an eth_sendTransaction request quotes', () => {
 			expect(getSendParamsGas('0x1e8480')).toBe(2_000_000n);
@@ -712,6 +909,39 @@ describe('wallet-connect.utils', () => {
 
 			expect(getSignedEthTypedData(typedData)).toEqual({ typedData, hasUnsignedKeys: false });
 		});
+	});
+
+	describe('digest coverage of the typed-data domain', () => {
+		// The domain does not follow the rule the message does. `TypedDataEncoder.hash` discards
+		// `types.EIP712Domain` and separates the signature with whichever members the domain object
+		// carries, so a member is covered because it is populated, not because it is declared. This
+		// is why the review states the domain as it stands rather than filtering it by declaration.
+		it('changes when a member the schema does not declare is added', () => {
+			expect(
+				ethersHash({
+					...permit2,
+					domain: { ...permit2.domain, salt: `0x${'ab'.repeat(32)}` }
+				})
+			).not.toBe(ethersHash(permit2));
+		});
+
+		it('is unchanged by dropping a declaration the domain still populates', () => {
+			expect(
+				ethersHash({
+					...permit2,
+					types: { ...permit2.types, EIP712Domain: [{ name: 'chainId', type: 'uint256' }] }
+				})
+			).toBe(ethersHash(permit2));
+		});
+
+		it.each([{ verifyingContract: ATTACKER }, { name: 'Not Permit2' }])(
+			'changes when the domain member %s changes',
+			(mutation) => {
+				expect(ethersHash({ ...permit2, domain: { ...permit2.domain, ...mutation } })).not.toBe(
+					ethersHash(permit2)
+				);
+			}
+		);
 	});
 
 	describe('digest coverage of the ERC-3009 authorization', () => {

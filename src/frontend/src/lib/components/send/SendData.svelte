@@ -13,7 +13,7 @@
 		amount?: bigint;
 		token: OptionToken;
 		exchangeRate?: number;
-		balance: OptionBalance;
+		balance?: OptionBalance;
 		source: string;
 		application: string;
 		// A caller whose decode produced no amount has nothing to say in the amount and balance rows,

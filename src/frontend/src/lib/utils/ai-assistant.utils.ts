@@ -195,11 +195,17 @@ export const parseReviewSendTokensToolArguments = ({
 export const parseShowBalanceToolArguments = ({
 	filterParams,
 	tokensUi,
-	networks
+	networks,
+	totalUsdBalance
 }: {
 	filterParams: ToolCallArgument[];
 	tokensUi: TokenUi[];
 	networks: Network[];
+	// The unfiltered net worth, from the same store the hero reads, so the assistant cannot
+	// quote a different total than the one on screen. Only the unfiltered branch can use it:
+	// the provider-held value it carries is portfolio-wide, so folding it into a per-token or
+	// per-network answer would overstate that answer.
+	totalUsdBalance: number;
 }): ShowBalanceToolResult => {
 	const { tokenSymbolFilter, networkIdFilter } = filterParams.reduce<{
 		tokenSymbolFilter?: string;
@@ -280,7 +286,7 @@ export const parseShowBalanceToolArguments = ({
 
 	return {
 		mainCard: {
-			totalUsdBalance: sumTokensUiUsdBalance(tokensUi)
+			totalUsdBalance
 		}
 	};
 };

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
+	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
 		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
@@ -18,6 +21,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -101,8 +105,6 @@
 
 	let unknownCall = $derived(call.type === 'unknown');
 
-	let unknownSelector = $derived(call.type === 'unknown' ? call.selector : undefined);
-
 	let erc20 = $derived(erc20Approve || erc20Transfer || allowanceDelta);
 
 	let decodedErc20Data = $derived.by(() => {
@@ -172,6 +174,12 @@
 	let noAmount = $derived((setApprovalForAll || unknownCall) && amount === ZERO);
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
+
+	// Names the fee rows for a screen reader. A `label` cannot do it: it only labels form controls,
+	// so its `for` would be ignored here and the group would be announced without a name.
+	const FEE_SECTION_LABEL = 'fee-label';
+
+	let activeTab = $state('summary');
 </script>
 
 <ContentWithToolbar>
@@ -207,73 +215,98 @@
 		</MessageBox>
 	{/if}
 
-	<SendData
-		amount={amountDisplay}
-		{application}
-		{balance}
-		destination={destinationDisplay}
-		showAmount={!noAmount}
-		showBalance={!noAmount}
-		showNullishAmountLabel={unverifiableErc20}
-		showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
-		source={$ethAddress ?? ''}
-		{token}
+	<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
+	     inform instead of blocking the way undecodable ERC20 calldata does. They sit with the other
+	     warnings rather than in a tab, since a warning behind a tab is one the user need not see. -->
+	{#if dappGasLimit}
+		<MessageBox level="info" testId="wallet-connect-dapp-gas-limit">
+			{$i18n.wallet_connect.text.dapp_gas_limit}
+		</MessageBox>
+	{:else if highGasLimit}
+		<MessageBox level="warning" testId="wallet-connect-high-gas-limit">
+			{$i18n.wallet_connect.text.high_gas_limit}
+		</MessageBox>
+	{/if}
+
+	<Tabs
+		contentStyleClass="mt-4"
+		tabs={[
+			{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
+			{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }
+		]}
+		bind:activeTab
 	>
-		{#snippet sourceNetwork()}
-			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
-				<NetworkWithLogo network={sourceNetworkProp} />
-			</WalletConnectModalValue>
-		{/snippet}
+		{#if activeTab === 'summary'}
+			<SendData
+				amount={amountDisplay}
+				{application}
+				{balance}
+				destination={destinationDisplay}
+				showAmount={!noAmount}
+				showBalance={!noAmount}
+				showNullishAmountLabel={unverifiableErc20}
+				showSigner={false}
+				showUnlimitedAmountLabel={erc20Approve || allowanceIncrease}
+				source={$ethAddress ?? ''}
+				{token}
+			>
+				{#snippet sourceNetwork()}
+					<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+						<NetworkWithLogo network={sourceNetworkProp} />
+					</WalletConnectModalValue>
+				{/snippet}
 
-		{#snippet destinationNetwork()}
-			{#if nonNullish(targetNetwork)}
-				<WalletConnectModalValue
-					label={$i18n.send.text.destination_network}
-					ref="destination-network"
-				>
-					<NetworkWithLogo network={targetNetwork} />
-				</WalletConnectModalValue>
-			{/if}
-		{/snippet}
+				{#snippet destinationNetwork()}
+					{#if nonNullish(targetNetwork)}
+						<WalletConnectModalValue
+							label={$i18n.send.text.destination_network}
+							ref="destination-network"
+						>
+							<NetworkWithLogo network={targetNetwork} />
+						</WalletConnectModalValue>
+					{/if}
+				{/snippet}
 
-		{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
-			<SendDataSpender {spender} />
-		{:else if nonNullish(decodedSetApprovalForAll)}
-			<SendDataSpender
-				label={$i18n.wallet_connect.text.operator}
-				ref="operator"
-				spender={decodedSetApprovalForAll.operator}
-			/>
+				{#if (erc20Approve || allowanceDelta) && nonNullish(spender)}
+					<SendDataSpender {spender} />
+				{:else if nonNullish(decodedSetApprovalForAll)}
+					<SendDataSpender
+						label={$i18n.wallet_connect.text.operator}
+						ref="operator"
+						spender={decodedSetApprovalForAll.operator}
+					/>
+				{/if}
+
+				<!-- The fee is two rows that belong together, so it takes a heading like every other
+				     block in this summary rather than trailing loose off the end of it. -->
+				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
+
+				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
+					{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+						<EthFeePriority gas={signedGas} styleClass="mb-2" />
+					{/if}
+
+					<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
+						{#snippet label()}
+							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+							{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+								{$i18n.fee.text.estimated}
+							{:else}
+								<Html text={$i18n.fee.text.max_fee_eth} />
+							{/if}
+						{/snippet}
+					</EthFeeDisplay>
+				</div>
+			</SendData>
+		{:else}
+			<!-- What the transaction calls is the one thing the review can still state about calldata
+			     it could not decode, and it is what lets the user look the call up for themselves. A
+			     batch names its own wrapper and nothing else, so the calls inside it are listed too. -->
+			<EthWalletConnectCallMethods {data} />
+
+			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 		{/if}
-
-		<EthFeeDisplay gas={signedGas}>
-			{#snippet label()}
-				<Html text={$i18n.fee.text.max_fee_eth} />
-			{/snippet}
-		</EthFeeDisplay>
-
-		<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
-		     inform instead of blocking the way undecodable ERC20 calldata does. -->
-		{#if dappGasLimit}
-			<MessageBox level="info" testId="wallet-connect-dapp-gas-limit">
-				{$i18n.wallet_connect.text.dapp_gas_limit}
-			</MessageBox>
-		{:else if highGasLimit}
-			<MessageBox level="warning" testId="wallet-connect-high-gas-limit">
-				{$i18n.wallet_connect.text.high_gas_limit}
-			</MessageBox>
-		{/if}
-
-		<!-- The function a call names is the one fact the review can still state about calldata it
-		     could not decode, and it is what lets the user look the call up for themselves. -->
-		{#if nonNullish(unknownSelector)}
-			<WalletConnectModalValue label={$i18n.wallet_connect.text.function} ref="function">
-				{unknownSelector}
-			</WalletConnectModalValue>
-		{/if}
-
-		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-	</SendData>
+	</Tabs>
 
 	{#snippet toolbar()}
 		<WalletConnectActions

@@ -50,6 +50,25 @@ export const estimateTransactionVSize = ({
 };
 
 /**
+ * Fee in satoshis for a P2WPKH transaction with `numInputs` inputs and the recipient +
+ * change output pair every selection produces.
+ *
+ * Rounds up, so the transaction is never priced below the requested rate. Shared with the
+ * pre-broadcast validation, which must arrive at the same number for the same inputs.
+ */
+export const calculateFeeSatoshis = ({
+	numInputs,
+	feeRateMiliSatoshisPerVByte
+}: {
+	numInputs: number;
+	feeRateMiliSatoshisPerVByte: bigint;
+}): bigint => {
+	const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
+
+	return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
+};
+
+/**
  * Main function to select UTXOs for a transaction with fee consideration.
  *
  * Algorithm (greedy, smallest-sufficient):
@@ -81,10 +100,8 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	const calcFee = (numInputs: number): bigint => {
-		const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
-		return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
-	};
+	const calcFee = (numInputs: number): bigint =>
+		calculateFeeSatoshis({ numInputs, feeRateMiliSatoshisPerVByte });
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;

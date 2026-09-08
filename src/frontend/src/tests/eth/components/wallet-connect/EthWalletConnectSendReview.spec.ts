@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
@@ -10,6 +11,7 @@ import {
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { MULTICALL_HASH } from '$eth/constants/multicall.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import {
@@ -18,11 +20,21 @@ import {
 	initEthFeeStore,
 	type EthFeeStore
 } from '$eth/stores/eth-fee.store';
+import type { EthFeePriorities } from '$eth/types/fee';
+import type { WalletConnectEthCall } from '$eth/types/wallet-connect';
 import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
+import {
+	CONVERT_AMOUNT_EXCHANGE_VALUE,
+	ETH_FEE_PRIORITY,
+	ETH_FEE_PRIORITY_OPTION
+} from '$lib/constants/test-ids.constants';
+import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
+import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { isNullish } from '@dfinity/utils';
+import { fireEvent, render, within } from '@testing-library/svelte';
 import { AbiCoder } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
@@ -122,8 +134,10 @@ describe('EthWalletConnectSendReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
-	it('should render the signer row', () => {
-		const { getByText, container } = render(EthWalletConnectSendReview, {
+	// The signer is the wallet the request was sent to, which the user opened to read this. It says
+	// nothing about the request and takes a row from the facts that do.
+	it('should not render the signer row', () => {
+		const { queryByText, container } = render(EthWalletConnectSendReview, {
 			props: {
 				...props,
 				destination: UNKNOWN_CONTRACT
@@ -131,8 +145,8 @@ describe('EthWalletConnectSendReview', () => {
 			context: mockContext
 		});
 
-		expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
-		expect(container.querySelector('#signer')).not.toBeNull();
+		expect(queryByText(en.wallet_connect.text.signer)).not.toBeInTheDocument();
+		expect(container.querySelector('#signer')).toBeNull();
 	});
 
 	it('should never summarize an ERC20 transfer as a native zero-value send', () => {
@@ -454,18 +468,74 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByTestId(unknownTestId)).toHaveTextContent(en.wallet_connect.text.unknown_call);
 		});
 
-		it('should name the function it could not decode', () => {
-			const { getByText } = renderUnknownCall({ data: `${PERMIT2_APPROVE_HASH}deadbeef` });
+		it('should name the function it could not decode', async () => {
+			const { getByText, getByRole } = renderUnknownCall({
+				data: `${PERMIT2_APPROVE_HASH}deadbeef`
+			});
 
-			expect(getByText(en.wallet_connect.text.function)).toBeInTheDocument();
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
 			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
 		});
 
-		it('should treat calldata too short to carry a selector as unreadable, and name no function', () => {
-			const { getByTestId, queryByText } = renderUnknownCall({ data: '0xab' });
+		it('should treat calldata too short to carry a selector as unreadable, and name none', async () => {
+			const { getByTestId, getByText, getByRole } = renderUnknownCall({ data: '0xab' });
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
-			expect(queryByText(en.wallet_connect.text.function)).not.toBeInTheDocument();
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			expect(getByText(en.wallet_connect.text.method_without_selector)).toBeInTheDocument();
+		});
+
+		// A batch names its own wrapper and nothing else, so the wrapper alone answers "what does
+		// this call?" with a name that describes neither the approve nor the swap inside it.
+		// Depth is what the list indents by, so a call two levels down must not sit at the same
+		// indent as a direct member of the wrapper.
+		it('should indent a batched call by how deep it actually sits', async () => {
+			const inner = encodeCall({
+				selector: ERC20_APPROVE_HASH,
+				to: RECIPIENT,
+				value: MAX_UINT_256
+			});
+
+			const nested = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [[inner]])
+				.slice(2)}`;
+
+			const data = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [[nested]])
+				.slice(2)}`;
+
+			const { getByRole, container } = renderUnknownCall({ data });
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			const indents = [...container.querySelectorAll('#methods li')].map(
+				(li) => (li as HTMLElement).style.paddingLeft
+			);
+
+			expect(indents).toEqual(['0rem', '1rem', '2rem']);
+		});
+
+		it('should list the calls batched inside a multicall, not only the wrapper', async () => {
+			const inner = [
+				encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 }),
+				encodeCall({ selector: PERMIT2_APPROVE_HASH, to: RECIPIENT, value: 1n })
+			];
+
+			const data = `${MULTICALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes[]'], [inner])
+				.slice(2)}`;
+
+			const { getByText, getByRole } = renderUnknownCall({ data });
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			expect(getByText(MULTICALL_HASH)).toBeInTheDocument();
+			expect(getByText(ERC20_APPROVE_HASH)).toBeInTheDocument();
+			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
 		});
 
 		it('should still show native value an unreadable call carries alongside it', () => {
@@ -489,6 +559,20 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
+		// A warning the user has to go looking for is one they can miss. Every message box sits above
+		// the tabs, so switching to the raw data does not take the warning off the screen.
+		it('should keep the warning visible on both tabs', async () => {
+			const { getByTestId, getByRole } = renderUnknownCall({
+				data: `${PERMIT2_APPROVE_HASH}deadbeef`
+			});
+
+			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+		});
+
 		it('should not warn about a request that carries no calldata at all', () => {
 			const { queryByTestId, getByRole } = render(EthWalletConnectSendReview, {
 				props: {
@@ -503,6 +587,142 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(queryByTestId(unknownTestId)).not.toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+	});
+
+	describe('transaction priority', () => {
+		// No base fee, so each option prices at exactly its own tip times the gas limit. That keeps
+		// the arithmetic below legible without depending on how a currency is formatted. The ceiling
+		// has to clear every tip, or all three collapse onto it and stop being distinguishable.
+		const CEILING_PER_GAS = 100_000_000_000n;
+
+		const priorities: EthFeePriorities = {
+			baseFeePerGas: ZERO,
+			perPriority: {
+				[Priority.SLOW]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 1_000_000_000n },
+				[Priority.STANDARD]: {
+					maxFeePerGas: CEILING_PER_GAS,
+					maxPriorityFeePerGas: 2_000_000_000n
+				},
+				[Priority.FAST]: { maxFeePerGas: CEILING_PER_GAS, maxPriorityFeePerGas: 4_000_000_000n }
+			}
+		};
+
+		// The option rows quote fiat only, so without a rate they render empty and prove nothing.
+		const exchangeRate = 2_000;
+
+		const renderRow = ({
+			requestedGas,
+			gas = estimatedGas,
+			call = props.call
+		}: {
+			requestedGas?: bigint;
+			gas?: bigint;
+			call?: WalletConnectEthCall;
+		}) => {
+			const feeStore = initEthFeeStore();
+
+			// Mirror what `EthFeeContext` puts in the store once a tier is selected, so the fee row and
+			// the option rows are pricing the same thing and can be compared.
+			feeStore.setFee({
+				...priorities.perPriority[Priority.STANDARD],
+				baseFeePerGas: priorities.baseFeePerGas,
+				gas
+			});
+
+			const feeContext = initEthFeeContext({
+				feeStore,
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+				feeExchangeRateStore: writable(exchangeRate)
+			});
+
+			feeContext.feePrioritiesStore.set(priorities);
+
+			return render(EthWalletConnectSendReview, {
+				props: {
+					...props,
+					amount: 1_000_000_000_000_000_000n,
+					call,
+					destination: RECIPIENT,
+					requestedGas
+				},
+				context: new Map<symbol, unknown>([
+					[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })],
+					[ETH_FEE_CONTEXT_KEY, feeContext]
+				])
+			});
+		};
+
+		// Two renders coexist in the document when a test compares them, so every query below is
+		// scoped to its own render rather than to the shared body.
+		const normalOptionFiat = ({ container }: ReturnType<typeof renderRow>): string => {
+			const row = within(container)
+				.getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.STANDARD}`)
+				.closest('label');
+
+			expect(row).not.toBeNull();
+
+			return within(row as HTMLLabelElement).getByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE)
+				.textContent as string;
+		};
+
+		beforeEach(() => {
+			// Large screens expand the options in place, so they are in the DOM without opening a sheet.
+			screensStore.set('lg');
+		});
+
+		it('should offer the choice when the network reports one', () => {
+			const { getByTestId } = renderRow({});
+
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
+		});
+
+		it('should price the options on the gas limit the dApp requested', () => {
+			// Same limit, reached two different ways: once because the dApp asked for it, once because
+			// it is what OISY resolved. Priced on the signed limit, both render the same amount.
+			expect(normalOptionFiat(renderRow({ requestedGas: 2_000_000n }))).toBe(
+				normalOptionFiat(renderRow({ gas: 2_000_000n }))
+			);
+		});
+
+		it('should not price the options on the estimate when the request carries its own limit', () => {
+			expect(normalOptionFiat(renderRow({ requestedGas: 2_000_000n }))).not.toBe(
+				normalOptionFiat(renderRow({}))
+			);
+		});
+
+		it('should quote the selected tier at the same amount as the fee row beneath it', () => {
+			// The fee row prices the signed limit through `EthFeeDisplay`; the option prices it through
+			// the priority row. A disagreement between the two is the bug this pairing exists to catch.
+			const result = renderRow({ requestedGas: 2_000_000n });
+
+			expect(
+				within(result.container).getByText(`0.004 ${ETHEREUM_TOKEN.symbol}`)
+			).toBeInTheDocument();
+
+			// Every option quotes fiat inside its own label, so the one outside them all is the fee
+			// row's. Matching on that rather than on a class keeps the test off the styling.
+			const outsideAnOption = within(result.container)
+				.getAllByTestId(CONVERT_AMOUNT_EXCHANGE_VALUE)
+				.filter((element) => isNullish(element.closest('label')));
+
+			expect(outsideAnOption).toHaveLength(1);
+
+			expect(normalOptionFiat(result)).toBe(outsideAnOption[0].textContent);
+		});
+
+		it.each([
+			{
+				request: 'an approval',
+				data: encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 })
+			},
+			{ request: 'a call it could not decode', data: `${MULTICALL_HASH}dead` }
+		])('should offer the choice on $request, which pays gas like any other', ({ data }) => {
+			const { getByTestId } = renderRow({ call: classifyWalletConnectEthCall(data) });
+
+			expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
 		});
 	});
 
@@ -528,10 +748,18 @@ describe('EthWalletConnectSendReview', () => {
 			});
 
 		it('should price the maximum fee on the gas limit the dApp requested, not on the estimate', () => {
-			const { getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
+			const { getByRole, getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
 
-			// en.fee.text.max_fee_eth contains HTML, so for simplicity we just search for a hardcoded string
-			expect(getByText('Max fee')).toBeInTheDocument();
+			// The label follows the feature flag: the request quotes an expected cost only where the
+			// priority work is enabled, and says "Estimated" rather than repeating the "Fee" heading
+			// above it. max_fee_eth contains HTML, so match its plain-text fragment.
+			expect(
+				getByText(SEND_TRANSACTION_PRIORITY_ENABLED ? en.fee.text.estimated : 'Max fee')
+			).toBeInTheDocument();
+
+			// By role, not by text: the heading has to actually name the group for a screen reader,
+			// which a bare `label` pointing at a `div` would not do while still reading correctly.
+			expect(getByRole('group', { name: en.fee.text.fee })).toBeInTheDocument();
 
 			// 2_000_000 gas at 1 gwei, against the 250_000 gas OISY resolved for the same transaction
 			expect(getByText(`0.002 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();

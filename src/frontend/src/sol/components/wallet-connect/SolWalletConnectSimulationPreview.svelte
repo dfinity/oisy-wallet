@@ -8,10 +8,13 @@
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
+	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
+	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		preview: SolSimulationPreview;
@@ -23,38 +26,31 @@
 
 	let { solDelta, tokenDeltas, controlChanges } = $derived(preview);
 
-	// The same mint can exist on several clusters, so the network is matched too.
 	const splToken = (tokenAddress: SplTokenAddress): SplCustomToken | undefined =>
-		$enabledSplTokens.find(
-			({ address, network: { id } }) => address === tokenAddress && id === feeToken.network.id
-		);
+		findSplToken({ tokens: $splTokens, tokenAddress, networkId: feeToken.network.id });
 
-	// Mints OISY cannot name, in the order they appear. A bare address reads as noise next to the
-	// tickers around it, so an unlisted mint is named by position instead and numbered only when
-	// there is more than one to tell apart.
+	// Mints nothing can name, in the order they appear. The wallet's own list answers first, then
+	// the name a Token-2022 mint carries in its own account; the numbered placeholder is what is
+	// left when neither does.
 	let unknownTokenAddresses = $derived(
-		tokenDeltas.reduce<SplTokenAddress[]>(
-			(acc, { tokenAddress }) =>
-				nonNullish(splToken(tokenAddress)) || acc.includes(tokenAddress)
-					? acc
-					: [...acc, tokenAddress],
-			[]
-		)
+		solUnknownTokenAddresses({
+			tokenAddresses: tokenDeltas.map(({ tokenAddress }) => tokenAddress),
+			tokens: $splTokens,
+			networkId: feeToken.network.id,
+			metadata: $splTokenMetadataStore
+		})
 	);
 
-	const symbol = (tokenAddress: SplTokenAddress): string => {
-		const known = splToken(tokenAddress)?.symbol;
-
-		if (nonNullish(known)) {
-			return known;
-		}
-
-		const index = unknownTokenAddresses.indexOf(tokenAddress);
-
-		return unknownTokenAddresses.length > 1
-			? `${$i18n.transaction.text.unknown_token} ${index + 1}`
-			: $i18n.transaction.text.unknown_token;
-	};
+	const symbol = (tokenAddress: SplTokenAddress): string =>
+		solTokenSymbol({
+			tokenAddress,
+			tokens: $splTokens,
+			networkId: feeToken.network.id,
+			metadata: $splTokenMetadataStore,
+			unknownTokenAddresses,
+			unknownTokenLabel: $i18n.transaction.text.unknown_token,
+			nativeSymbol: feeToken.symbol
+		});
 
 	// A mint OISY does not know has no rate of its own, and no other token's rate describes it, so
 	// such a delta is left as a bare amount rather than priced against something it is not.
