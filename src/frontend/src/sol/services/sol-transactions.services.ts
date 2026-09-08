@@ -275,7 +275,7 @@ export const loadNextSolTransactions = async ({
 	token,
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<void> => {
+}: LoadNextSolTransactionsParams): Promise<ResultSuccess> => {
 	const {
 		network: { id: networkId }
 	} = token;
@@ -289,7 +289,7 @@ export const loadNextSolTransactions = async ({
 	const network = mapNetworkIdToNetwork(token.network.id);
 
 	if (isNullish(network) || isNullish(address)) {
-		return;
+		return { success: false };
 	}
 
 	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
@@ -305,9 +305,18 @@ export const loadNextSolTransactions = async ({
 		...rest
 	});
 
+	// A page that could not be fetched is not the end of the history. Signalling the end here would
+	// retire the token from the Activity list for as long as it stays mounted, which is why a
+	// transient RPC failure used to hide transactions until the user re-entered the page.
+	if (isNullish(transactions)) {
+		return { success: false };
+	}
+
 	if (transactions.length === 0) {
 		signalEnd();
 	}
+
+	return { success: true };
 };
 
 const loadSolTransactions = async ({
@@ -318,7 +327,7 @@ const loadSolTransactions = async ({
 	tokenAddress,
 	before,
 	...rest
-}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[] | undefined> => {
 	const isHeadLoad = isNullish(before);
 
 	try {
@@ -455,7 +464,9 @@ const loadSolTransactions = async ({
 		}
 
 		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
-		return [];
+
+		// Distinct from an empty page: the caller must not read a failure as the end of the history.
+		return undefined;
 	}
 };
 
@@ -491,10 +502,8 @@ export const loadNextSolTransactionsByOldest = async ({
 		return { success: false };
 	}
 
-	await loadNextSolTransactions({
+	return await loadNextSolTransactions({
 		...rest,
 		before: lastSignature
 	});
-
-	return { success: true };
 };
