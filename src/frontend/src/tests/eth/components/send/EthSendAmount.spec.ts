@@ -27,7 +27,12 @@ describe('EthSendAmount', () => {
 	// rejected as invalid before this validation runs.
 	const balance = 10_000_000n;
 
-	const expectedError = en.send.assertion.insufficient_funds_for_gas;
+	// A native shortfall always reads as an amount problem - the gas is paid out of the same balance
+	// the amount is drawn from, so lowering the amount is the user's only fix - which is why both
+	// ways the ceiling check can fail report this one message.
+	const expectedError = en.send.assertion.insufficient_funds_for_amount;
+
+	const gasError = en.send.assertion.insufficient_funds_for_gas;
 
 	const toEther = (value: bigint): string => {
 		const padded = value.toString().padStart(ETHEREUM_TOKEN.decimals + 1, '0');
@@ -116,6 +121,10 @@ describe('EthSendAmount', () => {
 		await waitFor(() => {
 			expect(queryByText(expectedError)).toBeInTheDocument();
 		});
+
+		// Even here, where the amount by itself would fit and it is gas that tips the total over,
+		// the shortfall is reported as an amount problem - never as the gas variant.
+		expect(queryByText(gasError)).not.toBeInTheDocument();
 	});
 
 	it('still demands the tip when the ceiling is unknown', async () => {
@@ -131,18 +140,18 @@ describe('EthSendAmount', () => {
 		});
 	});
 
-	it('reads as an amount problem, not a gas one, when the amount alone exceeds the balance', async () => {
-		// Unlike the tip-only case above, the amount itself - ignoring gas entirely - is already
-		// more than the balance can cover, so the message must say so rather than blame gas.
+	it('reads as an amount problem when the amount alone exceeds the balance', async () => {
+		// The amount itself - ignoring gas entirely - is already more than the balance can cover,
+		// which reports the same message as the tip-only case above.
 		const { input, queryByText } = setup();
 
 		await fireEvent.input(input, { target: { value: toEther(balance + 1n) } });
 
 		await waitFor(() => {
-			expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			expect(queryByText(expectedError)).toBeInTheDocument();
 		});
 
-		expect(queryByText(expectedError)).not.toBeInTheDocument();
+		expect(queryByText(gasError)).not.toBeInTheDocument();
 	});
 
 	it('accepts an amount that leaves the ceiling covered', async () => {

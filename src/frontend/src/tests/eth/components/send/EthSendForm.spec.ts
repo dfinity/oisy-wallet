@@ -252,11 +252,11 @@ describe('EthSendForm', () => {
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
 		});
 
-		// The chain check is one comparison (`amount + gas > balance`), but the two ways it can fail
-		// are different problems for the user: an amount that alone already exceeds the balance is
-		// an amount problem, while gas tipping an otherwise-affordable amount over the balance is a
-		// gas problem. Only the latter should still read as "for gas".
-		it('reads as an amount problem, not a gas one, when the native amount alone exceeds the balance', async () => {
+		// The chain check is one comparison (`amount + gas > balance`), and for a native send both
+		// ways it can fail are the same problem for the user: the gas comes out of the balance the
+		// amount is drawn from, so lowering the amount is the only fix. The message therefore always
+		// reads as an amount problem and never as the gas variant, which belongs to ERC-20 sends.
+		it('reads as an amount problem, never a gas one, when a native amount exceeds the balance', async () => {
 			const { input, queryByTestId, queryByText, getByTestId, container } = setup({
 				token: ETHEREUM_TOKEN,
 				nativeEthereumBalance: 10_000_000n

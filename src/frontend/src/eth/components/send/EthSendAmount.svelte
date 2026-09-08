@@ -125,16 +125,13 @@
 				return NO_ISSUE;
 			}
 
-			// The amount alone, ignoring gas, can already exceed the balance - that is an amount
-			// problem, not a gas one, and must read as such even though both fail the same ceiling
-			// check. Only when the amount by itself would fit, and it is reserving gas that tips the
-			// total over, is the shortfall actually about gas.
+			// Always an amount problem, whether the amount alone exceeds the balance or it is
+			// reserving gas that tips the total over: the gas is paid out of the very balance the
+			// amount is drawn from, so lowering the amount is the user's only fix either way. The
+			// gas wording is reserved for the ERC-20 case, where the fee is settled in a token this
+			// field cannot influence - see `EthSendForm`'s dedicated fee box.
 			return {
-				fieldError: new InsufficientFundsError(
-					userAmount > parsedSendBalance
-						? $i18n.send.assertion.insufficient_funds_for_amount
-						: $i18n.send.assertion.insufficient_funds_for_gas
-				),
+				fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount),
 				insufficientTokenBalance: false,
 				insufficientFundsForFee: false,
 				pending: false
