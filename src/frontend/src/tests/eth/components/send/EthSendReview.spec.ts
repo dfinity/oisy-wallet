@@ -88,6 +88,10 @@ describe('EthSendReview', () => {
 		});
 
 		afterEach(() => {
+			// The expiry timeout outlives the test that scheduled it unless it is dropped here, and
+			// switching back to real timers would strand it rather than cancel it, leaving the suite
+			// order-dependent.
+			vi.clearAllTimers();
 			vi.useRealTimers();
 		});
 
