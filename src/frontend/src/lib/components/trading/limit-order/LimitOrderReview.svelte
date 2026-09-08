@@ -93,23 +93,22 @@
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
-	const severe = $derived(crossing && valueDiff < LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
+	const severe = $derived(crossing && valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
 
 	// The resting counterpart of `severe`: the order does not fill now, but it is
-	// priced more than 5% against current value, so it is the one the market
-	// reaches first and it would fill at that give-up. Same treatment as a severe
-	// crossing order — its own copy, and the confirmation is required before
-	// placing. The two are mutually exclusive (`restsAgainstValue` excludes
-	// crossing prices), so at most one box shows and they share one confirmation.
+	// priced 5% or more against current value, so it is the one the market reaches
+	// first and it would fill at that give-up. Same treatment as a severe crossing
+	// order — its own copy, and the confirmation is required before placing. The
+	// two are mutually exclusive (`restsAgainstValue` excludes crossing prices), so
+	// at most one box shows and they share one confirmation.
+	// `restsAgainstValue` only settles that the order rests against current value,
+	// with its own comparison left strict (a price exactly at current value is not
+	// "past" it); the severity boundary is applied separately and inclusively, the
+	// way `ValueDifference` classifies `errorLevel` — otherwise an exact -5% pairs
+	// a red figure with an amber warning and no confirmation.
 	const severeResting = $derived(
-		restsAgainstValue({
-			side,
-			price,
-			currentValue,
-			bid,
-			ask,
-			threshold: LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
-		})
+		restsAgainstValue({ side, price, currentValue, bid, ask, threshold: 0 }) &&
+			valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 	);
 
 	const confirmationRequired = $derived(severe || severeResting);

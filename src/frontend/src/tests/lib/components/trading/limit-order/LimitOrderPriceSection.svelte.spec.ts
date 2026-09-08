@@ -118,6 +118,27 @@ describe('LimitOrderPriceSection', () => {
 		);
 	});
 
+	// The severity boundary is inclusive, matching how `ValueDifference` classifies
+	// `errorLevel`: at exactly -5% the figure is red, so the warning must be too.
+	// A buy at 10.5 against a current value of 10 is the one arrangement that lands
+	// exactly on -5 in floating point — the sell side computes -5.000000000000004,
+	// which is past the boundary rather than on it.
+	it('renders the resting warning red at exactly the error threshold', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: {
+				...baseProps,
+				...wideBook,
+				side: 'buy' as LimitOrderSide,
+				currentValue: 10,
+				price: '10.5'
+			}
+		});
+
+		const warning = container.querySelector('p.text-error-primary');
+
+		expect(warning).toHaveTextContent(en.trading.limit_order.warning_resting_above_value_buy);
+	});
+
 	// A fill-or-kill order can never rest, so neither the resting copy nor the
 	// resting label may claim it — including on an empty book side, where
 	// `crossing` and the FOK-blocked branch are both out of the picture.

@@ -133,6 +133,18 @@ describe('LimitOrderReview', () => {
 		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
 	});
 
+	it('requires the confirmation at exactly the error threshold', () => {
+		// A buy at 10.5 against a current value of 10 is exactly -5% — the one
+		// arrangement that lands on the boundary in floating point (the sell side
+		// computes -5.000000000000004, already past it). The value difference renders
+		// red there, so the confirmation has to appear with it.
+		const { getByText } = render(LimitOrderReview, {
+			props: { ...baseProps, side: 'buy' as LimitOrderSide, bid: 8, ask: 11, price: 10.5 }
+		});
+
+		expect(getByText(en.trading.limit_order.rests_against_value_confirm)).toBeInTheDocument();
+	});
+
 	it('renders no confirmation for a resting order within the give-up threshold', () => {
 		// -3% versus current value: warned on the form, but not blocking here.
 		const { queryByText } = render(LimitOrderReview, {

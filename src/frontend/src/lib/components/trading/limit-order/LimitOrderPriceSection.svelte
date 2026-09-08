@@ -5,7 +5,10 @@
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
-	import { LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT } from '$lib/constants/oisy-trade.constants';
+	import {
+		LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT,
+		LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
+	} from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -209,19 +212,19 @@
 			if (fillOrKill) {
 				return {
 					text: side === 'sell' ? t.warning_fok_sell : t.warning_fok_buy,
-					danger: valueDiff < -5
+					danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 				};
 			}
 			return {
 				text: side === 'sell' ? t.warning_crossing_sell : t.warning_crossing_buy,
-				danger: valueDiff < -5
+				danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 			};
 		}
 		if (restingAgainstValue) {
 			return {
 				text:
 					side === 'sell' ? t.warning_resting_below_value_sell : t.warning_resting_above_value_buy,
-				danger: valueDiff < -5
+				danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 			};
 		}
 		return undefined;
@@ -370,7 +373,7 @@
 				 always agree; neutral otherwise. -->
 			<span class="shrink-0 text-sm">
 				<ValueDifference
-					errorLevel={-5}
+					errorLevel={LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT}
 					iconPosition="left"
 					muted={!(crossing || fillOrKill || restingAgainstValue)}
 					successNeutral
