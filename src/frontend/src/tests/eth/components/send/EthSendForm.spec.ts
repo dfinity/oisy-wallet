@@ -111,24 +111,46 @@ describe('EthSendForm', () => {
 	});
 
 	describe('the fee box', () => {
+		const gas = 21_000n;
+		const maxFeePerGas = 100n;
+		const maxPriorityFeePerGas = 5n;
+
+		// What the chain demands on top of the amount, and therefore what a native "Max" subtracts.
+		const ceiling = maxFeePerGas * gas;
+		// The weaker bound, which omits the base fee: a balance under it falls short of the fee
+		// whichever of the two is in force.
+		const tipOnly = maxPriorityFeePerGas * gas;
+
+		// Several times the ceiling, so only the amount math is in play.
+		const nativeBalance = 10_000_000n;
+
+		const toEther = (value: bigint): string => {
+			const padded = value.toString().padStart(ETHEREUM_TOKEN.decimals + 1, '0');
+
+			return `${padded.slice(0, -ETHEREUM_TOKEN.decimals)}.${padded.slice(-ETHEREUM_TOKEN.decimals)}`;
+		};
+
 		const setup = ({
 			token,
 			nativeEthereumBalance,
-			tokenBalance
+			tokenBalance,
+			amount
 		}: {
 			token: Token;
 			nativeEthereumBalance: bigint;
 			tokenBalance?: bigint;
+			// Pre-filled amount, as a remounted step receives it - no input event is fired for it.
+			amount?: string;
 		}) => {
 			const context = new Map<symbol, unknown>();
 			context.set(SEND_CONTEXT_KEY, initSendContext({ token }));
 
 			const feeStore = initEthFeeStore();
 			feeStore.setFee({
-				maxFeePerGas: 100n,
-				maxPriorityFeePerGas: 5n,
+				maxFeePerGas,
+				maxPriorityFeePerGas,
 				baseFeePerGas: 20n,
-				gas: 21_000n
+				gas
 			});
 			context.set(
 				ETH_FEE_CONTEXT_KEY,
@@ -151,7 +173,7 @@ describe('EthSendForm', () => {
 			}
 
 			const rendered = render(EthSendForm, {
-				props: { ...props, amount: undefined },
+				props: { ...props, amount },
 				context
 			});
 
@@ -318,19 +340,131 @@ describe('EthSendForm', () => {
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
 		});
 
-		it('does not show the orange fee box for a native ETH send short on gas', async () => {
-			const { input, queryByTestId, getByTestId } = setup({
-				token: ETHEREUM_TOKEN,
-				nativeEthereumBalance: ZERO
+		// A native balance smaller than the gas fee is not an amount problem: "Max" renders 0 and no
+		// value would go through, so the red field decoration was pointing the user at the one thing
+		// they cannot correct. The shortfall belongs in the same orange box an ERC-20 send uses - the
+		// native coin is already the fee token there.
+		describe('a native balance that cannot cover the gas', () => {
+			const shortOnGas = tipOnly - 1n;
+
+			const expectedGasMessage = replacePlaceholders(en.send.assertion.not_enough_tokens_for_gas, {
+				$symbol: ETHEREUM_TOKEN.symbol,
+				$balance: formatToken({
+					value: shortOnGas,
+					unitName: ETHEREUM_TOKEN.decimals,
+					displayDecimals: ETHEREUM_TOKEN.decimals
+				})
 			});
 
-			await fireEvent.input(input, { target: { value: '1' } });
+			it('shows the orange fee box alone, with the amount field still empty', async () => {
+				const { queryByTestId, queryByText, getByText, getByTestId, container } = setup({
+					token: ETHEREUM_TOKEN,
+					nativeEthereumBalance: shortOnGas
+				});
 
-			await waitFor(() => {
+				await waitFor(() => {
+					expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+				});
+
+				expect(getByText(expectedGasMessage)).toBeInTheDocument();
+				expect(
+					queryByText(en.send.assertion.insufficient_funds_for_amount)
+				).not.toBeInTheDocument();
+				expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+					'text-error-primary'
+				);
 				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 			});
 
+			it('shows the orange fee box alone for an explicit 0, the most such a balance offers', async () => {
+				const { input, queryByTestId, queryByText, getByTestId, container } = setup({
+					token: ETHEREUM_TOKEN,
+					nativeEthereumBalance: shortOnGas
+				});
+
+				await fireEvent.input(input, { target: { value: '0' } });
+
+				await waitFor(() => {
+					expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+				});
+
+				expect(
+					queryByText(en.send.assertion.insufficient_funds_for_amount)
+				).not.toBeInTheDocument();
+				expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+					'text-error-primary'
+				);
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+
+			// Two problems at once now: the amount really is more than the balance holds, and even a
+			// corrected amount would still have no gas behind it. Suppressing either one would hide a
+			// problem the user has to solve.
+			it('shows the field decoration and the orange fee box together for an oversized amount', async () => {
+				const { input, queryByTestId, getByText, getByTestId, container } = setup({
+					token: ETHEREUM_TOKEN,
+					nativeEthereumBalance: shortOnGas
+				});
+
+				await fireEvent.input(input, { target: { value: '10' } });
+
+				await waitFor(() => {
+					expect(getByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+				});
+
+				await waitFor(() => {
+					expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+				});
+
+				expect(getByText(expectedGasMessage)).toBeInTheDocument();
+				expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+					'text-error-primary'
+				);
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+			});
+		});
+
+		// The balance covers the gas comfortably here, so the amount is the only thing wrong: it fits
+		// inside the balance but not once gas is reserved. That keeps the amount wording and no fee
+		// box - lowering the amount is the fix.
+		it('decorates the field, without the orange fee box, when gas tips a native amount over the balance', async () => {
+			const { input, queryByTestId, getByText, getByTestId, container } = setup({
+				token: ETHEREUM_TOKEN,
+				nativeEthereumBalance: nativeBalance
+			});
+
+			await fireEvent.input(input, {
+				target: { value: toEther(nativeBalance - ceiling + 1n) }
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			});
+
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('leaves a native amount within the maximum undecorated, with Next enabled', async () => {
+			const { input, queryByTestId, queryByText, getByTestId, container } = setup({
+				token: ETHEREUM_TOKEN,
+				nativeEthereumBalance: nativeBalance
+			});
+
+			await fireEvent.input(input, { target: { value: toEther(nativeBalance - ceiling) } });
+
+			await waitFor(() => {
+				expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeEnabled();
+			});
+
+			expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).not.toBeInTheDocument();
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+				'text-error-primary'
+			);
 		});
 	});
 

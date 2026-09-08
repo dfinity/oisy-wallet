@@ -206,6 +206,36 @@ describe('EthSendAmount', () => {
 		});
 	});
 
+	// A balance that does not even cover the gas is nothing the amount can fix: "Max" is 0, so the
+	// field's own error would be pointing at the only thing that is not wrong. `EthSendForm`'s fee
+	// box reports that shortfall instead; this field speaks up only once the amount is oversized on
+	// top of it. Pre-filled amounts, so the assertions read the paint that lands on mount.
+	describe('a native balance that cannot cover the gas', () => {
+		// Under even the tip, so the balance falls short of the fee whichever bound is in force.
+		const shortOnGas = tipOnly - 1n;
+
+		it('leaves the field undecorated while the amount itself fits inside the balance', () => {
+			const { queryByText, maxButton } = setup({
+				nativeEthereumBalance: shortOnGas,
+				amount: toEther(shortOnGas)
+			});
+
+			expect(queryByText(expectedError)).not.toBeInTheDocument();
+			expect(queryByText(gasError)).not.toBeInTheDocument();
+			expect(maxButton()).not.toHaveClass('text-error-primary');
+		});
+
+		it('decorates the field once the amount is oversized on top of it', () => {
+			const { queryByText, maxButton } = setup({
+				nativeEthereumBalance: shortOnGas,
+				amount: toEther(shortOnGas + 1n)
+			});
+
+			expect(queryByText(expectedError)).toBeInTheDocument();
+			expect(maxButton()).toHaveClass('text-error-primary');
+		});
+	});
+
 	// The ERC-20 fee is paid in a different token than the one in this field, so that shortfall
 	// alone stays off the field - see `EthSendForm` for the dedicated fee box that reports it
 	// instead. An amount exceeding the token's own balance is this field's own problem, though, and

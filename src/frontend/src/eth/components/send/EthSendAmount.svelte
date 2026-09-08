@@ -46,8 +46,10 @@
 	// which also populates this itself for a plain invalid-amount error regardless of token type -
 	// see the effect below, which keeps it in step with the validation that gates "Next".
 	// An ERC-20 amount exceeding its own token balance lands here too, same as a native shortfall -
-	// it is this field's own problem to fix. Only the fee shortfall (the native coin can't cover
-	// gas, paid in a different token) stays off the field - see `EthSendForm`'s dedicated fee box.
+	// it is this field's own problem to fix. A fee shortfall never does: whether the fee is settled
+	// in a different token (ERC-20) or drawn from this very balance (native), a balance that cannot
+	// cover the gas at all is fixed by neither raising nor lowering the amount - see `EthSendForm`'s
+	// dedicated fee box.
 	let insufficientFundsError = $state<InsufficientFundsError | undefined>();
 
 	const {
@@ -70,7 +72,8 @@
 		fieldError?: InsufficientFundsError;
 		// ERC-20 only: the typed amount exceeds the token's own balance.
 		insufficientTokenBalance: boolean;
-		// ERC-20 only: the native coin can't cover the fee.
+		// The native coin can't cover the fee - the ERC-20 fee, settled in it, or its own gas on a
+		// native send. No amount fixes either, so both are reported off the field.
 		insufficientFundsForFee: boolean;
 		// True while sufficiency cannot be confirmed yet - the gas fee hasn't arrived. Gating
 		// must treat this like a shortfall (block "Next"): an unresolved fee is not a confirmed
@@ -92,13 +95,9 @@
 		pending: true
 	};
 
-	const evaluateAmount = (userAmount: bigint): AmountValidation => {
-		if (isNullish($storeFeeData)) {
-			return FEE_PENDING;
-		}
-
-		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
-		const parsedSendBalance = nonNullish($sendBalance)
+	// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
+	let parsedSendBalance = $derived(
+		nonNullish($sendBalance)
 			? parseToken({
 					value: formatToken({
 						value: $sendBalance,
@@ -107,34 +106,56 @@
 					}),
 					unitName: $sendTokenDecimals
 				})
-			: ZERO;
+			: ZERO
+	);
 
-		// The chain requires the balance to cover the amount plus `maxFeePerGas * gas` plus, on an
-		// OP-stack chain, the L1 data fee, so the ceiling is what decides whether a native send is
-		// affordable. `minGasFee` omits the base fee entirely and therefore bounds nothing the chain
-		// enforces.
+	// The chain requires the balance to cover the amount plus `maxFeePerGas * gas` plus, on an
+	// OP-stack chain, the L1 data fee, so the ceiling is what decides whether a native send is
+	// affordable. `minGasFee` omits the base fee entirely and therefore bounds nothing the chain
+	// enforces. Falling back to the tip rather than to zero: an unknown ceiling must not weaken the
+	// check below what it was before the flag.
+	let gasFee = $derived(
+		SEND_TRANSACTION_PRIORITY_ENABLED ? ($maxGasFee ?? $minGasFee ?? ZERO) : ($minGasFee ?? ZERO)
+	);
+
+	// Native only: the balance does not cover the gas on its own, so "Max" is 0 and no amount would
+	// go through. Reported by `EthSendForm`'s fee box - the same box the ERC-20 fee shortfall uses,
+	// the native coin already being the fee token there - and derived independently of the amount,
+	// because it holds just as much while the field is still empty.
+	let insufficientNativeBalanceForFee = $derived(
+		feeIsPaidFromAmount && nonNullish($storeFeeData) && parsedSendBalance < gasFee
+	);
+
+	const evaluateAmount = (userAmount: bigint): AmountValidation => {
+		if (isNullish($storeFeeData)) {
+			return FEE_PENDING;
+		}
+
 		if (feeIsPaidFromAmount) {
-			// Falling back to the tip rather than to zero: an unknown ceiling must not weaken the check
-			// below what it was before the flag.
-			const gasFee = SEND_TRANSACTION_PRIORITY_ENABLED
-				? ($maxGasFee ?? $minGasFee ?? ZERO)
-				: ($minGasFee ?? ZERO);
-
 			const total = userAmount + gasFee;
 
 			if (total <= parsedSendBalance) {
 				return NO_ISSUE;
 			}
 
-			// Always an amount problem, whether the amount alone exceeds the balance or it is
+			// Normally an amount problem, whether the amount alone exceeds the balance or it is
 			// reserving gas that tips the total over: the gas is paid out of the very balance the
 			// amount is drawn from, so lowering the amount is the user's only fix either way. The
 			// gas wording is reserved for the ERC-20 case, where the fee is settled in a token this
 			// field cannot influence - see `EthSendForm`'s dedicated fee box.
+			//
+			// Except when the gas shortfall is the whole story: the balance cannot cover the gas and
+			// the amount itself still fits inside it. "Max" reads 0, so blaming the amount points at
+			// a field no value would fix - the fee box reports the one thing the user can act on. It
+			// stays alongside the amount error whenever the amount is genuinely oversized too.
+			const gasShortfallOnly = insufficientNativeBalanceForFee && userAmount <= parsedSendBalance;
+
 			return {
-				fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount),
+				fieldError: gasShortfallOnly
+					? undefined
+					: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount),
 				insufficientTokenBalance: false,
-				insufficientFundsForFee: false,
+				insufficientFundsForFee: insufficientNativeBalanceForFee,
 				pending: false
 			};
 		}
@@ -176,8 +197,11 @@
 		nonNullish(parsedAmount) ? evaluateAmount(parsedAmount) : FEE_PENDING
 	);
 
+	// The native fee shortfall does not wait on an amount: an empty field is still a balance that
+	// cannot cover its own gas, and the box has to say so before anything is typed. The ERC-20 one
+	// comes from the amount validation, unchanged.
 	$effect(() => {
-		({ insufficientFundsForFee } = validation);
+		insufficientFundsForFee = insufficientNativeBalanceForFee || validation.insufficientFundsForFee;
 	});
 
 	// `TokenInput` writes this too, but only from its own debounced pass, which is triggered by a
