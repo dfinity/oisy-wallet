@@ -93,6 +93,14 @@
 	let amount = $state<number | undefined>();
 	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
 
+	// Keyed by value, not by identity: reloading a custom token re-creates the token object and
+	// its `TokenId` symbol, so an identity comparison would drop a valid amount on an unrelated
+	// store refresh.
+	const tokenKey = ({ id, network }: Token): string =>
+		`${id.description}#${network.id.description}`;
+
+	let selectedTokenKey: string | undefined = nonNullish($token) ? tokenKey($token) : undefined;
+
 	let burning = $derived(
 		notEmptyString(destination) &&
 			nonNullish($token) &&
@@ -163,6 +171,7 @@
 		activeSendDestinationTab = 'recentlyUsed';
 		selectedContact = undefined;
 		amount = undefined;
+		selectedTokenKey = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -221,6 +230,17 @@
 				return;
 			}
 		}
+
+		// An amount entered for the previous token is meaningless for the new one - and, when the
+		// two tokens have different decimals, it is not even a representable value, which surfaces
+		// as an invalid amount and a failing gas fee estimation.
+		const key = tokenKey(token);
+
+		if (selectedTokenKey !== key) {
+			amount = undefined;
+		}
+
+		selectedTokenKey = key;
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 

@@ -1,8 +1,29 @@
+import SendModal from '$lib/components/send/SendModal.svelte';
+import { token } from '$lib/stores/token.store';
+import type { Token } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 import {
 	createSelectedNftHarness,
 	createStepsHarness
 } from '$tests/utils/steps-reactivity.test-utils.svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
+
+vi.mock(
+	'$lib/components/send/SendTokensList.svelte',
+	async () => await import('./SendModalTokensListStub.svelte')
+);
+
+vi.mock(
+	'$lib/components/send/SendDestinationWizardStep.svelte',
+	async () => await import('./SendModalDestinationStub.svelte')
+);
+
+vi.mock(
+	'$lib/components/send/SendWizard.svelte',
+	async () => await import('./SendModalWizardStub.svelte')
+);
 
 describe('SendModal', () => {
 	describe('steps derivation reactivity (regression coverage)', () => {
@@ -132,6 +153,114 @@ describe('SendModal', () => {
 			} finally {
 				harness.destroy();
 			}
+		});
+	});
+
+	describe('amount reset on token change', () => {
+		// The amount lives above the wizard, so it survives step navigation. Carrying it over to a
+		// newly selected token is at best confusing and, when the two tokens have different
+		// decimals, produces an invalid amount and a failing gas fee estimation.
+
+		type GetByTestId = (testId: string) => HTMLElement;
+
+		const renderModal = async (): Promise<{ getByTestId: GetByTestId }> => {
+			const result = render(SendModal, {
+				props: { isTransactionsPage: false, isNftsPage: false }
+			});
+
+			await waitFor(() => expect(result.getByTestId('stub-select-token-a')).toBeInTheDocument());
+
+			return result;
+		};
+
+		const selectToken = async ({
+			getByTestId,
+			testId
+		}: {
+			getByTestId: GetByTestId;
+			testId: string;
+		}) => {
+			await fireEvent.click(getByTestId(testId));
+
+			await waitFor(() => expect(getByTestId('stub-destination-next')).toBeInTheDocument());
+
+			await fireEvent.click(getByTestId('stub-destination-next'));
+
+			await waitFor(() => expect(getByTestId('stub-amount')).toBeInTheDocument());
+		};
+
+		const enterAmount = async ({ getByTestId }: { getByTestId: GetByTestId }) => {
+			await fireEvent.click(getByTestId('stub-set-amount'));
+
+			await waitFor(() => expect(getByTestId('stub-amount')).toHaveTextContent('5'));
+		};
+
+		const backToTokensList = async ({ getByTestId }: { getByTestId: GetByTestId }) => {
+			await fireEvent.click(getByTestId('stub-to-tokens-list'));
+
+			await waitFor(() => expect(getByTestId('stub-select-token-a')).toBeInTheDocument());
+		};
+
+		beforeEach(() => {
+			token.reset();
+		});
+
+		it('clears the amount when another token is selected', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+			await enterAmount({ getByTestId });
+
+			await backToTokensList({ getByTestId });
+			await selectToken({ getByTestId, testId: 'stub-select-token-b' });
+
+			expect(getByTestId('stub-amount').textContent).toBe('');
+		});
+
+		it('keeps the amount when only the destination changes', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+			await enterAmount({ getByTestId });
+
+			await fireEvent.click(getByTestId('stub-send-back'));
+
+			await waitFor(() =>
+				expect(getByTestId('stub-destination-change-and-next')).toBeInTheDocument()
+			);
+
+			await fireEvent.click(getByTestId('stub-destination-change-and-next'));
+
+			await waitFor(() => expect(getByTestId('stub-amount')).toBeInTheDocument());
+
+			expect(getByTestId('stub-amount')).toHaveTextContent('5');
+		});
+
+		it('keeps the amount when the same token is re-selected as a re-created object', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+			await enterAmount({ getByTestId });
+
+			await backToTokensList({ getByTestId });
+			await selectToken({ getByTestId, testId: 'stub-select-token-a-recreated' });
+
+			expect(getByTestId('stub-amount')).toHaveTextContent('5');
+		});
+
+		it('keeps the amount when the token store re-emits the selected token as a fresh object', async () => {
+			const { getByTestId } = await renderModal();
+
+			await selectToken({ getByTestId, testId: 'stub-select-token-a' });
+			await enterAmount({ getByTestId });
+
+			const reloadedToken: Token = { ...mockValidToken, id: parseTokenId('TokenId') };
+
+			token.set(reloadedToken);
+
+			await waitFor(() => expect(getByTestId('stub-amount')).toBeInTheDocument());
+
+			expect(getByTestId('stub-amount')).toHaveTextContent('5');
 		});
 	});
 });
