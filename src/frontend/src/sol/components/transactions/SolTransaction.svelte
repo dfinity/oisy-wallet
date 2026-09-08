@@ -10,7 +10,7 @@
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { absBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
@@ -56,7 +56,7 @@
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore
 		})
@@ -65,7 +65,7 @@
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		solTokenSymbol({
 			tokenAddress,
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,

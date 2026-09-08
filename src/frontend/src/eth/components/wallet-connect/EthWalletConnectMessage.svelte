@@ -138,6 +138,11 @@
 
 	// Levels of indentation the list will render before it stops widening.
 	const MAX_NESTING_INDENT = 4;
+
+	// The type schema is usually longer than the rest of the payload put together, and it declares the
+	// shape of what is signed rather than stating any of it. Folded, the domain, the primary type and
+	// the message all fit on screen; open, they were pushed below a wall of field declarations.
+	const RAW_DATA_COLLAPSED_KEYS = ['types'];
 </script>
 
 {#if invalidTypedData}
@@ -224,10 +229,8 @@
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
 		{#if nonNullish(signedJson)}
-			<!-- Opened rather than collapsed: the tab exists to be read, and a reader who switched to
-			     it has already said the summary was not enough. -->
 			<div class="mt-4 rounded-xs bg-disabled p-4">
-				<Json _collapsed={false} json={signedJson} />
+				<Json _collapsed={false} collapsedKeys={RAW_DATA_COLLAPSED_KEYS} json={signedJson} />
 			</div>
 		{:else}
 			<p class="mb-4 font-normal">

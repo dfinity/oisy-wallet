@@ -46,12 +46,20 @@ const USDC_ARBITRUM = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const USDT_ETHEREUM = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 const ICP_ETHEREUM = '0x00f3C42833C3170159af4E92dbb451Fb3F708917';
+const BOB_LEDGER = '7pail-xaaaa-aaaas-aabmq-cai';
+const BOB_ETHEREUM = '0xecc5f868AdD75F4ff9FD00bbBDE12C35BA2C9C89';
+const GLDT_LEDGER = '6c7su-kiaaa-aaaar-qaira-cai';
+const GLDT_ETHEREUM = '0x86856814e74456893Cfc8946BedcBb472b5fA856';
 
 let mockEnabled = true;
+let mockUnwrapOnly = true;
 
 vi.mock('$env/rest/onesec.env', () => ({
 	get ONESEC_SWAP_ENABLED() {
 		return mockEnabled;
+	},
+	get ONESEC_UNWRAP_ONLY() {
+		return mockUnwrapOnly;
 	}
 }));
 
@@ -77,6 +85,7 @@ const makeErc20Token = ({
 describe('onesec-swap.utils', () => {
 	beforeEach(() => {
 		mockEnabled = true;
+		mockUnwrapOnly = true;
 	});
 
 	describe('ICP_LEDGER_TO_TOKEN', () => {
@@ -270,14 +279,15 @@ describe('onesec-swap.utils', () => {
 				expect(result).toBeUndefined();
 			});
 
-			it('returns the ICP EVM address when source is ICP token on Ethereum', () => {
+			it('returns undefined for an ICP-native token, whose EVM leg would wrap', () => {
+				// ICP is a `minter` token, so ICP is its native chain and ICP→EVM would mint
+				// wrapped ICP — the direction ONESEC_UNWRAP_ONLY closes.
 				const result = oneSecCompatibleDestinations({
 					sourceToken: makeIcToken(ICP_LEDGER),
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
-				expect(result?.evm).toBeDefined();
-				expect(result?.evm).toContain(ICP_ETHEREUM.toLowerCase());
+				expect(result).toBeUndefined();
 			});
 
 			it('returns undefined for an unknown ICP ledger canister', () => {
@@ -312,22 +322,22 @@ describe('onesec-swap.utils', () => {
 		describe('EVM source token', () => {
 			it('returns the matching ICP ledger for a known EVM address', () => {
 				const result = oneSecCompatibleDestinations({
-					sourceToken: makeErc20Token({ address: USDC_ETHEREUM }),
+					sourceToken: makeErc20Token({ address: ICP_ETHEREUM }),
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
 				expect(result?.icp).toBeDefined();
-				expect(result?.icp).toContain(USDC_LEDGER);
+				expect(result?.icp).toContain(ICP_LEDGER);
 				expect(result?.icp?.size).toBe(1);
 			});
 
 			it('is case-insensitive when matching the source EVM address', () => {
 				const result = oneSecCompatibleDestinations({
-					sourceToken: makeErc20Token({ address: USDC_ETHEREUM.toLowerCase() }),
+					sourceToken: makeErc20Token({ address: ICP_ETHEREUM.toLowerCase() }),
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
-				expect(result?.icp).toContain(USDC_LEDGER);
+				expect(result?.icp).toContain(ICP_LEDGER);
 			});
 
 			it('returns empty icp set for an unknown EVM address', () => {
@@ -355,12 +365,96 @@ describe('onesec-swap.utils', () => {
 
 			it('does not set evm or sol keys for EVM source', () => {
 				const result = oneSecCompatibleDestinations({
-					sourceToken: makeErc20Token({ address: USDC_ETHEREUM }),
+					sourceToken: makeErc20Token({ address: ICP_ETHEREUM }),
 					networkIds: [ETHEREUM_NETWORK.id]
 				});
 
 				expect(result?.evm).toBeUndefined();
 				expect(result?.sol).toBeUndefined();
+			});
+		});
+
+		describe('unwrap-only direction gate', () => {
+			const ONESEC_NETWORK_IDS = [
+				ETHEREUM_NETWORK.id,
+				ARBITRUM_MAINNET_NETWORK.id,
+				BASE_NETWORK.id
+			];
+
+			// `minter` tokens are ICP-native: the wrapped side is the ERC-20, so only
+			// EVM→ICP redeems and ICP→EVM must be closed.
+			it.each([
+				{ token: 'ICP', ledger: ICP_LEDGER, address: ICP_ETHEREUM },
+				{ token: 'BOB', ledger: BOB_LEDGER, address: BOB_ETHEREUM },
+				{ token: 'GLDT', ledger: GLDT_LEDGER, address: GLDT_ETHEREUM }
+			])('closes ICP→EVM for the ICP-native token $token', ({ ledger }) => {
+				expect(
+					oneSecCompatibleDestinations({
+						sourceToken: makeIcToken(ledger),
+						networkIds: ONESEC_NETWORK_IDS
+					})
+				).toBeUndefined();
+			});
+
+			it.each([
+				{ token: 'ICP', ledger: ICP_LEDGER, address: ICP_ETHEREUM },
+				{ token: 'BOB', ledger: BOB_LEDGER, address: BOB_ETHEREUM },
+				{ token: 'GLDT', ledger: GLDT_LEDGER, address: GLDT_ETHEREUM }
+			])('keeps EVM→ICP for the wrapped ERC-20 of $token', ({ ledger, address }) => {
+				const result = oneSecCompatibleDestinations({
+					sourceToken: makeErc20Token({ address }),
+					networkIds: [ETHEREUM_NETWORK.id]
+				});
+
+				expect(result?.icp).toContain(ledger);
+			});
+
+			// `locker` tokens are EVM-native: the wrapped side is the ICRC ledger, so only
+			// ICP→EVM redeems and EVM→ICP must be closed.
+			it.each([
+				{ token: 'USDC', ledger: USDC_LEDGER, address: USDC_ETHEREUM },
+				{ token: 'USDT', ledger: USDT_LEDGER, address: USDT_ETHEREUM }
+			])('closes EVM→ICP for the EVM-native token $token', ({ address }) => {
+				expect(
+					oneSecCompatibleDestinations({
+						sourceToken: makeErc20Token({ address }),
+						networkIds: [ETHEREUM_NETWORK.id]
+					})
+				).toBeUndefined();
+			});
+
+			it.each([
+				{ token: 'USDC', ledger: USDC_LEDGER, address: USDC_ETHEREUM },
+				{ token: 'USDT', ledger: USDT_LEDGER, address: USDT_ETHEREUM }
+			])('keeps ICP→EVM for the wrapped ICRC ledger of $token', ({ ledger, address }) => {
+				const result = oneSecCompatibleDestinations({
+					sourceToken: makeIcToken(ledger),
+					networkIds: [ETHEREUM_NETWORK.id]
+				});
+
+				expect(result?.evm).toContain(address.toLowerCase());
+			});
+
+			it('restores ICP→EVM for an ICP-native token when the flag is off', () => {
+				mockUnwrapOnly = false;
+
+				const result = oneSecCompatibleDestinations({
+					sourceToken: makeIcToken(ICP_LEDGER),
+					networkIds: [ETHEREUM_NETWORK.id]
+				});
+
+				expect(result?.evm).toContain(ICP_ETHEREUM.toLowerCase());
+			});
+
+			it('restores EVM→ICP for an EVM-native token when the flag is off', () => {
+				mockUnwrapOnly = false;
+
+				const result = oneSecCompatibleDestinations({
+					sourceToken: makeErc20Token({ address: USDC_ETHEREUM }),
+					networkIds: [ETHEREUM_NETWORK.id]
+				});
+
+				expect(result?.icp).toContain(USDC_LEDGER);
 			});
 		});
 	});
