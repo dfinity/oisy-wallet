@@ -1,7 +1,7 @@
 import type { TradingPair } from '$declarations/oisy_trade/oisy_trade.did';
 import type { ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
-import type { FieldErrorKind, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
+import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 
 export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	// The poll key. `get_my_orders` with `ById` is the only settlement oracle,
@@ -103,17 +103,15 @@ export interface OisyTradeQuote {
 }
 
 /**
- * A quote, or the named reason there is none.
+ * A quote, or nothing.
  *
- * The fan-out itself only carries offers — the registry adapter drops the
- * rejection — but `errorKind` maps one-to-one onto the shipped Limit Order i18n
- * copy, and it is what lets the form explain an empty offer list (via
- * `notOfferedExplained` + `message`) instead of the generic "swap is not
- * offered". Rejections without a kind (no pair, halted pair, unknown ledger fee)
- * have nothing user-actionable to say.
+ * Rejection carries no reason: the fan-out only transports offers, so nothing
+ * downstream could read one. The form explains an empty offer list from the pair
+ * instead (`oisyTradeAmountObjection`), which is the only explanation available
+ * without awaiting the order book. A rejection is still distinct from a throw —
+ * "no offer" must not reach the per-provider error analytics.
  */
-export type OisyTradeQuoteResult =
-	{ ok: true; quote: OisyTradeQuote } | { ok: false; errorKind?: FieldErrorKind };
+export type OisyTradeQuoteResult = { ok: true; quote: OisyTradeQuote } | { ok: false };
 
 export interface OisyTradeSwapDetails {
 	// Itemized, never summed: the three fees are denominated in two different

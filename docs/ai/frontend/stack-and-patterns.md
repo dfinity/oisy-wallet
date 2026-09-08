@@ -16,6 +16,31 @@ Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-tra
 
 `getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
 
+## Token identity — key by `TokenId`
+
+Whenever a `TokenId` is in scope, identify, compare and key tokens by it.
+Do not invent a second key next to one that already exists.
+
+- `TokenId` is a `Symbol`, so it is unique per token
+  ([`$lib/validation/token.validation.ts`](../../../src/frontend/src/lib/validation/token.validation.ts)),
+  and the token stores deliberately reuse the existing Symbol when re-setting
+  an entry with the same identifier
+  ([`$lib/stores/custom-tokens.store.ts`](../../../src/frontend/src/lib/stores/custom-tokens.store.ts),
+  [`$icp/stores/certified-icrc.store.ts`](../../../src/frontend/src/icp/stores/certified-icrc.store.ts)).
+  It therefore survives a store reload, and is re-created only on a full reset
+  — `resetAll()` after a failed certified update, or the page reload on
+  sign-out.
+- **Compare the object, never its description.** `TokenId.description` _is_ the
+  ticker — it comes from `parseTokenId(symbol)`
+  ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
+  [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
+  Two distinct contracts on the same network can share a ticker, so a ticker is
+  not unique and is not a key.
+- No `TokenId` reachable? Key on the stable asset identifier — contract address
+  / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
+  [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
+  — combined with the network. Never the ticker.
+
 ## Svelte — runes for new code
 
 The repo is **Svelte 5**. For new code, default to runes (`$state`,
@@ -245,5 +270,7 @@ component uses. Never re-implement an icon that already exists.
 - Adding a wrapper component that only re-exports another component.
 - `target="_blank"` without `rel="noopener noreferrer"`.
 - `{@html …}` without sanitisation.
+- Keying or matching a token by its ticker (including `TokenId.description`)
+  when the `TokenId` object itself is in scope.
 - `console.log` left in committed code (and `console.error` / `.warn` are
   ESLint errors — use `consoleError` / `consoleWarn`).
