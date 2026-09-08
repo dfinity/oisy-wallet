@@ -7,11 +7,13 @@ import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import {
 	deriveSolTransactionSummary,
 	formatSolInstructionSummary,
-	formatSolTransactionSummary
+	formatSolTransactionSummary,
+	solAtaFee
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
+import { mockAtaAddress, mockAtaAddress2 } from '$tests/mocks/sol.mock';
 
 const USER = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 
@@ -45,6 +47,60 @@ describe('sol-transaction-summary.utils', () => {
 			expect(result.kind).toBe('send');
 			expect(result.spent?.delta).toBe(-5_000_000n);
 			expect(result.counterparty).toBe('DkngoujigUiRtizQViQPpHUSgJWMg3o3dLVAfj7eEjT2');
+		});
+
+		// Taken from 469iBc7...VprPgtP on mainnet. The wallet address falls by 0.00310888 SOL, of
+		// which only 0.001 was wrapped and traded: the rest is the rent of the PUMP account the
+		// swap opened on the way. Stating the fall as the amount traded overstates the trade, and
+		// it does so on every swap that opens an account.
+		it('should state what a swap traded, not the rent it paid on the way', () => {
+			const wsol = mockAtaAddress;
+			const pump = mockAtaAddress2;
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ delta: -3_108_880n },
+					{
+						tokenAddress: 'pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn',
+						delta: 37_272_943n,
+						decimals: 6
+					}
+				],
+				instructions: [
+					{ kind: 'createTokenAccount', account: wsol, rent: 2_039_280n },
+					{ kind: 'wrap', amount: 1_000_000n },
+					{ kind: 'unwrap', account: wsol, returned: 3_039_280n },
+					{ kind: 'createTokenAccount', account: pump, rent: 2_108_880n }
+				]
+			});
+
+			expect(result.kind).toBe('swap');
+			expect(result.spent?.delta).toBe(-1_000_000n);
+			expect(result.received?.delta).toBe(37_272_943n);
+		});
+
+		// The rent came straight back, so it never cost the transaction anything and the amount
+		// traded is the fall in the balance exactly.
+		it('should leave a swap alone when the accounts it opens are all closed again', () => {
+			const wsol = mockAtaAddress;
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ delta: -1_000_000n },
+					{
+						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						delta: 250_000n,
+						decimals: 6
+					}
+				],
+				instructions: [
+					{ kind: 'createTokenAccount', account: wsol, rent: 2_039_280n },
+					{ kind: 'wrap', amount: 1_000_000n },
+					{ kind: 'unwrap', account: wsol, returned: 3_039_280n }
+				]
+			});
+
+			expect(result.spent?.delta).toBe(-1_000_000n);
 		});
 
 		it('should call a routed swap a swap with the pair at its ends', () => {
@@ -135,6 +191,82 @@ describe('sol-transaction-summary.utils', () => {
 					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
+		});
+	});
+
+	describe('solAtaFee', () => {
+		const RENT = 2_039_280n;
+
+		const create = (rent = RENT): SolInstructionSummary => ({
+			kind: 'createTokenAccount',
+			account: mockAtaAddress,
+			rent
+		});
+
+		const close = (returned = RENT): SolInstructionSummary => ({
+			kind: 'closeTokenAccount',
+			account: mockAtaAddress,
+			returned
+		});
+
+		it('should charge the rent of an account it only opens', () => {
+			expect(solAtaFee([create()])).toBe(RENT);
+		});
+
+		it('should charge the rent of each of several accounts', () => {
+			expect(solAtaFee([create(), create()])).toBe(RENT * 2n);
+		});
+
+		// The account is gone by the end of the transaction, so its rent is back in the wallet.
+		// Billing the open alone charges the user for something they no longer have.
+		it('should charge nothing when it closes what it opened', () => {
+			expect(solAtaFee([create(), close()])).toBe(ZERO);
+		});
+
+		it('should charge only the difference when it opens more than it closes', () => {
+			expect(solAtaFee([create(), create(), close()])).toBe(RENT);
+		});
+
+		// A refund is not a negative fee. It nets to nothing, and the caller shows nothing.
+		it('should never go below zero when it closes more than it opens', () => {
+			expect(solAtaFee([close(), close()])).toBe(ZERO);
+		});
+
+		// A wrap opens an account and the unwrap closes it, so its rent comes back like any other.
+		// What must not come back is the wrapped SOL the close hands over with it.
+		it('should net an unwrap by the rent alone, not by the SOL it unwrapped', () => {
+			expect(
+				solAtaFee([create(), { kind: 'unwrap', account: mockAtaAddress, returned: 5_000_000_000n }])
+			).toBe(ZERO);
+		});
+
+		it('should still charge an account it opens beside a wrap it unwraps', () => {
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+				])
+			).toBe(RENT);
+		});
+
+		// Its rent was paid by whatever transaction opened it, so this one has nothing to refund.
+		// Crediting the balance would report a fee of zero for rent this transaction did pay.
+		it('should net nothing for an unwrap of an account it did not open', () => {
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+				])
+			).toBe(RENT);
+		});
+
+		it('should read the accounts a route opened under it', () => {
+			expect(solAtaFee([{ kind: 'route', children: [create(), close()] }])).toBe(ZERO);
+		});
+
+		it('should charge nothing for a transaction that touches no account', () => {
+			expect(solAtaFee([])).toBe(ZERO);
 		});
 	});
 

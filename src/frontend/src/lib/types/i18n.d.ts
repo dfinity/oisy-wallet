@@ -979,6 +979,7 @@ interface I18nSwap {
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
 		near_intents_quote_expired: string;
+		oisy_trade_not_trackable: string;
 		oisy_trade_order_killed: string;
 		oisy_trade_settlement_unresolved: string;
 		oisy_trade_order_not_placed: string;
@@ -1251,11 +1252,13 @@ interface I18nFee {
 		estimated_eth: string;
 		max_fee_eth: string;
 		estimated_fee_eth: string;
+		estimated: string;
 		priority: string;
+		gwei: string;
 		priority_slow: string;
 		priority_slow_description: string;
-		priority_normal: string;
-		priority_normal_description: string;
+		priority_standard: string;
+		priority_standard_description: string;
 		priority_fast: string;
 		priority_fast_description: string;
 		convert_fee: string;
@@ -1302,6 +1305,7 @@ interface I18nWallet_connect {
 		application: string;
 		review: string;
 		method: string;
+		type: string;
 		methods: string;
 		events: string;
 		message: string;
@@ -1606,6 +1610,7 @@ interface I18nTrading {
 		error_balance_sell: string;
 		error_balance_buy: string;
 		error_lot_multiple: string;
+		error_lot_minimum: string;
 		error_tick_multiple: string;
 		error_min_notional: string;
 		error_max_notional: string;
@@ -1688,6 +1693,10 @@ interface I18nTransaction {
 		instruction_revoke: string;
 		instruction_set_authority: string;
 		instruction_route: string;
+		instruction_burn: string;
+		instruction_mint: string;
+		instruction_freeze: string;
+		instruction_thaw: string;
 		instruction_unknown: string;
 		instruction_unknown_via: string;
 		instruction_rent: string;

@@ -17,6 +17,7 @@
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
+	import { pollOisyTradeActiveUserTransactions } from '$lib/services/oisy-trade-active-tx.services';
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
 	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
@@ -34,6 +35,10 @@
 		buildNearIntentsSwapTrackingMetadata,
 		isNearIntentsActiveUserTransaction
 	} from '$lib/utils/near-intents-active-tx.utils';
+	import {
+		buildOisyTradeSwapTrackingMetadata,
+		isOisyTradeActiveUserTransaction
+	} from '$lib/utils/oisy-trade-active-tx.utils';
 	import {
 		buildOneSecSwapTrackingMetadata,
 		isOneSecActiveUserTransaction
@@ -101,6 +106,12 @@
 
 			if (chainFusion.length > 0) {
 				await pollChainFusionActiveUserTransactions({ identity, transactions: chainFusion });
+			}
+
+			const oisyTrade = $activeUserTransactionsPending.filter(isOisyTradeActiveUserTransaction);
+
+			if (oisyTrade.length > 0) {
+				await pollOisyTradeActiveUserTransactions({ identity, transactions: oisyTrade });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -217,6 +228,23 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isOisyTradeActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildOisyTradeSwapTrackingMetadata({ tx })
+				});
+
+				// Unconditional, unlike every other provider's: a failed OISY Trade swap is a
+				// killed fill-or-kill order whose *source* token has just been withdrawn back
+				// to the wallet. Elsewhere a failure means nothing moved and there is nothing
+				// to refresh; here the balance changed either way.
+				shouldRefresh = true;
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&

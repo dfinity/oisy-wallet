@@ -56,7 +56,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
@@ -92,6 +92,13 @@
 	let selectedContact = $state<ContactUi | undefined>();
 	let amount = $state<number | undefined>();
 	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
+
+	// Compared by identity, not by the symbol's description: `TokenId` is minted from the token
+	// symbol (`mapErc20Token`, `mapIcrcToken`), which two distinct assets may legitimately share.
+	// Identity is safe here because the stores reuse the existing `TokenId` when re-setting an entry
+	// with the same identifier - a reload of the selected token keeps it, and only a full
+	// `resetAll()` mints a new one.
+	let selectedTokenId: TokenId | undefined = $token?.id;
 
 	let burning = $derived(
 		notEmptyString(destination) &&
@@ -163,6 +170,7 @@
 		activeSendDestinationTab = 'recentlyUsed';
 		selectedContact = undefined;
 		amount = undefined;
+		selectedTokenId = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -221,6 +229,15 @@
 				return;
 			}
 		}
+
+		// An amount entered for the previous token is meaningless for the new one - and, when the
+		// two tokens have different decimals, it is not even a representable value, which surfaces
+		// as an invalid amount and a failing gas fee estimation.
+		if (selectedTokenId !== token.id) {
+			amount = undefined;
+		}
+
+		selectedTokenId = token.id;
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 

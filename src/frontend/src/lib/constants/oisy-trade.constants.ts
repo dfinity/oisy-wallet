@@ -1,3 +1,5 @@
+import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+
 // Display name for the OISY Trade provider, shown on the Trading tab venue tag,
 // order rows, and deposit/withdraw flows.
 export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
@@ -18,6 +20,41 @@ export const OISY_TRADE_POLL_INTERVAL_MILLIS = 30_000;
 // user left open: a FOK order is decided in the matching round that follows it, and
 // here somebody is watching a spinner for exactly this interval.
 export const OISY_TRADE_SWAP_SETTLE_POLL_INTERVAL_MILLIS = 2_000;
+
+// How long the background poller leaves an OISY Trade swap row alone before it will
+// act on it at all.
+//
+// Settlement belongs to the wizard, so this poller is a recovery path and the only
+// thing it may never do is act on a row a live foreground still owns: both withdraw
+// from the same account-wide free balance and neither sees the other's in-flight
+// calls, so two of them settling one order races into `InsufficientBalance` — not
+// retryable — and terminalizes a row the wizard is about to report as a success.
+//
+// The poller cannot ask whether a tab is still open; what it can observe is that the
+// row has gone unwritten. So the budget has to outlast any single foreground canister
+// call. It does not have to outlast a whole session, and making it much longer is not
+// free: the count is in memory so a refresh restarts it, and the loader skips ticks
+// while `document.hidden`. Half an hour would need the user to sit on a visible wallet
+// tab for half an uninterrupted hour before anything could be recovered, which
+// removes the recovery this row exists for. Recovering nothing is worse than
+// recovering a few minutes early.
+//
+// Five minutes: comfortably past any one approve, deposit, place or withdraw, and
+// short of the deposit's own 5-minute approve expiry.
+export const OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS = 5 * 60 * 1000;
+
+// That grace period as a count of the poller's own ticks, which is how it is
+// actually measured.
+//
+// Not as elapsed wall time: the row's `created_at_ns` comes from the backend
+// canister's clock while `Date.now()` comes from the browser's, and subtracting one
+// from the other makes the window depend on the difference between them. A device
+// clock five minutes fast collapses the budget to nothing, which would let a tick
+// act while approve and deposit are still in flight; one behind holds recovery off
+// for as long as it is behind. Counting the poller's own ticks needs neither clock.
+export const OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS = Math.ceil(
+	OISY_TRADE_SWAP_SETTLE_GRACE_PERIOD_MILLIS / ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS
+);
 
 // The oisy_trade canister caps a `get_my_orders` page (`ByPage.length`) at 100.
 export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;

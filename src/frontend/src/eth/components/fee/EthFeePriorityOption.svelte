@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import { formatGasFeeInGwei } from '$eth/utils/fee.utils';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
+	import { ETH_FEE_PRIORITY_OPTION_AMOUNT } from '$lib/constants/test-ids.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import type { EthFeePriority } from '$lib/enums/eth-fee-priority';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		priority: EthFeePriority;
@@ -10,7 +15,6 @@
 		emoji: string;
 		selected: boolean;
 		fee?: bigint;
-		symbol: string;
 		decimals: number;
 		exchangeRate?: number;
 		groupName: string;
@@ -25,7 +29,6 @@
 		emoji,
 		selected,
 		fee,
-		symbol,
 		decimals,
 		exchangeRate,
 		groupName,
@@ -34,6 +37,13 @@
 	}: Props = $props();
 
 	const inputId = $derived(`${groupName}-${priority}`);
+
+	// Quoted in gwei, not in the token: a whole fee is a few millionths of an ETH, so in the token's
+	// own units the three tiers separate in the eighth decimal and read as the same number. The fee
+	// row below keeps the token, where there is nothing to compare against.
+	const gweiFee = $derived(
+		nonNullish(fee) ? formatGasFeeInGwei({ value: fee, language: $currentLanguage }) : undefined
+	);
 </script>
 
 <label class="flex w-full cursor-pointer items-center gap-3 py-2" for={inputId}>
@@ -52,9 +62,23 @@
 		<span class="min-w-0 truncate text-sm text-tertiary">{description}</span>
 	</span>
 
-	<span class="ml-auto shrink-0 pl-2 text-right">
+	<span class="ml-auto shrink-0 pl-2">
 		{#if nonNullish(fee)}
-			<FeeDisplay {decimals} {exchangeRate} feeAmount={fee} {symbol} />
+			<!-- Mirrors the value side of `ModalValue`, which is what the fee row below these options
+			     renders, so an option and the fee it produces are laid out identically. -->
+			<span
+				class="flex flex-col items-end gap-1 text-sm text-tertiary sm:flex-row sm:items-center sm:gap-2"
+			>
+				<span class="font-bold text-primary" data-tid={ETH_FEE_PRIORITY_OPTION_AMOUNT}>
+					{gweiFee}
+					{$i18n.fee.text.gwei}
+				</span>
+
+				<ConvertAmountExchange
+					amount={formatToken({ value: fee, displayDecimals: decimals, unitName: decimals })}
+					{exchangeRate}
+				/>
+			</span>
 		{/if}
 	</span>
 </label>
