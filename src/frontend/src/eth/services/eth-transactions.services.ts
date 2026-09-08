@@ -86,14 +86,49 @@ export const reloadEthereumTransactions = (params: {
 const hasStoredEthTransactions = (tokenId: TokenId): boolean =>
 	(get(ethTransactionsStore)?.[tokenId] ?? []).length > 0;
 
-const maxEthBlockNumberInStore = (tokenId: TokenId): number | undefined => {
+/**
+ * How far above the chain tip a block height may sit before we stop believing it.
+ *
+ * A short reorg, or a provider still catching up with the explorer, can legitimately leave the
+ * newest height we hold above the tip we just read, so a small overshoot is normal. A height far
+ * beyond the tip cannot be explained that way: it can only come from an explorer response that
+ * invented it, and honouring it as a fetch boundary would pin `startBlock` above every block
+ * Etherscan can return until the chain caught up.
+ */
+const MAX_BLOCKS_AHEAD_OF_TIP = 1_000;
+
+const isBelievableBlockNumber = ({
+	blockNumber,
+	chainTip
+}: {
+	blockNumber: number;
+	chainTip: number | undefined;
+}): boolean => isNullish(chainTip) || blockNumber <= chainTip + MAX_BLOCKS_AHEAD_OF_TIP;
+
+/**
+ * Highest believable block number held in the store for a token.
+ *
+ * The store is fed by the explorer, so it can hold an invented height alongside the real ones.
+ * Skipping past it leaves the newest genuine block as the boundary, which keeps the load
+ * incremental instead of dropping back to a full refetch.
+ */
+const maxEthBlockNumberInStore = ({
+	tokenId,
+	chainTip
+}: {
+	tokenId: TokenId;
+	chainTip: number | undefined;
+}): number | undefined => {
 	const rows = get(ethTransactionsStore)?.[tokenId];
 
 	if (isNullish(rows) || rows.length === 0) {
 		return;
 	}
 
-	const blocks = rows.map(({ data }) => data.blockNumber).filter(nonNullish);
+	const blocks = rows
+		.map(({ data }) => data.blockNumber)
+		.filter(nonNullish)
+		.filter((blockNumber) => isBelievableBlockNumber({ blockNumber, chainTip }));
 
 	if (blocks.length === 0) {
 		return;
@@ -104,19 +139,31 @@ const maxEthBlockNumberInStore = (tokenId: TokenId): number | undefined => {
 
 /**
  * Next Etherscan `startBlock` after the newest known height; backend cursor wins over the store.
+ *
+ * A boundary too far above the tip to be believable is skipped rather than honoured: it would pin
+ * `startBlock` above every block the explorer can return and stop the incremental load for good.
+ * Falling through to the next candidate lets such a boundary heal itself on the following load.
  */
 const resolveEthIncrementalStartBlock = ({
 	newestStoredBlockIndex,
-	maxBlockFromTransactionsStore
+	maxBlockFromTransactionsStore,
+	chainTip
 }: {
 	newestStoredBlockIndex: bigint | undefined;
 	maxBlockFromTransactionsStore: number | undefined;
+	chainTip: number | undefined;
 }): number => {
-	if (nonNullish(newestStoredBlockIndex)) {
+	if (
+		nonNullish(newestStoredBlockIndex) &&
+		isBelievableBlockNumber({ blockNumber: Number(newestStoredBlockIndex), chainTip })
+	) {
 		return Number(newestStoredBlockIndex) + 1;
 	}
 
-	if (nonNullish(maxBlockFromTransactionsStore)) {
+	if (
+		nonNullish(maxBlockFromTransactionsStore) &&
+		isBelievableBlockNumber({ blockNumber: maxBlockFromTransactionsStore, chainTip })
+	) {
 		return maxBlockFromTransactionsStore + 1;
 	}
 
@@ -126,9 +173,10 @@ const resolveEthIncrementalStartBlock = ({
 /**
  * The chain's latest block, or `undefined` when it cannot be read.
  *
- * Two callers want it: the incremental fetch skips the explorer entirely when the tip has not
- * moved past everything we already hold, and the save uses it as the reference the finality check
- * measures against.
+ * Three callers want it: the boundary resolution discards a stored height too far above it to be
+ * believable, the incremental fetch skips the explorer entirely when the tip has not moved past
+ * everything we already hold, and the save uses it as the reference the finality check measures
+ * against.
  */
 const readChainTip = async ({
 	networkId
@@ -146,9 +194,8 @@ const readChainTip = async ({
 
 /**
  * Fetches native ETH history from Etherscan after `startBlock` (exclusive lower bound in API terms).
- * For incremental loads, skips the request when Infura reports the chain tip is still below `startBlock`.
  */
-const loadNewEthNativeTransactionsAfterStartBlock = async ({
+const loadNewEthNativeTransactionsAfterStartBlock = ({
 	networkId,
 	address,
 	startBlock
@@ -158,17 +205,6 @@ const loadNewEthNativeTransactionsAfterStartBlock = async ({
 	startBlock: number;
 }): Promise<Transaction[]> => {
 	const { transactions: transactionsProvider } = etherscanProviders(networkId);
-
-	if (startBlock === 0) {
-		return transactionsProvider({ address, startBlock: 0, sort: 'desc' });
-	}
-
-	const chainTip = await readChainTip({ networkId });
-
-	// If we cannot read the tip, still query Etherscan rather than leave the UI stale.
-	if (nonNullish(chainTip) && chainTip < startBlock) {
-		return [];
-	}
 
 	return transactionsProvider({ address, startBlock, sort: 'desc' });
 };
@@ -207,16 +243,16 @@ const loadCachedErc20Transactions = async ({
 		setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 	}
 
+	// One read serves every decision below: discarding a stored boundary the chain has not reached,
+	// skipping a fetch that cannot return anything, and giving the finality check a real reference
+	// point rather than the batch's own newest block.
+	const chainTip = await readChainTip({ networkId });
+
 	const startBlock = resolveEthIncrementalStartBlock({
 		newestStoredBlockIndex: stored?.newestBlockIndex,
-		maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
-			? undefined
-			: maxEthBlockNumberInStore(tokenId)
+		maxBlockFromTransactionsStore: maxEthBlockNumberInStore({ tokenId, chainTip }),
+		chainTip
 	});
-
-	// One read serves both purposes below: skipping a fetch that cannot return anything, and giving
-	// the finality check a real reference point rather than the batch's own newest block.
-	const chainTip = await readChainTip({ networkId });
 
 	const tipIsBehindWhatWeHold = startBlock > 0 && nonNullish(chainTip) && chainTip < startBlock;
 
@@ -248,25 +284,22 @@ const loadCachedErc20Transactions = async ({
 		ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 	}
 
-	if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
-		const blockNumbers = newTransactions.map(({ blockNumber }) => blockNumber).filter(nonNullish);
-		const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
-
-		// The batch's own newest block under-states how far behind the chain the rest of it sits, so
-		// measuring finality against it holds back transfers that are already final. Fall back to it
-		// only when the tip could not be read, where being conservative beats persisting too early.
-		const currentBlockNumber = chainTip ?? maxBlockNumber;
-
-		if (maxBlockNumber > 0) {
-			saveErc20FinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: newTransactions,
-				currentBlockNumber
-			}).catch((err) =>
-				consoleError('Background save of finalized ERC-20 transactions failed:', err)
-			);
-		}
+	// Finality is measured against the tip Infura reports, never against the batch's own newest
+	// block: a response that supplied both the transfers and the height certifying them could mark
+	// anything final. Without a tip we skip the save and let a later load persist them.
+	if (
+		USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
+		newTransactions.some(({ blockNumber }) => nonNullish(blockNumber)) &&
+		nonNullish(chainTip)
+	) {
+		saveErc20FinalizedTransactions({
+			identity,
+			tokenId: transactionTokenId,
+			transactions: newTransactions,
+			currentBlockNumber: chainTip
+		}).catch((err) =>
+			consoleError('Background save of finalized ERC-20 transactions failed:', err)
+		);
 	}
 };
 
@@ -305,18 +338,26 @@ const loadEthTransactions = async ({
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
 
+		// One read serves every decision below: discarding a stored boundary the chain has not
+		// reached, skipping a fetch that cannot return anything, and giving the finality check a real
+		// reference point rather than the batch's own newest block.
+		const chainTip = await readChainTip({ networkId });
+
 		const startBlock = resolveEthIncrementalStartBlock({
 			newestStoredBlockIndex: stored?.newestBlockIndex,
-			maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
-				? undefined
-				: maxEthBlockNumberInStore(tokenId)
+			maxBlockFromTransactionsStore: maxEthBlockNumberInStore({ tokenId, chainTip }),
+			chainTip
 		});
 
-		const newTransactions = await loadNewEthNativeTransactionsAfterStartBlock({
-			networkId,
-			address,
-			startBlock
-		});
+		const tipIsBehindWhatWeHold = startBlock > 0 && nonNullish(chainTip) && chainTip < startBlock;
+
+		const newTransactions = tipIsBehindWhatWeHold
+			? []
+			: await loadNewEthNativeTransactionsAfterStartBlock({
+					networkId,
+					address,
+					startBlock
+				});
 
 		// Combine newest-first: new transactions (desc) then stored (desc from backend)
 		const allTransactions = [...newTransactions, ...(stored?.transactions ?? [])];
@@ -338,22 +379,21 @@ const loadEthTransactions = async ({
 			ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 		}
 
-		// Save newly finalized transactions to backend (fire-and-forget).
-		// We use the highest block number in the batch as the "tip" for finality checks.
-		// This means only transactions at least ETH_FINALITY_BLOCKS behind this tip will
-		// be saved — the most recent transactions in the batch will be saved on a future load.
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
-			const blockNumbers = newTransactions.map((tx) => tx.blockNumber).filter(nonNullish);
-			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
-
-			if (maxBlockNumber > 0) {
-				saveEthFinalizedTransactions({
-					identity,
-					tokenId: transactionTokenId,
-					transactions: newTransactions,
-					currentBlockNumber: maxBlockNumber
-				}).catch((err) => consoleError('Background save of finalized transactions failed:', err));
-			}
+		// Save newly finalized transactions to backend (fire-and-forget). Finality is measured against
+		// the tip Infura reports, never against the batch's own newest block: a response that supplied
+		// both the transactions and the height certifying them could mark anything final. Without a tip
+		// we skip the save and let a later load persist them.
+		if (
+			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
+			newTransactions.some(({ blockNumber }) => nonNullish(blockNumber)) &&
+			nonNullish(chainTip)
+		) {
+			saveEthFinalizedTransactions({
+				identity,
+				tokenId: transactionTokenId,
+				transactions: newTransactions,
+				currentBlockNumber: chainTip
+			}).catch((err) => consoleError('Background save of finalized transactions failed:', err));
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);

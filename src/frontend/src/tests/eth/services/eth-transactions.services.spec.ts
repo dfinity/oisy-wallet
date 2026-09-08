@@ -436,7 +436,7 @@ describe('eth-transactions.services', () => {
 				);
 			});
 
-			it('should fall back to the batch newest block when the tip cannot be read', async () => {
+			it('should not persist anything when the tip cannot be read', async () => {
 				const [newer] = createMockEthTransactions(1);
 
 				mockErc20Transactions.mockResolvedValue([{ ...newer, blockNumber: 4242 }]);
@@ -445,9 +445,7 @@ describe('eth-transactions.services', () => {
 
 				await load();
 
-				expect(saveErc20FinalizedTransactions).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({ currentBlockNumber: 4242 })
-				);
+				expect(saveErc20FinalizedTransactions).not.toHaveBeenCalled();
 			});
 
 			it('should not persist anything when Etherscan returned nothing new', async () => {
@@ -537,8 +535,6 @@ describe('eth-transactions.services', () => {
 					startBlock: 0,
 					sort: 'desc'
 				});
-
-				expect(infuraMocks.mockInfuraGetBlockNumber).not.toHaveBeenCalled();
 			});
 
 			it('should fetch incrementally from Etherscan using newestBlockIndex + 1', async () => {
@@ -843,6 +839,8 @@ describe('eth-transactions.services', () => {
 				}));
 				mockEthTransactionsProvider.mockResolvedValueOnce(newTransactions);
 
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(1_000);
+
 				await loadEthereumTransactions({
 					identity: mockIdentity,
 					networkId: mockNetworkId,
@@ -855,7 +853,7 @@ describe('eth-transactions.services', () => {
 					identity: mockIdentity,
 					tokenId: { EvmNative: mockChainId },
 					transactions: newTransactions,
-					currentBlockNumber: 102
+					currentBlockNumber: 1_000
 				});
 			});
 
@@ -990,14 +988,19 @@ describe('eth-transactions.services', () => {
 				expect(transactionStore[mockTokenId]).toEqual(null);
 			});
 
-			it('should use max block number from new transactions for finality check', async () => {
+			it('should measure finality against the chain tip, not the batch', async () => {
 				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
 
-				const newTransactions = createMockEthTransactions(3).map((tx, i) => ({
+				// A response that supplies both the entries and the height certifying them could otherwise
+				// mark anything final: block 1_999_999_936 sits exactly ETH_FINALITY_BLOCKS below its own
+				// batch's newest block.
+				const forged = createMockEthTransactions(2).map((tx, i) => ({
 					...tx,
-					blockNumber: [50, 300, 150][i]
+					blockNumber: [2_000_000_000, 1_999_999_936][i]
 				}));
-				mockEthTransactionsProvider.mockResolvedValueOnce(newTransactions);
+				mockEthTransactionsProvider.mockResolvedValueOnce(forged);
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(23_000_000);
 
 				await loadEthereumTransactions({
 					identity: mockIdentity,
@@ -1008,10 +1011,79 @@ describe('eth-transactions.services', () => {
 				});
 
 				expect(saveEthFinalizedTransactions).toHaveBeenCalledWith(
-					expect.objectContaining({
-						currentBlockNumber: 300
-					})
+					expect.objectContaining({ currentBlockNumber: 23_000_000 })
 				);
+			});
+
+			it('should not persist anything when the tip cannot be read', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
+
+				const newTransactions = createMockEthTransactions(2).map((tx, i) => ({
+					...tx,
+					blockNumber: 100 + i
+				}));
+				mockEthTransactionsProvider.mockResolvedValueOnce(newTransactions);
+
+				infuraMocks.mockInfuraGetBlockNumber.mockRejectedValueOnce(new Error('no provider'));
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(saveEthFinalizedTransactions).not.toHaveBeenCalled();
+			});
+
+			it('should keep fetching when the stored block index is far above the chain tip', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: [],
+					newestBlockIndex: 1_999_999_936n,
+					oldestBlockIndex: 50n,
+					nextStart: undefined,
+					totalStored: 1n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(23_000_000);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(mockEthTransactionsProvider).toHaveBeenCalledWith({
+					address: mockEthAddress,
+					startBlock: 0,
+					sort: 'desc'
+				});
+			});
+
+			it('should still skip Etherscan when the tip is only just behind the stored height', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: [],
+					newestBlockIndex: 23_000_050n,
+					oldestBlockIndex: 50n,
+					nextStart: undefined,
+					totalStored: 1n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(23_000_000);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(mockEthTransactionsProvider).not.toHaveBeenCalled();
 			});
 		});
 
