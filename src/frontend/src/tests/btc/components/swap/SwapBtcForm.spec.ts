@@ -235,6 +235,7 @@ describe('SwapBtcForm', () => {
 			context: createContext({
 				utxosFee: {
 					feeSatoshis: ZERO,
+					feeRateMiliSatoshisPerVByte: 4000n,
 					utxos: [mockUtxo],
 					error: BtcPrepareSendError.UtxoLocked
 				}
@@ -263,6 +264,7 @@ describe('SwapBtcForm', () => {
 					offered: false,
 					utxosFee: {
 						feeSatoshis: ZERO,
+						feeRateMiliSatoshisPerVByte: 4000n,
 						utxos: [mockUtxo],
 						error: BtcPrepareSendError.UtxoLocked
 					}
@@ -286,7 +288,9 @@ describe('SwapBtcForm', () => {
 	it('explains a selection with no available inputs', () => {
 		const { getByText } = render(SwapBtcForm, {
 			props,
-			context: createContext({ utxosFee: { feeSatoshis: ZERO, utxos: [] } })
+			context: createContext({
+				utxosFee: { feeSatoshis: ZERO, feeRateMiliSatoshisPerVByte: 4000n, utxos: [] }
+			})
 		});
 
 		expect(getByText(en.send.info.no_available_utxos)).toBeInTheDocument();
