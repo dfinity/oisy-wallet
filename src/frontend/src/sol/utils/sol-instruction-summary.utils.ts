@@ -1,23 +1,14 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
+import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-
-/**
- * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
- * `getTransaction` report them. The RPC picks the parsed arm per instruction, so the unparsed one
- * survives in the union and contributes nothing here.
- */
-interface SolParsedRpcInstruction {
-	program?: string;
-	programId: SolAddress;
-	parsed: { type: string; info: object };
-}
 
 export interface SolInstructionGroup {
 	index: number;
@@ -359,6 +350,51 @@ const toEffect = ({
 			};
 		}
 
+		// Burning destroys what the account held, and minting creates into it. Neither is a
+		// transfer, so no counterparty names either, and the balance is the whole of what changed.
+		if (['burn', 'burnChecked', 'mintTo', 'mintToChecked'].includes(type)) {
+			const account = address({ info, key: 'account' });
+			const authority =
+				address({ info, key: 'authority' }) ?? address({ info, key: 'mintAuthority' });
+
+			if (
+				isNullish(account) ||
+				!(owned.has(account) || (nonNullish(authority) && owned.has(authority)))
+			) {
+				return undefined;
+			}
+
+			const { amount: checked, decimals } = tokenAmount(info);
+			const value = checked ?? amount({ info, key: 'amount' });
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type.startsWith('burn') ? 'burn' : 'mint',
+				account,
+				...(nonNullish(value) && { amount: value }),
+				...(nonNullish(decimals) && { decimals }),
+				...(nonNullish(mint) && { tokenAddress: mint })
+			};
+		}
+
+		// A frozen account holds exactly what it held and can do nothing with it, so no balance
+		// anywhere reports this happening.
+		if (['freezeAccount', 'thawAccount'].includes(type)) {
+			const account = address({ info, key: 'account' });
+
+			if (isNullish(account) || !owned.has(account)) {
+				return undefined;
+			}
+
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type === 'freezeAccount' ? 'freeze' : 'thaw',
+				account,
+				...(nonNullish(mint) && { tokenAddress: mint })
+			};
+		}
+
 		if (type === 'setAuthority') {
 			const account = address({ info, key: 'account' });
 
@@ -541,7 +577,8 @@ export const mapSolInstructionSummaries = ({
 	innerInstructions = [],
 	ownedAddresses,
 	addressToToken = {},
-	accountLamports = {}
+	accountLamports = {},
+	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
@@ -550,6 +587,10 @@ export const mapSolInstructionSummaries = ({
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	// Whether to keep a line for each top-level instruction that produced no effect of its own.
+	// Off where the list stands beside the balance changes that vouch for it, on where it is the
+	// only account of the transaction there is.
+	includeUnrecognised?: boolean;
 }): SolInstructionSummary[] => {
 	const flattened = flatten({ instructions, innerInstructions });
 
@@ -587,5 +628,40 @@ export const mapSolInstructionSummaries = ({
 		return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
 	}, []);
 
-	return groupRoutes({ effects, programs });
+	// A top-level instruction none of the effects came from is one the wallet could not read: a
+	// program it does not know, or a message whose instructions carry raw bytes rather than the
+	// parsed form. Kept in the position it holds in the transaction, so the list reads in the
+	// order the run would take rather than as the recognised instructions with the gaps closed up.
+	const covered = new Set(effects.map(({ parentIndex }) => parentIndex));
+
+	const listed = includeUnrecognised
+		? [
+				...effects,
+				...instructions.reduce<Effect[]>((acc, _, index) => {
+					if (covered.has(index)) {
+						return acc;
+					}
+
+					const program = programs[index];
+
+					// The review already states what these do, as the priority fee it charges for.
+					// Listing them here as instructions nothing could read would be noise on every
+					// transaction that sets a compute budget, and untrue besides.
+					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+						return acc;
+					}
+
+					return [
+						...acc,
+						{
+							kind: 'unknown' as const,
+							...(nonNullish(program) && { program }),
+							parentIndex: index
+						}
+					];
+				}, [])
+			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
+		: effects;
+
+	return groupRoutes({ effects: listed, programs });
 };

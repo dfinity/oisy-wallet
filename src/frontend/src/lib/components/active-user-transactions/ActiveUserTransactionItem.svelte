@@ -24,6 +24,7 @@
 		toLiquidiumExternalRefsMap
 	} from '$lib/utils/liquidium-active-tx.utils';
 	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
+	import { isOisyTradeActiveUserTransaction } from '$lib/utils/oisy-trade-active-tx.utils';
 	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
@@ -43,11 +44,12 @@
 	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
 	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
 	const isChainFusion = $derived(isChainFusionActiveUserTransaction(tx));
+	const isOisyTrade = $derived(isOisyTradeActiveUserTransaction(tx));
 	// Every swap provider is rendered identically — they share the same
-	// display-ref key names in `external_refs`. Velora's Delta/Market distinction
-	// and Chain Fusion's conversion direction are internal routing and deliberately
-	// not surfaced.
-	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion);
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction,
+	// Chain Fusion's conversion direction and OISY Trade's order side are internal
+	// routing and deliberately not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
@@ -88,7 +90,12 @@
 								// unconditional precisely so a row outliving a flag rollback keeps
 								// its provider name.
 								(swapProvidersDetails[SwapProvider.CHAIN_FUSION]?.name ?? '')
-							: undefined
+							: isOisyTrade
+								? // Unconditional for the same reason, and it matters more here: the
+									// OISY Trade swap flag is expected to move while the real receive
+									// amount lands, and a row can outlive any of that.
+									(swapProvidersDetails[SwapProvider.OISY_TRADE]?.name ?? '')
+								: undefined
 	);
 
 	const titleText = $derived(

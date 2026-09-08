@@ -36,7 +36,8 @@
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import {
 		flattenInstructions,
-		formatSolTransactionSummary
+		formatSolTransactionSummary,
+		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
@@ -99,20 +100,7 @@
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
-	let ataFee = $derived(
-		maxBigInt(
-			(instructions ?? []).reduce((acc, { kind, rent, returned }) => {
-				if (kind === 'createTokenAccount' && nonNullish(rent)) {
-					return acc + rent;
-				}
-
-				// A message that opens one account and closes another charges the difference. Netting
-				// below zero would turn a refund into a negative fee, which is not what a fee is.
-				return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
-			}, ZERO),
-			ZERO
-		)
-	);
+	let ataFee = $derived(solAtaFee(instructions ?? []));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -133,9 +121,14 @@
 
 	// The programs the run went through, in the order it reached them and each named once. The
 	// message names none of them itself: a routed swap performs every call inside another program.
+	//
+	// Only the programs that moved something. An instruction the wallet could not read names its
+	// program too, and most transactions carry a couple that change nothing the user holds, so
+	// counting those here would bury the program that did the work among its housekeeping.
 	let venues = $derived([
 		...new Set(
 			flattenInstructions(instructions ?? [])
+				.filter(({ kind }) => kind !== 'unknown')
 				.map(({ program }) => program)
 				.filter(nonNullish)
 		)
@@ -284,7 +277,7 @@
 	     material a user checks the summary against, not part of the summary: on a routed swap they
 	     are a dozen lines, and above the amounts they bury the one figure that matters. -->
 	<Tabs
-		styleClass="mt-4"
+		contentStyleClass="mt-4"
 		tabs={[
 			{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
 			{ label: $i18n.wallet_connect.text.tab_operations, id: 'operations' }

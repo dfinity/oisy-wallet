@@ -21,3 +21,9 @@ export const ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER = 10n;
 export const ETH_FEE_RETRY_BASE_DELAY = 2_000;
 export const ETH_FEE_RETRY_MAX_DELAY = 30_000;
 export const ETH_FEE_RETRY_MAX_ATTEMPTS = 5;
+
+// How many digits of a gwei fee actually carry information. Four keeps `1.234` intact and drops
+// the fraction of `44,185.0944`, which says nothing about a fee that size.
+export const GWEI_SIGNIFICANT_DIGITS = 4;
+
+export const WEI_PER_GWEI = 1_000_000_000n;

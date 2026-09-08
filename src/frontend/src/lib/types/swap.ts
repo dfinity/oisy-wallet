@@ -322,15 +322,18 @@ export type ChainFusionFee = ProviderFee & {
 	/**
 	 * Whether the fee comes out of the converted amount, reducing what the user receives.
 	 *
-	 * It decides the receive amount and nothing else: every fee is disclosed either way, in
-	 * the form's fee section, because the total shown there has to be the user's whole cost of
-	 * the conversion. The provider sheet carries no fees.
+	 * It decides two things at once: the receive amount, and where the fee is disclosed. A
+	 * deducted fee is already visible as the gap between the pay and receive amounts, so it is
+	 * stated in the provider sheet; a fee paid on top is itemized and totaled in the form's fee
+	 * section — see `chainFusionProviderDetailsFees` / `chainFusionFeeSectionFees`.
 	 *
 	 * The test is what the minter actually takes out of the amount it credits or pays out,
 	 * which is not the same as what the Convert flow displays — a real BTC → ckBTC
 	 * conversion showed Convert quoting 1:1 while the minter withheld its KYT fee. So:
 	 * - **Flagged:** the ckBTC KYT fee on a BTC → ckBTC deposit, and the Bitcoin network +
 	 *   minter fee on a ckBTC → BTC withdrawal (`IcTokenFees`'s `totalDestinationTokenFee`).
+	 *   Not the KYT fee on a withdrawal: finalized withdrawals pay out exactly
+	 *   `amount - bitcoin_fee - minter_fee`.
 	 * - **Not flagged:** a ck ledger fee, because `approve(amount)` debits `amount + fee`
 	 *   while the minter moves the full `amount`.
 	 * - **Not flagged:** the BTC network fee of a deposit — UTXO selection covers it out of

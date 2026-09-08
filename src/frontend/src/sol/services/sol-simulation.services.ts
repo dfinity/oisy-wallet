@@ -9,6 +9,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
 	isEmptySolSimulationPreview,
@@ -92,21 +93,25 @@ const simulate = async ({
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
 	// what attaches each simulated nested call to the instruction that made it.
 	const instructions = mapSolInstructionSummaries({
-		instructions: [...transactionMessage.instructions],
+		instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
 		innerInstructions: [...innerInstructions].map(({ index, instructions: inner }) => ({
 			index: Number(index),
 			instructions: [...inner]
 		})),
 		ownedAddresses: [address, ...ownedAddresses],
 		addressToToken,
-		accountLamports
+		accountLamports,
+		// A run whose calls all happen inside a program the wallet cannot read produces no effects
+		// at all, and the review then listed nothing for a transaction that plainly does something.
+		// Saying which programs it hands the instructions to is worth more than an empty list.
+		includeUnrecognised: true
 	});
 
 	// The message read on its own, without the nested calls the run reveals: a second account of
 	// the same transaction, which is what lets the review notice the two disagreeing.
 	const messageSummary = deriveSolMessageSummary({
 		instructions: mapSolInstructionSummaries({
-			instructions: [...transactionMessage.instructions],
+			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
 			innerInstructions: [],
 			ownedAddresses: [address, ...ownedAddresses],
 			addressToToken

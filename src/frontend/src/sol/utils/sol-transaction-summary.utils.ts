@@ -1,6 +1,6 @@
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { absBigInt } from '$lib/utils/bigint.utils';
+import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
@@ -19,6 +19,53 @@ export const flattenInstructions = (
 		instruction,
 		...flattenInstructions(instruction.children ?? [])
 	]);
+
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
+ * it closes hand back.
+ *
+ * A transaction that opens one account and closes another charges only the difference, and one
+ * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
+ * bills the user for accounts they no longer have.
+ *
+ * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
+ * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
+ * a caller shows nothing.
+ *
+ * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
+ * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
+ * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
+ * account, which the opening instruction states exactly, so the account is what ties the two
+ * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
+ * never this transaction's to charge.
+ */
+export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
+	const flattened = flattenInstructions(instructions);
+
+	const rentPaidFor = flattened.reduce<Record<string, bigint>>((acc, { kind, account, rent }) => {
+		if (kind !== 'createTokenAccount' || isNullish(account) || isNullish(rent)) {
+			return acc;
+		}
+
+		return { ...acc, [account]: rent };
+	}, {});
+
+	return maxBigInt(
+		flattened.reduce((acc, { kind, account, rent, returned }) => {
+			if (kind === 'createTokenAccount' && nonNullish(rent)) {
+				return acc + rent;
+			}
+
+			if (kind === 'unwrap') {
+				return acc - (nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO);
+			}
+
+			// A plain token account holds nothing but its rent, so what it hands back is the rent.
+			return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+		}, ZERO),
+		ZERO
+	);
+};
 
 /**
  * The tokens the transaction actually trades, read from its legs.
@@ -111,9 +158,23 @@ export const deriveSolTransactionSummary = ({
 }): SolTransactionSummary => {
 	const traded = tradedTokens(instructions);
 
-	const considered = netChanges.filter(
-		(change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined)
-	);
+	// Rent leaves the wallet address but is not traded, and the balance the chain reports cannot
+	// tell the two apart. A swap of 0.001 SOL that opens an account on the way spends 0.00310888
+	// of it, and stating that as the amount traded overstates the trade by the rent every time.
+	//
+	// The account is still the user's and closing it hands the rent back, so what it costs the
+	// transaction is stated as a fee of its own, beside this line rather than inside it. The
+	// balance changes keep the figure the chain reports: this is what the transaction did, not
+	// what the address holds.
+	const rent = solAtaFee(instructions);
+
+	const considered = netChanges
+		.filter((change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined))
+		.map((change) =>
+			isSolNetBalanceChangeSol(change) && rent !== ZERO
+				? { ...change, delta: change.delta + rent }
+				: change
+		);
 
 	const outs = considered.filter(({ delta }) => delta < ZERO);
 	const ins = considered.filter(({ delta }) => delta > ZERO);
@@ -240,7 +301,17 @@ export const formatSolTransactionSummary = ({
  * stays a renderer. The children of a route are the caller's to indent, not this function's.
  */
 export const formatSolInstructionSummary = ({
-	instruction: { kind, amount: value, tokenAddress, decimals, counterparty, own, rent, returned },
+	instruction: {
+		kind,
+		amount: value,
+		tokenAddress,
+		decimals,
+		counterparty,
+		own,
+		rent,
+		returned,
+		program
+	},
 	i18n,
 	symbolOf,
 	decimalsOf
@@ -342,9 +413,39 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	if ((kind === 'burn' || kind === 'mint') && nonNullish(value)) {
+		return {
+			text: replacePlaceholders(
+				kind === 'burn'
+					? i18n.transaction.text.instruction_burn
+					: i18n.transaction.text.instruction_mint,
+				{ $amount: amount(value), $symbol: symbolOf(tokenAddress) }
+			)
+		};
+	}
+
+	if (kind === 'freeze' || kind === 'thaw') {
+		return {
+			text:
+				kind === 'freeze'
+					? i18n.transaction.text.instruction_freeze
+					: i18n.transaction.text.instruction_thaw
+		};
+	}
+
 	if (kind === 'route') {
 		return {
 			text: i18n.transaction.text.instruction_route
+		};
+	}
+
+	// Says only that the wallet could not read it. The program beside it is the whole of what is
+	// known, so the line names that program rather than guessing at what the call does.
+	if (kind === 'unknown') {
+		return {
+			text: nonNullish(program)
+				? i18n.transaction.text.instruction_unknown_via
+				: i18n.transaction.text.instruction_unknown
 		};
 	}
 

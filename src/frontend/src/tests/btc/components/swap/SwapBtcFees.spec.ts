@@ -16,6 +16,12 @@ describe('SwapBtcFees', () => {
 		receiveAmount: 1_000_000n,
 		swapDetails: {
 			sourceFees: [
+				{
+					labelPath: 'fee.text.convert_inter_network_fee',
+					fee: 100n,
+					token: BTC_MAINNET_TOKEN,
+					deductedFromAmount: true
+				},
 				{ labelPath: 'fee.text.convert_btc_network_fee', fee: 1_000n, token: BTC_MAINNET_TOKEN }
 			],
 			externalFees: []
@@ -60,14 +66,51 @@ describe('SwapBtcFees', () => {
 		return context;
 	};
 
-	it('renders the priced fee breakdown for a Chain Fusion offer', () => {
+	// A total of one fee is that fee, so the lone row stands on its own under its own label
+	// rather than under a "Total fee" header it would only repeat.
+	it('renders a lone priced fee as a single row, without a total', () => {
 		const { getByText, queryByText } = render(SwapBtcFees, {
 			context: createContext({ offer: chainFusionOffer })
 		});
 
-		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
+		expect(getByText('0.00001 BTC')).toBeInTheDocument();
+		expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
 		expect(queryByText(en.fee.text.network_fee)).not.toBeInTheDocument();
+	});
+
+	// The KYT fee the ckBTC minter withholds is already priced into the receive amount, so the
+	// provider sheet states it and this section does not — a deposit's whole cost out of
+	// balance is the Bitcoin network fee alone.
+	it('leaves out the fee the provider sheet discloses', () => {
+		const { queryByText } = render(SwapBtcFees, {
+			context: createContext({ offer: chainFusionOffer })
+		});
+
+		expect(queryByText(en.fee.text.convert_inter_network_fee)).not.toBeInTheDocument();
+		expect(queryByText('0.000001 BTC')).not.toBeInTheDocument();
+	});
+
+	it('totals several priced fees under a collapsible header', () => {
+		const { getByText } = render(SwapBtcFees, {
+			context: createContext({
+				offer: {
+					...chainFusionOffer,
+					swapDetails: {
+						sourceFees: [
+							...chainFusionOffer.swapDetails.sourceFees,
+							{ labelPath: 'fee.text.fee', fee: 500n, token: BTC_MAINNET_TOKEN }
+						],
+						externalFees: []
+					}
+				}
+			})
+		});
+
+		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
+		expect(getByText('0.000015 BTC')).toBeInTheDocument();
+		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
+		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
 	});
 
 	// The NEAR Intents quote prices its own fees into the receive amount; the deposit's

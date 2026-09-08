@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
 	import {
 		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
@@ -173,6 +175,10 @@
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 
+	// Names the fee rows for a screen reader. A `label` cannot do it: it only labels form controls,
+	// so its `for` would be ignored here and the group would be announced without a name.
+	const FEE_SECTION_LABEL = 'fee-label';
+
 	let activeTab = $state('summary');
 </script>
 
@@ -223,7 +229,7 @@
 	{/if}
 
 	<Tabs
-		styleClass="mt-4"
+		contentStyleClass="mt-4"
 		tabs={[
 			{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
 			{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }
@@ -271,11 +277,26 @@
 					/>
 				{/if}
 
-				<EthFeeDisplay gas={signedGas}>
-					{#snippet label()}
-						<Html text={$i18n.fee.text.max_fee_eth} />
-					{/snippet}
-				</EthFeeDisplay>
+				<!-- The fee is two rows that belong together, so it takes a heading like every other
+				     block in this summary rather than trailing loose off the end of it. -->
+				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
+
+				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
+					{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+						<EthFeePriority gas={signedGas} styleClass="mb-2" />
+					{/if}
+
+					<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
+						{#snippet label()}
+							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+							{#if SEND_TRANSACTION_PRIORITY_ENABLED}
+								{$i18n.fee.text.estimated}
+							{:else}
+								<Html text={$i18n.fee.text.max_fee_eth} />
+							{/if}
+						{/snippet}
+					</EthFeeDisplay>
+				</div>
 			</SendData>
 		{:else}
 			<!-- What the transaction calls is the one thing the review can still state about calldata
