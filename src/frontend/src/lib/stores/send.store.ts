@@ -74,11 +74,6 @@ export const initSendContext = ({
 	// re-render, so it cannot be a prop.
 	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.STANDARD);
 
-	// Which token the amount currently cached by the send modal was typed for. Same reason as
-	// `sendEthCustomNonce` above: the wizard is remounted on every step, so without a record that
-	// outlives the mount a fresh mount is indistinguishable from a switch to another token.
-	const sendEthAmountTokenKey = writable<string | undefined>();
-
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -91,8 +86,7 @@ export const initSendContext = ({
 		sendDestination,
 		isIcBurning,
 		sendEthCustomNonce,
-		sendEthFeePriority,
-		sendEthAmountTokenKey
+		sendEthFeePriority
 	};
 };
 
@@ -109,7 +103,6 @@ export interface SendContext {
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
-	sendEthAmountTokenKey: Writable<string | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

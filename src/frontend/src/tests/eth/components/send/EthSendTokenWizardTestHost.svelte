@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import type { Readable, Writable } from 'svelte/store';
+	import type { Readable } from 'svelte/store';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -16,7 +16,6 @@
 		sendTokenDecimals: Readable<number>;
 		sendTokenId: Readable<TokenId>;
 		sendEthCustomNonce: Readable<number | undefined>;
-		sendEthAmountTokenKey: Writable<string | undefined>;
 	}
 
 	interface Props {
@@ -30,7 +29,6 @@
 		nft?: Nft;
 		selectedContact?: ContactUi;
 		onCloseStep: (step: string) => void;
-		onAmountChange?: (amount: OptionAmount) => void;
 	}
 
 	let {
@@ -43,8 +41,7 @@
 		initialSendProgressStep = ProgressStepsSend.INITIALIZATION,
 		nft,
 		selectedContact,
-		onCloseStep,
-		onAmountChange
+		onCloseStep
 	}: Props = $props();
 
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
@@ -57,10 +54,6 @@
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
 	// svelte-ignore state_referenced_locally -- this test host initializes context once for the mounted component under test.
 	setContext(SEND_CONTEXT_KEY, sendContext);
-
-	$effect(() => {
-		onAmountChange?.(amount);
-	});
 
 	const close = () => onCloseStep(sendProgressStep);
 </script>
