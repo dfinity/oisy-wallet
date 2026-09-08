@@ -1,4 +1,5 @@
 import type {
+	OrderBookDepth,
 	OrderStatus,
 	TradingPairInfo,
 	UserOrder,
@@ -150,6 +151,13 @@ const buildPair = ({
 
 const icpUsdc = buildPair({ base: ICP, quote: CKUSDC });
 
+// 10 ckUSDC/ICP, 5 ICP of bids and 50 ICP of asks — deep enough for every order
+// quoted here, since a Buy is covered by the levels' value rather than their quantity.
+const depth: OrderBookDepth = {
+	bids: [{ price: 10_000_000n, quantity: 500_000_000n }],
+	asks: [{ price: 10_000_000n, quantity: 5_000_000_000n }]
+};
+
 describe('oisy-trade-swap.services', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -199,14 +207,23 @@ describe('oisy-trade-swap.services', () => {
 	});
 
 	describe('fetchOisyTradeQuote', () => {
+		const mockDepth = () => vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue(depth);
+
+		const quote = (params: {
+			sourceToken: IcToken;
+			destinationToken: IcToken;
+			sourceAmount: bigint;
+		}) => fetchOisyTradeQuote({ identity: mockIdentity, ...params });
+
 		beforeEach(() => {
 			oisyTradeStore.setPairs([icpUsdc]);
+			mockDepth();
 		});
 
-		it('quotes a sell, netting both destination-denominated fees off the fill', () => {
-			// 2 ICP at the 1:1 placeholder → 2 ckUSDC gross (2_000_000 at 6 dp).
-			// Taker 10 bps = 2_000; withdrawal ledger fee = 10_000.
-			const result = fetchOisyTradeQuote({
+		it('quotes a sell, netting both destination-denominated fees off the fill', async () => {
+			// 2 ICP at 10 ckUSDC/ICP → 20 ckUSDC gross (20_000_000 at 6 dp).
+			// Taker 10 bps = 20_000; withdrawal ledger fee = 10_000.
+			const result = await quote({
 				sourceToken: ICP,
 				destinationToken: CKUSDC,
 				sourceAmount: 200_000_000n
@@ -214,15 +231,16 @@ describe('oisy-trade-swap.services', () => {
 
 			assert(result.ok);
 
-			expect(result.quote.receiveAmount).toBe(2_000_000n - 2_000n - 10_000n);
+			expect(result.quote.receiveAmount).toBe(20_000_000n - 20_000n - 10_000n);
 			expect(result.quote.swapDetails.order.side).toBe('sell');
 			expect(result.quote.swapDetails.order.depositAmount).toBe(200_000_000n);
+			expect(result.quote.swapDetails.order.price).toBe(10_000_000n);
 		});
 
-		it('quotes a buy in the other direction', () => {
-			// 2 ckUSDC at 1:1 → 2 ICP gross (200_000_000 at 8 dp).
-			// Taker 10 bps = 200_000; withdrawal ledger fee = 10_000.
-			const result = fetchOisyTradeQuote({
+		it('quotes a buy in the other direction', async () => {
+			// 2 ckUSDC at 10 ckUSDC/ICP buys 0.2 ICP → 20_000_000 gross (8 dp).
+			// Taker 10 bps = 20_000; withdrawal ledger fee = 10_000.
+			const result = await quote({
 				sourceToken: CKUSDC,
 				destinationToken: ICP,
 				sourceAmount: 2_000_000n
@@ -230,12 +248,32 @@ describe('oisy-trade-swap.services', () => {
 
 			assert(result.ok);
 
-			expect(result.quote.receiveAmount).toBe(200_000_000n - 200_000n - 10_000n);
+			expect(result.quote.receiveAmount).toBe(20_000_000n - 20_000n - 10_000n);
 			expect(result.quote.swapDetails.order.side).toBe('buy');
+			// The reserve at the limit price, which is the whole typed spend here.
+			expect(result.quote.swapDetails.order.depositAmount).toBe(2_000_000n);
 		});
 
-		it('itemizes the three fees in their own tokens and never sums them', () => {
-			const result = fetchOisyTradeQuote({
+		it('asks for the pair it is quoting, at the canister default depth', async () => {
+			const spy = mockDepth();
+
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKUSDC,
+				sourceAmount: 200_000_000n
+			});
+
+			expect(spy).toHaveBeenCalledOnce();
+
+			const [[{ request }]] = spy.mock.calls;
+
+			expect(request.limit).toEqual([]);
+			expect(request.trading_pair.base.toText()).toBe(ICP_LEDGER);
+			expect(request.trading_pair.quote.toText()).toBe(CKUSDC_LEDGER);
+		});
+
+		it('itemizes the three fees in their own tokens and never sums them', async () => {
+			const result = await quote({
 				sourceToken: ICP,
 				destinationToken: CKUSDC,
 				sourceAmount: 200_000_000n
@@ -246,13 +284,43 @@ describe('oisy-trade-swap.services', () => {
 			expect(result.quote.swapDetails.fees).toEqual([
 				// Two source ledger fees — approve and transfer_from — paid on top.
 				{ labelPath: 'swap.text.oisy_trade_deposit_fee', fee: 20_000n, token: ICP },
-				{ labelPath: 'swap.text.oisy_trade_taker_fee', fee: 2_000n, token: CKUSDC },
+				{ labelPath: 'swap.text.oisy_trade_taker_fee', fee: 20_000n, token: CKUSDC },
 				{ labelPath: 'swap.text.oisy_trade_withdrawal_fee', fee: 10_000n, token: CKUSDC }
 			]);
 		});
 
-		it('carries the taker rate and the pair floor for the sheet', () => {
-			const result = fetchOisyTradeQuote({
+		// The displayed amount is a floor the user is entitled to, so a fee that does
+		// not divide evenly rounds against us rather than for us.
+		//
+		// Reaching the remainder takes a deliberately chosen price. On the shipped grid
+		// a price is a multiple of `tick_size` and a quantity a multiple of `lot_size`,
+		// which forces the gross to a round figure whose fee usually divides exactly —
+		// so most plausible-looking numbers here would pass under a floor too, and
+		// assert nothing. This price carries a trailing tick to leave a remainder.
+		it('rounds the taker fee up so the offer is never a base unit optimistic', async () => {
+			// One lot of ICP at a tick-aligned 100.001 ckUSDC grosses 1_000_010, and the
+			// pair's 10 bps of that is 1000.01 exactly — the fraction a floor would drop.
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue({
+				bids: [{ price: 100_001_000n, quantity: 500_000_000n }],
+				asks: []
+			});
+
+			const result = await quote({
+				sourceToken: ICP,
+				destinationToken: CKUSDC,
+				sourceAmount: 1_000_000n
+			});
+
+			assert(result.ok);
+
+			// A floor would charge 1_000 and hand the user a base unit the venue keeps.
+			expect(result.quote.swapDetails.fees[1].fee).toBe(1_001n);
+			// And the extra unit reaches the offer, rather than stopping at the fee list.
+			expect(result.quote.receiveAmount).toBe(1_000_010n - 1_001n - 10_000n);
+		});
+
+		it('carries the taker rate and the pair floor for the sheet', async () => {
+			const result = await quote({
 				sourceToken: ICP,
 				destinationToken: CKUSDC,
 				sourceAmount: 200_000_000n
@@ -266,71 +334,145 @@ describe('oisy-trade-swap.services', () => {
 			expect(result.quote.swapDetails.quoteToken).toBe(CKUSDC);
 		});
 
-		it('rejects a halted pair without a reason to name', () => {
+		it('rejects a halted pair without a reason to name', async () => {
 			oisyTradeStore.setPairs([buildPair({ base: ICP, quote: CKUSDC, halted: true })]);
 
-			expect(
-				fetchOisyTradeQuote({
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: CKUSDC,
 					sourceAmount: 200_000_000n
 				})
-			).toEqual({ ok: false });
+			).resolves.toEqual({ ok: false });
 		});
 
-		it('rejects tokens that share no pair', () => {
-			expect(
-				fetchOisyTradeQuote({
+		it('rejects tokens that share no pair', async () => {
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: CKBTC,
 					sourceAmount: 200_000_000n
 				})
-			).toEqual({ ok: false });
+			).resolves.toEqual({ ok: false });
 		});
 
-		it('rejects every quote while the pair table has not loaded', () => {
+		it('rejects every quote while the pair table has not loaded', async () => {
 			oisyTradeStore.reset();
 
-			expect(
-				fetchOisyTradeQuote({
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: CKUSDC,
 					sourceAmount: 200_000_000n
 				})
-			).toEqual({ ok: false });
+			).resolves.toEqual({ ok: false });
 		});
 
-		it('rejects an amount off the lot grid, naming the reason for the form', () => {
-			expect(
-				fetchOisyTradeQuote({
+		it('rejects an amount below one lot', async () => {
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: CKUSDC,
 					sourceAmount: 100_000n
 				})
-			).toEqual({ ok: false, errorKind: 'lot' });
+			).resolves.toEqual({ ok: false });
 		});
 
-		it('rejects a quote whose fees would swallow the whole fill', () => {
-			// 0.01 ICP → 10_000 gross ckUSDC, exactly the withdrawal ledger fee.
-			expect(
-				fetchOisyTradeQuote({
+		it('rejects an order the book cannot absorb', async () => {
+			await expect(
+				quote({
+					sourceToken: ICP,
+					destinationToken: CKUSDC,
+					sourceAmount: 600_000_000n
+				})
+			).resolves.toEqual({ ok: false });
+		});
+
+		it('rejects a quote whose fees would swallow the whole fill', async () => {
+			// One lot of ICP against a 0.001 ckUSDC/ICP book grosses 10 units — three
+			// orders of magnitude under the 10_000 withdrawal ledger fee. Needs a pair
+			// with no notional floor, or the floor would reject it first.
+			oisyTradeStore.setPairs([buildPair({ base: ICP, quote: CKUSDC, minNotional: ZERO })]);
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue({
+				bids: [{ price: 1_000n, quantity: 500_000_000n }],
+				asks: []
+			});
+
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: CKUSDC,
 					sourceAmount: 1_000_000n
 				})
-			).toEqual({ ok: false });
+			).resolves.toEqual({ ok: false });
 		});
 
-		it('rejects a quote when a ledger fee is unknown', () => {
+		it('rejects a quote when a ledger fee is unknown', async () => {
 			const feeless = { ...CKUSDC, fee: undefined } as unknown as IcToken;
 
-			expect(
-				fetchOisyTradeQuote({
+			await expect(
+				quote({
 					sourceToken: ICP,
 					destinationToken: feeless,
 					sourceAmount: 200_000_000n
 				})
-			).toEqual({ ok: false });
+			).resolves.toEqual({ ok: false });
+		});
+
+		// The cheap disqualifications come first so an unquotable pair costs no
+		// canister call — the quote runs on every keystroke and every 5s tick.
+		it('does not fetch the book for a pair it cannot quote', async () => {
+			const spy = mockDepth();
+
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKBTC,
+				sourceAmount: 200_000_000n
+			});
+
+			expect(spy).not.toHaveBeenCalled();
+		});
+
+		// Nor for an amount the pair alone already refuses: no book could rescue a Sell
+		// that floors to zero quantity, or a Buy that cannot reach `min_notional`.
+		it('does not fetch the book for a sell below one lot', async () => {
+			const spy = mockDepth();
+
+			await quote({
+				sourceToken: ICP,
+				destinationToken: CKUSDC,
+				sourceAmount: 100_000n
+			});
+
+			expect(spy).not.toHaveBeenCalled();
+		});
+
+		it('does not fetch the book for a buy under the pair floor', async () => {
+			const spy = mockDepth();
+
+			// A spend under `min_notional` cannot clear the floor at any price: the
+			// order's notional is its reserve, and the reserve never exceeds the spend.
+			await quote({
+				sourceToken: CKUSDC,
+				destinationToken: ICP,
+				sourceAmount: 500n
+			});
+
+			expect(spy).not.toHaveBeenCalled();
+		});
+
+		// A failing depth query is a broken provider, not an absent one: it belongs in
+		// the per-provider `SWAP_OFFER` error analytics, which an empty result hides.
+		it('propagates a depth query failure rather than reporting no offer', async () => {
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockRejectedValue(new Error('depth down'));
+
+			await expect(
+				quote({
+					sourceToken: ICP,
+					destinationToken: CKUSDC,
+					sourceAmount: 200_000_000n
+				})
+			).rejects.toThrow('depth down');
 		});
 	});
 
@@ -351,6 +493,7 @@ describe('oisy-trade-swap.services', () => {
 
 		beforeEach(() => {
 			oisyTradeStore.setPairs([icpUsdc]);
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue(depth);
 		});
 
 		it('carries an OISY Trade quote through the fan-out into the results', async () => {
@@ -365,7 +508,7 @@ describe('oisy-trade-swap.services', () => {
 			const offer = results.find(({ provider }) => provider === SwapProvider.OISY_TRADE);
 
 			expect(offer).toBeDefined();
-			expect(offer?.receiveAmount).toBe(2_000_000n - 2_000n - 10_000n);
+			expect(offer?.receiveAmount).toBe(20_000_000n - 20_000n - 10_000n);
 		});
 
 		it('drops the offer when the source ledger has no ICRC-2', async () => {
@@ -397,14 +540,13 @@ describe('oisy-trade-swap.services', () => {
 		});
 
 		// Every `getQuote` is called inside a `.map()` whose array only afterwards
-		// reaches `Promise.allSettled`, so a *synchronous* throw escapes the settling
-		// and rejects the entire fan-out — losing ICPSwap's and KongSwap's offers
-		// along with OISY Trade's. The two siblings are async functions and get that
-		// containment for free; this entry is a sync quote and has to ask for it.
-		// `fetchOisyTradeQuote` is written not to throw, so this pins the containment
-		// rather than a reachable path — and the order-book walk that replaces the
-		// placeholder lands in exactly this function.
-		it('contains a synchronous quote failure rather than rejecting the fan-out', async () => {
+		// reaches `Promise.allSettled`, so a *synchronous* throw would escape the
+		// settling and reject the entire fan-out — losing ICPSwap's and KongSwap's
+		// offers along with OISY Trade's. Now that the quote awaits the order book it
+		// is an async function like its two siblings, which turns any throw inside it
+		// into a rejected promise the settling absorbs. This pins that: the registry
+		// entry no longer carries a `try/catch`, and it must not need one again.
+		it('contains a quote failure rather than rejecting the fan-out', async () => {
 			vi.spyOn(oisyTradeSwapServices, 'fetchOisyTradeQuote').mockImplementation(() => {
 				throw new Error('synchronous quote failure');
 			});
@@ -422,10 +564,12 @@ describe('oisy-trade-swap.services', () => {
 	});
 
 	describe('mapOisyTradeQuoteResult', () => {
-		it('tags the mapped offer with the OISY Trade provider', () => {
+		it('tags the mapped offer with the OISY Trade provider', async () => {
 			oisyTradeStore.setPairs([icpUsdc]);
+			vi.spyOn(oisyTradeApi, 'getOrderBookDepth').mockResolvedValue(depth);
 
-			const result = fetchOisyTradeQuote({
+			const result = await fetchOisyTradeQuote({
+				identity: mockIdentity,
 				sourceToken: ICP,
 				destinationToken: CKUSDC,
 				sourceAmount: 200_000_000n

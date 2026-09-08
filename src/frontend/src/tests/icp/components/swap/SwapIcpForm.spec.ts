@@ -588,8 +588,8 @@ describe('SwapIcpForm', () => {
 			fee: 10_000n
 		};
 
-		// A 0.01 ICP lot, so 1.23 sits on the grid and 1.234 does not. The tick is 0.001
-		// ckUSDC per whole ICP, which the 1:1 placeholder price floors onto exactly.
+		// A 0.01 ICP lot. An off-grid amount is no longer an objection — a Sell floors
+		// onto the grid — so the cases below use an amount *below* one lot instead.
 		const buildPair = ({ minNotional = 1_000n }: { minNotional?: bigint } = {}) =>
 			({
 				status: { Trading: null },
@@ -609,7 +609,7 @@ describe('SwapIcpForm', () => {
 				taker_fee_bps: 10
 			}) as unknown as TradingPairInfo;
 
-		const lotMessage = replacePlaceholders(en.trading.limit_order.error_lot_multiple, {
+		const lotMessage = replacePlaceholders(en.trading.limit_order.error_lot_minimum, {
 			$step: '0.01',
 			$symbol: 'ICP'
 		});
@@ -621,32 +621,38 @@ describe('SwapIcpForm', () => {
 			amountForSwap,
 			minNotional,
 			pairs = [buildPair({ minNotional })],
-			isSourceTokenIcrc2 = true
+			isSourceTokenIcrc2 = true,
+			// Reversed for the Buy-side cases: spending the *quote* token is what makes
+			// `min_notional` answerable without an order book.
+			sourceToken = icpToken,
+			destinationToken = usdcToken
 		}: {
 			swaps?: SwapMappedResult[];
 			amountForSwap: number;
 			minNotional?: bigint;
 			pairs?: TradingPairInfo[];
 			isSourceTokenIcrc2?: boolean;
+			sourceToken?: typeof icpToken;
+			destinationToken?: typeof usdcToken;
 		}) => {
 			oisyTradeStore.setPairs(pairs);
 
 			balancesStore.set({
-				id: icpToken.id,
+				id: sourceToken.id,
 				data: { data: 100_000_000_000n, certified: true }
 			});
 
 			mockContext.set(SWAP_CONTEXT_KEY, {
 				...initSwapContext({
-					sourceToken: icpToken as IcTokenToggleable,
-					destinationToken: usdcToken as IcTokenToggleable
+					sourceToken: sourceToken as IcTokenToggleable,
+					destinationToken: destinationToken as IcTokenToggleable
 				}),
 				sourceTokenExchangeRate: readable(10),
 				destinationTokenExchangeRate: readable(2),
 				isSourceTokenIcrc2: readable(isSourceTokenIcrc2)
 			});
 
-			icTokenFeeStore.setIcTokenFee({ tokenSymbol: icpToken.symbol, fee: 1000n });
+			icTokenFeeStore.setIcTokenFee({ tokenSymbol: sourceToken.symbol, fee: 1000n });
 
 			const amountsStore = initSwapAmountsStore();
 			amountsStore.setSwaps({ swaps, amountForSwap, selectedProvider: swaps[0] });
@@ -662,24 +668,41 @@ describe('SwapIcpForm', () => {
 			oisyTradeStore.reset();
 		});
 
-		it('names the lot grid when no provider quoted the amount', async () => {
-			const { container, getByText } = renderWithOisyTradePair({ amountForSwap: 1.234 });
+		it('names the lot grid when the amount is below one lot', async () => {
+			const { container, getByText } = renderWithOisyTradePair({ amountForSwap: 0.005 });
 
-			await enterAmount({ container, value: '1.234' });
+			await enterAmount({ container, value: '0.005' });
 
 			await waitFor(() => {
 				expect(getByText(lotMessage)).toBeInTheDocument();
 			});
 		});
 
-		// The generic message and the specific one contradict each other: a swap *is* offered,
-		// just not for this amount. `notOfferedExplained` is what suppresses the generic one.
-		it('replaces the generic not-offered message rather than doubling it', async () => {
+		// An off-grid Sell is floored onto the lot grid rather than refused, so it is
+		// orderable and there is nothing to explain. Any absence of an offer at this
+		// amount is the book's doing, which no amount-field message can honestly name.
+		it('says nothing about an off-grid amount, which is now floored rather than refused', async () => {
 			const { container, getByText, queryByText } = renderWithOisyTradePair({
 				amountForSwap: 1.234
 			});
 
 			await enterAmount({ container, value: '1.234' });
+
+			await waitFor(() => {
+				expect(getByText(en.swap.text.swap_is_not_offered)).toBeInTheDocument();
+			});
+
+			expect(queryByText(lotMessage)).not.toBeInTheDocument();
+		});
+
+		// The generic message and the specific one contradict each other: a swap *is* offered,
+		// just not for this amount. `notOfferedExplained` is what suppresses the generic one.
+		it('replaces the generic not-offered message rather than doubling it', async () => {
+			const { container, getByText, queryByText } = renderWithOisyTradePair({
+				amountForSwap: 0.005
+			});
+
+			await enterAmount({ container, value: '0.005' });
 
 			await waitFor(() => {
 				expect(getByText(lotMessage)).toBeInTheDocument();
@@ -688,11 +711,15 @@ describe('SwapIcpForm', () => {
 			expect(queryByText(en.swap.text.swap_is_not_offered)).not.toBeInTheDocument();
 		});
 
-		// A 1 ICP order at the 1:1 placeholder is a notional of 1 ckUSDC, under a floor of 10.
-		it('names the minimum order value when the amount is on the grid but too small', async () => {
+		// Spending 1 ckUSDC against a 10 ckUSDC floor. An order's notional is its
+		// reserve and the reserve never exceeds the spend, so this is unorderable at
+		// any price the book could offer — which is what makes it nameable without one.
+		it('names the minimum order value when a buy spends less than the floor', async () => {
 			const { container, getByText } = renderWithOisyTradePair({
 				amountForSwap: 1,
-				minNotional: 10_000_000n
+				minNotional: 10_000_000n,
+				sourceToken: usdcToken,
+				destinationToken: icpToken
 			});
 
 			await enterAmount({ container, value: '1' });
@@ -710,15 +737,16 @@ describe('SwapIcpForm', () => {
 		});
 
 		// The single highest-risk behaviour in the integration: an ICP source has five
-		// providers, and OISY Trade's lot grid must never reach `errorType` and disable Review
-		// for someone swapping 1.234 ICP through a provider that does not care about lots.
-		it('leaves Review enabled for an off-grid amount another provider quotes', async () => {
+		// providers, and OISY Trade's grid must never reach `errorType` and disable Review
+		// for someone swapping through a provider that has no lot size. The amount is
+		// below one lot, so the objection would fire if the offer list were empty.
+		it('leaves Review enabled for an unorderable amount another provider quotes', async () => {
 			const { container, getByText, queryByText } = renderWithOisyTradePair({
 				swaps: [mockOneSecProvider],
-				amountForSwap: 1.234
+				amountForSwap: 0.005
 			});
 
-			await enterAmount({ container, value: '1.234' });
+			await enterAmount({ container, value: '0.005' });
 
 			await waitFor(() => {
 				expect(getByText(en.swap.text.review_button).closest('button')).not.toBeDisabled();
