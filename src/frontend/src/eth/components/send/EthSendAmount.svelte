@@ -139,24 +139,21 @@
 			};
 		}
 
-		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the
-		// user. This is the field's own problem, same as a native shortfall, so it gets the same red
-		// decoration. Only the fee check below - paid in a different token - stays off the field; see
-		// `EthSendForm`'s dedicated fee box instead.
-		if (userAmount > parsedSendBalance) {
-			return {
-				fieldError: new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount),
-				insufficientTokenBalance: true,
-				insufficientFundsForFee: false,
-				pending: false
-			};
-		}
+		// An ERC-20 send has two independent shortfalls: the balance of the token being sent - e.g.
+		// 20 DAI - may not cover the amount, and the native coin may not cover the gas, settled in a
+		// different token. Lowering the amount cannot fix the gas side, so neither check may
+		// short-circuit the other: both are reported whenever both hold. The amount shortfall is the
+		// field's own problem and gets the same red decoration as a native one; the fee shortfall
+		// stays off the field, reported by `EthSendForm`'s dedicated fee box instead.
+		const insufficientTokenBalance = userAmount > parsedSendBalance;
 
-		// Finally, if ERC20, the ETH balance should cover the max gas fee.
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
 
 		return {
-			insufficientTokenBalance: false,
+			fieldError: insufficientTokenBalance
+				? new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount)
+				: undefined,
+			insufficientTokenBalance,
 			insufficientFundsForFee: nonNullish($maxGasFee) && ethBalance < $maxGasFee,
 			pending: false
 		};

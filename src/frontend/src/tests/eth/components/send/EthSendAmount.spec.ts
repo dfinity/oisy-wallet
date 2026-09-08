@@ -245,6 +245,24 @@ describe('EthSendAmount', () => {
 
 			expect(maxButton()).not.toHaveClass('text-error-primary');
 		});
+
+		// The two shortfalls are independent, so the fee check never takes the field's own error
+		// away: the amount is still more than the token balance, whatever the native coin holds.
+		it('keeps decorating the field when the native coin can not cover the fee either', async () => {
+			const { input, queryByText, maxButton } = setup({
+				token: mockValidErc20Token,
+				tokenBalance: erc20Balance,
+				nativeEthereumBalance: ZERO
+			});
+
+			await fireEvent.input(input, { target: { value: '150' } });
+
+			await waitFor(() => {
+				expect(queryByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			});
+
+			expect(maxButton()).toHaveClass('text-error-primary');
+		});
 	});
 
 	// The amount step is remounted every time the wizard leaves and returns to it (e.g. "Back" then

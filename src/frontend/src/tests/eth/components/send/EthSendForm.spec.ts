@@ -252,6 +252,45 @@ describe('EthSendForm', () => {
 			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
 		});
 
+		// Two independent problems, and lowering the amount fixes only one of them: the user still
+		// holds no ETH for gas afterwards. Reporting the amount alone hid that second problem until
+		// they had corrected the first, so both are surfaced together.
+		it('shows the field decoration and the orange fee box together when an ERC-20 amount exceeds its balance and ETH cannot cover the fee', async () => {
+			const { input, queryByTestId, getByText, getByTestId, container } = setup({
+				token: mockValidErc20Token,
+				nativeEthereumBalance: ZERO,
+				tokenBalance: 2_00000000n
+			});
+
+			await fireEvent.input(input, { target: { value: '10' } });
+
+			await waitFor(() => {
+				expect(getByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			});
+
+			await waitFor(() => {
+				expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).toBeInTheDocument();
+			});
+
+			expect(
+				getByText(
+					replacePlaceholders(en.send.assertion.not_enough_tokens_for_gas, {
+						$symbol: ETHEREUM_TOKEN.symbol,
+						$balance: formatToken({
+							value: ZERO,
+							unitName: ETHEREUM_TOKEN.decimals,
+							displayDecimals: ETHEREUM_TOKEN.decimals
+						})
+					})
+				)
+			).toBeInTheDocument();
+
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
 		// The chain check is one comparison (`amount + gas > balance`), and for a native send both
 		// ways it can fail are the same problem for the user: the gas comes out of the balance the
 		// amount is drawn from, so lowering the amount is the only fix. The message therefore always
