@@ -69,8 +69,11 @@
 	// Priced against the user while still resting: no immediate fill, so none of
 	// the crossing warnings apply, yet the order is the one the market reaches
 	// first and it would fill below (Sell) / above (Buy) current value.
+	// Never for a fill-or-kill order — it cannot rest at all, and with the book
+	// side empty neither `crossing` nor `fokBlocked` is there to claim the copy.
 	const restingAgainstValue = $derived(
 		active &&
+			!fillOrKill &&
 			restsAgainstValue({
 				side,
 				price: priceNum,
@@ -86,7 +89,9 @@
 	// moment the price is past current value at all — a full percent earlier than
 	// there is anything worth warning about.
 	const restingPastValue = $derived(
-		active && restsAgainstValue({ side, price: priceNum, currentValue, bid, ask, threshold: 0 })
+		active &&
+			!fillOrKill &&
+			restsAgainstValue({ side, price: priceNum, currentValue, bid, ask, threshold: 0 })
 	);
 
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));

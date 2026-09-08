@@ -118,6 +118,22 @@ describe('LimitOrderPriceSection', () => {
 		);
 	});
 
+	// A fill-or-kill order can never rest, so neither the resting copy nor the
+	// resting label may claim it — including on an empty book side, where
+	// `crossing` and the FOK-blocked branch are both out of the picture.
+	it('claims no resting behaviour for a fill-or-kill sell under current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, bid: null, ask: 11, price: '9', fillOrKill: true }
+		});
+
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_resting.split(' $')[0]
+		);
+	});
+
 	it('shows the resting-above-value warning for a buy priced over current value', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, ...wideBook, side: 'buy' as LimitOrderSide, price: '10.9' }
