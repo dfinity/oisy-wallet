@@ -1610,6 +1610,7 @@ interface I18nTrading {
 		error_balance_sell: string;
 		error_balance_buy: string;
 		error_lot_multiple: string;
+		error_lot_minimum: string;
 		error_tick_multiple: string;
 		error_min_notional: string;
 		error_max_notional: string;
