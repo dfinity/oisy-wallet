@@ -3,13 +3,22 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import {
+	OP_STACK_GAS_PRICE_ORACLE_ABI,
+	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
+} from '$evm/base/constants/base.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
+}));
+
+vi.mock('ethers/contract', () => ({
+	Contract: vi.fn()
 }));
 
 describe('infura.providers', () => {
@@ -89,6 +98,36 @@ describe('infura.providers', () => {
 					mockError
 				);
 			});
+		});
+	});
+
+	describe('getL1FeeUpperBound', () => {
+		const {
+			providers: { infura }
+		} = ETHEREUM_NETWORK;
+
+		const mockGetL1FeeUpperBound = vi.fn();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(Contract).prototype.getL1FeeUpperBound =
+				mockGetL1FeeUpperBound as unknown as typeof Contract.prototype.getL1FeeUpperBound;
+		});
+
+		it('should quote the GasPriceOracle predeploy for the given transaction size', async () => {
+			mockGetL1FeeUpperBound.mockResolvedValue(875_004_002n);
+
+			const provider = new InfuraProvider(infura);
+
+			await expect(provider.getL1FeeUpperBound(128n)).resolves.toBe(875_004_002n);
+
+			expect(Contract).toHaveBeenCalledExactlyOnceWith(
+				OP_STACK_GAS_PRICE_ORACLE_ADDRESS,
+				OP_STACK_GAS_PRICE_ORACLE_ABI,
+				expect.anything()
+			);
+			expect(mockGetL1FeeUpperBound).toHaveBeenCalledExactlyOnceWith(128n);
 		});
 	});
 

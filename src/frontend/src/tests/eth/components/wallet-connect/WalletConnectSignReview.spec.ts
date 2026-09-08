@@ -225,12 +225,16 @@ describe('WalletConnectSignReview', () => {
 	// The RPC method is `eth_signTypedData_v4` for a permit and for a drainer alike, so it is the
 	// struct that says what is being signed.
 	it('names the struct an unrecognised signature hashes', () => {
-		const { getByText } = render(WalletConnectSignReview, {
+		const { getByText, getAllByText } = render(WalletConnectSignReview, {
 			props: { ...props, request: transferWithAuthorizationRequest() }
 		});
 
 		expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
-		expect(getByText('TransferWithAuthorization')).toBeInTheDocument();
+
+		// Twice on purpose: the `Type` row states the struct that is hashed, the list below states
+		// the whole type graph it belongs to. The row is not a duplicate of the list's first entry,
+		// it is the labelled version of it.
+		expect(getAllByText('TransferWithAuthorization')).toHaveLength(2);
 	});
 
 	it('does not name structs for a schema it can describe', () => {

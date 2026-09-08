@@ -16,8 +16,10 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
-	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
@@ -29,6 +31,7 @@
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -50,8 +53,14 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendEthCustomNonce, sendEthFeePriority } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendTokenDecimals,
+		sendTokenId,
+		sendToken,
+		sendBalance,
+		sendEthCustomNonce,
+		sendEthFeePriority
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Props
@@ -102,6 +111,14 @@
 	);
 
 	let customNonce = $derived($sendEthCustomNonce);
+
+	// Set by the amount step's "Max" button, and read again at send time: only a "Max" amount stands
+	// for "whatever is left" rather than a figure the user typed.
+	let amountSetToMax = $state(false);
+
+	let feeIsPaidFromAmount = $derived(
+		isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)
+	);
 
 	/**
 	 * Fee context store
@@ -269,8 +286,13 @@
 			return;
 		}
 
+		// One snapshot for both the signature and the cap below. Rebuilding a literal from parts of it
+		// would let any term the rebuild omits - such as the OP-stack `l1Fee` - drop out of the ceiling
+		// the cap enforces, which is the very shortfall the cap exists to prevent.
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
+		const feeData = $feeStore;
+
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = feeData;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit
@@ -285,6 +307,33 @@
 		if (isNullish($ethAddress)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.address_unknown }
+			});
+			return;
+		}
+
+		const parsedAmount = parseToken({
+			value: `${amount}`,
+			unitName: $sendTokenDecimals
+		});
+
+		// The fee context keeps refetching through the review step - `observe` only stops at
+		// `SENDING` - while the amount stopped moving the moment the amount step was left, because
+		// the "Max" button that re-applies it is unmounted there. So a "Max" amount is priced
+		// against an older sample than the one being signed just above, and a fee that has risen in
+		// between leaves it unable to cover `gas * maxFeePerGas`. The chain drops such a transaction
+		// without reporting anything: the broadcast returns a hash and it is simply never included.
+		const sendAmount =
+			amountSetToMax && feeIsPaidFromAmount
+				? capSendAmountToFee({
+						amount: parsedAmount,
+						balance: $sendBalance,
+						feeData
+					})
+				: parsedAmount;
+
+		if (sendAmount <= ZERO) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.insufficient_funds_for_gas }
 			});
 			return;
 		}
@@ -306,10 +355,7 @@
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStep) => (sendProgressStep = step),
 				token: $sendToken,
-				amount: parseToken({
-					value: `${amount}`,
-					unitName: $sendTokenDecimals
-				}),
+				amount: sendAmount,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
@@ -380,6 +426,7 @@
 				{selectedContact}
 				bind:destination
 				bind:amount
+				bind:amountSetToMax
 			>
 				{#snippet cancel()}
 					<ButtonBack onclick={back} />

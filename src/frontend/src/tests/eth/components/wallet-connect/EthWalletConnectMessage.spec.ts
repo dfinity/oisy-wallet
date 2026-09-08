@@ -122,6 +122,34 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
 	});
 
+	it('should name the struct being signed, not just how the request arrived', () => {
+		// The RPC method says a typed-data signature; only the primary type says it is an allowance.
+		const { getByText } = render(EthWalletConnectMessage, { props: { request } });
+
+		expect(getByText(en.wallet_connect.text.type)).toBeInTheDocument();
+
+		expect(getByText('PermitSingle')).toBeInTheDocument();
+	});
+
+	it('should say nothing about a type for a request that is not typed data', () => {
+		const { queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: {
+					...request,
+					params: {
+						...request.params,
+						request: {
+							method: 'personal_sign',
+							params: ['0xdeadbeef', '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95']
+						}
+					}
+				} as WalletKitTypes.SessionRequest
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.type)).not.toBeInTheDocument();
+	});
+
 	it('should render the token if it is enabled', () => {
 		const { getByText } = render(EthWalletConnectMessage, {
 			props: {

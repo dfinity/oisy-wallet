@@ -41,6 +41,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
+import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import {
 	createSigner,
 	signMessage as signMessageBytes,
@@ -180,7 +181,9 @@ export const decode = async ({
 		? namedInstructions
 		: await loadSolProgramNames({
 				instructions: mapSolInstructionSummaries({
-					instructions: [...parsedTransactionMessage.instructions],
+					instructions: [...parsedTransactionMessage.instructions].map(
+						asSolParsedRpcInstructionOrSelf
+					),
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
 					includeUnrecognised: true
