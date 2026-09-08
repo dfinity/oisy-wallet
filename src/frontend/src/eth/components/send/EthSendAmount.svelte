@@ -43,7 +43,8 @@
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	// Drives the field's own red decoration (border, message, "Max" turning red) via `TokenInput`,
-	// which also populates this itself for a plain invalid-amount error regardless of token type.
+	// which also populates this itself for a plain invalid-amount error regardless of token type -
+	// see the effect below, which keeps it in step with the validation that gates "Next".
 	// An ERC-20 amount exceeding its own token balance lands here too, same as a native shortfall -
 	// it is this field's own problem to fix. Only the fee shortfall (the native coin can't cover
 	// gas, paid in a different token) stays off the field - see `EthSendForm`'s dedicated fee box.
@@ -180,6 +181,20 @@
 
 	$effect(() => {
 		({ insufficientFundsForFee } = validation);
+	});
+
+	// `TokenInput` writes this too, but only from its own debounced pass, which is triggered by a
+	// change of amount or token and by nothing else. On a step remounted with the amount already
+	// filled in - "Back" then "Next" again - that single pass runs while the gas fee is still in
+	// flight, resolves to "nothing settled yet", and is never re-run once the fee lands: the field
+	// kept a normal border, no message and a blue "Max" while "Next" was correctly blocked. Feeding
+	// it the same synchronous validation that gates "Next" repaints it on mount and again on every
+	// fee or balance change. `pending` is skipped rather than cleared: an empty or out-of-range
+	// amount resolves to it as well, and `TokenInput` owns the message for those.
+	$effect(() => {
+		if (!validation.pending) {
+			insufficientFundsError = validation.fieldError;
+		}
 	});
 
 	// Synchronous and independent of `TokenInput`'s own debounced validation cycle: recomputed the

@@ -368,6 +368,40 @@ describe('EthSendForm', () => {
 
 			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
 		});
+
+		// Blocking "Next" without repainting the field left the step looking valid and behaving
+		// invalid: the red border, the message and the red "Max" all have to come back with it.
+		it('repaints the field decoration for a native amount already over the balance', () => {
+			const { getByTestId, getByText, container } = setup({
+				token: ETHEREUM_TOKEN,
+				amount: '11000000',
+				nativeEthereumBalance: 10_000_000n
+			});
+
+			expect(getByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+		});
+
+		it('repaints the field decoration for an ERC-20 amount already over the token balance', () => {
+			const { getByTestId, getByText, queryByTestId, container } = setup({
+				token: mockValidErc20Token,
+				amount: '5',
+				nativeEthereumBalance: 10_000_000n,
+				tokenBalance: 1n
+			});
+
+			expect(getByText(en.send.assertion.insufficient_funds_for_amount)).toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
+			expect(getByTestId(SEND_FORM_NEXT_BUTTON)).toBeDisabled();
+
+			// The token's own shortfall belongs on the field, never in the fee box.
+			expect(queryByTestId(SEND_INSUFFICIENT_FEE_INFO)).not.toBeInTheDocument();
+		});
 	});
 
 	// The gas fee arrives asynchronously (a network round trip), so it can still be unresolved the

@@ -45,7 +45,8 @@ describe('EthSendAmount', () => {
 		feeResolved = true,
 		token = ETHEREUM_TOKEN,
 		nativeEthereumBalance = balance,
-		tokenBalance
+		tokenBalance,
+		amount
 	}: {
 		ceilingKnown?: boolean;
 		feeResolved?: boolean;
@@ -56,6 +57,9 @@ describe('EthSendAmount', () => {
 		// Balance of `token` itself. Only meaningful for an ERC-20 `token`, whose balance lives at
 		// a different store key than the native coin's.
 		tokenBalance?: bigint;
+		// Pre-filled amount, as a wizard step remounted after "Back" receives it - no input event
+		// is ever fired for it.
+		amount?: string;
 	} = {}) => {
 		const feeStore = initEthFeeStore();
 
@@ -93,7 +97,7 @@ describe('EthSendAmount', () => {
 		const { container, queryByText } = render(EthSendAmount, {
 			context,
 			props: {
-				amount: undefined,
+				amount,
 				insufficientFunds: false,
 				nativeEthereumToken: ETHEREUM_TOKEN,
 				onTokensList: () => undefined
@@ -108,7 +112,7 @@ describe('EthSendAmount', () => {
 
 		const maxButton = () => container.querySelector(`[data-tid="${MAX_BUTTON}"]`);
 
-		return { input, queryByText, maxButton };
+		return { input, queryByText, maxButton, feeStore };
 	};
 
 	const setupWithoutCeiling = () => setup({ ceilingKnown: false });
@@ -239,6 +243,63 @@ describe('EthSendAmount', () => {
 				).not.toBeInTheDocument();
 			});
 
+			expect(maxButton()).not.toHaveClass('text-error-primary');
+		});
+	});
+
+	// The amount step is remounted every time the wizard leaves and returns to it (e.g. "Back" then
+	// "Next" again), while the typed amount survives that remount. The field's decoration used to
+	// come only from `TokenInput`'s debounced validation pass, which is triggered by a change of
+	// amount or token and by nothing else: with the amount already in place, that single pass ran
+	// while the gas fee was still in flight, resolved to "nothing settled yet", and was never re-run
+	// once the fee landed - leaving the field with its normal border, no message and a blue "Max"
+	// while "Next" was (correctly) blocked.
+	describe('a step remounted with the amount already over the maximum', () => {
+		it('decorates the field on mount, with no input event and no wait', () => {
+			const { queryByText, maxButton } = setup({ amount: toEther(balance - tipOnly) });
+
+			expect(queryByText(expectedError)).toBeInTheDocument();
+			expect(maxButton()).toHaveClass('text-error-primary');
+		});
+
+		it('decorates the field once the gas fee lands after mount', async () => {
+			const { queryByText, maxButton, feeStore } = setup({
+				amount: toEther(balance - tipOnly),
+				feeResolved: false
+			});
+
+			// A fee round trip outlasts `TokenInput`'s 300ms debounce by far, so wait past it: the one
+			// validation pass a remount used to get had already come and gone - resolving to "nothing
+			// settled yet" - by the time the fee below arrives.
+			await new Promise((resolve) => setTimeout(resolve, 400));
+
+			// Nothing is confirmed insufficient while the fee is in flight, so nothing is painted yet.
+			expect(queryByText(expectedError)).not.toBeInTheDocument();
+
+			feeStore.setFee({ maxFeePerGas, maxPriorityFeePerGas, baseFeePerGas, gas });
+
+			await waitFor(() => {
+				expect(queryByText(expectedError)).toBeInTheDocument();
+			});
+
+			expect(maxButton()).toHaveClass('text-error-primary');
+		});
+
+		it('decorates the field for an ERC-20 amount already over the token balance', () => {
+			const { queryByText, maxButton } = setup({
+				token: mockValidErc20Token,
+				tokenBalance: 100_00000000n,
+				amount: '150'
+			});
+
+			expect(queryByText(expectedError)).toBeInTheDocument();
+			expect(maxButton()).toHaveClass('text-error-primary');
+		});
+
+		it('leaves an affordable amount undecorated', () => {
+			const { queryByText, maxButton } = setup({ amount: toEther(balance - ceiling) });
+
+			expect(queryByText(expectedError)).not.toBeInTheDocument();
 			expect(maxButton()).not.toHaveClass('text-error-primary');
 		});
 	});
