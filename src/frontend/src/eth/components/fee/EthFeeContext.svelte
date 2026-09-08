@@ -121,8 +121,11 @@
 	const updateFeeData = async () => {
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
-			// is destroyed or after the swap store has been reset (`sendToken` becomes `undefined`).
-			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress)) {
+			// is destroyed, after the swap store has been reset (`sendToken` becomes `undefined`), or
+			// after the consumer stopped observing. The last is why refusing to schedule is not enough:
+			// a call scheduled while observing still fires once the step has moved on, and it would pay
+			// for a fetch whose result the freeze then discards.
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || !observe) {
 				return;
 			}
 

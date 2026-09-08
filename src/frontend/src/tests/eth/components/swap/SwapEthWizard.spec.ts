@@ -39,6 +39,7 @@ import {
 import { mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable, type Writable } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 const mockParseToken = vi.hoisted(() => vi.fn());
 
@@ -170,16 +171,27 @@ describe('SwapEthWizard', () => {
 		});
 
 	describe('fee observation', () => {
+		let addressSpy: MockInstance;
+		let feeDataSpy: MockInstance;
+
 		beforeEach(() => {
 			vi.useFakeTimers();
 			// The fee fetch bails out before the request without an address of its own.
-			vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(
-				readable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-			);
-			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+			addressSpy = vi
+				.spyOn(addrDerived, 'ethAddress', 'get')
+				.mockReturnValue(readable('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'));
+			feeDataSpy = vi
+				.spyOn(feeServices, 'getEthFeeDataWithProvider')
+				.mockRejectedValue(new Error('offline'));
 		});
 
 		afterEach(() => {
+			// `clearAllMocks` between tests only drops call history, so these implementations would
+			// otherwise stay installed and keep later tests in this file rejecting their fee fetches.
+			addressSpy.mockRestore();
+			feeDataSpy.mockRestore();
+
+			vi.clearAllTimers();
 			vi.useRealTimers();
 		});
 
@@ -207,6 +219,27 @@ describe('SwapEthWizard', () => {
 
 			// The swap was quoted against the fee in hand; a fresh sample would move the total the
 			// user is looking at, and a spike right before "Swap now" would be signed as is.
+			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+
+		it('drops a fetch scheduled before the review step was reached', async () => {
+			const { mockContext } = createContext({
+				swaps: mockSwapProviders,
+				selectedProvider: mockSwapProviders[0]
+			});
+
+			const { rerender } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
+
+			// Scheduled while observing but not yet fired: refusing to schedule cannot help here.
+			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+
+			await rerender({
+				...BASE_PROPS,
+				currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' }
+			});
+
+			await vi.runOnlyPendingTimersAsync();
+
 			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
 		});
 	});
