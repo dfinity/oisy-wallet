@@ -3,17 +3,26 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { writable, type Readable } from 'svelte/store';
 
 /**
+ * The price of one mint, or `undefined` for a mint that was asked about and came back unpriced.
+ *
+ * The absent case is spelled out rather than left to the optional key: "nothing priced this" is a
+ * state the store is written into deliberately, to clear what an earlier transaction left behind,
+ * and a key that is present is not therefore a number.
+ */
+export type SplTokenPrice = number | undefined;
+
+/**
  * Keyed by network and then by mint, in USD. The same address exists on several clusters, and a
  * price only ever belongs to the one it was fetched for.
  */
 export type SplTokenPriceData = Partial<
-	Record<SolanaNetworkType, Partial<Record<SplTokenAddress, number>>>
+	Record<SolanaNetworkType, Partial<Record<SplTokenAddress, SplTokenPrice>>>
 >;
 
 interface SplTokenPriceStore extends Readable<SplTokenPriceData> {
 	set: (params: {
 		network: SolanaNetworkType;
-		prices: Partial<Record<SplTokenAddress, number>>;
+		prices: Partial<Record<SplTokenAddress, SplTokenPrice>>;
 	}) => void;
 	reset: () => void;
 }

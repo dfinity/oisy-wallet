@@ -52,6 +52,47 @@ describe('spl-token-price.services', () => {
 			expect(get(splTokenPriceStore)).toStrictEqual({ mainnet: { [mockSplAddress]: 7 } });
 		});
 
+		// Base58 is case-sensitive, so these are two different mints. Pricing either from a
+		// case-insensitive read would hand one of them what the other is worth.
+		describe('two mints sharing a lowercase form', () => {
+			const twin = mockSplAddress.toLowerCase();
+
+			it('should leave both unpriced when neither is answered exactly', async () => {
+				vi.mocked(exchangeRateSPLToUsd).mockResolvedValue({
+					[mockSplAddress.toUpperCase()]: price(4)
+				});
+
+				await loadSplTokenPrices({ tokenAddresses: [mockSplAddress, twin], network });
+
+				expect(get(splTokenPriceStore)).toStrictEqual({
+					mainnet: { [mockSplAddress]: undefined, [twin]: undefined }
+				});
+			});
+
+			// An exact answer names its mint outright, so there is nothing to confuse it with.
+			it('should still price the one the feed answered exactly', async () => {
+				vi.mocked(exchangeRateSPLToUsd).mockResolvedValue({ [twin]: price(4) });
+
+				await loadSplTokenPrices({ tokenAddresses: [mockSplAddress, twin], network });
+
+				expect(get(splTokenPriceStore)).toStrictEqual({
+					mainnet: { [mockSplAddress]: undefined, [twin]: 4 }
+				});
+			});
+
+			// The doubling can just as well be on the feed's side of the exchange.
+			it('should leave a mint unpriced when the feed doubles its form', async () => {
+				vi.mocked(exchangeRateSPLToUsd).mockResolvedValue({
+					[mockSplAddress.toUpperCase()]: price(4),
+					[twin]: price(9)
+				});
+
+				await loadSplTokenPrices({ tokenAddresses: [mockSplAddress], network });
+
+				expect(get(splTokenPriceStore)).toStrictEqual({ mainnet: { [mockSplAddress]: undefined } });
+			});
+		});
+
 		// An entry left behind by an earlier transaction would otherwise price this one.
 		it('should clear the price of a mint the feed no longer knows', async () => {
 			await loadSplTokenPrices({ tokenAddresses: [mockSplAddress], network });
