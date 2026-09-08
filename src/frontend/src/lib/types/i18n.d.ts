@@ -723,6 +723,7 @@ interface I18nSend {
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
 		unknown_destination: string;
+		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
 		scanned_address_only_destination_single_token: string;
