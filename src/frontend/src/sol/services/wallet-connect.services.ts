@@ -35,6 +35,7 @@ import { signTransaction as executeSign } from '$sol/services/sol-sign.services'
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
+import { loadSplTokenPrices } from '$sol/services/spl-token-price.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -123,13 +124,21 @@ export const decode = async ({
 		parties: simulatedParties
 	} = simulation ?? {};
 
-	// Name the mints and the programs the review is about to show. Best effort and awaited, since
-	// the review is synchronous and a name that landed after the modal opened would arrive too late
-	// to read.
+	// Name and price the mints, and name the programs, the review is about to show. Best effort and
+	// awaited, since the review is synchronous and anything that landed after the modal opened
+	// would arrive too late to read.
+	const reviewedTokenAddresses = (preview?.tokenDeltas ?? []).map(
+		({ tokenAddress }) => tokenAddress
+	);
+
 	const [namedInstructions] = await Promise.all([
 		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
 		loadSplTokenMetadata({
-			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
+			tokenAddresses: reviewedTokenAddresses,
+			network: solNetwork
+		}),
+		loadSplTokenPrices({
+			tokenAddresses: reviewedTokenAddresses,
 			network: solNetwork
 		})
 	]);

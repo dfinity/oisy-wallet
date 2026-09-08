@@ -3,6 +3,7 @@ import { CONVERT_AMOUNT_EXCHANGE_VALUE } from '$lib/constants/test-ids.constants
 import { exchangeStore } from '$lib/stores/exchange.store';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { splTokenPriceStore } from '$sol/stores/spl-token-price.store';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -26,6 +27,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 	beforeEach(() => {
 		exchangeStore.reset();
 		splCustomTokensStore.resetAll();
+		splTokenPriceStore.reset();
 	});
 
 	it('should render an outgoing SOL delta as a negative amount', () => {
@@ -94,6 +96,26 @@ describe('SolWalletConnectSimulationPreview', () => {
 		);
 
 		expect(getByTestId('simulated-sol-delta')).toHaveTextContent('< $0.01');
+	});
+
+	// A mint the portfolio feed does not cover — one the user disabled, or one the wallet has
+	// never listed — is priced for the review by address. Without that lookup the review named the
+	// token and then said nothing about what it was worth.
+	it('should price a mint the portfolio feed does not cover', () => {
+		splTokenPriceStore.set({ network: 'mainnet', prices: { [mockSplAddress]: 4 } });
+
+		const { getByTestId } = render(
+			SolWalletConnectSimulationPreview,
+			props({
+				tokenDeltas: [
+					{ account: mockAtaAddress, tokenAddress: mockSplAddress, decimals: 6, delta: 2_500_000n }
+				],
+				controlChanges: []
+			})
+		);
+
+		expect(getByTestId('simulated-token-delta')).toHaveTextContent('+2.5');
+		expect(getByTestId('simulated-token-delta')).toHaveTextContent('~$10.00');
 	});
 
 	// Pricing an unknown mint would mean borrowing a rate that describes a different token.

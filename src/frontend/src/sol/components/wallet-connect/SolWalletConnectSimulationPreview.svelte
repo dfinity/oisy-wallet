@@ -10,10 +10,12 @@
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import { splTokenPriceStore } from '$sol/stores/spl-token-price.store';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
+	import { solTokenUsdPrice } from '$sol/utils/sol-token-price.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -52,12 +54,22 @@
 			nativeSymbol: feeToken.symbol
 		});
 
-	// A mint OISY does not know has no rate of its own, and no other token's rate describes it, so
-	// such a delta is left as a bare amount rather than priced against something it is not.
+	// The portfolio feed answers first, for the tokens it covers. What is left is every mint the
+	// user does not hold: one they disabled, or one the wallet has never listed. Those were priced
+	// for this review, by address, since they have no place in a feed that follows holdings.
+	//
+	// A mint nothing can price is still left as a bare amount: no other token's rate describes it.
 	const splExchangeRate = (tokenAddress: SplTokenAddress): number | undefined => {
 		const token = splToken(tokenAddress);
 
-		return nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined;
+		return (
+			(nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined) ??
+			solTokenUsdPrice({
+				tokenAddress,
+				networkId: feeToken.network.id,
+				prices: $splTokenPriceStore
+			})
+		);
 	};
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
