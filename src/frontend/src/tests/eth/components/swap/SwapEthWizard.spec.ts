@@ -173,6 +173,17 @@ describe('SwapEthWizard', () => {
 	describe('fee observation', () => {
 		let addressSpy: MockInstance;
 		let feeDataSpy: MockInstance;
+		let storeSpy: MockInstance;
+
+		// The wizard builds its own fee store, so hand it one this test can seed: a fee already held
+		// is what the swap step leaves behind, since the modal keeps the wizard mounted across steps.
+		const withFee = (fee: FeeStoreData) => {
+			const state: Writable<FeeStoreData> = writable(fee);
+			const store: EthFeeStore = { subscribe: state.subscribe, setFee: (v) => state.set(v) };
+			storeSpy = vi.spyOn(feeStoreMod, 'initEthFeeStore').mockReturnValue(store);
+		};
+
+		const held: FeeStoreData = { gas: 21_000n, maxFeePerGas: 100n, maxPriorityFeePerGas: 5n };
 
 		beforeEach(() => {
 			vi.useFakeTimers();
@@ -190,6 +201,7 @@ describe('SwapEthWizard', () => {
 			// otherwise stay installed and keep later tests in this file rejecting their fee fetches.
 			addressSpy.mockRestore();
 			feeDataSpy.mockRestore();
+			storeSpy?.mockRestore();
 
 			vi.clearAllTimers();
 			vi.useRealTimers();
@@ -205,6 +217,8 @@ describe('SwapEthWizard', () => {
 		};
 
 		it('keeps fetching the fee on the swap step', async () => {
+			withFee(held);
+
 			renderAt(WizardStepsSwap.SWAP);
 
 			await vi.runOnlyPendingTimersAsync();
@@ -213,6 +227,8 @@ describe('SwapEthWizard', () => {
 		});
 
 		it('freezes the fee on the review step', async () => {
+			withFee(held);
+
 			renderAt(WizardStepsSwap.REVIEW);
 
 			await vi.runOnlyPendingTimersAsync();
@@ -223,6 +239,8 @@ describe('SwapEthWizard', () => {
 		});
 
 		it('drops a fetch scheduled before the review step was reached', async () => {
+			withFee(held);
+
 			const { mockContext } = createContext({
 				swaps: mockSwapProviders,
 				selectedProvider: mockSwapProviders[0]
@@ -241,6 +259,18 @@ describe('SwapEthWizard', () => {
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+
+		it('still fetches once on the review step when no fee is held', async () => {
+			withFee(undefined);
+
+			renderAt(WizardStepsSwap.REVIEW);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			// Freezing an empty store would leave the step with nothing to show or sign, and nothing
+			// left running to fill it.
+			expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalled();
 		});
 	});
 

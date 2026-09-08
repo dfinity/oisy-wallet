@@ -106,8 +106,11 @@
 	// dropped, or the frozen fee would drift underneath the amount it was priced against.
 	//
 	// A fee that was never set is not a frozen one. No consumer stopped observing to hold on to it,
-	// and nothing was derived from it, while a review step reached before the first sample landed
-	// would otherwise sit with its send button disabled and no fetch left to enable it.
+	// and nothing was derived from it. This is what keeps a consumer that mounts straight into a
+	// frozen step from dead-ending: the send modal rebuilds its wizard on every step change, so the
+	// review step can start with an empty store, and with no fee it has nothing to show or sign.
+	// Every gate below therefore asks `isFrozen()` rather than `observe`, so the first sample is
+	// always allowed through and only later ones are refused.
 	const isFrozen = (): boolean => !observe && nonNullish(get(feeStore));
 
 	const setFee = (data: TransactionFeeData) => {
@@ -125,7 +128,7 @@
 			// after the consumer stopped observing. The last is why refusing to schedule is not enough:
 			// a call scheduled while observing still fires once the step has moved on, and it would pay
 			// for a fetch whose result the freeze then discards.
-			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || !observe) {
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || isFrozen()) {
 				return;
 			}
 
@@ -351,7 +354,7 @@
 	// Without it a frozen step would still pay for a fetch whose result it must discard.
 	const debouncedFn = debounce(updateFeeData);
 	const debounceUpdateFeeData = (...args: unknown[]) => {
-		if (!isDestroyed && observe) {
+		if (!isDestroyed && !isFrozen()) {
 			debouncedFn(...args);
 		}
 	};
@@ -367,7 +370,7 @@
 	let retryAttempts = $state(0);
 
 	const scheduleRetry = () => {
-		if (isDestroyed || !observe || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
+		if (isDestroyed || isFrozen() || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
 			return;
 		}
 
@@ -378,7 +381,7 @@
 		retryTimer = setTimeout(() => {
 			retryTimer = undefined;
 
-			if (isDestroyed || !observe) {
+			if (isDestroyed || isFrozen()) {
 				return;
 			}
 
@@ -425,7 +428,9 @@
 	};
 
 	onMount(() => {
-		observe && debounceUpdateFeeData();
+		if (!isFrozen()) {
+			debounceUpdateFeeData();
+		}
 	});
 
 	onDestroy(async () => {
@@ -469,7 +474,7 @@
 	// Recover the fee when OISY returns to the foreground. Mobile browsers freeze backgrounded
 	// tabs and tear down the fee WebSocket; on return, re-fetch and reconnect the listener.
 	const onVisibilityChange = () => {
-		if (document.hidden || isDestroyed || !observe) {
+		if (document.hidden || isDestroyed || isFrozen()) {
 			return;
 		}
 
