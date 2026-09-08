@@ -1,19 +1,23 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
-	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isEthAddress } from '$eth/utils/account.utils';
-	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { SEND_INSUFFICIENT_FEE_INFO } from '$lib/constants/test-ids.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
@@ -40,14 +44,15 @@
 		cancel
 	}: Props = $props();
 
-	let insufficientFunds = $state(false);
+	// Starts blocked rather than permissive: a freshly (re-)mounted amount step - e.g. right after
+	// "Back" from Review, which remounts this form - must not read as valid before its own
+	// validation has actually run once on the current amount.
+	let insufficientFunds = $state(true);
+	let insufficientFundsForFee = $state(false);
 
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
 	let invalid = $derived(invalidDestination || insufficientFunds || isNullish(amount));
-
-	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: EthFeeContext =
-		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 </script>
 
 <SendForm
@@ -66,6 +71,7 @@
 			bind:amount
 			bind:amountSetToMax
 			bind:insufficientFunds
+			bind:insufficientFundsForFee
 		/>
 	{/snippet}
 
@@ -88,10 +94,17 @@
 	{/snippet}
 
 	{#snippet info()}
-		<SendFeeInfo
-			decimals={$feeDecimalsStore}
-			feeSymbol={$feeSymbolStore}
-			feeTokenId={$feeTokenIdStore}
-		/>
+		{#if insufficientFundsForFee}
+			<MessageBox level="warning" styleClass="mt-6 sm:text-sm" testId={SEND_INSUFFICIENT_FEE_INFO}>
+				{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
+					$symbol: nativeEthereumToken.symbol,
+					$balance: formatToken({
+						value: $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO,
+						unitName: nativeEthereumToken.decimals,
+						displayDecimals: nativeEthereumToken.decimals
+					})
+				})}
+			</MessageBox>
+		{/if}
 	{/snippet}
 </SendForm>

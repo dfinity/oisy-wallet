@@ -1,0 +1,203 @@
+{
+	"pair": {
+		"baseSymbol": "ICP",
+		"baseDecimals": 8,
+		"quoteSymbol": "USDT",
+		"quoteDecimals": 6,
+		"lotSize": "12000000",
+		"tickSize": "1",
+		"minNotional": "0",
+		"maxNotional": null,
+		"takerFeeBps": 100,
+		"makerFeeBps": 0
+	},
+	"fees": {
+		"$comment": "Ledger withdrawal fees, subtracted by the swap layer, not by the module.",
+		"baseLedgerFee": "10000",
+		"quoteLedgerFee": "10000"
+	},
+	"book": {
+		"$comment": "bids price-descending, asks price-ascending, as get_order_book_depth returns them.",
+		"bids": [
+			{ "price": "5000000", "quantity": "200000000" },
+			{ "price": "4000000", "quantity": "200000000" },
+			{ "price": "3000000", "quantity": "200000000" },
+			{ "price": "2000000", "quantity": "1000000000" }
+		],
+		"asks": [
+			{ "price": "8000000", "quantity": "200000000" },
+			{ "price": "10000000", "quantity": "200000000" },
+			{ "price": "20000000", "quantity": "200000000" },
+			{ "price": "24000000", "quantity": "1000000000" }
+		]
+	},
+	"cases": [
+		{
+			"id": "D",
+			"description": "sell 1 ICP: floors to 8 lots, absorbed by the best bid alone",
+			"side": "sell",
+			"sourceAmount": "100000000",
+			"expect": {
+				"price": "5000000",
+				"quantity": "96000000",
+				"deposit": "96000000",
+				"gross": "4800000"
+			},
+			"expectReceive": "4742000"
+		},
+		{
+			"id": "E",
+			"description": "sell 4 ICP: 33 lots, needs the first two bid levels",
+			"side": "sell",
+			"sourceAmount": "400000000",
+			"expect": {
+				"price": "4000000",
+				"quantity": "396000000",
+				"deposit": "396000000",
+				"gross": "15840000"
+			},
+			"expectReceive": "15671600"
+		},
+		{
+			"id": "F",
+			"description": "sell 10 ICP: 83 lots, needs all four bid levels",
+			"side": "sell",
+			"sourceAmount": "1000000000",
+			"expect": {
+				"price": "2000000",
+				"quantity": "996000000",
+				"deposit": "996000000",
+				"gross": "19920000"
+			},
+			"expectReceive": "19710800"
+		},
+		{
+			"id": "H",
+			"description": "buy with 10 USDT: covered by the best ask, affords 10 lots",
+			"side": "buy",
+			"sourceAmount": "10000000",
+			"expect": {
+				"price": "8000000",
+				"quantity": "120000000",
+				"deposit": "9600000",
+				"gross": "120000000"
+			},
+			"expectReceive": "118790000"
+		},
+		{
+			"id": "I",
+			"description": "buy with 30 USDT: lands on exactly 25 lots, so the lot floor is a no-op",
+			"side": "buy",
+			"sourceAmount": "30000000",
+			"expect": {
+				"price": "10000000",
+				"quantity": "300000000",
+				"deposit": "30000000",
+				"gross": "300000000"
+			},
+			"expectReceive": "296990000"
+		},
+		{
+			"id": "J",
+			"description": "buy with 40 USDT: value covered at the third ask level",
+			"side": "buy",
+			"sourceAmount": "40000000",
+			"expect": {
+				"price": "20000000",
+				"quantity": "192000000",
+				"deposit": "38400000",
+				"gross": "192000000"
+			},
+			"expectReceive": "190070000"
+		},
+		{
+			"id": "K",
+			"description": "buy with 100 USDT: value covered only at the deepest ask level",
+			"side": "buy",
+			"sourceAmount": "100000000",
+			"expect": {
+				"price": "24000000",
+				"quantity": "408000000",
+				"deposit": "97920000",
+				"gross": "408000000"
+			},
+			"expectReceive": "403910000"
+		},
+		{
+			"id": "sell-beyond-bid-depth",
+			"description": "sell 20 ICP against 16 ICP of bids: the order cannot fill outright",
+			"side": "sell",
+			"sourceAmount": "2000000000",
+			"expect": { "reason": "no_liquidity" }
+		},
+		{
+			"id": "buy-beyond-ask-value",
+			"description": "buy with 400 USDT against 316 USDT of asks: the spend is never covered",
+			"side": "buy",
+			"sourceAmount": "40000000000",
+			"expect": { "reason": "no_liquidity" }
+		},
+		{
+			"id": "sell-below-one-lot",
+			"description": "sell 0.1 ICP under a 0.12 ICP lot",
+			"side": "sell",
+			"sourceAmount": "10000000",
+			"expect": { "reason": "below_lot" }
+		},
+		{
+			"id": "buy-below-one-lot",
+			"description": "buy with 0.5 USDT, which affords 0.0625 ICP at the best ask",
+			"side": "buy",
+			"sourceAmount": "500000",
+			"expect": { "reason": "below_lot" }
+		},
+		{
+			"id": "sell-empty-book",
+			"description": "no bids at all",
+			"side": "sell",
+			"sourceAmount": "400000000",
+			"book": { "bids": [], "asks": [] },
+			"expect": { "reason": "no_liquidity" }
+		},
+		{
+			"id": "sell-below-one-lot-empty-book",
+			"description": "sub-lot sell with no bids: the lot is the reason, not the empty book",
+			"side": "sell",
+			"sourceAmount": "10000000",
+			"book": { "bids": [], "asks": [] },
+			"expect": { "reason": "below_lot" }
+		},
+		{
+			"id": "buy-empty-book",
+			"description": "no asks at all",
+			"side": "buy",
+			"sourceAmount": "40000000",
+			"book": { "bids": [], "asks": [] },
+			"expect": { "reason": "no_liquidity" }
+		},
+		{
+			"id": "sell-below-min-notional",
+			"description": "column D's 4.8 USDT notional against a 5 USDT floor",
+			"side": "sell",
+			"sourceAmount": "100000000",
+			"pair": { "minNotional": "5000000" },
+			"expect": { "reason": "below_min_notional" }
+		},
+		{
+			"id": "sell-above-max-notional",
+			"description": "column E's 15.84 USDT notional against a 10 USDT ceiling",
+			"side": "sell",
+			"sourceAmount": "400000000",
+			"pair": { "maxNotional": "10000000" },
+			"expect": { "reason": "above_max_notional" }
+		},
+		{
+			"id": "buy-above-max-notional",
+			"description": "column J's 38.4 USDT reserve against a 20 USDT ceiling",
+			"side": "buy",
+			"sourceAmount": "40000000",
+			"pair": { "maxNotional": "20000000" },
+			"expect": { "reason": "above_max_notional" }
+		}
+	]
+}
