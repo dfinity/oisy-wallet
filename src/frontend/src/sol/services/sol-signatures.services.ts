@@ -1,5 +1,7 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { last } from '$lib/utils/array.utils';
 import { fetchSignatures } from '$sol/api/solana.api';
+import { SOLANA_MAX_SKIPPED_SIGNATURE_PAGES } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -8,7 +10,7 @@ import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction'
 import type { SplToken } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { assertIsAddress, signature, address as solAddress } from '@solana/kit';
+import { assertIsAddress, signature, address as solAddress, type Signature } from '@solana/kit';
 
 interface GetSolSignaturesParams {
 	address: SolAddress;
@@ -105,37 +107,60 @@ export const getSolTransactions = async ({
 
 	const wallet = solAddress(relevantAddress);
 
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
+	let cursor: Signature | undefined = nonNullish(before) ? signature(before) : undefined;
 
-	const signatures: SolSignature[] = await fetchSignatures({
-		network,
-		wallet,
-		before: beforeSignature,
-		limit
-	});
+	// A page of signatures can map to nothing the user can see: a lookup on an associated token
+	// account answers with transactions that never moved anything of theirs. The caller's next
+	// cursor is the oldest transaction it holds, so stopping on such a page would have it ask for
+	// that very page again, and the history behind it would stay out of reach. Step over it here.
+	for (let page = 0; page <= SOLANA_MAX_SKIPPED_SIGNATURE_PAGES; page++) {
+		const signatures: SolSignature[] = await fetchSignatures({
+			network,
+			wallet,
+			before: cursor,
+			limit
+		});
 
-	if (
-		isNullish(before) &&
-		nonNullish(exitIfFirstSignatureMatches) &&
-		signatures.length > 0 &&
-		String(signatures[0].signature) === exitIfFirstSignatureMatches
-	) {
-		return [];
+		// No signature older than the cursor: this is the end of the history, whatever mapped.
+		if (signatures.length === 0) {
+			return [];
+		}
+
+		if (
+			page === 0 &&
+			isNullish(before) &&
+			nonNullish(exitIfFirstSignatureMatches) &&
+			String(signatures[0].signature) === exitIfFirstSignatureMatches
+		) {
+			return [];
+		}
+
+		const transactions = await signatures.reduce(
+			async (accPromise, signature) => {
+				const acc = await accPromise;
+				const parsedTransactions = await fetchSolTransactionsForSignature({
+					signature,
+					network,
+					address,
+					tokenAddress,
+					tokenOwnerAddress
+				});
+
+				return [...acc, ...parsedTransactions];
+			},
+			Promise.resolve([] as SolTransactionUi[])
+		);
+
+		if (transactions.length > 0) {
+			return transactions;
+		}
+
+		cursor = last(signatures)?.signature;
+
+		if (isNullish(cursor)) {
+			return [];
+		}
 	}
 
-	return await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const parsedTransactions = await fetchSolTransactionsForSignature({
-				signature,
-				network,
-				address,
-				tokenAddress,
-				tokenOwnerAddress
-			});
-
-			return [...acc, ...parsedTransactions];
-		},
-		Promise.resolve([] as SolTransactionUi[])
-	);
+	return [];
 };
