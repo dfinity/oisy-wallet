@@ -118,7 +118,7 @@
 		"@sveltejs/kit": "^2.70.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/postcss": "4.3.3",
-		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/jest-dom": "^7.0.0",
 		"@testing-library/svelte": "^5.3.1",
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/node": "^22.13.4",
@@ -143,7 +143,7 @@
 		"typescript": "^5.4.5",
 		"vite": "^7.3.2",
 		"vite-node": "^6.0.0",
-		"vitest": "^4.1.9",
+		"vitest": "^4.1.11",
 		"vitest-mock-extended": "^5.1.1"
 	},
 	"type": "module",
