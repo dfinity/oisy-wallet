@@ -58,7 +58,7 @@ describe('swap.derived', () => {
 			expect(get(isPageTokenSwappable)).toBeTruthy();
 		});
 
-		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag opens Bitcoin.
+		// Bitcoin is swappable as long as a provider reaches it: Chain Fusion or NEAR Intents.
 		it('should return true for Bitcoin token', () => {
 			mockPage.mockToken(BTC_MAINNET_TOKEN);
 
