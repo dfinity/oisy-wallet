@@ -171,6 +171,33 @@ describe('oisy-trade.services', () => {
 			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
 		});
 
+		it('does not overwrite a newer load for the same account when the older one resolves last', async () => {
+			const newerBalances = [
+				{ balance: { free: 3n, reserved: ZERO } }
+			] as unknown as UserTokenBalance[];
+
+			let resolveBalances: (value: UserTokenBalance[]) => void = () => undefined;
+			vi.mocked(oisyTradeApi.getBalances).mockReturnValueOnce(
+				new Promise<UserTokenBalance[]>((resolve) => {
+					resolveBalances = resolve;
+				})
+			);
+
+			// A poll is still in flight when e.g. a post-withdraw refresh starts.
+			const pending = loadOisyTrade({ identity: mockIdentity });
+
+			vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(newerBalances);
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(get(oisyTradeStore).balances).toEqual(newerBalances);
+
+			// Same identity, so only the generation can tell the two apart.
+			resolveBalances(balances);
+			await pending;
+
+			expect(get(oisyTradeStore).balances).toEqual(newerBalances);
+		});
+
 		it('does not overwrite a newer account when the older load resolves last', async () => {
 			const otherBalances = [
 				{ balance: { free: 2n, reserved: ZERO } }

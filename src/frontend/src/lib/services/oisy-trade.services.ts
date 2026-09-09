@@ -77,18 +77,34 @@ const loadMyOrders = async ({
 	return orders;
 };
 
-// The load is fire-and-forget and app-wide (`LoaderOisyTrade`), so a request
-// started for one identity can resolve after a sign-out has already reset the
-// store — or after a newer load has written. Re-reading `authIdentity` at the
-// commit point and dropping a result whose principal is no longer the current
-// one keeps the store from being repopulated with the previous account's data.
-const isCurrentIdentity = (identity: NonNullable<NullishIdentity>): boolean =>
+// The load is fire-and-forget and has several concurrent callers — the app-wide
+// `LoaderOisyTrade`, the initial load each `IntervalLoader` fires on mount, the
+// poll itself, and the post-deposit / post-withdraw / post-limit-order refreshes
+// — so a request can resolve after a sign-out has reset the store, or after a
+// newer request for the same account has already written. Every invocation takes
+// the next generation, and only the newest one may commit; the identity is
+// re-checked as well, so a result for a principal that is no longer signed in is
+// dropped even if nothing newer has started.
+let loadGeneration = 0;
+
+const isCurrentLoad = ({
+	generation,
+	identity
+}: {
+	generation: number;
+	identity: NonNullable<NullishIdentity>;
+}): boolean =>
+	generation === loadGeneration &&
 	get(authIdentity)?.getPrincipal().toText() === identity.getPrincipal().toText();
 
 // Best-effort load of trading pairs, supported tokens and the caller's DEX
 // balances into `oisyTradeStore`; errors are logged so a transient canister
 // failure never breaks the Trading tab. Read-only.
 export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity }): Promise<void> => {
+	// Taken before the nullish check on purpose: a sign-out has to invalidate the
+	// loads already in flight, not just skip its own.
+	const generation = ++loadGeneration;
+
 	if (isNullish(identity)) {
 		oisyTradeStore.reset();
 		return;
@@ -106,7 +122,7 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 			loadMyOrders({ identity, nullishIdentityErrorMessage })
 		]);
 
-		if (!isCurrentIdentity(identity)) {
+		if (!isCurrentLoad({ generation, identity })) {
 			return;
 		}
 
