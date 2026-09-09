@@ -534,12 +534,31 @@ describe('oisy-trade-active-tx.services', () => {
 				);
 			});
 
-			// Zero here would strand a successful swap.
-			it('withdraws a filled Buy’s whole destination when the quantity is unreadable', async () => {
+			// The quantity is a Buy's destination ceiling, so settling without one would
+			// withdraw an account-wide delta on the primary leg. Left alone like a row whose
+			// baselines cannot be read, rather than settled uncapped or skipped as zero.
+			it('leaves a Buy row alone when its quantity cannot be read', async () => {
+				const consoleErrorSpy = vi
+					.spyOn(consoleUtils, 'consoleError')
+					.mockImplementation(() => undefined);
 				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
 				getBalancesSpy.mockResolvedValue([balance({ ledger: CKUSDC_LEDGER, free: 5_000_000n })]);
 
 				await pollPastBudget([row({ side: { Buy: null }, refs: PLACED })]);
+
+				expect(withdrawSpy).not.toHaveBeenCalled();
+				expect(applySpy).not.toHaveBeenCalled();
+				expect(deleteSpy).not.toHaveBeenCalled();
+				expect(consoleErrorSpy).toHaveBeenCalled();
+			});
+
+			// A Sell never reads the quantity, so refusing to recover one over an unreadable
+			// ref would strand funds for nothing.
+			it('settles a Sell row whose quantity cannot be read', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([balance({ ledger: CKUSDC_LEDGER, free: 5_000_000n })]);
+
+				await pollPastBudget([row({ refs: PLACED })]);
 
 				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({

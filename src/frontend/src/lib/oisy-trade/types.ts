@@ -66,11 +66,18 @@ export interface OisyTradeOffer {
 	 * source-token smallest units: zero for a Sell, and for a Buy the reserve at the
 	 * limit price less what the book charges at its own prices.
 	 *
-	 * Not a prediction — an upper bound, and settlement's only defence against a
-	 * free balance that is account-wide. Every other credit that can land on that
-	 * leg while the order runs (most easily the caller's own resting orders filling,
-	 * which a swap crosses the very book of) exceeds it, so it is what separates
-	 * "the venue gave this back" from "something else arrived".
+	 * An upper bound **for the snapshot it was walked from**, not for the fill. The
+	 * order is placed later, at the same limit price but against whatever the book has
+	 * become: if the cheap asks are gone by then the fill costs more and releases less,
+	 * while this figure stays where it was. So it is a ceiling that can go stale high,
+	 * and settlement drawing a source credit within it can still take that much of a
+	 * credit the order did not make — the caller's own resting orders filling being the
+	 * likeliest source of one, on the very book a swap crosses.
+	 *
+	 * That bounds the mis-attribution rather than removing it: without this the whole
+	 * account-wide delta is withdrawn, which at a zero maker fee is the entire deposit.
+	 * Removing it needs the venue to report the order's executed cost, or to quote and
+	 * place atomically; a mutable book snapshot cannot establish it.
 	 */
 	maxSourceRelease: bigint;
 }

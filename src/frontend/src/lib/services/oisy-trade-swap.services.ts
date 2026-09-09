@@ -456,22 +456,35 @@ const attributable = ({ current, baseline }: { current: bigint; baseline: bigint
  * land on the same legs in the same round. At a zero maker fee a self-matched Buy is
  * credited exactly the reserve it spent, so the delta alone cannot tell that from an
  * order that filled for nothing — and withdrawing it hands the user their own maker
- * proceeds. Every ceiling errs toward leaving funds at the venue, where the Trading tab
- * still shows them.
+ * proceeds.
+ *
+ * The deposit and quantity ceilings are exact. `filledSourceRelease` is not: it is
+ * walked from the quote's book snapshot, so a book that worsens before the order lands
+ * leaves it high and a credit can still be drawn on within it. It bounds that draw by
+ * the quoted price improvement instead of leaving it at the whole deposit; closing it
+ * needs the venue to report the executed cost. See `OisyTradeOffer.maxSourceRelease`.
  */
 export interface OisyTradeSettlementBounds {
 	// See `OisyTradeOffer.maxSourceRelease`.
 	filledSourceRelease: bigint;
-	// Undefined on a Sell, which fills at maker prices: capping would strand the price
-	// improvement the offer promised.
+	// Undefined on a Sell, deliberately and not for want of a ceiling: sweeping the bids
+	// would give the symmetric one. This leg is the *primary* rather than a residue, and
+	// a cap that binds leaves part of the swap's own output at the venue with nothing
+	// marking it, since a filled row closes. Withdrawing too much moves the caller's own
+	// money to their own wallet; withdrawing too little looks like a swap that did not
+	// deliver. The cost of leaving it open is real — quote-token free balance is
+	// account-wide across pairs, so any resting order of the caller's that shares the
+	// quote token credits this leg — and it stands until the venue reports the executed
+	// proceeds.
 	filledDestinationCredit: bigint | undefined;
 	// The deposit, since a killed fill-or-kill order has zero execution.
 	killedSourceReturn: bigint;
 }
 
 /**
- * `quantity` is optional for the poller's sake: a row whose ref cannot be read leaves a
- * Buy's destination unbounded rather than zero, which would strand a successful fill.
+ * `quantity` is optional only because a Sell has no use for it. A Buy without one would
+ * be built unbounded on the leg that most needs a ceiling, so the poller refuses such a
+ * row before reaching here rather than settling it.
  */
 export const toOisyTradeSettlementBounds = ({
 	side,

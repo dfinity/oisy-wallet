@@ -75,11 +75,11 @@ const priceCoveringValue = ({
  * What acquiring `quantity` base tokens costs at the book's own prices, scaled by
  * `10^baseDecimals`.
  *
- * The engine matches from the best price outwards, so this is the **cheapest** the
- * fill can be — and therefore, subtracted from what the order reserves, the *most*
- * of that reserve the venue can hand back. Settlement needs that bound: the free
- * balance it reads is account-wide, so without one it cannot tell a released reserve
- * from any other credit that landed on the same leg.
+ * The engine matches from the best price outwards, so this is the cheapest the fill
+ * can be **against this snapshot** — and therefore, subtracted from what the order
+ * reserves, the most of that reserve the snapshot says can come back. It is what
+ * settlement bounds a source credit by; the caveat that the book moves afterwards
+ * belongs with the field, `OisyTradeOffer.maxSourceRelease`.
  *
  * Nothing when the levels cannot supply the quantity, which is unreachable for a
  * quantity this module derived: the price walk stopped at a level whose cumulative

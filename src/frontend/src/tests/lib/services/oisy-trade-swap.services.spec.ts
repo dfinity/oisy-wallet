@@ -1085,8 +1085,8 @@ describe('oisy-trade-swap.services', () => {
 			});
 		});
 
-		// The poller's case. Unbounded rather than zero, which would leave a successful
-		// swap's fill at the venue.
+		// The builder invents no ceiling it was not given. Only a Sell reaches it this way:
+		// the poller refuses a Buy row whose quantity ref will not parse.
 		it('leaves a Buy’s destination unbounded without a quantity', () => {
 			expect(
 				toOisyTradeSettlementBounds({ side: 'buy', ...facts, quantity: undefined })

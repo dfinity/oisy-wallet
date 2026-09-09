@@ -212,11 +212,25 @@ const pollOisyTradeTransaction = async ({
 		return;
 	}
 
+	const side = fromOisyTradeCandidDataSide(tx.data.OisyTrade.side);
+	const quantity = toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]);
+
+	// A Buy's destination ceiling *is* the quantity, so settling without one would leave
+	// the primary leg withdrawing an account-wide delta — the very thing these bounds
+	// exist to stop. Written at row creation like the baselines, so an unreadable one is
+	// a malformed row and gets their treatment: logged, non-terminal, left alone. A Sell
+	// needs no such ceiling, and refusing to recover one over a ref it never reads would
+	// strand funds for nothing.
+	if (side === 'buy' && isNullish(quantity)) {
+		consoleError('Unreadable order quantity on an OISY Trade active user transaction', tx.id);
+		return;
+	}
+
 	// A row predating the release ref reads zero and so skips its source residue, leaving
 	// it visible in the Trading tab rather than sweeping a delta nothing bounds.
 	const bounds = toOisyTradeSettlementBounds({
-		side: fromOisyTradeCandidDataSide(tx.data.OisyTrade.side),
-		quantity: toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]),
+		side,
+		quantity,
 		depositAmount: tx.data.OisyTrade.amount,
 		maxSourceRelease:
 			toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]) ?? ZERO
