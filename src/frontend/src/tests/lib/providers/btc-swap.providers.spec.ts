@@ -21,12 +21,13 @@ describe('btc-swap.providers', () => {
 		vi.clearAllMocks();
 	});
 
-	// The vitest env maps to LOCAL: the NEAR Intents BTC flag is on while Chain Fusion
-	// (STAGING-gated) is off.
-	it('should register NEAR Intents as the only provider under the default test env', () => {
-		expect(btcSwapProviders).toHaveLength(1);
-		expect(btcSwapProviders[0].key).toBe(SwapProvider.NEAR_INTENTS);
-		expect(btcSwapProviders[0].isEnabled).toBeTruthy();
+	// Both BTC providers are on in the default env; the two cases below drop one flag each.
+	it('should register Chain Fusion ahead of NEAR Intents under the default test env', () => {
+		expect(btcSwapProviders.map(({ key }) => key)).toEqual([
+			SwapProvider.CHAIN_FUSION,
+			SwapProvider.NEAR_INTENTS
+		]);
+		expect(btcSwapProviders.every(({ isEnabled }) => isEnabled)).toBeTruthy();
 	});
 
 	it('should not register NEAR Intents when its BTC flag is off', async () => {
@@ -46,17 +47,14 @@ describe('btc-swap.providers', () => {
 		}
 	});
 
-	it('should register Chain Fusion ahead of NEAR Intents when both flags are on', async () => {
+	it('should not register Chain Fusion when its flag is off', async () => {
 		vi.resetModules();
-		vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
+		vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
 
 		try {
 			const { btcSwapProviders: providers } = await import('$lib/providers/btc-swap.providers');
 
-			expect(providers.map(({ key }) => key)).toEqual([
-				SwapProvider.CHAIN_FUSION,
-				SwapProvider.NEAR_INTENTS
-			]);
+			expect(providers.map(({ key }) => key)).toEqual([SwapProvider.NEAR_INTENTS]);
 		} finally {
 			vi.doUnmock('$env/chain-fusion-swap.env');
 			vi.resetModules();
