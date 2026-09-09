@@ -27,6 +27,9 @@ export const isOisyTradeActiveUserTransaction = (tx: ActiveUserTransaction): boo
 export const toOisyTradeCandidDataSide = (side: LimitOrderSide): OisyTradeSide =>
 	side === 'sell' ? { Sell: null } : { Buy: null };
 
+export const fromOisyTradeCandidDataSide = (side: OisyTradeSide): LimitOrderSide =>
+	'Sell' in side ? 'sell' : 'buy';
+
 /**
  * Builds the `OisyTrade` AUT data variant: the order's side plus the canonical
  * immutable trio (source token, destination token, source amount in base units).

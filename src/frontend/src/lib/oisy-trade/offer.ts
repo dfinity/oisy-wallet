@@ -72,6 +72,45 @@ const priceCoveringValue = ({
 };
 
 /**
+ * What acquiring `quantity` base tokens costs at the book's own prices, scaled by
+ * `10^baseDecimals`.
+ *
+ * The engine matches from the best price outwards, so this is the **cheapest** the
+ * fill can be — and therefore, subtracted from what the order reserves, the *most*
+ * of that reserve the venue can hand back. Settlement needs that bound: the free
+ * balance it reads is account-wide, so without one it cannot tell a released reserve
+ * from any other credit that landed on the same leg.
+ *
+ * Nothing when the levels cannot supply the quantity, which is unreachable for a
+ * quantity this module derived: the price walk stopped at a level whose cumulative
+ * value already covers the spend, and every level up to it is priced at or below
+ * that limit, so those levels hold at least `quantity`.
+ */
+const sweptValue = ({
+	levels,
+	quantity
+}: {
+	levels: PriceLevel[];
+	quantity: bigint;
+}): bigint | undefined => {
+	let remaining = quantity;
+	let scaled = ZERO;
+
+	for (const level of levels) {
+		const taken = level.quantity < remaining ? level.quantity : remaining;
+
+		scaled += level.price * taken;
+		remaining -= taken;
+
+		if (remaining <= ZERO) {
+			return scaled;
+		}
+	}
+
+	return undefined;
+};
+
+/**
  * Quotes a fill-or-kill order against an order-book snapshot.
  *
  * Both sides run the same walk — accumulate levels until the order is covered, take
@@ -161,6 +200,16 @@ export const calculateOisyTradeOffer = ({
 		return reject('above_max_notional');
 	}
 
+	// Only levels at or below the limit can match, and a price-aggregated depth lists
+	// each price once, so this is exactly the prefix the fill sweeps.
+	const swept = isSell
+		? ZERO
+		: sweptValue({ levels: depth.asks.filter((level) => level.price <= price), quantity });
+
+	if (isNullish(swept)) {
+		return reject('no_liquidity');
+	}
+
 	return {
 		ok: true,
 		offer: {
@@ -171,7 +220,13 @@ export const calculateOisyTradeOffer = ({
 			// ledger fee and needs no withdrawal.
 			deposit: isSell ? quantity : notional,
 			// A Sell is paid in the quote token, a Buy receives the base token itself.
-			gross: isSell ? notional : quantity
+			gross: isSell ? notional : quantity,
+			// A Sell's reserve is the quantity itself and a full fill transfers all of it,
+			// so nothing can come back. A Buy reserves at its limit and fills at the
+			// book's, and the difference is released. The division floors the cost, which
+			// can overstate the release by under one quote unit — harmless, since
+			// settlement takes the lesser of this and the credit it measures.
+			maxSourceRelease: isSell ? ZERO : notional - swept / baseUnit
 		}
 	};
 };

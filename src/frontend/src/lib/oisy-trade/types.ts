@@ -61,6 +61,18 @@ export interface OisyTradeOffer {
 	 * tokens and gets the unspent reserve back.
 	 */
 	gross: bigint;
+	/**
+	 * The **most** of `deposit` the venue can return on the source leg, in
+	 * source-token smallest units: zero for a Sell, and for a Buy the reserve at the
+	 * limit price less what the book charges at its own prices.
+	 *
+	 * Not a prediction — an upper bound, and settlement's only defence against a
+	 * free balance that is account-wide. Every other credit that can land on that
+	 * leg while the order runs (most easily the caller's own resting orders filling,
+	 * which a swap crosses the very book of) exceeds it, so it is what separates
+	 * "the venue gave this back" from "something else arrived".
+	 */
+	maxSourceRelease: bigint;
 }
 
 export type OisyTradeOfferResult =

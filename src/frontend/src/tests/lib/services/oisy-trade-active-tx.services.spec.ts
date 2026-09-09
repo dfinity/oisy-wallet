@@ -1,4 +1,4 @@
-import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type { ActiveUserTransaction, OisyTradeSide } from '$declarations/backend/backend.did';
 import type { UserOrder, UserTokenBalance } from '$declarations/oisy_trade/oisy_trade.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
@@ -60,18 +60,20 @@ const order = (status: object): UserOrder[] =>
 const row = ({
 	refs = {},
 	status = { Executing: null },
-	createdAtNs = ZERO
+	createdAtNs = ZERO,
+	side = { Sell: null }
 }: {
 	refs?: Partial<Record<string, string>>;
 	status?: ActiveUserTransaction['status'];
 	createdAtNs?: bigint;
+	side?: OisyTradeSide;
 } = {}): ActiveUserTransaction => ({
 	...mockActiveUserTransaction,
 	id: 'row-1',
 	status,
 	data: {
 		OisyTrade: {
-			side: { Sell: null },
+			side,
 			source_token: { Icrc: Principal.fromText(ICP_TOKEN.ledgerCanisterId) },
 			dest_token: { Icrc: Principal.fromText(CKUSDC_LEDGER) },
 			amount: 300_000_000n
@@ -80,6 +82,9 @@ const row = ({
 	external_refs: toOisyTradeExternalRefs({
 		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: '0',
 		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]: '0',
+		// Room for every source residue the cases below release, so the cap is not what
+		// they are measuring. It has its own case.
+		[OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]: '300000000',
 		...refs
 	}),
 	created_at_ns: createdAtNs,
@@ -463,6 +468,107 @@ describe('oisy-trade-active-tx.services', () => {
 				await pollPastBudget([row({ refs: PLACED })]);
 
 				expect(withdrawSpy).toHaveBeenCalledOnce();
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: expect.objectContaining({ status: { Succeeded: null } })
+					})
+				);
+			});
+
+			// The delta is account-wide, so it counts credits this order never made — most
+			// easily the caller's own resting orders filling against the very swap that is
+			// settling. The row carries what the order could possibly have released, and the
+			// residue is taken within it; the rest stays at the venue.
+			it('withdraws a source residue only up to what the order could release', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: CKUSDC_LEDGER, free: 2_000_000n }),
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 300_000_000n })
+				]);
+
+				await pollPastBudget([
+					row({
+						refs: { ...PLACED, [OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]: '500000' }
+					})
+				]);
+
+				expect(withdrawSpy).toHaveBeenCalledTimes(2);
+				expect(withdrawSpy.mock.calls[1][0]).toEqual(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 500_000n })
+					})
+				);
+			});
+
+			// The deposit comes off the row's data variant, not a ref.
+			it('withdraws a killed order’s source back only up to the row’s deposit', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Expired: null }));
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 500_000_000n })
+				]);
+
+				await pollPastBudget([row({ refs: PLACED })]);
+
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 300_000_000n })
+					})
+				);
+			});
+
+			it('withdraws a filled Buy’s destination only up to the row’s quantity', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([balance({ ledger: CKUSDC_LEDGER, free: 5_000_000n })]);
+
+				await pollPastBudget([
+					row({
+						side: { Buy: null },
+						refs: { ...PLACED, [OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]: '2000000' }
+					})
+				]);
+
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 2_000_000n })
+					})
+				);
+			});
+
+			// Zero here would strand a successful swap.
+			it('withdraws a filled Buy’s whole destination when the quantity is unreadable', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([balance({ ledger: CKUSDC_LEDGER, free: 5_000_000n })]);
+
+				await pollPastBudget([row({ side: { Buy: null }, refs: PLACED })]);
+
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 5_000_000n })
+					})
+				);
+			});
+
+			// A row opened before the cap ref existed. Skipping its residue leaves the
+			// release at the venue, where the Trading tab still shows it and the user can
+			// withdraw it themselves — the same direction the cap errs in, and the opposite
+			// of sweeping a delta nothing bounds.
+			it('skips the source residue of a row written before the cap existed', async () => {
+				getMyOrdersSpy.mockResolvedValue(order({ Filled: null }));
+				getBalancesSpy.mockResolvedValue([
+					balance({ ledger: CKUSDC_LEDGER, free: 2_000_000n }),
+					balance({ ledger: ICP_TOKEN.ledgerCanisterId, free: 300_000_000n })
+				]);
+
+				await pollPastBudget([
+					row({ refs: { ...PLACED, [OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]: '' } })
+				]);
+
+				expect(withdrawSpy).toHaveBeenCalledOnce();
+				expect(withdrawSpy.mock.calls[0][0].request.token_id.ledger_id.toText()).toBe(
+					CKUSDC_LEDGER
+				);
+				// Still a complete settlement: an unwithdrawn residue that was never this
+				// order's does not keep the row open.
 				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({
 						update: expect.objectContaining({ status: { Succeeded: null } })

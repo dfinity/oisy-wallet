@@ -56,7 +56,7 @@ import {
 	toOisyTradeCandidSide,
 	toOisyTradePairTable
 } from '$lib/utils/oisy-trade-swap.utils';
-import { toPairView, toTradingPair } from '$lib/utils/oisy-trade.utils';
+import { toPairView, toTradingPair, type LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -449,6 +449,50 @@ const attributable = ({ current, baseline }: { current: bigint; baseline: bigint
 	current > baseline ? current - baseline : ZERO;
 
 /**
+ * The most this order can have credited to each leg settlement withdraws from.
+ *
+ * The baseline makes a delta *this flow's*, which is not the same as *this order's*: a
+ * swap crosses the very book the caller's own resting orders sit on, and their proceeds
+ * land on the same legs in the same round. At a zero maker fee a self-matched Buy is
+ * credited exactly the reserve it spent, so the delta alone cannot tell that from an
+ * order that filled for nothing — and withdrawing it hands the user their own maker
+ * proceeds. Every ceiling errs toward leaving funds at the venue, where the Trading tab
+ * still shows them.
+ */
+export interface OisyTradeSettlementBounds {
+	// See `OisyTradeOffer.maxSourceRelease`.
+	filledSourceRelease: bigint;
+	// Undefined on a Sell, which fills at maker prices: capping would strand the price
+	// improvement the offer promised.
+	filledDestinationCredit: bigint | undefined;
+	// The deposit, since a killed fill-or-kill order has zero execution.
+	killedSourceReturn: bigint;
+}
+
+/**
+ * `quantity` is optional for the poller's sake: a row whose ref cannot be read leaves a
+ * Buy's destination unbounded rather than zero, which would strand a successful fill.
+ */
+export const toOisyTradeSettlementBounds = ({
+	side,
+	quantity,
+	depositAmount,
+	maxSourceRelease
+}: {
+	side: LimitOrderSide;
+	quantity: bigint | undefined;
+	depositAmount: bigint;
+	maxSourceRelease: bigint;
+}): OisyTradeSettlementBounds => ({
+	filledSourceRelease: maxSourceRelease,
+	filledDestinationCredit: side === 'buy' ? quantity : undefined,
+	killedSourceReturn: depositAmount
+});
+
+const capped = ({ delta, cap }: { delta: bigint; cap: bigint | undefined }): bigint =>
+	isNullish(cap) || delta < cap ? delta : cap;
+
+/**
  * Withdraws an amount from a token's free DEX balance, or nothing when it is dust.
  *
  * `withdraw` refuses an `amount` at or below the ledger fee (`AmountTooSmall`), so a
@@ -523,6 +567,10 @@ const withdrawFreeBalance = async ({
  * move. The same distinction decides the status: a pre-existing destination balance
  * must not let a killed order read as filled.
  *
+ * That difference is necessary and **not sufficient**: it is this flow's, but not
+ * necessarily this order's, so each leg is additionally taken within
+ * `OisyTradeSettlementBounds`.
+ *
  * The terminal action is *withdraw what this order added to both legs*: a Buy that
  * crosses below its limit price has its unspent reserve released back to free
  * balance, so even a successful swap can leave source behind. The fill / kill
@@ -533,7 +581,8 @@ export const settleOisyTradeSwap = async ({
 	orderId,
 	sourceToken,
 	destinationToken,
-	baseline
+	baseline,
+	bounds
 }: {
 	identity: Identity;
 	// Absent only when no order was ever placed, or its id never came back.
@@ -542,6 +591,8 @@ export const settleOisyTradeSwap = async ({
 	destinationToken: IcToken;
 	// Both legs' free balance as it stood before the deposit.
 	baseline: OisyTradeFreeBalances;
+	// The most this order can have credited to each leg. See `OisyTradeSettlementBounds`.
+	bounds: OisyTradeSettlementBounds;
 }): Promise<OisyTradeSettlement> => {
 	const order = nonNullish(orderId) ? await readOisyTradeOrder({ identity, orderId }) : undefined;
 
@@ -587,12 +638,19 @@ export const settleOisyTradeSwap = async ({
 	const [primary, residue] =
 		status === 'filled'
 			? ([
-					[destinationToken, destinationAdded],
-					[sourceToken, sourceAdded]
+					[
+						destinationToken,
+						capped({ delta: destinationAdded, cap: bounds.filledDestinationCredit })
+					],
+					[sourceToken, capped({ delta: sourceAdded, cap: bounds.filledSourceRelease })]
 				] as const)
 			: ([
-					[sourceToken, sourceAdded],
-					[destinationToken, destinationAdded]
+					[sourceToken, capped({ delta: sourceAdded, cap: bounds.killedSourceReturn })],
+					// A killed order has zero execution, so it never credited the destination
+					// leg at all: whatever is there arrived from something else — most likely
+					// another of the caller's orders filling — and none of it is this swap's to
+					// move. Left at the venue rather than withdrawn, and dust-skipped below.
+					[destinationToken, ZERO]
 				] as const);
 
 	// Sequential, not concurrent: the canister rejects a second withdrawal while one is
@@ -661,6 +719,7 @@ const settleUntilTerminal = async (params: {
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	baseline: OisyTradeFreeBalances;
+	bounds: OisyTradeSettlementBounds;
 }): Promise<OisyTradeResolvedSettlement> => {
 	for (;;) {
 		try {
@@ -687,8 +746,10 @@ const settleUntilTerminal = async (params: {
  *
  * Only the source leg: no order ever existed, so nothing has touched the
  * destination. And only what the deposit added — the delta from the pre-deposit
- * baseline, not `depositAmount`, so a concurrent Trading-tab withdrawal cannot
- * make it over-draw a balance the user moved themselves.
+ * baseline, so a concurrent Trading-tab withdrawal cannot make it over-draw a
+ * balance the user moved themselves — capped at `depositAmount`, since the deposit
+ * is the only credit this flow produced and anything beyond it arrived from
+ * elsewhere, most easily one of the caller's own orders filling meanwhile.
  *
  * Retries transient failures unbounded, exactly like `settleUntilTerminal` and
  * for the same reason: giving up on a ledger's bad minute would end the flow with
@@ -700,8 +761,9 @@ const recoverOisyTradeDeposit = async (params: {
 	sourceToken: IcToken;
 	destinationToken: IcToken;
 	baseline: OisyTradeFreeBalances;
+	depositAmount: bigint;
 }): Promise<void> => {
-	const { identity, sourceToken, baseline } = params;
+	const { identity, sourceToken, baseline, depositAmount } = params;
 
 	for (;;) {
 		try {
@@ -710,7 +772,10 @@ const recoverOisyTradeDeposit = async (params: {
 			await withdrawFreeBalance({
 				identity,
 				token: sourceToken,
-				amount: attributable({ current: current.source, baseline: baseline.source })
+				amount: capped({
+					delta: attributable({ current: current.source, baseline: baseline.source }),
+					cap: depositAmount
+				})
 			});
 
 			return;
@@ -834,6 +899,7 @@ export const fetchOisyTradeSwap = async ({
 		}),
 		[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_PRICE]: `${order.price}`,
 		[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]: `${order.quantity}`,
+		[OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]: `${order.maxSourceRelease}`,
 		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_SOURCE_FREE]: `${baseline.source}`,
 		[OISY_TRADE_EXTERNAL_REF_KEYS.BASELINE_DEST_FREE]: `${baseline.destination}`
 	};
@@ -986,7 +1052,13 @@ export const fetchOisyTradeSwap = async ({
 		// resolves once the grace period has passed.
 		if (err instanceof OisyTradeError) {
 			try {
-				await recoverOisyTradeDeposit({ identity, sourceToken, destinationToken, baseline });
+				await recoverOisyTradeDeposit({
+					identity,
+					sourceToken,
+					destinationToken,
+					baseline,
+					depositAmount: order.depositAmount
+				});
 			} catch (recoveryErr: unknown) {
 				consoleError(recoveryErr);
 
@@ -1039,7 +1111,8 @@ export const fetchOisyTradeSwap = async ({
 		orderId,
 		sourceToken,
 		destinationToken,
-		baseline
+		baseline,
+		bounds: toOisyTradeSettlementBounds(order)
 	});
 
 	// This session reports the outcome itself — the wizard fires the swap funnel's

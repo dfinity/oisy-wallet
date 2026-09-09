@@ -207,7 +207,7 @@ export const resolveOisyTradeOrder = ({
 		return { ok: false };
 	}
 
-	const { price, quantity, deposit, gross } = result.offer;
+	const { price, quantity, deposit, gross, maxSourceRelease } = result.offer;
 
 	return {
 		ok: true,
@@ -216,7 +216,8 @@ export const resolveOisyTradeOrder = ({
 			pair: toTradingPair(pair),
 			price,
 			quantity,
-			depositAmount: deposit
+			depositAmount: deposit,
+			maxSourceRelease
 		},
 		gross
 	};

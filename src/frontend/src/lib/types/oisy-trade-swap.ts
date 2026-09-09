@@ -16,6 +16,15 @@ export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	// and the row has to keep describing the order the user reviewed.
 	ORDER_PRICE: 'order_price',
 	ORDER_QUANTITY: 'order_quantity',
+	// The most of the deposit the venue can hand back on the source leg, from the
+	// book the quote walked. Settlement withdraws the source residue of a filled
+	// order within this, because the delta it measures is account-wide and the
+	// caller's own resting orders filling — on the very pair the swap crosses —
+	// credits the same leg with far more than the order can have released. With a
+	// zero maker fee those proceeds are exactly the deposit, so the delta alone
+	// cannot tell them apart. Snapshotted at creation, since the book has moved by
+	// the time a later session polls.
+	MAX_SOURCE_RELEASE: 'max_source_release',
 	// The destination (or recovered source) withdrawal that closes the row.
 	WITHDRAW_BLOCK_INDEX: 'withdraw_block_index',
 	// Set when the order has resolved but a non-dust leg is still at the venue because
@@ -89,6 +98,10 @@ export interface OisyTradeResolvedOrder {
 	// the typed amount in the user's wallet, where it costs no fee and needs no
 	// withdrawal.
 	depositAmount: bigint;
+	// The ceiling on what settlement may withdraw back from the source leg of a
+	// filled order, in source-token smallest units — zero on a Sell, the reserve
+	// less the book's own cost on a Buy. See `OisyTradeOffer.maxSourceRelease`.
+	maxSourceRelease: bigint;
 }
 
 /**
