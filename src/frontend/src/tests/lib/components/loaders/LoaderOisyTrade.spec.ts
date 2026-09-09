@@ -3,14 +3,25 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-const { mockTradingEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
+const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
 	mockTradingEnabled: { value: true },
+	mockProviderEnabled: { value: true },
 	mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined))
 }));
 
+// The two flags are mocked independently, as `OisyTradeProvider.svelte.spec.ts`
+// does: the codebase models the Trading surface staying reachable through
+// another provider while OISY TRADE itself is off, and this loader must follow
+// the provider flag, not the aggregate.
 vi.mock('$env/trading', () => ({
 	get anyTradingProviderEnabled() {
 		return mockTradingEnabled.value;
+	}
+}));
+
+vi.mock('$env/oisy-trade', () => ({
+	get OISY_TRADE_ENABLED() {
+		return mockProviderEnabled.value;
 	}
 }));
 
@@ -23,6 +34,7 @@ describe('LoaderOisyTrade', () => {
 		vi.clearAllMocks();
 
 		mockTradingEnabled.value = true;
+		mockProviderEnabled.value = true;
 	});
 
 	it('should load the OISY Trade data when an identity is available', async () => {
@@ -46,8 +58,18 @@ describe('LoaderOisyTrade', () => {
 		});
 	});
 
-	it('should not load anything when no trading provider is enabled', () => {
-		mockTradingEnabled.value = false;
+	it('should not load anything when the OISY Trade provider is disabled', () => {
+		mockProviderEnabled.value = false;
+		mockAuthStore();
+
+		render(LoaderOisyTrade);
+
+		expect(mockLoadOisyTrade).not.toHaveBeenCalled();
+	});
+
+	it('should not load anything when OISY Trade is off but another provider keeps the surface on', () => {
+		mockTradingEnabled.value = true;
+		mockProviderEnabled.value = false;
 		mockAuthStore();
 
 		render(LoaderOisyTrade);
