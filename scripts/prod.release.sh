@@ -441,6 +441,9 @@ count_word() {
   esac
 }
 
+# Slack's composer converts a small markdown subset on paste: single-asterisk bold,
+# "- " bullets, backticks and fences. Double asterisks are not part of it and would
+# paste through literally.
 # The message covers only what was actually filed, including on a resumed run.
 FILED=()
 for key in $ALL_TARGETS; do
@@ -477,12 +480,12 @@ fi
     prefix="$(target_prefix "$key")"
     id_var="${prefix}_REQUEST_ID"
     id="${!id_var}"
-    echo "- **$(target_label "$key"):**"
+    echo "- *$(target_label "$key"):*"
     echo "  - URL: https://orbitwallet.io?reqid=$id&sid=$STATION_ID"
     echo "  - To view the request, run: \`dfx-orbit review id $id\`"
   done
   echo ""
-  echo "**Technical checks:** @Antonio Ventilii @Denys Karmazyn"
+  echo "*Technical checks:* @Antonio Ventilii @Denys Karmazyn"
   echo ""
   echo "- The release arguments are:"
   echo ""
@@ -510,11 +513,11 @@ fi
   fi
   echo "- Please verify that the request corresponds to the above parameters by following the instructions here: [OISY Orbit guide]($GUIDE_URL)"
   echo ""
-  echo "**Feature developers:**"
+  echo "*Feature developers:*"
   echo ""
   echo "- Please provide guidance in this thread on what features have changed."
   echo ""
-  echo "**Product owners:** @Stefan Berger @Pierre Samaties"
+  echo "*Product owners:* @Stefan Berger @Pierre Samaties"
   echo ""
   echo "- This release can be previewed on beta.oisy.com"
 } >"$MESSAGE_FILE"
