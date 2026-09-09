@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import * as ethBalanceServices from '$eth/services/eth-balance.services';
 import * as feeServices from '$eth/services/fee.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import * as sendServices from '$eth/services/send.services';
@@ -12,13 +13,14 @@ import {
 } from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
+import { MAX_BUTTON, REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -287,6 +289,107 @@ describe('EthSendTokenWizard.spec', () => {
 			// The amount shown for review was priced against the fee in hand; a fresh sample would
 			// move the fee underneath it, and a spike right before "Send" would be signed as is.
 			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('max send', () => {
+		// The fee the amount is capped against, as the frozen `feeState` above prices it:
+		// `maxFeePerGas * gas`, with no L1 data fee on Ethereum.
+		const gasFee = 2_000_000n * 100n;
+		// What the poll last saw, and what "Max" therefore offers.
+		const staleBalance = 1_000_000_000_000_000_000n;
+		// What the account holds by the time the transaction is signed, the difference being gas
+		// already spent by a transfer the poll has not caught up with.
+		const freshBalance = staleBalance - 500_000_000n;
+
+		const renderMaxSend = () => {
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: staleBalance, certified: false }
+			});
+
+			return render(EthSendTokenWizardTestHost, {
+				props: {
+					currentStep: { name: WizardStepsSend.SEND, title: WizardStepsSend.SEND },
+					destination,
+					sendContext: initSendContext({ token: ETHEREUM_TOKEN }),
+					sourceNetwork: ETHEREUM_NETWORK,
+					nativeEthereumToken: ETHEREUM_TOKEN,
+					onCloseStep: vi.fn()
+				}
+			});
+		};
+
+		beforeEach(() => {
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+
+			vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
+				...ctx,
+				maxGasFee: readable(gasFee),
+				minGasFee: readable(gasFee),
+				estimatedGasFee: readable(gasFee),
+				feePrioritiesStore: writable(undefined)
+			}));
+
+			vi.spyOn(ethBalanceServices, 'reloadEthereumBalance').mockImplementation(() => {
+				balancesStore.set({
+					id: ETHEREUM_TOKEN.id,
+					data: { data: freshBalance, certified: false }
+				});
+
+				return Promise.resolve({ success: true });
+			});
+		});
+
+		afterEach(() => {
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+		});
+
+		it('signs a Max amount that fits the balance as it is at signing time', async () => {
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(ethBalanceServices.reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+
+			// Not `staleBalance - gasFee`: that amount plus the gas it reserves is more than the
+			// account holds, and the chain refuses such a transaction outright.
+			expect(sendServices.send).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: freshBalance - gasFee })
+			);
+		});
+
+		it('still caps against the balance the amount was priced with when the re-read fails', async () => {
+			// A failed re-read empties the balance in the store rather than leaving the previous one.
+			vi.spyOn(ethBalanceServices, 'reloadEthereumBalance').mockImplementation(() => {
+				balancesStore.reset(ETHEREUM_TOKEN.id);
+
+				return Promise.resolve({ success: false });
+			});
+
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(sendServices.send).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: staleBalance - gasFee })
+			);
 		});
 	});
 

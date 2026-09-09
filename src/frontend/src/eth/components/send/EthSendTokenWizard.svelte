@@ -6,6 +6,7 @@
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
+	import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 	import { sendNft } from '$eth/services/nft-send.services';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -316,20 +317,36 @@
 			unitName: $sendTokenDecimals
 		});
 
+		const isMaxNativeSend = amountSetToMax && feeIsPaidFromAmount;
+
+		// The balance a "Max" amount was priced against is a poll sample, and every transaction the
+		// wallet sends in between - an ERC-20 transfer, an approval, a swap - pays its gas out of
+		// this very balance. Until the next poll lands, that sample still holds gas the account has
+		// already spent, and an amount drawn from it reserves more than there is left to reserve.
+		// Re-reading the balance here is what makes the cap below a cap on what the account actually
+		// has, rather than on what it had when the field was filled in.
+		const pricedAgainstBalance = $sendBalance;
+
+		if (isMaxNativeSend) {
+			await reloadEthereumBalance($sendToken);
+		}
+
 		// The fee is frozen from the review step on, so the sample signed just above is the one the
 		// amount step last showed. The "Max" button, however, re-applies its amount half a second
 		// after each fee change, so a click on "Review" inside that window carries an amount priced
 		// against the sample before. A fee that has risen in between leaves it unable to cover
 		// `gas * maxFeePerGas`, and the chain drops such a transaction without reporting anything:
 		// the broadcast returns a hash and it is simply never included.
-		const sendAmount =
-			amountSetToMax && feeIsPaidFromAmount
-				? capSendAmountToFee({
-						amount: parsedAmount,
-						balance: $sendBalance,
-						feeData
-					})
-				: parsedAmount;
+		const sendAmount = isMaxNativeSend
+			? capSendAmountToFee({
+					amount: parsedAmount,
+					// A re-read that failed leaves no balance behind rather than the previous one, and
+					// capping against nothing caps nothing: fall back to the sample the amount was
+					// priced against, so re-reading can only ever tighten this cap, never drop it.
+					balance: $sendBalance ?? pricedAgainstBalance,
+					feeData
+				})
+			: parsedAmount;
 
 		if (sendAmount <= ZERO) {
 			toastsError({
