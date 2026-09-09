@@ -10,7 +10,8 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
 	OisyTradeOrderStatus,
-	OisyTradeOrderView
+	OisyTradeOrderView,
+	OisyTradeTimeInForce
 } from '$lib/types/oisy-trade';
 import {
 	type LimitOrderPairView,
@@ -734,6 +735,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity,
 		filledQuantity = ZERO,
 		status,
+		timeInForce = 'GoodTilCanceled',
 		createdAt = 42n,
 		base = baseLedgerId,
 		quote = quoteLedgerId
@@ -744,6 +746,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity: bigint;
 		filledQuantity?: bigint;
 		status: OisyTradeOrderStatus;
+		timeInForce?: OisyTradeTimeInForce;
 		createdAt?: bigint;
 		base?: string;
 		quote?: string;
@@ -757,6 +760,7 @@ describe('oisy-trade.utils — orders', () => {
 				quantity,
 				filled_quantity: filledQuantity,
 				status: { [status]: null },
+				time_in_force: { [timeInForce]: null },
 				created_at: createdAt
 			}
 		}) as unknown as UserOrder;
@@ -784,8 +788,24 @@ describe('oisy-trade.utils — orders', () => {
 				price: 2.75,
 				filledQuantity: 25,
 				status: 'Open',
+				timeInForce: 'GoodTilCanceled',
 				createdAt: 42n
 			});
+		});
+
+		it('maps the time-in-force of a fill-or-kill order', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Sell',
+					quantity: 100n * 100_000_000n,
+					price: 2_750_000n,
+					status: 'Expired',
+					timeInForce: 'FillOrKill'
+				}),
+				tokens
+			});
+
+			expect(view?.timeInForce).toBe('FillOrKill');
 		});
 
 		it('maps a buy order', () => {
@@ -1020,6 +1040,7 @@ describe('oisy-trade.utils — search', () => {
 		price: 2.5,
 		filledQuantity: 0,
 		status: 'Open',
+		timeInForce: 'GoodTilCanceled',
 		createdAt: ZERO
 	};
 
