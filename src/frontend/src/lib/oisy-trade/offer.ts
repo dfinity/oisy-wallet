@@ -36,8 +36,6 @@ const priceCoveringQuantity = ({
 			return level.price;
 		}
 	}
-
-	return undefined;
 };
 
 /**
@@ -67,8 +65,6 @@ const priceCoveringValue = ({
 			return level.price;
 		}
 	}
-
-	return undefined;
 };
 
 /**
@@ -106,8 +102,6 @@ const sweptValue = ({
 			return scaled;
 		}
 	}
-
-	return undefined;
 };
 
 /**
