@@ -164,6 +164,20 @@ choose_targets() {
 
 # --- preflight --------------------------------------------------------------
 
+# GNU stat first, BSD stat second: `-f` is a valid GNU flag meaning something else
+# entirely, so probing BSD first prints filesystem junk wherever coreutils is
+# installed. `date -r` is no use either, it means two different things per platform.
+file_mtime() {
+  local out
+  out="$(stat -c '%y' "$1" 2>/dev/null)" || out=""
+  [ -n "$out" ] || out="$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$1" 2>/dev/null)" || out=""
+  [ -n "$out" ] || {
+    echo "unknown"
+    return
+  }
+  echo "${out:0:16}"
+}
+
 sha256_of() {
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$1" | cut -d' ' -f1
@@ -213,8 +227,13 @@ esac
 dfx-orbit me >/dev/null 2>&1 || die "dfx-orbit me failed, your identity cannot reach the station"
 ok "identity reaches the station"
 
-dirty="$(git status --porcelain --untracked-files=no)"
-[ -z "$dirty" ] || die "the working tree has uncommitted changes, a release must build a clean tree"
+# Untracked files reach the docker build context too, so they count as dirty. Only
+# gitignored paths (target/, out/, .env.production) are exempt.
+dirty="$(git status --porcelain)"
+if [ -n "$dirty" ]; then
+  printf '%s\n' "$dirty" >&2
+  die "the working tree is not clean, a release must build exactly what the tag contains"
+fi
 ok "working tree is clean"
 
 # --- env file ---------------------------------------------------------------
@@ -225,7 +244,7 @@ step "Production env file"
 ENV_SHA_COMPUTED="$(sha256_of .env.production)"
 ENV_SHA="$ENV_SHA_COMPUTED"
 say "  $BOLD$ENV_SHA$RESET  .env.production"
-note "$(grep -c '^[A-Z]' .env.production 2>/dev/null || echo 0) variables, modified $(date -r .env.production '+%Y-%m-%d %H:%M')"
+note "$(grep -c '^[A-Z]' .env.production 2>/dev/null || echo 0) variables, modified $(file_mtime .env.production)"
 say ""
 say "  This hash goes into the release message and every reviewer checks against it."
 say "  Confirm the file is the current production env from 1pass, feature flags included."
@@ -347,7 +366,8 @@ if [ "$SKIP_RUN" = "0" ]; then
   ok "checked out $TAG"
 
   record() {
-    printf 'export %s=%s\n' "$1" "$2" >>"$STATE_FILE"
+    # %q so a value that is not a plain id cannot execute when the file is sourced.
+    printf 'export %s=%q\n' "$1" "$2" >>"$STATE_FILE"
     printf -v "$1" '%s' "$2"
   }
 
