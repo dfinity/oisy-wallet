@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
 			"unable_to_retrieve_amount": "n/a（取得できません）",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
 			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",

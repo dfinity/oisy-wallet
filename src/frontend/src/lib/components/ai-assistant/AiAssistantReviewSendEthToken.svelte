@@ -14,6 +14,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isEthAddress } from '$eth/utils/account.utils';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -259,10 +260,7 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
 		}
 	};
 </script>

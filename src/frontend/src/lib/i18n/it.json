@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Si è verificato un errore durante il calcolo della commissione di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "La tua transazione non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la commissione di priorità fornita non era sufficiente. L'abbiamo aggiornata all'importo consigliato più recente, quindi riprova.",
 			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Attendi qualche secondo e poi controlla la lista delle transazioni del tuo token per verificare se la tua transazione è stata creata correttamente.",
 			"solana_insufficient_funds": "Il saldo del tuo token non è sufficiente per completare questa transazione. Il tuo saldo potrebbe essere cambiato dall'ultima volta che è stato visualizzato.",

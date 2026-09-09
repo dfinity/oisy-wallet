@@ -20,6 +20,7 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { mapEthereumErrorMsg } from '$eth/utils/eth-error.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
@@ -533,7 +534,10 @@
 				});
 			} else {
 				failedSwapError.set({
-					message: nearIntentsQuoteRejectedMessage(err) ?? $i18n.swap.error.failed_unexpectedly,
+					message:
+						nearIntentsQuoteRejectedMessage(err) ??
+						mapEthereumErrorMsg(err) ??
+						$i18n.swap.error.failed_unexpectedly,
 					variant: 'error'
 				});
 			}
