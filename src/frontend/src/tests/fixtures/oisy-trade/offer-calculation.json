@@ -41,7 +41,8 @@
 				"price": "5000000",
 				"quantity": "96000000",
 				"deposit": "96000000",
-				"gross": "4800000"
+				"gross": "4800000",
+				"maxSourceRelease": "0"
 			},
 			"expectReceive": "4742000"
 		},
@@ -54,7 +55,8 @@
 				"price": "4000000",
 				"quantity": "396000000",
 				"deposit": "396000000",
-				"gross": "15840000"
+				"gross": "15840000",
+				"maxSourceRelease": "0"
 			},
 			"expectReceive": "15671600"
 		},
@@ -67,7 +69,8 @@
 				"price": "2000000",
 				"quantity": "996000000",
 				"deposit": "996000000",
-				"gross": "19920000"
+				"gross": "19920000",
+				"maxSourceRelease": "0"
 			},
 			"expectReceive": "19710800"
 		},
@@ -80,7 +83,8 @@
 				"price": "8000000",
 				"quantity": "120000000",
 				"deposit": "9600000",
-				"gross": "120000000"
+				"gross": "120000000",
+				"maxSourceRelease": "0"
 			},
 			"expectReceive": "118790000"
 		},
@@ -93,7 +97,8 @@
 				"price": "10000000",
 				"quantity": "300000000",
 				"deposit": "30000000",
-				"gross": "300000000"
+				"gross": "300000000",
+				"maxSourceRelease": "4000000"
 			},
 			"expectReceive": "296990000"
 		},
@@ -106,7 +111,8 @@
 				"price": "20000000",
 				"quantity": "192000000",
 				"deposit": "38400000",
-				"gross": "192000000"
+				"gross": "192000000",
+				"maxSourceRelease": "23040000"
 			},
 			"expectReceive": "190070000"
 		},
@@ -119,9 +125,31 @@
 				"price": "24000000",
 				"quantity": "408000000",
 				"deposit": "97920000",
-				"gross": "408000000"
+				"gross": "408000000",
+				"maxSourceRelease": "60320000"
 			},
 			"expectReceive": "403910000"
+		},
+		{
+			"id": "buy-two-asks-releases-the-improvement",
+			"description": "buy with 10 USDT across two asks: it reserves at the 3.4 limit, clears the 2.98 level first, and the release is exactly that improvement — the bound that separates a returned reserve from a maker credit on the same leg",
+			"side": "buy",
+			"sourceAmount": "10000000",
+			"book": {
+				"bids": [],
+				"asks": [
+					{ "price": "2980000", "quantity": "129000000" },
+					{ "price": "3400000", "quantity": "300000000" }
+				]
+			},
+			"expect": {
+				"price": "3400000",
+				"quantity": "288000000",
+				"deposit": "9792000",
+				"gross": "288000000",
+				"maxSourceRelease": "541800"
+			},
+			"expectReceive": "285110000"
 		},
 		{
 			"id": "sell-beyond-bid-depth",
