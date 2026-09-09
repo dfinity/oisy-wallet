@@ -29,6 +29,7 @@ import type { WizardStep } from '$lib/types/wizard';
 import * as inputUtils from '$lib/utils/input.utils';
 import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -391,6 +392,38 @@ describe('EthSendTokenWizard.spec', () => {
 				expect.objectContaining({ amount: staleBalance - gasFee })
 			);
 		});
+	});
+
+	it('explains a broadcast the balance could not cover, without the node text', async () => {
+		// The error a staging "send max" came back with, as ethers hands it over.
+		const err = Object.assign(new Error('could not coalesce error'), {
+			code: 'UNKNOWN_ERROR',
+			error: { code: -32000, message: 'gas required exceeds allowance (17277)' }
+		});
+
+		vi.spyOn(toasts, 'toastsErrorNoTrace').mockImplementation(() => Symbol('toast'));
+		vi.mocked(sendServices.send).mockRejectedValueOnce(err);
+
+		const { getByTestId } = renderHost({
+			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
+			nft: undefined,
+			destination,
+			sourceNetwork: ETHEREUM_NETWORK,
+			nativeEthereumToken: ETHEREUM_TOKEN,
+			sendToken: ETHEREUM_TOKEN,
+			sendTokenDecimals: ETHEREUM_TOKEN.decimals
+		});
+
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
+
+		expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+			msg: { text: en.send.error.ethereum_insufficient_funds },
+			err
+		});
+
+		expect(toasts.toastsError).not.toHaveBeenCalled();
 	});
 
 	it('shows a toast and aborts when destination is empty', async () => {

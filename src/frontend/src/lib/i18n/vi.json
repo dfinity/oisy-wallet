@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Giao dịch của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể là do phí ưu tiên được cung cấp không đủ. Chúng tôi đã cập nhật lên số tiền được khuyến nghị mới nhất, vì vậy vui lòng thử lại.",
 			"solana_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",

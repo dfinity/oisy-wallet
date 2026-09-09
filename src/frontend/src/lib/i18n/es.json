@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Su transacción no fue procesada por la red Solana y expiró, muy probablemente porque la tarifa de prioridad proporcionada no era suficiente. La hemos actualizado al importe recomendado más reciente, por lo que por favor inténtelo de nuevo.",
 			"solana_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",

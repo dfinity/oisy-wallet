@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
 			"unable_to_retrieve_amount": "n/d (nie można pobrać)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",

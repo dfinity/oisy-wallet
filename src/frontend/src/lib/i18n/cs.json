@@ -1041,6 +1041,7 @@
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později.",
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Vaše transakce nebyla zpracována sítí Solana a vypršela, nejpravděpodobněji proto, že zadaný prioritní poplatek nebyl dostatečný. Aktualizovali jsme ho na nejnovější doporučenou částku, zkuste to prosím znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení pro transakci, kterou jste právě vytvořili. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí vašeho tokenu, zda byla vaše transakce vytvořena správně.",
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
