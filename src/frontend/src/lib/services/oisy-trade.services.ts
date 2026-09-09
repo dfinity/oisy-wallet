@@ -23,6 +23,7 @@ import {
 	OISY_TRADE_MAX_ORDER_PAGES,
 	OISY_TRADE_ORDERS_PAGE_SIZE
 } from '$lib/constants/oisy-trade.constants';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
@@ -76,6 +77,14 @@ const loadMyOrders = async ({
 	return orders;
 };
 
+// The load is fire-and-forget and app-wide (`LoaderOisyTrade`), so a request
+// started for one identity can resolve after a sign-out has already reset the
+// store — or after a newer load has written. Re-reading `authIdentity` at the
+// commit point and dropping a result whose principal is no longer the current
+// one keeps the store from being repopulated with the previous account's data.
+const isCurrentIdentity = (identity: NonNullable<NullishIdentity>): boolean =>
+	get(authIdentity)?.getPrincipal().toText() === identity.getPrincipal().toText();
+
 // Best-effort load of trading pairs, supported tokens and the caller's DEX
 // balances into `oisyTradeStore`; errors are logged so a transient canister
 // failure never breaks the Trading tab. Read-only.
@@ -96,6 +105,10 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 			getBalances({ identity, nullishIdentityErrorMessage }),
 			loadMyOrders({ identity, nullishIdentityErrorMessage })
 		]);
+
+		if (!isCurrentIdentity(identity)) {
+			return;
+		}
 
 		oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
 	} catch (err: unknown) {

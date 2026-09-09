@@ -18,7 +18,9 @@ import {
 	withdrawFromOisyTrade
 } from '$lib/services/oisy-trade.services';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -37,9 +39,22 @@ describe('oisy-trade.services', () => {
 	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
 	const orders = [{ id: 'order-1' }] as unknown as UserOrder[];
 
+	const resetStoreValue = {
+		pairs: undefined,
+		supportedTokens: undefined,
+		balances: undefined,
+		orders: undefined
+	};
+
+	// A second signed-in account, to drive the identity-transition guard.
+	const otherIdentity = { getPrincipal: () => mockPrincipal2 } as unknown as Identity;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		oisyTradeStore.reset();
+		// The store commit is guarded on the identity still being the current one,
+		// so the loading identity has to be the signed-in one for a write to land.
+		mockAuthStore();
 		vi.mocked(oisyTradeApi.getTradingPairs).mockResolvedValue(pairs);
 		vi.mocked(oisyTradeApi.listSupportedTokens).mockResolvedValue(supportedTokens);
 		vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(balances);
@@ -53,12 +68,7 @@ describe('oisy-trade.services', () => {
 
 			await loadOisyTrade({ identity: null });
 
-			expect(get(oisyTradeStore)).toEqual({
-				pairs: undefined,
-				supportedTokens: undefined,
-				balances: undefined,
-				orders: undefined
-			});
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
 			expect(oisyTradeApi.getTradingPairs).not.toHaveBeenCalled();
 		});
 
@@ -135,12 +145,55 @@ describe('oisy-trade.services', () => {
 
 			await expect(loadOisyTrade({ identity: mockIdentity })).resolves.toBeUndefined();
 
-			expect(get(oisyTradeStore)).toEqual({
-				pairs: undefined,
-				supportedTokens: undefined,
-				balances: undefined,
-				orders: undefined
-			});
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
+		});
+
+		it('does not repopulate the store when the load resolves after a sign-out', async () => {
+			let resolveBalances: (value: UserTokenBalance[]) => void = () => undefined;
+			vi.mocked(oisyTradeApi.getBalances).mockReturnValue(
+				new Promise<UserTokenBalance[]>((resolve) => {
+					resolveBalances = resolve;
+				})
+			);
+
+			// The signed-in load is still in flight when the user signs out.
+			const pending = loadOisyTrade({ identity: mockIdentity });
+
+			mockAuthStore(null);
+			await loadOisyTrade({ identity: null });
+
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
+
+			// The older request resolves last — it must not undo the reset.
+			resolveBalances(balances);
+			await pending;
+
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
+		});
+
+		it('does not overwrite a newer account when the older load resolves last', async () => {
+			const otherBalances = [
+				{ balance: { free: 2n, reserved: ZERO } }
+			] as unknown as UserTokenBalance[];
+
+			let resolveBalances: (value: UserTokenBalance[]) => void = () => undefined;
+			vi.mocked(oisyTradeApi.getBalances).mockReturnValueOnce(
+				new Promise<UserTokenBalance[]>((resolve) => {
+					resolveBalances = resolve;
+				})
+			);
+
+			const pending = loadOisyTrade({ identity: mockIdentity });
+
+			// The second account signs in and its load completes first.
+			mockAuthStore(otherIdentity);
+			vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(otherBalances);
+			await loadOisyTrade({ identity: otherIdentity });
+
+			resolveBalances(balances);
+			await pending;
+
+			expect(get(oisyTradeStore).balances).toEqual(otherBalances);
 		});
 	});
 
