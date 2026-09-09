@@ -254,4 +254,29 @@ describe('WalletConnectSignReview', () => {
 
 		expect(queryByText(en.wallet_connect.text.unreviewable_typed_data)).not.toBeInTheDocument();
 	});
+
+	// The chain the domain binds to, on a request whose schema says nothing else: the same struct
+	// signed for Arbitrum is not the signature it would be for Ethereum, and that much is knowable
+	// even where the contents are not.
+	it('states the network of a schema it cannot describe', () => {
+		const { getByText, getByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
+		});
+
+		expect(getByText(en.wallet_connect.text.network)).toBeInTheDocument();
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(
+			ARBITRUM_MAINNET_NETWORK.name
+		);
+	});
+
+	// Stated once, from the domain. The token is matched on that same chain id, so a row per source
+	// would print the same network twice under one label.
+	it('states the network once for a schema it can describe', () => {
+		const { getAllByText, getByTestId } = render(WalletConnectSignReview, {
+			props: { ...props, request: daiPermitRequest(true) }
+		});
+
+		expect(getAllByText(en.wallet_connect.text.network)).toHaveLength(1);
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
+	});
 });

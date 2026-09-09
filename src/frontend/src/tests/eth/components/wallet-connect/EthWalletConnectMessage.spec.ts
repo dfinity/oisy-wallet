@@ -447,13 +447,16 @@ describe('EthWalletConnectMessage', () => {
 		});
 
 		expect(queryByText(en.wallet_connect.text.token)).not.toBeInTheDocument();
-		expect(queryByText(en.wallet_connect.text.network)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.amount)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.expiration)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText('0x2222222222222222222222222222222222222222')).not.toBeInTheDocument();
+
+		// The chain is a domain member, not a message key, so it is unaffected by what the schema
+		// declines to declare.
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 
 		// The full payload stays available in the raw message viewer, one tab over.
 		await openRawTab(getByRole);
@@ -477,10 +480,10 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(en.wallet_connect.text.token)).toBeInTheDocument();
 		expect(getByText('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')).toBeInTheDocument();
 
-		// Nothing is claimed that is not known: no symbol, no network, and no scaled figure.
-		expect(queryByText(en.wallet_connect.text.network)).not.toBeInTheDocument();
+		// Nothing is claimed that is not known: no symbol and no scaled figure. The chain is read off
+		// the domain rather than off the token, so it survives the token going unlisted.
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
-		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 
 		expect(
 			queryByText(
@@ -532,17 +535,18 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { queryByText } = render(EthWalletConnectMessage, {
+		const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
 		});
 
 		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
-		expect(queryByText(`${en.wallet_connect.text.network}:`)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
-		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
+
+		// Ethereum is stated because the domain binds to it, not because a token resolved to it.
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
 
 	it('should handle errors when getting sign parameters', async () => {
@@ -603,17 +607,18 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { queryByText } = render(EthWalletConnectMessage, {
+		const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
 		});
 
 		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
-		expect(queryByText(`${en.wallet_connect.text.network}:`)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
-		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
+
+		// Ethereum is stated because the domain binds to it, not because a token resolved to it.
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
 
 	it('should handle empty details in the message', () => {
@@ -645,17 +650,18 @@ describe('EthWalletConnectMessage', () => {
 			}
 		} as WalletKitTypes.SessionRequest;
 
-		const { queryByText } = render(EthWalletConnectMessage, {
+		const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
 			props: {
 				request: newRequest
 			}
 		});
 
 		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
-		expect(queryByText(`${en.wallet_connect.text.network}:`)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
-		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
+
+		// Ethereum is stated because the domain binds to it, not because a token resolved to it.
+		expect(getByTestId('wallet-connect-domain-network')).toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
 
 	it('should not render the invalid typed-data warning by default', () => {
