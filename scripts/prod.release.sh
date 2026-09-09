@@ -235,7 +235,9 @@ confirm "  Is this the correct .env.production?" || die "aborted, fix the env fi
 
 step "Release tag"
 
-git fetch --tags --quiet
+# --force so a tag that was moved upstream updates locally instead of failing the
+# fetch, which is silent under --quiet and would abort the run without a reason.
+git fetch --tags --force --quiet || die "git fetch --tags failed"
 LATEST_TAG="$(git tag --sort=-v:refname | head -1)"
 if [ -z "$TAG" ]; then
   say "  The latest tag is $BOLD$LATEST_TAG$RESET."
