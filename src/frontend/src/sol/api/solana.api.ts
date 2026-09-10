@@ -164,7 +164,7 @@ export const fetchTransactionDetailForSignature = async ({
 		...rpcTransaction,
 		version: rpcTransaction.version,
 		confirmationStatus,
-		id: signature.toString(),
+		id: signature.signature,
 		signature: signature.signature
 	};
 
