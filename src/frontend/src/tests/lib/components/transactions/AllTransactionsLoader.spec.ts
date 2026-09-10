@@ -490,6 +490,128 @@ describe('AllTransactionsLoader', () => {
 		});
 	});
 
+	// A cold start, e.g. an incognito window: no IndexedDB cache, so every token arrives on its own
+	// first network page and the loaded set keeps changing after the first levelling pass.
+	describe('when the loaded set changes after the first pass', () => {
+		const solRow = ({
+			token,
+			timestamp
+		}: {
+			token: Token;
+			timestamp: bigint;
+		}): AllTransactionUiWithCmp => ({
+			transaction: { ...createMockSolTransactionsUi(1)[0], id: `late-${timestamp}`, timestamp },
+			component: 'solana' as const,
+			token
+		});
+
+		beforeEach(() => {
+			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+		});
+
+		it('should level a token whose first page arrived after the first pass', async () => {
+			const { rerender } = render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			});
+
+			spyLoadNextSolTransactions.mockClear();
+
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp })
+				]
+			});
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					minTimestamp: mockMinTimestamp,
+					token: mockSplToken,
+					signalEnd: expect.any(Function)
+				});
+			});
+		});
+
+		it('should level every token down to an older row that arrived after the first pass', async () => {
+			const { rerender } = render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			});
+
+			spyLoadNextSolTransactions.mockClear();
+
+			const olderTimestamp = mockMinTimestampStart - 1n;
+
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					solRow({ token: mockSplDefaultToken, timestamp: olderTimestamp })
+				]
+			});
+
+			await waitFor(() => {
+				solTokens.forEach(([token]) => {
+					expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+						identity: mockIdentity,
+						minTimestamp: normalizeTimestampToSeconds(olderTimestamp),
+						token,
+						signalEnd: expect.any(Function)
+					});
+				});
+			});
+		});
+
+		it('should run one follow-up pass for changes landing mid-pass, not one pass each', async () => {
+			let releaseFirstPass: (() => void) | undefined;
+
+			const firstPass = new Promise<void>((resolve) => {
+				releaseFirstPass = resolve;
+			});
+
+			spyLoadNextSolTransactions.mockImplementation(async () => {
+				await firstPass;
+
+				return { success: false };
+			});
+
+			const { rerender } = render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			});
+
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp })
+				]
+			});
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp + 1n })
+				]
+			});
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+
+			releaseFirstPass?.();
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length * 2);
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length * 2);
+		});
+	});
+
 	describe('load more', () => {
 		interface LoaderControls {
 			loadMore: () => Promise<boolean>;

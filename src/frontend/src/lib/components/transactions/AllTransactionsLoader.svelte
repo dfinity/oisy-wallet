@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, type Snippet, untrack } from 'svelte';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
@@ -93,12 +93,36 @@
 		await Promise.allSettled($enabledFungibleNetworkTokens.map(levelOne));
 	};
 
-	const loadMissingTransactions = async () => {
-		if (isNullish($authIdentity) || transactions.length === 0) {
-			return;
+	let levelling: Promise<void> | undefined;
+
+	let relevelRequested = false;
+
+	const levelLoadedSet = async () => {
+		do {
+			relevelRequested = false;
+
+			if (destroyed || isNullish($authIdentity) || transactions.length === 0) {
+				return;
+			}
+
+			await levelToOldest(oldestLoadedTimestamp());
+		} while (relevelRequested);
+	};
+
+	// One levelling pass at a time. A change landing mid-pass is not lost: it earns exactly one more
+	// pass once the current one ends, which then sees everything that arrived in between.
+	const loadMissingTransactions = (): Promise<void> => {
+		if (nonNullish(levelling)) {
+			relevelRequested = true;
+
+			return levelling;
 		}
 
-		await levelToOldest(oldestLoadedTimestamp());
+		levelling = levelLoadedSet().finally(() => {
+			levelling = undefined;
+		});
+
+		return levelling;
 	};
 
 	const totalLoaded = (): number =>
@@ -114,24 +138,34 @@
 
 		const loadedBefore = totalLoaded();
 
+		// Let a running pass settle first, so the page below starts from where it left each token
+		// rather than fetching the same page twice.
+		await levelling;
+
 		// One unconditional page per token first: without it every token already sits at the floor
 		// and levelling alone would find nothing left to do.
 		await Promise.allSettled($enabledFungibleNetworkTokens.map((token) => pageToken({ token })));
 
-		await levelToOldest(oldestLoadedTimestamp());
+		await loadMissingTransactions();
 
 		return totalLoaded() > loadedBefore;
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));
 
-	let firstLoad = $state(false);
-
+	// Levelled again on every change to the loaded set, not once after mount. Stores fill at different
+	// times: without a warm IndexedDB cache a token with little history can bring in a row from
+	// months ago while a busier token still holds only its first, recent page, or nothing yet. A
+	// single pass taken before that settles never pages the busier token down to the old row, and
+	// the scroll reveals rows already in memory without asking for more, so the gap stayed on screen.
 	$effect(() => {
-		if (allStoresAreLoaded && !firstLoad) {
-			firstLoad = true;
-			loadMissingTransactions();
+		if (!allStoresAreLoaded) {
+			return;
 		}
+
+		[transactions];
+
+		untrack(() => loadMissingTransactions());
 	});
 
 	let exhausted = $derived(
