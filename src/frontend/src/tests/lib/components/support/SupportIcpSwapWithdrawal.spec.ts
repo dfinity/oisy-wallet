@@ -1,3 +1,4 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as icrcDerived from '$icp/derived/icrc.derived';
 import SupportIcpSwapWithdrawal from '$lib/components/support/SupportIcpSwapWithdrawal.svelte';
 import {
@@ -35,11 +36,13 @@ vi.mock('$lib/services/support-analytics.services', () => ({
 	trackSupport: vi.fn()
 }));
 
+// ICP is deliberately NOT in the mocked enabledIcrcTokens below: production does not put it
+// there either, since it is not an ICRC token. The component must source it from ICP_TOKEN.
 const icp = {
 	...mockValidIcrcToken,
-	symbol: 'ICP',
-	decimals: 8,
-	ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai'
+	symbol: ICP_TOKEN.symbol,
+	decimals: ICP_TOKEN.decimals,
+	ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
 };
 
 const usdc = {
@@ -82,9 +85,7 @@ describe('SupportIcpSwapWithdrawal', () => {
 		vi.clearAllMocks();
 
 		mockAuthStore();
-		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() =>
-			readable([icp, usdc])
-		);
+		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([usdc]));
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
 			balances: []
@@ -100,6 +101,18 @@ describe('SupportIcpSwapWithdrawal', () => {
 		// Nothing is looked up until both tokens are chosen.
 		expect(queryByTestId(SUPPORT_ICPSWAP_EMPTY)).toBeNull();
 		expect(loadIcpSwapRecoverableBalances).not.toHaveBeenCalled();
+	});
+
+	it('offers ICP even though it is not an ICRC token', async () => {
+		// enabledIcrcTokens cannot carry ICP - it has its own `icp` standard and lives outside the
+		// ICRC stores - yet it is one side of most ICPSwap pools.
+		const { getByTestId } = render(SupportIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(SUPPORT_ICPSWAP_TOKEN_A));
+
+		expect(
+			getByTestId(`${SUPPORT_ICPSWAP_TOKEN_A}-option-${ICP_TOKEN.ledgerCanisterId}`)
+		).toBeInTheDocument();
 	});
 
 	it('excludes the token already picked on the other side', async () => {

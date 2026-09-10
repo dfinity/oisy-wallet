@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
@@ -46,10 +47,17 @@
 	const rowKey = ({ token, kind }: IcpSwapRecoverableBalance): string =>
 		`${token.ledgerCanisterId}-${kind}`;
 
+	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
+	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.
+	// The swap UI has the same gap and closes it the same way, by prepending ICP_TOKEN to its
+	// universe (see `allSwapUniverseTokens`). The selector sorts by symbol, so this order only
+	// decides which entry wins if a custom token ever duplicates the ICP ledger.
+	const candidateTokens = $derived([ICP_TOKEN as IcToken, ...$enabledIcrcTokens]);
+
 	// A pair needs two distinct tokens: the pool is between them, so the same token twice
 	// identifies nothing.
 	const otherTokens = (exclude: IcToken | undefined): IcToken[] =>
-		$enabledIcrcTokens.filter(
+		candidateTokens.filter(
 			({ ledgerCanisterId }) => ledgerCanisterId !== exclude?.ledgerCanisterId
 		);
 
