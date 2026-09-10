@@ -235,6 +235,15 @@ Implementation, in order:
    last caller.
 6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
    with the behaviour it ships (one loader per network, merged paging, balances).
+7. **Clean-up, #14030.** Merges last, after PR 4 and PR 5, and changes no behaviour. It removes
+   what lost its last caller: `getSolTransactions`, `GetSolTransactionsParams` and the per-token
+   `tokenAddress` / `tokenOwnerAddress` path of `fetchSolTransactionsForSignature`;
+   `loadSplTokenBalance`, `loadSolLamportsBalance`, `loadTokenBalance` and `SolBalance`, replaced
+   by `loadSolNetworkBalances`; and the mocks, specs and `getBalance` / `getTokenAccountBalance`
+   fixtures only they used. `isAtaAddress` and `checkIfAccountExists` stay for the send and fee
+   flows, and `SOLANA_MAX_SKIPPED_SIGNATURE_PAGES` for the pagers. The reconciliation tests of
+   section 7 load each token's history through its pager and `resolveSolSignatures`, and compare it
+   with `loadSolNetworkBalances`.
 
 ## 7. Acceptance criteria
 
