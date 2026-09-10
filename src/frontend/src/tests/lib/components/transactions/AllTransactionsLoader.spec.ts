@@ -14,7 +14,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { ACTIVITY_LEVELLING_MAX_PAGES, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -490,10 +490,12 @@ describe('AllTransactionsLoader', () => {
 		});
 	});
 
-	// A cold start, e.g. an incognito window: no IndexedDB cache, so every token arrives on its own
-	// first network page and the loaded set keeps changing after the first levelling pass.
-	describe('when the loaded set changes after the first pass', () => {
-		const solRow = ({
+	// A cold start, e.g. an incognito window: no IndexedDB cache, so each token arrives on its own
+	// first network page, some of them after levelling has already run.
+	describe('when a late token arrives after levelling ran', () => {
+		const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+		const lateRow = ({
 			token,
 			timestamp
 		}: {
@@ -505,39 +507,59 @@ describe('AllTransactionsLoader', () => {
 			token
 		});
 
+		const arrive = ({ token, timestamp }: { token: Token; timestamp: bigint }) => {
+			const row = lateRow({ token, timestamp });
+
+			solTransactionsStore.append({
+				tokenId: token.id,
+				transactions: [{ data: row.transaction as SolTransactionUi, certified: false }]
+			});
+
+			return row;
+		};
+
+		// USDC in the reported case: nothing loaded yet when levelling first runs.
+		const withoutLateToken = mockTransactions.filter(({ token }) => token.id !== mockSplToken.id);
+
 		beforeEach(() => {
 			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
 			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+
+			solTransactionsStore.reset(mockSplToken.id);
 		});
 
-		it('should level a token whose first page arrived after the first pass', async () => {
-			const { rerender } = render(AllTransactionsLoader, { props });
+		it('should level the late token down to the floor, and only that token', async () => {
+			const { rerender } = render(AllTransactionsLoader, {
+				props: { transactions: withoutLateToken }
+			});
 
 			await waitFor(() => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 			});
 
 			spyLoadNextSolTransactions.mockClear();
+			spyLoadNextIcTransactions.mockClear();
 
-			await rerender({
-				transactions: [
-					...mockTransactions,
-					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp })
-				]
-			});
+			const row = arrive({ token: mockSplToken, timestamp: mockMaxTimestamp });
+
+			await rerender({ transactions: [...withoutLateToken, row] });
 
 			await waitFor(() => {
-				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					token: mockSplToken,
 					signalEnd: expect.any(Function)
 				});
 			});
+
+			expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should level every token down to an older row that arrived after the first pass', async () => {
-			const { rerender } = render(AllTransactionsLoader, { props });
+		it('should level every token down to older rows the late token brings', async () => {
+			const { rerender } = render(AllTransactionsLoader, {
+				props: { transactions: withoutLateToken }
+			});
 
 			await waitFor(() => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
@@ -547,68 +569,63 @@ describe('AllTransactionsLoader', () => {
 
 			const olderTimestamp = mockMinTimestampStart - 1n;
 
-			await rerender({
-				transactions: [
-					...mockTransactions,
-					solRow({ token: mockSplDefaultToken, timestamp: olderTimestamp })
-				]
-			});
+			const row = arrive({ token: mockSplToken, timestamp: olderTimestamp });
+
+			await rerender({ transactions: [...withoutLateToken, row] });
 
 			await waitFor(() => {
-				solTokens.forEach(([token]) => {
-					expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
-						identity: mockIdentity,
-						minTimestamp: normalizeTimestampToSeconds(olderTimestamp),
-						token,
-						signalEnd: expect.any(Function)
-					});
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			});
+
+			solTokens.forEach(([token]) => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					minTimestamp: normalizeTimestampToSeconds(olderTimestamp),
+					token,
+					signalEnd: expect.any(Function)
 				});
 			});
 		});
 
-		it('should run one follow-up pass for changes landing mid-pass, not one pass each', async () => {
-			let releaseFirstPass: (() => void) | undefined;
-
-			const firstPass = new Promise<void>((resolve) => {
-				releaseFirstPass = resolve;
-			});
-
-			spyLoadNextSolTransactions.mockImplementation(async () => {
-				await firstPass;
-
-				return { success: false };
-			});
-
+		// The rows levelling pages in usually reach past the floor. Treating them as a new floor would
+		// set every token off again, and again, until each had loaded its whole history.
+		it('should not level again for rows that levelling itself paged in', async () => {
 			const { rerender } = render(AllTransactionsLoader, { props });
 
 			await waitFor(() => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 			});
 
-			await rerender({
-				transactions: [
-					...mockTransactions,
-					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp })
-				]
-			});
-			await rerender({
-				transactions: [
-					...mockTransactions,
-					solRow({ token: mockSplToken, timestamp: mockMaxTimestamp + 1n })
-				]
-			});
+			spyLoadNextSolTransactions.mockClear();
+			spyLoadNextIcTransactions.mockClear();
 
-			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			const overshoot = arrive({ token: SOLANA_TOKEN, timestamp: mockMinTimestampStart - 1n });
 
-			releaseFirstPass?.();
+			await rerender({ transactions: [...mockTransactions, overshoot] });
+
+			await settle();
+
+			expect(spyLoadNextSolTransactions).not.toHaveBeenCalled();
+			expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should stop levelling a token at the page cap', async () => {
+			// A loader that keeps reporting progress without its oldest transaction ever moving.
+			spyLoadNextSolTransactions.mockResolvedValue({ success: true });
+
+			render(AllTransactionsLoader, { props });
 
 			await waitFor(() => {
-				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length * 2);
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(
+					solTokens.length * ACTIVITY_LEVELLING_MAX_PAGES
+				);
 			});
 
-			await new Promise((resolve) => setTimeout(resolve, 0));
+			await settle();
 
-			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length * 2);
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(
+				solTokens.length * ACTIVITY_LEVELLING_MAX_PAGES
+			);
 		});
 	});
 
