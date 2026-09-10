@@ -57,19 +57,17 @@ const poolCanisterId = 'aaaaa-aa';
 const unusedIcp: IcpSwapRecoverableBalance = {
 	token: icp,
 	poolToken: { address: icp.ledgerCanisterId, standard: 'ICRC1' },
-	kind: 'unused',
 	amount: 150_000_000n
 };
 
-const mistransferredUsdc: IcpSwapRecoverableBalance = {
+const unusedUsdc: IcpSwapRecoverableBalance = {
 	token: usdc,
 	poolToken: { address: usdc.ledgerCanisterId, standard: 'ICRC2' },
-	kind: 'mistransferred',
 	amount: 2_000_000n
 };
 
-const withdrawTestId = ({ token, kind }: IcpSwapRecoverableBalance) =>
-	`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}-${kind}`;
+const withdrawTestId = ({ token }: IcpSwapRecoverableBalance) =>
+	`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}`;
 
 // Picks both legs of the pair, which is what triggers the pool lookup.
 const selectPair = async (getByTestId: (id: string) => HTMLElement) => {
@@ -169,7 +167,7 @@ describe('SupportIcpSwapWithdrawal', () => {
 	it('lists every recoverable balance with its own withdraw button', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			balances: [unusedIcp, mistransferredUsdc]
+			balances: [unusedIcp, unusedUsdc]
 		});
 
 		const { getByTestId } = render(SupportIcpSwapWithdrawal);
@@ -178,13 +176,13 @@ describe('SupportIcpSwapWithdrawal', () => {
 
 		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
 
-		expect(getByTestId(withdrawTestId(mistransferredUsdc))).toBeInTheDocument();
+		expect(getByTestId(withdrawTestId(unusedUsdc))).toBeInTheDocument();
 	});
 
 	it('withdraws only the row whose button was pressed, then reloads', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			balances: [unusedIcp, mistransferredUsdc]
+			balances: [unusedIcp, unusedUsdc]
 		});
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
 
@@ -233,7 +231,7 @@ describe('SupportIcpSwapWithdrawal', () => {
 	it('tracks the resolved pool with both symbols and the withdrawable count', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			balances: [unusedIcp, mistransferredUsdc]
+			balances: [unusedIcp, unusedUsdc]
 		});
 
 		const { getByTestId } = render(SupportIcpSwapWithdrawal);
@@ -283,8 +281,7 @@ describe('SupportIcpSwapWithdrawal', () => {
 		const expected = {
 			subcontext: 'icpswap_withdrawal',
 			token: 'ICP',
-			tokenStandard: icp.standard.code,
-			balanceKind: 'unused'
+			tokenStandard: icp.standard.code
 		};
 
 		await waitFor(() => {

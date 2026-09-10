@@ -106,8 +106,7 @@ describe('support-analytics.services', () => {
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
-				tokenStandard: 'icrc',
-				balanceKind: 'unused'
+				tokenStandard: 'icrc'
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
@@ -119,9 +118,7 @@ describe('support-analytics.services', () => {
 					result_status: 'executing',
 					event_subcontext: 'icpswap_withdrawal',
 					token_symbol: 'ICP',
-					token_standard: 'icrc',
-					event_key: 'balance_kind',
-					event_value: 'unused'
+					token_standard: 'icrc'
 				}
 			});
 		});
@@ -132,7 +129,6 @@ describe('support-analytics.services', () => {
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 				token: 'ckUSDC',
-				balanceKind: 'mistransferred',
 				error: 'Internal error: pool unavailable'
 			});
 
@@ -140,7 +136,7 @@ describe('support-analytics.services', () => {
 				expect.objectContaining({
 					metadata: expect.objectContaining({
 						result_status: 'error',
-						event_value: 'mistransferred',
+						token_symbol: 'ckUSDC',
 						result_error: 'Internal error: pool unavailable'
 					})
 				})
@@ -155,7 +151,6 @@ describe('support-analytics.services', () => {
 				token: undefined,
 				token2: undefined,
 				tokenStandard: undefined,
-				balanceKind: undefined,
 				balancesFound: undefined,
 				link: undefined,
 				error: undefined
@@ -177,8 +172,7 @@ describe('support-analytics.services', () => {
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
-				tokenStandard: 'icrc',
-				balanceKind: 'unused'
+				tokenStandard: 'icrc'
 			});
 
 			const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;

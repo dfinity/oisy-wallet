@@ -3,7 +3,6 @@ import { ICPSwapPoolCanister } from '$lib/canisters/icp-swap-pool.canister';
 import type {
 	ICPSwapDepositWithdrawParams,
 	ICPSwapGetUserUnusedBalanceParams,
-	ICPSwapMistransferBalanceParams,
 	ICPSwapQuoteSwapParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
@@ -79,24 +78,6 @@ export const getUserUnusedBalance = async ({
 }> => {
 	const { getUserUnusedBalance } = await getPoolCanister({ identity, canisterId });
 	return getUserUnusedBalance(principal);
-};
-
-export const getMistransferBalance = async ({
-	identity,
-	canisterId,
-	token
-}: CanisterApiFunctionParamsWithCanisterId<ICPSwapMistransferBalanceParams>): Promise<bigint> => {
-	const { getMistransferBalance } = await getPoolCanister({ identity, canisterId });
-	return getMistransferBalance(token);
-};
-
-export const withdrawMistransferBalance = async ({
-	identity,
-	canisterId,
-	token
-}: CanisterApiFunctionParamsWithCanisterId<ICPSwapMistransferBalanceParams>): Promise<bigint> => {
-	const { withdrawMistransferBalance } = await getPoolCanister({ identity, canisterId });
-	return withdrawMistransferBalance(token);
 };
 
 export const getPoolMetadata = async ({

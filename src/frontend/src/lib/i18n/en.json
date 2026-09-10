@@ -796,7 +796,6 @@
 			"checking_pool": "Checking the pool…",
 			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
 			"balance_unused": "Unused balance",
-			"balance_mistransferred": "Transferred without a deposit",
 			"withdraw": "Withdraw"
 		},
 		"alt": {

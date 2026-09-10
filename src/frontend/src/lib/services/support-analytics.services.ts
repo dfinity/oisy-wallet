@@ -14,9 +14,6 @@ import { nonNullish, notEmptyString } from '@dfinity/utils';
 // event covers the whole page rather than a family of `support_*` names.
 export type SupportAction = 'open' | 'contact' | 'select_pool' | 'withdraw';
 
-// Which of the two recoverable ICPSwap balances a `withdraw` acted on.
-export type SupportBalanceKind = 'unused' | 'mistransferred';
-
 export interface TrackSupportParams {
 	// The action → `event_modifier`.
 	action: SupportAction;
@@ -29,8 +26,6 @@ export interface TrackSupportParams {
 	token2?: string;
 	// The withdrawn token's ICRC standard → `token_standard`.
 	tokenStandard?: string;
-	// Which balance a `withdraw` acted on → `event_key: balance_kind` + `event_value`.
-	balanceKind?: SupportBalanceKind;
 	// How many withdrawable balances a `select_pool` turned up → `event_key: balances_found`
 	// + `event_value`. A count, deliberately never the amounts (see below).
 	balancesFound?: number;
@@ -57,7 +52,6 @@ export const buildSupportEvent = ({
 	token,
 	token2,
 	tokenStandard,
-	balanceKind,
 	balancesFound,
 	link,
 	error
@@ -72,10 +66,6 @@ export const buildSupportEvent = ({
 		...(nonNullish(token) && { token_symbol: token }),
 		...(nonNullish(token2) && { token2_symbol: token2 }),
 		...(notEmptyString(tokenStandard) && { token_standard: tokenStandard }),
-		...(nonNullish(balanceKind) && {
-			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.BALANCE_KIND,
-			event_value: balanceKind
-		}),
 		...(nonNullish(balancesFound) && {
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.BALANCES_FOUND,
 			event_value: `${balancesFound}`

@@ -16,13 +16,7 @@
 
 	let { balance, disabled = false, loading = false, onWithdraw }: Props = $props();
 
-	let { token, kind, amount } = $derived(balance);
-
-	let label = $derived(
-		kind === 'unused'
-			? $i18n.support.text.balance_unused
-			: $i18n.support.text.balance_mistransferred
-	);
+	let { token, amount } = $derived(balance);
 
 	let formattedAmount = $derived(formatToken({ value: amount, unitName: token.decimals }));
 </script>
@@ -32,7 +26,7 @@
 		<TokenLogo data={token} logoSize="xs" />
 		<span class="flex min-w-0 flex-col">
 			<span class="truncate">{formattedAmount} {token.symbol}</span>
-			<span class="truncate text-sm text-tertiary">{label}</span>
+			<span class="truncate text-sm text-tertiary">{$i18n.support.text.balance_unused}</span>
 		</span>
 	</span>
 
@@ -44,7 +38,7 @@
 		{loading}
 		onclick={onWithdraw}
 		styleClass="flex-none"
-		testId={`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}-${kind}`}
+		testId={`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}`}
 	>
 		{$i18n.support.text.withdraw} >
 	</Button>

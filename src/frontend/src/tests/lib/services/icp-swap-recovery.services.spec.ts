@@ -1,10 +1,5 @@
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import {
-	getMistransferBalance,
-	getUserUnusedBalance,
-	withdraw,
-	withdrawMistransferBalance
-} from '$lib/api/icp-swap-pool.api';
+import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import {
@@ -23,9 +18,7 @@ vi.mock('$lib/api/icp-swap-factory.api', () => ({
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({
 	getUserUnusedBalance: vi.fn(),
-	getMistransferBalance: vi.fn(),
-	withdraw: vi.fn(),
-	withdrawMistransferBalance: vi.fn()
+	withdraw: vi.fn()
 }));
 
 const tokenA = {
@@ -63,7 +56,6 @@ describe('icp-swap-recovery.services', () => {
 
 		vi.mocked(getPoolCanister).mockResolvedValue(pool);
 		vi.mocked(getUserUnusedBalance).mockResolvedValue({ balance0: ZERO, balance1: ZERO });
-		vi.mocked(getMistransferBalance).mockResolvedValue(ZERO);
 	});
 
 	describe('loadIcpSwapRecoverableBalances', () => {
@@ -124,56 +116,22 @@ describe('icp-swap-recovery.services', () => {
 			const { balances } = await loadIcpSwapRecoverableBalances(loadParams);
 
 			expect(balances).toStrictEqual([
-				{
-					token: tokenA,
-					poolToken: pool.token1,
-					kind: 'unused',
-					amount: tokenA.fee + 1n
-				}
+				{ token: tokenA, poolToken: pool.token1, amount: tokenA.fee + 1n }
 			]);
 		});
 
-		it('maps both kinds for both legs onto the tokens the user picked', async () => {
+		it('maps each leg onto the token the user picked', async () => {
 			vi.mocked(getUserUnusedBalance).mockResolvedValue({
 				balance0: 500_000n,
 				balance1: 900_000n
 			});
-			vi.mocked(getMistransferBalance).mockImplementation(({ token: { address } }) =>
-				Promise.resolve(address === tokenA.ledgerCanisterId ? 700_000n : ZERO)
-			);
 
 			const { balances } = await loadIcpSwapRecoverableBalances(loadParams);
 
+			// token0 is tokenB and token1 is tokenA - the factory's own order, not the user's.
 			expect(balances).toStrictEqual([
-				// token0 is tokenB: its unused balance survives, its mistransferred balance is zero.
-				{ token: tokenB, poolToken: pool.token0, kind: 'unused', amount: 500_000n },
-				// token1 is tokenA: both kinds survive.
-				{ token: tokenA, poolToken: pool.token1, kind: 'unused', amount: 900_000n },
-				{ token: tokenA, poolToken: pool.token1, kind: 'mistransferred', amount: 700_000n }
-			]);
-		});
-
-		it('still returns the unused balance when the mistransfer probe is rejected', async () => {
-			// ICPSwap answers getMistransferBalance with "Use deposit and withdraw instead" for a
-			// pool's own trading pair, which is the only pair we ask about. That must not cost the
-			// user the unused balance they actually have.
-			vi.mocked(getUserUnusedBalance).mockResolvedValue({
-				balance0: ZERO,
-				balance1: 100_000_000_000_000n
-			});
-			vi.mocked(getMistransferBalance).mockRejectedValue(
-				new Error('Internal error: Use deposit and withdraw instead')
-			);
-
-			const { balances } = await loadIcpSwapRecoverableBalances(loadParams);
-
-			expect(balances).toStrictEqual([
-				{
-					token: tokenA,
-					poolToken: pool.token1,
-					kind: 'unused',
-					amount: 100_000_000_000_000n
-				}
+				{ token: tokenB, poolToken: pool.token0, amount: 500_000n },
+				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
 			]);
 		});
 
@@ -182,40 +140,16 @@ describe('icp-swap-recovery.services', () => {
 
 			await expect(loadIcpSwapRecoverableBalances(loadParams)).rejects.toThrow('pool unavailable');
 		});
-
-		it('queries the mistransferred balance once per leg, with the pool standard', async () => {
-			await loadIcpSwapRecoverableBalances(loadParams);
-
-			expect(getMistransferBalance).toHaveBeenCalledTimes(2);
-			expect(getMistransferBalance).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				canisterId: poolCanisterId,
-				token: pool.token0
-			});
-			expect(getMistransferBalance).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				canisterId: poolCanisterId,
-				token: pool.token1
-			});
-		});
 	});
 
 	describe('withdrawIcpSwapBalance', () => {
 		const unused: IcpSwapRecoverableBalance = {
 			token: tokenA,
 			poolToken: pool.token1,
-			kind: 'unused',
 			amount: 900_000n
 		};
 
-		const mistransferred: IcpSwapRecoverableBalance = {
-			token: tokenB,
-			poolToken: pool.token0,
-			kind: 'mistransferred',
-			amount: 500_000n
-		};
-
-		it('withdraws an unused balance in full, with the token ledger fee', async () => {
+		it('withdraws the balance in full, with the token ledger fee', async () => {
 			vi.mocked(withdraw).mockResolvedValue(900_000n);
 
 			const result = await withdrawIcpSwapBalance({
@@ -232,25 +166,6 @@ describe('icp-swap-recovery.services', () => {
 				amount: 900_000n,
 				fee: tokenA.fee
 			});
-			expect(withdrawMistransferBalance).not.toHaveBeenCalled();
-		});
-
-		it('withdraws a mistransferred balance without an amount or a fee', async () => {
-			vi.mocked(withdrawMistransferBalance).mockResolvedValue(496_000n);
-
-			const result = await withdrawIcpSwapBalance({
-				identity: mockIdentity,
-				poolCanisterId,
-				balance: mistransferred
-			});
-
-			expect(result).toBe(496_000n);
-			expect(withdrawMistransferBalance).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				canisterId: poolCanisterId,
-				token: pool.token0
-			});
-			expect(withdraw).not.toHaveBeenCalled();
 		});
 
 		it('propagates a failing withdrawal', async () => {

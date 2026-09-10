@@ -44,8 +44,7 @@
 	// The row currently being withdrawn, so only its own button spins.
 	let withdrawingKey = $state<string | undefined>();
 
-	const rowKey = ({ token, kind }: IcpSwapRecoverableBalance): string =>
-		`${token.ledgerCanisterId}-${kind}`;
+	const rowKey = ({ token }: IcpSwapRecoverableBalance): string => token.ledgerCanisterId;
 
 	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
 	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.
@@ -124,7 +123,7 @@
 			return;
 		}
 
-		const { token, kind } = balance;
+		const { token } = balance;
 
 		withdrawingKey = rowKey(balance);
 
@@ -133,8 +132,7 @@
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 			token: token.symbol,
-			tokenStandard: token.standard.code,
-			balanceKind: kind
+			tokenStandard: token.standard.code
 		});
 
 		try {
@@ -154,8 +152,7 @@
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 				token: token.symbol,
-				tokenStandard: token.standard.code,
-				balanceKind: kind
+				tokenStandard: token.standard.code
 			});
 
 			// Re-read the pool so the withdrawn row disappears; a failure above deliberately
@@ -170,7 +167,6 @@
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
 				token: token.symbol,
 				tokenStandard: token.standard.code,
-				balanceKind: kind,
 				error: replaceIcErrorFields(err)
 			});
 		} finally {

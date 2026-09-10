@@ -541,7 +541,6 @@ interface I18nSupport {
 		checking_pool: string;
 		nothing_to_withdraw: string;
 		balance_unused: string;
-		balance_mistransferred: string;
 		withdraw: string;
 	};
 	alt: { select_token_first: string; select_token_second: string; withdraw: string };

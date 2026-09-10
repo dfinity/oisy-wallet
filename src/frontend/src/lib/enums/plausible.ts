@@ -144,7 +144,6 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
-	BALANCE_KIND = 'balance_kind',
 	BALANCES_FOUND = 'balances_found',
 	GROUP = 'group',
 	VISIBILITY = 'visibility',

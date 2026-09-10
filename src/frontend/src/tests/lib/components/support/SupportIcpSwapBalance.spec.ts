@@ -15,7 +15,6 @@ const token = {
 const unused: IcpSwapRecoverableBalance = {
 	token,
 	poolToken: { address: token.ledgerCanisterId, standard: 'ICRC1' },
-	kind: 'unused',
 	amount: 150_000_000n
 };
 
@@ -31,14 +30,6 @@ describe('SupportIcpSwapBalance', () => {
 		expect(getByText(en.support.text.balance_unused)).toBeInTheDocument();
 	});
 
-	it('labels a mistransferred balance differently', () => {
-		const { getByText } = render(SupportIcpSwapBalance, {
-			props: { balance: { ...unused, kind: 'mistransferred' }, onWithdraw: () => undefined }
-		});
-
-		expect(getByText(en.support.text.balance_mistransferred)).toBeInTheDocument();
-	});
-
 	it('calls onWithdraw when the button is clicked', async () => {
 		const onWithdraw = vi.fn();
 
@@ -46,7 +37,7 @@ describe('SupportIcpSwapBalance', () => {
 			props: { balance: unused, onWithdraw }
 		});
 
-		await fireEvent.click(getByTestId(`${testId}-unused`));
+		await fireEvent.click(getByTestId(testId));
 
 		expect(onWithdraw).toHaveBeenCalledOnce();
 	});
@@ -56,6 +47,6 @@ describe('SupportIcpSwapBalance', () => {
 			props: { balance: unused, disabled: true, onWithdraw: () => undefined }
 		});
 
-		expect(getByTestId(`${testId}-unused`)).toBeDisabled();
+		expect(getByTestId(testId)).toBeDisabled();
 	});
 });

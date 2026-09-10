@@ -15,7 +15,6 @@ import type {
 	UserTransaction,
 	Utxo
 } from '$declarations/backend/backend.did';
-import type { Token as ICPSwapToken } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
@@ -180,10 +179,6 @@ export interface ICPSwapDepositWithdrawParams {
 
 export interface ICPSwapGetUserUnusedBalanceParams {
 	principal: Principal;
-}
-
-export interface ICPSwapMistransferBalanceParams {
-	token: ICPSwapToken;
 }
 
 export interface ICPSwapQuoteParams {
