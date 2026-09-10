@@ -210,9 +210,12 @@ Implementation, in order:
 3. **Resolve once.** Turns signatures into records, fetching and deriving each signature once,
    and returns the records per token id (3.2).
 4. **One worker per network.** `SolLoaderWallets`, `SolWalletWorker` and `SolWalletScheduler`
-   move to one instance per network, with the head check of 3.5 and the balances of 3.8. The
-   scheduler posts per-token deltas, so the listener and the store keep their shape. T4 stays
-   green.
+   move to one instance per network, with the head check of 3.5 and the balances of 3.8. Token
+   ids are symbols and cannot cross the worker boundary, so the scheduler posts one message per
+   tick, with the balances keyed by mint and the new records tagged with their sources, and the
+   main thread routes them to the per-token stores, which keep their shape. A worker is started
+   for one address and token list, and the network's worker is replaced when either changes. The
+   behaviour T4 pins stays, expressed per network.
 5. **The pagers on the main thread.** `loadOlderTransactionsFor` returns the network pager, and
    the token page uses its single-source pager (3.6). `loadNextSolTransactions`,
    `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced.
@@ -271,9 +274,9 @@ Implementation, in order:
 ## 10. Notes for the implementation
 
 - `SchedulerTimer.start` (`src/frontend/src/lib/schedulers/scheduler.ts`) returns early while its
-  timer is running. That is harmless today because `sol-wallet.worker.ts` creates one scheduler per
-  token ref, but it must be handled when one scheduler serves a whole network and its token list
-  changes.
+  timer is running. PR 4 handles it at both ends: `sol-wallet.worker.ts` replaces its scheduler on
+  every start, and `SolWalletScheduler.start` stops its own timer when it is started for another
+  address or token list, so the running timer never keeps syncing the old one.
 - `fetchTransactionDetailForSignature` sets `id: signature.toString()` on the `SolSignature`
   object, which gives `"[object Object]"`. The record's own id comes from `signature.signature`,
   so nothing visible depends on it. It should be corrected when the resolver of PR 3 is written.

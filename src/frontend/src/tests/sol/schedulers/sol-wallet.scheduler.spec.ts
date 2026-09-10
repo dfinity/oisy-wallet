@@ -1,22 +1,32 @@
-import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
-import * as solanaApi from '$sol/api/solana.api';
+import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
-import * as solSignaturesServices from '$sol/services/sol-signatures.services';
+import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
+import {
+	mapSolSourcesToTokens,
+	resolveSolSignatures
+} from '$sol/services/sol-resolve-signatures.services';
+import { getSolSignatures } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
-import * as accountServices from '$sol/services/spl-accounts.services';
+import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolNetworkBalances } from '$sol/types/sol-balance';
+import type { SolResolvedTransaction, SolSignatureWithSources } from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { TestUtil } from '$tests/types/utils';
-import { jsonReplacer, nonNullish } from '@dfinity/utils';
-import { lamports } from '@solana/kit';
-import type { MockInstance } from 'vitest';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
+import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
+import { jsonReviver } from '@dfinity/utils';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -27,7 +37,20 @@ vi.mock('$env/user-transactions.env', () => ({
 }));
 
 vi.mock('$sol/services/sol-user-transactions.services', () => ({
-	saveSolFinalizedTransactions: vi.fn().mockResolvedValue({ success: true })
+	saveSolFinalizedTransactions: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-balances.services', () => ({
+	loadSolNetworkBalances: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-signatures.services', () => ({
+	getSolSignatures: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-resolve-signatures.services', () => ({
+	mapSolSourcesToTokens: vi.fn(),
+	resolveSolSignatures: vi.fn()
 }));
 
 vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
@@ -44,65 +67,86 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 });
 
 describe('sol-wallet.scheduler', () => {
-	let spyLoadBalance: MockInstance;
-	let spyLoadTransactions: MockInstance;
-	let spyLoadSolBalance: MockInstance;
-	let spyLoadSplBalance: MockInstance;
+	const mint: SplTokenAddress = mockSplAddress;
+	const mint2: SplTokenAddress = mockSolAddress2;
 
-	const mockSolBalance = lamports(100n);
-	const mockSplBalance = 123n;
-	const mockSolTransactions = createMockSolTransactionsUi(2);
+	const tokens = [
+		{ address: mint, owner: TOKEN_PROGRAM_ADDRESS },
+		{ address: mint2, owner: TOKEN_2022_PROGRAM_ADDRESS }
+	];
 
-	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
-		data: transaction,
-		certified: false
-	}));
+	const data: PostMessageDataRequestSol = {
+		address: { data: mockSolAddress, certified: false },
+		solanaNetwork: SolanaNetworks.mainnet,
+		tokens
+	};
+
+	const sourceTokens = new Map<SolAddress, SplTokenAddress | null>([
+		[mockSolAddress, null],
+		[mockAtaAddress, mint],
+		[mockAtaAddress2, mint2]
+	]);
+
+	const mockBalances: SolNetworkBalances = { sol: 100n, spl: { [mint]: 5n, [mint2]: 7n } };
+
+	const signatureAt = ({
+		slot,
+		sources = [mockSolAddress]
+	}: {
+		slot: bigint;
+		sources?: SolAddress[];
+	}): SolSignatureWithSources => ({ ...mockSolSignatureResponse(), slot, sources });
+
+	const toResolved = (signatures: SolSignatureWithSources[]): SolResolvedTransaction[] =>
+		signatures.map(({ signature, sources }) => ({
+			transaction: { ...createMockSolTransactionUi(signature), signature },
+			sources
+		}));
+
+	const newestSignature = signatureAt({ slot: 101n });
+	const olderSignature = signatureAt({ slot: 100n, sources: [mockAtaAddress] });
+	const page = [newestSignature, olderSignature];
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncSolWalletStatus',
-		data: {
-			state: 'in_progress'
-		}
+		data: { state: 'in_progress' }
 	};
 
 	const mockPostMessageStatusIdle = {
 		msg: 'syncSolWalletStatus',
-		data: {
-			state: 'idle'
-		}
+		data: { state: 'idle' }
 	};
-
-	const mockPostMessage = ({
-		withTransactions,
-		ref,
-		isSpl
-	}: {
-		withTransactions: boolean;
-		ref?: string;
-		isSpl: boolean;
-	}) => ({
-		msg: 'syncSolWallet',
-		ref,
-		data: {
-			wallet: {
-				balance: {
-					certified: false,
-					data: isSpl ? mockSplBalance : mockSolBalance
-				},
-				...(withTransactions && {
-					newTransactions: JSON.stringify(expectedSoLTransactions, jsonReplacer)
-				})
-			}
-		}
-	});
 
 	const postMessageMock = vi.fn();
 
 	let originalPostMessage: unknown;
 
-	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	let scheduler: SolWalletScheduler;
+
+	const walletPosts = () =>
+		postMessageMock.mock.calls
+			.map(([message]) => message)
+			.filter(({ msg }) => msg === 'syncSolWallet');
+
+	const postedTransactions = (post: {
+		data: { wallet: { newTransactions: string } };
+	}): SolResolvedTransaction[] => JSON.parse(post.data.wallet.newTransactions, jsonReviver);
+
+	const mockPage = (signatures: SolSignatureWithSources[]) =>
+		vi.mocked(getSolSignatures).mockResolvedValue({ signatures });
+
+	// The first job runs without being awaited by `start`, so the timers are advanced to let it end.
 	const awaitJobExecution = () =>
 		vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
+	// Retries wait between attempts, so a trigger that retries needs the timers run to settle.
+	const triggerAndSettle = async (triggerData: PostMessageDataRequestSol = data) => {
+		const promise = scheduler.trigger(triggerData);
+
+		await vi.runAllTimersAsync();
+
+		await promise;
+	};
 
 	beforeAll(() => {
 		originalPostMessage = window.postMessage;
@@ -115,21 +159,22 @@ describe('sol-wallet.scheduler', () => {
 
 		mockAuthStore();
 
-		spyLoadSolBalance = vi
-			.spyOn(solanaApi, 'loadSolLamportsBalance')
-			.mockResolvedValue(mockSolBalance);
-		spyLoadSplBalance = vi
-			.spyOn(accountServices, 'loadSplTokenBalance')
-			.mockResolvedValue(mockSplBalance);
-		spyLoadTransactions = vi
-			.spyOn(solSignaturesServices, 'getSolTransactions')
-			.mockResolvedValue(mockSolTransactions);
+		vi.mocked(AuthClientProvider.getInstance().loadIdentity).mockResolvedValue(mockIdentity);
 
-		const provider = AuthClientProvider.getInstance();
-		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
+		vi.mocked(loadSolNetworkBalances).mockResolvedValue(mockBalances);
+		mockPage(page);
+		vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+			Promise.resolve(toResolved(signatures))
+		);
+		vi.mocked(mapSolSourcesToTokens).mockResolvedValue(sourceTokens);
+		vi.mocked(saveSolFinalizedTransactions).mockResolvedValue({ success: true });
+
+		scheduler = new SolWalletScheduler();
 	});
 
 	afterEach(() => {
+		scheduler.stop();
+
 		vi.useRealTimers();
 	});
 
@@ -138,369 +183,363 @@ describe('sol-wallet.scheduler', () => {
 		window.postMessage = originalPostMessage;
 	});
 
-	const testWorker = ({
-		startData = undefined
-	}: {
-		startData?: PostMessageDataRequestSol | undefined;
-	}): TestUtil => {
-		const scheduler: SolWalletScheduler = new SolWalletScheduler();
-
-		const ref = nonNullish(startData)
-			? `${startData.tokenAddress ?? SOLANA_TOKEN.symbol}-${startData.solanaNetwork}`
-			: undefined;
-
-		const isSpl = nonNullish(startData?.tokenAddress) && nonNullish(startData?.tokenOwnerAddress);
-
-		return {
-			setup: () => {
-				spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
-			},
-
-			teardown: () => {
-				// reset internal store with balance and transactions
-				scheduler['store'] = {
-					balance: undefined,
-					transactions: {}
-				};
-
-				scheduler.stop();
-			},
-
-			tests: () => {
-				it('should trigger postMessage with correct data', async () => {
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					expect(postMessageMock).toHaveBeenCalledTimes(3);
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(
-						2,
-						mockPostMessage({ withTransactions: true, isSpl, ref })
-					);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(postMessageMock).toHaveBeenCalledTimes(5);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(postMessageMock).toHaveBeenCalledTimes(7);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
-				});
-
-				it('should start the scheduler with an interval', async () => {
-					await scheduler.start(startData);
-
-					expect(scheduler['timer']['timer']).toBeDefined();
-				});
-
-				it('should trigger the scheduler manually', async () => {
-					await scheduler.trigger(startData);
-
-					expect(spyLoadBalance).toHaveBeenCalledOnce();
-					expect(spyLoadTransactions).toHaveBeenCalledOnce();
-				});
-
-				it('should stop the scheduler', () => {
-					scheduler.stop();
-
-					expect(scheduler['timer']['timer']).toBeUndefined();
-				});
-
-				it('should trigger syncWallet periodically', async () => {
-					await scheduler.start(startData);
-
-					expect(spyLoadBalance).toHaveBeenCalledOnce();
-					expect(spyLoadTransactions).toHaveBeenCalledOnce();
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(spyLoadBalance).toHaveBeenCalledTimes(2);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(spyLoadBalance).toHaveBeenCalledTimes(3);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
-				});
-
-				it('should postMessage with status of the worker', async () => {
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					expect(postMessageMock).toHaveBeenCalledTimes(3);
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(
-						2,
-						mockPostMessage({ withTransactions: true, isSpl, ref })
-					);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
-				});
-
-				it('should trigger postMessage with error after retrying', async () => {
-					const err = new Error('test');
-					spyLoadBalance.mockRejectedValue(err);
-
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					// first time + 10 retries
-					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(11);
-
-					// idle and in_progress
-					// error
-					expect(postMessageMock).toHaveBeenCalledTimes(3);
-
-					expect(postMessageMock).toHaveBeenCalledWith({
-						msg: 'syncSolWalletError',
-						ref,
-						data: {
-							error: err
-						}
-					});
-				});
-
-				it('should reset the internal store after a fatal error so the next successful sync re-emits the full state', async () => {
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					// Sanity check: the first sync populated the internal store.
-					expect(scheduler['store'].transactions).toEqual(
-						expectedSoLTransactions.reduce(
-							(acc, transaction) => ({
-								...acc,
-								[transaction.data.id]: transaction
-							}),
-							{}
-						)
-					);
-					expect(scheduler['store'].balance).toBeDefined();
-
-					// Force the next iteration to fail and exhaust retries.
-					const err = new Error('Failed to fetch');
-					spyLoadBalance.mockRejectedValue(err);
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(postMessageMock).toHaveBeenCalledWith({
-						msg: 'syncSolWalletError',
-						ref,
-						data: {
-							error: err
-						}
-					});
-
-					// After the fatal error, the in-memory store must be cleared so the worker
-					// can start fresh on the next tick (mirroring the listener-side UI reset).
-					expect(scheduler['store']).toEqual({
-						balance: undefined,
-						transactions: {}
-					});
-
-					// Recovery: the next successful sync must emit the wallet payload again,
-					// not just status messages, so the previously reset UI store is repopulated.
-					spyLoadBalance.mockResolvedValue(isSpl ? mockSplBalance : mockSolBalance);
-					postMessageMock.mockClear();
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					expect(postMessageMock).toHaveBeenCalledWith(
-						mockPostMessage({ withTransactions: true, isSpl, ref })
-					);
-				});
-
-				it('should not post message when no new transactions or balance changes', async () => {
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					postMessageMock.mockClear();
-
-					// Mock no changes in transactions and balance
-					spyLoadTransactions.mockResolvedValue([]);
-					spyLoadSolBalance.mockResolvedValue(mockSolBalance);
-					spyLoadSplBalance.mockResolvedValue(mockSplBalance);
-
-					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
-
-					// Only status messages should be sent
-					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
-				});
-
-				it('should update store with new transactions', async () => {
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					expect(scheduler['store'].transactions).toEqual(
-						expectedSoLTransactions.reduce(
-							(acc, transaction) => ({
-								...acc,
-								[transaction.data.id]: transaction
-							}),
-							{}
-						)
-					);
-				});
-
-				it('should load balance with the correct parameters', async () => {
-					await scheduler.start(startData);
-
-					expect(spyLoadBalance).toHaveBeenCalledWith({
-						address: mockSolAddress,
-						network: startData?.solanaNetwork,
-						tokenAddress: startData?.tokenAddress,
-						tokenOwnerAddress: startData?.tokenOwnerAddress
-					});
-				});
-
-				it('should load transactions with the correct parameters', async () => {
-					await scheduler.start(startData);
-
-					expect(spyLoadTransactions).toHaveBeenCalledWith({
-						identity: mockIdentity,
-						address: mockSolAddress,
-						network: startData?.solanaNetwork,
-						tokenAddress: startData?.tokenAddress,
-						tokenOwnerAddress: startData?.tokenOwnerAddress
-					});
-				});
-			}
-		};
-	};
-
-	describe('sol-wallet worker should work for SOLANA tokens', () => {
-		const startData: PostMessageDataRequestSol = {
-			address: {
-				certified: false,
-				data: mockSolAddress
-			},
-			solanaNetwork: SolanaNetworks.mainnet
-		};
-
-		const { setup, teardown, tests } = testWorker({ startData });
-
-		beforeEach(setup);
-
-		afterEach(teardown);
-
-		tests();
-	});
-
-	describe('sol-wallet worker should work for SPL tokens', () => {
-		const startData: PostMessageDataRequestSol = {
-			address: {
-				certified: false,
-				data: mockSolAddress
-			},
-			solanaNetwork: SolanaNetworks.devnet,
-			tokenAddress: DEVNET_USDC_TOKEN.address,
-			tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
-		};
-
-		const { setup, teardown, tests } = testWorker({ startData });
-
-		beforeEach(setup);
-
-		afterEach(teardown);
-
-		tests();
-	});
-
-	describe('backend integration', () => {
-		const startData: PostMessageDataRequestSol = {
-			address: {
-				certified: false,
-				data: mockSolAddress
-			},
-			solanaNetwork: SolanaNetworks.mainnet
-		};
-
-		let scheduler: SolWalletScheduler;
-
-		beforeEach(() => {
-			scheduler = new SolWalletScheduler();
+	describe('timer', () => {
+		it('should post one wallet message per tick, between the status messages', async () => {
+			await scheduler.start(data);
+
+			await awaitJobExecution();
+
+			expect(postMessageMock).toHaveBeenCalledTimes(3);
+			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(2, {
+				msg: 'syncSolWallet',
+				ref: SolanaNetworks.mainnet,
+				data: {
+					wallet: {
+						balances: mockBalances,
+						newTransactions: expect.any(String)
+					}
+				}
+			});
+			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
+
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
+
+			// Nothing new: status messages only.
+			expect(postMessageMock).toHaveBeenCalledTimes(5);
+			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 		});
 
-		afterEach(() => {
-			scheduler['store'] = {
-				balance: undefined,
-				transactions: {}
-			};
+		it('should start the scheduler with an interval', async () => {
+			await scheduler.start(data);
+
+			expect(scheduler['timer']['timer']).toBeDefined();
+		});
+
+		it('should stop the scheduler', async () => {
+			await scheduler.start(data);
 
 			scheduler.stop();
+
+			expect(scheduler['timer']['timer']).toBeUndefined();
 		});
 
-		// The backend copy cannot carry what a row is shown from, so the first sync holds exactly what
-		// the chain returned, nothing restored alongside it.
-		it('should derive every record from the chain on the first sync', async () => {
-			await scheduler.trigger(startData);
+		it('should load every balance of the network with one call per tick', async () => {
+			await scheduler.start(data);
 
-			expect(Object.keys(scheduler['store'].transactions)).toEqual(
-				mockSolTransactions.map(({ id }) => `${id}`)
-			);
-		});
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS * 2);
 
-		it('should call saveSolFinalizedTransactions when new RPC transactions are found', async () => {
-			await scheduler.trigger(startData);
-
-			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				tokenId: { SolNativeMainnet: null },
-				transactions: mockSolTransactions
+			expect(loadSolNetworkBalances).toHaveBeenCalledTimes(3);
+			expect(loadSolNetworkBalances).toHaveBeenCalledWith({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokens
 			});
 		});
 
-		it('should not call saveSolFinalizedTransactions when all RPC transactions are already known', async () => {
-			await scheduler.trigger(startData);
+		it('should look up the newest page of every source once per tick', async () => {
+			await scheduler.start(data);
 
-			vi.clearAllMocks();
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS * 2);
 
-			await scheduler.trigger(startData);
+			expect(getSolSignatures).toHaveBeenCalledTimes(3);
+
+			vi.mocked(getSolSignatures).mock.calls.forEach(([params]) =>
+				expect(params).toEqual({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					tokensList: tokens
+				})
+			);
+		});
+	});
+
+	describe('head check', () => {
+		it('should resolve the whole first page when it holds nothing yet', async () => {
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokens,
+				signatures: page,
+				known: new Set()
+			});
+
+			const [post] = walletPosts();
+
+			expect(postedTransactions(post)).toEqual(toResolved(page));
+		});
+
+		it('should resolve nothing when no signature is newer than the newest it holds', async () => {
+			await scheduler.trigger(data);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenCalledOnce();
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should resolve only the signatures newer than the newest it holds', async () => {
+			await scheduler.trigger(data);
+
+			const newSignature = signatureAt({ slot: 102n });
+			mockPage([newSignature, ...page]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					signatures: [newSignature],
+					known: new Set(page.map(({ signature }) => signature))
+				})
+			);
+
+			const [post] = walletPosts();
+
+			expect(postedTransactions(post)).toEqual(toResolved([newSignature]));
+		});
+
+		// Older history is for the pagers, which keep their own cursors.
+		it('should not resolve an older signature it does not hold', async () => {
+			await scheduler.trigger(data);
+
+			mockPage([...page, signatureAt({ slot: 99n })]);
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenCalledOnce();
+		});
+
+		it('should resolve a signature of its newest slot that it has not seen yet', async () => {
+			await scheduler.trigger(data);
+
+			const sameSlotSignature = signatureAt({ slot: 101n, sources: [mockAtaAddress2] });
+			mockPage([newestSignature, sameSlotSignature, olderSignature]);
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ signatures: [sameSlotSignature] })
+			);
+		});
+
+		it('should resolve a signature returned by the wallet and two token accounts once, with all its sources', async () => {
+			const shared = signatureAt({
+				slot: 101n,
+				sources: [mockSolAddress, mockAtaAddress, mockAtaAddress2]
+			});
+			mockPage([shared]);
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ signatures: [shared] })
+			);
+
+			const [post] = walletPosts();
+
+			expect(postedTransactions(post)).toEqual(toResolved([shared]));
+		});
+
+		// What a tick holds is committed only once it succeeded, so a retry resolves the page again
+		// rather than dropping it.
+		it('should see the same signatures as new again when a tick is retried', async () => {
+			vi.mocked(loadSolNetworkBalances).mockRejectedValueOnce(new Error('Failed to fetch'));
+
+			await triggerAndSettle();
+
+			expect(resolveSolSignatures).toHaveBeenCalledTimes(2);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+		});
+	});
+
+	describe('posting', () => {
+		it('should not post when nothing changed', async () => {
+			await scheduler.trigger(data);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should post the balances with no transactions when only a balance changed', async () => {
+			await scheduler.trigger(data);
+
+			const balances = { ...mockBalances, spl: { ...mockBalances.spl, [mint2]: 8n } };
+			vi.mocked(loadSolNetworkBalances).mockResolvedValue(balances);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balances).toEqual(balances);
+			expect(postedTransactions(posts[0])).toEqual([]);
+		});
+	});
+
+	describe('backend', () => {
+		it("should save each token's records under its own backend token id", async () => {
+			const walletSignature = signatureAt({ slot: 103n });
+			const ataSignature = signatureAt({ slot: 102n, sources: [mockAtaAddress] });
+			const shared = signatureAt({
+				slot: 101n,
+				sources: [mockSolAddress, mockAtaAddress, mockAtaAddress2]
+			});
+			mockPage([walletSignature, ataSignature, shared]);
+
+			await scheduler.trigger(data);
+
+			await vi.waitFor(() => expect(saveSolFinalizedTransactions).toHaveBeenCalledTimes(3));
+
+			const [walletRecord, ataRecord, sharedRecord] = toResolved([
+				walletSignature,
+				ataSignature,
+				shared
+			]).map(({ transaction }) => transaction);
+
+			expect(mapSolSourcesToTokens).toHaveBeenCalledExactlyOnceWith({
+				address: mockSolAddress,
+				tokens
+			});
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SolNativeMainnet: null },
+				transactions: [walletRecord, sharedRecord]
+			});
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplMainnet: mint },
+				transactions: [ataRecord, sharedRecord]
+			});
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokenId: { SplMainnet: mint2 },
+				transactions: [sharedRecord]
+			});
+		});
+
+		it('should not save when it found no new record', async () => {
+			await scheduler.trigger(data);
+
+			await vi.waitFor(() => expect(saveSolFinalizedTransactions).toHaveBeenCalled());
+
+			vi.mocked(saveSolFinalizedTransactions).mockClear();
+
+			vi.mocked(loadSolNetworkBalances).mockResolvedValue({ ...mockBalances, sol: 200n });
+
+			await scheduler.trigger(data);
 
 			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should still succeed when saveSolFinalizedTransactions rejects', async () => {
+		it('should still post when the backend save fails', async () => {
 			vi.mocked(saveSolFinalizedTransactions).mockRejectedValue(new Error('Backend save failed'));
 
-			await scheduler.trigger(startData);
+			await scheduler.trigger(data);
 
-			const store = scheduler['store'].transactions;
-			for (const tx of mockSolTransactions) {
-				expect(store[tx.id]).toBeDefined();
-			}
+			expect(walletPosts()).toHaveLength(1);
+		});
+	});
+
+	describe('errors', () => {
+		it('should post syncSolWalletError for the network after retrying', async () => {
+			const error = new Error('test');
+			vi.mocked(loadSolNetworkBalances).mockRejectedValue(error);
+
+			await triggerAndSettle();
+
+			// first time + 10 retries
+			expect(loadSolNetworkBalances).toHaveBeenCalledTimes(11);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncSolWalletError',
+				ref: SolanaNetworks.mainnet,
+				data: { error }
+			});
+			expect(walletPosts()).toHaveLength(0);
 		});
 
-		it('should save under the SPL token the sync is for', async () => {
-			const splStartData: PostMessageDataRequestSol = {
-				address: {
-					certified: false,
-					data: mockSolAddress
-				},
-				solanaNetwork: SolanaNetworks.devnet,
-				tokenAddress: DEVNET_USDC_TOKEN.address,
-				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
-			};
+		// The listener resets every token of the network on an error, so the next sync must post
+		// everything again rather than a delta.
+		it('should post everything again after a fatal error', async () => {
+			await scheduler.trigger(data);
 
-			await scheduler.trigger(splStartData);
+			vi.mocked(loadSolNetworkBalances).mockRejectedValue(new Error('Failed to fetch'));
 
-			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
-				transactions: mockSolTransactions
-			});
+			await triggerAndSettle();
+
+			vi.mocked(loadSolNetworkBalances).mockResolvedValue(mockBalances);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balances).toEqual(mockBalances);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+		});
+	});
+
+	describe('data changes', () => {
+		it.each([
+			{ change: 'another token list', changedData: { ...data, tokens: [tokens[0]] } },
+			{
+				change: 'another address',
+				changedData: { ...data, address: { data: mockSolAddress2, certified: false } }
+			},
+			{ change: 'another network', changedData: { ...data, solanaNetwork: SolanaNetworks.devnet } }
+		])('should start over when triggered for $change', async ({ changedData }) => {
+			await scheduler.trigger(data);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(changedData);
+
+			expect(resolveSolSignatures).toHaveBeenCalledTimes(2);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].ref).toBe(changedData.solanaNetwork);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+		});
+
+		// `SchedulerTimer.start` returns early while its timer runs, so without stopping it first the
+		// timer would keep syncing the token list it was started with.
+		it('should sync the new token list when started again while its timer runs', async () => {
+			await scheduler.start(data);
+
+			await awaitJobExecution();
+
+			const changedData = { ...data, tokens: [tokens[0]] };
+
+			await scheduler.start(changedData);
+
+			await awaitJobExecution();
+
+			vi.mocked(getSolSignatures).mockClear();
+
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS * 2);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+
+			vi.mocked(getSolSignatures).mock.calls.forEach(([params]) =>
+				expect(params.tokensList).toEqual(changedData.tokens)
+			);
 		});
 	});
 });
