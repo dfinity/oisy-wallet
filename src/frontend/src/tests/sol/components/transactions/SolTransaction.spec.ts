@@ -1,10 +1,20 @@
+import { USDC_DECIMALS, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
+import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
@@ -226,6 +236,76 @@ describe('SolTransaction', () => {
 			assertNonNullish(amount);
 
 			expect(amount.textContent).toContain('-0.001005');
+		});
+	});
+
+	// One record per signature is stored under every token whose history returned it, and the
+	// backend cache keeps its value and direction but not the summary or the net changes.
+	describe('a SOL to USDC swap restored from the backend cache', () => {
+		const netChanges: SolNetBalanceChange[] = [
+			{ delta: -500_000_000n },
+			{ tokenAddress: USDC_TOKEN.address, decimals: USDC_DECIMALS, delta: 75_000_000n }
+		];
+
+		const instructions: SolInstructionSummary[] = [
+			{ kind: 'createTokenAccount', account: mockAtaAddress, rent: 2_039_280n },
+			{ kind: 'wrap', amount: 500_000_000n },
+			{ kind: 'unwrap', account: mockAtaAddress, returned: 502_039_280n }
+		];
+
+		const summary = deriveSolTransactionSummary({ netChanges, instructions });
+
+		// Shaped as the service shapes a swap: typed by its outgoing half, valued by the SOL spent.
+		const derived: SolTransactionUi = {
+			...mockTrx,
+			id: mockTrx.signature,
+			value: 500_000_000n,
+			type: 'send',
+			from: mockSolAddress,
+			to: mockSolAddress,
+			fee: 5_000n,
+			summary,
+			netChanges,
+			instructions
+		};
+
+		const restored = mapUserTransactionToSolTransaction({
+			transaction: mapSolTransactionToUserTransaction(derived),
+			address: mockSolAddress
+		});
+
+		const usdcReceived = `${formatToken({
+			value: 75_000_000n,
+			displayDecimals: EIGHT_DECIMALS,
+			unitName: USDC_DECIMALS,
+			showPlusSign: true
+		})} ${getTokenDisplaySymbol(USDC_TOKEN)}`;
+
+		const amountOf = (transaction: SolTransactionUi): string => {
+			const { container } = render(SolTransaction, {
+				props: { transaction, token: USDC_TOKEN }
+			});
+
+			const amount = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amount);
+
+			return amount.textContent ?? '';
+		};
+
+		it('should be a swap that spent the SOL', () => {
+			expect(summary.kind).toBe('swap');
+			expect(summary.spent?.delta).toBe(-500_000_000n);
+		});
+
+		it('should show the USDC received on the USDC row while the record is fresh', () => {
+			expect(amountOf(derived)).toBe(usdcReceived);
+		});
+
+		// Defect: the restored record has no net changes, so the row falls back to the SOL lamports,
+		// negated as a send and read in USDC decimals.
+		it.fails('should still show the USDC received once restored', () => {
+			expect(amountOf(restored)).toBe(usdcReceived);
 		});
 	});
 

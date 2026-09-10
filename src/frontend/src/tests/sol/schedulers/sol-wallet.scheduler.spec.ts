@@ -13,6 +13,10 @@ import {
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -539,6 +543,39 @@ describe('sol-wallet.scheduler', () => {
 			for (const tx of storedTransactions) {
 				expect(store[tx.id]).toBeUndefined();
 			}
+		});
+
+		// Current behaviour, not the goal: the backend cache keeps none of the derived fields, so a
+		// record that went through it reads as predating the summary and the worker always re-fetches.
+		it('should never short-circuit on records restored from the backend cache', async () => {
+			const [base] = createMockSolTransactionsUi(1);
+
+			const derived: SolTransactionUi = {
+				...base,
+				id: String(base.signature),
+				from: mockSolAddress,
+				summary: { kind: 'send', spent: { delta: -100n }, counterparty: mockSolAddress2 },
+				netChanges: [{ delta: -100n }]
+			};
+
+			const restored = mapUserTransactionToSolTransaction({
+				transaction: mapSolTransactionToUserTransaction(derived),
+				address: mockSolAddress
+			});
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [restored],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 1n
+			});
+
+			await scheduler.trigger(startData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
+			);
 		});
 
 		it('should still load RPC transactions when backend load fails', async () => {
