@@ -132,7 +132,7 @@ lists.
 
 The loader still saves each token's finalized records under that token's `solBackendTokenId`,
 as today. Nothing changes in the backend or in `backend.did`, and keeping it per token does not
-conflict with 3.2. Whether it is still read back is decision D4.
+conflict with 3.2. It is not read back for Solana history (D4).
 
 ### 3.8 Balances in the same worker
 
@@ -185,12 +185,13 @@ Test PRs, independent, already open as drafts:
 
 Implementation, in order:
 
-1. **Never render a backend copy (3.4, D4).** Either stop reading the Solana backend cache, or
-   re-derive every restored record before it reaches the store, as D4 decides. A record restored
-   from IndexedDB without a summary is not a derived record either, and is dropped from the
-   cache on load, so the pager fetches it again when it gets there. The refresh helpers go. This
-   PR is independent of the rest and ships first, because backend loading is on in every
-   environment (`USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED`), so F4 is live.
+1. **Never render a backend copy (3.4, D4), #14017.** The Solana backend cache is no longer read;
+   finalized records are still saved per token. A record restored from IndexedDB without a
+   summary is not a derived record either, and is dropped from the cache on load, so the next
+   load that reaches its signature derives it again. The restore mapper, the refresh helpers, the
+   backend pagination cursors and `exitIfFirstSignatureMatches` go. This PR is independent of the
+   rest and ships first, because backend loading is on in every environment
+   (`USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED`), so F4 is live.
 2. **The merged pager.** `getSolSignatures` becomes the pager of 3.3: lookups in parallel, newest
    first, each signature tagged with the sources that returned it, the cut applied, and its own
    cursor (3.5). It flips the F1 and F2 `it.fails` tests in T1 and T2.
@@ -203,7 +204,8 @@ Implementation, in order:
 5. **The pagers on the main thread.** `loadOlderTransactionsFor` returns the network pager, and
    the token page uses its single-source pager (3.6). `loadNextSolTransactions`,
    `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced.
-6. **PRODUCT.md.** A "Solana history" entry under Activity describing the behaviour that shipped.
+6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
+   with the behaviour it ships (one loader per network, merged paging, balances).
 
 ## 7. Acceptance criteria
 
@@ -246,19 +248,14 @@ Implementation, in order:
 - **D3. Restored records are re-derived.** This was generalised into one rule rather than a
   refresh check per record: nothing rendered comes from a backend copy (3.4), and no cursor is
   inferred from the store (3.5).
+- **D4. The Solana backend cache is no longer read; it is still written per token (#14017).** By
+  3.4 a backend record is never rendered, so reading it could only supply signatures, and it cannot
+  supply them reliably. A token keeps at most `MAX_USER_TRANSACTIONS_PER_TOKEN` (10,000) records,
+  only finalized ones, and only those that some session of this user happened to load. Treating it
+  as a source would reopen the holes 3.3 closes. Re-deriving every restored record instead would
+  cost the same RPC calls as not reading and keep more code.
 
-## 10. Pending decisions (facts are clear, a call is needed)
-
-- **D4. Read the Solana backend cache back at all?** By 3.4 a backend record is never rendered,
-  so reading it could only supply signatures, and it cannot supply them reliably. A token keeps
-  at most `MAX_USER_TRANSACTIONS_PER_TOKEN` (10,000) records, only finalized ones, and only those
-  that some session of this user happened to load. Treating it as a source would reopen the holes
-  3.3 closes. Recommendation: stop reading it for Solana history (PR 1 deletes the read path, the
-  backend pagination cursors and the refresh helpers), and keep writing it per token as today.
-  The alternative keeps reading and re-derives every restored record before it reaches the store,
-  which costs the same RPC calls as not reading and keeps more code.
-
-## 11. Notes for the implementation
+## 10. Notes for the implementation
 
 - `SchedulerTimer.start` (`src/frontend/src/lib/schedulers/scheduler.ts`) returns early while its
   timer is running. That is harmless today because `sol-wallet.worker.ts` creates one scheduler per
