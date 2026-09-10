@@ -32,13 +32,14 @@ live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
 
 - A new top-level **Support** page at `/support/`, reachable from the main navigation.
 - Card 1 — **Help & Support**: surfaces the existing external support link.
-- Card 2 — **ICPSwap Token Withdrawal**: pool selection by token pair, listing of the unused balance per leg, and withdrawal.
+- Card 2 — **ICPSwap Token Withdrawal**: two ways to find a stranded balance — a one-click scan of the pools between the user's active tokens, and manual selection of a token pair — then withdrawal.
 - A `support` Plausible event covering the page and the recovery tool.
 - `docs/ai/PRODUCT.md` updated in the same PR.
 
 **Out of scope (deliberate)**
 
-- Automatic discovery of pools with stuck balances. Every balance query is one call per pool, and the factory lists thousands of pools, so a blind scan is not viable. A later iteration may scan only the pools formed from the user's enabled tokens. Until then the user names the pair.
+- Scanning pools where only **one** leg is an active token. ~445 of the 860 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
+- Scanning other fee tiers. All 860 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
 - The **mistransferred balance** (see above): unreachable for an ICRC-2-only flow.
 - Any recovery for non-ICPSwap swap providers (KongSwap, Velora, NEAR Intents, OneSec).
 - Recovery of ICPSwap **liquidity positions**. Only loose balances are covered; the user holds no LP positions through OISY.
@@ -74,11 +75,42 @@ A short line explaining where to get help, and the existing external support lin
 
 ### Explanatory text
 
-A short paragraph, in plain language, stating: a swap on ICPSwap moves tokens into a pool canister before returning them; if that return step failed, the tokens are still yours and still in the pool; select the pair you were swapping and OISY will check and return them.
+A short paragraph, in plain language, stating: a swap on ICPSwap moves tokens into a pool canister before returning them; if that return step failed, the tokens are still yours and still in the pool; OISY can look for them and send them back.
 
-### Pool selection
+### Finding a balance: the scan
 
-Two token selectors, "Token A" and "Token B".
+A **Scan my pools** button checks, in one go, every ICPSwap pool that exists between two tokens the user currently holds active. This is the path that actually puts the tool to work: a user who does not remember which pair they were swapping cannot use the manual selector.
+
+The scan is cheap because the pool table comes in a single call, not one lookup per pair:
+
+1. `getAllPools` (`src/frontend/src/lib/api/icp-swap-factory.api.ts`) — one query returning every pool. Measured against the live factory: **860 pools, ~292 KB** of Candid text.
+2. Filter locally to pools whose **both** legs are in the candidate set (ICP + `enabledIcrcTokens`, the same set the manual selectors offer).
+3. `getUserUnusedBalance` per surviving pool, fanned out in parallel.
+
+Measured cost, live factory data:
+
+| Active tokens                     | Naive per-pair lookup       | This approach       |
+| --------------------------------- | --------------------------- | ------------------- |
+| ICP + 4 ck tokens (5)             | 10 `getPool` + 10 balance   | 1 query + 9 balance |
+| ICP + OISY's 16 default ICRC (17) | 136 `getPool` + 136 balance | 1 query + 9 balance |
+
+The cost is bounded by the pools that exist between the user's tokens, not by tokens², so it does not degrade as someone enables more tokens. Every call is a query now that the mistransfer probe is gone, so the whole scan is roughly one round trip.
+
+**A failing pool must not sink the scan.** The balance queries are settled independently: a pool that errors is reported as unreadable and the rest of the results still show. Awaiting a fan-out together is exactly what hid a real balance during development.
+
+**Where the scan is blind, and why that is acceptable.** It only finds pools where _both_ legs are active. The classic stranded swap is ICP into a token the user did not already hold, which may never have been enabled — that pool is invisible to the scan. Manual selection exists for precisely that gap, and the card says so rather than implying the scan is exhaustive.
+
+**No caching to reuse.** `icpSwapSupportedTokens` already calls `getAllPools` for the swap token list, but it reduces the result to a `Set` of ledger ids and discards the pool canister ids and pairings. The recovery service therefore makes its own `getAllPools` call rather than reshaping shared swap code.
+
+The scan runs only when the button is pressed, never on page load: most Support visits are for the help link, and 292 KB plus a fan-out is not something to spend unasked.
+
+### Results from more than one pool
+
+The scan can return balances from several pools, so a result carries the pool it belongs to. Rows are grouped per pool under the pair that identifies it (e.g. "ICP / ckETH"), and each row's Withdraw button targets that pool's canister id. Manual selection is the same view with exactly one group.
+
+### Pool selection (manual)
+
+Below the scan, two token selectors, "Token A" and "Token B", for naming a pair the scan cannot reach.
 
 - **Candidates**: enabled ICRC tokens only — `enabledIcrcTokens` (`src/frontend/src/icp/derived/icrc.derived.ts`). A token that is not enabled cannot be selected; the user must enable it first. This keeps decimals, symbol, logo and ledger fee available from OISY's own metadata, so no ledger lookups are needed.
 - Selecting the same token twice is rejected.
@@ -90,7 +122,7 @@ Resolve the pool the same way a swap does — `getPoolCanister` (`src/frontend/s
 
 The factory canonicalises the pair, so the order the user picks the two tokens in does not matter; `PoolData.token0` / `token1` come back in the pool's own order and drive the mapping below.
 
-If no pool exists for the pair, show an inline message (reuse `swap.error.pool_not_found`) rather than an empty balance list.
+If no pool exists for the pair, show an inline message rather than an empty balance list. This needs its own string, not `swap.error.pool_not_found` — that reads "Swap failed. Pool not found.", which is wrong on a page where no swap was attempted.
 
 ### Balance discovery
 
@@ -98,11 +130,12 @@ Once the pool canister ID is known, with the user's principal:
 
 1. `PoolData.token0` / `token1` from the factory lookup already carry the leg addresses, so no separate `getPoolMetadata` call is needed.
 2. `getUserUnusedBalance(principal)` → `balance0` / `balance1`, mapped to `token0` / `token1` by position — the same mapping `withdrawUserUnusedBalance` already performs.
-   Up to two rows result, one per leg. Each row shows the token logo, symbol, and the amount formatted with the token's decimals. Both lookups are queries, so a pair resolves in one round trip.
+
+Up to two rows result per pool, one per leg. Each row shows the token logo, symbol, and the amount formatted with the token's decimals. Both calls are queries, so a pool resolves in one round trip.
 
 **Hiding rules.** A row is hidden when its balance is zero, and also when it is at or below the token's ledger fee (`token.fee`) — such a balance cannot be moved and showing it only invites a failing withdrawal. When every row is hidden, the card states that nothing was found in this pool.
 
-Balances are fetched on demand (when a complete pair is selected, and on an explicit refresh), not polled.
+Balances are fetched on demand — when the scan runs, when a complete pair is selected, and on an explicit refresh — never polled.
 
 ### Withdrawal
 
@@ -138,6 +171,7 @@ A new `src/frontend/src/lib/services/support-analytics.services.ts` exports one 
 | ---------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `open`           | —                    | the Support page is opened                                       | `success`                                  | —                                                                                                                                                                    |
 | `contact`        | `help`               | the external support link in card 1 is clicked                   | `success`                                  | `event_key: link`, `event_value`: destination URL                                                                                                                    |
+| `scan`           | `icpswap_withdrawal` | the scan button completes                                        | `executing` → `success` / `error`          | `event_key: balances_found`, `event_value`: count of withdrawable rows; `source_detail`: number of pools scanned; `result_error` on failure                          |
 | `select_pool`    | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error` on failure |
 | `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed                               | `executing` → `success` / `error`          | `token_symbol`, `token_network: icp`, `token_standard`; `result_error` on failure                                                                                    |
 
@@ -157,6 +191,7 @@ The CI `test-coverage` gate enforces whole-project thresholds, so every new comp
 
 - Each new `.svelte` component gets a component test.
 - The new recovery service is unit-tested with mocked API functions: pool-not-found, zero balances, dust-only balances (hidden), a mixed set, withdrawal success, and withdrawal failure leaving the row in place.
+- The scan is unit-tested against a mocked `getAllPools` table: only pools with both legs active are queried, pools at another fee tier or with an inactive leg are skipped, a pool whose balance query rejects does not discard the others, and the returned rows carry the pool they belong to.
 - `support-analytics.services.spec.ts` follows `analytics.md` §7: assert the exact event name, the full metadata for each action × outcome, that optional fields are **absent** (not `undefined`) when nullish, and that no amount, principal, or unsanitised error reaches the payload.
 - `nav.utils` gains cases for `isSupportPath` / `isRouteSupport`.
 - Extend the existing navigation tests so the new item is asserted in both the desktop `more` section and the mobile More sheet, in the right position.
@@ -166,7 +201,7 @@ The CI `test-coverage` gate enforces whole-project thresholds, so every new comp
 Update `docs/ai/PRODUCT.md` in the same PR:
 
 - Add Support to the `## Navigation` section.
-- Add a `## Support` section describing the page and the ICPSwap recovery tool — including the deliberate exclusions above (no auto-discovery, ICPSwap only, no LP positions, no mistransferred balance and why), so a later reader can tell "excluded on purpose" from "forgotten".
+- Add a `## Support` section describing the page and the ICPSwap recovery tool — both the scan and manual selection, what the scan deliberately does not cover (pools with only one active leg, other fee tiers), and the other exclusions (ICPSwap only, no LP positions, no mistransferred balance and why), so a later reader can tell "excluded on purpose" from "forgotten".
 - Add a `### Support tracking` subsection under `## Analytics`, in the same table form as the existing "Personal notes tracking" and "Trading tracking" subsections, and state the no-amounts rule there.
 
 ## Acceptance criteria
@@ -175,26 +210,32 @@ Update `docs/ai/PRODUCT.md` in the same PR:
 2. The page shows two cards, Help & Support first, ICPSwap Token Withdrawal second, styled like the Settings cards.
 3. The user menu's existing external Support link is unchanged.
 4. The ICPSwap card explains the problem in plain language before asking for any input.
-5. Only enabled ICRC tokens are selectable, and the same token cannot be picked twice.
-6. Selecting a pair with no pool at the supported fee tier shows a "pool not found" message, not an empty list.
-7. For a pair with a pool, the card lists every non-zero unused balance above the token's ledger fee, and nothing else.
-8. Balances at or below the ledger fee, and zero balances, are not shown at all.
-9. When nothing is found, the card says so explicitly.
-10. Each listed balance has its own Withdraw button; pressing it withdraws the full amount, shows a loading state on that row only, and on success shows a toast and removes the row.
-11. A failed withdrawal shows the ICPSwap error and leaves the row in place for a retry.
-12. Token order in the two selectors does not change the result.
-13. The `support` event fires for all four modifiers with the metadata in the table above, and no event carries a token amount, a USD value, or a principal.
-14. The swap flow's own behaviour is unchanged.
+5. A **Scan my pools** button finds every stranded balance in the pools between the user's active tokens, in one pass, and reports how many pools it looked at.
+6. The scan runs only on press, never on page load.
+7. A pool that fails during the scan is reported without discarding the other results.
+8. Results from several pools are grouped per pool under the pair that identifies it, and each Withdraw button targets the right pool.
+9. The card states that the scan only covers pairs of active tokens, and offers manual selection for the rest.
+10. Only enabled ICRC tokens plus ICP are selectable, and the same token cannot be picked twice.
+11. Selecting a pair with no pool at the supported fee tier shows a "pool not found" message, not an empty list.
+12. For a pair with a pool, the card lists every non-zero unused balance above the token's ledger fee, and nothing else.
+13. Balances at or below the ledger fee, and zero balances, are not shown at all.
+14. When nothing is found, the card says so explicitly.
+15. Each listed balance has its own Withdraw button; pressing it withdraws the full amount, shows a loading state on that row only, and on success shows a toast and removes the row.
+16. A failed withdrawal shows the ICPSwap error and leaves the row in place for a retry.
+17. Token order in the two selectors does not change the result.
+18. The `support` event fires for all five modifiers with the metadata in the table above, and no event carries a token amount, a USD value, or a principal.
+19. The swap flow's own behaviour is unchanged.
 
 ## Decisions taken during specification
 
-| Question                                        | Decision                                                                                                                                                  |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Two "Support" destinations (user menu vs. page) | Keep the user menu as it is; both coexist, page card 1 carries the same link.                                                                             |
-| Withdraw button granularity                     | Per-row, so a partial failure is visible.                                                                                                                 |
-| Mistransferred balance                          | Dropped. It only arises from the direct ICRC-1 deposit flow; OISY is ICRC-2-only, and ICPSwap refuses the query for a pool's own pair.                    |
-| Analytics                                       | Track, as a single structured `support` event (pattern B), with the type encoded in `event_context` / `event_subcontext` / `event_modifier` / `result_*`. |
-| Amounts in analytics                            | Omitted, per privacy invariant 3; a `balances_found` count carries the product signal instead.                                                            |
+| Question                                        | Decision                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Two "Support" destinations (user menu vs. page) | Keep the user menu as it is; both coexist, page card 1 carries the same link.                                                                                                                                                                                                                                                                                       |
+| Withdraw button granularity                     | Per-row, so a partial failure is visible.                                                                                                                                                                                                                                                                                                                           |
+| How to discover stranded pools                  | Scan the pools between the user's active tokens, sourced from one `getAllPools` query. Rejected: mining the transaction store for pool counterparties — its recall depends on how much history happens to be loaded, and OISY's IC transaction store is paginated and index-canister-dependent, so the tool could silently miss the very balance the user came for. |
+| Mistransferred balance                          | Dropped. It only arises from the direct ICRC-1 deposit flow; OISY is ICRC-2-only, and ICPSwap refuses the query for a pool's own pair.                                                                                                                                                                                                                              |
+| Analytics                                       | Track, as a single structured `support` event (pattern B), with the type encoded in `event_context` / `event_subcontext` / `event_modifier` / `result_*`.                                                                                                                                                                                                           |
+| Amounts in analytics                            | Omitted, per privacy invariant 3; a `balances_found` count carries the product signal instead.                                                                                                                                                                                                                                                                      |
 
 ## Follow-up (fast-follow PR, not this one)
 
