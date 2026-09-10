@@ -92,10 +92,12 @@ const isWithdrawable = ({ amount, token: { fee } }: IcpSwapRecoverableBalance): 
 /**
  * Collects everything the user can recover from one ICPSwap pool.
  *
- * Both kinds of stranded funds are looked up for both tokens of the pair. Note that
- * `getMistransferBalance` is an update call - the Candid interface declares no query annotation
- * for it, unlike `getUserUnusedBalance` - so it goes through consensus and dominates the latency
- * here. The cycles are paid by the pool canister, not by OISY or the user.
+ * Both kinds of stranded funds are looked up for both tokens of the pair. The unused balance is
+ * required; the mistransfer probe is best-effort, because ICPSwap answers
+ * `getMistransferBalance` with `InternalError: Use deposit and withdraw instead` for a pool's own
+ * trading pair. `getMistransferBalance` is also an update call - the Candid interface declares no
+ * query annotation for it, unlike `getUserUnusedBalance` - so it goes through consensus and
+ * dominates the latency here. The cycles are paid by the pool canister, not by OISY or the user.
  *
  * @throws IcpSwapPoolNotFoundError if the pair has no pool at the supported fee tier.
  */
@@ -128,12 +130,26 @@ export const loadIcpSwapRecoverableBalances = async ({
 		[]
 	);
 
-	const [{ balance0, balance1 }, ...mistransferred] = await Promise.all([
-		getUserUnusedBalance({ identity, canisterId, principal: identity.getPrincipal() }),
-		...legs.map(({ poolToken }) =>
-			getMistransferBalance({ identity, canisterId, token: poolToken })
-		)
-	]);
+	// The unused balance is the balance that matters and the one that must be readable, so a
+	// failure here fails the load.
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
+
+	// The mistransfer probe is best-effort. ICPSwap rejects `getMistransferBalance` with
+	// `InternalError: Use deposit and withdraw instead` for a pool's own trading pair - which is
+	// the only pair we ever ask about - so in practice this errors for both legs. A rejected probe
+	// must therefore not cost the user the unused balance they actually have, which is what
+	// awaiting these together used to do.
+	const mistransferProbes = await Promise.allSettled(
+		legs.map(({ poolToken }) => getMistransferBalance({ identity, canisterId, token: poolToken }))
+	);
+
+	const mistransferred = mistransferProbes.map((probe) =>
+		probe.status === 'fulfilled' ? probe.value : ZERO
+	);
 
 	const unusedByAddress = new Map<string, bigint>([
 		[pool.token0.address, balance0],

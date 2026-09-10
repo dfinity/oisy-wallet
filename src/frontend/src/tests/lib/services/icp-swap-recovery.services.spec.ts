@@ -153,6 +153,36 @@ describe('icp-swap-recovery.services', () => {
 			]);
 		});
 
+		it('still returns the unused balance when the mistransfer probe is rejected', async () => {
+			// ICPSwap answers getMistransferBalance with "Use deposit and withdraw instead" for a
+			// pool's own trading pair, which is the only pair we ask about. That must not cost the
+			// user the unused balance they actually have.
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: ZERO,
+				balance1: 100_000_000_000_000n
+			});
+			vi.mocked(getMistransferBalance).mockRejectedValue(
+				new Error('Internal error: Use deposit and withdraw instead')
+			);
+
+			const { balances } = await loadIcpSwapRecoverableBalances(loadParams);
+
+			expect(balances).toStrictEqual([
+				{
+					token: tokenA,
+					poolToken: pool.token1,
+					kind: 'unused',
+					amount: 100_000_000_000_000n
+				}
+			]);
+		});
+
+		it('fails the load when the unused balance itself cannot be read', async () => {
+			vi.mocked(getUserUnusedBalance).mockRejectedValue(new Error('pool unavailable'));
+
+			await expect(loadIcpSwapRecoverableBalances(loadParams)).rejects.toThrow('pool unavailable');
+		});
+
 		it('queries the mistransferred balance once per leg, with the pool standard', async () => {
 			await loadIcpSwapRecoverableBalances(loadParams);
 
