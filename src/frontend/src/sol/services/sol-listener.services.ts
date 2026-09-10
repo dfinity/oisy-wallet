@@ -11,8 +11,35 @@ import {
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+/**
+ * Removes the rows a token holds for the signatures of `transactions` under another id. A record
+ * derived under its signature id supersedes the per-instruction rows of the older shape: same
+ * transaction, different ids. Call it before writing `transactions` to the token.
+ */
+export const cleanUpStaleSolTransactions = ({
+	tokenId,
+	transactions
+}: {
+	tokenId: TokenId;
+	transactions: SolTransactionUi[];
+}) => {
+	const incomingSignatures = new Set(transactions.map(({ signature }) => String(signature)));
+	const incomingIds = new Set(transactions.map(({ id }) => `${id}`));
+
+	const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
+		.filter(
+			({ data }) => incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
+		)
+		.map(({ data: { id } }) => `${id}`);
+
+	if (staleIds.length > 0) {
+		solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
+	}
+};
 
 export const syncWallet = ({
 	data,
@@ -42,21 +69,7 @@ export const syncWallet = ({
 
 	const transactions: SolCertifiedTransaction[] = JSON.parse(newTransactions, jsonReviver);
 
-	// A record re-derived under its signature id supersedes the per-instruction rows the store may
-	// still hold for the same signature: same transaction, older shape, different ids.
-	const incomingSignatures = new Set(
-		transactions.map(({ data: { signature } }) => String(signature))
-	);
-	const incomingIds = new Set(transactions.map(({ data: { id } }) => `${id}`));
-	const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
-		.filter(
-			({ data }) => incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
-		)
-		.map(({ data: { id } }) => `${id}`);
-
-	if (staleIds.length > 0) {
-		solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
-	}
+	cleanUpStaleSolTransactions({ tokenId, transactions: transactions.map(({ data }) => data) });
 
 	solTransactionsStore.prepend({
 		tokenId,
