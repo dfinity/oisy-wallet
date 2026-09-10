@@ -1561,7 +1561,6 @@
 			"estimated_btc": "예상 BTC 네트워크 수수료",
 			"estimated_inter_network": "예상 네트워크 간 수수료",
 			"estimated_eth": "예상 이더리움 수수료",
-			"max_fee_eth": "최대 수수료 <small>(보통 &lt; 30초 이내)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",

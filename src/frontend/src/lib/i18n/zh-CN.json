@@ -1561,7 +1561,6 @@
 			"estimated_btc": "预计 BTC 网络手续费",
 			"estimated_inter_network": "预计跨网络手续费",
 			"estimated_eth": "预计以太坊手续费",
-			"max_fee_eth": "最高手续费 <small>(通常少于 30 秒)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",

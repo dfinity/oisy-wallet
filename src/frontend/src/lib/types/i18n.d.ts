@@ -1251,7 +1251,6 @@ interface I18nFee {
 		estimated_btc: string;
 		estimated_inter_network: string;
 		estimated_eth: string;
-		max_fee_eth: string;
 		estimated_fee_eth: string;
 		estimated: string;
 		priority: string;
