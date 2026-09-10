@@ -30,8 +30,8 @@ mint the transaction moved. So a swap between SOL and USDC is fetched and derive
 once in each token's worker, and gives two identical records. Each worker runs in its own
 realm, so the per-network detail cache in `fetchTransactionDetailForSignature`
 (`src/frontend/src/sol/api/solana.api.ts`) is not shared between them. For a wallet with `k`
-enabled SPL tokens that means `k + 1` `getSignaturesForAddress` calls a minute, and on a cold
-start up to `(k + 1) × 10` `getTransaction` calls, many for the same signature.
+enabled SPL tokens that means `k + 1` `getSignaturesForAddress` calls a minute, and at startup
+as many as `(k + 1) × 10` `getTransaction` calls, many for the same signature.
 
 The fix is to turn it around: collect the user's signatures once, across the wallet and every
 ATA, fetch and derive each signature once, then hand the record to every token it belongs to.
@@ -117,8 +117,8 @@ lists.
 
 - **The Activity list** gets one pager per network, over all its sources.
   `loadOlderTransactionsFor` (`src/frontend/src/lib/services/transactions-pagination.services.ts`)
-  returns the same pager for every token of a network, and the calls several of those tokens make
-  in the same round share one in-flight page instead of each paging on its own. The pager signals
+  returns the same pager for every token of a network, and when several of those tokens page in
+  the same round, they share one in-flight page instead of each paging on its own. The pager signals
   the end to every token of the network once all its sources are exhausted, and the floor that
   `AllTransactionsLoader.svelte` levels to is checked against the pager's cut. Because a merged
   page hands a record to every token it belongs to at once, the Activity list never holds one
