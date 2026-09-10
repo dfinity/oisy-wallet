@@ -31,6 +31,8 @@ export interface OisyTradeOrderView {
 	// Cumulative filled quantity in whole base tokens.
 	filledQuantity: number;
 	status: OisyTradeOrderStatus;
+	// Time-in-force the order was placed with.
+	timeInForce: OisyTradeTimeInForce;
 	// Submission time in nanoseconds since the Unix epoch — shown as the history
 	// row's meta line (when the order was placed).
 	createdAt: bigint;
@@ -38,6 +40,9 @@ export interface OisyTradeOrderView {
 
 // The five candid `OrderStatus` discriminants, flattened to a string union.
 export type OisyTradeOrderStatus = 'Pending' | 'Open' | 'Filled' | 'Canceled' | 'Expired';
+
+// The two candid `TimeInForce` discriminants, flattened to a string union.
+export type OisyTradeTimeInForce = 'FillOrKill' | 'GoodTilCanceled';
 
 // Display-only status: an Open order that has already partially filled is shown
 // as "Partial" (still active). Not a candid discriminant.

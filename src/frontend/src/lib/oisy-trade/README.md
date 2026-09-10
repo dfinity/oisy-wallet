@@ -4,6 +4,13 @@ Given an order-book snapshot, this module answers one question: **what is the
 largest fill-or-kill order this book is certain to fill, and what is it certain to
 produce?** That answer is what the Swap flow shows as an OISY Trade offer.
 
+It answers one thing more, for the settlement that follows rather than for the
+offer: **`maxSourceRelease`** — the most of the deposit the venue can hand back once
+the order fills. A Buy reserves at its limit price and fills at the book's, so the
+difference comes back, and the free balance settlement reads is account-wide, so
+without a bound it cannot tell that release from any other credit. The book is the
+only place that bound exists, which is why it is computed here.
+
 ## This code does not belong here
 
 It belongs in the `oisy_trade` canister, next to the book it reads and the matching

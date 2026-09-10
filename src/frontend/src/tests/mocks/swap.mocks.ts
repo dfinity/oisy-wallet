@@ -1,5 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
+import { ZERO } from '$lib/constants/app.constants';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import {
 	SwapProvider,
@@ -97,7 +98,8 @@ export const mockOisyTradeProvider: Extract<
 			},
 			price: 10_000_000n,
 			quantity: 100_000_000n,
-			depositAmount: 100_000_000n
+			depositAmount: 100_000_000n,
+			maxSourceRelease: ZERO
 		}
 	},
 	type: undefined
