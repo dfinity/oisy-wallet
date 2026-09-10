@@ -1,5 +1,5 @@
 import Support from '$lib/components/support/Support.svelte';
-import { SUPPORT_HELP_CARD } from '$lib/constants/test-ids.constants';
+import { SUPPORT_HELP_CARD, SUPPORT_ICPSWAP_CARD } from '$lib/constants/test-ids.constants';
 import { trackSupport } from '$lib/services/support-analytics.services';
 import { render } from '@testing-library/svelte';
 
@@ -12,10 +12,15 @@ describe('Support', () => {
 		vi.clearAllMocks();
 	});
 
-	it('renders the Help & Support card', () => {
+	it('renders the two cards, Help & Support first', () => {
 		const { getByTestId } = render(Support);
 
-		expect(getByTestId(SUPPORT_HELP_CARD)).toBeInTheDocument();
+		const help = getByTestId(SUPPORT_HELP_CARD);
+		const icpSwap = getByTestId(SUPPORT_ICPSWAP_CARD);
+
+		expect(help).toBeInTheDocument();
+		expect(icpSwap).toBeInTheDocument();
+		expect(help.compareDocumentPosition(icpSwap) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
 	it('tracks the page open once', () => {

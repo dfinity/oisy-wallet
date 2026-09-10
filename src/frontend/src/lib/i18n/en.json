@@ -786,7 +786,30 @@
 			"title": "Support",
 			"help_title": "Help & Support",
 			"help_description": "Browse the $oisy_name help centre for answers to common questions, or get in touch with the team if you are stuck.",
-			"help_link": "Go to the help centre"
+			"help_link": "Go to the help centre",
+			"icpswap_title": "ICPSwap Token Withdrawal",
+			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. Pick the pair you were swapping and $oisy_name will check for anything left behind.",
+			"token_first": "First token",
+			"token_second": "Second token",
+			"select_token": "Select",
+			"checking_pool": "Checking the pool…",
+			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
+			"balance_unused": "Unused balance",
+			"balance_mistransferred": "Transferred without a deposit",
+			"withdraw": "Withdraw"
+		},
+		"alt": {
+			"select_token_first": "Select the first token of the pool",
+			"select_token_second": "Select the second token of the pool",
+			"withdraw": "Withdraw $symbol from the pool"
+		},
+		"error": {
+			"pool_not_found": "No ICPSwap pool exists for this pair. Check the two tokens and try again.",
+			"load_failed": "Could not read your balances from this pool.",
+			"withdraw_failed": "The withdrawal failed."
+		},
+		"success": {
+			"withdraw": "Withdrew $amount $symbol from the pool."
 		}
 	},
 	"settings": {

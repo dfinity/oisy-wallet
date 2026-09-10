@@ -786,7 +786,30 @@
 			"title": "",
 			"help_title": "",
 			"help_description": "",
-			"help_link": ""
+			"help_link": "",
+			"icpswap_title": "",
+			"icpswap_description": "",
+			"token_first": "",
+			"token_second": "",
+			"select_token": "",
+			"checking_pool": "",
+			"nothing_to_withdraw": "",
+			"balance_unused": "",
+			"balance_mistransferred": "",
+			"withdraw": ""
+		},
+		"alt": {
+			"select_token_first": "",
+			"select_token_second": "",
+			"withdraw": ""
+		},
+		"error": {
+			"pool_not_found": "",
+			"load_failed": "",
+			"withdraw_failed": ""
+		},
+		"success": {
+			"withdraw": ""
 		}
 	},
 	"settings": {

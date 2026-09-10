@@ -125,6 +125,13 @@ export const NAVIGATION_ITEM_SUPPORT = 'navigation-item-support';
 
 export const SUPPORT_HELP_CARD = 'support-help-card';
 export const SUPPORT_HELP_LINK = 'support-help-link';
+export const SUPPORT_ICPSWAP_CARD = 'support-icpswap-card';
+export const SUPPORT_ICPSWAP_TOKEN_A = 'support-icpswap-token-a';
+export const SUPPORT_ICPSWAP_TOKEN_B = 'support-icpswap-token-b';
+export const SUPPORT_ICPSWAP_LOADING = 'support-icpswap-loading';
+export const SUPPORT_ICPSWAP_ERROR = 'support-icpswap-error';
+export const SUPPORT_ICPSWAP_EMPTY = 'support-icpswap-empty';
+export const SUPPORT_ICPSWAP_WITHDRAW_BUTTON = 'support-icpswap-withdraw';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';

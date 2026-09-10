@@ -527,7 +527,25 @@ interface I18nHero {
 }
 
 interface I18nSupport {
-	text: { title: string; help_title: string; help_description: string; help_link: string };
+	text: {
+		title: string;
+		help_title: string;
+		help_description: string;
+		help_link: string;
+		icpswap_title: string;
+		icpswap_description: string;
+		token_first: string;
+		token_second: string;
+		select_token: string;
+		checking_pool: string;
+		nothing_to_withdraw: string;
+		balance_unused: string;
+		balance_mistransferred: string;
+		withdraw: string;
+	};
+	alt: { select_token_first: string; select_token_second: string; withdraw: string };
+	error: { pool_not_found: string; load_failed: string; withdraw_failed: string };
+	success: { withdraw: string };
 }
 
 interface I18nSettings {

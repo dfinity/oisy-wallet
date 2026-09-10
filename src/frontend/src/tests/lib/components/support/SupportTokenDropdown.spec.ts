@@ -1,0 +1,61 @@
+import SupportTokenDropdown from '$lib/components/support/SupportTokenDropdown.svelte';
+import en from '$tests/mocks/i18n.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+
+const icp = {
+	...mockValidIcrcToken,
+	symbol: 'ICP',
+	ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai'
+};
+
+const usdc = {
+	...mockValidIcrcToken,
+	symbol: 'ckUSDC',
+	ledgerCanisterId: 'qaa6y-5yaaa-aaaaa-aaafa-cai'
+};
+
+const testId = 'token-dropdown';
+
+const props = {
+	tokens: [icp, usdc],
+	ariaLabel: 'Pick a token',
+	testId,
+	onSelect: () => undefined
+};
+
+describe('SupportTokenDropdown', () => {
+	it('prompts for a selection while nothing is selected', () => {
+		const { getByText } = render(SupportTokenDropdown, { props });
+
+		expect(getByText(en.support.text.select_token)).toBeInTheDocument();
+	});
+
+	it('shows the selected symbol on the button', () => {
+		const { getByTestId } = render(SupportTokenDropdown, {
+			props: { ...props, selected: usdc }
+		});
+
+		expect(getByTestId(testId)).toHaveTextContent('ckUSDC');
+	});
+
+	it('lists the tokens sorted case-insensitively by symbol and reports the pick', async () => {
+		const onSelect = vi.fn();
+
+		const { getByTestId } = render(SupportTokenDropdown, { props: { ...props, onSelect } });
+
+		await fireEvent.click(getByTestId(testId));
+
+		const list = getByTestId(`${testId}-list`);
+		const symbols = Array.from(list.querySelectorAll('[data-tid^="token-dropdown-option-"]')).map(
+			(option) => option.textContent?.trim()
+		);
+
+		// localeCompare collates case-insensitively, so ckUSDC sorts before ICP.
+		expect(symbols).toStrictEqual(['ckUSDC', 'ICP']);
+
+		await fireEvent.click(getByTestId(`${testId}-option-${usdc.ledgerCanisterId}`));
+
+		expect(onSelect).toHaveBeenCalledExactlyOnceWith(usdc);
+	});
+});
