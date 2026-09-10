@@ -26,9 +26,21 @@
 		onSelect(token);
 	};
 
-	// Two tokens can share a symbol, so the ledger canister id is the stable key and the value
-	// that disambiguates the button label is left to the symbol the user already recognises.
-	const sortedTokens = $derived([...tokens].sort((a, b) => a.symbol.localeCompare(b.symbol)));
+	// `enabledIcrcTokens` concatenates the enabled default tokens with the enabled custom ones, and
+	// unlike `icrcTokens` it does not drop a custom token that duplicates a default. A token that is
+	// both therefore arrives twice, which throws `each_key_duplicate` on the keyed each below and
+	// leaves the panel empty. Deduplicate on the ledger canister id, keeping the first occurrence:
+	// that is the default entry, which is the variant the rest of the app treats as authoritative.
+	const uniqueTokens = $derived(
+		tokens.filter(
+			({ ledgerCanisterId }, index) =>
+				tokens.findIndex((token) => token.ledgerCanisterId === ledgerCanisterId) === index
+		)
+	);
+
+	// Two tokens can share a symbol, so the ledger canister id is the stable key and the label is
+	// left as the symbol the user already recognises.
+	const sortedTokens = $derived([...uniqueTokens].sort((a, b) => a.symbol.localeCompare(b.symbol)));
 </script>
 
 <span class="support-token-selector min-w-36">

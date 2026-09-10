@@ -39,6 +39,27 @@ describe('SupportTokenDropdown', () => {
 		expect(getByTestId(testId)).toHaveTextContent('ckUSDC');
 	});
 
+	it('renders a token that is both a default and an enabled custom token only once', async () => {
+		// enabledIcrcTokens concatenates enabled defaults with enabled customs without dropping a
+		// custom that duplicates a default, so the same ledger canister id can arrive twice. A keyed
+		// each throws each_key_duplicate on that and renders nothing at all.
+		const duplicate = { ...icp, name: 'ICP (custom entry)' };
+
+		const { getByTestId } = render(SupportTokenDropdown, {
+			props: { ...props, tokens: [icp, usdc, duplicate] }
+		});
+
+		await fireEvent.click(getByTestId(testId));
+
+		const list = getByTestId(`${testId}-list`);
+		const options = list.querySelectorAll(`[data-tid^="${testId}-option-"]`);
+
+		expect(options).toHaveLength(2);
+		expect(
+			list.querySelectorAll(`[data-tid="${testId}-option-${icp.ledgerCanisterId}"]`)
+		).toHaveLength(1);
+	});
+
 	it('is disabled and says so when no token is available', async () => {
 		const { getByTestId } = render(SupportTokenDropdown, { props: { ...props, tokens: [] } });
 
