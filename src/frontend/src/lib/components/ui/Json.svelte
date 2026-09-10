@@ -59,13 +59,21 @@
 	// A folded entry still holds the width of a line where it sits, so leaving it in place keeps
 	// pushing down what the caller wanted read first. Order within each group is left untouched, and
 	// arrays are left alone entirely: their order is data, not presentation.
-	const collapsedLast = (entries: [string, unknown][]): [string, unknown][] =>
-		isArray
-			? entries
-			: [
-					...entries.filter(([key]) => !collapsedKeys.includes(key)),
-					...entries.filter(([key]) => collapsedKeys.includes(key))
-				];
+	const collapsedLast = (entries: [string, unknown][]): [string, unknown][] => {
+		if (isArray) {
+			return entries;
+		}
+
+		const folded = new Set(collapsedKeys);
+		const open: [string, unknown][] = [];
+		const closed: [string, unknown][] = [];
+
+		for (const entry of entries) {
+			(folded.has(entry[0]) ? closed : open).push(entry);
+		}
+
+		return [...open, ...closed];
+	};
 
 	let children = $derived(isExpandable ? collapsedLast(Object.entries(json as object)) : []);
 	let hasChildren = $derived(children.length > 0);
