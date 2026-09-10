@@ -158,6 +158,7 @@
 			"menu": "你的钱包地址、设置、登出与外部链接",
 			"documentation": "打开 $oisy_name 文档",
 			"support": "打开 $oisy_name 文档的支持部分",
+			"support_page": "",
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
 			"vip_qr_code": "生成一个邀请链接",
 			"binance_qr_code": "生成一个 Binance Clubhouse 链接",
@@ -778,6 +779,14 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "切换隐私模式"
+		}
+	},
+	"support": {
+		"text": {
+			"title": "",
+			"help_title": "",
+			"help_description": "",
+			"help_link": ""
 		}
 	},
 	"settings": {

@@ -158,6 +158,7 @@
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
+			"support_page": "",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
 			"vip_qr_code": "Vygenerovat pozvánku",
 			"binance_qr_code": "Vygenerovat odkaz na Binance Clubhouse",
@@ -778,6 +779,14 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
+		}
+	},
+	"support": {
+		"text": {
+			"title": "",
+			"help_title": "",
+			"help_description": "",
+			"help_link": ""
 		}
 	},
 	"settings": {

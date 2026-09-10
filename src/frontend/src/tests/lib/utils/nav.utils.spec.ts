@@ -31,10 +31,12 @@ import {
 	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
+	isRouteSupport,
 	isRouteTokens,
 	isRouteTrading,
 	isRouteTransactions,
 	isSettingsPath,
+	isSupportPath,
 	isTokensPath,
 	isTransactionsPath,
 	loadRouteParams,
@@ -529,6 +531,25 @@ describe('nav.utils', () => {
 			});
 		});
 
+		describe('isRouteSupport', () => {
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Support}`;
+
+			it('should return true when route id matches Support path', () => {
+				expect(isRouteSupport(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteSupport(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Support path', () => {
+				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteSupport(mockPage(`/anotherGroup/${AppPath.Support}`))).toBeFalsy();
+			});
+		});
+
 		describe('isRouteDappExplorer', () => {
 			it('should return true when route id matches Explore path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
@@ -692,6 +713,13 @@ describe('nav.utils', () => {
 			expect(isSettingsPath('/(app)/settings')).toBeTruthy();
 			expect(isSettingsPath('/(app)/settings/wrong')).toBeFalsy();
 			expect(isSettingsPath(null)).toBeFalsy();
+		});
+
+		it('isSupportPath', () => {
+			expect(isSupportPath(withAppPrefix(AppPath.Support))).toBeTruthy();
+			expect(isSupportPath('/(app)/support')).toBeTruthy();
+			expect(isSupportPath('/(app)/support/wrong')).toBeFalsy();
+			expect(isSupportPath(null)).toBeFalsy();
 		});
 
 		it('isDappExplorerPath', () => {

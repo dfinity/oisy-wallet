@@ -158,6 +158,7 @@
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
+			"support_page": "",
 			"open_twitter": "DFINITY X/트위터 피드 열기",
 			"vip_qr_code": "초대 링크 생성",
 			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
@@ -778,6 +779,14 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "개인정보 보호 모드 켜기/끄기"
+		}
+	},
+	"support": {
+		"text": {
+			"title": "",
+			"help_title": "",
+			"help_description": "",
+			"help_link": ""
 		}
 	},
 	"settings": {

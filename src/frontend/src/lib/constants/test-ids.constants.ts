@@ -121,6 +121,11 @@ export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
 export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
+export const NAVIGATION_ITEM_SUPPORT = 'navigation-item-support';
+
+export const SUPPORT_HELP_CARD = 'support-help-card';
+export const SUPPORT_HELP_LINK = 'support-help-link';
+
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';

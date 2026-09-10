@@ -158,6 +158,7 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
+			"support_page": "Open the support page",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
@@ -780,6 +781,14 @@
 			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
+	"support": {
+		"text": {
+			"title": "Support",
+			"help_title": "Help & Support",
+			"help_description": "Browse the $oisy_name help centre for answers to common questions, or get in touch with the team if you are stuck.",
+			"help_link": "Go to the help centre"
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Settings",
@@ -985,7 +994,7 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"

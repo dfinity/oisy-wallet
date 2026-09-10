@@ -28,6 +28,8 @@ export const isTransactionsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
 export const isSettingsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
+export const isSupportPath = (path: string | null) =>
+	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Support}`;
 export const isDappExplorerPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 export const isActivityPath = (path: string | null) =>
@@ -58,6 +60,8 @@ export const transactionsUrl = ({ token }: { token: Token }): string =>
 export const isRouteTransactions = ({ route: { id } }: Page): boolean => isTransactionsPath(id);
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => isSettingsPath(id);
+
+export const isRouteSupport = ({ route: { id } }: Page): boolean => isSupportPath(id);
 
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean => isDappExplorerPath(id);
 

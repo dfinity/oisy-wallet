@@ -12,6 +12,7 @@ import {
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
+	NAVIGATION_ITEM_SUPPORT,
 	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_ITEM_TRADE
 } from '$lib/constants/test-ids.constants';
@@ -60,6 +61,7 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_SUPPORT)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
@@ -124,6 +126,39 @@ describe('NavigationMainMenuItems', () => {
 		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
 
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
+	});
+
+	it('surfaces Support in More linking to the Support page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const supportLink = getByTestId(NAVIGATION_ITEM_SUPPORT);
+
+		expect(supportLink.getAttribute('href')).toContain(AppPath.Support);
+	});
+
+	it('places Support directly before Settings in the desktop More section', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const support = getByTestId(NAVIGATION_ITEM_SUPPORT);
+		const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
+
+		const moreItems = Array.from(
+			settings.parentElement?.querySelectorAll('[data-tid^="navigation-item-"]') ?? []
+		);
+
+		expect(moreItems.indexOf(settings) - moreItems.indexOf(support)).toBe(1);
+	});
+
+	it('surfaces Support inside the mobile More sheet', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(queryByTestId(NAVIGATION_ITEM_SUPPORT)).toBeNull();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_MORE));
+
+		expect(getByTestId(NAVIGATION_ITEM_SUPPORT)).toBeInTheDocument();
 	});
 
 	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {

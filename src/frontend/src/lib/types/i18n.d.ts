@@ -147,6 +147,7 @@ interface I18nNavigation {
 		menu: string;
 		documentation: string;
 		support: string;
+		support_page: string;
 		open_twitter: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
@@ -523,6 +524,10 @@ interface I18nHero {
 		tooltip_toggle_balance: string;
 	};
 	alt: { toggle_privacy_mode: string };
+}
+
+interface I18nSupport {
+	text: { title: string; help_title: string; help_description: string; help_link: string };
 }
 
 interface I18nSettings {
@@ -2371,6 +2376,7 @@ interface I18n {
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
+	support: I18nSupport;
 	settings: I18nSettings;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;

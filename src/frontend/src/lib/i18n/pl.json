@@ -158,6 +158,7 @@
 			"menu": "Adres Twojego portfela, ustawienia, wylogowanie i linki zewnętrzne",
 			"documentation": "Otwórz dokumentację $oisy_name",
 			"support": "Otwórz sekcję wsparcia w dokumentacji $oisy_name",
+			"support_page": "",
 			"open_twitter": "Otwórz kanał DFINITY X/Twitter",
 			"vip_qr_code": "Wygeneruj link zaproszenia",
 			"binance_qr_code": "Wygeneruj link do Binance Clubhouse",
@@ -778,6 +779,14 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "Włącz i wyłącz tryb prywatności"
+		}
+	},
+	"support": {
+		"text": {
+			"title": "",
+			"help_title": "",
+			"help_description": "",
+			"help_link": ""
 		}
 	},
 	"settings": {

@@ -158,6 +158,7 @@
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
 			"documentation": "Abrir a documentação de $oisy_name",
 			"support": "Abrir a seção de Suporte da documentação de $oisy_name",
+			"support_page": "",
 			"open_twitter": "Abrir o feed DFINITY X/Twitter",
 			"vip_qr_code": "Gerar um link de convite",
 			"binance_qr_code": "Gerar um link do Binance Clubhouse",
@@ -778,6 +779,14 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
+		}
+	},
+	"support": {
+		"text": {
+			"title": "",
+			"help_title": "",
+			"help_description": "",
+			"help_link": ""
 		}
 	},
 	"settings": {

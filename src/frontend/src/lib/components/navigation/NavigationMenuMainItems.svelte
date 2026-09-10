@@ -15,6 +15,7 @@
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconCoins from '$lib/components/icons/lucide/IconCoins.svelte';
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
@@ -39,6 +40,7 @@
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_SUPPORT,
 		NAVIGATION_ITEM_TOKENS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
@@ -62,6 +64,7 @@
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
+		isRouteSupport,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -263,6 +266,14 @@
 						}
 					}
 				: {}),
+			support: {
+				label: $i18n.navigation.text.support,
+				ariaLabel: $i18n.navigation.alt.support_page,
+				testId: prefixedTestId(NAVIGATION_ITEM_SUPPORT),
+				icon: IconHelp,
+				href: url(AppPath.Support),
+				selected: isRouteSupport(page)
+			},
 			settings: {
 				label: $i18n.navigation.text.settings,
 				ariaLabel: $i18n.navigation.alt.settings,
