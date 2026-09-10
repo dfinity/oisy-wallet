@@ -3,6 +3,7 @@ import type {
 	OrderStatus,
 	PriceLevel,
 	Side,
+	TimeInForce,
 	TradingPair,
 	TradingPairInfo,
 	UserOrder,
@@ -18,6 +19,7 @@ import type {
 	OisyTradeOrderDisplayStatus,
 	OisyTradeOrderStatus,
 	OisyTradeOrderView,
+	OisyTradeTimeInForce,
 	OisyTradeWithdrawToken
 } from '$lib/types/oisy-trade';
 import type { BadgeVariant } from '$lib/types/style';
@@ -464,10 +466,7 @@ export const isOrderValid = ({
 	if (!validateAmount({ side, baseAmount, price, freeBalance, pair }).ok) {
 		return false;
 	}
-	if (fillOrKill && !crossesBook({ side, price, bid, ask })) {
-		return false;
-	}
-	return true;
+	return !(fillOrKill && !crossesBook({ side, price, bid, ask }));
 };
 
 // Max for the spend side. Sell: free base floored to lot. Buy: free quote
@@ -711,6 +710,10 @@ export const toCandidSide = (side: LimitOrderSide): Side =>
 const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
 	Object.keys(status)[0] as OisyTradeOrderStatus;
 
+// The candid `TimeInForce` variant flattened to its single discriminant.
+const timeInForceKey = (timeInForce: TimeInForce): OisyTradeTimeInForce =>
+	Object.keys(timeInForce)[0] as OisyTradeTimeInForce;
+
 // Cached per ledger so the synthetic `TokenId` (a symbol) stays stable across
 // derivations — a fresh id would never match balance/exchange lookups keyed by
 // token id and would churn object identity on every re-derive.
@@ -787,7 +790,7 @@ export const mapOisyTradeOrder = ({
 		return undefined;
 	}
 
-	const { side, price, quantity, filled_quantity, status, created_at } = order;
+	const { side, price, quantity, filled_quantity, status, created_at, time_in_force } = order;
 
 	return {
 		id,
@@ -800,6 +803,7 @@ export const mapOisyTradeOrder = ({
 		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
 		price: Number(price) / 10 ** quote.decimals,
 		status: orderStatusKey(status),
+		timeInForce: timeInForceKey(time_in_force),
 		createdAt: created_at
 	};
 };
