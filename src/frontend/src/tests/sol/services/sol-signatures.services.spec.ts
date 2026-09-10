@@ -320,37 +320,6 @@ describe('sol-signatures.services', () => {
 			expect(spyFetchTransactionsForSignature).not.toHaveBeenCalled();
 		});
 
-		it('should skip parsing when exitIfFirstSignatureMatches equals the newest RPC signature', async () => {
-			const [head] = mockSignatures;
-
-			const transactions = await getSolTransactions({
-				identity: mockIdentity,
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				exitIfFirstSignatureMatches: String(head.signature)
-			});
-
-			expect(transactions).toEqual([]);
-			expect(spyFetchSignatures).toHaveBeenCalledOnce();
-			expect(spyFetchTransactionsForSignature).not.toHaveBeenCalled();
-		});
-
-		it('should not skip parsing when before is set even if exitIfFirstSignatureMatches matches the page head', async () => {
-			const [pageHead] = mockSignatures;
-			const before = mockSolSignature();
-
-			const transactions = await getSolTransactions({
-				identity: mockIdentity,
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				before,
-				exitIfFirstSignatureMatches: String(pageHead.signature)
-			});
-
-			expect(transactions).toHaveLength(mockSignatures.length * mockSolTransactions.length);
-			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(mockSignatures.length);
-		});
-
 		it('should handle empty transactions responses', async () => {
 			spyFetchSignatures.mockReturnValue([mockSolSignatureResponse()]);
 			spyFetchTransactionsForSignature.mockReturnValue([]);
@@ -415,22 +384,6 @@ describe('sol-signatures.services', () => {
 
 			expect(transactions).toHaveLength(0);
 			expect(spyFetchSignatures).toHaveBeenCalledTimes(SOLANA_MAX_SKIPPED_SIGNATURE_PAGES + 1);
-		});
-
-		it('should not step over an invisible page when the head short-circuits', async () => {
-			const [head] = mockSignatures;
-
-			spyFetchTransactionsForSignature.mockResolvedValue([]);
-
-			const transactions = await getSolTransactions({
-				identity: mockIdentity,
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				exitIfFirstSignatureMatches: String(head.signature)
-			});
-
-			expect(transactions).toEqual([]);
-			expect(spyFetchSignatures).toHaveBeenCalledOnce();
 		});
 
 		it('should handle RPC errors gracefully', async () => {

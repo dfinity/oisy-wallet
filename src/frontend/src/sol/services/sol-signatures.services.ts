@@ -85,8 +85,7 @@ export const getSolTransactions = async ({
 	tokenAddress,
 	tokenOwnerAddress,
 	before,
-	limit = Number(WALLET_PAGINATION),
-	exitIfFirstSignatureMatches
+	limit = Number(WALLET_PAGINATION)
 }: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
 	if (nonNullish(tokenAddress)) {
 		assertIsAddress(tokenAddress);
@@ -123,15 +122,6 @@ export const getSolTransactions = async ({
 
 		// No signature older than the cursor: this is the end of the history, whatever mapped.
 		if (signatures.length === 0) {
-			return [];
-		}
-
-		if (
-			page === 0 &&
-			isNullish(before) &&
-			nonNullish(exitIfFirstSignatureMatches) &&
-			String(signatures[0].signature) === exitIfFirstSignatureMatches
-		) {
 			return [];
 		}
 
