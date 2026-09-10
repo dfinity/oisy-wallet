@@ -282,6 +282,55 @@ describe('sol-transactions.services', () => {
 			expect(record.from).toBe(mockSolAddress);
 		});
 
+		describe('with the token accounts of the user passed in', () => {
+			// Somebody else pays into a token account of the user that holds no balance on either side:
+			// only the accounts the caller names can tell that the account is theirs.
+			const detail = () =>
+				detailWith({
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'transfer',
+								info: {
+									source: mockSolAddress3,
+									destination: mockAtaAddress,
+									authority: mockSolAddress2,
+									amount: '5'
+								}
+							}
+						}
+					],
+					accountKeys: [
+						{ pubkey: mockSolAddress2, signer: true, writable: true, source: 'transaction' },
+						{ pubkey: mockSolAddress3, signer: false, writable: true, source: 'transaction' },
+						{ pubkey: mockAtaAddress, signer: false, writable: true, source: 'transaction' }
+					],
+					preBalances: [10_000n, ZERO, ZERO],
+					postBalances: [5_000n, ZERO, ZERO]
+				});
+
+			it('should return nothing when the account is not named', async () => {
+				spyFetchTransactionDetailForSignature.mockResolvedValueOnce(detail());
+
+				await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([]);
+			});
+
+			it('should treat every account named as the user own', async () => {
+				spyFetchTransactionDetailForSignature.mockResolvedValueOnce(detail());
+
+				const result = await fetchSolTransactionsForSignature({
+					...mockParams,
+					ownedTokenAccounts: [mockSplAddress, mockAtaAddress]
+				});
+
+				expect(result).toHaveLength(1);
+				expect(result[0].instructions).toHaveLength(1);
+				expect(spyFindAssociatedTokenPda).not.toHaveBeenCalled();
+			});
+		});
+
 		it('should resolve the owner of the counterparty for the record', async () => {
 			spyGetAccountOwner.mockResolvedValueOnce(mockSolAddress3);
 
