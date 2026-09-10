@@ -13,9 +13,7 @@ import {
 	getAccountOwner,
 	getSolCreateAccountFee,
 	getTokenInfo,
-	loadSolLamportsBalance,
-	loadTokenAccount,
-	loadTokenBalance
+	loadTokenAccount
 } from '$sol/api/solana.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -39,8 +37,6 @@ import type { MockInstance } from 'vitest';
 vi.mock('$sol/providers/sol-rpc.providers');
 
 describe('solana.api', () => {
-	let mockGetBalance: MockInstance;
-	let mockGetTokenAccountBalance: MockInstance;
 	let mockGetSignaturesForAddress: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
@@ -50,7 +46,6 @@ describe('solana.api', () => {
 
 	const mockAddresses = [mockSolAddress, mockSolAddress2];
 	const mockBalance = 500000n;
-	const mockAtaBalance = 987654321n;
 	const mockCreateAccountFee = 123n;
 	const mockPriorityFee = 100n;
 	const mockRecentPriorityFees = [
@@ -185,14 +180,6 @@ describe('solana.api', () => {
 
 		mockAccountInfo = {};
 
-		mockGetBalance = vi
-			.fn()
-			.mockReturnValue({ send: () => Promise.resolve({ value: lamports(mockBalance) }) });
-
-		mockGetTokenAccountBalance = vi.fn().mockReturnValue({
-			send: () => Promise.resolve({ value: { amount: mockAtaBalance } })
-		});
-
 		mockGetSignaturesForAddress = vi.fn().mockReturnValue({
 			send: () => Promise.resolve([mockSolSignatureResponse(), mockSolSignatureResponse()])
 		});
@@ -210,8 +197,6 @@ describe('solana.api', () => {
 		});
 
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
-			getBalance: mockGetBalance,
-			getTokenAccountBalance: mockGetTokenAccountBalance,
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
 			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
@@ -224,122 +209,6 @@ describe('solana.api', () => {
 
 	afterEach(() => {
 		Map.prototype.get = originalMapGet;
-	});
-
-	describe('loadSolLamportsBalance', () => {
-		it('should load balance successfully', async () => {
-			const balance = await loadSolLamportsBalance({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toEqual(mockBalance);
-			expect(mockGetBalance).toHaveBeenCalled();
-		});
-
-		it('should handle zero balance', async () => {
-			mockGetBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: lamports(ZERO) })
-			});
-
-			const balance = await loadSolLamportsBalance({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toEqual(ZERO);
-		});
-
-		it('should throw error when RPC call fails', async () => {
-			mockGetBalance.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
-
-			await expect(
-				loadSolLamportsBalance({
-					address: mockSolAddress,
-					network: SolanaNetworks.mainnet
-				})
-			).rejects.toThrow(mockError);
-		});
-
-		it('should throw error when address is empty', async () => {
-			await expect(
-				loadSolLamportsBalance({
-					address: '',
-					network: SolanaNetworks.mainnet
-				})
-			).rejects.toThrow();
-		});
-	});
-
-	describe('loadTokenBalance', () => {
-		it('should load balance successfully', async () => {
-			const balance = await loadTokenBalance({
-				ataAddress: mockAtaAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toEqual(mockAtaBalance);
-			expect(mockGetTokenAccountBalance).toHaveBeenCalled();
-		});
-
-		it('should handle zero balance', async () => {
-			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: ZERO } })
-			});
-
-			const balance = await loadTokenBalance({
-				ataAddress: mockAtaAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toEqual(ZERO);
-		});
-
-		it('should handle undefined balance', async () => {
-			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: undefined } })
-			});
-
-			const balance = await loadTokenBalance({
-				ataAddress: mockAtaAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toBeUndefined();
-		});
-
-		it('should handle null balance', async () => {
-			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: null } })
-			});
-
-			const balance = await loadTokenBalance({
-				ataAddress: mockAtaAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(balance).toBeUndefined();
-		});
-
-		it('should throw error when RPC call fails', async () => {
-			mockGetTokenAccountBalance.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
-
-			await expect(
-				loadTokenBalance({
-					ataAddress: mockAtaAddress,
-					network: SolanaNetworks.mainnet
-				})
-			).rejects.toThrow(mockError);
-		});
-
-		it('should throw error when address is empty', async () => {
-			await expect(
-				loadTokenBalance({
-					ataAddress: '',
-					network: SolanaNetworks.mainnet
-				})
-			).rejects.toThrow();
-		});
 	});
 
 	describe('fetchSignatures', () => {

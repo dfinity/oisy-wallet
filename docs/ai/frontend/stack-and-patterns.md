@@ -14,7 +14,7 @@ Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-tra
 
 ### Solana (RPC signatures and details)
 
-`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+Each tick, the head check of `SolWalletScheduler` asks every source (the wallet and the associated token account of each enabled token) for its newest page, and resolves only the signatures newer than the newest one it has already resolved. When no source has anything newer, a tick costs one `getSignaturesForAddress` call per source and no `getTransaction`.
 
 ## Token identity — key by `TokenId`
 

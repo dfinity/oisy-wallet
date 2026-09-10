@@ -1,6 +1,8 @@
 import { last } from '$lib/utils/array.utils';
+import { fetchSignatures } from '$sol/api/solana.api';
 import { resolveSolSignatures } from '$sol/services/sol-resolve-signatures.services';
-import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
+import { getSolSignatures } from '$sol/services/sol-signatures.services';
+import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolResolvedTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
@@ -9,10 +11,9 @@ import {
 	fixtureSolAtaAddresses
 } from '$tests/fixtures/solana/addresses.fixture';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
 
 const { getTransactionCalls } = vi.hoisted(() => ({ getTransactionCalls: [] as string[] }));
 
@@ -103,37 +104,40 @@ describe('sol-resolve-signatures.services integration', () => {
 		};
 	};
 
-	// Today's per-token loader, paged to the end the way the token's worker and pager page it.
+	// The per-token loader the network loader replaced: one source paged to the end on its own, and
+	// each of its signatures derived with that source as the only token account of the user.
 	const loadTokenHistory = async ({
-		tokenAddress,
-		tokenOwnerAddress,
+		source,
 		before
 	}: {
-		tokenAddress?: string;
-		tokenOwnerAddress?: string;
+		source: string;
 		before?: string;
 	}): Promise<SolTransactionUi[]> => {
-		const transactions = await getSolTransactions({
-			identity: mockIdentity,
-			address: wallet,
+		const signatures = await fetchSignatures({
+			wallet: solAddress(source),
 			network,
-			tokenAddress,
-			tokenOwnerAddress,
-			before,
+			before: nonNullish(before) ? signature(before) : undefined,
 			limit
 		});
 
-		if (transactions.length === 0) {
-			return transactions;
+		if (signatures.length === 0) {
+			return [];
 		}
 
+		const transactions = await Promise.all(
+			signatures.map((solSignature) =>
+				fetchSolTransactionsForSignature({
+					signature: solSignature,
+					network,
+					address: wallet,
+					ownedTokenAccounts: source === wallet ? [] : [source]
+				})
+			)
+		);
+
 		return [
-			...transactions,
-			...(await loadTokenHistory({
-				tokenAddress,
-				tokenOwnerAddress,
-				before: last(transactions)?.signature
-			}))
+			...transactions.flat(),
+			...(await loadTokenHistory({ source, before: last(signatures)?.signature }))
 		];
 	};
 
@@ -166,17 +170,10 @@ describe('sol-resolve-signatures.services integration', () => {
 
 		expect(recordSignatures).toHaveLength(new Set(recordSignatures).size);
 
-		const sources = [
-			{ source: wallet, tokenAddress: undefined, tokenOwnerAddress: undefined },
-			...walletAtas.map(({ ataAddress, token: { address, owner } }) => ({
-				source: ataAddress,
-				tokenAddress: address,
-				tokenOwnerAddress: owner
-			}))
-		];
+		const sources = [wallet, ...walletAtas.map(({ ataAddress }) => ataAddress)];
 
-		for (const { source, tokenAddress, tokenOwnerAddress } of sources) {
-			const today = await loadTokenHistory({ tokenAddress, tokenOwnerAddress });
+		for (const source of sources) {
+			const today = await loadTokenHistory({ source });
 
 			const resolved = records
 				.filter(({ sources: recordSources }) => recordSources.includes(source))

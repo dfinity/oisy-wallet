@@ -1,28 +1,15 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { last } from '$lib/utils/array.utils';
 import { fetchSignatures } from '$sol/api/solana.api';
-import { SOLANA_MAX_SKIPPED_SIGNATURE_PAGES } from '$sol/constants/sol.constants';
-import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type {
 	GetSolSignaturesParams,
-	GetSolTransactionsParams,
 	SolSignaturesCursor,
 	SolSignaturesPage
 } from '$sol/types/sol-api';
-import type {
-	SolSignature,
-	SolSignatureWithSources,
-	SolTransactionUi
-} from '$sol/types/sol-transaction';
+import type { SolSignature, SolSignatureWithSources } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import {
-	assertIsAddress,
-	signature,
-	address as solAddress,
-	type Address,
-	type Signature
-} from '@solana/kit';
+import { assertIsAddress, address as solAddress, type Address } from '@solana/kit';
 
 const findSignatureSources = async ({
 	wallet,
@@ -168,83 +155,4 @@ export const getSolSignatures = async ({
 			pending: newestFirst.filter(({ slot }) => slot <= cutSlot)
 		}
 	};
-};
-
-/**
- * Fetches transactions without an error for a given wallet address.
- */
-export const getSolTransactions = async ({
-	address,
-	network,
-	tokenAddress,
-	tokenOwnerAddress,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
-	if (nonNullish(tokenAddress)) {
-		assertIsAddress(tokenAddress);
-	}
-
-	if (nonNullish(tokenOwnerAddress)) {
-		assertIsAddress(tokenOwnerAddress);
-	}
-
-	const [relevantAddress] =
-		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
-			? await findAssociatedTokenPda({
-					owner: solAddress(address),
-					tokenProgram: solAddress(tokenOwnerAddress),
-					mint: solAddress(tokenAddress)
-				})
-			: [address];
-
-	const wallet = solAddress(relevantAddress);
-
-	let cursor: Signature | undefined = nonNullish(before) ? signature(before) : undefined;
-
-	// A page of signatures can map to nothing the user can see: a lookup on an associated token
-	// account answers with transactions that never moved anything of theirs. The caller's next
-	// cursor is the oldest transaction it holds, so stopping on such a page would have it ask for
-	// that very page again, and the history behind it would stay out of reach. Step over it here.
-	for (let page = 0; page <= SOLANA_MAX_SKIPPED_SIGNATURE_PAGES; page++) {
-		const signatures: SolSignature[] = await fetchSignatures({
-			network,
-			wallet,
-			before: cursor,
-			limit
-		});
-
-		// No signature older than the cursor: this is the end of the history, whatever mapped.
-		if (signatures.length === 0) {
-			return [];
-		}
-
-		const transactions = await signatures.reduce(
-			async (accPromise, signature) => {
-				const acc = await accPromise;
-				const parsedTransactions = await fetchSolTransactionsForSignature({
-					signature,
-					network,
-					address,
-					tokenAddress,
-					tokenOwnerAddress
-				});
-
-				return [...acc, ...parsedTransactions];
-			},
-			Promise.resolve([] as SolTransactionUi[])
-		);
-
-		if (transactions.length > 0) {
-			return transactions;
-		}
-
-		cursor = last(signatures)?.signature;
-
-		if (isNullish(cursor)) {
-			return [];
-		}
-	}
-
-	return [];
 };
