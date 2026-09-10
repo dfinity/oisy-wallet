@@ -132,12 +132,12 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 
 The [Support](#support) page emits one structured `support` event under `event_context: support` and `source_location: support_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
 
-| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                     |
-| ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------- |
-| `open`           | —                    | the Support page opens                      | `success`                       | —                                                                                         |
-| `contact`        | `help`               | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                         |
-| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count      |
-| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`, `event_key: balance_kind` (`unused` / `mistransferred`) |
+| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                |
+| ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| `open`           | —                    | the Support page opens                      | `success`                       | —                                                                                    |
+| `contact`        | `help`               | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
 
 Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
 
@@ -229,10 +229,9 @@ The first card explains where to get help and links out to the OISY help centre.
 
 OISY swaps ICRC tokens through ICPSwap, which deposits the tokens into a pool canister, swaps them, then withdraws them back. When that final withdrawal fails — the pool canister unavailable, a slow subnet, the browser closed mid-flow — the tokens stay credited to the user inside the pool. The swap flow already retries twice, but once the user leaves the swap wizard OISY previously offered no way back to the funds.
 
-This card recovers them. The user picks the two tokens of the pool they were swapping; OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists what is recoverable. Two kinds of stranded funds are covered:
+This card recovers them. The user picks the two tokens of the pool they were swapping; OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists the **unused balance** for each leg — the balance the pool credited to the user and never returned.
 
-- the **unused balance** — deposited and credited to the user but never swapped or withdrawn, which is what a failed swap or a failed withdrawal leaves behind;
-- the **mistransferred balance** — transferred straight to the pool canister without a matching deposit call, so the pool never credited it to a position.
+ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
 
 Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads the pool so the row disappears. Only the pressed row shows a loading state.
 
