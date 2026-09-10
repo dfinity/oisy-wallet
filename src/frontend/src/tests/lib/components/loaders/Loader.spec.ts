@@ -3,7 +3,6 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
-import type * as LendBorrowEnv from '$env/lend-borrow';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -38,16 +37,8 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
-const { mockLendBorrowEnabled, mockLiquidiumEnabled } = vi.hoisted(() => ({
-	mockLendBorrowEnabled: { value: true },
+const { mockLiquidiumEnabled } = vi.hoisted(() => ({
 	mockLiquidiumEnabled: { value: true }
-}));
-
-vi.mock('$env/lend-borrow', async (importOriginal) => ({
-	...(await importOriginal<typeof LendBorrowEnv>()),
-	get LEND_BORROW_ENABLED() {
-		return mockLendBorrowEnabled.value;
-	}
 }));
 
 vi.mock('$env/liquidium', () => ({
@@ -138,7 +129,6 @@ describe('Loader', () => {
 
 			ethAddressStore.reset();
 
-			mockLendBorrowEnabled.value = true;
 			mockLiquidiumEnabled.value = true;
 		});
 
@@ -152,11 +142,8 @@ describe('Loader', () => {
 			});
 		});
 
-		it.each([
-			{ flag: 'the lend & borrow feature', disable: () => (mockLendBorrowEnabled.value = false) },
-			{ flag: 'the Liquidium provider', disable: () => (mockLiquidiumEnabled.value = false) }
-		])('should not load the ETH address when $flag is disabled', async ({ disable }) => {
-			disable();
+		it('should not load the ETH address when the Liquidium provider is disabled', async () => {
+			mockLiquidiumEnabled.value = false;
 
 			setupUserNetworksStore('allDisabled');
 
