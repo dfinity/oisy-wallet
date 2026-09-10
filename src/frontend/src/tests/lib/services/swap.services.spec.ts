@@ -2103,9 +2103,9 @@ describe('swap.services', () => {
 		});
 
 		it('should withdraw the amount the pool actually returned, not the quote', async () => {
-			// Slippage ate 70 units: a successful swap, since `amountOutMinimum` is 3% below the
-			// 1_020 gross quote, but less than the quote the review step displayed.
-			const swappedAmount = 950n;
+			// Slippage ate 25 of the 1_020 gross quote: a successful swap, since `amountOutMinimum`
+			// is 3% below it, but less than the 1_000 quote the review step displayed.
+			const swappedAmount = 995n;
 
 			vi.mocked(icpSwapPool.swap).mockResolvedValue(swappedAmount);
 
@@ -2121,7 +2121,7 @@ describe('swap.services', () => {
 		});
 
 		it('should not fall back to the unused balance when the swap returns less than the quote', async () => {
-			const swappedAmount = 950n;
+			const swappedAmount = 995n;
 
 			vi.mocked(icpSwapPool.swap).mockResolvedValue(swappedAmount);
 			// The pool rejects a withdrawal above the balance it credited - it does not clamp it.
