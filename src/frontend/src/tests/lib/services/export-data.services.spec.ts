@@ -15,7 +15,7 @@ import {
 	type TokenCsvRow,
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
@@ -23,8 +23,8 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactionsByOldest: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTransactions: vi.fn()
 }));
 
 vi.mock('$lib/stores/toasts.store', () => ({
@@ -120,7 +120,7 @@ const defaultTransactionParams = (): Parameters<typeof exportTransactionsCsv>[0]
 
 describe('export-data.services', () => {
 	const mockLoadNextIcTransactionsByOldest = vi.mocked(loadNextIcTransactionsByOldest);
-	const mockLoadNextSolTransactionsByOldest = vi.mocked(loadNextSolTransactionsByOldest);
+	const mockLoadOlderSolTransactions = vi.mocked(loadOlderSolTransactions);
 	const mockBuildTokenRows = vi.mocked(buildTokenRows);
 	const mockSortTokenRows = vi.mocked(sortTokenRows);
 	const mockBuildTransactionRows = vi.mocked(buildTransactionRows);
@@ -206,7 +206,7 @@ describe('export-data.services', () => {
 
 			expect(result).toBeFalsy();
 			expect(mockLoadNextIcTransactionsByOldest).not.toHaveBeenCalled();
-			expect(mockLoadNextSolTransactionsByOldest).not.toHaveBeenCalled();
+			expect(mockLoadOlderSolTransactions).not.toHaveBeenCalled();
 			expect(buildTransactions).not.toHaveBeenCalled();
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).not.toHaveBeenCalled();
@@ -230,7 +230,7 @@ describe('export-data.services', () => {
 
 				return Promise.resolve({ success: true });
 			});
-			mockLoadNextSolTransactionsByOldest.mockRejectedValue(new Error('sol loader failed'));
+			mockLoadOlderSolTransactions.mockRejectedValue(new Error('sol loader failed'));
 
 			const result = await exportTransactionsCsv({
 				...defaultTransactionParams(),
@@ -241,7 +241,7 @@ describe('export-data.services', () => {
 
 			expect(result).toBeTruthy();
 			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
-			expect(mockLoadNextSolTransactionsByOldest).toHaveBeenCalledOnce();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledOnce();
 			expect(buildTransactions).toHaveBeenCalledOnce();
 			expect(mockBuildTransactionRows).toHaveBeenCalledOnce();
 			expect(mockDownloadCsv).toHaveBeenCalledExactlyOnceWith({

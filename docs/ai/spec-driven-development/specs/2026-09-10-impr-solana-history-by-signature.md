@@ -221,7 +221,18 @@ Implementation, in order:
    behaviour T4 pins stays, expressed per network.
 5. **The pagers on the main thread.** `loadOlderTransactionsFor` returns the network pager, and
    the token page uses its single-source pager (3.6). `loadNextSolTransactions`,
-   `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced.
+   `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced. As built
+   (`sol-history-pagers.services.ts`): cursors live in module state, keyed by network for the
+   Activity list and by token for a token's page, and a pager starts over when its address or its
+   network's token list changes. The floor is checked against the oldest signature the pager has
+   returned, which is the cut of 3.3 as the caller can see it. A call that brings nothing new (an
+   empty page with a cursor, or only signatures the tokens already hold) asks for up to
+   `SOLANA_MAX_SKIPPED_SIGNATURE_PAGES` more pages before it returns, so that neither case stalls
+   the list. A record the network already holds under one token is handed to the others without
+   being fetched again. A token's own pager is `getSolSignatures` with the token's source as its
+   only address, and the token page still waits for the worker's first page before it pages. The
+   export pages through the network pager too. `getSolTransactions` stays until PR 4, which is its
+   last caller.
 6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
    with the behaviour it ships (one loader per network, merged paging, balances).
 

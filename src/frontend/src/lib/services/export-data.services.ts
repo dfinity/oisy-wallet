@@ -23,7 +23,7 @@ import {
 	type UserAddresses
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -146,10 +146,11 @@ const loadAllTransactionsHistory = async ({
 			return;
 		}
 
+		// The pager is shared by every token of the network, so the loops of its tokens share its pages,
+		// and its end stops all of them.
 		if (isNetworkIdSolana(networkId)) {
-			const { success } = await loadNextSolTransactionsByOldest({
+			const { success } = await loadOlderSolTransactions({
 				identity,
-				minTimestamp: 0,
 				token,
 				signalEnd: () => {
 					disableLoader[key] = true;
