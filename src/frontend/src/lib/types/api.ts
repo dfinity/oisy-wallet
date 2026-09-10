@@ -15,7 +15,7 @@ import type {
 	UserTransaction,
 	Utxo
 } from '$declarations/backend/backend.did';
-import type { Token } from '$declarations/icp_swap_pool/icp_swap_pool.did';
+import type { Token as ICPSwapToken } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
@@ -27,6 +27,7 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address } from '$lib/types/address';
 import type { OnramperCryptoWallet, OnramperId, OnramperNetworkWallet } from '$lib/types/onramper';
+import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
@@ -182,7 +183,7 @@ export interface ICPSwapGetUserUnusedBalanceParams {
 }
 
 export interface ICPSwapMistransferBalanceParams {
-	token: Token;
+	token: ICPSwapToken;
 }
 
 export interface ICPSwapQuoteParams {
