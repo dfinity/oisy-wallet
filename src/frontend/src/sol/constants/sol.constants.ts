@@ -64,3 +64,7 @@ export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
 // detail fetch per signature, so the loader steps over at most this many of them in one round
 // rather than walking an arbitrarily long run of them while the user waits.
 export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
+
+// A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
+// `getTransaction` calls, so only this many are in flight at once.
+export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;

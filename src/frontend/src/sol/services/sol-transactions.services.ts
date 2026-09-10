@@ -115,13 +115,17 @@ export const fetchSolTransactionsForSignature = async ({
 	network,
 	address,
 	tokenAddress,
-	tokenOwnerAddress
+	tokenOwnerAddress,
+	ownedTokenAccounts = []
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
 	tokenAddress?: SplTokenAddress;
 	tokenOwnerAddress?: SolAddress;
+	// Token accounts of the user that may hold no balance yet, known without deriving them here: a
+	// caller resolving a signature for every token of a network passes all their accounts at once.
+	ownedTokenAccounts?: SolAddress[];
 }): Promise<SolTransactionUi[]> => {
 	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
 		signature,
@@ -164,14 +168,15 @@ export const fetchSolTransactionsForSignature = async ({
 	const { addressToOwner, addressToToken } = tokenBalanceMetadata;
 
 	// The accounts the user owns going in: the wallet, every token account the balances name as
-	// theirs, and the associated token account the caller asked about, which may hold no balance
+	// theirs, and the associated token accounts the caller asked about, which may hold no balance
 	// yet. Accounts the transaction itself opens for the user are learnt by the derivation.
 	const ownedAddresses = [
 		address,
 		...Object.entries(addressToOwner)
 			.filter(([, owner]) => owner === address)
 			.map(([account]) => account),
-		...(nonNullish(ataAddress) ? [ataAddress] : [])
+		...(nonNullish(ataAddress) ? [ataAddress] : []),
+		...ownedTokenAccounts
 	];
 
 	// What each account held going in, so a close can say what it hands back: the instruction
