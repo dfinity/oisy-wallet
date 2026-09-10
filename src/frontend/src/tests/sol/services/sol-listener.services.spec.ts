@@ -1,14 +1,35 @@
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { getIdbBalances } from '$lib/api/idb-balances.api';
+import { getIdbSolTransactions } from '$lib/api/idb-transactions.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
+import {
+	syncWallet,
+	syncWalletError,
+	syncWalletFromCache
+} from '$sol/services/sol-listener.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import {
+	createMockSolTransactionsUi,
+	mockSolCertifiedTransactions
+} from '$tests/mocks/sol-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
 import { get } from 'svelte/store';
+
+vi.mock(import('$lib/api/idb-transactions.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	getIdbSolTransactions: vi.fn()
+}));
+
+vi.mock(import('$lib/api/idb-balances.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	getIdbBalances: vi.fn()
+}));
 
 describe('sol-listener.services', () => {
 	describe('sol-listener', () => {
@@ -101,6 +122,32 @@ describe('sol-listener.services', () => {
 				syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
 				expect(console.warn).toHaveBeenCalled();
+			});
+		});
+
+		describe('syncWalletFromCache', () => {
+			beforeEach(() => {
+				mockAuthStore();
+
+				vi.mocked(getIdbBalances).mockResolvedValue(undefined);
+			});
+
+			// Earlier versions cached the backend copy of a record, which has no summary. It is not
+			// what the chain says, so it must not reach the store.
+			it('should leave out cached records that were not derived from chain data', async () => {
+				const [derived, restored] = createMockSolTransactionsUi(2);
+				const derivedRecord = { ...derived, summary: { kind: 'send' as const } };
+
+				vi.mocked(getIdbSolTransactions).mockResolvedValue([
+					derivedRecord,
+					{ ...restored, summary: undefined }
+				]);
+
+				await syncWalletFromCache({ tokenId, networkId: SOLANA_MAINNET_NETWORK_ID });
+
+				expect(get(solTransactionsStore)?.[tokenId]).toEqual([
+					{ data: derivedRecord, certified: false }
+				]);
 			});
 		});
 	});
