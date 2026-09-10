@@ -121,6 +121,14 @@ signatures newer than the newest one the loader holds. When no source has anythi
 tick costs one `getSignaturesForAddress` call per source and nothing else. This replaces
 `exitIfFirstSignatureMatches` (#12772).
 
+When more than a page of new signatures arrives between two ticks, the head check keeps paging
+with the merged pager's cursor until a page reaches the newest slot it holds, so nothing between
+that page and what it holds is left out. The pages per tick are bounded; a walk that runs out of
+them keeps its cursor as a catch-up cursor in the worker, and the next ticks resume it, after the
+fresh head page, until it reaches what was held when it began. The first tick, holding nothing,
+still loads only the first page: older history is the pagers'. A tick's catch-up cursors are kept
+only once it succeeds, and dropped when the address, network or token list changes.
+
 ### 3.6 Scrolling: one pager per network for Activity, one per token for its page
 
 A pager is the merged pagination of 3.3 over a set of sources, so one implementation serves both

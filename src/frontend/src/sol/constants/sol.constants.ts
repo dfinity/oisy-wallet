@@ -59,6 +59,11 @@ export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
 export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
 
+// Every page of the wallet's head check costs a signature lookup per source, and a tick runs
+// every minute. A burst bigger than this many pages is not dropped: the head check resumes it on
+// the next ticks, so the bound only spreads the lookups out.
+export const SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK = 5;
+
 // A signature lookup on an associated token account answers with transactions that never moved
 // anything of the user's, and a whole page of history can consist of them. Each page costs one
 // detail fetch per signature, so the loader steps over at most this many of them in one round
