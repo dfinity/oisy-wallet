@@ -116,6 +116,32 @@ describe('InfiniteScroll', () => {
 		expect(getObserver().observe).not.toHaveBeenCalled();
 	});
 
+	// `observe` on a target already observed is a no-op in the browser, so re-enabling must disconnect
+	// first or an intersection still under way is never reported again.
+	it('should re-arm the observer from scratch when re-enabled', async () => {
+		const { rerender } = render(InfiniteScroll, {
+			onIntersect: vi.fn(),
+			children: mockSnippet
+		});
+
+		const observer = getObserver();
+
+		await waitFor(() => expect(observer.observe).toHaveBeenCalledOnce());
+
+		await rerender({ disabled: true });
+		await rerender({ disabled: false });
+
+		expect(observer.observe).toHaveBeenCalledTimes(2);
+
+		const [firstObserve, secondObserve] = observer.observe.mock.invocationCallOrder;
+
+		expect(
+			observer.disconnect.mock.invocationCallOrder.some(
+				(order) => order > firstObserve && order < secondObserve
+			)
+		).toBeTruthy();
+	});
+
 	it('should call onIntersect only when an observed entry intersects', async () => {
 		const onIntersect = vi.fn<() => Promise<void>>(() => Promise.resolve());
 

@@ -38,28 +38,15 @@
 	// svelte-ignore state_referenced_locally
 	const observer: IntersectionObserver = new IntersectionObserver(onIntersection, options);
 
-	// Svelte workaround: beforeUpdate is called twice when bindings are used -> https://github.com/sveltejs/svelte/issues/6016
-	let skipContainerNextUpdate = false;
-
-	// We disconnect previous observer before any update. We do want to trigger an intersection in case of layout shifting.
-	$effect.pre(() => {
-		if (!skipContainerNextUpdate) {
-			observer.disconnect();
-		}
-
-		skipContainerNextUpdate = isNullish(intersectionTarget);
-	});
-
+	// Re-armed from scratch on every change rather than only re-observed: `observe` on a target the
+	// observer already holds is a no-op, so an intersection that never ended is never reported again.
+	// A list re-enabled while its end sat on screen (a fetch that came back empty, then new rows
+	// arriving) therefore stopped loading until the user scrolled away and back. Disconnecting first
+	// makes the browser deliver a fresh initial entry.
 	$effect(() => {
-		// The DOM has been updated. We reset the observer to the current last HTML element of the infinite list.
+		observer.disconnect();
 
-		// If no element to observe
-		if (isNullish(intersectionTarget)) {
-			return;
-		}
-
-		// If the infinite scroll is disabled, no observation should happen
-		if (disabled) {
+		if (isNullish(intersectionTarget) || disabled) {
 			return;
 		}
 
