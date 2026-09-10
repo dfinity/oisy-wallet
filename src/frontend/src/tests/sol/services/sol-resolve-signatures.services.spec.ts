@@ -113,9 +113,9 @@ describe('sol-resolve-signatures.services', () => {
 		});
 
 		it('should map only the wallet when there are no tokens', async () => {
-			await expect(mapSolSourcesToTokens({ address: mockSolAddress, tokens: [] })).resolves.toStrictEqual(
-				new Map([[walletSource, null]])
-			);
+			await expect(
+				mapSolSourcesToTokens({ address: mockSolAddress, tokens: [] })
+			).resolves.toStrictEqual(new Map([[walletSource, null]]));
 
 			expect(spyFindAssociatedTokenPda).not.toHaveBeenCalled();
 		});
@@ -198,9 +198,7 @@ describe('sol-resolve-signatures.services', () => {
 			// The newest signature is the slowest to resolve: the result must not follow completion.
 			spyFetchSolTransactionsForSignature.mockImplementation(
 				async ({ signature }: { signature: SolSignatureWithSources }) => {
-					await new Promise((resolve) =>
-						queueMicrotask(() => resolve(undefined))
-					);
+					await new Promise((resolve) => queueMicrotask(() => resolve(undefined)));
 
 					if (signature.signature === signatures[0].signature) {
 						await Promise.resolve();
@@ -292,12 +290,10 @@ describe('sol-resolve-signatures.services', () => {
 						: Promise.resolve([recordFor(signature)])
 			);
 
-			await expect(resolve({ signatures })).rejects.toThrowError(mockError);
+			await expect(resolve({ signatures })).rejects.toThrow(mockError);
 
 			// No fetch is started once the page has failed.
-			expect(spyFetchSolTransactionsForSignature.mock.calls.length).toBeLessThan(
-				signatures.length
-			);
+			expect(spyFetchSolTransactionsForSignature.mock.calls.length).toBeLessThan(signatures.length);
 		});
 	});
 });
