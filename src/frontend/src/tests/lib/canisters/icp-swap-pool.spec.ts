@@ -3,6 +3,7 @@ import type {
 	Result,
 	SwapArgs,
 	_SERVICE as SwapPoolService,
+	Token,
 	WithdrawArgs
 } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -29,6 +30,11 @@ const withdrawArgs: WithdrawArgs = {
 	amount: 500000000n,
 	fee: 10000n,
 	token: 'aaaaa-aa'
+};
+
+const mistransferToken: Token = {
+	address: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+	standard: 'icrc1'
 };
 
 const principal = Principal.fromText('aaaaa-aa');
@@ -231,6 +237,68 @@ describe('icp_swap_pool.canister', () => {
 			});
 			const { getUserUnusedBalance } = await createPool({ serviceOverride: service });
 			const result = getUserUnusedBalance(principal);
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getMistransferBalance', () => {
+		it('returns the mistransferred balance successfully', async () => {
+			service.getMistransferBalance.mockResolvedValue(okResult);
+			const { getMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = await getMistransferBalance(mistransferToken);
+
+			expect(result).toEqual(amount);
+			expect(service.getMistransferBalance).toHaveBeenCalledWith(mistransferToken);
+		});
+
+		it('throws CanisterInternalError on error variant', async () => {
+			service.getMistransferBalance.mockResolvedValue(errResult);
+			const { getMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = getMistransferBalance(mistransferToken);
+
+			await expect(result).rejects.toThrow(
+				new CanisterInternalError('Internal error: Internal failure')
+			);
+		});
+
+		it('throws raw error if getMistransferBalance throws', async () => {
+			service.getMistransferBalance.mockImplementation(() => {
+				throw mockResponseError;
+			});
+			const { getMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = getMistransferBalance(mistransferToken);
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('withdrawMistransferBalance', () => {
+		it('returns the withdrawn amount successfully', async () => {
+			service.withdrawMistransferBalance.mockResolvedValue(okResult);
+			const { withdrawMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = await withdrawMistransferBalance(mistransferToken);
+
+			expect(result).toEqual(amount);
+			expect(service.withdrawMistransferBalance).toHaveBeenCalledWith(mistransferToken);
+		});
+
+		it('throws CanisterInternalError on error variant', async () => {
+			service.withdrawMistransferBalance.mockResolvedValue(errResult);
+			const { withdrawMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = withdrawMistransferBalance(mistransferToken);
+
+			await expect(result).rejects.toThrow(
+				new CanisterInternalError('Internal error: Internal failure')
+			);
+		});
+
+		it('throws raw error if withdrawMistransferBalance throws', async () => {
+			service.withdrawMistransferBalance.mockImplementation(() => {
+				throw mockResponseError;
+			});
+			const { withdrawMistransferBalance } = await createPool({ serviceOverride: service });
+			const result = withdrawMistransferBalance(mistransferToken);
 
 			await expect(result).rejects.toThrow(mockResponseError);
 		});

@@ -4,6 +4,7 @@ import type {
 	Result,
 	SwapArgs,
 	_SERVICE as SwapPoolService,
+	Token,
 	WithdrawArgs
 } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { idlFactory as certifiedPoolIdlFactory } from '$declarations/icp_swap_pool/icp_swap_pool.factory.certified.did';
@@ -109,6 +110,49 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	withdraw = async (args: WithdrawArgs): Promise<bigint> => {
 		const { withdraw } = this.caller({ certified: true });
 		const result: Result = await withdraw(args);
+
+		if ('ok' in result) {
+			return result.ok;
+		}
+
+		throw mapIcpSwapFactoryError(result.err);
+	};
+
+	/**
+	 * Retrieves the balance of tokens that were transferred to the pool canister without a matching
+	 * deposit call, and that the pool therefore never credited to the caller.
+	 *
+	 * Unlike `getUserUnusedBalance`, this is an update call - the Candid interface declares no query
+	 * annotation for it.
+	 *
+	 * @param token - The token to check: its ledger canister id and standard.
+	 * @returns The mistransferred amount (bigint).
+	 * @throws CanisterInternalError if fetching the balance fails.
+	 */
+	getMistransferBalance = async (token: Token): Promise<bigint> => {
+		const { getMistransferBalance } = this.caller({ certified: true });
+		const result: Result = await getMistransferBalance(token);
+
+		if ('ok' in result) {
+			return result.ok;
+		}
+
+		throw mapIcpSwapFactoryError(result.err);
+	};
+
+	/**
+	 * Withdraws the mistransferred balance of a token back to the caller.
+	 *
+	 * The endpoint takes neither an amount nor a fee: it always transfers the full balance and
+	 * deducts the ledger fee itself.
+	 *
+	 * @param token - The token to withdraw: its ledger canister id and standard.
+	 * @returns Amount of tokens withdrawn (bigint).
+	 * @throws CanisterInternalError if the withdrawal fails.
+	 */
+	withdrawMistransferBalance = async (token: Token): Promise<bigint> => {
+		const { withdrawMistransferBalance } = this.caller({ certified: true });
+		const result: Result = await withdrawMistransferBalance(token);
 
 		if ('ok' in result) {
 			return result.ok;
