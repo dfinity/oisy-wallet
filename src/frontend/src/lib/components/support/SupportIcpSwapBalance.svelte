@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { SUPPORT_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
@@ -11,14 +12,21 @@
 		balance: IcpSwapRecoverableBalance;
 		disabled?: boolean;
 		loading?: boolean;
+		// The pool the row belongs to. A scan can surface the same token from two pools, so the
+		// ledger id alone no longer identifies a row.
+		testIdSuffix?: string;
 		onWithdraw: () => void;
 	}
 
-	let { balance, disabled = false, loading = false, onWithdraw }: Props = $props();
+	let { balance, disabled = false, loading = false, testIdSuffix, onWithdraw }: Props = $props();
 
 	let { token, amount } = $derived(balance);
 
 	let formattedAmount = $derived(formatToken({ value: amount, unitName: token.decimals }));
+
+	let testId = $derived(
+		`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${nonNullish(testIdSuffix) ? `${testIdSuffix}-` : ''}${token.ledgerCanisterId}`
+	);
 </script>
 
 <div class="mt-3 flex w-full flex-row items-center justify-between gap-3">
@@ -38,7 +46,7 @@
 		{loading}
 		onclick={onWithdraw}
 		styleClass="flex-none"
-		testId={`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}`}
+		{testId}
 	>
 		{$i18n.support.text.withdraw} >
 	</Button>

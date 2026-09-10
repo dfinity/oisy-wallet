@@ -131,6 +131,9 @@ export const SUPPORT_ICPSWAP_TOKEN_B = 'support-icpswap-token-b';
 export const SUPPORT_ICPSWAP_LOADING = 'support-icpswap-loading';
 export const SUPPORT_ICPSWAP_ERROR = 'support-icpswap-error';
 export const SUPPORT_ICPSWAP_EMPTY = 'support-icpswap-empty';
+export const SUPPORT_ICPSWAP_SCAN_BUTTON = 'support-icpswap-scan';
+export const SUPPORT_ICPSWAP_SCAN_SUMMARY = 'support-icpswap-scan-summary';
+export const SUPPORT_ICPSWAP_POOL_GROUP = 'support-icpswap-pool';
 export const SUPPORT_ICPSWAP_WITHDRAW_BUTTON = 'support-icpswap-withdraw';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';

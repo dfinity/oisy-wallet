@@ -54,6 +54,30 @@ describe('support-analytics.services', () => {
 			});
 		});
 
+		it('tracks a scan with the pools checked and the rows found', () => {
+			trackSupport({
+				action: 'scan',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				balancesFound: 3,
+				poolsScanned: 9
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'support',
+				metadata: {
+					event_context: 'support',
+					event_modifier: 'scan',
+					source_location: 'support_page',
+					result_status: 'success',
+					event_subcontext: 'icpswap_withdrawal',
+					event_key: 'balances_found',
+					event_value: '3',
+					source_detail: '9'
+				}
+			});
+		});
+
 		it('tracks a resolved pool with both leg symbols and the withdrawable count', () => {
 			trackSupport({
 				action: 'select_pool',
@@ -100,7 +124,7 @@ describe('support-analytics.services', () => {
 			);
 		});
 
-		it('tracks a withdrawal with the balance kind and the token standard', () => {
+		it('tracks a withdrawal with the token symbol and standard', () => {
 			trackSupport({
 				action: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
@@ -152,6 +176,7 @@ describe('support-analytics.services', () => {
 				token2: undefined,
 				tokenStandard: undefined,
 				balancesFound: undefined,
+				poolsScanned: undefined,
 				link: undefined,
 				error: undefined
 			});

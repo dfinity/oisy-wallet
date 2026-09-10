@@ -30,6 +30,16 @@ describe('SupportIcpSwapBalance', () => {
 		expect(getByText(en.support.text.balance_unused)).toBeInTheDocument();
 	});
 
+	it('scopes the test id to the pool, so the same token from two pools stays distinct', () => {
+		const { getByTestId } = render(SupportIcpSwapBalance, {
+			props: { balance: unused, testIdSuffix: 'pool-a', onWithdraw: () => undefined }
+		});
+
+		expect(
+			getByTestId(`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-pool-a-${token.ledgerCanisterId}`)
+		).toBeInTheDocument();
+	});
+
 	it('calls onWithdraw when the button is clicked', async () => {
 		const onWithdraw = vi.fn();
 

@@ -534,6 +534,12 @@ interface I18nSupport {
 		help_link: string;
 		icpswap_title: string;
 		icpswap_description: string;
+		scan: string;
+		scanning: string;
+		scan_hint: string;
+		scan_nothing_found: string;
+		scan_unreadable: string;
+		or_pick_a_pair: string;
 		token_first: string;
 		token_second: string;
 		select_token: string;
@@ -543,8 +549,13 @@ interface I18nSupport {
 		balance_unused: string;
 		withdraw: string;
 	};
-	alt: { select_token_first: string; select_token_second: string; withdraw: string };
-	error: { pool_not_found: string; load_failed: string; withdraw_failed: string };
+	alt: { select_token_first: string; select_token_second: string; withdraw: string; scan: string };
+	error: {
+		pool_not_found: string;
+		load_failed: string;
+		withdraw_failed: string;
+		scan_failed: string;
+	};
 	success: { withdraw: string };
 }
 

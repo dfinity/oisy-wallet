@@ -1,10 +1,11 @@
-import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
+import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import {
 	IcpSwapPoolNotFoundError,
 	loadIcpSwapRecoverableBalances,
+	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
 	type IcpSwapRecoverableBalance
 } from '$lib/services/icp-swap-recovery.services';
@@ -13,7 +14,8 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/api/icp-swap-factory.api', () => ({
-	getPoolCanister: vi.fn()
+	getPoolCanister: vi.fn(),
+	getAllPools: vi.fn()
 }));
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({
@@ -139,6 +141,115 @@ describe('icp-swap-recovery.services', () => {
 			vi.mocked(getUserUnusedBalance).mockRejectedValue(new Error('pool unavailable'));
 
 			await expect(loadIcpSwapRecoverableBalances(loadParams)).rejects.toThrow('pool unavailable');
+		});
+	});
+
+	describe('scanIcpSwapPools', () => {
+		// A third token the user does not hold, plus a pool that pairs it with tokenA.
+		const foreign = { address: 'aaaaa-aa', standard: 'ICRC2' };
+
+		const inactiveLegPool = {
+			...pool,
+			key: 'inactive-leg',
+			canisterId: Principal.fromText('r7inp-6aaaa-aaaaa-aaabq-cai'),
+			token0: { address: tokenA.ledgerCanisterId, standard: 'ICRC1' },
+			token1: foreign
+		};
+
+		const otherFeePool = {
+			...pool,
+			key: 'other-fee',
+			fee: 500n,
+			canisterId: Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai')
+		};
+
+		beforeEach(() => {
+			vi.mocked(getAllPools).mockResolvedValue([pool, inactiveLegPool, otherFeePool]);
+		});
+
+		it('only queries pools whose both legs are active, at the supported fee tier', async () => {
+			const { poolsScanned } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(poolsScanned).toBe(1);
+			expect(getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: poolCanisterId,
+				principal: mockIdentity.getPrincipal()
+			});
+		});
+
+		it('fetches the pool table exactly once', async () => {
+			await scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] });
+
+			expect(getAllPools).toHaveBeenCalledOnce();
+		});
+
+		it('returns only the pools that hold something, labelled by their pair', async () => {
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: ZERO,
+				balance1: 900_000n
+			});
+
+			const { pools, unreadablePools } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(unreadablePools).toBe(0);
+			expect(pools).toStrictEqual([
+				{
+					poolCanisterId,
+					pair: [tokenB.symbol, tokenA.symbol],
+					balances: [{ token: tokenA, poolToken: pool.token1, amount: 900_000n }]
+				}
+			]);
+		});
+
+		it('drops a pool that holds nothing withdrawable', async () => {
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({ balance0: ZERO, balance1: ZERO });
+
+			const { pools, poolsScanned } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(poolsScanned).toBe(1);
+			expect(pools).toStrictEqual([]);
+		});
+
+		it('counts a failing pool instead of losing the whole scan', async () => {
+			const secondPool = {
+				...pool,
+				key: 'second',
+				canisterId: Principal.fromText('r7inp-6aaaa-aaaaa-aaabq-cai')
+			};
+			vi.mocked(getAllPools).mockResolvedValue([pool, secondPool]);
+			vi.mocked(getUserUnusedBalance).mockImplementation(({ canisterId }) =>
+				canisterId === poolCanisterId
+					? Promise.resolve({ balance0: ZERO, balance1: 900_000n })
+					: Promise.reject(new Error('pool unavailable'))
+			);
+
+			const { pools, poolsScanned, unreadablePools } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(poolsScanned).toBe(2);
+			expect(unreadablePools).toBe(1);
+			expect(pools).toHaveLength(1);
+			expect(pools[0].poolCanisterId).toBe(poolCanisterId);
+		});
+
+		it('propagates a failure to fetch the pool table', async () => {
+			vi.mocked(getAllPools).mockRejectedValue(new Error('factory unavailable'));
+
+			await expect(
+				scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] })
+			).rejects.toThrow('factory unavailable');
 		});
 	});
 

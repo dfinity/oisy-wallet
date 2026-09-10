@@ -789,6 +789,12 @@
 			"help_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
+			"scan": "",
+			"scanning": "",
+			"scan_hint": "",
+			"scan_nothing_found": "",
+			"scan_unreadable": "",
+			"or_pick_a_pair": "",
 			"token_first": "",
 			"token_second": "",
 			"select_token": "",
@@ -801,12 +807,14 @@
 		"alt": {
 			"select_token_first": "",
 			"select_token_second": "",
-			"withdraw": ""
+			"withdraw": "",
+			"scan": ""
 		},
 		"error": {
 			"pool_not_found": "",
 			"load_failed": "",
-			"withdraw_failed": ""
+			"withdraw_failed": "",
+			"scan_failed": ""
 		},
 		"success": {
 			"withdraw": ""

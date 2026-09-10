@@ -12,7 +12,7 @@ import { nonNullish, notEmptyString } from '@dfinity/utils';
 
 // The action on the Support page, carried in `event_modifier`, so one `support`
 // event covers the whole page rather than a family of `support_*` names.
-export type SupportAction = 'open' | 'contact' | 'select_pool' | 'withdraw';
+export type SupportAction = 'open' | 'contact' | 'scan' | 'select_pool' | 'withdraw';
 
 export interface TrackSupportParams {
 	// The action → `event_modifier`.
@@ -26,9 +26,11 @@ export interface TrackSupportParams {
 	token2?: string;
 	// The withdrawn token's ICRC standard → `token_standard`.
 	tokenStandard?: string;
-	// How many withdrawable balances a `select_pool` turned up → `event_key: balances_found`
-	// + `event_value`. A count, deliberately never the amounts (see below).
+	// How many withdrawable balances a `select_pool` or `scan` turned up → `event_key:
+	// balances_found` + `event_value`. A count, deliberately never the amounts (see below).
 	balancesFound?: number;
+	// How many pools a `scan` looked at → `source_detail`.
+	poolsScanned?: number;
 	// Destination URL of the help link → `event_value`, for the `contact` action.
 	link?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
@@ -53,6 +55,7 @@ export const buildSupportEvent = ({
 	token2,
 	tokenStandard,
 	balancesFound,
+	poolsScanned,
 	link,
 	error
 }: TrackSupportParams): TrackEventParams => ({
@@ -70,6 +73,7 @@ export const buildSupportEvent = ({
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.BALANCES_FOUND,
 			event_value: `${balancesFound}`
 		}),
+		...(nonNullish(poolsScanned) && { source_detail: `${poolsScanned}` }),
 		...(notEmptyString(link) && {
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
 			event_value: link

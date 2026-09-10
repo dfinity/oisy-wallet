@@ -1,7 +1,7 @@
 import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { Token as ICPSwapToken } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { IcToken } from '$icp/types/ic-token';
-import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
+import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
@@ -19,7 +19,21 @@ export interface IcpSwapRecoverableBalance {
 
 export interface IcpSwapPoolBalances {
 	poolCanisterId: string;
+	// The pool's own pair, in its own order, for labelling a group of rows. Kept separately from
+	// `balances` because dust filtering can leave a group with a single row while the pair is still
+	// what identifies the pool to the user.
+	pair: [string, string];
 	balances: IcpSwapRecoverableBalance[];
+}
+
+export interface IcpSwapScanResult {
+	// Pools looked at - i.e. those with both legs among the user's active tokens.
+	poolsScanned: number;
+	// Only the pools that turned out to hold something withdrawable.
+	pools: IcpSwapPoolBalances[];
+	// Pools whose balance query failed. Reported rather than swallowed, so a partial scan never
+	// passes for an exhaustive one.
+	unreadablePools: number;
 }
 
 // Thrown when the pair has no pool at the fee tier OISY swaps on. The factory rejects an unknown
@@ -76,6 +90,47 @@ const findPool = async ({
 const isWithdrawable = ({ amount, token: { fee } }: IcpSwapRecoverableBalance): boolean =>
 	amount > fee;
 
+// Maps one pool's two unused balances onto the tokens OISY knows, dropping anything that cannot
+// be moved. Shared by the manual lookup and the scan so both produce identical rows.
+const toPoolBalances = ({
+	pool,
+	tokenByAddress,
+	balance0,
+	balance1
+}: {
+	pool: PoolData;
+	tokenByAddress: Map<string, IcToken>;
+	balance0: bigint;
+	balance1: bigint;
+}): IcpSwapPoolBalances => {
+	const unusedByAddress = new Map<string, bigint>([
+		[pool.token0.address, balance0],
+		[pool.token1.address, balance1]
+	]);
+
+	// The pool returns the pair in its own canonical order, so map each leg back onto the token
+	// OISY knows rather than assuming an order.
+	const balances = [pool.token0, pool.token1].reduce<IcpSwapRecoverableBalance[]>(
+		(acc, poolToken) => {
+			const token = tokenByAddress.get(poolToken.address);
+
+			return nonNullish(token)
+				? [...acc, { token, poolToken, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
+				: acc;
+		},
+		[]
+	);
+
+	return {
+		poolCanisterId: pool.canisterId.toString(),
+		pair: [
+			tokenByAddress.get(pool.token0.address)?.symbol ?? pool.token0.address,
+			tokenByAddress.get(pool.token1.address)?.symbol ?? pool.token1.address
+		],
+		balances: balances.filter(isWithdrawable)
+	};
+};
+
 /**
  * Collects what the user can recover from one ICPSwap pool: the balance the pool credited to them
  * and never returned, which is what a failed swap or a failed post-swap withdrawal leaves behind.
@@ -99,38 +154,79 @@ export const loadIcpSwapRecoverableBalances = async ({
 }): Promise<IcpSwapPoolBalances> => {
 	const pool = await findPool({ identity, tokenA, tokenB });
 
-	const canisterId = pool.canisterId.toString();
-
 	const { balance0, balance1 } = await getUserUnusedBalance({
 		identity,
-		canisterId,
+		canisterId: pool.canisterId.toString(),
 		principal: identity.getPrincipal()
 	});
 
-	const unusedByAddress = new Map<string, bigint>([
-		[pool.token0.address, balance0],
-		[pool.token1.address, balance1]
-	]);
+	return toPoolBalances({
+		pool,
+		tokenByAddress: new Map([
+			[tokenA.ledgerCanisterId, tokenA],
+			[tokenB.ledgerCanisterId, tokenB]
+		]),
+		balance0,
+		balance1
+	});
+};
 
-	// The pool returns the pair in its own canonical order, so map each leg back onto the token
-	// the user picked rather than assuming tokenA is token0.
-	const tokenByAddress = new Map<string, IcToken>([
-		[tokenA.ledgerCanisterId, tokenA],
-		[tokenB.ledgerCanisterId, tokenB]
-	]);
+/**
+ * Finds every stranded balance across the pools that exist between the user's active tokens.
+ *
+ * The pool table arrives in a single `getAllPools` query - 860 pools at the time of writing - and
+ * is filtered locally, so the cost is one query plus one balance query per pool that actually
+ * exists between two active tokens. That is bounded by the pools that exist rather than by the
+ * square of the token count: a 17-token wallet reaches 9 pools, not 136 pairs.
+ *
+ * Balance queries are settled independently. A pool that fails is counted, not thrown, so one bad
+ * pool cannot cost the user every other result.
+ *
+ * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
+ * Those are reachable through the manual pair lookup above; widening the filter is not viable,
+ * since roughly half of all pools have ICP as a leg.
+ */
+export const scanIcpSwapPools = async ({
+	identity,
+	tokens
+}: {
+	identity: Identity;
+	tokens: IcToken[];
+}): Promise<IcpSwapScanResult> => {
+	const tokenByAddress = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
 
-	const balances = [pool.token0, pool.token1].reduce<IcpSwapRecoverableBalance[]>(
-		(acc, poolToken) => {
-			const token = tokenByAddress.get(poolToken.address);
+	const allPools = await getAllPools({ identity });
 
-			return nonNullish(token)
-				? [...acc, { token, poolToken, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
-				: acc;
-		},
-		[]
+	const candidatePools = allPools.filter(
+		({ fee, token0, token1 }) =>
+			fee === ICP_SWAP_POOL_FEE &&
+			tokenByAddress.has(token0.address) &&
+			tokenByAddress.has(token1.address)
 	);
 
-	return { poolCanisterId: canisterId, balances: balances.filter(isWithdrawable) };
+	const settled = await Promise.allSettled(
+		candidatePools.map(async (pool) => {
+			const { balance0, balance1 } = await getUserUnusedBalance({
+				identity,
+				canisterId: pool.canisterId.toString(),
+				principal: identity.getPrincipal()
+			});
+
+			return toPoolBalances({ pool, tokenByAddress, balance0, balance1 });
+		})
+	);
+
+	return {
+		poolsScanned: candidatePools.length,
+		pools: settled.reduce<IcpSwapPoolBalances[]>(
+			(acc, result) =>
+				result.status === 'fulfilled' && result.value.balances.length > 0
+					? [...acc, result.value]
+					: acc,
+			[]
+		),
+		unreadablePools: settled.filter(({ status }) => status === 'rejected').length
+	};
 };
 
 /**
