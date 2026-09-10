@@ -23,6 +23,7 @@ import {
 	mockSolTransactionDetail
 } from '$tests/mocks/sol-transactions.mock';
 import {
+	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3,
