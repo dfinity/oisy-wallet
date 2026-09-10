@@ -18,6 +18,7 @@ interface I18nBorrow {
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
+	provider_unavailable: { title: string; description: string };
 }
 
 interface I18nBorrowings {

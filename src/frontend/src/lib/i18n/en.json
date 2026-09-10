@@ -20,6 +20,10 @@
 				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
 				"action": "Borrow"
 			}
+		},
+		"provider_unavailable": {
+			"title": "Borrowing is temporarily unavailable",
+			"description": "No borrowing provider is available right now. Your balances are safe and you can borrow again once a provider is back online."
 		}
 	},
 	"borrowings": {

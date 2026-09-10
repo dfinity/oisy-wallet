@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
