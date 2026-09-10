@@ -23,6 +23,16 @@ describe('Support', () => {
 		expect(help.compareDocumentPosition(icpSwap) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
+	it('separates the cards instead of letting them touch', () => {
+		const { getByTestId } = render(Support);
+
+		// SettingsCard's own `first-of-type:mt-0` cannot see siblings through the test-id
+		// wrappers, so the container supplies the spacing.
+		const container = getByTestId(SUPPORT_HELP_CARD).parentElement;
+
+		expect(container?.className).toContain('gap-5');
+	});
+
 	it('tracks the page open once', () => {
 		render(Support);
 

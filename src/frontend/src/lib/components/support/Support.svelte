@@ -13,6 +13,11 @@
 	});
 </script>
 
-<SupportHelp />
+<!-- SettingsCard spaces itself with `mt-5 first-of-type:mt-0`, which relies on the cards being
+     siblings. Each card here sits inside its own test-id wrapper, so every card is the first (and
+     only) div of its type and its own margin never applies - hence the gap on the container. -->
+<div class="flex flex-col gap-5">
+	<SupportHelp />
 
-<SupportIcpSwapWithdrawal />
+	<SupportIcpSwapWithdrawal />
+</div>
