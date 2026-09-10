@@ -292,7 +292,7 @@ describe('sol-signatures.services', () => {
 
 			// Sorted so that the page boundary cases stay red only for the hole they pin, not for the order.
 			const slotsNewestFirst = (signatures: SolSignature[]): bigint[] =>
-				signatures.map(({ slot }) => slot).sort((a, b) => Number(b - a));
+				signatures.map(({ slot }) => slot).sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
 
 			it('should return every signature when each source holds fewer than the limit', async () => {
 				mockHistories({
