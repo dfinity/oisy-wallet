@@ -6,9 +6,11 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { mockSolTransactionDetail } from '$tests/mocks/sol-transactions.mock';
 import {
+	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3,
