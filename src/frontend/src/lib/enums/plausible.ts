@@ -24,7 +24,8 @@ export enum PLAUSIBLE_EVENTS {
 	LIMIT_ORDER = 'limit_order',
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
-	PERSONAL_NOTE_SHARE = 'personal_note_share'
+	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	SUPPORT = 'support'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -51,7 +52,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
-	PERSONAL_NOTES = 'personal_notes'
+	PERSONAL_NOTES = 'personal_notes',
+	SUPPORT = 'support'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -85,6 +87,11 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 	SHARE = 'share'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT {
+	HELP = 'help',
+	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
@@ -132,10 +139,13 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	OISY_TRADE = 'oisy_trade',
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
-	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
+	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
+	SUPPORT_PAGE = 'support_page'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
+	BALANCE_KIND = 'balance_kind',
+	BALANCES_FOUND = 'balances_found',
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
 	SORT = 'sort',
