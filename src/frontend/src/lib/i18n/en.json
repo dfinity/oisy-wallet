@@ -792,6 +792,7 @@
 			"token_first": "First token",
 			"token_second": "Second token",
 			"select_token": "Select",
+			"no_tokens": "No ICRC tokens are enabled. Enable the two tokens of the pool first.",
 			"checking_pool": "Checking the pool…",
 			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
 			"balance_unused": "Unused balance",

@@ -537,6 +537,7 @@ interface I18nSupport {
 		token_first: string;
 		token_second: string;
 		select_token: string;
+		no_tokens: string;
 		checking_pool: string;
 		nothing_to_withdraw: string;
 		balance_unused: string;

@@ -39,6 +39,17 @@ describe('SupportTokenDropdown', () => {
 		expect(getByTestId(testId)).toHaveTextContent('ckUSDC');
 	});
 
+	it('is disabled and says so when no token is available', async () => {
+		const { getByTestId } = render(SupportTokenDropdown, { props: { ...props, tokens: [] } });
+
+		expect(getByTestId(testId)).toBeDisabled();
+
+		// Force the panel open to prove it explains itself rather than showing a blank list.
+		await fireEvent.click(getByTestId(testId));
+
+		expect(document.querySelector(`[data-tid="${testId}-list"]`)).toBeNull();
+	});
+
 	it('lists the tokens sorted case-insensitively by symbol and reports the pick', async () => {
 		const onSelect = vi.fn();
 

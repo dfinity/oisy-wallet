@@ -792,6 +792,7 @@
 			"token_first": "",
 			"token_second": "",
 			"select_token": "",
+			"no_tokens": "",
 			"checking_pool": "",
 			"nothing_to_withdraw": "",
 			"balance_unused": "",
