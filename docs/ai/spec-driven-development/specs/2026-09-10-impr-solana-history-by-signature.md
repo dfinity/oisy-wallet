@@ -173,14 +173,15 @@ pinned as `it.fails` with the correct expectation, so its fix flips it.
 
 Test PRs, independent, already open as drafts:
 
-- **T1.** Unit tests for `getSolSignatures`, `getSolTransactions`, `fetchSignatures` and the
-  detail cache.
-- **T2.** Fixture-backed tests (`sol-rpc-fixture.test-utils.ts`) on real chain data for wallet
-  `7q6R…` and its four fixture ATAs: merged-pagination coverage (F2), `before` across addresses
-  (Q1), and how often one signature appears in several sources.
-- **T3.** Round-trip of a record through the backend mappers (F3, F4).
-- **T4.** Characterization of the worker, scheduler and listener behaviour this spec must keep
-  (per-token routing, stale per-instruction row cleanup, only new records posted).
+- **T1 (#14016).** Unit tests for `getSolSignatures`, `getSolTransactions`, `fetchSignatures`
+  and the detail cache.
+- **T2 (#14013).** Fixture-backed tests (`sol-rpc-fixture.test-utils.ts`) on real chain data for
+  wallet `7q6R…` and its four fixture ATAs: merged-pagination coverage (F2), `before` across
+  addresses (Q1), and how often one signature appears in several sources.
+- **T3 (#14015).** Round-trip of a record through the backend mappers (F3, F4), down to the
+  rendered row and the Activity rows.
+- **T4 (#14014).** Characterization of the worker, scheduler and listener behaviour this spec
+  must keep (per-token routing, stale per-instruction row cleanup, only new records posted).
 
 Implementation, in order:
 
