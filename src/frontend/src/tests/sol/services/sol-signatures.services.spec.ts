@@ -20,7 +20,8 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
-	mockSolSignatureResponses
+	mockSolSignatureResponses,
+	mockSolSignatureResponsesAtSlots
 } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import {
@@ -29,8 +30,9 @@ import {
 	mockSolAddress,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
+import { isNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { address, type Address } from '@solana/kit';
+import { address, type Address, type Signature } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
@@ -218,6 +220,171 @@ describe('sol-signatures.services', () => {
 
 			await expect(getSolSignatures(mockParams)).rejects.toThrow(mockError);
 		});
+
+		// One flaky token account costs the whole page, wallet signatures included: pinned so the
+		// refactor changes it on purpose rather than by accident.
+		it('should reject when a single token account lookup fails', async () => {
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress ? Promise.reject(mockError) : mockSignaturesSol
+			);
+
+			await expect(getSolSignatures(mockParams)).rejects.toThrow(mockError);
+		});
+
+		// Looking them up one after the other would make a page take longer with every token held.
+		it('should look up the token accounts concurrently', async () => {
+			const resolvers: (() => void)[] = [];
+
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockSolAddress
+					? []
+					: new Promise<SolSignature[]>((resolve) => resolvers.push(() => resolve([])))
+			);
+
+			const result = getSolSignatures(mockParams);
+
+			await vi.waitFor(() =>
+				expect(spyFetchSignatures).toHaveBeenCalledTimes(1 + mockTokensList.length)
+			);
+
+			resolvers.forEach((resolve) => resolve());
+
+			await expect(result).resolves.toEqual([]);
+		});
+
+		describe('paging across the wallet and its token accounts', () => {
+			const limit = 3;
+
+			// Answers like the RPC: the newest signatures of the account strictly older than `before`.
+			const mockHistories = ({
+				wallet,
+				tokenAccount
+			}: {
+				wallet: SolSignature[];
+				tokenAccount: SolSignature[];
+			}) => {
+				const histories: Record<string, SolSignature[]> = {
+					[mockSolAddress]: wallet,
+					[mockAtaAddress]: tokenAccount,
+					[mockAtaAddress2]: []
+				};
+
+				const allSignatures = [...wallet, ...tokenAccount];
+
+				spyFetchSignatures.mockImplementation(
+					({
+						wallet: account,
+						before,
+						limit: pageLimit
+					}: {
+						wallet: Address;
+						before?: Signature;
+						limit: number;
+					}) => {
+						const beforeSlot = allSignatures.find(({ signature }) => signature === before)?.slot;
+
+						return histories[account.toString()]
+							.filter(({ slot }) => isNullish(beforeSlot) || slot < beforeSlot)
+							.slice(0, pageLimit);
+					}
+				);
+			};
+
+			// Sorted so that the page boundary cases stay red only for the hole they pin, not for the order.
+			const slotsNewestFirst = (signatures: SolSignature[]): bigint[] =>
+				signatures.map(({ slot }) => slot).sort((a, b) => Number(b - a));
+
+			it('should return every signature when each source holds fewer than the limit', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 90n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([80n])
+				});
+
+				const signatures = await getSolSignatures({ ...mockParams, limit });
+
+				expect(signatures.map(({ slot }) => slot)).toEqual([100n, 90n, 80n]);
+			});
+
+			// Defect: the wallet page and each token account page are concatenated, not merged newest first.
+			it.fails('should return the signatures newest first', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 90n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([95n, 85n])
+				});
+
+				const signatures = await getSolSignatures({ ...mockParams, limit });
+
+				expect(signatures.map(({ slot }) => slot)).toEqual([100n, 95n, 90n, 85n]);
+			});
+
+			// Defect: the page runs past the oldest wallet signature fetched, over wallet signatures never fetched.
+			it.fails(
+				'should end the page at the newest of the oldest signatures of the full sources',
+				async () => {
+					mockHistories({
+						wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n]),
+						tokenAccount: mockSolSignatureResponsesAtSlots([99n, 70n, 50n, 40n])
+					});
+
+					const signatures = await getSolSignatures({ ...mockParams, limit });
+
+					expect(slotsNewestFirst(signatures)).toEqual([100n, 99n, 95n, 91n]);
+				}
+			);
+
+			// Defect: a source that ran out of signatures still stretches the page past the full ones.
+			it.fails('should not end the page at a source that holds fewer than the limit', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([99n, 80n])
+				});
+
+				const signatures = await getSolSignatures({ ...mockParams, limit });
+
+				expect(slotsNewestFirst(signatures)).toEqual([100n, 99n, 95n, 91n]);
+			});
+
+			// Defect: paging on from the oldest signature of each page skips wallet signatures for good.
+			it.fails(
+				'should reach every signature when paging on from the oldest signature of each page',
+				async () => {
+					mockHistories({
+						wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n, 86n, 60n]),
+						tokenAccount: mockSolSignatureResponsesAtSlots([99n, 70n, 50n, 40n])
+					});
+
+					const collected: SolSignature[] = [];
+					let before: string | undefined;
+
+					for (let page = 0; page < 10; page++) {
+						const signatures = await getSolSignatures({ ...mockParams, before, limit });
+
+						if (signatures.length === 0) {
+							break;
+						}
+
+						collected.push(...signatures);
+
+						before = signatures.reduce((oldest, current) =>
+							current.slot < oldest.slot ? current : oldest
+						).signature;
+					}
+
+					expect(slotsNewestFirst(collected)).toEqual([
+						100n,
+						99n,
+						95n,
+						91n,
+						88n,
+						86n,
+						70n,
+						60n,
+						50n,
+						40n
+					]);
+				}
+			);
+		});
 	});
 
 	describe('getSolTransactions', () => {
@@ -274,6 +441,61 @@ describe('sol-signatures.services', () => {
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
 				mint: mockSplAddress
 			});
+		});
+
+		// The token account only picks which signatures to load: the mapper derives it again from the
+		// owner and matches balance changes against the owner, so it must be handed the owner.
+		it('should load the signatures of the token account but map them for the owner', async () => {
+			spyFindAssociatedTokenPda.mockResolvedValueOnce([address(mockAtaAddress)]);
+
+			await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: mockSplAddress,
+				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+			});
+
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ wallet: address(mockAtaAddress) })
+			);
+
+			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(mockSignatures.length);
+
+			mockSignatures.forEach((signature, index) => {
+				expect(spyFetchTransactionsForSignature).toHaveBeenNthCalledWith(index + 1, {
+					signature,
+					network: SolanaNetworks.mainnet,
+					address: mockSolAddress,
+					tokenAddress: mockSplAddress,
+					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+				});
+			});
+		});
+
+		it('should return the transactions in the order of their signatures', async () => {
+			const transactionsBySignature = createMockSolTransactionsUi(mockSignatures.length);
+
+			// The newest signature settles last, so the order cannot come from which lookup ends first.
+			spyFetchTransactionsForSignature.mockImplementation(
+				async ({ signature }: { signature: SolSignature }) => {
+					const index = mockSignatures.indexOf(signature);
+
+					for (let tick = index; tick < mockSignatures.length; tick++) {
+						await Promise.resolve();
+					}
+
+					return [transactionsBySignature[index]];
+				}
+			);
+
+			const transactions = await getSolTransactions({
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(transactions).toEqual(transactionsBySignature);
 		});
 
 		it('should handle before parameter', async () => {
