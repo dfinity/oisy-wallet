@@ -14,10 +14,10 @@ This spec introduces a **Support** page where a user can point OISY at an ICPSwa
 
 ICPSwap distinguishes two balances, recovered through different endpoints. Both are in scope.
 
-| Kind | How it happens | Query | Withdraw |
-| --- | --- | --- | --- |
-| **Unused balance** | Tokens deposited into the pool and credited to the user, but never swapped or never withdrawn. This is the common case after a failed swap or a failed post-swap withdrawal. | `getUserUnusedBalance(principal)` → `{ balance0, balance1 }` | `withdraw({ token, amount, fee })` |
-| **Mistransferred balance** | Tokens transferred straight to the pool canister without a matching `deposit` call, so the pool never credited them to a position. | `getMistransferBalance(token)` → `nat` | `withdrawMistransferBalance(token)` |
+| Kind                       | How it happens                                                                                                                                                               | Query                                                        | Withdraw                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| **Unused balance**         | Tokens deposited into the pool and credited to the user, but never swapped or never withdrawn. This is the common case after a failed swap or a failed post-swap withdrawal. | `getUserUnusedBalance(principal)` → `{ balance0, balance1 }` | `withdraw({ token, amount, fee })`  |
+| **Mistransferred balance** | Tokens transferred straight to the pool canister without a matching `deposit` call, so the pool never credited them to a position.                                           | `getMistransferBalance(token)` → `nat`                       | `withdrawMistransferBalance(token)` |
 
 Both are declared in `src/declarations/icp_swap_pool/icp_swap_pool.did`. `getUserUnusedBalance` and `withdraw` are already wrapped in OISY's canister and API layers; `getMistransferBalance` and `withdrawMistransferBalance` are not and must be added.
 
@@ -136,12 +136,12 @@ New enum members in `src/frontend/src/lib/enums/plausible.ts`:
 
 A new `src/frontend/src/lib/services/support-analytics.services.ts` exports one typed `trackSupport` function. Every event carries `event_context: support` and `source_location: support_page`.
 
-| `event_modifier` | `event_subcontext` | Fires when | `result_status` | Other properties |
-| --- | --- | --- | --- | --- |
-| `open` | — | the Support page is opened | `success` | — |
-| `contact` | `help` | the external support link in card 1 is clicked | `success` | `event_key: link`, `event_value`: destination URL |
-| `select_pool` | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error` on failure |
-| `withdraw` | `icpswap_withdrawal` | a row's Withdraw button is pressed | `executing` → `success` / `error` | `token_symbol`, `token_network: icp`, `token_standard`, `event_key: balance_kind`, `event_value: unused \| mistransferred`; `result_error` on failure |
+| `event_modifier` | `event_subcontext`   | Fires when                                                       | `result_status`                            | Other properties                                                                                                                                                     |
+| ---------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open`           | —                    | the Support page is opened                                       | `success`                                  | —                                                                                                                                                                    |
+| `contact`        | `help`               | the external support link in card 1 is clicked                   | `success`                                  | `event_key: link`, `event_value`: destination URL                                                                                                                    |
+| `select_pool`    | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error` on failure |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed                               | `executing` → `success` / `error`          | `token_symbol`, `token_network: icp`, `token_standard`, `event_key: balance_kind`, `event_value: unused \| mistransferred`; `result_error` on failure                |
 
 **Deliberate omission — no amounts.** Withdrawal events carry the token symbol but **not** `token_amount` or `token_usd_value`. Privacy invariant 3 in `analytics.md` forbids "a raw amount that could fingerprint a specific user"; a stuck ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is exactly the de-anonymising join the invariant rules out. The `balances_found` count on `select_pool` gives the same product signal — how often users actually have stuck funds — without the amount.
 
@@ -190,14 +190,14 @@ Update `docs/ai/PRODUCT.md` in the same PR:
 
 ## Decisions taken during specification
 
-| Question | Decision |
-| --- | --- |
-| Two "Support" destinations (user menu vs. page) | Keep the user menu as it is; both coexist, page card 1 carries the same link. |
-| Withdraw button granularity | Per-row, so a partial failure is visible. |
-| Eager vs. deferred mistransfer lookup | Always check on pool selection; the cost is latency only, covered by a loading state. |
-| Ledger fee on `withdrawMistransferBalance` | The endpoint deducts the fee itself, so the same dust threshold applies to both balance kinds. |
-| Analytics | Track, as a single structured `support` event (pattern B), with the type encoded in `event_context` / `event_subcontext` / `event_modifier` / `result_*`. |
-| Amounts in analytics | Omitted, per privacy invariant 3; a `balances_found` count carries the product signal instead. |
+| Question                                        | Decision                                                                                                                                                  |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Two "Support" destinations (user menu vs. page) | Keep the user menu as it is; both coexist, page card 1 carries the same link.                                                                             |
+| Withdraw button granularity                     | Per-row, so a partial failure is visible.                                                                                                                 |
+| Eager vs. deferred mistransfer lookup           | Always check on pool selection; the cost is latency only, covered by a loading state.                                                                     |
+| Ledger fee on `withdrawMistransferBalance`      | The endpoint deducts the fee itself, so the same dust threshold applies to both balance kinds.                                                            |
+| Analytics                                       | Track, as a single structured `support` event (pattern B), with the type encoded in `event_context` / `event_subcontext` / `event_modifier` / `result_*`. |
+| Amounts in analytics                            | Omitted, per privacy invariant 3; a `balances_found` count carries the product signal instead.                                                            |
 
 ## Follow-up (fast-follow PR, not this one)
 
