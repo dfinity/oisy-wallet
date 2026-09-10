@@ -136,6 +136,7 @@ The [Support](#support) page emits one structured `support` event under `event_c
 | ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
 | `open`           | —                    | the Support page opens                      | `success`                       | —                                                                                    |
 | `contact`        | `help`               | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
 | `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
 | `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
 
@@ -229,7 +230,11 @@ The first card explains where to get help and links out to the OISY help centre.
 
 OISY swaps ICRC tokens through ICPSwap, which deposits the tokens into a pool canister, swaps them, then withdraws them back. When that final withdrawal fails — the pool canister unavailable, a slow subnet, the browser closed mid-flow — the tokens stay credited to the user inside the pool. The swap flow already retries twice, but once the user leaves the swap wizard OISY previously offered no way back to the funds.
 
-This card recovers them. The user picks the two tokens of the pool they were swapping; OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists the **unused balance** for each leg — the balance the pool credited to the user and never returned.
+This card recovers them, two ways.
+
+**Scan my pools** checks, in one press, every ICPSwap pool that exists between two tokens active in the user's wallet — the path for someone who does not remember which pair they were swapping. The pool table arrives in a single query and is filtered locally, so the cost is one query plus one balance query per pool that actually exists between two active tokens: a wallet with 17 active tokens reaches 9 pools, not 136 pairs. Pools are read independently, so one that fails is reported as unreadable rather than discarding the rest — a partial scan never passes for a complete one. The scan runs only when pressed, never on page load.
+
+The scan only covers pools where **both** legs are active. A swap into a token the user never enabled leaves a pool the scan cannot see, so the card says as much and offers the second way: the user picks the two tokens themselves. Either way OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists the **unused balance** for each leg — the balance the pool credited to the user and never returned. Results are grouped per pool under the pair that identifies it.
 
 ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
 
@@ -239,7 +244,7 @@ Balances at or below the token's ledger fee are **not shown at all** — they ca
 
 Only **enabled** ICRC tokens can be picked, and a token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
 
-The page deliberately does **not**: discover pools with stranded funds on its own (every balance check is one call per pool, against a factory listing thousands, so the user names the pair); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
+The page deliberately does **not**: scan pools where only one leg is active (roughly half of all pools have ICP as a leg, so that would be hundreds of balance queries — manual selection covers them); scan other fee tiers (every live pool sits on the one OISY trades on); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
 
 ---
 
