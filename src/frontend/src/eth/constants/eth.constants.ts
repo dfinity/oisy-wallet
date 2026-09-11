@@ -22,6 +22,13 @@ export const ETH_FEE_RETRY_BASE_DELAY = 2_000;
 export const ETH_FEE_RETRY_MAX_DELAY = 30_000;
 export const ETH_FEE_RETRY_MAX_ATTEMPTS = 5;
 
+// How long a token waits before asking Etherscan again for older history after a failed page,
+// doubling with each failure in a row up to the ceiling. The lists retry a failed page on the next
+// scroll into view, so without it an explorer that keeps failing would be hit on every scroll. See
+// `requestOlderEtherscanPage`.
+export const ETH_OLDER_PAGE_RETRY_BASE_DELAY = 5_000;
+export const ETH_OLDER_PAGE_RETRY_MAX_DELAY = 60_000;
+
 // How long a fee stays valid once the user reaches the send review step. The fee is frozen there,
 // so it ages while the summary sits on screen; past this the send is blocked rather than signed at
 // a price the network has since left behind. Going back re-enables fetching and resets the clock.
