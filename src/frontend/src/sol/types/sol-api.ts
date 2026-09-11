@@ -1,8 +1,7 @@
-import type { NullishIdentity } from '$lib/types/identity';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSignature, SolSignatureWithSources } from '$sol/types/sol-transaction';
-import type { SplToken, SplTokenAddress } from '$sol/types/spl';
+import type { SplToken } from '$sol/types/spl';
 
 /**
  * Where the merged signature pager of a wallet resumes. It is owned by the pager: pass back the
@@ -34,14 +33,4 @@ export interface SolSignaturesPage {
 	signatures: SolSignatureWithSources[];
 	// Absent once every source has been paged to its end: there is no next page.
 	cursor?: SolSignaturesCursor;
-}
-
-export interface GetSolTransactionsParams {
-	identity: NullishIdentity;
-	address: SolAddress;
-	network: SolanaNetworkType;
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
-	before?: string;
-	limit?: number;
 }

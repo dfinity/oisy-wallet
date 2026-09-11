@@ -1,12 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { last } from '$lib/utils/array.utils';
-import {
-	fetchSignatures,
-	fetchTransactionDetailForSignature,
-	loadSolLamportsBalance,
-	loadTokenBalance
-} from '$sol/api/solana.api';
-import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
+import { fetchSignatures, fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
+import { resolveSolSignatures } from '$sol/services/sol-resolve-signatures.services';
+import { getSolSignatures } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignaturesCursor, SolSignaturesPage } from '$sol/types/sol-api';
@@ -17,7 +14,6 @@ import {
 	fixtureSolAtaAddresses
 } from '$tests/fixtures/solana/addresses.fixture';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import {
@@ -146,36 +142,67 @@ describe('sol-signatures.services integration', () => {
 		}, 600000);
 	});
 
-	describe('getSolTransactions', () => {
+	describe('balance reconciliation', () => {
+		// The enabled tokens of a fixture wallet: the network worker loads all their balances at once.
+		const walletTokens = (wallet: string) =>
+			fixtureSolAtaAddresses.filter(({ address }) => address === wallet).map(({ token }) => token);
+
+		// The history of one token, loaded the way its own page loads it: the pager over the token's
+		// source only, and each page resolved into the wallet's records.
+		const loadSourceTransactions = async ({
+			wallet,
+			source,
+			tokens,
+			cursor
+		}: {
+			wallet: string;
+			source: string;
+			tokens: ReturnType<typeof walletTokens>;
+			cursor?: SolSignaturesCursor;
+		}): Promise<SolTransactionUi[]> => {
+			const page = await getSolSignatures({
+				address: source,
+				network: SolanaNetworks.mainnet,
+				tokensList: [],
+				limit: 10,
+				cursor
+			});
+
+			const records = await resolveSolSignatures({
+				address: wallet,
+				network: SolanaNetworks.mainnet,
+				tokens,
+				signatures: page.signatures
+			});
+
+			const transactions = records.map(({ transaction }) => transaction);
+
+			return isNullish(page.cursor)
+				? transactions
+				: [
+						...transactions,
+						...(await loadSourceTransactions({ wallet, source, tokens, cursor: page.cursor }))
+					];
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
+
+			vi.spyOn(solProgramToken, 'findAssociatedTokenPda').mockImplementation(({ owner, mint }) => {
+				const { ataAddress } =
+					fixtureSolAtaAddresses.find(
+						({ address, token }) => address === owner && token.address === mint
+					) ?? {};
+
+				return Promise.resolve([solAddress(ataAddress ?? ''), 123 as ProgramDerivedAddressBump]);
+			});
 		});
 
 		it.each(fixtureSolAddresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
-				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
-					const transactions = await getSolTransactions({
-						identity: mockIdentity,
-						address,
-						network: SolanaNetworks.mainnet,
-						before: lastSignature,
-						limit: 10
-					});
-
-					if (transactions.length === 0) {
-						return transactions;
-					}
-
-					const nextTransactions: SolTransactionUi[] = await loadTransactions(
-						last(transactions)?.signature
-					);
-
-					return [...transactions, ...nextTransactions];
-				};
-
 				const loadSignatures = async (lastSignature?: string): Promise<SolSignature[]> => {
 					const wallet = solAddress(address);
 
@@ -197,7 +224,11 @@ describe('sol-signatures.services integration', () => {
 					return [...signatures, ...nextSignatures];
 				};
 
-				const transactions = await loadTransactions();
+				const transactions = await loadSourceTransactions({
+					wallet: address,
+					source: address,
+					tokens: []
+				});
 
 				const signatures = await loadSignatures();
 
@@ -236,9 +267,10 @@ describe('sol-signatures.services integration', () => {
 					ZERO
 				);
 
-				const fetchedSolBalance = await loadSolLamportsBalance({
+				const { sol: fetchedSolBalance } = await loadSolNetworkBalances({
 					address,
-					network: SolanaNetworks.mainnet
+					network: SolanaNetworks.mainnet,
+					tokens: walletTokens(address)
 				});
 
 				expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
@@ -248,39 +280,14 @@ describe('sol-signatures.services integration', () => {
 
 		it.each(fixtureSolAtaAddresses)(
 			'should match the total SPL balance of an account (for example, ATA address $ataAddress for token $token.symbol)',
-			async ({
-				address,
-				ataAddress,
-				token: { address: tokenAddress, owner: tokenOwnerAddress }
-			}) => {
-				vi.spyOn(solProgramToken, 'findAssociatedTokenPda').mockResolvedValue([
-					solAddress(ataAddress),
-					123 as ProgramDerivedAddressBump
-				]);
+			async ({ address, ataAddress, token }) => {
+				const { address: tokenAddress } = token;
 
-				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
-					const transactions = await getSolTransactions({
-						identity: mockIdentity,
-						address,
-						network: SolanaNetworks.mainnet,
-						tokenAddress,
-						tokenOwnerAddress,
-						before: lastSignature,
-						limit: 10
-					});
-
-					if (transactions.length === 0) {
-						return transactions;
-					}
-
-					const nextTransactions: SolTransactionUi[] = await loadTransactions(
-						last(transactions)?.signature
-					);
-
-					return [...transactions, ...nextTransactions];
-				};
-
-				const transactions = await loadTransactions();
+				const transactions = await loadSourceTransactions({
+					wallet: address,
+					source: ataAddress,
+					tokens: [token]
+				});
 
 				const transactionBalance = transactions.reduce<bigint>(
 					(acc, { netChanges }) =>
@@ -290,12 +297,17 @@ describe('sol-signatures.services integration', () => {
 					ZERO
 				);
 
-				const fetchedBalance = await loadTokenBalance({
-					ataAddress,
-					network: SolanaNetworks.mainnet
+				const { spl } = await loadSolNetworkBalances({
+					address,
+					network: SolanaNetworks.mainnet,
+					tokens: walletTokens(address)
 				});
 
-				expect(transactionBalance).toBe(fetchedBalance);
+				const { [tokenAddress]: fetchedSplBalance } = spl;
+
+				// A token whose balance could not be read is left out, so it must be there to reconcile.
+				expect(fetchedSplBalance).toBeDefined();
+				expect(transactionBalance).toBe(fetchedSplBalance);
 			},
 			600000
 		);
