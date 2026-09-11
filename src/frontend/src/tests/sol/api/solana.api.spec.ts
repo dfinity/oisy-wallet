@@ -9,6 +9,7 @@ import {
 	checkIfAccountExists,
 	estimatePriorityFee,
 	fetchSignatures,
+	fetchTransactionDetailForSignature,
 	getAccountInfo,
 	getAccountOwner,
 	getSolCreateAccountFee,
@@ -22,9 +23,12 @@ import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
 import {
+	mockSolSignature,
 	mockSolSignatureResponse,
+	mockSolSignatureResponses,
 	mockSolSignatureWithErrorResponse
 } from '$tests/mocks/sol-signatures.mock';
+import { mockSolTransactionDetail } from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
@@ -425,6 +429,148 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(1);
+		});
+
+		it('should keep paging until it holds limit successful signatures, in order', async () => {
+			const [first, second, third, fourth] = mockSolSignatureResponses(4);
+
+			mockGetSignaturesForAddress
+				.mockReturnValueOnce({
+					send: () =>
+						Promise.resolve([
+							first,
+							mockSolSignatureWithErrorResponse(),
+							mockSolSignatureWithErrorResponse()
+						])
+				})
+				.mockReturnValueOnce({
+					send: () =>
+						Promise.resolve([
+							mockSolSignatureWithErrorResponse(),
+							second,
+							mockSolSignatureWithErrorResponse()
+						])
+				})
+				.mockReturnValueOnce({
+					send: () => Promise.resolve([third, fourth, mockSolSignatureWithErrorResponse()])
+				});
+
+			const signatures = await fetchSignatures({
+				wallet: address(mockSolAddress),
+				network: SolanaNetworks.mainnet,
+				limit: 3
+			});
+
+			expect(signatures).toEqual([first, second, third]);
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(3);
+		});
+
+		it('should page on from the last fetched signature even when it errored', async () => {
+			const start = mockSolSignature();
+			const erroredLast = mockSolSignatureWithErrorResponse();
+
+			mockGetSignaturesForAddress
+				.mockReturnValueOnce({
+					send: () =>
+						Promise.resolve([mockSolSignatureResponse(), mockSolSignatureResponse(), erroredLast])
+				})
+				.mockReturnValueOnce({
+					send: () => Promise.resolve([])
+				});
+
+			await fetchSignatures({
+				wallet: address(mockSolAddress),
+				network: SolanaNetworks.mainnet,
+				before: start,
+				limit: 3
+			});
+
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(2);
+			expect(mockGetSignaturesForAddress).toHaveBeenNthCalledWith(1, address(mockSolAddress), {
+				before: start,
+				limit: 3
+			});
+			expect(mockGetSignaturesForAddress).toHaveBeenNthCalledWith(2, address(mockSolAddress), {
+				before: erroredLast.signature,
+				limit: 3
+			});
+		});
+	});
+
+	describe('fetchTransactionDetailForSignature', () => {
+		let mockGetTransaction: MockInstance;
+
+		beforeEach(() => {
+			mockGetTransaction = vi.fn().mockReturnValue({
+				send: () => Promise.resolve(mockSolTransactionDetail)
+			});
+
+			const mockSolanaHttpRpc = vi.fn().mockReturnValue({
+				getTransaction: mockGetTransaction
+			});
+
+			vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
+		});
+
+		it('should cache a finalized transaction per network', async () => {
+			const signature = mockSolSignatureResponse();
+
+			const first = await fetchTransactionDetailForSignature({
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(first).toEqual({
+				...mockSolTransactionDetail,
+				confirmationStatus: 'finalized',
+				id: expect.any(String),
+				signature: signature.signature
+			});
+			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith(signature.signature, {
+				maxSupportedTransactionVersion: 0,
+				encoding: 'jsonParsed'
+			});
+
+			const second = await fetchTransactionDetailForSignature({
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(second).toBe(first);
+			expect(mockGetTransaction).toHaveBeenCalledOnce();
+
+			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.devnet });
+
+			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
+		});
+
+		it('should not cache a confirmed transaction', async () => {
+			const signature = mockSolSignatureResponse({ confirmationStatus: 'confirmed' });
+
+			const first = await fetchTransactionDetailForSignature({
+				signature,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(first?.confirmationStatus).toBe('confirmed');
+
+			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet });
+
+			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
+		});
+
+		it('should return null when the RPC has no transaction', async () => {
+			mockGetTransaction.mockReturnValue({ send: () => Promise.resolve(null) });
+
+			const signature = mockSolSignatureResponse();
+
+			await expect(
+				fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet })
+			).resolves.toBeNull();
+
+			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet });
+
+			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
 		});
 	});
 

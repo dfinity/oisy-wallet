@@ -228,8 +228,9 @@ Implementation, in order:
   loader returns (checked with the fixture harness, not with mocks).
 - A transaction that moves SOL and `n` SPL tokens causes exactly one `getTransaction` call per
   session, whatever `n` is.
-- A cold start makes at most one `getSignaturesForAddress` call per source per page: no source is
-  asked again once it has returned less than a full page, nor while it is already below the cut.
+- A cold start makes at most one `fetchSignatures` call per source per page (which may itself call
+  `getSignaturesForAddress` again to fill the page past failed signatures): no source is asked
+  again once it has returned less than a full page, nor while it is already below the cut.
 - Paging the merged list to the end yields the union of every source's full history: no holes.
 - The integration reconciliation tests (the SOL and SPL balance checks in
   `sol-signatures.services.integration.spec.ts`) keep passing.

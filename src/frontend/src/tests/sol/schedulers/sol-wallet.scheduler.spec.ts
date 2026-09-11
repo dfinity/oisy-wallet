@@ -13,12 +13,19 @@ import {
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolTransactionUi,
+	createMockSolTransactionsUi
+} from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { jsonReplacer, nonNullish } from '@dfinity/utils';
+import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
@@ -541,6 +548,39 @@ describe('sol-wallet.scheduler', () => {
 			}
 		});
 
+		// Current behaviour, not the goal: the backend cache keeps none of the derived fields, so a
+		// record that went through it reads as predating the summary and the worker always re-fetches.
+		it('should never short-circuit on records restored from the backend cache', async () => {
+			const [base] = createMockSolTransactionsUi(1);
+
+			const derived: SolTransactionUi = {
+				...base,
+				id: String(base.signature),
+				from: mockSolAddress,
+				summary: { kind: 'send', spent: { delta: -100n }, counterparty: mockSolAddress2 },
+				netChanges: [{ delta: -100n }]
+			};
+
+			const restored = mapUserTransactionToSolTransaction({
+				transaction: mapSolTransactionToUserTransaction(derived),
+				address: mockSolAddress
+			});
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [restored],
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 100n,
+				nextStart: undefined,
+				totalStored: 1n
+			});
+
+			await scheduler.trigger(startData);
+
+			expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
+			);
+		});
+
 		it('should still load RPC transactions when backend load fails', async () => {
 			vi.mocked(loadSolUserTransactions).mockRejectedValue(new Error('Backend read failed'));
 
@@ -656,6 +696,173 @@ describe('sol-wallet.scheduler', () => {
 				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
 				transactions: [correctedTransaction, correctedSameSignatureTransaction]
 			});
+		});
+	});
+
+	describe('delta sync', () => {
+		const solMainnetData: PostMessageDataRequestSol = {
+			address: {
+				certified: false,
+				data: mockSolAddress
+			},
+			solanaNetwork: SolanaNetworks.mainnet
+		};
+
+		const solDevnetData: PostMessageDataRequestSol = {
+			...solMainnetData,
+			solanaNetwork: SolanaNetworks.devnet
+		};
+
+		const splDevnetData: PostMessageDataRequestSol = {
+			...solDevnetData,
+			tokenAddress: DEVNET_USDC_TOKEN.address,
+			tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+		};
+
+		const toCertified = (transactions: SolTransactionUi[]) =>
+			transactions.map((transaction) => ({ data: transaction, certified: false }));
+
+		const walletPosts = () =>
+			postMessageMock.mock.calls
+				.map(([message]) => message)
+				.filter(({ msg }) => msg === 'syncSolWallet');
+
+		const postedTransactions = (post: { data: { wallet: { newTransactions: string } } }) =>
+			JSON.parse(post.data.wallet.newTransactions, jsonReviver);
+
+		let scheduler: SolWalletScheduler;
+
+		beforeEach(() => {
+			// Other describes leave their own backend responses behind; start every case from an empty backend.
+			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
+
+			scheduler = new SolWalletScheduler();
+		});
+
+		afterEach(() => {
+			scheduler.stop();
+		});
+
+		it('should post the stored records together with the RPC records on the initial sync', async () => {
+			const storedTransactions = ['stored-1', 'stored-2'].map((id) => ({
+				...createMockSolTransactionUi(id),
+				summary: { kind: 'send' as const }
+			}));
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: storedTransactions,
+				newestBlockIndex: 100n,
+				oldestBlockIndex: 50n,
+				nextStart: undefined,
+				totalStored: 2n
+			});
+
+			await scheduler.trigger(solMainnetData);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(
+				toCertified([...mockSolTransactions, ...storedTransactions])
+			);
+		});
+
+		it('should post only the new transactions on a later sync', async () => {
+			await scheduler.trigger(solMainnetData);
+
+			const newTransaction = createMockSolTransactionUi('txn-new');
+			spyLoadTransactions.mockResolvedValue([newTransaction, ...mockSolTransactions]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(solMainnetData);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(toCertified([newTransaction]));
+		});
+
+		it('should not post when the RPC returns only known transactions and the balance is unchanged', async () => {
+			await scheduler.trigger(solMainnetData);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(solMainnetData);
+
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should post the balance with no transactions when only the balance changed', async () => {
+			await scheduler.trigger(solMainnetData);
+
+			spyLoadSolBalance.mockResolvedValue(lamports(200n));
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(solMainnetData);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balance).toEqual({ data: lamports(200n), certified: false });
+			expect(postedTransactions(posts[0])).toEqual([]);
+		});
+
+		it('should reset the store when triggered for another token', async () => {
+			await scheduler.trigger(solMainnetData);
+
+			const splTransaction = createMockSolTransactionUi('spl-1');
+			spyLoadTransactions.mockResolvedValue([splTransaction]);
+			postMessageMock.mockClear();
+			vi.mocked(loadSolUserTransactions).mockClear();
+
+			await scheduler.trigger(splDevnetData);
+
+			// A fresh store makes this the initial sync of the new token, so the backend is read again.
+			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
+			expect(scheduler['store'].transactions).toEqual({
+				[splTransaction.id]: { data: splTransaction, certified: false }
+			});
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].ref).toBe(`${DEVNET_USDC_TOKEN.address}-${SolanaNetworks.devnet}`);
+			expect(postedTransactions(posts[0])).toEqual(toCertified([splTransaction]));
+		});
+
+		it('should reset the store when triggered for the same token on another network', async () => {
+			await scheduler.trigger(solMainnetData);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(solDevnetData);
+
+			const posts = walletPosts();
+
+			// Same balance and same RPC records: only the reset makes them count as new again.
+			expect(posts).toHaveLength(1);
+			expect(posts[0].ref).toBe(`${SOLANA_TOKEN.symbol}-${SolanaNetworks.devnet}`);
+			expect(postedTransactions(posts[0])).toEqual(expectedSoLTransactions);
+		});
+
+		it('should reset the store when started again for another token', async () => {
+			await scheduler.start(solMainnetData);
+
+			await awaitJobExecution();
+
+			scheduler.stop();
+
+			postMessageMock.mockClear();
+
+			await scheduler.start(solDevnetData);
+
+			await awaitJobExecution();
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].ref).toBe(`${SOLANA_TOKEN.symbol}-${SolanaNetworks.devnet}`);
+			expect(postedTransactions(posts[0])).toEqual(expectedSoLTransactions);
 		});
 	});
 });
