@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
+	import { loadOisyTradeBalances } from '$lib/services/oisy-trade.services';
 
-	// Loads the DEX pairs, supported tokens, balances and orders app-wide (e.g. the
-	// hero net worth, which counts deposited balances) without visiting the Trading
-	// tab or the OISY Trade page first. Reactive on the identity.
+	// Loads the DEX balances app-wide, so the hero net worth counts deposited
+	// assets without visiting the Trading tab or the OISY Trade page first.
+	// Reactive on the identity. Balances are all the hero reads — pairs, supported
+	// tokens and the order history stay with the page-level loaders, which fetch
+	// them through the full `loadOisyTrade`.
 	//
 	// Gated on the provider flag rather than the `anyTradingProviderEnabled`
 	// aggregate: this only ever talks to the OISY Trade canister, so it must stay
@@ -16,6 +18,6 @@
 			return;
 		}
 
-		loadOisyTrade({ identity: $authIdentity });
+		loadOisyTradeBalances({ identity: $authIdentity });
 	});
 </script>

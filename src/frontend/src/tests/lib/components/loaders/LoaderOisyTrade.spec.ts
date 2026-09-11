@@ -3,10 +3,10 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
+const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTradeBalances } = vi.hoisted(() => ({
 	mockTradingEnabled: { value: true },
 	mockProviderEnabled: { value: true },
-	mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined))
+	mockLoadOisyTradeBalances: vi.fn(() => Promise.resolve(undefined))
 }));
 
 // The two flags are mocked independently, as `OisyTradeProvider.svelte.spec.ts`
@@ -26,7 +26,7 @@ vi.mock('$env/oisy-trade', () => ({
 }));
 
 vi.mock('$lib/services/oisy-trade.services', () => ({
-	loadOisyTrade: mockLoadOisyTrade
+	loadOisyTradeBalances: mockLoadOisyTradeBalances
 }));
 
 describe('LoaderOisyTrade', () => {
@@ -37,24 +37,24 @@ describe('LoaderOisyTrade', () => {
 		mockProviderEnabled.value = true;
 	});
 
-	it('should load the OISY Trade data when an identity is available', async () => {
+	it('should load the OISY Trade balances when an identity is available', async () => {
 		mockAuthStore();
 
 		render(LoaderOisyTrade);
 
 		await waitFor(() => {
-			expect(mockLoadOisyTrade).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			expect(mockLoadOisyTradeBalances).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 		});
 	});
 
-	// Signed out, `loadOisyTrade` resets the store, so the loader must still call it.
+	// Signed out, `loadOisyTradeBalances` resets the store, so the loader must still call it.
 	it('should call the loader with a nullish identity when signed out', async () => {
 		mockAuthStore(null);
 
 		render(LoaderOisyTrade);
 
 		await waitFor(() => {
-			expect(mockLoadOisyTrade).toHaveBeenCalledExactlyOnceWith({ identity: null });
+			expect(mockLoadOisyTradeBalances).toHaveBeenCalledExactlyOnceWith({ identity: null });
 		});
 	});
 
@@ -64,7 +64,7 @@ describe('LoaderOisyTrade', () => {
 
 		render(LoaderOisyTrade);
 
-		expect(mockLoadOisyTrade).not.toHaveBeenCalled();
+		expect(mockLoadOisyTradeBalances).not.toHaveBeenCalled();
 	});
 
 	it('should not load anything when OISY Trade is off but another provider keeps the surface on', () => {
@@ -74,6 +74,6 @@ describe('LoaderOisyTrade', () => {
 
 		render(LoaderOisyTrade);
 
-		expect(mockLoadOisyTrade).not.toHaveBeenCalled();
+		expect(mockLoadOisyTradeBalances).not.toHaveBeenCalled();
 	});
 });

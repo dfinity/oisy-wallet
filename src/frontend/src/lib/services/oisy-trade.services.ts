@@ -132,6 +132,45 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 	}
 };
 
+// Balances-only load for the app-wide `LoaderOisyTrade`: the hero's net worth is
+// the sole consumer outside the Trading surfaces, and `oisyTradeUsdValue` derives
+// from the balances joined against `enabledIcTokens` and `exchanges` — nothing
+// else the full load fetches is read there. One query instead of four to eight,
+// and the total no longer waits on the caller's order history. The write goes
+// through `setBalances` so it cannot blank what the Trading tab has loaded,
+// mirroring `loadOisyTradeSwapPairs`/`setPairs` for the quote path.
+//
+// Shares `loadGeneration` with the full load, so whichever started last wins. A
+// full load losing to this one would drop its pairs/tokens/orders, but the
+// app-wide effect only re-runs on an identity change, and that resets the store
+// anyway. Best-effort: errors are logged, never surfaced.
+export const loadOisyTradeBalances = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<void> => {
+	const generation = ++loadGeneration;
+
+	if (isNullish(identity)) {
+		oisyTradeStore.reset();
+		return;
+	}
+
+	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
+
+	try {
+		const balances = await getBalances({ identity, nullishIdentityErrorMessage });
+
+		if (!isCurrentLoad({ generation, identity })) {
+			return;
+		}
+
+		oisyTradeStore.setBalances(balances);
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
 // Withdraws `amount` (the gross figure entered by the user) from the caller's
 // free DEX balance back to their wallet. The ledger transfer fee is deducted by
 // the canister, so the user receives `amount - ledger_fee`. On success the

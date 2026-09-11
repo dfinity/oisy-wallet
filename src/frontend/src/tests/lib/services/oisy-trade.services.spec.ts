@@ -15,6 +15,7 @@ import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import {
 	cancelLimitOrder,
 	loadOisyTrade,
+	loadOisyTradeBalances,
 	withdrawFromOisyTrade
 } from '$lib/services/oisy-trade.services';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
@@ -221,6 +222,75 @@ describe('oisy-trade.services', () => {
 			await pending;
 
 			expect(get(oisyTradeStore).balances).toEqual(otherBalances);
+		});
+	});
+
+	describe('loadOisyTradeBalances', () => {
+		it('fetches only the balances and leaves the other fields untouched', async () => {
+			await loadOisyTradeBalances({ identity: mockIdentity });
+
+			expect(get(oisyTradeStore)).toEqual({
+				...resetStoreValue,
+				balances
+			});
+			expect(oisyTradeApi.getBalances).toHaveBeenCalledOnce();
+			expect(oisyTradeApi.getTradingPairs).not.toHaveBeenCalled();
+			expect(oisyTradeApi.listSupportedTokens).not.toHaveBeenCalled();
+			expect(oisyTradeApi.getMyOrders).not.toHaveBeenCalled();
+		});
+
+		it('does not blank what the full load already wrote', async () => {
+			await loadOisyTrade({ identity: mockIdentity });
+
+			const newerBalances = [
+				{ balance: { free: 9n, reserved: ZERO } }
+			] as unknown as UserTokenBalance[];
+			vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(newerBalances);
+
+			await loadOisyTradeBalances({ identity: mockIdentity });
+
+			expect(get(oisyTradeStore)).toEqual({
+				pairs,
+				supportedTokens,
+				orders,
+				balances: newerBalances
+			});
+		});
+
+		it('resets the store and does not call the canister when there is no identity', async () => {
+			oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
+
+			await loadOisyTradeBalances({ identity: null });
+
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
+			expect(oisyTradeApi.getBalances).not.toHaveBeenCalled();
+		});
+
+		it('does not commit when the identity changed while in flight', async () => {
+			let resolveBalances: (value: UserTokenBalance[]) => void = () => undefined;
+			vi.mocked(oisyTradeApi.getBalances).mockReturnValue(
+				new Promise<UserTokenBalance[]>((resolve) => {
+					resolveBalances = resolve;
+				})
+			);
+
+			const pending = loadOisyTradeBalances({ identity: mockIdentity });
+
+			mockAuthStore(null);
+			await loadOisyTradeBalances({ identity: null });
+
+			resolveBalances(balances);
+			await pending;
+
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
+		});
+
+		it('swallows canister errors and leaves the store unchanged', async () => {
+			vi.mocked(oisyTradeApi.getBalances).mockRejectedValue(new Error('canister down'));
+
+			await expect(loadOisyTradeBalances({ identity: mockIdentity })).resolves.toBeUndefined();
+
+			expect(get(oisyTradeStore)).toEqual(resetStoreValue);
 		});
 	});
 
