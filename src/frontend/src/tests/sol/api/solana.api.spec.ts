@@ -392,7 +392,8 @@ describe('solana.api', () => {
 			expect(first).toEqual({
 				...mockSolTransactionDetail,
 				confirmationStatus: 'finalized',
-				id: expect.any(String),
+				// The id is the signature itself, not the `[object Object]` a stringified signature gave.
+				id: signature.signature,
 				signature: signature.signature
 			});
 			expect(mockGetTransaction).toHaveBeenCalledExactlyOnceWith(signature.signature, {

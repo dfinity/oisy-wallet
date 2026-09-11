@@ -135,6 +135,8 @@ describe('sol-signatures.services', () => {
 		});
 
 		it('should derive each associated token account with the program of its token', async () => {
+			spyFindAssociatedTokenPda.mockResolvedValue([address(mockAtaAddress)]);
+
 			await getSolSignatures({
 				...mockParams,
 				tokensList: [{ address: mockSplAddress, owner: TOKEN_2022_PROGRAM_ADDRESS }]

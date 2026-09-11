@@ -1,6 +1,6 @@
 import { SOLANA_TRANSACTION_DETAIL_CONCURRENCY } from '$sol/constants/sol.constants';
+import { findSolTokenAccounts, mergeSignatureSources } from '$sol/services/sol-signatures.services';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
-import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
@@ -9,12 +9,12 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Which token each source address belongs to: the wallet maps to `null` (native SOL), the
- * associated token account of each token to its mint. The account is derived with the token's own
- * program, so Token-2022 accounts are found as the signature pager finds them.
+ * associated token account of each token to its mint. The accounts come from the same derivation
+ * the signature pager pages, so a source always maps to the token it was paged for.
  */
 export const mapSolSourcesToTokens = async ({
 	address,
@@ -23,39 +23,13 @@ export const mapSolSourcesToTokens = async ({
 	address: SolAddress;
 	tokens: Pick<SplToken, 'address' | 'owner'>[];
 }): Promise<Map<SolAddress, SplTokenAddress | null>> => {
-	const tokenAccounts = await Promise.all(
-		tokens.map(
-			async ({ address: tokenAddress, owner: tokenOwnerAddress }) =>
-				[
-					await calculateAssociatedTokenAddress({
-						owner: address,
-						tokenAddress,
-						tokenOwnerAddress
-					}),
-					tokenAddress
-				] as const
-		)
-	);
+	const tokenAccounts = await findSolTokenAccounts({ wallet: address, tokens });
 
-	return new Map<SolAddress, SplTokenAddress | null>([[address, null], ...tokenAccounts]);
+	return new Map<SolAddress, SplTokenAddress | null>([
+		[address, null],
+		...tokenAccounts.map(({ tokenAccount, tokenAddress }) => [tokenAccount, tokenAddress] as const)
+	]);
 };
-
-const mergeBySignature = (signatures: SolSignatureWithSources[]): SolSignatureWithSources[] => [
-	...signatures
-		.reduce((acc, solSignature) => {
-			const existing = acc.get(solSignature.signature);
-
-			acc.set(
-				solSignature.signature,
-				isNullish(existing)
-					? solSignature
-					: { ...existing, sources: [...new Set([...existing.sources, ...solSignature.sources])] }
-			);
-
-			return acc;
-		}, new Map<SolSignatureWithSources['signature'], SolSignatureWithSources>())
-		.values()
-];
 
 // Runs `task` over every item with at most `concurrency` of them in flight, and keeps the input
 // order in the result. After a failure no further item is started, since the call rejects anyway.
@@ -118,7 +92,7 @@ export const resolveSolSignatures = async ({
 	signatures: SolSignatureWithSources[];
 	known?: ReadonlySet<string>;
 }): Promise<SolResolvedTransaction[]> => {
-	const toResolve = mergeBySignature(signatures).filter(
+	const toResolve = [...mergeSignatureSources(signatures).values()].filter(
 		({ signature }) => !(known?.has(signature) ?? false)
 	);
 
