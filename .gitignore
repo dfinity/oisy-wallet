@@ -71,3 +71,4 @@ coverage/
 tmp
 .qodo
 /cycles-ledger.wasm.gz
+/icrc1-ledger.wasm.gz

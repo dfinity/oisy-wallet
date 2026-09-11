@@ -12,6 +12,7 @@ mod settings;
 mod signer;
 mod stats;
 mod status;
+mod tips;
 mod transactions;
 mod user_profile;
 mod utils;
