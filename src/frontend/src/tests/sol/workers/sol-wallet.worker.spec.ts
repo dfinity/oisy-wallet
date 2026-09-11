@@ -12,12 +12,15 @@ const hoisted = vi.hoisted(() => {
 		trigger: ReturnType<typeof vi.fn>;
 	}[] = [];
 
-	return { schedulerInstances };
+	// What the next scheduler's start returns, to hold it pending.
+	const startResult: { promise: Promise<void> | undefined } = { promise: undefined };
+
+	return { schedulerInstances, startResult };
 });
 
 vi.mock('$sol/schedulers/sol-wallet.scheduler', () => ({
 	SolWalletScheduler: class {
-		start = vi.fn();
+		start = vi.fn(() => hoisted.startResult.promise);
 		stop = vi.fn();
 		trigger = vi.fn();
 
@@ -83,6 +86,35 @@ describe('sol-wallet.worker', () => {
 				dataWithAnotherToken
 			);
 		});
+
+		// Messages are not handled one after the other: a start can still await the identity when the
+		// next message arrives. Stopping its scheduler is what keeps it from starting a timer that no
+		// later stop could reach (`SchedulerTimer.start`).
+		it.each(['startSolWalletTimer', 'stopSolWalletTimer'])(
+			'should stop a scheduler whose start is pending when %s arrives',
+			async (msg) => {
+				let resolveStart: () => void = () => {};
+
+				hoisted.startResult.promise = new Promise((resolve) => (resolveStart = resolve));
+
+				const pendingStart = onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));
+
+				hoisted.startResult.promise = undefined;
+
+				const [pending] = hoisted.schedulerInstances;
+
+				expect(pending.start).toHaveBeenCalledOnce();
+				expect(pending.stop).not.toHaveBeenCalled();
+
+				await onSolWalletMessage(createEvent({ msg, data: dataWithAnotherToken }));
+
+				expect(pending.stop).toHaveBeenCalledOnce();
+
+				resolveStart();
+
+				await pendingStart;
+			}
+		);
 
 		it('should trigger the running scheduler', async () => {
 			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));

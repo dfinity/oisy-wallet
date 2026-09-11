@@ -7,16 +7,19 @@ import {
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
+import { balancesStore } from '$lib/stores/balances.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SplToken } from '$sol/types/spl';
+import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
-import type { Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
@@ -141,6 +144,96 @@ describe('SolLoaderWallets', () => {
 
 		expect(SolWalletWorker.init).toHaveBeenCalledTimes(2);
 		expect(workers[0].destroy).toHaveBeenCalledOnce();
+		expect(workers[1].start).toHaveBeenCalledOnce();
+	});
+
+	describe('what the stores hold when the worker is replaced', () => {
+		const syncedTokenIds = [SOLANA_TOKEN.id, mockValidSplToken.id];
+
+		const fillStores = () =>
+			syncedTokenIds.forEach((tokenId) => {
+				solTransactionsStore.set({
+					tokenId,
+					transactions: [{ data: createMockSolTransactionUi('old-address-tx'), certified: false }]
+				});
+				balancesStore.set({ id: tokenId, data: { data: 100n, certified: false } });
+			});
+
+		beforeEach(() => {
+			solTransactionsStore.reinitialize();
+			balancesStore.reinitialize();
+
+			solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
+			splTokensStore.set([mockValidSplToken]);
+		});
+
+		// The new worker's first sync would prepend the new address's rows to the old one's.
+		it('should clear the rows and balances of the old address, and restore them from the cache', async () => {
+			render(SolLoaderWallets);
+
+			await settle();
+
+			fillStores();
+
+			solAddressMainnetStore.set({ data: mockSolAddress2, certified: true });
+
+			await settle();
+
+			syncedTokenIds.forEach((tokenId) => {
+				expect(get(solTransactionsStore)?.[tokenId]).toBeNull();
+				expect(get(balancesStore)?.[tokenId]).toBeNull();
+			});
+
+			expect(SolWalletWorker.init).toHaveBeenLastCalledWith({
+				token: SOLANA_TOKEN,
+				splTokens: [mockValidSplToken],
+				cachedTokenIds: new Set()
+			});
+		});
+
+		it('should keep the rows and balances when only the token list changes', async () => {
+			render(SolLoaderWallets);
+
+			await settle();
+
+			fillStores();
+
+			splTokensStore.set([mockValidSplToken, splToken2]);
+
+			await settle();
+
+			expect(SolWalletWorker.init).toHaveBeenCalledTimes(2);
+
+			syncedTokenIds.forEach((tokenId) => {
+				expect(get(solTransactionsStore)?.[tokenId]).toHaveLength(1);
+				expect(get(balancesStore)?.[tokenId]?.data).toBe(100n);
+			});
+		});
+	});
+
+	// A custom SPL token's id comes from its symbol: new metadata can change it while its mint and
+	// program stay the same, and the old worker would go on writing under the old id.
+	it('should restart the worker of a network when a token id changes', async () => {
+		solAddressMainnetStore.set({ data: mockSolAddress, certified: true });
+		splTokensStore.set([mockValidSplToken]);
+
+		render(SolLoaderWallets);
+
+		await settle();
+
+		const renamed: SplToken = { ...mockValidSplToken, id: parseTokenId('RenamedSplTokenId') };
+
+		splTokensStore.set([renamed]);
+
+		await settle();
+
+		expect(SolWalletWorker.init).toHaveBeenCalledTimes(2);
+		expect(workers[0].destroy).toHaveBeenCalledOnce();
+		expect(SolWalletWorker.init).toHaveBeenLastCalledWith({
+			token: SOLANA_TOKEN,
+			splTokens: [renamed],
+			cachedTokenIds: new Set([SOLANA_TOKEN.id, mockValidSplToken.id])
+		});
 		expect(workers[1].start).toHaveBeenCalledOnce();
 	});
 

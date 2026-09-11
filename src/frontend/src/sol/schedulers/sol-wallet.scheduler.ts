@@ -38,9 +38,10 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balances: SolNetworkBalances | undefined;
-	// The newest slot the head check has resolved, and every signature it has resolved. Only a
-	// signature above that slot, or in it and not resolved yet, is new: anything older belongs to the
-	// pagers, which keep their own cursors. It is never inferred from what the UI store holds.
+	// The newest slot the head check has resolved, and the signatures of that slot it has resolved.
+	// Only a signature above that slot, or in it and not resolved yet, is new: anything older belongs
+	// to the pagers, which keep their own cursors. So no older signature needs remembering, and a
+	// long session does not pile them up. It is never inferred from what the UI store holds.
 	newestSlot: SolSignature['slot'] | undefined;
 	signatures: Set<string>;
 }
@@ -146,6 +147,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		network,
 		tokens
 	}: LoadSolWalletParams): Promise<SolWalletHead> => {
+		// Known limit: this reads one page and drops its cursor. The pager holds the cut slot back in
+		// the cursor, and returns an empty page while a source walks through a crowded slot, so when
+		// more than a page of signatures arrives between two ticks, what lies between that page and
+		// `newestSlot` is never loaded here. The head check that pages with the cursor and resumes the
+		// walk on the next ticks follows in its own change.
 		const { signatures } = await getSolSignatures({ address, network, tokensList: tokens });
 
 		const { newestSlot, signatures: known } = this.store;
@@ -272,15 +278,17 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			isNullish(this.store.balances) ||
 			!balancesEqual({ current: this.store.balances, next: balances });
 
+		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
+			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
+			this.store.newestSlot
+		);
+
 		this.store = {
 			balances,
-			newestSlot: signatures.reduce<SolSignature['slot'] | undefined>(
-				(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
-				this.store.newestSlot
-			),
+			newestSlot,
 			signatures: new Set([
-				...this.store.signatures,
-				...signatures.map(({ signature }) => signature)
+				...(newestSlot === this.store.newestSlot ? this.store.signatures : []),
+				...signatures.filter(({ slot }) => slot === newestSlot).map(({ signature }) => signature)
 			])
 		};
 

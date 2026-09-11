@@ -107,6 +107,23 @@ describe('worker.sol-wallet.services', () => {
 			);
 		});
 
+		// The cache is optional: without a worker the whole network would stop syncing.
+		it('should still start a worker when a token cannot be synced from the IDB cache', async () => {
+			vi.mocked(syncWalletFromCache)
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce(new Error('IDB read failed'));
+
+			const worker = await initMainnet();
+
+			expect(syncWalletFromCache).toHaveBeenCalledTimes(3);
+
+			worker.start();
+
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ msg: 'startSolWalletTimer' })
+			);
+		});
+
 		// Syncing again would put back a cached balance older than the one already shown.
 		it('should not sync again the tokens a previous worker of the network synced', async () => {
 			await SolWalletWorker.init({
