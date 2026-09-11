@@ -20,7 +20,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { ResultSuccess } from '$lib/types/utils';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
-import * as solTransactionsServices from '$sol/services/sol-transactions.services';
+import * as solHistoryPagersServices from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -44,8 +44,8 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactionsByOldest: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTransactions: vi.fn()
 }));
 
 describe('AllTransactionsLoader', () => {
@@ -155,10 +155,7 @@ describe('AllTransactionsLoader', () => {
 		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(true);
 
 		spyLoadNextIcTransactions = vi.spyOn(icTransactionsServices, 'loadNextIcTransactionsByOldest');
-		spyLoadNextSolTransactions = vi.spyOn(
-			solTransactionsServices,
-			'loadNextSolTransactionsByOldest'
-		);
+		spyLoadNextSolTransactions = vi.spyOn(solHistoryPagersServices, 'loadOlderSolTransactions');
 
 		spyLoadNextIcTransactions.mockImplementation(
 			async ({ signalEnd }: { signalEnd: () => void }) => {

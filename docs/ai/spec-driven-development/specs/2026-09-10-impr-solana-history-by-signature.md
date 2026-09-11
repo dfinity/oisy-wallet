@@ -213,12 +213,29 @@ Implementation, in order:
    maps a source to its token (the wallet to SOL, an ATA to its mint), so the caller hands the
    record to the token of each of its sources (3.2). One failed fetch rejects the page.
 4. **One worker per network.** `SolLoaderWallets`, `SolWalletWorker` and `SolWalletScheduler`
-   move to one instance per network, with the head check of 3.5 and the balances of 3.8. The
-   scheduler posts per-token deltas, so the listener and the store keep their shape. T4 stays
-   green.
+   move to one instance per network, with the head check of 3.5 and the balances of 3.8. Token
+   ids are symbols and cannot cross the worker boundary, so the scheduler posts one message per
+   tick, with the balances keyed by mint and the new records tagged with their sources, and the
+   main thread routes them to the per-token stores, which keep their shape. A worker is started
+   for one address and token list, and the network's worker is replaced when either changes. The
+   behaviour T4 pins stays, expressed per network.
 5. **The pagers on the main thread.** `loadOlderTransactionsFor` returns the network pager, and
    the token page uses its single-source pager (3.6). `loadNextSolTransactions`,
-   `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced.
+   `loadNextSolTransactionsByOldest` and the backend pagination cursors are replaced. As built
+   (`sol-history-pagers.services.ts`): cursors live in module state, keyed by network for the
+   Activity list and by token for a token's page, and a pager starts over when its address or its
+   network's token list changes. The floor is checked against the oldest signature the pager has
+   returned, which is the cut of 3.3 as the caller can see it. A call that brings nothing new (an
+   empty page with a cursor, or only signatures the tokens already hold) asks for up to
+   `SOLANA_MAX_SKIPPED_SIGNATURE_PAGES` more pages before it returns, so that neither case stalls
+   the list. A signature is skipped only when every token it belongs to already holds its record.
+   Otherwise it is derived again with every account of the network and written to all of those
+   tokens in place of any copy they hold, since a held copy may have been derived with one token's
+   account only. A token's own pager is `getSolSignatures` with the token's source as its
+   only address, and the token page still waits for the worker's first page before it pages. The
+   export pages through the network pager too, and fails rather than export a history that stops
+   at a page that failed. `getSolTransactions` stays until PR 4, which is its
+   last caller.
 6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
    with the behaviour it ships (one loader per network, merged paging, balances).
 
@@ -275,9 +292,9 @@ Implementation, in order:
 ## 10. Notes for the implementation
 
 - `SchedulerTimer.start` (`src/frontend/src/lib/schedulers/scheduler.ts`) returns early while its
-  timer is running. That is harmless today because `sol-wallet.worker.ts` creates one scheduler per
-  token ref, but it must be handled when one scheduler serves a whole network and its token list
-  changes.
+  timer is running. PR 4 handles it at both ends: `sol-wallet.worker.ts` replaces its scheduler on
+  every start, and `SolWalletScheduler.start` stops its own timer when it is started for another
+  address or token list, so the running timer never keeps syncing the old one.
 - `fetchTransactionDetailForSignature` sets `id: signature.toString()` on the `SolSignature`
   object, which gives `"[object Object]"`. The record's own id comes from `signature.signature`,
   so nothing visible depends on it. It should be corrected when the resolver of PR 3 is written.
