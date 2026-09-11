@@ -759,9 +759,14 @@ export const fetchIcpSwap = async ({
 		});
 	}
 
+	// The amount the pool actually credited to the user's in-pool balance. It can be lower than
+	// the quote the review step displayed - anything down to `slippageMinimum` is a successful
+	// swap - so it is what we withdraw below, not the quote.
+	let swappedAmount: bigint;
+
 	try {
 		// Perform the actual token swap after a successful deposit
-		await swapIcp({
+		swappedAmount = await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
 			amountIn: parsedSwapAmount.toString(),
@@ -786,7 +791,9 @@ export const fetchIcpSwap = async ({
 
 		progress(ProgressStepsSwap.UPDATE_UI);
 
-		throwSwapError({
+		// `return` so that the compiler knows this branch ends the flow and `swappedAmount` is
+		// assigned below - `throwSwapError` returns `never`, but that alone does not narrow here.
+		return throwSwapError({
 			code,
 			message,
 			variant
@@ -800,7 +807,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount + destinationTokenFee,
+			amount: swappedAmount,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
