@@ -22,10 +22,10 @@ ic-cdk-management-canister = { workspace = true }
 ic-cdk-timers = { workspace = true }
 ic-cycles-ledger-client = { workspace = true }
 ic-ledger-types = { workspace = true }
-icrc-ledger-types = { workspace = true }
 ic-signature-verification = { workspace = true }
 ic-stable-structures = { workspace = true }
 ic-vetkeys = { workspace = true }
+icrc-ledger-types = { workspace = true }
 lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }

@@ -15,6 +15,7 @@ import {
 	loadSolUserTransactions,
 	saveSolFinalizedTransactions
 } from '$sol/services/sol-user-transactions.services';
+import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -173,6 +174,23 @@ export const fetchSolTransactionsForSignature = async ({
 		...(nonNullish(ataAddress) ? [ataAddress] : [])
 	];
 
+	// What each account held going in, so a close can say what it hands back: the instruction
+	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
+	const balances = preBalances ?? [];
+
+	const accountLamports = parsedAccountKeys.reduce<Record<SolAddress, bigint>>(
+		(acc, { pubkey }, index) => {
+			const lamports = balances[index];
+
+			if (nonNullish(lamports)) {
+				acc[pubkey] = lamports;
+			}
+
+			return acc;
+		},
+		{}
+	);
+
 	const instructionSummaries = mapSolInstructionSummaries({
 		instructions: [...instructions],
 		innerInstructions: [...putativeInnerInstructions].map(({ index, instructions: inner }) => ({
@@ -180,7 +198,8 @@ export const fetchSolTransactionsForSignature = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses,
-		addressToToken
+		addressToToken,
+		accountLamports
 	});
 
 	const netChanges = mapSolNetBalanceChanges({
@@ -199,6 +218,13 @@ export const fetchSolTransactionsForSignature = async ({
 	if (instructionSummaries.length === 0 && netChanges.length === 0) {
 		return [];
 	}
+
+	// Name the mints this record mentions. Best effort: an unnamed token still renders, and the
+	// loader skips mints it has already asked about, so a busy wallet does not re-ask per page.
+	await loadSplTokenMetadata({
+		tokenAddresses: netChanges.map(({ tokenAddress }) => tokenAddress).filter(nonNullish),
+		network
+	});
 
 	const summary = deriveSolTransactionSummary({
 		netChanges,

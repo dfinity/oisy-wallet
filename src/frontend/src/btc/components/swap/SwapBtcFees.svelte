@@ -15,7 +15,8 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { SwapProvider } from '$lib/types/swap';
+	import { SwapProvider, type ChainFusionFee } from '$lib/types/swap';
+	import { chainFusionFeeSectionFees } from '$lib/utils/chain-fusion-swap.utils';
 	import { resolveText } from '$lib/utils/i18n.utils';
 
 	const { sourceToken, sourceTokenExchangeRate } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -26,10 +27,11 @@
 
 	// The Bitcoin counterpart of `SwapFees`, which cannot serve this form: it reads the IC
 	// token fee context, which only the ICP-source wizard sets. Same rule as there — every
-	// fee the quote priced, so the total is the user's whole cost of the conversion.
+	// fee the user pays on top of the amount, so the total is their whole cost out of balance,
+	// while the ones the minter withholds are disclosed in the provider sheet.
 	let fees = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
-			? $swapAmountsStore.selectedProvider.swapDetails.sourceFees
+			? chainFusionFeeSectionFees($swapAmountsStore.selectedProvider.swapDetails.sourceFees)
 			: undefined
 	);
 
@@ -45,34 +47,44 @@
 	);
 </script>
 
-{#if nonNullish(fees) && nonNullish(totalFee) && nonNullish($sourceToken)}
-	<ModalExpandableValues>
-		{#snippet listHeader()}
-			<FeeDisplay
-				decimals={$sourceToken.decimals}
-				exchangeRate={$sourceTokenExchangeRate}
-				feeAmount={totalFee}
-				symbol={$sourceToken.symbol}
-				zeroAmountLabel={$i18n.fee.text.zero_fee}
-			>
-				{#snippet label()}{$i18n.swap.text.total_fee}{/snippet}
-			</FeeDisplay>
-		{/snippet}
+{#snippet feeRow({ labelPath, fee, token }: ChainFusionFee)}
+	<FeeDisplay
+		decimals={token.decimals}
+		exchangeRate={$exchanges?.[token.id]?.usd}
+		feeAmount={fee}
+		symbol={token.symbol}
+		zeroAmountLabel={$i18n.fee.text.zero_fee}
+	>
+		{#snippet label()}{resolveText({ i18n: $i18n, path: labelPath })}{/snippet}
+	</FeeDisplay>
+{/snippet}
 
-		{#snippet listItems()}
-			{#each fees as { labelPath, fee, token } (labelPath)}
+{#if nonNullish(fees) && nonNullish(totalFee) && nonNullish($sourceToken)}
+	<!-- A total of one fee is that fee: a collapsible whose only item repeats its header
+		 says nothing, so a single row stands on its own under its own label. -->
+	{#if fees.length === 1}
+		{@render feeRow(fees[0])}
+	{:else}
+		<ModalExpandableValues>
+			{#snippet listHeader()}
 				<FeeDisplay
-					decimals={token.decimals}
-					exchangeRate={$exchanges?.[token.id]?.usd}
-					feeAmount={fee}
-					symbol={token.symbol}
+					decimals={$sourceToken.decimals}
+					exchangeRate={$sourceTokenExchangeRate}
+					feeAmount={totalFee}
+					symbol={$sourceToken.symbol}
 					zeroAmountLabel={$i18n.fee.text.zero_fee}
 				>
-					{#snippet label()}{resolveText({ i18n: $i18n, path: labelPath })}{/snippet}
+					{#snippet label()}{$i18n.swap.text.total_fee}{/snippet}
 				</FeeDisplay>
-			{/each}
-		{/snippet}
-	</ModalExpandableValues>
+			{/snippet}
+
+			{#snippet listItems()}
+				{#each fees as chainFusionFee (chainFusionFee.labelPath)}
+					{@render feeRow(chainFusionFee)}
+				{/each}
+			{/snippet}
+		</ModalExpandableValues>
+	{/if}
 {:else if nonNullish(satoshisFee) && nonNullish($sourceToken)}
 	<FeeDisplay
 		decimals={$sourceToken.decimals}

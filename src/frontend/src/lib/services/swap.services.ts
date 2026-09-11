@@ -68,6 +68,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
@@ -584,6 +585,12 @@ const fetchSwapAmountsICP = async ({
 					slippage,
 					destToken: destinationToken as IcToken
 				});
+			} else if (provider.key === SwapProvider.OISY_TRADE && isSourceTokenIcrc2) {
+				// Gated on ICRC-2 like ICPSwap: the deposit leg is `icrc2_approve` plus
+				// `icrc2_transfer_from`, so a source ledger without ICRC-2 cannot be
+				// deposited at all.
+				const quote = result.value as OisyTradeQuote | undefined;
+				mapped = nonNullish(quote) ? provider.mapQuoteResult({ quote }) : undefined;
 			}
 
 			if (nonNullish(mapped)) {
@@ -1134,6 +1141,12 @@ export const swapService = {
 	// `fetchChainFusionIcpSwap` and never reaches this entry — exactly as it does for
 	// 1Sec above.
 	[SwapProvider.CHAIN_FUSION]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// OISY Trade needs the resolved order parameters — side, price, quantity —
+	// which `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly
+	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
+	[SwapProvider.OISY_TRADE]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;

@@ -6,6 +6,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { BITCOIN_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { EthAddress } from '$eth/types/address';
@@ -18,7 +19,11 @@ import {
 	withdrawalStatuses
 } from '$icp/api/ckbtc-minter.api';
 import { retrieveEthStatus } from '$icp/api/cketh-minter.api';
-import { CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { getTransactions } from '$icp/api/icrc-index-ng.api';
+import {
+	CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
+	CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS
+} from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import {
 	CHAIN_FUSION_EXTERNAL_REF_KEYS,
@@ -45,6 +50,7 @@ import {
 	toChainFusionExternalRefsMap,
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
+	toCkBtcMintDepositTxid,
 	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
@@ -364,6 +370,82 @@ const resolveBtcDepositConfirmations = async ({
 	return nonNullish(utxo) ? tipHeight - utxo.height + 1 : undefined;
 };
 
+// The ckBTC ledger index a minter's mints land in — the pairing already lives in the ck
+// token data; only ckBTC entries can match a ckBTC minter id.
+const toCkBtcIndexCanisterId = (minterCanisterId: string): string | undefined =>
+	[...ICRC_CK_TOKENS, ...PUBLIC_ICRC_TOKENS].find(
+		(token) => token.minterCanisterId === minterCanisterId
+	)?.indexCanisterId;
+
+/**
+ * Whether the ckBTC ledger records a mint crediting this deposit to the account.
+ *
+ * Read only to break the tie below, where a deposit is absent from both the minter's known
+ * UTXOs and its own deposit address. Walked backwards from the account's newest transaction
+ * and bounded by the row's creation time rather than a page count: the row is durable and
+ * resumes on login, so its mint can sit arbitrarily deep behind traffic that accrued while
+ * the user was away — but it can never predate the row that initiated the deposit.
+ */
+const hasCkBtcMintForDeposit = async ({
+	identity,
+	indexCanisterId,
+	txid,
+	createdAtNs
+}: {
+	identity: Identity;
+	indexCanisterId: string;
+	txid: string;
+	createdAtNs: bigint;
+}): Promise<boolean> => {
+	let start: bigint | undefined;
+	let hasOlderPages = true;
+
+	while (hasOlderPages) {
+		const { transactions, oldest_tx_id } = await getTransactions({
+			identity,
+			indexCanisterId,
+			owner: identity.getPrincipal(),
+			start,
+			maxResults: CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE,
+			certified: false
+		});
+
+		if (transactions.length === 0) {
+			return false;
+		}
+
+		const minted = transactions.some(({ transaction: { mint } }) => {
+			const memo = fromNullable(fromNullable(mint)?.memo ?? []);
+
+			return nonNullish(memo) && toCkBtcMintDepositTxid(memo) === txid;
+		});
+
+		if (minted) {
+			return true;
+		}
+
+		const oldestFetched = transactions.reduce((min, tx) => (tx.id < min.id ? tx : min));
+
+		// The mint cannot predate the row that initiated the deposit, so everything past this
+		// point is other traffic.
+		if (oldestFetched.transaction.timestamp < createdAtNs) {
+			return false;
+		}
+
+		// Stop when the account's history is exhausted — or, defensively, when a page fails to
+		// move the cursor: the walk synthesizes its own cursor, unlike the canister-issued
+		// `next_page` token `getAllAddressUtxos` follows.
+		const oldestTxId = fromNullable(oldest_tx_id);
+		hasOlderPages =
+			(isNullish(oldestTxId) || oldestFetched.id > oldestTxId) &&
+			(isNullish(start) || oldestFetched.id < start);
+
+		start = oldestFetched.id;
+	}
+
+	return false;
+};
+
 /**
  * Resolves a ckBTC deposit's state, and — this is the one poller in the codebase
  * that mutates — asks the minter to mint when the deposit is ready for it.
@@ -393,12 +475,14 @@ const resolveBtcDepositConfirmations = async ({
 const resolveChainFusionBtcMintOutcome = async ({
 	identity,
 	txId,
+	createdAtNs,
 	data,
 	refs,
 	caches
 }: {
 	identity: Identity;
 	txId: string;
+	createdAtNs: bigint;
 	data: ChainFusionData;
 	refs: Partial<Record<ChainFusionExternalRefKey, string>>;
 	caches: ChainFusionPollCaches;
@@ -439,7 +523,25 @@ const resolveChainFusionBtcMintOutcome = async ({
 		});
 
 		if (isNullish(confirmations)) {
-			return 'unseen';
+			// Absent from the deposit address, having already been absent from the minter's known
+			// UTXOs. That is the shape of a deposit the Bitcoin canister has not indexed yet — and
+			// equally of one the minter minted and has since *spent* to fund a withdrawal, which
+			// erases it from both. The ledger settles it: the minter's mint memo names the outpoint
+			// it credited and stays on the account for good.
+			const indexCanisterId = toCkBtcIndexCanisterId(minterCanisterId);
+
+			if (isNullish(indexCanisterId)) {
+				return 'unseen';
+			}
+
+			const minted = await hasCkBtcMintForDeposit({
+				identity,
+				indexCanisterId,
+				txid,
+				createdAtNs
+			});
+
+			return minted ? 'minted' : 'unseen';
 		}
 
 		const { min_confirmations } = await memoize({
@@ -495,6 +597,7 @@ const pollChainFusionBtcMint = async ({
 	const outcome = await resolveChainFusionBtcMintOutcome({
 		identity,
 		txId: tx.id,
+		createdAtNs: tx.created_at_ns,
 		data,
 		refs,
 		caches

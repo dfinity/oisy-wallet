@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.5.4",
+	"version": "2.5.5",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -83,7 +83,10 @@
 		"@metamask/detect-provider": "^2.0.0",
 		"@plausible-analytics/tracker": "^0.4.5",
 		"@reown/walletkit": "^1.5.5",
+		"@solana-program/address-lookup-table": "^0.13.0",
 		"@solana-program/compute-budget": "^0.17.0",
+		"@solana-program/memo": "^0.12.0",
+		"@solana-program/stake": "^0.8.0",
 		"@solana-program/system": "^0.13.0",
 		"@solana-program/token": "^0.15.0",
 		"@solana-program/token-2022": "^0.13.0",
@@ -131,7 +134,7 @@
 		"prettier-plugin-motoko": "^0.13.0",
 		"prettier-plugin-organize-imports": "^4.3.0",
 		"prettier-plugin-svelte": "^4.1.0",
-		"prettier-plugin-tailwindcss": "^0.8.0",
+		"prettier-plugin-tailwindcss": "^0.8.1",
 		"sass": "^1.98.0",
 		"svelte": "^5.56.6",
 		"svelte-check": "^4.6.0",

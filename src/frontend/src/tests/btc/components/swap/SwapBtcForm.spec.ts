@@ -131,16 +131,16 @@ describe('SwapBtcForm', () => {
 		vi.clearAllMocks();
 	});
 
-	// The Convert flow's breakdown minus its zero-valued conversion-fee row, and including the
-	// KYT fee the minter withholds — which `SwapFees` would have filtered out as already
+	// The Convert flow's breakdown minus its zero-valued conversion-fee row, and minus the KYT
+	// fee the minter withholds — which the provider sheet states instead, since it is already
 	// reflected in the receive amount.
 	it('itemizes the deposit fees from the selected offer', () => {
 		const { getByText, queryByText } = render(SwapBtcForm, { props, context: createContext() });
 
-		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
-		expect(getByText(en.fee.text.convert_inter_network_fee)).toBeInTheDocument();
 		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
 		expect(queryByText(en.fee.text.convert_fee)).not.toBeInTheDocument();
+		// One fee left means one row, not a "Total fee" header over a list of one.
+		expect(queryByText(en.swap.text.total_fee)).not.toBeInTheDocument();
 	});
 
 	it('renders both token inputs and the provider row', () => {
@@ -210,18 +210,21 @@ describe('SwapBtcForm', () => {
 		});
 	});
 
-	// The gap between the pay and receive amounts is the KYT fee, so it has to be part of the
-	// total the form reports — otherwise nothing on the form accounts for it.
-	it('counts the deducted KYT fee into the total', () => {
-		const { getByText } = render(SwapBtcForm, { props, context: createContext() });
+	// The KYT fee is already the gap between the pay and receive amounts, so the fee section
+	// reports only what the deposit costs on top of it — the Bitcoin network fee. The provider
+	// sheet states the KYT fee; counting it here as well would read as a second charge.
+	it('keeps the deducted KYT fee out of the fee section', () => {
+		const { getByText, queryByText } = render(SwapBtcForm, { props, context: createContext() });
 
-		const total = formatToken({
-			value: KYT_FEE + mockUtxosFee.feeSatoshis,
-			unitName: BTC_MAINNET_TOKEN.decimals,
-			displayDecimals: BTC_MAINNET_TOKEN.decimals
-		});
+		const asBtc = (value: bigint) =>
+			`${formatToken({
+				value,
+				unitName: BTC_MAINNET_TOKEN.decimals,
+				displayDecimals: BTC_MAINNET_TOKEN.decimals
+			})} ${BTC_MAINNET_TOKEN.symbol}`;
 
-		expect(getByText(`${total} ${BTC_MAINNET_TOKEN.symbol}`)).toBeInTheDocument();
+		expect(getByText(asBtc(mockUtxosFee.feeSatoshis))).toBeInTheDocument();
+		expect(queryByText(asBtc(KYT_FEE + mockUtxosFee.feeSatoshis))).not.toBeInTheDocument();
 	});
 
 	// The quote refuses to price an unusable selection, so the absent offer is explained by

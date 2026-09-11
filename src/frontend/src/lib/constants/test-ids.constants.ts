@@ -346,6 +346,10 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+
+export const ETH_FEE_PRIORITY = 'eth-fee-priority';
+export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
+export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
 export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar

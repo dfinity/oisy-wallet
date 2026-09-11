@@ -376,7 +376,7 @@ impl TieredRateLimiter {
     /// checked before a shared global 20/min and 100/hour.
     #[must_use]
     pub fn new() -> Self {
-        Self::with_caller_burst(2)
+        Self::with_tiers(2, 10, 20, 100)
     }
 
     /// All four tiers chosen explicitly, for endpoints that are not vetKD
