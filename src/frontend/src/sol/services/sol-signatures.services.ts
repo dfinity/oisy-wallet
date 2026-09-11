@@ -3,6 +3,8 @@ import { last } from '$lib/utils/array.utils';
 import { fetchSignatures } from '$sol/api/solana.api';
 import { SOLANA_MAX_SKIPPED_SIGNATURE_PAGES } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
+import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
+import type { SolAddress } from '$sol/types/address';
 import type {
 	GetSolSignaturesParams,
 	GetSolTransactionsParams,
@@ -14,6 +16,7 @@ import type {
 	SolSignatureWithSources,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
+import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import {
@@ -24,6 +27,29 @@ import {
 	type Signature
 } from '@solana/kit';
 
+/**
+ * The associated token account of each token for a wallet, derived with the token's own program so
+ * Token-2022 accounts are found too. The pager pages these accounts and the resolver seeds them as
+ * the user's: one derivation, so the two can never disagree on which account belongs to a token.
+ */
+export const findSolTokenAccounts = ({
+	wallet,
+	tokens
+}: {
+	wallet: SolAddress;
+	tokens: Pick<SplToken, 'address' | 'owner'>[];
+}): Promise<{ tokenAccount: SolAddress; tokenAddress: SplTokenAddress }[]> =>
+	Promise.all(
+		tokens.map(async ({ address: tokenAddress, owner: tokenOwnerAddress }) => ({
+			tokenAccount: await calculateAssociatedTokenAddress({
+				owner: wallet,
+				tokenAddress,
+				tokenOwnerAddress
+			}),
+			tokenAddress
+		}))
+	);
+
 const findSignatureSources = async ({
 	wallet,
 	tokensList
@@ -31,25 +57,16 @@ const findSignatureSources = async ({
 	wallet: Address;
 	tokensList: GetSolSignaturesParams['tokensList'];
 }): Promise<Address[]> => {
-	const ataAddresses = await Promise.all(
-		(tokensList ?? []).map(async ({ address: tokenAddress, owner: tokenOwnerAddress }) => {
-			assertIsAddress(tokenAddress);
-			assertIsAddress(tokenOwnerAddress);
+	const tokenAccounts = await findSolTokenAccounts({ wallet, tokens: tokensList ?? [] });
 
-			const [ataAddress] = await findAssociatedTokenPda({
-				owner: wallet,
-				tokenProgram: solAddress(tokenOwnerAddress),
-				mint: solAddress(tokenAddress)
-			});
-
-			return ataAddress;
-		})
-	);
-
-	return [...new Set([wallet, ...ataAddresses])];
+	return [
+		...new Set([wallet, ...tokenAccounts.map(({ tokenAccount }) => solAddress(tokenAccount))])
+	];
 };
 
-const mergeSignatureSources = (
+// Shared with the resolver, so a signature reached through several sources carries the same tags
+// whichever of the two merged it.
+export const mergeSignatureSources = (
 	signatures: SolSignatureWithSources[]
 ): Map<SolSignature['signature'], SolSignatureWithSources> =>
 	signatures.reduce((acc, solSignature) => {
