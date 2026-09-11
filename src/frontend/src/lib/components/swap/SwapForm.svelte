@@ -5,6 +5,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapMinimumAmountInfo from '$lib/components/swap/SwapMinimumAmountInfo.svelte';
 	import SwapReceiveShortcuts from '$lib/components/swap/SwapReceiveShortcuts.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapTwoSwapsHint from '$lib/components/swap/SwapTwoSwapsHint.svelte';
@@ -452,6 +453,8 @@
 		<div class="mt-4">
 			{@render message?.()}
 		</div>
+
+		<SwapMinimumAmountInfo />
 
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
