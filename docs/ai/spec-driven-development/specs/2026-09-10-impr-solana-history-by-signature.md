@@ -225,10 +225,13 @@ Implementation, in order:
    returned, which is the cut of 3.3 as the caller can see it. A call that brings nothing new (an
    empty page with a cursor, or only signatures the tokens already hold) asks for up to
    `SOLANA_MAX_SKIPPED_SIGNATURE_PAGES` more pages before it returns, so that neither case stalls
-   the list. A record the network already holds under one token is handed to the others without
-   being fetched again. A token's own pager is `getSolSignatures` with the token's source as its
+   the list. A signature is skipped only when every token it belongs to already holds its record.
+   Otherwise it is derived again with every account of the network and written to all of those
+   tokens in place of any copy they hold, since a held copy may have been derived with one token's
+   account only. A token's own pager is `getSolSignatures` with the token's source as its
    only address, and the token page still waits for the worker's first page before it pages. The
-   export pages through the network pager too. `getSolTransactions` stays until PR 4, which is its
+   export pages through the network pager too, and fails rather than export a history that stops
+   at a page that failed. `getSolTransactions` stays until PR 4, which is its
    last caller.
 6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
    with the behaviour it ships (one loader per network, merged paging, balances).

@@ -1,5 +1,6 @@
 import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import { enabledSplTokens } from '$lib/derived/tokens.derived';
 import type { Token, TokenId } from '$lib/types/token';
@@ -12,7 +13,6 @@ import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { SOLANA_MAX_SKIPPED_SIGNATURE_PAGES } from '$sol/constants/sol.constants';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-import { cleanUpStaleSolTransactions } from '$sol/services/sol-listener.services';
 import {
 	mapSolSourcesToTokens,
 	resolveSolSignatures
@@ -55,8 +55,6 @@ interface SolPagerSource {
 	splTokens: SplToken[];
 	// The tokens this pager writes to.
 	tokens: Token[];
-	// Every token of the network, whose records the pager reuses rather than fetching them again.
-	networkTokens: Token[];
 	// What the pager pages through, as `getSolSignatures` takes it: its first source, plus the
 	// associated token account of each token in `tokensList`.
 	signatures: () => Promise<{ address: SolAddress; tokensList: SplToken[] }>;
@@ -117,7 +115,6 @@ const networkPagerSource = (token: Token): SolPagerSource | undefined => {
 		wallet,
 		splTokens,
 		tokens,
-		networkTokens: tokens,
 		signatures: () => Promise.resolve({ address: wallet, tokensList: splTokens }),
 		route: async () => {
 			const sourceToMint = await mapSolSourcesToTokens({ address: wallet, tokens: splTokens });
@@ -148,24 +145,21 @@ const tokenPagerSource = (token: Token): SolPagerSource | undefined => {
 		return;
 	}
 
-	const { native, splTokens: networkSplTokens } = networkTokensOf(networkId);
+	const { splTokens: networkSplTokens } = networkTokensOf(networkId);
 
 	const splTokens =
 		isTokenSpl(token) && !networkSplTokens.some(({ id }) => id === token.id)
 			? [...networkSplTokens, token]
 			: networkSplTokens;
 
-	const networkTokens = [...(nonNullish(native) ? [native] : []), ...splTokens];
-
 	return {
-		key: wallet,
+		// Keyed on the token list too, although it pages one source: its records are derived with the
+		// accounts of the whole list, so a new list starts over, as it does for the network pager.
+		key: `${wallet}:${splTokensKey(splTokens)}`,
 		network,
 		wallet,
 		splTokens,
 		tokens: [token],
-		networkTokens: networkTokens.some(({ id }) => id === token.id)
-			? networkTokens
-			: [...networkTokens, token],
 		// Only the token's own source, so that scrolling a token does not page through the history
 		// of the others. `getSolSignatures` pages its first address as a source of its own.
 		signatures: async () => ({
@@ -215,21 +209,18 @@ const reachedFloor = ({
 	nonNullish(oldestTimestamp) &&
 	normalizeTimestampToSeconds(oldestTimestamp) <= normalizeTimestampToSeconds(minTimestamp);
 
-// The records the tokens already hold, by signature. Only records kept under their signature id
+// The signatures a token already holds a record for. Only records kept under their signature id
 // count: a per-instruction row of the older shape is fetched again, so that it gets replaced.
-const heldSolRecords = (tokens: Token[]): Map<string, SolTransactionUi> => {
-	const store = get(solTransactionsStore);
-
-	return new Map(
-		tokens.flatMap(({ id: tokenId }) =>
-			(store?.[tokenId] ?? [])
-				.filter(({ data: { id, signature } }) => `${id}` === String(signature))
-				.map(({ data }) => [String(data.signature), data] as const)
-		)
+const heldSolSignatures = (tokenId: TokenId): Set<string> =>
+	new Set(
+		(get(solTransactionsStore)?.[tokenId] ?? [])
+			.filter(({ data: { id, signature } }) => `${id}` === String(signature))
+			.map(({ data: { signature } }) => String(signature))
 	);
-};
 
-// Writes each token the records it does not hold yet. Resolves to how many were written.
+// Writes each token its records, in place of any copy it holds of the same transaction: a copy
+// derived with fewer accounts as the user's, or the per-instruction rows of the older shape. Resolves
+// to how many records are new to their token.
 const writeSolRecords = ({
 	recordsByToken,
 	network,
@@ -242,24 +233,26 @@ const writeSolRecords = ({
 	[...recordsByToken].reduce((written, [token, records]) => {
 		const { id: tokenId } = token;
 
-		const heldIds = new Set(
-			(get(solTransactionsStore)?.[tokenId] ?? []).map(({ data: { id } }) => `${id}`)
+		const signatures = new Set(records.map(({ signature }) => String(signature)));
+
+		const held = (get(solTransactionsStore)?.[tokenId] ?? []).filter(({ data: { signature } }) =>
+			signatures.has(String(signature))
 		);
 
-		const newRecords = records.filter(({ id }) => !heldIds.has(`${id}`));
+		const heldIds = new Set(held.map(({ data: { id } }) => `${id}`));
 
-		if (newRecords.length === 0) {
-			return written;
+		if (held.length > 0) {
+			solTransactionsStore.cleanUp({ tokenId, transactionIds: [...heldIds] });
 		}
-
-		cleanUpStaleSolTransactions({ tokenId, transactions: newRecords });
 
 		solTransactionsStore.append({
 			tokenId,
-			transactions: newRecords.map((data) => ({ data, certified: false }))
+			transactions: records.map((data) => ({ data, certified: false }))
 		});
 
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED) {
+		const newRecords = records.filter(({ id }) => !heldIds.has(`${id}`));
+
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRecords.length > 0) {
 			saveSolFinalizedTransactions({
 				identity,
 				tokenId: solBackendTokenId({
@@ -273,15 +266,19 @@ const writeSolRecords = ({
 		return written + newRecords.length;
 	}, 0);
 
+// Resolves to how many records are new to their token, or to nothing when the pager was replaced
+// while the page was on its way: what it brought was asked for another wallet or token list.
 const pageOnce = async ({
 	pager,
-	source: { network, wallet, splTokens, networkTokens, signatures: signaturesOf, route },
-	identity
+	source: { network, wallet, splTokens, signatures: signaturesOf, route },
+	identity,
+	isCurrent
 }: {
 	pager: SolPager;
 	source: SolPagerSource;
 	identity: LoadOlderTransactionsParams['identity'];
-}): Promise<number> => {
+	isCurrent: () => boolean;
+}): Promise<number | undefined> => {
 	const { address, tokensList } = await signaturesOf();
 
 	const { signatures, cursor } = await getSolSignatures({
@@ -291,39 +288,57 @@ const pageOnce = async ({
 		cursor: pager.cursor
 	});
 
-	// A record the network already holds under one token is handed to the others as it is, rather
-	// than fetched and derived again.
-	const held = heldSolRecords(networkTokens);
+	const tokensOf = await route();
+
+	const tokensBySignature = signatures.reduce<Map<string, Token[]>>(
+		(acc, { signature, sources }) => {
+			const key = String(signature);
+
+			acc.set(key, [...new Set([...(acc.get(key) ?? []), ...tokensOf(sources)])]);
+
+			return acc;
+		},
+		new Map()
+	);
+
+	const heldByToken = new Map(
+		[...new Set([...tokensBySignature.values()].flat())].map(({ id }) => [
+			id,
+			heldSolSignatures(id)
+		])
+	);
+
+	// A held record is not handed to other tokens as it is: whoever derived it, the worker included,
+	// may have seeded only one token's account as the user's, and missed what moved in the others. A
+	// signature is skipped only when every token it belongs to holds it, and is otherwise derived again
+	// with every account of the network, which costs no fetch once its details are cached.
+	const complete = new Set(
+		[...tokensBySignature]
+			.filter(([signature, tokens]) =>
+				tokens.every(({ id }) => heldByToken.get(id)?.has(signature) ?? false)
+			)
+			.map(([signature]) => signature)
+	);
 
 	const resolved = await resolveSolSignatures({
 		address: wallet,
 		network,
 		tokens: splTokens,
 		signatures,
-		known: new Set(held.keys())
+		known: complete
 	});
 
-	const records = new Map([
-		...held,
-		...resolved.map(({ transaction }) => [String(transaction.signature), transaction] as const)
-	]);
+	if (!isCurrent()) {
+		return;
+	}
 
-	const tokensOf = await route();
+	const recordsByToken = resolved.reduce<Map<Token, SolTransactionUi[]>>((acc, { transaction }) => {
+		(tokensBySignature.get(String(transaction.signature)) ?? []).forEach((token) =>
+			acc.set(token, [...(acc.get(token) ?? []), transaction])
+		);
 
-	const recordsByToken = signatures.reduce<Map<Token, SolTransactionUi[]>>(
-		(acc, { signature, sources }) => {
-			const record = records.get(String(signature));
-
-			if (isNullish(record)) {
-				return acc;
-			}
-
-			tokensOf(sources).forEach((token) => acc.set(token, [...(acc.get(token) ?? []), record]));
-
-			return acc;
-		},
-		new Map()
-	);
+		return acc;
+	}, new Map());
 
 	const written = writeSolRecords({ recordsByToken, network, identity });
 
@@ -332,15 +347,13 @@ const pageOnce = async ({
 	pager.cursor = cursor;
 	pager.ended = isNullish(cursor);
 
-	const oldestTimestamp = signatures.reduce<bigint | undefined>(
-		(acc, { blockTime }) =>
-			isNullish(blockTime) ? acc : isNullish(acc) || blockTime < acc ? BigInt(blockTime) : acc,
-		undefined
-	);
+	// A record without a block time is kept at zero, so the floor has to see it there too. The minimum
+	// is kept across pages: pages follow slots, and block times are not monotonic in slot order.
+	pager.oldestTimestamp = signatures.reduce<bigint | undefined>((acc, { blockTime }) => {
+		const timestamp = BigInt(blockTime ?? ZERO);
 
-	if (nonNullish(oldestTimestamp)) {
-		pager.oldestTimestamp = oldestTimestamp;
-	}
+		return isNullish(acc) || timestamp < acc ? timestamp : acc;
+	}, pager.oldestTimestamp);
 
 	return written;
 };
@@ -352,16 +365,24 @@ const pageUntilRecords = async ({
 	pager,
 	source,
 	identity,
-	minTimestamp
+	minTimestamp,
+	isCurrent
 }: {
 	pager: SolPager;
 	source: SolPagerSource;
 	identity: LoadOlderTransactionsParams['identity'];
 	minTimestamp?: number;
+	isCurrent: () => boolean;
 }): Promise<ResultSuccess> => {
 	try {
 		for (let page = 0; page <= SOLANA_MAX_SKIPPED_SIGNATURE_PAGES; page++) {
-			const written = await pageOnce({ pager, source, identity });
+			const written = await pageOnce({ pager, source, identity, isCurrent });
+
+			// Replaced while in flight: its end and its callbacks are those of a pager that is gone,
+			// and the caller that asks again reaches the one that replaced it.
+			if (isNullish(written)) {
+				break;
+			}
 
 			if (pager.ended) {
 				pager.signalEnds.forEach((signalEnd) => signalEnd());
@@ -376,10 +397,15 @@ const pageUntilRecords = async ({
 
 		return { success: true };
 	} catch (err: unknown) {
-		// Not the end of the history: the cursor is kept, and the next call asks for the same page.
+		if (!isCurrent()) {
+			return { success: true };
+		}
+
+		// Not the end of the history: the cursor is kept, and the next call asks for the same page. The
+		// error goes back with the result, so that a caller that must not stop short can tell it apart.
 		consoleError('Failed to load older Solana transactions:', err);
 
-		return { success: false };
+		return { success: false, err };
 	}
 };
 
@@ -423,7 +449,13 @@ const loadOlder = async ({
 		return { success: false };
 	}
 
-	const inFlight = pageUntilRecords({ pager, source, identity, minTimestamp }).finally(() => {
+	const inFlight = pageUntilRecords({
+		pager,
+		source,
+		identity,
+		minTimestamp,
+		isCurrent: () => pagers.get(id) === pager
+	}).finally(() => {
 		if (pager.inFlight === inFlight) {
 			pager.inFlight = undefined;
 		}
