@@ -13,15 +13,17 @@
 	} from '$lib/services/transactions-pagination.services';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+	import type { ResultSuccess } from '$lib/types/utils';
 	import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 
 	interface LoaderControls {
 		/**
-		 * Pages every token one step further back. Resolves to whether any new transaction was
+		 * Pages every token one step further back. `success` is whether any new transaction was
 		 * actually loaded, counted across the stores themselves so an active filter cannot make a
-		 * successful fetch look empty.
+		 * successful fetch look empty. `err` is set when a page failed, so loading nothing does not
+		 * mean the chains have nothing left.
 		 */
-		loadMore: () => Promise<boolean>;
+		loadMore: () => Promise<ResultSuccess>;
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
 	}
@@ -58,11 +60,11 @@
 	}: {
 		token: Token;
 		minTimestamp?: number;
-	}): Promise<boolean> => {
+	}): Promise<ResultSuccess> => {
 		const { id: tokenId } = token;
 
 		if (destroyed || disableLoader[tokenId] || isNullish($authIdentity)) {
-			return false;
+			return { success: false };
 		}
 
 		const loadOlder = loadOlderTransactionsFor(token);
@@ -71,39 +73,48 @@
 			// Nothing to page for this chain; treat it as done rather than retrying every intersection.
 			disableLoader[tokenId] = true;
 
-			return false;
+			return { success: false };
 		}
 
-		const { success } = await loadOlder({
-			token,
-			identity: $authIdentity,
-			...(nonNullish(minTimestamp) && { minTimestamp }),
-			signalEnd: () => (disableLoader[tokenId] = true)
-		});
-
-		return success;
+		try {
+			return await loadOlder({
+				token,
+				identity: $authIdentity,
+				...(nonNullish(minTimestamp) && { minTimestamp }),
+				signalEnd: () => (disableLoader[tokenId] = true)
+			});
+		} catch (err: unknown) {
+			return { success: false, err };
+		}
 	};
 
 	// Levelling in flight per token. A run for a token already being levelled is chained after the
 	// current one instead of started alongside it, so the two never fetch the same page.
-	const levellingByToken = new SvelteMap<TokenId, Promise<void>>();
+	const levellingByToken = new SvelteMap<TokenId, Promise<ResultSuccess>>();
 
 	// Pulls a token back until it reaches `minTimestamp`, runs out of history, or hits the page cap.
+	// Resolves with the failure that cut the run short, if any.
 	const levelToken = ({
 		token,
 		minTimestamp
 	}: {
 		token: Token;
 		minTimestamp: number;
-	}): Promise<void> => {
-		const run = async () => {
+	}): Promise<ResultSuccess> => {
+		const run = async (): Promise<ResultSuccess> => {
 			// Each chain loader ends the run by returning `success: false` once its oldest loaded
 			// transaction has reached the floor. The cap only guards against one that never does.
 			for (let page = 0; page < ACTIVITY_LEVELLING_MAX_PAGES; page++) {
-				if (!(await pageToken({ token, minTimestamp }))) {
-					return;
+				const result = await pageToken({ token, minTimestamp });
+
+				// A failed page ends the run too, rather than hammering a chain that is erroring, but its
+				// `err` is passed on so the caller does not take the token as levelled.
+				if (!result.success) {
+					return result;
 				}
 			}
+
+			return { success: true };
 		};
 
 		const inFlight = levellingByToken.get(token.id);
@@ -112,22 +123,21 @@
 		// update rather than a microtask later.
 		const next = (isNullish(inFlight) ? run() : inFlight.then(run))
 			// A failed page only ends this token's run; the others carry on.
-			.catch(() => undefined);
+			.catch((err: unknown) => ({ success: false, err }));
 
 		levellingByToken.set(token.id, next);
 
 		return next;
 	};
 
-	const levelTokens = async ({
+	const levelTokens = ({
 		tokens,
 		minTimestamp
 	}: {
 		tokens: Token[];
 		minTimestamp: number;
-	}) => {
-		await Promise.all(tokens.map((token) => levelToken({ token, minTimestamp })));
-	};
+	}): Promise<ResultSuccess[]> =>
+		Promise.all(tokens.map((token) => levelToken({ token, minTimestamp })));
 
 	// The floor every token is levelled to. Set from the oldest row on screen when levelling first
 	// runs, deepened by `loadMore`, and lowered by a token whose history arrives late with older rows.
@@ -183,9 +193,9 @@
 			0
 		);
 
-	const loadMore = async (): Promise<boolean> => {
+	const loadMore = async (): Promise<ResultSuccess> => {
 		if (isNullish($authIdentity) || transactions.length === 0) {
-			return false;
+			return { success: false };
 		}
 
 		const loadedBefore = totalLoaded();
@@ -196,13 +206,25 @@
 
 		// One unconditional page per token first: without it every token already sits at the floor
 		// and levelling alone would find nothing left to do.
-		await Promise.allSettled($enabledFungibleNetworkTokens.map((token) => pageToken({ token })));
+		const pages = await Promise.all(
+			$enabledFungibleNetworkTokens.map((token) => pageToken({ token }))
+		);
 
 		levelFloor = oldestLoadedTimestamp();
 
-		await levelTokens({ tokens: $enabledFungibleNetworkTokens, minTimestamp: levelFloor });
+		const levelled = await levelTokens({
+			tokens: $enabledFungibleNetworkTokens,
+			minTimestamp: levelFloor
+		});
 
-		return totalLoaded() > loadedBefore;
+		// Without it a round in which pages failed and nothing loaded would read as the chains having
+		// nothing left, and the scroll would stop asking.
+		const failure = [...pages, ...levelled].find(({ err }) => nonNullish(err));
+
+		return {
+			success: totalLoaded() > loadedBefore,
+			...(nonNullish(failure) && { err: failure.err })
+		};
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));
