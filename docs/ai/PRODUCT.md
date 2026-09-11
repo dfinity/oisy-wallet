@@ -162,6 +162,10 @@ The same warning appears on the token's own page, above its transaction list —
 
 This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
+### Solana history
+
+A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
+
 ---
 
 ## Exchange-rate sourcing
