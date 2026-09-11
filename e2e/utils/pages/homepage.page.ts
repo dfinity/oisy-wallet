@@ -34,7 +34,7 @@ import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
-import { getQRCodeValueFromDataURL } from '../qr-code.utils';
+import { getQRCodeValueFromCanvas } from '../qr-code.utils';
 import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
@@ -204,28 +204,9 @@ abstract class Homepage {
 		await this.waitForByTestId({ testId: LOGIN_BUTTON, options });
 	}
 
-	private async getCanvasAsDataURL({
-		selector
-	}: SelectorOperationParams): Promise<string | undefined> {
-		return await this.#page.evaluate<string | undefined, { selector: string }>(
-			({ selector }) => {
-				const canvas = document.querySelector<HTMLCanvasElement>(selector);
-				return canvas?.toDataURL();
-			},
-			{
-				selector
-			}
-		);
-	}
-
 	protected async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
 		await this.#page.locator(selector).waitFor();
-
-		const dataUrl = await this.getCanvasAsDataURL({ selector });
-
-		if (nonNullish(dataUrl)) {
-			return getQRCodeValueFromDataURL({ dataUrl });
-		}
+		return await getQRCodeValueFromCanvas({ page: this.#page, selector });
 	}
 
 	protected async waitForModal({
