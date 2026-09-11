@@ -207,8 +207,11 @@ Implementation, in order:
    parallel, newest first, each signature tagged with the sources that returned it, the cut
    applied, and its own cursor (3.5) carrying each source's `before`, the exhausted sources and
    the signatures held back. It replaces the F1 and F2 `it.fails` tests in T1 and T2.
-3. **Resolve once.** Turns signatures into records, fetching and deriving each signature once,
-   and returns the records per token id (3.2).
+3. **Resolve once.** `resolveSolSignatures` turns a page of the pager into records, fetching and
+   deriving each signature once with bounded concurrency, every ATA of the network seeded as the
+   user's. Each record keeps the sources the pager tagged it with, and `mapSolSourcesToTokens`
+   maps a source to its token (the wallet to SOL, an ATA to its mint), so the caller hands the
+   record to the token of each of its sources (3.2). One failed fetch rejects the page.
 4. **One worker per network.** `SolLoaderWallets`, `SolWalletWorker` and `SolWalletScheduler`
    move to one instance per network, with the head check of 3.5 and the balances of 3.8. The
    scheduler posts per-token deltas, so the listener and the store keep their shape. T4 stays
