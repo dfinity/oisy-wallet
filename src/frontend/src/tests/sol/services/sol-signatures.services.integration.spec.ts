@@ -9,6 +9,7 @@ import {
 import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolSignaturesCursor, SolSignaturesPage } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import {
@@ -42,6 +43,109 @@ vi.mock('@solana-program/token', () => ({
 }));
 
 describe('sol-signatures.services integration', () => {
+	describe('getSolSignatures', () => {
+		const [wallet] = fixtureSolAddresses;
+
+		const walletAtas = fixtureSolAtaAddresses.filter(({ address }) => address === wallet);
+
+		const loadSourceHistory = async ({
+			source,
+			before
+		}: {
+			source: string;
+			before?: string;
+		}): Promise<SolSignature[]> => {
+			const signatures = await fetchSignatures({
+				wallet: solAddress(source),
+				network: SolanaNetworks.mainnet,
+				before: nonNullish(before) ? signature(before) : undefined,
+				limit: 10
+			});
+
+			if (signatures.length === 0) {
+				return signatures;
+			}
+
+			return [
+				...signatures,
+				...(await loadSourceHistory({ source, before: last(signatures)?.signature }))
+			];
+		};
+
+		const pageToEnd = async (cursor?: SolSignaturesCursor): Promise<SolSignaturesPage[]> => {
+			const page = await getSolSignatures({
+				address: wallet,
+				network: SolanaNetworks.mainnet,
+				tokensList: walletAtas.map(({ token }) => token),
+				limit: 10,
+				cursor
+			});
+
+			return [page, ...(isNullish(page.cursor) ? [] : await pageToEnd(page.cursor))];
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(solProgramToken, 'findAssociatedTokenPda').mockImplementation(({ mint }) => {
+				const { ataAddress } = walletAtas.find(({ token }) => token.address === mint) ?? {};
+
+				return Promise.resolve([solAddress(ataAddress ?? ''), 123 as ProgramDerivedAddressBump]);
+			});
+		});
+
+		it('should page to the union of the histories of the wallet and its token accounts, newest first, each signature once and tagged with its sources', async () => {
+			const sources = [wallet, ...walletAtas.map(({ ataAddress }) => ataAddress)];
+
+			const histories = await Promise.all(
+				sources.map(async (source) => ({
+					source,
+					signatures: await loadSourceHistory({ source })
+				}))
+			);
+
+			const expectedSources = histories.reduce<Record<string, string[]>>(
+				(acc, { source, signatures }) =>
+					signatures.reduce<Record<string, string[]>>(
+						(inner, { signature: solSignature }) => ({
+							...inner,
+							[solSignature]: [...(inner[solSignature] ?? []), source]
+						}),
+						acc
+					),
+				{}
+			);
+
+			const pages = await pageToEnd();
+
+			const returned = pages.flatMap(({ signatures }) => signatures);
+
+			// The recorded histories hold 169 unique signatures, far more than one page.
+			expect(Object.keys(expectedSources)).toHaveLength(169);
+			expect(pages.length).toBeGreaterThan(1);
+
+			expect(returned).toHaveLength(Object.keys(expectedSources).length);
+
+			expect(
+				returned.reduce<Record<string, string[]>>(
+					(acc, { signature: solSignature, sources: returnedSources }) => ({
+						...acc,
+						[solSignature]: [...returnedSources].sort()
+					}),
+					{}
+				)
+			).toEqual(
+				Object.fromEntries(
+					Object.entries(expectedSources).map(([key, value]) => [key, [...value].sort()])
+				)
+			);
+
+			returned.slice(1).forEach(({ slot }, i) => {
+				expect(slot).toBeLessThanOrEqual(returned[i].slot);
+			});
+		}, 600000);
+	});
+
 	describe('getSolTransactions', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -197,12 +301,10 @@ describe('sol-signatures.services integration', () => {
 		);
 	});
 
-	describe('getSolSignatures', () => {
+	describe('fetchSignatures across the wallet and its token accounts', () => {
 		const [walletAddress] = fixtureSolAddresses;
 
 		const walletAtas = fixtureSolAtaAddresses.filter(({ address }) => address === walletAddress);
-
-		const tokensList = walletAtas.map(({ token: { address, owner } }) => ({ address, owner }));
 
 		const sourceAddresses = [walletAddress, ...walletAtas.map(({ ataAddress }) => ataAddress)];
 
@@ -239,13 +341,6 @@ describe('sol-signatures.services integration', () => {
 				Promise.resolve([])
 			);
 
-		// The merged page is not sorted, so its last element says nothing about age. The slot does.
-		const oldestBySlot = (signatures: SolSignature[]): SolSignature | undefined =>
-			signatures.reduce<SolSignature | undefined>(
-				(oldest, current) => (isNullish(oldest) || current.slot <= oldest.slot ? current : oldest),
-				undefined
-			);
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -259,40 +354,6 @@ describe('sol-signatures.services integration', () => {
 				return Promise.resolve([solAddress(ata.ataAddress), 123 as ProgramDerivedAddressBump]);
 			});
 		});
-
-		// Defect: every source gets the same `before` and `limit` and the union comes back uncut, so
-		// the oldest signature of a page skips whatever the denser sources had between it and their
-		// own tenth signature.
-		it.fails(
-			'should cover the full history of the wallet and its ATAs when paging the merged signatures',
-			async () => {
-				const loadMerged = async (before?: string): Promise<SolSignature[]> => {
-					const page = await getSolSignatures({
-						address: walletAddress,
-						network: SolanaNetworks.mainnet,
-						tokensList,
-						before,
-						limit: 10
-					});
-
-					if (page.length === 0) {
-						return page;
-					}
-
-					return [...page, ...(await loadMerged(oldestBySlot(page)?.signature))];
-				};
-
-				const merged = new Set((await loadMerged()).map(({ signature }) => signature));
-
-				const expected = new Set(
-					(await loadAllHistories()).flat().map(({ signature }) => signature)
-				);
-
-				expect([...expected].filter((signature) => !merged.has(signature))).toEqual([]);
-				expect(merged).toEqual(expected);
-			},
-			600000
-		);
 
 		it('should answer `before` with a foreign signature by slot', async () => {
 			const [walletHistory, ...ataHistories] = await loadAllHistories();
