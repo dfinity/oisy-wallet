@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "2.5.5",
+	"version": "2.5.6",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -89,7 +89,7 @@
 		"@solana-program/stake": "^0.8.0",
 		"@solana-program/system": "^0.13.0",
 		"@solana-program/token": "^0.15.0",
-		"@solana-program/token-2022": "^0.13.0",
+		"@solana-program/token-2022": "^0.14.1",
 		"@solana/kit": "^7.0.0",
 		"@velora-dex/sdk": "^10.2.2",
 		"barcode-detector": "^3.2.1",
@@ -105,7 +105,7 @@
 		"onesec-bridge": "^0.13.0",
 		"qr-creator": "^1.0.0",
 		"svelte-confetti": "^2.3.2",
-		"viem": "^2.55.8",
+		"viem": "^2.55.11",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
@@ -118,7 +118,7 @@
 		"@sveltejs/kit": "^2.70.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/postcss": "4.3.3",
-		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/jest-dom": "^7.0.0",
 		"@testing-library/svelte": "^5.3.1",
 		"@types/dom-view-transitions": "^1.0.6",
 		"@types/node": "^22.13.4",
@@ -143,8 +143,8 @@
 		"typescript": "^5.4.5",
 		"vite": "^7.3.2",
 		"vite-node": "^6.0.0",
-		"vitest": "^4.1.9",
-		"vitest-mock-extended": "^5.1.0"
+		"vitest": "^4.1.11",
+		"vitest-mock-extended": "^5.1.1"
 	},
 	"type": "module",
 	"overrides": {

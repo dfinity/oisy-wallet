@@ -26,7 +26,7 @@
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -36,7 +36,8 @@
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
 	import {
 		flattenInstructions,
-		formatSolTransactionSummary
+		formatSolTransactionSummary,
+		solAtaFee
 	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
@@ -99,20 +100,7 @@
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
-	let ataFee = $derived(
-		maxBigInt(
-			(instructions ?? []).reduce((acc, { kind, rent, returned }) => {
-				if (kind === 'createTokenAccount' && nonNullish(rent)) {
-					return acc + rent;
-				}
-
-				// A message that opens one account and closes another charges the difference. Netting
-				// below zero would turn a refund into a negative fee, which is not what a fee is.
-				return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
-			}, ZERO),
-			ZERO
-		)
-	);
+	let ataFee = $derived(solAtaFee(instructions ?? []));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -152,7 +140,7 @@
 			tokenAddresses: [statedSummary?.spent, statedSummary?.received].map(
 				(change) => change?.tokenAddress
 			),
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore
 		})
@@ -166,7 +154,7 @@
 					symbolOf: (tokenAddress) =>
 						solTokenSymbol({
 							tokenAddress,
-							tokens: $enabledSplTokens,
+							tokens: $splTokens,
 							networkId: token.network.id,
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,
@@ -289,7 +277,7 @@
 	     material a user checks the summary against, not part of the summary: on a routed swap they
 	     are a dozen lines, and above the amounts they bury the one figure that matters. -->
 	<Tabs
-		styleClass="mt-4"
+		contentStyleClass="mt-4"
 		tabs={[
 			{ label: $i18n.transaction.text.tab_summary, id: 'summary' },
 			{ label: $i18n.wallet_connect.text.tab_operations, id: 'operations' }

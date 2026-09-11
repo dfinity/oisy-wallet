@@ -27,14 +27,14 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
 	import { solTokenSymbol, solUnknownTokenAddresses } from '$sol/utils/sol-token-name.utils';
-	import { formatSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
-	import { findEnabledSplToken } from '$sol/utils/spl.utils';
+	import { formatSolTransactionSummary, solAtaFee } from '$sol/utils/sol-transaction-summary.utils';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -64,8 +64,8 @@
 
 	const splToken = (tokenAddress: string) =>
 		nonNullish(token)
-			? findEnabledSplToken({
-					tokens: $enabledSplTokens,
+			? findSplToken({
+					tokens: $splTokens,
 					tokenAddress,
 					networkId: token.network.id
 				})
@@ -76,7 +76,7 @@
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: (netChanges ?? []).map(({ tokenAddress }) => tokenAddress),
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token?.network.id ?? SOLANA_TOKEN.network.id,
 			metadata: $splTokenMetadataStore
 		})
@@ -85,7 +85,7 @@
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		solTokenSymbol({
 			tokenAddress,
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token?.network.id ?? SOLANA_TOKEN.network.id,
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,
@@ -140,8 +140,8 @@
 			}
 
 			return (
-				findEnabledSplToken({
-					tokens: $enabledSplTokens,
+				findSplToken({
+					tokens: $splTokens,
 					tokenAddress: change.tokenAddress,
 					networkId: token?.network.id ?? SOLANA_TOKEN.network.id
 				}) ?? token
@@ -149,15 +149,10 @@
 		})()
 	);
 
-	// The rent the transaction paid to open token accounts, stated apart like the send form does:
-	// it is not part of the fee, and folded into a delta it reads as value lost to the transfer.
-	let ataFee = $derived(
-		(instructions ?? []).reduce(
-			(acc, { kind, rent }) =>
-				kind === 'createTokenAccount' && nonNullish(rent) ? acc + rent : acc,
-			ZERO
-		)
-	);
+	// The rent the transaction paid to open token accounts, net of what the ones it closed handed
+	// back, stated apart like the send form does: it is not part of the fee, and folded into a
+	// delta it reads as value lost to the transfer.
+	let ataFee = $derived(solAtaFee(instructions ?? []));
 
 	// The venue of a routed swap: the program its legs ran through.
 	let routeProgram = $derived(

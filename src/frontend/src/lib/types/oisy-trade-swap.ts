@@ -1,7 +1,7 @@
 import type { TradingPair } from '$declarations/oisy_trade/oisy_trade.did';
 import type { ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
-import type { FieldErrorKind, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
+import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 
 export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	// The poll key. `get_my_orders` with `ById` is the only settlement oracle,
@@ -16,8 +16,37 @@ export const OISY_TRADE_EXTERNAL_REF_KEYS = {
 	// and the row has to keep describing the order the user reviewed.
 	ORDER_PRICE: 'order_price',
 	ORDER_QUANTITY: 'order_quantity',
+	// The most of the deposit the venue can hand back on the source leg, from the
+	// book the quote walked. Settlement withdraws the source residue of a filled
+	// order within this, because the delta it measures is account-wide and the
+	// caller's own resting orders filling — on the very pair the swap crosses —
+	// credits the same leg with far more than the order can have released. With a
+	// zero maker fee those proceeds are exactly the deposit, so the delta alone
+	// cannot tell them apart. Snapshotted at creation, since the book has moved by
+	// the time a later session polls.
+	MAX_SOURCE_RELEASE: 'max_source_release',
 	// The destination (or recovered source) withdrawal that closes the row.
 	WITHDRAW_BLOCK_INDEX: 'withdraw_block_index',
+	// Set when the order has resolved but a non-dust leg is still at the venue because
+	// withdrawing it was refused definitively. The row does *not* close on it — it
+	// stays non-terminal and the poller keeps retrying — so this is the record that the
+	// order's outcome was not the whole story, and it is also what tells the poller the
+	// record has already been written, so the write happens once per row rather than
+	// once per attempt.
+	RESIDUE_STRANDED: 'residue_stranded',
+	// Both legs' free DEX balance as it stood *before* the deposit, in base units.
+	// Settlement acts on the difference from these, never on the account-wide
+	// total: a user can arrive at a swap with either leg already funded from the
+	// Trading tab, and those balances are neither this swap's to withdraw nor
+	// evidence of how its order resolved. Written at creation, which is already
+	// before the first canister call, so they cost no extra ordering.
+	//
+	// Both are written in that one call, so a row never holds only one of them. A row
+	// whose baselines cannot be read is therefore malformed, not early, and the poller
+	// declines to settle it rather than substituting zero — which would credit this
+	// order with the caller's entire free balance and re-create both harms above.
+	BASELINE_SOURCE_FREE: 'baseline_source_free',
+	BASELINE_DEST_FREE: 'baseline_dest_free',
 	// Display + analytics metadata snapshotted at creation. These reuse OneSec's
 	// exact key strings — `ActiveUserTransactionItem` reads *every* row's refs
 	// through `toOneSecExternalRefsMap`, so a fifth swap provider renders for free
@@ -69,6 +98,10 @@ export interface OisyTradeResolvedOrder {
 	// the typed amount in the user's wallet, where it costs no fee and needs no
 	// withdrawal.
 	depositAmount: bigint;
+	// The ceiling on what settlement may withdraw back from the source leg of a
+	// filled order, in source-token smallest units — zero on a Sell, the reserve
+	// less the book's own cost on a Buy. See `OisyTradeOffer.maxSourceRelease`.
+	maxSourceRelease: bigint;
 }
 
 /**
@@ -83,17 +116,15 @@ export interface OisyTradeQuote {
 }
 
 /**
- * A quote, or the named reason there is none.
+ * A quote, or nothing.
  *
- * The fan-out itself only carries offers — the registry adapter drops the
- * rejection — but `errorKind` maps one-to-one onto the shipped Limit Order i18n
- * copy, and it is what lets the form explain an empty offer list (via
- * `notOfferedExplained` + `message`) instead of the generic "swap is not
- * offered". Rejections without a kind (no pair, halted pair, unknown ledger fee)
- * have nothing user-actionable to say.
+ * Rejection carries no reason: the fan-out only transports offers, so nothing
+ * downstream could read one. The form explains an empty offer list from the pair
+ * instead (`oisyTradeAmountObjection`), which is the only explanation available
+ * without awaiting the order book. A rejection is still distinct from a throw —
+ * "no offer" must not reach the per-provider error analytics.
  */
-export type OisyTradeQuoteResult =
-	{ ok: true; quote: OisyTradeQuote } | { ok: false; errorKind?: FieldErrorKind };
+export type OisyTradeQuoteResult = { ok: true; quote: OisyTradeQuote } | { ok: false };
 
 export interface OisyTradeSwapDetails {
 	// Itemized, never summed: the three fees are denominated in two different

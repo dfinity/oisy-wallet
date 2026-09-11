@@ -33,6 +33,17 @@ export type SolParsedInstruction =
 
 export type SolInstruction = Instruction;
 
+/**
+ * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
+ * `getTransaction` report them. The RPC picks the parsed arm per instruction, so the unparsed one
+ * survives in the union and says nothing.
+ */
+export interface SolParsedRpcInstruction {
+	program?: string;
+	programId: SolAddress;
+	parsed: { type: string; info: object };
+}
+
 export type SolRpcInstruction =
 	NonNullable<SolRpcTransactionRaw>['transaction']['message']['instructions'][number] & {
 		programAddress: Address;
