@@ -303,7 +303,11 @@ describe('sol-signatures.services integration', () => {
 					tokens: walletTokens(address)
 				});
 
-				expect(transactionBalance).toBe(spl[tokenAddress]);
+				const { [tokenAddress]: fetchedSplBalance } = spl;
+
+				// A token whose balance could not be read is left out, so it must be there to reconcile.
+				expect(fetchedSplBalance).toBeDefined();
+				expect(transactionBalance).toBe(fetchedSplBalance);
 			},
 			600000
 		);
