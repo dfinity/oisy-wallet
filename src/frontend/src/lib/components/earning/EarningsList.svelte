@@ -52,7 +52,7 @@
 	});
 
 	// Liquidium supply positions sit alongside the vault stakes (grouped by type, each card
-	// carrying its own provider tag). Gated by the lend & borrow feature flag.
+	// carrying its own provider tag). Gated by the lend & borrow provider flags.
 	let supplyReserves = $derived(
 		anyLendBorrowProviderEnabled
 			? ($liquidiumPortfolio?.reserves ?? []).filter(({ deposited }) => deposited > ZERO)
