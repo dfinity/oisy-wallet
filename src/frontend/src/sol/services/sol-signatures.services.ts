@@ -63,6 +63,10 @@ const newestSlot = (slots: SolSignature['slot'][]): SolSignature['slot'] | undef
  * of each token in `tokensList`, as one list: unique signatures, newest first, each tagged with
  * every source whose history holds it.
  *
+ * Newest first means by slot. Within a slot, only the order in which one source returned
+ * signatures on one page is kept: across sources, or across pages, their position in the block is
+ * not known, so nothing may rely on the order of signatures that share a slot.
+ *
  * A page ends at the cut: the newest of the oldest signatures of the sources that have not reached
  * their end. Such a source may still hold signatures older than its oldest one, even in the same
  * slot, so a page returns only the signatures strictly newer than the cut, and the cursor keeps the
@@ -115,7 +119,8 @@ export const getSolSignatures = async ({
 		)
 	]);
 
-	// The sort is stable, so signatures of the same slot keep the order their source returned them in.
+	// A stable sort: signatures one source returned on this page keep their order within a slot.
+	// Nothing orders signatures of the same slot across sources (see the doc comment).
 	const newestFirst = [...merged.values()].sort(({ slot: slotA }, { slot: slotB }) =>
 		slotA === slotB ? 0 : slotA > slotB ? -1 : 1
 	);
