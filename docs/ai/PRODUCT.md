@@ -18,7 +18,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 - **Portfolio** — Assets, NFTs, Activity.
 - **Finance** — Trade, Earn, Borrow.
-- **More** — Notes, Explore, Rewards, Support, Settings.
+- **More** — Notes, Explore, Rewards, Help, Settings.
 
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
@@ -26,9 +26,9 @@ On **desktop** every section is laid out at once under a non-interactive heading
 - **Finance destinations.** **Earn** (`/earn/`) is a standalone destination, distinct from the Earning tab inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag and — since each has a single provider today — route **directly to that provider's page**, skipping the intermediate category page: Trade to the **OISY TRADE** provider page (`/providers/oisy-trade/`), Borrow to the Liquidium provider page (`/providers/liquidium/`). The Assets **Trading** tab (`/trading/`) remains a distinct surface. Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
-- **Support** (`/support/`) sits in the More group directly before Settings. It is a page of its own; the user menu keeps its separate link straight out to the external help centre, so two entries labelled "Support" coexist by design.
+- **Help** (`/help/`) sits in the More group directly before Settings, under a life-buoy icon. The user menu keeps its own link straight out to the external help centre; the two do not compete, because the navigation entry is Help and the menu entry is Support.
 
-On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Support / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
+On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Help / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
@@ -128,14 +128,14 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 | `deposit`        | funds are deposited | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_price`, `token_usd_value`; `result_error` on failure |
 | `withdraw`       | funds are withdrawn | `executing` → `success`/`error` | same                                                                                            |
 
-### Support tracking
+### Help tracking
 
-The [Support](#support) page emits one structured `support` event under `event_context: support` and `source_location: support_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
+The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
 
 | `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                |
 | ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| `open`           | —                    | the Support page opens                      | `success`                       | —                                                                                    |
-| `contact`        | `help`               | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                    |
+| `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
 | `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
 | `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
 | `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
@@ -218,13 +218,15 @@ The **currency** selector does **not** appear in the user menu — it is always 
 
 ---
 
-## Support
+## Help
 
-A dedicated page (`/support/`) that collects the tools a user needs when something has gone wrong. It is laid out like Settings — a stack of cards — so the two read as one family, and is built to take further support tools over time.
+A dedicated page (`/help/`) for resolving problems without filing a ticket. The test for what belongs here is whether it lets a user settle something themselves that would otherwise become a support request. It is laid out like Settings — a stack of cards — so the two read as one family.
 
-### Help & Support
+Data export is deliberately **not** here: it is a utility, not help. It stays on the Settings page until a second utility exists to justify a Utilities page of its own.
 
-The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link.
+### Support
+
+The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
 
 ### ICPSwap Token Withdrawal
 
