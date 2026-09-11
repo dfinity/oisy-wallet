@@ -211,23 +211,63 @@ describe('sol-history-pagers.services', () => {
 			expect(signaturesIn(USDC_TOKEN)).toEqual([swap.signature]);
 		});
 
-		it('should hand a record another token already holds to the others without fetching it again', async () => {
+		it('should derive a record one token holds again, with every account, before handing it to the others', async () => {
 			const swap = signatureAt({ blockTime: 100, sources: [wallet, usdcAta] });
 
+			// As the worker derives it: with the wallet only, so it may miss what moved in USDC.
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN.id,
-				transactions: [{ data: recordOf(swap), certified: false }]
+				transactions: [{ data: { ...recordOf(swap), value: 1n }, certified: false }]
 			});
+
+			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+				Promise.resolve(
+					signatures.map((signature) => ({
+						transaction: { ...recordOf(signature), value: 2n },
+						sources: signature.sources
+					}))
+				)
+			);
 
 			mockPages({ signatures: [swap], cursor: cursor('next') });
 
 			await load();
 
-			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith(
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith({
+				address: wallet,
+				network: 'mainnet',
+				tokens: [BONK_TOKEN, USDC_TOKEN],
+				signatures: [swap],
+				known: new Set()
+			});
+
+			const valuesIn = (token: Token) =>
+				(get(solTransactionsStore)?.[token.id] ?? []).map(({ data: { value } }) => value);
+
+			expect(valuesIn(SOLANA_TOKEN)).toEqual([2n]);
+			expect(valuesIn(USDC_TOKEN)).toEqual([2n]);
+			expect(signaturesIn(BONK_TOKEN)).toEqual([]);
+		});
+
+		it('should skip a signature every token it belongs to already holds', async () => {
+			const swap = signatureAt({ blockTime: 100, sources: [wallet, usdcAta] });
+
+			[SOLANA_TOKEN, USDC_TOKEN].forEach(({ id }) =>
+				solTransactionsStore.append({
+					tokenId: id,
+					transactions: [{ data: recordOf(swap), certified: false }]
+				})
+			);
+
+			mockPages({ signatures: [swap], cursor: cursor('next') });
+
+			await load();
+
+			expect(resolveSolSignatures).toHaveBeenCalledWith(
 				expect.objectContaining({ known: new Set([swap.signature]) })
 			);
+			expect(signaturesIn(SOLANA_TOKEN)).toEqual([swap.signature]);
 			expect(signaturesIn(USDC_TOKEN)).toEqual([swap.signature]);
-			expect(signaturesIn(BONK_TOKEN)).toEqual([]);
 		});
 
 		it('should signal the end to every token of the network', async () => {
@@ -258,6 +298,32 @@ describe('sol-history-pagers.services', () => {
 		it('should stop at the floor, checked against the oldest signature the pager returned', async () => {
 			mockPages({
 				signatures: [signatureAt({ blockTime: 50, sources: [wallet] })],
+				cursor: cursor('next')
+			});
+
+			await expect(load({ minTimestamp: 60 })).resolves.toEqual({ success: true });
+			await expect(load({ minTimestamp: 60 })).resolves.toEqual({ success: false });
+
+			expect(getSolSignatures).toHaveBeenCalledOnce();
+		});
+
+		it('should keep the oldest block time across pages, which are not ordered by it', async () => {
+			mockPages(
+				{ signatures: [signatureAt({ blockTime: 50, sources: [wallet] })], cursor: cursor('a') },
+				{ signatures: [signatureAt({ blockTime: 80, sources: [wallet] })], cursor: cursor('b') }
+			);
+
+			await load();
+			await load();
+
+			await expect(load({ minTimestamp: 60 })).resolves.toEqual({ success: false });
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+		});
+
+		it('should take a signature without a block time as zero for the floor', async () => {
+			mockPages({
+				signatures: [{ ...signatureAt({ blockTime: 100, sources: [wallet] }), blockTime: null }],
 				cursor: cursor('next')
 			});
 
@@ -319,7 +385,10 @@ describe('sol-history-pagers.services', () => {
 
 			await load({ signalEnd });
 
-			await expect(load({ signalEnd })).resolves.toEqual({ success: false });
+			await expect(load({ signalEnd })).resolves.toEqual({
+				success: false,
+				err: new Error('RPC down')
+			});
 
 			expect(signalEnd).not.toHaveBeenCalled();
 
@@ -336,7 +405,10 @@ describe('sol-history-pagers.services', () => {
 			mockPages({ signatures: [signatureAt({ blockTime: 100, sources: [wallet] })] });
 			vi.mocked(resolveSolSignatures).mockRejectedValueOnce(new Error('RPC down'));
 
-			await expect(load({ signalEnd })).resolves.toEqual({ success: false });
+			await expect(load({ signalEnd })).resolves.toEqual({
+				success: false,
+				err: new Error('RPC down')
+			});
 
 			expect(signalEnd).not.toHaveBeenCalled();
 		});
@@ -372,6 +444,54 @@ describe('sol-history-pagers.services', () => {
 
 			expect(getSolSignatures).toHaveBeenLastCalledWith(
 				expect.objectContaining({ tokensList: [BONK_TOKEN], cursor: undefined })
+			);
+		});
+
+		it('should not let a page asked for before the address changed touch the pager that replaced it', async () => {
+			const signalEnd = vi.fn();
+			const stale = signatureAt({ blockTime: 100, sources: [wallet] });
+			const nextCursor = cursor('next');
+
+			let answerStalePage: (page: SolSignaturesPage) => void = () => {};
+
+			vi.mocked(getSolSignatures).mockImplementationOnce(
+				() =>
+					new Promise((resolve) => {
+						answerStalePage = resolve;
+					})
+			);
+			mockPages(
+				{
+					signatures: [signatureAt({ blockTime: 100, sources: [mockSolAddress2] })],
+					cursor: nextCursor
+				},
+				{ signatures: [signatureAt({ blockTime: 90, sources: [mockSolAddress2] })] }
+			);
+
+			const stalePage = load({ signalEnd });
+
+			solAddressMainnetStore.set({ data: mockSolAddress2, certified: true });
+			vi.mocked(mapSolSourcesToTokens).mockResolvedValue(
+				new Map([
+					[wallet, null],
+					[mockSolAddress2, null]
+				])
+			);
+
+			await load({ signalEnd });
+
+			// The last page of the old wallet's history, which would end its pager.
+			answerStalePage({ signatures: [stale] });
+
+			await expect(stalePage).resolves.toEqual({ success: true });
+
+			expect(signalEnd).not.toHaveBeenCalled();
+			expect(signaturesIn(SOLANA_TOKEN)).not.toContain(stale.signature);
+
+			await load({ signalEnd });
+
+			expect(getSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ address: mockSolAddress2, cursor: nextCursor })
 			);
 		});
 
@@ -477,6 +597,44 @@ describe('sol-history-pagers.services', () => {
 			expect(getSolSignatures).toHaveBeenLastCalledWith(
 				expect.objectContaining({ address: mockSolAddress2, cursor: undefined })
 			);
+		});
+
+		it('should start over when the token list of the network changes', async () => {
+			mockPages(
+				{ signatures: [signatureAt({ blockTime: 100, sources: [bonkAta] })], cursor: cursor('a') },
+				{ signatures: [signatureAt({ blockTime: 90, sources: [bonkAta] })] }
+			);
+
+			await load({ token: BONK_TOKEN });
+
+			splTokens.set([BONK_TOKEN]);
+
+			await load({ token: BONK_TOKEN });
+
+			expect(getSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ address: bonkAta, cursor: undefined })
+			);
+			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ tokens: [BONK_TOKEN] })
+			);
+		});
+
+		it('should derive a record another token holds again rather than reuse it', async () => {
+			const swap = signatureAt({ blockTime: 100, sources: [bonkAta] });
+
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN.id,
+				transactions: [{ data: recordOf(swap), certified: false }]
+			});
+
+			mockPages({ signatures: [swap], cursor: cursor('next') });
+
+			await load({ token: BONK_TOKEN });
+
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ tokens: [BONK_TOKEN, USDC_TOKEN], known: new Set() })
+			);
+			expect(signaturesIn(BONK_TOKEN)).toEqual([swap.signature]);
 		});
 	});
 });
