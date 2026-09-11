@@ -259,6 +259,61 @@ describe('export-data.services', () => {
 			});
 		});
 
+		it('fails the export when a Solana page fails, rather than exporting what came before it', async () => {
+			const error = new Error('RPC down');
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockResolvedValueOnce({ success: false, err: error });
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN],
+				buildTransactions
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.error.export_failed,
+				level: 'error',
+				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'error',
+				errorCode: 'build_failed',
+				error: 'RPC down'
+			});
+		});
+
+		it('exports once the Solana pager signals the end', async () => {
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN]
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(mockDownloadCsv).toHaveBeenCalledOnce();
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'success'
+			});
+		});
+
 		it('shows an error toast when building the export throws', async () => {
 			const error = new Error('row build failed');
 			mockBuildTransactionRows.mockImplementation(() => {
