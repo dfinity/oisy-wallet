@@ -534,6 +534,8 @@ interface I18nHelp {
 		support_title: string;
 		support_description: string;
 		support_link: string;
+		network_explorers_title: string;
+		network_explorers_description: string;
 		explorers_title: string;
 		explorers_description: string;
 		explorers_velora_description: string;
@@ -561,6 +563,7 @@ interface I18nHelp {
 		withdraw: string;
 	};
 	alt: {
+		network_explorer_link: string;
 		explorer_link: string;
 		select_token_first: string;
 		select_token_second: string;

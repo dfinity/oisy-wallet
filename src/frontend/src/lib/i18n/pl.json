@@ -792,6 +792,8 @@
 			"support_title": "Wsparcie",
 			"support_description": "Odpowiedzi i więcej informacji znajdziesz na stronie wsparcia w dokumentacji $oisy_name. Jeśli utkniesz, skontaktuj się z zespołem.",
 			"support_link": "Przejdź na naszą stronę wsparcia",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "Wypłać"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "Wybierz pierwszy token puli",
 			"select_token_second": "Wybierz drugi token puli",

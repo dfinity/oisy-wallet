@@ -792,6 +792,8 @@
 			"support_title": "Suporte",
 			"support_description": "Encontre respostas e mais informações na página de suporte da documentação do $oisy_name, ou fale com a equipe se você travar.",
 			"support_link": "Ir para nossa página de suporte",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "Sacar"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "Selecionar o primeiro token do pool",
 			"select_token_second": "Selecionar o segundo token do pool",

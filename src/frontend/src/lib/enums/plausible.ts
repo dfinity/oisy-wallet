@@ -91,6 +91,7 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
 	SUPPORT = 'support',
+	NETWORK_EXPLORERS = 'network_explorers',
 	PROVIDER_EXPLORERS = 'provider_explorers',
 	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }

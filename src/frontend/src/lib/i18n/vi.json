@@ -792,6 +792,8 @@
 			"support_title": "Hỗ trợ",
 			"support_description": "Tìm câu trả lời và thêm thông tin trên trang hỗ trợ trong tài liệu $oisy_name, hoặc liên hệ với đội ngũ nếu bạn gặp khó khăn.",
 			"support_link": "Đến trang hỗ trợ của chúng tôi",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "Rút"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "Chọn token thứ nhất của pool",
 			"select_token_second": "Chọn token thứ hai của pool",

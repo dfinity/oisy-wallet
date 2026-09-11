@@ -792,6 +792,8 @@
 			"support_title": "Support",
 			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
 			"support_link": "Visit our support page",
+			"network_explorers_title": "Block explorers",
+			"network_explorers_description": "$oisy_name builds its history from third-party indexers, which can lag behind the chain. A block explorer shows what the network itself records for your address.",
 			"explorers_title": "Provider transaction status",
 			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
 			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
@@ -819,6 +821,7 @@
 			"withdraw": "Withdraw"
 		},
 		"alt": {
+			"network_explorer_link": "Open the $network block explorer for your address",
 			"explorer_link": "Open the $provider explorer for your $chain address",
 			"select_token_first": "Select the first token of the pool",
 			"select_token_second": "Select the second token of the pool",

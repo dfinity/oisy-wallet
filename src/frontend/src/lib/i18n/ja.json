@@ -792,6 +792,8 @@
 			"support_title": "サポート",
 			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
 			"support_link": "サポートページへ",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "出金"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "プールの 1 つ目のトークンを選択",
 			"select_token_second": "プールの 2 つ目のトークンを選択",
