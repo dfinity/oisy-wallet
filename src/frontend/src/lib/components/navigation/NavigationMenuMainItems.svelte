@@ -5,6 +5,7 @@
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { HELP_ENABLED } from '$env/help.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
@@ -266,14 +267,20 @@
 						}
 					}
 				: {}),
-			help: {
-				label: $i18n.navigation.text.help,
-				ariaLabel: $i18n.navigation.alt.help_page,
-				testId: prefixedTestId(NAVIGATION_ITEM_HELP),
-				icon: IconLifeBuoy,
-				href: url(AppPath.Help),
-				selected: isRouteHelp(page)
-			},
+			// Gated on HELP_ENABLED: with the flag off the entry is simply absent, which is all
+			// the gating the page needs - it has nothing worth hiding behind a route guard.
+			...(HELP_ENABLED
+				? {
+						help: {
+							label: $i18n.navigation.text.help,
+							ariaLabel: $i18n.navigation.alt.help_page,
+							testId: prefixedTestId(NAVIGATION_ITEM_HELP),
+							icon: IconLifeBuoy,
+							href: url(AppPath.Help),
+							selected: isRouteHelp(page)
+						}
+					}
+				: {}),
 			settings: {
 				label: $i18n.navigation.text.settings,
 				ariaLabel: $i18n.navigation.alt.settings,

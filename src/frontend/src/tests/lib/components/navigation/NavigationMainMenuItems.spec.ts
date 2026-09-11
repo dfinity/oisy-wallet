@@ -24,6 +24,14 @@ import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.stor
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
+const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
+
+vi.mock('$env/help.env', () => ({
+	get HELP_ENABLED() {
+		return featureFlags.helpEnabled;
+	}
+}));
+
 const navigationMocks = vi.hoisted(() => ({
 	beforeNavigateCallback: undefined as undefined | (() => void),
 	afterNavigateCallback: undefined as undefined | ((navigation: { from: null }) => void)
@@ -45,6 +53,7 @@ describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		featureFlags.helpEnabled = true;
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
 		bottomSheetOpenStore.set(false);
@@ -128,28 +137,38 @@ describe('NavigationMainMenuItems', () => {
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
 	});
 
-	it('surfaces Support in More linking to the Support page', () => {
-		const { getByTestId } = render(NavigationMainMenuItems);
+	it('hides Help when the feature flag is off', () => {
+		featureFlags.helpEnabled = false;
 
-		const supportLink = getByTestId(NAVIGATION_ITEM_HELP);
+		const { queryByTestId } = render(NavigationMainMenuItems);
 
-		expect(supportLink.getAttribute('href')).toContain(AppPath.Help);
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+		// Its neighbour still renders, so the More group itself is intact.
+		expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 	});
 
-	it('places Support directly before Settings in the desktop More section', () => {
+	it('surfaces Help in More linking to the Help page', () => {
 		const { getByTestId } = render(NavigationMainMenuItems);
 
-		const support = getByTestId(NAVIGATION_ITEM_HELP);
+		const helpLink = getByTestId(NAVIGATION_ITEM_HELP);
+
+		expect(helpLink.getAttribute('href')).toContain(AppPath.Help);
+	});
+
+	it('places Help directly before Settings in the desktop More section', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const help = getByTestId(NAVIGATION_ITEM_HELP);
 		const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
 
 		const moreItems = Array.from(
 			settings.parentElement?.querySelectorAll('[data-tid^="navigation-item-"]') ?? []
 		);
 
-		expect(moreItems.indexOf(settings) - moreItems.indexOf(support)).toBe(1);
+		expect(moreItems.indexOf(settings) - moreItems.indexOf(help)).toBe(1);
 	});
 
-	it('surfaces Support inside the mobile More sheet', async () => {
+	it('surfaces Help inside the mobile More sheet', async () => {
 		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
 			props: { layout: 'mobile' }
 		});
