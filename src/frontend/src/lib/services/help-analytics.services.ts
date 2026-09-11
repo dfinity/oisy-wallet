@@ -8,11 +8,13 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { TrackEventParams } from '$lib/types/analytics';
+import type { HelpExplorerChain } from '$lib/types/help';
+import type { SwapProvider } from '$lib/types/swap';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 
 // The action on the Help page, carried in `event_modifier`, so one `help`
 // event covers the whole page rather than a family of `help_*` names.
-export type HelpAction = 'open' | 'contact' | 'scan' | 'select_pool' | 'withdraw';
+export type HelpAction = 'open' | 'contact' | 'explorer' | 'scan' | 'select_pool' | 'withdraw';
 
 export interface TrackHelpParams {
 	// The action → `event_modifier`.
@@ -32,7 +34,15 @@ export interface TrackHelpParams {
 	// How many pools a `scan` looked at → `source_detail`.
 	poolsScanned?: number;
 	// Destination URL of the help link → `event_value`, for the `contact` action.
+	// Only for links that are constants: never for a provider explorer URL, which
+	// embeds a wallet address (privacy invariant 3, see below).
 	link?: string;
+	// Third-party provider the action targeted → `event_provider`. Carries the
+	// `SwapProvider` id rather than the display name, so UI copy can change without
+	// moving the Plausible dimension.
+	provider?: SwapProvider;
+	// Chain the provider link is scoped to → `event_key: network` + `event_value`.
+	network?: HelpExplorerChain;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
 }
@@ -47,6 +57,12 @@ export interface TrackHelpParams {
 // distinctive amount that is also visible on-chain, which is exactly the
 // de-anonymising join forbidden by invariant 3 in docs/ai/frontend/analytics.md.
 // The `balances_found` count on `select_pool` carries the same product signal.
+// The same rule keeps provider explorer URLs out of `link`: they embed a wallet
+// address, so those clicks report the provider and the chain instead.
+//
+// `balances_found`, `link` and `network` all land in `event_key` / `event_value`.
+// No action produces more than one of them, so the last one set wins by construction
+// rather than by accident - add a numbered suffix (`event_key2`) on the first overlap.
 export const buildHelpEvent = ({
 	action,
 	resultStatus,
@@ -57,6 +73,8 @@ export const buildHelpEvent = ({
 	balancesFound,
 	poolsScanned,
 	link,
+	provider,
+	network,
 	error
 }: TrackHelpParams): TrackEventParams => ({
 	name: PLAUSIBLE_EVENTS.HELP,
@@ -77,6 +95,11 @@ export const buildHelpEvent = ({
 		...(notEmptyString(link) && {
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
 			event_value: link
+		}),
+		...(nonNullish(provider) && { event_provider: provider }),
+		...(nonNullish(network) && {
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.NETWORK,
+			event_value: network
 		}),
 		...(notEmptyString(error) && { result_error: error })
 	}
