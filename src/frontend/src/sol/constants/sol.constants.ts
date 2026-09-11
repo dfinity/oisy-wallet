@@ -65,6 +65,10 @@ export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
 // rather than walking an arbitrarily long run of them while the user waits.
 export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
 
+// The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
+// https://solana.com/docs/rpc/http/getmultipleaccounts
+export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
+
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.
 export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
