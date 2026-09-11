@@ -36,7 +36,7 @@ const loadAccountsInfo = async ({
  * three calls per token.
  *
  * Each token's associated token account is derived with the token's own program, so Token-2022
- * accounts are found and parse like legacy ones.
+ * accounts are found and parsed like legacy ones.
  */
 export const loadSolNetworkBalances = async ({
 	address,
@@ -58,8 +58,8 @@ export const loadSolNetworkBalances = async ({
 		network
 	});
 
-	const spl = tokens.reduce<Record<SplTokenAddress, bigint>>(
-		(acc, { address: tokenAddress }, index) => {
+	const spl = tokens.reduce<Partial<Record<SplTokenAddress, bigint>>>(
+		(acc, { address: tokenAddress, owner: tokenOwnerAddress }, index) => {
 			const account = ataAccounts[index];
 
 			// A null account is the RPC saying the ATA was never created (or was closed): the user
@@ -69,7 +69,12 @@ export const loadSolNetworkBalances = async ({
 				return acc;
 			}
 
-			const tokenAccount = isNullish(account) ? undefined : parseTokenAccountState(account);
+			// Only an account of this token's own program is a token account of it: at the same
+			// address, a legacy account must not be read as Token-2022 or the other way round.
+			const tokenAccount =
+				isNullish(account) || account.owner !== tokenOwnerAddress
+					? undefined
+					: parseTokenAccountState(account);
 
 			// An account that exists but is not a token account of this mint has no balance we can
 			// read. Reporting zero would erase a balance the user may well hold, so the token is left
@@ -78,7 +83,9 @@ export const loadSolNetworkBalances = async ({
 				return acc;
 			}
 
-			acc[tokenAddress] = tokenAccount.amount;
+			// The address is the wallet's ATA, but `SetAuthority` can hand the account to someone
+			// else. What it holds is then theirs, and the wallet holds none of it.
+			acc[tokenAddress] = tokenAccount.owner === address ? tokenAccount.amount : ZERO;
 			return acc;
 		},
 		{}
