@@ -40,6 +40,10 @@
 		"method": "cargo-binstall",
 		"version": "0.9.3"
 	},
+	"cargo-nextest": {
+		"method": "cargo-binstall",
+		"version": "0.9.138"
+	},
 	"cargo-audit": {
 		"method": "cargo-binstall",
 		"version": "0.21.2"
