@@ -1,9 +1,11 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
 import SolTransactionsScroll from '$sol/components/transactions/SolTransactionsScroll.svelte';
-import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTokenTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
@@ -13,8 +15,8 @@ import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock'
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactions: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTokenTransactions: vi.fn()
 }));
 
 describe('SolTransactionsScroll', () => {
@@ -24,8 +26,6 @@ describe('SolTransactionsScroll', () => {
 		...tx,
 		from: mockSolAddress
 	}));
-
-	const mockLastSignature = mockTransactions[mockTransactions.length - 1].signature;
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
@@ -37,6 +37,8 @@ describe('SolTransactionsScroll', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		mockAuthStore();
 
 		token.set(mockToken);
 
@@ -54,13 +56,12 @@ describe('SolTransactionsScroll', () => {
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	describe('when the infinite scroll is triggered', () => {
-		it('should load next transactions', () => {
+		it('should page the token through its own pager, without a cursor of its own making', () => {
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).toHaveBeenCalledOnce();
-			expect(loadNextSolTransactions).toHaveBeenNthCalledWith(1, {
+			expect(loadOlderSolTokenTransactions).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
 				token: mockToken,
-				before: mockLastSignature,
 				signalEnd: expect.any(Function)
 			});
 		});
@@ -70,7 +71,7 @@ describe('SolTransactionsScroll', () => {
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should not load next transactions if the transactions store is nullish', () => {
@@ -78,7 +79,7 @@ describe('SolTransactionsScroll', () => {
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 
 		it('should not load next transactions if the transactions store is empty', () => {
@@ -87,7 +88,7 @@ describe('SolTransactionsScroll', () => {
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).not.toHaveBeenCalled();
+			expect(loadOlderSolTokenTransactions).not.toHaveBeenCalled();
 		});
 	});
 });
