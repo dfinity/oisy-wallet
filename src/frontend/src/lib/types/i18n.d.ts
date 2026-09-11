@@ -122,6 +122,7 @@ interface I18nNavigation {
 		source_code: string;
 		documentation: string;
 		support: string;
+		help: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
@@ -148,6 +149,7 @@ interface I18nNavigation {
 		menu: string;
 		documentation: string;
 		support: string;
+		help_page: string;
 		open_twitter: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
@@ -524,6 +526,39 @@ interface I18nHero {
 		tooltip_toggle_balance: string;
 	};
 	alt: { toggle_privacy_mode: string };
+}
+
+interface I18nHelp {
+	text: {
+		title: string;
+		support_title: string;
+		support_description: string;
+		support_link: string;
+		icpswap_title: string;
+		icpswap_description: string;
+		scan: string;
+		scanning: string;
+		scan_hint: string;
+		scan_nothing_found: string;
+		scan_unreadable: string;
+		or_pick_a_pair: string;
+		token_first: string;
+		token_second: string;
+		select_token: string;
+		no_tokens: string;
+		checking_pool: string;
+		nothing_to_withdraw: string;
+		balance_unused: string;
+		withdraw: string;
+	};
+	alt: { select_token_first: string; select_token_second: string; withdraw: string; scan: string };
+	error: {
+		pool_not_found: string;
+		load_failed: string;
+		withdraw_failed: string;
+		scan_failed: string;
+	};
+	success: { withdraw: string };
 }
 
 interface I18nSettings {
@@ -2371,6 +2406,7 @@ interface I18n {
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
+	help: I18nHelp;
 	settings: I18nSettings;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;

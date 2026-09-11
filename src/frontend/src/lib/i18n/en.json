@@ -136,6 +136,7 @@
 			"source_code": "Source code",
 			"documentation": "Documentation",
 			"support": "Support",
+			"help": "Help",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
@@ -162,6 +163,7 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
+			"help_page": "Open the help page",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
@@ -784,6 +786,45 @@
 			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "Help",
+			"support_title": "Support",
+			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
+			"support_link": "Visit our support page",
+			"icpswap_title": "ICPSwap Token Withdrawal",
+			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
+			"scan": "Scan my pools",
+			"scanning": "Checking your pools…",
+			"scan_hint": "Checks every pool between two tokens active in your wallet. If you swapped into a token you never enabled, enable it first or name the pair below.",
+			"scan_nothing_found": "Nothing left behind in the $pools pools checked.",
+			"scan_unreadable": "$unreadable of the $pools pools could not be read. Try again, or name the pair below.",
+			"or_pick_a_pair": "Or name a pair",
+			"token_first": "First token",
+			"token_second": "Second token",
+			"select_token": "Select",
+			"no_tokens": "No ICRC tokens are enabled. Enable the two tokens of the pool first.",
+			"checking_pool": "Checking the pool…",
+			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
+			"balance_unused": "Unused balance",
+			"withdraw": "Withdraw"
+		},
+		"alt": {
+			"select_token_first": "Select the first token of the pool",
+			"select_token_second": "Select the second token of the pool",
+			"withdraw": "Withdraw $symbol from the pool",
+			"scan": "Scan the pools between your active tokens"
+		},
+		"error": {
+			"pool_not_found": "No ICPSwap pool exists for this pair. Check the two tokens and try again.",
+			"load_failed": "Could not read your balances from this pool.",
+			"withdraw_failed": "The withdrawal failed.",
+			"scan_failed": "Could not fetch the list of ICPSwap pools."
+		},
+		"success": {
+			"withdraw": "Withdrew $amount $symbol from the pool."
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Settings",
@@ -989,7 +1030,7 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"

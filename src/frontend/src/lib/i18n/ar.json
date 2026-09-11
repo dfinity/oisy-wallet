@@ -136,6 +136,7 @@
 			"source_code": "الرمز المصدري",
 			"documentation": "الوثائق",
 			"support": "الدعم",
+			"help": "",
 			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
 			"vip_qr_code": "الرمز الخاص",
 			"binance_qr_code": "رمز باينانس التعريفي",
@@ -162,6 +163,7 @@
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
+			"help_page": "",
 			"open_twitter": "افتح حساب DFINITY X/Twitter",
 			"vip_qr_code": "إنشاء رابط دعوة",
 			"binance_qr_code": "إنشاء رابط Binance Clubhouse",
@@ -782,6 +784,45 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "تشغيل وإيقاف وضع الخصوصية"
+		}
+	},
+	"help": {
+		"text": {
+			"title": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
+			"icpswap_title": "",
+			"icpswap_description": "",
+			"scan": "",
+			"scanning": "",
+			"scan_hint": "",
+			"scan_nothing_found": "",
+			"scan_unreadable": "",
+			"or_pick_a_pair": "",
+			"token_first": "",
+			"token_second": "",
+			"select_token": "",
+			"no_tokens": "",
+			"checking_pool": "",
+			"nothing_to_withdraw": "",
+			"balance_unused": "",
+			"withdraw": ""
+		},
+		"alt": {
+			"select_token_first": "",
+			"select_token_second": "",
+			"withdraw": "",
+			"scan": ""
+		},
+		"error": {
+			"pool_not_found": "",
+			"load_failed": "",
+			"withdraw_failed": "",
+			"scan_failed": ""
+		},
+		"success": {
+			"withdraw": ""
 		}
 	},
 	"settings": {

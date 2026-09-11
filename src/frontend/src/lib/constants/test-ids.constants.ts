@@ -121,6 +121,21 @@ export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
 export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
+export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
+
+export const HELP_SUPPORT_CARD = 'help-support-card';
+export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
+export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
+export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';
+export const HELP_ICPSWAP_LOADING = 'help-icpswap-loading';
+export const HELP_ICPSWAP_ERROR = 'help-icpswap-error';
+export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
+export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
+export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
+export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
+export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
