@@ -2,6 +2,7 @@ import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
@@ -26,6 +27,7 @@ import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -60,6 +62,15 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsStatus: vi.fn(),
 	submitNearIntentsDeposit: vi.fn()
 }));
+
+const ethereumNativeId = nativeSwapTokenIdentifier({
+	networkId: ETHEREUM_NETWORK_ID,
+	symbol: 'ETH'
+});
+const solanaNativeId = nativeSwapTokenIdentifier({
+	networkId: SOLANA_MAINNET_NETWORK_ID,
+	symbol: 'SOL'
+});
 
 describe('near-intents.services', () => {
 	beforeEach(() => {
@@ -545,7 +556,9 @@ describe('near-intents.services', () => {
 
 			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
 
-			expect(result).toEqual(new Set(['0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', 'eth']));
+			expect(result).toEqual(
+				new Set(['0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', ethereumNativeId])
+			);
 		});
 
 		it('should return contract addresses and symbols across multiple EVM networks', async () => {
@@ -558,7 +571,7 @@ describe('near-intents.services', () => {
 			expect(result).toEqual(
 				new Set([
 					'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-					'eth',
+					ethereumNativeId,
 					'0xaf88d065e77c8cc2239327c5edb3a432268e5831'
 				])
 			);
@@ -569,7 +582,9 @@ describe('near-intents.services', () => {
 
 			const result = await nearIntentsSupportedTokens({ networkIds: [SOLANA_MAINNET_NETWORK_ID] });
 
-			expect(result).toEqual(new Set(['sol', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v']));
+			expect(result).toEqual(
+				new Set([solanaNativeId, 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'])
+			);
 		});
 
 		it('should return empty set when no tokens match the given network', async () => {
@@ -590,13 +605,44 @@ describe('near-intents.services', () => {
 			expect(result).toEqual(new Set());
 		});
 
-		it('should use lowercase symbol for native tokens without contractAddress', async () => {
+		it('should use the network-qualified identifier for native tokens without contractAddress', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 
 			const result = await nearIntentsSupportedTokens({ networkIds: [ETHEREUM_NETWORK_ID] });
 
-			expect(result.has('eth')).toBeTruthy();
+			expect(result.has(ethereumNativeId)).toBeTruthy();
+			expect(result.has('eth')).toBeFalsy();
 			expect(result.has('ETH')).toBeFalsy();
+		});
+
+		// The identifier space is flat per category, so a bare symbol made native ETH on one EVM
+		// chain indistinguishable from native ETH on another.
+		it('should key the same native symbol per network', async () => {
+			const nativeEth = (blockchain: string): NearIntentsToken => ({
+				assetId: `nep141:${blockchain}.omft.near`,
+				decimals: 18,
+				blockchain,
+				symbol: 'ETH',
+				price: 3000.0,
+				priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+				contractAddress: null
+			});
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([
+				nativeEth('eth'),
+				nativeEth('base'),
+				nativeEth('arb')
+			]);
+
+			const result = await nearIntentsSupportedTokens({
+				networkIds: [ETHEREUM_NETWORK_ID, BASE_NETWORK_ID, ARBITRUM_MAINNET_NETWORK_ID]
+			});
+
+			expect(result.size).toBe(3);
+			expect(result.has(ethereumNativeId)).toBeTruthy();
+			expect(
+				result.has(nativeSwapTokenIdentifier({ networkId: BASE_NETWORK_ID, symbol: 'ETH' }))
+			).toBeTruthy();
 		});
 
 		it('should lowercase mixed-case EVM contract addresses', async () => {
@@ -618,12 +664,14 @@ describe('near-intents.services', () => {
 			expect(result.has('0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48')).toBeFalsy();
 		});
 
-		it('should use lowercased symbol for native BTC when filtering by BTC mainnet network', async () => {
+		it('should use the network-qualified identifier for native BTC when filtering by BTC mainnet network', async () => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
 
 			const result = await nearIntentsSupportedTokens({ networkIds: [BTC_MAINNET_NETWORK_ID] });
 
-			expect(result).toEqual(new Set(['btc']));
+			expect(result).toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: BTC_MAINNET_NETWORK_ID, symbol: 'BTC' })])
+			);
 		});
 
 		it('should not treat the btc blockchain as EVM when a contract address is present', async () => {
