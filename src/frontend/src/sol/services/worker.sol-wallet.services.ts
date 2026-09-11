@@ -97,7 +97,9 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			network: { id: networkId }
 		} = token;
 
-		await Promise.all(
+		// The cache only shows something while the chain loads: a token whose cache cannot be read must
+		// not keep the whole network from syncing.
+		await Promise.allSettled(
 			[token, ...splTokens]
 				.filter(({ id }) => !(cachedTokenIds?.has(id) ?? false))
 				.map(({ id: tokenId }) => syncWalletFromCache({ tokenId, networkId }))
