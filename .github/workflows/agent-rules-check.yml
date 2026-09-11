@@ -1,0 +1,28 @@
+name: Check agent-rules sync
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'docs/ai/**'
+      - '.github/copilot-instructions.md'
+      - 'scripts/build.agent-rules.mjs'
+      - '.github/workflows/agent-rules-check.yml'
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  agent-rules-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify agent-rules sync
+        run: node scripts/build.agent-rules.mjs --check
