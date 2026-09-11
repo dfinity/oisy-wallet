@@ -7,8 +7,10 @@ import {
 import {
 	fetchNearIntentsQuote,
 	fetchNearIntentsTokens,
+	NEAR_INTENTS_QUOTE_ERROR_PREFIX,
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import type {
 	NearIntentsQuoteRequest,
 	NearIntentsQuoteResponse,
@@ -43,6 +45,110 @@ export const loadNearIntentsTokens = async (): Promise<NearIntentsToken[]> => {
 
 export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
+};
+
+// 1Click restricts some chains to swaps above a fiat floor ($1,000 on Polygon and BSC at
+// the time of writing), on either side of the route, and exposes the figure only in the
+// refusal message. A one-unit dry quote provokes that refusal without committing to
+// anything: the limit is checked before the recipient and refund addresses are validated,
+// so placeholder addresses are enough and the probe needs neither the user's addresses nor
+// a plausible amount.
+//
+// If 1Click ever validates addresses first, every probe reads as unrestricted and the hint
+// stops appearing — the reactive refusal still names the limit, so that fails safe.
+const NEAR_INTENTS_LIMIT_PROBE_ADDRESS = 'oisy-swap-limit-probe';
+const NEAR_INTENTS_LIMIT_PROBE_AMOUNT = 1n;
+const NEAR_INTENTS_LIMIT_PROBE_SLIPPAGE = 100;
+
+// A refusal that is not the fiat limit proves both probed chains are unrestricted, so it is
+// remembered per chain. The limit itself proves only that one of the two sides is
+// restricted, not which, so that verdict is remembered against the pair. A pair whose chains
+// are both already known unrestricted needs no probe, which is what stops this from being a
+// request per pair selection.
+const unrestrictedBlockchains = new Set<string>();
+const restrictedPairLimits = new Map<string, number>();
+
+const restrictionPairKey = (blockchains: [string, string]): string =>
+	[...blockchains].sort().join('<->');
+
+export const clearNearIntentsSwapLimitCache = (): void => {
+	unrestrictedBlockchains.clear();
+	restrictedPairLimits.clear();
+};
+
+/**
+ * The fiat floor 1Click imposes on a token pair, in USD, or `undefined` when the pair has
+ * none, when the pair is not routable through NEAR Intents, or when the probe could not
+ * reach a verdict.
+ *
+ * `undefined` is deliberately not distinguished from "not yet known": the caller shows a
+ * hint or shows nothing, and a swap is never blocked on this answer.
+ */
+export const fetchNearIntentsSwapLimit = async ({
+	sourceToken,
+	destinationToken
+}: Pick<NearIntentsQuoteParams, 'sourceToken' | 'destinationToken'>): Promise<
+	number | undefined
+> => {
+	if (!NEAR_INTENTS_SWAP_ENABLED) {
+		return;
+	}
+
+	const nearTokens = await loadNearIntentsTokens();
+
+	const assets = resolveNearIntentsSwapAssets({ nearTokens, sourceToken, destinationToken });
+
+	if (isNullish(assets)) {
+		return;
+	}
+
+	const { srcAsset, destAsset } = assets;
+
+	const blockchains: [string, string] = [srcAsset.blockchain, destAsset.blockchain];
+
+	const cachedLimit = restrictedPairLimits.get(restrictionPairKey(blockchains));
+
+	if (nonNullish(cachedLimit)) {
+		return cachedLimit;
+	}
+
+	if (blockchains.every((blockchain) => unrestrictedBlockchains.has(blockchain))) {
+		return;
+	}
+
+	const rememberUnrestricted = () => {
+		blockchains.forEach((blockchain) => unrestrictedBlockchains.add(blockchain));
+	};
+
+	try {
+		await fetchNearIntentsQuote({
+			...buildNearIntentsQuoteRequest({
+				slippageTolerance: NEAR_INTENTS_LIMIT_PROBE_SLIPPAGE,
+				srcAsset,
+				destAsset,
+				amount: NEAR_INTENTS_LIMIT_PROBE_AMOUNT,
+				userAddress: NEAR_INTENTS_LIMIT_PROBE_ADDRESS,
+				recipientAddress: NEAR_INTENTS_LIMIT_PROBE_ADDRESS,
+				deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
+			}),
+			dry: true
+		});
+
+		// Implausible at one unit, but a quote is still proof there is no floor above it.
+		rememberUnrestricted();
+	} catch (err: unknown) {
+		if (err instanceof SwapAmountTooLowError && err.minimum?.type === 'usd') {
+			restrictedPairLimits.set(restrictionPairKey(blockchains), err.minimum.value);
+
+			return err.minimum.value;
+		}
+
+		// Only a refusal is evidence. A transport failure says nothing about the route, so it
+		// is not cached either way and the next pair selection retries.
+		if (err instanceof Error && err.message.startsWith(NEAR_INTENTS_QUOTE_ERROR_PREFIX)) {
+			rememberUnrestricted();
+		}
+	}
 };
 
 // Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive) and
