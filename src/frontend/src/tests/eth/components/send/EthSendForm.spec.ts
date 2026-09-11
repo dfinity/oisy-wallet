@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
@@ -78,7 +77,7 @@ describe('EthSendForm', () => {
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container, getByTestId, getByText, queryByTestId } = render(EthSendForm, {
+		const { container, getByTestId, getByText } = render(EthSendForm, {
 			props,
 			context: mockContext
 		});
@@ -89,21 +88,9 @@ describe('EthSendForm', () => {
 
 		expect(getByTestId(SEND_DESTINATION_SECTION)).toBeInTheDocument();
 
-		// The label follows the feature flag: the estimate only replaces the ceiling where the
-		// priority work is enabled.
-		expect(
-			getByText(
-				SEND_TRANSACTION_PRIORITY_ENABLED
-					? en.fee.text.estimated_fee_eth
-					: // max_fee_eth contains HTML, so match the leading plain-text fragment only
-						'Max fee'
-			)
-		).toBeInTheDocument();
+		expect(getByText(en.fee.text.estimated_fee_eth)).toBeInTheDocument();
 
-		// The priority row follows the same flag, so beta and production keep today's form.
-		expect(queryByTestId(ETH_FEE_PRIORITY)).toStrictEqual(
-			SEND_TRANSACTION_PRIORITY_ENABLED ? expect.anything() : null
-		);
+		expect(getByTestId(ETH_FEE_PRIORITY)).toBeInTheDocument();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 

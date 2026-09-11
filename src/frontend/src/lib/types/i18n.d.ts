@@ -18,6 +18,7 @@ interface I18nBorrow {
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
+	provider_unavailable: { title: string; description: string };
 }
 
 interface I18nBorrowings {
@@ -1285,7 +1286,6 @@ interface I18nFee {
 		estimated_btc: string;
 		estimated_inter_network: string;
 		estimated_eth: string;
-		max_fee_eth: string;
 		estimated_fee_eth: string;
 		estimated: string;
 		priority: string;

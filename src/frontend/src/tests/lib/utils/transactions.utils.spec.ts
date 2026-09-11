@@ -15,6 +15,11 @@ import {
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { BONK_TOKEN, BONK_TOKEN_ID } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
+	USDC_DECIMALS as SPL_USDC_DECIMALS,
+	USDC_TOKEN as SPL_USDC_TOKEN,
+	USDC_TOKEN_ID as SPL_USDC_TOKEN_ID
+} from '$env/tokens/tokens-spl/tokens.usdc.env';
+import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN,
@@ -55,6 +60,10 @@ import {
 } from '$lib/utils/transactions.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import {
 	createMockEthCertifiedTransactions,
@@ -689,6 +698,54 @@ describe('transactions.utils', () => {
 				});
 
 				expect(result).toHaveLength(2);
+			});
+
+			describe('a SOL to USDC swap restored from the backend cache', () => {
+				const usdcReceived = {
+					delta: 75_000_000n,
+					tokenAddress: SPL_USDC_TOKEN.address,
+					decimals: SPL_USDC_DECIMALS
+				};
+
+				// Shaped as the service shapes a swap: typed by its outgoing half, valued by the SOL spent.
+				const swap: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					value: 500_000_000n,
+					type: 'send',
+					summary: { kind: 'swap', spent: { delta: -500_000_000n }, received: usdcReceived },
+					netChanges: [{ delta: -500_000_000n }, usdcReceived]
+				};
+
+				const restored = mapUserTransactionToSolTransaction({
+					transaction: mapSolTransactionToUserTransaction({ ...swap, id: String(swap.signature) }),
+					address: swap.from
+				});
+
+				// Defect: the backend cache drops the summary, so a restored swap keeps only its SOL row,
+				// and the record under USDC is a `send` of the 500_000_000n lamports spent.
+				it.fails('should keep both sides of the swap, the USDC side positive and in USDC', () => {
+					const result = mapAllTransactionsUi({
+						tokens: [SOLANA_TOKEN, SPL_USDC_TOKEN],
+						$ethTransactions: {},
+						...rest,
+						$solTransactions: {
+							[SOLANA_TOKEN_ID]: [{ data: restored, certified: false }],
+							[SPL_USDC_TOKEN_ID]: [{ data: restored, certified: false }]
+						}
+					});
+
+					expect(result.map(({ token: { symbol } }) => symbol)).toEqual([
+						SOLANA_TOKEN.symbol,
+						SPL_USDC_TOKEN.symbol
+					]);
+
+					const usdc = result.find(({ token }) => token === SPL_USDC_TOKEN);
+
+					// The row renders the net change of its own token, so that is what must survive.
+					expect((usdc?.transaction as SolTransactionUi | undefined)?.netChanges).toContainEqual(
+						usdcReceived
+					);
+				});
 			});
 
 			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {

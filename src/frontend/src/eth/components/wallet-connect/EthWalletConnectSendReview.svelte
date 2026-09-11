@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
@@ -19,7 +18,6 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
@@ -282,18 +280,12 @@
 				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
 
 				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
-					{#if SEND_TRANSACTION_PRIORITY_ENABLED}
-						<EthFeePriority gas={signedGas} styleClass="mb-2" />
-					{/if}
+					<EthFeePriority gas={signedGas} styleClass="mb-2" />
 
-					<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
+					<EthFeeDisplay estimated gas={signedGas}>
 						{#snippet label()}
 							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
-							{#if SEND_TRANSACTION_PRIORITY_ENABLED}
-								{$i18n.fee.text.estimated}
-							{:else}
-								<Html text={$i18n.fee.text.max_fee_eth} />
-							{/if}
+							{$i18n.fee.text.estimated}
 						{/snippet}
 					</EthFeeDisplay>
 				</div>
