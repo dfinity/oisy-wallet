@@ -17,6 +17,7 @@ import { getSolSignatures } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolNetworkBalances } from '$sol/types/sol-balance';
 import type { SolResolvedTransaction, SolSignatureWithSources } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -54,7 +55,8 @@ vi.mock(import('$sol/api/solana.api'), async (importOriginal) => ({
 	fetchSignatures: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-signatures.services', () => ({
+vi.mock(import('$sol/services/sol-signatures.services'), async (importOriginal) => ({
+	...(await importOriginal()),
 	getSolSignatures: vi.fn()
 }));
 
@@ -772,6 +774,59 @@ describe('sol-wallet.scheduler', () => {
 			expect(getSolSignatures).toHaveBeenCalledTimes(2);
 			expect(walletPosts()).toHaveLength(0);
 			expect(scheduler['store'].catchUp).toEqual([]);
+		});
+
+		// While a walk is still paging through a crowded slot, the head answers every tick with the same
+		// empty page and cut: it is the same burst, not a new one to walk again.
+		it('should queue one walk for a crowded slot that the head keeps answering with the same cut', async () => {
+			const crowded = Array.from(
+				{ length: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK * 2 + 5 },
+				() => signatureAt({ slot: 105n })
+			);
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toHaveLength(1);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toHaveLength(1);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toEqual([]);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		it('should resolve a signature returned by the head and a walk once, with the sources of both', async () => {
+			const fromWallet = signatureAt({ slot: 105n });
+			const fromTokenAccount = { ...fromWallet, sources: [mockAtaAddress] };
+
+			const walkCursor: SolSignaturesCursor = {
+				before: { [mockSolAddress]: { signature: fromWallet.signature, slot: 106n } },
+				exhausted: [],
+				pending: []
+			};
+
+			vi.mocked(getSolSignatures).mockImplementation(({ cursor }) =>
+				Promise.resolve(
+					isNullish(cursor)
+						? { signatures: [fromWallet], cursor: walkCursor }
+						: { signatures: [fromTokenAccount] }
+				)
+			);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					signatures: [{ ...fromWallet, sources: [mockSolAddress, mockAtaAddress] }]
+				})
+			);
 		});
 	});
 

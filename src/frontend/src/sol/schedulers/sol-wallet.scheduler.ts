@@ -15,7 +15,7 @@ import {
 	mapSolSourcesToTokens,
 	resolveSolSignatures
 } from '$sol/services/sol-resolve-signatures.services';
-import { getSolSignatures } from '$sol/services/sol-signatures.services';
+import { getSolSignatures, mergeSignatureSources } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -58,7 +58,20 @@ interface SolWalletCatchUp {
 	// The newest slot held when the walk began. The walk ends on the page that passes it, and
 	// everything it returned above it is new, whatever the head check has resolved since.
 	newestSlot: SolSignature['slot'];
+	// The head cursor the walk began from. A head that has not moved since, such as a crowded slot
+	// that keeps answering an empty page with the same cut, is the same burst: it must not queue a
+	// second walk that would replay the first one's pages.
+	anchor: string;
 }
+
+const cursorKey = ({ before, exhausted, pending }: SolSignaturesCursor): string =>
+	JSON.stringify([
+		Object.entries(before)
+			.map(([source, entry]) => `${source}:${entry?.signature ?? ''}`)
+			.sort(),
+		[...exhausted].sort(),
+		pending.map(({ signature }) => signature).sort()
+	]);
 
 interface SolWalletHead {
 	// Every new signature the head check collected, including those that derive to no record.
@@ -225,6 +238,15 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		const { signatures: head, cursor } = await getSolSignatures(params);
 
+		const anchor = nonNullish(cursor) ? cursorKey(cursor) : undefined;
+
+		const startsWalk =
+			nonNullish(cursor) &&
+			nonNullish(anchor) &&
+			nonNullish(newestSlot) &&
+			!passesSlot({ cursor, slot: newestSlot }) &&
+			!catchUp.some((walk) => walk.anchor === anchor);
+
 		// With nothing held yet, the first page is all the head check loads: older history belongs to
 		// the pagers.
 		const resumed = isNullish(newestSlot)
@@ -233,25 +255,19 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 					...params,
 					// Walks left from earlier ticks go first, so that a steady flow of new signatures
 					// cannot hold them back.
-					walks: [
-						...catchUp,
-						...(isNullish(cursor) || passesSlot({ cursor, slot: newestSlot })
-							? []
-							: [{ cursor, newestSlot }])
-					],
+					walks: [...catchUp, ...(startsWalk ? [{ cursor, newestSlot, anchor }] : [])],
 					pages: SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK - 1
 				});
 
 		// Two walks can return the same signature when one reaches a slot whose signatures the
-		// other's cursor still holds back.
+		// other's cursor still holds back. Each returns it tagged with the sources it saw, and the
+		// tags decide which tokens receive the record, so they are merged, never replaced.
 		const newSignatures = [
-			...new Map(
+			...mergeSignatureSources(
 				[
 					...head.filter(({ slot }) => isNullish(newestSlot) || slot >= newestSlot),
 					...resumed.signatures
-				]
-					.filter(({ signature }) => !known.has(signature))
-					.map((solSignature) => [solSignature.signature, solSignature])
+				].filter(({ signature }) => !known.has(signature))
 			).values()
 		];
 
