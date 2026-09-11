@@ -32,7 +32,9 @@ out/
 # frontend code
 node_modules/
 build/
+build-ai/
 .svelte-kit/
+.svelte-kit-ai/
 package/
 
 # environment variables
