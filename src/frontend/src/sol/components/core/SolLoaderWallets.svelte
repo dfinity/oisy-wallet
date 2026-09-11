@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import {
@@ -8,8 +8,9 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { enabledSplTokens } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import type { NetworkId } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
@@ -17,14 +18,25 @@
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import type { SolAddress } from '$sol/types/address';
 	import type { SplToken } from '$sol/types/spl';
+
+	// The address, the token list and the token ids the worker is started with: a worker never
+	// changes them. A custom SPL token's id comes from its symbol, so it can change while its mint
+	// and program stay the same, and the worker would go on writing under the old id. Token ids are
+	// symbols, equal only to themselves, so the key is compared entry by entry.
+	type WorkerKey = (string | TokenId)[];
 
 	interface NetworkWallet {
 		token: Token;
 		splTokens: SplToken[];
-		// The address and the token list the worker is started with: a worker never changes them.
-		key: string;
+		address: SolAddress;
+		key: WorkerKey;
 	}
+
+	const sameKey = ({ current, next }: { current: WorkerKey; next: WorkerKey }): boolean =>
+		current.length === next.length && current.every((entry, index) => entry === next[index]);
 
 	// One worker per Solana network with an address: its native token and its enabled SPL tokens.
 	let networkWallets: NetworkWallet[] = $derived(
@@ -47,16 +59,26 @@
 
 			const splTokens = $enabledSplTokens.filter(({ network: { id } }) => id === networkId);
 
-			const key = JSON.stringify([
+			const key: WorkerKey = [
 				address,
-				splTokens.map(({ address: tokenAddress, owner }) => `${tokenAddress}:${owner}`).sort()
-			]);
+				token.id,
+				...splTokens
+					.map(({ address: tokenAddress, owner, id }) => ({
+						source: `${tokenAddress}:${owner}`,
+						id
+					}))
+					.sort(({ source: sourceA }, { source: sourceB }) => sourceA.localeCompare(sourceB))
+					.flatMap(({ source, id }) => [source, id])
+			];
 
-			return [...acc, { token, splTokens, key }];
+			return [...acc, { token, splTokens, address, key }];
 		}, [])
 	);
 
-	const workers = new SvelteMap<NetworkId, { key: string; worker: SolWalletWorker }>();
+	const workers = new SvelteMap<
+		NetworkId,
+		{ address: SolAddress; key: WorkerKey; worker: SolWalletWorker }
+	>();
 
 	let destroyed = false;
 
@@ -73,23 +95,37 @@
 			.forEach(destroyWorker);
 
 		await Promise.allSettled(
-			wanted.map(async ({ token, splTokens, key }) => {
+			wanted.map(async ({ token, splTokens, address, key }) => {
 				const {
 					network: { id: networkId }
 				} = token;
 
 				const current = workers.get(networkId);
 
-				if (current?.key === key) {
+				if (nonNullish(current) && sameKey({ current: current.key, next: key })) {
 					return;
 				}
 
 				destroyWorker(networkId);
 
+				// The stores hold the rows and balances of the address the old worker synced. The new
+				// worker's first sync would prepend to them, so they are cleared, and restored from the
+				// cache as on a first start.
+				const addressChanged = nonNullish(current) && current.address !== address;
+
+				if (addressChanged) {
+					new Set([...current.worker.tokenIds, token.id, ...splTokens.map(({ id }) => id)]).forEach(
+						(tokenId) => {
+							solTransactionsStore.reset(tokenId);
+							balancesStore.reset(tokenId);
+						}
+					);
+				}
+
 				const worker = await SolWalletWorker.init({
 					token,
 					splTokens,
-					cachedTokenIds: new Set(current?.worker.tokenIds)
+					cachedTokenIds: new Set(addressChanged ? [] : current?.worker.tokenIds)
 				});
 
 				if (destroyed) {
@@ -99,7 +135,7 @@
 
 				worker.start();
 
-				workers.set(networkId, { key, worker });
+				workers.set(networkId, { address, key, worker });
 			})
 		);
 	};
