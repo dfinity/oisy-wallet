@@ -18,6 +18,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
 	SolParsedInstruction,
+	SolParsedRpcInstruction,
 	SolRpcInstruction
 } from '$sol/types/sol-instructions';
 import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-transaction';
@@ -37,6 +38,7 @@ import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
+import { type Option, unwrapOption } from '@solana/kit';
 
 const ignoredInstruction = (): MappedSolTransaction => ({ amount: undefined });
 const unreviewedInstruction = (): MappedSolTransaction => ({
@@ -762,6 +764,222 @@ const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTra
 	// Decoded or not, the honest answer is that this message does more than the summary shows.
 	return unreviewedInstruction();
 };
+
+const isKitInstruction = (instruction: unknown): instruction is SolInstruction =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'programAddress' in instruction &&
+	'data' in instruction &&
+	'accounts' in instruction;
+
+/**
+ * How one program's decoded instructions are spelled in the RPC's vocabulary.
+ *
+ * The decoders name an instruction by an enum member and its accounts by role, which is almost
+ * exactly what the RPC reports: `TransferChecked` against `transferChecked`, `source` against
+ * `source`. Where the two genuinely disagree, the difference is written down here rather than
+ * handled by a branch per instruction, so a program's whole instruction set is covered at once
+ * and a variant nobody thought about still arrives named.
+ */
+interface ProgramVocabulary {
+	program: string;
+	names: Record<number, string>;
+	types?: Record<string, string>;
+	accounts?: Record<string, string>;
+	fields?: Record<string, string>;
+}
+
+/**
+ * Built per call rather than held in a table, so that merely importing this module does not read
+ * every program's enum. Consumers that mock a program package would otherwise fail to load over a
+ * decoding path they never take.
+ */
+const vocabularyOf = (programId: SolAddress): ProgramVocabulary | undefined => {
+	if (programId === SYSTEM_PROGRAM_ADDRESS) {
+		return {
+			program: 'system',
+			names: SystemInstruction,
+			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
+			// below are written against those.
+			types: { transferSol: 'transfer' },
+			fields: { amount: 'lamports' }
+		};
+	}
+
+	// `setAuthority` is the only instruction naming the account it acts on `owned`, and `mintTo`
+	// the only one naming it `token`. The RPC calls both `account`, as everything else does.
+	if (programId === TOKEN_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-token',
+			names: TokenInstruction,
+			accounts: { owned: 'account', token: 'account' }
+		};
+	}
+
+	if (programId === TOKEN_2022_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-token-2022',
+			names: Token2022Instruction,
+			accounts: { owned: 'account', token: 'account' }
+		};
+	}
+
+	if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-associated-token-account',
+			names: AssociatedTokenInstruction,
+			types: {
+				createAssociatedToken: 'create',
+				createAssociatedTokenIdempotent: 'createIdempotent'
+			},
+			// The RPC names the new account `account`, the wallet it belongs to `wallet` and
+			// whoever funds it `source`. Only the mint is called the same thing by both.
+			accounts: { ata: 'account', owner: 'wallet', payer: 'source' }
+		};
+	}
+
+	// Stake and address lookup table are deliberately absent. No effect is derived from either, so
+	// decoding them changes not one line of what the review shows, and reaching for their packages
+	// here pulls both into the chunk the activity loads: 132KB for an identical screen.
+};
+
+const fieldOf = ({ info, key }: { info: object; key: string }): unknown =>
+	(info as Record<string, unknown>)[key];
+
+const lowerFirst = (value: string): string => `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
+
+const addressOfMeta = (meta: unknown): SolAddress | undefined =>
+	nonNullish(meta) &&
+	typeof meta === 'object' &&
+	'address' in meta &&
+	typeof meta.address === 'string'
+		? meta.address
+		: undefined;
+
+/**
+ * A decoded instruction's accounts and data, flattened the way the RPC reports them.
+ *
+ * The discriminator is dropped, since it says only which instruction this is, and an optional
+ * field that carries nothing is dropped rather than reported as empty: an authority given up is
+ * an authority with no name, not one named nothing.
+ */
+const infoOf = ({
+	accounts,
+	data,
+	vocabulary: { accounts: renames = {}, fields = {} }
+}: {
+	accounts: Record<string, unknown>;
+	data: Record<string, unknown>;
+	vocabulary: ProgramVocabulary;
+}): object => {
+	const named = Object.entries(accounts).reduce<Record<string, unknown>>((acc, [role, meta]) => {
+		const value = addressOfMeta(meta);
+
+		return nonNullish(value) ? { ...acc, [renames[role] ?? role]: value } : acc;
+	}, {});
+
+	return Object.entries(data).reduce<Record<string, unknown>>((acc, [key, raw]) => {
+		if (key === 'discriminator') {
+			return acc;
+		}
+
+		const value = isSolOption(raw) ? unwrapOption(raw) : raw;
+
+		return nonNullish(value) ? { ...acc, [fields[key] ?? key]: value } : acc;
+	}, named);
+};
+
+const isSolOption = (value: unknown): value is Option<SolAddress> =>
+	nonNullish(value) && typeof value === 'object' && '__option' in value;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	nonNullish(value) && typeof value === 'object';
+
+/**
+ * A kit instruction read into the shape the RPC reports.
+ *
+ * An unsigned message carries its instructions as raw bytes, so nothing below recognised them:
+ * every WalletConnect request derived an empty effect list from the message itself, which left the
+ * summary permanently unstated and, once the review started listing what it could not read, put
+ * "unrecognised" against a plain SOL transfer. The wallet already decodes those bytes to name the
+ * parties; this puts the same decoding in front of the effects, so what a message says it does is
+ * read exactly as what a run did.
+ *
+ * Guarded, because the decoders assert on their input: a malformed or not yet supported variant
+ * must leave the instruction unread, never throw into the signing flow.
+ */
+export const asSolParsedRpcInstruction = (
+	instruction: unknown
+): SolParsedRpcInstruction | undefined => {
+	if (!isKitInstruction(instruction)) {
+		return;
+	}
+
+	const programId = instruction.programAddress;
+
+	const vocabulary = vocabularyOf(programId);
+
+	if (isNullish(vocabulary)) {
+		return;
+	}
+
+	try {
+		const decoded = parseSolInstruction(instruction);
+
+		if (!('instructionType' in decoded)) {
+			return;
+		}
+
+		const { instructionType } = decoded;
+
+		const name = vocabulary.names[Number(instructionType)];
+
+		if (isNullish(name)) {
+			return;
+		}
+
+		const spelled = lowerFirst(name);
+		const type = vocabulary.types?.[spelled] ?? spelled;
+
+		const accounts = 'accounts' in decoded && isRecord(decoded.accounts) ? decoded.accounts : {};
+		const data = 'data' in decoded && isRecord(decoded.data) ? decoded.data : {};
+
+		const info = infoOf({ accounts, data, vocabulary });
+
+		return {
+			program: vocabulary.program,
+			programId,
+			parsed: {
+				type,
+				// A checked transfer or approval states the decimals alongside the amount, and the
+				// RPC reports the pair nested. Both spellings are carried so neither reader has to
+				// know which side produced the instruction.
+				info:
+					'decimals' in info && 'amount' in info
+						? {
+								...info,
+								tokenAmount: {
+									amount: String(fieldOf({ info, key: 'amount' })),
+									decimals: fieldOf({ info, key: 'decimals' })
+								}
+							}
+						: info
+			}
+		};
+	} catch (_err: unknown) {
+		// An instruction the decoders cannot read stays unread, which is the same outcome an
+		// unknown program gets and the honest one.
+	}
+};
+
+/**
+ * The same, but total: an instruction the wallet cannot decode keeps its place in the list.
+ *
+ * Dropping it would shift every instruction after it, and both the route programs and the count of
+ * what could not be read are addressed by position.
+ */
+export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
+	asSolParsedRpcInstruction(instruction) ?? instruction;
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation

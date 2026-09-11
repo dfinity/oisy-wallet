@@ -16,7 +16,7 @@ ic-cdk = "0.20.2"
 ic-cdk-bitcoin-canister = "0.2.0"
 ic-cdk-management-canister = "0.1.1"
 ic-cdk-timers = "1.0.0"
-canbench-rs = { version = "0.6.0" }
+canbench-rs = { version = "0.7.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }

@@ -6,19 +6,9 @@ import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
 } from '$sol/types/sol-instruction-summary';
+import type { SolParsedRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-
-/**
- * A `jsonParsed` instruction, as both `simulateTransaction`'s inner instructions and
- * `getTransaction` report them. The RPC picks the parsed arm per instruction, so the unparsed one
- * survives in the union and contributes nothing here.
- */
-interface SolParsedRpcInstruction {
-	program?: string;
-	programId: SolAddress;
-	parsed: { type: string; info: object };
-}
 
 export interface SolInstructionGroup {
 	index: number;
@@ -357,6 +347,51 @@ const toEffect = ({
 				}),
 				...(nonNullish(delegate) && { counterparty: delegate, own: owned.has(delegate) }),
 				...(nonNullish(accountMints[source]) && { tokenAddress: accountMints[source] })
+			};
+		}
+
+		// Burning destroys what the account held, and minting creates into it. Neither is a
+		// transfer, so no counterparty names either, and the balance is the whole of what changed.
+		if (['burn', 'burnChecked', 'mintTo', 'mintToChecked'].includes(type)) {
+			const account = address({ info, key: 'account' });
+			const authority =
+				address({ info, key: 'authority' }) ?? address({ info, key: 'mintAuthority' });
+
+			if (
+				isNullish(account) ||
+				!(owned.has(account) || (nonNullish(authority) && owned.has(authority)))
+			) {
+				return undefined;
+			}
+
+			const { amount: checked, decimals } = tokenAmount(info);
+			const value = checked ?? amount({ info, key: 'amount' });
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type.startsWith('burn') ? 'burn' : 'mint',
+				account,
+				...(nonNullish(value) && { amount: value }),
+				...(nonNullish(decimals) && { decimals }),
+				...(nonNullish(mint) && { tokenAddress: mint })
+			};
+		}
+
+		// A frozen account holds exactly what it held and can do nothing with it, so no balance
+		// anywhere reports this happening.
+		if (['freezeAccount', 'thawAccount'].includes(type)) {
+			const account = address({ info, key: 'account' });
+
+			if (isNullish(account) || !owned.has(account)) {
+				return undefined;
+			}
+
+			const mint = address({ info, key: 'mint' }) ?? accountMints[account];
+
+			return {
+				kind: type === 'freezeAccount' ? 'freeze' : 'thaw',
+				account,
+				...(nonNullish(mint) && { tokenAddress: mint })
 			};
 		}
 

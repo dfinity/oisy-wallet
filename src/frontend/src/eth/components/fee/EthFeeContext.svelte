@@ -45,6 +45,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { assertIsNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -71,7 +72,7 @@
 
 	let {
 		observe,
-		priority = EthFeePriority.NORMAL,
+		priority = EthFeePriority.STANDARD,
 		destination = '',
 		amount,
 		data,
@@ -99,11 +100,35 @@
 
 	const errorMsgs: symbol[] = [];
 
+	// A fetch outlives a flip of `observe`: it is a chain of awaits, and nothing cancels it. A
+	// consumer that stopped observing has frozen the fee (the send review step, for one), and what
+	// it derived from that fee is not re-derived there. So a sample that comes back late must be
+	// dropped, or the frozen fee would drift underneath the amount it was priced against.
+	//
+	// A fee that was never set is not a frozen one. No consumer stopped observing to hold on to it,
+	// and nothing was derived from it. This is what keeps a consumer that mounts straight into a
+	// frozen step from dead-ending: the send modal rebuilds its wizard on every step change, so the
+	// review step can start with an empty store, and with no fee it has nothing to show or sign.
+	// Every gate below therefore asks `isFrozen()` rather than `observe`, so the first sample is
+	// always allowed through and only later ones are refused.
+	const isFrozen = (): boolean => !observe && nonNullish(get(feeStore));
+
+	const setFee = (data: TransactionFeeData) => {
+		if (isFrozen()) {
+			return;
+		}
+
+		feeStore.setFee(data);
+	};
+
 	const updateFeeData = async () => {
 		try {
 			// The debounce utility has no cancel support, so this callback can fire after the component
-			// is destroyed or after the swap store has been reset (`sendToken` becomes `undefined`).
-			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress)) {
+			// is destroyed, after the swap store has been reset (`sendToken` becomes `undefined`), or
+			// after the consumer stopped observing. The last is why refusing to schedule is not enough:
+			// a call scheduled while observing still fires once the step has moved on, and it would pay
+			// for a fetch whose result the freeze then discards.
+			if (isDestroyed || isNullish(sendToken) || isNullish($ethAddress) || isFrozen()) {
 				return;
 			}
 
@@ -123,6 +148,10 @@
 				to: destination !== '' ? destination : $ethAddress,
 				priority
 			});
+
+			if (isFrozen()) {
+				return;
+			}
 
 			feePrioritiesStore.set(priorities);
 
@@ -158,7 +187,7 @@
 							data
 						});
 
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
@@ -186,7 +215,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -210,7 +239,7 @@
 						data: encodedData
 					});
 
-					feeStore.setFee({
+					setFee({
 						...feeData,
 						gas: estimatedGas ?? ERC20_FALLBACK_FEE
 					});
@@ -233,7 +262,7 @@
 				// Deposit gas cannot be estimated before approval is on-chain, so we use a
 				// conservative fallback here. The actual deposit transaction re-estimates gas
 				// after the approval step succeeds (see depositErc4626 in erc4626.services.ts).
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: (approveGas ?? ERC20_FALLBACK_FEE) + ERC20_FALLBACK_FEE
 				});
@@ -249,7 +278,7 @@
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
@@ -284,14 +313,14 @@
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
-				feeStore.setFee({
+				setFee({
 					...feeData,
 					gas: estimatedGasNft
 				});
 				return;
 			}
 
-			feeStore.setFee({
+			setFee({
 				...feeData,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
@@ -318,10 +347,14 @@
 		}
 	};
 
-	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed.
+	// Wrap the debounced function to prevent scheduling new calls after the component is destroyed,
+	// or once the consumer has stopped observing. The latter is the single choke point every fetch
+	// goes through, including the imperative `triggerUpdateFee` a consumer calls when its own inputs
+	// change, and the throttled listener callback whose timer can outlive the listener itself.
+	// Without it a frozen step would still pay for a fetch whose result it must discard.
 	const debouncedFn = debounce(updateFeeData);
 	const debounceUpdateFeeData = (...args: unknown[]) => {
-		if (!isDestroyed) {
+		if (!isDestroyed && !isFrozen()) {
 			debouncedFn(...args);
 		}
 	};
@@ -337,7 +370,7 @@
 	let retryAttempts = $state(0);
 
 	const scheduleRetry = () => {
-		if (isDestroyed || !observe || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
+		if (isDestroyed || isFrozen() || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
 			return;
 		}
 
@@ -348,7 +381,7 @@
 		retryTimer = setTimeout(() => {
 			retryTimer = undefined;
 
-			if (isDestroyed || !observe) {
+			if (isDestroyed || isFrozen()) {
 				return;
 			}
 
@@ -395,7 +428,9 @@
 	};
 
 	onMount(() => {
-		observe && debounceUpdateFeeData();
+		if (!isFrozen()) {
+			debounceUpdateFeeData();
+		}
 	});
 
 	onDestroy(async () => {
@@ -439,7 +474,7 @@
 	// Recover the fee when OISY returns to the foreground. Mobile browsers freeze backgrounded
 	// tabs and tear down the fee WebSocket; on return, re-fetch and reconnect the listener.
 	const onVisibilityChange = () => {
-		if (document.hidden || isDestroyed || !observe) {
+		if (document.hidden || isDestroyed || isFrozen()) {
 			return;
 		}
 
@@ -450,6 +485,8 @@
 	// from the same call, so switching between them is arithmetic, not a round trip.
 	// Tracks the choice alone: a fresh fetch already applies the current priority itself, and
 	// depending on the sample too would set the fee twice per fetch.
+	// Goes through `setFee` like every other write, so re-pricing respects the freeze too: arithmetic
+	// on a sample already in hand still moves the fee a frozen step has priced its amount against.
 	$effect(() => {
 		const selected = priority;
 
@@ -466,7 +503,7 @@
 				return;
 			}
 
-			feeStore.setFee({
+			setFee({
 				...current,
 				...priorities.perPriority[selected],
 				baseFeePerGas: priorities.baseFeePerGas

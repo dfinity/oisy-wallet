@@ -18,11 +18,16 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
 	createMockSolTransactionsUi,
+	mockSolRpcSendTransaction,
 	mockSolTransactionDetail
 } from '$tests/mocks/sol-transactions.mock';
 import {
@@ -425,10 +430,26 @@ describe('sol-transactions.services', () => {
 			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 			spyGetTransactions.mockRejectedValue(error);
 
-			await loadNextSolTransactions({ ...mockParams, before });
+			const result = await loadNextSolTransactions({ ...mockParams, before });
 
 			expect(get(solTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+
+			// A failed page is not the end of the history: signalling the end would retire the token
+			// from the Activity list until the page is re-entered.
+			expect(signalEnd).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false });
+		});
+
+		it('should signal end only when a page that loaded holds no transaction', async () => {
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			const result = await loadNextSolTransactions({
+				...mockParams,
+				before: mockSolSignature()
+			});
+
 			expect(signalEnd).toHaveBeenCalledOnce();
+			expect(result).toEqual({ success: true });
 		});
 
 		it('should work with different networks', async () => {
@@ -503,6 +524,47 @@ describe('sol-transactions.services', () => {
 			await loadNextSolTransactions(mockParams);
 
 			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
+			);
+		});
+
+		// Current behaviour, not the goal: the backend cache keeps none of the derived fields, so
+		// every record it restores reads as predating the summary and the head load always re-fetches.
+		it('should never short-circuit a head load on records restored from the backend cache', async () => {
+			vi.spyOn(solanaApi, 'fetchTransactionDetailForSignature').mockResolvedValueOnce(
+				mockSolRpcSendTransaction
+			);
+
+			const [derived] = await fetchSolTransactionsForSignature({
+				signature: {
+					...mockSolSignatureResponse(),
+					signature: mockSolRpcSendTransaction.signature
+				},
+				network: 'mainnet',
+				address: mockSolAddress
+			});
+
+			expect(derived.summary).toBeDefined();
+
+			const restored = mapUserTransactionToSolTransaction({
+				transaction: mapSolTransactionToUserTransaction(derived),
+				address: mockSolAddress
+			});
+
+			expect(restored.summary).toBeUndefined();
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [restored],
+				newestBlockIndex: mockSolRpcSendTransaction.slot,
+				oldestBlockIndex: mockSolRpcSendTransaction.slot,
+				nextStart: undefined,
+				totalStored: 1n
+			});
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
 			);
 		});
@@ -898,6 +960,19 @@ describe('sol-transactions.services', () => {
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
+		it('should not signal the end when the page fails to load', async () => {
+			spyGetTransactions.mockRejectedValueOnce(new Error('Failed to load transactions'));
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			// The Activity list stops paginating a token for good once the end is signalled, so a
+			// failed page has to leave it open for the next attempt.
+			expect(signalEnd).not.toHaveBeenCalled();
+			expect(result).toEqual({ success: false });
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toHaveLength(mockTransactions.length);
+		});
+
 		it('should load transactions with the correct parameters', async () => {
 			const result = await loadNextSolTransactionsByOldest(mockParams);
 
@@ -909,6 +984,28 @@ describe('sol-transactions.services', () => {
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: mockLastSignature
+			});
+		});
+
+		it('should page from the oldest transaction even when the store is not in order', async () => {
+			// What the wallet worker delivers on a cold start: the transactions it read over RPC,
+			// followed by the shorter page the backend had stored. The newest entries end up last,
+			// so the position in the array is not the order.
+			const [newest, ...older] = mockTransactions;
+
+			seedStore([...older, newest]);
+
+			const { signature: oldestSignature } = older[older.length - 1];
+
+			const result = await loadNextSolTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: oldestSignature
 			});
 		});
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
@@ -19,6 +19,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -29,15 +30,36 @@
 
 	let method = $derived(request.params.request.method);
 
-	let domainName = $derived.by(() => {
-		if (isEthSignTypedDataMethod(method)) {
-			const {
-				domain: { name }
-			} = getSignParamsMessageTypedDataV4(request.params.request.params);
+	// The struct being hashed, which is what the request actually asks for. Parsing can fail on a
+	// malformed payload, and a title is no reason to throw: such a request is titled by its method
+	// alone and left to the review, which is where an unparseable payload is reported.
+	let primaryType = $derived.by(() => {
+		if (!isEthSignTypedDataMethod(method)) {
+			return;
+		}
 
-			return name;
+		try {
+			const { primaryType } = getSignParamsMessageTypedDataV4(request.params.request.params);
+
+			return notEmptyString(primaryType) ? primaryType : undefined;
+		} catch (_: unknown) {
+			return undefined;
 		}
 	});
+
+	// Typed data is a transaction the user authorizes rather than a message they write, so it is
+	// titled as one, named by its struct where the request declares a usable one. A raw message
+	// stays a message. Either way the title says what OISY makes of the request, never what the
+	// request calls itself: the domain name it supplies is stated in the summary instead.
+	let modalTitle = $derived(
+		isEthSignTypedDataMethod(method)
+			? nonNullish(primaryType)
+				? replacePlaceholders($i18n.wallet_connect.text.sign_transaction_with_type, {
+						$type: primaryType
+					})
+				: $i18n.wallet_connect.text.sign_transaction
+			: $i18n.wallet_connect.text.sign_message
+	);
 
 	/**
 	 * Modal
@@ -98,7 +120,7 @@
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{domainName ?? $i18n.wallet_connect.text.sign_message}
+			{modalTitle}
 		</WalletConnectModalTitle>
 	{/snippet}
 

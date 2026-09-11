@@ -99,6 +99,7 @@ export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-not
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+export const REVIEW_FORM_FEE_EXPIRED = 'review-form-fee-expired';
 
 export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
@@ -346,9 +347,11 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SEND_INSUFFICIENT_FEE_INFO = 'send-insufficient-fee-info';
 
 export const ETH_FEE_PRIORITY = 'eth-fee-priority';
 export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
+export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
 export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
 export const SWAP_FEE_INFO = 'swap-fee-info';
 

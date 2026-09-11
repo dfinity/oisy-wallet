@@ -2,7 +2,10 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
-import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import {
+	solTransactionsStore,
+	type SolCertifiedTransaction
+} from '$sol/stores/sol-transactions.store';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
@@ -72,6 +75,56 @@ describe('sol-listener.services', () => {
 				const transactions = get(solTransactionsStore);
 
 				expect(transactions?.[tokenId]).toEqual(mockSolCertifiedTransactions);
+			});
+
+			// Older builds stored one row per instruction (`<signature>-<index>`); the current worker
+			// emits one record per signature, so those rows must go once the record arrives.
+			describe('stale per-instruction rows', () => {
+				const [{ data: baseTransaction }, otherTransaction] = mockSolCertifiedTransactions;
+				const signature = String(baseTransaction.signature);
+
+				const toCertified = (id: string): SolCertifiedTransaction => ({
+					data: { ...baseTransaction, id },
+					certified: false
+				});
+
+				const instructionRows = [toCertified(`${signature}-0`), toCertified(`${signature}-1`)];
+				const record = toCertified(signature);
+
+				const syncTransactions = (transactions: SolCertifiedTransaction[]) =>
+					syncWallet({
+						data: mockPostMessage({
+							newTransactions: JSON.stringify(transactions, jsonReplacer)
+						}),
+						tokenId
+					});
+
+				it('should replace the per-instruction rows of a signature with its record', () => {
+					solTransactionsStore.set({ tokenId, transactions: instructionRows });
+
+					syncTransactions([record]);
+
+					expect(get(solTransactionsStore)?.[tokenId]).toEqual([record]);
+				});
+
+				it('should keep the rows of other signatures', () => {
+					solTransactionsStore.set({
+						tokenId,
+						transactions: [...instructionRows, otherTransaction]
+					});
+
+					syncTransactions([record]);
+
+					expect(get(solTransactionsStore)?.[tokenId]).toEqual([record, otherTransaction]);
+				});
+
+				it('should not duplicate a record re-sent with the same id', () => {
+					solTransactionsStore.set({ tokenId, transactions: [record, otherTransaction] });
+
+					syncTransactions([record]);
+
+					expect(get(solTransactionsStore)?.[tokenId]).toEqual([record, otherTransaction]);
+				});
 			});
 		});
 

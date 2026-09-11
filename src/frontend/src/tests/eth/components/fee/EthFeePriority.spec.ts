@@ -2,12 +2,15 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import type { EthFeePriorities } from '$eth/types/fee';
+import { formatGasFeeInGwei } from '$eth/utils/fee.utils';
 import {
 	CONVERT_AMOUNT_EXCHANGE_VALUE,
 	ETH_FEE_PRIORITY,
 	ETH_FEE_PRIORITY_OPTION,
+	ETH_FEE_PRIORITY_OPTION_AMOUNT,
 	ETH_FEE_PRIORITY_TRIGGER
 } from '$lib/constants/test-ids.constants';
+import { currentLanguage } from '$lib/derived/i18n.derived';
 import { EthFeePriority as Priority } from '$lib/enums/eth-fee-priority';
 import { screensStore } from '$lib/stores/screens.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
@@ -24,12 +27,12 @@ describe('EthFeePriority', () => {
 		baseFeePerGas: 20_000_000_000n,
 		perPriority: {
 			[Priority.SLOW]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 1_000_000_000n },
-			[Priority.NORMAL]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
+			[Priority.STANDARD]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 5_000_000_000n },
 			[Priority.FAST]: { maxFeePerGas: 100_000_000_000n, maxPriorityFeePerGas: 20_000_000_000n }
 		}
 	};
 
-	// The rows quote fiat only, so an exchange rate is required for them to render at all.
+	// The exchange rate is what the fiat line under each gwei amount needs to render.
 	const exchangeRate = 3_000;
 
 	const setup = ({
@@ -38,7 +41,7 @@ describe('EthFeePriority', () => {
 	}: { withPriorities?: boolean; withSymbol?: boolean } = {}) => {
 		const feeStore = initEthFeeStore();
 		feeStore.setFee({
-			...priorities.perPriority[Priority.NORMAL],
+			...priorities.perPriority[Priority.STANDARD],
 			baseFeePerGas: priorities.baseFeePerGas,
 			gas
 		});
@@ -80,7 +83,7 @@ describe('EthFeePriority', () => {
 		await waitFor(() => {
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.SLOW}`)).toBeInTheDocument();
 			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.FAST}`)).toBeInTheDocument();
-			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.NORMAL}`)).toBeChecked();
+			expect(getByTestId(`${ETH_FEE_PRIORITY_OPTION}-${Priority.STANDARD}`)).toBeChecked();
 		});
 	});
 
@@ -97,6 +100,25 @@ describe('EthFeePriority', () => {
 		// gas limit cancel out and only the tip moves the amounts, and the formatted currency string
 		// depends on locale and currency stores that are not what this test is about.
 		expect(new Set(values.map(({ textContent }) => textContent)).size).toBe(values.length);
+	});
+
+	it('quotes each option in gwei as well as fiat', async () => {
+		const { context } = setup();
+
+		const { findAllByTestId } = render(EthFeePriority, { context });
+
+		const amounts = await findAllByTestId(ETH_FEE_PRIORITY_OPTION_AMOUNT);
+
+		expect(amounts).toHaveLength(Object.values(Priority).length);
+
+		// The same gas limit and base fee price every row, so only the tip moves them apart. In the
+		// native token that difference sits in the eighth decimal, which is the reason for gwei.
+		expect(new Set(amounts.map(({ textContent }) => textContent)).size).toBe(amounts.length);
+
+		// Grouped: 21_000 gas at 21 gwei effective is 441_000 gwei, which needs a separator to read.
+		expect(amounts[0]).toHaveTextContent(
+			`${formatGasFeeInGwei({ value: 441_000_000_000_000n, language: get(currentLanguage) })} ${en.fee.text.gwei}`
+		);
 	});
 
 	it('records the choice in the send context', async () => {
@@ -161,7 +183,7 @@ describe('EthFeePriority', () => {
 			// Scoped to the header: the options stay mounted while collapsed, so a document-wide
 			// query would keep passing if the header stopped naming the choice.
 			expect(
-				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_normal)
+				within(getByTestId('collapsible-header')).getByText(en.fee.text.priority_standard)
 			).toBeInTheDocument();
 		});
 	});
@@ -174,7 +196,7 @@ describe('EthFeePriority', () => {
 		const { getAllByText } = render(EthFeePriority, { context });
 
 		await waitFor(() => {
-			expect(getAllByText(en.fee.text.priority_normal)).toHaveLength(1);
+			expect(getAllByText(en.fee.text.priority_standard)).toHaveLength(1);
 		});
 	});
 

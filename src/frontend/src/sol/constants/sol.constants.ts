@@ -58,3 +58,13 @@ export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 // over the odds is a legitimate thing to want during congestion.
 export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
 export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
+
+// A signature lookup on an associated token account answers with transactions that never moved
+// anything of the user's, and a whole page of history can consist of them. Each page costs one
+// detail fetch per signature, so the loader steps over at most this many of them in one round
+// rather than walking an arbitrarily long run of them while the user waits.
+export const SOLANA_MAX_SKIPPED_SIGNATURE_PAGES = 3;
+
+// The RPC rejects a `getMultipleAccounts` call that asks for more accounts than this.
+// https://solana.com/docs/rpc/http/getmultipleaccounts
+export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
