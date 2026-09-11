@@ -78,6 +78,13 @@ export type SolSignatureWithSources = SolSignature & {
 	sources: SolAddress[];
 };
 
+export interface SolResolvedTransaction {
+	transaction: SolTransactionUi;
+	// The sources whose history returned the signature, as the pager tagged it: the record belongs
+	// to the token of each of them.
+	sources: SolAddress[];
+}
+
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
 	TransactionWithinSizeLimit &
