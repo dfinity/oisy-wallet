@@ -211,6 +211,40 @@ describe('sol-wallet.scheduler', () => {
 			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 		});
 
+		// The worker replaces its scheduler without awaiting the start of the one it replaces.
+		it('should never start the timer of a scheduler stopped while it loads the identity', async () => {
+			let resolveIdentity: (identity: typeof mockIdentity) => void = () => {};
+
+			vi.mocked(AuthClientProvider.getInstance().loadIdentity).mockReturnValueOnce(
+				new Promise((resolve) => (resolveIdentity = resolve))
+			);
+
+			const replaced = new SolWalletScheduler();
+
+			const replacedStart = replaced.start(data);
+
+			replaced.stop();
+
+			const changedData = { ...data, tokens: [tokens[0]] };
+
+			await scheduler.start(changedData);
+
+			resolveIdentity(mockIdentity);
+
+			await replacedStart;
+
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS * 2);
+
+			expect(replaced['timer']['timer']).toBeUndefined();
+			expect(scheduler['timer']['timer']).toBeDefined();
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(3);
+
+			vi.mocked(getSolSignatures).mock.calls.forEach(([params]) =>
+				expect(params.tokensList).toEqual(changedData.tokens)
+			);
+		});
+
 		it('should start the scheduler with an interval', async () => {
 			await scheduler.start(data);
 
@@ -295,7 +329,7 @@ describe('sol-wallet.scheduler', () => {
 			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
 				expect.objectContaining({
 					signatures: [newSignature],
-					known: new Set(page.map(({ signature }) => signature))
+					known: new Set([newestSignature.signature])
 				})
 			);
 
@@ -326,6 +360,38 @@ describe('sol-wallet.scheduler', () => {
 			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
 				expect.objectContaining({ signatures: [sameSlotSignature] })
 			);
+		});
+
+		// Everything below the newest slot is old whatever it holds, so a long session does not pile
+		// up the signatures of every slot it went through.
+		it('should remember only the signatures of its newest slot, and resolve the same', async () => {
+			await scheduler.trigger(data);
+
+			expect(scheduler['store'].signatures).toEqual(new Set([newestSignature.signature]));
+
+			const sameSlotSignature = signatureAt({ slot: 101n, sources: [mockAtaAddress2] });
+			mockPage([newestSignature, sameSlotSignature, olderSignature]);
+
+			await scheduler.trigger(data);
+
+			expect(scheduler['store'].signatures).toEqual(
+				new Set([newestSignature.signature, sameSlotSignature.signature])
+			);
+
+			const newerSignature = signatureAt({ slot: 102n });
+			mockPage([newerSignature, newestSignature, sameSlotSignature, olderSignature]);
+
+			await scheduler.trigger(data);
+
+			expect(scheduler['store'].signatures).toEqual(new Set([newerSignature.signature]));
+			expect(resolveSolSignatures).toHaveBeenCalledTimes(3);
+			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ signatures: [newerSignature] })
+			);
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).toHaveBeenCalledTimes(3);
 		});
 
 		it('should resolve a signature returned by the wallet and two token accounts once, with all its sources', async () => {
