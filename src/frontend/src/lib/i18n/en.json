@@ -1198,6 +1198,7 @@
 			"swap_amount_too_low": "The amount is below the provider's minimum. Please enter a higher amount.",
 			"swap_amount_too_low_minimum": "The amount is below the provider's minimum. Enter at least $amount $symbol.",
 			"swap_amount_too_low_minimum_fiat": "The amount is below the provider's minimum. Enter at least $amount.",
+			"swap_minimum_amount_hint": "This pair currently has a minimum swap amount of $amount.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",

@@ -1198,6 +1198,7 @@
 			"swap_amount_too_low": "",
 			"swap_amount_too_low_minimum": "",
 			"swap_amount_too_low_minimum_fiat": "",
+			"swap_minimum_amount_hint": "",
 			"executing_transaction": "Ejecutando transacción...",
 			"initializing": "Inicializando transacción...",
 			"swapping": "Intercambiando...",

@@ -921,6 +921,7 @@ interface I18nSwap {
 		swap_amount_too_low: string;
 		swap_amount_too_low_minimum: string;
 		swap_amount_too_low_minimum_fiat: string;
+		swap_minimum_amount_hint: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;

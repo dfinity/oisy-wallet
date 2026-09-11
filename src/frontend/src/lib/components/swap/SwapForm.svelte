@@ -4,6 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapCrossChainInfo from '$lib/components/swap/SwapCrossChainInfo.svelte';
+	import SwapMinimumAmountInfo from '$lib/components/swap/SwapMinimumAmountInfo.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
@@ -335,6 +336,8 @@
 		</div>
 
 		{@render message?.()}
+
+		<SwapMinimumAmountInfo />
 
 		<SwapCrossChainInfo />
 

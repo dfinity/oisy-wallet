@@ -1198,6 +1198,7 @@
 			"swap_amount_too_low": "",
 			"swap_amount_too_low_minimum": "",
 			"swap_amount_too_low_minimum_fiat": "",
+			"swap_minimum_amount_hint": "",
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",
