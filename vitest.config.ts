@@ -43,6 +43,10 @@ export default defineConfig((): UserConfig => ({
 				replacement: resolve(__dirname, 'src/frontend/src/sol')
 			},
 			{
+				find: '$xrp',
+				replacement: resolve(__dirname, 'src/frontend/src/xrp')
+			},
+			{
 				find: '$icp-eth',
 				replacement: resolve(__dirname, 'src/frontend/src/icp-eth')
 			},

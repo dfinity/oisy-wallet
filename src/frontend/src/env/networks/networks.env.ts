@@ -5,6 +5,7 @@ import { SUPPORTED_BITCOIN_NETWORKS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
+import { SUPPORTED_XRP_NETWORKS } from '$env/networks/networks.xrp.env';
 import type { Network, NetworkId } from '$lib/types/network';
 
 export const SUPPORTED_NETWORKS: Network[] = [
@@ -13,6 +14,7 @@ export const SUPPORTED_NETWORKS: Network[] = [
 	...SUPPORTED_BITCOIN_NETWORKS,
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_SOLANA_NETWORKS,
+	...SUPPORTED_XRP_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ];
 
