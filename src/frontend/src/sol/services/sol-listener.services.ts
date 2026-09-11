@@ -84,7 +84,7 @@ export const syncWallet = ({
 	Object.entries(spl).forEach(([mint, balance]) => {
 		const tokenId = splTokenIds.get(mint);
 
-		if (nonNullish(tokenId)) {
+		if (nonNullish(tokenId) && nonNullish(balance)) {
 			balancesStore.batchSet({ id: tokenId, data: { data: balance, certified: false } });
 		}
 	});
