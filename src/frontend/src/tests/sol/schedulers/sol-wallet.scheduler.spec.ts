@@ -6,24 +6,17 @@ import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
-import {
-	loadSolUserTransactions,
-	saveSolFinalizedTransactions
-} from '$sol/services/sol-user-transactions.services';
+import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import {
-	mapSolTransactionToUserTransaction,
-	mapUserTransactionToSolTransaction
-} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	createMockSolTransactionUi,
 	createMockSolTransactionsUi
 } from '$tests/mocks/sol-transactions.mock';
-import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
@@ -38,7 +31,6 @@ vi.mock('$env/user-transactions.env', () => ({
 }));
 
 vi.mock('$sol/services/sol-user-transactions.services', () => ({
-	loadSolUserTransactions: vi.fn().mockResolvedValue(undefined),
 	saveSolFinalizedTransactions: vi.fn().mockResolvedValue({ success: true })
 }));
 
@@ -454,26 +446,14 @@ describe('sol-wallet.scheduler', () => {
 			scheduler.stop();
 		});
 
-		it('should call loadSolUserTransactions on initial sync', async () => {
+		// The backend copy cannot carry what a row is shown from, so the first sync holds exactly what
+		// the chain returned, nothing restored alongside it.
+		it('should derive every record from the chain on the first sync', async () => {
 			await scheduler.trigger(startData);
 
-			expect(loadSolUserTransactions).toHaveBeenCalledExactlyOnceWith({
-				identity: mockIdentity,
-				tokenId: { SolNativeMainnet: null },
-				address: mockSolAddress
-			});
-		});
-
-		it('should not call loadSolUserTransactions on subsequent syncs', async () => {
-			await scheduler.trigger(startData);
-
-			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
-
-			vi.clearAllMocks();
-
-			await scheduler.trigger(startData);
-
-			expect(loadSolUserTransactions).not.toHaveBeenCalled();
+			expect(Object.keys(scheduler['store'].transactions)).toEqual(
+				mockSolTransactions.map(({ id }) => `${id}`)
+			);
 		});
 
 		it('should call saveSolFinalizedTransactions when new RPC transactions are found', async () => {
@@ -496,104 +476,6 @@ describe('sol-wallet.scheduler', () => {
 			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should load backend stored transactions and include them in the response', async () => {
-			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
-				...tx,
-				id: `stored-${i}`,
-				summary: { kind: 'send' as const }
-			}));
-
-			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: storedTransactions,
-				newestBlockIndex: 100n,
-				oldestBlockIndex: 50n,
-				nextStart: undefined,
-				totalStored: 2n
-			});
-
-			await scheduler.trigger(startData);
-
-			const store = scheduler['store'].transactions;
-			for (const tx of storedTransactions) {
-				expect(store[tx.id]).toEqual({ data: tx, certified: false });
-			}
-		});
-
-		// A stored record without a summary predates the redesign; the worker refetches instead of
-		// short-circuiting, and the re-derived record replaces it in the worker store.
-		it('should re-derive stored records that predate the summary', async () => {
-			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
-				...tx,
-				id: `stored-${i}`
-			}));
-
-			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: storedTransactions,
-				newestBlockIndex: 100n,
-				oldestBlockIndex: 50n,
-				nextStart: undefined,
-				totalStored: 2n
-			});
-
-			await scheduler.trigger(startData);
-
-			expect(spyLoadTransactions).toHaveBeenCalledWith(
-				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
-			);
-
-			const store = scheduler['store'].transactions;
-
-			for (const tx of storedTransactions) {
-				expect(store[tx.id]).toBeUndefined();
-			}
-		});
-
-		// Current behaviour, not the goal: the backend cache keeps none of the derived fields, so a
-		// record that went through it reads as predating the summary and the worker always re-fetches.
-		it('should never short-circuit on records restored from the backend cache', async () => {
-			const [base] = createMockSolTransactionsUi(1);
-
-			const derived: SolTransactionUi = {
-				...base,
-				id: String(base.signature),
-				from: mockSolAddress,
-				summary: { kind: 'send', spent: { delta: -100n }, counterparty: mockSolAddress2 },
-				netChanges: [{ delta: -100n }]
-			};
-
-			const restored = mapUserTransactionToSolTransaction({
-				transaction: mapSolTransactionToUserTransaction(derived),
-				address: mockSolAddress
-			});
-
-			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: [restored],
-				newestBlockIndex: 100n,
-				oldestBlockIndex: 100n,
-				nextStart: undefined,
-				totalStored: 1n
-			});
-
-			await scheduler.trigger(startData);
-
-			expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith(
-				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
-			);
-		});
-
-		it('should still load RPC transactions when backend load fails', async () => {
-			vi.mocked(loadSolUserTransactions).mockRejectedValue(new Error('Backend read failed'));
-
-			await scheduler.trigger(startData);
-
-			expect(spyLoadTransactions).toHaveBeenCalledOnce();
-
-			const store = scheduler['store'].transactions;
-			for (const tx of mockSolTransactions) {
-				expect(store[tx.id]).toBeDefined();
-			}
-		});
-
 		it('should still succeed when saveSolFinalizedTransactions rejects', async () => {
 			vi.mocked(saveSolFinalizedTransactions).mockRejectedValue(new Error('Backend save failed'));
 
@@ -605,7 +487,7 @@ describe('sol-wallet.scheduler', () => {
 			}
 		});
 
-		it('should use correct tokenId for SPL tokens', async () => {
+		it('should save under the SPL token the sync is for', async () => {
 			const splStartData: PostMessageDataRequestSol = {
 				address: {
 					certified: false,
@@ -618,83 +500,10 @@ describe('sol-wallet.scheduler', () => {
 
 			await scheduler.trigger(splStartData);
 
-			expect(loadSolUserTransactions).toHaveBeenCalledWith({
+			expect(saveSolFinalizedTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
-				address: mockSolAddress
-			});
-		});
-
-		it('should refresh ownerless stored SPL transactions', async () => {
-			const splStartData: PostMessageDataRequestSol = {
-				address: {
-					certified: false,
-					data: mockSolAddress
-				},
-				solanaNetwork: SolanaNetworks.devnet,
-				tokenAddress: DEVNET_USDC_TOKEN.address,
-				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
-			};
-			const [storedTransaction, storedSameSignatureTransaction] = createMockSolTransactionsUi(
-				2
-			).map((tx, index) => ({
-				...tx,
-				id: `stored-same-signature-transaction-${index}`,
-				blockNumber: 100
-			}));
-			const ownerlessStoredTransaction: SolTransactionUi = {
-				...storedTransaction,
-				id: 'ownerless-stored-transaction',
-				blockNumber: 100,
-				type: 'receive',
-				from: mockAtaAddress,
-				to: mockSolAddress2,
-				fromOwner: undefined,
-				toOwner: undefined
-			};
-			const correctedTransaction: SolTransactionUi = {
-				...ownerlessStoredTransaction,
-				type: 'send',
-				fromOwner: mockSolAddress
-			};
-			const correctedSameSignatureTransaction: SolTransactionUi = {
-				...storedSameSignatureTransaction,
-				id: 'corrected-same-signature-transaction'
-			};
-
-			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: [ownerlessStoredTransaction, storedSameSignatureTransaction],
-				newestBlockIndex: 100n,
-				oldestBlockIndex: 100n,
-				nextStart: undefined,
-				totalStored: 2n
-			});
-			spyLoadTransactions.mockResolvedValue([
-				correctedTransaction,
-				correctedSameSignatureTransaction
-			]);
-
-			await scheduler.trigger(splStartData);
-
-			expect(spyLoadTransactions).toHaveBeenCalledWith(
-				expect.objectContaining({
-					exitIfFirstSignatureMatches: undefined
-				})
-			);
-			expect(scheduler['store'].transactions).toEqual({
-				[correctedTransaction.id]: {
-					data: correctedTransaction,
-					certified: false
-				},
-				[correctedSameSignatureTransaction.id]: {
-					data: correctedSameSignatureTransaction,
-					certified: false
-				}
-			});
-			expect(saveSolFinalizedTransactions).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				tokenId: { SplDevnet: DEVNET_USDC_TOKEN.address },
-				transactions: [correctedTransaction, correctedSameSignatureTransaction]
+				transactions: mockSolTransactions
 			});
 		});
 	});
@@ -733,9 +542,6 @@ describe('sol-wallet.scheduler', () => {
 		let scheduler: SolWalletScheduler;
 
 		beforeEach(() => {
-			// Other describes leave their own backend responses behind; start every case from an empty backend.
-			vi.mocked(loadSolUserTransactions).mockResolvedValue(undefined);
-
 			scheduler = new SolWalletScheduler();
 		});
 
@@ -743,28 +549,14 @@ describe('sol-wallet.scheduler', () => {
 			scheduler.stop();
 		});
 
-		it('should post the stored records together with the RPC records on the initial sync', async () => {
-			const storedTransactions = ['stored-1', 'stored-2'].map((id) => ({
-				...createMockSolTransactionUi(id),
-				summary: { kind: 'send' as const }
-			}));
-
-			vi.mocked(loadSolUserTransactions).mockResolvedValue({
-				transactions: storedTransactions,
-				newestBlockIndex: 100n,
-				oldestBlockIndex: 50n,
-				nextStart: undefined,
-				totalStored: 2n
-			});
-
+		// Nothing is restored from the backend cache any more: the first post is what the chain returned.
+		it('should post only the RPC records on the initial sync', async () => {
 			await scheduler.trigger(solMainnetData);
 
 			const posts = walletPosts();
 
 			expect(posts).toHaveLength(1);
-			expect(postedTransactions(posts[0])).toEqual(
-				toCertified([...mockSolTransactions, ...storedTransactions])
-			);
+			expect(postedTransactions(posts[0])).toEqual(toCertified(mockSolTransactions));
 		});
 
 		it('should post only the new transactions on a later sync', async () => {
@@ -813,12 +605,9 @@ describe('sol-wallet.scheduler', () => {
 			const splTransaction = createMockSolTransactionUi('spl-1');
 			spyLoadTransactions.mockResolvedValue([splTransaction]);
 			postMessageMock.mockClear();
-			vi.mocked(loadSolUserTransactions).mockClear();
 
 			await scheduler.trigger(splDevnetData);
 
-			// A fresh store makes this the initial sync of the new token, so the backend is read again.
-			expect(loadSolUserTransactions).toHaveBeenCalledOnce();
 			expect(scheduler['store'].transactions).toEqual({
 				[splTransaction.id]: { data: splTransaction, certified: false }
 			});

@@ -21,6 +21,7 @@ import {
 	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import {
 	buildNearIntentsQuoteRequest,
 	mapNearIntentsQuoteResult,
@@ -62,7 +63,9 @@ const EVM_BLOCKCHAINS = new Set(
  *
  * EVM contract addresses are lowercased (hex is case-insensitive).
  * Solana addresses are kept as-is (Base58 is case-sensitive).
- * Native tokens (no contract address) use lowercased symbols.
+ * Native tokens (no contract address) are keyed by {@link nativeSwapTokenIdentifier}, which
+ * qualifies the symbol with the network — 1Click lists a native ETH per EVM chain, and a
+ * bare `'eth'` would collapse all of them into one entry the filter cannot tell apart.
  */
 export const nearIntentsSupportedTokens = async ({
 	networkIds
@@ -71,27 +74,24 @@ export const nearIntentsSupportedTokens = async ({
 }): Promise<Set<string>> => {
 	const tokens = await loadNearIntentsTokens();
 
-	const blockchains = new Set(
-		networkIds.reduce<string[]>((acc, id) => {
-			const b = NEAR_INTENTS_BLOCKCHAIN_MAP[id];
+	// The map is injective, so the inverse is a plain lookup: one network per blockchain.
+	const blockchainNetworkIds = networkIds.reduce<Map<string, NetworkId>>((acc, id) => {
+		const b = NEAR_INTENTS_BLOCKCHAIN_MAP[id];
 
-			if (nonNullish(b)) {
-				acc.push(b);
-			}
-
-			return acc;
-		}, [])
-	);
+		return nonNullish(b) ? acc.set(b, id) : acc;
+	}, new Map());
 
 	return tokens.reduce<Set<string>>((acc, { blockchain, contractAddress, symbol }) => {
-		if (!blockchains.has(blockchain)) {
+		const networkId = blockchainNetworkIds.get(blockchain);
+
+		if (isNullish(networkId)) {
 			return acc;
 		}
 
 		if (nonNullish(contractAddress)) {
 			acc.add(EVM_BLOCKCHAINS.has(blockchain) ? contractAddress.toLowerCase() : contractAddress);
 		} else {
-			acc.add(symbol.toLowerCase());
+			acc.add(nativeSwapTokenIdentifier({ networkId, symbol }));
 		}
 
 		return acc;
