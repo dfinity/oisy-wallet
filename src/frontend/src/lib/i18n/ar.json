@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -1561,7 +1565,6 @@
 			"estimated_btc": "رسوم شبكة البيتكوين المقدرة",
 			"estimated_inter_network": "رسوم الشبكة البينية المقدرة",
 			"estimated_eth": "رسوم الإيثيريوم المقدرة",
-			"max_fee_eth": "الحد الأقصى للرسوم <small>(على الأرجح في < 30 ثانية)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
