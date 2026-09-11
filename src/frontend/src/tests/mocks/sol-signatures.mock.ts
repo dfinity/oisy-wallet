@@ -18,6 +18,9 @@ export const mockSolSignatureResponse = (overrides: Partial<SolSignature> = {}):
 	...overrides
 });
 
+export const mockSolSignatureResponses = (n: number): SolSignature[] =>
+	Array.from({ length: n }, () => mockSolSignatureResponse());
+
 export const mockSolSignatureResponsesAtSlots = (slots: bigint[]): SolSignature[] =>
 	slots.map((slot) => mockSolSignatureResponse({ slot }));
 
