@@ -10,38 +10,21 @@ import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { jsonReviver, nonNullish } from '@dfinity/utils';
+import type {
+	SolPostMessageDataResponseWallet,
+	SolWalletRouting
+} from '$sol/types/sol-post-message';
+import type { SolResolvedTransaction } from '$sol/types/sol-transaction';
+import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const syncWallet = ({
-	data,
-	tokenId
+const syncTokenTransactions = ({
+	tokenId,
+	transactions
 }: {
-	data: SolPostMessageDataResponseWallet;
 	tokenId: TokenId;
+	transactions: SolCertifiedTransaction[];
 }) => {
-	const {
-		wallet: {
-			balance: { certified, data: balance },
-			newTransactions
-		}
-	} = data;
-
-	if (nonNullish(balance)) {
-		balancesStore.batchSet({
-			id: tokenId,
-			data: {
-				data: balance,
-				certified
-			}
-		});
-	} else {
-		balancesStore.reset(tokenId);
-	}
-
-	const transactions: SolCertifiedTransaction[] = JSON.parse(newTransactions, jsonReviver);
-
 	// A record re-derived under its signature id supersedes the per-instruction rows the store may
 	// still hold for the same signature: same transaction, older shape, different ids.
 	const incomingSignatures = new Set(
@@ -62,6 +45,64 @@ export const syncWallet = ({
 		tokenId,
 		transactions
 	});
+};
+
+/**
+ * Writes one tick of a Solana network worker into the per-token stores: each balance to its token,
+ * and each record to every token whose source returned its signature (the wallet to native SOL, an
+ * associated token account to the token of its mint). A source the routing does not know, left from
+ * a token list the worker has since been restarted without, is dropped.
+ */
+export const syncWallet = ({
+	data,
+	routing: { nativeTokenId, splTokenIds, sourceTokens }
+}: {
+	data: SolPostMessageDataResponseWallet;
+	routing: SolWalletRouting;
+}) => {
+	const {
+		wallet: {
+			balances: { sol, spl },
+			newTransactions
+		}
+	} = data;
+
+	balancesStore.batchSet({ id: nativeTokenId, data: { data: sol, certified: false } });
+
+	Object.entries(spl).forEach(([mint, balance]) => {
+		const tokenId = splTokenIds.get(mint);
+
+		// A balance the worker could not read is absent: the token keeps the balance it last had.
+		if (nonNullish(tokenId) && nonNullish(balance)) {
+			balancesStore.batchSet({ id: tokenId, data: { data: balance, certified: false } });
+		}
+	});
+
+	const resolved: SolResolvedTransaction[] = JSON.parse(newTransactions, jsonReviver);
+
+	const tokenIdOfSource = (source: SolResolvedTransaction['sources'][number]) => {
+		const mint = sourceTokens.get(source);
+
+		if (mint === undefined) {
+			return;
+		}
+
+		return isNullish(mint) ? nativeTokenId : splTokenIds.get(mint);
+	};
+
+	const transactionsByToken = resolved.reduce((acc, { transaction, sources }) => {
+		new Set(sources.map(tokenIdOfSource).filter(nonNullish)).forEach((tokenId) =>
+			acc.set(tokenId, [...(acc.get(tokenId) ?? []), { data: transaction, certified: false }])
+		);
+
+		return acc;
+	}, new Map<TokenId, SolCertifiedTransaction[]>());
+
+	// Every token of the network gets its list, even an empty one: a token without an entry in the
+	// store is still loading, and would stay so.
+	[nativeTokenId, ...splTokenIds.values()].forEach((tokenId) =>
+		syncTokenTransactions({ tokenId, transactions: transactionsByToken.get(tokenId) ?? [] })
+	);
 };
 
 export const syncWalletError = ({

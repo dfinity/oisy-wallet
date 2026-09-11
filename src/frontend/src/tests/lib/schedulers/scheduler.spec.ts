@@ -105,6 +105,40 @@ describe('scheduler', () => {
 				expect(console.error).not.toHaveBeenCalled();
 			});
 
+			// A worker does not await one message before handling the next, so a stop can arrive while a
+			// start still awaits the identity.
+			it('should not start when stopped while it loads the identity', async () => {
+				let resolveIdentity: (identity: typeof mockIdentity) => void = () => {};
+
+				vi.spyOn(provider, 'loadIdentity').mockReturnValueOnce(
+					new Promise((resolve) => (resolveIdentity = resolve))
+				);
+
+				const startPromise = scheduler.start(mockParams);
+
+				scheduler.stop();
+
+				resolveIdentity(mockIdentity);
+
+				await startPromise;
+
+				await vi.advanceTimersByTimeAsync(mockInterval * 2);
+
+				expect(mockJob).not.toHaveBeenCalled();
+				expect(scheduler['timer']).toBeUndefined();
+			});
+
+			it('should start again once stopped and started anew', async () => {
+				await scheduler.start(mockParams);
+
+				scheduler.stop();
+
+				await scheduler.start(mockParams);
+
+				expect(mockJob).toHaveBeenCalledTimes(2);
+				expect(scheduler['timer']).toBeDefined();
+			});
+
 			it('should post initial and final status messages', async () => {
 				await scheduler.start(mockParams);
 

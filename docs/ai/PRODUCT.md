@@ -166,6 +166,8 @@ This is distinct from a token whose issuer provides **no** Index canister at all
 
 A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
 
+OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
+
 ---
 
 ## Exchange-rate sourcing
