@@ -136,6 +136,7 @@ The [Help](#help) page emits one structured `help` event under `event_context: h
 | ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
 | `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                    |
 | `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `explorer`       | `network_explorers`  | a block explorer link is clicked            | `success`                       | `event_key: network` + the network; no `event_provider`                              |
 | `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                       | `event_provider`: the provider id; `event_key: network` + the chain                  |
 | `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
 | `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
@@ -143,7 +144,7 @@ The [Help](#help) page emits one structured `help` event under `event_context: h
 
 Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
 
-The same invariant keeps the destination URL out of the `explorer` action, unlike `contact`: every provider explorer URL embeds a wallet address. The provider and the chain carry the whole product signal — which provider users check, and for which chain — with none of the identity.
+The same invariant keeps the destination URL out of both `explorer` subcontexts, unlike `contact`: every explorer URL on those two cards embeds a wallet address. The provider and the network carry the whole product signal — which explorer users reach for, and for which chain — with none of the identity.
 
 ---
 
@@ -234,6 +235,17 @@ Data export is deliberately **not** here: it is a utility, not help. It stays on
 ### Support
 
 The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
+
+### Block explorers
+
+OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The block explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo.
+
+The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Six of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
+
+- **Internet Computer** uses `icexplorer.io`, not the network's own `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character account identifier — while the address OISY shows a user is their principal. This is a correctness requirement, not a preference.
+- **Bitcoin** uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
+
+As on the provider card below, a link whose address has not loaded is left out, and a card with no available link is hidden.
 
 ### Provider transaction status
 
