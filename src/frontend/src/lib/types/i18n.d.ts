@@ -920,6 +920,7 @@ interface I18nSwap {
 		swap_is_not_offered: string;
 		swap_amount_too_low: string;
 		swap_amount_too_low_minimum: string;
+		swap_amount_too_low_minimum_fiat: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;

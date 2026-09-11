@@ -98,14 +98,24 @@ export interface FetchSwapAmountsParams {
 export type Slippage = string | number;
 
 /**
+ * A provider's minimum swap amount, which is not always denominated in the token
+ * being swapped.
+ *
+ * NEAR Intents enforces two unrelated minimums: a per-route bridge minimum, quoted in
+ * the source token's smallest unit, and a per-chain limit quoted in fiat. The fiat one
+ * cannot be converted to token units for display without inventing precision the
+ * constraint does not have, so the denomination travels with the value.
+ */
+export type SwapAmountMinimum = { type: 'token'; value: bigint } | { type: 'usd'; value: number };
+
+/**
  * The reason no offer could be quoted, when a provider named one.
  *
- * `minAmount` is the provider's minimum, in the source token's smallest unit,
- * when the provider communicated it.
+ * `minimum` is the provider's minimum, when the provider communicated it.
  */
 export interface SwapQuoteError {
 	type: 'amount-too-low';
-	minAmount?: bigint;
+	minimum?: SwapAmountMinimum;
 }
 
 export type SwapMappedResult =

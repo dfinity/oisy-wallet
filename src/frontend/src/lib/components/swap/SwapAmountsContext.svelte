@@ -141,7 +141,7 @@
 				amountForSwap: parsedAmount,
 				selectedProvider: undefined,
 				...(err instanceof SwapAmountTooLowError && {
-					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
+					quoteError: { type: 'amount-too-low', minimum: err.minimum }
 				})
 			});
 		} finally {
