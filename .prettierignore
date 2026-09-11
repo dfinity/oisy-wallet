@@ -16,5 +16,10 @@ yarn.lock
 
 .dfx
 
+# `cap sync` copies the built web assets into the native projects.
+mobile/ios/App/App/public
+mobile/android/app/src/main/assets/public
+mobile/ios/App/Pods
+
 # Recorded Solana RPC responses: large, machine-generated, and kept minified on purpose.
 src/frontend/src/tests/fixtures/solana/rpc

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Universal Links for the ICRC-167 delegation callback: iOS routes
+	     https://<env>/signer-callback into the app after verifying the
+	     domain's apple-app-site-association against this app ID. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:audit.oisy.com</string>
+		<string>applinks:staging.oisy.com</string>
+		<string>applinks:oisy.com</string>
+	</array>
+</dict>
+</plist>
