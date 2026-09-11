@@ -8,6 +8,7 @@ import {
 	nearIntentsSupportedTokens
 } from '$lib/services/near-intents.services';
 import { SwapProvider } from '$lib/types/swap';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -111,7 +112,12 @@ describe('btc-swap.providers', () => {
 		it('should advertise the sibling NEAR Intents categories as destinations', () => {
 			const evmSet = new Set(['0xabc']);
 			const solSet = new Set(['SplAddr1']);
-			const btcSet = new Set(['btc']);
+			const btcSet = new Set([
+				nativeSwapTokenIdentifier({
+					networkId: BTC_MAINNET_TOKEN.network.id,
+					symbol: BTC_MAINNET_TOKEN.symbol
+				})
+			]);
 
 			const result = nearIntentsEntry().getSupportedDestinations({
 				sourceToken: BTC_MAINNET_TOKEN,

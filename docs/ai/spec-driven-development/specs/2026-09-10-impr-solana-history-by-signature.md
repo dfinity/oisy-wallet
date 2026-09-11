@@ -79,11 +79,22 @@ export all read it as they do today.
 
 ### 3.3 Merged pagination with no holes
 
-A page of the merged list ends at the **newest of the per-source oldest signatures**, counting
-only sources that returned a full page. Anything older than that cut is not returned yet,
-because a source that stopped above it may still hold signatures in between. The next page asks
-every source for signatures `before` the cut. A source that returned less than a full page has
-reached the end of its history and is not asked again.
+Each source pages through its own history: every call for a source continues `before` that
+source's own oldest fetched signature, so a signature is never used as a cursor for an address
+whose history it is not in.
+
+A page of the merged list ends at the **cut**: the newest of the oldest signatures of the
+sources that returned a full page. It returns only what lies **strictly above the cut's slot**.
+Anything older is held back, because a source that stopped above it may still hold signatures in
+between. The cut's slot itself is held back too, until every source has passed it: a source that
+reaches one of its signatures later must still add its tag (3.2).
+
+What was fetched but not returned travels in the cursor, with each source's own `before` and the
+sources that returned less than a full page. Those have reached the end of their history and are
+not asked again. A source already below the cut is not asked again until the cut reaches it. A
+page can be empty while a cursor is still returned, when a source is still walking through a
+crowded slot: only a missing cursor means the end. A cursor is only valid for the sources it was
+made for, so when the token list changes, paging starts over.
 
 ### 3.4 A record on screen is always derived from chain data
 
@@ -192,9 +203,10 @@ Implementation, in order:
    backend pagination cursors and `exitIfFirstSignatureMatches` go. This PR is independent of the
    rest and ships first, because backend loading is on in every environment
    (`USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED`), so F4 is live.
-2. **The merged pager.** `getSolSignatures` becomes the pager of 3.3: lookups in parallel, newest
-   first, each signature tagged with the sources that returned it, the cut applied, and its own
-   cursor (3.5). It flips the F1 and F2 `it.fails` tests in T1 and T2.
+2. **The merged pager, #14025.** `getSolSignatures` becomes the pager of 3.3: lookups in
+   parallel, newest first, each signature tagged with the sources that returned it, the cut
+   applied, and its own cursor (3.5) carrying each source's `before`, the exhausted sources and
+   the signatures held back. It replaces the F1 and F2 `it.fails` tests in T1 and T2.
 3. **Resolve once.** Turns signatures into records, fetching and deriving each signature once,
    and returns the records per token id (3.2).
 4. **One worker per network.** `SolLoaderWallets`, `SolWalletWorker` and `SolWalletScheduler`
@@ -213,8 +225,9 @@ Implementation, in order:
   loader returns (checked with the fixture harness, not with mocks).
 - A transaction that moves SOL and `n` SPL tokens causes exactly one `getTransaction` call per
   session, whatever `n` is.
-- A cold start makes one `getSignaturesForAddress` call per source per page, and no source is
-  asked again once it has returned less than a full page.
+- A cold start makes at most one `fetchSignatures` call per source per page (which may itself call
+  `getSignaturesForAddress` again to fill the page past failed signatures): no source is asked
+  again once it has returned less than a full page, nor while it is already below the cut.
 - Paging the merged list to the end yields the union of every source's full history: no holes.
 - The integration reconciliation tests (the SOL and SPL balance checks in
   `sol-signatures.services.integration.spec.ts`) keep passing.
@@ -228,11 +241,12 @@ Implementation, in order:
 ## 8. Open questions (facts to confirm)
 
 - **Q1.** Does `getSignaturesForAddress(address, { before })` accept a signature that is not in
-  that address's own history, and return that address's signatures older than it? The merged
-  cursor relies on it. **Answered on the public mainnet RPC (T2):** with a token account's
-  signature at slot 338170096 that the wallet never saw, the wallet's page is exactly its 10
-  signatures strictly older than that slot, newest first. Production uses Alchemy, which serves old
-  history from its own store, so it still needs one check there before PR 2 lands.
+  that address's own history, and return that address's signatures older than it? **No longer
+  needed:** the pager of 3.3 continues each source from its own oldest signature, so it never
+  passes one address's signature as another's cursor. For the record, on the public mainnet RPC
+  (T2) the answer is yes: with a token account's signature at slot 338170096 that the wallet never
+  saw, the wallet's page is exactly its 10 signatures strictly older than that slot. Alchemy was
+  not checked, and only a design that crosses addresses would need it.
 - **Q2.** Failed transactions: `fetchSignatures` drops signatures whose `err` is set, but the fee
   payer of a failed transaction still paid its fee. Do any of the fixture wallets have failed
   transactions they paid for? If so, the SOL balance reconciliation only passes because it sums

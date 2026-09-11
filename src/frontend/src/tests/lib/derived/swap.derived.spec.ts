@@ -17,6 +17,7 @@ import {
 } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -180,7 +181,12 @@ describe('swap.derived', () => {
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: {
 							coverage: 'all',
-							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+							supportedTokenIds: new Set([
+								nativeSwapTokenIdentifier({
+									networkId: SOLANA_TOKEN.network.id,
+									symbol: SOLANA_TOKEN.symbol
+								})
+							])
 						},
 						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
@@ -263,7 +269,12 @@ describe('swap.derived', () => {
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: {
 							coverage: 'all',
-							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+							supportedTokenIds: new Set([
+								nativeSwapTokenIdentifier({
+									networkId: SOLANA_TOKEN.network.id,
+									symbol: SOLANA_TOKEN.symbol
+								})
+							])
 						},
 						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
