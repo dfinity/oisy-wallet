@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -1561,7 +1565,6 @@
 			"estimated_btc": "Szacowana opłata sieciowa BTC",
 			"estimated_inter_network": "Szacowana opłata między sieciami",
 			"estimated_eth": "Szacowana opłata Ethereum",
-			"max_fee_eth": "Maksymalna opłata <small>(prawdopodobnie w < 30 sekund)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
