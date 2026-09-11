@@ -14,7 +14,7 @@ Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-tra
 
 ### Solana (RPC signatures and details)
 
-`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+Solana history is loaded from the chain only: `getSolTransactions` takes a page of signatures from `fetchSignatures` and derives each one with `fetchSolTransactionsForSignature`. The backend user-transaction cache is written per token but never read for Solana, because its copy cannot carry what a row is shown from (see "Solana history" in `docs/ai/PRODUCT.md`). `fetchTransactionDetailForSignature` caches finalized details per network, so polling a page that is already held re-fetches only the signatures that are not finalized yet.
 
 ## Token identity — key by `TokenId`
 
