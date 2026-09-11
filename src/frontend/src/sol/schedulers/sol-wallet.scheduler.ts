@@ -1,4 +1,3 @@
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
@@ -9,71 +8,121 @@ import type {
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
-import type { CertifiedData } from '$lib/types/store';
 import { consoleError } from '$lib/utils/console.utils';
-import { loadSolLamportsBalance } from '$sol/api/solana.api';
-import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
+import {
+	mapSolSourcesToTokens,
+	resolveSolSignatures
+} from '$sol/services/sol-resolve-signatures.services';
+import { getSolSignatures } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
-import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
-import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolBalance } from '$sol/types/sol-balance';
+import type { SolNetworkBalances } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type {
+	SolResolvedTransaction,
+	SolSignature,
+	SolSignatureWithSources,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import type { Nullish } from '@dfinity/zod-schemas';
 
 interface LoadSolWalletParams {
-	identity: NullishIdentity;
-	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
+	network: SolanaNetworkType;
+	tokens: PostMessageDataRequestSol['tokens'];
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<Nullish<SolBalance>> | undefined;
-	transactions: Record<string, SolCertifiedTransaction>;
+	balances: SolNetworkBalances | undefined;
+	// The newest slot the head check has resolved, and the signatures of that slot it has resolved.
+	// Only a signature above that slot, or in it and not resolved yet, is new: anything older belongs
+	// to the pagers, which keep their own cursors. So no older signature needs remembering, and a
+	// long session does not pile them up. It is never inferred from what the UI store holds.
+	newestSlot: SolSignature['slot'] | undefined;
+	signatures: Set<string>;
 }
 
-interface SolWalletData {
-	balance: CertifiedData<SolBalance | null>;
-	transactions: SolCertifiedTransaction[];
+interface SolWalletHead {
+	// Every new signature of the head page, including those that derive to no record.
+	signatures: SolSignatureWithSources[];
+	transactions: SolResolvedTransaction[];
 }
 
+const initialStore = (): SolWalletStore => ({
+	balances: undefined,
+	newestSlot: undefined,
+	signatures: new Set()
+});
+
+const dataKey = ({
+	address: { data: address },
+	solanaNetwork,
+	tokens
+}: PostMessageDataRequestSol): string =>
+	JSON.stringify([
+		solanaNetwork,
+		address,
+		tokens.map(({ address: tokenAddress, owner }) => `${tokenAddress}:${owner}`).sort()
+	]);
+
+const balancesEqual = ({
+	current,
+	next
+}: {
+	current: SolNetworkBalances;
+	next: SolNetworkBalances;
+}): boolean =>
+	current.sol === next.sol &&
+	Object.keys(current.spl).length === Object.keys(next.spl).length &&
+	Object.entries(current.spl).every(([mint, balance]) => next.spl[mint] === balance);
+
+/**
+ * Syncs every balance and the newest history of one Solana network: the wallet and the associated
+ * token account of each enabled SPL token. Each tick posts at most one message, with the balances and
+ * the records it has not posted yet, each tagged with the sources whose history returned it.
+ */
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
 	#ref: PostMessageCommon['ref'] | undefined;
+	#dataKey: string | undefined;
 
 	private timer = new SchedulerTimer('syncSolWalletStatus');
 
-	private store: SolWalletStore = {
-		balance: undefined,
-		transactions: {}
-	};
+	private store: SolWalletStore = initialStore();
 
 	stop() {
 		this.timer.stop();
 	}
 
-	protected setRef(data: PostMessageDataRequestSol | undefined) {
-		const newRef = nonNullish(data)
-			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
-			: undefined;
+	// What the store holds is only valid for the address and token list it was built from.
+	private setData(data: PostMessageDataRequestSol | undefined): { changed: boolean } {
+		const key = nonNullish(data) ? dataKey(data) : undefined;
+		const changed = key !== this.#dataKey;
 
-		if (this.#ref !== newRef) {
-			this.store = {
-				balance: undefined,
-				transactions: {}
-			};
+		if (changed) {
+			this.store = initialStore();
 		}
 
-		this.#ref = newRef;
+		this.#dataKey = key;
+		this.#ref = data?.solanaNetwork;
+
+		return { changed };
 	}
 
 	async start(data: PostMessageDataRequestSol | undefined) {
-		this.setRef(data);
+		const previousKey = this.#dataKey;
+
+		const { changed } = this.setData(data);
+
+		// `SchedulerTimer.start` returns early while its timer runs, and that timer keeps the data it
+		// was started with. Started again for another address or token list, it would go on syncing the
+		// old one, so it is stopped first.
+		if (changed && nonNullish(previousKey)) {
+			this.timer.stop();
+		}
 
 		await this.timer.start<PostMessageDataRequestSol>({
 			interval: SOL_WALLET_TIMER_INTERVAL_MILLIS,
@@ -83,7 +132,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	async trigger(data: PostMessageDataRequestSol | undefined) {
-		this.setRef(data);
+		this.setData(data);
 
 		await this.timer.trigger<PostMessageDataRequestSol>({
 			job: this.syncWallet,
@@ -91,57 +140,75 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		});
 	}
 
-	private loadBalance = async ({
+	// The head check: the newest page of the merged pager, and only what is newer than what this
+	// scheduler already holds. When nothing is, a tick costs one signature lookup per source.
+	private loadHead = async ({
 		address,
-		solanaNetwork: network,
-		tokenAddress,
-		tokenOwnerAddress
-	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
-		data:
-			nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
-				? await loadSplTokenBalance({
-						address,
-						network,
-						tokenAddress,
-						tokenOwnerAddress
-					})
-				: await loadSolLamportsBalance({ address, network }),
-		certified: false
-	});
+		network,
+		tokens
+	}: LoadSolWalletParams): Promise<SolWalletHead> => {
+		// Known limit: this reads one page and drops its cursor. The pager holds the cut slot back in
+		// the cursor, and returns an empty page while a source walks through a crowded slot, so when
+		// more than a page of signatures arrives between two ticks, what lies between that page and
+		// `newestSlot` is never loaded here. The head check that pages with the cursor and resumes the
+		// walk on the next ticks follows in its own change.
+		const { signatures } = await getSolSignatures({ address, network, tokensList: tokens });
 
-	private loadTransactions = async ({
-		identity,
-		solanaNetwork: network,
-		address,
-		tokenAddress,
-		tokenOwnerAddress
-	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		// Always from the chain, never from the backend copy: that copy cannot carry what a row is
-		// shown from, and a wrong one is never replaced (see `saveSolFinalizedTransactions`).
-		const rpcTransactions = await getSolTransactions({
-			network,
-			identity,
-			address,
-			tokenAddress,
-			tokenOwnerAddress
-		});
+		const { newestSlot, signatures: known } = this.store;
 
-		const newTransactions: SolCertifiedTransaction[] = rpcTransactions
-			.filter(({ id }) => isNullish(this.store.transactions[`${id}`]))
-			.map((transaction) => ({
-				data: transaction,
-				certified: false
-			}));
+		const newSignatures = signatures.filter(
+			({ signature, slot }) =>
+				!known.has(signature) && (isNullish(newestSlot) || slot >= newestSlot)
+		);
 
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
-			saveSolFinalizedTransactions({
-				identity,
-				tokenId: solBackendTokenId({ network, tokenAddress }),
-				transactions: newTransactions.map(({ data }) => data)
-			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
+		if (newSignatures.length === 0) {
+			return { signatures: [], transactions: [] };
 		}
 
-		return newTransactions;
+		return {
+			signatures: newSignatures,
+			transactions: await resolveSolSignatures({
+				address,
+				network,
+				tokens,
+				signatures: newSignatures,
+				known
+			})
+		};
+	};
+
+	// The backend cache stays per token: each token's records under its own key, one save per token.
+	private saveFinalizedTransactions = async ({
+		identity,
+		address,
+		network,
+		tokens,
+		transactions
+	}: LoadSolWalletParams & {
+		identity: NullishIdentity;
+		transactions: SolResolvedTransaction[];
+	}) => {
+		const sourceTokens = await mapSolSourcesToTokens({ address, tokens });
+
+		const transactionsByToken = transactions.reduce((acc, { transaction, sources }) => {
+			new Set(sources.map((source) => sourceTokens.get(source))).forEach((mint) => {
+				if (mint !== undefined) {
+					acc.set(mint, [...(acc.get(mint) ?? []), transaction]);
+				}
+			});
+
+			return acc;
+		}, new Map<SplTokenAddress | null, SolTransactionUi[]>());
+
+		await Promise.all(
+			[...transactionsByToken.entries()].map(([mint, tokenTransactions]) =>
+				saveSolFinalizedTransactions({
+					identity,
+					tokenId: solBackendTokenId({ network, tokenAddress: mint ?? undefined }),
+					transactions: tokenTransactions
+				})
+			)
+		);
 	};
 
 	private loadAndSyncWalletData = async ({
@@ -150,23 +217,39 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}: Required<SchedulerJobData<PostMessageDataRequestSol>>) => {
 		const {
 			address: { data: address },
-			...rest
+			solanaNetwork: network,
+			tokens
 		} = data;
 
-		const [balance, transactions] = await Promise.all([
-			this.loadBalance({
-				identity,
-				address,
-				...rest
-			}),
-			this.loadTransactions({
-				identity,
-				address,
-				...rest
-			})
+		const params: LoadSolWalletParams = { address, network, tokens };
+
+		const [balances, head] = await Promise.all([
+			loadSolNetworkBalances(params),
+			this.loadHead(params)
 		]);
 
-		this.syncWalletData({ response: { balance, transactions } });
+		// Committed only once both loads succeeded: a retry after a failure must see the same
+		// signatures as new again.
+		const { hasChanges } = this.syncWalletData({ balances, head });
+
+		if (!hasChanges) {
+			return;
+		}
+
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && head.transactions.length > 0) {
+			this.saveFinalizedTransactions({
+				identity,
+				...params,
+				transactions: head.transactions
+			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
+		}
+
+		this.postMessageWallet({
+			wallet: {
+				balances,
+				newTransactions: JSON.stringify(head.transactions, jsonReplacer)
+			}
+		});
 	};
 
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestSol>) => {
@@ -179,53 +262,37 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			});
 		} catch (error: unknown) {
 			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
-			this.store = {
-				balance: undefined,
-				transactions: {}
-			};
+			this.store = initialStore();
 			this.postMessageWalletError({ error });
 		}
 	};
 
 	private syncWalletData = ({
-		response: { balance, transactions }
+		balances,
+		head: { signatures, transactions }
 	}: {
-		response: SolWalletData;
-	}) => {
-		if (!this.store.balance?.certified && balance.certified) {
-			throw new Error('Balance certification status cannot change from uncertified to certified');
-		}
+		balances: SolNetworkBalances;
+		head: SolWalletHead;
+	}): { hasChanges: boolean } => {
+		const newBalances =
+			isNullish(this.store.balances) ||
+			!balancesEqual({ current: this.store.balances, next: balances });
 
-		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
-		const newTransactions = transactions.length > 0;
+		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
+			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
+			this.store.newestSlot
+		);
 
 		this.store = {
-			...this.store,
-			...(newBalance && { balance }),
-			...(newTransactions && {
-				transactions: {
-					...this.store.transactions,
-					...transactions.reduce(
-						(acc, transaction) => ({
-							...acc,
-							[transaction.data.id]: transaction
-						}),
-						{}
-					)
-				}
-			})
+			balances,
+			newestSlot,
+			signatures: new Set([
+				...(newestSlot === this.store.newestSlot ? this.store.signatures : []),
+				...signatures.filter(({ slot }) => slot === newestSlot).map(({ signature }) => signature)
+			])
 		};
 
-		if (!newBalance && !newTransactions) {
-			return;
-		}
-
-		this.postMessageWallet({
-			wallet: {
-				balance,
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
-			}
-		});
+		return { hasChanges: newBalances || transactions.length > 0 };
 	};
 
 	private postMessageWallet(data: SolPostMessageDataResponseWallet) {
