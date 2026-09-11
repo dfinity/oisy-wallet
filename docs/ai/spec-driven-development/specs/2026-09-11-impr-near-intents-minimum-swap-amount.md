@@ -205,20 +205,28 @@ that path keeps working from the real failed quote, so the two never disagree.
 The probe fires **when the pair is selected**, so the hint is on screen before the user
 touches the amount field.
 
-**It goes in the source input's existing tertiary row, not in the provider sheet.** The two
-provider minimums OISY already shows — Chain Fusion's `swap.text.chain_fusion_minimum_amount`
-and OISY Trade's `swap.text.oisy_trade_minimum_notional` — are `ModalValue` rows inside their
-`SwapDetails*` components, which `SwapProvider.svelte` renders only when
-`nonNullish(selectedProvider)`. Below a minimum there is no quote, so no selected provider,
-so that entire block is absent: the one place OISY already puts provider minimums is
-structurally unavailable exactly when this hint is needed.
+**It cannot go in the provider sheet.** The two provider minimums OISY already shows —
+Chain Fusion's `swap.text.chain_fusion_minimum_amount` and OISY Trade's
+`swap.text.oisy_trade_minimum_notional` — are `ModalValue` rows inside their `SwapDetails*`
+components, which `SwapProvider.svelte` renders only when `nonNullish(selectedProvider)`.
+Below a minimum there is no quote, so no selected provider, so that entire block is absent:
+the one place OISY already puts provider minimums is structurally unavailable exactly when
+this hint is needed.
 
-The source `TokenInput` in `SwapForm.svelte` already renders a `text-tertiary` `amountInfo`
-row under the pay amount, currently holding `TokenInputAmountExchange` (the fiat value of
-what was typed). The hint joins that row. It is the field the constraint applies to, the
-styling is already right, and the destination side uses the same `amountInfo` slot for the
-reactive refusal, so the informational and error states stay symmetric instead of occupying
-unrelated parts of the form.
+**It goes full width beside the other pair-level notices**, as a new
+`SwapMinimumAmountInfo.svelte` rendering a `MessageBox` in a `mt-6` wrapper next to
+`SwapCrossChainInfo` in `SwapForm.svelte` — the established pattern for telling the user
+something about the pair they have chosen.
+
+The obvious-looking alternative, joining the pay field's existing `text-tertiary`
+`amountInfo` row, was built and rejected on inspection. That row is
+`flex min-h-6 items-center justify-between` (`TokenInputContent.svelte`) with the balance
+and Max button as its other child, so on a 375px viewport the left side has very little
+width: `~CHF 12'345.67` beside `Min. CHF 1'000.00` wraps onto two lines and runs into the
+balance. A full-width box has room for any currency and cannot collide with anything. Being
+a box rather than micro-text also suits a $1,000 floor, which is worth noticing.
+
+The copy is a sentence rather than a `Min. …` label, because it now sits in a banner.
 
 **A USD minimum is shown in the user's display currency, never as a raw dollar figure.**
 The API enforces the limit in USD, but OISY does not show the user USD unless that is what
@@ -308,9 +316,13 @@ The `test-coverage` gate enforces whole-project thresholds, so this lands with i
   One test pins the check-ordering assumption from §3.4 by asserting that a placeholder
   address is enough to surface the limit, so the trick fails loudly in a spec rather than
   silently in the UI if 1Click reorders its validation.
-- `src/frontend/src/tests/lib/components/swap/SwapForm.spec.ts` — the hint rendered for a
-  restricted pair, absent for an unrestricted one, absent while the verdict is unknown, and
-  absent when `formatCurrency` returns `undefined`.
+- `src/frontend/src/tests/lib/components/swap/SwapMinimumAmountInfo.spec.ts` — the notice
+  rendered for a restricted pair, converted into the selected currency, absent while the
+  verdict is unknown, and absent (with no bare figure) when `formatCurrency` returns
+  `undefined`.
+- `src/frontend/src/tests/lib/components/swap/SwapAmountsContext.spec.ts` — the probe runs on
+  pair selection, is not repeated when only the amount changes, re-runs when the pair
+  changes, and leaves the store empty when it reaches no verdict or throws.
 
 ## 7. Implementation plan: atomic PRs
 
@@ -348,5 +360,7 @@ None outstanding. All four were decided on 2026-09-11:
   every pair would be clutter. A materiality threshold was considered and rejected: it would
   need an arbitrary cutoff to pick and defend, where the fiat/bridge split follows the
   constraints' own natures.
-- **The hint lives in the source input's existing tertiary row**, not in the provider sheet
-  (§3.5) — the sheet cannot host it, since it does not render without a selected provider.
+- **The hint is a full-width `MessageBox` beside the other pair-level notices** (§3.5). The
+  provider sheet cannot host it, since it does not render without a selected provider, and
+  the pay field's info row proved too narrow: a long currency string wraps into the balance
+  on a 375px viewport.
