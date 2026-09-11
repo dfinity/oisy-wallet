@@ -121,6 +121,7 @@ interface I18nNavigation {
 		source_code: string;
 		documentation: string;
 		support: string;
+		help: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
@@ -147,7 +148,7 @@ interface I18nNavigation {
 		menu: string;
 		documentation: string;
 		support: string;
-		support_page: string;
+		help_page: string;
 		open_twitter: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
@@ -526,12 +527,12 @@ interface I18nHero {
 	alt: { toggle_privacy_mode: string };
 }
 
-interface I18nSupport {
+interface I18nHelp {
 	text: {
 		title: string;
-		help_title: string;
-		help_description: string;
-		help_link: string;
+		support_title: string;
+		support_description: string;
+		support_link: string;
 		icpswap_title: string;
 		icpswap_description: string;
 		scan: string;
@@ -2405,7 +2406,7 @@ interface I18n {
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
-	support: I18nSupport;
+	help: I18nHelp;
 	settings: I18nSettings;
 	shortcuts: I18nShortcuts;
 	networks: I18nNetworks;

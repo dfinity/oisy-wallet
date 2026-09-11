@@ -132,6 +132,7 @@
 			"source_code": "Codice sorgente",
 			"documentation": "Documentazione",
 			"support": "Supporto",
+			"help": "",
 			"confirm_navigate": "Sei sicuro di voler andartene?",
 			"vip_qr_code": "Codici QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
@@ -158,7 +159,7 @@
 			"menu": "Il tuo indirizzo del wallet, impostazioni, disconnessione e collegamenti esterni",
 			"documentation": "Apri la documentazione di $oisy_name",
 			"support": "Apri la sezione Supporto della documentazione di $oisy_name",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "Apri il feed X/Twitter di DFINITY",
 			"vip_qr_code": "Genera un link di invito",
 			"binance_qr_code": "Genera un link Binance Clubhouse",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Attiva e disattiva la modalità privacy"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

@@ -132,6 +132,7 @@
 			"source_code": "ソースコード",
 			"documentation": "ドキュメント",
 			"support": "サポート",
+			"help": "",
 			"confirm_navigate": "ページを離れても良いですか？",
 			"vip_qr_code": "VIP QRコード",
 			"binance_qr_code": "バイナンス クラブハウスQR",
@@ -158,7 +159,7 @@
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "DFINITY X/Twitterを開く",
 			"vip_qr_code": "招待リンクを生成",
 			"binance_qr_code": "バイナンスクラブハウスリンクを生成",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "プライバシーモードのオン/オフを切り替える"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

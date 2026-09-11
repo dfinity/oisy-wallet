@@ -132,6 +132,7 @@
 			"source_code": "Zdrojový kód",
 			"documentation": "Dokumentace",
 			"support": "Podpora",
+			"help": "",
 			"confirm_navigate": "Jste si jisti, že chcete odejít?",
 			"vip_qr_code": "VIP QR kódy",
 			"binance_qr_code": "QR kód Binance Clubhouse",
@@ -158,7 +159,7 @@
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
 			"vip_qr_code": "Vygenerovat pozvánku",
 			"binance_qr_code": "Vygenerovat odkaz na Binance Clubhouse",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

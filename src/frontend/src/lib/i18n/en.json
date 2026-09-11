@@ -132,6 +132,7 @@
 			"source_code": "Source code",
 			"documentation": "Documentation",
 			"support": "Support",
+			"help": "Help",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
@@ -158,7 +159,7 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
-			"support_page": "Open the support page",
+			"help_page": "Open the help page",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
-			"title": "Support",
-			"help_title": "Help & Support",
-			"help_description": "Browse the $oisy_name help centre for answers to common questions, or get in touch with the team if you are stuck.",
-			"help_link": "Go to the help centre",
+			"title": "Help",
+			"support_title": "Support",
+			"support_description": "Browse the $oisy_name help centre for answers to common questions, or get in touch with the team if you are stuck.",
+			"support_link": "Go to the help centre",
 			"icpswap_title": "ICPSwap Token Withdrawal",
 			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
 			"scan": "Scan my pools",

@@ -4,23 +4,23 @@ import {
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	type PLAUSIBLE_EVENT_RESULT_STATUSES,
-	type PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT
+	type PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 
-// The action on the Support page, carried in `event_modifier`, so one `support`
-// event covers the whole page rather than a family of `support_*` names.
-export type SupportAction = 'open' | 'contact' | 'scan' | 'select_pool' | 'withdraw';
+// The action on the Help page, carried in `event_modifier`, so one `help`
+// event covers the whole page rather than a family of `help_*` names.
+export type HelpAction = 'open' | 'contact' | 'scan' | 'select_pool' | 'withdraw';
 
-export interface TrackSupportParams {
+export interface TrackHelpParams {
 	// The action → `event_modifier`.
-	action: SupportAction;
+	action: HelpAction;
 	// Lifecycle: `executing` when an async action starts, then `success` / `error`.
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
 	// The card the action happened in → `event_subcontext`; omitted for the page itself.
-	subcontext?: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT;
+	subcontext?: PLAUSIBLE_EVENT_SUBCONTEXT_HELP;
 	// Pool leg symbols → `token_symbol` / `token2_symbol`.
 	token?: string;
 	token2?: string;
@@ -37,9 +37,9 @@ export interface TrackSupportParams {
 	error?: string;
 }
 
-// One structured event for the Support page: the action rides in
+// One structured event for the Help page: the action rides in
 // `event_modifier`, the card in `event_subcontext` and the outcome in
-// `result_status`, so a single `support` event covers every action x state
+// `result_status`, so a single `help` event covers every action x state
 // distinguished by metadata rather than a bespoke event name per case.
 //
 // Privacy: withdrawal events deliberately carry no `token_amount` and no
@@ -47,7 +47,7 @@ export interface TrackSupportParams {
 // distinctive amount that is also visible on-chain, which is exactly the
 // de-anonymising join forbidden by invariant 3 in docs/ai/frontend/analytics.md.
 // The `balances_found` count on `select_pool` carries the same product signal.
-export const buildSupportEvent = ({
+export const buildHelpEvent = ({
 	action,
 	resultStatus,
 	subcontext,
@@ -58,12 +58,12 @@ export const buildSupportEvent = ({
 	poolsScanned,
 	link,
 	error
-}: TrackSupportParams): TrackEventParams => ({
-	name: PLAUSIBLE_EVENTS.SUPPORT,
+}: TrackHelpParams): TrackEventParams => ({
+	name: PLAUSIBLE_EVENTS.HELP,
 	metadata: {
-		event_context: PLAUSIBLE_EVENT_CONTEXTS.SUPPORT,
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.HELP,
 		event_modifier: action,
-		source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SUPPORT_PAGE,
+		source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE,
 		result_status: resultStatus,
 		...(nonNullish(subcontext) && { event_subcontext: subcontext }),
 		...(nonNullish(token) && { token_symbol: token }),
@@ -83,8 +83,8 @@ export const buildSupportEvent = ({
 });
 
 // Fires the event built above. Call sites that must hand the payload to a child
-// component's own click handler (e.g. ExternalLink) use `buildSupportEvent`
+// component's own click handler (e.g. ExternalLink) use `buildHelpEvent`
 // instead, per the return-vs-fire rule in docs/ai/frontend/analytics.md.
-export const trackSupport = (params: TrackSupportParams) => {
-	trackEvent(buildSupportEvent(params));
+export const trackHelp = (params: TrackHelpParams) => {
+	trackEvent(buildHelpEvent(params));
 };

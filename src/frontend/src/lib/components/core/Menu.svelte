@@ -61,7 +61,7 @@
 	import {
 		isRouteActivity,
 		isRouteRewards,
-		isRouteSupport,
+		isRouteHelp,
 		isRouteDappExplorer,
 		isRouteSettings,
 		networkUrl
@@ -113,9 +113,9 @@
 	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
 	const activityRoute = $derived(isRouteActivity(page));
 	const rewardsRoute = $derived(isRouteRewards(page));
-	const supportRoute = $derived(isRouteSupport(page));
+	const helpRoute = $derived(isRouteHelp(page));
 	const addressesOption = $derived(
-		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute && !supportRoute
+		!settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute && !helpRoute
 	);
 
 	const addressModalId = Symbol();

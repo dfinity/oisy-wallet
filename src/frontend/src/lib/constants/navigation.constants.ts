@@ -5,7 +5,7 @@ import type { NavigationBarSlot, NavigationSection } from '$lib/types/navigation
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
 	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
-	{ id: 'more', items: ['notes', 'explore', 'rewards', 'support', 'settings'] }
+	{ id: 'more', items: ['notes', 'explore', 'rewards', 'help', 'settings'] }
 ];
 
 // Mobile bottom-bar information architecture: five slots, two of which are
@@ -17,5 +17,5 @@ export const MOBILE_NAVIGATION_BAR: NavigationBarSlot[] = [
 	{ type: 'item', id: 'activity' },
 	{ type: 'group', id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ type: 'item', id: 'notes' },
-	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'support', 'settings'] }
+	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'help', 'settings'] }
 ];

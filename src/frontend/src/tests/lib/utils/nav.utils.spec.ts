@@ -22,21 +22,21 @@ import {
 	isDappExplorerPath,
 	isEarnPath,
 	isEarningPath,
+	isHelpPath,
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteEarn,
 	isRouteEarning,
+	isRouteHelp,
 	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
-	isRouteSupport,
 	isRouteTokens,
 	isRouteTrading,
 	isRouteTransactions,
 	isSettingsPath,
-	isSupportPath,
 	isTokensPath,
 	isTransactionsPath,
 	loadRouteParams,
@@ -531,22 +531,22 @@ describe('nav.utils', () => {
 			});
 		});
 
-		describe('isRouteSupport', () => {
-			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Support}`;
+		describe('isRouteHelp', () => {
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Help}`;
 
 			it('should return true when route id matches Support path', () => {
-				expect(isRouteSupport(mockPage(mockPath))).toBeTruthy();
-				expect(isRouteSupport(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+				expect(isRouteHelp(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteHelp(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Support path', () => {
-				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
-				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
 
-				expect(isRouteSupport(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
-				expect(isRouteSupport(mockPage(`/anotherGroup/${AppPath.Support}`))).toBeFalsy();
+				expect(isRouteHelp(mockPage(`/anotherGroup/${AppPath.Help}`))).toBeFalsy();
 			});
 		});
 
@@ -715,11 +715,11 @@ describe('nav.utils', () => {
 			expect(isSettingsPath(null)).toBeFalsy();
 		});
 
-		it('isSupportPath', () => {
-			expect(isSupportPath(withAppPrefix(AppPath.Support))).toBeTruthy();
-			expect(isSupportPath('/(app)/support')).toBeTruthy();
-			expect(isSupportPath('/(app)/support/wrong')).toBeFalsy();
-			expect(isSupportPath(null)).toBeFalsy();
+		it('isHelpPath', () => {
+			expect(isHelpPath(withAppPrefix(AppPath.Help))).toBeTruthy();
+			expect(isHelpPath('/(app)/help')).toBeTruthy();
+			expect(isHelpPath('/(app)/help/wrong')).toBeFalsy();
+			expect(isHelpPath(null)).toBeFalsy();
 		});
 
 		it('isDappExplorerPath', () => {

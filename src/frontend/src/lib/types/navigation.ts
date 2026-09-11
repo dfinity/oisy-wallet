@@ -10,7 +10,7 @@ export type NavigationItemId =
 	| 'earn'
 	| 'explore'
 	| 'notes'
-	| 'support'
+	| 'help'
 	| 'settings'
 	| 'rewards';
 

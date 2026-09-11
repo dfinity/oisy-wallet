@@ -1,9 +1,9 @@
 import {
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT
+	PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { buildSupportEvent, trackSupport } from '$lib/services/support-analytics.services';
+import { buildHelpEvent, trackHelp } from '$lib/services/help-analytics.services';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -14,40 +14,40 @@ describe('support-analytics.services', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('trackSupport', () => {
+	describe('trackHelp', () => {
 		it('tracks the page open with no subcontext', () => {
-			trackSupport({
+			trackHelp({
 				action: 'open',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'open',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'success'
 				}
 			});
 		});
 
 		it('tracks a help-link click with the destination URL', () => {
-			trackSupport({
+			trackHelp({
 				action: 'contact',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.HELP,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.SUPPORT,
 				link: 'https://support.example.org'
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'contact',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'success',
-					event_subcontext: 'help',
+					event_subcontext: 'support',
 					event_key: 'link',
 					event_value: 'https://support.example.org'
 				}
@@ -55,20 +55,20 @@ describe('support-analytics.services', () => {
 		});
 
 		it('tracks a scan with the pools checked and the rows found', () => {
-			trackSupport({
+			trackHelp({
 				action: 'scan',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				balancesFound: 3,
 				poolsScanned: 9
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'scan',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'success',
 					event_subcontext: 'icpswap_withdrawal',
 					event_key: 'balances_found',
@@ -79,21 +79,21 @@ describe('support-analytics.services', () => {
 		});
 
 		it('tracks a resolved pool with both leg symbols and the withdrawable count', () => {
-			trackSupport({
+			trackHelp({
 				action: 'select_pool',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
 				token2: 'ckUSDC',
 				balancesFound: 2
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'select_pool',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'success',
 					event_subcontext: 'icpswap_withdrawal',
 					token_symbol: 'ICP',
@@ -105,10 +105,10 @@ describe('support-analytics.services', () => {
 		});
 
 		it('tracks a zero-balance pool, keeping the count rather than omitting it', () => {
-			trackSupport({
+			trackHelp({
 				action: 'select_pool',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
 				token2: 'ckUSDC',
 				balancesFound: 0
@@ -125,20 +125,20 @@ describe('support-analytics.services', () => {
 		});
 
 		it('tracks a withdrawal with the token symbol and standard', () => {
-			trackSupport({
+			trackHelp({
 				action: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
 				tokenStandard: 'icrc'
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'withdraw',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'executing',
 					event_subcontext: 'icpswap_withdrawal',
 					token_symbol: 'ICP',
@@ -148,10 +148,10 @@ describe('support-analytics.services', () => {
 		});
 
 		it('tracks a failed withdrawal with the sanitized error', () => {
-			trackSupport({
+			trackHelp({
 				action: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ckUSDC',
 				error: 'Internal error: pool unavailable'
 			});
@@ -168,7 +168,7 @@ describe('support-analytics.services', () => {
 		});
 
 		it('omits every optional field rather than sending it as undefined', () => {
-			trackSupport({
+			trackHelp({
 				action: 'open',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				subcontext: undefined,
@@ -192,10 +192,10 @@ describe('support-analytics.services', () => {
 		});
 
 		it('never emits an amount, a USD value or a principal', () => {
-			trackSupport({
+			trackHelp({
 				action: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.ICPSWAP_WITHDRAWAL,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ICP',
 				tokenStandard: 'icrc'
 			});
@@ -211,23 +211,23 @@ describe('support-analytics.services', () => {
 		});
 	});
 
-	describe('buildSupportEvent', () => {
+	describe('buildHelpEvent', () => {
 		it('returns the payload without firing it', () => {
-			const event = buildSupportEvent({
+			const event = buildHelpEvent({
 				action: 'contact',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT.HELP,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.SUPPORT,
 				link: 'https://support.example.org'
 			});
 
 			expect(event).toStrictEqual({
-				name: 'support',
+				name: 'help',
 				metadata: {
-					event_context: 'support',
+					event_context: 'help',
 					event_modifier: 'contact',
-					source_location: 'support_page',
+					source_location: 'help_page',
 					result_status: 'success',
-					event_subcontext: 'help',
+					event_subcontext: 'support',
 					event_key: 'link',
 					event_value: 'https://support.example.org'
 				}

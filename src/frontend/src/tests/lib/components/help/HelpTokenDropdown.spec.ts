@@ -1,4 +1,4 @@
-import SupportTokenDropdown from '$lib/components/support/SupportTokenDropdown.svelte';
+import HelpTokenDropdown from '$lib/components/help/HelpTokenDropdown.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -24,15 +24,15 @@ const props = {
 	onSelect: () => undefined
 };
 
-describe('SupportTokenDropdown', () => {
+describe('HelpTokenDropdown', () => {
 	it('prompts for a selection while nothing is selected', () => {
-		const { getByText } = render(SupportTokenDropdown, { props });
+		const { getByText } = render(HelpTokenDropdown, { props });
 
-		expect(getByText(en.support.text.select_token)).toBeInTheDocument();
+		expect(getByText(en.help.text.select_token)).toBeInTheDocument();
 	});
 
 	it('shows the selected symbol on the button', () => {
-		const { getByTestId } = render(SupportTokenDropdown, {
+		const { getByTestId } = render(HelpTokenDropdown, {
 			props: { ...props, selected: usdc }
 		});
 
@@ -45,7 +45,7 @@ describe('SupportTokenDropdown', () => {
 		// each throws each_key_duplicate on that and renders nothing at all.
 		const duplicate = { ...icp, name: 'ICP (custom entry)' };
 
-		const { getByTestId } = render(SupportTokenDropdown, {
+		const { getByTestId } = render(HelpTokenDropdown, {
 			props: { ...props, tokens: [icp, usdc, duplicate] }
 		});
 
@@ -61,7 +61,7 @@ describe('SupportTokenDropdown', () => {
 	});
 
 	it('is disabled and says so when no token is available', async () => {
-		const { getByTestId } = render(SupportTokenDropdown, { props: { ...props, tokens: [] } });
+		const { getByTestId } = render(HelpTokenDropdown, { props: { ...props, tokens: [] } });
 
 		expect(getByTestId(testId)).toBeDisabled();
 
@@ -74,7 +74,7 @@ describe('SupportTokenDropdown', () => {
 	it('lists the tokens sorted case-insensitively by symbol and reports the pick', async () => {
 		const onSelect = vi.fn();
 
-		const { getByTestId } = render(SupportTokenDropdown, { props: { ...props, onSelect } });
+		const { getByTestId } = render(HelpTokenDropdown, { props: { ...props, onSelect } });
 
 		await fireEvent.click(getByTestId(testId));
 

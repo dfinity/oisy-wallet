@@ -132,6 +132,7 @@
 			"source_code": "الرمز المصدري",
 			"documentation": "الوثائق",
 			"support": "الدعم",
+			"help": "",
 			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
 			"vip_qr_code": "الرمز الخاص",
 			"binance_qr_code": "رمز باينانس التعريفي",
@@ -158,7 +159,7 @@
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "افتح حساب DFINITY X/Twitter",
 			"vip_qr_code": "إنشاء رابط دعوة",
 			"binance_qr_code": "إنشاء رابط Binance Clubhouse",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "تشغيل وإيقاف وضع الخصوصية"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

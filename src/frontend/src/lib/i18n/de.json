@@ -132,6 +132,7 @@
 			"source_code": "Quellcode",
 			"documentation": "Dokumentation",
 			"support": "Support",
+			"help": "",
 			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
 			"vip_qr_code": "VIP QR-Code",
 			"binance_qr_code": "Binance Clubhouse-QR",
@@ -158,7 +159,7 @@
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Privatsphären Modus aktivieren oder deaktivieren"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

@@ -132,6 +132,7 @@
 			"source_code": "소스 코드",
 			"documentation": "문서",
 			"support": "지원",
+			"help": "",
 			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
 			"vip_qr_code": "VIP QR 코드",
 			"binance_qr_code": "바이낸스 클럽하우스 QR",
@@ -158,7 +159,7 @@
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "DFINITY X/트위터 피드 열기",
 			"vip_qr_code": "초대 링크 생성",
 			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "개인정보 보호 모드 켜기/끄기"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

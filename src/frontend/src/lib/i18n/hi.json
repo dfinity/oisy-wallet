@@ -132,6 +132,7 @@
 			"source_code": "स्रोत कोड",
 			"documentation": "दस्तावेज़",
 			"support": "सहायता",
+			"help": "",
 			"confirm_navigate": "क्या आप वाकई बाहर जाना चाहते हैं?",
 			"vip_qr_code": "वीआईपी क्यूआर कोड",
 			"binance_qr_code": "बाइनेंस क्लबहाउस क्यूआर",
@@ -158,7 +159,7 @@
 			"menu": "आपका वॉलेट पता, सेटिंग्स, साइन-आउट और बाहरी लिंक",
 			"documentation": "$oisy_name दस्तावेज़ खोलें",
 			"support": "$oisy_name दस्तावेज़ों का समर्थन अनुभाग खोलें",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "DFINITY X/Twitter फ़ीड खोलें",
 			"vip_qr_code": "एक निमंत्रण लिंक जनरेट करें",
 			"binance_qr_code": "एक बाइनेंस क्लबहाउस लिंक जनरेट करें",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "प्राइवेसी मोड को चालू और बंद करें"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

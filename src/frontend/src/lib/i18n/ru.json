@@ -132,6 +132,7 @@
 			"source_code": "Исходный код",
 			"documentation": "Документация",
 			"support": "Поддержка",
+			"help": "",
 			"confirm_navigate": "Вы уверены, что хотите покинуть страницу?",
 			"vip_qr_code": "VIP QR-коды",
 			"binance_qr_code": "QR-код Binance Clubhouse",
@@ -158,7 +159,7 @@
 			"menu": "Адрес кошелька, настройки, выход и ссылки",
 			"documentation": "Документация $oisy_name",
 			"support": "Раздел поддержки документации $oisy_name",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "X/Twitter DFINITY",
 			"vip_qr_code": "Создать приглашение",
 			"binance_qr_code": "Создать ссылку на Binance",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Включить/выключить режим конфиденциальности"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

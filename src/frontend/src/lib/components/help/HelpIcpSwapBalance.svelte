@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { SUPPORT_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
+	import { HELP_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 	import type { IcpSwapRecoverableBalance } from '$lib/services/icp-swap-recovery.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -25,7 +25,7 @@
 	let formattedAmount = $derived(formatToken({ value: amount, unitName: token.decimals }));
 
 	let testId = $derived(
-		`${SUPPORT_ICPSWAP_WITHDRAW_BUTTON}-${nonNullish(testIdSuffix) ? `${testIdSuffix}-` : ''}${token.ledgerCanisterId}`
+		`${HELP_ICPSWAP_WITHDRAW_BUTTON}-${nonNullish(testIdSuffix) ? `${testIdSuffix}-` : ''}${token.ledgerCanisterId}`
 	);
 </script>
 
@@ -34,13 +34,13 @@
 		<TokenLogo data={token} logoSize="xs" />
 		<span class="flex min-w-0 flex-col">
 			<span class="truncate">{formattedAmount} {token.symbol}</span>
-			<span class="truncate text-sm text-tertiary">{$i18n.support.text.balance_unused}</span>
+			<span class="truncate text-sm text-tertiary">{$i18n.help.text.balance_unused}</span>
 		</span>
 	</span>
 
 	<!-- Button is flex-1 by default, which would let the loading state stretch across the row. -->
 	<Button
-		ariaLabel={replacePlaceholders($i18n.support.alt.withdraw, { $symbol: token.symbol })}
+		ariaLabel={replacePlaceholders($i18n.help.alt.withdraw, { $symbol: token.symbol })}
 		{disabled}
 		link
 		{loading}
@@ -48,6 +48,6 @@
 		styleClass="flex-none"
 		{testId}
 	>
-		{$i18n.support.text.withdraw} >
+		{$i18n.help.text.withdraw} >
 	</Button>
 </div>

@@ -132,6 +132,7 @@
 			"source_code": "Mã nguồn",
 			"documentation": "Tài liệu",
 			"support": "Hỗ trợ",
+			"help": "",
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
 			"vip_qr_code": "Mã QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
@@ -158,7 +159,7 @@
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
-			"support_page": "",
+			"help_page": "",
 			"open_twitter": "Mở X/Twitter của DFINITY",
 			"vip_qr_code": "Tạo liên kết mời",
 			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
@@ -781,12 +782,12 @@
 			"toggle_privacy_mode": "Bật chế độ riêng tư để ẩn số dư của bạn"
 		}
 	},
-	"support": {
+	"help": {
 		"text": {
 			"title": "",
-			"help_title": "",
-			"help_description": "",
-			"help_link": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
 			"icpswap_title": "",
 			"icpswap_description": "",
 			"scan": "",

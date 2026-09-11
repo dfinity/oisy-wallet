@@ -25,7 +25,7 @@ export enum PLAUSIBLE_EVENTS {
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
-	SUPPORT = 'support'
+	HELP = 'help'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -53,7 +53,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
-	SUPPORT = 'support'
+	HELP = 'help'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -89,8 +89,8 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 	SHARE = 'share'
 }
 
-export enum PLAUSIBLE_EVENT_SUBCONTEXT_SUPPORT {
-	HELP = 'help',
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
+	SUPPORT = 'support',
 	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }
 
@@ -140,7 +140,7 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
-	SUPPORT_PAGE = 'support_page'
+	HELP_PAGE = 'help_page'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {

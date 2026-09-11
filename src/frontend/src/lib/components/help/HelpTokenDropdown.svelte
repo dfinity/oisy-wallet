@@ -43,7 +43,7 @@
 	const sortedTokens = $derived([...uniqueTokens].sort((a, b) => a.symbol.localeCompare(b.symbol)));
 </script>
 
-<span class="support-token-selector min-w-36">
+<span class="help-token-selector min-w-36">
 	<Dropdown
 		bind:this={dropdown}
 		{ariaLabel}
@@ -59,7 +59,7 @@
 				{selected.symbol}
 			</span>
 		{:else}
-			{$i18n.support.text.select_token}
+			{$i18n.help.text.select_token}
 		{/if}
 
 		{#snippet title()}
@@ -69,7 +69,7 @@
 		{#snippet items()}
 			{#if sortedTokens.length === 0}
 				<p class="p-3 text-sm text-tertiary" data-tid={`${testId}-empty`}>
-					{$i18n.support.text.no_tokens}
+					{$i18n.help.text.no_tokens}
 				</p>
 			{:else}
 				<List condensed noPadding testId={`${testId}-list`}>
@@ -105,7 +105,7 @@
 </span>
 
 <style lang="scss">
-	:global .support-token-selector {
+	:global .help-token-selector {
 		button {
 			font-weight: normal !important;
 		}
