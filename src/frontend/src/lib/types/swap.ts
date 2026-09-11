@@ -119,10 +119,20 @@ export type Slippage = string | number;
 export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
 
 /**
+ * A provider's minimum swap amount, which is not always denominated in the token
+ * being swapped.
+ *
+ * NEAR Intents enforces two unrelated minimums: a per-route bridge minimum, quoted in
+ * the source token's smallest unit, and a per-chain limit quoted in fiat. The fiat one
+ * cannot be converted to token units for display without inventing precision the
+ * constraint does not have, so the denomination travels with the value.
+ */
+export type SwapAmountMinimum = { type: 'token'; value: bigint } | { type: 'usd'; value: number };
+
+/**
  * The reason no offer could be quoted, when a provider named one.
  *
- * `minAmount` is the provider's minimum, in the source token's smallest unit,
- * when the provider communicated it.
+ * `minimum` is the provider's minimum, when the provider communicated it.
  *
  * `intermediateToken` is the token OISY lists that a provider routes the pair through in a shape
  * OISY cannot verify: the user can make the swap as two separate swaps through it.
@@ -130,7 +140,7 @@ export type SwapSlippageStatus = 'valid' | 'warning' | 'invalid';
 export type SwapQuoteError =
 	| {
 			type: 'amount-too-low';
-			minAmount?: bigint;
+			minimum?: SwapAmountMinimum;
 	  }
 	| {
 			type: 'two-swaps';

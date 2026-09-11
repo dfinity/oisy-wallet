@@ -1,4 +1,4 @@
-import type { SwapProvider } from '$lib/types/swap';
+import type { SwapAmountMinimum, SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import type { LiFiStep } from '@lifi/sdk';
 
@@ -46,13 +46,13 @@ export class TimeoutError extends Error {}
 /**
  * A swap quote provider refused the requested amount as below its minimum.
  *
- * `minAmount` is the provider's minimum, in the source token's smallest unit,
- * when the provider names one.
+ * `minimum` is the provider's minimum, when the provider names one. See
+ * `SwapAmountMinimum` for why it carries its own denomination.
  */
 export class SwapAmountTooLowError extends Error {
 	constructor(
 		message: string,
-		readonly minAmount?: bigint
+		readonly minimum?: SwapAmountMinimum
 	) {
 		super(message);
 	}
