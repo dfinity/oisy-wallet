@@ -4,6 +4,7 @@ import { OISY_NAME } from '$lib/constants/oisy.constants';
 import {
 	HELP_EXPLORERS_CARD,
 	HELP_ICPSWAP_CARD,
+	HELP_NETWORK_EXPLORERS_CARD,
 	HELP_SUPPORT_CARD
 } from '$lib/constants/test-ids.constants';
 import { trackHelp } from '$lib/services/help-analytics.services';
@@ -24,25 +25,26 @@ describe('Help', () => {
 		mockAuthStore();
 	});
 
-	it('renders the three cards, Support first and the explorers above ICPSwap', () => {
-		// The explorer card hides itself while every address is still nullish.
+	it('renders the four cards in order: Support, networks, providers, ICPSwap', () => {
+		// Both explorer cards hide themselves while every address is still nullish.
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
 		const { getByTestId } = render(Help);
 
-		const support = getByTestId(HELP_SUPPORT_CARD);
-		const explorers = getByTestId(HELP_EXPLORERS_CARD);
-		const icpSwap = getByTestId(HELP_ICPSWAP_CARD);
+		const cards = [
+			getByTestId(HELP_SUPPORT_CARD),
+			getByTestId(HELP_NETWORK_EXPLORERS_CARD),
+			getByTestId(HELP_EXPLORERS_CARD),
+			getByTestId(HELP_ICPSWAP_CARD)
+		];
 
-		expect(support).toBeInTheDocument();
-		expect(explorers).toBeInTheDocument();
-		expect(icpSwap).toBeInTheDocument();
-		expect(
-			support.compareDocumentPosition(explorers) & Node.DOCUMENT_POSITION_FOLLOWING
-		).toBeTruthy();
-		expect(
-			explorers.compareDocumentPosition(icpSwap) & Node.DOCUMENT_POSITION_FOLLOWING
-		).toBeTruthy();
+		cards.forEach((card) => expect(card).toBeInTheDocument());
+
+		cards.slice(0, -1).forEach((card, index) => {
+			expect(
+				card.compareDocumentPosition(cards[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+		});
 	});
 
 	it('separates the cards instead of letting them touch', () => {

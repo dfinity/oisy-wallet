@@ -125,6 +125,8 @@ export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
 
 export const HELP_SUPPORT_CARD = 'help-support-card';
 export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_NETWORK_EXPLORERS_CARD = 'help-network-explorers-card';
+export const HELP_NETWORK_EXPLORERS_LINK = 'help-network-explorers-link';
 export const HELP_EXPLORERS_CARD = 'help-explorers-card';
 export const HELP_EXPLORERS_GROUP = 'help-explorers-group';
 export const HELP_EXPLORERS_LINK = 'help-explorers-link';

@@ -792,6 +792,8 @@
 			"support_title": "Podpora",
 			"support_description": "Odpovědi a další informace najdete na stránce podpory v dokumentaci $oisy_name. Pokud si nebudete vědět rady, obraťte se na tým.",
 			"support_link": "Přejít na naši stránku podpory",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "Vybrat"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "Vyberte první token poolu",
 			"select_token_second": "Vyberte druhý token poolu",

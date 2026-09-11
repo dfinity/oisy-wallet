@@ -792,6 +792,8 @@
 			"support_title": "Поддержка",
 			"support_description": "Ответы и дополнительную информацию вы найдёте на странице поддержки в документации $oisy_name. Если не получается разобраться, напишите команде.",
 			"support_link": "Перейти на страницу поддержки",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "Вывести"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "Выберите первый токен пула",
 			"select_token_second": "Выберите второй токен пула",

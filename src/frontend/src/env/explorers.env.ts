@@ -61,3 +61,19 @@ export const {
 	NEAR_INTENTS: NEAR_INTENTS_EXPLORER_URL,
 	ONESEC: ONESEC_EXPLORER_URL
 } = PROVIDER_EXPLORER_URLS;
+
+// Explorers used to look up a whole ADDRESS, where the network's own `explorerUrl`
+// above cannot serve one. Everything else reuses that URL, so these two are the
+// exception rather than a second set.
+//
+// ICP: `dashboard.internetcomputer.org` keys its account page by the 64-character
+// account identifier, and the address OISY shows a user is their principal - which
+// only icexplorer resolves. BTC: blockstream would work; mempool.space is the one
+// this wallet points a user at for their own address.
+const ADDRESS_EXPLORER_URLS = {
+	ICP: 'https://www.icexplorer.io',
+	BTC_MAINNET: 'https://mempool.space'
+};
+
+export const { ICP: ICP_ADDRESS_EXPLORER_URL, BTC_MAINNET: BTC_MAINNET_ADDRESS_EXPLORER_URL } =
+	ADDRESS_EXPLORER_URLS;

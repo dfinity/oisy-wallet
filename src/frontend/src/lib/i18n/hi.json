@@ -792,6 +792,8 @@
 			"support_title": "सपोर्ट",
 			"support_description": "$oisy_name डॉक्यूमेंटेशन के सपोर्ट पेज पर जवाब और अधिक जानकारी पाएँ, या अटक जाने पर टीम से संपर्क करें।",
 			"support_link": "हमारे सपोर्ट पेज पर जाएँ",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "निकालें"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "पूल का पहला टोकन चुनें",
 			"select_token_second": "पूल का दूसरा टोकन चुनें",

@@ -792,6 +792,8 @@
 			"support_title": "支持",
 			"support_description": "在 $oisy_name 文档的支持页面查找答案和更多信息，如果仍无法解决，请联系团队。",
 			"support_link": "前往我们的支持页面",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "提取"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "选择资金池的第一个代币",
 			"select_token_second": "选择资金池的第二个代币",

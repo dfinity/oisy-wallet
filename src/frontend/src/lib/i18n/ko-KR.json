@@ -792,6 +792,8 @@
 			"support_title": "지원",
 			"support_description": "$oisy_name 문서의 지원 페이지에서 답변과 자세한 정보를 확인할 수 있습니다. 해결되지 않으면 팀에 문의하세요.",
 			"support_link": "지원 페이지로 이동",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": "출금"
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "풀의 첫 번째 토큰 선택",
 			"select_token_second": "풀의 두 번째 토큰 선택",

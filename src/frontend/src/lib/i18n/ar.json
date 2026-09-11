@@ -792,6 +792,8 @@
 			"support_title": "",
 			"support_description": "",
 			"support_link": "",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
 			"explorers_title": "",
 			"explorers_description": "",
 			"explorers_velora_description": "",
@@ -819,6 +821,7 @@
 			"withdraw": ""
 		},
 		"alt": {
+			"network_explorer_link": "",
 			"explorer_link": "",
 			"select_token_first": "",
 			"select_token_second": "",
