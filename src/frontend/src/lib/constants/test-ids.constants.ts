@@ -125,6 +125,9 @@ export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
 
 export const HELP_SUPPORT_CARD = 'help-support-card';
 export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_EXPLORERS_CARD = 'help-explorers-card';
+export const HELP_EXPLORERS_GROUP = 'help-explorers-group';
+export const HELP_EXPLORERS_LINK = 'help-explorers-link';
 export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
 export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
 export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';

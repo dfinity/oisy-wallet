@@ -534,6 +534,15 @@ interface I18nHelp {
 		support_title: string;
 		support_description: string;
 		support_link: string;
+		explorers_title: string;
+		explorers_description: string;
+		explorers_velora_description: string;
+		explorers_near_intents_description: string;
+		explorers_onesec_description: string;
+		explorers_chain_eth: string;
+		explorers_chain_sol: string;
+		explorers_chain_btc: string;
+		explorers_chain_icp: string;
 		icpswap_title: string;
 		icpswap_description: string;
 		scan: string;
@@ -551,7 +560,13 @@ interface I18nHelp {
 		balance_unused: string;
 		withdraw: string;
 	};
-	alt: { select_token_first: string; select_token_second: string; withdraw: string; scan: string };
+	alt: {
+		explorer_link: string;
+		select_token_first: string;
+		select_token_second: string;
+		withdraw: string;
+		scan: string;
+	};
 	error: {
 		pool_not_found: string;
 		load_failed: string;
