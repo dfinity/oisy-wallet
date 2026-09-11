@@ -135,36 +135,66 @@ API may well keep, so anchor on the part that states the constraint. If a future
 states a minimum in a shape neither pattern matches, the generic `Error` path and today's
 "not offered" message remain the fallback — no regression, just no improvement.
 
-### 3.3 Probe the minimum when the pair is chosen
+### 3.3 Only the fiat chain limit is announced upfront
 
-A new `fetchNearIntentsMinimumAmount` in
-`src/frontend/src/lib/services/near-intents.services.ts` asks for a deliberately tiny
-`dry: true` quote and reads the refusal:
+The two minimums are announced differently, because they are different kinds of thing.
 
-- **Probe amount** = `max(3, floor(0.01 / price * 10 ** decimals))`, from the `price` and
-  `decimals` of the origin asset in the already-cached `/tokens` response (`cachedTokens`).
-  $0.01 sits below every minimum observed (the smallest was ≈ $0.09) and above the
-  degenerate floor; the `3` guards a token whose $0.01 rounds to nothing.
-- **Addresses** are the real ones the quote fan-out already passes (`userAddress`,
-  `recipientAddress` in `NearIntentsQuoteParams`, `src/frontend/src/lib/types/swap.ts`), so
-  the bridge-minimum check is reached. The swap form only offers destinations whose address
-  the user holds, so they are always available.
-- **`dry: true`**, so no deposit address is allocated. Everything else mirrors
-  `buildNearIntentsQuoteRequest`.
+The **bridge minimum** is an inherent withdrawal-cost floor: ≈ $0.09 out of Ethereum toward
+an L2, ≈ $6.60 toward Bitcoin. Almost nobody swaps below it, and since §3.2 it is reported
+correctly the moment it does bind. Putting "minimum 0.000083 BTC" under every BTC pair
+would be clutter in service of a constraint that rarely applies, so it stays reactive-only.
 
-Outcomes: a `SwapAmountTooLowError` yields the minimum; a **successful** quote means no
-minimum above ~$0.01 and yields none; any other error yields none. "None" is indistinguishable
-from "not yet known" to the UI, and in both cases the form behaves exactly as it does today.
+The **fiat chain limit** is a policy restriction: $1,000, on two chains, large enough to
+change whether a user attempts the swap at all. That one is worth saying before the user
+commits to a number, and it is the only thing this section adds.
 
-**Caching and request budget.** One probe per `(originAsset, destinationAsset)` pair, cached
-for the session in a module-level map alongside `cachedTokens`, keyed by asset id pair. The
-probe must **not** run inside `loadSwapAmounts`, which repeats every
-`SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS` (5 s) — that would turn one extra request into a
-steady stream against an endpoint we call unauthenticated and which documents a 429
-`rate-limit-exceeded`. It runs once when the pair changes. A failed probe is not cached, so
-switching away and back retries it.
+### 3.4 Probing is per chain, and needs neither a pair nor an address
 
-### 3.4 Show it as guidance, then as the reason
+Restricting the upfront hint to the fiat limit makes the probe far cheaper than a general
+minimum probe would be, because of two properties from §2: the fiat limit is a property of a
+**chain** rather than of a route, and it is checked **before** address validation.
+
+So `fetchNearIntentsChainRestriction` in
+`src/frontend/src/lib/services/near-intents.services.ts` sends a `dry: true` quote with
+`amount: "1"` and deliberately placeholder addresses, and reads which way it fails:
+
+| Response                                                           | Conclusion                                                |
+| ------------------------------------------------------------------ | --------------------------------------------------------- |
+| `Temporary swap limits: minimum swap amount is $1,000`             | one side of the probed pair is restricted, at that figure |
+| anything else (`recipient is not valid`, `Failed to get quote`, …) | neither side is restricted                                |
+
+No price arithmetic, no `decimals`, no user addresses, and no dependence on the
+$0.01-probe reasoning that the bridge minimum needed — `amount: "1"` is enough, because the
+limit is evaluated before anything else can object. `dry: true` means no deposit address is
+ever allocated, and in practice the request 400s regardless.
+
+**What is cached, and why that shape.** A non-fiat answer proves **both** probed chains are
+unrestricted, so it is recorded per chain. A fiat answer proves at least one side is
+restricted but not which, so it is recorded against the **pair**. A pair whose two chains
+are both already known-unrestricted needs no probe at all, which is what keeps this from
+being a request per pair selection: after the first few pairs, most of the six chains in
+`NEAR_INTENTS_BLOCKCHAIN_MAP` have a verdict and probing stops.
+
+This also avoids a bootstrap trap. Deciding to "probe only chains already known to be
+restricted" cannot work — on a fresh session nothing is known, so nothing would be probed
+and the hint would never appear. Probing until a chain has _any_ verdict, rather than until
+it has a restricted one, is what makes the cache converge instead of staying empty.
+
+The probe must **not** run inside `loadSwapAmounts`, which repeats every
+`SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS` (5 s) — that would turn a bounded handful of
+requests into a steady stream against an endpoint we call unauthenticated and which
+documents a 429 `rate-limit-exceeded`. It runs when the pair changes, and only when the
+verdict is not already cached. A failed probe is not cached, so switching away and back
+retries it.
+
+**The placeholder-address trick is deliberate but fail-safe.** It relies on the observed
+check ordering. If 1Click ever validates addresses first, every probe returns
+`recipient is not valid` and the cache concludes "unrestricted" — the hint silently stops
+appearing, and the reactive message from §3.2 still names the limit when the user hits it.
+That is the right direction to fail in, and §6 pins the ordering with a test so the
+assumption is visible rather than implicit.
+
+### 3.5 Show it as guidance, then as the reason
 
 The proactive minimum is **information, not an error**: it appears in tertiary text near the
 source amount input, which is the field it constrains, and it does not block anything or
@@ -174,6 +204,21 @@ that path keeps working from the real failed quote, so the two never disagree.
 
 The probe fires **when the pair is selected**, so the hint is on screen before the user
 touches the amount field.
+
+**It goes in the source input's existing tertiary row, not in the provider sheet.** The two
+provider minimums OISY already shows — Chain Fusion's `swap.text.chain_fusion_minimum_amount`
+and OISY Trade's `swap.text.oisy_trade_minimum_notional` — are `ModalValue` rows inside their
+`SwapDetails*` components, which `SwapProvider.svelte` renders only when
+`nonNullish(selectedProvider)`. Below a minimum there is no quote, so no selected provider,
+so that entire block is absent: the one place OISY already puts provider minimums is
+structurally unavailable exactly when this hint is needed.
+
+The source `TokenInput` in `SwapForm.svelte` already renders a `text-tertiary` `amountInfo`
+row under the pay amount, currently holding `TokenInputAmountExchange` (the fiat value of
+what was typed). The hint joins that row. It is the field the constraint applies to, the
+styling is already right, and the destination side uses the same `amountInfo` slot for the
+reactive refusal, so the informational and error states stay symmetric instead of occupying
+unrelated parts of the form.
 
 **A USD minimum is shown in the user's display currency, never as a raw dollar figure.**
 The API enforces the limit in USD, but OISY does not show the user USD unless that is what
@@ -190,15 +235,12 @@ currency (right after a switch) or is missing. Treat that exactly like an unknow
 show no hint, and in the reactive path fall back to the minimum-less
 `swap.text.swap_amount_too_low`, never a bare number with no currency on it.
 
-New `swap.text` keys in `src/frontend/src/lib/i18n/en.json`, beside the existing
-`swap_amount_too_low*` pair:
-
-- a token-denominated hint, taking `$amount` and `$symbol`, formatted with `formatToken` and
-  the source token's decimals exactly as `quoteErrorMinAmount` does in `SwapForm.svelte`;
-- a fiat-denominated hint, taking a single `$amount` placeholder that already carries the
-  currency symbol from `formatCurrency` — the key must not hardcode `$` or any currency;
-- a fiat-denominated refusal, the error-state counterpart of `swap_amount_too_low_minimum`
-  for the reactive path, with the same placeholder contract.
+One new `swap.text` key in `src/frontend/src/lib/i18n/en.json`: a short hint naming the
+minimum, taking a single `$amount` placeholder that already carries the currency symbol from
+`formatCurrency` — the key must not hardcode `$` or any currency. The reactive counterparts
+(`swap_amount_too_low`, `swap_amount_too_low_minimum`,
+`swap_amount_too_low_minimum_fiat`) already exist from §3.2. No token-denominated hint key is
+needed, since only the fiat limit is announced upfront (§3.3).
 
 Other locales are structurally synced by the existing i18n workflow, which does not
 translate; translations follow the project's usual route and are not part of this change.
@@ -217,76 +259,94 @@ translate; translations follow the project's usual route and are not part of thi
   separate mechanisms with their own sources.
 - **No binary search for an exact minimum.** One probe, one number, straight from the API.
 - **No use of the quote's `minAmountIn`** for this purpose (see §2).
-- **No conversion of the fiat minimum into source-token units** (see §3.4).
+- **No conversion of the fiat minimum into source-token units** (see §3.5).
+- **No upfront announcement of the bridge minimum** (see §3.3).
 - **No new API key or authenticated access.** Probes go out unauthenticated like every other
   1Click call today.
 
 ## 5. Acceptance criteria
 
+For the §3.2 half:
+
 - A BTC→Polygon swap of a few hundred dollars no longer says "This swap is currently not
   offered."; it says the amount is below the provider's minimum and names the $1,000 limit
   in the user's display currency. The same holds for BSC, and for Polygon and BSC as the
   **source** side.
-- Selecting a pair whose route has a minimum shows that minimum before any amount is
-  entered, in non-error styling, in the source token's units for the per-route bridge
-  minimum and in the user's display currency for the temporary chain limit.
 - Switching display currency re-renders the fiat minimum in the new currency; while the
   exchange rate is still catching up, no hint is shown and no uncurrencied number appears.
-- Selecting a pair with no minimum above ~$0.01, or one whose probe fails or returns an
-  unrecognised message, shows no hint and behaves exactly as today.
-- Entering an amount below the minimum still produces the red destination-side refusal from
-  the real quote round; entering an amount above it quotes normally.
 - The pre-existing `Amount is too low for bridge` behaviour is unchanged in message and in
   formatting.
-- Switching pairs repeatedly issues at most one probe per pair; the 5-second periodic quote
-  refresh issues none.
 - No provider other than NEAR Intents changes behaviour, and a successful quote from another
   provider still wins over a NEAR Intents refusal, as `reduceSettledSwapResults` already
   guarantees.
+
+For the §3.3–§3.5 half:
+
+- Selecting a Polygon or BSC pair shows the $1,000 limit under the pay amount, in non-error
+  styling, in the user's display currency, before any amount is entered.
+- Selecting a pair with no fiat limit shows no hint, including pairs that do have a bridge
+  minimum — that one is never announced upfront.
+- A pair whose probe fails, or whose verdict is not yet known, shows no hint and behaves
+  exactly as today.
+- Entering an amount below the limit still produces the red destination-side refusal from the
+  real quote round; entering an amount above it quotes normally. The hint and the refusal
+  never disagree, because both come from the same message shape.
+- Selecting pairs among chains whose verdicts are already cached issues no probe at all, and
+  the 5-second periodic quote refresh never issues one.
 
 ## 6. Tests
 
 The `test-coverage` gate enforces whole-project thresholds, so this lands with its tests:
 
 - `src/frontend/src/tests/lib/rest/near-intents.rest.spec.ts` — both refusal shapes, the
-  thousands separator, an unrecognised message falling through to plain `Error`, and a
-  message that says "minimum swap amount" with no parseable figure.
-- `src/frontend/src/tests/lib/services/near-intents.services.spec.ts` — probe amount
-  derivation from `price`/`decimals` including the `3`-unit floor, the cache (one request per
-  pair, no caching of failures), a successful probe yielding no minimum, and a non-amount
-  error yielding no minimum.
-- `src/frontend/src/tests/lib/components/swap/SwapForm.spec.ts` — hint rendering for both
-  minimum kinds, absence when unknown, the reactive red refusal for the fiat shape, and the
-  `formatCurrency`-returns-`undefined` case rendering no number.
-- `docs/ai/PRODUCT.md` updated in this PR, per Step 4 — Build (Claude Code).
+  separator and decimal variants, an unrecognised message falling through to plain `Error`,
+  and a "minimum swap amount" message with no parseable figure. (Landed with §3.2.)
+- `src/frontend/src/tests/lib/services/near-intents.services.spec.ts` — a fiat refusal
+  yielding a restricted verdict for the pair, a non-fiat response yielding an unrestricted
+  verdict for **both** chains, no probe when both chains are already known unrestricted,
+  failures not cached, and the probe request itself carrying `dry: true` and `amount: "1"`.
+  One test pins the check-ordering assumption from §3.4 by asserting that a placeholder
+  address is enough to surface the limit, so the trick fails loudly in a spec rather than
+  silently in the UI if 1Click reorders its validation.
+- `src/frontend/src/tests/lib/components/swap/SwapForm.spec.ts` — the hint rendered for a
+  restricted pair, absent for an unrestricted one, absent while the verdict is unknown, and
+  absent when `formatCurrency` returns `undefined`.
 
 ## 7. Implementation plan: atomic PRs
 
 1. `fix(frontend): name the NEAR Intents temporary swap limit instead of "not offered"`
-   §3.1 and §3.2 plus the USD refusal key and its rendering in the existing reactive path.
-   This alone fixes the reported Polygon symptom and is shippable on its own.
-2. `feat(frontend): show the NEAR Intents minimum before an amount is entered` (needs 1)
-   §3.3 and the hint half of §3.4, plus the `PRODUCT.md` update.
+   §3.1 and §3.2. This alone fixes the reported Polygon symptom and is shippable on its own.
+   Carries the `PRODUCT.md` description of the reactive behaviour, since it is the PR that
+   changes it. **Shipped as #14037.**
+2. `feat(frontend): show the NEAR Intents swap limit before an amount is entered` (needs 1)
+   §3.3 to §3.5, extending the `PRODUCT.md` section that PR 1 created.
 
 ## 8. Open questions (facts to confirm)
 
 - Is the $1,000 restriction on `pol`/`bsc` genuinely temporary, and is NEAR able to say what
   drives it and when it lifts? The design does not depend on the answer — nothing is
   hardcoded — but it tells us whether this is worth a follow-up at all or will vanish.
-- Does 1Click rate-limit unauthenticated callers in a way one probe per pair could trip? The
-  spec documents a 429 `rate-limit-exceeded`; the practical budget for an unauthenticated
-  integration is not documented. The probe fires on pair selection (§9); if the budget turns
-  out to be tight, moving it behind the first focus of the amount field is a contained
-  change to when the probe is called, not to any of its mechanics.
+- Does 1Click rate-limit unauthenticated callers in a way the probe could trip? The spec
+  documents a 429 `rate-limit-exceeded` and the practical budget is not published. The
+  per-chain cache bounds this at roughly one probe per chain per session rather than one per
+  pair selection, which makes it a much smaller question than it was for a general
+  minimum probe; if the budget turns out to be tight anyway, deferring the probe to the first
+  focus of the amount field is a change to when it is called and to nothing else.
 
 ## 9. Pending decisions
 
-None outstanding. Both were decided on 2026-09-11 and are folded into §3.4:
+None outstanding. All four were decided on 2026-09-11:
 
 - **The fiat minimum is shown in the user's display currency and is not converted into
-  source-token units.** The limit is genuinely a fiat constraint, so it is rendered through
-  the app's normal `formatCurrency` path rather than as a hardcoded dollar figure, and a
-  token-unit rendering would drift with the price while reading as exact.
+  source-token units** (§3.5). The limit is genuinely a fiat constraint, so it is rendered
+  through the app's normal `formatCurrency` path rather than as a hardcoded dollar figure,
+  and a token-unit rendering would drift with the price while reading as exact.
 - **The probe fires on pair selection**, not on first interaction with the amount field, so
-  the minimum is visible before the user commits to a number — which is the point of the
-  improvement. The cost is one cached request per pair.
+  the minimum is visible before the user commits to a number.
+- **Only the fiat chain limit is announced upfront** (§3.3); the bridge minimum stays
+  reactive-only, because it is an inherent cost floor that rarely binds and announcing it on
+  every pair would be clutter. A materiality threshold was considered and rejected: it would
+  need an arbitrary cutoff to pick and defend, where the fiat/bridge split follows the
+  constraints' own natures.
+- **The hint lives in the source input's existing tertiary row**, not in the provider sheet
+  (§3.5) — the sheet cannot host it, since it does not render without a selected provider.
