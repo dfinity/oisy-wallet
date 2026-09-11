@@ -792,6 +792,15 @@
 			"support_title": "Podpora",
 			"support_description": "Odpovědi a další informace najdete na stránce podpory v dokumentaci $oisy_name. Pokud si nebudete vědět rady, obraťte se na tým.",
 			"support_link": "Přejít na naši stránku podpory",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "Výběr tokenů z ICPSwapu",
 			"icpswap_description": "Při swapu na ICPSwapu projdou vaše tokeny nejprve poolem a teprve pak se vrátí k vám. Pokud tento poslední krok selhal, tokeny jsou stále vaše a stále v poolu. $oisy_name je může najít a poslat vám je zpět.",
 			"scan": "Zkontrolovat moje pooly",
@@ -810,6 +819,7 @@
 			"withdraw": "Vybrat"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "Vyberte první token poolu",
 			"select_token_second": "Vyberte druhý token poolu",
 			"withdraw": "Vybrat $symbol z poolu",

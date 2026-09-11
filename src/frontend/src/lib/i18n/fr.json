@@ -792,6 +792,15 @@
 			"support_title": "Support",
 			"support_description": "Retrouvez des réponses et plus d'informations sur la page de support de la documentation $oisy_name, ou contactez l'équipe si vous êtes bloqué.",
 			"support_link": "Accéder à notre page de support",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "Retrait de tokens ICPSwap",
 			"icpswap_description": "Lors d'un swap sur ICPSwap, vos tokens passent par un pool avant de vous être renvoyés. Si cette dernière étape a échoué, les tokens sont toujours à vous et toujours dans le pool. $oisy_name peut les rechercher et vous les renvoyer.",
 			"scan": "Analyser mes pools",
@@ -810,6 +819,7 @@
 			"withdraw": "Retirer"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "Sélectionner le premier token du pool",
 			"select_token_second": "Sélectionner le deuxième token du pool",
 			"withdraw": "Retirer $symbol du pool",

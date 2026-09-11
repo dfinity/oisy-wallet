@@ -792,6 +792,15 @@
 			"support_title": "Поддержка",
 			"support_description": "Ответы и дополнительную информацию вы найдёте на странице поддержки в документации $oisy_name. Если не получается разобраться, напишите команде.",
 			"support_link": "Перейти на страницу поддержки",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "Вывод токенов из ICPSwap",
 			"icpswap_description": "При свопе на ICPSwap ваши токены сначала попадают в пул и только потом возвращаются к вам. Если этот последний шаг не удался, токены по-прежнему ваши и по-прежнему в пуле. $oisy_name может найти их и отправить обратно.",
 			"scan": "Проверить мои пулы",
@@ -810,6 +819,7 @@
 			"withdraw": "Вывести"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "Выберите первый токен пула",
 			"select_token_second": "Выберите второй токен пула",
 			"withdraw": "Вывести $symbol из пула",

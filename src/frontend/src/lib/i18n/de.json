@@ -792,6 +792,15 @@
 			"support_title": "Support",
 			"support_description": "Antworten und weitere Informationen findest du auf der Support-Seite in der $oisy_name-Dokumentation. Wenn du nicht weiterkommst, melde dich beim Team.",
 			"support_link": "Zu unserer Support-Seite",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "ICPSwap-Token-Auszahlung",
 			"icpswap_description": "Bei einem Swap über ICPSwap wandern deine Tokens zuerst in einen Pool, bevor sie an dich zurückgehen. Ist dieser letzte Schritt fehlgeschlagen, gehören die Tokens weiterhin dir und liegen noch im Pool. $oisy_name kann danach suchen und sie zurücksenden.",
 			"scan": "Meine Pools prüfen",
@@ -810,6 +819,7 @@
 			"withdraw": "Auszahlen"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "Erstes Token des Pools auswählen",
 			"select_token_second": "Zweites Token des Pools auswählen",
 			"withdraw": "$symbol aus dem Pool auszahlen",

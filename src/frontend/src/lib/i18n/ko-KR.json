@@ -792,6 +792,15 @@
 			"support_title": "지원",
 			"support_description": "$oisy_name 문서의 지원 페이지에서 답변과 자세한 정보를 확인할 수 있습니다. 해결되지 않으면 팀에 문의하세요.",
 			"support_link": "지원 페이지로 이동",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "ICPSwap 토큰 출금",
 			"icpswap_description": "ICPSwap에서 스왑하면 토큰이 먼저 풀로 이동한 뒤 다시 돌아옵니다. 이 마지막 단계가 실패했다면 토큰은 여전히 사용자의 것이며 풀에 남아 있습니다. $oisy_name에서 이를 찾아 돌려줄 수 있습니다.",
 			"scan": "내 풀 확인",
@@ -810,6 +819,7 @@
 			"withdraw": "출금"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "풀의 첫 번째 토큰 선택",
 			"select_token_second": "풀의 두 번째 토큰 선택",
 			"withdraw": "풀에서 $symbol 출금",
