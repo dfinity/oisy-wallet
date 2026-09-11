@@ -18,6 +18,7 @@ import { ACTIVITY_LEVELLING_MAX_PAGES, WALLET_PAGINATION } from '$lib/constants/
 import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+import type { ResultSuccess } from '$lib/types/utils';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
 import * as solHistoryPagersServices from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -415,6 +416,22 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
+		// Retrying straight away would only hammer an RPC that is already failing. The page is asked
+		// for again on the next round instead.
+		it('should end the levelling run on a failed page without retrying it in a loop', async () => {
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false, err: new Error('429') });
+
+			render(AllTransactionsLoader, { props });
+
+			await waitFor(() => {
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+		});
+
 		it('should keep loading transactions if the timestamp is still not the minimum', async () => {
 			let counter = 0;
 
@@ -628,9 +645,18 @@ describe('AllTransactionsLoader', () => {
 
 	describe('load more', () => {
 		interface LoaderControls {
-			loadMore: () => Promise<boolean>;
+			loadMore: () => Promise<ResultSuccess>;
 			exhausted: boolean;
 		}
+
+		const olderSolRow = () => ({
+			data: {
+				...createMockSolTransactionsUi(1)[0],
+				id: `older-${Math.random()}`,
+				timestamp: mockMinTimestampStart - 1n
+			} as SolTransactionUi,
+			certified: false
+		});
 
 		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
 			let captured: LoaderControls | undefined;
@@ -676,7 +702,8 @@ describe('AllTransactionsLoader', () => {
 				expect(controls()).toBeDefined();
 			});
 
-			await expect(controls()?.loadMore()).resolves.toBeFalsy();
+			// No `err` either: every token stopped for an ordinary reason.
+			await expect(controls()?.loadMore()).resolves.toEqual({ success: false });
 		});
 
 		// The scroll decides whether to keep paging from this result, so it has to reflect the stores
@@ -691,22 +718,101 @@ describe('AllTransactionsLoader', () => {
 			spyLoadNextSolTransactions.mockImplementation(async () => {
 				solTransactionsStore.append({
 					tokenId: SOLANA_TOKEN.id,
-					transactions: [
-						{
-							data: {
-								...createMockSolTransactionsUi(1)[0],
-								id: `older-${Math.random()}`,
-								timestamp: mockMinTimestampStart - 1n
-							} as SolTransactionUi,
-							certified: false
-						}
-					]
+					transactions: [olderSolRow()]
 				});
 
 				return await Promise.resolve({ success: false });
 			});
 
-			await expect(controls()?.loadMore()).resolves.toBeTruthy();
+			await expect(controls()?.loadMore()).resolves.toEqual({ success: true });
+		});
+
+		// The scroll stops asking once a round loads nothing. A failed page must not look like that,
+		// or a transient RPC error leaves the list stuck at its current depth.
+		it('should report a failed page rather than an empty round', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			const err = new Error('Solana RPC unavailable');
+
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false, err });
+
+			await expect(controls()?.loadMore()).resolves.toEqual({ success: false, err });
+
+			expect(controls()?.exhausted).toBeFalsy();
+		});
+
+		it('should report a page that threw as failed', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			const err = new Error('Network down');
+
+			spyLoadNextSolTransactions.mockRejectedValue(err);
+
+			await expect(controls()?.loadMore()).resolves.toEqual({ success: false, err });
+		});
+
+		it('should page a token again after its page failed, and report what it loads', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false, err: new Error('429') });
+
+			await controls()?.loadMore();
+
+			spyLoadNextSolTransactions.mockClear();
+
+			spyLoadNextSolTransactions.mockImplementation(async ({ token }: { token: Token }) => {
+				if (token.id === SOLANA_TOKEN.id) {
+					solTransactionsStore.append({ tokenId: token.id, transactions: [olderSolRow()] });
+				}
+
+				return await Promise.resolve({ success: false });
+			});
+
+			await expect(controls()?.loadMore()).resolves.toEqual({ success: true });
+
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ token: SOLANA_TOKEN })
+			);
+		});
+
+		it('should not page a token again once it signalled the end', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextSolTransactions.mockImplementation(
+				async ({ token, signalEnd }: { token: Token; signalEnd: () => void }) => {
+					if (token.id === SOLANA_TOKEN.id) {
+						signalEnd();
+					}
+
+					return await Promise.resolve({ success: false });
+				}
+			);
+
+			await controls()?.loadMore();
+
+			spyLoadNextSolTransactions.mockClear();
+
+			await controls()?.loadMore();
+
+			expect(spyLoadNextSolTransactions).not.toHaveBeenCalledWith(
+				expect.objectContaining({ token: SOLANA_TOKEN })
+			);
 		});
 
 		it('should page every token once regardless of the floor', async () => {
