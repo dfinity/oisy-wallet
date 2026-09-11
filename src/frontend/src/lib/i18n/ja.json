@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -1602,7 +1606,6 @@
 			"estimated_btc": "推定BTCネットワーク手数料",
 			"estimated_inter_network": "推定ネットワーク間手数料",
 			"estimated_eth": "推定Ethereum手数料",
-			"max_fee_eth": "最大手数料<small>（おそらく30秒以内）</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",

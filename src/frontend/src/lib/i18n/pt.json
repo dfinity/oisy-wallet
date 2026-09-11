@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -1602,7 +1606,6 @@
 			"estimated_btc": "Taxa de Rede BTC estimada",
 			"estimated_inter_network": "Taxa Inter-Rede estimada",
 			"estimated_eth": "Taxa Ethereum estimada",
-			"max_fee_eth": "Taxa máxima <small>(provavelmente em < 30 segundos)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",

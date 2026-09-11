@@ -20,6 +20,10 @@
 				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
 				"action": "Borrow"
 			}
+		},
+		"provider_unavailable": {
+			"title": "Borrowing is temporarily unavailable",
+			"description": "No borrowing provider is available right now. Your balances are safe and you can borrow again once a provider is back online."
 		}
 	},
 	"borrowings": {
@@ -1602,7 +1606,6 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"estimated_fee_eth": "Estimated fee",
 			"estimated": "Estimated",
 			"priority": "Priority",

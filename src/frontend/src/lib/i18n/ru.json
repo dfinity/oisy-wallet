@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -1602,7 +1606,6 @@
 			"estimated_btc": "Примерная комиссия сети BTC",
 			"estimated_inter_network": "Примерная межсетевая комиссия",
 			"estimated_eth": "Примерная комиссия Ethereum",
-			"max_fee_eth": "Максимальная комиссия <small>(отправка, менее чем за 30 секунд)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
