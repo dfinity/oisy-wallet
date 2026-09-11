@@ -172,14 +172,33 @@ turn the form red. When the user then enters an amount below it, the existing re
 destination-side message stays the mechanism that says "this is why you have no offer" —
 that path keeps working from the real failed quote, so the two never disagree.
 
+The probe fires **when the pair is selected**, so the hint is on screen before the user
+touches the amount field.
+
+**A USD minimum is shown in the user's display currency, never as a raw dollar figure.**
+The API enforces the limit in USD, but OISY does not show the user USD unless that is what
+they picked, so the figure goes through the same path as every other fiat amount in the app
+— `formatCurrency` (`src/frontend/src/lib/utils/format.utils.ts`) with `$currentCurrency`
+(`$lib/derived/currency.derived`), `$currencyExchangeStore`
+(`$lib/stores/currency-exchange.store`) and `$currentLanguage` (`$lib/derived/i18n.derived`),
+the pattern used in `LiquidiumPositionCard.svelte` and its siblings. The minimum is not
+converted into source-token units: the constraint really is a fiat one, and a token figure
+would drift with the price while reading as precise.
+
+`formatCurrency` returns `undefined` while the exchange rate still belongs to the previous
+currency (right after a switch) or is missing. Treat that exactly like an unknown minimum:
+show no hint, and in the reactive path fall back to the minimum-less
+`swap.text.swap_amount_too_low`, never a bare number with no currency on it.
+
 New `swap.text` keys in `src/frontend/src/lib/i18n/en.json`, beside the existing
 `swap_amount_too_low*` pair:
 
 - a token-denominated hint, taking `$amount` and `$symbol`, formatted with `formatToken` and
   the source token's decimals exactly as `quoteErrorMinAmount` does in `SwapForm.svelte`;
-- a USD-denominated hint, taking the formatted dollar figure;
-- a USD-denominated refusal, the error-state counterpart of `swap_amount_too_low_minimum`
-  for the reactive path.
+- a fiat-denominated hint, taking a single `$amount` placeholder that already carries the
+  currency symbol from `formatCurrency` — the key must not hardcode `$` or any currency;
+- a fiat-denominated refusal, the error-state counterpart of `swap_amount_too_low_minimum`
+  for the reactive path, with the same placeholder contract.
 
 Other locales are structurally synced by the existing i18n workflow, which does not
 translate; translations follow the project's usual route and are not part of this change.
@@ -198,17 +217,21 @@ translate; translations follow the project's usual route and are not part of thi
   separate mechanisms with their own sources.
 - **No binary search for an exact minimum.** One probe, one number, straight from the API.
 - **No use of the quote's `minAmountIn`** for this purpose (see §2).
+- **No conversion of the fiat minimum into source-token units** (see §3.4).
 - **No new API key or authenticated access.** Probes go out unauthenticated like every other
   1Click call today.
 
 ## 5. Acceptance criteria
 
 - A BTC→Polygon swap of a few hundred dollars no longer says "This swap is currently not
-  offered."; it says the amount is below the provider's minimum and names $1,000. The same
-  holds for BSC, and for Polygon and BSC as the **source** side.
+  offered."; it says the amount is below the provider's minimum and names the $1,000 limit
+  in the user's display currency. The same holds for BSC, and for Polygon and BSC as the
+  **source** side.
 - Selecting a pair whose route has a minimum shows that minimum before any amount is
   entered, in non-error styling, in the source token's units for the per-route bridge
-  minimum and in USD for the temporary chain limit.
+  minimum and in the user's display currency for the temporary chain limit.
+- Switching display currency re-renders the fiat minimum in the new currency; while the
+  exchange rate is still catching up, no hint is shown and no uncurrencied number appears.
 - Selecting a pair with no minimum above ~$0.01, or one whose probe fails or returns an
   unrecognised message, shows no hint and behaves exactly as today.
 - Entering an amount below the minimum still produces the red destination-side refusal from
@@ -233,7 +256,8 @@ The `test-coverage` gate enforces whole-project thresholds, so this lands with i
   pair, no caching of failures), a successful probe yielding no minimum, and a non-amount
   error yielding no minimum.
 - `src/frontend/src/tests/lib/components/swap/SwapForm.spec.ts` — hint rendering for both
-  minimum kinds, absence when unknown, and the reactive red refusal for the USD shape.
+  minimum kinds, absence when unknown, the reactive red refusal for the fiat shape, and the
+  `formatCurrency`-returns-`undefined` case rendering no number.
 - `docs/ai/PRODUCT.md` updated in this PR, per Step 4 — Build (Claude Code).
 
 ## 7. Implementation plan: atomic PRs
@@ -251,17 +275,18 @@ The `test-coverage` gate enforces whole-project thresholds, so this lands with i
   hardcoded — but it tells us whether this is worth a follow-up at all or will vanish.
 - Does 1Click rate-limit unauthenticated callers in a way one probe per pair could trip? The
   spec documents a 429 `rate-limit-exceeded`; the practical budget for an unauthenticated
-  integration is not documented. If it is tight, the probe should move behind the first
-  focus of the amount field rather than pair selection.
+  integration is not documented. The probe fires on pair selection (§9); if the budget turns
+  out to be tight, moving it behind the first focus of the amount field is a contained
+  change to when the probe is called, not to any of its mechanics.
 
-## 9. Pending decisions (facts are clear, someone must decide)
+## 9. Pending decisions
 
-- **Should the USD minimum also be shown converted into source-token units?** Facts: the
-  limit is enforced in USD at 1Click's own price, and the input field is in token units, so
-  the honest figure and the actionable one differ. Showing only USD is accurate but leaves
-  the user converting; showing both is more useful and slightly less precise. Owner: product
-  and design.
-- **Should the hint appear on pair selection or on first interaction with the amount field?**
-  Facts: eager is more helpful and costs one request per pair; lazy costs nothing for users
-  who never reach that field. Interacts with the rate-limit open question above. Owner:
-  product.
+None outstanding. Both were decided on 2026-09-11 and are folded into §3.4:
+
+- **The fiat minimum is shown in the user's display currency and is not converted into
+  source-token units.** The limit is genuinely a fiat constraint, so it is rendered through
+  the app's normal `formatCurrency` path rather than as a hardcoded dollar figure, and a
+  token-unit rendering would drift with the price while reading as exact.
+- **The probe fires on pair selection**, not on first interaction with the amount field, so
+  the minimum is visible before the user commits to a number — which is the point of the
+  improvement. The cost is one cached request per pair.
