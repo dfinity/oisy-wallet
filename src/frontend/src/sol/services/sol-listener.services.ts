@@ -72,7 +72,8 @@ export const syncWallet = ({
 	Object.entries(spl).forEach(([mint, balance]) => {
 		const tokenId = splTokenIds.get(mint);
 
-		if (nonNullish(tokenId)) {
+		// A balance the worker could not read is absent: the token keeps the balance it last had.
+		if (nonNullish(tokenId) && nonNullish(balance)) {
 			balancesStore.batchSet({ id: tokenId, data: { data: balance, certified: false } });
 		}
 	});
