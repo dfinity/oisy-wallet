@@ -1,25 +1,9 @@
-import { USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED } from '$env/user-transactions.env';
-import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
-import type { NullishIdentity } from '$lib/types/identity';
-import type { Token } from '$lib/types/token';
-import type { ResultSuccess } from '$lib/types/utils';
 import { absBigInt } from '$lib/utils/bigint.utils';
-import { consoleError } from '$lib/utils/console.utils';
-import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
-import { getSolTransactions } from '$sol/services/sol-signatures.services';
-import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
-import {
-	solTransactionsStore,
-	type SolCertifiedTransaction
-} from '$sol/stores/sol-transactions.store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolRpcTransaction,
@@ -27,27 +11,17 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
-import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
-import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
 export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
-
-const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCertifiedTransaction[] =>
-	transactions.map((transaction) => ({
-		data: transaction,
-		certified: false
-	}));
 
 interface SolTokenAccountMetadata {
 	addressToOwner: Record<SolAddress, SolAddress>;
@@ -250,154 +224,4 @@ export const fetchSolTransactionsForSignature = async ({
 	};
 
 	return [record];
-};
-
-export const loadNextSolTransactions = async ({
-	token,
-	signalEnd,
-	...rest
-}: LoadNextSolTransactionsParams): Promise<ResultSuccess> => {
-	const {
-		network: { id: networkId }
-	} = token;
-
-	const address = isNetworkIdSOLDevnet(networkId)
-		? get(solAddressDevnet)
-		: isNetworkIdSOLLocal(networkId)
-			? get(solAddressLocal)
-			: get(solAddressMainnet);
-
-	const network = mapNetworkIdToNetwork(token.network.id);
-
-	if (isNullish(network) || isNullish(address)) {
-		return { success: false };
-	}
-
-	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
-		? token
-		: { address: undefined, owner: undefined };
-
-	const transactions = await loadSolTransactions({
-		token,
-		network,
-		address,
-		tokenAddress,
-		tokenOwnerAddress,
-		...rest
-	});
-
-	// A page that could not be fetched is not the end of the history. Signalling the end here would
-	// retire the token from the Activity list for as long as it stays mounted, which is why a
-	// transient RPC failure used to hide transactions until the user re-entered the page.
-	if (isNullish(transactions)) {
-		return { success: false };
-	}
-
-	if (transactions.length === 0) {
-		signalEnd();
-	}
-
-	return { success: true };
-};
-
-const loadSolTransactions = async ({
-	token: { id: tokenId },
-	network,
-	identity,
-	tokenAddress,
-	before,
-	...rest
-}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[] | undefined> => {
-	const isHeadLoad = isNullish(before);
-
-	try {
-		// Always from the chain, never from the backend copy: that copy cannot carry what a row is
-		// shown from, and a wrong one is never replaced (see `saveSolFinalizedTransactions`).
-		const transactions = await getSolTransactions({
-			network,
-			identity,
-			tokenAddress,
-			before,
-			...rest
-		});
-
-		const certifiedTransactions = mapSolCertifiedTransactions(transactions);
-
-		// A record re-derived under its signature id supersedes the per-instruction rows the store
-		// may still hold for the same signature: same transaction, older shape, different ids.
-		const incomingSignatures = new Set(transactions.map(({ signature }) => String(signature)));
-		const incomingIds = new Set(transactions.map(({ id }) => `${id}`));
-		const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
-			.filter(
-				({ data }) =>
-					incomingSignatures.has(String(data.signature)) && !incomingIds.has(`${data.id}`)
-			)
-			.map(({ data: { id } }) => `${id}`);
-
-		if (staleIds.length > 0) {
-			solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
-		}
-
-		solTransactionsStore.append({
-			tokenId,
-			transactions: certifiedTransactions
-		});
-
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && transactions.length > 0) {
-			saveSolFinalizedTransactions({
-				identity,
-				tokenId: solBackendTokenId({ network, tokenAddress }),
-				transactions
-			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
-		}
-
-		return certifiedTransactions;
-	} catch (error: unknown) {
-		if (isHeadLoad) {
-			solTransactionsStore.reset(tokenId);
-		}
-
-		consoleError(`Failed to load transactions for ${tokenId.description}:`, error);
-
-		// Distinct from an empty page: the caller must not read a failure as the end of the history.
-		return undefined;
-	}
-};
-
-export const loadNextSolTransactionsByOldest = async ({
-	minTimestamp,
-	...rest
-}: {
-	identity: NullishIdentity;
-	minTimestamp?: number;
-	token: Token;
-	signalEnd: () => void;
-}): Promise<ResultSuccess> => {
-	// Read at call time rather than taken as a parameter: callers page in a loop, and each round has
-	// to see what the previous one appended. A list handed in would be a snapshot from before the
-	// first await.
-	const transactions = (get(solTransactionsStore)?.[rest.token.id] ?? []).map(({ data }) => data);
-
-	// If there are no transactions, we let the worker load the first ones
-	if (transactions.length === 0) {
-		return { success: false };
-	}
-
-	const lastTransaction = findOldestTransaction(transactions);
-
-	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
-
-	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
-	if (
-		nonNullish(minTimestamp) &&
-		nonNullish(minIcTimestamp) &&
-		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
-	) {
-		return { success: false };
-	}
-
-	return await loadNextSolTransactions({
-		...rest,
-		before: lastSignature
-	});
 };
