@@ -23,7 +23,7 @@
 		<ExternalLink
 			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
 			href={OISY_SUPPORT_URL}
-			iconVisible={false}
+			iconAsLast
 			styleClass="font-bold"
 			testId={HELP_SUPPORT_LINK}
 			trackEvent={buildHelpEvent({

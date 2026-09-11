@@ -790,8 +790,8 @@
 		"text": {
 			"title": "Help",
 			"support_title": "Support",
-			"support_description": "Browse the $oisy_name help centre for answers to common questions, or get in touch with the team if you are stuck.",
-			"support_link": "Go to the help centre",
+			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
+			"support_link": "Visit our support page",
 			"icpswap_title": "ICPSwap Token Withdrawal",
 			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
 			"scan": "Scan my pools",
