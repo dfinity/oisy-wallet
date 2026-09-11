@@ -31,6 +31,7 @@ import {
 	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
+	isRouteTesting,
 	isRouteTokens,
 	isRouteTrading,
 	isRouteTransactions,
@@ -526,6 +527,26 @@ describe('nav.utils', () => {
 				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
 				expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBeFalsy();
+			});
+		});
+
+		// Testing harness - DO NOT MERGE.
+		describe('isRouteTesting', () => {
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Testing}`;
+
+			it('should return true when route id matches Testing path', () => {
+				expect(isRouteTesting(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteTesting(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Testing path', () => {
+				expect(isRouteTesting(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteTesting(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteTesting(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteTesting(mockPage(`/anotherGroup/${AppPath.Testing}`))).toBeFalsy();
 			});
 		});
 
