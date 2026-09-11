@@ -89,9 +89,15 @@ export const syncWalletError = ({
 	});
 };
 
+// A record without a summary was not derived from chain data: earlier versions cached the backend
+// copy, which cannot carry what a row is shown from. It is left out, and the next load that reaches
+// its signature derives it again.
+const getIdbDerivedSolTransactions = async (params: GetIdbTransactionsParams) =>
+	(await getIdbSolTransactions(params))?.filter(({ summary }) => nonNullish(summary));
+
 export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'principal'>) =>
 	syncWalletFromIdbCache({
 		...params,
-		getIdbTransactions: getIdbSolTransactions,
+		getIdbTransactions: getIdbDerivedSolTransactions,
 		transactionsStore: solTransactionsStore
 	});

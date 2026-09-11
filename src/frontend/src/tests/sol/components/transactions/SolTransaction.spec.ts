@@ -8,10 +8,6 @@ import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
-import {
-	mapSolTransactionToUserTransaction,
-	mapUserTransactionToSolTransaction
-} from '$sol/utils/user-transactions.utils';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
@@ -239,9 +235,9 @@ describe('SolTransaction', () => {
 		});
 	});
 
-	// One record per signature is stored under every token whose history returned it, and the
-	// backend cache keeps its value and direction but not the summary or the net changes.
-	describe('a SOL to USDC swap restored from the backend cache', () => {
+	// One record per signature is stored under every token whose history returned it, so the USDC
+	// row of a swap must read its own net change, not the record's value (the SOL spent).
+	describe('a SOL to USDC swap on the USDC row', () => {
 		const netChanges: SolNetBalanceChange[] = [
 			{ delta: -500_000_000n },
 			{ tokenAddress: USDC_TOKEN.address, decimals: USDC_DECIMALS, delta: 75_000_000n }
@@ -269,11 +265,6 @@ describe('SolTransaction', () => {
 			instructions
 		};
 
-		const restored = mapUserTransactionToSolTransaction({
-			transaction: mapSolTransactionToUserTransaction(derived),
-			address: mockSolAddress
-		});
-
 		const usdcReceived = `${formatToken({
 			value: 75_000_000n,
 			displayDecimals: EIGHT_DECIMALS,
@@ -298,14 +289,8 @@ describe('SolTransaction', () => {
 			expect(summary.spent?.delta).toBe(-500_000_000n);
 		});
 
-		it('should show the USDC received on the USDC row while the record is fresh', () => {
+		it('should show the USDC received on the USDC row', () => {
 			expect(amountOf(derived)).toBe(usdcReceived);
-		});
-
-		// Defect: the restored record has no net changes, so the row falls back to the SOL lamports,
-		// negated as a send and read in USDC decimals.
-		it.fails('should still show the USDC received once restored', () => {
-			expect(amountOf(restored)).toBe(usdcReceived);
 		});
 	});
 
