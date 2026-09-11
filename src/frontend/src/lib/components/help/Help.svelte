@@ -4,6 +4,7 @@
 	import HelpNetworkExplorers from '$lib/components/help/HelpNetworkExplorers.svelte';
 	import HelpProviderExplorers from '$lib/components/help/HelpProviderExplorers.svelte';
 	import HelpSupport from '$lib/components/help/HelpSupport.svelte';
+	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackHelp } from '$lib/services/help-analytics.services';
 
@@ -26,4 +27,10 @@
 	<HelpProviderExplorers />
 
 	<HelpIcpSwapWithdrawal />
+</div>
+
+<!-- Outside the flex container on purpose: as a child its mt-24 would stack on top of the gap,
+     and the spacing here should match the Settings page exactly. -->
+<div class="mt-24">
+	<SettingsVersion />
 </div>

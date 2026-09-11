@@ -1,4 +1,6 @@
-import Support from '$lib/components/help/Help.svelte';
+import Help from '$lib/components/help/Help.svelte';
+import { APP_VERSION } from '$lib/constants/app.constants';
+import { OISY_NAME } from '$lib/constants/oisy.constants';
 import {
 	HELP_EXPLORERS_CARD,
 	HELP_ICPSWAP_CARD,
@@ -15,7 +17,7 @@ vi.mock('$lib/services/help-analytics.services', () => ({
 	trackHelp: vi.fn()
 }));
 
-describe('Support', () => {
+describe('Help', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -27,7 +29,7 @@ describe('Support', () => {
 		// Both explorer cards hide themselves while every address is still nullish.
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
-		const { getByTestId } = render(Support);
+		const { getByTestId } = render(Help);
 
 		const cards = [
 			getByTestId(HELP_SUPPORT_CARD),
@@ -46,7 +48,7 @@ describe('Support', () => {
 	});
 
 	it('separates the cards instead of letting them touch', () => {
-		const { getByTestId } = render(Support);
+		const { getByTestId } = render(Help);
 
 		// SettingsCard's own `first-of-type:mt-0` cannot see siblings through the test-id
 		// wrappers, so the container supplies the spacing.
@@ -55,8 +57,25 @@ describe('Support', () => {
 		expect(container?.className).toContain('gap-5');
 	});
 
+	it('closes the page with the version block, spaced like the Settings page', () => {
+		const { getByText, container } = render(Help);
+
+		// SettingsVersion renders the app name next to a link to its release tag.
+		expect(getByText(OISY_NAME)).toBeInTheDocument();
+		expect(getByText(`v${APP_VERSION}`)).toBeInTheDocument();
+
+		// The mt-24 wrapper is a sibling of the card stack, not a child: inside the flex
+		// container its margin would stack on top of the gap.
+		const version = getByText(OISY_NAME).closest('.mt-24');
+
+		expect(version).toBeInTheDocument();
+		expect(version?.parentElement).toBe(
+			container.querySelector('.flex.flex-col.gap-5')?.parentElement
+		);
+	});
+
 	it('tracks the page open once', () => {
-		render(Support);
+		render(Help);
 
 		expect(trackHelp).toHaveBeenCalledExactlyOnceWith({
 			action: 'open',
