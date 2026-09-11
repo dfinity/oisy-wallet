@@ -251,6 +251,55 @@ describe('user-transactions.utils', () => {
 			expect(result.type).toBe('send');
 			expect(result.status).toBe('finalized');
 		});
+
+		// Since one record is derived per signature, its id is the signature itself, with no
+		// instruction suffix to split off.
+		describe('a record derived under its signature id', () => {
+			const derived: SolTransactionUi = {
+				...mockSolUserTransactionUi,
+				id: mockSignature,
+				status: 'confirmed',
+				summary: { kind: 'send', spent: { delta: -5000n }, counterparty: mockSolAddress2 },
+				netChanges: [{ delta: -5000n }],
+				instructions: [{ kind: 'send', amount: 5000n, counterparty: mockSolAddress2 }]
+			};
+
+			const restore = (): SolTransactionUi =>
+				mapUserTransactionToSolTransaction({
+					transaction: mapSolTransactionToUserTransaction(derived),
+					address: mockSolAddress
+				});
+
+			it('should keep its id and signature', () => {
+				const result = restore();
+
+				expect(result.id).toBe(mockSignature);
+				expect(result.signature).toEqual(signature(mockSignature));
+			});
+
+			it('should keep the fee and both owners', () => {
+				const result = restore();
+
+				expect(result.fee).toBe(derived.fee);
+				expect(result.fromOwner).toBe(derived.fromOwner);
+				expect(result.toOwner).toBe(derived.toOwner);
+			});
+
+			// Only finalized records are saved, so whatever the commitment was when it was derived,
+			// what comes back is finalized.
+			it('should come back finalized', () => {
+				expect(restore().status).toBe('finalized');
+			});
+
+			// The backend UserTransaction has no room for them: pinned so a change to that is noticed.
+			it('should come back without the summary, the net changes and the instructions', () => {
+				const result = restore();
+
+				expect(result.summary).toBeUndefined();
+				expect(result.netChanges).toBeUndefined();
+				expect(result.instructions).toBeUndefined();
+			});
+		});
 	});
 
 	describe('isSolTransactionFinalized', () => {

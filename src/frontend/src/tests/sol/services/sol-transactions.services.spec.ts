@@ -18,11 +18,16 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mapSolTransactionToUserTransaction,
+	mapUserTransactionToSolTransaction
+} from '$sol/utils/user-transactions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
 	createMockSolTransactionsUi,
+	mockSolRpcSendTransaction,
 	mockSolTransactionDetail
 } from '$tests/mocks/sol-transactions.mock';
 import {
@@ -519,6 +524,47 @@ describe('sol-transactions.services', () => {
 			await loadNextSolTransactions(mockParams);
 
 			expect(spyGetTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
+			);
+		});
+
+		// Current behaviour, not the goal: the backend cache keeps none of the derived fields, so
+		// every record it restores reads as predating the summary and the head load always re-fetches.
+		it('should never short-circuit a head load on records restored from the backend cache', async () => {
+			vi.spyOn(solanaApi, 'fetchTransactionDetailForSignature').mockResolvedValueOnce(
+				mockSolRpcSendTransaction
+			);
+
+			const [derived] = await fetchSolTransactionsForSignature({
+				signature: {
+					...mockSolSignatureResponse(),
+					signature: mockSolRpcSendTransaction.signature
+				},
+				network: 'mainnet',
+				address: mockSolAddress
+			});
+
+			expect(derived.summary).toBeDefined();
+
+			const restored = mapUserTransactionToSolTransaction({
+				transaction: mapSolTransactionToUserTransaction(derived),
+				address: mockSolAddress
+			});
+
+			expect(restored.summary).toBeUndefined();
+
+			vi.mocked(loadSolUserTransactions).mockResolvedValue({
+				transactions: [restored],
+				newestBlockIndex: mockSolRpcSendTransaction.slot,
+				oldestBlockIndex: mockSolRpcSendTransaction.slot,
+				nextStart: undefined,
+				totalStored: 1n
+			});
+			spyGetTransactions.mockResolvedValueOnce([]);
+
+			await loadNextSolTransactions(mockParams);
+
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ exitIfFirstSignatureMatches: undefined })
 			);
 		});
