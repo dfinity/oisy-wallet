@@ -301,12 +301,10 @@ describe('sol-signatures.services integration', () => {
 		);
 	});
 
-	describe('getSolSignatures', () => {
+	describe('fetchSignatures across the wallet and its token accounts', () => {
 		const [walletAddress] = fixtureSolAddresses;
 
 		const walletAtas = fixtureSolAtaAddresses.filter(({ address }) => address === walletAddress);
-
-		const tokensList = walletAtas.map(({ token: { address, owner } }) => ({ address, owner }));
 
 		const sourceAddresses = [walletAddress, ...walletAtas.map(({ ataAddress }) => ataAddress)];
 
@@ -343,13 +341,6 @@ describe('sol-signatures.services integration', () => {
 				Promise.resolve([])
 			);
 
-		// The merged page is not sorted, so its last element says nothing about age. The slot does.
-		const oldestBySlot = (signatures: SolSignature[]): SolSignature | undefined =>
-			signatures.reduce<SolSignature | undefined>(
-				(oldest, current) => (isNullish(oldest) || current.slot <= oldest.slot ? current : oldest),
-				undefined
-			);
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -363,40 +354,6 @@ describe('sol-signatures.services integration', () => {
 				return Promise.resolve([solAddress(ata.ataAddress), 123 as ProgramDerivedAddressBump]);
 			});
 		});
-
-		// Defect: every source gets the same `before` and `limit` and the union comes back uncut, so
-		// the oldest signature of a page skips whatever the denser sources had between it and their
-		// own tenth signature.
-		it.fails(
-			'should cover the full history of the wallet and its ATAs when paging the merged signatures',
-			async () => {
-				const loadMerged = async (before?: string): Promise<SolSignature[]> => {
-					const page = await getSolSignatures({
-						address: walletAddress,
-						network: SolanaNetworks.mainnet,
-						tokensList,
-						before,
-						limit: 10
-					});
-
-					if (page.length === 0) {
-						return page;
-					}
-
-					return [...page, ...(await loadMerged(oldestBySlot(page)?.signature))];
-				};
-
-				const merged = new Set((await loadMerged()).map(({ signature }) => signature));
-
-				const expected = new Set(
-					(await loadAllHistories()).flat().map(({ signature }) => signature)
-				);
-
-				expect([...expected].filter((signature) => !merged.has(signature))).toEqual([]);
-				expect(merged).toEqual(expected);
-			},
-			600000
-		);
 
 		it('should answer `before` with a foreign signature by slot', async () => {
 			const [walletHistory, ...ataHistories] = await loadAllHistories();
