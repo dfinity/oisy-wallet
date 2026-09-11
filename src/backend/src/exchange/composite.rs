@@ -88,7 +88,11 @@ pub(crate) async fn fetch_all_prices<P: ExchangePriceProvider>(
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
+    use std::{
+        cell::RefCell,
+        future::{ready, Future},
+        rc::Rc,
+    };
 
     use candid::Principal;
     use futures::executor::block_on;
@@ -106,11 +110,11 @@ mod tests {
     }
 
     impl ExchangePriceProvider for MockPrimaryProvider {
-        async fn fetch_prices(
+        fn fetch_prices(
             &self,
             _token_ids: &[StoredTokenId],
-        ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
-            self.result.clone()
+        ) -> impl Future<Output = Result<Vec<(StoredTokenId, ExchangeData)>, String>> {
+            ready(self.result.clone())
         }
     }
 
