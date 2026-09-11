@@ -11,7 +11,10 @@ import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignaturesCursor, SolSignaturesPage } from '$sol/types/sol-api';
 import type { SolSignature } from '$sol/types/sol-transaction';
 import type { RequiredSplToken, SplTokenAddress } from '$sol/types/spl';
-import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
+import {
+	mockSolSignatureResponse,
+	mockSolSignatureResponsesAtSlots
+} from '$tests/mocks/sol-signatures.mock';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
@@ -20,7 +23,7 @@ import {
 } from '$tests/mocks/sol.mock';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { address, type Address } from '@solana/kit';
+import { address, type Address, type Signature } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
@@ -492,6 +495,149 @@ describe('sol-signatures.services', () => {
 			await expect(getSolSignatures({ ...mockParams, limit: 1, cursor })).rejects.toThrow(
 				mockError
 			);
+		});
+
+		// One flaky token account costs the whole page, wallet signatures included: pinned so the
+		// refactor changes it on purpose rather than by accident.
+		it('should reject when a single token account lookup fails', async () => {
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress ? Promise.reject(mockError) : Promise.resolve([])
+			);
+
+			await expect(getSolSignatures(mockParams)).rejects.toThrow(mockError);
+		});
+
+		// Looking them up one after the other would make a page take longer with every token held.
+		it('should look up the token accounts concurrently', async () => {
+			const resolvers: (() => void)[] = [];
+
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockSolAddress
+					? []
+					: new Promise<SolSignature[]>((resolve) => resolvers.push(() => resolve([])))
+			);
+
+			const result = getSolSignatures(mockParams);
+
+			await vi.waitFor(() =>
+				expect(spyFetchSignatures).toHaveBeenCalledTimes(1 + mockTokensList.length)
+			);
+
+			resolvers.forEach((resolve) => resolve());
+
+			await expect(result).resolves.toEqual({ signatures: [] });
+		});
+
+		describe('paging across the wallet and its token accounts', () => {
+			const limit = 3;
+
+			// Answers like the RPC: the newest signatures of the account strictly older than `before`.
+			const mockHistories = ({
+				wallet,
+				tokenAccount
+			}: {
+				wallet: SolSignature[];
+				tokenAccount: SolSignature[];
+			}) => {
+				const histories: Record<string, SolSignature[]> = {
+					[mockSolAddress]: wallet,
+					[mockAtaAddress]: tokenAccount,
+					[mockAtaAddress2]: []
+				};
+
+				const allSignatures = [...wallet, ...tokenAccount];
+
+				spyFetchSignatures.mockImplementation(
+					({
+						wallet: account,
+						before,
+						limit: pageLimit
+					}: {
+						wallet: Address;
+						before?: Signature;
+						limit: number;
+					}) => {
+						const beforeSlot = allSignatures.find(({ signature }) => signature === before)?.slot;
+
+						return histories[account.toString()]
+							.filter(({ slot }) => isNullish(beforeSlot) || slot < beforeSlot)
+							.slice(0, pageLimit);
+					}
+				);
+			};
+
+			const slotsOf = ({ signatures }: SolSignaturesPage): bigint[] =>
+				signatures.map(({ slot }) => slot);
+
+			it('should return every signature when each source holds fewer than the limit', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 90n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([80n])
+				});
+
+				expect(slotsOf(await getSolSignatures({ ...mockParams, limit }))).toEqual([100n, 90n, 80n]);
+			});
+
+			// Was F1: the wallet page and each token account page came back concatenated.
+			it('should return the signatures newest first', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 90n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([95n, 85n])
+				});
+
+				expect(slotsOf(await getSolSignatures({ ...mockParams, limit }))).toEqual([
+					100n,
+					95n,
+					90n,
+					85n
+				]);
+			});
+
+			// Was F2: the page ran past the oldest wallet signature fetched. It now stops strictly above
+			// the cut, the newest of the oldest signatures of the full sources (the wallet's 91).
+			it('should end the page above the newest of the oldest signatures of the full sources', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([99n, 70n, 50n, 40n])
+				});
+
+				expect(slotsOf(await getSolSignatures({ ...mockParams, limit }))).toEqual([100n, 99n, 95n]);
+			});
+
+			// Was F2: a source that ran out of signatures stretched the page past the full ones.
+			it('should not end the page at a source that holds fewer than the limit', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([99n, 80n])
+				});
+
+				expect(slotsOf(await getSolSignatures({ ...mockParams, limit }))).toEqual([100n, 99n, 95n]);
+			});
+
+			// Was F2: paging on from each page's oldest signature skipped wallet signatures for good.
+			it('should reach every signature when paging with the cursor to the end', async () => {
+				mockHistories({
+					wallet: mockSolSignatureResponsesAtSlots([100n, 95n, 91n, 88n, 86n, 60n]),
+					tokenAccount: mockSolSignatureResponsesAtSlots([99n, 70n, 50n, 40n])
+				});
+
+				const collected: bigint[] = [];
+				let cursor: SolSignaturesCursor | undefined;
+
+				for (let page = 0; page < 20; page++) {
+					const result = await getSolSignatures({ ...mockParams, limit, cursor });
+
+					collected.push(...slotsOf(result));
+
+					if (isNullish(result.cursor)) {
+						break;
+					}
+
+					({ cursor } = result);
+				}
+
+				expect(collected).toEqual([100n, 99n, 95n, 91n, 88n, 86n, 70n, 60n, 50n, 40n]);
+			});
 		});
 	});
 });

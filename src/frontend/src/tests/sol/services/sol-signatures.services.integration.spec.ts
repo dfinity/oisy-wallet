@@ -16,7 +16,12 @@ import {
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+import {
+	signature,
+	address as solAddress,
+	type ProgramDerivedAddressBump,
+	type Signature
+} from '@solana/kit';
 
 // Everything above the RPC boundary runs for real; only the boundary itself is served from
 // recorded fixtures. That is what makes this a meaningful check of our parsing and mapping.
@@ -302,5 +307,113 @@ describe('sol-signatures.services integration', () => {
 			},
 			600000
 		);
+	});
+
+	describe('fetchSignatures across the wallet and its token accounts', () => {
+		const [walletAddress] = fixtureSolAddresses;
+
+		const walletAtas = fixtureSolAtaAddresses.filter(({ address }) => address === walletAddress);
+
+		const sourceAddresses = [walletAddress, ...walletAtas.map(({ ataAddress }) => ataAddress)];
+
+		// A single address is walked by feeding the last signature of a page back as `before`, so
+		// this is the reference history of one source.
+		const loadFullHistory = async ({
+			address,
+			before
+		}: {
+			address: string;
+			before?: Signature;
+		}): Promise<SolSignature[]> => {
+			const signatures = await fetchSignatures({
+				wallet: solAddress(address),
+				network: SolanaNetworks.mainnet,
+				before,
+				limit: 10
+			});
+
+			if (signatures.length === 0) {
+				return signatures;
+			}
+
+			return [
+				...signatures,
+				...(await loadFullHistory({ address, before: last(signatures)?.signature }))
+			];
+		};
+
+		// Sequential on purpose: recording against a public RPC is throttled.
+		const loadAllHistories = async (): Promise<SolSignature[][]> =>
+			await sourceAddresses.reduce<Promise<SolSignature[][]>>(
+				async (acc, address) => [...(await acc), await loadFullHistory({ address })],
+				Promise.resolve([])
+			);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(solProgramToken, 'findAssociatedTokenPda').mockImplementation(({ mint }) => {
+				const ata = walletAtas.find(({ token: { address } }) => address === mint);
+
+				if (isNullish(ata)) {
+					throw new Error(`No fixture ATA for mint ${mint}`);
+				}
+
+				return Promise.resolve([solAddress(ata.ataAddress), 123 as ProgramDerivedAddressBump]);
+			});
+		});
+
+		it('should answer `before` with a foreign signature by slot', async () => {
+			const [walletHistory, ...ataHistories] = await loadAllHistories();
+
+			const walletSignatures = new Set(walletHistory.map(({ signature }) => signature));
+			const walletSlots = new Set(walletHistory.map(({ slot }) => slot));
+
+			// A signature the wallet never saw, in a slot the wallet has nothing in, with wallet
+			// history behind it: the only ordering the RPC can apply is the slot.
+			const foreign = ataHistories
+				.flat()
+				.find(
+					({ signature, slot }) =>
+						!walletSignatures.has(signature) &&
+						!walletSlots.has(slot) &&
+						walletHistory.some(({ slot: walletSlot }) => walletSlot < slot)
+				);
+
+			assert(nonNullish(foreign));
+
+			const signatures = await fetchSignatures({
+				wallet: solAddress(walletAddress),
+				network: SolanaNetworks.mainnet,
+				before: foreign.signature,
+				limit: 10
+			});
+
+			expect(signatures.map(({ signature }) => signature)).toEqual(
+				walletHistory
+					.filter(({ slot }) => slot < foreign.slot)
+					.slice(0, 10)
+					.map(({ signature }) => signature)
+			);
+		}, 600000);
+
+		it('should find the same signature in more than one source', async () => {
+			const histories = await loadAllHistories();
+
+			const occurrences = histories
+				.flat()
+				.reduce<Map<string, number>>(
+					(acc, { signature }) => acc.set(signature, (acc.get(signature) ?? 0) + 1),
+					new Map()
+				);
+
+			const total = histories.reduce((acc, history) => acc + history.length, 0);
+
+			expect([...occurrences.values()].some((count) => count >= 2)).toBeTruthy();
+
+			// Pinned against the recorded fixtures: every signature past the unique count is a
+			// transaction the per-token loaders fetch and parse more than once.
+			expect({ total, unique: occurrences.size }).toStrictEqual({ total: 210, unique: 169 });
+		}, 600000);
 	});
 });
