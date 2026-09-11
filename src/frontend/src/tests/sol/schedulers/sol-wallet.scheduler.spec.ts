@@ -1,6 +1,7 @@
-import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
+import { fetchSignatures } from '$sol/api/solana.api';
 import {
 	SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -46,6 +47,11 @@ vi.mock('$sol/services/sol-user-transactions.services', () => ({
 
 vi.mock('$sol/services/sol-balances.services', () => ({
 	loadSolNetworkBalances: vi.fn()
+}));
+
+vi.mock(import('$sol/api/solana.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	fetchSignatures: vi.fn()
 }));
 
 vi.mock('$sol/services/sol-signatures.services', () => ({
@@ -624,6 +630,148 @@ describe('sol-wallet.scheduler', () => {
 			vi.mocked(getSolSignatures).mock.calls.forEach(([{ cursor }]) =>
 				expect(cursor).toBeUndefined()
 			);
+		});
+	});
+
+	// The merged pager as it is, over a wallet whose history `fetchSignatures` serves: the cut, the
+	// signatures it holds back in its cursor and its empty pages are the pager's own, not a mock's.
+	describe('head check with the merged pager', () => {
+		const pagerLimit = Number(WALLET_PAGINATION);
+
+		// The wallet is the only source, so the pager derives no token account.
+		const walletOnly: PostMessageDataRequestSol = { ...data, tokens: [] };
+
+		const held = signatureAt({ slot: 100n });
+
+		const mockWalletHistory = async (history: SolSignatureWithSources[]) => {
+			const { getSolSignatures: pager } = await vi.importActual<{
+				getSolSignatures: typeof getSolSignatures;
+			}>('$sol/services/sol-signatures.services');
+
+			vi.mocked(getSolSignatures).mockImplementation(pager);
+
+			vi.mocked(fetchSignatures).mockImplementation(({ before, limit }) => {
+				const start = isNullish(before)
+					? 0
+					: history.findIndex(({ signature }) => signature === before) + 1;
+
+				return Promise.resolve(
+					history.slice(start, start + limit).map(({ sources: _, ...solSignature }) => solSignature)
+				);
+			});
+		};
+
+		const headCursors = () => vi.mocked(getSolSignatures).mock.calls.map(([{ cursor }]) => cursor);
+
+		beforeEach(async () => {
+			await mockWalletHistory([held]);
+
+			await scheduler.trigger(walletOnly);
+
+			vi.mocked(getSolSignatures).mockClear();
+			vi.mocked(resolveSolSignatures).mockClear();
+			postMessageMock.mockClear();
+		});
+
+		it('should load the signatures of the cut slot, which the pager holds back, on the next page of the same tick', async () => {
+			const newSignatures = signaturesFrom({ slot: 112n, count: pagerLimit + 2 });
+			const cutSignature = newSignatures[pagerLimit - 1];
+
+			await mockWalletHistory([...newSignatures, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			const [firstPage, nextPage] = headCursors();
+
+			expect(firstPage).toBeUndefined();
+			expect(nextPage?.pending.map(({ signature }) => signature)).toEqual([cutSignature.signature]);
+
+			expect(postedSignatures()).toEqual(signaturesOf(newSignatures));
+		});
+
+		it('should load the signatures of the cut slot on the next tick when the pages of a tick run out', async () => {
+			const burst = signaturesFrom({
+				slot: 200n,
+				count: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK + 3
+			});
+
+			await mockWalletHistory([...burst, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK);
+
+			const readInOneTick = pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK - 1;
+
+			expect(postedSignatures()).toEqual(signaturesOf(burst.slice(0, readInOneTick)));
+
+			vi.mocked(getSolSignatures).mockClear();
+
+			await scheduler.trigger(walletOnly);
+
+			const [, resumed] = headCursors();
+
+			expect(resumed?.pending.map(({ signature }) => signature)).toEqual([
+				burst[readInOneTick].signature
+			]);
+
+			// Everything once, and nothing it held before the burst.
+			expect(postedSignatures()).toEqual(signaturesOf(burst));
+		});
+
+		it('should keep paging through a crowded slot while the pager returns empty pages', async () => {
+			const crowded = Array.from({ length: pagerLimit * 2 + 5 }, () => signatureAt({ slot: 105n }));
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			const pages = await Promise.all(
+				vi.mocked(getSolSignatures).mock.results.map(({ value }) => value)
+			);
+
+			expect(pages.map(({ signatures }) => signatures.length)).toEqual([0, 0, crowded.length + 1]);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		it('should load a crowded slot that takes more pages than a tick has on the next ticks', async () => {
+			const crowded = Array.from(
+				{ length: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK + 5 },
+				() => signatureAt({ slot: 105n })
+			);
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(walletPosts()).toHaveLength(0);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		// Everything above the newest slot held has been loaded once the cut reaches it, even when the
+		// pager still holds that slot back.
+		it('should settle once a crowded slot is the newest it holds', async () => {
+			const crowded = Array.from({ length: pagerLimit * 2 + 5 }, () => signatureAt({ slot: 105n }));
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(walletOnly);
+			await scheduler.trigger(walletOnly);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+			expect(walletPosts()).toHaveLength(0);
+			expect(scheduler['store'].catchUp).toEqual([]);
 		});
 	});
 

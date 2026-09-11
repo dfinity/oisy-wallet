@@ -55,7 +55,7 @@ interface SolWalletStore {
 
 interface SolWalletCatchUp {
 	cursor: SolSignaturesCursor;
-	// The newest slot held when the walk began. The walk ends on the page that reaches it, and
+	// The newest slot held when the walk began. The walk ends on the page that passes it, and
 	// everything it returned above it is new, whatever the head check has resolved since.
 	newestSlot: SolSignature['slot'];
 }
@@ -74,17 +74,27 @@ const initialStore = (): SolWalletStore => ({
 	catchUp: []
 });
 
-// The merged pager returns a signature of a slot only with every other signature of that slot, so
-// once a walk reaches the newest slot held, it has returned everything above it.
-const reachesSlot = ({
-	signatures,
+// A walk from the head has returned every signature above the cut of its last page: the newest of
+// the oldest signatures of the sources still paging. Once that cut is at or below a slot, the walk
+// has passed it, even while its cursor still holds that slot back or its page is empty. The slot
+// itself was returned whole before the walk began, so nothing of it is new either.
+const passesSlot = ({
+	cursor,
 	slot
 }: {
-	signatures: SolSignatureWithSources[];
+	cursor: SolSignaturesCursor;
 	slot: SolSignature['slot'];
-}): boolean => signatures.some(({ slot: signatureSlot }) => signatureSlot <= slot);
+}): boolean => {
+	const cut = Object.values(cursor.before).reduce<SolSignature['slot'] | undefined>(
+		(acc, before) =>
+			isNullish(before) ? acc : isNullish(acc) || before.slot > acc ? before.slot : acc,
+		undefined
+	);
 
-// Continues the oldest walk until it reaches the slot it started from or its history ends, then the
+	return nonNullish(cut) && cut <= slot;
+};
+
+// Continues the oldest walk until it passes the slot it started from or its history ends, then the
 // next one, until the pages run out. Only the signatures above that slot are returned: anything
 // older belongs to the pagers.
 const resumeHead = async ({
@@ -103,11 +113,12 @@ const resumeHead = async ({
 
 	const { signatures, cursor } = await getSolSignatures({ ...params, cursor: walk.cursor });
 
-	const ended = isNullish(cursor) || reachesSlot({ signatures, slot: walk.newestSlot });
-
 	const next = await resumeHead({
 		...params,
-		walks: ended ? rest : [{ ...walk, cursor }, ...rest],
+		walks:
+			isNullish(cursor) || passesSlot({ cursor, slot: walk.newestSlot })
+				? rest
+				: [{ ...walk, cursor }, ...rest],
 		pages: pages - 1
 	});
 
@@ -224,7 +235,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 					// cannot hold them back.
 					walks: [
 						...catchUp,
-						...(isNullish(cursor) || reachesSlot({ signatures: head, slot: newestSlot })
+						...(isNullish(cursor) || passesSlot({ cursor, slot: newestSlot })
 							? []
 							: [{ cursor, newestSlot }])
 					],
