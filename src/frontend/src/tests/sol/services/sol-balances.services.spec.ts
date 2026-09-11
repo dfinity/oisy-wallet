@@ -18,6 +18,8 @@ import {
 	address,
 	getAddressDecoder,
 	getAddressEncoder,
+	lamports,
+	type Base64EncodedBytes,
 	type ProgramDerivedAddressBump
 } from '@solana/kit';
 import type { MockInstance } from 'vitest';
@@ -42,42 +44,42 @@ describe('sol-balances.services', () => {
 		const mintAt = (index: number): SolAddress =>
 			getAddressDecoder().decode(new Uint8Array(32).fill(index + 1));
 
-		const walletAccount = (lamports: bigint): NonNullable<SolanaParsedAccountInfo> =>
-			({
-				executable: false,
-				lamports,
-				owner: SYSTEM_PROGRAM_ADDRESS,
-				space: ZERO,
-				data: ['', 'base64']
-			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+		const walletAccount = (balance: bigint): NonNullable<SolanaParsedAccountInfo> => ({
+			executable: false,
+			lamports: lamports(balance),
+			owner: address(SYSTEM_PROGRAM_ADDRESS),
+			space: ZERO,
+			data: ['' as Base64EncodedBytes, 'base64']
+		});
 
 		const tokenAccount = ({
 			mint,
 			amount,
-			program = TOKEN_PROGRAM_ADDRESS
+			program = TOKEN_PROGRAM_ADDRESS,
+			authority = mockSolAddress
 		}: {
 			mint: SolAddress;
 			amount: bigint;
 			program?: SolAddress;
-		}): NonNullable<SolanaParsedAccountInfo> =>
-			({
-				executable: false,
-				lamports: 2_039_280n,
-				owner: program,
+			authority?: SolAddress;
+		}): NonNullable<SolanaParsedAccountInfo> => ({
+			executable: false,
+			lamports: lamports(2_039_280n),
+			owner: address(program),
+			space: 165n,
+			data: {
+				program: program === TOKEN_2022_PROGRAM_ADDRESS ? 'spl-token-2022' : 'spl-token',
 				space: 165n,
-				data: {
-					program: program === TOKEN_2022_PROGRAM_ADDRESS ? 'spl-token-2022' : 'spl-token',
-					space: 165n,
-					parsed: {
-						type: 'account',
-						info: {
-							mint,
-							owner: mockSolAddress,
-							tokenAmount: { amount: `${amount}`, decimals: 6 }
-						}
+				parsed: {
+					type: 'account',
+					info: {
+						mint,
+						owner: authority,
+						tokenAmount: { amount: `${amount}`, decimals: 6 }
 					}
 				}
-			}) as unknown as NonNullable<SolanaParsedAccountInfo>;
+			}
+		});
 
 		const usdc: Pick<SplToken, 'address' | 'owner'> = {
 			address: USDC_TOKEN.address,
@@ -189,6 +191,38 @@ describe('sol-balances.services', () => {
 			});
 
 			expect(spl).toStrictEqual({});
+		});
+
+		it('should leave out a token whose ATA belongs to another token program', async () => {
+			accounts.set(mockSolAddress, walletAccount(1n));
+			accounts.set(
+				ataOf(usdc.address),
+				tokenAccount({ mint: usdc.address, amount: 10n, program: TOKEN_2022_PROGRAM_ADDRESS })
+			);
+
+			const { spl } = await loadSolNetworkBalances({
+				address: mockSolAddress,
+				network,
+				tokens: [usdc]
+			});
+
+			expect(spl).toStrictEqual({});
+		});
+
+		it('should return zero for a token whose ATA was handed to another authority', async () => {
+			accounts.set(mockSolAddress, walletAccount(1n));
+			accounts.set(
+				ataOf(usdc.address),
+				tokenAccount({ mint: usdc.address, amount: 10n, authority: mockSplAddress })
+			);
+
+			const { spl } = await loadSolNetworkBalances({
+				address: mockSolAddress,
+				network,
+				tokens: [usdc]
+			});
+
+			expect(spl).toStrictEqual({ [usdc.address]: ZERO });
 		});
 
 		it('should load only the wallet when there are no tokens', async () => {

@@ -40,12 +40,14 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balances: SolNetworkBalances | undefined;
-	// The newest slot the head check has resolved, and every signature it has resolved. Only a
-	// signature above that slot, or in it and not resolved yet, is new, unless a catch-up walk that
-	// began below it returns it: anything older belongs to the pagers, which keep their own cursors.
-	// It is never inferred from what the UI store holds.
+	// The newest slot the head check has resolved, and the signatures it has resolved at that slot and
+	// at the slot each catch-up walk ends on. Only a signature above that slot, or in it and not
+	// resolved yet, is new, unless a catch-up walk that began below it returns it: anything older
+	// belongs to the pagers, which keep their own cursors. A walk also returns the slot it ends on, so
+	// the signatures resolved there are kept while it runs. No other signature needs remembering, and
+	// a long session does not pile them up. It is never inferred from what the UI store holds.
 	newestSlot: SolSignature['slot'] | undefined;
-	signatures: Set<string>;
+	signatures: Map<SolSignature['signature'], SolSignature['slot']>;
 	// The walks from the head down to what was held that ran out of pages, oldest first. Each resumes
 	// on the next tick, so a burst bigger than a tick's pages is never skipped.
 	catchUp: SolWalletCatchUp[];
@@ -68,7 +70,7 @@ interface SolWalletHead {
 const initialStore = (): SolWalletStore => ({
 	balances: undefined,
 	newestSlot: undefined,
-	signatures: new Set(),
+	signatures: new Map(),
 	catchUp: []
 });
 
@@ -254,7 +256,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				network,
 				tokens,
 				signatures: newSignatures,
-				known
+				known: new Set(known.keys())
 			})
 		};
 	};
@@ -360,16 +362,23 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			isNullish(this.store.balances) ||
 			!balancesEqual({ current: this.store.balances, next: balances });
 
+		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
+			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
+			this.store.newestSlot
+		);
+
+		// The only slots a later page can still return a signature it has resolved from.
+		const keptSlots = new Set([newestSlot, ...catchUp.map(({ newestSlot: slot }) => slot)]);
+
 		this.store = {
 			balances,
-			newestSlot: signatures.reduce<SolSignature['slot'] | undefined>(
-				(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
-				this.store.newestSlot
+			newestSlot,
+			signatures: new Map(
+				[
+					...this.store.signatures,
+					...signatures.map(({ signature, slot }) => [signature, slot] as const)
+				].filter(([, slot]) => keptSlots.has(slot))
 			),
-			signatures: new Set([
-				...this.store.signatures,
-				...signatures.map(({ signature }) => signature)
-			]),
 			catchUp
 		};
 
