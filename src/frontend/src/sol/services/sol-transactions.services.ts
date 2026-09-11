@@ -3,7 +3,7 @@ import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { Token, TokenId } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { absBigInt } from '$lib/utils/bigint.utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -11,10 +11,7 @@ import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.ut
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
-import {
-	loadSolUserTransactions,
-	saveSolFinalizedTransactions
-} from '$sol/services/sol-user-transactions.services';
+import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import {
 	solTransactionsStore,
@@ -35,11 +32,7 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import {
-	requiresStoredDerivationRefresh,
-	requiresStoredSplOwnerRefresh,
-	solBackendTokenId
-} from '$sol/utils/user-transactions.utils';
+import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
@@ -49,23 +42,6 @@ import { get } from 'svelte/store';
 // https://solana.com/docs/core/fees#base-transaction-fee
 export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
-
-const solBackendPaginationCursors = new Map<TokenId, bigint>();
-
-const setSolBackendPaginationCursor = ({
-	tokenId,
-	nextStart
-}: {
-	tokenId: TokenId;
-	nextStart: bigint | undefined;
-}) => {
-	if (nonNullish(nextStart)) {
-		solBackendPaginationCursors.set(tokenId, nextStart);
-		return;
-	}
-
-	solBackendPaginationCursors.delete(tokenId);
-};
 
 const mapSolCertifiedTransactions = (transactions: SolTransactionUi[]): SolCertifiedTransaction[] =>
 	transactions.map((transaction) => ({
@@ -323,7 +299,6 @@ const loadSolTransactions = async ({
 	token: { id: tokenId },
 	network,
 	identity,
-	address,
 	tokenAddress,
 	before,
 	...rest
@@ -331,108 +306,22 @@ const loadSolTransactions = async ({
 	const isHeadLoad = isNullish(before);
 
 	try {
-		const backendTokenId = solBackendTokenId({ network, tokenAddress });
-		const backendCursor = solBackendPaginationCursors.get(tokenId);
-
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && !isHeadLoad && nonNullish(backendCursor)) {
-			const storedPage = await loadSolUserTransactions({
-				identity,
-				tokenId: backendTokenId,
-				address,
-				start: backendCursor
-			});
-
-			setSolBackendPaginationCursor({ tokenId, nextStart: storedPage?.nextStart });
-
-			if (nonNullish(storedPage) && storedPage.transactions.length > 0) {
-				const certifiedTransactions = mapSolCertifiedTransactions(storedPage.transactions);
-
-				solTransactionsStore.append({
-					tokenId,
-					transactions: certifiedTransactions
-				});
-
-				return certifiedTransactions;
-			}
-		}
-
-		const stored =
-			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && isHeadLoad
-				? await loadSolUserTransactions({
-						identity,
-						tokenId: backendTokenId,
-						address
-					})
-				: undefined;
-
-		if (isHeadLoad) {
-			setSolBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
-		}
-
-		const storedTransactions = stored?.transactions ?? [];
-
-		const storedRefreshSignatures = new Set(
-			storedTransactions
-				.filter(
-					(transaction) =>
-						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
-						requiresStoredDerivationRefresh({ transaction })
-				)
-				.map(({ signature }) => String(signature))
-		);
-		const shouldRefreshStoredTransactions = storedRefreshSignatures.size > 0;
-
-		const exitIfFirstSignatureMatches =
-			USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED &&
-			!shouldRefreshStoredTransactions &&
-			isNullish(before) &&
-			storedTransactions.length > 0 &&
-			nonNullish(storedTransactions[0]?.signature)
-				? String(storedTransactions[0].signature)
-				: undefined;
-
-		const newTransactions = await getSolTransactions({
+		// Always from the chain, never from the backend copy: that copy cannot carry what a row is
+		// shown from, and a wrong one is never replaced (see `saveSolFinalizedTransactions`).
+		const transactions = await getSolTransactions({
 			network,
 			identity,
-			address,
 			tokenAddress,
 			before,
-			exitIfFirstSignatureMatches,
 			...rest
 		});
-		const newestStoredSlot = stored?.newestBlockIndex;
 
-		// On head loads, keep only RPC transactions newer than the backend cache.
-		// Cursor pagination already asks RPC for older transactions, so those pages must not use this filter.
-		const freshTransactions =
-			nonNullish(newestStoredSlot) && isHeadLoad
-				? newTransactions.filter(
-						({ blockNumber, signature }) =>
-							isNullish(blockNumber) ||
-							blockNumber > Number(newestStoredSlot) ||
-							storedRefreshSignatures.has(String(signature))
-					)
-				: newTransactions;
-
-		const freshSignatures = new Set(freshTransactions.map(({ signature }) => String(signature)));
-		const refreshedSignatures = new Set(
-			[...storedRefreshSignatures].filter((signature) => freshSignatures.has(signature))
-		);
-
-		const storedTransactionsToUse = isHeadLoad
-			? storedTransactions.filter(({ signature }) => !refreshedSignatures.has(String(signature)))
-			: storedTransactions;
-
-		const allTransactions = isHeadLoad
-			? [...freshTransactions, ...storedTransactionsToUse]
-			: freshTransactions;
-
-		const certifiedTransactions = mapSolCertifiedTransactions(allTransactions);
+		const certifiedTransactions = mapSolCertifiedTransactions(transactions);
 
 		// A record re-derived under its signature id supersedes the per-instruction rows the store
 		// may still hold for the same signature: same transaction, older shape, different ids.
-		const incomingSignatures = new Set(allTransactions.map(({ signature }) => String(signature)));
-		const incomingIds = new Set(allTransactions.map(({ id }) => `${id}`));
+		const incomingSignatures = new Set(transactions.map(({ signature }) => String(signature)));
+		const incomingIds = new Set(transactions.map(({ id }) => `${id}`));
 		const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
 			.filter(
 				({ data }) =>
@@ -449,15 +338,15 @@ const loadSolTransactions = async ({
 			transactions: certifiedTransactions
 		});
 
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && freshTransactions.length > 0) {
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && transactions.length > 0) {
 			saveSolFinalizedTransactions({
 				identity,
-				tokenId: backendTokenId,
-				transactions: freshTransactions
+				tokenId: solBackendTokenId({ network, tokenAddress }),
+				transactions
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
 
-		return mapSolCertifiedTransactions(freshTransactions);
+		return certifiedTransactions;
 	} catch (error: unknown) {
 		if (isHeadLoad) {
 			solTransactionsStore.reset(tokenId);

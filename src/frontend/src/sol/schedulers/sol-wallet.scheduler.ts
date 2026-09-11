@@ -13,10 +13,7 @@ import type { CertifiedData } from '$lib/types/store';
 import { consoleError } from '$lib/utils/console.utils';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
-import {
-	loadSolUserTransactions,
-	saveSolFinalizedTransactions
-} from '$sol/services/sol-user-transactions.services';
+import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolAddress } from '$sol/types/address';
@@ -24,11 +21,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type { SplTokenAddress } from '$sol/types/spl';
-import {
-	requiresStoredDerivationRefresh,
-	requiresStoredSplOwnerRefresh,
-	solBackendTokenId
-} from '$sol/utils/user-transactions.utils';
+import { solBackendTokenId } from '$sol/utils/user-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 
@@ -123,103 +116,32 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		tokenAddress,
 		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const isInitialSync = Object.keys(this.store.transactions).length === 0;
-
-		let storedTransactions: SolCertifiedTransaction[] = [];
-
-		if (isInitialSync && USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED) {
-			try {
-				const backendTokenId = solBackendTokenId({ network, tokenAddress });
-
-				const stored = await loadSolUserTransactions({
-					identity,
-					tokenId: backendTokenId,
-					address
-				});
-
-				if (nonNullish(stored) && stored.transactions.length > 0) {
-					storedTransactions = stored.transactions.map((transaction) => ({
-						data: transaction,
-						certified: false
-					}));
-
-					for (const tx of storedTransactions) {
-						this.store.transactions[tx.data.id] = tx;
-					}
-				}
-			} catch (_: unknown) {
-				// Backend load failure is non-critical; fall through to RPC
-			}
-		}
-
-		const storedRefreshSignatures = new Set(
-			storedTransactions
-				.filter(
-					({ data: transaction }) =>
-						requiresStoredSplOwnerRefresh({ transaction, address, tokenAddress }) ||
-						requiresStoredDerivationRefresh({ transaction })
-				)
-				.map(({ data: { signature } }) => String(signature))
-		);
-
-		const exitIfFirstSignatureMatches =
-			storedRefreshSignatures.size === 0 &&
-			storedTransactions.length > 0 &&
-			nonNullish(storedTransactions[0]?.data.signature)
-				? String(storedTransactions[0].data.signature)
-				: undefined;
-
+		// Always from the chain, never from the backend copy: that copy cannot carry what a row is
+		// shown from, and a wrong one is never replaced (see `saveSolFinalizedTransactions`).
 		const rpcTransactions = await getSolTransactions({
 			network,
 			identity,
 			address,
 			tokenAddress,
-			tokenOwnerAddress,
-			exitIfFirstSignatureMatches
+			tokenOwnerAddress
 		});
 
-		const rpcCertified = rpcTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		const newTransactions: SolCertifiedTransaction[] = rpcTransactions
+			.filter(({ id }) => isNullish(this.store.transactions[`${id}`]))
+			.map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
 
-		const rpcSignatures = new Set(rpcCertified.map(({ data: { signature } }) => String(signature)));
-		const refreshedSignatures = new Set(
-			[...storedRefreshSignatures].filter((signature) => rpcSignatures.has(signature))
-		);
-
-		if (refreshedSignatures.size > 0) {
-			storedTransactions = storedTransactions.filter(
-				({ data: { signature } }) => !refreshedSignatures.has(String(signature))
-			);
-
-			this.store.transactions = Object.fromEntries(
-				Object.entries(this.store.transactions).filter(
-					([
-						_,
-						{
-							data: { signature }
-						}
-					]) => !refreshedSignatures.has(String(signature))
-				)
-			);
-		}
-
-		const newRpcTransactions = rpcCertified.filter(
-			({ data: { id, signature } }) =>
-				refreshedSignatures.has(String(signature)) || isNullish(this.store.transactions[`${id}`])
-		);
-
-		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRpcTransactions.length > 0) {
-			const backendTokenId = solBackendTokenId({ network, tokenAddress });
+		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newTransactions.length > 0) {
 			saveSolFinalizedTransactions({
 				identity,
-				tokenId: backendTokenId,
-				transactions: newRpcTransactions.map(({ data }) => data)
+				tokenId: solBackendTokenId({ network, tokenAddress }),
+				transactions: newTransactions.map(({ data }) => data)
 			}).catch((err) => consoleError('Background save of finalized SOL transactions failed:', err));
 		}
 
-		return [...newRpcTransactions, ...storedTransactions];
+		return newTransactions;
 	};
 
 	private loadAndSyncWalletData = async ({
