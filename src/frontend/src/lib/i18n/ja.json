@@ -136,7 +136,7 @@
 			"source_code": "ソースコード",
 			"documentation": "ドキュメント",
 			"support": "サポート",
-			"help": "",
+			"help": "ヘルプ",
 			"confirm_navigate": "ページを離れても良いですか？",
 			"vip_qr_code": "VIP QRコード",
 			"binance_qr_code": "バイナンス クラブハウスQR",
@@ -163,7 +163,7 @@
 			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
 			"documentation": "$oisy_nameドキュメントを開く",
 			"support": "$oisy_nameドキュメントのサポートページを開く",
-			"help_page": "",
+			"help_page": "ヘルプページを開く",
 			"open_twitter": "DFINITY X/Twitterを開く",
 			"vip_qr_code": "招待リンクを生成",
 			"binance_qr_code": "バイナンスクラブハウスリンクを生成",
@@ -788,41 +788,41 @@
 	},
 	"help": {
 		"text": {
-			"title": "",
-			"support_title": "",
-			"support_description": "",
-			"support_link": "",
-			"icpswap_title": "",
-			"icpswap_description": "",
-			"scan": "",
-			"scanning": "",
-			"scan_hint": "",
-			"scan_nothing_found": "",
-			"scan_unreadable": "",
-			"or_pick_a_pair": "",
-			"token_first": "",
-			"token_second": "",
-			"select_token": "",
-			"no_tokens": "",
-			"checking_pool": "",
-			"nothing_to_withdraw": "",
-			"balance_unused": "",
-			"withdraw": ""
+			"title": "ヘルプ",
+			"support_title": "サポート",
+			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
+			"support_link": "サポートページへ",
+			"icpswap_title": "ICPSwap のトークン出金",
+			"icpswap_description": "ICPSwap でのスワップでは、トークンは一度プールに移されてから返却されます。この最後のステップが失敗した場合、トークンは引き続きお客様のもので、プールに残っています。$oisy_name がそれを探して返却できます。",
+			"scan": "プールを確認",
+			"scanning": "プールを確認しています…",
+			"scan_hint": "ウォレットで有効な 2 つのトークンの組み合わせすべてのプールを確認します。有効にしていないトークンへスワップした場合は、先にそのトークンを有効にするか、下でペアを指定してください。",
+			"scan_nothing_found": "確認した $pools 件のプールに残高は残っていません。",
+			"scan_unreadable": "$pools 件のうち $unreadable 件のプールを読み取れませんでした。もう一度お試しか、下でペアを指定してください。",
+			"or_pick_a_pair": "またはペアを指定",
+			"token_first": "1 つ目のトークン",
+			"token_second": "2 つ目のトークン",
+			"select_token": "選択",
+			"no_tokens": "有効な ICRC トークンがありません。先にプールの 2 つのトークンを有効にしてください。",
+			"checking_pool": "プールを確認しています…",
+			"nothing_to_withdraw": "このプールに出金できる残高はありません。",
+			"balance_unused": "未使用の残高",
+			"withdraw": "出金"
 		},
 		"alt": {
-			"select_token_first": "",
-			"select_token_second": "",
-			"withdraw": "",
-			"scan": ""
+			"select_token_first": "プールの 1 つ目のトークンを選択",
+			"select_token_second": "プールの 2 つ目のトークンを選択",
+			"withdraw": "プールから $symbol を出金",
+			"scan": "有効なトークン間のプールを確認"
 		},
 		"error": {
-			"pool_not_found": "",
-			"load_failed": "",
-			"withdraw_failed": "",
-			"scan_failed": ""
+			"pool_not_found": "このペアの ICPSwap プールは存在しません。2 つのトークンをご確認のうえ、もう一度お試しください。",
+			"load_failed": "このプールの残高を読み取れませんでした。",
+			"withdraw_failed": "出金に失敗しました。",
+			"scan_failed": "ICPSwap のプール一覧を取得できませんでした。"
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "プールから $amount $symbol を出金しました。"
 		}
 	},
 	"settings": {

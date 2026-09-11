@@ -136,7 +136,7 @@
 			"source_code": "Codice sorgente",
 			"documentation": "Documentazione",
 			"support": "Supporto",
-			"help": "",
+			"help": "Aiuto",
 			"confirm_navigate": "Sei sicuro di voler andartene?",
 			"vip_qr_code": "Codici QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
@@ -163,7 +163,7 @@
 			"menu": "Il tuo indirizzo del wallet, impostazioni, disconnessione e collegamenti esterni",
 			"documentation": "Apri la documentazione di $oisy_name",
 			"support": "Apri la sezione Supporto della documentazione di $oisy_name",
-			"help_page": "",
+			"help_page": "Apri la pagina di aiuto",
 			"open_twitter": "Apri il feed X/Twitter di DFINITY",
 			"vip_qr_code": "Genera un link di invito",
 			"binance_qr_code": "Genera un link Binance Clubhouse",
@@ -788,41 +788,41 @@
 	},
 	"help": {
 		"text": {
-			"title": "",
-			"support_title": "",
-			"support_description": "",
-			"support_link": "",
-			"icpswap_title": "",
-			"icpswap_description": "",
-			"scan": "",
-			"scanning": "",
-			"scan_hint": "",
-			"scan_nothing_found": "",
-			"scan_unreadable": "",
-			"or_pick_a_pair": "",
-			"token_first": "",
-			"token_second": "",
-			"select_token": "",
-			"no_tokens": "",
-			"checking_pool": "",
-			"nothing_to_withdraw": "",
-			"balance_unused": "",
-			"withdraw": ""
+			"title": "Aiuto",
+			"support_title": "Supporto",
+			"support_description": "Trovi risposte e altre informazioni nella pagina di supporto della documentazione di $oisy_name, oppure contatta il team se sei bloccato.",
+			"support_link": "Vai alla nostra pagina di supporto",
+			"icpswap_title": "Prelievo di token da ICPSwap",
+			"icpswap_description": "In uno swap su ICPSwap i tuoi token passano da un pool prima di tornare a te. Se questo ultimo passaggio non è riuscito, i token sono ancora tuoi e sono ancora nel pool. $oisy_name può cercarli e restituirteli.",
+			"scan": "Controlla i miei pool",
+			"scanning": "Controllo dei tuoi pool…",
+			"scan_hint": "Controlla ogni pool tra due token attivi nel tuo wallet. Se hai fatto uno swap verso un token che non hai mai attivato, attivalo prima oppure indica la coppia qui sotto.",
+			"scan_nothing_found": "Non è rimasto nulla nei $pools pool controllati.",
+			"scan_unreadable": "Non è stato possibile leggere $unreadable dei $pools pool. Riprova oppure indica la coppia qui sotto.",
+			"or_pick_a_pair": "Oppure indica una coppia",
+			"token_first": "Primo token",
+			"token_second": "Secondo token",
+			"select_token": "Seleziona",
+			"no_tokens": "Nessun token ICRC è attivo. Attiva prima i due token del pool.",
+			"checking_pool": "Controllo del pool…",
+			"nothing_to_withdraw": "Non c’è nulla da prelevare in questo pool.",
+			"balance_unused": "Saldo non utilizzato",
+			"withdraw": "Preleva"
 		},
 		"alt": {
-			"select_token_first": "",
-			"select_token_second": "",
-			"withdraw": "",
-			"scan": ""
+			"select_token_first": "Seleziona il primo token del pool",
+			"select_token_second": "Seleziona il secondo token del pool",
+			"withdraw": "Preleva $symbol dal pool",
+			"scan": "Controlla i pool tra i tuoi token attivi"
 		},
 		"error": {
-			"pool_not_found": "",
-			"load_failed": "",
-			"withdraw_failed": "",
-			"scan_failed": ""
+			"pool_not_found": "Non esiste alcun pool ICPSwap per questa coppia. Controlla i due token e riprova.",
+			"load_failed": "Non è stato possibile leggere i tuoi saldi in questo pool.",
+			"withdraw_failed": "Il prelievo non è riuscito.",
+			"scan_failed": "Non è stato possibile recuperare l’elenco dei pool ICPSwap."
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "Prelevati $amount $symbol dal pool."
 		}
 	},
 	"settings": {

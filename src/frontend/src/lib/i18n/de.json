@@ -136,7 +136,7 @@
 			"source_code": "Quellcode",
 			"documentation": "Dokumentation",
 			"support": "Support",
-			"help": "",
+			"help": "Hilfe",
 			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
 			"vip_qr_code": "VIP QR-Code",
 			"binance_qr_code": "Binance Clubhouse-QR",
@@ -163,7 +163,7 @@
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
-			"help_page": "",
+			"help_page": "Hilfeseite öffnen",
 			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
@@ -788,41 +788,41 @@
 	},
 	"help": {
 		"text": {
-			"title": "",
-			"support_title": "",
-			"support_description": "",
-			"support_link": "",
-			"icpswap_title": "",
-			"icpswap_description": "",
-			"scan": "",
-			"scanning": "",
-			"scan_hint": "",
-			"scan_nothing_found": "",
-			"scan_unreadable": "",
-			"or_pick_a_pair": "",
-			"token_first": "",
-			"token_second": "",
-			"select_token": "",
-			"no_tokens": "",
-			"checking_pool": "",
-			"nothing_to_withdraw": "",
-			"balance_unused": "",
-			"withdraw": ""
+			"title": "Hilfe",
+			"support_title": "Support",
+			"support_description": "Antworten und weitere Informationen findest du auf der Support-Seite in der $oisy_name-Dokumentation. Wenn du nicht weiterkommst, melde dich beim Team.",
+			"support_link": "Zu unserer Support-Seite",
+			"icpswap_title": "ICPSwap-Token-Auszahlung",
+			"icpswap_description": "Bei einem Swap über ICPSwap wandern deine Tokens zuerst in einen Pool, bevor sie an dich zurückgehen. Ist dieser letzte Schritt fehlgeschlagen, gehören die Tokens weiterhin dir und liegen noch im Pool. $oisy_name kann danach suchen und sie zurücksenden.",
+			"scan": "Meine Pools prüfen",
+			"scanning": "Deine Pools werden geprüft…",
+			"scan_hint": "Prüft jeden Pool zwischen zwei Tokens, die in deinem Wallet aktiv sind. Hast du in ein Token getauscht, das du nie aktiviert hast, aktiviere es zuerst oder gib das Paar unten an.",
+			"scan_nothing_found": "In den $pools geprüften Pools ist nichts zurückgeblieben.",
+			"scan_unreadable": "$unreadable der $pools Pools konnten nicht gelesen werden. Versuche es erneut oder gib das Paar unten an.",
+			"or_pick_a_pair": "Oder Paar angeben",
+			"token_first": "Erstes Token",
+			"token_second": "Zweites Token",
+			"select_token": "Auswählen",
+			"no_tokens": "Es sind keine ICRC-Tokens aktiv. Aktiviere zuerst die beiden Tokens des Pools.",
+			"checking_pool": "Pool wird geprüft…",
+			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
+			"balance_unused": "Ungenutztes Guthaben",
+			"withdraw": "Auszahlen"
 		},
 		"alt": {
-			"select_token_first": "",
-			"select_token_second": "",
-			"withdraw": "",
-			"scan": ""
+			"select_token_first": "Erstes Token des Pools auswählen",
+			"select_token_second": "Zweites Token des Pools auswählen",
+			"withdraw": "$symbol aus dem Pool auszahlen",
+			"scan": "Pools zwischen deinen aktiven Tokens prüfen"
 		},
 		"error": {
-			"pool_not_found": "",
-			"load_failed": "",
-			"withdraw_failed": "",
-			"scan_failed": ""
+			"pool_not_found": "Für dieses Paar gibt es keinen ICPSwap-Pool. Prüfe die beiden Tokens und versuche es erneut.",
+			"load_failed": "Deine Guthaben in diesem Pool konnten nicht gelesen werden.",
+			"withdraw_failed": "Die Auszahlung ist fehlgeschlagen.",
+			"scan_failed": "Die Liste der ICPSwap-Pools konnte nicht geladen werden."
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "$amount $symbol aus dem Pool ausgezahlt."
 		}
 	},
 	"settings": {

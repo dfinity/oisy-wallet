@@ -136,7 +136,7 @@
 			"source_code": "소스 코드",
 			"documentation": "문서",
 			"support": "지원",
-			"help": "",
+			"help": "도움말",
 			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
 			"vip_qr_code": "VIP QR 코드",
 			"binance_qr_code": "바이낸스 클럽하우스 QR",
@@ -163,7 +163,7 @@
 			"menu": "지갑 주소, 설정, 로그아웃 및 외부 링크",
 			"documentation": "$oisy_name 문서 열기",
 			"support": "$oisy_name 문서의 지원 섹션 열기",
-			"help_page": "",
+			"help_page": "도움말 페이지 열기",
 			"open_twitter": "DFINITY X/트위터 피드 열기",
 			"vip_qr_code": "초대 링크 생성",
 			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
@@ -788,41 +788,41 @@
 	},
 	"help": {
 		"text": {
-			"title": "",
-			"support_title": "",
-			"support_description": "",
-			"support_link": "",
-			"icpswap_title": "",
-			"icpswap_description": "",
-			"scan": "",
-			"scanning": "",
-			"scan_hint": "",
-			"scan_nothing_found": "",
-			"scan_unreadable": "",
-			"or_pick_a_pair": "",
-			"token_first": "",
-			"token_second": "",
-			"select_token": "",
-			"no_tokens": "",
-			"checking_pool": "",
-			"nothing_to_withdraw": "",
-			"balance_unused": "",
-			"withdraw": ""
+			"title": "도움말",
+			"support_title": "지원",
+			"support_description": "$oisy_name 문서의 지원 페이지에서 답변과 자세한 정보를 확인할 수 있습니다. 해결되지 않으면 팀에 문의하세요.",
+			"support_link": "지원 페이지로 이동",
+			"icpswap_title": "ICPSwap 토큰 출금",
+			"icpswap_description": "ICPSwap에서 스왑하면 토큰이 먼저 풀로 이동한 뒤 다시 돌아옵니다. 이 마지막 단계가 실패했다면 토큰은 여전히 사용자의 것이며 풀에 남아 있습니다. $oisy_name에서 이를 찾아 돌려줄 수 있습니다.",
+			"scan": "내 풀 확인",
+			"scanning": "풀을 확인하는 중…",
+			"scan_hint": "지갑에서 활성화된 두 토큰 사이의 모든 풀을 확인합니다. 활성화하지 않은 토큰으로 스왑했다면 먼저 그 토큰을 활성화하거나 아래에서 쌍을 지정하세요.",
+			"scan_nothing_found": "확인한 $pools개의 풀에 남은 잔액이 없습니다.",
+			"scan_unreadable": "$pools개 풀 중 $unreadable개를 읽을 수 없습니다. 다시 시도하거나 아래에서 쌍을 지정하세요.",
+			"or_pick_a_pair": "또는 쌍 지정",
+			"token_first": "첫 번째 토큰",
+			"token_second": "두 번째 토큰",
+			"select_token": "선택",
+			"no_tokens": "활성화된 ICRC 토큰이 없습니다. 먼저 풀의 두 토큰을 활성화하세요.",
+			"checking_pool": "풀을 확인하는 중…",
+			"nothing_to_withdraw": "이 풀에는 출금할 잔액이 없습니다.",
+			"balance_unused": "미사용 잔액",
+			"withdraw": "출금"
 		},
 		"alt": {
-			"select_token_first": "",
-			"select_token_second": "",
-			"withdraw": "",
-			"scan": ""
+			"select_token_first": "풀의 첫 번째 토큰 선택",
+			"select_token_second": "풀의 두 번째 토큰 선택",
+			"withdraw": "풀에서 $symbol 출금",
+			"scan": "활성화된 토큰 사이의 풀 확인"
 		},
 		"error": {
-			"pool_not_found": "",
-			"load_failed": "",
-			"withdraw_failed": "",
-			"scan_failed": ""
+			"pool_not_found": "이 쌍에 해당하는 ICPSwap 풀이 없습니다. 두 토큰을 확인한 뒤 다시 시도하세요.",
+			"load_failed": "이 풀의 잔액을 읽을 수 없습니다.",
+			"withdraw_failed": "출금에 실패했습니다.",
+			"scan_failed": "ICPSwap 풀 목록을 가져올 수 없습니다."
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "풀에서 $amount $symbol 출금을 완료했습니다."
 		}
 	},
 	"settings": {

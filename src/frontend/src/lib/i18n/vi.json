@@ -136,7 +136,7 @@
 			"source_code": "Mã nguồn",
 			"documentation": "Tài liệu",
 			"support": "Hỗ trợ",
-			"help": "",
+			"help": "Trợ giúp",
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
 			"vip_qr_code": "Mã QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
@@ -163,7 +163,7 @@
 			"menu": "Địa chỉ ví, cài đặt, đăng xuất và các liên kết bên ngoài của bạn",
 			"documentation": "Mở tài liệu $oisy_name",
 			"support": "Mở phần Hỗ trợ trong tài liệu $oisy_name",
-			"help_page": "",
+			"help_page": "Mở trang trợ giúp",
 			"open_twitter": "Mở X/Twitter của DFINITY",
 			"vip_qr_code": "Tạo liên kết mời",
 			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
@@ -788,41 +788,41 @@
 	},
 	"help": {
 		"text": {
-			"title": "",
-			"support_title": "",
-			"support_description": "",
-			"support_link": "",
-			"icpswap_title": "",
-			"icpswap_description": "",
-			"scan": "",
-			"scanning": "",
-			"scan_hint": "",
-			"scan_nothing_found": "",
-			"scan_unreadable": "",
-			"or_pick_a_pair": "",
-			"token_first": "",
-			"token_second": "",
-			"select_token": "",
-			"no_tokens": "",
-			"checking_pool": "",
-			"nothing_to_withdraw": "",
-			"balance_unused": "",
-			"withdraw": ""
+			"title": "Trợ giúp",
+			"support_title": "Hỗ trợ",
+			"support_description": "Tìm câu trả lời và thêm thông tin trên trang hỗ trợ trong tài liệu $oisy_name, hoặc liên hệ với đội ngũ nếu bạn gặp khó khăn.",
+			"support_link": "Đến trang hỗ trợ của chúng tôi",
+			"icpswap_title": "Rút token từ ICPSwap",
+			"icpswap_description": "Khi swap trên ICPSwap, token của bạn đi vào một pool trước khi được gửi lại cho bạn. Nếu bước cuối đó thất bại, token vẫn là của bạn và vẫn ở trong pool. $oisy_name có thể tìm và gửi lại cho bạn.",
+			"scan": "Kiểm tra pool của tôi",
+			"scanning": "Đang kiểm tra các pool của bạn…",
+			"scan_hint": "Kiểm tra mọi pool giữa hai token đang hoạt động trong ví của bạn. Nếu bạn đã swap sang một token chưa bao giờ bật, hãy bật nó trước hoặc nhập cặp token bên dưới.",
+			"scan_nothing_found": "Không còn gì trong $pools pool đã kiểm tra.",
+			"scan_unreadable": "Không đọc được $unreadable trong $pools pool. Hãy thử lại hoặc nhập cặp token bên dưới.",
+			"or_pick_a_pair": "Hoặc nhập một cặp",
+			"token_first": "Token thứ nhất",
+			"token_second": "Token thứ hai",
+			"select_token": "Chọn",
+			"no_tokens": "Chưa có token ICRC nào được bật. Hãy bật hai token của pool trước.",
+			"checking_pool": "Đang kiểm tra pool…",
+			"nothing_to_withdraw": "Không có gì để rút trong pool này.",
+			"balance_unused": "Số dư chưa dùng",
+			"withdraw": "Rút"
 		},
 		"alt": {
-			"select_token_first": "",
-			"select_token_second": "",
-			"withdraw": "",
-			"scan": ""
+			"select_token_first": "Chọn token thứ nhất của pool",
+			"select_token_second": "Chọn token thứ hai của pool",
+			"withdraw": "Rút $symbol từ pool",
+			"scan": "Kiểm tra các pool giữa những token đang hoạt động của bạn"
 		},
 		"error": {
-			"pool_not_found": "",
-			"load_failed": "",
-			"withdraw_failed": "",
-			"scan_failed": ""
+			"pool_not_found": "Không có pool ICPSwap nào cho cặp này. Hãy kiểm tra hai token và thử lại.",
+			"load_failed": "Không đọc được số dư của bạn trong pool này.",
+			"withdraw_failed": "Rút không thành công.",
+			"scan_failed": "Không tải được danh sách pool của ICPSwap."
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "Đã rút $amount $symbol từ pool."
 		}
 	},
 	"settings": {
