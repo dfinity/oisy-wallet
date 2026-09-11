@@ -1,8 +1,15 @@
 import Help from '$lib/components/help/Help.svelte';
 import { APP_VERSION } from '$lib/constants/app.constants';
 import { OISY_NAME } from '$lib/constants/oisy.constants';
-import { HELP_ICPSWAP_CARD, HELP_SUPPORT_CARD } from '$lib/constants/test-ids.constants';
+import {
+	HELP_EXPLORERS_CARD,
+	HELP_ICPSWAP_CARD,
+	HELP_SUPPORT_CARD
+} from '$lib/constants/test-ids.constants';
 import { trackHelp } from '$lib/services/help-analytics.services';
+import { ethAddressStore } from '$lib/stores/address.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/help-analytics.services', () => ({
@@ -12,18 +19,29 @@ vi.mock('$lib/services/help-analytics.services', () => ({
 describe('Help', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		ethAddressStore.reset();
+		mockAuthStore();
 	});
 
-	it('renders the two cards, Support first', () => {
+	it('renders the three cards, Support first and the explorers above ICPSwap', () => {
+		// The explorer card hides itself while every address is still nullish.
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
+
 		const { getByTestId } = render(Help);
 
 		const support = getByTestId(HELP_SUPPORT_CARD);
+		const explorers = getByTestId(HELP_EXPLORERS_CARD);
 		const icpSwap = getByTestId(HELP_ICPSWAP_CARD);
 
 		expect(support).toBeInTheDocument();
+		expect(explorers).toBeInTheDocument();
 		expect(icpSwap).toBeInTheDocument();
 		expect(
-			support.compareDocumentPosition(icpSwap) & Node.DOCUMENT_POSITION_FOLLOWING
+			support.compareDocumentPosition(explorers) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		expect(
+			explorers.compareDocumentPosition(icpSwap) & Node.DOCUMENT_POSITION_FOLLOWING
 		).toBeTruthy();
 	});
 

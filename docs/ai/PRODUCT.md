@@ -136,11 +136,14 @@ The [Help](#help) page emits one structured `help` event under `event_context: h
 | ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
 | `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                    |
 | `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                       | `event_provider`: the provider id; `event_key: network` + the chain                  |
 | `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
 | `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
 | `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
 
 Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
+
+The same invariant keeps the destination URL out of the `explorer` action, unlike `contact`: every provider explorer URL embeds a wallet address. The provider and the chain carry the whole product signal — which provider users check, and for which chain — with none of the identity.
 
 ---
 
@@ -235,6 +238,22 @@ Data export is deliberately **not** here: it is a utility, not help. It stays on
 ### Support
 
 The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
+
+### Provider transaction status
+
+Swaps and bridge transfers are settled by third parties, and a cross-chain transfer can sit in a provider-internal state for minutes: a deposit seen but not yet credited, one leg filled while the destination leg waits, a refund in flight. OISY shows "pending" for that whole window; the provider's own explorer already says exactly where the transfer is.
+
+This card links straight into those explorers, each pre-filtered to the user's own address — one link per address a provider can settle against:
+
+- **Velora** — the user's order list, on their Ethereum address.
+- **NEAR Intents** — three links, for their Ethereum, Solana and Bitcoin addresses.
+- **1Sec** — two links, for their principal and their Ethereum address.
+
+One Ethereum address serves every EVM network OISY supports, so the EVM link is offered once per provider rather than per chain. The links point at the providers' production explorers only, and a link whose address has not loaded yet is left out entirely rather than opening an explorer with an empty query; a provider with no available link, and a card with no available provider, disappear the same way.
+
+The links are deliberately **not** gated behind the providers' swap feature flags. Those flags decide whether a _new_ transfer may be started, while this card answers a question about a transfer already made — and a past transfer outlives a flag rollback. It matters most for 1Sec, whose integration is being wound down to its unwrapping direction: the users with the strongest reason to check a 1Sec transfer are the ones holding a bridged position the wallet no longer routes into.
+
+The card links out; it does not read provider state, and it cannot say whether a given transfer is stuck. ICPSwap and KongSwap are not listed — ICP-side activity is already visible in the wallet's own history, and the card below recovers the one ICPSwap failure mode that strands funds.
 
 ### ICPSwap Token Withdrawal
 

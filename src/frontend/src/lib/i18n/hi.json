@@ -792,6 +792,15 @@
 			"support_title": "सपोर्ट",
 			"support_description": "$oisy_name डॉक्यूमेंटेशन के सपोर्ट पेज पर जवाब और अधिक जानकारी पाएँ, या अटक जाने पर टीम से संपर्क करें।",
 			"support_link": "हमारे सपोर्ट पेज पर जाएँ",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "ICPSwap से टोकन निकासी",
 			"icpswap_description": "ICPSwap पर स्वैप करते समय आपके टोकन पहले एक पूल में जाते हैं और फिर आपको वापस भेजे जाते हैं। अगर वह आखिरी चरण विफल हो गया, तो टोकन अब भी आपके हैं और अब भी पूल में हैं। $oisy_name उन्हें खोजकर आपको वापस भेज सकता है।",
 			"scan": "मेरे पूल जाँचें",
@@ -810,6 +819,7 @@
 			"withdraw": "निकालें"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "पूल का पहला टोकन चुनें",
 			"select_token_second": "पूल का दूसरा टोकन चुनें",
 			"withdraw": "पूल से $symbol निकालें",

@@ -4,6 +4,7 @@ import {
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { buildHelpEvent, trackHelp } from '$lib/services/help-analytics.services';
+import { SwapProvider } from '$lib/types/swap';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -233,6 +234,40 @@ describe('support-analytics.services', () => {
 				}
 			});
 			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('reports an explorer click by provider and chain', () => {
+			const event = buildHelpEvent({
+				action: 'explorer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.PROVIDER_EXPLORERS,
+				provider: SwapProvider.ONE_SEC,
+				network: 'icp'
+			});
+
+			expect(event).toStrictEqual({
+				name: 'help',
+				metadata: {
+					event_context: 'help',
+					event_modifier: 'explorer',
+					source_location: 'help_page',
+					result_status: 'success',
+					event_subcontext: 'provider_explorers',
+					event_provider: 'oneSec',
+					event_key: 'network',
+					event_value: 'icp'
+				}
+			});
+		});
+
+		it('omits the provider and the chain when they are not given', () => {
+			const { metadata } = buildHelpEvent({
+				action: 'open',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+
+			expect(Object.keys(metadata ?? {})).not.toContain('event_provider');
+			expect(Object.keys(metadata ?? {})).not.toContain('event_key');
 		});
 	});
 });

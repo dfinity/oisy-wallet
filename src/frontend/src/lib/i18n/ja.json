@@ -792,6 +792,15 @@
 			"support_title": "サポート",
 			"support_description": "$oisy_name ドキュメントのサポートページで回答や詳しい情報をご確認いただけます。解決しない場合はチームまでご連絡ください。",
 			"support_link": "サポートページへ",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
 			"icpswap_title": "ICPSwap のトークン出金",
 			"icpswap_description": "ICPSwap でのスワップでは、トークンは一度プールに移されてから返却されます。この最後のステップが失敗した場合、トークンは引き続きお客様のもので、プールに残っています。$oisy_name がそれを探して返却できます。",
 			"scan": "プールを確認",
@@ -810,6 +819,7 @@
 			"withdraw": "出金"
 		},
 		"alt": {
+			"explorer_link": "",
 			"select_token_first": "プールの 1 つ目のトークンを選択",
 			"select_token_second": "プールの 2 つ目のトークンを選択",
 			"withdraw": "プールから $symbol を出金",

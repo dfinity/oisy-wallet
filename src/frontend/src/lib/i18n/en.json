@@ -792,6 +792,15 @@
 			"support_title": "Support",
 			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
 			"support_link": "Visit our support page",
+			"explorers_title": "Provider transaction status",
+			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
+			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
+			"explorers_near_intents_description": "Cross-chain swaps between EVM networks, Solana and Bitcoin.",
+			"explorers_onesec_description": "Bridge transfers between the Internet Computer and EVM networks.",
+			"explorers_chain_eth": "Ethereum & EVM networks",
+			"explorers_chain_sol": "Solana",
+			"explorers_chain_btc": "Bitcoin",
+			"explorers_chain_icp": "Internet Computer",
 			"icpswap_title": "ICPSwap Token Withdrawal",
 			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
 			"scan": "Scan my pools",
@@ -810,6 +819,7 @@
 			"withdraw": "Withdraw"
 		},
 		"alt": {
+			"explorer_link": "Open the $provider explorer for your $chain address",
 			"select_token_first": "Select the first token of the pool",
 			"select_token_second": "Select the second token of the pool",
 			"withdraw": "Withdraw $symbol from the pool",
