@@ -55,7 +55,7 @@
 			return;
 		}
 
-		const { hasMore } = nonNullish(erc20Token)
+		const { hasMore, err } = nonNullish(erc20Token)
 			? await loadNextErc20UserTransactions({
 					identity: $authIdentity,
 					address: $ethAddress,
@@ -74,6 +74,12 @@
 					cursor: getEthBackendPaginationCursor(token.id),
 					oldestLoadedBlockNumber
 				});
+
+		// A failed page leaves the scroll enabled, so the next time the end of the list comes into view
+		// it asks again. Resolving without progress keeps `InfiniteScroll` from retrying meanwhile.
+		if (nonNullish(err)) {
+			return;
+		}
 
 		if (!hasMore) {
 			disableInfiniteScroll = true;

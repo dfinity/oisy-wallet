@@ -4,6 +4,7 @@ import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { ResultSuccess } from '$lib/types/utils';
 import {
 	IntersectionObserverActive,
+	IntersectionObserverManual,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -131,28 +132,7 @@ describe('AllTransactionsScroll', () => {
 	// The browser reports the end of the list again only once the user scrolls it back into view, so
 	// these drive that by hand instead of on every `observe`.
 	describe('when the end of the list comes back into view', () => {
-		let enterView: () => void;
-
-		class IntersectionObserverManual implements IntersectionObserver {
-			public readonly root: Element | Document | null = null;
-			public readonly rootMargin: string = '';
-			public readonly thresholds: ReadonlyArray<number> = [];
-			public takeRecords: () => IntersectionObserverEntry[] = () => [];
-
-			constructor(private callback: IntersectionObserverCallback) {}
-
-			observe(element: Element) {
-				enterView = () =>
-					this.callback(
-						[{ isIntersecting: true, target: element } as unknown as IntersectionObserverEntry],
-						this
-					);
-
-				enterView();
-			}
-			disconnect = () => null;
-			unobserve = () => null;
-		}
+		const { enterView } = IntersectionObserverManual;
 
 		const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
