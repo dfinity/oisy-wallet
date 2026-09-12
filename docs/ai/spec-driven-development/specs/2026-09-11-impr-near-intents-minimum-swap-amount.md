@@ -224,6 +224,26 @@ pre-empt, so continuing to state a floor the user has visibly cleared is just no
 that is already dense. It is keyed on `swaps.length` in the swap-amounts store, so it returns
 if the pair changes back to one that has no offer.
 
+**It is the only place the fiat limit is stated.** The red refusal in the destination field's
+`amountInfo` slot no longer covers the fiat case: the notice is already on screen for such a
+pair, so a red message would state the same figure twice, and that slot sits under the
+_receive_ field, which is the wrong place for a constraint on what is paid. It also flickers,
+because it is gated on `isSwapAmountsLoading` and the quote round repeats every
+`SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS` — with `transition:slide` on it, the message
+animates out and back on a five-second loop. Below the floor the Review button stays disabled
+and the notice explains why.
+
+The other refusals in that slot are untouched: the per-route bridge minimum keeps naming its
+figure there (it has no notice of its own, by §3.3), as do the minimum-less
+`swap_amount_too_low` and the generic `swap_is_not_offered`, which is genuinely a fact about
+the receive side. `swap_amount_too_low_minimum_fiat`, added by PR 1, becomes unused and is
+removed.
+
+Because the red message is suppressed for the fiat case, the notice must never be absent when
+that refusal arrives. A real refusal carries the same figure the probe looks for, so
+`SwapAmountsContext` records it in the limit store as well — the probe becomes an
+optimisation that puts the notice up earlier, not the only way it can appear.
+
 The obvious-looking alternative, joining the pay field's existing `text-tertiary`
 `amountInfo` row, was built and rejected on inspection. That row is
 `flex min-h-6 items-center justify-between` (`TokenInputContent.svelte`) with the balance
@@ -300,6 +320,10 @@ For the §3.3–§3.5 half:
   display currency, before any amount is entered, below the cross-chain notice where the pair
   spans two networks.
 - The notice disappears as soon as a provider quotes, and returns if the offers go away.
+- An amount below the fiat limit produces **no** red message under the receive field; the
+  notice carries the figure and the Review button stays disabled. An amount below a bridge
+  minimum still produces the red message naming that figure, unchanged.
+- A fiat refusal puts the notice up even when the probe reached no verdict.
 - Selecting a pair with no fiat limit shows no hint, including pairs that do have a bridge
   minimum — that one is never announced upfront.
 - A pair whose probe fails, or whose verdict is not yet known, shows no hint and behaves
