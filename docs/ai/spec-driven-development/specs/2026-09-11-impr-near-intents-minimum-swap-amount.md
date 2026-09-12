@@ -214,9 +214,15 @@ the one place OISY already puts provider minimums is structurally unavailable ex
 this hint is needed.
 
 **It goes full width beside the other pair-level notices**, as a new
-`SwapMinimumAmountInfo.svelte` rendering a `MessageBox` in a `mt-6` wrapper next to
+`SwapMinimumAmountInfo.svelte` rendering a `MessageBox` in a `mt-6` wrapper, placed **after**
 `SwapCrossChainInfo` in `SwapForm.svelte` — the established pattern for telling the user
-something about the pair they have chosen.
+something about the pair they have chosen. Which networks the swap crosses is the more
+fundamental fact about the pair, so it reads first; the amount constraint follows it.
+
+**It disappears once a provider quotes.** An offer answers the question the notice exists to
+pre-empt, so continuing to state a floor the user has visibly cleared is just noise in a form
+that is already dense. It is keyed on `swaps.length` in the swap-amounts store, so it returns
+if the pair changes back to one that has no offer.
 
 The obvious-looking alternative, joining the pay field's existing `text-tertiary`
 `amountInfo` row, was built and rejected on inspection. That row is
@@ -290,8 +296,10 @@ For the §3.2 half:
 
 For the §3.3–§3.5 half:
 
-- Selecting a Polygon or BSC pair shows the $1,000 limit under the pay amount, in non-error
-  styling, in the user's display currency, before any amount is entered.
+- Selecting a Polygon or BSC pair shows the $1,000 limit in non-error styling, in the user's
+  display currency, before any amount is entered, below the cross-chain notice where the pair
+  spans two networks.
+- The notice disappears as soon as a provider quotes, and returns if the offers go away.
 - Selecting a pair with no fiat limit shows no hint, including pairs that do have a bridge
   minimum — that one is never announced upfront.
 - A pair whose probe fails, or whose verdict is not yet known, shows no hint and behaves
@@ -318,8 +326,8 @@ The `test-coverage` gate enforces whole-project thresholds, so this lands with i
   silently in the UI if 1Click reorders its validation.
 - `src/frontend/src/tests/lib/components/swap/SwapMinimumAmountInfo.spec.ts` — the notice
   rendered for a restricted pair, converted into the selected currency, absent while the
-  verdict is unknown, and absent (with no bare figure) when `formatCurrency` returns
-  `undefined`.
+  verdict is unknown, absent (with no bare figure) when `formatCurrency` returns `undefined`,
+  gone once a provider has quoted, and still there when a quote round returned no offers.
 - `src/frontend/src/tests/lib/components/swap/SwapAmountsContext.spec.ts` — the probe runs on
   pair selection, is not repeated when only the amount changes, re-runs when the pair
   changes, and leaves the store empty when it reaches no verdict or throws.
