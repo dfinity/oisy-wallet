@@ -942,6 +942,50 @@ describe('SwapAmountsContext.svelte', () => {
 			});
 		});
 
+		// The form leaves the fiat case to the standing notice instead of a red message, so the
+		// notice must not be missing just because the probe happened to fail.
+		it('records the limit a real refusal names, even when the probe reached no verdict', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+				new SwapAmountTooLowError('NEAR Intents quote failed: minimum swap amount is $1,000', {
+					type: 'usd',
+					value: 1000
+				})
+			);
+
+			await renderWithContext({
+				amount: '20',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.2'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBe(1000);
+		});
+
+		it('does not record a token-denominated refusal as a fiat limit', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+				new SwapAmountTooLowError('NEAR Intents quote failed: try at least 8300', {
+					type: 'token',
+					value: 8300n
+				})
+			);
+
+			await renderWithContext({
+				amount: '20',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.2'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBeUndefined();
+		});
+
 		it('leaves the store empty when the probe reaches no verdict', async () => {
 			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
 

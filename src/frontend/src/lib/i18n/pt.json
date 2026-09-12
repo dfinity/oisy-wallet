@@ -1197,7 +1197,6 @@
 			"swap_is_not_offered": "Esta troca não é oferecida atualmente.",
 			"swap_amount_too_low": "",
 			"swap_amount_too_low_minimum": "",
-			"swap_amount_too_low_minimum_fiat": "",
 			"swap_minimum_amount_hint": "",
 			"executing_transaction": "Executando transação...",
 			"initializing": "Inicializando transação...",

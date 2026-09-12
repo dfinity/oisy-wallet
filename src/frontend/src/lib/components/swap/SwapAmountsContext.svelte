@@ -135,6 +135,13 @@
 				return;
 			}
 
+			// A real refusal carries the same fiat floor the probe looks for, so it is recorded
+			// too. The form leaves this case to the standing notice instead of repeating it in
+			// red, and that notice must not be missing because a probe happened to fail.
+			if (err instanceof SwapAmountTooLowError && err.minimum?.type === 'usd') {
+				nearIntentsSwapLimitStore.set(err.minimum.value);
+			}
+
 			// Any fetch failure (no pool for the pair, provider or network error) surfaces as
 			// "no offers". A provider that refused the amount as below its minimum names the
 			// reason, which the form surfaces instead of the generic "swap is not offered".

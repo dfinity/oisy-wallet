@@ -1197,7 +1197,6 @@
 			"swap_is_not_offered": "Этот обмен в настоящее время не предлагается.",
 			"swap_amount_too_low": "",
 			"swap_amount_too_low_minimum": "",
-			"swap_amount_too_low_minimum_fiat": "",
 			"swap_minimum_amount_hint": "",
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
