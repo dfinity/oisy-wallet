@@ -35,7 +35,8 @@ import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { assertNever, isNullish } from '@dfinity/utils';
+import { consoleWarn } from '$lib/utils/console.utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userNetworks: Readable<UserNetworks> = derived(
@@ -60,7 +61,11 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
-		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
+		// Returns `undefined` for a key this frontend does not know. The backend can learn a
+		// new network before the frontend supports it — and the two deploy independently — so
+		// an unmapped key must degrade to "ignore that setting" rather than throw, which would
+		// take down the whole user-networks mapping and with it the user's network settings.
+		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId | undefined => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
 			}
@@ -113,13 +118,20 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
-			assertNever(key, `Unknown network key: ${key}`);
+			consoleWarn(`Unknown network key: ${Object.keys(key).join(', ')}`);
+
+			return undefined;
 		};
 
 		return {
 			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-				const networkId: NetworkId = keyToNetworkId(key);
+				const networkId = keyToNetworkId(key);
+
+				if (isNullish(networkId)) {
+					return acc;
+				}
+
 				return { ...acc, [networkId]: { enabled, isTestnet } };
 			}, {}),
 			// We always enable ICP network.
