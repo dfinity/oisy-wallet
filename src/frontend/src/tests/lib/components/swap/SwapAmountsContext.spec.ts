@@ -4,7 +4,9 @@ import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as tokensStore from '$lib/derived/tokens.derived';
+import * as nearIntentsService from '$lib/services/near-intents.services';
 import * as swapService from '$lib/services/swap.services';
+import { nearIntentsSwapLimitStore } from '$lib/stores/near-intents-swap-limit.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { SwapAmountTooLowError } from '$lib/types/errors';
@@ -844,6 +846,192 @@ describe('SwapAmountsContext.svelte', () => {
 			expect(get(store)?.swaps).toEqual(freshResults);
 
 			vi.useRealTimers();
+		});
+	});
+
+	describe('NEAR Intents swap limit', () => {
+		beforeEach(() => {
+			nearIntentsSwapLimitStore.reset();
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue([]);
+		});
+
+		afterEach(() => {
+			nearIntentsSwapLimitStore.reset();
+		});
+
+		it('loads the pair limit into the store', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(1000);
+
+			await renderWithContext({
+				amount: undefined,
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			expect(nearIntentsService.fetchNearIntentsSwapLimit).toHaveBeenCalledWith({
+				sourceToken,
+				destinationToken
+			});
+			expect(get(nearIntentsSwapLimitStore)).toBe(1000);
+		});
+
+		// The floor depends on the pair alone, so it must not be re-fetched on the 5-second
+		// quote refresh or on every keystroke in the amount field.
+		it('does not reload the limit when only the amount changes', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(1000);
+
+			const { rerender } = await renderWithContext({
+				amount: '1',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			await act(() =>
+				rerender({
+					amount: '2',
+					sourceToken,
+					destinationToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+			await waitForDebounce();
+
+			expect(nearIntentsService.fetchNearIntentsSwapLimit).toHaveBeenCalledOnce();
+		});
+
+		it('reloads the limit when the pair changes', async () => {
+			const limitMock = vi
+				.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit')
+				.mockResolvedValue(1000);
+
+			const { rerender } = await renderWithContext({
+				amount: '1',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			await act(() =>
+				rerender({
+					amount: '1',
+					sourceToken,
+					destinationToken: mockValidIcrcToken as IcToken,
+					slippageValue: '0.3',
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
+				})
+			);
+			await waitForDebounce();
+
+			expect(limitMock).toHaveBeenCalledTimes(2);
+			expect(limitMock).toHaveBeenLastCalledWith({
+				sourceToken,
+				destinationToken: mockValidIcrcToken
+			});
+		});
+
+		// The form leaves the fiat case to the standing notice instead of a red message, so the
+		// notice must not be missing just because the probe happened to fail.
+		it('records the limit a real refusal names, even when the probe reached no verdict', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+				new SwapAmountTooLowError('NEAR Intents quote failed: minimum swap amount is $1,000', {
+					type: 'usd',
+					value: 1000
+				})
+			);
+
+			await renderWithContext({
+				amount: '20',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.2'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBe(1000);
+		});
+
+		it('does not record a token-denominated refusal as a fiat limit', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
+			vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+				new SwapAmountTooLowError('NEAR Intents quote failed: try at least 8300', {
+					type: 'token',
+					value: 8300n
+				})
+			);
+
+			await renderWithContext({
+				amount: '20',
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.2'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBeUndefined();
+		});
+
+		it('leaves the store empty when the probe reaches no verdict', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(undefined);
+
+			await renderWithContext({
+				amount: undefined,
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBeUndefined();
+		});
+
+		it('leaves the store empty when the probe throws', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockRejectedValue(
+				new Error('probe exploded')
+			);
+
+			await renderWithContext({
+				amount: undefined,
+				sourceToken,
+				destinationToken,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			expect(get(nearIntentsSwapLimitStore)).toBeUndefined();
+		});
+
+		it('does not probe until both tokens are chosen', async () => {
+			vi.spyOn(nearIntentsService, 'fetchNearIntentsSwapLimit').mockResolvedValue(1000);
+
+			await renderWithContext({
+				amount: undefined,
+				sourceToken,
+				destinationToken: undefined,
+				slippageValue: '0.3'
+			});
+
+			await waitForDebounce();
+
+			expect(nearIntentsService.fetchNearIntentsSwapLimit).not.toHaveBeenCalled();
+			expect(get(nearIntentsSwapLimitStore)).toBeUndefined();
 		});
 	});
 });

@@ -350,6 +350,16 @@ NEAR Intents enforces two unrelated floors, and they are quoted in different thi
 
 Neither floor is hardcoded, and neither is the list of chains that carry one: both are read from the provider's refusal, so a chain leaving or joining the restriction, or the figure moving, needs no change here. A minimum the provider does not name, or names in a form OISY does not recognise, falls back to the generic message. A quote from any other provider still wins over a NEAR Intents refusal, so a swap that one provider will not take at that size is still offered by whoever will.
 
+**The fiat limit is announced before the user commits to an amount.** Picking a pair on a restricted chain states the floor straight away, in a notice below the form's other remarks about the chosen pair — which networks the swap crosses is the more fundamental fact and so reads first. It is information rather than an error: nothing is disabled and nothing turns red, because the quote round remains the authority on whether a swap is possible. A $1,000 floor is large enough to change whether someone attempts the swap at all, so making them discover it by being refused is the wrong order.
+
+The notice withdraws the moment a provider quotes. An offer answers the question it exists to pre-empt, and a form this dense should not keep restating a floor the user has visibly cleared. It comes back if the offers do not survive a change of pair or amount.
+
+**Entering less than the fiat limit adds nothing further.** The notice is already on screen saying what the floor is, so the form does not also colour the receive field red with the same figure — one statement of a limit is enough, and a constraint on what is paid does not belong under what is received. The Review button simply stays unavailable until the amount clears the floor. The other refusals are unchanged: an amount below a route's own bridge minimum still says so in the receive field, since that floor has no standing notice, and a pair no provider will quote at any size still reports that there is no offer.
+
+Only the fiat limit is announced this way. The per-route bridge minimum is an inherent cost of getting funds out, usually a few cents to a few dollars, and almost nobody swaps below it — printing it under every pair would be noise in service of a constraint that rarely binds, and it is reported accurately the moment it does. A pair with no fiat floor therefore shows nothing at all, and so does a pair whose floor could not be determined: unknown and absent deliberately look the same, since both mean the user should simply carry on.
+
+Finding out costs one request per pair at most, and usually none. The restriction belongs to a chain rather than to a route, so learning that a chain is unrestricted settles every pair that uses it; after the first few pairs, most chains have an answer and nothing further is asked. The answer is never re-fetched while an amount is being typed.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.

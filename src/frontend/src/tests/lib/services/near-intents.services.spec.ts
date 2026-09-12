@@ -14,12 +14,15 @@ import {
 } from '$lib/constants/swap.constants';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
 import {
+	clearNearIntentsSwapLimitCache,
 	clearNearIntentsTokensCache,
+	fetchNearIntentsSwapLimit,
 	fetchNearIntentsSwapQuote,
 	loadNearIntentsTokens,
 	nearIntentsSupportedTokens,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import type { NearIntentsToken } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import {
@@ -60,7 +63,8 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsTokens: vi.fn(),
 	fetchNearIntentsQuote: vi.fn(),
 	fetchNearIntentsStatus: vi.fn(),
-	submitNearIntentsDeposit: vi.fn()
+	submitNearIntentsDeposit: vi.fn(),
+	NEAR_INTENTS_QUOTE_ERROR_PREFIX: 'NEAR Intents quote failed:'
 }));
 
 const ethereumNativeId = nativeSwapTokenIdentifier({
@@ -700,6 +704,138 @@ describe('near-intents.services', () => {
 
 			expect(result.has('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')).toBeTruthy();
 			expect(result.has('epjfwdd5aufqssqem2qn1xzybapc8g4weggkzwytdt1v')).toBeFalsy();
+		});
+	});
+
+	describe('fetchNearIntentsSwapLimit', () => {
+		const ethToken: Erc20Token = {
+			...mockValidErc20Token,
+			network: ETHEREUM_NETWORK,
+			address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+		};
+
+		const arbToken: Erc20Token = {
+			...mockValidErc20Token,
+			network: ARBITRUM_MAINNET_NETWORK,
+			address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831'
+		};
+
+		const fiatLimitRefusal = new SwapAmountTooLowError(
+			'NEAR Intents quote failed: Temporary swap limits: minimum swap amount is $1,000',
+			{ type: 'usd', value: 1000 }
+		);
+
+		const addressRefusal = new Error('NEAR Intents quote failed: recipient is not valid');
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			clearNearIntentsTokensCache();
+			clearNearIntentsSwapLimitCache();
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+		});
+
+		it('should report the fiat limit a restricted pair is refused with', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(fiatLimitRefusal);
+
+			const result = await fetchNearIntentsSwapLimit({
+				sourceToken: ethToken,
+				destinationToken: arbToken
+			});
+
+			expect(result).toBe(1000);
+		});
+
+		// One unit and placeholder addresses are enough because 1Click checks the limit before
+		// it validates the addresses. If that ordering ever changes this probe goes blind, so
+		// the request it sends is pinned here rather than left implicit.
+		it('should probe with a dry one-unit quote and placeholder addresses', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(fiatLimitRefusal);
+
+			await fetchNearIntentsSwapLimit({ sourceToken: ethToken, destinationToken: arbToken });
+
+			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					dry: true,
+					amount: '1',
+					swapType: 'EXACT_INPUT',
+					recipient: expect.any(String),
+					refundTo: expect.any(String)
+				})
+			);
+		});
+
+		it('should report no limit when the refusal is not about a fiat minimum', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(addressRefusal);
+
+			const result = await fetchNearIntentsSwapLimit({
+				sourceToken: ethToken,
+				destinationToken: arbToken
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should reuse a cached fiat limit instead of probing again', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(fiatLimitRefusal);
+
+			await fetchNearIntentsSwapLimit({ sourceToken: ethToken, destinationToken: arbToken });
+			const result = await fetchNearIntentsSwapLimit({
+				sourceToken: ethToken,
+				destinationToken: arbToken
+			});
+
+			expect(result).toBe(1000);
+			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledOnce();
+		});
+
+		// A non-fiat refusal proves the request got past the limit check, so neither chain is
+		// restricted — which is what lets the cache converge instead of probing every pair.
+		it('should not probe again once both chains are known unrestricted', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(addressRefusal);
+
+			await fetchNearIntentsSwapLimit({ sourceToken: ethToken, destinationToken: arbToken });
+			await fetchNearIntentsSwapLimit({ sourceToken: arbToken, destinationToken: ethToken });
+
+			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledOnce();
+		});
+
+		it('should not cache a verdict when the request never reached the API', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(
+				new TypeError('Failed to fetch')
+			);
+
+			const first = await fetchNearIntentsSwapLimit({
+				sourceToken: ethToken,
+				destinationToken: arbToken
+			});
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockRejectedValue(fiatLimitRefusal);
+
+			const second = await fetchNearIntentsSwapLimit({
+				sourceToken: ethToken,
+				destinationToken: arbToken
+			});
+
+			expect(first).toBeUndefined();
+			expect(second).toBe(1000);
+			expect(nearIntentsApi.fetchNearIntentsQuote).toHaveBeenCalledTimes(2);
+		});
+
+		it('should report no limit for a pair NEAR Intents cannot route', async () => {
+			const unroutable: Erc20Token = {
+				...mockValidErc20Token,
+				network: ETHEREUM_NETWORK,
+				address: '0xnot-a-supported-asset'
+			};
+
+			const result = await fetchNearIntentsSwapLimit({
+				sourceToken: unroutable,
+				destinationToken: arbToken
+			});
+
+			expect(result).toBeUndefined();
+			expect(nearIntentsApi.fetchNearIntentsQuote).not.toHaveBeenCalled();
 		});
 	});
 });

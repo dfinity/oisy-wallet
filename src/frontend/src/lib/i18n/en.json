@@ -989,7 +989,7 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
@@ -1197,7 +1197,7 @@
 			"swap_is_not_offered": "This swap is currently not offered.",
 			"swap_amount_too_low": "The amount is below the provider's minimum. Please enter a higher amount.",
 			"swap_amount_too_low_minimum": "The amount is below the provider's minimum. Enter at least $amount $symbol.",
-			"swap_amount_too_low_minimum_fiat": "The amount is below the provider's minimum. Enter at least $amount.",
+			"swap_minimum_amount_hint": "This pair currently has a minimum swap amount of $amount.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
