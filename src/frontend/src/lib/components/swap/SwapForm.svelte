@@ -337,9 +337,9 @@
 
 		{@render message?.()}
 
-		<SwapMinimumAmountInfo />
-
 		<SwapCrossChainInfo />
+
+		<SwapMinimumAmountInfo />
 
 		<SwapSlippage
 			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
