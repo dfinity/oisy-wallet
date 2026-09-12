@@ -454,8 +454,6 @@
 			{@render message?.()}
 		</div>
 
-		<SwapMinimumAmountInfo />
-
 		{#if nonNullish(twoSwapsQuoteError)}
 			{#key twoSwapsQuoteError.intermediateToken.id}
 				<SwapTwoSwapsHint
@@ -466,6 +464,8 @@
 		{:else}
 			<SwapCrossChainInfo />
 		{/if}
+
+		<SwapMinimumAmountInfo />
 
 		{#if slippageInvalid}
 			<p class="mt-4 text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
