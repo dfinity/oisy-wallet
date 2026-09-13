@@ -317,6 +317,93 @@ describe('tip.services', () => {
 			// attempt says so.
 			expect(warnSpy).toHaveBeenCalledTimes(2);
 		});
+
+		// An ambiguous create — the canister stored the tip, the response was lost —
+		// answers `DuplicateTipId` on the retry. Rethrowing it cost the sender the
+		// link: `storeClaimCode` runs after the create, so the tip stayed funded and
+		// claimable with no recovery secret, while the screen said the reservation
+		// had failed.
+		describe('when the create comes back DuplicateTipId', () => {
+			it('reconciles with the claim code and still returns the link', async () => {
+				vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ DuplicateTipId: null });
+				const detailsSpy = vi
+					.spyOn(backendApi, 'getTipDetails')
+					.mockResolvedValue({} as Awaited<ReturnType<typeof backendApi.getTipDetails>>);
+				const secretSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+
+				const draft = newTipDraft();
+
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft,
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).resolves.toEqual({
+					link: expect.stringContaining(draft.claimCode),
+					secretStored: true
+				});
+
+				// The claim code is what proves the stored tip is this draft's, so it
+				// has to be the one sent — a bare id lookup would pass for someone
+				// else's tip.
+				const [[verified]] = detailsSpy.mock.calls;
+
+				expect(verified.tip_id).toBe(draft.tipId);
+				expect(verified.claim_code).toBe(draft.claimCode);
+
+				// The whole point: the recovery secret gets written, so the sender can
+				// find this link again.
+				expect(secretSpy).toHaveBeenCalledOnce();
+			});
+
+			it('rethrows when the stored tip does not answer to this claim code', async () => {
+				vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ DuplicateTipId: null });
+				vi.spyOn(backendApi, 'getTipDetails').mockRejectedValue({ NotFound: null });
+				const secretSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+
+				// A genuine id collision rather than a lost response. Continuing here
+				// would hand the sender a link to a tip that is not theirs.
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual({ NotFound: null });
+
+				expect(secretSpy).not.toHaveBeenCalled();
+			});
+
+			it('leaves every other create failure alone', async () => {
+				vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ Uncovered: null });
+				const detailsSpy = vi.spyOn(backendApi, 'getTipDetails');
+
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual({ Uncovered: null });
+
+				// `Uncovered` means the tip was never stored, so there is nothing to
+				// read back and asking would only cost a call.
+				expect(detailsSpy).not.toHaveBeenCalled();
+			});
+		});
 	});
 
 	describe('cancelTip', () => {

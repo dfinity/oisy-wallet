@@ -20,7 +20,7 @@ import {
 import { decryptClaimCode, encryptClaimCode } from '$lib/services/tip.vetkeys';
 import type { CanisterIdText } from '$lib/types/canister';
 import { consoleError, consoleWarn } from '$lib/utils/console.utils';
-import { isNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -155,6 +155,16 @@ export const tipRateLimit = (
 	};
 };
 
+/**
+ * Whether a tip call was refused because the id is already taken.
+ *
+ * `DuplicateTipId` is a unit variant, so the key has to be probed rather than
+ * its value — `null` is what a match looks like, and a truthiness check would
+ * read it as absent.
+ */
+const isDuplicateTipId = (err: unknown): boolean =>
+	nonNullish(err) && typeof err === 'object' && 'DuplicateTipId' in err;
+
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;
 
@@ -246,10 +256,17 @@ const storeClaimCode = async ({
  *
  * **Retrying is safe.** Pass the same `draft` again: the tip id is unchanged, so
  * the approve targets the same subaccount and *replaces* the same allowance
- * rather than adding to it, and the create either succeeds or fails
- * `DuplicateTipId` because the first attempt already landed. This is why the
- * draft is the caller's to hold — generating a fresh one on retry would strand
- * the first allowance until it expired.
+ * rather than adding to it. A create that answers `DuplicateTipId` is reconciled
+ * rather than thrown — the tip is read back with this draft's claim code, and a
+ * match means the first attempt landed and the flow continues to the link. This
+ * is why the draft is the caller's to hold: generating a fresh one on retry
+ * would strand the first allowance until it expired.
+ *
+ * That read-back is a non-certified query, so it is weaker evidence than the
+ * write it stands in for. Acceptable here because of what it decides: whether to
+ * store a local recovery secret. A wrong answer costs a secret for a tip that is
+ * not there, which nothing reads. It is not enough to decide that money moved —
+ * `claimTip` does that on the certified path.
  *
  * Returns `secretStored: false` when the recoverable copy of the claim code
  * could not be saved. The tip is real and claimable either way; what the sender
@@ -314,15 +331,37 @@ export const reserveTip = async ({
 		throw err;
 	}
 
-	await createTipApi({
-		identity,
-		tip_id: draft.tipId,
-		ledger_canister_id: Principal.fromText(ledgerCanisterId),
-		amount,
-		expires_at_ns: expiresAtNs,
-		message: toNullable(message),
-		claim_code_hash: await claimCodeHash(draft.claimCode)
-	});
+	try {
+		await createTipApi({
+			identity,
+			tip_id: draft.tipId,
+			ledger_canister_id: Principal.fromText(ledgerCanisterId),
+			amount,
+			expires_at_ns: expiresAtNs,
+			message: toNullable(message),
+			claim_code_hash: await claimCodeHash(draft.claimCode)
+		});
+	} catch (err: unknown) {
+		if (!isDuplicateTipId(err)) {
+			throw err;
+		}
+
+		// On a retry this is the expected answer, not a failure: the first attempt
+		// landed and only its response was lost. Rethrowing it used to cost the
+		// sender the link — `storeClaimCode` runs after this, so an ambiguous
+		// create left a funded, claimable tip with no recovery secret and no way to
+		// find it again, while telling the sender the reservation had failed.
+		//
+		// Reading the tip back with this draft's claim code is what separates that
+		// from a genuine id collision: only the tip created from this draft answers
+		// to this code, so success here proves the stored tip is ours and the flow
+		// can continue. A collision answers `NotFound` and rethrows.
+		await getTipDetails({
+			identity,
+			tip_id: draft.tipId,
+			claim_code: draft.claimCode
+		});
+	}
 
 	return { link: buildTipLink(draft), secretStored: await storeClaimCode({ identity, draft }) };
 };
