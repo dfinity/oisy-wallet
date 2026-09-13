@@ -118,8 +118,8 @@ export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
 	solanaNetwork: z.custom<SolanaNetworkType>(),
-	tokenAddress: z.custom<SplTokenAddress>().optional(),
-	tokenOwnerAddress: z.custom<SolAddress>().optional()
+	// The enabled SPL tokens of the network: the mint and the token program that owns it.
+	tokens: z.array(z.object({ address: z.custom<SplTokenAddress>(), owner: z.custom<SolAddress>() }))
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
