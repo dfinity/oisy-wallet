@@ -151,6 +151,37 @@ describe('ConvertAmountSource', () => {
 		expect(testProps.sendAmount).toBe(props.sendAmount);
 	});
 
+	it('should clamp the max button value to the cap when one is set', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: { ...props, maxAmount: 1000n },
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveTextContent('Max: 0.00001 BTC');
+	});
+
+	it('should keep the affordable max when it is below the cap', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: { ...props, maxAmount: defaultBalance },
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
+	});
+
+	it('should set sendAmount to the capped value on max button click', async () => {
+		const testProps = $state({ ...props, maxAmount: 1000n });
+
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(balanceTestId));
+
+		expect(testProps.sendAmount).toBe('0.00001');
+	});
+
 	it('should display max button value in a correct format', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props,
