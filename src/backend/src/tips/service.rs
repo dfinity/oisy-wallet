@@ -10,7 +10,6 @@ use std::cmp::Reverse;
 
 use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
-use serde_bytes::ByteBuf;
 use shared::types::tip::{
     CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
     TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
@@ -119,7 +118,7 @@ fn read_tip(tip_id: &TipId) -> Option<TipRecord> {
 fn tip_spender(tip_id: &str) -> Account {
     Account {
         owner: canister_self(),
-        subaccount: Some(ByteBuf::from(spender_subaccount(tip_id).to_vec())),
+        subaccount: Some(spender_subaccount(tip_id)),
     }
 }
 
@@ -185,6 +184,14 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
     }
 
     mutate_state(|s| {
+        // Re-read the clock. `now` above was taken before two awaited ledger
+        // calls, and an expiry that was in the future when the request arrived
+        // can be in the past by the time it is written — which would store a tip
+        // that is already unclaimable and hand the sender a dead link. The same
+        // stale reading also drove the retention sweep below.
+        let now = time();
+        validate_expiry(request.expires_at_ns, now)?;
+
         // Collect the caller's own past-retention rows first, so History
         // pruning is driven by the sender who is actually using the feature
         // rather than waiting on the hourly sweep. Scoped to one sender, so it
@@ -257,14 +264,22 @@ pub fn get_tip_details(request: TipClaimRequest) -> Result<TipDetails, TipError>
     Ok(record.to_details())
 }
 
-/// Pays a tip out to the caller, exactly once.
+/// Pays a tip out to the caller.
 ///
-/// The record flips to `Claiming` **before** the ledger call, which is what
-/// makes a double claim impossible: a second caller arriving mid-flight sees
-/// `ClaimInProgress`, not a second payout. Every failure reverts to `Reserved`
-/// — safe even for an ambiguous transport error, because the allowance itself
-/// is the source of truth: if the transfer did happen, the next claim finds the
-/// allowance consumed and fails `Uncovered` rather than paying twice.
+/// The record flips to `Claiming` **before** the ledger call, so a second caller
+/// arriving mid-flight sees `ClaimInProgress` rather than starting a second
+/// payout. Every failure reverts to `Reserved` — safe even for an ambiguous
+/// transport error, because the allowance is the source of truth: if the
+/// transfer did happen, the next claim finds it consumed and fails `Uncovered`.
+///
+/// **Once, but not by this state machine alone.** The `Claiming` guard lapses
+/// after [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`], because a claim whose reply never
+/// comes back must not strand the tip forever. A first `transfer_from` that is
+/// still genuinely in flight past that point — a congested subnet, not only the
+/// upgrade case — can therefore overlap a second attempt. What stops both from
+/// paying is the allowance covering exactly one payout, which the client sizes
+/// and `create_tip` only checks a lower bound on. So "exactly once" is a
+/// property of the allowance, and this code's job is not to weaken it.
 ///
 /// # Errors
 /// Errors are enumerated by [`TipError`].
@@ -306,7 +321,12 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     let transfer = icrc2::transfer_from(
         record.ledger_canister_id,
         TransferFromArgs {
-            spender_subaccount: Some(ByteBuf::from(spender_subaccount(&tip_id).to_vec())),
+            // The subaccount of *this canister* the allowance was granted to.
+            // Omitting it would address the bare-principal allowance, which for
+            // tips is always empty — every tip's allowance sits under its own
+            // subaccount, and that is what keeps one tip's reservation unusable
+            // for another.
+            spender_subaccount: Some(spender_subaccount(&tip_id)),
             from: Account {
                 owner: record.sender,
                 subaccount: None,
@@ -327,7 +347,16 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
         Ok(block_index) => {
             let claimed_at_ns = time();
             mutate_state(|s| {
-                if let Some(Candid(current)) = s.tips.get(&key) {
+                // Only if this claim still owns the slot, the same test
+                // `release_claim` applies to a failure. Without it a late success
+                // wrote `Claimed` over whatever it found — including a
+                // `Claimed{someone_else}` that had already paid out, which would
+                // erase the record of who actually received the money.
+                if let Some(Candid(current)) = s
+                    .tips
+                    .get(&key)
+                    .filter(|Candid(current)| claim_is_ours(current, claimer, now))
+                {
                     store_tip(
                         s,
                         &key,
@@ -375,6 +404,23 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     }
 }
 
+/// Whether the record is still the `Claiming` slot this call created.
+///
+/// Both ends of a claim need this and for the same reason. A claim that timed
+/// out and was taken over must not have its late answer — success or failure —
+/// overwrite whoever holds the tip now. The claimer alone is not enough to
+/// identify it: the same principal can retry after a timeout, so the start
+/// instant is what distinguishes this attempt from that one.
+fn claim_is_ours(record: &TipRecord, claimer: Principal, started_at_ns: u64) -> bool {
+    matches!(
+        record.state,
+        TipState::Claiming {
+            claimer: in_flight_claimer,
+            started_at_ns: in_flight_started,
+        } if in_flight_claimer == claimer && in_flight_started == started_at_ns
+    )
+}
+
 /// Returns a failed claim's tip to `Reserved` and records why it failed, but
 /// only if this claim still owns it. A claim that timed out and was taken over by
 /// someone else must not have its late failure clobber the new claimer's state —
@@ -393,14 +439,7 @@ fn release_claim(
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
         };
-        let is_ours = matches!(
-            current.state,
-            TipState::Claiming {
-                claimer: in_flight_claimer,
-                started_at_ns: in_flight_started,
-            } if in_flight_claimer == claimer && in_flight_started == started_at_ns
-        );
-        if is_ours {
+        if claim_is_ours(&current, claimer, started_at_ns) {
             store_tip(
                 s,
                 key,
@@ -440,7 +479,20 @@ pub fn cancel_tip(tip_id: String) -> Result<(), TipError> {
         if record.has_claim_in_flight(now) {
             return Err(TipError::ClaimInProgress);
         }
-        if !matches!(record.state, TipState::Reserved | TipState::Claiming { .. }) {
+        // `Reserved`, and not past its deadline — which is what the doc above
+        // always said and the code did not do.
+        //
+        // A timed-out `Claiming` used to qualify. The timeout only means no
+        // *reply* has come back; the ledger call may still be outstanding and
+        // may still pay, and the success branch of `claim_tip` writes `Claimed`
+        // over whatever it finds. So cancelling one returned Ok on a promise the
+        // canister could not keep. The sender's allowance is theirs to revoke
+        // either way, which is the lever that actually stops a payout.
+        //
+        // An expired tip is refused for a quieter reason: it lapsed, and
+        // rewriting that history row as `Cancelled` claims the sender did
+        // something they did not.
+        if !matches!(record.state, TipState::Reserved) || record.is_expired(now) {
             return Err(TipError::NotCancellable);
         }
 
@@ -541,6 +593,7 @@ mod tests {
         DefaultMemoryImpl,
     };
     use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
 
     use super::*;
 

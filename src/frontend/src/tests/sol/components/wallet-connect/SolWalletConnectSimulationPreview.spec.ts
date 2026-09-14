@@ -171,6 +171,22 @@ describe('SolWalletConnectSimulationPreview', () => {
 
 			expect(getByTestId('simulated-token-delta')).toHaveTextContent(mockValidSplToken.symbol);
 		});
+
+		// Hiding a token from the asset list says which assets the user wants to hold, not which
+		// ones the wallet can read. The review resolved enabled tokens only, so disabling one
+		// turned every change that moved it anonymous.
+		it('should name a mint the user disabled', () => {
+			splCustomTokensStore.setAll([
+				{ data: { ...mockValidSplToken, version: undefined, enabled: false }, certified: false }
+			]);
+
+			const { getByTestId } = render(
+				SolWalletConnectSimulationPreview,
+				props({ tokenDeltas: [delta(mockValidSplToken.address)], controlChanges: [] })
+			);
+
+			expect(getByTestId('simulated-token-delta')).toHaveTextContent(mockValidSplToken.symbol);
+		});
 	});
 
 	// An authority change moves nothing, so it has to be named in its own right or it is invisible.

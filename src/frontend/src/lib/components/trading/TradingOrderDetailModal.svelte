@@ -58,7 +58,9 @@
 
 	let { order }: Props = $props();
 
-	let { side, base, quote, quantity, price, filledQuantity } = $derived(order);
+	let { side, base, quote, quantity, price, filledQuantity, timeInForce } = $derived(order);
+
+	const fillOrKill = $derived(timeInForce === 'FillOrKill');
 
 	const baseSymbol = $derived(getTokenDisplaySymbol(base));
 	const quoteSymbol = $derived(getTokenDisplaySymbol(quote));
@@ -201,12 +203,12 @@
 	const confirmCancel = async () => {
 		canceling = true;
 		// `quantity` and `price` are JS numbers, so stringify them via Decimal to get plain
-		// decimal strings (no `1e-7`/float artifacts). The order view carries no time-in-force,
-		// so `order_type` is omitted on cancel.
+		// decimal strings (no `1e-7`/float artifacts).
 		const orderFields: Omit<TrackLimitOrderParams, 'action' | 'resultStatus' | 'error'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
+			orderType: fillOrKill ? 'FOK' : 'GTC',
 			baseAmount: new Decimal(quantity).toFixed(),
 			price: new Decimal(price).toFixed(),
 			baseUsdPrice,
@@ -273,8 +275,11 @@
 
 		<LimitOrderTermsList
 			{makerFee}
-			orderTypeLabel={$i18n.trading.limit_order.order_type_gtc}
+			orderTypeLabel={fillOrKill
+				? $i18n.trading.limit_order.order_type_fok
+				: $i18n.trading.limit_order.order_type_gtc}
 			{takerFee}
+			takerOnly={fillOrKill}
 		/>
 		{#if showFilled}
 			<ModalValue>

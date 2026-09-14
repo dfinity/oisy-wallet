@@ -10,12 +10,16 @@ export const isTokenSplCustomToken = (token: Token): token is SplCustomToken =>
 	isTokenSpl(token) && isTokenToggleable(token);
 
 /**
- * The enabled SPL token of a mint on a network, or nothing when the wallet does not list it.
+ * The SPL token of a mint on a network, or nothing when the wallet does not list it.
  *
  * The same mint can exist on several clusters, which is why the network is part of the key. One
  * lookup for every surface that names a token, so an unlisted mint fails the same way everywhere.
+ *
+ * Enablement is not part of the question: it says which tokens the user wants to hold, not which
+ * ones the wallet knows how to read. Callers pass the full list, so a disabled token is still
+ * named and still carries its decimals.
  */
-export const findEnabledSplToken = ({
+export const findSplToken = ({
 	tokens,
 	tokenAddress,
 	networkId

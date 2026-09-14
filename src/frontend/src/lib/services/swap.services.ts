@@ -68,6 +68,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
+import type { OisyTradeQuote } from '$lib/types/oisy-trade-swap';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
@@ -584,6 +585,12 @@ const fetchSwapAmountsICP = async ({
 					slippage,
 					destToken: destinationToken as IcToken
 				});
+			} else if (provider.key === SwapProvider.OISY_TRADE && isSourceTokenIcrc2) {
+				// Gated on ICRC-2 like ICPSwap: the deposit leg is `icrc2_approve` plus
+				// `icrc2_transfer_from`, so a source ledger without ICRC-2 cannot be
+				// deposited at all.
+				const quote = result.value as OisyTradeQuote | undefined;
+				mapped = nonNullish(quote) ? provider.mapQuoteResult({ quote }) : undefined;
 			}
 
 			if (nonNullish(mapped)) {
@@ -752,9 +759,14 @@ export const fetchIcpSwap = async ({
 		});
 	}
 
+	// The amount the pool actually credited to the user's in-pool balance. It can be lower than
+	// the quote the review step displayed - anything down to `slippageMinimum` is a successful
+	// swap - so it is what we withdraw below, not the quote.
+	let swappedAmount: bigint;
+
 	try {
 		// Perform the actual token swap after a successful deposit
-		await swapIcp({
+		swappedAmount = await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
 			amountIn: parsedSwapAmount.toString(),
@@ -779,7 +791,9 @@ export const fetchIcpSwap = async ({
 
 		progress(ProgressStepsSwap.UPDATE_UI);
 
-		throwSwapError({
+		// `return` so that the compiler knows this branch ends the flow and `swappedAmount` is
+		// assigned below - `throwSwapError` returns `never`, but that alone does not narrow here.
+		return throwSwapError({
 			code,
 			message,
 			variant
@@ -793,7 +807,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount + destinationTokenFee,
+			amount: swappedAmount,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
@@ -1134,6 +1148,12 @@ export const swapService = {
 	// `fetchChainFusionIcpSwap` and never reaches this entry — exactly as it does for
 	// 1Sec above.
 	[SwapProvider.CHAIN_FUSION]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// OISY Trade needs the resolved order parameters — side, price, quantity —
+	// which `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly
+	// and never reaches this entry, exactly as it does for 1Sec and Chain Fusion.
+	[SwapProvider.OISY_TRADE]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
 	}
 } satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;

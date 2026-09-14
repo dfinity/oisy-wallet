@@ -336,11 +336,15 @@ const resolveCkErc20WithdrawalDetails = async (
 };
 
 /**
- * ckBTC → BTC. Three fees, itemized exactly as `IcTokenFees` does, and only one of them
- * comes out of what the user receives: the Bitcoin network and minter fees the ckBTC
- * minter pays out of the amount it withdraws, which is the `totalDestinationTokenFee` the
- * Convert flow deducts too. The ledger fee (for `icrc2_approve`) and the KYT fee are
- * charged beside the amount.
+ * ckBTC → BTC. Two fees, and only one of them comes out of what the user receives: the
+ * Bitcoin network and minter fees the ckBTC minter pays out of the amount it withdraws,
+ * which is the `totalDestinationTokenFee` the Convert flow deducts too. The ledger fee (for
+ * `icrc2_approve`) is charged beside the amount.
+ *
+ * `IcTokenFees`'s third row, the KYT fee, is deliberately absent: the user is not charged it
+ * on this side of the pair, unlike on a deposit. Finalized withdrawals pay out exactly
+ * `amount - bitcoin_fee - minter_fee`, and the minter burns the full `amount` with no check
+ * fee in the memo — the Convert flow lists a fee nobody pays.
  *
  * The fee estimate depends on the amount, so unlike the Ethereum arms this query re-runs on
  * every debounced amount change. It does *not* refresh beyond that: `SwapTokenWizard` sets
@@ -390,11 +394,6 @@ const resolveCkBtcWithdrawalDetails = async ({
 	return {
 		sourceFees: [
 			{ labelPath: 'fee.text.fee', fee, token: sourceToken },
-			{
-				labelPath: 'fee.text.estimated_inter_network',
-				fee: minterInfo.data.kyt_fee,
-				token: sourceToken
-			},
 			{
 				labelPath: 'fee.text.estimated_btc',
 				fee: bitcoin_fee + minter_fee,

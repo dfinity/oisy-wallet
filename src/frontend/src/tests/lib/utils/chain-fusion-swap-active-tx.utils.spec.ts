@@ -38,6 +38,7 @@ import {
 	toChainFusionExternalRefsMap,
 	toChainFusionWithdrawalLearnedRefs,
 	toChainFusionWithdrawalStatus,
+	toCkBtcMintDepositTxid,
 	type ChainFusionBtcMintOutcome,
 	type ChainFusionMintOutcome
 } from '$lib/utils/chain-fusion-swap-active-tx.utils';
@@ -46,6 +47,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
 import { encodePrincipalToEthAddress, type CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { Cbor } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 const CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
@@ -595,6 +597,43 @@ describe('chain-fusion-swap-active-tx.utils', () => {
 		it('should match the row txid against the reversed on-chain one', () => {
 			expect(isSameUtxoTxid({ utxo: mockUtxo, txid: txid.toUpperCase() })).toBeTruthy();
 			expect(isSameUtxoTxid({ utxo: otherUtxo, txid })).toBeFalsy();
+		});
+	});
+
+	describe('toCkBtcMintDepositTxid', () => {
+		const depositTxid = utxoTxIdToString(mockUtxo.outpoint.txid);
+
+		const unrelatedUtxo: CkBtcMinterDid.Utxo = {
+			...mockUtxo,
+			outpoint: { txid: Uint8Array.from([9, 9, 9]), vout: 0 }
+		};
+
+		const convertMemo = (utxo: CkBtcMinterDid.Utxo) =>
+			new Uint8Array(Cbor.encode([0, [utxo.outpoint.txid, utxo.outpoint.vout, 100]]));
+
+		// Same byte-order flip as `isSameUtxoTxid`: the memo carries the outpoint, the row
+		// carries what the signer returned.
+		it('should read the deposit txid out of a convert mint memo', () => {
+			expect(toCkBtcMintDepositTxid(convertMemo(mockUtxo))).toBe(depositTxid);
+			expect(toCkBtcMintDepositTxid(convertMemo(unrelatedUtxo))).not.toBe(depositTxid);
+		});
+
+		it('should ignore a mint that credited no deposit', () => {
+			// The minter paying itself accumulated check fees.
+			expect(toCkBtcMintDepositTxid(new Uint8Array(Cbor.encode([1])))).toBeUndefined();
+
+			// A convert memo the minter wrote without the outpoint.
+			expect(
+				toCkBtcMintDepositTxid(new Uint8Array(Cbor.encode([0, [undefined, 0, 100]])))
+			).toBeUndefined();
+		});
+
+		// Legacy mints carry a 0- or 32-byte memo the decoder rejects outright, and the
+		// account's history holds mints from flows that are none of this row's business.
+		it('should ignore a memo it cannot decode', () => {
+			expect(toCkBtcMintDepositTxid(new Uint8Array(0))).toBeUndefined();
+			expect(toCkBtcMintDepositTxid(new Uint8Array(32))).toBeUndefined();
+			expect(toCkBtcMintDepositTxid(Uint8Array.from([1, 2, 3]))).toBeUndefined();
 		});
 	});
 
