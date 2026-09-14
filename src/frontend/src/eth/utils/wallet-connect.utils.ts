@@ -749,6 +749,106 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
 	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
 
 /**
+ * The structs an EIP-712 payload hashes, the one it is rooted at and the ones it declares beneath.
+ *
+ * `eth_signTypedData_v4` shows `eth_signTypedData_v4` as its method, which names the RPC call and
+ * not the thing being signed. What a signature authorizes is the struct: an `ERC-2612 Permit` and a
+ * `TransferWithAuthorization` arrive through the same method and do entirely different things.
+ *
+ * The root is the primary type as the hash derives it from the type graph, never the `primaryType`
+ * the payload declares. The two need not agree, and only the derived one is hashed, so listing the
+ * declared field would name a struct the signature does not cover.
+ */
+export const getEthTypedDataMethods = ({
+	types
+}: WalletConnectEthSignTypedDataV4): { name: string; depth: number }[] => {
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	try {
+		const root = TypedDataEncoder.getPrimaryType(rest);
+
+		const methods: { name: string; depth: number }[] = [];
+		const walked = new Set<string>();
+
+		// Walked from the root rather than read off the keys of `types`, so each struct is listed
+		// beneath the one that declares it. Reading the keys put every struct at one level, which
+		// said a struct nested two deep was a member of the root, and would have named a declaration
+		// the root never reaches as though the signature covered it.
+		const walk = ({ name, depth }: { name: string; depth: number }) => {
+			if (walked.has(name)) {
+				return;
+			}
+
+			walked.add(name);
+
+			methods.push({ name, depth });
+
+			(rest[name] ?? []).forEach(({ type }) => {
+				// A member declared as an array is the same struct, however many dimensions deep.
+				const member = type.replace(/(\[\d*\])*$/, '');
+
+				if (member in rest) {
+					walk({ name: member, depth: depth + 1 });
+				}
+			});
+		};
+
+		walk({ name: root, depth: 0 });
+
+		return methods;
+	} catch (_err: unknown) {
+		// Typed data whose root cannot be resolved would not be signed at all, and is warned about
+		// and blocked as invalid rather than named here. `getPrimaryType` is what rejects a payload
+		// declaring a struct nothing reaches, so this arm covers that case too.
+		return [];
+	}
+};
+
+/**
+ * Whether a request would be signed without OISY being able to state what it authorizes.
+ *
+ * A signature is not a lesser thing than a transaction. An ERC-3009 authorization lets its holder
+ * pull tokens out of the wallet, a Permit2 batch grants allowances over several tokens at once, and
+ * a marketplace order sells an NFT; each is a struct OISY does not recognise, and each used to be
+ * previewed as an application, a method name and a collapsed blob of JSON, with approval enabled
+ * and nothing said about what signing it would allow.
+ *
+ * This is the `eth_sendTransaction` fallback in the other review: the summary is built from an
+ * allowlist, and everything the allowlist does not cover falls through to a preview that states
+ * nothing rather than to one that states it cannot say. Recognising one more schema improves what
+ * the user is told; it is not what stands between them and an unexplained signature.
+ *
+ * `false` for a raw-message method. Those carry no schema and OISY makes no claim about them: the
+ * message shown is the message signed, so there is no summary that could be silently absent.
+ * `false`, too, for typed data that fails to sign at all, which {@link hasInvalidTypedData} already
+ * warns about and blocks.
+ */
+export const hasUnreviewableTypedData = ({
+	method,
+	params,
+	sessionChainId
+}: {
+	method: string;
+	params: string[];
+	sessionChainId: string | undefined;
+}): boolean => {
+	if (!isEthSignTypedDataMethod(method)) {
+		return false;
+	}
+
+	if (hasInvalidTypedData({ method, params, sessionChainId })) {
+		return false;
+	}
+
+	try {
+		return isNullish(getEthTypedDataApproval(getSignParamsMessageTypedDataV4(params)));
+	} catch (_err: unknown) {
+		// Typed data that cannot even be read is the invalid case above, not this one.
+		return false;
+	}
+};
+
+/**
  * Whether a typed-data request would fail to sign — i.e. its typed data cannot
  * be parsed, validated, and hashed. Used by the confirmation UI to warn and
  * disable approval, so the preview mirrors what the signer would do (which

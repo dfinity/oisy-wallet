@@ -118,6 +118,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: expect.any(BigInt),
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: expect.any(Array),
 				error: undefined
 			});
@@ -133,6 +134,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: [],
 				error: BtcPrepareSendError.InsufficientBalance
 			});
@@ -146,6 +148,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: [],
 				error: BtcPrepareSendError.PendingTransactionsNotAvailable
 			});
@@ -161,6 +164,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: [],
 				error: BtcPrepareSendError.PendingTransactionsNotAvailable
 			});
@@ -176,6 +180,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: expect.any(BigInt),
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: expect.any(Array),
 				error: undefined
 			});
@@ -209,6 +214,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: expect.any(BigInt),
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: expect.any(Array),
 				error: undefined
 			});
@@ -290,6 +296,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: [],
 				error: BtcPrepareSendError.UtxoLocked
 			});
@@ -312,6 +319,7 @@ describe('btc-utxos.service', () => {
 
 			expect(result).toEqual({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: mockFeeRateFromPercentiles,
 				utxos: [],
 				error: BtcPrepareSendError.UtxoLocked
 			});
