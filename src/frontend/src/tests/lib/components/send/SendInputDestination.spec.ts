@@ -1,9 +1,13 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
+import {
+	SEND_FIRST_TIME_DESTINATION_CONFIRM,
+	SEND_FIRST_TIME_DESTINATION_WARNING
+} from '$lib/constants/test-ids.constants';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
-import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -12,7 +16,6 @@ import { render } from '@testing-library/svelte';
 describe('SendInputDestination', () => {
 	const props = {
 		destination: mockEthAddress,
-		networkContacts: {},
 		inputPlaceholder: 'test',
 		invalidDestination: false
 	};
@@ -73,36 +76,29 @@ describe('SendInputDestination', () => {
 		expect(queryByText(en.send.assertion.invalid_destination_address)).not.toBeInTheDocument();
 	});
 
-	it('does not render unknown destination warning message if there is a contact with the provided address', () => {
+	it('renders first time destination warning message even for a saved contact', () => {
 		const [contact] = getMockContactsUi({
 			n: 1,
 			name: 'Multiple Addresses Contact',
 			addresses: [mockContactEthAddressUi]
 		}) as unknown as ContactUi[];
 
-		const { queryByText } = render(SendInputDestination, {
+		contactsStore.set([contact]);
+
+		const { getByTestId } = render(SendInputDestination, {
 			props: {
 				...props,
 				invalidDestination: false,
-				knownDestinations: {},
-				networkContacts: {
-					[getNetworkContactKey({
-						contact,
-						address: props.destination
-					})]: {
-						contact,
-						address: props.destination
-					}
-				}
+				knownDestinations: {}
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
-		expect(queryByText(en.send.info.unknown_destination)).not.toBeInTheDocument();
+		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
 	});
 
-	it('does not render unknown destination warning message if inserted destination is less than 10 characters', () => {
-		const { queryByText } = render(SendInputDestination, {
+	it('does not render first time destination warning message if inserted destination is less than 10 characters', () => {
+		const { queryByTestId } = render(SendInputDestination, {
 			props: {
 				...props,
 				destination: '0x1d63841',
@@ -112,11 +108,11 @@ describe('SendInputDestination', () => {
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
-		expect(queryByText(en.send.info.unknown_destination)).not.toBeInTheDocument();
+		expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toBeInTheDocument();
 	});
 
-	it('renders unknown destination warning message', () => {
-		const { getByText } = render(SendInputDestination, {
+	it('renders first time destination warning message', () => {
+		const { getByTestId } = render(SendInputDestination, {
 			props: {
 				...props,
 				invalidDestination: false,
@@ -125,6 +121,24 @@ describe('SendInputDestination', () => {
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
-		expect(getByText(en.send.info.unknown_destination)).toBeInTheDocument();
+		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toHaveTextContent(
+			en.send.info.first_time_destination
+		);
+	});
+
+	it('does not ask to confirm the first time destination on the address step', () => {
+		const { getByTestId, queryByTestId } = render(SendInputDestination, {
+			props: {
+				...props,
+				invalidDestination: false,
+				knownDestinations: {}
+			},
+			context: mockContext(ETHEREUM_TOKEN)
+		});
+
+		expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM)).not.toBeInTheDocument();
+		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toHaveTextContent(
+			en.send.info.first_time_destination_confirm
+		);
 	});
 });
