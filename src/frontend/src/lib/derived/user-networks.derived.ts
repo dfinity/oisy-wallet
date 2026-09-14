@@ -61,10 +61,16 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
-		// Returns `undefined` for a key this frontend does not know. The backend can learn a
-		// new network before the frontend supports it — and the two deploy independently — so
-		// an unmapped key must degrade to "ignore that setting" rather than throw, which would
-		// take down the whole user-networks mapping and with it the user's network settings.
+		// Returns `undefined` for a key present in the generated bindings but not mapped here.
+		// That gap is real: `binding-checks` regenerates the declarations in the same PR that
+		// adds a backend variant, so the wire type learns it one release before the network id
+		// it maps to exists. An unmapped key must then degrade to "ignore that setting" rather
+		// than throw, which would take down the whole mapping and with it the user's settings.
+		//
+		// It is NOT wire-level forward compatibility: a variant missing from
+		// `backend.factory.did.js` fails Candid decoding in `get_user_profile`, long before this
+		// runs. A closed candid variant cannot be forward compatible — hence the breaking-change
+		// flag on any PR that adds one.
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId | undefined => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
