@@ -79,8 +79,7 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
-	GLOBAL = 'global',
-	PROFILE_DECODE_FAILED = 'profile_decode_failed'
+	GLOBAL = 'global'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {

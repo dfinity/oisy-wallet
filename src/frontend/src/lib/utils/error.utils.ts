@@ -192,15 +192,6 @@ const IC_VERSION_MISMATCH_MARKER = 'Version mismatch';
 export const isVersionMismatchError = (err: unknown): boolean =>
 	err instanceof Error && err.message.includes(IC_VERSION_MISMATCH_MARKER);
 
-// @dfinity/candid throws this when a decoded value carries a field the frontend's generated
-// bindings do not know — the backend is ahead of us. The number is Candid's deterministic hash
-// of the field name (`h = h * 223 + byte`, mod 2^32), so it identifies which field it was even
-// though the name itself never reaches us.
-const CANDID_UNKNOWN_FIELD_PATTERN = /Cannot find field hash _(\d+)_/;
-
-export const unknownCandidFieldHash = (err: unknown): string | undefined =>
-	isNullish(err) ? undefined : errorDetailToString(err)?.match(CANDID_UNKNOWN_FIELD_PATTERN)?.[1];
-
 const IC_CALL_CONTEXT_MARKER = 'Call context:';
 const IC_CANISTER_ID_KEY = 'Canister ID';
 const IC_METHOD_NAME_KEY = 'Method name';

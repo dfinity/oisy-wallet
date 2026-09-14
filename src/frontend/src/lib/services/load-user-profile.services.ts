@@ -1,6 +1,5 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
-import { trackProfileDecodeFailed } from '$lib/services/error-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -8,7 +7,6 @@ import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors'
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { unknownCandidFieldHash } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -115,15 +113,6 @@ export const loadUserProfile = async ({
 	} catch (err: unknown) {
 		if (err instanceof SignupsClosedError) {
 			return { success: false, err: 'signups-closed', profileCreated };
-		}
-
-		// A profile carrying a variant our generated bindings do not know cannot be decoded at all,
-		// and the loader signs the user out. Nothing recovers from that until the frontend catches
-		// up with the backend, so it has to be visible rather than just another failed load.
-		const fieldHash = unknownCandidFieldHash(err);
-
-		if (nonNullish(fieldHash)) {
-			trackProfileDecodeFailed({ fieldHash });
 		}
 
 		const { settings } = get(i18n);

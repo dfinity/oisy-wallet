@@ -130,18 +130,6 @@ reading; one chatty call site turns the whole event into noise, so dedupe at the
 source when the caller can fire repeatedly (e.g. a Svelte `derived` that
 recomputes).
 
-#### Candid field hashes in `result_error_code`
-
-When the backend returns a variant this frontend's generated bindings do not know,
-Candid fails to decode and the field **name never reaches us** — only its hash.
-`profile_decode_failed` therefore reports the hash in `result_error_code`.
-
-To read a row, hash the candidate names the backend added and match:
-`h = 0; for each byte b: h = (h * 223 + b) mod 2^32`. For example
-`XrpMainnet` → `400215630`. The hash identifies the field name, not which
-vocabulary it came from (`NetworkSettingsFor`, `ExperimentalFeatureSettingsFor`
-and `ProviderAgreementType` can all grow) — in practice the name resolves that.
-
 ---
 
 ## 4. Metadata vocabulary (reuse the enums)
