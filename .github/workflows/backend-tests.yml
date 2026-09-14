@@ -124,7 +124,7 @@ jobs:
         # until deployment to production.  As it is, any PRs that change the backend candid
         # will still need to be announced as a breaking change, but that is probably acceptable,
         # and it makes it clear if the API is revised to no longer be breaking.
-        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: api-changes
         with:
           filters: |

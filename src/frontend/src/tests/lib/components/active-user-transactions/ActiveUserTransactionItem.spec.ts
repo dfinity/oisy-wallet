@@ -6,6 +6,7 @@ import {
 	mockChainFusionActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
+	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
@@ -58,6 +59,24 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → ETH`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Internet Computer → Ethereum');
 		expect(container).toHaveTextContent('Chain Fusion');
+	});
+
+	// A fifth swap provider renders through the shared layout for free, because its
+	// display refs speak OneSec's exact key strings — and its provider entry is
+	// unconditional, so a row outliving a flag rollback keeps its name.
+	it('renders OISY Trade rows as a swap with the provider, collapsing the same-network line', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockOisyTradeActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 3 ICP → ckUSDC`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('OISY Trade');
+		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {

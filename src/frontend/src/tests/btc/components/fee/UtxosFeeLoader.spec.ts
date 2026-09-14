@@ -28,6 +28,7 @@ describe('UtxosFeeLoader', () => {
 
 	const mockBtcReviewResult = {
 		feeSatoshis: 700n,
+		feeRateMiliSatoshisPerVByte: 4000n,
 		utxos: []
 	};
 
@@ -109,6 +110,7 @@ describe('UtxosFeeLoader', () => {
 			expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				utxosFee: {
 					feeSatoshis: mockBtcReviewResult.feeSatoshis,
+					feeRateMiliSatoshisPerVByte: 4000n,
 					utxos: mockBtcReviewResult.utxos
 				},
 				amountForFee: amount
@@ -240,6 +242,7 @@ describe('UtxosFeeLoader', () => {
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
 				feeSatoshis: 100n,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			},
 			amountForFee: amount
@@ -264,6 +267,7 @@ describe('UtxosFeeLoader', () => {
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
 				feeSatoshis: 100n,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			},
 			amountForFee: 1

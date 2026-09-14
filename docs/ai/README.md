@@ -15,6 +15,7 @@ docs/ai/
 ├── README.md                            ← you are here
 ├── governance.md                        Truth hierarchy, boundaries, capabilities, meta-update rule
 ├── pr-and-ci.md                         PR title regex, body template, CI cheatsheet, local gates
+├── visual-artifacts.md                  Mockups / wireframes / chat artifacts: reuse real UI, don't invent
 ├── integrations/                        Third-party APIs/services: what data we fetch & where
 │   ├── README.md                        Provider index (Alchemy, Infura, Etherscan, OnRamper, …)
 │   └── <provider>.md                    One reference doc per provider

@@ -192,14 +192,17 @@
 						: $i18n.liquidium.text.withdraw_at_risk_warning}
 				</span>
 
-				<label class="flex cursor-pointer items-start gap-3">
+				<div class="flex items-start gap-3">
 					<Checkbox
 						checked={confirmChecked}
 						inputId="liquidium-withdraw-confirm"
 						onChange={() => (confirmChecked = !confirmChecked)}
 					/>
-					<span class="text-sm">{$i18n.liquidium.text.withdraw_risk_confirm}</span>
-				</label>
+
+					<label class="block text-sm leading-snug" for="liquidium-withdraw-confirm"
+						>{$i18n.liquidium.text.withdraw_risk_confirm}</label
+					>
+				</div>
 			</div>
 		</MessageBox>
 	{/if}

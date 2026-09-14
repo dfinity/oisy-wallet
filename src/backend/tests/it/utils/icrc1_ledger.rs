@@ -7,12 +7,28 @@
 //! the transferred amount. This is the same `ic-icrc1-ledger` wasm that ckBTC,
 //! ckETH and ckUSDC run in production.
 //!
-//! Note this is *not* the cycles ledger the rest of the suite uses: that one
-//! speaks `icrc_2_approve` with underscores and is a different interface.
+//! Note this is *not* the cycles ledger the rest of the suite uses. The
+//! difference is the wasm and its install arguments, which is why `InitArgs`,
+//! `ArchiveOptions` and `FeatureFlags` are still declared below — they belong to
+//! this ledger's `init`, not to any ICRC standard, and no published crate ships
+//! them. It is *not* that the cycles ledger speaks a different wire protocol: an
+//! earlier version of this comment said it "speaks `icrc_2_approve` with
+//! underscores", and the underscore is in a Rust method name, not on the wire.
 
 use std::{env, fs::read};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Nat, Principal};
+// The ICRC-1/2 shapes come from the canonical crate, the same one the production
+// `tips::icrc2` module uses — a second copy here could drift from the encoding
+// under test and still pass. Re-exported so callers keep importing the ledger
+// shapes from the module that speaks to the ledger.
+pub use icrc_ledger_types::{
+    icrc1::account::{Account, Subaccount},
+    icrc2::{
+        allowance::{Allowance, AllowanceArgs},
+        approve::{ApproveArgs, ApproveError},
+    },
+};
 use pocket_ic::PocketIc;
 use serde_bytes::ByteBuf;
 
@@ -28,25 +44,16 @@ pub const TRANSFER_FEE: u64 = 10_000;
 /// Cycles for the ledger canister. Archive spawning wants a healthy balance.
 const LEDGER_CYCLES: u128 = 2_000_000_000_000;
 
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct Account {
-    pub owner: Principal,
-    pub subaccount: Option<ByteBuf>,
+/// `Account` is foreign now, so these two cannot be inherent constructors. Thin
+/// on purpose: they exist to keep the call sites reading as one expression.
+pub fn account_owner(owner: Principal) -> Account {
+    Account::from(owner)
 }
 
-impl Account {
-    pub fn owner(owner: Principal) -> Self {
-        Self {
-            owner,
-            subaccount: None,
-        }
-    }
-
-    pub fn with_subaccount(owner: Principal, subaccount: Vec<u8>) -> Self {
-        Self {
-            owner,
-            subaccount: Some(ByteBuf::from(subaccount)),
-        }
+pub fn account_with_subaccount(owner: Principal, subaccount: Subaccount) -> Account {
+    Account {
+        owner,
+        subaccount: Some(subaccount),
     }
 }
 
@@ -100,43 +107,6 @@ pub enum LedgerArg {
     Upgrade(Option<()>),
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct ApproveArgs {
-    pub from_subaccount: Option<ByteBuf>,
-    pub spender: Account,
-    pub amount: Nat,
-    pub expected_allowance: Option<Nat>,
-    pub expires_at: Option<u64>,
-    pub fee: Option<Nat>,
-    pub memo: Option<ByteBuf>,
-    pub created_at_time: Option<u64>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum ApproveError {
-    GenericError { message: String, error_code: Nat },
-    TemporarilyUnavailable,
-    Duplicate { duplicate_of: Nat },
-    BadFee { expected_fee: Nat },
-    AllowanceChanged { current_allowance: Nat },
-    CreatedInFuture { ledger_time: u64 },
-    TooOld,
-    Expired { ledger_time: u64 },
-    InsufficientFunds { balance: Nat },
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct AllowanceArgs {
-    pub account: Account,
-    pub spender: Account,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct Allowance {
-    pub allowance: Nat,
-    pub expires_at: Option<u64>,
-}
-
 fn wasm_bytes() -> Vec<u8> {
     let path = env::var("ICRC1_LEDGER_WASM_FILE")
         .unwrap_or_else(|_| DEFAULT_ICRC1_LEDGER_WASM.to_string());
@@ -156,7 +126,7 @@ pub fn deploy(pic: &PocketIc, controller: Principal, funded: &[(Principal, u64)]
     pic.add_cycles(ledger, LEDGER_CYCLES);
 
     let arg = LedgerArg::Init(Box::new(InitArgs {
-        minting_account: Account::owner(controller),
+        minting_account: account_owner(controller),
         fee_collector_account: None,
         transfer_fee: Nat::from(TRANSFER_FEE),
         decimals: Some(8),
@@ -166,7 +136,7 @@ pub fn deploy(pic: &PocketIc, controller: Principal, funded: &[(Principal, u64)]
         metadata: vec![],
         initial_balances: funded
             .iter()
-            .map(|(owner, amount)| (Account::owner(*owner), Nat::from(*amount)))
+            .map(|(owner, amount)| (account_owner(*owner), Nat::from(*amount)))
             .collect(),
         // The reason this file exists: without ICRC-2 the ledger rejects every
         // approve, and none of the tip flows are testable.
@@ -249,13 +219,7 @@ pub fn approve(
 }
 
 pub fn balance_of(pic: &PocketIc, ledger: Principal, owner: Principal) -> Nat {
-    query(
-        pic,
-        ledger,
-        owner,
-        "icrc1_balance_of",
-        Account::owner(owner),
-    )
+    query(pic, ledger, owner, "icrc1_balance_of", account_owner(owner))
 }
 
 pub fn allowance(
@@ -270,7 +234,7 @@ pub fn allowance(
         owner,
         "icrc2_allowance",
         AllowanceArgs {
-            account: Account::owner(owner),
+            account: account_owner(owner),
             spender,
         },
     )

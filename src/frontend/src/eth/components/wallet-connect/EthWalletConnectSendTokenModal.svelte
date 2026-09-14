@@ -73,7 +73,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken, sendEthFeePriority } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -215,6 +215,7 @@
 		{destination}
 		nativeEthereumToken={$nativeEthereumTokenWithFallback}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
+		priority={$sendEthFeePriority}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{sourceNetwork}

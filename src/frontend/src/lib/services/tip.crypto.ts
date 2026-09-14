@@ -2,8 +2,15 @@
  * The two secrets a tip is built from, and the hashes derived from them.
  *
  * A tip has an **id**, which is public (it is the `<id>` in the link path and
- * the canister's map key), and a **claim code**, which is not: it lives only in
- * the link fragment, so it never reaches the canister — only its SHA-256 does.
+ * the canister's map key), and a **claim code**, which is not: it lives in the
+ * link fragment, which browsers never put on the wire — so it stays out of
+ * request paths, referrer headers and web-server logs, and only its SHA-256 is
+ * stored by the canister.
+ *
+ * It is *not* secret from the canister at redemption: claiming sends the code
+ * itself in an update call, because hashing it there is the only way to check
+ * it. What the fragment buys is that the code never travels as a URL anyone
+ * else logs, not that it is never transmitted.
  * Anyone holding the full link can claim; anyone holding just the id cannot.
  *
  * Both hashes here must agree byte-for-byte with the canister

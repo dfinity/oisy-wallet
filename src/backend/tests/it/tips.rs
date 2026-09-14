@@ -23,7 +23,7 @@ use shared::types::{
 };
 
 use crate::utils::{
-    icrc1_ledger::{self, Account as LedgerAccount, TRANSFER_FEE},
+    icrc1_ledger::{self, TRANSFER_FEE},
     pocketic::{controller, setup, PicBackend, PicCanisterTrait},
 };
 
@@ -43,8 +43,8 @@ fn now_ns(pic_setup: &PicBackend) -> u64 {
 /// If the backend ever changed how it derives this, the allowance the test
 /// grants would stop matching the one the backend spends from, and every claim
 /// would fail — which is the point of computing it separately.
-fn spender_subaccount(tip_id: &str) -> Vec<u8> {
-    Sha256::digest(tip_id.as_bytes()).to_vec()
+fn spender_subaccount(tip_id: &str) -> [u8; 32] {
+    Sha256::digest(tip_id.as_bytes()).into()
 }
 
 fn claim_code_hash(claim_code: &str) -> ByteBuf {
@@ -78,7 +78,7 @@ impl TipEnv {
             &self.pic_setup.pic,
             self.ledger,
             self.sender,
-            LedgerAccount::with_subaccount(
+            icrc1_ledger::account_with_subaccount(
                 self.pic_setup.canister_id(),
                 spender_subaccount(tip_id),
             ),
@@ -186,7 +186,7 @@ impl TipEnv {
             &self.pic_setup.pic,
             self.ledger,
             self.sender,
-            LedgerAccount::with_subaccount(
+            icrc1_ledger::account_with_subaccount(
                 self.pic_setup.canister_id(),
                 spender_subaccount(tip_id),
             ),
@@ -678,6 +678,105 @@ fn storing_claim_codes_is_rate_limited() {
 }
 
 #[test]
+fn a_long_tip_id_can_still_recover_its_link() {
+    // `MAX_TIP_ID_BYTES` is 64 and the secrets map key is a `Blob<32>`, so the
+    // raw bytes made ids of 33-64 a silent dead zone: creatable, claimable and
+    // cancellable, but the recovery secret could never be stored or read. The
+    // sender would only find out when the link they wanted back was not there.
+    let env = setup_tips();
+    let tip_id = "a".repeat(48);
+    let claim_code = "code-long-id";
+
+    env.reserve(&tip_id, claim_code, TIP_AMOUNT);
+
+    let ciphertext = ByteBuf::from(vec![9u8; 32]);
+    let stored: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.clone(),
+                encrypted_claim_code: ciphertext.clone(),
+            },
+        )
+        .expect("set_tip_secret should reach the handler");
+
+    assert!(matches!(stored, SetTipSecretResult::Ok));
+
+    let read: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id)
+        .expect("get_tip_secret should reach the handler");
+
+    assert_eq!(read, GetTipSecretResult::Ok(Some(ciphertext)));
+}
+
+#[test]
+fn an_expired_tip_cannot_be_rewritten_as_cancelled() {
+    // It lapsed. Calling that a cancellation puts something in the sender's
+    // history they did not do, and the allowance expired with it either way.
+    let env = setup_tips();
+    let tip_id = "tip-lapsed";
+    let expires_at_ns = now_ns(&env.pic_setup) + ONE_HOUR_NS;
+
+    env.approve(tip_id, TIP_AMOUNT + TRANSFER_FEE, Some(expires_at_ns));
+    assert_eq!(
+        env.create(tip_id, "code-lapsed", TIP_AMOUNT, expires_at_ns),
+        Ok(())
+    );
+
+    env.pic_setup
+        .pic
+        .advance_time(Duration::from_secs(60 * 60 + 1));
+    env.pic_setup.pic.tick();
+
+    assert_eq!(
+        env.cancel(env.sender, tip_id),
+        Err(TipError::NotCancellable)
+    );
+
+    let tips = env.my_tips(env.sender);
+
+    assert_eq!(
+        tips[0].status,
+        TipStatus::Expired,
+        "and it still reads as expired"
+    );
+}
+
+#[test]
+fn the_secrets_store_refuses_an_empty_tip_id() {
+    // The store had its own length check rather than going through
+    // `validate_tip_id`, so it matched on the upper bound and diverged on the
+    // lower one: an empty id was accepted. That key matches no tip, so claim,
+    // cancel and prune — all of which clean up by tip id — could never remove
+    // what was written under it.
+    let env = setup_tips();
+
+    let stored: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: String::new(),
+                encrypted_claim_code: ByteBuf::from(vec![7u8; 48]),
+            },
+        )
+        .expect("set_tip_secret should reach the handler");
+
+    assert_eq!(stored, SetTipSecretResult::Err(TipError::InvalidTipId));
+
+    let read: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", String::new())
+        .expect("get_tip_secret should reach the handler");
+
+    assert_eq!(read, GetTipSecretResult::Err(TipError::InvalidTipId));
+}
+
+#[test]
 fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
     // Tips live in stable memory regions of their own, and those regions were
     // renumbered late (main had taken `MemoryId::new(20)` for contact images
@@ -702,19 +801,15 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
 
     // A claim is submitted but deliberately not awaited: after one round the
     // canister has written `Claiming` and handed the transfer to the ledger, so
-    // the upgrade below lands on a canister that is mid-way through a payout
-    // rather than on a quiet one.
+    // the upgrade below lands on a canister mid-way through a payout.
     //
-    // It is worth being exact about what this does and does not reach. The
-    // hazard behind open question 4 is the upgrade landing between the ledger
-    // call and its reply, which destroys the callback. That is not expressible
-    // here: pocket-ic drives rounds to answer the `install_code` ingress, and
-    // while this claim's ingress is outstanding it cannot — the upgrade fails
-    // with "Failed to answer to ingress after 100 rounds". Awaiting the claim
-    // first is what unblocks the upgrade, and awaiting it completes it. So the
-    // lost-callback path is still unmeasured, and the five-minute in-flight
-    // timeout that recovers from it is covered only by the unit tests in
-    // `tips/model.rs`.
+    // Whether the upgrade lands *before* or *after* the ledger's reply is up to
+    // the scheduler, and both happen — locally the claim tends to complete
+    // first; on CI the upgrade gets in between and destroys the callback, so the
+    // claim call comes back as a trap. Nothing below depends on which, because
+    // the guarantee does not: the record is committed before the await, the
+    // allowance is the source of truth for whether the money moved, and neither
+    // outcome may pay twice.
     let in_flight = env
         .pic_setup
         .pic
@@ -736,38 +831,45 @@ fn a_tip_survives_an_upgrade_and_still_pays_exactly_once() {
         .upgrade_latest_wasm(None)
         .expect("upgrade should succeed with a claim outstanding");
 
-    env.pic_setup
-        .pic
-        .await_call(in_flight)
-        .expect("the claim should still answer across the upgrade");
+    // Answered or trapped, both are fine. A lost callback is exactly the case
+    // the `Claiming` state and its timeout exist for.
+    let _ = env.pic_setup.pic.await_call(in_flight);
 
-    // The money and the record agree, which is the whole point of the region
-    // being read back as the structure that wrote it.
-    assert_eq!(env.balance(claimer), Nat::from(TIP_AMOUNT));
-    assert_eq!(env.tip_allowance(tip_id), Nat::from(0u64));
+    // Whatever happened to the call, at most one payout may have occurred.
+    let tip_amount = Nat::from(TIP_AMOUNT);
+    let paid_immediately = env.balance(claimer);
 
+    assert!(
+        paid_immediately <= tip_amount,
+        "a claim across an upgrade paid more than the tip: {paid_immediately}"
+    );
+
+    // The record survived the upgrade as itself. This is the half that was never
+    // measured: tips took stable memory regions of their own and those regions
+    // were renumbered late, and a region reopened as the wrong structure decodes
+    // into plausible rubbish rather than failing outright — so the amount and the
+    // deadline are checked, not just that a row came back.
     let tips = env.my_tips(env.sender);
 
     assert_eq!(tips.len(), 1, "the tip survived the upgrade");
     assert_eq!(tips[0].tip_id, tip_id);
-    assert_eq!(tips[0].status, TipStatus::Claimed);
-
-    // Every field the sender sees came back as itself. A region reopened as the
-    // wrong structure would decode into plausible-looking rubbish here rather
-    // than failing outright, so the amount and the deadline are checked, not
-    // just the presence of a row.
-    assert_eq!(tips[0].amount, Nat::from(TIP_AMOUNT));
+    assert_eq!(tips[0].amount, tip_amount);
     assert_eq!(tips[0].expires_at_ns, expires_at_ns);
 
-    // And the second attempt is refused rather than paid, on a record that has
-    // now been through an upgrade.
-    assert_eq!(
-        env.claim(claimer, tip_id, claim_code),
-        Err(TipError::NotFound)
-    );
+    // The upgrade helper advances time well past the in-flight window, so a tip
+    // left in `Claiming` by a lost callback is claimable again by here. Retrying
+    // is what proves the design: if the first transfer did land, the allowance is
+    // spent and this fails; if it did not, this pays. Either way, once.
+    let _ = env.claim(claimer, tip_id, claim_code);
+
     assert_eq!(
         env.balance(claimer),
-        Nat::from(TIP_AMOUNT),
-        "the claimer was paid exactly once across the upgrade"
+        tip_amount,
+        "the claimer ends up paid exactly once, whichever side of the ledger reply the upgrade landed on"
+    );
+    assert_eq!(
+        env.tip_allowance(tip_id),
+        Nat::from(0u64),
+        "and the allowance that paid for it is spent, so nothing can draw on it again"
     );
 }

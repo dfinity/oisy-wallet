@@ -44,7 +44,9 @@ describe('isInvalidUtxosFee', () => {
 	});
 
 	it('returns true when no UTXOs were selected', () => {
-		expect(isInvalidUtxosFee({ feeSatoshis: ZERO, utxos: [] })).toBeTruthy();
+		expect(
+			isInvalidUtxosFee({ feeSatoshis: ZERO, feeRateMiliSatoshisPerVByte: 4000n, utxos: [] })
+		).toBeTruthy();
 	});
 });
 
@@ -78,7 +80,10 @@ describe('mapUtxosFeeErrorToMessage', () => {
 
 	it('falls back to the no-available-UTXOs message', () => {
 		expect(
-			mapUtxosFeeErrorToMessage({ utxosFee: { feeSatoshis: ZERO, utxos: [] }, i18n: en })
+			mapUtxosFeeErrorToMessage({
+				utxosFee: { feeSatoshis: ZERO, feeRateMiliSatoshisPerVByte: 4000n, utxos: [] },
+				i18n: en
+			})
 		).toBe(en.send.info.no_available_utxos);
 	});
 });
