@@ -35,6 +35,15 @@ export const ERC20_DEPOSIT_HASH = '0x26b3293f';
 // https://etherscan.io/tx/0x6d6027a32a817833daa02ca4a6fa7fb4b22ce18570f0a6f1ddaf03dd06776a5b
 export const ERC20_DEPOSIT_ERC20_HASH = '0xdb9751af';
 
+// `increaseAllowance` and `decreaseAllowance` are not part of ERC-20. OpenZeppelin added them so a
+// spender's allowance could be changed without passing through the zero-then-set dance the standard
+// `approve` invites, and dropped them again in v5. The tokens minted before that still carry them,
+// USDC and DAI among them, and they grant an allowance exactly as `approve` does.
+// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.6/contracts/token/ERC20/ERC20.sol
+export const ERC20_INCREASE_ALLOWANCE_HASH = '0x39509351';
+
+export const ERC20_DECREASE_ALLOWANCE_HASH = '0xa457c2d7';
+
 // The ERC20 transfer contract function prefix is 0xa9059cbb
 // https://polygonscan.com/tx/0x99358ec7a9b45aec7f9587ae48edc06528d1c600db53329b9c1eebb10ce64640
 export const ERC20_TRANSFER_HASH = '0xa9059cbb';

@@ -1,7 +1,18 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
+import {
+	ERC20_APPROVE_HASH,
+	ERC20_DECREASE_ALLOWANCE_HASH,
+	ERC20_INCREASE_ALLOWANCE_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
+import {
+	MULTICALL_DEADLINE_HASH,
+	MULTICALL_HASH,
+	MULTICALL_MAX_METHODS
+} from '$eth/constants/multicall.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { ErcTransfer } from '$eth/types/eth-transaction';
@@ -9,11 +20,20 @@ import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
+	decodeSetApprovalForAllData,
 	findErcTransfer,
 	findErcTransfers,
 	formatErcTransferAsset,
+	getCalldataMethods,
+	getCalldataSelector,
 	groupEthTransactionsByNetworkAndHash,
+	hasCalldata,
+	isErc20TransactionApprove,
+	isErc20TransactionDecreaseAllowance,
+	isErc20TransactionDeposit,
+	isErc20TransactionIncreaseAllowance,
 	isErc20TransactionTransfer,
+	isErcTransactionSetApprovalForAll,
 	isMaxUint256,
 	mapAddressToName,
 	mapEthTransactionUi,
@@ -36,6 +56,7 @@ import {
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { AbiCoder } from 'ethers/abi';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -471,6 +492,294 @@ describe('transactions.utils', () => {
 
 		it('should return false for nullish calldata', () => {
 			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isErc20TransactionIncreaseAllowance', () => {
+		it('should detect the increaseAllowance selector', () => {
+			expect(
+				isErc20TransactionIncreaseAllowance(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should not detect another allowance selector', () => {
+			expect(isErc20TransactionIncreaseAllowance(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+			expect(
+				isErc20TransactionIncreaseAllowance(`${ERC20_DECREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeFalsy();
+		});
+
+		it('should not detect undefined data', () => {
+			expect(isErc20TransactionIncreaseAllowance(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isErc20TransactionDecreaseAllowance', () => {
+		it('should detect the decreaseAllowance selector', () => {
+			expect(
+				isErc20TransactionDecreaseAllowance(`${ERC20_DECREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should not detect the increaseAllowance selector', () => {
+			expect(
+				isErc20TransactionDecreaseAllowance(`${ERC20_INCREASE_ALLOWANCE_HASH}deadbeef`)
+			).toBeFalsy();
+		});
+
+		it('should not detect undefined data', () => {
+			expect(isErc20TransactionDecreaseAllowance(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('hasCalldata', () => {
+		it.each([undefined, '', '0x', '0X'])('should read %s as carrying no call', (data) => {
+			expect(hasCalldata(data)).toBeFalsy();
+		});
+
+		// Four bytes of nothing is still a call, and reviewing it as a plain transfer is exactly the
+		// misstatement the unknown state exists to prevent.
+		it.each(['0xab', '0xdeadbeef', `${ERC20_APPROVE_HASH}deadbeef`])(
+			'should read %s as carrying a call',
+			(data) => {
+				expect(hasCalldata(data)).toBeTruthy();
+			}
+		);
+	});
+
+	describe('getCalldataMethods', () => {
+		const SPENDER = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
+		const PERMIT2_APPROVE_HASH = '0x87517c45';
+		const UNIVERSAL_ROUTER_EXECUTE_HASH = '0x3593564c';
+
+		const encode = ({ selector, value }: { selector: string; value: bigint }) =>
+			`${selector}${AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [SPENDER, value]).slice(2)}`;
+
+		const encodeMulticall = ({
+			selector = MULTICALL_HASH,
+			calls
+		}: {
+			selector?: string;
+			calls: string[];
+		}) =>
+			`${selector}${AbiCoder.defaultAbiCoder()
+				.encode(
+					selector === MULTICALL_DEADLINE_HASH ? ['uint256', 'bytes[]'] : ['bytes[]'],
+					selector === MULTICALL_DEADLINE_HASH ? [1n, calls] : [calls]
+				)
+				.slice(2)}`;
+
+		it.each([undefined, '', '0x'])('should list nothing for %s', (data) => {
+			expect(getCalldataMethods(data)).toEqual({ methods: [], capped: false });
+		});
+
+		it('should list a plain call as itself', () => {
+			expect(getCalldataMethods(encode({ selector: ERC20_APPROVE_HASH, value: 1n }))).toEqual({
+				methods: [{ selector: ERC20_APPROVE_HASH, depth: 0 }],
+				capped: false
+			});
+		});
+
+		it('should list calldata too short to name a function, without a selector', () => {
+			expect(getCalldataMethods('0xab')).toEqual({
+				methods: [{ selector: undefined, depth: 0 }],
+				capped: false
+			});
+		});
+
+		it('should list the wrapper and the calls batched inside it', () => {
+			const data = encodeMulticall({
+				calls: [
+					encode({ selector: ERC20_APPROVE_HASH, value: 1n }),
+					encode({ selector: PERMIT2_APPROVE_HASH, value: 2n })
+				]
+			});
+
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [
+					{ selector: MULTICALL_HASH, depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, depth: 1 },
+					{ selector: PERMIT2_APPROVE_HASH, depth: 1 }
+				],
+				capped: false
+			});
+		});
+
+		it('should read the batch out of the deadline variant, past its first argument', () => {
+			const data = encodeMulticall({
+				selector: MULTICALL_DEADLINE_HASH,
+				calls: [encode({ selector: ERC20_APPROVE_HASH, value: 1n })]
+			});
+
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [
+					{ selector: MULTICALL_DEADLINE_HASH, depth: 0 },
+					{ selector: ERC20_APPROVE_HASH, depth: 1 }
+				],
+				capped: false
+			});
+		});
+
+		it('should stop descending at the depth limit rather than walk a tree of the caller choosing', () => {
+			const data = encodeMulticall({
+				calls: [
+					encodeMulticall({
+						calls: [
+							encodeMulticall({ calls: [encode({ selector: ERC20_APPROVE_HASH, value: 1n })] })
+						]
+					})
+				]
+			});
+
+			expect(getCalldataMethods(data).methods.map(({ depth }) => depth)).toEqual([0, 1, 2]);
+		});
+
+		it('should cap the list rather than render a batch of any length', () => {
+			const calls = Array.from({ length: MULTICALL_MAX_METHODS + 10 }, () =>
+				encode({ selector: ERC20_APPROVE_HASH, value: 1n })
+			);
+
+			const { methods, capped } = getCalldataMethods(encodeMulticall({ calls }));
+
+			expect(methods).toHaveLength(MULTICALL_MAX_METHODS);
+			expect(capped).toBeTruthy();
+		});
+
+		// A batch that ends exactly on the cap left nothing out. Reporting it as truncated would put
+		// a "some calls are not listed" note on a list that is complete.
+		it('should not report a batch that ends exactly on the cap as capped', () => {
+			// The wrapper occupies one of the entries, so the batch that exactly fills the cap is one
+			// call shorter than it.
+			const calls = Array.from({ length: MULTICALL_MAX_METHODS - 1 }, () =>
+				encode({ selector: ERC20_APPROVE_HASH, value: 1n })
+			);
+
+			const { methods, capped } = getCalldataMethods(encodeMulticall({ calls }));
+
+			expect(methods).toHaveLength(MULTICALL_MAX_METHODS);
+			expect(capped).toBeFalsy();
+		});
+
+		// A wrapper whose arguments do not decode has yielded nothing, and saying so is the point:
+		// listing it alone is honest, inventing its contents would not be.
+		it('should list a wrapper whose arguments do not decode as itself', () => {
+			expect(getCalldataMethods(`${MULTICALL_HASH}deadbeef`)).toEqual({
+				methods: [{ selector: MULTICALL_HASH, depth: 0 }],
+				capped: false
+			});
+		});
+
+		// A Universal Router `execute` carries opcodes and bare arguments, not calldata. There are
+		// no selectors in it to find, and none are claimed.
+		it('should not claim to read a wrapper it cannot open', () => {
+			const data = `${UNIVERSAL_ROUTER_EXECUTE_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['bytes', 'bytes[]', 'uint256'], ['0x0a00', ['0xdeadbeef'], 1n])
+				.slice(2)}`;
+
+			expect(getCalldataMethods(data)).toEqual({
+				methods: [{ selector: UNIVERSAL_ROUTER_EXECUTE_HASH, depth: 0 }],
+				capped: false
+			});
+		});
+	});
+
+	describe('getCalldataSelector', () => {
+		it('should return the selector lowercased', () => {
+			expect(getCalldataSelector(`${ERC20_INCREASE_ALLOWANCE_HASH.toUpperCase()}deadbeef`)).toBe(
+				ERC20_INCREASE_ALLOWANCE_HASH
+			);
+		});
+
+		it.each([undefined, '0x', '0xab', '0x3950935'])('should return no selector for %s', (data) => {
+			expect(getCalldataSelector(data)).toBeUndefined();
+		});
+	});
+
+	describe('isErcTransactionSetApprovalForAll', () => {
+		it('should return true for calldata starting with the setApprovalForAll selector', () => {
+			expect(
+				isErcTransactionSetApprovalForAll(`${ERC_SET_APPROVAL_FOR_ALL_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should return false for calldata of an ERC20 method', () => {
+			expect(isErcTransactionSetApprovalForAll(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+
+			expect(isErcTransactionSetApprovalForAll(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeFalsy();
+		});
+
+		it('should return false for nullish calldata', () => {
+			expect(isErcTransactionSetApprovalForAll(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('decodeSetApprovalForAllData', () => {
+		const operator = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+
+		const encode = (approved: boolean): string =>
+			`${ERC_SET_APPROVAL_FOR_ALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['address', 'bool'], [operator, approved])
+				.slice(2)}`;
+
+		it('should decode the operator and a granted approval', () => {
+			expect(decodeSetApprovalForAllData(encode(true))).toStrictEqual({
+				operator,
+				approved: true
+			});
+		});
+
+		it('should decode the operator and a revoked approval', () => {
+			expect(decodeSetApprovalForAllData(encode(false))).toStrictEqual({
+				operator,
+				approved: false
+			});
+		});
+
+		it('should throw on truncated calldata rather than inventing an operator', () => {
+			expect(() => decodeSetApprovalForAllData(`${ERC_SET_APPROVAL_FOR_ALL_HASH}00`)).toThrow();
+		});
+	});
+
+	// Casing is not part of calldata: the EVM sees the same four bytes either way, so a classifier
+	// that reads the text can be stepped around without changing the call that executes. That let a
+	// token transfer reach the review as a native zero-value send, with the fail-closed warning
+	// silent because the calldata was never recognised as ERC-20 in the first place.
+	describe('ERC20 selectors are matched as bytes, not as text', () => {
+		const args =
+			'000000000000000000000000ca11bde05977b3631167028862be2a173976ca110000000000000000000000000000000000000000000000000de0b6b3a7640000';
+
+		it.each(['0xA9059CBB', '0xa9059CBB', '0xA9059cbb'])(
+			'should recognise %s as a transfer',
+			(selector) => {
+				expect(isErc20TransactionTransfer(`${selector}${args}`)).toBeTruthy();
+			}
+		);
+
+		it.each(['0x095EA7B3', '0x095eA7B3'])('should recognise %s as an approve', (selector) => {
+			expect(isErc20TransactionApprove(`${selector}${args}`)).toBeTruthy();
+		});
+
+		it.each(['0x26B3293F', '0xDB9751AF'])('should recognise %s as a deposit', (selector) => {
+			expect(isErc20TransactionDeposit(`${selector}${args}`)).toBeTruthy();
+		});
+
+		it.each(['0xA22CB465', '0xa22CB465', '0xA22cb465'])(
+			'should recognise %s as a setApprovalForAll',
+			(selector) => {
+				expect(isErcTransactionSetApprovalForAll(`${selector}${args}`)).toBeTruthy();
+			}
+		);
+
+		// The selector is four bytes and no more: a longer prefix that merely starts the same way is
+		// a different call.
+		it('should not mistake one selector for another that shares a prefix', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}${args}`)).toBeFalsy();
+			expect(isErc20TransactionApprove(`${ERC20_TRANSFER_HASH}${args}`)).toBeFalsy();
+		});
+
+		it('should return false for calldata too short to carry a selector', () => {
+			expect(isErc20TransactionTransfer('0xa905')).toBeFalsy();
+			expect(isErc20TransactionApprove('0x')).toBeFalsy();
 		});
 	});
 

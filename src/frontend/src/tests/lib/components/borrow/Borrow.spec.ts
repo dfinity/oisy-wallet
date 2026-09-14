@@ -1,9 +1,12 @@
 import Borrow from '$lib/components/borrow/Borrow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import * as borrowDerived from '$lib/derived/borrow.derived';
+import * as borrowRegistry from '$lib/providers/borrow.providers';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
+import { readable } from 'svelte/store';
 
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({
@@ -11,9 +14,8 @@ vi.mock('$app/navigation', () => ({
 	afterNavigate: vi.fn()
 }));
 
-// Force the feature flags on (off by default outside staging) so the page renders.
+// Force the provider flag on (off by default outside staging) so Liquidium is registered.
 vi.mock('$env/lend-borrow', () => ({
-	LEND_BORROW_ENABLED: true,
 	anyLendBorrowProviderEnabled: true
 }));
 
@@ -86,5 +88,31 @@ describe('Borrow', () => {
 
 		expect(container).not.toHaveTextContent(en.earning.card_fields.currentBorrowing);
 		expect(container).not.toHaveTextContent(en.earning.card_fields.interestPerYear);
+	});
+
+	describe('when no borrow provider is available', () => {
+		beforeEach(() => {
+			vi.spyOn(borrowRegistry, 'borrowProviders', 'get').mockReturnValue([]);
+			vi.spyOn(borrowDerived, 'borrowData', 'get').mockReturnValue(readable({}));
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('still renders the page with the provider-unavailable empty state', () => {
+			const { container } = render(Borrow);
+
+			expect(container).toHaveTextContent(en.borrow.text.header_title);
+			expect(container).toHaveTextContent(en.borrow.text.borrowing_options);
+			expect(container).toHaveTextContent(en.borrow.provider_unavailable.title);
+			expect(container).not.toHaveTextContent(en.borrow.cards.liquidium.title);
+		});
+
+		it('does not navigate away', () => {
+			render(Borrow);
+
+			expect(mockGoto).not.toHaveBeenCalled();
+		});
 	});
 });

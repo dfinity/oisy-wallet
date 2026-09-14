@@ -37,6 +37,7 @@ export const prepareBtcSend = ({
 	if (isNullish(pendingUtxoOutpoints)) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.PendingTransactionsNotAvailable
 		};
@@ -48,6 +49,7 @@ export const prepareBtcSend = ({
 	if (allUtxos.length === 0) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.InsufficientBalance
 		};
@@ -65,6 +67,7 @@ export const prepareBtcSend = ({
 	if (filteredUtxos.length === 0) {
 		return {
 			feeSatoshis: ZERO,
+			feeRateMiliSatoshisPerVByte,
 			utxos: [],
 			error: BtcPrepareSendError.UtxoLocked
 		};
@@ -81,6 +84,7 @@ export const prepareBtcSend = ({
 	if (!selection.sufficientFunds) {
 		return {
 			feeSatoshis: selection.feeSatoshis,
+			feeRateMiliSatoshisPerVByte,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};
@@ -89,6 +93,7 @@ export const prepareBtcSend = ({
 	// Fee is already calculated in the selection process
 	return {
 		feeSatoshis: selection.feeSatoshis,
+		feeRateMiliSatoshisPerVByte,
 		utxos: selection.selectedUtxos
 	};
 };

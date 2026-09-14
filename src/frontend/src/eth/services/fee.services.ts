@@ -1,4 +1,8 @@
 import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -12,14 +16,17 @@ import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.prov
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
+import { OP_STACK_UNSIGNED_TX_SIZE } from '$evm/base/constants/base.constants';
 import {
 	BSC_MIN_MAX_FEE_PER_GAS,
 	BSC_MIN_MAX_PRIORITY_FEE_PER_GAS
 } from '$evm/bsc/constants/bsc.constants';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { maxBigInt } from '$lib/utils/bigint.utils';
@@ -27,6 +34,27 @@ import { consoleWarn } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 const BSC_CHAIN_IDS: EthereumChainId[] = [BSC_MAINNET_NETWORK.chainId, BSC_TESTNET_NETWORK.chainId];
+
+// Every OP-stack chain OISY supports. Arbitrum is not one of them: its own L1 cost is folded into
+// the gas the transaction reports, so `gasLimit * maxFeePerGas` already covers it.
+const OP_STACK_CHAIN_IDS: EthereumChainId[] = [BASE_NETWORK.chainId, BASE_SEPOLIA_NETWORK.chainId];
+
+// Deliberately not best-effort. Swallowing a failure here would leave the ceiling at
+// `maxFeePerGas * gas` on a chain that charges more than that, which is precisely what let "Max"
+// offer an unminable amount, and it would do so silently: the quote would look affordable and the
+// transaction would never be included. Letting it throw surfaces the problem and retries it, and
+// the call shares a provider with the rest of the fee data, so there is little for it to fail on
+// alone. `undefined` here means the chain has no such fee, never that we failed to read it.
+const getL1DataFee = async ({
+	chainId,
+	provider
+}: {
+	chainId: EthereumChainId;
+	provider: InfuraProvider;
+}): Promise<bigint | undefined> =>
+	OP_STACK_CHAIN_IDS.includes(chainId)
+		? await provider.getL1FeeUpperBound(OP_STACK_UNSIGNED_TX_SIZE)
+		: undefined;
 
 const getGasFeeFloor = (
 	chainId: EthereumChainId
@@ -123,14 +151,17 @@ export const getEthFeeDataWithProvider = async ({
 	networkId,
 	chainId,
 	from,
-	to
+	to,
+	priority = EthFeePriority.STANDARD
 }: {
 	networkId: NetworkId;
 	chainId: bigint;
 	from: EthAddress;
 	to: EthAddress;
+	priority?: EthFeePriority;
 }): Promise<{
 	feeData: Omit<TransactionFeeData, 'gas'>;
+	priorities: EthFeePriorities;
 	provider: InfuraProvider;
 	params: GetFeeData;
 }> => {
@@ -146,24 +177,45 @@ export const getEthFeeDataWithProvider = async ({
 
 	const { getSuggestedFeeData } = new InfuraGasRest(chainId);
 
-	const {
-		maxFeePerGas: suggestedMaxFeePerGas,
-		maxPriorityFeePerGas: suggestedMaxPriorityFeePerGas
-	} = await getSuggestedFeeData();
+	const { baseFeePerGas, perPriority } = await getSuggestedFeeData();
+
+	// Flat, priority-independent and not refunded: it belongs to the transaction, not to a tier.
+	const l1Fee = await getL1DataFee({ chainId, provider });
 
 	const { maxFeePerGas: floorMaxFeePerGas, maxPriorityFeePerGas: floorMaxPriorityFeePerGas } =
 		getGasFeeFloor(chainId);
 
-	const feeData = {
-		...feeDataRest,
+	// The provider's own quote and the network floor are lower bounds on what will actually be
+	// accepted, so they apply to every priority, not only the selected one. Applying them once
+	// after selection would let a slow choice fall below what the chain relays.
+	const applyFloors = ({
+		maxFeePerGas: priorityMaxFeePerGas,
+		maxPriorityFeePerGas: priorityMaxPriorityFeePerGas
+	}: EthFeePerGas): EthFeePerGas => ({
 		maxFeePerGas:
-			maxBigInt(maxBigInt(maxFeePerGas, suggestedMaxFeePerGas), floorMaxFeePerGas) ?? null,
+			maxBigInt(maxBigInt(maxFeePerGas, priorityMaxFeePerGas), floorMaxFeePerGas) ?? null,
 		maxPriorityFeePerGas:
 			maxBigInt(
-				maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas),
+				maxBigInt(maxPriorityFeePerGas, priorityMaxPriorityFeePerGas),
 				floorMaxPriorityFeePerGas
 			) ?? null
+	});
+
+	const priorities: EthFeePriorities = {
+		baseFeePerGas,
+		perPriority: {
+			[EthFeePriority.SLOW]: applyFloors(perPriority[EthFeePriority.SLOW]),
+			[EthFeePriority.STANDARD]: applyFloors(perPriority[EthFeePriority.STANDARD]),
+			[EthFeePriority.FAST]: applyFloors(perPriority[EthFeePriority.FAST])
+		}
 	};
 
-	return { feeData, provider, params };
+	const feeData = {
+		...feeDataRest,
+		...priorities.perPriority[priority],
+		baseFeePerGas,
+		l1Fee
+	};
+
+	return { feeData, priorities, provider, params };
 };
