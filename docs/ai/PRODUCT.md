@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Send
+
+### First-time destination addresses
+
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses, not a send on another network.
+
+Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
+
+The send flow says so twice. On the address step, entering such an address raises a warning that this is the first send to it and that transfers cannot be reversed; it does not block moving on. On the review step the same warning returns with a **confirmation checkbox, and the send button stays disabled until it is ticked** — the same pattern as the confirmation for a swap that would lose significant value. The confirmation belongs to that address and that visit: going back, changing the destination and returning asks again. It is never remembered — there is no "don't warn me about this address", and the only thing that retires the warning is a real send.
+
+Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
+
+Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting is exempt: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+---
+
 ## Activity
 
 ### IC transactions and Index-canister outages
