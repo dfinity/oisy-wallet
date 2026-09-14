@@ -135,10 +135,13 @@
 	{@render info?.()}
 
 	{#if firstTimeDestination}
-		<FirstTimeDestinationWarning
-			confirmed={firstTimeDestinationConfirmed}
-			onConfirm={() => (firstTimeDestinationConfirmed = !firstTimeDestinationConfirmed)}
-		/>
+		<div class="mt-4">
+			<FirstTimeDestinationWarning
+				confirmed={firstTimeDestinationConfirmed}
+				onConfirm={() => (firstTimeDestinationConfirmed = !firstTimeDestinationConfirmed)}
+				styleClass="mb-0!"
+			/>
+		</div>
 	{/if}
 
 	{#snippet toolbar()}
