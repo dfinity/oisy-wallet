@@ -108,6 +108,9 @@ export const submitXrpTransaction = async ({
 		engineResult,
 		engineResultMessage: result.engine_result_message as string | undefined,
 		txHash: (result.tx_json as { hash?: string } | undefined)?.hash,
-		accepted: engineResult.startsWith('tes') || engineResult.startsWith('ter')
+		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
+		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
+		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
+		accepted: (result.accepted as boolean | undefined) ?? false
 	};
 };
