@@ -2,7 +2,10 @@ use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::{personal_note_share::MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES, token_id::TokenId};
+use shared::types::{
+    personal_note_share::MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES, tip::MAX_TIP_ID_BYTES,
+    token_id::TokenId,
+};
 
 #[derive(Default)]
 pub struct Candid<T>(pub T)
@@ -336,5 +339,69 @@ mod contact_image_key_tests {
         for id in [0u64, 1, 500, u64::MAX] {
             assert!(start <= encoded(&ContactImageKey(target, id)));
         }
+    }
+}
+
+/// Primary key of the tip store: the opaque, client-generated tip id that also
+/// appears as `<id>` in the share link. Bounded (not fixed-size) — the client
+/// generates a 128-bit id, but the bound only enforces generous headroom.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct TipId(pub String);
+
+impl Storable for TipId {
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_TIP_ID_BYTES,
+        is_fixed_size: false,
+    };
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Borrowed(self.0.as_bytes())
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.0.into_bytes()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(String::from_utf8(bytes.into_owned()).expect("tip id should be valid UTF-8"))
+    }
+}
+
+/// Key of the by-sender index over the tip store, laid out so that one
+/// sender's tips form a contiguous range: `[u32 BE principal_len][principal_bytes][tip_id_bytes]`.
+/// Same encoding as [`PersonalNoteShareCreatorKey`], for the same reason — a
+/// length-prefixed principal keeps the range scan exact even though principals
+/// vary in length.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct TipSenderKey(pub StoredPrincipal, pub TipId);
+
+impl Storable for TipSenderKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let tip_id_bytes = self.1.to_bytes();
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + tip_id_bytes.len());
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(&tip_id_bytes);
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let tip_id = TipId::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
+        Self(principal, tip_id)
     }
 }

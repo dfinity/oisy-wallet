@@ -944,13 +944,22 @@ describe('chain-fusion-swap.services', () => {
 			BtcPrepareSendError.InsufficientBalanceForFee,
 			BtcPrepareSendError.UtxoLocked
 		])('should not quote when the UTXO selection fails with %s', async (error) => {
-			vi.mocked(prepareBtcSend).mockReturnValue({ feeSatoshis: ZERO, utxos: [], error });
+			vi.mocked(prepareBtcSend).mockReturnValue({
+				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: 4000n,
+				utxos: [],
+				error
+			});
 
 			await expect(btcQuote()).resolves.toBeUndefined();
 		});
 
 		it('should not quote when the UTXO selection picked no inputs', async () => {
-			vi.mocked(prepareBtcSend).mockReturnValue({ feeSatoshis: 1_000n, utxos: [] });
+			vi.mocked(prepareBtcSend).mockReturnValue({
+				feeSatoshis: 1_000n,
+				feeRateMiliSatoshisPerVByte: 4000n,
+				utxos: []
+			});
 
 			await expect(btcQuote()).resolves.toBeUndefined();
 		});

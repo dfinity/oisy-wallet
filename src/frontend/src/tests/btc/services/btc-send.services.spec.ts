@@ -236,8 +236,10 @@ describe('btc-send.services', () => {
 			}
 		};
 
+		// 1 input + 2 outputs = 141 vB, at 4 sat/vByte = 564 satoshis.
 		const validUtxosFee: UtxosFee = {
-			feeSatoshis: 1000n, // 250 * 4 = 1000, within tolerance
+			feeSatoshis: 564n,
+			feeRateMiliSatoshisPerVByte: 4000n,
 			utxos: [validUtxo]
 		};
 
@@ -260,8 +262,6 @@ describe('btc-send.services', () => {
 			).mockResolvedValue({ success: true });
 			vi.spyOn(btcUtils, 'getPendingTransactionUtxoOutpoints').mockReturnValue([]);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoOutpoints').mockReturnValue(['txid1:0', 'txid2:0']);
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 		});
 
 		it('should pass validation for valid UTXOs and parameters', async () => {
@@ -419,10 +419,6 @@ describe('btc-send.services', () => {
 
 		describe('InvalidFeeCalculation validation', () => {
 			it('should throw InvalidFeeCalculation error when fee is too low', async () => {
-				// Mock estimated transaction size and fee rate to make expected fee higher than provided fee
-				vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(1000);
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(10000n);
-
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, feeSatoshis: 100n } // Very low fee
@@ -440,10 +436,6 @@ describe('btc-send.services', () => {
 			});
 
 			it('should throw InvalidFeeCalculation error when fee is too high', async () => {
-				// Mock estimated transaction size to make expected fee much lower than provided fee
-				vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(100);
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1n);
-
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, feeSatoshis: 50000n } // Very high fee
@@ -462,14 +454,15 @@ describe('btc-send.services', () => {
 		});
 
 		it('should throw InsufficientBalanceForFee error when UTXOs have insufficient funds', async () => {
-			// Use smaller fee and transaction size for consistent calculation
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
-
 			const params = {
 				...defaultValidateParams,
 				amount: 1, // 1 BTC = 100,000,000 satoshis, but UTXO only has 100,000
-				utxosFee: { ...validUtxosFee, feeSatoshis: 250n } // 250 * 1 = 250, within tolerance
+				// 141 vB at 1 sat/vByte = 141 satoshis, a valid fee for this selection
+				utxosFee: {
+					...validUtxosFee,
+					feeSatoshis: 141n,
+					feeRateMiliSatoshisPerVByte: 1000n
+				}
 			};
 
 			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
@@ -484,17 +477,13 @@ describe('btc-send.services', () => {
 		});
 
 		it('should accept fee within tolerance range', async () => {
-			// Mock transaction size for predictable fee calculation
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
-
-			const expectedFee = BigInt(250) * 4n; // 1000 satoshis
-			const toleranceRange = expectedFee / 10n; // 100 satoshis
+			const expectedFee = 564n;
+			const toleranceRange = expectedFee / 10n; // 56 satoshis
 
 			// Test fee at upper tolerance boundary
 			const paramsUpperBound = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 620
 			};
 
 			await expect(validateBtcSend(paramsUpperBound)).resolves.not.toThrow();
@@ -502,7 +491,7 @@ describe('btc-send.services', () => {
 			// Test fee at lower tolerance boundary
 			const paramsLowerBound = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 900
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 508
 			};
 
 			await expect(validateBtcSend(paramsLowerBound)).resolves.not.toThrow();
@@ -518,15 +507,13 @@ describe('btc-send.services', () => {
 				}
 			};
 
-			// Mock the transaction size estimation for 2 inputs
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(370);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(3000n);
-
 			const params = {
 				...defaultValidateParams,
 				utxosFee: {
 					...validUtxosFee,
-					feeSatoshis: 1110n, // 370 * 3 = 1110, within tolerance
+					// 2 inputs + 2 outputs = 209 vB, at 3 sat/vByte = 627 satoshis
+					feeSatoshis: 627n,
+					feeRateMiliSatoshisPerVByte: 3000n,
 					utxos: [validUtxo, utxo2]
 				}
 			};
@@ -534,35 +521,48 @@ describe('btc-send.services', () => {
 			await expect(validateBtcSend(params)).resolves.not.toThrow();
 		});
 
-		it('should call getFeeRateFromPercentiles with correct parameters', async () => {
+		it('should not re-sample the fee rate', async () => {
 			const getFeeRateFromPercentilesSpy = vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles');
 
 			await validateBtcSend(defaultValidateParams);
 
-			expect(getFeeRateFromPercentilesSpy).toHaveBeenCalledWith({
-				network: defaultValidateParams.network,
-				identity: defaultValidateParams.identity
-			});
+			expect(getFeeRateFromPercentilesSpy).not.toHaveBeenCalled();
+		});
+
+		it('should accept a fee the mempool has since moved away from', async () => {
+			// The percentile median that priced this fee shifts within a minute of ordinary
+			// mempool movement, and near the 1 sat/vByte floor one slot of drift already
+			// exceeds the tolerance. The fee is judged against the rate it was quoted at, so
+			// the send survives the drift instead of failing on the confirmation step.
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
+
+			const params = {
+				...defaultValidateParams,
+				utxosFee: {
+					...validUtxosFee,
+					feeSatoshis: 181n,
+					feeRateMiliSatoshisPerVByte: 1284n
+				}
+			};
+
+			await expect(validateBtcSend(params)).resolves.not.toThrow();
 		});
 
 		it('should validate exact fee tolerance boundaries', async () => {
-			vi.spyOn(btcUtxosUtils, 'estimateTransactionVSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
-
-			const expectedFee = 250n * 4n; // 1000 satoshis
-			const toleranceRange = expectedFee / 10n; // 100 satoshis
+			const expectedFee = 564n;
+			const toleranceRange = expectedFee / 10n; // 56 satoshis
 
 			// Test fee just outside tolerance (should fail)
 			const paramsOutsideUpper = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange + 1n } // 1101
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange + 1n } // 621
 			};
 
 			await expect(validateBtcSend(paramsOutsideUpper)).rejects.toThrow(BtcValidationError);
 
 			const paramsOutsideLower = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange - 1n } // 899
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange - 1n } // 507
 			};
 
 			await expect(validateBtcSend(paramsOutsideLower)).rejects.toThrow(BtcValidationError);
@@ -570,7 +570,7 @@ describe('btc-send.services', () => {
 			// Test fee exactly at tolerance boundary (should pass)
 			const paramsExactUpper = {
 				...defaultValidateParams,
-				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
+				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 620
 			};
 
 			await expect(validateBtcSend(paramsExactUpper)).resolves.not.toThrow();

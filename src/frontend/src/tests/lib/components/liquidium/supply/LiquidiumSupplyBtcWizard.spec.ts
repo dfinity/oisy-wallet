@@ -76,6 +76,7 @@ describe('LiquidiumSupplyBtcWizard', () => {
 		});
 		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
+			feeRateMiliSatoshisPerVByte: mockUtxosFee.feeRateMiliSatoshisPerVByte,
 			utxos: mockUtxosFee.utxos
 		});
 		vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
@@ -156,6 +157,7 @@ describe('LiquidiumSupplyBtcWizard', () => {
 			// UTXOs cannot fund the broadcast — the signer would reject the transaction.
 			vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: [],
 				error: BtcPrepareSendError.UtxoLocked
 			});

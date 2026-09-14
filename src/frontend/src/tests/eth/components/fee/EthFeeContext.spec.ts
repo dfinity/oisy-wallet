@@ -38,7 +38,7 @@ import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import type { Snippet } from 'svelte';
-import { readable, writable, type Writable } from 'svelte/store';
+import { get, readable, writable, type Writable } from 'svelte/store';
 
 vi.mock('$eth/rest/infura.rest', () => ({
 	InfuraGasRest: vi.fn()
@@ -213,6 +213,133 @@ describe('EthFeeContext', () => {
 		expect(setFeeMock.mock.calls[0][0]).toEqual(
 			expect.objectContaining({ maxPriorityFeePerGas: 30n })
 		);
+	});
+
+	describe('re-pricing to another priority', () => {
+		// Every tier from one sample, so switching between them is arithmetic on what is already
+		// held rather than a fetch. This is the write path that does not go through a request.
+		const renderWithPriorities = (props: Partial<typeof baseProps> = {}) => {
+			// Hangs so no fetched sample can land and overwrite the tiers seeded below: the only
+			// writes left are the ones the re-pricing effect makes.
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockImplementation(async () => await new Promise(() => {}));
+
+			const feePrioritiesStore = writable({
+				baseFeePerGas: 5n,
+				perPriority: {
+					[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
+					[EthFeePriority.STANDARD]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 5n },
+					[EthFeePriority.FAST]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 30n }
+				}
+			});
+
+			return render(EthFeeContext, {
+				props: { ...baseProps, priority: EthFeePriority.STANDARD, ...props },
+				context: new Map([[ETH_FEE_CONTEXT_KEY, { feeStore, feePrioritiesStore }]])
+			});
+		};
+
+		// The fee the consumer holds and has priced its amount against.
+		const held = { gas: 21n, maxFeePerGas: 100n, maxPriorityFeePerGas: 5n };
+
+		it('re-prices while observing', async () => {
+			const { rerender } = renderWithPriorities();
+
+			await vi.runAllTimersAsync();
+
+			feeState.set(held);
+			setFeeMock.mockClear();
+
+			await rerender({ ...baseProps, priority: EthFeePriority.FAST });
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledWith(
+				expect.objectContaining({ maxPriorityFeePerGas: 30n })
+			);
+		});
+
+		it('does not re-price a frozen fee', async () => {
+			const { rerender } = renderWithPriorities();
+
+			await vi.runAllTimersAsync();
+
+			feeState.set(held);
+			setFeeMock.mockClear();
+
+			// A tier change reaching a step that has stopped observing would re-price the very fee
+			// that step froze, without a fetch and without the user seeing it.
+			await rerender({ ...baseProps, observe: false, priority: EthFeePriority.FAST });
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).not.toHaveBeenCalled();
+			expect(get(feeState)).toStrictEqual(held);
+		});
+	});
+
+	describe('a sample that comes back after observing stopped', () => {
+		// A hanging fetch that is still in flight when `observe` flips, which is the only way a
+		// sample can reach a consumer that has stopped observing.
+		const renderWithInFlightFetch = () => {
+			let release: () => void = () => undefined;
+			const inFlight = new Promise<void>((resolve) => {
+				release = resolve;
+			});
+
+			InfuraGasRest.prototype.getSuggestedFeeData = vi.fn().mockImplementation(
+				async () =>
+					await inFlight.then(() => ({
+						baseFeePerGas: 5n,
+						perPriority: {
+							[EthFeePriority.SLOW]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+							[EthFeePriority.STANDARD]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n },
+							[EthFeePriority.FAST]: { maxFeePerGas: 12n, maxPriorityFeePerGas: 7n }
+						}
+					}))
+			);
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			return { ...renderWith(), release };
+		};
+
+		it('is dropped when a fee is already held', async () => {
+			const { rerender, release } = renderWithInFlightFetch();
+
+			// Let the debounce fire so the request is genuinely in flight before observing stops.
+			await vi.advanceTimersByTimeAsync(1000);
+
+			expect(InfuraGasRest.prototype.getSuggestedFeeData).toHaveBeenCalled();
+
+			// The fee the consumer holds and has priced its amount against.
+			const held = { gas: 21n, maxFeePerGas: 100n, maxPriorityFeePerGas: 3n };
+			feeState.set(held);
+
+			await rerender({ ...baseProps, observe: false });
+
+			release();
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).not.toHaveBeenCalled();
+			expect(get(feeState)).toStrictEqual(held);
+		});
+
+		it('is accepted when no fee was ever set', async () => {
+			const { rerender, release } = renderWithInFlightFetch();
+
+			await vi.advanceTimersByTimeAsync(1000);
+
+			feeState.set(undefined);
+
+			await rerender({ ...baseProps, observe: false });
+
+			release();
+			await vi.runAllTimersAsync();
+
+			// Nothing was frozen, and a review step reached before the first sample landed would
+			// otherwise sit with its send button disabled and no fetch left to enable it.
+			expect(setFeeMock).toHaveBeenCalledOnce();
+		});
 	});
 
 	it('should set fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {

@@ -28,7 +28,7 @@
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import {
 		sign as signService,
 		decode as decodeService
@@ -39,6 +39,7 @@
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -122,14 +123,11 @@
 		}
 	};
 
-	// When the transaction moves an SPL token we know, review it with that token's
-	// metadata; otherwise fall back to the network's native SOL token. The same mint
-	// can exist on several clusters, so we match the current network too.
+	// When the transaction moves an SPL token the wallet lists, review it with that token's
+	// metadata; otherwise fall back to the network's native SOL token.
 	let reviewToken = $derived(
 		nonNullish(tokenAddress)
-			? ($enabledSplTokens.find(
-					({ address, network: { id } }) => address === tokenAddress && id === networkId
-				) ?? token)
+			? (findSplToken({ tokens: $splTokens, tokenAddress, networkId }) ?? token)
 			: token
 	);
 

@@ -7,6 +7,7 @@ import type {
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { OisyTradeError } from '$lib/canisters/oisy-trade.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import { OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS } from '$lib/constants/oisy-trade.constants';
 import { allSortedIcrcTokens } from '$lib/derived/all-tokens.derived';
 import {
@@ -16,6 +17,7 @@ import {
 import {
 	isRetryableOisyTradeError,
 	settleOisyTradeSwap,
+	toOisyTradeSettlementBounds,
 	toOisyTradeSettlementRowUpdate,
 	type OisyTradeSettlement
 } from '$lib/services/oisy-trade-swap.services';
@@ -28,6 +30,7 @@ import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import {
 	findOisyTradeRowToken,
+	fromOisyTradeCandidDataSide,
 	toOisyTradeExternalRefs,
 	toOisyTradeExternalRefsMap,
 	toOisyTradeRefAmount
@@ -209,6 +212,30 @@ const pollOisyTradeTransaction = async ({
 		return;
 	}
 
+	const side = fromOisyTradeCandidDataSide(tx.data.OisyTrade.side);
+	const quantity = toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.ORDER_QUANTITY]);
+
+	// A Buy's destination ceiling *is* the quantity, so settling without one would leave
+	// the primary leg withdrawing an account-wide delta — the very thing these bounds
+	// exist to stop. Written at row creation like the baselines, so an unreadable one is
+	// a malformed row and gets their treatment: logged, non-terminal, left alone. A Sell
+	// needs no such ceiling, and refusing to recover one over a ref it never reads would
+	// strand funds for nothing.
+	if (side === 'buy' && isNullish(quantity)) {
+		consoleError('Unreadable order quantity on an OISY Trade active user transaction', tx.id);
+		return;
+	}
+
+	// A row predating the release ref reads zero and so skips its source residue, leaving
+	// it visible in the Trading tab rather than sweeping a delta nothing bounds.
+	const bounds = toOisyTradeSettlementBounds({
+		side,
+		quantity,
+		depositAmount: tx.data.OisyTrade.amount,
+		maxSourceRelease:
+			toOisyTradeRefAmount(refs[OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]) ?? ZERO
+	});
+
 	let settlement: OisyTradeSettlement;
 
 	try {
@@ -217,7 +244,8 @@ const pollOisyTradeTransaction = async ({
 			orderId: orderIdRef,
 			sourceToken,
 			destinationToken,
-			baseline: { source, destination }
+			baseline: { source, destination },
+			bounds
 		});
 	} catch (err: unknown) {
 		// The retry policy, and the reason this branch exists at all. `retryable` covers

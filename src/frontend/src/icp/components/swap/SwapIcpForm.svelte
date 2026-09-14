@@ -11,10 +11,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import {
-		fetchOisyTradeQuote,
-		oisyTradeSwapPairTable
-	} from '$lib/services/oisy-trade-swap.services';
+	import { oisyTradeSwapPairTable } from '$lib/services/oisy-trade-swap.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
@@ -30,7 +27,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { findOisyTradePair } from '$lib/utils/oisy-trade-swap.utils';
+	import { findOisyTradePair, oisyTradeAmountObjection } from '$lib/utils/oisy-trade-swap.utils';
 	import { formatTradeAmount, toPairView } from '$lib/utils/oisy-trade.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
@@ -184,9 +181,8 @@
 		});
 	});
 
-	// Asked of the service rather than read off the fan-out: the fan-out carries offers
-	// only, so a rejection never reaches the store. The quote is a synchronous read over
-	// the already-cached pair table, so asking again here costs nothing.
+	// Derived from the pair rather than read off the fan-out: the fan-out carries offers
+	// only, so a rejection never reaches the store.
 	let oisyTradeErrorKind = $derived.by(() => {
 		if (
 			!noOfferQuoted ||
@@ -213,23 +209,16 @@
 			return undefined;
 		}
 
-		// Guarded even though the quote is contractually non-throwing: it converts a
-		// human price through `toPriceUnits`, and `Number.toFixed` switches to
-		// exponential notation at 1e21, which `BigInt` refuses. The registry's
-		// `getQuote` has the same catch. Here the call sits inside a `$derived.by`,
-		// where an escaping error would take the whole form down — and the worst
-		// outcome this branch can honestly report is "no explanation".
-		try {
-			const result = fetchOisyTradeQuote({
-				sourceToken: $sourceToken,
-				destinationToken: $destinationToken,
-				sourceAmount
-			});
-
-			return result.ok ? undefined : result.errorKind;
-		} catch (_: unknown) {
-			return undefined;
-		}
+		// Judged from the pair alone rather than by re-running the quote. The quote now
+		// awaits the order book, and this sits in a `$derived.by`, which cannot await —
+		// so the two objections a pair settles on its own are what the form can name.
+		// Anything book-dependent stays unexplained and falls back to the generic
+		// "swap is not offered". See `oisyTradeAmountObjection`.
+		return oisyTradeAmountObjection({
+			sourceToken: $sourceToken,
+			amount: sourceAmount,
+			pair: oisyTradePair
+		});
 	});
 
 	// The shipped Limit Order copy, filled from the same `toPairView` fields that
@@ -240,20 +229,20 @@
 			return undefined;
 		}
 
-		const {
-			baseSymbol,
-			quoteSymbol,
-			baseDecimals,
-			quoteDecimals,
-			lotSize,
-			minNotional,
-			maxNotional
-		} = toPairView(oisyTradePair);
+		const { baseSymbol, quoteSymbol, baseDecimals, quoteDecimals, lotSize, minNotional } =
+			toPairView(oisyTradePair);
 		const t = $i18n.trading.limit_order;
 
+		// Exhaustive over what `oisyTradeAmountObjection` can return, which is only these
+		// two. `max_notional` needs a price and so a book, and `balance` never arises at
+		// quote time — the quote validates with no balance on purpose, so an unaffordable
+		// amount still produces an offer and the form's own insufficient-funds check
+		// reports it, exactly as for every other provider.
 		switch (oisyTradeErrorKind) {
+			// The minimum, not the Limit Order form's "multiple": a Sell is floored onto the
+			// lot grid, so the only lot objection left is an amount that cannot fill one.
 			case 'lot':
-				return replacePlaceholders(t.error_lot_multiple, {
+				return replacePlaceholders(t.error_lot_minimum, {
 					$step: formatTradeAmount({ amount: lotSize, decimals: baseDecimals }),
 					$symbol: baseSymbol
 				});
@@ -262,16 +251,6 @@
 					$amount: formatTradeAmount({ amount: minNotional, decimals: quoteDecimals }),
 					$symbol: quoteSymbol
 				});
-			case 'max_notional':
-				return replacePlaceholders(t.error_max_notional, {
-					$amount: formatTradeAmount({ amount: maxNotional ?? 0, decimals: quoteDecimals }),
-					$symbol: quoteSymbol
-				});
-			// `balance` is unreachable here: the quote deliberately validates with no balance,
-			// so an unaffordable amount still produces an offer and the form's own
-			// insufficient-funds check reports it, exactly as for every other provider.
-			default:
-				return undefined;
 		}
 	});
 
