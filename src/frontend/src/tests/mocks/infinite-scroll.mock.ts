@@ -130,6 +130,20 @@ export class IntersectionObserverActiveInterval implements IntersectionObserver 
 	unobserve = () => null;
 }
 
+const intersectingEntry = (target: Element): IntersectionObserverEntry => {
+	const rect = target.getBoundingClientRect();
+
+	return {
+		boundingClientRect: rect,
+		intersectionRatio: 1,
+		intersectionRect: rect,
+		isIntersecting: true,
+		rootBounds: null,
+		target,
+		time: performance.now()
+	};
+};
+
 /**
  * Reports the end of the list once on `observe`, as a browser does for the initial state, and again
  * only when a test calls `enterView`, as a browser does once the user scrolls it back into view. A
@@ -175,11 +189,6 @@ export class IntersectionObserverManual implements IntersectionObserver {
 			return;
 		}
 
-		this.callback(
-			targets.map(
-				(target) => ({ isIntersecting: true, target }) as unknown as IntersectionObserverEntry
-			),
-			this
-		);
+		this.callback(targets.map(intersectingEntry), this);
 	}
 }

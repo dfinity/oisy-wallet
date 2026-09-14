@@ -8,6 +8,7 @@ import {
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('AllTransactionsScroll', () => {
@@ -134,8 +135,6 @@ describe('AllTransactionsScroll', () => {
 	describe('when the end of the list comes back into view', () => {
 		const { enterView } = IntersectionObserverManual;
 
-		const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
-
 		const renderScroll = (onLoadMore: () => Promise<ResultSuccess>) =>
 			render(AllTransactionsScroll, {
 				props: {
@@ -163,7 +162,7 @@ describe('AllTransactionsScroll', () => {
 				expect(onLoadMore).toHaveBeenCalledOnce();
 			});
 
-			await settle();
+			await runResolvedPromises();
 
 			enterView();
 
@@ -185,7 +184,7 @@ describe('AllTransactionsScroll', () => {
 				expect(onLoadMore).toHaveBeenCalledOnce();
 			});
 
-			await settle();
+			await runResolvedPromises();
 
 			// Not asked again on its own: a chain that keeps failing must not be retried in a loop.
 			expect(onLoadMore).toHaveBeenCalledOnce();
@@ -197,11 +196,36 @@ describe('AllTransactionsScroll', () => {
 				expect(onLoadMore).toHaveBeenCalledTimes(3);
 			});
 
-			await settle();
+			await runResolvedPromises();
 
 			enterView();
 
 			expect(onLoadMore).toHaveBeenCalledTimes(3);
+		});
+
+		// One chain loading does not make the round a success for the chain that failed: reporting
+		// progress would re-arm the observer at once and retry that chain in a tight loop.
+		it('should not ask again on its own when a fetch loaded from some chains and failed on another', async () => {
+			const onLoadMore = vi
+				.fn()
+				.mockResolvedValueOnce({ success: true, err: new Error('RPC unavailable') })
+				.mockResolvedValue({ success: false });
+
+			renderScroll(onLoadMore);
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledOnce();
+			});
+
+			await runResolvedPromises();
+
+			expect(onLoadMore).toHaveBeenCalledOnce();
+
+			enterView();
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledTimes(2);
+			});
 		});
 	});
 
