@@ -74,7 +74,8 @@ describe('token-id.utils', () => {
 		});
 
 		it('throws for a variant it does not know', () => {
-			expect(() => tokenIdKey({ Unknown: null } as unknown as TokenId)).toThrow();
+			// @ts-expect-error Testing an unknown variant
+			expect(() => tokenIdKey({ Unknown: null })).toThrow();
 		});
 	});
 
