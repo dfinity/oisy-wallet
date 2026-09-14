@@ -53,6 +53,11 @@
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
 	let reservedAmount: bigint | undefined = $state();
+	// The token it was reserved in, for the same reason. `disabled` on the form
+	// only gates its submit button, so the selector stays live while the request
+	// is in flight — reading `selectedToken` on the share screen would let a
+	// change made mid-request relabel a link that was created for the old one.
+	let reservedToken: IcToken | undefined = $state();
 	// The History row currently open on the share step, if any. Distinguishes a
 	// freshly created tip (nothing to cancel yet from here) from a live one
 	// reopened for a second look.
@@ -192,6 +197,7 @@
 			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
 		);
 		reservedAmount = tip.amount;
+		reservedToken = selectedToken;
 		expiresAtNs = tip.expires_at_ns;
 		viewingTip = tip;
 		trackTip({ step: 'reopen', side: 'sender', symbol: selectedToken?.symbol });
@@ -260,6 +266,7 @@
 		// there, which reads as a dead click.
 		viewingTip = undefined;
 		reservedAmount = parsedAmount;
+		reservedToken = selectedToken;
 		expiresAtNs = deadline;
 		link = undefined;
 		linkMessage = undefined;
@@ -364,7 +371,7 @@
 					bind:durationMs
 					bind:message
 				/>
-			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
+			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(reservedToken) && nonNullish(reservedAmount)}
 				<TipShare
 					amount={reservedAmount}
 					{cancelling}
@@ -377,7 +384,7 @@
 					onDone={nonNullish(viewingTip)
 						? () => goToStep(WizardStepsTip.HISTORY)
 						: modalStore.close}
-					token={selectedToken}
+					token={reservedToken}
 				/>
 			{:else if currentStep?.name === WizardStepsTip.HISTORY}
 				<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onOpenTip={openTip} />
