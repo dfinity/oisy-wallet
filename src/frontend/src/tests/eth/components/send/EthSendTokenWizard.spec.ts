@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+import * as feeServices from '$eth/services/fee.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import * as sendServices from '$eth/services/send.services';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
@@ -18,7 +19,7 @@ import * as exchDerived from '$lib/derived/exchange.derived';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
-import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
@@ -95,7 +96,9 @@ describe('EthSendTokenWizard.spec', () => {
 		vi.spyOn(feeStoreMod, 'initEthFeeContext').mockImplementation((ctx) => ({
 			...ctx,
 			maxGasFee: readable(undefined),
-			minGasFee: readable(undefined)
+			minGasFee: readable(undefined),
+			estimatedGasFee: readable(undefined),
+			feePrioritiesStore: writable(undefined)
 		}));
 
 		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
@@ -238,6 +241,53 @@ describe('EthSendTokenWizard.spec', () => {
 		await vi.runOnlyPendingTimersAsync();
 
 		expect(onCloseStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSend.DONE);
+	});
+
+	describe('fee observation', () => {
+		// The amount step needs the whole send context (balance, exchange rate, priority), so the
+		// real one stands in for the minimal mock the send assertions above get by with.
+		const renderStep = (name: WizardStepsSend) =>
+			render(EthSendTokenWizard, {
+				props: {
+					currentStep: { name, title: name },
+					sendProgressStep: ProgressStepsSend.INITIALIZATION,
+					destination,
+					sourceNetwork: ETHEREUM_NETWORK,
+					amount: 1,
+					nativeEthereumToken: ETHEREUM_TOKEN,
+					onBack: vi.fn(),
+					onClose: vi.fn(),
+					onNext: vi.fn(),
+					onSendBack: vi.fn(),
+					onTokensList: vi.fn()
+				},
+				context: new Map<unknown, unknown>([
+					[ETH_FEE_CONTEXT_KEY, { feeStore }],
+					[SEND_CONTEXT_KEY, initSendContext({ token: ETHEREUM_TOKEN })]
+				])
+			});
+
+		beforeEach(() => {
+			vi.spyOn(feeServices, 'getEthFeeDataWithProvider').mockRejectedValue(new Error('offline'));
+		});
+
+		it('keeps fetching the fee on the amount step', async () => {
+			renderStep(WizardStepsSend.SEND);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(feeServices.getEthFeeDataWithProvider).toHaveBeenCalled();
+		});
+
+		it('freezes the fee on the review step', async () => {
+			renderStep(WizardStepsSend.REVIEW);
+
+			await vi.runOnlyPendingTimersAsync();
+
+			// The amount shown for review was priced against the fee in hand; a fresh sample would
+			// move the fee underneath it, and a spike right before "Send" would be signed as is.
+			expect(feeServices.getEthFeeDataWithProvider).not.toHaveBeenCalled();
+		});
 	});
 
 	it('shows a toast and aborts when destination is empty', async () => {

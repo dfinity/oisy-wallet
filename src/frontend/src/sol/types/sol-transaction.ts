@@ -73,6 +73,18 @@ export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
 
+export type SolSignatureWithSources = SolSignature & {
+	// The addresses (the wallet, or the token accounts) whose history returned this signature.
+	sources: SolAddress[];
+};
+
+export interface SolResolvedTransaction {
+	transaction: SolTransactionUi;
+	// The sources whose history returned the signature, as the pager tagged it: the record belongs
+	// to the token of each of them.
+	sources: SolAddress[];
+}
+
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &
 	TransactionWithinSizeLimit &

@@ -851,14 +851,14 @@ type MyTip = record {
 	// screen discloses this before the claimer commits.
 	claimed_by : opt principal;
 	tip_id : text;
-	created_at_ns : nat64;
-	message : opt text;
-	ledger_canister_id : principal;
-	amount : nat;
 	// The most recent claim that did not pay out, if any. Present alongside
 	// `status = Failed` for a live tip, and kept afterwards so a tip that
 	// eventually succeeded can still show it was not first time lucky.
 	last_claim_failure : opt TipClaimFailure;
+	created_at_ns : nat64;
+	message : opt text;
+	ledger_canister_id : principal;
+	amount : nat;
 	expires_at_ns : nat64
 };
 // NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
@@ -1198,6 +1198,27 @@ type TipClaim = record {
 	// What was transferred to the claimer, in base units.
 	amount : nat
 };
+// The most recent failed claim on a tip. Returned only to the tip's own sender.
+//
+// Deliberately not the ledger's error text: that is written for an operator, it
+// can name balances, and it has no business being rendered to a user.
+type TipClaimFailure = record { at_ns : nat64; reason : TipClaimFailureReason };
+// Why a claim attempt did not pay out.
+//
+// Three outcomes, and the split is by what the sender can do about it.
+// `Uncovered` is the reservation having been reduced or revoked, so the link is
+// dead and only a new tip fixes it. `InsufficientFunds` is the reservation
+// standing but the money not being there, so the same link works again once
+// they top up. `TransferFailed` is everything else — the ledger refusing or
+// failing to answer — where retrying is the whole advice.
+type TipClaimFailureReason = variant {
+	Uncovered;
+	TransferFailed;
+	// The sender's account no longer holds the amount. Distinct from
+	// `Uncovered`: the reservation is still granted, the money is simply not
+	// there, so topping up makes the same link work again.
+	InsufficientFunds
+};
 // Identifies a tip **and** proves the caller holds its link.
 //
 // One type for both `get_tip_details` and `claim_tip` on purpose: reading the
@@ -1236,10 +1257,6 @@ type TipError = variant {
 	// deliberately distinguishable failure, reachable only with a valid link,
 	// because telling the claimer "come back later" is useless.
 	Uncovered;
-	// The sender's account no longer holds the amount. The reservation is still
-	// granted and the claim code is still valid, so the same link works again once
-	// they top up, which is why this is not folded into `TransferFailed`.
-	InsufficientFunds;
 	// No claimable tip for this id. Also returned for an expired, cancelled or
 	// already-claimed tip, and for a wrong claim code — every case collapsed
 	// into one response so a prober can never distinguish them.
@@ -1264,6 +1281,10 @@ type TipError = variant {
 	MessageTooLong;
 	// The caller already holds [`MAX_TIPS_PER_USER`] active tips.
 	TooManyTips;
+	// The sender's account no longer holds the amount. The reservation is still
+	// granted and the claim code is still valid, so the same link works again
+	// once they top up — which is why this is not folded into `TransferFailed`.
+	InsufficientFunds;
 	// The amount is zero, or below one ledger fee — a tip that cannot cover
 	// its own payout is not a tip.
 	AmountTooSmall
@@ -1276,12 +1297,16 @@ type TipError = variant {
 // allowance on every History read; it surfaces on the claim path instead, as
 // [`TipError::Uncovered`].
 type TipStatus = variant {
-	// Funds are authorised in the sender's own account, waiting for a claimer.
-	Reserved;
 	// Somebody tried to claim and the payout did not go through, and the tip is
 	// still live. The code stays valid, so this is the one status the sender can
 	// act on — typically by topping up the account the tip draws from.
+	//
+	// Distinct from `Reserved` precisely because it is actionable: without it a
+	// tip nobody has touched and a tip that has already failed a claimer look
+	// identical in History.
 	Failed;
+	// Funds are authorised in the sender's own account, waiting for a claimer.
+	Reserved;
 	// A claimer moved the tokens.
 	Claimed;
 	// The sender revoked it before anyone claimed.
@@ -1289,25 +1314,6 @@ type TipStatus = variant {
 	// The deadline passed unclaimed. Nothing was ever transferred, so nothing
 	// is returned — the allowance simply lapsed on the ledger.
 	Expired
-};
-// Why a claim attempt did not pay out. Only the two outcomes the ledger lets us
-// tell apart today: `Uncovered` is the sender having reduced or revoked the
-// reservation, `TransferFailed` is everything else, including the sender's
-// balance having dropped below the amount.
-type TipClaimFailureReason = variant {
-	Uncovered;
-	// The sender's account no longer holds the amount. Distinct from `Uncovered`:
-	// the reservation is still granted, the money is simply not there, so topping
-	// up makes the same link work again.
-	InsufficientFunds;
-	TransferFailed
-};
-// The most recent failed claim on a tip. Returned only to the tip's own sender.
-// Deliberately not the ledger's error text: that is written for an operator, it
-// can name balances, and it has no business being rendered to a user.
-type TipClaimFailure = record {
-	at_ns : nat64;
-	reason : TipClaimFailureReason
 };
 // vetKey material for the tip-secrets store, or why it could not be derived.
 type TipVetkeyResult = variant {
@@ -1803,6 +1809,10 @@ service : (Arg) -> {
 	// Returns the caller's own tips, newest first, for History. Bounded by
 	// `MAX_TIPS_RETURNED`.
 	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path. The row cap is what bounds the work
+	// here, and a caller can only ever read their own tips.
+	//
 	// # Errors
 	// Errors are enumerated by `TipError`.
 	get_my_tips : () -> (GetMyTipsResult) query;
@@ -1873,6 +1883,11 @@ service : (Arg) -> {
 	// the sender's message. Requires the claim code, so the message is visible only
 	// to someone holding the full link.
 	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path, because state changes during a
+	// query are not persisted. The abuse surface is one O(log n) lookup that also
+	// has to guess a 128-bit claim code.
+	//
 	// # Errors
 	// `TipError::NotFound` for an unclaimable tip or a wrong claim code.
 	get_tip_details : (TipClaimRequest) -> (GetTipDetailsResult) query;
@@ -1886,6 +1901,10 @@ service : (Arg) -> {
 	//
 	// `EncryptedMaps` keys every map by its owner, so this can only ever return
 	// the caller's own ciphertext.
+	//
+	// Not rate-limited, for the same reason as [`get_tip`]: a stateful limiter is
+	// a no-op on the non-certified query path. The work is one keyed lookup
+	// scoped to the caller.
 	//
 	// # Errors
 	// Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
@@ -2023,7 +2042,7 @@ service : (Arg) -> {
 	// about who can claim the tip — the canister still only holds the code's hash.
 	//
 	// # Errors
-	// Errors are enumerated by `TipError` (`InvalidTipId`,
+	// Errors are enumerated by `TipError` (`RateLimited`, `InvalidTipId`,
 	// `SecretCiphertextTooLarge`, `InternalError`).
 	set_tip_secret : (SetTipSecretRequest) -> (CancelTipResult);
 	// Sets the user's preference to show (or hide) testnets in the interface.

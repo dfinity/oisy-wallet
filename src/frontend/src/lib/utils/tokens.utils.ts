@@ -379,6 +379,28 @@ export const sumTokensUiUsdStakeBalance = (tokens: TokenUi[]): number =>
 	);
 
 /**
+ * Calculates the net worth: the wallet and staked balances of the provided UI tokens, plus the
+ * value held with a provider.
+ *
+ * Single source of truth for the total the hero shows, so any other surface quoting "the user's
+ * balance" cannot drift from it.
+ *
+ * @param tokens - The list of UI tokens to account for.
+ * @param providersUsdBalance - The portfolio-wide provider-held value, which does not narrow with
+ * the token list — so it belongs only in an unfiltered total, never in a per-token or per-network
+ * one.
+ * @returns The sum of the UI tokens' USD balance and stake balance, plus the provider-held value.
+ */
+export const sumTotalUsdBalance = ({
+	tokens,
+	providersUsdBalance
+}: {
+	tokens: TokenUi[];
+	providersUsdBalance: number;
+}): number =>
+	sumTokensUiUsdBalance(tokens) + sumTokensUiUsdStakeBalance(tokens) + providersUsdBalance;
+
+/**
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param tokens - The list of UI tokens for filtering by network env and total USD balance calculation.
