@@ -60,9 +60,11 @@ therefore the right per-chain destinations store — itself.
 ### The confirmation pattern already exists
 
 `SwapReview.svelte:171-189` gates a swap that would lose significant value behind exactly this
-shape: a `MessageBox level="error"` whose `icon` snippet is a `Checkbox`, the copy as the
-checkbox's `<label>`, and the action button disabled until it is ticked. The first-time
-destination confirmation reuses that pattern rather than inventing a second one.
+shape: a `MessageBox` whose `icon` snippet is a `Checkbox`, the copy as the checkbox's
+`<label>`, and the action button disabled until it is ticked. The first-time destination
+confirmation reuses that layout rather than inventing a second one, but stays at the
+`warning` level: a swap losing half its value is an error, a first send to a new recipient is
+routine, and red spent on the routine case stops being read.
 
 ---
 
@@ -130,7 +132,7 @@ which it needs for the contacts tab.
 
 ### 2. Shared presentation — `src/frontend/src/lib/components/send/FirstTimeDestinationWarning.svelte`
 
-A `MessageBox level="error"` following the `SwapReview` confirmation pattern: with an
+A `MessageBox level="warning"` following the `SwapReview` confirmation layout: with an
 `onConfirm` callback it renders the `Checkbox` as the box's `icon` and the copy as its
 `<label>`, plus the confirmation sentence; without one it renders the same copy as plain text.
 The consumer owns the checked state (`Checkbox.svelte` is one-way).

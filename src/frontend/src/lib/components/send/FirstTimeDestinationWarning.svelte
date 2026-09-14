@@ -39,7 +39,7 @@
 
 <MessageBox
 	icon={nonNullish(onConfirm) ? checkbox : undefined}
-	level="error"
+	level="warning"
 	{styleClass}
 	testId={SEND_FIRST_TIME_DESTINATION_WARNING}
 >
