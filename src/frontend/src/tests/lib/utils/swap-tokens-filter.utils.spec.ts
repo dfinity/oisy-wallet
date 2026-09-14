@@ -1,4 +1,11 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type {
 	SwapProviderSupport,
 	SwapSupportedTokensData
@@ -6,15 +13,30 @@ import type {
 import { SwapProvider } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import {
+	chainFusionCompatibleDestinations,
+	toChainFusionPairs
+} from '$lib/utils/chain-fusion-swap.utils';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
 import {
 	computeReceiveSupportedTokens,
-	filterSwapTokens
+	filterSwapTokens,
+	nativeSwapTokenIdentifier,
+	networksWithSupport
 } from '$lib/utils/swap-tokens-filter.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
-import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidIcCkToken,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+
+const btcIdentifier = nativeSwapTokenIdentifier({
+	networkId: BTC_MAINNET_TOKEN.network.id,
+	symbol: BTC_MAINNET_TOKEN.symbol
+});
 
 describe('filterSwapTokens', () => {
 	const asToggleable = <T extends Token>({
@@ -296,8 +318,8 @@ describe('filterSwapTokens', () => {
 			btc: { coverage: 'all', supportedTokenIds }
 		});
 
-		it('matches Bitcoin on its lowercased symbol', () => {
-			const supportedData = withBtcSupport(new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]));
+		it('matches Bitcoin on its network-qualified native identifier', () => {
+			const supportedData = withBtcSupport(new Set([btcIdentifier]));
 
 			const result = filterSwapTokens({ tokens: [btcActive, btcInactive], supportedData });
 
@@ -370,9 +392,7 @@ describe('computeReceiveSupportedTokens', () => {
 		expect(data.btc).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 	});
 
-	it('Chain Fusion ICP→BTC narrows Bitcoin destinations to the native symbol', () => {
-		const btcIdentifier = BTC_MAINNET_TOKEN.symbol.toLowerCase();
-
+	it('Chain Fusion ICP→BTC narrows Bitcoin destinations to the native identifier', () => {
 		const providers: SwapProviderSupport[] = [
 			{
 				key: SwapProvider.CHAIN_FUSION,
@@ -397,7 +417,7 @@ describe('computeReceiveSupportedTokens', () => {
 			{
 				key: SwapProvider.CHAIN_FUSION,
 				sourceCategory: 'btc',
-				supportedSourceTokens: new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]),
+				supportedSourceTokens: new Set([btcIdentifier]),
 				getSupportedDestinations: () => ({ icp: new Set([icpSourceId]) })
 			}
 		];
@@ -654,5 +674,75 @@ describe('computeReceiveSupportedTokens', () => {
 
 		expect(data.evm.coverage).toBe('all');
 		expect(data.sol.coverage).toBe('all');
+	});
+});
+
+describe('nativeSwapTokenIdentifier', () => {
+	it('distinguishes the same native symbol on different networks', () => {
+		const identifiers = [ETHEREUM_TOKEN, BASE_ETH_TOKEN, ARBITRUM_ETH_TOKEN].map(
+			({ network, symbol }) => nativeSwapTokenIdentifier({ networkId: network.id, symbol })
+		);
+
+		expect(new Set(identifiers).size).toBe(identifiers.length);
+	});
+
+	it('is case-insensitive on the symbol', () => {
+		expect(
+			nativeSwapTokenIdentifier({ networkId: ETHEREUM_NETWORK.id, symbol: 'ETH' })
+		).toStrictEqual(nativeSwapTokenIdentifier({ networkId: ETHEREUM_NETWORK.id, symbol: 'eth' }));
+	});
+});
+
+// Regression: selecting ckETH as the source used to widen the receive list to Base and
+// Arbitrum ETH. All three natives carry the symbol 'ETH' and the `evm` identifier set has no
+// network dimension, so Chain Fusion's Ethereum-mainnet-only offer matched the L2 tokens too —
+// and the network filter, derived from the surviving tokens, grew from 1 EVM chip to 3.
+// ckUSDT and every other ckERC20 were unaffected: a contract address already pins the network.
+describe('a ck source does not reach its twin symbol on another EVM network', () => {
+	const CKETH_PAIRS = toChainFusionPairs([
+		{
+			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+			minterCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+			twinToken: ETHEREUM_TOKEN
+		}
+	]);
+
+	const ckEthToken = {
+		...mockValidIcCkToken,
+		ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+		twinToken: ETHEREUM_TOKEN
+	};
+
+	const providers: SwapProviderSupport[] = [
+		{
+			key: SwapProvider.CHAIN_FUSION,
+			sourceCategory: 'icp',
+			supportedSourceTokens: new Set([IC_CKETH_LEDGER_CANISTER_ID]),
+			getSupportedDestinations: ({ sourceToken }) =>
+				chainFusionCompatibleDestinations({ sourceToken, pairs: CKETH_PAIRS })
+		}
+	];
+
+	const supportedData = computeReceiveSupportedTokens({ sourceToken: ckEthToken, providers });
+
+	const enabledEthTokens = [ETHEREUM_TOKEN, BASE_ETH_TOKEN, ARBITRUM_ETH_TOKEN].map((token) => ({
+		...token,
+		enabled: true
+	}));
+
+	it('keeps only the Ethereum mainnet native token in the receive list', () => {
+		const result = filterSwapTokens({ tokens: enabledEthTokens, supportedData });
+
+		expect(result.map(({ id }) => id)).toStrictEqual([ETHEREUM_TOKEN.id]);
+	});
+
+	it('offers only the Ethereum network in the destination network filter', () => {
+		const reachable = networksWithSupport({
+			networks: [ETHEREUM_NETWORK, BASE_NETWORK, ARBITRUM_MAINNET_NETWORK],
+			tokens: enabledEthTokens,
+			supportedData
+		});
+
+		expect(reachable).toStrictEqual([ETHEREUM_NETWORK.id]);
 	});
 });

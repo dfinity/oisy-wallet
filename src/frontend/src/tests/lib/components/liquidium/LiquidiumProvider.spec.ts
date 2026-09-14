@@ -10,9 +10,8 @@ vi.mock('$app/navigation', () => ({
 	afterNavigate: vi.fn()
 }));
 
-// Force the feature flags on (off by default outside staging) so the page renders.
+// Force the provider flags on (off by default outside staging) so the page renders.
 vi.mock('$env/lend-borrow', () => ({
-	LEND_BORROW_ENABLED: true,
 	anyLendBorrowProviderEnabled: true
 }));
 vi.mock('$env/liquidium', () => ({ LIQUIDIUM_ENABLED: true }));

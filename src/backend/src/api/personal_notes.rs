@@ -13,7 +13,7 @@ use crate::{
     utils::{
         guards::{caller_is_not_anonymous, caller_is_registered_user},
         rate_limiter::{
-            self, VetKeyRateLimiters, DELETE_PERSONAL_NOTE_RATE_LIMITER,
+            self, TieredRateLimiter, DELETE_PERSONAL_NOTE_RATE_LIMITER,
             GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER,
             GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER, SET_PERSONAL_NOTE_RATE_LIMITER,
         },
@@ -83,7 +83,7 @@ pub async fn get_personal_notes_encrypted_vetkey(
     transport_key: ByteBuf,
 ) -> PersonalNotesVetkeyResult {
     if let Err(e) =
-        GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller)
+        GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER.with(TieredRateLimiter::check_caller)
     {
         return PersonalNotesVetkeyResult::Err(PersonalNoteError::RateLimited(e));
     }
@@ -101,7 +101,7 @@ pub async fn get_personal_notes_encrypted_vetkey(
 #[update(guard = "caller_is_registered_user")]
 pub async fn get_personal_notes_vetkey_public_key() -> PersonalNotesVetkeyResult {
     if let Err(e) =
-        GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller)
+        GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(TieredRateLimiter::check_caller)
     {
         return PersonalNotesVetkeyResult::Err(PersonalNoteError::RateLimited(e));
     }

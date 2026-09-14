@@ -6,7 +6,6 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { LEND_BORROW_ENABLED } from '$env/lend-borrow';
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -80,12 +79,10 @@
 
 	const debounceLoadXrpAddressMainnet = debounce(loadXrpAddressMainnet);
 
-	const isLiquidiumProviderEnabled = LEND_BORROW_ENABLED && LIQUIDIUM_ENABLED;
-
 	$effect(() => {
 		if (progressDone) {
 			if (
-				($networkEthereumEnabled || $networkEvmMainnetEnabled || isLiquidiumProviderEnabled) &&
+				($networkEthereumEnabled || $networkEvmMainnetEnabled || LIQUIDIUM_ENABLED) &&
 				isNullish($ethAddress)
 			) {
 				debounceLoadEthAddress();
