@@ -10,7 +10,8 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
 	OisyTradeOrderStatus,
-	OisyTradeOrderView
+	OisyTradeOrderView,
+	OisyTradeTimeInForce
 } from '$lib/types/oisy-trade';
 import {
 	type LimitOrderPairView,
@@ -43,6 +44,7 @@ import {
 	queuePositionDisplay,
 	queuePositionFraction,
 	referenceRate,
+	restsAgainstValue,
 	spendAmount,
 	sumOisyTradeAssetsFreeUsd,
 	sumOisyTradeAssetsUsd,
@@ -356,6 +358,47 @@ describe('oisy-trade.utils — limit order', () => {
 
 		it('cannot cross an empty book side', () => {
 			expect(crossesBook({ side: 'sell', price: 1, bid: null, ask: 2.7 })).toBeFalsy();
+		});
+	});
+
+	describe('restsAgainstValue', () => {
+		// Book 8 / 11 around a current value of 10: prices between the bid and the
+		// ask rest, and the ones on the wrong side of 10 give value up.
+		const book = { bid: 8, ask: 11, currentValue: 10, threshold: -1 };
+
+		it('is true for a resting sell priced below current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9 })).toBeTruthy();
+		});
+
+		it('is true for a resting buy priced above current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 10.5 })).toBeTruthy();
+		});
+
+		it('is false within the threshold', () => {
+			// -0.5% give-up, above the -1% threshold.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9.95 })).toBeFalsy();
+		});
+
+		it('is false for a price at or better than current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 10.5 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 9.5 })).toBeFalsy();
+		});
+
+		it('is false for a crossing price, whose own warning applies', () => {
+			// Sell at the bid crosses, however far below current value it sits.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 8 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'buy', price: 11 })).toBeFalsy();
+		});
+
+		it('is false without a price or a current value', () => {
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 0 })).toBeFalsy();
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, currentValue: 0 })).toBeFalsy();
+		});
+
+		it('honours the caller threshold', () => {
+			// -10% give-up: flagged at -5, not at -20.
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, threshold: -5 })).toBeTruthy();
+			expect(restsAgainstValue({ ...book, side: 'sell', price: 9, threshold: -20 })).toBeFalsy();
 		});
 	});
 
@@ -692,6 +735,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity,
 		filledQuantity = ZERO,
 		status,
+		timeInForce = 'GoodTilCanceled',
 		createdAt = 42n,
 		base = baseLedgerId,
 		quote = quoteLedgerId
@@ -702,6 +746,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity: bigint;
 		filledQuantity?: bigint;
 		status: OisyTradeOrderStatus;
+		timeInForce?: OisyTradeTimeInForce;
 		createdAt?: bigint;
 		base?: string;
 		quote?: string;
@@ -715,6 +760,7 @@ describe('oisy-trade.utils — orders', () => {
 				quantity,
 				filled_quantity: filledQuantity,
 				status: { [status]: null },
+				time_in_force: { [timeInForce]: null },
 				created_at: createdAt
 			}
 		}) as unknown as UserOrder;
@@ -742,8 +788,24 @@ describe('oisy-trade.utils — orders', () => {
 				price: 2.75,
 				filledQuantity: 25,
 				status: 'Open',
+				timeInForce: 'GoodTilCanceled',
 				createdAt: 42n
 			});
+		});
+
+		it('maps the time-in-force of a fill-or-kill order', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Sell',
+					quantity: 100n * 100_000_000n,
+					price: 2_750_000n,
+					status: 'Expired',
+					timeInForce: 'FillOrKill'
+				}),
+				tokens
+			});
+
+			expect(view?.timeInForce).toBe('FillOrKill');
 		});
 
 		it('maps a buy order', () => {
@@ -978,6 +1040,7 @@ describe('oisy-trade.utils — search', () => {
 		price: 2.5,
 		filledQuantity: 0,
 		status: 'Open',
+		timeInForce: 'GoodTilCanceled',
 		createdAt: ZERO
 	};
 

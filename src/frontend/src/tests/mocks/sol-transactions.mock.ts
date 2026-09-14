@@ -40,12 +40,25 @@ export const mockSignature =
 export const mockSignature2 =
 	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
 
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+// Two transactions cannot share a signature on Solana, so neither may two mocks: code that groups
+// by signature would see one transaction where the test means several. Derived from the id so it
+// stays deterministic, and varying only the last two characters keeps the value valid base58.
+const mockSignatureFor = (id: string): string => {
+	const seed = [...id].reduce((acc, character) => acc + character.charCodeAt(0), 0);
+
+	return `${mockSignature.slice(0, -2)}${BASE58_ALPHABET[seed % 58]}${
+		BASE58_ALPHABET[Math.floor(seed / 58) % 58]
+	}`;
+};
+
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 	Array.from({ length: n }, (_, i) => createMockSolTransactionUi(`txn-${i + 1}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
-	signature: signature(mockSignature),
+	signature: signature(mockSignatureFor(id)),
 	timestamp: ZERO,
 	type: 'send',
 	value: 100n,

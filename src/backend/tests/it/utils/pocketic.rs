@@ -489,7 +489,6 @@ fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii
 }
 
 impl PicBackend {
-    #[expect(dead_code)]
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
             env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
