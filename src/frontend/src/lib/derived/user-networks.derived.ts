@@ -33,11 +33,16 @@ import {
 } from '$env/networks/networks.sol.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+
+// This store is a derived: it recomputes on every `userProfileStore` write (uncertified, then
+// certified, then each settings change). Reporting an unmapped key is a one-off signal, not a
+// per-recompute one, so each distinct key is reported once per session.
+const reportedUnmappedKeys = new Set<string>();
 
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
@@ -67,10 +72,10 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		// it maps to exists. An unmapped key must then degrade to "ignore that setting" rather
 		// than throw, which would take down the whole mapping and with it the user's settings.
 		//
-		// It is NOT wire-level forward compatibility: a variant missing from
-		// `backend.factory.did.js` fails Candid decoding in `get_user_profile`, long before this
-		// runs. A closed candid variant cannot be forward compatible — hence the breaking-change
-		// flag on any PR that adds one.
+		// It is NOT wire-level forward compatibility: if a nested variant is missing from
+		// `backend.factory.did.js`, Candid degrades the enclosing optional `UserProfile.settings`
+		// to null, so this function never sees the key and all settings revert to defaults.
+		// This still makes adding a variant a breaking Candid interface change.
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId | undefined => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
@@ -124,7 +129,13 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
-			consoleWarn(`Unknown network key: ${Object.keys(key).join(', ')}`);
+			const unmappedKey = Object.keys(key).join(', ');
+
+			if (!reportedUnmappedKeys.has(unmappedKey)) {
+				reportedUnmappedKeys.add(unmappedKey);
+
+				trackUnmappedNetworkSettingsKey({ key: unmappedKey });
+			}
 
 			return undefined;
 		};

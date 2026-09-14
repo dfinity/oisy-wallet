@@ -6,6 +6,7 @@ import {
 import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { userNetworks } from '$lib/derived/user-networks.derived';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { UserNetworks } from '$lib/types/user-networks';
 import {
@@ -19,6 +20,10 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+vi.mock('$lib/services/error-analytics.services', () => ({
+	trackUnmappedNetworkSettingsKey: vi.fn()
+}));
 
 describe('user-networks.derived', () => {
 	const certified = true;
@@ -113,8 +118,8 @@ describe('user-networks.derived', () => {
 
 		// Every variant in the generated bindings is mapped today, so the cast below is the only
 		// way to reach the state a new backend variant creates: decodable at the wire, unmapped
-		// here. It does not stand in for a variant missing from the bindings — that one fails
-		// Candid decoding upstream and never reaches this derived.
+		// here. It does not stand in for a variant missing from the bindings — Candid degrades
+		// the enclosing optional settings record to null, so that key never reaches this derived.
 		it('should ignore an unmapped network key and keep mapping the known ones', () => {
 			userProfileStore.set({
 				certified,
@@ -146,7 +151,11 @@ describe('user-networks.derived', () => {
 				[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
 			});
 
-			expect(console.warn).toHaveBeenCalledWith('Unknown network key: FutureNetworkMainnet');
+			// The derived was read twice above, and it recomputes on every read — exactly once is
+			// what proves the per-key deduplication, not just that the event fires at all.
+			expect(trackUnmappedNetworkSettingsKey).toHaveBeenCalledExactlyOnceWith({
+				key: 'FutureNetworkMainnet'
+			});
 		});
 	});
 });
