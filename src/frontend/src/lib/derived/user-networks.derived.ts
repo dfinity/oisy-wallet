@@ -33,11 +33,16 @@ import {
 } from '$env/networks/networks.sol.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { consoleWarn } from '$lib/utils/console.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+
+// This store is a derived: it recomputes on every `userProfileStore` write (uncertified, then
+// certified, then each settings change). Reporting an unmapped key is a one-off signal, not a
+// per-recompute one, so each distinct key is reported once per session.
+const reportedUnmappedKeys = new Set<string>();
 
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
@@ -124,7 +129,13 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
-			consoleWarn(`Unknown network key: ${Object.keys(key).join(', ')}`);
+			const unmappedKey = Object.keys(key).join(', ');
+
+			if (!reportedUnmappedKeys.has(unmappedKey)) {
+				reportedUnmappedKeys.add(unmappedKey);
+
+				trackUnmappedNetworkSettingsKey({ key: unmappedKey });
+			}
 
 			return undefined;
 		};
