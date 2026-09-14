@@ -39,6 +39,11 @@
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
 	let reservedAmount: bigint | undefined = $state();
+	// The token it was reserved in, for the same reason. `disabled` on the form
+	// only gates its submit button, so the selector stays live while the request
+	// is in flight — reading `selectedToken` on the share screen would let a
+	// change made mid-request relabel a link that was created for the old one.
+	let reservedToken: IcToken | undefined = $state();
 	// The recoverable copy of the claim code could not be saved, so this link is
 	// the only one there will be.
 	let linkNotSaved = $state(false);
@@ -125,6 +130,7 @@
 			});
 
 			reservedAmount = parsedAmount;
+			reservedToken = selectedToken;
 			expiresAtNs = deadline;
 			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
@@ -198,14 +204,14 @@
 					bind:durationMs
 					bind:message
 				/>
-			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
+			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(reservedToken) && nonNullish(reservedAmount)}
 				<TipShare
 					amount={reservedAmount}
 					{expiresAtNs}
 					{link}
 					{linkNotSaved}
 					onDone={modalStore.close}
-					token={selectedToken}
+					token={reservedToken}
 				/>
 			{:else}
 				<TipIntro onGetStarted={enterTokensList} onViewHistory={modalStore.close} />
