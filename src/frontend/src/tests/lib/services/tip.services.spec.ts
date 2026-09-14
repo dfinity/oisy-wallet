@@ -14,6 +14,7 @@ import {
 import * as tipVetkeys from '$lib/services/tip.vetkeys';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 const LEDGER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
 const AMOUNT = 500_000n;
@@ -324,12 +325,23 @@ describe('tip.services', () => {
 		// claimable with no recovery secret, while the screen said the reservation
 		// had failed.
 		describe('when the create comes back DuplicateTipId', () => {
+			// What the canister says it stored. Defaults to the terms the tests
+			// reserve with, so a test only has to say how the stored tip *differs*.
+			const storedTip = (
+				overrides: Partial<Awaited<ReturnType<typeof backendApi.getTipDetails>>> = {}
+			) =>
+				({
+					amount: AMOUNT,
+					expires_at_ns: EXPIRES_AT_NS,
+					ledger_canister_id: Principal.fromText(LEDGER_ID),
+					message: [],
+					...overrides
+				}) as Awaited<ReturnType<typeof backendApi.getTipDetails>>;
+
 			it('reconciles with the claim code and still returns the link', async () => {
 				vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ DuplicateTipId: null });
-				const detailsSpy = vi
-					.spyOn(backendApi, 'getTipDetails')
-					.mockResolvedValue({} as Awaited<ReturnType<typeof backendApi.getTipDetails>>);
+				const detailsSpy = vi.spyOn(backendApi, 'getTipDetails').mockResolvedValue(storedTip());
 				const secretSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
 
 				const draft = newTipDraft();
@@ -359,6 +371,40 @@ describe('tip.services', () => {
 				// The whole point: the recovery secret gets written, so the sender can
 				// find this link again.
 				expect(secretSpy).toHaveBeenCalledOnce();
+			});
+
+			// The draft is deliberately kept across retries, but the form stays
+			// editable — so a sender can edit the amount, retry, replace the
+			// allowance at the new figure, and reach here with the stored tip still
+			// holding the old one. Continuing would return a link whose share screen
+			// and eventual payout disagree.
+			it.each([
+				{ term: 'amount', overrides: { amount: AMOUNT + 1n } },
+				{ term: 'deadline', overrides: { expires_at_ns: EXPIRES_AT_NS + 1n } },
+				{
+					term: 'ledger',
+					overrides: { ledger_canister_id: Principal.fromText('n5wcd-faaaa-aaaar-qaaea-cai') }
+				}
+			])('rethrows when the stored $term differs from the retry', async ({ overrides }) => {
+				vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ DuplicateTipId: null });
+				vi.spyOn(backendApi, 'getTipDetails').mockResolvedValue(storedTip(overrides));
+				const secretSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual({ DuplicateTipId: null });
+
+				// No link, and no recovery secret for terms the canister never agreed
+				// to — the sender is told the reservation failed instead.
+				expect(secretSpy).not.toHaveBeenCalled();
 			});
 
 			it('rethrows when the stored tip does not answer to this claim code', async () => {
