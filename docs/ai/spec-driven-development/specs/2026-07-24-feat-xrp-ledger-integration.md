@@ -4,7 +4,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 - **Feature:** Add the XRP Ledger as a new supported chain — native XRP balance, send, receive, and transaction history
 - **Reference:** [xrpl.org documentation](https://xrpl.org/docs), Solana integration (closest precedent — no spec exists for its original build, only incremental specs)
-- **Status:** Draft — **not yet approved for implementation** (see [Pending decisions](#8-pending-decisions-facts-clear--decision-only))
+- **Status:** In implementation — foundational decisions **approved** (the new `$xrp` folder and the Ed25519 curve; see [§8](#8-pending-decisions-facts-clear--decision-only)). Phased rollout tracked in [§6](#6-implementation-plan-phased-prs), shipped **disabled** until the enable PR.
 
 ---
 

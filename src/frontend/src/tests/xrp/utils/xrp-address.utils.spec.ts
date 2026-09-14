@@ -21,6 +21,16 @@ describe('xrp-address.utils', () => {
 		it('produces a valid XRPL classic address', () => {
 			expect(isXrpAddress(mapEd25519PublicKeyToClassicAddress(RAW_PUBLIC_KEY))).toBeTruthy();
 		});
+
+		it('rejects a truncated key rather than deriving a bogus address', () => {
+			expect(() => mapEd25519PublicKeyToClassicAddress(RAW_PUBLIC_KEY.slice(0, 31))).toThrow();
+		});
+
+		it('rejects an over-long (e.g. 0xED-prefixed 33-byte) key', () => {
+			const prefixedKey = Uint8Array.from(Buffer.from(CANONICAL_PUBLIC_KEY_HEX, 'hex'));
+
+			expect(() => mapEd25519PublicKeyToClassicAddress(prefixedKey)).toThrow();
+		});
 	});
 
 	describe('isXrpAddress', () => {
