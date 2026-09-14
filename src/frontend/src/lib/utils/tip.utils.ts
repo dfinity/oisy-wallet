@@ -6,10 +6,16 @@ import type { Token } from '$lib/types/token';
  * The tokens a tip can be issued in.
  *
  * The filter is structural, not a policy we picked: a tip is an ICRC-2
- * allowance, so it only works on ledgers that *have* an allowance primitive —
- * ICP and the ck-assets. A native BTC, ETH or SOL balance cannot be reserved
- * without someone taking custody of it, which is the one thing this feature is
- * built to avoid.
+ * allowance, so a native BTC, ETH or SOL balance cannot be reserved without
+ * someone taking custody of it, which is the one thing this feature is built to
+ * avoid.
+ *
+ * **This is a filter by token family, not by capability.** `isTokenIcrc` says a
+ * token is ICRC — it does not say the ledger implements ICRC-2. The defaults
+ * (ICP and the ck-assets) all do, but an imported ICRC-1-only ledger passes here
+ * and only fails later, at `icrc2_approve`. The real check is
+ * `isIcrcTokenSupportIcrc2`, which is an async per-ledger call and so does not
+ * fit a synchronous filter; wiring it in is tracked separately.
  *
  * Narrowing to `IcToken` is deliberate: the sender's approve needs the token's
  * `ledgerCanisterId`, which only the IC token type carries.
