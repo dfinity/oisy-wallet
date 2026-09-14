@@ -86,16 +86,16 @@ describe('SendReview', () => {
 
 	it('warns and gates a burn, since sending to a minter account destroys the assets', () => {
 		const destination = encodeIcrcAccount(mockIcrcAccount);
-		const context = mockContext(mockValidIcToken);
+		const sendContext = initSendContext({ token: mockValidIcToken });
 		// isIcBurning reads the destination from the context, which the wizard step fills in
-		context.get(SEND_CONTEXT_KEY)?.sendDestination.set(destination);
+		sendContext.sendDestination.set(destination);
 
 		const { getByTestId } = render(SendReview, {
 			props: { ...props, destination },
-			context
+			context: new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, sendContext]])
 		});
 
-		expect(get(context.get(SEND_CONTEXT_KEY)!.isIcBurning)).toBeTruthy();
+		expect(get(sendContext.isIcBurning)).toBeTruthy();
 
 		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
 		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
