@@ -176,6 +176,11 @@ export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+
+// Most pages the Activity list fetches for one token in a single levelling run. A safety net for a
+// chain loader that keeps reporting progress without its oldest transaction moving, not a throttle:
+// a token it stops is picked up again by the next page the user scrolls to.
+export const ACTIVITY_LEVELLING_MAX_PAGES = 50;
 // How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
 // At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
 export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
@@ -199,6 +204,11 @@ export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_00
 // 5s — and it is the outer bound on top of the query gate that skips the call
 // entirely while the deposit is still gathering confirmations.
 export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+
+// Page size for a pending ckBTC deposit's walk over the account's ledger history looking
+// for its own mint. The walk itself is bounded by the row's creation time, not by a page
+// count — see `hasCkBtcMintForDeposit`.
+export const CHAIN_FUSION_CKBTC_MINT_LOOKUP_PAGE_SIZE = 100n;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds

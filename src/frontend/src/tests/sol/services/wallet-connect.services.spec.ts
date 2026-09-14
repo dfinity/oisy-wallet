@@ -24,6 +24,7 @@ import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { MappedSolTransaction, SolTransferParties } from '$sol/types/sol-transaction';
@@ -338,6 +339,56 @@ describe('wallet-connect.services', () => {
 
 				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
 				expect(result).not.toHaveProperty('preview');
+			});
+		});
+
+		// The Operations tab lists what the message contains. A run reveals the calls made inside
+		// other programs; without one the message's own instructions are still worth listing, and
+		// the review has to say which of the two it got.
+		describe('the instruction list', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			const mockParties: SolTransferParties = {
+				sources: [{ address: mockSolAddress, own: true }],
+				destinations: [{ address: mockSolAddress2, own: false }],
+				partial: false
+			};
+
+			const simulated: SolInstructionSummary[] = [
+				{ kind: 'send', amount: 1_000_000n, counterparty: mockSolAddress2 }
+			];
+
+			it('should call the list simulated when the run produced one', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					instructions: simulated,
+					parties: mockParties
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(
+					expect.objectContaining({ instructions: simulated, simulatedInstructions: true })
+				);
+			});
+
+			// A run reports its parties whether or not it produced any instruction summaries, so
+			// this is the state where only the list falls back.
+			it('should read the message when the run produced no list', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).not.toHaveProperty('simulatedInstructions');
+				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
 			});
 		});
 

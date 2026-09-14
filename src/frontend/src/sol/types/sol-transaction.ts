@@ -2,6 +2,11 @@ import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
+import type {
+	SolNetBalanceChange,
+	SolTransactionSummary
+} from '$sol/types/sol-transaction-summary';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	getBase58Decoder,
@@ -30,6 +35,12 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	// For Solana transactions, we want to show the owner instead of the ATA address
 	fromOwner?: SolAddress;
 	toOwner?: SolAddress;
+	// The one-line summary, the per-asset net and the readable instruction list, derived once at
+	// fetch time from the raw transaction. The raw is not kept, so nothing can re-derive them:
+	// they either travel with the record or they are gone.
+	summary?: SolTransactionSummary;
+	netChanges?: SolNetBalanceChange[];
+	instructions?: SolInstructionSummary[];
 }
 
 const mockSolSignature = () => {
@@ -61,6 +72,18 @@ export type SolRpcTransaction = SolRpcTransactionRaw & {
 export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
+
+export type SolSignatureWithSources = SolSignature & {
+	// The addresses (the wallet, or the token accounts) whose history returned this signature.
+	sources: SolAddress[];
+};
+
+export interface SolResolvedTransaction {
+	transaction: SolTransactionUi;
+	// The sources whose history returned the signature, as the pager tagged it: the record belongs
+	// to the token of each of them.
+	sources: SolAddress[];
+}
 
 export type SolSignedTransaction = Transaction &
 	FullySignedTransaction &

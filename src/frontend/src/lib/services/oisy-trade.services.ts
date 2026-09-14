@@ -23,6 +23,7 @@ import {
 	OISY_TRADE_MAX_ORDER_PAGES,
 	OISY_TRADE_ORDERS_PAGE_SIZE
 } from '$lib/constants/oisy-trade.constants';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
@@ -76,10 +77,34 @@ const loadMyOrders = async ({
 	return orders;
 };
 
+// The load is fire-and-forget and has several concurrent callers — the app-wide
+// `LoaderOisyTrade`, the initial load each `IntervalLoader` fires on mount, the
+// poll itself, and the post-deposit / post-withdraw / post-limit-order refreshes
+// — so a request can resolve after a sign-out has reset the store, or after a
+// newer request for the same account has already written. Every invocation takes
+// the next generation, and only the newest one may commit; the identity is
+// re-checked as well, so a result for a principal that is no longer signed in is
+// dropped even if nothing newer has started.
+let loadGeneration = 0;
+
+const isCurrentLoad = ({
+	generation,
+	identity
+}: {
+	generation: number;
+	identity: NonNullable<NullishIdentity>;
+}): boolean =>
+	generation === loadGeneration &&
+	get(authIdentity)?.getPrincipal().toText() === identity.getPrincipal().toText();
+
 // Best-effort load of trading pairs, supported tokens and the caller's DEX
 // balances into `oisyTradeStore`; errors are logged so a transient canister
 // failure never breaks the Trading tab. Read-only.
 export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity }): Promise<void> => {
+	// Taken before the nullish check on purpose: a sign-out has to invalidate the
+	// loads already in flight, not just skip its own.
+	const generation = ++loadGeneration;
+
 	if (isNullish(identity)) {
 		oisyTradeStore.reset();
 		return;
@@ -97,7 +122,50 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 			loadMyOrders({ identity, nullishIdentityErrorMessage })
 		]);
 
+		if (!isCurrentLoad({ generation, identity })) {
+			return;
+		}
+
 		oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
+// Balances-only load for the app-wide `LoaderOisyTrade`: the hero's net worth is
+// the sole consumer outside the Trading surfaces, and `oisyTradeUsdValue` derives
+// from the balances joined against `enabledIcTokens` and `exchanges` — nothing
+// else the full load fetches is read there. One query instead of four to eight,
+// and the total no longer waits on the caller's order history. The write goes
+// through `setBalances` so it cannot blank what the Trading tab has loaded,
+// mirroring `loadOisyTradeSwapPairs`/`setPairs` for the quote path.
+//
+// Shares `loadGeneration` with the full load, so whichever started last wins. A
+// full load losing to this one would drop its pairs/tokens/orders, but the
+// app-wide effect only re-runs on an identity change, and that resets the store
+// anyway. Best-effort: errors are logged, never surfaced.
+export const loadOisyTradeBalances = async ({
+	identity
+}: {
+	identity: NullishIdentity;
+}): Promise<void> => {
+	const generation = ++loadGeneration;
+
+	if (isNullish(identity)) {
+		oisyTradeStore.reset();
+		return;
+	}
+
+	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
+
+	try {
+		const balances = await getBalances({ identity, nullishIdentityErrorMessage });
+
+		if (!isCurrentLoad({ generation, identity })) {
+			return;
+		}
+
+		oisyTradeStore.setBalances(balances);
 	} catch (err: unknown) {
 		consoleError(err);
 	}
