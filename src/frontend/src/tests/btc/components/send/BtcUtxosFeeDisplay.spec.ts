@@ -48,6 +48,7 @@ describe('BtcUtxosFeeDisplay', () => {
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
 				feeSatoshis: mockFeeSatoshis,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			}
 		});
@@ -70,6 +71,7 @@ describe('BtcUtxosFeeDisplay', () => {
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
 				feeSatoshis: ZERO,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			}
 		});
@@ -107,6 +109,7 @@ describe('BtcUtxosFeeDisplay', () => {
 		utxosFeeStore.setUtxosFee({
 			utxosFee: {
 				feeSatoshis: mockFeeSatoshis,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			}
 		});

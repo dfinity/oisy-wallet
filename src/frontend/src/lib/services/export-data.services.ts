@@ -23,9 +23,9 @@ import {
 	type UserAddresses
 } from '$lib/utils/export-data.utils';
 import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import type { Identity } from '@dfinity/agent';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { get } from 'svelte/store';
 
@@ -117,6 +117,11 @@ const loadAllTransactionsHistory = async ({
 }): Promise<void> => {
 	const disableLoader: Record<string, boolean> = {};
 
+	// A Solana page that failed is not the end of the history, and exporting after it would hand over
+	// a CSV that stops short while reporting success. Collected rather than thrown, so that the loops
+	// of the other tokens run as they always have.
+	const solFailures: unknown[] = [];
+
 	const loadOne = async (token: Token): Promise<void> => {
 		const {
 			id: tokenId,
@@ -146,10 +151,11 @@ const loadAllTransactionsHistory = async ({
 			return;
 		}
 
+		// The pager is shared by every token of the network, so the loops of its tokens share its pages,
+		// and its end stops all of them.
 		if (isNetworkIdSolana(networkId)) {
-			const { success } = await loadNextSolTransactionsByOldest({
+			const { success, err } = await loadOlderSolTransactions({
 				identity,
-				minTimestamp: 0,
 				token,
 				signalEnd: () => {
 					disableLoader[key] = true;
@@ -158,11 +164,22 @@ const loadAllTransactionsHistory = async ({
 
 			if (success) {
 				await loadOne(token);
+
+				return;
+			}
+
+			// Only a failed page carries an error: the end comes through `signalEnd`.
+			if (!disableLoader[key] && nonNullish(err)) {
+				solFailures.push(err);
 			}
 		}
 	};
 
 	await Promise.allSettled(tokens.map(loadOne));
+
+	if (solFailures.length > 0) {
+		throw solFailures[0];
+	}
 };
 
 export type TransactionCsvVariant = 'basic' | 'extended';

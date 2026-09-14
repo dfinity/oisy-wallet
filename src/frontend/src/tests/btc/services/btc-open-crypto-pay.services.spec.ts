@@ -68,6 +68,7 @@ describe('btc-open-crypto-pay.services', () => {
 
 		const mockUtxosFee: UtxosFee = {
 			feeSatoshis: 1000n,
+			feeRateMiliSatoshisPerVByte: 4000n,
 			utxos: []
 		};
 
@@ -192,6 +193,7 @@ describe('btc-open-crypto-pay.services', () => {
 			it('should return the result from prepareBtcSend', () => {
 				const expectedFee: UtxosFee = {
 					feeSatoshis: 5000n,
+					feeRateMiliSatoshisPerVByte: 4000n,
 					utxos: [{ value: 100000n }] as unknown as UtxosFee['utxos']
 				};
 
@@ -223,6 +225,7 @@ describe('btc-open-crypto-pay.services', () => {
 			sumInUSD: 50.5,
 			fee: {
 				feeSatoshis: 1000n,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			}
 		} as PayableTokenWithConvertedAmount;
@@ -232,6 +235,7 @@ describe('btc-open-crypto-pay.services', () => {
 			satoshisAmount: 100000n,
 			utxosFee: {
 				feeSatoshis: 1000n,
+				feeRateMiliSatoshisPerVByte: 4000n,
 				utxos: []
 			}
 		};
