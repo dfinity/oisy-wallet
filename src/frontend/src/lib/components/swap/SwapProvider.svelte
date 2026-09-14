@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+	import { oisyTradeSwapEnabled } from '$env/oisy-trade-swap';
 	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
@@ -9,6 +10,7 @@
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
+	import SwapDetailsOisyTrade from '$lib/components/swap/SwapDetailsOisyTrade.svelte';
 	import SwapDetailsOneSec from '$lib/components/swap/SwapDetailsOneSec.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import BestRateBadge from '$lib/components/ui/BestRateBadge.svelte';
@@ -121,6 +123,8 @@
 				<SwapDetailsOneSec provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.CHAIN_FUSION && CHAIN_FUSION_SWAP_ENABLED}
 				<SwapDetailsChainFusion provider={selectedProvider} />
+			{:else if selectedProvider.provider === SwapProvider.OISY_TRADE && oisyTradeSwapEnabled}
+				<SwapDetailsOisyTrade provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

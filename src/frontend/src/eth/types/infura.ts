@@ -1,6 +1,6 @@
 import type { EthAddress } from '$eth/types/address';
 
-interface FeeEstimateLevel {
+export interface FeeEstimateLevel {
 	suggestedMaxPriorityFeePerGas: string;
 	suggestedMaxFeePerGas: string;
 	minWaitTimeEstimate: number;

@@ -110,6 +110,7 @@ describe('BtcSendTokenWizard', () => {
 
 		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
+			feeRateMiliSatoshisPerVByte: mockUtxosFee.feeRateMiliSatoshisPerVByte,
 			utxos: mockUtxosFee.utxos
 		});
 		vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({

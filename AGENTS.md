@@ -69,22 +69,24 @@ and `Cargo.toml`. The non-obvious bits:
 
 ## 3. Where to look (frontend)
 
-| You're about to…                              | Read first                                                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Open any PR                                   | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                             |
-| Touch any frontend file                       | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                                 |
-| Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                           |
-| Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                         |
-| Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                       |
-| Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                                   |
-| Write copy, pick a colour, or add an icon     | [`docs/ai/frontend/brand-and-copy.md`](./docs/ai/frontend/brand-and-copy.md)                                 |
-| Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)               |
-| Add an API call / service / store             | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                   |
-| Split / refactor a component                  | [`docs/ai/frontend/workflows/refactor-split.md`](./docs/ai/frontend/workflows/refactor-split.md)             |
-| Add an i18n key                               | [`docs/ai/frontend/workflows/add-i18n-key.md`](./docs/ai/frontend/workflows/add-i18n-key.md)                 |
-| Add a token / network                         | [`docs/ai/frontend/workflows/new-token-or-network.md`](./docs/ai/frontend/workflows/new-token-or-network.md) |
-| Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                               |
-| Add or change an analytics / tracking event   | [`docs/ai/frontend/analytics.md`](./docs/ai/frontend/analytics.md)                                           |
+| You're about to…                              | Read first                                                                                                                                         |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open any PR                                   | [`docs/ai/pr-and-ci.md`](./docs/ai/pr-and-ci.md)                                                                                                   |
+| Touch any frontend file                       | [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)                                                                                       |
+| Add or move a file                            | [`docs/ai/frontend/structure.md`](./docs/ai/frontend/structure.md)                                                                                 |
+| Write Svelte 5 / runes / stores / TS          | [`docs/ai/frontend/stack-and-patterns.md`](./docs/ai/frontend/stack-and-patterns.md)                                                               |
+| Add UI                                        | [`docs/ai/frontend/reusability.md`](./docs/ai/frontend/reusability.md)                                                                             |
+| Identify, compare or key a token              | [`docs/ai/frontend/stack-and-patterns.md#token-identity--key-by-tokenid`](./docs/ai/frontend/stack-and-patterns.md#token-identity--key-by-tokenid) |
+| Produce a mockup, wireframe, or chat artifact | [`docs/ai/visual-artifacts.md`](./docs/ai/visual-artifacts.md)                                                                                     |
+| Add user-visible text or interactive elements | [`docs/ai/frontend/i18n-and-a11y.md`](./docs/ai/frontend/i18n-and-a11y.md)                                                                         |
+| Write copy, pick a colour, or add an icon     | [`docs/ai/frontend/brand-and-copy.md`](./docs/ai/frontend/brand-and-copy.md)                                                                       |
+| Add a Svelte component                        | [`docs/ai/frontend/workflows/new-component.md`](./docs/ai/frontend/workflows/new-component.md)                                                     |
+| Add an API call / service / store             | [`docs/ai/frontend/workflows/new-service.md`](./docs/ai/frontend/workflows/new-service.md)                                                         |
+| Split / refactor a component                  | [`docs/ai/frontend/workflows/refactor-split.md`](./docs/ai/frontend/workflows/refactor-split.md)                                                   |
+| Add an i18n key                               | [`docs/ai/frontend/workflows/add-i18n-key.md`](./docs/ai/frontend/workflows/add-i18n-key.md)                                                       |
+| Add a token / network                         | [`docs/ai/frontend/workflows/new-token-or-network.md`](./docs/ai/frontend/workflows/new-token-or-network.md)                                       |
+| Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                                                                     |
+| Add or change an analytics / tracking event   | [`docs/ai/frontend/analytics.md`](./docs/ai/frontend/analytics.md)                                                                                 |
 
 ---
 
