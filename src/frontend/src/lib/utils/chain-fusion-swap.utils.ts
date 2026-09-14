@@ -150,6 +150,23 @@ export const asCkTwinOf = ({
 	isCkTokenWithTwin(ckToken) && ckToken.twinToken.id === nativeToken.id ? ckToken : undefined;
 
 /**
+ * Splits the quoted fees by the surface that discloses them.
+ *
+ * A fee the minter withholds from the amount it converts is already visible as the gap
+ * between the pay and the receive amount, so itemizing it below the form as well reads as a
+ * second, separate charge. Those belong to the provider sheet — the same division Velora
+ * makes, whose Delta gas comes out of the receive amount and is stated there as its network
+ * cost rather than in the fee section. Everything the user pays on top of the amount stays
+ * in the fee section, whose total has to be the whole cost paid out of balance. The two are
+ * complementary: every quoted fee lands on exactly one surface.
+ */
+export const chainFusionFeeSectionFees = (fees: ChainFusionFee[]): ChainFusionFee[] =>
+	fees.filter(({ deductedFromAmount }) => deductedFromAmount !== true);
+
+export const chainFusionProviderDetailsFees = (fees: ChainFusionFee[]): ChainFusionFee[] =>
+	fees.filter(({ deductedFromAmount }) => deductedFromAmount === true);
+
+/**
  * A ck conversion is 1:1, so the received amount is the source amount less only the
  * fees the minter actually takes out of it — see `ChainFusionFee.deductedFromAmount`.
  * Fees charged on top, such as a ck ledger fee, are itemized below the form and must

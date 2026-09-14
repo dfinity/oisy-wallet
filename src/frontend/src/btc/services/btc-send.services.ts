@@ -1,10 +1,9 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { estimateTransactionVSize, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
+import { calculateFeeSatoshis, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
 import { getPendingTransactionUtxoOutpoints, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
@@ -126,7 +125,7 @@ export const validateBtcSend = async ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
 	}
 
-	const { utxos, feeSatoshis } = utxosFee;
+	const { utxos, feeSatoshis, feeRateMiliSatoshisPerVByte } = utxosFee;
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	if (utxos.length === 0) {
@@ -179,21 +178,25 @@ export const validateBtcSend = async ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
 
-	// 4. Validate fee calculation matches expected transaction structure ( recipient + change)
-	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
-		network,
-		identity
-	});
-	const estimatedTxVSize = estimateTransactionVSize({
+	// 4. Validate the fee prices the transaction structure this selection will broadcast
+	// (recipient + change), at the rate it was quoted with.
+	//
+	// The rate comes from the fee itself, never from a fresh sample of the percentiles. The
+	// two are not interchangeable: the median percentile shifts by more than this tolerance
+	// within a minute of ordinary mempool movement, and near the 1 sat/vByte floor a single
+	// slot of drift already exceeds 10%. Checking the quoted fee against a later sample
+	// therefore rejected sends whose fee was correct when it was quoted and still is. A
+	// stale preview is a reason to refresh the preview, not to block a broadcast the user
+	// has approved.
+	const expectedFee = calculateFeeSatoshis({
 		numInputs: utxos.length,
-		numOutputs: 2
+		feeRateMiliSatoshisPerVByte
 	});
-	const expectedMinFee = (BigInt(estimatedTxVSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
-	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
-	const minAcceptableFee = expectedMinFee - feeToleranceRange;
-	const maxAcceptableFee = expectedMinFee + feeToleranceRange;
+	const feeToleranceRange = expectedFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
+	const minAcceptableFee = expectedFee - feeToleranceRange;
+	const maxAcceptableFee = expectedFee + feeToleranceRange;
 
 	if (feeSatoshis < minAcceptableFee || feeSatoshis > maxAcceptableFee) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidFeeCalculation);

@@ -1,4 +1,5 @@
-import type { UserTransaction } from '$declarations/backend/backend.did';
+import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Transaction } from '$lib/types/transaction';
 import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -104,3 +105,13 @@ export const isTransactionFinalized = ({
 	blockNumber?: number;
 	currentBlockNumber: number;
 }): boolean => nonNullish(blockNumber) && currentBlockNumber - blockNumber >= ETH_FINALITY_BLOCKS;
+
+/**
+ * Derives the backend `TokenId` for an ERC-20 token: its contract address paired with the chain id.
+ */
+export const erc20BackendTokenId = ({
+	address,
+	network: { chainId }
+}: Pick<Erc20Token, 'address' | 'network'>): BackendTokenId => ({
+	Erc20: [address, chainId]
+});

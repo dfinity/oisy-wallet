@@ -66,7 +66,8 @@ describe('oisy-trade.derived — orders', () => {
 				price: 1n,
 				quantity: 100n,
 				filled_quantity: ZERO,
-				status: { [status]: null }
+				status: { [status]: null },
+				time_in_force: { GoodTilCanceled: null }
 			}
 		}) as unknown as UserOrder;
 

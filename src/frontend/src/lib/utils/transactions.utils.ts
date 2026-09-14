@@ -34,7 +34,6 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
-import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -46,6 +45,7 @@ import {
 } from '$lib/utils/network.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -244,9 +244,96 @@ export const mapAllTransactionsUi = ({
 	// Remove native ETH/EVM transactions that duplicate an ERC token transfer on the same network and hash.
 	const duplicates = findDuplicateEthNativeTransactions(ethTransactions);
 
-	return duplicates.size > 0
-		? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
-		: allTransactions;
+	const withoutEthDuplicates =
+		duplicates.size > 0
+			? allTransactions.filter((tx) => !duplicates.has(tx as EthAllTransactionUiWithCmp))
+			: allTransactions;
+
+	return dropDuplicateSolTransactions(withoutEthDuplicates);
+};
+
+/**
+ * One Solana record per signature lives in the store of every token the transaction touched, and
+ * the merged list keeps one row per token it moved.
+ *
+ * A swap is deliberately two rows, one per side, because each carries its own token's icon and
+ * balance change and a user scanning for a token wants to find it on the row that names it. What
+ * gets dropped is the rest: the tokens a transaction merely brushed, where a send that opened an
+ * account would otherwise appear again under SOL for the rent alone.
+ */
+const dropDuplicateSolTransactions = (
+	transactions: AllTransactionUiWithCmp[]
+): AllTransactionUiWithCmp[] => {
+	const groups = transactions.reduce<Map<string, AllTransactionUiWithCmp[]>>((acc, entry) => {
+		if (entry.component !== 'solana') {
+			return acc;
+		}
+
+		// Keyed by signature, which is what makes two rows the same transaction. The id is the
+		// signature for a record this redesign derived, but a record cached before it carries a
+		// per-instruction id, and grouping on that would leave its duplicates in place.
+		const key = String((entry.transaction as SolTransactionUi).signature ?? entry.transaction.id);
+		const group = acc.get(key);
+
+		if (nonNullish(group)) {
+			group.push(entry);
+		} else {
+			acc.set(key, [entry]);
+		}
+
+		return acc;
+	}, new Map());
+
+	const drop = new Set<AllTransactionUiWithCmp>();
+
+	groups.forEach((group) => {
+		if (group.length < 2) {
+			return;
+		}
+
+		const [{ transaction }] = group;
+		const { summary } = transaction as SolTransactionUi;
+
+		// The tokens the transaction is about: both sides of a swap, the single side of everything
+		// else. A token outside this set was only brushed, and its row would describe nothing.
+		const stated = [summary?.spent, summary?.received].filter(nonNullish);
+
+		// A transaction OISY could not reduce still moved what it moved, and it earns a row per
+		// token exactly as a swap does. Without this it kept one row, arbitrarily the first, which
+		// said "Interaction" over an amount belonging to whichever token happened to come first.
+		//
+		// The net of a token that only paid the fee is zero, so the fee alone never earns a row.
+		const subjects =
+			stated.length > 0
+				? stated
+				: ((transaction as SolTransactionUi).netChanges ?? []).filter(
+						({ delta }) => delta !== ZERO
+					);
+
+		// One row per subject, matched to the token that names it. A subject the merged list has no
+		// row for simply yields none.
+		const kept = subjects.reduce<AllTransactionUiWithCmp[]>((acc, { tokenAddress }) => {
+			const match = group.find(
+				(entry) =>
+					!acc.includes(entry) &&
+					(isNullish(tokenAddress)
+						? !isTokenSpl(entry.token)
+						: isTokenSpl(entry.token) && entry.token.address === tokenAddress)
+			);
+
+			return nonNullish(match) ? [...acc, match] : acc;
+		}, []);
+
+		const survivors = kept.length > 0 ? kept : [group[0]];
+
+		group.forEach((entry) => {
+			if (!survivors.includes(entry)) {
+				drop.add(entry);
+			}
+		});
+	});
+
+	return drop.size > 0 ? transactions.filter((entry) => !drop.has(entry)) : transactions;
 };
 
 // When using this filter function in combination with an infinite loader we need to make sure that the transactions are filtered while loading and not right before displaying them.
@@ -416,11 +503,29 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction in a newest-first transaction store.
+ * Finds the oldest of a list of transactions.
+ *
+ * A transaction store is assembled from several sources at once: a page the wallet worker
+ * delivers, the local cache, and the pages loaded on demand as the user scrolls. Nothing keeps
+ * the result sorted, so the last entry is not necessarily the oldest one. Callers page from
+ * whatever this returns, and a cursor that is not the oldest asks again for history the store
+ * already holds, which leaves everything behind it out of reach.
  *
  * @param transactions - The list of transactions to search through.
- * @returns The last transaction or undefined if no transactions are provided.
+ * @returns The oldest transaction, by the same ordering the lists render with, or undefined when
+ *   there is none.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined => last(transactions);
+): T | undefined =>
+	// One pass rather than a sorted copy: this runs on every page of every chain, and the lists it
+	// walks are the whole loaded history. Taking the entry that would sort last, ties included,
+	// keeps it identical to sorting.
+	transactions.reduce<T | undefined>(
+		(oldest, transaction) =>
+			isNullish(oldest) ||
+			sortTransactions({ transactionA: transaction, transactionB: oldest }) >= 0
+				? transaction
+				: oldest,
+		undefined
+	);
