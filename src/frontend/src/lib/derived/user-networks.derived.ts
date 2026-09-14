@@ -67,10 +67,10 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		// it maps to exists. An unmapped key must then degrade to "ignore that setting" rather
 		// than throw, which would take down the whole mapping and with it the user's settings.
 		//
-		// It is NOT wire-level forward compatibility: a variant missing from
-		// `backend.factory.did.js` fails Candid decoding in `get_user_profile`, long before this
-		// runs. A closed candid variant cannot be forward compatible — hence the breaking-change
-		// flag on any PR that adds one.
+		// It is NOT wire-level forward compatibility: if a nested variant is missing from
+		// `backend.factory.did.js`, Candid degrades the enclosing optional `UserProfile.settings`
+		// to null, so this function never sees the key and all settings revert to defaults.
+		// This still makes adding a variant a breaking Candid interface change.
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId | undefined => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;

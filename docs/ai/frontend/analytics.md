@@ -119,8 +119,9 @@ impossible happening in production?". Helpers live in
 [`error-analytics.services.ts`](../../../src/frontend/src/lib/services/error-analytics.services.ts).
 
 - `event_context` / `event_subcontext` say _which_ invariant broke.
-- `result_error_severity` is **required** — without it the volume cannot be read
-  by impact, and `error` degrades into an undifferentiated counter.
+- `result_error_severity` is **required**. The generic `error` event is the explicit
+  exception to §4's `result_error*` / `result_status` pairing because its name already
+  fixes the outcome; without severity, the volume cannot be read by impact.
 - A flow that can legitimately fail does **not** belong here. It keeps its own
   event and reports the outcome via `result_status` (that is what `onramper_open`
   and `rate_limited` do). Reserve `error` for "this branch should be dead code".
