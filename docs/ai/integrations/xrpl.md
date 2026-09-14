@@ -5,8 +5,9 @@ exposed by `rippled` / Clio nodes). This is the same HTTP JSON-RPC used across
 the XRPL ecosystem; OISY talks to it with a plain `fetch` POST — there is no
 XRPL SDK dependency.
 
-XRP Ledger support ships **disabled by default** (`VITE_XRP_MAINNET_ENABLED`),
-so none of the below is exercised in production until the feature is enabled.
+XRP Ledger support is temporarily **disabled in user-facing environments** by
+`XRP_MAINNET_DISABLED_OVERRIDE`, so none of the below is exercised in production.
+After enablement, the standard `VITE_XRP_MAINNET_DISABLED` flag will govern it.
 
 ## What we use it for
 
