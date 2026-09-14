@@ -8,14 +8,18 @@ export const mockSolSignature = () => {
 	return signature(base58);
 };
 
-export const mockSolSignatureResponse = (): SolSignature => ({
+export const mockSolSignatureResponse = (overrides: Partial<SolSignature> = {}): SolSignature => ({
 	signature: mockSolSignature(),
 	err: null,
 	confirmationStatus: 'finalized',
 	blockTime: 1234567890n as UnixTimestamp,
 	slot: 1234567890n,
-	memo: 'Some memo'
+	memo: 'Some memo',
+	...overrides
 });
+
+export const mockSolSignatureResponsesAtSlots = (slots: bigint[]): SolSignature[] =>
+	slots.map((slot) => mockSolSignatureResponse({ slot }));
 
 export const mockSolSignatureWithErrorResponse = () => ({
 	signature: mockSolSignature(),

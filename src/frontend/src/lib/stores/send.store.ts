@@ -1,5 +1,6 @@
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { EthFeePriority } from '$lib/enums/eth-fee-priority';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
@@ -69,6 +70,10 @@ export const initSendContext = ({
 	// To persist the value between components, we need to put it in a context outside the WizardModal
 	const sendEthCustomNonce = writable<number | undefined>();
 
+	// Same reason as `sendEthCustomNonce` above: the choice has to outlive the wizard's step
+	// re-render, so it cannot be a prop.
+	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.STANDARD);
+
 	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
 	// but consumed at the send step, so it must survive the WizardModal step re-renders.
 	const sendXrpDestinationTag = writable<number | undefined>();
@@ -85,6 +90,7 @@ export const initSendContext = ({
 		sendDestination,
 		isIcBurning,
 		sendEthCustomNonce,
+		sendEthFeePriority,
 		sendXrpDestinationTag
 	};
 };
@@ -101,6 +107,7 @@ export interface SendContext {
 	sendDestination: Writable<Address>;
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
+	sendEthFeePriority: Writable<EthFeePriority>;
 	sendXrpDestinationTag: Writable<number | undefined>;
 }
 

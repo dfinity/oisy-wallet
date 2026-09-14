@@ -536,7 +536,6 @@ describe('ic-transactions.services', () => {
 
 		const mockParams = {
 			minTimestamp: mockMinTimestamp,
-			transactions: mockTransactions,
 			owner: mockIdentity.getPrincipal(),
 			identity: mockIdentity,
 			maxResults: WALLET_PAGINATION,
@@ -544,14 +543,28 @@ describe('ic-transactions.services', () => {
 			signalEnd
 		};
 
+		// The loader reads the store at call time rather than taking a list, so the cases below set up
+		// what it should find there.
+		const seedStore = (transactions: IcTransactionUi[]) => {
+			icTransactionsStore.reset(mockToken.id);
+			icTransactionsStore.append({
+				tokenId: mockToken.id,
+				transactions: transactions.map((data) => ({ data, certified: false }))
+			});
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
+
+			seedStore(mockTransactions);
 		});
 
 		it('should not load transactions if the transactions list is empty', async () => {
-			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions: [] });
+			icTransactionsStore.reset(mockToken.id);
+
+			const result = await loadNextIcTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: false });
 
@@ -602,7 +615,9 @@ describe('ic-transactions.services', () => {
 			}));
 			const lastId = transactions[transactions.length - 1].id;
 
-			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextIcTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 
@@ -632,7 +647,9 @@ describe('ic-transactions.services', () => {
 			}));
 			const lastId = transactions[transactions.length - 1].id;
 
-			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+			seedStore(transactions);
+
+			const result = await loadNextIcTransactionsByOldest(mockParams);
 
 			expect(result).toEqual({ success: true });
 
@@ -679,6 +696,9 @@ describe('ic-transactions.services', () => {
 			});
 
 			vi.clearAllMocks();
+
+			// The first call appended to the store, which the loader now reads, so restore the input.
+			seedStore(mockTransactions);
 
 			const resultWithMillis = await loadNextIcTransactionsByOldest(mockParams);
 

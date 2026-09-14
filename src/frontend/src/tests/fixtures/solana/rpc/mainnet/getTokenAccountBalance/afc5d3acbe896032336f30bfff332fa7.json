@@ -1,0 +1,1 @@
+{"method":"getTokenAccountBalance","params":["CTZFRs7fNtgEastyD6XoBsc9ySDuZTtuRvaFbH86WRb"],"response":{"context":{"apiVersion":"4.2.1","slot":{"__bigint__":"442314119"}},"value":{"amount":"0","decimals":5,"uiAmount":0,"uiAmountString":"0"}}}

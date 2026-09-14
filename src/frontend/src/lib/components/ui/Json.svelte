@@ -6,6 +6,11 @@
 	interface Props {
 		json?: unknown;
 		defaultExpandedLevel?: number;
+		// Entries of this node that start folded, and are moved below the entries that stay open.
+		// Deliberately not handed down to the children: the caller chooses the entries it can name, and
+		// a key deeper in the tree that happens to carry the same name is somebody else's data, which
+		// must not be hidden by a rule meant for this level.
+		collapsedKeys?: string[];
 		_key?: string;
 		_level?: number;
 		_collapsed?: boolean;
@@ -14,6 +19,7 @@
 	let {
 		json,
 		defaultExpandedLevel = Infinity,
+		collapsedKeys = [],
 		_key = '',
 		_level = 1,
 		_collapsed
@@ -49,9 +55,28 @@
 	let isExpandable = $derived(valueType === 'object');
 	let value = $derived(isExpandable ? json : stringifyJson({ value: json }));
 	let keyLabel = $derived(`${_key}${_key.length > 0 ? ': ' : ''}`);
-	let children = $derived(isExpandable ? Object.entries(json as object) : []);
-	let hasChildren = $derived(children.length > 0);
 	let isArray = $derived(Array.isArray(json));
+	// A folded entry still holds the width of a line where it sits, so leaving it in place keeps
+	// pushing down what the caller wanted read first. Order within each group is left untouched, and
+	// arrays are left alone entirely: their order is data, not presentation.
+	const collapsedLast = (entries: [string, unknown][]): [string, unknown][] => {
+		if (isArray) {
+			return entries;
+		}
+
+		const folded = new Set(collapsedKeys);
+		const open: [string, unknown][] = [];
+		const closed: [string, unknown][] = [];
+
+		for (const entry of entries) {
+			(folded.has(entry[0]) ? closed : open).push(entry);
+		}
+
+		return [...open, ...closed];
+	};
+
+	let children = $derived(isExpandable ? collapsedLast(Object.entries(json as object)) : []);
+	let hasChildren = $derived(children.length > 0);
 	let openBracket = $derived(isArray ? '[' : '{');
 	let closeBracket = $derived(isArray ? ']' : '}');
 	let root = $derived(_level === 1);
@@ -64,36 +89,53 @@
 	const toggle = () => {
 		collapsed = !collapsed;
 	};
+
+	// A span carrying role="button" is activated by a pointer only, so a folded node would be
+	// unreachable without a mouse.
+	const toggleOnKey = (event: KeyboardEvent) => {
+		const { key } = event;
+
+		if (key !== 'Enter' && key !== ' ') {
+			return;
+		}
+
+		// Space scrolls the page on anything that is not a real button.
+		event.preventDefault();
+
+		toggle();
+	};
 </script>
 
 {#if isExpandable && hasChildren}
 	{#if collapsed}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
 			class:collapsed
 			class:expanded={!collapsed}
 			class:root
+			aria-expanded={!collapsed}
 			aria-label="Toggle"
 			data-tid={testId}
 			onclick={stopPropagation(toggle)}
+			onkeydown={toggleOnKey}
 			role="button"
 			tabindex="0"
 			>{keyLabel}
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
 	{:else}
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
 			class:collapsed
 			class:expanded={!collapsed}
 			class:root
+			aria-expanded={!collapsed}
 			aria-label="Toggle"
 			data-tid={testId}
 			onclick={stopPropagation(toggle)}
+			onkeydown={toggleOnKey}
 			role="button"
 			tabindex="0">{keyLabel}<span class="bracket open">{openBracket}</span></span
 		>
@@ -101,7 +143,13 @@
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<Self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
+					<Self
+						_collapsed={collapsedKeys.includes(key) ? true : undefined}
+						_key={key}
+						_level={_level + 1}
+						{defaultExpandedLevel}
+						json={value}
+					/>
 				</li>
 			{/each}
 		</ul>

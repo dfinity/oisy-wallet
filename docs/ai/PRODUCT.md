@@ -162,6 +162,14 @@ The same warning appears on the token's own page, above its transaction list —
 
 This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
+### Solana history
+
+A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
+
+OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
+
+Scrolling back through Solana history works per network on the Activity page and per token on a token's own page. On the Activity page every token of a Solana network pages through the same merged list of the wallet's and its token accounts' signatures, so a transaction reaches every token it belongs to in the same step: both sides of a swap appear together, never one without the other. When that list runs out, every token of the network is marked as having no more history at once. A token's own page pages through that token's history only, so scrolling a token does not walk through the others' history. Each list remembers where it stopped on its own, never guessing from the transactions already on screen, and starts over after a change of wallet or of the network's enabled tokens. A page that could not be fetched is retried on the next scroll rather than read as the end of the history, and a page that brings nothing new does not stop the list: a few more are asked for in the same step. The data export reaches the full Solana history the same way.
+
 ---
 
 ## Exchange-rate sourcing
@@ -291,6 +299,12 @@ When an Ethereum send or approval flow is open, OISY fetches the current network
 
 A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
+The fee a send quotes is what the transaction is **expected to cost**, not the most it could cost. Ethereum charges the network's own base fee plus whatever tip the sender adds, and refunds the difference between that and the ceiling the sender authorised; it also refunds gas the transaction did not use. Quoting the ceiling would overstate the price, often close to double for a token transfer, because the ceiling deliberately carries headroom for a base-fee rise and because token transfers pad their gas limit. The ceiling still decides whether a send is **affordable**: the balance checks and the "max" amount button hold the user to the worst case, so a send can never start out payable and end up short. When the network does not report a base fee, the quote falls back to the ceiling, since overstating the cost is safer than showing none. The send flow and WalletConnect transaction requests quote an expected cost; swap, convert and stake still quote the maximum. This is currently limited to local and staging builds: beta and production still quote the maximum everywhere, unchanged.
+
+### Transaction priority
+
+An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**, **standard** or **fast**. This is currently limited to local and staging builds; beta and production keep the previous single-speed form. Standard is the default and the recommendation, and the choice lasts for that one send rather than being remembered. Each option is priced against the same transaction, so the amounts differ only by the tip the sender is willing to add, which is the part of the fee they actually control. That difference is quoted in gwei, a billionth of the native token, because in the token's own units a whole fee is a few millionths and the three options separate only in the eighth decimal; the fiat value beside each one is the same amount in money. The fee row itself stays in the token, since it quotes a single amount with nothing beside it to compare. Picking a different speed re-prices from the sample already in hand rather than asking the network again, so the quoted fee updates immediately. Whatever is chosen is what gets signed. On a small screen the options open in a sheet; on a large one they expand in place. Where the network reports no choice, the row does not appear and the send behaves as it did before. The same choice is offered when a connected dApp asks the wallet to sign a transaction, on every request type it can ask for, since the speed is a property of the transaction rather than of what the transaction does. There the options are priced against the gas limit the dApp asked for, which is the limit that gets signed, so they agree with the fee quoted beneath them. Swaps, conversions and staking still use the standard speed.
+
 ---
 
 ## Bitcoin
@@ -325,7 +339,7 @@ The XRP Ledger requires an account to keep a minimum balance on-ledger (the **ba
 
 Turning ETH into ckETH, a twinned ERC-20 into its ckERC-20 counterpart, or BTC into ckBTC is offered inside the Swap modal as an ordinary provider named **Chain Fusion**, competing on rate with ICPSwap, KongSwap, Velora, NEAR Intents and 1Sec. Selecting ETH as the pay token puts ckETH among the receive options; selecting ckETH puts ETH among them, and the same holds for every ck twin whose native side is on **Ethereum mainnet** — the only network where the ck helper contracts are deployed. USDC on Base or Arbitrum therefore gets no Chain Fusion offer, because a ckUSDC deposit made there could never be minted.
 
-**Bitcoin joins the swap universe through this provider, and only through it.** Before Chain Fusion, a user holding BTC opened Swap and saw no offers at all: no DEX in the list quotes a Bitcoin pair. Bitcoin now appears as a pay token with ckBTC as its sole receive option, and ckBTC offers BTC back alongside whatever the IC DEXes and 1Sec quote. The pairing is Bitcoin↔ICP only — Bitcoin never reaches Ethereum or Solana in the network filter, because no provider can take it there.
+**Bitcoin joins the swap universe through this provider, and in production only through it.** Before Chain Fusion, a user holding BTC opened Swap and saw no offers at all: no DEX in the list quotes a Bitcoin pair. Bitcoin now appears as a pay token with ckBTC as its sole receive option, and ckBTC offers BTC back alongside whatever the IC DEXes and 1Sec quote. In production the pairing is Bitcoin↔ICP only: Bitcoin never reaches Ethereum or Solana in the network filter, because no provider there can take it. On local and staging, NEAR Intents also serves Bitcoin (see [NEAR Intents as a Bitcoin swap provider](#near-intents-as-a-bitcoin-swap-provider-local-and-staging)).
 
 The offer carries no slippage: a ck conversion is deterministic, so the rate is 1:1 apart from fees, and the form's fee section itemizes those fees one row at a time rather than as a single sum — the provider sheet carries no fees, only the provider's identity and the minimum amount the minter imposes. Two cases are worth calling out:
 
@@ -335,6 +349,33 @@ The offer carries no slippage: a ck conversion is deterministic, so the rate is 
 The quoted receive amount is what the minter actually credits, which is **not** always what the Convert flow shows. Two directions are not 1:1: a **BTC deposit** loses the minter's KYT fee (Convert quotes it 1:1 and is wrong — a 1 000-satoshi deposit mints 900), and a **ckBTC withdrawal** loses the Bitcoin network and minter fees. Everything else is 1:1, with its fees charged on top. Either way the fee breakdown lists every component that costs something, and its total is the user's whole cost of the conversion — the part paid out of balance plus the part withheld from what lands.
 
 The pre-existing **Convert** flow is unchanged and still reachable from a token's own page. Both paths coexist; the two mechanisms are identical, only the entry point, the presentation and — for a BTC deposit — the honesty of the quoted amount differ.
+
+### NEAR Intents as a Bitcoin swap provider (local and staging)
+
+Behind `NEAR_INTENTS_BTC_SWAP_ENABLED` (`src/frontend/src/env/rest/near-intents.env.ts`, on for local and staging builds, off in production), NEAR Intents also serves Bitcoin. Native BTC then appears as a pay token toward the NEAR Intents destination chains (Ethereum, Arbitrum, Base, BSC, Polygon and Solana mainnets), competing with the Chain Fusion ckBTC offer, and EVM and Solana tokens quote toward BTC, with the payout going to the user's own BTC address. A destination whose address the user does not hold yet is simply not quoted, so a quote can never pay out to a wrong-chain address.
+
+Funds cannot move before the user has acknowledged the NEAR Intents terms of service, exactly as in the EVM and Solana wizards. A BTC-source swap broadcasts the deposit transaction and becomes an **active user transaction at the moment of broadcast**, not when the flow finishes: a BTC broadcast is irreversible, so the swap is tracked even if a later step throws, and the global poller drives it to success or failure across modal close, refresh and logout, identically to the EVM and Solana NEAR Intents swaps. The spent UTXOs stay reserved while the deposit is pending, so a concurrent send cannot double-spend them.
+
+What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
+
+### 1Sec restricted to the unwrapping direction
+
+1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
+
+Which leg that is depends on the token, because 1Sec wraps in both directions. Its config records the chain each token is native to, and OISY offers only the leg that returns a token to that chain:
+
+- **ICP-native tokens** — ICP, BOB, GLDT, ckBTC — are wrapped as ERC-20s on the EVM chains. Only **EVM → ICP** is offered, so selecting native ICP (or ICRC BOB / GLDT) as the pay token no longer lists any Ethereum, Base or Arbitrum receive option.
+- **EVM-native tokens** — USDC, USDT, cbBTC — are wrapped as ICRC ledgers on ICP. Only **ICP → EVM** is offered, so selecting native USDC on Ethereum no longer lists the 1Sec-bridged USDC on ICP as a receive option.
+
+The rule is enforced once, on the directed pair, so the destination **network** filter narrows with it: a pay token with no reachable 1Sec destination drops the networks it could only have reached through 1Sec, rather than offering a network whose token list is then empty.
+
+Only 1Sec is affected. Chain Fusion still converts ck twins both ways (ckUSDC stays reachable from Ethereum USDC), the IC DEXes still quote ICP-side pairs, and Velora still quotes EVM-side pairs — no token loses a non-1Sec route.
+
+Three tokens in 1Sec's config have no practical effect in OISY: **CHAT** is bridged by 1Sec's canister but is absent from the `onesec-bridge` package's token config, so OISY has never routed it in either direction; and **ckBTC**'s wrapped ERC-20 and **cbBTC**'s wrapped ICRC ledger are not OISY tokens, so the surviving leg of each has no pay token to start from.
+
+What this deliberately does not do: it does not hide, disable or remove a token, and it does not change which tokens 1Sec accepts as a pay token — only which destinations it offers for them. In particular the wrapped ERC-20 of ICP stays a curated, [suggested](#curated-tokens-vs-metadata-only-tokens) token on all three EVM chains, precisely so that a holder's balance stays visible: it was never in most users' custom-token list, so dropping it from the curated set would hide the very balance they need to swap back.
+
+The restriction is a code-level kill switch — `ONESEC_UNWRAP_ONLY` in `src/frontend/src/env/rest/onesec.env.ts`, in the same style as the price-provider flags. Setting it to `false` restores both directions unchanged.
 
 ### Cross-session settlement
 
@@ -347,6 +388,22 @@ How settlement is observed differs by direction, because the minters answer diff
 - A **Bitcoin deposit** (BTC → ckBTC) is the one conversion the app has to _finish_, not merely watch: the ckBTC minter credits nothing until someone asks it to look at the deposit address, so a deposit whose tab was closed before its confirmations landed would otherwise sit there indefinitely. The row therefore asks the minter to mint once the deposit has enough confirmations — sparingly, since OISY already does this for every enabled ckBTC wallet, and the request is harmless to repeat — and takes the minter's own answer as the verdict: minted, or rejected because the Bitcoin checker flagged the coins or they were too small to cover the check fee. A deposit that is confirmed but not yet minted, and any failure to reach the minter, leave the conversion in flight so the next attempt retries.
 
 When a row reaches a terminal state it refreshes the wallet and reports into the **swap** analytics funnel — not the convert one — exactly once, including when it finalizes across a page refresh.
+
+---
+
+## Trade (OISY Trade)
+
+### Price warnings on a limit order
+
+A limit order is priced against two independent references: **current value** — the cross of the two legs' USD prices from the wallet's own price feed — and the venue's **order book** (best bid / best ask). The price section warns whenever those two together say the order is likely to cost the user value, and the wording says which of the situations they are in.
+
+A price that **crosses the book** (a sell at or below the best bid, a buy at or above the best ask) fills almost immediately, and the form says exactly that. A price that does **not** cross rests — but if it sits more than **1% on the wrong side of current value** (a sell below it, a buy above it), it is the price the market reaches first, and it would fill at a value the feed already calls worse than the tokens are worth. That case carries its own warning ("This price is below current value. Your order rests for now, but it may fill very soon, at a loss versus current value."), amber while the give-up is under 5% and red at or beyond it, and the value-difference figure beside the price is coloured with it rather than staying neutral. Inside the 1% band nothing is said and the figure stays neutral: the feed and the book drift against each other continuously, so a sub-1% gap carries no signal. A resting price on the _favourable_ side of current value is never warned about, however far out it sits.
+
+The price field's own label follows the same line, but turns on the **sign alone** rather than the 1% point: "When 1 ICP reaches" / "drops to" describes a price the market has yet to hit, so it holds only while the price is still ahead of current value. A crossing price and a resting price past current value by any amount both read as the immediate sale or purchase they effectively are ("Sell now, while 1 ICP ≥"), because a resting order priced past current value is what the bots monitoring the venue take first. A price a hair past current value therefore relabels without being warned about.
+
+The review step repeats the distinction. At or beyond a **5% give-up — crossing or resting** — "Place order" stays disabled until the user ticks a confirmation checkbox. Each case gets its own one-line acknowledgement: the crossing one an immediate fill at a price worse than market, the resting one that the order may fill very soon at such a price. The side-specific warning itself stays on the form. In between — past 1% but under 5% — the form warns and the review does not block. The boundary is inclusive on both surfaces, so an exact 5% give-up is red and does require the confirmation.
+
+A **fill-or-kill** order is the exception to all of this: it can only execute by crossing, so a FOK price that cannot cross is a blocking error ("it would be canceled") that disables Review and takes precedence over both warnings above.
 
 ---
 
