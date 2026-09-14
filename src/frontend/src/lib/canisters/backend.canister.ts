@@ -33,7 +33,13 @@ import {
 	mapPersonalNotesVetkeyError,
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
+import {
+	networkSettingsForNames,
+	tolerantIdlCertifiedFactoryBackend,
+	tolerantIdlFactoryBackend
+} from '$lib/canisters/backend.tolerant.factory';
 import { ZERO } from '$lib/constants/app.constants';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import type {
 	AddPendingTransactionOutcome,
 	AddUserDismissedNotificationParams,
@@ -65,7 +71,7 @@ import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
-import { mapUserNetworks } from '$lib/utils/user-networks.utils';
+import { mapUserNetworks, resolveNetworkSettingsKeys } from '$lib/utils/user-networks.utils';
 import {
 	Canister,
 	createServices,
@@ -74,6 +80,41 @@ import {
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
+
+/**
+ * Resolves the network settings keys of a tolerantly decoded profile back to names, and reports
+ * the ones no known name hashes to — a network the backend has and these bindings do not.
+ *
+ * Only the unresolved entries are dropped. The generated decoder would have dropped the whole
+ * `settings` record instead, silently resetting every preference the user ever saved.
+ */
+const mapTolerantUserProfile = (response: GetUserProfileResponse): GetUserProfileResponse => {
+	if (!('Ok' in response)) {
+		return response;
+	}
+
+	// Defensive: this runs on freshly decoded wire data, where the opt may be absent entirely.
+	const [settings] = response.Ok.settings ?? [];
+
+	if (isNullish(settings)) {
+		return response;
+	}
+
+	const { networks, unresolved } = resolveNetworkSettingsKeys({
+		networks: settings.networks.networks,
+		names: networkSettingsForNames()
+	});
+
+	unresolved.forEach((key) => trackUnmappedNetworkSettingsKey({ key }));
+
+	return {
+		Ok: {
+			...response.Ok,
+			settings: [{ ...settings, networks: { ...settings.networks, networks } }]
+		}
+	};
+};
 
 export class BackendCanister extends Canister<BackendService> {
 	static async create({
@@ -91,7 +132,47 @@ export class BackendCanister extends Canister<BackendService> {
 			certifiedIdlFactory: idlCertifiedFactoryBackend
 		});
 
-		return new BackendCanister(canisterId, service, certifiedService);
+		// Read-only companions. `IDL.Unknown` cannot be serialized, so these must never be used for
+		// a call that sends a `NetworkSettingsFor` — only `get_user_profile` reads through them.
+		const { service: tolerantService, certifiedService: tolerantCertifiedService } =
+			createServices<BackendService>({
+				options: {
+					...options,
+					agent
+				},
+				idlFactory: tolerantIdlFactoryBackend,
+				certifiedIdlFactory: tolerantIdlCertifiedFactoryBackend
+			});
+
+		return new BackendCanister({
+			canisterId,
+			service,
+			certifiedService,
+			tolerantService,
+			tolerantCertifiedService
+		});
+	}
+
+	readonly #tolerantService: BackendService;
+	readonly #tolerantCertifiedService: BackendService;
+
+	private constructor({
+		canisterId,
+		service,
+		certifiedService,
+		tolerantService,
+		tolerantCertifiedService
+	}: {
+		canisterId: Principal;
+		service: BackendService;
+		certifiedService: BackendService;
+		tolerantService: BackendService;
+		tolerantCertifiedService: BackendService;
+	}) {
+		super(canisterId, service, certifiedService);
+
+		this.#tolerantService = tolerantService;
+		this.#tolerantCertifiedService = tolerantCertifiedService;
 	}
 
 	listCustomTokens = (): Promise<CustomToken[]> => {
@@ -130,10 +211,14 @@ export class BackendCanister extends Canister<BackendService> {
 		return response;
 	};
 
-	getUserProfile = ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
-		const { get_user_profile } = this.caller({ certified });
+	getUserProfile = async ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
+		const { get_user_profile } = certified ? this.#tolerantCertifiedService : this.#tolerantService;
 
-		return get_user_profile();
+		// Typed as `GetUserProfileResponse`, but the network settings keys are candid hashes until
+		// `mapTolerantUserProfile` resolves them back to names.
+		const response = await get_user_profile();
+
+		return mapTolerantUserProfile(response);
 	};
 
 	newUserSignupsAllowed = ({ certified }: QueryParams): Promise<boolean> => {
