@@ -7,6 +7,7 @@ use shared::types::signer::topup::TopUpCyclesLedgerResult;
 use crate::{
     api,
     personal_notes::share::service::prune_expired_shares,
+    tips::service::prune_expired_tips,
     token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
 };
 
@@ -95,6 +96,13 @@ async fn hourly_housekeeping_tasks() {
     let pruned = prune_expired_shares();
     if pruned > 0 {
         ic_cdk::println!("Pruned {pruned} expired personal_note_shares entries");
+    }
+
+    // Only tips past their retention window; a lapsed tip stays visible in the
+    // sender's History until then.
+    let pruned_tips = prune_expired_tips();
+    if pruned_tips > 0 {
+        ic_cdk::println!("Pruned {pruned_tips} tips past their retention window");
     }
 }
 

@@ -35,4 +35,17 @@ describe('BottomSheetConfirmationPopup', () => {
 		expect(getByTestId('confirmation-title')).toBeInTheDocument();
 		expect(getByTestId('confirmation-content')).toBeInTheDocument();
 	});
+
+	it('renders a centered modal card at the same breakpoint as Modal.svelte (>=640px)', () => {
+		// Regression: Modal.svelte's own dialog becomes a centered card at the `sm`
+		// breakpoint (640px, see gix.scss). This popup used to only switch at 1024px,
+		// so it rendered as a mobile bottom sheet while the parent modal already
+		// looked like a desktop dialog.
+		screensStore.set('md');
+
+		const { queryByTestId, getByTestId } = render(BottomSheetConfirmationPopup, { props });
+
+		expect(getByTestId(CONFIRMATION_POPUP_MODAL)).toBeInTheDocument();
+		expect(queryByTestId('bottom-sheet')).toBeNull();
+	});
 });

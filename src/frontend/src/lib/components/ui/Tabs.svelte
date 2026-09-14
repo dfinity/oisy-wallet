@@ -16,6 +16,9 @@
 		activeTab: string;
 		children?: Snippet;
 		styleClass?: string;
+		// The gap between the tab row and its content. The default suits a full page; a modal whose
+		// other rows sit `mb-4` apart wants the tabs on the same rhythm rather than looser.
+		contentStyleClass?: string;
 		tabVariant?: TabVariant;
 		trackEventName?: string;
 	}
@@ -25,6 +28,7 @@
 		activeTab = $bindable(),
 		tabs,
 		styleClass,
+		contentStyleClass = 'mt-6',
 		tabVariant = 'default',
 		trackEventName
 	}: Props = $props();
@@ -80,6 +84,6 @@
 	{/each}
 </div>
 
-<div class="mt-6">
+<div class={contentStyleClass}>
 	{@render children?.()}
 </div>
