@@ -24,11 +24,21 @@ export enum PLAUSIBLE_EVENTS {
 	LIMIT_ORDER = 'limit_order',
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
-	PERSONAL_NOTE_SHARE = 'personal_note_share'
+	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	// An invariant we believed unreachable was reached. Not for flows that can legitimately
+	// fail — those keep their own event and report the outcome via `result_status`.
+	ERROR = 'error'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
-	MAJOR = 'major'
+	// The user cannot continue at all.
+	BLOCKER = 'blocker',
+	// A whole feature is unusable, the rest of the app works.
+	CRITICAL = 'critical',
+	// The user's action visibly failed.
+	MAJOR = 'major',
+	// Invisible to the user; they keep working as normal.
+	MINOR = 'minor'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -69,7 +79,12 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
-	GLOBAL = 'global'
+	GLOBAL = 'global',
+	PROFILE_DECODE_FAILED = 'profile_decode_failed'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
+	SETTINGS_KEY_UNMAPPED = 'settings_key_unmapped'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
