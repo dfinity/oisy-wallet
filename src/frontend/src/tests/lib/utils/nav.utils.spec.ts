@@ -22,12 +22,14 @@ import {
 	isDappExplorerPath,
 	isEarnPath,
 	isEarningPath,
+	isHelpPath,
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteEarn,
 	isRouteEarning,
+	isRouteHelp,
 	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
@@ -529,6 +531,25 @@ describe('nav.utils', () => {
 			});
 		});
 
+		describe('isRouteHelp', () => {
+			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Help}`;
+
+			it('should return true when route id matches Support path', () => {
+				expect(isRouteHelp(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteHelp(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Support path', () => {
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteHelp(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteHelp(mockPage(`/anotherGroup/${AppPath.Help}`))).toBeFalsy();
+			});
+		});
+
 		describe('isRouteDappExplorer', () => {
 			it('should return true when route id matches Explore path', () => {
 				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
@@ -692,6 +713,13 @@ describe('nav.utils', () => {
 			expect(isSettingsPath('/(app)/settings')).toBeTruthy();
 			expect(isSettingsPath('/(app)/settings/wrong')).toBeFalsy();
 			expect(isSettingsPath(null)).toBeFalsy();
+		});
+
+		it('isHelpPath', () => {
+			expect(isHelpPath(withAppPrefix(AppPath.Help))).toBeTruthy();
+			expect(isHelpPath('/(app)/help')).toBeTruthy();
+			expect(isHelpPath('/(app)/help/wrong')).toBeFalsy();
+			expect(isHelpPath(null)).toBeFalsy();
 		});
 
 		it('isDappExplorerPath', () => {

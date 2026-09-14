@@ -18,7 +18,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 - **Portfolio** — Assets, NFTs, Activity.
 - **Finance** — Trade, Earn, Borrow.
-- **More** — Notes, Explore, Rewards, Settings.
+- **More** — Notes, Explore, Rewards, Help, Settings.
 
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
@@ -26,8 +26,9 @@ On **desktop** every section is laid out at once under a non-interactive heading
 - **Finance destinations.** **Earn** (`/earn/`) is a standalone destination, distinct from the Earning tab inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag and — since each has a single provider today — route **directly to that provider's page**, skipping the intermediate category page: Trade to the **OISY TRADE** provider page (`/providers/oisy-trade/`), Borrow to the Liquidium provider page (`/providers/liquidium/`). The Assets **Trading** tab (`/trading/`) remains a distinct surface. Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
+- **Help** (`/help/`) sits in the More group directly before Settings, under a life-buoy icon. The user menu keeps its own link straight out to the external help centre; the two do not compete, because the navigation entry is Help and the menu entry is Support.
 
-On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
+On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Help / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
@@ -127,6 +128,20 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 | `deposit`        | funds are deposited | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_price`, `token_usd_value`; `result_error` on failure |
 | `withdraw`       | funds are withdrawn | `executing` → `success`/`error` | same                                                                                            |
 
+### Help tracking
+
+The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
+
+| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                |
+| ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
+| `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                    |
+| `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
+| `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
+| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
+
+Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
+
 ---
 
 ## Tokens
@@ -208,6 +223,38 @@ The user-menu popover (the `IconUser` button) carries a **Language** selector fo
 The user menu also carries the **theme/appearance** selector when signed in (unchanged).
 
 The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.
+
+---
+
+## Help
+
+A dedicated page (`/help/`) for resolving problems without filing a ticket. The test for what belongs here is whether it lets a user settle something themselves that would otherwise become a support request. It is laid out like Settings — a stack of cards — so the two read as one family.
+
+Data export is deliberately **not** here: it is a utility, not help. It stays on the Settings page until a second utility exists to justify a Utilities page of its own.
+
+### Support
+
+The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
+
+### ICPSwap Token Withdrawal
+
+OISY swaps ICRC tokens through ICPSwap, which deposits the tokens into a pool canister, swaps them, then withdraws them back. When that final withdrawal fails — the pool canister unavailable, a slow subnet, the browser closed mid-flow — the tokens stay credited to the user inside the pool. The swap flow already retries twice, but once the user leaves the swap wizard OISY previously offered no way back to the funds.
+
+This card recovers them, two ways.
+
+**Scan my pools** checks, in one press, every ICPSwap pool that exists between two tokens active in the user's wallet — the path for someone who does not remember which pair they were swapping. The pool table arrives in a single query and is filtered locally, so the cost is one query plus one balance query per pool that actually exists between two active tokens: a wallet with 17 active tokens reaches 9 pools, not 136 pairs. Pools are read independently, so one that fails is reported as unreadable rather than discarding the rest — a partial scan never passes for a complete one. The scan runs only when pressed, never on page load.
+
+The scan only covers pools where **both** legs are active. A swap into a token the user never enabled leaves a pool the scan cannot see, so the card says as much and offers the second way: the user picks the two tokens themselves. Either way OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists the **unused balance** for each leg — the balance the pool credited to the user and never returned. Results are grouped per pool under the pair that identifies it.
+
+ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
+
+Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads the pool so the row disappears. Only the pressed row shows a loading state.
+
+Balances at or below the token's ledger fee are **not shown at all** — they cannot be moved, and offering them would only invite a withdrawal that is bound to fail. When a pair resolves to a pool that holds nothing, the card says so explicitly rather than showing an empty space; when the pair has no pool at all, it says that instead.
+
+Only **enabled** ICRC tokens can be picked, and a token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
+
+The page deliberately does **not**: scan pools where only one leg is active (roughly half of all pools have ICP as a leg, so that would be hundreds of balance queries — manual selection covers them); scan other fee tiers (every live pool sits on the one OISY trades on); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
 
 ---
 

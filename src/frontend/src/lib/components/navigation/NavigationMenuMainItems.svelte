@@ -5,6 +5,7 @@
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { HELP_ENABLED } from '$env/help.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
@@ -17,6 +18,7 @@
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
+	import IconLifeBuoy from '$lib/components/icons/lucide/IconLifeBuoy.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
@@ -39,6 +41,7 @@
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_HELP,
 		NAVIGATION_ITEM_TOKENS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
@@ -62,6 +65,7 @@
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
+		isRouteHelp,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -260,6 +264,20 @@
 							icon: IconNotebook,
 							onclick: () => modalStore.openNotes(notesModalId),
 							selected: false
+						}
+					}
+				: {}),
+			// Gated on HELP_ENABLED: with the flag off the entry is simply absent, which is all
+			// the gating the page needs - it has nothing worth hiding behind a route guard.
+			...(HELP_ENABLED
+				? {
+						help: {
+							label: $i18n.navigation.text.help,
+							ariaLabel: $i18n.navigation.alt.help_page,
+							testId: prefixedTestId(NAVIGATION_ITEM_HELP),
+							icon: IconLifeBuoy,
+							href: url(AppPath.Help),
+							selected: isRouteHelp(page)
 						}
 					}
 				: {}),
