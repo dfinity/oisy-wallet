@@ -34,6 +34,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSplCustomToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
@@ -427,7 +428,7 @@ describe('AllTransactionsLoader', () => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 			});
 
-			await new Promise((resolve) => setTimeout(resolve, 0));
+			await runResolvedPromises();
 
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
 		});
@@ -743,6 +744,33 @@ describe('AllTransactionsLoader', () => {
 			await expect(controls()?.loadMore()).resolves.toEqual({ success: false, err });
 
 			expect(controls()?.exhausted).toBeFalsy();
+		});
+
+		// Levelling it in the same round would ask for the cursor that just failed again straight away.
+		it('should leave a token whose page failed out of the levelling of the same round', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			await runResolvedPromises();
+
+			spyLoadNextSolTransactions.mockClear();
+
+			spyLoadNextSolTransactions.mockImplementation(async ({ token }: { token: Token }) =>
+				token.id === SOLANA_TOKEN.id
+					? await Promise.resolve({ success: false, err: new Error('429') })
+					: await Promise.resolve({ success: true })
+			);
+
+			await controls()?.loadMore();
+
+			const solanaPages = spyLoadNextSolTransactions.mock.calls.filter(
+				([{ token }]) => token.id === SOLANA_TOKEN.id
+			);
+
+			expect(solanaPages).toHaveLength(1);
 		});
 
 		it('should report a page that threw as failed', async () => {

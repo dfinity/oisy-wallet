@@ -207,19 +207,26 @@
 		// One unconditional page per token first: without it every token already sits at the floor
 		// and levelling alone would find nothing left to do.
 		const pages = await Promise.all(
-			$enabledFungibleNetworkTokens.map((token) => pageToken({ token }))
+			$enabledFungibleNetworkTokens.map(async (token) => ({
+				token,
+				result: await pageToken({ token })
+			}))
 		);
 
 		levelFloor = oldestLoadedTimestamp();
 
+		// A token whose page just failed waits for the next round: levelling it now would ask for the
+		// same failed cursor again straight away.
 		const levelled = await levelTokens({
-			tokens: $enabledFungibleNetworkTokens,
+			tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
 			minTimestamp: levelFloor
 		});
 
 		// Without it a round in which pages failed and nothing loaded would read as the chains having
 		// nothing left, and the scroll would stop asking.
-		const failure = [...pages, ...levelled].find(({ err }) => nonNullish(err));
+		const failure = [...pages.map(({ result }) => result), ...levelled].find(({ err }) =>
+			nonNullish(err)
+		);
 
 		return {
 			success: totalLoaded() > loadedBefore,

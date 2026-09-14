@@ -86,17 +86,22 @@
 		// Whether the fetch achieved anything has to come from the loader, not from this list: it is
 		// filtered, so history that loaded but does not match the current filter leaves its length
 		// untouched. Reading the length here would strand the user on a narrow filter.
+		// A page failed, so the chains may well have more. Going dry would stop asking until unrelated
+		// rows arrived; staying open lets the next intersection try again. What the other chains loaded
+		// is still revealed, but no progress is reported even then: progress re-arms the observer at
+		// once, which would retry the failing chain in a tight loop.
+		if (nonNullish(result.err)) {
+			if (result.success) {
+				pages++;
+			}
+
+			return false;
+		}
+
 		if (result.success) {
 			pages++;
 
 			return true;
-		}
-
-		// A page failed, so the chains may well have more. Going dry would stop asking until unrelated
-		// rows arrived; staying open lets the next intersection try again, and not reporting progress
-		// keeps the observer from retrying in a tight loop meanwhile.
-		if (nonNullish(result.err)) {
-			return false;
 		}
 
 		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
