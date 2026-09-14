@@ -111,6 +111,37 @@ more than ~2 related actions.
 Extend the existing enum / constants file in place — respect the closed
 structure (commandment 7). Don't create a parallel naming scheme.
 
+### `error` — the one event for things that should not happen
+
+`PLAUSIBLE_EVENTS.ERROR` is deliberately generic: **one** event name for every
+invariant we believed unreachable, so a single dashboard row answers "is anything
+impossible happening in production?". Helpers live in
+[`error-analytics.services.ts`](../../../src/frontend/src/lib/services/error-analytics.services.ts).
+
+- `event_context` / `event_subcontext` say _which_ invariant broke.
+- `result_error_severity` is **required** — without it the volume cannot be read
+  by impact, and `error` degrades into an undifferentiated counter.
+- A flow that can legitimately fail does **not** belong here. It keeps its own
+  event and reports the outcome via `result_status` (that is what `onramper_open`
+  and `rate_limited` do). Reserve `error` for "this branch should be dead code".
+
+Keep it rare. A generic name is only useful while every occurrence is worth
+reading; one chatty call site turns the whole event into noise, so dedupe at the
+source when the caller can fire repeatedly (e.g. a Svelte `derived` that
+recomputes).
+
+#### Candid field hashes in `result_error_code`
+
+When the backend returns a variant this frontend's generated bindings do not know,
+Candid fails to decode and the field **name never reaches us** — only its hash.
+`profile_decode_failed` therefore reports the hash in `result_error_code`.
+
+To read a row, hash the candidate names the backend added and match:
+`h = 0; for each byte b: h = (h * 223 + b) mod 2^32`. For example
+`XrpMainnet` → `400215630`. The hash identifies the field name, not which
+vocabulary it came from (`NetworkSettingsFor`, `ExperimentalFeatureSettingsFor`
+and `ProviderAgreementType` can all grow) — in practice the name resolves that.
+
 ---
 
 ## 4. Metadata vocabulary (reuse the enums)
