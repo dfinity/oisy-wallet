@@ -184,6 +184,36 @@ export const idlFactory = ({ IDL }) => {
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcGetPendingTransactionsError
 	});
+	const TipError = IDL.Variant({
+		InvalidExpiry: IDL.Null,
+		ClaimInProgress: IDL.Null,
+		SecretCiphertextTooLarge: IDL.Null,
+		Uncovered: IDL.Null,
+		NotFound: IDL.Null,
+		NotYourTip: IDL.Null,
+		InvalidClaimCodeHash: IDL.Null,
+		InvalidTipId: IDL.Null,
+		RateLimited: RateLimitError,
+		DuplicateTipId: IDL.Null,
+		NotCancellable: IDL.Null,
+		TransferFailed: IDL.Record({ msg: IDL.Text }),
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		MessageTooLong: IDL.Null,
+		TooManyTips: IDL.Null,
+		InsufficientFunds: IDL.Null,
+		AmountTooSmall: IDL.Null
+	});
+	const CancelTipResult = IDL.Variant({ Ok: IDL.Null, Err: TipError });
+	const TipClaimRequest = IDL.Record({
+		tip_id: IDL.Text,
+		claim_code: IDL.Text
+	});
+	const TipClaim = IDL.Record({
+		block_index: IDL.Nat,
+		ledger_canister_id: IDL.Principal,
+		amount: IDL.Nat
+	});
+	const ClaimTipResult = IDL.Variant({ Ok: TipClaim, Err: TipError });
 	const Config = IDL.Record({
 		derivation_origin: IDL.Opt(IDL.Text),
 		ii_canister_id: IDL.Opt(IDL.Principal),
@@ -413,6 +443,14 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: PersonalNoteShareError
 	});
+	const CreateTipRequest = IDL.Record({
+		tip_id: IDL.Text,
+		claim_code_hash: IDL.Vec(IDL.Nat8),
+		message: IDL.Opt(IDL.Text),
+		ledger_canister_id: IDL.Principal,
+		amount: IDL.Nat,
+		expires_at_ns: IDL.Nat64
+	});
 	const UserAgreement = IDL.Record({
 		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
 		text_sha256: IDL.Opt(IDL.Text),
@@ -587,6 +625,37 @@ export const idlFactory = ({ IDL }) => {
 		price: IDL.Opt(IDL.Float64)
 	});
 	const ExchangeRate = IDL.Record({ usd: ExchangeData });
+	const TipStatus = IDL.Variant({
+		Failed: IDL.Null,
+		Reserved: IDL.Null,
+		Claimed: IDL.Null,
+		Cancelled: IDL.Null,
+		Expired: IDL.Null
+	});
+	const TipClaimFailureReason = IDL.Variant({
+		Uncovered: IDL.Null,
+		TransferFailed: IDL.Null,
+		InsufficientFunds: IDL.Null
+	});
+	const TipClaimFailure = IDL.Record({
+		at_ns: IDL.Nat64,
+		reason: TipClaimFailureReason
+	});
+	const MyTip = IDL.Record({
+		status: TipStatus,
+		claimed_by: IDL.Opt(IDL.Principal),
+		tip_id: IDL.Text,
+		last_claim_failure: IDL.Opt(TipClaimFailure),
+		created_at_ns: IDL.Nat64,
+		message: IDL.Opt(IDL.Text),
+		ledger_canister_id: IDL.Principal,
+		amount: IDL.Nat,
+		expires_at_ns: IDL.Nat64
+	});
+	const GetMyTipsResult = IDL.Variant({
+		Ok: IDL.Vec(MyTip),
+		Err: TipError
+	});
 	const GetPersonalNoteShareResult = IDL.Variant({
 		Ok: PersonalNoteShareContent,
 		Err: PersonalNoteShareError
@@ -610,6 +679,30 @@ export const idlFactory = ({ IDL }) => {
 	const PersonalNotesVetkeyResult = IDL.Variant({
 		Ok: IDL.Vec(IDL.Nat8),
 		Err: PersonalNoteError
+	});
+	const PublicTip = IDL.Record({
+		ledger_canister_id: IDL.Principal,
+		amount: IDL.Nat,
+		expires_at_ns: IDL.Nat64
+	});
+	const GetTipResult = IDL.Variant({ Ok: PublicTip, Err: TipError });
+	const TipDetails = IDL.Record({
+		message: IDL.Opt(IDL.Text),
+		ledger_canister_id: IDL.Principal,
+		amount: IDL.Nat,
+		expires_at_ns: IDL.Nat64
+	});
+	const GetTipDetailsResult = IDL.Variant({
+		Ok: TipDetails,
+		Err: TipError
+	});
+	const TipVetkeyResult = IDL.Variant({
+		Ok: IDL.Vec(IDL.Nat8),
+		Err: TipError
+	});
+	const GetTipSecretResult = IDL.Variant({
+		Ok: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		Err: TipError
 	});
 	const AgreementType = IDL.Variant({
 		TermsOfUse: IDL.Null,
@@ -767,6 +860,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: PersonalNoteError
 	});
+	const SetTipSecretRequest = IDL.Record({
+		tip_id: IDL.Text,
+		encrypted_claim_code: IDL.Vec(IDL.Nat8)
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -807,6 +904,7 @@ export const idlFactory = ({ IDL }) => {
 		token_activity_count: IDL.Nat64,
 		personal_note_shares_count: IDL.Nat64,
 		agreement_history_count: IDL.Nat64,
+		tips_count: IDL.Nat64,
 		personal_notes_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
@@ -890,6 +988,8 @@ export const idlFactory = ({ IDL }) => {
 			[BtcGetPendingTransactionsResult],
 			[]
 		),
+		cancel_tip: IDL.Func([IDL.Text], [CancelTipResult], []),
+		claim_tip: IDL.Func([TipClaimRequest], [ClaimTipResult], []),
 		config: IDL.Func([], [Config], ['query']),
 		consume_personal_note_share: IDL.Func([IDL.Text], [ConsumePersonalNoteShareResult], []),
 		create_active_user_transaction: IDL.Func(
@@ -903,6 +1003,7 @@ export const idlFactory = ({ IDL }) => {
 			[CreatePersonalNoteShareResult],
 			[]
 		),
+		create_tip: IDL.Func([CreateTipRequest], [CancelTipResult], []),
 		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_active_user_transaction: IDL.Func([IDL.Text], [DeleteActiveUserTransactionResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
@@ -921,6 +1022,7 @@ export const idlFactory = ({ IDL }) => {
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)], ['query']),
 		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
+		get_my_tips: IDL.Func([], [GetMyTipsResult], ['query']),
 		get_personal_note_share: IDL.Func([IDL.Text], [GetPersonalNoteShareResult], ['query']),
 		get_personal_note_shares_count: IDL.Func([], [GetPersonalNoteSharesCountResult], ['query']),
 		get_personal_notes: IDL.Func([], [GetPersonalNotesResult], ['query']),
@@ -931,6 +1033,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		get_personal_notes_vetkey_public_key: IDL.Func([], [PersonalNotesVetkeyResult], []),
+		get_tip: IDL.Func([IDL.Text], [GetTipResult], ['query']),
+		get_tip_details: IDL.Func([TipClaimRequest], [GetTipDetailsResult], ['query']),
+		get_tip_encrypted_vetkey: IDL.Func([IDL.Vec(IDL.Nat8)], [TipVetkeyResult], []),
+		get_tip_secret: IDL.Func([IDL.Text], [GetTipSecretResult], ['query']),
+		get_tip_vetkey_public_key: IDL.Func([], [TipVetkeyResult], []),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
@@ -957,6 +1064,7 @@ export const idlFactory = ({ IDL }) => {
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
 		set_personal_note: IDL.Func([PersonalNoteEntry], [SetPersonalNoteResult], []),
+		set_tip_secret: IDL.Func([SetTipSecretRequest], [CancelTipResult], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		sign_onramper_widget_url: IDL.Func(
 			[SignOnramperWidgetUrlRequest],
