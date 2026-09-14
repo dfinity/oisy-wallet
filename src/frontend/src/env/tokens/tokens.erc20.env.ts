@@ -8,6 +8,7 @@ import { AMDON_TOKEN } from '$env/tokens/tokens-erc20/tokens.amdon.env';
 import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { ARMON_TOKEN } from '$env/tokens/tokens-erc20/tokens.armon.env';
 import { BABAON_TOKEN } from '$env/tokens/tokens-erc20/tokens.babaon.env';
+import { BAT_TOKEN } from '$env/tokens/tokens-erc20/tokens.bat.env';
 import { BIDUON_TOKEN } from '$env/tokens/tokens-erc20/tokens.biduon.env';
 import { BOB_TOKEN } from '$env/tokens/tokens-erc20/tokens.bob.env';
 import { CBBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.cbbtc.env';
@@ -132,6 +133,7 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDC_TOKEN,
 	LINK_TOKEN,
 	PEPE_TOKEN,
+	BAT_TOKEN,
 	OCT_TOKEN,
 	SHIB_TOKEN,
 	WBTC_TOKEN,

@@ -1,7 +1,10 @@
 use ic_cdk::{api::msg_caller, query, update};
 use shared::types::{
     result_types::{GetUserTransactionsResult, SaveUserTransactionsResult},
-    user_transaction::{GetUserTransactionsRequest, SaveUserTransactionsRequest},
+    user_transaction::{
+        GetUserTransactionsRequest, SaveUserTransactionsRequest, UserTransactionError,
+        MAX_SAVE_USER_TRANSACTIONS_BATCH,
+    },
 };
 
 use crate::{
@@ -51,6 +54,20 @@ pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserT
         token_id,
         transactions,
     } = request;
+
+    // Cheapest check first: an oversized batch is rejected before any of its
+    // fields are walked.
+    if transactions.len() > MAX_SAVE_USER_TRANSACTIONS_BATCH {
+        return Err(UserTransactionError::TooManyTransactions).into();
+    }
+
+    // A transaction with an oversized field is not chain data, so the call is
+    // rejected outright rather than returned as an error, the same way
+    // `set_custom_token` handles input that is too large. Kept out of the doc
+    // comment because those are exported into `backend.did`.
+    if let Err(err) = model::validate_transactions(&transactions) {
+        ic_cdk::trap(format!("Invalid transaction: {err}"));
+    }
 
     let principal = msg_caller();
 

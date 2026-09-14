@@ -56,7 +56,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
@@ -92,6 +92,13 @@
 	let selectedContact = $state<ContactUi | undefined>();
 	let amount = $state<number | undefined>();
 	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
+
+	// Compared by identity, not by the symbol's description: `TokenId` is minted from the token
+	// symbol (`mapErc20Token`, `mapIcrcToken`), which two distinct assets may legitimately share.
+	// Identity is safe here because the stores reuse the existing `TokenId` when re-setting an entry
+	// with the same identifier - a reload of the selected token keeps it, and only a full
+	// `resetAll()` mints a new one.
+	let selectedTokenId: TokenId | undefined = $token?.id;
 
 	let burning = $derived(
 		notEmptyString(destination) &&
@@ -163,6 +170,7 @@
 		activeSendDestinationTab = 'recentlyUsed';
 		selectedContact = undefined;
 		amount = undefined;
+		selectedTokenId = undefined;
 
 		sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
@@ -221,6 +229,15 @@
 				return;
 			}
 		}
+
+		// An amount entered for the previous token is meaningless for the new one - and, when the
+		// two tokens have different decimals, it is not even a representable value, which surfaces
+		// as an invalid amount and a failing gas fee estimation.
+		if (selectedTokenId !== token.id) {
+			amount = undefined;
+		}
+
+		selectedTokenId = token.id;
 
 		const skip = shouldSkipDestinationStep({ destination, token });
 
@@ -293,59 +310,65 @@
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-		{#key currentStep?.name}
-			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-				<SendTokensList
-					{lockedNetwork}
-					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-					{onSendToken}
-				/>
-			{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-				<SendNftsList
-					onSelect={selectNft}
-					onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-				/>
-			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-				<ModalNetworksFilter
-					onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-					showStakeBalance={false}
-				/>
-			{:else if currentStep?.name === WizardStepsSend.DESTINATION}
-				<SendDestinationWizardStep
-					formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
-						? 'close'
-						: 'back'}
-					onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-					onClose={close}
-					onNext={modal.next}
-					onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
-					bind:destination
-					bind:activeSendDestinationTab
-					bind:selectedContact
-				/>
-			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-				<SendQrCodeScan
-					expectedToken={$token}
-					{onDecodeQrCode}
-					onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
-					bind:destination
-					bind:amount
-				/>
-			{:else if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
-				<SendWizard
-					{currentStep}
-					{destination}
-					nft={selectedNft}
-					onBack={modal.back}
-					onClose={close}
-					onNext={modal.next}
-					onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
-					onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-					{selectedContact}
-					bind:amount
-					bind:sendProgressStep
-				/>
-			{/if}
-		{/key}
+		<!-- The amount, review and sending steps share one wizard, and therefore one fee: rebuilding it
+		     between them would throw away the fee the amount was priced against, leaving the review
+		     step with nothing to show or sign now that it no longer fetches its own. The wizard keys
+		     its own step components internally, so they still reset. -->
+		{#if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
+			<SendWizard
+				{currentStep}
+				{destination}
+				nft={selectedNft}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				{selectedContact}
+				bind:amount
+				bind:sendProgressStep
+			/>
+		{:else}
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+					<SendTokensList
+						{lockedNetwork}
+						onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+						{onSendToken}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
+					<SendNftsList
+						onSelect={selectNft}
+						onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+					<ModalNetworksFilter
+						onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						showStakeBalance={false}
+					/>
+				{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+					<SendDestinationWizardStep
+						formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
+							? 'close'
+							: 'back'}
+						onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+						onClose={close}
+						onNext={modal.next}
+						onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+						bind:destination
+						bind:activeSendDestinationTab
+						bind:selectedContact
+					/>
+				{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+					<SendQrCodeScan
+						expectedToken={$token}
+						{onDecodeQrCode}
+						onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+						bind:destination
+						bind:amount
+					/>
+				{/if}
+			{/key}
+		{/if}
 	</WizardModal>
 </TokenActionContext>

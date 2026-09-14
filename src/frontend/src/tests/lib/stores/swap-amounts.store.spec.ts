@@ -44,6 +44,39 @@ describe('swap-amounts.store', () => {
 		});
 	});
 
+	it('should set swaps with a quote error', () => {
+		const store = initSwapAmountsStore();
+
+		store.setSwaps({
+			swaps: [],
+			amountForSwap: '1000000',
+			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+		});
+
+		expect(get(store)).toEqual({
+			swaps: [],
+			amountForSwap: '1000000',
+			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+		});
+	});
+
+	it('should drop a previous quote error when swaps are set without one', () => {
+		const store = initSwapAmountsStore();
+
+		store.setSwaps({
+			swaps: [],
+			amountForSwap: '1000000',
+			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+		});
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: '2000000'
+		});
+
+		expect(get(store)?.quoteError).toBeUndefined();
+	});
+
 	it('should not set provider if swaps array is empty', () => {
 		const store = initSwapAmountsStore();
 		store.setSelectedProvider(mockSwapProviders[0]);
