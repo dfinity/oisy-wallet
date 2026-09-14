@@ -13,10 +13,13 @@
 	interface Props {
 		formattedDate: string;
 		transactions: AllTransactionUiWithCmpNonEmptyList;
+		// Whether the list this group belongs to is filtered to a single token. What a transaction
+		// did to that one token is then the subject, rather than what it did overall.
+		singleToken?: boolean;
 		testId?: string;
 	}
 
-	let { formattedDate, transactions, testId }: Props = $props();
+	let { formattedDate, transactions, singleToken = false, testId }: Props = $props();
 
 	let capitalizedFormattedDate = $derived(capitalizeFirstLetter(formattedDate));
 </script>
@@ -37,7 +40,7 @@
 					{:else if component === 'ethereum'}
 						<EthTransaction iconType="token" {token} {transaction} />
 					{:else if component === 'solana'}
-						<SolTransaction iconType="token" {token} {transaction} />
+						<SolTransaction iconType="token" {singleToken} {token} {transaction} />
 					{:else if component === 'xrp'}
 						<XrpTransaction iconType="token" {token} {transaction} />
 					{:else}

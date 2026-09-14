@@ -79,6 +79,8 @@ specs/
 
 This keeps the `specs/` listing readable (one `.md` per spec) while letting each spec carry its own assets. The folder is optional — many specs will not need one. References from the spec to an asset use a relative path, e.g. `[rounding demo](./2026-06-04-feat-limit-orders/wireframes/rounding-demo.html)`.
 
+**Assets must look like the real app.** Wireframes, design outputs, and artifacts rendered in a chat are built from the components, theme tokens, and copy that already ship, not from invented lookalikes. Anything genuinely new is called out explicitly next to the mock. Read [`docs/ai/visual-artifacts.md`](../visual-artifacts.md) before producing one. The same applies to a mock produced ad hoc in any agent or chat session, with or without a spec.
+
 ### Step 4 — Build (Claude Code)
 
 Open Claude Code in the oisy-wallet repo and say:

@@ -27,6 +27,34 @@ of persisted data is a migration and must be done deliberately.
    **Never reuse a previously-used `MemoryId`.** Stable memory at that
    slot may still hold legacy data.
 
+   **"The next number" is not safe on its own.** The namespace is shared and
+   append-only, and nothing in the toolchain protects it: two branches can each
+   take what looks like the next free id, and both compile, both lint and both
+   pass their own tests. It only breaks once they meet on `main` and deploy, as
+   two structures decoding each other's bytes. This has happened — tips took id
+   20 while `CONTACT_IMAGE_MEMORY_ID` took id 20 on `main`. `every_memory_id_is_claimed_once`
+   in `state/memory.rs` now catches it, but it catches it at _merge_ time, so
+   check what has landed on `main` before picking a number, and re-check after
+   a long-lived branch merges `main` in.
+
+   Each id also claims a whole **bucket** — 128 pages, 8 MiB — the first time
+   its structure is initialised, and _when_ that happens depends on how the
+   store is held:
+
+   - **Eagerly**, for a structure built inside the `STATE` thread_local (`tips`,
+     `tips_by_sender`). `#[init]` calls `set_config`, which calls
+     `mutate_state`, which forces the whole of `STATE` to build — so
+     `StableBTreeMap::init` writes its header and the bucket is claimed **at
+     install**, before anyone calls anything.
+   - **Lazily**, for a store held as an `Option` and attached on first use (the
+     vetKeys `EncryptedMaps`: `personal_notes`, `tip_secrets`). Those claim
+     their bucket the first time the feature is actually used.
+
+   The distinction matters because a bucket is claimed by growing stable memory,
+   which needs _reserved cycles_. On a canister with a tight
+   `reserved_cycles_limit`, the eager case fails the install outright, while the
+   lazy case fails at first use — long after deployment looked fine.
+
 2. **Define the type alias** in
    [`types/maps.rs`](../../../../src/backend/src/types/maps.rs):
 
@@ -118,6 +146,14 @@ adding migration tests.
   will fail.
 - Don't run the migration outside `post_upgrade`. `init` is for fresh
   installs, not upgrades.
+- Don't assume `Cell::init` writes the value you hand it. It **loads** the
+  stored value whenever the region is non-empty and writes only when the region
+  is fresh — so a `StableCell`'s contents are whatever the very first touch
+  wrote, permanently, and no redeploy changes them. This is how a store gets
+  stuck: the tip-secrets `KeyManager` was first initialised in a test
+  environment under `dfx_test_key`, which exists only on a local replica, and
+  every vetKD derivation there trapped with `InvalidKeyName` forever after. If
+  you need a different value, you need a fresh region or a reinstall.
 - Don't leave migration code in `lib.rs` indefinitely. Add a TODO
   comment with the release tag after which it can be removed, and clean
   it up when it's safe.

@@ -29,6 +29,9 @@ export interface NearIntentsQuoteRequest {
 	deadline: string;
 	quoteWaitingTimeMs?: number;
 	referral?: string;
+	virtualChainRecipient?: string;
+	virtualChainRefundRecipient?: string;
+	customRecipientMsg?: string;
 }
 
 export interface NearIntentsQuote {
@@ -47,6 +50,10 @@ export interface NearIntentsQuote {
 	timeWhenInactive?: string;
 	timeEstimate: number;
 	refundFee?: string;
+	withdrawFee?: string;
+	virtualChainRecipient?: string;
+	virtualChainRefundRecipient?: string;
+	customRecipientMsg?: string;
 }
 
 export interface NearIntentsQuoteResponse {
@@ -72,6 +79,9 @@ export const NEAR_INTENTS_EXTERNAL_REF_KEYS = {
 	// re-derive the swap's state across refresh / logout.
 	DEPOSIT_ADDRESS: 'near_intents_deposit_address',
 	DEPOSIT_MEMO: 'near_intents_deposit_memo',
+	// The 1Click quote signature. The service documents it as the client's receipt for
+	// resolving disputes over a deposit, so it is retained alongside the address it signs.
+	SIGNATURE: 'near_intents_signature',
 	// Optional debug/traceability, learned mid-flow from `/status` swapDetails.
 	ORIGIN_TX_HASH: 'near_intents_origin_tx_hash',
 	DESTINATION_TX_HASH: 'near_intents_destination_tx_hash',
