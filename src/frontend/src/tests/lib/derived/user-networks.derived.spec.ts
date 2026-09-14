@@ -111,9 +111,11 @@ describe('user-networks.derived', () => {
 			});
 		});
 
-		// The backend can learn a network before the frontend supports it, and the two deploy
-		// independently, so an unmapped settings key must not take the whole mapping down.
-		it('should ignore an unknown network key and keep mapping the known ones', () => {
+		// Every variant in the generated bindings is mapped today, so the cast below is the only
+		// way to reach the state a new backend variant creates: decodable at the wire, unmapped
+		// here. It does not stand in for a variant missing from the bindings — that one fails
+		// Candid decoding upstream and never reaches this derived.
+		it('should ignore an unmapped network key and keep mapping the known ones', () => {
 			userProfileStore.set({
 				certified,
 				profile: {
@@ -124,7 +126,7 @@ describe('user-networks.derived', () => {
 							...mockNetworksSettings,
 							networks: [
 								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
-								// A variant this frontend does not know yet.
+								// Stands in for a variant the bindings carry but `keyToNetworkId` has no arm for.
 								[
 									{ FutureNetworkMainnet: null } as unknown as NetworkSettingsFor,
 									{ enabled: true, is_testnet: false }
