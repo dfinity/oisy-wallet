@@ -1,7 +1,12 @@
-import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
-import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { fetchSignatures } from '$sol/api/solana.api';
+import {
+	SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK,
+	TOKEN_2022_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import {
@@ -12,6 +17,7 @@ import { getSolSignatures } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
+import type { SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolNetworkBalances } from '$sol/types/sol-balance';
 import type { SolResolvedTransaction, SolSignatureWithSources } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -26,7 +32,7 @@ import {
 	mockSolAddress2,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { jsonReviver } from '@dfinity/utils';
+import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -44,7 +50,13 @@ vi.mock('$sol/services/sol-balances.services', () => ({
 	loadSolNetworkBalances: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-signatures.services', () => ({
+vi.mock(import('$sol/api/solana.api'), async (importOriginal) => ({
+	...(await importOriginal()),
+	fetchSignatures: vi.fn()
+}));
+
+vi.mock(import('$sol/services/sol-signatures.services'), async (importOriginal) => ({
+	...(await importOriginal()),
 	getSolSignatures: vi.fn()
 }));
 
@@ -134,6 +146,45 @@ describe('sol-wallet.scheduler', () => {
 
 	const mockPage = (signatures: SolSignatureWithSources[]) =>
 		vi.mocked(getSolSignatures).mockResolvedValue({ signatures });
+
+	const historyPageSize = 2;
+
+	// Pages through `history` like the merged pager: a cursor continues after the oldest signature of
+	// its page, so it stays valid when newer signatures arrive on top.
+	const mockHistory = (history: SolSignatureWithSources[]) =>
+		vi.mocked(getSolSignatures).mockImplementation(({ cursor }) => {
+			const start = isNullish(cursor)
+				? 0
+				: history.findIndex(
+						({ signature }) => signature === cursor.before[mockSolAddress]?.signature
+					) + 1;
+
+			const signatures = history.slice(start, start + historyPageSize);
+			const oldest = signatures[signatures.length - 1];
+
+			return Promise.resolve({
+				signatures,
+				cursor:
+					start + historyPageSize < history.length && nonNullish(oldest)
+						? {
+								before: { [mockSolAddress]: { signature: oldest.signature, slot: oldest.slot } },
+								exhausted: [],
+								pending: []
+							}
+						: undefined
+			});
+		});
+
+	const signaturesFrom = ({ slot, count }: { slot: bigint; count: number }) =>
+		Array.from({ length: count }, (_, index) => signatureAt({ slot: slot - BigInt(index) }));
+
+	const postedSignatures = (): string[] =>
+		walletPosts()
+			.flatMap(postedTransactions)
+			.map(({ transaction: { signature } }) => signature);
+
+	const signaturesOf = (signatures: SolSignatureWithSources[]): string[] =>
+		signatures.map(({ signature }) => signature);
 
 	// The first job runs without being awaited by `start`, so the timers are advanced to let it end.
 	const awaitJobExecution = () =>
@@ -365,16 +416,18 @@ describe('sol-wallet.scheduler', () => {
 		// Everything below the newest slot is old whatever it holds, so a long session does not pile
 		// up the signatures of every slot it went through.
 		it('should remember only the signatures of its newest slot, and resolve the same', async () => {
+			const remembered = () => new Set(scheduler['store'].signatures.keys());
+
 			await scheduler.trigger(data);
 
-			expect(scheduler['store'].signatures).toEqual(new Set([newestSignature.signature]));
+			expect(remembered()).toEqual(new Set([newestSignature.signature]));
 
 			const sameSlotSignature = signatureAt({ slot: 101n, sources: [mockAtaAddress2] });
 			mockPage([newestSignature, sameSlotSignature, olderSignature]);
 
 			await scheduler.trigger(data);
 
-			expect(scheduler['store'].signatures).toEqual(
+			expect(remembered()).toEqual(
 				new Set([newestSignature.signature, sameSlotSignature.signature])
 			);
 
@@ -383,7 +436,7 @@ describe('sol-wallet.scheduler', () => {
 
 			await scheduler.trigger(data);
 
-			expect(scheduler['store'].signatures).toEqual(new Set([newerSignature.signature]));
+			expect(remembered()).toEqual(new Set([newerSignature.signature]));
 			expect(resolveSolSignatures).toHaveBeenCalledTimes(3);
 			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
 				expect.objectContaining({ signatures: [newerSignature] })
@@ -425,6 +478,355 @@ describe('sol-wallet.scheduler', () => {
 
 			expect(posts).toHaveLength(1);
 			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+		});
+	});
+
+	describe('head check across pages', () => {
+		// More pages than one tick reads, on top of what the first tick holds.
+		const burst = signaturesFrom({
+			slot: 200n,
+			count: historyPageSize * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK * 2
+		});
+
+		const readInOneTick = historyPageSize * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK;
+
+		// Older history belongs to the pagers.
+		it('should read only the first page when it holds nothing yet', async () => {
+			const history = signaturesFrom({ slot: 110n, count: historyPageSize * 3 });
+			mockHistory(history);
+
+			await scheduler.trigger(data);
+
+			expect(getSolSignatures).toHaveBeenCalledExactlyOnceWith({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokensList: tokens
+			});
+			expect(postedSignatures()).toEqual(signaturesOf(history.slice(0, historyPageSize)));
+		});
+
+		it('should load a burst of more than a page within one tick', async () => {
+			await scheduler.trigger(data);
+
+			const pagesBurst = signaturesFrom({
+				slot: 150n,
+				count: historyPageSize * (SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK - 1)
+			});
+			mockHistory([...pagesBurst, ...page]);
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			// Every page of the burst, and the one that reaches what it holds.
+			expect(getSolSignatures).toHaveBeenCalledTimes(SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK);
+			expect(resolveSolSignatures).toHaveBeenLastCalledWith(
+				expect.objectContaining({ signatures: pagesBurst })
+			);
+			expect(postedSignatures()).toEqual(signaturesOf(pagesBurst));
+		});
+
+		it('should stop paging once it reaches the newest signature it holds', async () => {
+			const older = signaturesFrom({ slot: 99n, count: historyPageSize * 3 });
+			mockHistory([...page, ...older]);
+
+			await scheduler.trigger(data);
+
+			const newSignatures = signaturesFrom({ slot: 103n, count: historyPageSize });
+			mockHistory([...newSignatures, ...page, ...older]);
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+			expect(postedSignatures()).toEqual(signaturesOf(newSignatures));
+		});
+
+		it('should complete a burst bigger than a tick on the next ticks, missing and repeating nothing', async () => {
+			await scheduler.trigger(data);
+
+			mockHistory([...burst, ...page]);
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK);
+			expect(postedSignatures()).toEqual(signaturesOf(burst.slice(0, readInOneTick)));
+
+			await scheduler.trigger(data);
+			await scheduler.trigger(data);
+
+			expect(postedSignatures()).toEqual(signaturesOf(burst));
+
+			// Caught up, a tick is back to one page.
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(getSolSignatures).toHaveBeenCalledOnce();
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should not skip a burst that arrives while it is catching up', async () => {
+			await scheduler.trigger(data);
+
+			mockHistory([...burst, ...page]);
+
+			await scheduler.trigger(data);
+
+			const nextBurst = signaturesFrom({ slot: 300n, count: historyPageSize * 2 });
+			mockHistory([...nextBurst, ...burst, ...page]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+			await scheduler.trigger(data);
+
+			const expected = signaturesOf([...nextBurst, ...burst.slice(readInOneTick)]);
+			const posted = postedSignatures();
+
+			expect(posted).toHaveLength(expected.length);
+			expect(new Set(posted)).toEqual(new Set(expected));
+
+			vi.mocked(getSolSignatures).mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(getSolSignatures).toHaveBeenCalledOnce();
+		});
+
+		it('should resume from the same place when a tick is retried', async () => {
+			await scheduler.trigger(data);
+
+			mockHistory([...burst, ...page]);
+
+			await scheduler.trigger(data);
+
+			vi.mocked(loadSolNetworkBalances).mockRejectedValueOnce(new Error('Failed to fetch'));
+			postMessageMock.mockClear();
+
+			await triggerAndSettle();
+			await scheduler.trigger(data);
+
+			expect(postedSignatures()).toEqual(signaturesOf(burst.slice(readInOneTick)));
+		});
+
+		it('should drop what it has left to catch up when triggered for another token list', async () => {
+			await scheduler.trigger(data);
+
+			mockHistory([...burst, ...page]);
+
+			await scheduler.trigger(data);
+
+			const changedData = { ...data, tokens: [tokens[0]] };
+			vi.mocked(getSolSignatures).mockClear();
+
+			await scheduler.trigger(changedData);
+			await scheduler.trigger(changedData);
+
+			// A first page for the new token list, then a head page that reaches it.
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+
+			vi.mocked(getSolSignatures).mock.calls.forEach(([{ cursor }]) =>
+				expect(cursor).toBeUndefined()
+			);
+		});
+	});
+
+	// The merged pager as it is, over a wallet whose history `fetchSignatures` serves: the cut, the
+	// signatures it holds back in its cursor and its empty pages are the pager's own, not a mock's.
+	describe('head check with the merged pager', () => {
+		const pagerLimit = Number(WALLET_PAGINATION);
+
+		// The wallet is the only source, so the pager derives no token account.
+		const walletOnly: PostMessageDataRequestSol = { ...data, tokens: [] };
+
+		const held = signatureAt({ slot: 100n });
+
+		const mockWalletHistory = async (history: SolSignatureWithSources[]) => {
+			const { getSolSignatures: pager } = await vi.importActual<{
+				getSolSignatures: typeof getSolSignatures;
+			}>('$sol/services/sol-signatures.services');
+
+			vi.mocked(getSolSignatures).mockImplementation(pager);
+
+			vi.mocked(fetchSignatures).mockImplementation(({ before, limit }) => {
+				const start = isNullish(before)
+					? 0
+					: history.findIndex(({ signature }) => signature === before) + 1;
+
+				return Promise.resolve(
+					history.slice(start, start + limit).map(({ sources: _, ...solSignature }) => solSignature)
+				);
+			});
+		};
+
+		const headCursors = () => vi.mocked(getSolSignatures).mock.calls.map(([{ cursor }]) => cursor);
+
+		beforeEach(async () => {
+			await mockWalletHistory([held]);
+
+			await scheduler.trigger(walletOnly);
+
+			vi.mocked(getSolSignatures).mockClear();
+			vi.mocked(resolveSolSignatures).mockClear();
+			postMessageMock.mockClear();
+		});
+
+		it('should load the signatures of the cut slot, which the pager holds back, on the next page of the same tick', async () => {
+			const newSignatures = signaturesFrom({ slot: 112n, count: pagerLimit + 2 });
+			const cutSignature = newSignatures[pagerLimit - 1];
+
+			await mockWalletHistory([...newSignatures, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			const [firstPage, nextPage] = headCursors();
+
+			expect(firstPage).toBeUndefined();
+			expect(nextPage?.pending.map(({ signature }) => signature)).toEqual([cutSignature.signature]);
+
+			expect(postedSignatures()).toEqual(signaturesOf(newSignatures));
+		});
+
+		it('should load the signatures of the cut slot on the next tick when the pages of a tick run out', async () => {
+			const burst = signaturesFrom({
+				slot: 200n,
+				count: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK + 3
+			});
+
+			await mockWalletHistory([...burst, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK);
+
+			const readInOneTick = pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK - 1;
+
+			expect(postedSignatures()).toEqual(signaturesOf(burst.slice(0, readInOneTick)));
+
+			vi.mocked(getSolSignatures).mockClear();
+
+			await scheduler.trigger(walletOnly);
+
+			const [, resumed] = headCursors();
+
+			expect(resumed?.pending.map(({ signature }) => signature)).toEqual([
+				burst[readInOneTick].signature
+			]);
+
+			// Everything once, and nothing it held before the burst.
+			expect(postedSignatures()).toEqual(signaturesOf(burst));
+		});
+
+		it('should keep paging through a crowded slot while the pager returns empty pages', async () => {
+			const crowded = Array.from({ length: pagerLimit * 2 + 5 }, () => signatureAt({ slot: 105n }));
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			const pages = await Promise.all(
+				vi.mocked(getSolSignatures).mock.results.map(({ value }) => value)
+			);
+
+			expect(pages.map(({ signatures }) => signatures.length)).toEqual([0, 0, crowded.length + 1]);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		it('should load a crowded slot that takes more pages than a tick has on the next ticks', async () => {
+			const crowded = Array.from(
+				{ length: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK + 5 },
+				() => signatureAt({ slot: 105n })
+			);
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(walletPosts()).toHaveLength(0);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		// Everything above the newest slot held has been loaded once the cut reaches it, even when the
+		// pager still holds that slot back.
+		it('should settle once a crowded slot is the newest it holds', async () => {
+			const crowded = Array.from({ length: pagerLimit * 2 + 5 }, () => signatureAt({ slot: 105n }));
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			vi.mocked(getSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(walletOnly);
+			await scheduler.trigger(walletOnly);
+
+			expect(getSolSignatures).toHaveBeenCalledTimes(2);
+			expect(walletPosts()).toHaveLength(0);
+			expect(scheduler['store'].catchUp).toEqual([]);
+		});
+
+		// While a walk is still paging through a crowded slot, the head answers every tick with the same
+		// empty page and cut: it is the same burst, not a new one to walk again.
+		it('should queue one walk for a crowded slot that the head keeps answering with the same cut', async () => {
+			const crowded = Array.from(
+				{ length: pagerLimit * SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK * 2 + 5 },
+				() => signatureAt({ slot: 105n })
+			);
+
+			await mockWalletHistory([...crowded, held]);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toHaveLength(1);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toHaveLength(1);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(scheduler['store'].catchUp).toEqual([]);
+
+			expect(new Set(postedSignatures())).toEqual(new Set(signaturesOf(crowded)));
+			expect(postedSignatures()).toHaveLength(crowded.length);
+		});
+
+		it('should resolve a signature returned by the head and a walk once, with the sources of both', async () => {
+			const fromWallet = signatureAt({ slot: 105n });
+			const fromTokenAccount = { ...fromWallet, sources: [mockAtaAddress] };
+
+			const walkCursor: SolSignaturesCursor = {
+				before: { [mockSolAddress]: { signature: fromWallet.signature, slot: 106n } },
+				exhausted: [],
+				pending: []
+			};
+
+			vi.mocked(getSolSignatures).mockImplementation(({ cursor }) =>
+				Promise.resolve(
+					isNullish(cursor)
+						? { signatures: [fromWallet], cursor: walkCursor }
+						: { signatures: [fromTokenAccount] }
+				)
+			);
+
+			await scheduler.trigger(walletOnly);
+
+			expect(resolveSolSignatures).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					signatures: [{ ...fromWallet, sources: [mockSolAddress, mockAtaAddress] }]
+				})
+			);
 		});
 	});
 
