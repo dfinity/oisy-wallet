@@ -1,7 +1,11 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
+	import { getContext, untrack, type Snippet } from 'svelte';
+	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
+	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
+	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
+	import FirstTimeDestinationWarning from '$lib/components/send/FirstTimeDestinationWarning.svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -15,6 +19,15 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isFirstTimeDestination } from '$lib/utils/known-destinations.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdICP,
+		isNetworkIdSolana
+	} from '$lib/utils/network.utils';
+	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 
 	interface BaseProps {
 		destination?: string;
@@ -54,6 +67,44 @@
 
 	const { sendToken, sendTokenExchangeRate, isIcBurning } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let networkId = $derived($sendToken.network.id);
+
+	// The store is resolved lazily, so that only the chain the user is sending on is subscribed.
+	let knownDestinations = $derived(
+		isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)
+			? $ethKnownDestinations
+			: isNetworkIdICP(networkId)
+				? $icKnownDestinations
+				: isNetworkIdBitcoin(networkId)
+					? $btcKnownDestinations
+					: isNetworkIdSolana(networkId)
+						? $solKnownDestinations
+						: undefined
+	);
+
+	// Minting is the minter sending out: a first-time counterparty is the norm there, and the
+	// destination is a peer rather than something to verify against a history. Burning is not
+	// exempt - sending assets to a minter account by mistake destroys them.
+	let firstTimeDestination = $derived(
+		!$isIcMintingAccount &&
+			notEmptyString(destination) &&
+			isFirstTimeDestination({ destination, networkId, knownDestinations })
+	);
+
+	let firstTimeDestinationConfirmed = $state(false);
+
+	const resetFirstTimeDestinationConfirmation = () => {
+		firstTimeDestinationConfirmed = false;
+	};
+
+	$effect(() => {
+		[destination, firstTimeDestination];
+
+		untrack(resetFirstTimeDestinationConfirmation);
+	});
+
+	let sendDisabled = $derived(disabled || (firstTimeDestination && !firstTimeDestinationConfirmed));
 </script>
 
 <ContentWithToolbar>
@@ -83,6 +134,13 @@
 
 	{@render info?.()}
 
+	{#if firstTimeDestination}
+		<FirstTimeDestinationWarning
+			confirmed={firstTimeDestinationConfirmed}
+			onConfirm={() => (firstTimeDestinationConfirmed = !firstTimeDestinationConfirmed)}
+		/>
+	{/if}
+
 	{#snippet toolbar()}
 		{#if 'replaceToolbar' in rest}
 			{@render rest.replaceToolbar()}
@@ -91,7 +149,7 @@
 
 			<ButtonGroup testId="toolbar">
 				<ButtonBack onclick={onBack} />
-				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+				<Button disabled={sendDisabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
 					{$isIcMintingAccount
 						? $i18n.mint.text.mint
 						: $isIcBurning
