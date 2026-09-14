@@ -151,9 +151,8 @@ describe('user-networks.derived', () => {
 				[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
 			});
 
-			// The derived was read twice above, and it recomputes on every read — exactly once is
-			// what proves the per-key deduplication, not just that the event fires at all.
-			expect(trackUnmappedNetworkSettingsKey).toHaveBeenCalledExactlyOnceWith({
+			// Deduplication is asserted where it lives now, in error-analytics.services.spec.ts.
+			expect(trackUnmappedNetworkSettingsKey).toHaveBeenCalledWith({
 				key: 'FutureNetworkMainnet'
 			});
 		});
