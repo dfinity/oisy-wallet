@@ -118,8 +118,8 @@ describe('user-networks.derived', () => {
 
 		// Every variant in the generated bindings is mapped today, so the cast below is the only
 		// way to reach the state a new backend variant creates: decodable at the wire, unmapped
-		// here. It does not stand in for a variant missing from the bindings — that one fails
-		// Candid decoding upstream and never reaches this derived.
+		// here. It does not stand in for a variant missing from the bindings — Candid degrades
+		// the enclosing optional settings record to null, so that key never reaches this derived.
 		it('should ignore an unmapped network key and keep mapping the known ones', () => {
 			userProfileStore.set({
 				certified,
