@@ -26,7 +26,7 @@
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -140,7 +140,7 @@
 			tokenAddresses: [statedSummary?.spent, statedSummary?.received].map(
 				(change) => change?.tokenAddress
 			),
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore
 		})
@@ -154,7 +154,7 @@
 					symbolOf: (tokenAddress) =>
 						solTokenSymbol({
 							tokenAddress,
-							tokens: $enabledSplTokens,
+							tokens: $splTokens,
 							networkId: token.network.id,
 							metadata: $splTokenMetadataStore,
 							unknownTokenAddresses: summaryTokenAddresses,

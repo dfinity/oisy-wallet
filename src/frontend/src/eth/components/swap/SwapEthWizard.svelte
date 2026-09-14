@@ -550,7 +550,8 @@
 		amount={swapAmount}
 		destination={ckDepositDestination}
 		{nativeEthereumToken}
-		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
+		observe={currentStep?.name !== WizardStepsSwap.SWAPPING &&
+			currentStep?.name !== WizardStepsSwap.REVIEW}
 		sendToken={$sourceToken}
 		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network}

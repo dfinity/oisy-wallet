@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 import { USDC_SYMBOL, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
@@ -748,13 +747,14 @@ describe('EthWalletConnectSendReview', () => {
 			});
 
 		it('should price the maximum fee on the gas limit the dApp requested, not on the estimate', () => {
-			const { getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
+			const { getByRole, getByText, queryByText } = renderWithGas({ requestedGas: 2_000_000n });
 
-			// The label follows the feature flag: the request quotes an expected cost only where the
-			// priority work is enabled. max_fee_eth contains HTML, so match its plain-text fragment.
-			expect(
-				getByText(SEND_TRANSACTION_PRIORITY_ENABLED ? en.fee.text.estimated_fee_eth : 'Max fee')
-			).toBeInTheDocument();
+			// The row says "Estimated" rather than repeating the "Fee" heading above it.
+			expect(getByText(en.fee.text.estimated)).toBeInTheDocument();
+
+			// By role, not by text: the heading has to actually name the group for a screen reader,
+			// which a bare `label` pointing at a `div` would not do while still reading correctly.
+			expect(getByRole('group', { name: en.fee.text.fee })).toBeInTheDocument();
 
 			// 2_000_000 gas at 1 gwei, against the 250_000 gas OISY resolved for the same transaction
 			expect(getByText(`0.002 ${ETHEREUM_TOKEN.symbol}`)).toBeInTheDocument();

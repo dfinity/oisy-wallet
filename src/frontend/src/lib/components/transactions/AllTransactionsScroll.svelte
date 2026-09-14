@@ -54,18 +54,20 @@
 
 	let disableInfiniteScroll = $derived(everythingLoadedIsOnScreen && !canFetchMore);
 
-	const onIntersect = async () => {
+	// Resolves whether it made progress, so `InfiniteScroll` checks the end of the list again even when
+	// a filter keeps the displayed list from growing.
+	const onIntersect = async (): Promise<boolean> => {
 		// Still revealing what is already in memory.
 		if (!everythingLoadedIsOnScreen) {
 			pages++;
 
-			return;
+			return true;
 		}
 
 		// The user reached the end of the loaded set, so go get more from the chains themselves.
 		// Without this the list stopped at whatever the initial levelling pass had fetched.
 		if (isNullish(onLoadMore) || !canFetchMore || loading) {
-			return;
+			return false;
 		}
 
 		const lengthBeforeFetch = sortedTransactions.length;
@@ -86,12 +88,14 @@
 		if (loadedMore) {
 			pages++;
 
-			return;
+			return true;
 		}
 
 		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
 		// firing against chains that have nothing left.
 		dryAtLength = lengthBeforeFetch;
+
+		return false;
 	};
 
 	$effect(() => {

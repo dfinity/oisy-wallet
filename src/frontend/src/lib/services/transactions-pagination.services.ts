@@ -14,7 +14,7 @@ import {
 	isNetworkIdICP,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -33,14 +33,6 @@ const loadNextIc: LoadOlderTransactions = ({ token, identity, minTimestamp, sign
 		...(nonNullish(minTimestamp) && { minTimestamp })
 	});
 };
-
-const loadNextSol: LoadOlderTransactions = ({ token, identity, minTimestamp, signalEnd }) =>
-	loadNextSolTransactionsByOldest({
-		token,
-		identity,
-		signalEnd,
-		...(nonNullish(minTimestamp) && { minTimestamp })
-	});
 
 /**
  * How many transactions a token currently has loaded, straight from its own store.
@@ -83,7 +75,7 @@ export const loadOlderTransactionsFor = ({
 	}
 
 	if (isNetworkIdSolana(networkId)) {
-		return loadNextSol;
+		return loadOlderSolTransactions;
 	}
 
 	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {

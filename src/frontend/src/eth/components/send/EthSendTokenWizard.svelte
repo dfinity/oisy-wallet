@@ -316,12 +316,12 @@
 			unitName: $sendTokenDecimals
 		});
 
-		// The fee context keeps refetching through the review step - `observe` only stops at
-		// `SENDING` - while the amount stopped moving the moment the amount step was left, because
-		// the "Max" button that re-applies it is unmounted there. So a "Max" amount is priced
-		// against an older sample than the one being signed just above, and a fee that has risen in
-		// between leaves it unable to cover `gas * maxFeePerGas`. The chain drops such a transaction
-		// without reporting anything: the broadcast returns a hash and it is simply never included.
+		// The fee is frozen from the review step on, so the sample signed just above is the one the
+		// amount step last showed. The "Max" button, however, re-applies its amount half a second
+		// after each fee change, so a click on "Review" inside that window carries an amount priced
+		// against the sample before. A fee that has risen in between leaves it unable to cover
+		// `gas * maxFeePerGas`, and the chain drops such a transaction without reporting anything:
+		// the broadcast returns a hash and it is simply never included.
 		const sendAmount =
 			amountSetToMax && feeIsPaidFromAmount
 				? capSendAmountToFee({
@@ -395,7 +395,8 @@
 	{amount}
 	{destination}
 	{nativeEthereumToken}
-	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	observe={currentStep?.name !== WizardStepsSend.SENDING &&
+		currentStep?.name !== WizardStepsSend.REVIEW}
 	priority={$sendEthFeePriority}
 	sendNft={nft}
 	sendToken={$sendToken}

@@ -1,6 +1,7 @@
 import { loadNextBtcTransactionsByOldest } from '$btc/services/btc-transactions.services';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -11,7 +12,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import { loadOlderTransactionsFor } from '$lib/services/transactions-pagination.services';
 import type { Token } from '$lib/types/token';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
@@ -19,8 +20,8 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactionsByOldest: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTransactions: vi.fn()
 }));
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
@@ -116,26 +117,26 @@ describe('transactions-pagination.services', () => {
 			expect(loadNextIcTransactionsByOldest).not.toHaveBeenCalled();
 		});
 
-		it('should pass the Solana loader straight through', async () => {
+		it('should route Solana to the network pager', async () => {
 			const loadOlder = loadOlderTransactionsFor(SOLANA_TOKEN);
 
-			await loadOlder?.({ token: SOLANA_TOKEN, identity: mockIdentity, signalEnd });
-
-			expect(loadNextSolTransactionsByOldest).toHaveBeenCalledExactlyOnceWith({
+			await loadOlder?.({
 				token: SOLANA_TOKEN,
 				identity: mockIdentity,
+				minTimestamp: 123,
+				signalEnd
+			});
+
+			expect(loadOlderSolTransactions).toHaveBeenCalledExactlyOnceWith({
+				token: SOLANA_TOKEN,
+				identity: mockIdentity,
+				minTimestamp: 123,
 				signalEnd
 			});
 		});
 
-		it('should omit the floor when the caller wants a page regardless', async () => {
-			const loadOlder = loadOlderTransactionsFor(SOLANA_TOKEN);
-
-			await loadOlder?.({ token: SOLANA_TOKEN, identity: mockIdentity, signalEnd });
-
-			expect(loadNextSolTransactionsByOldest).toHaveBeenCalledExactlyOnceWith(
-				expect.not.objectContaining({ minTimestamp: expect.anything() })
-			);
+		it('should give every token of a Solana network the same pager', () => {
+			expect(loadOlderTransactionsFor(SOLANA_TOKEN)).toBe(loadOlderTransactionsFor(BONK_TOKEN));
 		});
 	});
 });

@@ -5,7 +5,7 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
@@ -15,7 +15,7 @@
 		flattenInstructions,
 		formatSolInstructionSummary
 	} from '$sol/utils/sol-transaction-summary.utils';
-	import { findEnabledSplToken } from '$sol/utils/spl.utils';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		instructions: SolInstructionSummary[];
@@ -28,8 +28,8 @@
 	let { instructions, token, netChanges }: Props = $props();
 
 	const splToken = (tokenAddress: string) =>
-		findEnabledSplToken({
-			tokens: $enabledSplTokens,
+		findSplToken({
+			tokens: $splTokens,
 			tokenAddress,
 			networkId: token.network.id
 		});
@@ -39,7 +39,7 @@
 	let unknownTokenAddresses = $derived(
 		solUnknownTokenAddresses({
 			tokenAddresses: flattenInstructions(instructions).map(({ tokenAddress }) => tokenAddress),
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore
 		})
@@ -48,7 +48,7 @@
 	const symbolOf = (tokenAddress: string | undefined): string =>
 		solTokenSymbol({
 			tokenAddress,
-			tokens: $enabledSplTokens,
+			tokens: $splTokens,
 			networkId: token.network.id,
 			metadata: $splTokenMetadataStore,
 			unknownTokenAddresses,

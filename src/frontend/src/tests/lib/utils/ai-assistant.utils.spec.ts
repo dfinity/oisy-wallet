@@ -290,6 +290,10 @@ describe('ai-assistant.utils', () => {
 		const usdcBep20TokenUi = { ...USDC_TOKEN_BEP20, usdBalance: 1000, balance: 1000n };
 		const usdcSplTokenUi = { ...USDC_TOKEN_SPL, usdBalance: 1000, balance: 1000n };
 
+		// Deliberately unequal to any sum of the token balances above, so the assertions can tell
+		// the net worth passed in apart from a total recomputed from the token list.
+		const totalUsdBalance = 9999;
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 		});
@@ -308,7 +312,8 @@ describe('ai-assistant.utils', () => {
 						}
 					],
 					tokensUi: [icpTokenUi, { ...ETHEREUM_TOKEN, usdBalance: 1000, balance: 1000n }],
-					networks: [ICP_NETWORK, ETHEREUM_NETWORK]
+					networks: [ICP_NETWORK, ETHEREUM_NETWORK],
+					totalUsdBalance
 				})
 			).toEqual({
 				mainCard: {
@@ -328,7 +333,8 @@ describe('ai-assistant.utils', () => {
 						}
 					],
 					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi, ckUsdcTokenUi],
-					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK],
+					totalUsdBalance
 				})
 			).toEqual({
 				mainCard: {
@@ -353,7 +359,8 @@ describe('ai-assistant.utils', () => {
 						}
 					],
 					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi],
-					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK],
+					totalUsdBalance
 				})
 			).toEqual({
 				mainCard: {
@@ -364,17 +371,17 @@ describe('ai-assistant.utils', () => {
 			});
 		});
 
-		it('returns correct result when no filters provided', () => {
+		it('returns the provided net worth, not the token sum, when no filters provided', () => {
 			expect(
 				parseShowBalanceToolArguments({
 					filterParams: [],
 					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi],
-					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
+					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK],
+					totalUsdBalance
 				})
 			).toEqual({
 				mainCard: {
-					totalUsdBalance:
-						usdcErc20TokenUi.usdBalance + usdcBep20TokenUi.usdBalance + usdcSplTokenUi.usdBalance
+					totalUsdBalance
 				}
 			});
 		});

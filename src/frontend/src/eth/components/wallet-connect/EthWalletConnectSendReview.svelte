@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthFeePriority from '$eth/components/fee/EthFeePriority.svelte';
 	import EthWalletConnectCallMethods from '$eth/components/wallet-connect/EthWalletConnectCallMethods.svelte';
@@ -19,7 +18,6 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
@@ -175,6 +173,10 @@
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 
+	// Names the fee rows for a screen reader. A `label` cannot do it: it only labels form controls,
+	// so its `for` would be ignored here and the group would be announced without a name.
+	const FEE_SECTION_LABEL = 'fee-label';
+
 	let activeTab = $state('summary');
 </script>
 
@@ -273,19 +275,20 @@
 					/>
 				{/if}
 
-				{#if SEND_TRANSACTION_PRIORITY_ENABLED}
-					<EthFeePriority gas={signedGas} />
-				{/if}
+				<!-- The fee is two rows that belong together, so it takes a heading like every other
+				     block in this summary rather than trailing loose off the end of it. -->
+				<span id={FEE_SECTION_LABEL} class="font-bold">{$i18n.fee.text.fee}</span>
 
-				<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED} gas={signedGas}>
-					{#snippet label()}
-						<Html
-							text={SEND_TRANSACTION_PRIORITY_ENABLED
-								? $i18n.fee.text.estimated_fee_eth
-								: $i18n.fee.text.max_fee_eth}
-						/>
-					{/snippet}
-				</EthFeeDisplay>
+				<div class="mb-4" aria-labelledby={FEE_SECTION_LABEL} role="group">
+					<EthFeePriority gas={signedGas} styleClass="mb-2" />
+
+					<EthFeeDisplay estimated gas={signedGas}>
+						{#snippet label()}
+							<!-- "Fee" is the heading above; repeating it in the row would say it twice. -->
+							{$i18n.fee.text.estimated}
+						{/snippet}
+					</EthFeeDisplay>
+				</div>
 			</SendData>
 		{:else}
 			<!-- What the transaction calls is the one thing the review can still state about calldata

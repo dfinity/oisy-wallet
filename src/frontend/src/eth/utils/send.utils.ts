@@ -48,11 +48,11 @@ export const shouldSendWithApproval = ({
 /**
  * Caps a native send at what the fee it will actually be signed with still leaves affordable.
  *
- * "Max" is priced against the fee sampled when the button is pressed, but the transaction is
- * signed with whatever the fee store holds at send time, and those are not the same sample: the
- * review step no longer re-applies "Max", while the fee keeps being refetched underneath it. When
- * the fee has risen in between, the frozen amount no longer leaves enough to cover
- * `gas * maxFeePerGas`, and the chain drops the transaction without reporting anything.
+ * "Max" is re-applied half a second after each fee change, while the fee is frozen the moment the
+ * review step is entered. A click on "Review" inside that window therefore carries an amount priced
+ * against the sample before the one the transaction is signed with. When the fee has risen in
+ * between, the frozen amount no longer leaves enough to cover `gas * maxFeePerGas`, and the chain
+ * drops the transaction without reporting anything.
  *
  * Caps rather than re-derives upwards: a fee that has fallen leaves the reviewed amount untouched,
  * so the send never moves more than the user was shown. Only a "Max" send is capped, because only

@@ -52,7 +52,7 @@ export const selectSolSimulationAddresses = ({
 	);
 };
 
-const parseTokenAccountState = (
+export const parseTokenAccountState = (
 	account: NonNullable<SolanaParsedAccountInfo>
 ): SolTokenAccountState | undefined => {
 	const { data } = account;

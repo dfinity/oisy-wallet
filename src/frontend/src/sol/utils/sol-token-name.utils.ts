@@ -3,7 +3,7 @@ import type { SplTokenMetadata, SplTokenMetadataData } from '$sol/stores/spl-tok
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { findEnabledSplToken } from '$sol/utils/spl.utils';
+import { findSplToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 /**
@@ -30,6 +30,9 @@ const namesOn = ({
  * a single view holds more than one of them: two rows reading "Unknown token" are worse than an
  * address, because nothing distinguishes them.
  *
+ * The list the caller passes is the wallet's whole one, disabled tokens included: hiding a token
+ * from the asset list says nothing about how to read a transaction that moves it.
+ *
  * The order comes from the caller because the caller is what defines the view: a list of deltas,
  * a list of instructions, a single row.
  */
@@ -54,7 +57,7 @@ export const solTokenSymbol = ({
 		return nativeSymbol;
 	}
 
-	const listed = findEnabledSplToken({ tokens, tokenAddress, networkId })?.symbol;
+	const listed = findSplToken({ tokens, tokenAddress, networkId })?.symbol;
 
 	if (nonNullish(listed)) {
 		return listed;
@@ -94,7 +97,7 @@ export const solUnknownTokenAddresses = ({
 		if (
 			isNullish(tokenAddress) ||
 			acc.includes(tokenAddress) ||
-			nonNullish(findEnabledSplToken({ tokens, tokenAddress, networkId })) ||
+			nonNullish(findSplToken({ tokens, tokenAddress, networkId })) ||
 			notEmptyString(names[tokenAddress]?.symbol)
 		) {
 			return acc;

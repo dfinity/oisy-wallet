@@ -34,7 +34,6 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
-import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -504,11 +503,29 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction in a newest-first transaction store.
+ * Finds the oldest of a list of transactions.
+ *
+ * A transaction store is assembled from several sources at once: a page the wallet worker
+ * delivers, the local cache, and the pages loaded on demand as the user scrolls. Nothing keeps
+ * the result sorted, so the last entry is not necessarily the oldest one. Callers page from
+ * whatever this returns, and a cursor that is not the oldest asks again for history the store
+ * already holds, which leaves everything behind it out of reach.
  *
  * @param transactions - The list of transactions to search through.
- * @returns The last transaction or undefined if no transactions are provided.
+ * @returns The oldest transaction, by the same ordering the lists render with, or undefined when
+ *   there is none.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined => last(transactions);
+): T | undefined =>
+	// One pass rather than a sorted copy: this runs on every page of every chain, and the lists it
+	// walks are the whole loaded history. Taking the entry that would sort last, ties included,
+	// keeps it identical to sorting.
+	transactions.reduce<T | undefined>(
+		(oldest, transaction) =>
+			isNullish(oldest) ||
+			sortTransactions({ transactionA: transaction, transactionB: oldest }) >= 0
+				? transaction
+				: oldest,
+		undefined
+	);

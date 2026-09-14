@@ -83,15 +83,15 @@ describe('cross-chain-swap derived stores', () => {
 			expect(result).not.toContain(SOLANA_DEVNET_NETWORK);
 		});
 
-		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag is on, so the
-		// default assertions above already cover the NEAR-Intents-only combination
-		// (Chain Fusion is STAGING-gated and off here).
+		// Both BTC providers are on in the default env, so the assertions above already
+		// cover the both-on combination; the cases below drop one flag at a time.
 		it('should not include Bitcoin networks while no provider reaches Bitcoin', async () => {
 			vi.resetModules();
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
 
 			try {
 				const [
@@ -113,6 +113,7 @@ describe('cross-chain-swap derived stores', () => {
 
 				expect(result).not.toContain(bitcoinMainnet);
 			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}
@@ -120,7 +121,6 @@ describe('cross-chain-swap derived stores', () => {
 
 		it('should include the enabled Bitcoin mainnet network when only Chain Fusion is on', async () => {
 			vi.resetModules();
-			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
@@ -149,7 +149,6 @@ describe('cross-chain-swap derived stores', () => {
 				// `crossChainSwapNetworksMainnets`, and testnets are off here anyway.
 				expect(result).not.toContain(bitcoinTestnet);
 			} finally {
-				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}

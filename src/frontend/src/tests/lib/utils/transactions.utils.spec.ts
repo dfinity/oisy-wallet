@@ -1889,6 +1889,14 @@ describe('transactions.utils', () => {
 			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
 		});
 
+		it('should return the oldest transaction of a list that is not in order', () => {
+			// A store holds a worker's page, the local cache and the pages loaded on demand, and
+			// nothing sorts the result, so the newest can sit at the end.
+			const [newest, ...older] = [...icTransactions].reverse();
+
+			expect(findOldestTransaction([...older, newest])).toStrictEqual(expectedOldestTransaction);
+		});
+
 		it('should return the last transaction in the list if oldest timestamps are tied', () => {
 			const tiedOldestTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
 				...transaction,

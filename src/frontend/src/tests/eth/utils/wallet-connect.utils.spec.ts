@@ -911,6 +911,39 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
+	describe('digest coverage of the typed-data domain', () => {
+		// The domain does not follow the rule the message does. `TypedDataEncoder.hash` discards
+		// `types.EIP712Domain` and separates the signature with whichever members the domain object
+		// carries, so a member is covered because it is populated, not because it is declared. This
+		// is why the review states the domain as it stands rather than filtering it by declaration.
+		it('changes when a member the schema does not declare is added', () => {
+			expect(
+				ethersHash({
+					...permit2,
+					domain: { ...permit2.domain, salt: `0x${'ab'.repeat(32)}` }
+				})
+			).not.toBe(ethersHash(permit2));
+		});
+
+		it('is unchanged by dropping a declaration the domain still populates', () => {
+			expect(
+				ethersHash({
+					...permit2,
+					types: { ...permit2.types, EIP712Domain: [{ name: 'chainId', type: 'uint256' }] }
+				})
+			).toBe(ethersHash(permit2));
+		});
+
+		it.each([{ verifyingContract: ATTACKER }, { name: 'Not Permit2' }])(
+			'changes when the domain member %s changes',
+			(mutation) => {
+				expect(ethersHash({ ...permit2, domain: { ...permit2.domain, ...mutation } })).not.toBe(
+					ethersHash(permit2)
+				);
+			}
+		);
+	});
+
 	describe('digest coverage of the ERC-3009 authorization', () => {
 		// The reason the undeclared keys are dangerous: they can be anything at all
 		// without the user's signature changing by a single bit.

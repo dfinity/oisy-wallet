@@ -1,4 +1,5 @@
 import { sendBtc } from '$btc/services/btc-send.services';
+import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -10,10 +11,12 @@ import { swap as sendEvmSwap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
+import { sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
+import * as icpSwapFactory from '$lib/api/icp-swap-factory.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
@@ -28,6 +31,7 @@ import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
 	enableSwapDestinationToken,
+	fetchIcpSwap,
 	fetchNearIntentsBtcSwap,
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
@@ -71,7 +75,7 @@ import {
 	mockValidIcrcToken
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
@@ -105,9 +109,25 @@ vi.mock('$lib/services/icp-swap.services', () => ({
 }));
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({
+	swap: vi.fn(),
+	deposit: vi.fn(),
+	depositFrom: vi.fn(),
 	withdraw: vi.fn(),
 	getUserUnusedBalance: vi.fn(),
 	getPoolMetadata: vi.fn()
+}));
+
+vi.mock('$lib/api/icp-swap-factory.api', () => ({
+	getPoolCanister: vi.fn()
+}));
+
+vi.mock('$icp/services/ic-send.services', () => ({
+	sendIcp: vi.fn(),
+	sendIcrc: vi.fn()
+}));
+
+vi.mock('$lib/utils/wallet.utils', () => ({
+	waitAndTriggerWallet: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -2030,6 +2050,94 @@ describe('swap.services', () => {
 			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 			expect(get(kongSwapTokensStore)).toStrictEqual({});
+		});
+	});
+
+	describe('fetchIcpSwap', () => {
+		// Distinct ledger canister ids: the shared IC token mocks reuse one, and the flow keys the
+		// pool sides off them.
+		const sourceToken = {
+			...mockValidIcToken,
+			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
+			decimals: 8,
+			fee: 10n,
+			enabled: true
+		} as IcTokenToggleable;
+
+		const destinationToken = {
+			...mockValidIcrcToken,
+			ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai',
+			decimals: 8,
+			fee: 20n,
+			enabled: true
+		} as IcTokenToggleable;
+
+		// The quote the review step displayed, net of the destination token fee - so the gross
+		// quote the pool was asked about is `receiveAmount + destinationToken.fee`.
+		const receiveAmount = 1_000n;
+
+		const params = {
+			identity: mockIdentity,
+			progress: vi.fn(),
+			setFailedProgressStep: vi.fn(),
+			sourceToken,
+			destinationToken,
+			swapAmount: 1,
+			receiveAmount,
+			slippageValue: 3,
+			sourceTokenFee: sourceToken.fee,
+			isSourceTokenIcrc2: false
+		};
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			vi.mocked(icpSwapFactory.getPoolCanister).mockResolvedValue({
+				canisterId: mockPrincipal,
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'ICRC2' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'ICRC2' }
+			} as PoolData);
+			vi.mocked(sendIcrc).mockResolvedValue(1n);
+			vi.mocked(icpSwapPool.deposit).mockResolvedValue(100_000_000n);
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValue(1n);
+		});
+
+		it('should withdraw the amount the pool actually returned, not the quote', async () => {
+			// Slippage ate 25 of the 1_020 gross quote: a successful swap, since `amountOutMinimum`
+			// is 3% below it, but less than the 1_000 quote the review step displayed.
+			const swappedAmount = 995n;
+
+			vi.mocked(icpSwapPool.swap).mockResolvedValue(swappedAmount);
+
+			await fetchIcpSwap(params);
+
+			expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: mockPrincipal.toText(),
+				token: destinationToken.ledgerCanisterId,
+				amount: swappedAmount,
+				fee: destinationToken.fee
+			});
+		});
+
+		it('should not fall back to the unused balance when the swap returns less than the quote', async () => {
+			const swappedAmount = 995n;
+
+			vi.mocked(icpSwapPool.swap).mockResolvedValue(swappedAmount);
+			// The pool rejects a withdrawal above the balance it credited - it does not clamp it.
+			vi.mocked(icpSwapPool.withdraw).mockImplementation(async ({ amount }) => {
+				if (amount > swappedAmount) {
+					throw new Error('InsufficientFunds');
+				}
+
+				return await Promise.resolve(amount);
+			});
+
+			await fetchIcpSwap(params);
+
+			expect(icpSwapPool.getUserUnusedBalance).not.toHaveBeenCalled();
+			expect(params.setFailedProgressStep).not.toHaveBeenCalled();
+			expect(params.progress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 		});
 	});
 
