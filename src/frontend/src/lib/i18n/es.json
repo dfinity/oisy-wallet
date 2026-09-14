@@ -988,7 +988,7 @@
 			"cketh_certified": "Por favor, espera hasta que los parámetros de cKeth hayan sido certificados.",
 			"pending_bitcoin_transaction": "Puedes enviar otra transacción de Bitcoin una vez que la pendiente esté completa.",
 			"no_available_utxos": "No tendrás utxos disponibles para realizar esta transacción.",
-			"first_time_destination": "Parece que nunca has enviado tokens a esta dirección. Una transferencia no se puede revertir, así que verifica la dirección con cuidado.",
+			"first_time_destination": "Nunca has enviado tokens a esta dirección, así que verifica la dirección con cuidado.",
 			"first_time_destination_confirm": "Confirma que este es un primer envío.",
 			"fee_expired": "",
 			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>",

@@ -156,10 +156,10 @@ with the confirmation reset on a destination change, as `SwapReview` does. The
 
 ### 4. i18n
 
-Under `send.info`, replacing `unknown_destination`: `first_time_destination` ("It appears you
-have never sent tokens to this address before. A transfer cannot be reversed, so verify the
-address carefully.") and `first_time_destination_confirm` ("Confirm that this is a first time
-send."), the latter appended only where the checkbox is. Regenerate types with
+Under `send.info`, replacing `unknown_destination`: `first_time_destination` ("You have never
+sent tokens to this address before, so verify the address carefully.") and
+`first_time_destination_confirm` ("Confirm that this is a first time send."), the latter
+appended only where the checkbox is. Regenerate types with
 `npm run i18n`, and translate every locale of the `Languages` enum (`ar.json` is not in it and
 only receives the empty keys the generator adds).
 

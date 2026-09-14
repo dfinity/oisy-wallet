@@ -988,7 +988,7 @@
 			"cketh_certified": "Bitte warte, bis die ckETH-Parameter zertifiziert sind.",
 			"pending_bitcoin_transaction": "Du kannst eine weitere Bitcoin-Transaktion senden, sobald die ausstehende abgeschlossen ist.",
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
-			"first_time_destination": "Es sieht so aus, als hättest du noch nie Tokens an diese Adresse gesendet. Ein Transfer kann nicht rückgängig gemacht werden, prüfe die Adresse deshalb sorgfältig.",
+			"first_time_destination": "Du hast noch nie Tokens an diese Adresse gesendet, prüfe die Adresse deshalb sorgfältig.",
 			"first_time_destination_confirm": "Bestätige, dass dies eine erstmalige Sendung ist.",
 			"fee_expired": "",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
