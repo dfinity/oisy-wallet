@@ -5,7 +5,8 @@ import {
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
-	replaceIcErrorFields
+	replaceIcErrorFields,
+	unknownCandidFieldHash
 } from '$lib/utils/error.utils';
 
 describe('error.utils', () => {
@@ -898,6 +899,42 @@ Call context:
 
 		it('should return false for undefined', () => {
 			expect(isVersionMismatchError(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('unknownCandidFieldHash', () => {
+		// The exact message @dfinity/candid throws when the wire carries a variant tag our
+		// generated bindings lack. 400215630 is the Candid hash of `XrpMainnet`.
+		const decodeError = new Error('Cannot find field hash _400215630_');
+
+		it('should return the hash of the field the bindings do not know', () => {
+			expect(unknownCandidFieldHash(decodeError)).toBe('400215630');
+		});
+
+		it('should find the hash when the decode error is wrapped in a larger message', () => {
+			expect(
+				unknownCandidFieldHash(
+					new Error(
+						'Call failed:\n  Method name: get_user_profile\nCannot find field hash _400215630_'
+					)
+				)
+			).toBe('400215630');
+		});
+
+		it('should read the message of a plain string error', () => {
+			expect(unknownCandidFieldHash('Cannot find field hash _90402076_')).toBe('90402076');
+		});
+
+		it('should return undefined for an unrelated error', () => {
+			expect(unknownCandidFieldHash(new Error('Some other error'))).toBeUndefined();
+		});
+
+		it('should return undefined for null', () => {
+			expect(unknownCandidFieldHash(null)).toBeUndefined();
+		});
+
+		it('should return undefined for undefined', () => {
+			expect(unknownCandidFieldHash(undefined)).toBeUndefined();
 		});
 	});
 });
