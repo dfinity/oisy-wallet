@@ -2,7 +2,12 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
-import { XRP_FEE_CONTEXT_KEY, initFeeStore, initXrpFeeContext } from '$xrp/stores/xrp-fee.store';
+import {
+	XRP_FEE_CONTEXT_KEY,
+	initFeeStore,
+	initReserveStore,
+	initXrpFeeContext
+} from '$xrp/stores/xrp-fee.store';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -30,6 +35,7 @@ describe('XrpSendForm', () => {
 		mockContext.set(
 			XRP_FEE_CONTEXT_KEY,
 			initXrpFeeContext({
+				reserveStore: initReserveStore(),
 				feeStore,
 				feeSymbolStore: writable(XRP_TOKEN.symbol),
 				feeDecimalsStore: writable(XRP_TOKEN.decimals),

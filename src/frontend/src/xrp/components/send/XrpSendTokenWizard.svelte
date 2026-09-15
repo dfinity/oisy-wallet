@@ -32,6 +32,7 @@
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
+		initReserveStore,
 		initXrpFeeContext,
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
@@ -76,6 +77,7 @@
 	 */
 
 	const feeStore = initFeeStore();
+	const reserveStore = initReserveStore();
 
 	const feeSymbolStore = writable<string | undefined>(XRP_TOKEN.symbol);
 	const feeTokenIdStore = writable<TokenId | undefined>(XRP_TOKEN.id);
@@ -90,6 +92,7 @@
 		XRP_FEE_CONTEXT_KEY,
 		initXrpFeeContext({
 			feeStore,
+			reserveStore,
 			feeSymbolStore,
 			feeDecimalsStore,
 			feeTokenIdStore,
