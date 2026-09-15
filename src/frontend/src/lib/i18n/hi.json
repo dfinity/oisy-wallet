@@ -145,7 +145,8 @@
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
 			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
-			"notes": "नोट्स"
+			"notes": "नोट्स",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
@@ -169,7 +170,8 @@
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
 			"show_balances": "छिपी हुई शेष राशि दिखाएं",
-			"notes": "नोट्स खोलें"
+			"notes": "नोट्स खोलें",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"
@@ -2802,7 +2804,7 @@
 				"snapshot_caption": "नोट की अभी की स्थिति की एक कॉपी शेयर करता है। बाद में नोट संपादित करने या हटाने से यह लिंक नहीं बदलेगा।",
 				"cap_reached": "आपने अधिकतम $max सक्रिय शेयर लिंक की सीमा पूरी कर ली है। ये समाप्त होने या उपयोग होने पर खाली हो जाते हैं।",
 				"expires_after": "लिंक इसके बाद समाप्त होगा",
-				"expiry_1h": "1 घंटा",
+				"expiry_1h": "",
 				"expiry_24h": "24 घंटे",
 				"expiry_7d": "7 दिन",
 				"expiry_30d": "30 दिन",
@@ -2836,6 +2838,51 @@
 				"discover": "OISY के बारे में जानें",
 				"unavailable_title": "यह लिंक समाप्त हो चुका है या पहले ही इस्तेमाल किया जा चुका है"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

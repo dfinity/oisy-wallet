@@ -74,6 +74,12 @@ fn classify_tokens<'a>(token_ids: &'a [StoredTokenId]) -> ClassifiedTokens<'a> {
                     .or_default()
                     .push(token_id.clone());
             }
+            TokenId::XrpNativeMainnet => {
+                native_coins
+                    .entry("ripple")
+                    .or_default()
+                    .push(token_id.clone());
+            }
 
             TokenId::Erc20(address, chain_id) => {
                 let Some(platform) = coingecko_platform(*chain_id) else {
@@ -264,6 +270,7 @@ mod tests {
         let icp = StoredTokenId(TokenId::IcpNative);
         let sol = StoredTokenId(TokenId::SolNativeMainnet);
         let btc = StoredTokenId(TokenId::BtcNativeMainnet);
+        let xrp = StoredTokenId(TokenId::XrpNativeMainnet);
         let unsupported_evm = StoredTokenId(TokenId::EvmNative(999));
         let btc_testnet = StoredTokenId(TokenId::BtcNativeTestnet);
         let sol_devnet = StoredTokenId(TokenId::SolNativeDevnet);
@@ -275,6 +282,7 @@ mod tests {
             icp.clone(),
             sol.clone(),
             btc.clone(),
+            xrp.clone(),
             unsupported_evm,
             btc_testnet,
             sol_devnet,
@@ -292,7 +300,8 @@ mod tests {
         );
         assert_eq!(classified.native_coins.get("solana"), Some(&vec![sol]));
         assert_eq!(classified.native_coins.get("bitcoin"), Some(&vec![btc]));
-        assert_eq!(classified.native_coins.len(), 5);
+        assert_eq!(classified.native_coins.get("ripple"), Some(&vec![xrp]));
+        assert_eq!(classified.native_coins.len(), 6);
         assert!(classified.contract_platforms.is_empty());
         assert!(classified.address_to_token_id.is_empty());
     }
