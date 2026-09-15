@@ -1,4 +1,8 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
+import {
+	ETH_OLDER_PAGE_RETRY_BASE_DELAY,
+	ETH_OLDER_PAGE_RETRY_MAX_DELAY
+} from '$eth/constants/eth.constants';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -81,6 +85,58 @@ export const isEthBackendAtCapacity = (tokenId: TokenId): boolean =>
 	ethBackendAtCapacity.has(tokenId);
 
 /**
+ * Per token, how many older pages in a row Etherscan failed to serve, and when it may be asked again.
+ *
+ * A failed page is not the end of the history, so the lists ask again on the next scroll into view.
+ * Held here rather than in either list so the Activity list and the token page share one budget.
+ * It never gives up: it only spaces the attempts out, and the first page served clears it.
+ */
+const etherscanOlderPageBackOff = new Map<
+	TokenId,
+	{ failures: number; retryAt: number; err: unknown }
+>();
+
+export const resetEtherscanOlderPageBackOff = () => etherscanOlderPageBackOff.clear();
+
+/**
+ * Runs an Etherscan request for older history, or skips it while the token is backing off from
+ * earlier failures. A skipped request resolves with the last failure, so callers treat it exactly
+ * like the failed page it stands in for.
+ */
+export const requestOlderEtherscanPage = async <T>({
+	tokenId,
+	request
+}: {
+	tokenId: TokenId;
+	request: () => Promise<T>;
+}): Promise<{ page: T } | { err: unknown }> => {
+	const backOff = etherscanOlderPageBackOff.get(tokenId);
+
+	if (nonNullish(backOff) && Date.now() < backOff.retryAt) {
+		return { err: backOff.err };
+	}
+
+	try {
+		const page = await request();
+
+		etherscanOlderPageBackOff.delete(tokenId);
+
+		return { page };
+	} catch (err: unknown) {
+		const failures = (backOff?.failures ?? 0) + 1;
+
+		const delay = Math.min(
+			ETH_OLDER_PAGE_RETRY_BASE_DELAY * 2 ** (failures - 1),
+			ETH_OLDER_PAGE_RETRY_MAX_DELAY
+		);
+
+		etherscanOlderPageBackOff.set(tokenId, { failures, retryAt: Date.now() + delay, err });
+
+		return { err };
+	}
+};
+
+/**
  * Loads a page of stored ETH transactions from the backend, mapping each
  * `UserTransaction` into a frontend `Transaction`.
  *
@@ -157,7 +213,9 @@ export const saveEthFinalizedTransactions = ({
  *   displayed in the UI. Used as the upper bound when querying Etherscan for older history.
  * @param beAtCapacity - When `true`, skip persisting Etherscan results to the backend
  *   (e.g. the backend storage is full).
- * @returns Whether more pages may exist beyond the returned batch.
+ * @returns Whether more pages may exist beyond the returned batch. `err` is set when the page
+ *   failed, in which case `hasMore: false` says nothing about the history and callers must ask again
+ *   later rather than treat the token as exhausted.
  */
 export const loadNextEthUserTransactions = async ({
 	identity,
@@ -177,7 +235,7 @@ export const loadNextEthUserTransactions = async ({
 	cursor: bigint | undefined;
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
-}): Promise<{ hasMore: boolean }> => {
+}): Promise<{ hasMore: boolean; err?: unknown }> => {
 	const atCapacity = beAtCapacity || isEthBackendAtCapacity(tokenId);
 
 	if (nonNullish(cursor)) {
@@ -269,7 +327,7 @@ const loadOlderFromEtherscan = async ({
 	networkId: NetworkId;
 	oldestLoadedBlockNumber: number | undefined;
 	skipSave: boolean;
-}): Promise<{ hasMore: boolean }> => {
+}): Promise<{ hasMore: boolean; err?: unknown }> => {
 	if (isNullish(oldestLoadedBlockNumber) || oldestLoadedBlockNumber <= 0) {
 		return { hasMore: false };
 	}
@@ -278,45 +336,54 @@ const loadOlderFromEtherscan = async ({
 		return { hasMore: false };
 	}
 
-	try {
-		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+	const result = await requestOlderEtherscanPage({
+		tokenId,
+		request: () => {
+			const { transactions: transactionsProvider } = etherscanProviders(networkId);
 
-		const olderTransactions = await transactionsProvider({
-			address,
-			endBlock: oldestLoadedBlockNumber - 1,
-			sort: 'desc'
-		});
-
-		if (olderTransactions.length === 0) {
-			return { hasMore: false };
+			return transactionsProvider({
+				address,
+				endBlock: oldestLoadedBlockNumber - 1,
+				sort: 'desc'
+			});
 		}
+	});
 
-		const certifiedTransactions = olderTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+	// A page that could not be fetched is not the start of the history. Reporting it as one used to
+	// retire the token from the list until the page was left.
+	if ('err' in result) {
+		return { hasMore: false, err: result.err };
+	}
 
-		ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+	const { page: olderTransactions } = result;
 
-		if (!skipSave) {
-			try {
-				const { getBlockNumber } = infuraProviders(networkId);
-
-				const latestBlockNumber = await getBlockNumber();
-
-				await saveEthFinalizedTransactions({
-					identity,
-					tokenId: transactionTokenId,
-					transactions: olderTransactions,
-					currentBlockNumber: latestBlockNumber
-				});
-			} catch (_: unknown) {
-				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
-			}
-		}
-
-		return { hasMore: true };
-	} catch (_: unknown) {
+	if (olderTransactions.length === 0) {
 		return { hasMore: false };
 	}
+
+	const certifiedTransactions = olderTransactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
+
+	ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+
+	if (!skipSave) {
+		try {
+			const { getBlockNumber } = infuraProviders(networkId);
+
+			const latestBlockNumber = await getBlockNumber();
+
+			await saveEthFinalizedTransactions({
+				identity,
+				tokenId: transactionTokenId,
+				transactions: olderTransactions,
+				currentBlockNumber: latestBlockNumber
+			});
+		} catch (_: unknown) {
+			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+		}
+	}
+
+	return { hasMore: true };
 };

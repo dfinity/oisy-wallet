@@ -12,10 +12,11 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import {
 	IntersectionObserverActive,
+	IntersectionObserverManual,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
 describe('EthTransactionsScroll', () => {
@@ -139,5 +140,68 @@ describe('EthTransactionsScroll', () => {
 
 		expect(loadNextSpy).not.toHaveBeenCalled();
 		expect(loadNextErc20Spy).not.toHaveBeenCalled();
+	});
+
+	describe('when the end of the list comes back into view', () => {
+		const { enterView } = IntersectionObserverManual;
+
+		const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+		beforeEach(() => {
+			window.IntersectionObserver = IntersectionObserverManual;
+		});
+
+		afterEach(() => {
+			window.IntersectionObserver = IntersectionObserverActive;
+		});
+
+		it('should stop asking once the history runs out', async () => {
+			loadNextSpy.mockResolvedValue({ hasMore: false });
+
+			render(EthTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await waitFor(() => expect(loadNextSpy).toHaveBeenCalledOnce());
+
+			await settle();
+
+			enterView();
+
+			expect(loadNextSpy).toHaveBeenCalledOnce();
+		});
+
+		// Ending the scroll on a failed page hid the rest of the history until the page was left.
+		it('should ask again after a failed page, but not on its own', async () => {
+			loadNextSpy.mockResolvedValueOnce({ hasMore: false, err: new Error('Etherscan down') });
+
+			render(EthTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await waitFor(() => expect(loadNextSpy).toHaveBeenCalledOnce());
+
+			await settle();
+
+			expect(loadNextSpy).toHaveBeenCalledOnce();
+
+			enterView();
+
+			await waitFor(() => expect(loadNextSpy).toHaveBeenCalledTimes(2));
+		});
+
+		it('should ask again after a failed ERC20 page', async () => {
+			token.set(USDC_TOKEN);
+
+			setTransactions({ tokenId: USDC_TOKEN.id });
+
+			loadNextErc20Spy.mockResolvedValueOnce({ hasMore: false, err: new Error('Etherscan down') });
+
+			render(EthTransactionsScroll, { token: USDC_TOKEN, children: mockSnippet });
+
+			await waitFor(() => expect(loadNextErc20Spy).toHaveBeenCalledOnce());
+
+			await settle();
+
+			enterView();
+
+			await waitFor(() => expect(loadNextErc20Spy).toHaveBeenCalledTimes(2));
+		});
 	});
 });
