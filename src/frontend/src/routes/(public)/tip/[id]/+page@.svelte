@@ -25,6 +25,14 @@
 	</div>
 
 	<main class="w-full max-w-[545px] rounded-3xl bg-primary p-6 shadow-lg md:p-8">
-		<TipClaim {tipId} />
+		<!--
+			Keyed, because SvelteKit reuses this component across `/tip/<id>`
+			navigations: the prop changes, the child does not remount, and it went on
+			showing the previous tip's preview while the handover read the new id —
+			so the amount on screen and the tip being claimed could disagree.
+		-->
+		{#key tipId}
+			<TipClaim {tipId} />
+		{/key}
 	</main>
 </div>
