@@ -31,10 +31,11 @@
 {/snippet}
 
 {#snippet text()}
-	{$i18n.send.info.first_time_destination}
-	{#if nonNullish(onConfirm)}
-		{$i18n.send.info.first_time_destination_confirm}
-	{/if}
+	<!-- The confirmation speaks in the first person, as the label of what the user is ticking, so
+	it replaces the warning rather than being appended to it. -->
+	{nonNullish(onConfirm)
+		? $i18n.send.info.first_time_destination_confirm
+		: $i18n.send.info.first_time_destination}
 {/snippet}
 
 <MessageBox

@@ -157,9 +157,11 @@ with the confirmation reset on a destination change, as `SwapReview` does. The
 ### 4. i18n
 
 Under `send.info`, replacing `unknown_destination`: `first_time_destination` ("You have never
-sent tokens to this address before, so verify the address carefully.") and
-`first_time_destination_confirm` ("Confirm that this is a first time send."), the latter
-appended only where the checkbox is. Regenerate types with
+sent tokens to this address before. Verify the address carefully.") for the address step, and
+`first_time_destination_confirm` ("This is the first time I send tokens to this address and I
+have verified the address carefully.") for the review step. The confirmation speaks in the
+first person, as the label of what the user is ticking, so it **replaces** the warning rather
+than being appended to it. Regenerate types with
 `npm run i18n`, and translate every locale of the `Languages` enum (`ar.json` is not in it and
 only receives the empty keys the generator adds).
 

@@ -33,6 +33,10 @@ describe('FirstTimeDestinationWarning', () => {
 		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toHaveTextContent(
 			en.send.info.first_time_destination_confirm
 		);
+		// the first-person confirmation replaces the warning, it is not appended to it
+		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).not.toHaveTextContent(
+			en.send.info.first_time_destination
+		);
 		expect(getByTestId('checkbox')).not.toBeChecked();
 	});
 
