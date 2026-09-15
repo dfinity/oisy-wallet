@@ -145,7 +145,8 @@
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
 			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
-			"notes": "Note"
+			"notes": "Note",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
@@ -169,7 +170,8 @@
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
 			"show_balances": "Mostra i saldi nascosti",
-			"notes": "Apri le note"
+			"notes": "Apri le note",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2794,7 +2796,7 @@
 				"snapshot_caption": "Condivide una copia della nota così com'è ora. Modificarla o eliminarla in seguito non cambierà questo link.",
 				"cap_reached": "Hai raggiunto il massimo di $max link di condivisione attivi. Si liberano quando scadono o vengono usati.",
 				"expires_after": "Il link scade dopo",
-				"expiry_1h": "1 ora",
+				"expiry_1h": "",
 				"expiry_24h": "24 ore",
 				"expiry_7d": "7 giorni",
 				"expiry_30d": "30 giorni",
@@ -2828,6 +2830,51 @@
 				"discover": "Scopri OISY",
 				"unavailable_title": "Questo link è scaduto o è già stato usato"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
