@@ -1,10 +1,10 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
-	isXrpTransactionValidated,
 	loadXrpAccountInfo,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
+	loadXrpTransactionOutcome,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
@@ -228,19 +228,42 @@ describe('xrpl.rest', () => {
 		});
 	});
 
-	describe('isXrpTransactionValidated', () => {
-		it('is true only when the transaction is validated', async () => {
-			mockFetchResponse({ body: { result: { validated: true } } });
+	describe('loadXrpTransactionOutcome', () => {
+		it('reports the validated flag and the final transaction result', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
+			});
 
 			await expect(
-				isXrpTransactionValidated({ hash: 'H', network: XrpNetworks.mainnet })
-			).resolves.toBeTruthy();
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
 
+		it('is not validated while the transaction is still pending', async () => {
 			mockFetchResponse({ body: { result: { validated: false } } });
 
 			await expect(
-				isXrpTransactionValidated({ hash: 'H', network: XrpNetworks.mainnet })
-			).resolves.toBeFalsy();
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: false, transactionResult: undefined });
+		});
+
+		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
+		it('reports a validated failure with its tec result', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+		});
+
+		it('tolerates a response without meta', async () => {
+			mockFetchResponse({ body: { result: { validated: true } } });
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: undefined });
 		});
 	});
 });

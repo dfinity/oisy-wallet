@@ -145,21 +145,32 @@ export const loadXrpLedgerIndex = async ({
 	return ledgerIndex;
 };
 
-/** Whether a transaction hash has been included in a validated ledger (via the `tx` method). */
-export const isXrpTransactionValidated = async ({
+/**
+ * The final outcome of a transaction hash, via the `tx` method.
+ *
+ * `validated` only means the transaction is **final**, not that it succeeded: a
+ * fee-claiming `tec*` transaction is validated too. Callers must therefore decide on
+ * `transactionResult` (the validated `meta.TransactionResult`), not on `validated` alone.
+ */
+export const loadXrpTransactionOutcome = async ({
 	hash,
 	network
 }: {
 	hash: string;
 	network: XrpNetworkType;
-}): Promise<boolean> => {
+}): Promise<{ validated: boolean; transactionResult: string | undefined }> => {
 	const result = await xrpJsonRpc({
 		network,
 		method: 'tx',
 		params: { transaction: hash }
 	});
 
-	return result.validated === true;
+	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
+
+	return {
+		validated: result.validated === true,
+		transactionResult: TransactionResult
+	};
 };
 
 /**
