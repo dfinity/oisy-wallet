@@ -1,9 +1,11 @@
 import TipClaim from '$lib/components/tip/TipClaim.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { PendingTipClaim } from '$lib/types/tip';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
@@ -66,6 +68,7 @@ describe('TipClaim', () => {
 			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue({ NotFound: null });
 			mockAuthStore(null);
 			goto.mockReturnValue(new Promise(() => {}));
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
 
 			const { container, getByText } = render(TipClaim, { props: { tipId } });
 
@@ -87,10 +90,78 @@ describe('TipClaim', () => {
 			mockAuthStore(null);
 
 			const { getByText } = render(TipClaim, { props: { tipId } });
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
 
 			await waitFor(() =>
 				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
 			);
+		});
+	});
+
+	// Only the canister saying a link is dead may be reported as dead. Anything
+	// else is this end failing, and "this tip is no longer available" is then a
+	// false statement about someone's money — one they cannot act on, because the
+	// unavailable screen offers no retry.
+	describe('when this end is what failed', () => {
+		it('offers a retry instead of calling a live tip unavailable', async () => {
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue(new Error('boundary node'));
+			mockAuthStore(null);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText, queryByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			expect(queryByText(get(i18n).tip.text.unavailable_title)).not.toBeInTheDocument();
+			expect(getByText(get(i18n).core.text.retry)).toBeInTheDocument();
+		});
+
+		it('reads the preview again when the retry is taken', async () => {
+			setFragment(`#c=${claimCode}`);
+			const previewSpy = vi
+				.spyOn(tipServices, 'loadTipPreview')
+				.mockRejectedValueOnce(new Error('boundary node'))
+				.mockResolvedValueOnce({
+					amount: 1n,
+					ledger_canister_id: ledgerCanisterId,
+					expires_at_ns: ZERO
+				} as Awaited<ReturnType<typeof tipServices.loadTipPreview>>);
+			mockAuthStore(null);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			getByText(get(i18n).core.text.retry).click();
+
+			// A transient failure should cost one tap, not the tip.
+			await waitFor(() => expect(previewSpy).toHaveBeenCalledTimes(2));
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.claim_ready_title_plain)).toBeInTheDocument()
+			);
+		});
+
+		it('does not leave the recipient on a spinner when the wallet will not open', async () => {
+			// `handing-off` renders a bare spinner with no way out, so a rejected
+			// navigation used to strand the recipient until they reloaded the page.
+			setFragment(`#c=${claimCode}`);
+			mockAuthStore();
+			goto.mockRejectedValue(new Error('navigation blew up'));
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			expect(getByText(get(i18n).core.text.retry)).toBeInTheDocument();
 		});
 	});
 

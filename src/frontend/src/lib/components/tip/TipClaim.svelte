@@ -23,6 +23,7 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isTipUnavailable } from '$lib/utils/tip.utils';
 
 	interface Props {
 		tipId: string;
@@ -40,7 +41,7 @@
 	 * claimed, or a fragment that did not survive the trip. They are deliberately
 	 * indistinguishable, so probing random ids teaches nothing.
 	 */
-	type PageState = 'loading' | 'preview' | 'handing-off' | 'unavailable';
+	type PageState = 'loading' | 'preview' | 'handing-off' | 'unavailable' | 'unreachable';
 
 	let pageState = $state<PageState>('loading');
 	let preview = $state<PublicTip | undefined>();
@@ -60,6 +61,20 @@
 	const toUnavailable = () => {
 		preview = undefined;
 		pageState = 'unavailable';
+	};
+
+	/**
+	 * This end failed, rather than the tip being gone.
+	 *
+	 * Kept apart from `unavailable` for the same reason the authenticated flow
+	 * keeps them apart (see `isTipUnavailable`): "this tip is no longer available"
+	 * is a statement about someone's money, and a dropped connection is no
+	 * evidence for it. Retrying from here re-enters `load`, which picks the right
+	 * thing to redo — the preview while anonymous, the handover once signed in.
+	 */
+	const toUnreachable = () => {
+		preview = undefined;
+		pageState = 'unreachable';
 	};
 
 	const loadTokenMetadata = async (ledger: Principal) => {
@@ -122,7 +137,10 @@
 		try {
 			await goto(AppPath.Tokens);
 		} catch (err: unknown) {
+			// `handing-off` renders a bare spinner, so returning here left the
+			// recipient watching it forever with no way out but a reload.
 			consoleWarn('Could not open the wallet to claim a tip', err);
+			toUnreachable();
 			return;
 		}
 
@@ -149,12 +167,30 @@
 			preview = await loadTipPreview({ tipId });
 			pageState = 'preview';
 			void loadTokenMetadata(preview.ledger_canister_id);
-		} catch (_: unknown) {
-			toUnavailable();
+		} catch (err: unknown) {
+			// The authenticated flow has always drawn this line; the anonymous
+			// preview did not, so a boundary node having a bad minute made a live
+			// tip read as permanently expired — with no retry, because the only
+			// button left was "take me to the wallet".
+			consoleWarn('Could not read the tip preview', err);
+
+			if (isTipUnavailable(err)) {
+				toUnavailable();
+				return;
+			}
+
+			toUnreachable();
 		}
 	};
 
 	onMount(load);
+
+	// Back to `loading` first, so the screen says something is happening and a
+	// second click cannot start a third attempt.
+	const retryLoad = async () => {
+		pageState = 'loading';
+		await load();
+	};
 
 	// Signing in happens in a popup, so this component stays mounted and simply
 	// carries on as the identity appears — no round-trip through a URL.
@@ -254,6 +290,23 @@
 	<div class="flex justify-center py-12 text-brand-primary">
 		<Spinner size="32px" />
 	</div>
+{:else if pageState === 'unreachable'}
+	<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.unreachable_title}</h1>
+
+	<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unreachable_description}</p>
+
+	<!--
+		Retry re-enters `load`, which redoes whichever step failed: the preview
+		while anonymous, the handover once signed in. The wallet stays on offer
+		underneath, because a retry that keeps failing should not be the only door.
+	-->
+	<Button fullWidth onclick={retryLoad}>
+		{$i18n.core.text.retry}
+	</Button>
+
+	<Button disabled={leaving} fullWidth link loading={leaving} onclick={toWallet}>
+		{$i18n.tip.text.take_me_to_wallet}
+	</Button>
 {:else if pageState === 'unavailable'}
 	<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.unavailable_title}</h1>
 
