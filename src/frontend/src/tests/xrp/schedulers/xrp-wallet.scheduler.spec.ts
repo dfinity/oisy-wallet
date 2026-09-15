@@ -145,4 +145,66 @@ describe('xrp-wallet.scheduler', () => {
 
 		scheduler.stop();
 	});
+
+	describe('on a failing balance load', () => {
+		const walletPosts = () =>
+			postMessageMock.mock.calls
+				.map(([message]) => message)
+				.filter(({ msg }) => msg === 'syncXrpWallet');
+
+		const triggerAndSettle = async (scheduler: XrpWalletScheduler) => {
+			const promise = scheduler.trigger(startData);
+
+			await vi.runAllTimersAsync();
+
+			await promise;
+		};
+
+		it('should postMessage syncXrpWalletError after exhausting the retries', async () => {
+			const error = new Error('test');
+			spyLoadBalance.mockRejectedValue(error);
+
+			const scheduler = new XrpWalletScheduler();
+
+			await triggerAndSettle(scheduler);
+
+			// first attempt + 10 retries
+			expect(spyLoadBalance).toHaveBeenCalledTimes(11);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncXrpWalletError',
+				ref,
+				data: { error }
+			});
+			expect(walletPosts()).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		// `syncWalletData` short-circuits on an unchanged balance, so the failure branch clears the
+		// store. Without that reset the recovered sync would emit nothing and the UI would stay empty.
+		it('should postMessage the same balance again after a fatal error', async () => {
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.trigger(startData);
+
+			expect(walletPosts()).toHaveLength(1);
+
+			spyLoadBalance.mockRejectedValue(new Error('Failed to fetch'));
+
+			await triggerAndSettle(scheduler);
+
+			spyLoadBalance.mockResolvedValue(mockBalance);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(startData);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balance).toEqual({ certified: false, data: mockBalance });
+
+			scheduler.stop();
+		});
+	});
 });
