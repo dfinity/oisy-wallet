@@ -22,8 +22,15 @@ import { derived, type Readable } from 'svelte/store';
  * and could not: its allowance is still granted and its code still works, so it
  * encumbers the balance exactly as a untouched one does — and it is the case
  * where the sender most needs the number to be right, since topping up is the
- * fix. Claimed, cancelled and expired tips hold nothing: the allowance is spent,
- * revoked, or lapsed on the ledger.
+ * fix. Claimed, cancelled and expired tips hold nothing.
+ *
+ * That last part is about what can be *drawn*, not about what the ledger still
+ * has on file. A cancellation revokes the allowance as its second step, and that
+ * step can fail — `cancelTip` reports it rather than throwing, precisely because
+ * nothing depends on it. The approval it leaves is inert: only the backend can
+ * draw on it, only through that tip's subaccount, and `claim_tip` refuses a
+ * cancelled tip. So dropping the tip from this sum the moment it is cancelled is
+ * right even when the revoke did not land.
  */
 export const reservedTipAmounts: Readable<Record<TokenId, bigint>> = derived(
 	[tipsStore, tokens],
