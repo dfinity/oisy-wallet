@@ -1,0 +1,158 @@
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { xrpAddressMainnetStore } from '$lib/stores/address.store';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
+import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
+import * as xrplRest from '$xrp/rest/xrpl.rest';
+import {
+	XRP_FEE_CONTEXT_KEY,
+	initFeeStore,
+	initReserveStore,
+	initXrpFeeContext
+} from '$xrp/stores/xrp-fee.store';
+import { XrpNetworks } from '$xrp/types/network';
+import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
+import { render, waitFor } from '@testing-library/svelte';
+import { get, writable } from 'svelte/store';
+
+describe('XrpFeeContext', () => {
+	const nodeFee = 15n;
+
+	let feeStore: ReturnType<typeof initFeeStore>;
+	let reserveStore: ReturnType<typeof initReserveStore>;
+
+	const renderContext = (observe = true) => {
+		const context = new Map();
+
+		context.set(
+			XRP_FEE_CONTEXT_KEY,
+			initXrpFeeContext({
+				feeStore,
+				reserveStore,
+				feeSymbolStore: writable(XRP_TOKEN.symbol),
+				feeDecimalsStore: writable(XRP_TOKEN.decimals),
+				feeTokenIdStore: writable(XRP_TOKEN.id),
+				feeExchangeRateStore: writable(undefined)
+			})
+		);
+
+		return render(XrpFeeContext, {
+			props: { token: XRP_TOKEN, observe, children: mockSnippet },
+			context
+		});
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		feeStore = initFeeStore();
+		reserveStore = initReserveStore();
+
+		xrpAddressMainnetStore.reset();
+		xrpAddressMainnetStore.set({ data: mockXrpAddress, certified: true });
+
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(nodeFee);
+		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+			balance: 50_000_000n,
+			sequence: 7,
+			ownerCount: 0
+		});
+	});
+
+	describe('the fee', () => {
+		it('publishes the open-ledger fee reported by the node', async () => {
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(get(feeStore)).toBe(nodeFee);
+			});
+
+			expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalledWith({
+				network: XrpNetworks.mainnet,
+				fallbackFee: XRP_DEFAULT_FEE_DROPS
+			});
+
+			unmount();
+		});
+
+		// The fee is best-effort: the form always needs a figure to subtract.
+		it('falls back to the default fee when the node call fails', async () => {
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockRejectedValue(new Error('rpc down'));
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(get(feeStore)).toBe(XRP_DEFAULT_FEE_DROPS);
+			});
+
+			unmount();
+		});
+	});
+
+	describe('the reserve', () => {
+		it('publishes the reserve for the number of ledger objects the account owns', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+				balance: 50_000_000n,
+				sequence: 7,
+				ownerCount: 3
+			});
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 3 }));
+			});
+
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: mockXrpAddress,
+				network: XrpNetworks.mainnet
+			});
+
+			unmount();
+		});
+
+		// An unfunded account is not on-ledger and owns nothing, so the default already
+		// describes it — and the same conservative figure applies if the call fails.
+		it('keeps the owns-nothing default when account_info fails', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('actNotFound'));
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+		});
+
+		it('does not fetch the reserve without an address', async () => {
+			xrpAddressMainnetStore.reset();
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
+			});
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+		});
+	});
+
+	it('fetches nothing while not observing', async () => {
+		const { unmount } = renderContext(false);
+
+		await vi.waitFor(() => {
+			expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
+		});
+
+		expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+
+		unmount();
+	});
+});
