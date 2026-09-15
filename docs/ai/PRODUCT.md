@@ -257,6 +257,8 @@ Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OIS
 
 That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
 
+The instruction list reads an account the message opens for the user as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction.
+
 Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
 
 The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
