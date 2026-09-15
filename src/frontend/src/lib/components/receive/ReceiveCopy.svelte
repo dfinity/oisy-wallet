@@ -7,15 +7,21 @@
 		address: string;
 		copyAriaLabel: string;
 		testId?: string;
+		/** Fired after a successful copy, for callers that want to know it happened. */
+		onCopy?: () => void;
 	}
 
-	let { address, copyAriaLabel, testId }: Props = $props();
+	let { address, copyAriaLabel, testId, onCopy }: Props = $props();
 </script>
 
 <ButtonIcon
 	ariaLabel={copyAriaLabel}
 	link={false}
-	onclick={async () => await copyToClipboard({ value: address, text: copyAriaLabel })}
+	onclick={async () => {
+		await copyToClipboard({ value: address, text: copyAriaLabel });
+
+		onCopy?.();
+	}}
 	{testId}
 >
 	{#snippet icon()}

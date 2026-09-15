@@ -57,6 +57,7 @@ export interface Modal<T> {
 		| 'about-why-oisy'
 		| 'vip-qr-code'
 		| 'referral-code'
+		| 'tip'
 		| 'referral-state'
 		| 'address-book'
 		| 'notes'
@@ -139,6 +140,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
+	openTip: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openNotes: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
@@ -241,6 +243,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
+		openTip: setType('tip'),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
