@@ -2439,6 +2439,9 @@ interface I18nTip {
 		history_failed: string;
 		group_failed: string;
 		group_failed_hint: string;
+		failure_uncovered: string;
+		failure_insufficient_funds: string;
+		failure_transfer_failed: string;
 		group_open: string;
 		group_claimed: string;
 		group_expired: string;
@@ -2455,6 +2458,8 @@ interface I18nTip {
 		cancel_tip: string;
 		cancel_failed: string;
 		cancelled_toast: string;
+		cancelled_allowance_kept: string;
+		token_unavailable: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;

@@ -1,7 +1,8 @@
-import type { MyTip } from '$declarations/backend/backend.did';
+import type { MyTip, TipClaimFailureReason } from '$declarations/backend/backend.did';
 import {
 	TIP_HISTORY_GROUP_ORDER,
 	isTipCancellable,
+	tipFailureReasonKey,
 	tipHistoryGroup,
 	tipStatusKey,
 	tipStatusTextClass
@@ -99,6 +100,40 @@ describe('tip-status.utils', () => {
 			// below rows that need nothing.
 			expect(TIP_HISTORY_GROUP_ORDER[0]).toBe('failed');
 			expect(TIP_HISTORY_GROUP_ORDER).toEqual(['failed', 'open', 'claimed', 'expired']);
+		});
+	});
+
+	describe('tipFailureReasonKey', () => {
+		const failed = (reason: TipClaimFailureReason): MyTip => ({
+			...tip({ Failed: null }),
+			last_claim_failure: [{ at_ns: 1_700_000_000_000_000_000n, reason }]
+		});
+
+		it('tells the three reasons apart', () => {
+			// They ask for three different things, which is the whole reason this
+			// exists: `Uncovered` means the reservation is gone and only a new tip
+			// fixes it, `InsufficientFunds` that the same link works after a top up,
+			// `TransferFailed` that retrying is the advice.
+			expect(tipFailureReasonKey(failed({ Uncovered: null }))).toBe('uncovered');
+			expect(tipFailureReasonKey(failed({ InsufficientFunds: null }))).toBe('insufficient_funds');
+			expect(tipFailureReasonKey(failed({ TransferFailed: null }))).toBe('transfer_failed');
+		});
+
+		it('has nothing to say about a tip that never failed a claim', () => {
+			expect(tipFailureReasonKey(tip({ Reserved: null }))).toBeUndefined();
+		});
+
+		it('still reports the reason on a tip that later succeeded', () => {
+			// The canister keeps the record so a tip that was not first time lucky can
+			// still show it. Read alongside the status, not instead of it.
+			expect(
+				tipFailureReasonKey({
+					...tip({ Claimed: null }),
+					last_claim_failure: [
+						{ at_ns: 1_700_000_000_000_000_000n, reason: { InsufficientFunds: null } }
+					]
+				})
+			).toBe('insufficient_funds');
 		});
 	});
 });

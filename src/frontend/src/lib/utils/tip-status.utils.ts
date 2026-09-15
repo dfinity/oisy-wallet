@@ -1,7 +1,11 @@
 import type { MyTip, TipStatus } from '$declarations/backend/backend.did';
+import { isNullish } from '@dfinity/utils';
 
 /** The five statuses the canister stores, as a discriminant a component can switch on. */
 export type TipStatusKey = 'reserved' | 'failed' | 'claimed' | 'expired' | 'cancelled';
+
+/** Why a claim did not pay out, as a discriminant. Mirrors `TipClaimFailureReason`. */
+export type TipFailureReasonKey = 'uncovered' | 'insufficient_funds' | 'transfer_failed';
 
 /**
  * How History groups rows. Fewer groups than statuses on purpose: what the reader
@@ -12,8 +16,9 @@ export type TipHistoryGroup = 'failed' | 'open' | 'claimed' | 'expired';
 
 /**
  * Failed first, because it is the only group the sender can do anything about —
- * somebody tried to claim and could not, and the code is still valid, so topping
- * up the account makes the tip work. Then what is still live, then what is done.
+ * somebody tried to claim and could not. What to do about it depends on which of
+ * the three reasons it was, which is why the row carries the reason rather than
+ * the heading promising a fix. Then what is still live, then what is done.
  */
 export const TIP_HISTORY_GROUP_ORDER: TipHistoryGroup[] = ['failed', 'open', 'claimed', 'expired'];
 
@@ -80,6 +85,39 @@ export const tipStatusTextClass = (status: TipStatusKey): string => {
 	}
 
 	return 'text-tertiary';
+};
+
+/**
+ * Why the most recent claim on a tip did not pay out, if one did not.
+ *
+ * The three reasons ask for three different things and the difference matters:
+ * `Uncovered` means the reservation is gone, so the link is dead and only a new
+ * tip fixes it; `InsufficientFunds` means the same link works again after a top
+ * up; `TransferFailed` means retrying is the whole of the advice. A single hint
+ * over the group could only ever be right about one of them, and the one it used
+ * to give — top up, the links still work — is wrong for two.
+ *
+ * Present on any tip that has ever failed a claim, including one that later
+ * succeeded, so callers read it alongside the status rather than instead of it.
+ */
+export const tipFailureReasonKey = (tip: MyTip): TipFailureReasonKey | undefined => {
+	const [failure] = tip.last_claim_failure;
+
+	if (isNullish(failure)) {
+		return undefined;
+	}
+
+	const { reason } = failure;
+
+	if ('Uncovered' in reason) {
+		return 'uncovered';
+	}
+
+	if ('InsufficientFunds' in reason) {
+		return 'insufficient_funds';
+	}
+
+	return 'transfer_failed';
 };
 
 /**
