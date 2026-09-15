@@ -89,7 +89,7 @@
 	{/snippet}
 
 	{#snippet sendAmount()}
-		<BtcSendAmount {onTokensList} bind:amount bind:amountError />
+		<BtcSendAmount {onTokensList} {source} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
