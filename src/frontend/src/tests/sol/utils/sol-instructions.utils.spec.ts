@@ -56,6 +56,7 @@ import {
 	StakeAuthorize
 } from '@solana-program/stake';
 import {
+	getCreateAccountAllowPrefundInstruction,
 	getCreateAccountInstruction,
 	getCreateAccountWithSeedInstruction
 } from '@solana-program/system';
@@ -1083,6 +1084,60 @@ describe('sol-instructions.utils', () => {
 				baseAccount: createNoopSigner(address(mockSolAddress3)),
 				seed: 'vault',
 				amount: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that opens a System-owned account', () => {
+			// A third opcode onto the same spendable account. It needs no payer of its own, which is why
+			// only the owner is read.
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that states no payer', () => {
+			// The account prefunds itself, so there is no payer meta at all. The refusal must not depend
+			// on reading one.
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should leave a `CreateAccountAllowPrefund` instruction that opens an account for a program unread', () => {
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 2_039_280n,
 				space: 165n,
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
