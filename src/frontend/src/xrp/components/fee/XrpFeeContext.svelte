@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
+	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import type { Token } from '$lib/types/token';
 	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
-	import { loadXrpOpenLedgerFee } from '$xrp/rest/xrpl.rest';
+	import { loadXrpAccountInfo, loadXrpOpenLedgerFee } from '$xrp/rest/xrpl.rest';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
+	import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 
 	interface Props {
 		token: Token;
@@ -15,7 +17,32 @@
 
 	let { token, observe, children }: Props = $props();
 
-	const { feeStore }: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const { feeStore, reserveStore }: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+
+	// The reserve depends on how many ledger objects the account owns, which only
+	// `account_info` reports. It is fetched once per account rather than on the fee timer:
+	// unlike the fee it does not move while a send is being composed.
+	const loadReserve = async () => {
+		if (!observe || isNullish(token)) {
+			return;
+		}
+
+		const network = mapNetworkIdToNetwork(token.network.id);
+		const address = $xrpAddressMainnet;
+
+		if (isNullish(network) || isNullish(address)) {
+			return;
+		}
+
+		try {
+			const { ownerCount } = await loadXrpAccountInfo({ address, network });
+
+			reserveStore.setReserve(getXrpReserveDrops({ ownerCount }));
+		} catch (_: unknown) {
+			// An unfunded account is not on-ledger and owns nothing, so the default (the base
+			// reserve) already describes it; the same conservative figure applies if the call fails.
+		}
+	};
 
 	const estimateFee = async () => {
 		if (!observe || isNullish(token)) {
@@ -49,9 +76,12 @@
 	};
 
 	$effect(() => {
-		[token];
+		[token, $xrpAddressMainnet];
 
-		untrack(() => updateFee());
+		untrack(() => {
+			updateFee();
+			loadReserve();
+		});
 	});
 
 	onDestroy(clearTimer);
