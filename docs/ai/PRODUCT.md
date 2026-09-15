@@ -271,6 +271,10 @@ An **account creation** is read by what will own the new account. One opened for
 
 An **account assignment** hands an account to a different program. The account is the instruction's only argument and must sign, and the connected wallet signs every request it is sent, so a message can name that wallet itself — after which the named program, not the System program, governs it. Nothing about that fits an amount, a source or a destination, which is the same reason a token account's authority change is refused, so an assignment is refused too. Sizing an account is left alone: it hands control of the account to nobody.
 
+Every other System-program instruction is read deliberately too. Withdrawing from a nonce account and the seed-derived transfer both state an amount, a source and a destination, so they read as the transfers they are. Initialising or re-authorising a nonce account names who may withdraw its balance, and sizing an account states a length and nothing else, so all three are refused on the same test as an assignment. Advancing and upgrading a nonce account are ignored: they use a nonce rather than deciding anything about it, moving no lamports and naming no authority.
+
+Because the set is closed and published, an instruction OISY has never classified is a gap in its own table rather than something unknowable — so an unclassified System instruction is refused rather than warned about. That is the opposite of a call into a program OISY does not know, where refusing everything undecodable would block most real dApp interactions and the warning is the honest answer.
+
 The deliberate cost is that a legitimate System-owned creation is refused as well — a durable nonce account is System-owned and carries data. Recognising that specific pattern is a follow-up; until then the review errs toward refusing.
 
 ### Sources and destinations of a Solana transaction

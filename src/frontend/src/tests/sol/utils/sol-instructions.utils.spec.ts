@@ -56,11 +56,19 @@ import {
 	StakeAuthorize
 } from '@solana-program/stake';
 import {
+	getAdvanceNonceAccountInstruction,
+	getAllocateInstruction,
+	getAllocateWithSeedInstruction,
 	getAssignInstruction,
 	getAssignWithSeedInstruction,
+	getAuthorizeNonceAccountInstruction,
 	getCreateAccountAllowPrefundInstruction,
 	getCreateAccountInstruction,
-	getCreateAccountWithSeedInstruction
+	getCreateAccountWithSeedInstruction,
+	getInitializeNonceAccountInstruction,
+	getTransferSolWithSeedInstruction,
+	getUpgradeNonceAccountInstruction,
+	getWithdrawNonceAccountInstruction
 } from '@solana-program/system';
 import {
 	AuthorityType,
@@ -1076,9 +1084,9 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should leave a `CreateAccountWithSeed` instruction that opens an account for a program unread', () => {
-			// The owning program governs what leaves it, so this is not a wallet. Nothing else about the
-			// instruction is displayable, which is the reading it already had.
+		it('should state the rent of a `CreateAccountWithSeed` instruction that opens an account for a program', () => {
+			// The owning program governs what leaves it, so the lamports are the rent of the operation
+			// the creation belongs to, exactly as for the plain form.
 			const instruction = getCreateAccountWithSeedInstruction({
 				payer: createNoopSigner(address(mockSolAddress)),
 				newAccount: address(mockSolAddress2),
@@ -1091,11 +1099,11 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(mapSolInstruction(instruction)).toStrictEqual({
-				amount: undefined,
-				unreviewed: true
+				amount: 2_039_280n,
+				payer: mockSolAddress
 			});
 
-			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should fail closed on a `CreateAccountAllowPrefund` instruction that opens a System-owned account', () => {
@@ -1135,7 +1143,7 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should leave a `CreateAccountAllowPrefund` instruction that opens an account for a program unread', () => {
+		it('should state the rent of a `CreateAccountAllowPrefund` instruction that opens an account for a program', () => {
 			const instruction = getCreateAccountAllowPrefundInstruction({
 				newAccount: createNoopSigner(address(mockSolAddress2)),
 				payer: createNoopSigner(address(mockSolAddress)),
@@ -1145,11 +1153,11 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(mapSolInstruction(instruction)).toStrictEqual({
-				amount: undefined,
-				unreviewed: true
+				amount: 2_039_280n,
+				payer: mockSolAddress
 			});
 
-			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should fail closed on an `Assign` instruction, which hands an account to a program', () => {
@@ -1182,6 +1190,124 @@ describe('sol-instructions.utils', () => {
 				amount: undefined,
 				ambiguous: true
 			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
+			const instruction = getWithdrawNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				recipientAccount: address(mockSolAddress3),
+				nonceAuthority: createNoopSigner(address(mockSolAddress)),
+				withdrawAmount: 5_000n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 5_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress3
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should state a `TransferSolWithSeed` instruction as the transfer it is', () => {
+			const instruction = getTransferSolWithSeedInstruction({
+				source: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				destination: address(mockSolAddress3),
+				amount: 7_000n,
+				fromSeed: 'vault',
+				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 7_000n,
+				source: mockSolAddress2,
+				destination: mockSolAddress3
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `InitializeNonceAccount` instruction, which names who may withdraw', () => {
+			const instruction = getInitializeNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				nonceAuthority: address(mockSolAddress3)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `AuthorizeNonceAccount` instruction, which changes who may withdraw', () => {
+			const instruction = getAuthorizeNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				nonceAuthority: createNoopSigner(address(mockSolAddress)),
+				newNonceAuthority: address(mockSolAddress3)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `Allocate` instruction, which states only a length', () => {
+			const instruction = getAllocateInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress)),
+				space: 165n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `AllocateWithSeed` instruction', () => {
+			const instruction = getAllocateWithSeedInstruction({
+				newAccount: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				base: address(mockSolAddress),
+				seed: 'vault',
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore an `AdvanceNonceAccount` instruction, which uses a nonce rather than deciding anything', () => {
+			const instruction = getAdvanceNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2),
+				nonceAuthority: createNoopSigner(address(mockSolAddress))
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore an `UpgradeNonceAccount` instruction', () => {
+			const instruction = getUpgradeNonceAccountInstruction({
+				nonceAccount: address(mockSolAddress2)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
