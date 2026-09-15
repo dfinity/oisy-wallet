@@ -422,11 +422,29 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 
 	if (instructionType === SystemInstruction.CreateAccount) {
 		const {
-			data: { lamports },
+			data: { lamports, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
 		} = instruction;
+
+		// An account the System program owns holds no data and has no program deciding what may
+		// leave it: whoever holds `newAccount`'s key can spend the lamports it is opened with, which
+		// makes this instruction a transfer to that key wearing an account creation's name. The
+		// review cannot say so — the lamports arrive here as an amount with a payer and no
+		// counterparty, and beside a dust transfer they were summed into that transfer's figure
+		// under that transfer's destination, so the funding rode along inside a figure the user read
+		// as something else. Refuse it, for the same reason an authority change is refused rather
+		// than warned about: it is decoded in full and still cannot be stated.
+		//
+		// Only System-owned accounts. Opening an account for a program is how a dApp legitimately
+		// asks for one - a swap routed through Whirlpool creates its wrapped SOL account with a
+		// top-level `createAccount` owned by the token program, then initialises it - and the
+		// program that owns such an account is what governs the lamports in it. Those keep the rent
+		// they state, which the review carries as the cost of the operation it belongs to.
+		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+			return unfaithfulInstruction();
+		}
 
 		return {
 			amount: lamports,

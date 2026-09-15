@@ -55,6 +55,7 @@ import {
 	getWithdrawInstruction,
 	StakeAuthorize
 } from '@solana-program/stake';
+import { getCreateAccountInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -1002,6 +1003,46 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolSystemInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccount` instruction that opens a System-owned account', () => {
+			// Nothing governs such an account but the key it is opened at, so its lamports are spendable
+			// by whoever holds that key. The review has no counterparty to name it as, which is what let
+			// it ride along inside a neighbouring transfer's figure.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should state the rent of a `CreateAccount` instruction that opens an account for a program', () => {
+			// How a dApp legitimately asks for an account: a swap routed through Whirlpool opens its
+			// wrapped SOL account this way before initialising it. The token program governs what leaves
+			// it, so the lamports are the rent of that operation rather than a transfer.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 2_039_280n,
+				payer: mockSolAddress
+			});
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
