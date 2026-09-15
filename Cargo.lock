@@ -1598,9 +1598,9 @@ dependencies = [
 
 [[package]]
 name = "ic-vetkeys"
-version = "0.7.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c7ce838bc1fc10a504f722ef46a1c473413f520e5303dd200e15f2937ce7052"
+checksum = "59dff0baaee15b1b9d7e9b7d125fd8becf53e2b62ac30a9dd9d74f5269932323"
 dependencies = [
  "aes-gcm",
  "anyhow",
