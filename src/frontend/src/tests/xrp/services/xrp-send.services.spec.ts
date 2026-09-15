@@ -145,6 +145,42 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledOnce();
 	});
 
+	// The transaction stays valid until its LastLedgerSequence, so confirmation must keep
+	// polling rather than give up on a fixed budget and report a false failure — which would
+	// invite the user to send a duplicate. The count deliberately exceeds the ten retries the
+	// previous implementation allowed.
+	it('keeps polling beyond ten attempts while the transaction can still be included', async () => {
+		const validatesOnAttempt = 15;
+		let attempts = 0;
+
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(async () => {
+			attempts++;
+
+			return attempts < validatesOnAttempt
+				? { validated: false, transactionResult: undefined }
+				: { validated: true, transactionResult: 'tesSUCCESS' };
+		});
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+
+		expect(attempts).toBe(validatesOnAttempt);
+	});
+
+	// Only once the ledger has passed the LastLedgerSequence is non-inclusion final.
+	it('fails once the transaction can no longer be included', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		// The first call builds the payment (LastLedgerSequence 1020); the poll then sees a
+		// ledger beyond it.
+		vi.spyOn(xrplRest, 'loadXrpLedgerIndex')
+			.mockResolvedValueOnce(1000)
+			.mockResolvedValue(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
+	});
+
 	it('does not reach DONE when the transaction fails', async () => {
 		const progress = vi.fn();
 
