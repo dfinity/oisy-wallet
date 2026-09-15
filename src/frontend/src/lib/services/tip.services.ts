@@ -460,9 +460,18 @@ export const claimTip = ({
  * the tip is not claimable by anyone, and `cancel_tip` refuses a second attempt
  * with `NotCancellable` — so rethrowing a failed revoke reported "nothing has
  * moved, so try again" for an operation that had already happened and that
- * retrying could never complete. The revoke is reported instead: the caller says
- * that the reservation is still standing, and it lapses on its own at the tip's
- * deadline, which is the expiry {@link reserveTip} approved it with.
+ * retrying could never complete. The revoke is reported instead, and the caller
+ * says so.
+ *
+ * What a failed revoke leaves behind is a standing approval and nothing else.
+ * Only the backend can draw on it, only through this tip's own subaccount, and
+ * `claim_tip` refuses a cancelled tip — so no one can spend it, and it lapses at
+ * the tip's deadline, which is the expiry {@link reserveTip} approved it with.
+ * Nor does it hold any of the sender's balance: an approval is a permission, not
+ * a transfer, and what a tip has promised away is read from the tip's own state
+ * rather than from the ledger — so a cancellation frees it the moment the
+ * canister records it. Which is why this is reported rather than retried: there
+ * is nothing for a retry to give back.
  */
 export const cancelTip = async ({
 	identity,

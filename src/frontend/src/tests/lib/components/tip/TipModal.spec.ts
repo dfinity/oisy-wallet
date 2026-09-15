@@ -1,6 +1,9 @@
 import type { MyTip } from '$declarations/backend/backend.did';
 import TipModal from '$lib/components/tip/TipModal.svelte';
-import { TIP_HISTORY_ROW_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	TIP_HISTORY_CANCEL_BUTTON,
+	TIP_HISTORY_ROW_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -127,6 +130,71 @@ describe('TipModal', () => {
 		// tip rather than a missing one.
 		expect(container.textContent).not.toContain('first-code');
 		expect(container.textContent).toContain('second-code');
+	});
+
+	describe('cancelling a reopened tip', () => {
+		const openAndCancel = async () => {
+			vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+				tip({ tip_id: 'live', ledger: mockValidIcrcToken.ledgerCanisterId })
+			]);
+			vi.spyOn(tipServices, 'recoverTipLink').mockResolvedValue(
+				'https://oisy.com/tip#i=live&c=live-code'
+			);
+
+			const shown = vi.spyOn(toastsStore, 'toastsShow').mockImplementation(() => Symbol());
+			const errored = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
+
+			const { container, getByText } = render(TipModal);
+
+			const [row] = await openHistory({ container, getByText, rows: 1 });
+
+			row.click();
+
+			await waitFor(() =>
+				expect(
+					container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
+				).toBeInTheDocument()
+			);
+
+			container
+				.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
+				?.click();
+
+			await waitFor(() => expect(shown).toHaveBeenCalledOnce());
+
+			return { shown, errored };
+		};
+
+		it('reports plain success when the allowance went back too', async () => {
+			vi.spyOn(tipServices, 'cancelTip').mockResolvedValue({ allowanceRevoked: true });
+
+			const { shown, errored } = await openAndCancel();
+
+			expect(shown).toHaveBeenCalledWith({
+				text: get(i18n).tip.text.cancelled_toast,
+				level: 'success'
+			});
+			expect(errored).not.toHaveBeenCalled();
+		});
+
+		it('warns without claiming a failure when only the allowance stayed behind', async () => {
+			// The tip is cancelled and unclaimable, which is the half that was asked
+			// for and the half that cannot be retried — `cancel_tip` refuses a second
+			// attempt. So this is neither a success to gloss over nor a failure that
+			// invites a retry the canister would turn down.
+			vi.spyOn(tipServices, 'cancelTip').mockResolvedValue({ allowanceRevoked: false });
+
+			const { shown, errored } = await openAndCancel();
+
+			expect(shown).toHaveBeenCalledWith({
+				text: get(i18n).tip.text.cancelled_allowance_kept,
+				level: 'warn'
+			});
+
+			// Not `cancel_failed` — "Nothing has moved, so try again" was the untrue
+			// part, and it must not come back as a toast alongside the warning.
+			expect(errored).not.toHaveBeenCalled();
+		});
 	});
 
 	it('says so rather than dropping the reader on the intro when the token is gone', async () => {
