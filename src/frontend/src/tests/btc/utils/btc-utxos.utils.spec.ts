@@ -3,6 +3,7 @@ import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-tr
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
 	calculateFeeSatoshis,
+	calculateMaxSpendableAmount,
 	calculateUtxoSelection,
 	estimateTransactionVSize,
 	extractUtxoOutpoints,
@@ -672,6 +673,83 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('calculateMaxSpendableAmount', () => {
+		const feeRateMiliSatoshisPerVByte = 1_000n;
+
+		it('should spend every available UTXO minus the fee for that many inputs', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				300_000n - calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		// Regression: the wallet balance is read at 1 confirmation but a send selects from 6, so
+		// offering the balance quoted a "Max" the selection then rejected for want of funds.
+		it('should exclude UTXOs below the confirmation floor a send selects from', () => {
+			const utxos = [
+				createMockUtxo({ value: 1_000, height: 10 }),
+				createMockUtxo({ value: 40_000, height: 3, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		it('should exclude UTXOs reserved by a pending transaction', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: ['08070605:0'],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				100_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		it('should return zero when nothing is available', () => {
+			const result = calculateMaxSpendableAmount({
+				utxos: [createMockUtxo({ value: 100_000, height: 0 })],
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(ZERO);
+		});
+
+		it('should return zero rather than a negative amount when the fee exceeds the funds', () => {
+			const result = calculateMaxSpendableAmount({
+				utxos: [createMockUtxo({ value: 1 })],
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(ZERO);
 		});
 	});
 

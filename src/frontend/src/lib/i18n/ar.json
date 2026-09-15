@@ -145,7 +145,8 @@
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
 			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
@@ -169,7 +170,8 @@
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
 			"show_balances": "إظهار الأرصدة المخفية",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -2829,6 +2831,51 @@
 				"discover": "",
 				"unavailable_title": ""
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
