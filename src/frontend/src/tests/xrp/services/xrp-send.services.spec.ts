@@ -1,7 +1,7 @@
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import * as xrplApi from '$xrp/api/xrpl.api';
 import { XRP_LAST_LEDGER_SEQUENCE_OFFSET } from '$xrp/constants/xrp.constants';
+import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
@@ -27,20 +27,20 @@ describe('xrp-send.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(xrplApi, 'loadXrpAccountInfo').mockResolvedValue({
+		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
 			sequence: 7
 		});
-		vi.spyOn(xrplApi, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
-		vi.spyOn(xrplApi, 'loadXrpLedgerIndex').mockResolvedValue(1000);
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
+		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(1000);
 		vi.spyOn(xrpSignServices, 'getXrpSigningPublicKey').mockResolvedValue(signingPublicKey);
 		vi.spyOn(xrpSignServices, 'signXrpTransaction').mockResolvedValue('SIGNED_BLOB');
-		vi.spyOn(xrplApi, 'submitXrpTransaction').mockResolvedValue({
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tesSUCCESS',
 			accepted: true,
 			txHash: 'TXHASH'
 		});
-		vi.spyOn(xrplApi, 'isXrpTransactionValidated').mockResolvedValue(true);
+		vi.spyOn(xrplRest, 'isXrpTransactionValidated').mockResolvedValue(true);
 	});
 
 	it('builds the payment from fetched sequence/fee/ledger and threshold-signs it', async () => {
@@ -66,7 +66,7 @@ describe('xrp-send.services', () => {
 	it('submits the signed blob and returns the accepted result', async () => {
 		const result = await sendXrp(params);
 
-		expect(xrplApi.submitXrpTransaction).toHaveBeenCalledWith({
+		expect(xrplRest.submitXrpTransaction).toHaveBeenCalledWith({
 			txBlob: 'SIGNED_BLOB',
 			network: XrpNetworks.mainnet
 		});
@@ -90,14 +90,14 @@ describe('xrp-send.services', () => {
 	it('waits for the transaction to be validated', async () => {
 		await sendXrp(params);
 
-		expect(xrplApi.isXrpTransactionValidated).toHaveBeenCalledWith({
+		expect(xrplRest.isXrpTransactionValidated).toHaveBeenCalledWith({
 			hash: 'TXHASH',
 			network: XrpNetworks.mainnet
 		});
 	});
 
 	it('throws when the node rejects the transaction', async () => {
-		vi.spyOn(xrplApi, 'submitXrpTransaction').mockResolvedValue({
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tecUNFUNDED_PAYMENT',
 			accepted: false
 		});

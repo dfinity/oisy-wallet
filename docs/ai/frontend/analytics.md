@@ -111,6 +111,26 @@ more than ~2 related actions.
 Extend the existing enum / constants file in place — respect the closed
 structure (commandment 7). Don't create a parallel naming scheme.
 
+### `error` — the one event for things that should not happen
+
+`PLAUSIBLE_EVENTS.ERROR` is deliberately generic: **one** event name for every
+invariant we believed unreachable, so a single dashboard row answers "is anything
+impossible happening in production?". Helpers live in
+[`error-analytics.services.ts`](../../../src/frontend/src/lib/services/error-analytics.services.ts).
+
+- `event_context` / `event_subcontext` say _which_ invariant broke.
+- `result_error_severity` is **required**. The generic `error` event is the explicit
+  exception to §4's `result_error*` / `result_status` pairing because its name already
+  fixes the outcome; without severity, the volume cannot be read by impact.
+- A flow that can legitimately fail does **not** belong here. It keeps its own
+  event and reports the outcome via `result_status` (that is what `onramper_open`
+  and `rate_limited` do). Reserve `error` for "this branch should be dead code".
+
+Keep it rare. A generic name is only useful while every occurrence is worth
+reading; one chatty call site turns the whole event into noise, so dedupe at the
+source when the caller can fire repeatedly (e.g. a Svelte `derived` that
+recomputes).
+
 ---
 
 ## 4. Metadata vocabulary (reuse the enums)

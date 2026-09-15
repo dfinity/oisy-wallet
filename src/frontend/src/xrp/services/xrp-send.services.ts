@@ -2,16 +2,16 @@ import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { retryWithDelay } from '$lib/services/rest.services';
 import type { NullishIdentity } from '$lib/types/identity';
 import {
+	XRP_DEFAULT_FEE_DROPS,
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET
+} from '$xrp/constants/xrp.constants';
+import {
 	isXrpTransactionValidated,
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	submitXrpTransaction
-} from '$xrp/api/xrpl.api';
-import {
-	XRP_DEFAULT_FEE_DROPS,
-	XRP_LAST_LEDGER_SEQUENCE_OFFSET
-} from '$xrp/constants/xrp.constants';
+} from '$xrp/rest/xrpl.rest';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';

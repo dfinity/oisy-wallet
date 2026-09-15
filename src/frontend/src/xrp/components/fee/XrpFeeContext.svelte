@@ -2,8 +2,8 @@
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import type { Token } from '$lib/types/token';
-	import { loadXrpOpenLedgerFee } from '$xrp/api/xrpl.api';
 	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
+	import { loadXrpOpenLedgerFee } from '$xrp/rest/xrpl.rest';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 
