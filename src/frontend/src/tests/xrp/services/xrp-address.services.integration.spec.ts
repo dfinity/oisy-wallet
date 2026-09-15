@@ -1,12 +1,24 @@
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
+import { getAddressDecoder } from '@solana/kit';
 
-// These tests exercise the real frontend master-key derivation branch
-// (FRONTEND_DERIVATION_ENABLED), which the unit tests bypass by mocking the
-// signer. Unlike Solana, XRP is mainnet-only and not yet deployed, so no
-// independently-known on-chain address exists for these wallets to pin as a
-// golden value; we therefore assert the derivation yields a valid, stable
-// XRPL classic address for known principals across the prod and staging envs.
+// These tests are done with real addresses from our test wallets.
+//
+// XRP is not deployed yet, so unlike Solana there is no on-chain history to read
+// a golden address from. The pinned addresses below are therefore anchored on the
+// signer result that already exists in the repository for the very same wallets:
+// `deriveXrpAddress` and `deriveSolAddress` are the same derivation (same signer
+// canister namespace, same `0xfe` schema byte, same principal encoding, same
+// ed25519 master key) and differ only in the derivation path passed by the caller.
+// Each wallet is therefore checked twice: once against its pinned XRPL classic
+// address, and once against the signer-obtained Solana address from
+// `sol-address.services.integration.spec.ts`, by feeding the Solana path through
+// the XRP derivation. The second assertion is what makes the first non-circular —
+// a wrong schema byte, namespace, principal encoding or master key breaks it.
+//
+// The classic-address encoding itself (`0xED` prefix, RIPEMD160(SHA256(·)),
+// base58check) is pinned separately against the authoritative XRPL test vector in
+// `xrp-address.utils.spec.ts`.
 describe('xrp-address.services integration', () => {
 	type EnvCheck = (c: {
 		PROD: boolean;
@@ -55,89 +67,99 @@ describe('xrp-address.services integration', () => {
 			// Test wallet 2774700
 			{
 				principal: 'oo32k-e35z2-7kq33-gsl4w-oqrbw-hil6w-ybnw5-7uy27-rbxta-e4cuh-jqe',
+				expected: 'rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi',
+				expectedSol: 'EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt',
 				envs: prodEnvs
 			},
 			{
 				principal: '4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe',
+				expected: 'rETD6N4kWuW9tDE6ewyzZsXw2uqzDAPQwg',
+				expectedSol: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 				envs: stagingEnvs
 			},
 
 			// Test wallet 2663584
 			{
 				principal: 'v2smi-hhewl-kr7al-mrhkv-ubkqe-px4w7-c5qj7-vosjk-iwjkj-b55qg-5ae',
+				expected: 'rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi',
+				expectedSol: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
 				envs: prodEnvs
 			},
 			{
 				principal: 'ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe',
+				expected: 'rLWZvEEtQcoik1N1ps7Lab7XZt5oG4Yn5b',
+				expectedSol: 'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f',
 				envs: stagingEnvs
 			}
 		];
 
-		describe.each(testCases)('for principal $principal', ({ principal, envs }) => {
-			const identity = {
-				getPrincipal: () => Principal.fromText(principal)
-			} as unknown as Identity;
+		describe.each(testCases)(
+			'for principal $principal',
+			({ principal, expected, expectedSol, envs }) => {
+				const identity = {
+					getPrincipal: () => Principal.fromText(principal)
+				} as unknown as Identity;
 
-			it.each(envs)(
-				'derives a valid, deterministic XRPL classic address in $env env',
-				async ({ env, checkEnv }) => {
-					vi.stubEnv('VITE_DFX_NETWORK', env);
-					vi.stubGlobal('VITE_DFX_NETWORK', env);
+				it.each(envs)(
+					'should return the correct derived address in $env env',
+					async ({ env, checkEnv }) => {
+						vi.stubEnv('VITE_DFX_NETWORK', env);
+						vi.stubGlobal('VITE_DFX_NETWORK', env);
 
-					vi.resetModules();
+						vi.resetModules();
 
-					const addressEnv = await import('$env/address.env');
+						const addressEnv = await import('$env/address.env');
 
-					vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(() => true);
+						vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(
+							() => true
+						);
 
-					const constants = await import('$lib/constants/app.constants');
-					const { getXrpAddressMainnet } = await import('$xrp/services/xrp-address.services');
-					const { isXrpAddress } = await import('$xrp/utils/xrp-address.utils');
+						const constants = await import('$lib/constants/app.constants');
+						const { getXrpAddressMainnet } = await import('$xrp/services/xrp-address.services');
 
-					const check = checkEnv(constants);
+						const check = checkEnv(constants);
 
-					expect(check).toBeTruthy();
+						expect(check).toBeTruthy();
 
-					const address = await getXrpAddressMainnet(identity);
+						await expect(getXrpAddressMainnet(identity)).resolves.toBe(expected);
 
-					// The derivation ran through the local master-key path, not the signer.
-					expect(isXrpAddress(address)).toBeTruthy();
+						vi.unstubAllGlobals();
+						vi.unstubAllEnvs();
+					}
+				);
 
-					// The derivation is pure in (principal, env, master key): a second call
-					// must return the exact same address.
-					await expect(getXrpAddressMainnet(identity)).resolves.toBe(address);
+				it.each(envs)(
+					'should reproduce the signer-obtained Solana address through the XRP derivation in $env env',
+					async ({ env, checkEnv }) => {
+						vi.stubEnv('VITE_DFX_NETWORK', env);
+						vi.stubGlobal('VITE_DFX_NETWORK', env);
 
-					vi.unstubAllGlobals();
-					vi.unstubAllEnvs();
-				}
-			);
-		});
+						vi.resetModules();
 
-		it('derives distinct addresses for distinct principals in the same env', async () => {
-			vi.stubEnv('VITE_DFX_NETWORK', 'staging');
-			vi.stubGlobal('VITE_DFX_NETWORK', 'staging');
+						const constants = await import('$lib/constants/app.constants');
+						const { SIGNER_MASTER_PUB_KEY } = await import('$lib/constants/signer.constants');
+						const { deriveXrpAddress } = await import('$lib/ic-pub-key/src/cli');
 
-			vi.resetModules();
+						const check = checkEnv(constants);
 
-			const addressEnv = await import('$env/address.env');
+						expect(check).toBeTruthy();
+						expect(SIGNER_MASTER_PUB_KEY).not.toBeUndefined();
 
-			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockImplementation(() => true);
+						const publicKey = deriveXrpAddress({
+							user: principal,
+							derivationPath: ['SOL', 'mainnet'],
+							pubkey: SIGNER_MASTER_PUB_KEY?.schnorr.ed25519.pubkey ?? ''
+						});
 
-			const { getXrpAddressMainnet } = await import('$xrp/services/xrp-address.services');
+						expect(getAddressDecoder().decode(Uint8Array.from(Buffer.from(publicKey, 'hex')))).toBe(
+							expectedSol
+						);
 
-			const addressA = await getXrpAddressMainnet({
-				getPrincipal: () =>
-					Principal.fromText('4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe')
-			} as unknown as Identity);
-			const addressB = await getXrpAddressMainnet({
-				getPrincipal: () =>
-					Principal.fromText('ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe')
-			} as unknown as Identity);
-
-			expect(addressA).not.toBe(addressB);
-
-			vi.unstubAllGlobals();
-			vi.unstubAllEnvs();
-		});
+						vi.unstubAllGlobals();
+						vi.unstubAllEnvs();
+					}
+				);
+			}
+		);
 	});
 });
