@@ -369,19 +369,18 @@ to review independently.
 There is **no external Phase 0** — the chain-fusion-signer already exposes
 everything needed (verified §2.1), so the whole effort lives in this repo.
 
-**Rollout safety — disabled by a temporary override, not a bespoke flag.** XRP
-uses the **same enablement convention as every other chain** —
-`VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While the integration is in
-progress, a **temporary in-code override** (`XRP_MAINNET_DISABLED_OVERRIDE` in
-`networks.xrp.env.ts`) force-disables it regardless of the env var, so
-`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays and XRP
-is absent from every enabled-network/token derivation and the UI — zero
-behavioural change, zero impact on existing tests. Enabling XRP is simply
-**removing the override** (final PR), after which it behaves exactly like
-BTC/ETH/SOL. Enablement stays entirely in code — **no CI/deploy env plumbing** —
-so each PR merges to `main` safely without exposing a half-built chain. To test
-a build meanwhile, flip the override to `false` on the branch (XRP is then
-enabled by default like the other chains — no env-override needed).
+**Rollout safety — disabled on user-facing environments by a temporary
+override, not a bespoke flag.** XRP uses the **same enablement convention as
+every other chain** — `VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While
+the integration is in progress, `XRP_MAINNET_DISABLED_OVERRIDE` force-disables
+XRP on prod, beta, and in Vitest regardless of the env var. Real local and
+staging/test_fe builds remain governed by `VITE_XRP_MAINNET_DISABLED`, so they
+default to enabled for testing. On prod, beta, and in Vitest,
+`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays.
+Enabling XRP everywhere is simply **removing the override** (final PR), after
+which it behaves exactly like BTC/ETH/SOL. Enablement stays entirely in code —
+**no CI/deploy env plumbing** — so each PR merges to `main` safely without
+exposing a half-built chain to users.
 
 **Mainnet first.** The initial PRs are **mainnet-only**; XRPL **testnet** (plus
 a Bithomp testnet explorer + faucet) is a deliberate fast-follow, not part of
@@ -391,7 +390,7 @@ these PRs.
 | ----- | --------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1     | `feat/frontend/xrp-network-and-address` | —          | `$xrp` folder + alias, network + native-XRP token catalog (mainnet-only), Ed25519 address derivation (`deriveXrpAddress` in `cli.ts` + `$xrp/services/xrp-address.services.ts`) via existing `getSchnorrPublicKey`, `ripple-address-codec` dependency, address validation, unit tests against an authoritative XRPL vector. Ships disabled.                                                                                                                                                                                  |
 | 2     | `feat/frontend/xrp-receive-address`     | Phase 1    | Address store + loading orchestration (`addresses.services`, `Loader.svelte`) + address deriveds (`address.derived`, `network-address.derived`), enabled-network wiring (`network.utils`, `network(s).derived`), and the receive-modal display (+ i18n, test-ids). Still disabled, so the receive entry is gated off until enablement.                                                                                                                                                                                       |
-| 3     | `feat/frontend/xrp-rpc-client`          | Phase 2    | XRPL JSON-RPC client — `loadXrpBalance` (`account_info`) via `$xrp/api/xrpl.api.ts` + `$xrp/providers/xrp-rpc.providers.ts`, `XRP_RPC_HTTP_URL_MAINNET` env, `docs/ai/integrations/xrpl.md`, mocked-fetch unit tests. No CSP change (covered by the existing `https:` wildcard).                                                                                                                                                                                                                                             |
+| 3     | `feat/frontend/xrp-rpc-client`          | Phase 2    | XRPL JSON-RPC client — `loadXrpBalance` (`account_info`) via `$xrp/rest/xrpl.rest.ts` + `$xrp/providers/xrp-rpc.providers.ts`, `XRP_RPC_HTTP_URL_MAINNET` env, `docs/ai/integrations/xrpl.md`, mocked-fetch unit tests. No CSP change (covered by the existing `https:` wildcard).                                                                                                                                                                                                                                           |
 | 4     | `feat/frontend/xrp-balance`             | Phase 3    | **This PR.** Balance-loading subsystem: `$xrp/{workers,schedulers,services,components}` + listener + `XrpLoaderWallets`, post-message schema/registry wiring, native XRP balance written to `balancesStore`, and the native XRP token wired into the app-wide token list (`enabledXrpTokens` → `nativeTokens` in `lib/derived/tokens.derived.ts`) so the coin shows in the wallet alongside its already-wired network. (Base-reserve-aware _max-send_ lands with the send PR; the balance shown is the full ledger balance.) |
 | 5     | `feat/frontend/xrp-send`                | Phase 4    | Tx serialization (`ripple-binary-codec`) + signing via existing `signWithSchnorr`, send flow incl. destination-tag UI and reserve-aware max-amount, transaction history from `account_tx`                                                                                                                                                                                                                                                                                                                                    |
 | 6     | `feat/frontend/xrp-enable`              | Phase 5    | Remove the temporary `XRP_MAINNET_DISABLED_OVERRIDE` (so `VITE_XRP_MAINNET_DISABLED` governs XRP like every other chain), exchange-rate/price lookup, `PRODUCT.md` update                                                                                                                                                                                                                                                                                                                                                    |
