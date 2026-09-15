@@ -21,7 +21,9 @@
 
 	let { onSelectToken, onClose }: Props = $props();
 
-	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { setTokens, filterQuery } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
 	let tokens = $derived(tippableTokens($enabledFungibleTokens));
 
@@ -47,17 +49,31 @@
 	{/snippet}
 
 	{#snippet noResults()}
+		<!--
+			Three different reasons the list can be empty, and they are not
+			interchangeable. `ModalTokensList` renders this once its own search and
+			category filters match nothing, while `tokens` is the *unfiltered*
+			tippable set — so testing only `tokens.length` told a user whose search
+			simply missed that their assets were hidden for having no balance.
+		-->
+		{@const searching = ($filterQuery ?? '') !== ''}
 		<div class="py-12">
 			<p class="m-0 text-center text-lg font-bold">
-				{tokens.length === 0
-					? $i18n.tip.text.no_supported_tokens_title
-					: $i18n.tokens.text.all_tokens_with_zero_hidden}
+				{#if tokens.length === 0}
+					{$i18n.tip.text.no_supported_tokens_title}
+				{:else if searching}
+					{$i18n.core.text.no_results}
+				{:else}
+					{$i18n.tokens.text.all_tokens_with_zero_hidden}
+				{/if}
 			</p>
-			<p class="m-0 mt-4 text-center text-tertiary">
-				{tokens.length === 0
-					? $i18n.tip.text.no_supported_tokens_description
-					: $i18n.tip.text.empty_balance_description}
-			</p>
+			{#if !searching}
+				<p class="m-0 mt-4 text-center text-tertiary">
+					{tokens.length === 0
+						? $i18n.tip.text.no_supported_tokens_description
+						: $i18n.tip.text.empty_balance_description}
+				</p>
+			{/if}
 		</div>
 	{/snippet}
 
