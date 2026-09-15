@@ -468,6 +468,21 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		}
 	}
 
+	// The prefunding variant opens an account that may already hold lamports, and states its own
+	// on top. Same owner, same spendable account, a different opcode: a fix that named only the two
+	// creations above would leave this one funding a stranger's key with a warning. Read as the
+	// others are - the owner alone, the rest left unread - and note it carries no payer of its own
+	// when the new account prefunds itself.
+	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
+		const {
+			data: { programAddress: owner }
+		} = instruction;
+
+		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+			return unfaithfulInstruction();
+		}
+	}
+
 	if (instructionType === SystemInstruction.TransferSol) {
 		const {
 			data: { amount },
