@@ -4,7 +4,7 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestXrp } from '$lib/types/post-message';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import * as xrplApi from '$xrp/api/xrpl.api';
+import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
 import { XrpNetworks } from '$xrp/types/network';
 import type { MockInstance } from 'vitest';
@@ -75,7 +75,7 @@ describe('xrp-wallet.scheduler', () => {
 
 		mockAuthStore();
 
-		spyLoadBalance = vi.spyOn(xrplApi, 'loadXrpBalance').mockResolvedValue(mockBalance);
+		spyLoadBalance = vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(mockBalance);
 
 		const provider = AuthClientProvider.getInstance();
 		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
