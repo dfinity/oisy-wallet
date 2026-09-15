@@ -87,6 +87,18 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// An ambiguous response must not be read as a balance: the union branches strip unknown
+		// keys, so without mutual exclusion the error would be discarded and `1` returned.
+		it('throws on a response carrying both account_data and an error', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '1' }, error: 'actNotFound' } }
+			});
+
+			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL account_info response'
+			);
+		});
+
 		// XRPL reports drops as an unsigned decimal string; `BigInt` alone would accept all of these
 		// and hand back a plausible-looking balance.
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
