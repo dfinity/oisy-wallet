@@ -128,6 +128,81 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		describe('an account the message itself opens for the user', () => {
+			const creation = {
+				program: 'system',
+				programId: '11111111111111111111111111111111',
+				parsed: {
+					type: 'createAccount',
+					info: {
+						lamports: 2039280,
+						newAccount: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+						owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+						space: 165
+					}
+				}
+			};
+
+			const initialisation = {
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: {
+					type: 'initializeAccount',
+					info: {
+						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+						mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						owner: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+						rentSysvar: 'SysvarRent111111111111111111111111111111111'
+					}
+				}
+			};
+
+			it('should read it as the token account it becomes, carrying its rent', () => {
+				// Previously the creation produced no effect, so the list called an instruction the wallet
+				// had decoded "unrecognised" and named the System program as the whole of what it knew.
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [creation, initialisation],
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+					})
+				).toStrictEqual([
+					{
+						kind: 'createTokenAccount',
+						account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						rent: 2039280n
+					}
+				]);
+			});
+
+			it('should not list the same account twice when a program opened it', () => {
+				// The associated token account program opens its account with the same call made inside
+				// itself, and that creation is already the line its own instruction produces.
+				const summaries = mapSolInstructionSummaries({
+					instructions: [
+						{
+							program: 'spl-associated-token-account',
+							programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+							parsed: {
+								type: 'create',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+									source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+									wallet: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+								}
+							}
+						}
+					],
+					innerInstructions: [{ index: 0, instructions: [creation] }],
+					ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+				});
+
+				expect(summaries.filter(({ kind }) => kind === 'createTokenAccount')).toHaveLength(1);
+			});
+		});
+
 		describe('a transaction the user is not part of', () => {
 			it('should produce nothing at all', () => {
 				expect(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY)).toStrictEqual([]);
