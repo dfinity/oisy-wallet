@@ -1,7 +1,7 @@
 import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 import * as authServices from '$lib/services/auth.services';
 import * as loadUserServices from '$lib/services/load-user-profile.services';
-import { userProfileStore } from '$lib/stores/user-profile.store';
+import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -151,5 +151,35 @@ describe('LoaderUserProfile', () => {
 
 			expect(get(userProfileStore)).toBeNull();
 		});
+
+		it('should clear that a profile was just created', () => {
+			// It drives the first-time welcome, and nothing used to clear it — so
+			// after someone signed up and signed out, the next established user in
+			// the same tab was shown their welcome.
+			userProfileCreated.set(true);
+
+			render(LoaderUserProfile, { children: mockSnippet });
+
+			expect(get(userProfileCreated)).toBeFalsy();
+		});
+	});
+
+	it('should leave a just-created profile flag alone on a plain reload', async () => {
+		// The same function runs on `oisyRefreshUserProfile`. Clearing the flag
+		// there would take it away from the user who had just earned it, before the
+		// welcome had a chance to show.
+		userProfileCreated.set(true);
+
+		vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementation(async () => {
+			userProfileStore.set({ certified: true, profile: mockUserProfile });
+			await Promise.resolve();
+			return { success: true, profileCreated: true };
+		});
+
+		render(LoaderUserProfile, { children: mockSnippet });
+
+		emit({ message: 'oisyRefreshUserProfile' });
+
+		await waitFor(() => expect(get(userProfileCreated)).toBeTruthy());
 	});
 });
