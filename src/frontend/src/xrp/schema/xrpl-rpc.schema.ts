@@ -5,9 +5,18 @@ import * as z from 'zod';
 // is pinned here rather than left to the conversion.
 export const XrpDropsSchema = z.string().regex(/^\d+$/);
 
+// The branches must be mutually exclusive: zod strips unknown keys and returns the
+// first branch that parses, so without forbidding the opposite variant's key a
+// response carrying both would be read as a balance and the error silently dropped.
 const XrplAccountInfoResultSchema = z.union([
-	z.object({ account_data: z.object({ Balance: XrpDropsSchema }) }),
-	z.object({ error: z.string() })
+	z.object({
+		account_data: z.object({ Balance: XrpDropsSchema }),
+		error: z.never().optional()
+	}),
+	z.object({
+		error: z.string(),
+		account_data: z.never().optional()
+	})
 ]);
 
 export const XrplAccountInfoResponseSchema = z.object({
