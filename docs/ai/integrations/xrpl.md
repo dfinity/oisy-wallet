@@ -20,7 +20,7 @@ Later phases add `fee`, `submit` (send) and `account_tx` (history) — see the
 
 ## Balance (`account_info`)
 
-`loadXrpBalance` (`src/frontend/src/xrp/api/xrpl.api.ts`) POSTs
+`loadXrpBalance` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs
 
 ```json
 { "method": "account_info", "params": [{ "account": "r...", "ledger_index": "validated" }] }

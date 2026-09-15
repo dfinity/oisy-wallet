@@ -1,8 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { loadXrpBalance } from '$xrp/api/xrpl.api';
+import { loadXrpBalance } from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
 
-describe('xrpl.api', () => {
+describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 
 	const mockFetchResponse = ({
