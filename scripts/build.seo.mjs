@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { OISY_IC_DOMAIN, findHtmlFiles } from './build.utils.mjs';
 
@@ -82,20 +82,32 @@ const replaceMeta = ({ html, attribute, key, value }) => {
 const applyShareCard = ({ route, image, i18n }) => {
 	const htmlFilePath = join(OUTPUT_DIR, route, 'index.html');
 
-	if (!existsSync(htmlFilePath)) {
-		throw new Error(
-			`Expected a prerendered page at build/${route}/index.html to attach a share card to. ` +
-				`Is \`export const prerender = true\` still set on that route?`
-		);
-	}
-
 	const en = JSON.parse(
 		readFileSync(join(process.cwd(), 'src/frontend/src/lib/i18n/en.json'), 'utf-8')
 	);
 	const { title, description } = i18n(en);
 	const imageUrl = `${SITE_ROOT_CANONICAL}${image}`;
 
-	let html = readFileSync(htmlFilePath, 'utf-8');
+	// Read first and interpret `ENOENT` afterwards, rather than checking that the
+	// file exists and then reading it. The check-then-read version says the same
+	// thing but leaves a gap between the two in which the file can change, which
+	// CodeQL flags as a race — and the message is just as good derived from the
+	// failure itself.
+	let html;
+
+	try {
+		html = readFileSync(htmlFilePath, 'utf-8');
+	} catch (err) {
+		if (err.code === 'ENOENT') {
+			throw new Error(
+				`Expected a prerendered page at build/${route}/index.html to attach a share card to. ` +
+					`Is \`export const prerender = true\` still set on that route?`,
+				{ cause: err }
+			);
+		}
+
+		throw err;
+	}
 
 	for (const meta of [
 		{ attribute: 'property', key: 'og:title', value: title },
