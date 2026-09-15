@@ -19,3 +19,10 @@ export interface XrpSubmitResult {
 	txHash?: string;
 	accepted: boolean;
 }
+
+export interface XrpAccountInfo {
+	balance: bigint;
+	sequence: number;
+	// Number of ledger objects the account owns; each one raises the reserve it must retain.
+	ownerCount: number;
+}

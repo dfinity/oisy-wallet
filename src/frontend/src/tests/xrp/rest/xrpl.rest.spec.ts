@@ -1,5 +1,12 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { loadXrpBalance, submitXrpTransaction } from '$xrp/rest/xrpl.rest';
+import {
+	loadXrpAccountInfo,
+	loadXrpBalance,
+	loadXrpLedgerIndex,
+	loadXrpOpenLedgerFee,
+	loadXrpTransactionOutcome,
+	submitXrpTransaction
+} from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
 
 describe('xrpl.rest', () => {
@@ -172,6 +179,103 @@ describe('xrpl.rest', () => {
 			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
 				'invalidTransaction'
 			);
+		});
+	});
+
+	describe('loadXrpAccountInfo', () => {
+		it('returns the balance and sequence for a funded account', async () => {
+			mockFetchResponse({
+				body: {
+					result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } }
+				}
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info).toEqual({ balance: 30_000_000n, sequence: 42, ownerCount: 3 });
+		});
+
+		it('defaults the owner count to zero when the account owns nothing', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '30000000', Sequence: 42 } } }
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info.ownerCount).toBe(0);
+		});
+
+		it('throws for an unfunded account', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'actNotFound'
+			);
+		});
+	});
+
+	describe('loadXrpOpenLedgerFee', () => {
+		it('returns the open-ledger fee in drops', async () => {
+			mockFetchResponse({ body: { result: { drops: { open_ledger_fee: '15', base_fee: '10' } } } });
+
+			const fee = await loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n });
+
+			expect(fee).toBe(15n);
+		});
+
+		it('falls back to the provided fee when the node omits it', async () => {
+			mockFetchResponse({ body: { result: { drops: {} } } });
+
+			const fee = await loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n });
+
+			expect(fee).toBe(10n);
+		});
+	});
+
+	describe('loadXrpLedgerIndex', () => {
+		it('returns the current ledger index', async () => {
+			mockFetchResponse({ body: { result: { ledger_current_index: 987654 } } });
+
+			await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(987654);
+		});
+	});
+
+	describe('loadXrpTransactionOutcome', () => {
+		it('reports the validated flag and the final transaction result', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
+
+		it('is not validated while the transaction is still pending', async () => {
+			mockFetchResponse({ body: { result: { validated: false } } });
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: false, transactionResult: undefined });
+		});
+
+		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
+		it('reports a validated failure with its tec result', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+		});
+
+		it('tolerates a response without meta', async () => {
+			mockFetchResponse({ body: { result: { validated: true } } });
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: undefined });
 		});
 	});
 });
