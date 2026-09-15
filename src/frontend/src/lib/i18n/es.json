@@ -2906,6 +2906,8 @@
 			"short_balance_description": "",
 			"claim_failed_title": "",
 			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
 			"history_title": "",
 			"history_empty": "",
 			"history_failed": "",

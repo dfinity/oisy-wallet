@@ -74,3 +74,20 @@ export const rememberTipWelcomeSeen = (principal: string): void => {
 		// Nothing to do. Worst case the intro appears again next time.
 	}
 };
+
+/**
+ * Whether the canister itself said the link is dead.
+ *
+ * Only this may be reported to someone as their tip being gone. Anything else —
+ * a dropped connection, an expired delegation, a rate limit, a stale bundle — is
+ * this end failing, and "this tip is no longer available" would then be a false
+ * statement about someone's money, and one they cannot act on. Those belong in a
+ * retryable state instead. Found the hard way: a live tip with a valid code read
+ * as gone because the call failed locally.
+ *
+ * `NotFound` covers unknown, expired, cancelled, already-claimed and a wrong
+ * claim code — the canister answers all five identically on purpose, so probing
+ * random ids teaches nothing.
+ */
+export const isTipUnavailable = (err: unknown): boolean =>
+	typeof err === 'object' && err !== null && ('NotFound' in err || 'InvalidTipId' in err);

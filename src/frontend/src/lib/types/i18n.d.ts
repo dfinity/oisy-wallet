@@ -2432,6 +2432,8 @@ interface I18nTip {
 		short_balance_description: string;
 		claim_failed_title: string;
 		claim_failed: string;
+		unreachable_title: string;
+		unreachable_description: string;
 		history_title: string;
 		history_empty: string;
 		history_failed: string;
