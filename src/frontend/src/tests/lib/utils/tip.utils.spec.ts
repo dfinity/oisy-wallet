@@ -2,7 +2,12 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { tipFees, tippableTokens } from '$lib/utils/tip.utils';
+import {
+	hasSeenTipWelcome,
+	rememberTipWelcomeSeen,
+	tipFees,
+	tippableTokens
+} from '$lib/utils/tip.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
 describe('tip.utils', () => {
@@ -49,5 +54,54 @@ describe('tipFees', () => {
 		const { reserve, payout, total } = tipFees(7n);
 
 		expect(reserve + payout).toBe(total);
+	});
+
+	describe('the post-claim welcome', () => {
+		const alice = 'aaaaa-aa';
+		const bob = 'bbbbb-bb';
+
+		beforeEach(() => {
+			localStorage.clear();
+		});
+
+		it('is unseen until it is remembered', () => {
+			expect(hasSeenTipWelcome(alice)).toBeFalsy();
+
+			rememberTipWelcomeSeen(alice);
+
+			expect(hasSeenTipWelcome(alice)).toBeTruthy();
+		});
+
+		it('is remembered per principal', () => {
+			// One browser, several claimers — a house tablet passed between staff.
+			// A single flag would burn the intro on whoever claimed first.
+			rememberTipWelcomeSeen(alice);
+
+			expect(hasSeenTipWelcome(alice)).toBeTruthy();
+			expect(hasSeenTipWelcome(bob)).toBeFalsy();
+		});
+
+		it('counts as seen when storage cannot be read', () => {
+			// Some privacy modes throw instead of returning. A claimer who cannot be
+			// remembered would otherwise meet the same intro on every claim, so the
+			// unreadable case errs towards silence.
+			const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+				throw new Error('denied');
+			});
+
+			expect(hasSeenTipWelcome(alice)).toBeTruthy();
+
+			spy.mockRestore();
+		});
+
+		it('does not throw when storage cannot be written', () => {
+			const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+				throw new Error('full');
+			});
+
+			expect(() => rememberTipWelcomeSeen(alice)).not.toThrow();
+
+			spy.mockRestore();
+		});
 	});
 });
