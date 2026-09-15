@@ -25,10 +25,14 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
  * Calculated from Unspent Transaction Outputs (UTXOs) with different confirmation states.
  *
  * **Bitcoin Balance Model:**
- * - Confirmed: UTXOs with sufficient confirmations (6+), the baseline spendable amount
- * - Unconfirmed: Incoming UTXOs with 0-5 confirmations (in mempool or recent blocks)
- * - Locked: Confirmed UTXOs temporarily unspendable due to pending outgoing transactions
+ * - Confirmed: the Bitcoin canister's UTXOs, less what a pending send has already spent
+ * - Unconfirmed: incoming UTXOs still in the mempool, which the canister cannot see yet
+ * - Locked: the part of a pending send the canister still counts as the user's
  * - Total: Combined confirmed and unconfirmed balances (total Bitcoin ownership)
+ *
+ * Note that `confirmed` is not a spendable amount: it is read at
+ * `BTC_BALANCE_MIN_CONFIRMATIONS` and so counts change and incoming UTXOs a send cannot select
+ * yet. The cap a send must respect comes from `initBtcMaxSendAmount` instead.
  *
  * **Usage Guidelines:**
  * - Use `confirmed` for transfer validation and spendable balance calculations
@@ -38,10 +42,11 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
  */
 export interface BtcWalletBalance {
 	/**
-	 * Confirmed balance with sufficient block confirmations (typically 6+)
+	 * Balance of the UTXOs the Bitcoin canister reports, less `locked`
 	 *
-	 * Represents UTXOs that are confirmed on the blockchain and considered safe.
-	 * This is the baseline amount from which other balances are calculated.
+	 * Represents UTXOs that are confirmed on the blockchain at
+	 * `BTC_BALANCE_MIN_CONFIRMATIONS`. This is the baseline amount from which other balances are
+	 * calculated — not the amount a send may select, see the note on this interface.
 	 *
 	 * Source: Bitcoin canister/node with minimum confirmation requirements
 	 *
@@ -50,11 +55,13 @@ export interface BtcWalletBalance {
 	confirmed: bigint;
 
 	/**
-	 * Unconfirmed incoming balance (0-5 confirmations)
+	 * Unconfirmed incoming balance (still in the mempool)
 	 *
-	 * Sum of incoming transactions that have been broadcast to the network
-	 * but haven't yet reached the confirmation threshold. These represent
-	 * Bitcoin that will be spendable once confirmed but isn't yet safe to use.
+	 * Sum of incoming transactions that have been broadcast to the network but are not in a block
+	 * yet. These represent Bitcoin that will be spendable once confirmed but isn't yet safe to use.
+	 *
+	 * A receive that has made it into a block is already inside `confirmed`, so it is deliberately
+	 * excluded here — counting it in both would inflate `total`.
 	 *
 	 * Only includes incoming transactions - outgoing unconfirmed transactions
 	 * don't contribute to spendable balance.
@@ -66,9 +73,9 @@ export interface BtcWalletBalance {
 	/**
 	 * Locked balance from pending outgoing transactions
 	 *
-	 * Sum of confirmed UTXO values that are currently being spent in pending
-	 * outgoing transactions. These UTXOs are still on-chain and confirmed,
-	 * but must be considered unavailable to prevent double-spending attempts.
+	 * The part of a pending send that the Bitcoin canister still counts as the user's: the net
+	 * outflow of a send still in the mempool, or — when the provider has not seen the send — the
+	 * whole reserved inputs.
 	 *
 	 * Used for transparency to show users why their spendable balance
 	 * may be temporarily reduced while transactions are pending.
