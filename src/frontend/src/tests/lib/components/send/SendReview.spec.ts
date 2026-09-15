@@ -7,7 +7,6 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -60,13 +59,13 @@ describe('SendReview', () => {
 	});
 
 	it('still warns and gates when the destination is a saved contact', () => {
-		const contacts = getMockContactsUi({
-			n: 1,
-			name: 'Contact with Ethereum address',
-			addresses: [mockContactEthAddressUi]
-		}) as unknown as ContactUi[];
-
-		contactsStore.set(contacts);
+		contactsStore.set(
+			getMockContactsUi({
+				n: 1,
+				name: 'Contact with Ethereum address',
+				addresses: [mockContactEthAddressUi]
+			})
+		);
 
 		const { getByTestId } = render(SendReview, { props, context: mockContext() });
 

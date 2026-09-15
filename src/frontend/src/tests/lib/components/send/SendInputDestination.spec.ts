@@ -6,7 +6,6 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -77,13 +76,13 @@ describe('SendInputDestination', () => {
 	});
 
 	it('renders first time destination warning message even for a saved contact', () => {
-		const [contact] = getMockContactsUi({
-			n: 1,
-			name: 'Multiple Addresses Contact',
-			addresses: [mockContactEthAddressUi]
-		}) as unknown as ContactUi[];
-
-		contactsStore.set([contact]);
+		contactsStore.set(
+			getMockContactsUi({
+				n: 1,
+				name: 'Multiple Addresses Contact',
+				addresses: [mockContactEthAddressUi]
+			})
+		);
 
 		const { getByTestId } = render(SendInputDestination, {
 			props: {
