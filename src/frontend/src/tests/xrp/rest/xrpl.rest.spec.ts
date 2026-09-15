@@ -6,10 +6,10 @@ import {
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	submitXrpTransaction
-} from '$xrp/api/xrpl.api';
+} from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
 
-describe('xrpl.api', () => {
+describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 
 	const mockFetchResponse = ({
@@ -85,6 +85,27 @@ describe('xrpl.api', () => {
 				'invalidParams'
 			);
 		});
+
+		it('throws on a response with neither account_data nor an error', async () => {
+			mockFetchResponse({ body: { result: {} } });
+
+			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL account_info response'
+			);
+		});
+
+		// XRPL reports drops as an unsigned decimal string; `BigInt` alone would accept all of these
+		// and hand back a plausible-looking balance.
+		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
+			'throws instead of converting the invalid balance %j',
+			async (Balance) => {
+				mockFetchResponse({ body: { result: { account_data: { Balance } } } });
+
+				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+					'Unexpected XRPL account_info response'
+				);
+			}
+		);
 	});
 
 	describe('submitXrpTransaction', () => {
@@ -96,7 +117,8 @@ describe('xrpl.api', () => {
 					result: {
 						engine_result: 'tesSUCCESS',
 						engine_result_message: 'The transaction was applied.',
-						tx_json: { hash: 'ABCDEF' }
+						tx_json: { hash: 'ABCDEF' },
+						accepted: true
 					}
 				}
 			});
@@ -111,7 +133,30 @@ describe('xrpl.api', () => {
 			});
 		});
 
-		it('marks a non-tes/ter engine result as not accepted', async () => {
+		// `ter` is a retry class: a queued one was taken by the node, a non-queued one was not.
+		it('marks a queued ter response (terQUEUED) as accepted', async () => {
+			mockFetchResponse({
+				body: { result: { engine_result: 'terQUEUED', accepted: true, queued: true } }
+			});
+
+			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+			expect(result.accepted).toBeTruthy();
+			expect(result.engineResult).toBe('terQUEUED');
+		});
+
+		it('marks a non-queued ter response (terPRE_SEQ) as not accepted', async () => {
+			mockFetchResponse({
+				body: { result: { engine_result: 'terPRE_SEQ', accepted: false } }
+			});
+
+			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+			expect(result.accepted).toBeFalsy();
+			expect(result.engineResult).toBe('terPRE_SEQ');
+		});
+
+		it('marks a response without an accepted flag as not accepted', async () => {
 			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
 
 			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });

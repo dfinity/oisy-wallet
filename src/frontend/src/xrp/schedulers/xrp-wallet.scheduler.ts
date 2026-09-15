@@ -8,7 +8,7 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { loadXrpBalance } from '$xrp/api/xrpl.api';
+import { loadXrpBalance } from '$xrp/rest/xrpl.rest';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
