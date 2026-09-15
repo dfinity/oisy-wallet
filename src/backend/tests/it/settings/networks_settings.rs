@@ -154,12 +154,18 @@ fn test_update_user_network_settings_saves_settings() {
 }
 
 /// Network settings live in stable memory as `Candid<StoredUserProfile>`, so every new
-/// `NetworkSettingsFor` variant is a change to a persisted type. Adding one is safe in the
-/// forward direction — stored values simply never carry it — but nothing proved that a profile
-/// holding the *new* variant still decodes after an upgrade, which is the case a future variant
-/// would break. XRP is the newest one, so it is the one worth pinning.
+/// `NetworkSettingsFor` variant is a change to a persisted type. This pins that a profile
+/// carrying the newest variant survives a canister upgrade instead of being dropped or
+/// trapping on read.
+///
+/// It is a *self*-upgrade and proves only same-version persistence: `setup` and
+/// `upgrade_latest_wasm` both resolve `BACKEND_WASM_PATH`, so the same build encodes and
+/// decodes the profile. It is deliberately not a schema-evolution guard — that would need the
+/// harness to deploy a pre-change wasm and then upgrade to this one, which it cannot do with a
+/// single shared wasm path. Every other upgrade test here (`contacts`, `tips`,
+/// `active_user_transactions`) has the same shape and the same limit.
 #[test]
-fn test_user_network_settings_survive_an_upgrade() {
+fn test_user_network_settings_survive_a_self_upgrade() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
