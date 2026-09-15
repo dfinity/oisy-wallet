@@ -117,7 +117,7 @@ describe('near-intents.rest', () => {
 			await expect(result).rejects.toThrow(SwapAmountTooLowError);
 			await expect(result).rejects.toMatchObject({
 				message: 'NEAR Intents quote failed: Amount is too low for bridge, try at least 8300',
-				minAmount: 8300n
+				minimum: { type: 'token', value: 8300n }
 			});
 		});
 
@@ -131,7 +131,106 @@ describe('near-intents.rest', () => {
 			const result = fetchNearIntentsQuote(quoteRequest);
 
 			await expect(result).rejects.toThrow(SwapAmountTooLowError);
-			await expect(result).rejects.toMatchObject({ minAmount: undefined });
+			await expect(result).rejects.toMatchObject({ minimum: undefined });
+		});
+
+		it('throws SwapAmountTooLowError with a fiat minimum for the temporary swap limit', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () =>
+					Promise.resolve({
+						message: 'Temporary swap limits: minimum swap amount is $1,000'
+					})
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow(SwapAmountTooLowError);
+			await expect(result).rejects.toMatchObject({
+				message: 'NEAR Intents quote failed: Temporary swap limits: minimum swap amount is $1,000',
+				minimum: { type: 'usd', value: 1000 }
+			});
+		});
+
+		it.each([
+			{
+				description: 'no thousands separator',
+				message: 'minimum swap amount is $1000',
+				expected: 1000
+			},
+			{
+				description: 'several separators',
+				message: 'minimum swap amount is $1,000,000',
+				expected: 1000000
+			},
+			{
+				description: 'a decimal figure',
+				message: 'minimum swap amount is $1,000.50',
+				expected: 1000.5
+			},
+			{
+				description: 'a space after the sign',
+				message: 'minimum swap amount is $ 250',
+				expected: 250
+			}
+		])('parses the fiat minimum with $description', async ({ message, expected }) => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () => Promise.resolve({ message })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toMatchObject({
+				minimum: { type: 'usd', value: expected }
+			});
+		});
+
+		it('prefers the token minimum when a message somehow carries both shapes', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () =>
+					Promise.resolve({
+						message:
+							'Amount is too low for bridge, try at least 8300, minimum swap amount is $1,000'
+					})
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toMatchObject({
+				minimum: { type: 'token', value: 8300n }
+			});
+		});
+
+		it('throws SwapAmountTooLowError without a minimum when the fiat limit names no parseable figure', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () =>
+					Promise.resolve({ message: 'Temporary swap limits: minimum swap amount is unknown' })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow(SwapAmountTooLowError);
+			await expect(result).rejects.toMatchObject({ minimum: undefined });
+		});
+
+		it('reports no minimum rather than zero when the figure is separators only', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () => Promise.resolve({ message: 'minimum swap amount is $,,,' })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow(SwapAmountTooLowError);
+			await expect(result).rejects.toMatchObject({ minimum: undefined });
 		});
 
 		it('throws a plain Error for other 400 messages', async () => {

@@ -342,6 +342,14 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
 
+### An amount NEAR Intents refuses as too small says so, and names the floor
+
+A swap the provider declines only because the amount is too small is not an unavailable swap, so it does not claim to be one. Where NEAR Intents names a minimum, the form repeats it instead of the generic "This swap is currently not offered.", and the user can act on it without guessing.
+
+NEAR Intents enforces two unrelated floors, and they are quoted in different things. A **per-route bridge minimum** applies to every route and is a cost of getting funds out on the far side, so it is small and denominated in the token being paid: a few thousand satoshi out of Bitcoin, a fraction of a cent out of Ethereum toward an L2, and noticeably more toward Bitcoin than toward Base. It is shown in the pay token's own units. Separately, some chains carry a **flat fiat floor** — $1,000 on Polygon and BSC at the time of writing, applying whether the chain is the pay side or the receive side, and described by the provider as temporary. Because that limit is enforced in money rather than in tokens, it is shown as money, converted into whichever display currency the user has selected rather than as a hardcoded dollar figure. It is deliberately not restated in token units, which would drift with the price and read as more exact than the constraint is. While a currency switch is still settling and no exchange rate is available, the form says the amount is below the minimum without naming a figure, rather than showing a number with no currency attached.
+
+Neither floor is hardcoded, and neither is the list of chains that carry one: both are read from the provider's refusal, so a chain leaving or joining the restriction, or the figure moving, needs no change here. A minimum the provider does not name, or names in a form OISY does not recognise, falls back to the generic message. A quote from any other provider still wins over a NEAR Intents refusal, so a swap that one provider will not take at that size is still offered by whoever will.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.

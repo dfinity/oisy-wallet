@@ -50,13 +50,13 @@ describe('swap-amounts.store', () => {
 		store.setSwaps({
 			swaps: [],
 			amountForSwap: '1000000',
-			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+			quoteError: { type: 'amount-too-low', minimum: { type: 'token', value: 8300n } }
 		});
 
 		expect(get(store)).toEqual({
 			swaps: [],
 			amountForSwap: '1000000',
-			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+			quoteError: { type: 'amount-too-low', minimum: { type: 'token', value: 8300n } }
 		});
 	});
 
@@ -66,7 +66,7 @@ describe('swap-amounts.store', () => {
 		store.setSwaps({
 			swaps: [],
 			amountForSwap: '1000000',
-			quoteError: { type: 'amount-too-low', minAmount: 8300n }
+			quoteError: { type: 'amount-too-low', minimum: { type: 'token', value: 8300n } }
 		});
 
 		store.setSwaps({
