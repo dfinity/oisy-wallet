@@ -769,6 +769,18 @@ mod tests {
         assert!(candidates.contains(&custom));
     }
 
+    /// The test above derives its expected length from `native_token_ids()`, so removing a
+    /// native from that list shrinks both sides and still passes. XRP needs pinning explicitly:
+    /// it is not a custom token, so `native_token_ids` is the only way it can ever reach the
+    /// refresh set, and `custom_tokens_to_mark` deliberately keeps natives out of
+    /// `token_activity` — dropping it would leave XRP with no USD rate at all, silently.
+    #[test]
+    fn refresh_candidates_always_include_native_xrp() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::XrpNativeMainnet)));
+    }
+
     #[test]
     fn refresh_candidates_excludes_natives_when_not_requested() {
         let custom = custom_token(1);
