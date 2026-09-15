@@ -34,7 +34,7 @@ import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.util
 import { mapSolInstruction, mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	getCloseLookupTableInstruction,
@@ -55,7 +55,10 @@ import {
 	getWithdrawInstruction,
 	StakeAuthorize
 } from '@solana-program/stake';
-import { getCreateAccountInstruction } from '@solana-program/system';
+import {
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -1045,6 +1048,51 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountWithSeed` instruction that opens a System-owned account', () => {
+			// No key signs for a derived address, but System `transferSolWithSeed` spends such an account
+			// against a signature from its base, so this funds a native wallet just as a plain creation
+			// does - and the review can name it no better.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should leave a `CreateAccountWithSeed` instruction that opens an account for a program unread', () => {
+			// The owning program governs what leaves it, so this is not a wallet. Nothing else about the
+			// instruction is displayable, which is the reading it already had.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
 		});
 
 		it('should map a valid Token instruction', () => {
