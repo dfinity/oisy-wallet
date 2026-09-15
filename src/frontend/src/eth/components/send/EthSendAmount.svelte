@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -113,10 +112,8 @@
 	// OP-stack chain, the L1 data fee, so the ceiling is what decides whether a native send is
 	// affordable. `minGasFee` omits the base fee entirely and therefore bounds nothing the chain
 	// enforces. Falling back to the tip rather than to zero: an unknown ceiling must not weaken the
-	// check below what it was before the flag.
-	let gasFee = $derived(
-		SEND_TRANSACTION_PRIORITY_ENABLED ? ($maxGasFee ?? $minGasFee ?? ZERO) : ($minGasFee ?? ZERO)
-	);
+	// check below what the tip alone already enforces.
+	let gasFee = $derived($maxGasFee ?? $minGasFee ?? ZERO);
 
 	// Native only: the balance does not cover the gas on its own, so "Max" is 0 and no amount would
 	// go through. Reported by `EthSendForm`'s fee box - the same box the ERC-20 fee shortfall uses,

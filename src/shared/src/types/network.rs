@@ -33,6 +33,9 @@ pub enum NetworkSettingsFor {
     PolygonAmoy,
     ArbitrumMainnet,
     ArbitrumSepolia,
+    XrpMainnet,
+    // Appended last on purpose: the derived `Ord` orders `NetworkSettingsMap` by declaration
+    // order, so inserting earlier would reorder the keys of already-stored settings.
 }
 
 /// A list of logical networks grouped by type.

@@ -5,15 +5,16 @@
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+	import type { ResultSuccess } from '$lib/types/utils';
 
 	interface Props {
 		sortedTransactions: AllTransactionUiWithCmp[];
 		transactionsToDisplay: AllTransactionUiWithCmp[];
 		/**
-		 * Fetches another page from every chain, resolving to whether anything new was loaded.
-		 * Absent while the list has no loader above it.
+		 * Fetches another page from every chain. `success` is whether anything new was loaded, and
+		 * `err` is set when a page failed. Absent while the list has no loader above it.
 		 */
-		onLoadMore?: () => Promise<boolean>;
+		onLoadMore?: () => Promise<ResultSuccess>;
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
 		children: Snippet;
@@ -54,28 +55,30 @@
 
 	let disableInfiniteScroll = $derived(everythingLoadedIsOnScreen && !canFetchMore);
 
-	const onIntersect = async () => {
+	// Resolves whether it made progress, so `InfiniteScroll` checks the end of the list again even when
+	// a filter keeps the displayed list from growing.
+	const onIntersect = async (): Promise<boolean> => {
 		// Still revealing what is already in memory.
 		if (!everythingLoadedIsOnScreen) {
 			pages++;
 
-			return;
+			return true;
 		}
 
 		// The user reached the end of the loaded set, so go get more from the chains themselves.
 		// Without this the list stopped at whatever the initial levelling pass had fetched.
 		if (isNullish(onLoadMore) || !canFetchMore || loading) {
-			return;
+			return false;
 		}
 
 		const lengthBeforeFetch = sortedTransactions.length;
 
 		loading = true;
 
-		let loadedMore = false;
+		let result: ResultSuccess;
 
 		try {
-			loadedMore = await onLoadMore();
+			result = await onLoadMore();
 		} finally {
 			loading = false;
 		}
@@ -83,15 +86,29 @@
 		// Whether the fetch achieved anything has to come from the loader, not from this list: it is
 		// filtered, so history that loaded but does not match the current filter leaves its length
 		// untouched. Reading the length here would strand the user on a narrow filter.
-		if (loadedMore) {
+		// A page failed, so the chains may well have more. Going dry would stop asking until unrelated
+		// rows arrived; staying open lets the next intersection try again. What the other chains loaded
+		// is still revealed, but no progress is reported even then: progress re-arms the observer at
+		// once, which would retry the failing chain in a tight loop.
+		if (nonNullish(result.err)) {
+			if (result.success) {
+				pages++;
+			}
+
+			return false;
+		}
+
+		if (result.success) {
 			pages++;
 
-			return;
+			return true;
 		}
 
 		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
 		// firing against chains that have nothing left.
 		dryAtLength = lengthBeforeFetch;
+
+		return false;
 	};
 
 	$effect(() => {

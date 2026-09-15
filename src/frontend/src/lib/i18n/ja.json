@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -141,7 +145,8 @@
 			"show_balances": "残高を表示",
 			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
 			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。",
-			"notes": "メモ"
+			"notes": "メモ",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
@@ -165,7 +170,8 @@
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
 			"show_balances": "非表示の残高を表示する",
-			"notes": "メモを開く"
+			"notes": "メモを開く",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"
@@ -1574,7 +1580,6 @@
 			"estimated_btc": "推定BTCネットワーク手数料",
 			"estimated_inter_network": "推定ネットワーク間手数料",
 			"estimated_eth": "推定Ethereum手数料",
-			"max_fee_eth": "最大手数料<small>（おそらく30秒以内）</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
@@ -2804,7 +2809,7 @@
 				"snapshot_caption": "現在の状態のメモのコピーを共有します。後でメモを編集または削除しても、このリンクは変わりません。",
 				"cap_reached": "有効な共有リンクの上限（$max件）に達しました。期限切れまたは使用済みになると解放されます。",
 				"expires_after": "リンクの有効期限",
-				"expiry_1h": "1時間",
+				"expiry_1h": "",
 				"expiry_24h": "24時間",
 				"expiry_7d": "7日間",
 				"expiry_30d": "30日間",
@@ -2838,6 +2843,51 @@
 				"discover": "OISYを見てみる",
 				"unavailable_title": "このリンクは期限切れか、すでに使用されています"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

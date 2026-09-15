@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -141,7 +145,8 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo de privacidad activado. Pulsa [P] para mostrar tus saldos de nuevo.",
 			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos.",
-			"notes": "Notas"
+			"notes": "Notas",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Ir a la vista de activos",
@@ -165,7 +170,8 @@
 			"address_book": "agenda",
 			"hide_balances": "Ocultar saldos ",
 			"show_balances": "Mostrar saldos",
-			"notes": "Abrir notas"
+			"notes": "Abrir notas",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -1574,7 +1580,6 @@
 			"estimated_btc": "Comisión de Red BTC Estimada",
 			"estimated_inter_network": "Comisión Inter-red Estimada",
 			"estimated_eth": "Comisión de Ethereum Estimada",
-			"max_fee_eth": "Comisión máx. <small>(probablemente en &lt; 30 segundos)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
@@ -2804,7 +2809,7 @@
 				"snapshot_caption": "Comparte una copia de la nota tal como está ahora. Editar o eliminar la nota después no cambiará este enlace.",
 				"cap_reached": "Has alcanzado el máximo de $max enlaces de compartición activos. Se liberan cuando expiran o se usan.",
 				"expires_after": "El enlace expira después de",
-				"expiry_1h": "1 hora",
+				"expiry_1h": "",
 				"expiry_24h": "24 horas",
 				"expiry_7d": "7 días",
 				"expiry_30d": "30 días",
@@ -2838,6 +2843,51 @@
 				"discover": "Descubre OISY",
 				"unavailable_title": "Este enlace ha expirado o ya se ha usado"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
