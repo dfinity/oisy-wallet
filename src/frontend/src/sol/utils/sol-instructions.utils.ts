@@ -512,12 +512,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		}
 	}
 
-	// Handing an account to a program, which is the System program's own version of the authority
-	// change already refused for a token account. The instruction states the new owner and the
-	// account, and the account is its only meta and a required signer - so a request can name the
-	// connected wallet itself, which signs every message it is sent as the fee payer. Afterwards the
-	// named program governs that account, and the summary has no field that says any of it: there is
-	// no amount, no source and no destination, exactly the shape a warning would let ride along
+	// Handing an account to a program is the System program's own version of the authority change
+	// already refused for a token account. A plain `Assign` requires the account to sign;
+	// `AssignWithSeed` instead requires the derivation base to sign. In either form, the authorized
+	// signer can hand the account to the named program, and the summary has no field that says any
+	// of it: there is no amount, source, or destination, so a warning would let the change ride along
 	// behind a transfer the user does see.
 	if (
 		instructionType === SystemInstruction.Assign ||
