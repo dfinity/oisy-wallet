@@ -45,8 +45,13 @@ Two consequences are deliberate:
   having been sent to; today's suppression let an address that was merely saved pass silently.
 
 Coverage of "the chain": ETH/EVM = all tokens of the same network; IC = ICP transactions for
-ICP, the ck/ICRC ones otherwise; BTC = all BTC; SOL = all SOL/SPL. Address matching is
-case-insensitive where the network's addresses are (`getRecordValueByCaseSensitivity`).
+ICP, the ck/ICRC ones otherwise; BTC = all BTC; SOL = all SOL/SPL. The last two are not split
+by network, so a send on a test network counts on mainnet as well - narrow in practice
+(Bitcoin's address formats differ per network, and testnets are opt-in), and inherited rather
+than chosen: the gate reads the very store the Recently Used list reads, and an address that
+list offers must not then demand a confirmation. Scoping both by network is a follow-up, along
+with merging the ICP and ICRC sets. Address matching is case-insensitive where the network's
+addresses are (`getRecordValueByCaseSensitivity`).
 
 ### Where the two steps live
 

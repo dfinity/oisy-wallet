@@ -152,7 +152,7 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ### First-time destination addresses
 
-A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses, not a send on another network.
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers, which is the tokens of that chain: for Ethereum and the EVM chains that means the same network only, while for Bitcoin and Solana a send on a test network also counts.
 
 Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
 
