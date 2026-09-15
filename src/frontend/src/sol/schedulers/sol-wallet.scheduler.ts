@@ -9,15 +9,17 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import { consoleError } from '$lib/utils/console.utils';
+import { SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK } from '$sol/constants/sol.constants';
 import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import {
 	mapSolSourcesToTokens,
 	resolveSolSignatures
 } from '$sol/services/sol-resolve-signatures.services';
-import { getSolSignatures } from '$sol/services/sol-signatures.services';
+import { getSolSignatures, mergeSignatureSources } from '$sol/services/sol-signatures.services';
 import { saveSolFinalizedTransactions } from '$sol/services/sol-user-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { GetSolSignaturesParams, SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolNetworkBalances } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import type {
@@ -38,25 +40,106 @@ interface LoadSolWalletParams {
 
 interface SolWalletStore {
 	balances: SolNetworkBalances | undefined;
-	// The newest slot the head check has resolved, and the signatures of that slot it has resolved.
-	// Only a signature above that slot, or in it and not resolved yet, is new: anything older belongs
-	// to the pagers, which keep their own cursors. So no older signature needs remembering, and a
-	// long session does not pile them up. It is never inferred from what the UI store holds.
+	// The newest slot the head check has resolved, and the signatures it has resolved at that slot and
+	// at the slot each catch-up walk ends on. Only a signature above that slot, or in it and not
+	// resolved yet, is new, unless a catch-up walk that began below it returns it: anything older
+	// belongs to the pagers, which keep their own cursors. A walk also returns the slot it ends on, so
+	// the signatures resolved there are kept while it runs. No other signature needs remembering, and
+	// a long session does not pile them up. It is never inferred from what the UI store holds.
 	newestSlot: SolSignature['slot'] | undefined;
-	signatures: Set<string>;
+	signatures: Map<SolSignature['signature'], SolSignature['slot']>;
+	// The walks from the head down to what was held that ran out of pages, oldest first. Each resumes
+	// on the next tick, so a burst bigger than a tick's pages is never skipped.
+	catchUp: SolWalletCatchUp[];
 }
 
+interface SolWalletCatchUp {
+	cursor: SolSignaturesCursor;
+	// The newest slot held when the walk began. The walk ends on the page that passes it, and
+	// everything it returned above it is new, whatever the head check has resolved since.
+	newestSlot: SolSignature['slot'];
+	// The head cursor the walk began from. A head that has not moved since, such as a crowded slot
+	// that keeps answering an empty page with the same cut, is the same burst: it must not queue a
+	// second walk that would replay the first one's pages.
+	anchor: string;
+}
+
+const cursorKey = ({ before, exhausted, pending }: SolSignaturesCursor): string =>
+	JSON.stringify([
+		Object.entries(before)
+			.map(([source, entry]) => `${source}:${entry?.signature ?? ''}`)
+			.sort(),
+		[...exhausted].sort(),
+		pending.map(({ signature }) => signature).sort()
+	]);
+
 interface SolWalletHead {
-	// Every new signature of the head page, including those that derive to no record.
+	// Every new signature the head check collected, including those that derive to no record.
 	signatures: SolSignatureWithSources[];
 	transactions: SolResolvedTransaction[];
+	catchUp: SolWalletCatchUp[];
 }
 
 const initialStore = (): SolWalletStore => ({
 	balances: undefined,
 	newestSlot: undefined,
-	signatures: new Set()
+	signatures: new Map(),
+	catchUp: []
 });
+
+// A walk from the head has returned every signature above the cut of its last page: the newest of
+// the oldest signatures of the sources still paging. Once that cut is at or below a slot, the walk
+// has passed it, even while its cursor still holds that slot back or its page is empty. The slot
+// itself was returned whole before the walk began, so nothing of it is new either.
+const passesSlot = ({
+	cursor,
+	slot
+}: {
+	cursor: SolSignaturesCursor;
+	slot: SolSignature['slot'];
+}): boolean => {
+	const cut = Object.values(cursor.before).reduce<SolSignature['slot'] | undefined>(
+		(acc, before) =>
+			isNullish(before) ? acc : isNullish(acc) || before.slot > acc ? before.slot : acc,
+		undefined
+	);
+
+	return nonNullish(cut) && cut <= slot;
+};
+
+// Continues the oldest walk until it passes the slot it started from or its history ends, then the
+// next one, until the pages run out. Only the signatures above that slot are returned: anything
+// older belongs to the pagers.
+const resumeHead = async ({
+	walks,
+	pages,
+	...params
+}: Pick<GetSolSignaturesParams, 'address' | 'network' | 'tokensList'> & {
+	walks: SolWalletCatchUp[];
+	pages: number;
+}): Promise<Pick<SolWalletHead, 'signatures' | 'catchUp'>> => {
+	const [walk, ...rest] = walks;
+
+	if (isNullish(walk) || pages <= 0) {
+		return { signatures: [], catchUp: walks };
+	}
+
+	const { signatures, cursor } = await getSolSignatures({ ...params, cursor: walk.cursor });
+
+	const next = await resumeHead({
+		...params,
+		walks:
+			isNullish(cursor) || passesSlot({ cursor, slot: walk.newestSlot })
+				? rest
+				: [{ ...walk, cursor }, ...rest],
+		pages: pages - 1
+	});
+
+	return {
+		signatures: [...signatures.filter(({ slot }) => slot >= walk.newestSlot), ...next.signatures],
+		catchUp: next.catchUp
+	};
+};
 
 const dataKey = ({
 	address: { data: address },
@@ -140,39 +223,67 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		});
 	}
 
-	// The head check: the newest page of the merged pager, and only what is newer than what this
-	// scheduler already holds. When nothing is, a tick costs one signature lookup per source.
+	// The head check: the merged pager from its newest page down to the newest slot this scheduler
+	// already holds, and only what is newer than that. When nothing is, a tick costs one signature
+	// lookup per source. More than a page of new signatures is paged through, within a bound per
+	// tick: the rest is resumed on the next ticks, before anything newer.
 	private loadHead = async ({
 		address,
 		network,
 		tokens
 	}: LoadSolWalletParams): Promise<SolWalletHead> => {
-		// Known limit: this reads one page and drops its cursor. The pager holds the cut slot back in
-		// the cursor, and returns an empty page while a source walks through a crowded slot, so when
-		// more than a page of signatures arrives between two ticks, what lies between that page and
-		// `newestSlot` is never loaded here. The head check that pages with the cursor and resumes the
-		// walk on the next ticks follows in its own change.
-		const { signatures } = await getSolSignatures({ address, network, tokensList: tokens });
+		const params = { address, network, tokensList: tokens };
 
-		const { newestSlot, signatures: known } = this.store;
+		const { newestSlot, signatures: known, catchUp } = this.store;
 
-		const newSignatures = signatures.filter(
-			({ signature, slot }) =>
-				!known.has(signature) && (isNullish(newestSlot) || slot >= newestSlot)
-		);
+		const { signatures: head, cursor } = await getSolSignatures(params);
+
+		const anchor = nonNullish(cursor) ? cursorKey(cursor) : undefined;
+
+		const startsWalk =
+			nonNullish(cursor) &&
+			nonNullish(anchor) &&
+			nonNullish(newestSlot) &&
+			!passesSlot({ cursor, slot: newestSlot }) &&
+			!catchUp.some((walk) => walk.anchor === anchor);
+
+		// With nothing held yet, the first page is all the head check loads: older history belongs to
+		// the pagers.
+		const resumed = isNullish(newestSlot)
+			? { signatures: [], catchUp: [] }
+			: await resumeHead({
+					...params,
+					// Walks left from earlier ticks go first, so that a steady flow of new signatures
+					// cannot hold them back.
+					walks: [...catchUp, ...(startsWalk ? [{ cursor, newestSlot, anchor }] : [])],
+					pages: SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK - 1
+				});
+
+		// Two walks can return the same signature when one reaches a slot whose signatures the
+		// other's cursor still holds back. Each returns it tagged with the sources it saw, and the
+		// tags decide which tokens receive the record, so they are merged, never replaced.
+		const newSignatures = [
+			...mergeSignatureSources(
+				[
+					...head.filter(({ slot }) => isNullish(newestSlot) || slot >= newestSlot),
+					...resumed.signatures
+				].filter(({ signature }) => !known.has(signature))
+			).values()
+		];
 
 		if (newSignatures.length === 0) {
-			return { signatures: [], transactions: [] };
+			return { signatures: [], transactions: [], catchUp: resumed.catchUp };
 		}
 
 		return {
 			signatures: newSignatures,
+			catchUp: resumed.catchUp,
 			transactions: await resolveSolSignatures({
 				address,
 				network,
 				tokens,
 				signatures: newSignatures,
-				known
+				known: new Set(known.keys())
 			})
 		};
 	};
@@ -269,7 +380,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private syncWalletData = ({
 		balances,
-		head: { signatures, transactions }
+		head: { signatures, transactions, catchUp }
 	}: {
 		balances: SolNetworkBalances;
 		head: SolWalletHead;
@@ -283,13 +394,19 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			this.store.newestSlot
 		);
 
+		// The only slots a later page can still return a signature it has resolved from.
+		const keptSlots = new Set([newestSlot, ...catchUp.map(({ newestSlot: slot }) => slot)]);
+
 		this.store = {
 			balances,
 			newestSlot,
-			signatures: new Set([
-				...(newestSlot === this.store.newestSlot ? this.store.signatures : []),
-				...signatures.filter(({ slot }) => slot === newestSlot).map(({ signature }) => signature)
-			])
+			signatures: new Map(
+				[
+					...this.store.signatures,
+					...signatures.map(({ signature, slot }) => [signature, slot] as const)
+				].filter(([, slot]) => keptSlots.has(slot))
+			),
+			catchUp
 		};
 
 		return { hasChanges: newBalances || transactions.length > 0 };

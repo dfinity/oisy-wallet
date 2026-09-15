@@ -27,7 +27,7 @@ for how these fit together.
 
 ## Balance (`account_info`)
 
-`loadXrpBalance` (`src/frontend/src/xrp/api/xrpl.api.ts`) POSTs
+`loadXrpBalance` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs
 
 ```json
 { "method": "account_info", "params": [{ "account": "r...", "ledger_index": "validated" }] }
@@ -37,6 +37,23 @@ and reads `result.account_data.Balance` — a string of **drops**
 (1 XRP = 1,000,000 drops), returned as a `bigint`. An account that has never
 been funded is not on-ledger and the node returns the `actNotFound` error; OISY
 treats that as a **zero** balance (a valid state, not an error).
+
+## Send (`submit`)
+
+`submitXrpTransaction` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs a signed,
+hex-encoded transaction blob:
+
+```json
+{ "method": "submit", "params": [{ "tx_blob": "12000022..." }] }
+```
+
+The blob is serialized client-side with `ripple-binary-codec` (`encodeForSigning`
+then `encode`, in `src/frontend/src/xrp/services/xrp-sign.services.ts`) — there is
+no XRPL SDK dependency. The response's `accepted` boolean is **authoritative** for
+whether the node took the transaction (applied / queued / broadcast / kept); the
+`engine_result` string is informational only (its `ter` prefix is a retry class,
+not proof of acceptance). `submit` is a **preliminary** result, so finality is
+confirmed separately by polling the transaction hash.
 
 ## Configuration
 

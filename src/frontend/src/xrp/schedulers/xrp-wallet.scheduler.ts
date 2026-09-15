@@ -8,7 +8,7 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { loadXrpBalance, loadXrpTransactions } from '$xrp/api/xrpl.api';
+import { loadXrpBalance, loadXrpTransactions } from '$xrp/rest/xrpl.rest';
 import type { XrpCertifiedTransaction } from '$xrp/stores/xrp-transactions.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
