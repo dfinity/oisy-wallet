@@ -10,7 +10,6 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
 	import { XrpAmountAssertionError } from '$xrp/types/xrp-send';
 
@@ -29,11 +28,13 @@
 	const { sendToken, sendBalance, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { feeStore: fee }: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const { feeStore: fee, reserveStore: reserve }: XrpFeeContext =
+		getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
 
-	// XRPL accounts must retain the base reserve; both the fee and the reserve are unavailable
-	// to send, so they are subtracted from the max and required by the balance check.
-	let unavailable = $derived(($fee ?? ZERO) + XRP_BASE_RESERVE_DROPS);
+	// An XRPL account must retain its reserve — the base plus the owner reserve for every
+	// ledger object it owns. Neither that nor the fee is available to send, so both are
+	// subtracted from the max and required by the balance check.
+	let unavailable = $derived(($fee ?? ZERO) + $reserve);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {

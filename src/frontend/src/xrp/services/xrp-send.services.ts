@@ -1,15 +1,16 @@
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
-import { retryWithDelay } from '$lib/services/rest.services';
 import type { NullishIdentity } from '$lib/types/identity';
+import { randomWait } from '$lib/utils/time.utils';
 import {
+	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_DEFAULT_FEE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET
 } from '$xrp/constants/xrp.constants';
 import {
-	isXrpTransactionValidated,
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
+	loadXrpTransactionOutcome,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
@@ -17,8 +18,53 @@ import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import { buildXrpPayment } from '$xrp/utils/xrp-transaction.utils';
+import {
+	buildXrpPayment,
+	isXrpSubmitAccepted,
+	isXrpTransactionSuccessful
+} from '$xrp/utils/xrp-transaction.utils';
 import { assertNonNullish } from '@dfinity/utils';
+
+/**
+ * Waits for a submitted transaction to be validated, and reports its final result.
+ *
+ * A transaction is only definitively failed once the ledger has advanced past the
+ * `LastLedgerSequence` it was signed with: until then it can still be included. Giving up
+ * earlier would report a failure for a payment that may yet validate, and invite the user
+ * to send a duplicate — a real risk for a `terQUEUED` submission, which waits for a later
+ * ledger by definition. So this polls to that expiry rather than to a fixed retry budget.
+ */
+const confirmXrpTransaction = async ({
+	hash,
+	network,
+	lastLedgerSequence
+}: {
+	hash: string;
+	network: XrpNetworkType;
+	lastLedgerSequence: number;
+}): Promise<string | undefined> => {
+	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
+		const { validated, transactionResult } = await loadXrpTransactionOutcome({ hash, network });
+
+		if (validated) {
+			return transactionResult;
+		}
+
+		const ledgerIndex = await loadXrpLedgerIndex({ network });
+
+		// Past its LastLedgerSequence the transaction can never be applied, so this failure is
+		// final — and, unlike an early timeout, sending again is safe.
+		if (ledgerIndex > lastLedgerSequence) {
+			throw new Error(
+				`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
+			);
+		}
+
+		await randomWait({});
+	}
+
+	throw new Error('XRP transaction confirmation stopped before its ledger expiry was reached.');
+};
 
 /**
  * Sends native XRP: fetches the account sequence, the open-ledger fee and the current
@@ -26,7 +72,7 @@ import { assertNonNullish } from '@dfinity/utils';
  * transaction to be included in a validated ledger.
  *
  * `amount` is in drops. The caller is responsible for having already reserved the
- * account base reserve out of the max amount (see `getXrpMaxAmount`).
+ * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  */
 export const sendXrp = async ({
 	identity,
@@ -54,6 +100,8 @@ export const sendXrp = async ({
 		getXrpSigningPublicKey({ identity, network })
 	]);
 
+	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
 	const transaction = buildXrpPayment({
 		account: source,
 		destination,
@@ -62,7 +110,7 @@ export const sendXrp = async ({
 		sequence,
 		signingPublicKey,
 		destinationTag,
-		lastLedgerSequence: ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET
+		lastLedgerSequence
 	});
 
 	progress?.(ProgressStepsSendXrp.SIGN);
@@ -71,7 +119,7 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SEND);
 	const result = await submitXrpTransaction({ txBlob, network });
 
-	if (!result.accepted) {
+	if (!isXrpSubmitAccepted(result)) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
@@ -83,16 +131,15 @@ export const sendXrp = async ({
 	const { txHash } = result;
 	assertNonNullish(txHash, 'XRP submit response did not include a transaction hash.');
 
-	await retryWithDelay({
-		request: async () => {
-			const validated = await isXrpTransactionValidated({ hash: txHash, network });
-
-			if (!validated) {
-				throw new Error('XRP transaction not yet validated');
-			}
-		},
-		maxRetries: 10
+	const transactionResult = await confirmXrpTransaction({
+		hash: txHash,
+		network,
+		lastLedgerSequence
 	});
+
+	if (!isXrpTransactionSuccessful(transactionResult)) {
+		throw new Error(`XRP transaction failed: ${transactionResult}`);
+	}
 
 	progress?.(ProgressStepsSendXrp.DONE);
 
