@@ -198,6 +198,42 @@ describe('TipShare', () => {
 		expect(getByText(text.scan_or_photo)).toBeInTheDocument();
 	});
 
+	describe('the claim instructions', () => {
+		it('are withheld until there is a code to scan', () => {
+			// Only the heading used to change while a link was on its way. These two
+			// lines went on telling the reader to scan the code and to photograph it
+			// for later, over a QR that was still a pulsing placeholder.
+			const { queryByText } = render(TipShare, {
+				props: { ...props, link: undefined, generating: true }
+			});
+
+			const { text } = get(i18n).tip;
+
+			expect(queryByText(text.no_wallet_needed)).toBeNull();
+			expect(queryByText(text.scan_or_photo)).toBeNull();
+			expect(queryByText(text.generating_link)).toBeInTheDocument();
+		});
+
+		it('go away entirely once there is known to be no code', () => {
+			// Every line in the box is about a code to scan, and the warning below is
+			// already saying there is not going to be one. Heading included: "Scan to
+			// claim this tip" directly above that warning contradicted it.
+			const { queryByText } = render(TipShare, {
+				props: { ...props, link: undefined, linkMessage: 'No link for this one' }
+			});
+
+			const { text } = get(i18n).tip;
+
+			expect(queryByText(text.no_wallet_needed)).toBeNull();
+			expect(queryByText(text.scan_or_photo)).toBeNull();
+			expect(queryByText(text.no_wallet_needed_title)).toBeNull();
+			expect(queryByText(text.recovering_link)).toBeNull();
+
+			// The warning, and the rest of the screen, still stand.
+			expect(queryByText('No link for this one')).toBeInTheDocument();
+		});
+	});
+
 	describe('when the link could not be saved', () => {
 		it('tells the sender to copy it now', () => {
 			// The tip is real either way; what is lost is finding this link again. Said

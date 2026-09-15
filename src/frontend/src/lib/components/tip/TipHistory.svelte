@@ -9,13 +9,13 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
-	import { TIP_HISTORY_ROW_BUTTON } from '$lib/constants/test-ids.constants';
+	import { TIP_HISTORY_ERROR, TIP_HISTORY_ROW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { consoleError } from '$lib/utils/console.utils';
 	import {
 		formatNanosecondsToDate,
 		formatToken,
@@ -25,6 +25,7 @@
 	import {
 		isTipCancellable,
 		TIP_HISTORY_GROUP_ORDER,
+		tipFailureReasonKey,
 		tipHistoryGroup,
 		tipStatusKey,
 		tipStatusTextClass,
@@ -41,6 +42,9 @@
 
 	let tips = $state<MyTip[]>([]);
 	let loading = $state(true);
+	// Distinguishes "no tips" from "could not find out", which look identical
+	// otherwise and mean opposite things to a sender looking for a link.
+	let loadError = $state(false);
 
 	// The sender holds these tokens by definition — they reserved them — so their
 	// own token list is a sound source for symbol and decimals here, unlike on the
@@ -110,10 +114,19 @@
 			return;
 		}
 
+		loadError = false;
+		loading = true;
+
 		try {
 			tips = await loadMyTips({ identity: $authIdentity });
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.tip.text.history_failed }, err });
+			// Held in state rather than only toasted. `tips` is still the empty array
+			// it started as, so the screen went on to render "You have not issued any
+			// tips yet" underneath a toast that was already fading — telling a sender
+			// whose tips are holding their money that they have none, on the one
+			// screen that exists to find a lost link.
+			loadError = true;
+			consoleError('Could not load the sender tip history', err);
 		} finally {
 			loading = false;
 		}
@@ -140,6 +153,19 @@
 	-->
 	{#if loading}
 		<SkeletonCards rows={3} testIdPrefix="tip-history" />
+	{:else if loadError}
+		<!--
+			Retry in the content rather than the toolbar: the toolbar's button closes
+			the screen, and the one thing worth doing here is asking again. Nothing
+			about the tips themselves changed, so the retry is free of consequence.
+		-->
+		<div class="py-12 text-center" data-tid={TIP_HISTORY_ERROR}>
+			<p class="m-0 text-tertiary">{$i18n.tip.text.history_failed}</p>
+
+			<Button colorStyle="secondary-light" onclick={load} styleClass="mt-4">
+				{$i18n.core.text.retry}
+			</Button>
+		</div>
 	{:else if tips.length === 0}
 		<!-- `m-0`: the 18px a bare `<p>` carries would sit under an otherwise
 		     symmetrically padded empty state. -->
@@ -152,9 +178,14 @@
 
 			<!--
 				One line of explanation, only on the group that asks something of the
-				reader. "Failed" alone invites the wrong conclusion — that the money went
-				somewhere or the link is dead — when in fact nothing moved and the same
-				link still works.
+				reader. "Failed" alone invites the wrong conclusion, that the money went
+				somewhere, when nothing moved.
+
+				What it does not do any more is promise a fix. It used to say the links
+				still work and a top-up is all it takes, which `backend.did` contradicts
+				for `Uncovered`: the reservation is gone, so the link is dead and only a
+				new tip replaces it. Three reasons, three different remedies — so the
+				heading covers what they share and each row names its own.
 			-->
 			{#if group === 'failed'}
 				<p class="m-0 text-sm text-tertiary">{$i18n.tip.text.group_failed_hint}</p>
@@ -165,6 +196,7 @@
 				{@const token = tokenFor(tip)}
 				{@const remaining = remainingLabel(tip)}
 				{@const [claimer] = tip.claimed_by}
+				{@const failureReason = tipFailureReasonKey(tip)}
 
 				{#if isTipCancellable(tip)}
 					<button
@@ -221,6 +253,17 @@
 											})}
 										{:else if status === 'reserved' && nonNullish(remaining)}
 											&nbsp;|&nbsp;{remaining}
+										{:else if status === 'failed' && nonNullish(failureReason)}
+											<!--
+												Only in this branch, not the one below: a failed tip is
+												always cancellable, so its row is always the clickable one.
+
+												A few words rather than the remedy, because the line is
+												`truncate`d and a sentence would be cut mid-advice. It is
+												what the heading above cannot say — it covers three reasons
+												that want three different things done.
+											-->
+											&nbsp;|&nbsp;{$i18n.tip.text[`failure_${failureReason}`]}
 										{/if}
 									</span>
 								{/snippet}

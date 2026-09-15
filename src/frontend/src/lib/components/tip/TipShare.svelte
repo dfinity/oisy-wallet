@@ -189,31 +189,45 @@
 		Not a `MessageBox`: that component is an icon beside left-aligned text, and
 		this block is neither. Centred and quiet on purpose — it is reassurance, so
 		it should be legible without competing with the amount above it.
+
+		Gone entirely once there is known to be no link. Every line in it is about a
+		code to scan, and `linkMessage` is already saying in a warning below that
+		there is no code — a box headed "Scan to claim this tip" above that warning
+		contradicted it.
 	-->
-	<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
-		<!--
-			`m-0` on both, then one explicit step between them. A bare `<p>` carries an
-			18px bottom margin in this app, which is more than this block's own padding
-			— so the heading sat further from its own paragraph than the paragraph sat
-			from the edge, and the whole box read bottom-heavy.
-		-->
-		<p class="m-0 font-bold">
-			{awaitingLink
-				? generating
-					? $i18n.tip.text.generating_link
-					: $i18n.tip.text.recovering_link
-				: $i18n.tip.text.no_wallet_needed_title}
-		</p>
+	{#if isNullish(linkMessage)}
+		<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
+			<!--
+				`m-0` on both, then one explicit step between them. A bare `<p>` carries an
+				18px bottom margin in this app, which is more than this block's own padding
+				— so the heading sat further from its own paragraph than the paragraph sat
+				from the edge, and the whole box read bottom-heavy.
+			-->
+			<p class="m-0 font-bold">
+				{awaitingLink
+					? generating
+						? $i18n.tip.text.generating_link
+						: $i18n.tip.text.recovering_link
+					: $i18n.tip.text.no_wallet_needed_title}
+			</p>
 
-		<!--
-			Two lines, not one sentence: the first answers "can they even claim this",
-			the second says what to do with the code. `m-0` on the second so they read
-			as one paragraph broken for scanning, rather than two separate blocks.
-		-->
-		<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+			<!--
+				Held back until the code is actually on screen. These two lines tell the
+				reader to scan it and to photograph it for later, which is not something
+				anyone can do while the QR above is still a pulsing placeholder — and
+				during the wait the heading is carrying the whole message on its own.
 
-		<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
-	</div>
+				Two lines, not one sentence: the first answers "can they even claim this",
+				the second says what to do with the code. `m-0` on the second so they read
+				as one paragraph broken for scanning, rather than two separate blocks.
+			-->
+			{#if nonNullish(link)}
+				<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+
+				<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
+			{/if}
+		</div>
+	{/if}
 
 	<!--
 		Out of the box and on its own line: the deadline is the one fact on this
