@@ -2,11 +2,12 @@ import type { MyTip } from '$declarations/backend/backend.did';
 import TipHistory from '$lib/components/tip/TipHistory.svelte';
 import {
 	TIP_HISTORY_CANCEL_BUTTON,
+	TIP_HISTORY_ERROR,
 	TIP_HISTORY_ROW_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
-import * as toastsStore from '$lib/stores/toasts.store';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
@@ -19,11 +20,13 @@ describe('TipHistory', () => {
 	const tip = ({
 		tip_id,
 		status,
-		claimed_by = []
+		claimed_by = [],
+		last_claim_failure = []
 	}: {
 		tip_id: string;
 		status: MyTip['status'];
 		claimed_by?: MyTip['claimed_by'];
+		last_claim_failure?: MyTip['last_claim_failure'];
 	}): MyTip => ({
 		tip_id,
 		ledger_canister_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
@@ -33,7 +36,7 @@ describe('TipHistory', () => {
 		status,
 		message: [],
 		claimed_by,
-		last_claim_failure: []
+		last_claim_failure
 	});
 
 	beforeEach(() => {
@@ -41,25 +44,91 @@ describe('TipHistory', () => {
 		mockAuthStore();
 	});
 
-	it('says the list failed to load, not that a claim failed', async () => {
-		// The catch reached for `claim_failed` — "The tip could not be claimed.
-		// Nothing was transferred, so try again." — on a read that claims nothing.
-		// A sender reading that has been told a payout went wrong when all that
-		// happened is that their own list did not arrive.
-		const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
-
+	it('says the list failed to load, not that there are no tips', async () => {
+		// `tips` is still the empty array it started as, so the screen rendered "You
+		// have not issued any tips yet" — telling a sender whose tips are holding
+		// their money that they have none, on the one screen that exists to find a
+		// lost link. It also used to reach for `claim_failed` on a read that claims
+		// nothing.
+		vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
 		vi.spyOn(tipServices, 'loadMyTips').mockRejectedValue(new Error('canister unreachable'));
 
-		render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
+		const { container, queryByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
 
 		const { text } = get(i18n).tip;
 
-		await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+		await waitFor(() =>
+			expect(container.querySelector(`[data-tid=${TIP_HISTORY_ERROR}]`)).toBeInTheDocument()
+		);
 
-		const [[{ msg }]] = toasts.mock.calls as unknown as [[{ msg: { text: string } }]];
+		expect(queryByText(text.history_failed)).toBeInTheDocument();
+		expect(queryByText(text.history_empty)).not.toBeInTheDocument();
+		expect(queryByText(text.claim_failed)).not.toBeInTheDocument();
+	});
 
-		expect(msg.text).toBe(text.history_failed);
-		expect(msg.text).not.toBe(text.claim_failed);
+	it('asks again when the retry is pressed', async () => {
+		vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+		const loadSpy = vi
+			.spyOn(tipServices, 'loadMyTips')
+			.mockRejectedValueOnce(new Error('canister unreachable'))
+			.mockResolvedValueOnce([tip({ tip_id: 'live', status: { Reserved: null } })]);
+
+		const { container, getByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
+
+		await waitFor(() =>
+			expect(container.querySelector(`[data-tid=${TIP_HISTORY_ERROR}]`)).toBeInTheDocument()
+		);
+
+		getByText(get(i18n).core.text.retry).click();
+
+		// The error state gives way to the rows, rather than the retry leaving the
+		// failure on screen alongside them.
+		await waitFor(() => {
+			expect(loadSpy).toHaveBeenCalledTimes(2);
+			expect(container.querySelector(`[data-tid=${TIP_HISTORY_ERROR}]`)).not.toBeInTheDocument();
+			expect(container.querySelectorAll(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)).toHaveLength(
+				1
+			);
+		});
+	});
+
+	it('says on the row which of the three reasons a payout failed for', async () => {
+		// The group heading used to promise that "the links still work, so topping up
+		// your balance is all it takes". `backend.did` says the opposite for
+		// `Uncovered`: the reservation is gone, the link is dead, and only a new tip
+		// fixes it. One hint over the group can only ever be right about one of the
+		// three, so the reason belongs on the row.
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({
+				tip_id: 'revoked',
+				status: { Failed: null },
+				last_claim_failure: [{ at_ns: nowNs, reason: { Uncovered: null } }]
+			}),
+			tip({
+				tip_id: 'short',
+				status: { Failed: null },
+				last_claim_failure: [{ at_ns: nowNs, reason: { InsufficientFunds: null } }]
+			})
+		]);
+
+		const { queryByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
+
+		const { text } = get(i18n).tip;
+
+		// `exact: false`: the reason shares its line with the row date, separated by a
+		// pipe, so the element's own text is never the reason on its own.
+		await waitFor(() =>
+			expect(queryByText(text.failure_uncovered, { exact: false })).toBeInTheDocument()
+		);
+
+		expect(queryByText(text.failure_insufficient_funds, { exact: false })).toBeInTheDocument();
+		expect(queryByText(text.failure_transfer_failed, { exact: false })).not.toBeInTheDocument();
 	});
 
 	it('makes only a live row openable', async () => {

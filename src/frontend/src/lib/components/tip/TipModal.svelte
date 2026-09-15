@@ -130,7 +130,7 @@
 		cancelling = true;
 
 		try {
-			await cancelTip({
+			const { allowanceRevoked } = await cancelTip({
 				identity: $authIdentity,
 				tipId: viewingTip.tip_id,
 				ledgerCanisterId: viewingTip.ledger_canister_id.toText()
@@ -141,7 +141,16 @@
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				symbol: selectedToken?.symbol
 			});
-			toastsShow({ text: $i18n.tip.text.cancelled_toast, level: 'success' });
+			// A cancellation either way — the tip is recorded as cancelled and nobody
+			// can claim it, which is the half the sender asked for and the half that
+			// cannot be retried. Only the release of the reserved amount is in
+			// question, so it is said as a warning rather than swallowed or dressed up
+			// as a failure that invites a retry the canister would refuse.
+			toastsShow(
+				allowanceRevoked
+					? { text: $i18n.tip.text.cancelled_toast, level: 'success' }
+					: { text: $i18n.tip.text.cancelled_allowance_kept, level: 'warn' }
+			);
 			viewingTip = undefined;
 			// Back to the list, which reloads on mount, so the cancelled row cannot
 			// linger claiming to be live.
@@ -167,6 +176,17 @@
 	};
 
 	/**
+	 * Whether a finished recovery is still the one being waited for.
+	 *
+	 * Recovery takes seconds, and Back is available throughout, so a sender can
+	 * open row A, return to the list and open row B while A is still deriving. Both
+	 * completion paths write the same `link` and `linkMessage`, so without this the
+	 * late arrival would put A's claim code on B's share screen — handing over a
+	 * link for a tip other than the one on display.
+	 */
+	const isStaleRecovery = (tip: MyTip): boolean => viewingTip?.tip_id !== tip.tip_id;
+
+	/**
 	 * Opens a tip from its History row: transition first, link second.
 	 *
 	 * Everything the row already knew — token, amount, deadline — is enough to
@@ -184,20 +204,38 @@
 			return;
 		}
 
-		selectedToken = tippableTokens($tokens).find(
+		const token = tippableTokens($tokens).find(
 			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
 		);
+
+		// A tip outlives the sender's token list: a custom ICRC token can be removed
+		// while a tip denominated in it is still live. Without it there is no
+		// symbol, no decimals and no logo, so the share screen cannot draw itself —
+		// and its render guard failing is not a silent condition, it dropped the
+		// reader on the intro step as though the click had gone somewhere. Said out
+		// loud instead, with the one action that fixes it. The tip is untouched:
+		// re-add the token and the row opens.
+		if (isNullish(token)) {
+			toastsError({ msg: { text: $i18n.tip.text.token_unavailable } });
+			return;
+		}
+
+		selectedToken = token;
 		reservedAmount = tip.amount;
-		reservedToken = selectedToken;
+		reservedToken = token;
 		expiresAtNs = tip.expires_at_ns;
 		viewingTip = tip;
-		trackTip({ step: 'reopen', side: 'sender', symbol: selectedToken?.symbol });
+		trackTip({ step: 'reopen', side: 'sender', symbol: token.symbol });
 		link = undefined;
 		linkMessage = undefined;
 		goToStep(WizardStepsTip.SHARE);
 
 		try {
 			const recovered = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
+
+			if (isStaleRecovery(tip)) {
+				return;
+			}
 
 			// Not an error: a tip created before the recovery store existed has no
 			// stored code, and no amount of retrying will conjure one.
@@ -211,19 +249,27 @@
 			// piece of advice that cannot work until the window passes.
 			const limit = tipRateLimit(err);
 
-			linkMessage = nonNullish(limit)
-				? rateLimitedMessage(limit)
-				: $i18n.tip.text.link_recovery_failed;
-
+			// Reported even when nobody is looking at this tip any more: the recovery
+			// did fail, and that is a fact about the tip rather than about the screen.
+			// `token`, not `selectedToken`, which by now may belong to another row.
+			//
 			// The reopen itself was already reported as a plain step. This is the
 			// separate fact that it did not produce a link.
 			trackTip({
 				step: 'reopen',
 				side: 'sender',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				symbol: selectedToken?.symbol,
+				symbol: token.symbol,
 				...(nonNullish(limit) && { rateLimited: true })
 			});
+
+			if (isStaleRecovery(tip)) {
+				return;
+			}
+
+			linkMessage = nonNullish(limit)
+				? rateLimitedMessage(limit)
+				: $i18n.tip.text.link_recovery_failed;
 		}
 	};
 
@@ -333,7 +379,22 @@
 -->
 <div class="sm:[--dialog-max-height:80dvh]">
 	<TokenActionContext token={selectedToken}>
-		<WizardModal bind:this={modal} onClose={modalStore.close} {steps} bind:currentStep>
+		<!--
+			Locked down while a reservation or a cancellation is in flight, the way
+			`SendModal`, `SwapModal` and the claim modal lock their own money steps.
+			Disabling the footer was not enough on its own: the close button, the
+			backdrop and Escape all still worked, so a sender could leave while
+			`reserveTip` was running — and if the recoverable copy of the claim code
+			then failed to store, the link they left behind was the only one there was
+			ever going to be.
+		-->
+		<WizardModal
+			bind:this={modal}
+			disablePointerEvents={generating || cancelling}
+			onClose={modalStore.close}
+			{steps}
+			bind:currentStep
+		>
 			<!--
 				The title tracks the state, not just the step. A screen that opens on the
 				click and is still filling in should not already claim "Tip is ready" — the

@@ -13,6 +13,7 @@ export const TIP_RECEIVED_BUTTON = 'tip-received-button';
 export const TIP_WELCOME_MODAL = 'tip-welcome-modal';
 export const TIP_WELCOME_CTA_BUTTON = 'tip-welcome-cta-button';
 export const TIP_HISTORY_CANCEL_BUTTON = 'tip-history-cancel-button';
+export const TIP_HISTORY_ERROR = 'tip-history-error';
 export const TIP_HISTORY_ROW_BUTTON = 'tip-history-row-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
