@@ -54,6 +54,12 @@
 		notOfferedExplained?: boolean;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
+		/**
+		 * Hard cap (base units) for "Max", for a source token whose spendable amount is lower
+		 * than its balance — BTC, where the balance also counts UTXOs a send cannot select yet.
+		 * Left unset, "Max" is the balance minus the fee as before.
+		 */
+		maxAmount?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -70,6 +76,7 @@
 		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
+		maxAmount,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -225,6 +232,7 @@
 											balance={$sourceTokenBalance}
 											error={nonNullish(errorType)}
 											{fee}
+											{maxAmount}
 											token={$sourceToken}
 											bind:amountSetToMax
 											bind:amount={swapAmount}
