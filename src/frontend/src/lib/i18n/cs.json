@@ -145,7 +145,8 @@
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
 			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
-			"notes": "Poznámky"
+			"notes": "Poznámky",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
@@ -169,7 +170,8 @@
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
 			"show_balances": "Zobrazit skryté zůstatky",
-			"notes": "Otevřít poznámky"
+			"notes": "Otevřít poznámky",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Dokumentace"
@@ -2803,7 +2805,7 @@
 				"snapshot_caption": "Sdílí kopii poznámky v jejím aktuálním stavu. Pozdější úprava nebo smazání poznámky tento odkaz nezmění.",
 				"cap_reached": "Dosáhl(a) jsi maxima $max aktivních sdílených odkazů. Uvolní se, jakmile vyprší nebo budou použity.",
 				"expires_after": "Odkaz vyprší po",
-				"expiry_1h": "1 hodině",
+				"expiry_1h": "",
 				"expiry_24h": "24 hodinách",
 				"expiry_7d": "7 dnech",
 				"expiry_30d": "30 dnech",
@@ -2837,6 +2839,51 @@
 				"discover": "Objevit OISY",
 				"unavailable_title": "Tento odkaz vypršel nebo už byl použit"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
