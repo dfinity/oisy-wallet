@@ -452,6 +452,22 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
+	// The seed variant funds a spendable account by another route: the address is derived rather
+	// than a key, so nobody signs for it, but System `transferSolWithSeed` moves lamports out of
+	// such an account against a signature from the `base` it was derived from. A System-owned
+	// account opened this way is therefore the same native wallet, spendable by whoever holds that
+	// base, and the review can no more name it than it can name a plain creation's. Only the owner
+	// is read here: everything else about this instruction stays unread, as it already was.
+	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
+		const {
+			data: { programAddress: owner }
+		} = instruction;
+
+		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+			return unfaithfulInstruction();
+		}
+	}
+
 	if (instructionType === SystemInstruction.TransferSol) {
 		const {
 			data: { amount },
