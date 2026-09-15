@@ -166,40 +166,39 @@ const isDuplicateTipId = (err: unknown): boolean =>
 	nonNullish(err) && typeof err === 'object' && 'DuplicateTipId' in err;
 
 /**
- * The `create_tip` refusals that prove the canister stored nothing.
+ * The `create_tip` refusals a retry should keep its allowance for.
  *
- * Every one is a rejection of the request itself, decided before any state is
- * written, so the allowance the sender just paid for is backing a tip that does
- * not and will not exist.
+ * A denylist rather than a list of refusals that clean up, and the inversion is
+ * the point. Every error `create_tip` returns is decided before `store_tip`:
+ * the id, claim-code, message and expiry validators, the duplicate check, the
+ * fee and allowance lookups, the coverage and cap checks — all of them return
+ * early, so a decoded `TipError` means nothing was written. Enumerating the
+ * cleanup cases instead meant a variant added later silently kept its
+ * allowance, which is exactly how `MessageTooLong` was missed.
  *
- * Deliberately a list rather than "anything that is not a success". The ones
- * left out are the point:
+ * So these two are excluded on purpose, not for safety:
  *
- * - **A transport failure is not in here at all.** A lost response is exactly
- *   the case where the tip may well exist — it is why `DuplicateTipId` is
- *   reconciled rather than thrown — and revoking then would strip the allowance
- *   from a live, claimable tip. `createTip` throws the decoded variant for a
- *   canister rejection and an `Error` for anything else, which is what makes the
- *   two tellable apart.
- * - **`RateLimited` is transient.** The sender retries with the same draft, and
- *   the allowance is still the right one; revoking would cost a fee and force a
+ * - `RateLimited` is transient. The sender retries with the same draft and the
+ *   allowance is still the right one; revoking would cost a fee and force a
  *   second approve for nothing.
- * - **`InternalError` is ambiguous.** It says the canister broke, not that it
- *   wrote nothing.
+ * - `InternalError` says the canister broke rather than that it wrote nothing,
+ *   which is the one answer not to reason from.
+ *
+ * A transport failure never reaches here: `createTip` throws the decoded
+ * variant for a canister rejection and an `Error` otherwise, and a lost reply
+ * is precisely when the tip may exist — revoking then would strip the allowance
+ * from a live, claimable tip.
  */
-const CREATE_REFUSALS_LEAVING_NO_TIP = [
-	'TooManyTips',
-	'AmountTooSmall',
-	'InvalidExpiry',
-	'InvalidTipId',
-	'InvalidClaimCodeHash',
-	'Uncovered'
-] as const;
+const CREATE_REFUSALS_KEEPING_THE_ALLOWANCE = ['RateLimited', 'InternalError'] as const;
 
 const leavesNoTip = (err: unknown): boolean =>
 	nonNullish(err) &&
 	typeof err === 'object' &&
-	CREATE_REFUSALS_LEAVING_NO_TIP.some((variant) => variant in err);
+	!CREATE_REFUSALS_KEEPING_THE_ALLOWANCE.some((variant) => variant in err) &&
+	// A bare `Error` has no variant key at all; only a decoded `TipError` proves
+	// the canister answered.
+	Object.keys(err).length > 0 &&
+	!(err instanceof Error);
 
 /**
  * Gives back an allowance that is now backing nothing.

@@ -414,12 +414,18 @@ describe('tip.services', () => {
 			const revokeCall = (spy: ReturnType<typeof vi.spyOn>) =>
 				spy.mock.calls.length > 1 ? spy.mock.calls[1][0] : undefined;
 
+			// Every one of these is decided before `store_tip`, so the tip does not
+			// exist and the allowance is backing nothing. `MessageTooLong` is here
+			// because an allowlist missed it once — the guard is a denylist now, so
+			// a variant added later cleans up by default rather than silently not.
 			it.each([
 				{ refusal: 'TooManyTips' },
 				{ refusal: 'AmountTooSmall' },
 				{ refusal: 'InvalidExpiry' },
 				{ refusal: 'InvalidTipId' },
 				{ refusal: 'InvalidClaimCodeHash' },
+				{ refusal: 'MessageTooLong' },
+				{ refusal: 'TransferFailed' },
 				{ refusal: 'Uncovered' }
 			])('gives the allowance back after $refusal', async ({ refusal }) => {
 				const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
