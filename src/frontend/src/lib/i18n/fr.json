@@ -2897,6 +2897,8 @@
 			"short_balance_description": "",
 			"claim_failed_title": "",
 			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",

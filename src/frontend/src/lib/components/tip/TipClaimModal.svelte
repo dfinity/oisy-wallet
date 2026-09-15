@@ -38,7 +38,11 @@
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { hasSeenTipWelcome, rememberTipWelcomeSeen } from '$lib/utils/tip.utils';
+	import {
+		hasSeenTipWelcome,
+		isTipUnavailable,
+		rememberTipWelcomeSeen
+	} from '$lib/utils/tip.utils';
 
 	interface Props {
 		pending: PendingTipClaim;
@@ -64,7 +68,7 @@
 	// the tip — the link is still good — it is the same `failed` state with an
 	// answer to "when should I try again".
 	let rateLimit = $state<ReturnType<typeof tipRateLimit>>();
-	let amountLabel = $state<string | undefined>();
+	let claimedAmount = $state<bigint | undefined>();
 	let message = $state<string | undefined>();
 	// From the ledger itself, not the claimer's token list: whoever opens a tip
 	// link may never have held this token, so the list is the wrong place to look
@@ -72,6 +76,16 @@
 	let symbol = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
 	let logo = $state<string | undefined>();
+	// Derived rather than assigned once: `claimedAmount` is set the instant the
+	// payout returns, and the label fills in by itself when the ledger's decimals
+	// and symbol arrive. Never a number the ledger has not told us how to render —
+	// printing base units would put a figure eight orders of magnitude out on the
+	// line confirming what someone was just paid.
+	let amountLabel = $derived(
+		nonNullish(claimedAmount) && nonNullish(decimals) && nonNullish(symbol)
+			? `${formatToken({ value: claimedAmount, unitName: decimals, displayDecimals: decimals })} ${symbol}`
+			: undefined
+	);
 	// Kept from the claim so the token can be switched on for a claimer who has
 	// never held it.
 	let claimedLedgerId = $state<Principal | undefined>();
@@ -147,18 +161,6 @@
 	const isShortBalance = (err: unknown): boolean =>
 		typeof err === 'object' && err !== null && 'InsufficientFunds' in err;
 
-	/**
-	 * Only the canister itself saying the link is dead may be reported as dead.
-	 *
-	 * Anything else — a dropped connection, an expired delegation, a rate limit, a
-	 * stale bundle — is this end failing, and "this tip is no longer available"
-	 * would then be a false statement about someone's money, and one they cannot
-	 * act on. Those get the retryable state instead. Found the hard way: a live
-	 * tip with a valid code read as gone because the call failed locally.
-	 */
-	const isUnavailable = (err: unknown): boolean =>
-		typeof err === 'object' && err !== null && ('NotFound' in err || 'InvalidTipId' in err);
-
 	const loadTokenMetadata = async (ledger: Principal) => {
 		try {
 			const meta = mapTokenMetadata(
@@ -202,7 +204,7 @@
 			consoleWarn('Could not read the tip to claim', err);
 
 			return {
-				failure: isUnavailable(err) ? 'unavailable' : 'failed',
+				failure: isTipUnavailable(err) ? 'unavailable' : 'failed',
 				limit: tipRateLimit(err)
 			};
 		}
@@ -263,18 +265,16 @@
 		try {
 			const claimed = await claimTip({ identity, tipId, claimCode });
 
-			await metadata;
-
-			// Never a number the ledger has not told us how to render: printing base
-			// units would put a figure eight orders of magnitude out on the line
-			// confirming what someone was just paid.
+			// Not awaited before flipping to `received`. The payout has happened, and
+			// an unresponsive ledger metadata call would otherwise hold the modal on
+			// `claiming` after the money had already moved — the one screen that must
+			// never lag behind the ledger.
 			claimedLedgerId = details.ledger_canister_id;
-			amountLabel =
-				nonNullish(decimals) && nonNullish(symbol)
-					? `${formatToken({ value: claimed.amount, unitName: decimals, displayDecimals: decimals })} ${symbol}`
-					: undefined;
+			claimedAmount = claimed.amount;
 			message = fromNullable(details.message);
 			claimState = 'received';
+
+			await metadata;
 
 			trackTip({
 				step: 'claim',
@@ -296,7 +296,7 @@
 				? 'uncovered'
 				: isShortBalance(err)
 					? 'shortBalance'
-					: isUnavailable(err)
+					: isTipUnavailable(err)
 						? 'unavailable'
 						: 'failed';
 
@@ -357,6 +357,23 @@
 			? replacePlaceholders($i18n.tip.text.received_title, { $amount: amountLabel })
 			: $i18n.tip.text.claimed_title
 	);
+
+	/**
+	 * The dialog's accessible name.
+	 *
+	 * This modal has no `title` snippet on purpose — no header, no close cross —
+	 * which also left it with nothing for `aria-labelledby` to point at, so it
+	 * reached assistive technology as an unnamed dialog about someone's money.
+	 * Tracks whichever `h3` is actually on screen, so a screen reader is told what
+	 * a sighted reader sees rather than a generic label.
+	 */
+	let dialogName = $derived(
+		claimState === 'claiming'
+			? $i18n.tip.text.claiming_title
+			: claimState === 'received'
+				? title
+				: failure.title
+	);
 </script>
 
 <!-- The same welcome a reward gets. It is money arriving, unasked for. -->
@@ -370,7 +387,7 @@
 	at all — a modal that can be clicked away mid-payout would leave the outcome
 	of a money movement unreported.
 -->
-<Modal disablePointerEvents={claimState === 'claiming'} onClose={close}>
+<Modal ariaLabel={dialogName} disablePointerEvents={claimState === 'claiming'} onClose={close}>
 	<ContentWithToolbar>
 		{#if claimState === 'claiming' || claimState === 'received'}
 			<TipClaimHero {logo} {symbol} />

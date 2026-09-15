@@ -116,6 +116,25 @@ describe('TipClaimModal', () => {
 		expect(getByText(get(i18n).tip.text.status_completed)).toBeInTheDocument();
 	});
 
+	it('gives the dialog the name a sighted reader sees', async () => {
+		// The modal omits `title` on purpose, so there is no header for
+		// `aria-labelledby` to point at — which left assistive technology with an
+		// unnamed dialog about someone's money.
+		mockDetails();
+		mockClaim();
+
+		const { container, getByText } = render(TipClaimModal, { props: { pending } });
+
+		await waitFor(() => expect(getByText(/0\.005 ICP Received!/)).toBeInTheDocument());
+
+		const dialog = container.querySelector('[role="dialog"]');
+
+		expect(dialog).toHaveAttribute('aria-label', expect.stringContaining('0.005 ICP'));
+		// Never both: an element carrying an `aria-label` and an `aria-labelledby`
+		// leaves which one wins up to the screen reader.
+		expect(dialog).not.toHaveAttribute('aria-labelledby');
+	});
+
 	it('cannot be dismissed while the payout is in flight', async () => {
 		// Clicking a claim away mid-payout would leave the outcome of a money
 		// movement unreported.

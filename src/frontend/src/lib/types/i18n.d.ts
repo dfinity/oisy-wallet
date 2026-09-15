@@ -2423,6 +2423,8 @@ interface I18nTip {
 		short_balance_description: string;
 		claim_failed_title: string;
 		claim_failed: string;
+		unreachable_title: string;
+		unreachable_description: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;
