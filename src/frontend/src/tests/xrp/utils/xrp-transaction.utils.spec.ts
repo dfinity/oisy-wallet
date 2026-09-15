@@ -1,4 +1,8 @@
-import { buildXrpPayment } from '$xrp/utils/xrp-transaction.utils';
+import {
+	buildXrpPayment,
+	isXrpSubmitAccepted,
+	isXrpTransactionSuccessful
+} from '$xrp/utils/xrp-transaction.utils';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -37,6 +41,40 @@ describe('xrp-transaction.utils', () => {
 
 		it('includes LastLedgerSequence when provided', () => {
 			expect(buildXrpPayment({ ...base, lastLedgerSequence: 100 }).LastLedgerSequence).toBe(100);
+		});
+	});
+
+	describe('isXrpSubmitAccepted', () => {
+		it.each(['tesSUCCESS', 'terQUEUED'])(
+			'accepts %s when the node reports acceptance',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeTruthy();
+			}
+		);
+
+		// An applied fee-claiming tec result is "accepted" too, but the payment failed.
+		it.each(['tecUNFUNDED_PAYMENT', 'temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+			'rejects %s even when the node reports acceptance',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeFalsy();
+			}
+		);
+
+		it.each(['tesSUCCESS', 'terQUEUED'])(
+			'rejects %s when the node did not accept it',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: false })).toBeFalsy();
+			}
+		);
+	});
+
+	describe('isXrpTransactionSuccessful', () => {
+		it('is true only for tesSUCCESS', () => {
+			expect(isXrpTransactionSuccessful('tesSUCCESS')).toBeTruthy();
+		});
+
+		it.each(['tecUNFUNDED_PAYMENT', 'terQUEUED', undefined])('is false for %j', (result) => {
+			expect(isXrpTransactionSuccessful(result)).toBeFalsy();
 		});
 	});
 });

@@ -6,10 +6,10 @@ import {
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET
 } from '$xrp/constants/xrp.constants';
 import {
-	isXrpTransactionValidated,
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
+	loadXrpTransactionOutcome,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
@@ -17,7 +17,11 @@ import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import { buildXrpPayment } from '$xrp/utils/xrp-transaction.utils';
+import {
+	buildXrpPayment,
+	isXrpSubmitAccepted,
+	isXrpTransactionSuccessful
+} from '$xrp/utils/xrp-transaction.utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 /**
@@ -71,7 +75,7 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SEND);
 	const result = await submitXrpTransaction({ txBlob, network });
 
-	if (!result.accepted) {
+	if (!isXrpSubmitAccepted(result)) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
@@ -83,16 +87,25 @@ export const sendXrp = async ({
 	const { txHash } = result;
 	assertNonNullish(txHash, 'XRP submit response did not include a transaction hash.');
 
-	await retryWithDelay({
+	// Retry only until the transaction is final. The success check lives after the loop on
+	// purpose: a validated failure is terminal, and retrying it would delay the error by ten
+	// attempts instead of surfacing it at once.
+	const { transactionResult } = await retryWithDelay({
 		request: async () => {
-			const validated = await isXrpTransactionValidated({ hash: txHash, network });
+			const outcome = await loadXrpTransactionOutcome({ hash: txHash, network });
 
-			if (!validated) {
+			if (!outcome.validated) {
 				throw new Error('XRP transaction not yet validated');
 			}
+
+			return outcome;
 		},
 		maxRetries: 10
 	});
+
+	if (!isXrpTransactionSuccessful(transactionResult)) {
+		throw new Error(`XRP transaction failed: ${transactionResult}`);
+	}
 
 	progress?.(ProgressStepsSendXrp.DONE);
 

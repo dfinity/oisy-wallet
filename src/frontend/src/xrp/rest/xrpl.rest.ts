@@ -81,9 +81,12 @@ export const loadXrpBalance = async ({
 };
 
 /**
- * Account balance (drops) and current `Sequence` for a funded account. Unlike
- * {@link loadXrpBalance}, this throws for an unfunded account (`actNotFound`): you
+ * Account balance (drops), current `Sequence` and `OwnerCount` for a funded account.
+ * Unlike {@link loadXrpBalance}, this throws for an unfunded account (`actNotFound`): you
  * cannot build a valid transaction without a sequence number.
+ *
+ * `OwnerCount` is needed for the reserve: every ledger object the account owns raises the
+ * amount it must retain beyond the base reserve.
  */
 export const loadXrpAccountInfo = async ({
 	address,
@@ -98,7 +101,8 @@ export const loadXrpAccountInfo = async ({
 		params: { account: address, ledger_index: 'validated' }
 	});
 
-	const accountData = result.account_data as { Balance: string; Sequence: number } | undefined;
+	const accountData = result.account_data as
+		{ Balance: string; Sequence: number; OwnerCount?: number } | undefined;
 
 	if (isNullish(accountData)) {
 		throw new Error(
@@ -106,7 +110,12 @@ export const loadXrpAccountInfo = async ({
 		);
 	}
 
-	return { balance: BigInt(accountData.Balance), sequence: accountData.Sequence };
+	return {
+		balance: BigInt(accountData.Balance),
+		sequence: accountData.Sequence,
+		// Absent for an account that owns nothing.
+		ownerCount: accountData.OwnerCount ?? 0
+	};
 };
 
 /**
@@ -145,29 +154,42 @@ export const loadXrpLedgerIndex = async ({
 	return ledgerIndex;
 };
 
-/** Whether a transaction hash has been included in a validated ledger (via the `tx` method). */
-export const isXrpTransactionValidated = async ({
+/**
+ * The final outcome of a transaction hash, via the `tx` method.
+ *
+ * `validated` only means the transaction is **final**, not that it succeeded: a
+ * fee-claiming `tec*` transaction is validated too. Callers must therefore decide on
+ * `transactionResult` (the validated `meta.TransactionResult`), not on `validated` alone.
+ */
+export const loadXrpTransactionOutcome = async ({
 	hash,
 	network
 }: {
 	hash: string;
 	network: XrpNetworkType;
-}): Promise<boolean> => {
+}): Promise<{ validated: boolean; transactionResult: string | undefined }> => {
 	const result = await xrpJsonRpc({
 		network,
 		method: 'tx',
 		params: { transaction: hash }
 	});
 
-	return result.validated === true;
+	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
+
+	return {
+		validated: result.validated === true,
+		transactionResult: TransactionResult
+	};
 };
 
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `engine_result` is the node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`);
- * a `tes`/`ter` code means the node accepted the transaction for processing, which is
- * not yet final validation. Callers should confirm finality by polling the tx hash.
+ * `accepted` reports whether the node took the transaction; `engine_result` is its
+ * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither
+ * alone means the payment will succeed — an applied `tec*` result is accepted too — so
+ * callers must judge the result class (see `isXrpSubmitAccepted`) and then confirm
+ * finality *and* success by polling the tx hash (see {@link loadXrpTransactionOutcome}).
  */
 export const submitXrpTransaction = async ({
 	txBlob,

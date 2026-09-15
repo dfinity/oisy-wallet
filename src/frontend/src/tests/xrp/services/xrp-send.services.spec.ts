@@ -29,7 +29,8 @@ describe('xrp-send.services', () => {
 
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
-			sequence: 7
+			sequence: 7,
+			ownerCount: 0
 		});
 		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
 		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(1000);
@@ -40,7 +41,10 @@ describe('xrp-send.services', () => {
 			accepted: true,
 			txHash: 'TXHASH'
 		});
-		vi.spyOn(xrplRest, 'isXrpTransactionValidated').mockResolvedValue(true);
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tesSUCCESS'
+		});
 	});
 
 	it('builds the payment from fetched sequence/fee/ledger and threshold-signs it', async () => {
@@ -90,7 +94,7 @@ describe('xrp-send.services', () => {
 	it('waits for the transaction to be validated', async () => {
 		await sendXrp(params);
 
-		expect(xrplRest.isXrpTransactionValidated).toHaveBeenCalledWith({
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: 'TXHASH',
 			network: XrpNetworks.mainnet
 		});
@@ -103,5 +107,54 @@ describe('xrp-send.services', () => {
 		});
 
 		await expect(sendXrp(params)).rejects.toThrow('tecUNFUNDED_PAYMENT');
+	});
+
+	// `accepted` is also true for an applied fee-claiming `tec*` result, so acceptance alone
+	// must not let the send reach confirmation.
+	it('throws for an accepted tec result rather than confirming it', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			engineResult: 'tecUNFUNDED_PAYMENT',
+			accepted: true,
+			txHash: 'TXHASH'
+		});
+
+		await expect(sendXrp(params)).rejects.toThrow('tecUNFUNDED_PAYMENT');
+
+		expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+	});
+
+	// A validated transaction is only final; `tec*` results are validated too.
+	it('throws when the transaction is validated with a failing result', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed: tecUNFUNDED_PAYMENT');
+	});
+
+	// The failure is terminal, so it must surface at once instead of being retried.
+	it('does not retry a validated failure', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed');
+
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledOnce();
+	});
+
+	it('does not reach DONE when the transaction fails', async () => {
+		const progress = vi.fn();
+
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		await expect(sendXrp({ ...params, progress })).rejects.toThrow('XRP transaction failed');
+
+		expect(progress.mock.calls.map(([step]) => step)).not.toContain(ProgressStepsSendXrp.DONE);
 	});
 });
