@@ -146,6 +146,79 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// A job snapshots the address it was scheduled with. If the scheduler is re-keyed to another
+	// address while that job is in flight, its result belongs to the previous account and must not
+	// be merged into or posted against the new one.
+	describe('when the address changes mid-flight', () => {
+		const otherData: PostMessageDataRequestXrp = {
+			address: { data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: false },
+			xrpNetwork: XrpNetworks.mainnet
+		};
+
+		const postsOf = (msg: string) =>
+			postMessageMock.mock.calls.map(([message]) => message).filter((m) => m.msg === msg);
+
+		const rekey = (scheduler: XrpWalletScheduler) =>
+			(scheduler as unknown as { setRef: (d: PostMessageDataRequestXrp) => void }).setRef(
+				otherData
+			);
+
+		it('should discard a balance that resolves after the re-key', async () => {
+			let resolveBalance: ((balance: bigint) => void) | undefined;
+			spyLoadBalance.mockImplementation(
+				() =>
+					new Promise<bigint>((resolve) => {
+						resolveBalance = resolve;
+					})
+			);
+
+			const scheduler = new XrpWalletScheduler();
+			const promise = scheduler.trigger(startData);
+
+			// `trigger` awaits the identity before running the job, so let it reach `loadXrpBalance`
+			// first — otherwise the re-key happens before the request is even in flight.
+			await vi.advanceTimersByTimeAsync(100);
+
+			expect(spyLoadBalance).toHaveBeenCalled();
+
+			rekey(scheduler);
+			resolveBalance?.(mockBalance);
+
+			await vi.runAllTimersAsync();
+			await promise;
+
+			expect(postsOf('syncXrpWallet')).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		it('should not report an error for an address the scheduler moved on from', async () => {
+			spyLoadBalance.mockRejectedValue(new Error('test'));
+
+			const scheduler = new XrpWalletScheduler();
+			const promise = scheduler.trigger(startData);
+
+			rekey(scheduler);
+
+			await vi.runAllTimersAsync();
+			await promise;
+
+			expect(postsOf('syncXrpWalletError')).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		it('should still post a balance that resolves before any re-key', async () => {
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.trigger(startData);
+
+			expect(postsOf('syncXrpWallet')).toHaveLength(1);
+
+			scheduler.stop();
+		});
+	});
+
 	describe('on a failing balance load', () => {
 		const walletPosts = () =>
 			postMessageMock.mock.calls

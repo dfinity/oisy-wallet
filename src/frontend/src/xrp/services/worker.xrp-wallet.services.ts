@@ -108,6 +108,9 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 				return;
 			}
 
+			// `SchedulerTimer.start` is a no-op while its timer exists, so the running timer has to be
+			// cleared first or it would keep polling the previous address under the new ref.
+			this.stopTimer();
 			this.start();
 		});
 	};

@@ -156,8 +156,9 @@ describe('worker.xrp-wallet.services', () => {
 				});
 			});
 
-			// Without this the timer inside the worker keeps polling the address it last received.
-			it('should restart the timer with the new address while running', async () => {
+			// `SchedulerTimer.start` is a no-op while its timer exists, so a bare start would leave the
+			// timer polling the previous address under the new ref. The stop must come first.
+			it('should stop the timer before restarting it with the new address', async () => {
 				const worker = await initWorker();
 
 				worker.start();
@@ -166,7 +167,11 @@ describe('worker.xrp-wallet.services', () => {
 				xrpAddressMainnetStore.set(otherAddress);
 				await drainQueue();
 
-				expect(postMessageSpy).toHaveBeenCalledWith({
+				expect(postMessageSpy.mock.calls.map(([{ msg }]) => msg)).toEqual([
+					'stopXrpWalletTimer',
+					'startXrpWalletTimer'
+				]);
+				expect(postMessageSpy).toHaveBeenLastCalledWith({
 					msg: 'startXrpWalletTimer',
 					workerId: mockId,
 					data: { address: otherAddress, xrpNetwork: XrpNetworks.mainnet }
