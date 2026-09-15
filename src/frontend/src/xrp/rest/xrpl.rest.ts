@@ -4,7 +4,12 @@ import { XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpAccountInfo, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import type {
+	XrpAccountInfo,
+	XrpAccountTransactionEntry,
+	XrpSubmitResult,
+	XrpTransactionsPage
+} from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 const xrpJsonRpc = async ({
@@ -217,4 +222,40 @@ export const submitXrpTransaction = async ({
 		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
 		accepted: (result.accepted as boolean | undefined) ?? false
 	};
+};
+
+/**
+ * Native XRP transaction history via the XRPL `account_tx` method.
+ *
+ * `ledger_index_min` / `ledger_index_max` of `-1` mean "the full available range";
+ * `forward: false` returns newest-first. `marker` is the opaque pagination cursor
+ * returned by a previous page — pass it back to fetch the next (older) page.
+ */
+export const loadXrpTransactions = async ({
+	address,
+	network,
+	limit,
+	marker
+}: {
+	address: XrpAddress;
+	network: XrpNetworkType;
+	limit: number;
+	marker?: unknown;
+}): Promise<XrpTransactionsPage> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'account_tx',
+		params: {
+			account: address,
+			ledger_index_min: -1,
+			ledger_index_max: -1,
+			limit,
+			forward: false,
+			...(nonNullish(marker) && { marker })
+		}
+	});
+
+	const transactions = (result.transactions as XrpAccountTransactionEntry[] | undefined) ?? [];
+
+	return { transactions, marker: result.marker };
 };

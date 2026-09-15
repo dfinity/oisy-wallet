@@ -3,8 +3,9 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
-import { nonNullish } from '@dfinity/utils';
+import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -16,7 +17,8 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance }
+			balance: { certified, data: balance },
+			newTransactions
 		}
 	} = data;
 
@@ -31,6 +33,11 @@ export const syncWallet = ({
 	} else {
 		balancesStore.reset(tokenId);
 	}
+
+	xrpTransactionsStore.prepend({
+		tokenId,
+		transactions: JSON.parse(newTransactions, jsonReviver)
+	});
 };
 
 export const syncWalletError = ({
@@ -45,6 +52,7 @@ export const syncWalletError = ({
 	const errorText = get(i18n).init.error.xrp_wallet_error;
 
 	balancesStore.reset(tokenId);
+	xrpTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
 		consoleWarn(`${errorText}:`, err);

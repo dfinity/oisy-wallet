@@ -4,6 +4,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -322,6 +323,62 @@ describe('applyTransactionsFilter', () => {
 				transactions: allTxs,
 				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['9999'] },
 				contacts: allContacts
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('XRP transactions', () => {
+		// XRP address-book contacts are not supported yet (they need a backend address
+		// type), so the XRP branch exists to collect the plain from/to addresses — and to
+		// keep the exhaustive `assertNever` from throwing on an XRP transaction.
+		const xrpSendTx = {
+			component: 'xrp',
+			token: XRP_TOKEN,
+			transaction: {
+				id: 'xrp-1',
+				type: 'send',
+				status: 'confirmed',
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress',
+				value: 100n,
+				timestamp: ZERO
+			}
+		} as unknown as AllTransactionUiWithCmp;
+
+		const xrpContact: ContactUi = {
+			name: 'Xrp Friend',
+			id: 7n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: 'rReceiverAddress', addressType: 'Sol' }]
+		};
+
+		it('keeps an XRP transaction when filtering by type', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['send'] },
+				contacts: []
+			});
+
+			expect(result).toEqual([xrpSendTx]);
+		});
+
+		it('matches an XRP transaction by its recipient address without throwing', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+				contacts: [xrpContact]
+			});
+
+			expect(result).toEqual([xrpSendTx]);
+		});
+
+		it('excludes an XRP transaction whose addresses no contact holds', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+				contacts: [{ ...xrpContact, addresses: [{ address: 'rOther', addressType: 'Sol' }] }]
 			});
 
 			expect(result).toEqual([]);

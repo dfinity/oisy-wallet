@@ -22,6 +22,9 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 // lingering.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 
+// Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
+// XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
+export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
 // Safety net for the confirmation poll only: the real bound is the transaction's
 // LastLedgerSequence, so this merely stops the loop if a node never advances its ledger
 // index. Generous next to the ~80s validity window at a 1-2s poll interval.
