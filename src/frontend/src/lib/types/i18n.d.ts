@@ -132,6 +132,7 @@ interface I18nNavigation {
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
 		notes: string;
+		issue_tip: string;
 	};
 	alt: {
 		tokens: string;
@@ -156,6 +157,7 @@ interface I18nNavigation {
 		hide_balances: string;
 		show_balances: string;
 		notes: string;
+		issue_tip: string;
 	};
 	short: { documentation: string };
 }
@@ -2365,6 +2367,50 @@ interface I18nNotes {
 	};
 }
 
+interface I18nTip {
+	text: {
+		intro_title: string;
+		intro_heading: string;
+		intro_body: string;
+		select_token: string;
+		create_title: string;
+		share_title: string;
+		empty_balance_title: string;
+		empty_balance_description: string;
+		no_supported_tokens_title: string;
+		no_supported_tokens_description: string;
+		expiration: string;
+		expiry_24h: string;
+		expiry_3d: string;
+		expiry_7d: string;
+		message: string;
+		message_placeholder: string;
+		total_estimated_fee: string;
+		reserve_fee: string;
+		payout_fee: string;
+		fees_are_yours: string;
+		lapse_notice: string;
+		generate: string;
+		share_heading: string;
+		copy_link: string;
+		share_link: string;
+		they_will_receive: string;
+		no_wallet_needed_title: string;
+		no_wallet_needed: string;
+		scan_or_photo: string;
+		expires_at: string;
+		done: string;
+		link_not_saved: string;
+		reserve_failed: string;
+		message_too_long: string;
+		learn_how_it_works: string;
+		view_history: string;
+		get_started: string;
+		rate_limited: string;
+	};
+	alt: { intro_illustration: string };
+}
+
 interface I18n {
 	lang: Languages;
 	borrow: I18nBorrow;
@@ -2423,4 +2469,5 @@ interface I18n {
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 	notes: I18nNotes;
+	tip: I18nTip;
 }

@@ -356,11 +356,30 @@ export const reserveTip = async ({
 		// from a genuine id collision: only the tip created from this draft answers
 		// to this code, so success here proves the stored tip is ours and the flow
 		// can continue. A collision answers `NotFound` and rethrows.
-		await getTipDetails({
+		const stored = await getTipDetails({
 			identity,
 			tip_id: draft.tipId,
 			claim_code: draft.claimCode
 		});
+
+		// Ours is not enough — it also has to be for the same thing. The draft is
+		// kept across retries on purpose, but the form stays editable, so a sender
+		// who edits the amount and retries reaches here with the allowance replaced
+		// at the new figure while the stored tip still holds the old one. Continuing
+		// would hand back a link whose share screen and eventual payout disagree.
+		//
+		// Rethrown rather than reconciled to the stored terms: the sender asked for
+		// the edited tip, and quietly giving them the original under a success
+		// message is the worse of the two lies. The original is still reserved and
+		// still theirs — it appears in History, where it can be cancelled — and
+		// closing the modal starts a fresh draft.
+		if (
+			stored.amount !== amount ||
+			stored.expires_at_ns !== expiresAtNs ||
+			stored.ledger_canister_id.toText() !== ledgerCanisterId
+		) {
+			throw err;
+		}
 	}
 
 	return { link: buildTipLink(draft), secretStored: await storeClaimCode({ identity, draft }) };
