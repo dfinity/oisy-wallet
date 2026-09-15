@@ -1,6 +1,11 @@
 import { XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
-import { buildXrpPayment, mapXrpTransaction } from '$xrp/utils/xrp-transaction.utils';
+import {
+	buildXrpPayment,
+	isXrpSubmitAccepted,
+	isXrpTransactionSuccessful,
+	mapXrpTransaction
+} from '$xrp/utils/xrp-transaction.utils';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -193,6 +198,40 @@ describe('xrp-transaction.utils', () => {
 
 			expect(ui?.id).toBe('H8');
 			expect(ui?.blockNumber).toBe(99);
+		});
+	});
+
+	describe('isXrpSubmitAccepted', () => {
+		it.each(['tesSUCCESS', 'terQUEUED'])(
+			'accepts %s when the node reports acceptance',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeTruthy();
+			}
+		);
+
+		// An applied fee-claiming tec result is "accepted" too, but the payment failed.
+		it.each(['tecUNFUNDED_PAYMENT', 'temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+			'rejects %s even when the node reports acceptance',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeFalsy();
+			}
+		);
+
+		it.each(['tesSUCCESS', 'terQUEUED'])(
+			'rejects %s when the node did not accept it',
+			(engineResult) => {
+				expect(isXrpSubmitAccepted({ engineResult, accepted: false })).toBeFalsy();
+			}
+		);
+	});
+
+	describe('isXrpTransactionSuccessful', () => {
+		it('is true only for tesSUCCESS', () => {
+			expect(isXrpTransactionSuccessful('tesSUCCESS')).toBeTruthy();
+		});
+
+		it.each(['tecUNFUNDED_PAYMENT', 'terQUEUED', undefined])('is false for %j', (result) => {
+			expect(isXrpTransactionSuccessful(result)).toBeFalsy();
 		});
 	});
 });

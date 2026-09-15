@@ -5,6 +5,15 @@ export const XRP_DERIVATION_PATH_PREFIX = 'XRP';
 // This is the current network value; it is a validator-configurable amount.
 export const XRP_BASE_RESERVE_DROPS = 1_000_000n;
 
+// XRPL owner reserve in drops, required *per ledger object* the account owns (trust lines,
+// offers, escrows, …) on top of the base reserve. Also the current, validator-configurable
+// network value.
+//
+// TODO: both reserves are authoritatively reported by the node (`server_state` returns them
+// in drops); reading them would survive a network change. Left hardcoded for now because the
+// call has not been verified against a live XRPL node.
+export const XRP_OWNER_RESERVE_DROPS = 200_000n;
+
 // Fallback per-transaction fee in drops, used when the node's fee estimate is unavailable.
 export const XRP_DEFAULT_FEE_DROPS = 10n;
 
@@ -16,3 +25,7 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
 // XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
 export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
+// Safety net for the confirmation poll only: the real bound is the transaction's
+// LastLedgerSequence, so this merely stops the loop if a node never advances its ledger
+// index. Generous next to the ~80s validity window at a 1-2s poll interval.
+export const XRP_CONFIRM_MAX_ATTEMPTS = 120;
