@@ -990,7 +990,7 @@
 			"cketh_certified": "Veuillez patienter jusqu'à ce que les paramètres ckETH aient été certifiés.",
 			"pending_bitcoin_transaction": "Vous pourrez envoyer une autre transaction Bitcoin une fois celle en attente terminée.",
 			"no_available_utxos": "Vous n'aurez pas d'utxos disponibles pour effectuer cette transaction.",
-			"first_time_destination": "Vous n'avez jamais envoyé de tokens à cette adresse. Vérifiez l'adresse attentivement.",
+			"first_time_destination": "Il semble que vous n'ayez jamais envoyé de tokens à cette adresse. Vérifiez l'adresse attentivement.",
 			"first_time_destination_confirm": "C'est la première fois que j'envoie des tokens à cette adresse et j'ai vérifié l'adresse attentivement.",
 			"fee_expired": "",
 			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>",

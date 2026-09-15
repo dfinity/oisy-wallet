@@ -80,9 +80,10 @@ routine, and red spent on the routine case stops being read.
 Trigger: a valid destination longer than `MIN_DESTINATION_LENGTH_FOR_ERROR_STATE` with no
 previous send on record. **Saved contacts no longer suppress it.**
 
-It uses the same warning-level box as the review step, without the checkbox: it states that
-the user has never sent tokens to the address and asks them to verify it carefully. **Next
-stays enabled** — the user is stopped once, at the last moment, not twice.
+It uses the same warning-level box as the review step, without the checkbox: it says it
+appears the user has never sent tokens to the address and asks them to verify it carefully.
+The hedge is deliberate here, since the claim rests on the history that happens to be loaded.
+**Next stays enabled** — the user is stopped once, at the last moment, not twice.
 
 ### Review step
 
@@ -163,12 +164,14 @@ with the confirmation reset on a destination change, as `SwapReview` does. The
 
 ### 4. i18n
 
-Under `send.info`, replacing `unknown_destination`: `first_time_destination` ("You have never
-sent tokens to this address before. Verify the address carefully.") for the address step, and
+Under `send.info`, replacing `unknown_destination`: `first_time_destination` ("It appears you
+have never sent tokens to this address before. Verify the address carefully.") for the address
+step, and
 `first_time_destination_confirm` ("This is the first time I send tokens to this address and I
 have verified the address carefully.") for the review step. The confirmation speaks in the
 first person, as the label of what the user is ticking, so it **replaces** the warning rather
-than being appended to it. Regenerate types with
+than being appended to it. It carries no hedge: the user is stating what they did, not being
+told what the wallet found. Regenerate types with
 `npm run i18n`, and translate every locale of the `Languages` enum (`ar.json` is not in it and
 only receives the empty keys the generator adds).
 
