@@ -12,6 +12,7 @@ import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
+import type { PendingTipClaim } from '$lib/types/tip';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -58,6 +59,8 @@ export interface Modal<T> {
 		| 'vip-qr-code'
 		| 'referral-code'
 		| 'tip'
+		| 'tip-welcome'
+		| 'tip-claim'
 		| 'referral-state'
 		| 'address-book'
 		| 'notes'
@@ -141,6 +144,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openTip: (id: symbol) => void;
+	openTipClaim: (params: SetWithDataParams<PendingTipClaim>) => void;
+	openTipWelcome: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openNotes: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
@@ -244,6 +249,10 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openTip: setType('tip'),
+		openTipWelcome: setType('tip-welcome'),
+		openTipClaim: <(params: SetWithDataParams<PendingTipClaim>) => void>(
+			setTypeWithData('tip-claim')
+		),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
