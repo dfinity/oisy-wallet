@@ -266,7 +266,7 @@ describe('TipHistory', () => {
 		);
 
 		const { container, queryByText } = render(TipHistory, {
-			props: { onClose: vi.fn(), onViewLink: vi.fn() }
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
 		});
 
 		expect(container.querySelectorAll('[data-tid^="tip-history-"]').length).toBeGreaterThan(0);
