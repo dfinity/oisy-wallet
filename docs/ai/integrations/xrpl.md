@@ -5,19 +5,25 @@ exposed by `rippled` / Clio nodes). This is the same HTTP JSON-RPC used across
 the XRPL ecosystem; OISY talks to it with a plain `fetch` POST — there is no
 XRPL SDK dependency.
 
-XRP Ledger support is temporarily **disabled in user-facing environments** by
-`XRP_MAINNET_DISABLED_OVERRIDE`, so none of the below is exercised in production.
-After enablement, the standard `VITE_XRP_MAINNET_DISABLED` flag will govern it.
+XRP Ledger follows the same enablement convention as every other mainnet
+network: it is **enabled by default** and can be switched off per environment
+with `VITE_XRP_MAINNET_DISABLED`.
 
 ## What we use it for
 
-| Area    | Method         | Purpose                                                      |
-| ------- | -------------- | ------------------------------------------------------------ |
-| Balance | `account_info` | Native XRP balance (in drops) for the user's classic address |
-| Send    | `submit`       | Broadcast a signed transaction blob to the network           |
+| Area    | Method           | Purpose                                                           |
+| ------- | ---------------- | ----------------------------------------------------------------- |
+| Balance | `account_info`   | Native XRP balance (in drops) for the user's classic address      |
+| Send    | `account_info`   | The account `Sequence` required to build a payment                |
+| Send    | `fee`            | Current open-ledger fee, in drops                                 |
+| Send    | `ledger_current` | Current ledger index, used to set `LastLedgerSequence`            |
+| Send    | `submit`         | Broadcasts a signed transaction blob                              |
+| Send    | `tx`             | Polls a submitted transaction hash for validation                 |
+| History | `account_tx`     | Native XRP transaction history, paginated with an opaque `marker` |
 
-Later phases add `fee` and `account_tx` (history) — see the
-[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md).
+See the
+[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
+for how these fit together.
 
 ## Balance (`account_info`)
 

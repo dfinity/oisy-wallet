@@ -9,6 +9,7 @@ import {
 	ICP_PSEUDO_TESTNET_NETWORK_SYMBOL
 } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.xrp.env';
 import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { get } from 'svelte/store';
 
@@ -24,7 +25,8 @@ describe('networks.derived', () => {
 				BASE_NETWORK_SYMBOL,
 				BSC_MAINNET_NETWORK_SYMBOL,
 				POLYGON_MAINNET_NETWORK_SYMBOL,
-				SOLANA_MAINNET_NETWORK_SYMBOL
+				SOLANA_MAINNET_NETWORK_SYMBOL,
+				XRP_MAINNET_NETWORK_SYMBOL
 			]);
 		});
 	});

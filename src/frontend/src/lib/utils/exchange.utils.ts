@@ -184,6 +184,7 @@ export interface ProviderFallbackPrices {
 	btcPrice?: CoingeckoSimplePriceResponse;
 	icpPrice?: CoingeckoSimplePriceResponse;
 	solPrice?: CoingeckoSimplePriceResponse;
+	xrpPrice?: CoingeckoSimplePriceResponse;
 	bnbPrice?: CoingeckoSimplePriceResponse;
 	polPrice?: CoingeckoSimplePriceResponse;
 	arbitrumEthPrice?: CoingeckoSimplePriceResponse;
@@ -272,6 +273,10 @@ export const mergeExchangePrices = async ({
 		currentSolPrice: mergeNative({
 			providerPrice: providerPrices.solPrice,
 			backendPrice: backendData.currentSolPrice
+		}),
+		currentXrpPrice: mergeNative({
+			providerPrice: providerPrices.xrpPrice,
+			backendPrice: backendData.currentXrpPrice
 		}),
 		currentBnbPrice: mergeNative({
 			providerPrice: providerPrices.bnbPrice,
