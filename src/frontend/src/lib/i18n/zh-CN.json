@@ -1747,6 +1747,7 @@
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
+			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，该交易未被签名。",
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"

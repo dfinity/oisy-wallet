@@ -1747,6 +1747,7 @@
 			"from_address_not_wallet": "트랜잭션에 요청된 발신 주소가 이 지갑의 주소가 아닙니다.",
 			"unknown_destination": "알 수 없는 수신 주소입니다.",
 			"ambiguous_transaction": "이 거래는 여러 주소 간에 자금을 이동하므로 검토를 위해 정확하게 표시할 수 없습니다. 보안을 위해 서명되지 않았습니다.",
+			"unreviewed_without_simulation": "OISY가 이 트랜잭션의 일부를 읽을 수 없었고 네트워크에서 시뮬레이션도 반환되지 않아, 해당 부분이 무엇을 하는지 설명할 수 있는 것이 없습니다. 안전을 위해 서명되지 않았습니다.",
 			"sol_transaction_as_message": "이 메시지는 Solana 트랜잭션으로, 트랜잭션 검토를 통해서만 승인될 수 있습니다. 보안을 위해 서명되지 않았습니다.",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."

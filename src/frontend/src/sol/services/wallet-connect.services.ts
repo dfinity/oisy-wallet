@@ -84,6 +84,11 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
 	identity: NullishIdentity;
+	// Whether the review in front of the user was built from a simulated run. The decode already
+	// made the call, so its outcome is handed on rather than repeated here: asking again would put
+	// a second round trip on the critical path, and a simulation that landed after the user pressed
+	// approve would describe a review they never read.
+	simulated: boolean;
 };
 
 export const decode = async ({
@@ -439,6 +444,7 @@ export const sign = ({
 	token,
 	progress,
 	identity,
+	simulated,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -481,7 +487,8 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous } = mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous, unreviewed } =
+				mapSolTransactionMessage(parsedTransactionMessage);
 
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary
@@ -490,6 +497,24 @@ export const sign = ({
 			if (ambiguous) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// An instruction OISY cannot read does not corrupt the summary, so it is a warning rather
+			// than a refusal - but the thing that makes it a warning and not a blindfold is the
+			// simulated run, which reports what the message would do to the user's own accounts
+			// whether or not any decoder understood it. Without that run the review says only that
+			// something in here could not be read, and approving it is approving an effect nobody
+			// described. The simulation is best effort by design and stays that way: it is not
+			// required of a message OISY did read, and a provider that times out on a transaction
+			// the wallet understands still signs.
+			if ((unreviewed ?? false) && !simulated) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
