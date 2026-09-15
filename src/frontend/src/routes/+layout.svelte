@@ -21,6 +21,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { initMobileAuthListener } from '$lib/services/auth-mobile.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
 	import { purgeLegacyPersonalNotesVetkeyCache } from '$lib/services/personal-notes.vetkeys';
@@ -33,7 +34,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
-	import { isIOS } from '$lib/utils/device.utils';
+	import { isIOS, isNativePlatform } from '$lib/utils/device.utils';
 	import { initWorkerCleanupOnPageUnload } from '$lib/utils/page-unload.utils';
 
 	interface Props {
@@ -59,7 +60,9 @@
 			syncAuthStore(),
 			initPlausibleAnalytics(),
 			i18n.init(),
-			purgeLegacyPersonalNotesVetkeyCache()
+			purgeLegacyPersonalNotesVetkeyCache(),
+			// Registers the deep-link handler for the auth-bridge callback in the Capacitor shell.
+			...(browser && isNativePlatform() ? [initMobileAuthListener()] : [])
 		]);
 	};
 
