@@ -36,7 +36,7 @@ describe('xrp-wallet.scheduler', () => {
 		xrpNetwork: XrpNetworks.mainnet
 	};
 
-	const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}`;
+	const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}-${startData.address.data}`;
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncXrpWalletStatus',

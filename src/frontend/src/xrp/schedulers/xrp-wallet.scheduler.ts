@@ -32,7 +32,11 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 	}
 
 	protected setRef(data: PostMessageDataRequestXrp | undefined) {
-		const newRef = nonNullish(data) ? `${XRP_TOKEN.symbol}-${data.xrpNetwork}` : undefined;
+		// The address is part of the ref, so a scheduler re-keyed to another address does not filter
+		// its first sync against the previous address's balance (mirrors btc-wallet.scheduler.ts).
+		const newRef = nonNullish(data)
+			? `${XRP_TOKEN.symbol}-${data.xrpNetwork}-${data.address.data}`
+			: undefined;
 
 		if (this.#ref !== newRef) {
 			this.store = {
