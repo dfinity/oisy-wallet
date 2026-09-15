@@ -47,9 +47,18 @@ const { mockLiquidiumEnabled } = vi.hoisted(() => ({
 
 // XRP is force-disabled under TEST, so the enablement derived is mocked with a
 // toggle that individual tests can switch on to exercise the XRP loader branch.
-const mocks = vi.hoisted(() => ({
-	xrpMainnetEnabled: null as unknown as Writable<boolean>
-}));
+const mocks = vi.hoisted(() => {
+	let xrpMainnetEnabled!: Writable<boolean>;
+
+	return {
+		get xrpMainnetEnabled(): Writable<boolean> {
+			return xrpMainnetEnabled;
+		},
+		set xrpMainnetEnabled(value: Writable<boolean>) {
+			xrpMainnetEnabled = value;
+		}
+	};
+});
 
 vi.mock('$env/liquidium', () => ({
 	get LIQUIDIUM_ENABLED() {

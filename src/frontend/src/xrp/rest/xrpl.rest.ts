@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
+import { XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
@@ -30,13 +31,6 @@ const xrpJsonRpc = async ({
 	return result;
 };
 
-interface XrplAccountInfoResponse {
-	result: {
-		account_data?: { Balance: string };
-		error?: string;
-	};
-}
-
 /**
  * Native XRP balance in drops (1 XRP = 1,000,000 drops), via the XRP Ledger
  * JSON-RPC `account_info` method.
@@ -65,19 +59,25 @@ export const loadXrpBalance = async ({
 		throw new Error(`XRPL account_info request failed with status ${response.status}`);
 	}
 
-	const {
-		result: { account_data, error }
-	}: XrplAccountInfoResponse = await response.json();
+	// The response is untrusted external JSON: validate it before converting, so a malformed
+	// `Balance` cannot pass through `BigInt` as a plausible-looking amount.
+	const parsed = XrplAccountInfoResponseSchema.safeParse(await response.json());
 
-	if (error === 'actNotFound') {
-		return ZERO;
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	if (isNullish(account_data)) {
-		throw new Error(`Unexpected XRPL account_info response: ${error ?? 'missing account_data'}`);
+	const { result } = parsed.data;
+
+	if ('error' in result) {
+		if (result.error === 'actNotFound') {
+			return ZERO;
+		}
+
+		throw new Error(`Unexpected XRPL account_info response: ${result.error}`);
 	}
 
-	return BigInt(account_data.Balance);
+	return BigInt(result.account_data.Balance);
 };
 
 /**

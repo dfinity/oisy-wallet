@@ -21,7 +21,7 @@ Later phases add `fee` and `account_tx` (history) — see the
 
 ## Balance (`account_info`)
 
-`loadXrpBalance` (`src/frontend/src/xrp/api/xrpl.api.ts`) POSTs
+`loadXrpBalance` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs
 
 ```json
 { "method": "account_info", "params": [{ "account": "r...", "ledger_index": "validated" }] }
@@ -34,7 +34,7 @@ treats that as a **zero** balance (a valid state, not an error).
 
 ## Send (`submit`)
 
-`submitXrpTransaction` (`src/frontend/src/xrp/api/xrpl.api.ts`) POSTs a signed,
+`submitXrpTransaction` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs a signed,
 hex-encoded transaction blob:
 
 ```json

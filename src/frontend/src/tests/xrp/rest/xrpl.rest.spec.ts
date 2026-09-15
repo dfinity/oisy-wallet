@@ -1,8 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { loadXrpBalance, submitXrpTransaction } from '$xrp/api/xrpl.api';
+import { loadXrpBalance, submitXrpTransaction } from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
 
-describe('xrpl.api', () => {
+describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 
 	const mockFetchResponse = ({
@@ -78,6 +78,27 @@ describe('xrpl.api', () => {
 				'invalidParams'
 			);
 		});
+
+		it('throws on a response with neither account_data nor an error', async () => {
+			mockFetchResponse({ body: { result: {} } });
+
+			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL account_info response'
+			);
+		});
+
+		// XRPL reports drops as an unsigned decimal string; `BigInt` alone would accept all of these
+		// and hand back a plausible-looking balance.
+		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
+			'throws instead of converting the invalid balance %j',
+			async (Balance) => {
+				mockFetchResponse({ body: { result: { account_data: { Balance } } } });
+
+				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+					'Unexpected XRPL account_info response'
+				);
+			}
+		);
 	});
 
 	describe('submitXrpTransaction', () => {
