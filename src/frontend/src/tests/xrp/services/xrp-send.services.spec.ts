@@ -153,12 +153,14 @@ describe('xrp-send.services', () => {
 		const validatesOnAttempt = 15;
 		let attempts = 0;
 
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
 			attempts++;
 
-			return attempts < validatesOnAttempt
-				? { validated: false, transactionResult: undefined }
-				: { validated: true, transactionResult: 'tesSUCCESS' };
+			return Promise.resolve(
+				attempts < validatesOnAttempt
+					? { validated: false, transactionResult: undefined }
+					: { validated: true, transactionResult: 'tesSUCCESS' }
+			);
 		});
 
 		await expect(sendXrp(params)).resolves.toBeDefined();
