@@ -29,7 +29,8 @@ describe('xrp-send.services', () => {
 
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
-			sequence: 7
+			sequence: 7,
+			ownerCount: 0
 		});
 		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
 		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(1000);

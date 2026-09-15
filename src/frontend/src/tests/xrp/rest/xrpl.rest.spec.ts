@@ -185,12 +185,24 @@ describe('xrpl.rest', () => {
 	describe('loadXrpAccountInfo', () => {
 		it('returns the balance and sequence for a funded account', async () => {
 			mockFetchResponse({
+				body: {
+					result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } }
+				}
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info).toEqual({ balance: 30_000_000n, sequence: 42, ownerCount: 3 });
+		});
+
+		it('defaults the owner count to zero when the account owns nothing', async () => {
+			mockFetchResponse({
 				body: { result: { account_data: { Balance: '30000000', Sequence: 42 } } }
 			});
 
 			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
 
-			expect(info).toEqual({ balance: 30_000_000n, sequence: 42 });
+			expect(info.ownerCount).toBe(0);
 		});
 
 		it('throws for an unfunded account', async () => {
