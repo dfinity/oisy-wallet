@@ -74,6 +74,10 @@ export const initSendContext = ({
 	// re-render, so it cannot be a prop.
 	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.STANDARD);
 
+	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
+	// but consumed at the send step, so it must survive the WizardModal step re-renders.
+	const sendXrpDestinationTag = writable<number | undefined>();
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -86,7 +90,8 @@ export const initSendContext = ({
 		sendDestination,
 		isIcBurning,
 		sendEthCustomNonce,
-		sendEthFeePriority
+		sendEthFeePriority,
+		sendXrpDestinationTag
 	};
 };
 
@@ -103,6 +108,7 @@ export interface SendContext {
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
+	sendXrpDestinationTag: Writable<number | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
