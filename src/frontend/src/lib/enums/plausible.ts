@@ -25,6 +25,7 @@ export enum PLAUSIBLE_EVENTS {
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	TIP = 'tip',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -61,7 +62,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
-	PERSONAL_NOTES = 'personal_notes'
+	PERSONAL_NOTES = 'personal_notes',
+	TIPS = 'tips'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -146,7 +148,9 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	OISY_TRADE = 'oisy_trade',
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
-	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
+	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
+	TIP_SENDER = 'tip_sender',
+	TIP_CLAIMER = 'tip_claimer'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {

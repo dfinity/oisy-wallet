@@ -145,7 +145,8 @@
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
 			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요.",
-			"notes": "메모"
+			"notes": "메모",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
@@ -169,7 +170,8 @@
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
-			"notes": "메모 열기"
+			"notes": "메모 열기",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "문서"
@@ -2808,7 +2810,7 @@
 				"snapshot_caption": "현재 상태의 메모 사본을 공유합니다. 이후에 메모를 수정하거나 삭제해도 이 링크는 변경되지 않습니다.",
 				"cap_reached": "활성 공유 링크 최대 개수($max개)에 도달했습니다. 만료되거나 사용되면 다시 사용할 수 있게 됩니다.",
 				"expires_after": "링크 만료 시간",
-				"expiry_1h": "1시간",
+				"expiry_1h": "",
 				"expiry_24h": "24시간",
 				"expiry_7d": "7일",
 				"expiry_30d": "30일",
@@ -2842,6 +2844,51 @@
 				"discover": "OISY 알아보기",
 				"unavailable_title": "이 링크는 만료되었거나 이미 사용되었습니다"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
