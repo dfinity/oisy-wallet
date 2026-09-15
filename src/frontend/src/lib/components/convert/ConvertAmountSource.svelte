@@ -114,7 +114,16 @@
 			return;
 		}
 
-		debounce(() => setMax(), 500)();
+		debounce(() => {
+			// Rechecked because the flag can be cleared during the delay: typing into the input
+			// clears it, and this callback would otherwise overwrite what the user just typed —
+			// and re-arm the flag, so the next fee change would do it again.
+			if (!amountSetToMax) {
+				return;
+			}
+
+			setMax();
+		}, 500)();
 	};
 
 	$effect(() => {

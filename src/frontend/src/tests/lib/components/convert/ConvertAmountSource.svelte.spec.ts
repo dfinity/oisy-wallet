@@ -1,10 +1,14 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
+import {
+	TOKEN_INPUT_AMOUNT_EXCHANGE,
+	TOKEN_INPUT_CURRENCY_TOKEN
+} from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
 import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -171,6 +175,37 @@ describe('ConvertAmountSource', () => {
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		expect(testProps.sendAmount).toBe('0.00001');
+	});
+
+	// Regression: the flag was read once when the reapplication was scheduled, so typing during
+	// the 500ms delay had the manual amount overwritten by the pending callback.
+	it('should not overwrite a manually typed amount when the user types during the delay', async () => {
+		const testProps = $state({ ...props, maxAmount: undefined as bigint | undefined });
+
+		const { getByTestId, container } = render(ConvertAmountSource, {
+			props: testProps,
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(balanceTestId));
+
+		expect(testProps.sendAmount).toBe(maxButtonValue);
+
+		// Schedules the debounced reapplication.
+		testProps.maxAmount = 1000n;
+
+		const input: HTMLInputElement | null = container.querySelector(
+			`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
+		);
+
+		assertNonNullish(input);
+
+		await fireEvent.input(input, { target: { value: '0.002' } });
+
+		// wait for the debounced setMax to have been completed
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(testProps.sendAmount).toBe('0.002');
 	});
 
 	it('should clamp the max button value to the cap when one is set', () => {

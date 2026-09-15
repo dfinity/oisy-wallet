@@ -138,6 +138,36 @@ describe('MaxBalanceButton', () => {
 		}
 	});
 
+	// Regression: the flag was read once when the reapplication was scheduled, so typing during
+	// the 500ms delay had the manual amount overwritten by the pending callback.
+	it('does not overwrite a manually typed amount when the user types during the delay', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, fee: 10_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1.9');
+
+			// Schedules the debounced reapplication.
+			await rerender({ ...baseProps, fee: 50_000_000n });
+
+			await fireEvent.click(getByTestId('max-balance-button-simulate-input'));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('0.002');
+			expect(getByTestId(amountSetToMaxTestId)).toHaveTextContent('false');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	// A pending send reserving UTXOs shrinks the cap without moving the fee.
 	it('reapplies max when the cap shrinks and the fee is unchanged', async () => {
 		vi.useFakeTimers();
