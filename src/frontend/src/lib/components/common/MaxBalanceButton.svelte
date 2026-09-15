@@ -81,7 +81,11 @@
 	};
 
 	$effect(() => {
-		[fee];
+		// `maxAmount` is tracked alongside the fee because it arrives asynchronously and can
+		// shrink afterwards — a BTC cap lands once the UTXOs load and drops again when a
+		// pending send reserves some. A "Max" chosen before either would otherwise stay at the
+		// balance-based amount the cap exists to rule out.
+		[fee, maxAmount];
 
 		debounceSetMax();
 	});

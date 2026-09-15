@@ -118,7 +118,9 @@
 	};
 
 	$effect(() => {
-		[totalFee];
+		// Same reason as `MaxBalanceButton`: the cap arrives asynchronously and can shrink
+		// afterwards, so a "Max" chosen before it landed has to be reapplied.
+		[totalFee, maxAmount];
 
 		untrack(() => debounceSetMax());
 	});

@@ -108,4 +108,58 @@ describe('MaxBalanceButton', () => {
 			vi.useRealTimers();
 		}
 	});
+
+	// Regression: the cap arrives asynchronously — a BTC one only once the UTXOs load, which
+	// routinely takes longer than the debounce the click itself schedules. A "Max" chosen
+	// before it landed then stayed at the balance-based amount the cap exists to rule out.
+	it('reapplies max once a cap arrives when the amount is set to max', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: baseProps
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			// Drain the debounce the click scheduled, so the cap below is the only thing that
+			// can reapply the max.
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('2');
+
+			await rerender({ ...baseProps, maxAmount: 100_000_000n });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	// A pending send reserving UTXOs shrinks the cap without moving the fee.
+	it('reapplies max when the cap shrinks and the fee is unchanged', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const { getByTestId, rerender } = render(MaxBalanceButtonTestHost, {
+				props: { ...baseProps, maxAmount: 100_000_000n }
+			});
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('1');
+
+			await rerender({ ...baseProps, maxAmount: 50_000_000n });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(getByTestId(amountTestId)).toHaveTextContent('0.5');
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });

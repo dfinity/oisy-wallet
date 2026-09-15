@@ -151,6 +151,28 @@ describe('ConvertAmountSource', () => {
 		expect(testProps.sendAmount).toBe(props.sendAmount);
 	});
 
+	// Regression: the cap arrives asynchronously — a BTC one only once the UTXOs load — so a
+	// "Max" chosen before it landed stayed at the balance-based amount the cap rules out.
+	it('should update sendAmount if max button was clicked and a cap arrived afterwards', async () => {
+		const testProps = $state({ ...props, maxAmount: undefined as bigint | undefined });
+
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: testProps,
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(balanceTestId));
+
+		expect(testProps.sendAmount).toBe(maxButtonValue);
+
+		testProps.maxAmount = 1000n;
+
+		// wait for debounced setMax to be completed
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(testProps.sendAmount).toBe('0.00001');
+	});
+
 	it('should clamp the max button value to the cap when one is set', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props: { ...props, maxAmount: 1000n },
