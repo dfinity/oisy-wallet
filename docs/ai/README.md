@@ -16,6 +16,11 @@ docs/ai/
 ├── governance.md                        Truth hierarchy, boundaries, capabilities, meta-update rule
 ├── pr-and-ci.md                         PR title regex, body template, CI cheatsheet, local gates
 ├── visual-artifacts.md                  Mockups / wireframes / chat artifacts: reuse real UI, don't invent
+├── PRODUCT.md                           Living description of all current product behaviours
+├── spec-driven-development/             Spec-first workflow (Cowork → Claude Code)
+│   ├── workflow.md                      The workflow itself, step by step
+│   ├── stacked-builds.md                Building a multi-PR spec as a local stack
+│   └── specs/                           One spec per feature / improvement / bugfix
 ├── integrations/                        Third-party APIs/services: what data we fetch & where
 │   ├── README.md                        Provider index (Alchemy, Infura, Etherscan, OnRamper, …)
 │   └── <provider>.md                    One reference doc per provider
