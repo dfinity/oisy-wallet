@@ -21,3 +21,8 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 // long it can be included (~4s/ledger, so ~80s) before it definitively fails rather than
 // lingering.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
+
+// Safety net for the confirmation poll only: the real bound is the transaction's
+// LastLedgerSequence, so this merely stops the loop if a node never advances its ledger
+// index. Generous next to the ~80s validity window at a 1-2s poll interval.
+export const XRP_CONFIRM_MAX_ATTEMPTS = 120;
