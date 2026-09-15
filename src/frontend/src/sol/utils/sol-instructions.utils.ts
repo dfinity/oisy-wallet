@@ -8,6 +8,9 @@ import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
+	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
+	SOLANA_RENT_EXEMPTION_YEARS,
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -417,12 +420,34 @@ const parseSolInstruction = (
 	return instruction;
 };
 
+/**
+ * The lamports an account of this size must hold to be rent-exempt, which is what opening one
+ * legitimately costs.
+ */
+const solRentExemptLamports = (space: bigint): bigint =>
+	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space) *
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR *
+	SOLANA_RENT_EXEMPTION_YEARS;
+
+/**
+ * Whether a creation funds the account beyond what its size costs.
+ *
+ * Rent is the price of the account existing, and the review carries it as the cost of the operation
+ * the creation belongs to. Anything above it is a balance sitting in an account somebody else
+ * controls, and the program owning that account decides where it goes - closing an SPL token
+ * account hands its whole balance to a destination the closing instruction names, and a message can
+ * open, initialise and close one in a single request. That is a payment, and the creation states no
+ * destination for the review to show it against.
+ */
+const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
+	lamports > solRentExemptLamports(space);
+
 const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
 		const {
-			data: { lamports, programAddress: owner },
+			data: { lamports, space, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
@@ -442,7 +467,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		// top-level `createAccount` owned by the token program, then initialises it - and the
 		// program that owns such an account is what governs the lamports in it. Those keep the rent
 		// they state, which the review carries as the cost of the operation it belongs to.
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		// System-owned means nothing governs the lamports but the key the account is opened at.
+		// Over-funded means a program governs them and the creation still states no destination: an
+		// SPL token account opened, initialised and closed in one message hands its whole balance to
+		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
 			return unfaithfulInstruction();
 		}
 
