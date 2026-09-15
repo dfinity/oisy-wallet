@@ -263,6 +263,10 @@ export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-code'
 );
+export const modalTip: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip'
+);
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
