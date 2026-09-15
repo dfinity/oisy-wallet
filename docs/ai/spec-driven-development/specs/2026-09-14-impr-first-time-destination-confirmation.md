@@ -75,16 +75,18 @@ routine, and red spent on the routine case stops being read.
 Trigger: a valid destination longer than `MIN_DESTINATION_LENGTH_FOR_ERROR_STATE` with no
 previous send on record. **Saved contacts no longer suppress it.**
 
-It is the same red box as the review step, without the checkbox: it states that this is the
-first send to the address and that a transfer cannot be reversed. **Next stays enabled** — the
-user is stopped once, at the last moment, not twice.
+It uses the same warning-level box as the review step, without the checkbox: it states that
+the user has never sent tokens to the address and asks them to verify it carefully. **Next
+stays enabled** — the user is stopped once, at the last moment, not twice.
 
 ### Review step
 
 When the destination has no previous send on record, the review step shows the box **with the
 confirmation checkbox**, and the **Send button stays disabled until it is ticked**, on top of
 each chain's existing `disabled` conditions. It renders directly above the toolbar, after the
-network / fee / info blocks.
+network / fee / info blocks. Its copy is the address-step sentence reworded in the first
+person, as the statement the checkbox agrees to, and replaces that sentence rather than
+following it.
 
 Ticking is per address and per visit: going back to edit the destination and returning re-arms
 the gate.
