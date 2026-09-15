@@ -263,6 +263,16 @@ The preview is deliberately **not** a safety verdict. It runs against the networ
 
 Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
 
+### Account creations and handovers in a Solana transaction
+
+The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there.
+
+An **account creation** is read by what will own the new account. One opened for a program — the wrapped SOL account a routed swap opens before initialising it, or an associated token account's rent — is governed by that program, and its lamports are the cost of the operation the creation belongs to, so it reads as it always has. One owned by the **System program** is different: it holds no data and no program decides what may leave it, so it is an address with a balance and a key that can spend it, and the review has no field for that — its single destination belongs to the transfer it displays. Those are refused, in all three forms the System program offers (plain, seed-derived, and prefunding). The seed-derived form is included because a derived address has no key of its own, yet lamports can still be moved out of it against a signature from the base it was derived from.
+
+An **account assignment** hands an account to a different program. The account is the instruction's only argument and must sign, and the connected wallet signs every request it is sent, so a message can name that wallet itself — after which the named program, not the System program, governs it. Nothing about that fits an amount, a source or a destination, which is the same reason a token account's authority change is refused, so an assignment is refused too. Sizing an account is left alone: it hands control of the account to nobody.
+
+The deliberate cost is that a legitimate System-owned creation is refused as well — a durable nonce account is System-owned and carries data. Recognising that specific pattern is a follow-up; until then the review errs toward refusing.
+
 ### Sources and destinations of a Solana transaction
 
 The same review answers "where is this going?" with two lists rather than one address. **Sources** holds the accounts the transaction spends from, and **Destinations** the accounts it pays into. The two rules are asymmetric on purpose: Sources holds the sources of transfers **the user's account is the source of**, while Destinations holds the destinations of transfers the user's account is **either the source or the destination** of. So a counterparty paying into a pool is never listed as a source, and the user appears as a source only when value genuinely leaves one of their accounts. A plain send yields exactly one entry in each list; a swap yields several, because every leg the user is on one side of contributes its destination.
