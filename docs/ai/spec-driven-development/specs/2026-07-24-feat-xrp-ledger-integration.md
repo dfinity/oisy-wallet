@@ -369,19 +369,18 @@ to review independently.
 There is **no external Phase 0** — the chain-fusion-signer already exposes
 everything needed (verified §2.1), so the whole effort lives in this repo.
 
-**Rollout safety — disabled by a temporary override, not a bespoke flag.** XRP
-uses the **same enablement convention as every other chain** —
-`VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While the integration is in
-progress, a **temporary in-code override** (`XRP_MAINNET_DISABLED_OVERRIDE` in
-`networks.xrp.env.ts`) force-disables it regardless of the env var, so
-`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays and XRP
-is absent from every enabled-network/token derivation and the UI — zero
-behavioural change, zero impact on existing tests. Enabling XRP is simply
-**removing the override** (final PR), after which it behaves exactly like
-BTC/ETH/SOL. Enablement stays entirely in code — **no CI/deploy env plumbing** —
-so each PR merges to `main` safely without exposing a half-built chain. To test
-a build meanwhile, flip the override to `false` on the branch (XRP is then
-enabled by default like the other chains — no env-override needed).
+**Rollout safety — disabled on user-facing environments by a temporary
+override, not a bespoke flag.** XRP uses the **same enablement convention as
+every other chain** — `VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While
+the integration is in progress, `XRP_MAINNET_DISABLED_OVERRIDE` force-disables
+XRP on prod, beta, and in Vitest regardless of the env var. Real local and
+staging/test_fe builds remain governed by `VITE_XRP_MAINNET_DISABLED`, so they
+default to enabled for testing. On prod, beta, and in Vitest,
+`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays.
+Enabling XRP everywhere is simply **removing the override** (final PR), after
+which it behaves exactly like BTC/ETH/SOL. Enablement stays entirely in code —
+**no CI/deploy env plumbing** — so each PR merges to `main` safely without
+exposing a half-built chain to users.
 
 **Mainnet first.** The initial PRs are **mainnet-only**; XRPL **testnet** (plus
 a Bithomp testnet explorer + faucet) is a deliberate fast-follow, not part of
