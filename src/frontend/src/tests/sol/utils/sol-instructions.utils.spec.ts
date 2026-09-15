@@ -56,6 +56,8 @@ import {
 	StakeAuthorize
 } from '@solana-program/stake';
 import {
+	getAssignInstruction,
+	getAssignWithSeedInstruction,
 	getCreateAccountAllowPrefundInstruction,
 	getCreateAccountInstruction,
 	getCreateAccountWithSeedInstruction
@@ -1148,6 +1150,40 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(console.warn).toHaveBeenCalledOnce();
+		});
+
+		it('should fail closed on an `Assign` instruction, which hands an account to a program', () => {
+			// The account is the instruction's only meta and a required signer, and the connected wallet
+			// signs every message it is sent, so a request can name the wallet itself. The System
+			// program's version of the authority change already refused for a token account.
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `AssignWithSeed` instruction', () => {
+			const instruction = getAssignWithSeedInstruction({
+				account: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				base: address(mockSolAddress),
+				seed: 'vault',
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should map a valid Token instruction', () => {
