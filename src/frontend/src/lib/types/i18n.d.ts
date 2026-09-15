@@ -2394,13 +2394,62 @@ interface I18nTip {
 		done: string;
 		link_not_saved: string;
 		reserve_failed: string;
+		status_title: string;
+		claim_title: string;
+		claim_amount: string;
+		claim_expires: string;
+		claim_ready_title: string;
+		claim_ready_title_plain: string;
+		claim_ready_description: string;
+		claim_token: string;
+		claim_status: string;
+		open_or_create: string;
+		open_or_create_hint: string;
+		claimer_disclosure: string;
+		claimed_title: string;
+		claimed_description: string;
+		claiming_title: string;
+		claiming_description: string;
+		claim_retry: string;
+		received_title: string;
+		received_description: string;
+		network: string;
+		status_completed: string;
+		take_me_to_wallet: string;
+		unavailable_title: string;
+		unavailable_description: string;
+		uncovered_title: string;
+		uncovered_description: string;
+		short_balance_title: string;
+		short_balance_description: string;
+		claim_failed_title: string;
+		claim_failed: string;
+		unreachable_title: string;
+		unreachable_description: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;
 		get_started: string;
 		rate_limited: string;
+		rate_limited_title: string;
 	};
-	alt: { intro_illustration: string };
+	alt: {
+		intro_illustration: string;
+		claim_illustration: string;
+		claim_failed_illustration: string;
+		welcome_illustration: string;
+	};
+	share: { title: string; description: string };
+	welcome: {
+		title: string;
+		heading: string;
+		body: string;
+		point_access_title: string;
+		point_access_text: string;
+		point_stay_title: string;
+		point_stay_text: string;
+		cta: string;
+	};
 }
 
 interface I18n {
