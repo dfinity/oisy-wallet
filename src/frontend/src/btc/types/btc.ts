@@ -35,10 +35,18 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
  * yet. The cap a send must respect comes from `initBtcMaxSendAmount` instead.
  *
  * **Usage Guidelines:**
- * - Use `confirmed` for transfer validation and spendable balance calculations
- * - Use `total` for primary balance display (user's actual Bitcoin holdings)
+ * - For transfer validation and any spendable amount, use `initBtcMaxSendAmount`, **not**
+ *   `confirmed`. Validating against `confirmed` can accept a send the UTXO selection cannot fund,
+ *   because of the change and not-yet-selectable UTXOs described in the note above. Nothing in the
+ *   send path does so today: the UTXO selection is the authority and rejects an unfundable amount
+ *   (`isInvalidUtxosFee`). `MaxBalanceButton` does fall back to `confirmed` while
+ *   `initBtcMaxSendAmount` is still `undefined`, which can briefly offer an unfundable Max — that
+ *   fallback is a loading affordance and the selection still fails it safely downstream.
+ * - Use `confirmed` for the displayed balance — it is what the worker posts to `balancesStore`.
  * - Use `unconfirmed` to show pending incoming activity status
  * - Use `locked` for transparency about funds tied up in pending transactions
+ * - `total` is not read by the UI today. It is the honest figure for total holdings, but switching
+ *   the displayed balance to it is a product decision, not a drop-in swap.
  */
 export interface BtcWalletBalance {
 	/**

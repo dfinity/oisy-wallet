@@ -160,11 +160,14 @@ export const getPendingTransactionUtxoOutpoints = (address: string): string[] | 
 /**
  * Calculates Bitcoin wallet balance breakdown following standard Bitcoin accounting principles.
  *
- * Bitcoin balances are calculated based on Unspent Transaction Outputs (UTXOs):
- * - Confirmed Balance: Sum of UTXOs with sufficient block confirmations (typically 6+)
- * - Unconfirmed Balance: Sum of incoming UTXOs with 0-5 confirmations (in mempool or recent blocks)
- * - Locked Balance: Sum of confirmed UTXOs that are temporarily unspendable due to pending outgoing transactions
- * - Total Balance: Combined confirmed and unconfirmed balances (represents total Bitcoin ownership)
+ * The four fields of {@link BtcWalletBalance}, whose contract this implements:
+ * - Confirmed: the canister's UTXOs at {@link BTC_BALANCE_MIN_CONFIRMATIONS}, less `locked`. Not a
+ *   spendable amount — it counts change and incoming UTXOs a send cannot select yet, so the cap a
+ *   send must respect comes from `initBtcMaxSendAmount` instead.
+ * - Unconfirmed: incoming UTXOs still in the mempool. A receive already in a block is inside
+ *   `balance`, so counting it here too would inflate `total`.
+ * - Locked: the part of a pending send `balance` still counts as the user's, per the rule below.
+ * - Total: confirmed + unconfirmed (total Bitcoin ownership).
  *
  * `balance` comes from the Bitcoin canister at {@link BTC_BALANCE_MIN_CONFIRMATIONS}, so it is
  * authoritative for everything already in a block. The adjustments below exist only to model what
