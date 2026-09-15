@@ -145,7 +145,8 @@
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
 			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
-			"notes": "Заметки"
+			"notes": "Заметки",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Активы",
@@ -169,7 +170,8 @@
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
-			"notes": "Открыть заметки"
+			"notes": "Открыть заметки",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Документы"
@@ -2802,7 +2804,7 @@
 				"snapshot_caption": "Делится копией заметки в её текущем виде. Последующее редактирование или удаление заметки не изменит эту ссылку.",
 				"cap_reached": "Ты достиг(ла) максимума в $max активных ссылок для доступа. Они освобождаются после истечения срока действия или использования.",
 				"expires_after": "Ссылка истекает через",
-				"expiry_1h": "1 час",
+				"expiry_1h": "",
 				"expiry_24h": "24 часа",
 				"expiry_7d": "7 дней",
 				"expiry_30d": "30 дней",
@@ -2836,6 +2838,51 @@
 				"discover": "Узнать про OISY",
 				"unavailable_title": "Срок действия этой ссылки истёк или она уже была использована"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }
