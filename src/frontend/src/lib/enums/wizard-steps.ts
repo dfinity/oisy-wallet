@@ -98,7 +98,8 @@ export enum WizardStepsTip {
 	INTRO = 'Intro',
 	TOKENS_LIST = 'Tokens List',
 	CREATE = 'Create',
-	SHARE = 'Share'
+	SHARE = 'Share',
+	HISTORY = 'History'
 }
 
 export enum WizardStepsLiquidiumSupply {

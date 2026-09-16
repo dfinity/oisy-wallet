@@ -6,6 +6,7 @@ import {
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
+	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
@@ -169,6 +170,21 @@ describe('xrpl.rest', () => {
 			expect(result.engineResult).toBe('terPRE_SEQ');
 		});
 
+		// `accepted` comes from an untrusted node, so it is validated rather than cast: a
+		// non-boolean would otherwise pass through and read as truthy.
+		it.each(['false', 'true', 1, 0, {}])(
+			'marks a non-boolean accepted value %j as not accepted',
+			async (accepted) => {
+				mockFetchResponse({
+					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
+				});
+
+				const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+				expect(result.accepted).toBeFalsy();
+			}
+		);
+
 		it('marks a response without an accepted flag as not accepted', async () => {
 			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
 
@@ -208,14 +224,26 @@ describe('xrpl.rest', () => {
 			expect(info).toEqual({ balance: 30_000_000n, sequence: 42, ownerCount: 3 });
 		});
 
-		it('defaults the owner count to zero when the account owns nothing', async () => {
+		it('returns a zero owner count when the account owns nothing', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42 } } }
+				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 0 } } }
 			});
 
 			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
 
 			expect(info.ownerCount).toBe(0);
+		});
+
+		// Defaulting a missing OwnerCount to zero would under-reserve and let `getXrpMaxAmount`
+		// return more than the ledger accepts, so it must fail instead.
+		it.each([undefined, '3', null, {}])('throws for an owner count of %j', async (OwnerCount) => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
+			});
+
+			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'missing or invalid OwnerCount'
+			);
 		});
 
 		// Typed so callers can tell "owns nothing" apart from an operational failure.
@@ -260,6 +288,32 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { ledger_current_index: 987654 } } });
 
 			await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(987654);
+		});
+	});
+
+	describe('loadXrpValidatedLedgerIndex', () => {
+		it('returns the validated ledger index', async () => {
+			mockFetchResponse({ body: { result: { ledger_index: 987_000, validated: true } } });
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				987_000
+			);
+		});
+
+		it('reads the index nested under ledger', async () => {
+			mockFetchResponse({ body: { result: { ledger: { ledger_index: 987_001 } } } });
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				987_001
+			);
+		});
+
+		it('throws when the validated index is missing', async () => {
+			mockFetchResponse({ body: { result: {} } });
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+				'missing validated ledger_index'
+			);
 		});
 	});
 
