@@ -770,7 +770,8 @@
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
-			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
+			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen.",
+			"xrp_wallet_error": "Fehler beim Laden der XRP-Wallet-Informationen."
 		}
 	},
 	"hero": {
@@ -934,6 +935,14 @@
 				"solana_local_address_title": "Solana Local Wallet Adresse",
 				"solana_address_copied": "Solana-Adresse in Zwischenablage kopiert",
 				"display_solana_address_qr": "Solana-Adresse als QR-Code anzeigen"
+			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
 			}
 		}
 	},

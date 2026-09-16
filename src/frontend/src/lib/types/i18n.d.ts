@@ -513,6 +513,7 @@ interface I18nInit {
 		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
+		xrp_wallet_error: string;
 	};
 }
 
@@ -668,6 +669,14 @@ interface I18nReceive {
 			solana_local_address_title: string;
 			solana_address_copied: string;
 			display_solana_address_qr: string;
+		};
+	};
+	xrp: {
+		text: {
+			xrp_address: string;
+			xrp_address_title: string;
+			xrp_address_copied: string;
+			display_xrp_address_qr: string;
 		};
 	};
 }
