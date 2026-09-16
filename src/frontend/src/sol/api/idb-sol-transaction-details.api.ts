@@ -10,9 +10,9 @@ import { clear, createStore, delMany, entries, get, keys, set, type UseStore } f
 /**
  * The details of a finalized Solana transaction, kept per network and signature.
  *
- * A finalized transaction never changes, so what one realm fetched serves the other: the network
- * worker and the lists of the main thread each derive their records from the same detail, and a
- * reload reads it back rather than asking the RPC for it again.
+ * A finalized transaction never changes, so a detail fetched once can serve every later derivation of
+ * it: the worker's first page after a reload, whose own record of what it holds starts empty, and a
+ * pager that derives a held record again for a token that does not hold it yet.
  *
  * The slots live in their own store so that trimming reads only the slots, never the details.
  */

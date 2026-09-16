@@ -78,10 +78,10 @@ export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
 // `getTransaction` calls, so only this many are in flight at once.
 export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
 
-// How many transaction details are kept per network in IndexedDB, the newest slots first. Enough to
-// cover the history a user scrolls back through in a session, while the details themselves are
-// large enough that keeping every transaction ever looked at would grow without end.
-export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 1_000;
+// How many transaction details are kept per network in IndexedDB, the newest slots first. The newest
+// page is what the worker fetches again on every reload, and a few pages below it cover what a newly
+// enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
+export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;
 
 // How far over its size the cache is allowed to run before it is trimmed back to it. Trimming reads
 // the slot of everything it holds, so doing it on the write after the write that trimmed would read

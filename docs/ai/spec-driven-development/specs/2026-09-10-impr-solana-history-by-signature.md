@@ -167,15 +167,25 @@ exist means zero. Today that takes one `getBalance` plus up to three calls per S
 (`isAtaAddress`, `checkIfAccountExists` and `getTokenAccountBalance`, in `loadSplTokenBalance`).
 Balances are still posted per token.
 
-### 3.9 One fetch of a transaction's details for every realm
+### 3.9 Transaction details survive a reload
 
 `fetchTransactionDetailForSignature` keeps the details of a finalized transaction in IndexedDB,
 per network and signature, and reads them back before asking the RPC. The in-memory map stays in
-front of it. Without it the network worker and the pagers of the main thread hold a map each, so
-each fetches the same details once, and a reload fetches them all again. Only finalized details
-are kept: a transaction that is not finalized can still be dropped by the network. Two realms that
-ask for the same signature before either has kept it still fetch it twice; the cache spares the
-repeat, not the race.
+front of it, but it is per realm and dies with the tab. Two derivations need a detail again:
+
+- **The worker's first page after a reload.** The worker skips only the signatures in its own set,
+  which starts empty, so every reload fetched its newest page again.
+- **A held record derived again.** A pager skips a signature only when every token it belongs to
+  holds it (3.6), and derives it again otherwise, for example after a token is enabled.
+
+Measured on the recorded mainnet wallet (169 signatures, pages of 10), `getTransaction` calls without
+and with the cache: the worker's first page after a reload, 9 and 0; deriving the newest page again,
+9 and 0; deriving the whole history again after a reload, 169 and 0. The overlap between the worker
+and the Activity list in one session is 0 either way, since the pagers skip what the stores hold.
+
+Only finalized details are kept: a transaction that is not finalized can still be dropped by the
+network. Two realms that ask for the same signature before either has kept it still fetch it twice;
+the cache spares the repeat, not the race.
 
 The store keeps the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network, trimmed back
 to that size once it runs past it by `SOLANA_TRANSACTION_DETAILS_CACHE_SLACK`, and is cleared at
@@ -326,9 +336,10 @@ Implementation, in order:
   as a source would reopen the holes 3.3 closes. Re-deriving every restored record instead would
   cost the same RPC calls as not reading and keep more code.
 
-- **D5. The details of a finalized transaction are cached in IndexedDB.** The per-realm map alone
-  left the worker and the main thread fetching the same details once each, and a reload fetching
-  them again (3.9). Bounded per network and cleared at sign-out.
+- **D5. The details of a finalized transaction are cached in IndexedDB, 200 per network.** The
+  per-realm map alone left every reload fetching the worker's first page again, and every
+  derivation of a held record for another token fetching its details again (3.9). 200 details are
+  about 2 MB. Cleared at sign-out.
 
 ## 10. Notes for the implementation
 
