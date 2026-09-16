@@ -54,3 +54,14 @@ export const XrplFeeResultSchema = z.object({
 export const XrplLedgerCurrentResultSchema = z.object({
 	ledger_current_index: XrpLedgerCounterSchema
 });
+
+// The `ledger` command reports the index either at the top level or nested under `ledger`,
+// depending on the node. `validated` must be true: a non-validated ledger's index can be ahead
+// of the last validated one, which is the open-vs-validated confusion this call exists to avoid.
+export const XrplLedgerResultSchema = z.union([
+	z.object({ validated: z.literal(true), ledger_index: XrpLedgerCounterSchema }),
+	z.object({
+		validated: z.literal(true),
+		ledger: z.object({ ledger_index: XrpLedgerCounterSchema })
+	})
+]);

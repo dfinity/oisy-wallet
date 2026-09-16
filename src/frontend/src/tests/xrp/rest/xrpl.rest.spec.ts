@@ -343,7 +343,7 @@ describe('xrpl.rest', () => {
 
 	describe('loadXrpValidatedLedgerIndex', () => {
 		it('returns the validated ledger index', async () => {
-			mockFetchResponse({ body: { result: { ledger_index: 987_000, validated: true } } });
+			mockFetchResponse({ body: { result: { validated: true, ledger_index: 987_000 } } });
 
 			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
 				987_000
@@ -351,7 +351,9 @@ describe('xrpl.rest', () => {
 		});
 
 		it('reads the index nested under ledger', async () => {
-			mockFetchResponse({ body: { result: { ledger: { ledger_index: 987_001 } } } });
+			mockFetchResponse({
+				body: { result: { validated: true, ledger: { ledger_index: 987_001 } } }
+			});
 
 			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
 				987_001
@@ -365,6 +367,28 @@ describe('xrpl.rest', () => {
 				'missing validated ledger_index'
 			);
 		});
+
+		// A non-validated ledger's index can be ahead of the last validated one, which is the
+		// confusion this call exists to avoid.
+		it.each([false, undefined, 'true'])('throws when validated is %j', async (validated) => {
+			mockFetchResponse({ body: { result: { validated, ledger_index: 987_000 } } });
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+				'missing validated ledger_index'
+			);
+		});
+
+		// A malformed HIGH index would declare a still-live payment expired.
+		it.each(['987000', -1, 1.5, Number.MAX_SAFE_INTEGER + 2, null])(
+			'throws for a validated ledger index of %j',
+			async (ledger_index) => {
+				mockFetchResponse({ body: { result: { validated: true, ledger_index } } });
+
+				await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					'missing validated ledger_index'
+				);
+			}
+		);
 	});
 
 	describe('loadXrpTransactionOutcome', () => {
