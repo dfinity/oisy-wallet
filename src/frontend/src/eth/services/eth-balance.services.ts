@@ -14,7 +14,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
@@ -25,13 +25,28 @@ export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
 	return loadErc20Balance({ token: token as Erc20Token });
 };
 
-const loadEthBalance = async ({
+const loadEthBalance = async (params: {
+	networkId: NetworkId;
+	tokenId: TokenId;
+}): Promise<ResultSuccess> => ({ success: nonNullish(await readEthBalance(params)) });
+
+/**
+ * Loads the native balance and hands it back, besides storing it.
+ *
+ * The store is written through `batchSet`, which only lands on the next animation frame, and not at
+ * all while the tab is in the background. A caller that needs the value straight away must take it
+ * from here: reading it back from the store after awaiting this still yields the previous sample.
+ *
+ * `undefined` when there is no address yet or the read failed, in which case the stored balance has
+ * been reset.
+ */
+export const readEthBalance = async ({
 	networkId,
 	tokenId
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-}): Promise<ResultSuccess> => {
+}): Promise<bigint | undefined> => {
 	const address = get(addressStore);
 
 	const {
@@ -41,7 +56,7 @@ const loadEthBalance = async ({
 	} = get(i18n);
 
 	if (isNullish(address)) {
-		return { success: false };
+		return;
 	}
 
 	try {
@@ -49,6 +64,8 @@ const loadEthBalance = async ({
 		const data = await balance(address);
 
 		balancesStore.batchSet({ id: tokenId, data: { data, certified: false } });
+
+		return data;
 	} catch (err: unknown) {
 		balancesStore.reset(tokenId);
 
@@ -64,11 +81,7 @@ const loadEthBalance = async ({
 				$network: `${networkId.description}`
 			})} ${err}`
 		});
-
-		return { success: false };
 	}
-
-	return { success: true };
 };
 
 const loadErc20Balance = async ({
