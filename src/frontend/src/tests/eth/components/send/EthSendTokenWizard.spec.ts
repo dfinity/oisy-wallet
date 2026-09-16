@@ -26,9 +26,11 @@ import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import type { WizardStep } from '$lib/types/wizard';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as inputUtils from '$lib/utils/input.utils';
 import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -331,14 +333,11 @@ describe('EthSendTokenWizard.spec', () => {
 				feePrioritiesStore: writable(undefined)
 			}));
 
-			vi.spyOn(ethBalanceServices, 'reloadEthereumBalance').mockImplementation(() => {
-				balancesStore.set({
-					id: ETHEREUM_TOKEN.id,
-					data: { data: freshBalance, certified: false }
-				});
-
-				return Promise.resolve({ success: true });
-			});
+			// The store is deliberately left untouched. In production the read stores its result
+			// through `batchSet`, which only lands on the next animation frame, so at the moment the
+			// amount is capped the store still holds `staleBalance`. A cap that read the balance back
+			// from the store would sign `staleBalance - gasFee` here and fail the test below.
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockResolvedValue(freshBalance);
 		});
 
 		afterEach(() => {
@@ -358,7 +357,10 @@ describe('EthSendTokenWizard.spec', () => {
 			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 			await vi.runOnlyPendingTimersAsync();
 
-			expect(ethBalanceServices.reloadEthereumBalance).toHaveBeenCalledWith(ETHEREUM_TOKEN);
+			expect(ethBalanceServices.readEthBalance).toHaveBeenCalledExactlyOnceWith({
+				networkId: ETHEREUM_TOKEN.network.id,
+				tokenId: ETHEREUM_TOKEN.id
+			});
 
 			// Not `staleBalance - gasFee`: that amount plus the gas it reserves is more than the
 			// account holds, and the chain refuses such a transaction outright.
@@ -367,12 +369,12 @@ describe('EthSendTokenWizard.spec', () => {
 			);
 		});
 
-		it('still caps against the balance the amount was priced with when the re-read fails', async () => {
-			// A failed re-read empties the balance in the store rather than leaving the previous one.
-			vi.spyOn(ethBalanceServices, 'reloadEthereumBalance').mockImplementation(() => {
+		it('caps against the last sample when the re-read fails', async () => {
+			// A failed read resets the stored balance, so the cap has to have taken its sample first.
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockImplementation(() => {
 				balancesStore.reset(ETHEREUM_TOKEN.id);
 
-				return Promise.resolve({ success: false });
+				return Promise.resolve(undefined);
 			});
 
 			const { getByTestId, rerender } = renderMaxSend();
@@ -390,6 +392,37 @@ describe('EthSendTokenWizard.spec', () => {
 			expect(sendServices.send).toHaveBeenCalledWith(
 				expect.objectContaining({ amount: staleBalance - gasFee })
 			);
+		});
+
+		it('refuses a Max send when neither the read nor the store knows the balance', async () => {
+			vi.spyOn(ethBalanceServices, 'readEthBalance').mockResolvedValue(undefined);
+
+			const { getByTestId, rerender } = renderMaxSend();
+
+			await fireEvent.click(getByTestId(MAX_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			await rerender({
+				currentStep: { name: WizardStepsSend.REVIEW, title: WizardStepsSend.REVIEW }
+			});
+
+			// A failed poll while the user sits on the review step: the store has nothing left.
+			balancesStore.reset(ETHEREUM_TOKEN.id);
+
+			await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+			await vi.runOnlyPendingTimersAsync();
+
+			// Capping against no balance would leave the Max amount unbounded.
+			expect(sendServices.send).not.toHaveBeenCalled();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith({
+				msg: {
+					text: replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: ETHEREUM_TOKEN.symbol,
+						$network: ETHEREUM_NETWORK.name
+					})
+				}
+			});
 		});
 	});
 

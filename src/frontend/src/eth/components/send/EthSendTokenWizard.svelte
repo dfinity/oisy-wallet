@@ -6,7 +6,7 @@
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
-	import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+	import { readEthBalance } from '$eth/services/eth-balance.services';
 	import { sendNft } from '$eth/services/nft-send.services';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -47,6 +47,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -317,36 +318,50 @@
 			unitName: $sendTokenDecimals
 		});
 
-		const isMaxNativeSend = amountSetToMax && feeIsPaidFromAmount;
+		let sendAmount = parsedAmount;
 
-		// The balance a "Max" amount was priced against is a poll sample, and every transaction the
-		// wallet sends in between - an ERC-20 transfer, an approval, a swap - pays its gas out of
-		// this very balance. Until the next poll lands, that sample still holds gas the account has
-		// already spent, and an amount drawn from it reserves more than there is left to reserve.
-		// Re-reading the balance here is what makes the cap below a cap on what the account actually
-		// has, rather than on what it had when the field was filled in.
-		const pricedAgainstBalance = $sendBalance;
+		if (amountSetToMax && feeIsPaidFromAmount) {
+			// Taken before the re-read below, whose failure resets the stored balance. It is the last
+			// poll sample rather than the one "Max" was priced against: a failed poll while on this
+			// step can already have emptied it, which is why a missing balance is refused below
+			// instead of being treated as nothing to cap.
+			const sampledBalance = $sendBalance;
 
-		if (isMaxNativeSend) {
-			await reloadEthereumBalance($sendToken);
+			// The balance a "Max" amount was priced against is a poll sample, and every transaction the
+			// wallet sends in between - an ERC-20 transfer, an approval, a swap - pays its gas out of
+			// this very balance. Until the next poll lands, that sample still holds gas the account
+			// has already spent, and an amount drawn from it reserves more than there is left to
+			// reserve.
+			//
+			// The value is taken from the read itself, never from the store: the store is written
+			// through `batchSet`, which only lands on the next animation frame, so reading it back
+			// here would still yield the stale sample this re-read exists to replace.
+			const balance =
+				(await readEthBalance({ networkId: $sendToken.network.id, tokenId: $sendToken.id })) ??
+				sampledBalance;
+
+			// Neither the chain nor the store can say what the account holds. `capSendAmountToFee`
+			// returns an amount it has no balance for unchanged, so going on would broadcast a "Max"
+			// that nothing bounds.
+			if (isNullish(balance)) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders($i18n.init.error.loading_balance, {
+							$symbol: $sendToken.symbol,
+							$network: sourceNetwork.name
+						})
+					}
+				});
+				return;
+			}
+
+			// The fee is frozen from the review step on, so the sample signed just above is the one the
+			// amount step last showed. The "Max" button, however, re-applies its amount half a second
+			// after each fee change, so a click on "Review" inside that window carries an amount priced
+			// against the sample before. A fee that has risen in between leaves it unable to cover
+			// `gas * maxFeePerGas`, and the chain refuses such a transaction outright.
+			sendAmount = capSendAmountToFee({ amount: parsedAmount, balance, feeData });
 		}
-
-		// The fee is frozen from the review step on, so the sample signed just above is the one the
-		// amount step last showed. The "Max" button, however, re-applies its amount half a second
-		// after each fee change, so a click on "Review" inside that window carries an amount priced
-		// against the sample before. A fee that has risen in between leaves it unable to cover
-		// `gas * maxFeePerGas`, and the chain drops such a transaction without reporting anything:
-		// the broadcast returns a hash and it is simply never included.
-		const sendAmount = isMaxNativeSend
-			? capSendAmountToFee({
-					amount: parsedAmount,
-					// A re-read that failed leaves no balance behind rather than the previous one, and
-					// capping against nothing caps nothing: fall back to the sample the amount was
-					// priced against, so re-reading can only ever tighten this cap, never drop it.
-					balance: $sendBalance ?? pricedAgainstBalance,
-					feeData
-				})
-			: parsedAmount;
 
 		if (sendAmount <= ZERO) {
 			toastsError({
