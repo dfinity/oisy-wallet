@@ -17,6 +17,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { capSendAmountToFee, shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -249,10 +250,7 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
 
 			onBack();
 		}
@@ -409,10 +407,7 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
 
 			onBack();
 		}
