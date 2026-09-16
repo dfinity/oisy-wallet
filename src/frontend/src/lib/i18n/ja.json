@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました。",
 			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "XRPウォレット情報の読み込み中にエラーが発生しました。"
 		}
 	},
 	"hero": {
