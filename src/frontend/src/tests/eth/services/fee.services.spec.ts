@@ -288,7 +288,7 @@ describe('eth-fee-data.services', () => {
 			const { chainId } = ARBITRUM_SEPOLIA_NETWORK;
 
 			beforeEach(async () => {
-				vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false } as unknown as Response));
+				vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 400 })));
 
 				const { InfuraGasRest: ActualInfuraGasRest } =
 					await vi.importActual<typeof InfuraRestModule>('$eth/rest/infura.rest');
