@@ -31,8 +31,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		this.timer.stop();
 	}
 
+	// The address is part of the ref, so a scheduler re-keyed to another address does not filter its
+	// first sync against the previous address's balance (mirrors btc-wallet.scheduler.ts).
+	private refFor = ({ xrpNetwork, address }: PostMessageDataRequestXrp): string =>
+		`${XRP_TOKEN.symbol}-${xrpNetwork}-${address.data}`;
+
 	protected setRef(data: PostMessageDataRequestXrp | undefined) {
-		const newRef = nonNullish(data) ? `${XRP_TOKEN.symbol}-${data.xrpNetwork}` : undefined;
+		const newRef = nonNullish(data) ? this.refFor(data) : undefined;
 
 		if (this.#ref !== newRef) {
 			this.store = {
@@ -73,7 +78,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		certified: false
 	});
 
-	private loadAndSyncWalletData = async ({ data }: { data: PostMessageDataRequestXrp }) => {
+	private loadAndSyncWalletData = async ({
+		data,
+		expectedRef
+	}: {
+		data: PostMessageDataRequestXrp;
+		expectedRef: string;
+	}) => {
 		const {
 			address: { data: address },
 			xrpNetwork
@@ -81,18 +92,28 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 
 		const balance = await this.loadBalance({ address, xrpNetwork });
 
-		this.syncWalletData({ balance });
+		this.syncWalletData({ balance, expectedRef });
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestXrp>) => {
 		assertNonNullish(data, 'No data provided to get XRP balance.');
 
+		// The job snapshots the address it was scheduled with; the ref it belongs to is captured
+		// alongside so a result landing after the scheduler was re-keyed can be discarded.
+		const expectedRef = this.refFor(data);
+
 		try {
 			await retryWithDelay({
-				request: async () => await this.loadAndSyncWalletData({ data }),
+				request: async () => await this.loadAndSyncWalletData({ data, expectedRef }),
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
+			// A failure for a superseded address must not reset the current account or report an
+			// error against it.
+			if (expectedRef !== this.#ref) {
+				return;
+			}
+
 			// Mirror the listener-side UI reset; otherwise the next sync only emits deltas and the UI stays empty.
 			this.store = {
 				balance: undefined
@@ -101,7 +122,19 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		}
 	};
 
-	private syncWalletData = ({ balance }: { balance: CertifiedData<XrpBalance | null> }) => {
+	private syncWalletData = ({
+		balance,
+		expectedRef
+	}: {
+		balance: CertifiedData<XrpBalance | null>;
+		expectedRef: string;
+	}) => {
+		// Discard a result for an address the scheduler has moved on from, before it can be merged
+		// into the store that `setRef` already cleared for the new address.
+		if (expectedRef !== this.#ref) {
+			return;
+		}
+
 		if (!this.store.balance?.certified && balance.certified) {
 			throw new Error('Balance certification status cannot change from uncertified to certified');
 		}
