@@ -13,6 +13,7 @@ import { infuraErc4626Providers } from '$eth/providers/infura-erc4626.providers'
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { approve } from '$eth/services/approve.services';
 import { safeLoadMetadata as safeLoadErc20Metadata } from '$eth/services/erc20.services';
+import { reloadNativeBalanceOnMined } from '$eth/services/native-balance.services';
 import { getNonce } from '$eth/services/nonce.services';
 import { prepare } from '$eth/services/prepare.services';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -381,7 +382,11 @@ export const depositErc4626 = async ({
 	});
 
 	const { sendTransaction } = infuraProviders(networkId);
-	await sendTransaction(rawTransaction);
+	const transactionSent = await sendTransaction(rawTransaction);
+
+	// Not awaited: the gas is only charged once the transaction is mined. `waitAndTriggerWallet`
+	// below does not cover it, EVM balances having no wallet worker to trigger.
+	reloadNativeBalanceOnMined({ transaction: transactionSent, networkId });
 
 	progress?.(ProgressStepsStake.UPDATE_UI);
 
@@ -458,7 +463,11 @@ const sendErc4626Unstake = async ({
 	});
 
 	const { sendTransaction } = infuraProviders(networkId);
-	await sendTransaction(rawTransaction);
+	const transactionSent = await sendTransaction(rawTransaction);
+
+	// Not awaited: the gas is only charged once the transaction is mined. `waitAndTriggerWallet`
+	// below does not cover it, EVM balances having no wallet worker to trigger.
+	reloadNativeBalanceOnMined({ transaction: transactionSent, networkId });
 
 	progress?.(ProgressStepsUnstake.UPDATE_UI);
 

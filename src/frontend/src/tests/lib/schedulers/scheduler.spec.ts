@@ -239,6 +239,83 @@ describe('scheduler', () => {
 			});
 		});
 
+		// `stop` does not cancel a job that is already awaiting, so a stop/start pair leaves the
+		// previous job running alongside the new one. The previous job must not report on the shared
+		// status once its generation has been superseded.
+		describe('when a stop/start overlaps a running job', () => {
+			const deferred = () => {
+				let resolve: () => void = () => undefined;
+				let reject: (err: unknown) => void = () => undefined;
+				const promise = new Promise<void>((res, rej) => {
+					resolve = res;
+					reject = rej;
+				});
+
+				return { promise, resolve, reject };
+			};
+
+			it('should keep the new job able to post after the previous one completes', async () => {
+				const first = deferred();
+				const second = deferred();
+
+				mockJob.mockImplementationOnce(() => first.promise);
+				mockJob.mockImplementationOnce(() => second.promise);
+
+				const firstStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				scheduler.stop();
+
+				const secondStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				// The superseded job lands first and must not flip the status to idle.
+				first.resolve();
+				await vi.advanceTimersByTimeAsync(0);
+
+				postMessageMock.mockClear();
+
+				scheduler.postMsg({
+					msg: 'syncIcpWallet',
+					ref: 'mock-ref',
+					data: { value: 'from-new-job' }
+				});
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				second.resolve();
+				await Promise.all([firstStart, secondStart]);
+			});
+
+			it('should not stop the running timer when the superseded job fails', async () => {
+				const first = deferred();
+				const second = deferred();
+
+				mockJob.mockImplementationOnce(() => first.promise);
+				mockJob.mockImplementationOnce(() => second.promise);
+
+				const firstStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				scheduler.stop();
+
+				const secondStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				first.reject(new Error('superseded'));
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(scheduler['timer']).toBeDefined();
+
+				second.resolve();
+				await Promise.all([firstStart, secondStart]);
+			});
+		});
+
 		describe('trigger', () => {
 			const { interval: _, ...mockTriggerParams } = mockParams;
 
