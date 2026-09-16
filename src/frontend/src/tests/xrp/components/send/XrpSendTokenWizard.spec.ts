@@ -127,6 +127,30 @@ describe('XrpSendTokenWizard', () => {
 		);
 	});
 
+	// The fee that priced the amount must be the fee that is signed — `SendModal` documents that
+	// these steps share one fee, and re-fetching would sign a figure the user never reviewed.
+	it('should forward the reviewed fee to sendXrp', async () => {
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(xrpSendServices.sendXrp).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ fee: nodeFee })
+		);
+	});
+
+	// A failed fetch still publishes the default fallback, so the only way the fee is unset is a
+	// request that has not answered yet. Nothing may be signed against a fee that was never shown.
+	it('should not call sendXrp while no fee has been reviewed yet', async () => {
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockReturnValue(new Promise(() => {}));
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+	});
+
 	it('should pass the destination tag through when one is set', async () => {
 		const context = mockContextMap([mockSendContextEntry({ token: XRP_TOKEN })]);
 		const sendContext = context.get(SEND_CONTEXT_KEY) as SendContext;

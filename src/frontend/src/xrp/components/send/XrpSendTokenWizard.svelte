@@ -29,7 +29,6 @@
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
-	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
@@ -157,13 +156,16 @@
 		// 10s fee poller can raise what the account must retain underneath an already-accepted
 		// amount. Re-assert it here rather than at the input, because the review step would be
 		// stale too.
+		// The reviewed fee is required, not defaulted: a nullish one means nothing was priced, and
+		// the same value is both checked here and signed below.
 		if (
 			isNullish($sendBalance) ||
 			isNullish($reserveStore) ||
+			isNullish($feeStore) ||
 			!isXrpAmountSendable({
 				amount: amountDrops,
 				balance: $sendBalance,
-				fee: $feeStore ?? XRP_DEFAULT_FEE_DROPS,
+				fee: $feeStore,
 				reserve: $reserveStore
 			})
 		) {
@@ -189,6 +191,7 @@
 				source,
 				destination,
 				amount: amountDrops,
+				fee: $feeStore,
 				destinationTag: $sendXrpDestinationTag
 			});
 

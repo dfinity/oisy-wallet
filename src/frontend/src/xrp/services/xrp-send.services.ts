@@ -3,14 +3,12 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_CONFIRM_MAX_ATTEMPTS,
-	XRP_DEFAULT_FEE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
-	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
 	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
@@ -95,6 +93,7 @@ export const sendXrp = async ({
 	source,
 	destination,
 	amount,
+	fee,
 	destinationTag,
 	progress
 }: {
@@ -103,27 +102,26 @@ export const sendXrp = async ({
 	source: XrpAddress;
 	destination: XrpAddress;
 	amount: XrpBalance;
+	fee: XrpBalance;
 	destinationTag?: number;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSubmitResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
 
-	const [{ sequence }, fee, ledgerIndex, signingPublicKey] = await Promise.all([
+	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
+	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
+	// total past the balance even though the caller's sendability check passed.
+	//
+	// Still bounded here, since the value reaching this point is ultimately node-derived.
+	if (fee > XRP_MAX_FEE_DROPS) {
+		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
+	}
+
+	const [{ sequence }, ledgerIndex, signingPublicKey] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network }),
-		loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }),
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
-
-	// The fee comes from the node and escalates with load, so it is bounded here: an escalated
-	// or hostile estimate must fail loudly rather than be signed for an amount the user never
-	// reviewed. The transaction is not yet bound to the reviewed fee — that arrives with the
-	// send wizard, which can pass it in.
-	if (fee > XRP_MAX_FEE_DROPS) {
-		throw new Error(
-			`XRP fee estimate ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`
-		);
-	}
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 
