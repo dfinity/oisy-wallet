@@ -5,6 +5,7 @@ import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
+import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -263,6 +264,32 @@ describe('xrp-send.services', () => {
 
 	it('accepts a fee at the maximum', async () => {
 		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS })).resolves.toBeDefined();
+	});
+
+	// Typed so the wizard can tell a validated failure from an indeterminate confirmation: both
+	// happen at the CONFIRM step, so the step alone cannot separate them.
+	it('rejects a validated tec failure with XrpTransactionFailedError', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpTransactionFailedError);
+	});
+
+	it('does not use that type for an indeterminate expiry', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		const promise = sendXrp(params);
+
+		await expect(promise).rejects.toThrow('XRP transaction expired');
+		await expect(promise).rejects.not.toBeInstanceOf(XrpTransactionFailedError);
 	});
 
 	it('does not reach DONE when the transaction fails', async () => {
