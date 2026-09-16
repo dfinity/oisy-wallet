@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
 			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Lỗi khi tải thông tin ví XRP."
 		}
 	},
 	"hero": {
