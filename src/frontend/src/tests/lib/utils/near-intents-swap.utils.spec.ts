@@ -5,6 +5,7 @@ import {
 	type SwapCategorizedTokenIds
 } from '$lib/types/swap';
 import { buildNearIntentsSupportedDestinations } from '$lib/utils/near-intents-swap.utils';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
@@ -12,7 +13,10 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 describe('buildNearIntentsSupportedDestinations', () => {
 	const evmId = mockValidErc20Token.address.toLowerCase();
 	const solId = mockValidSplToken.address;
-	const btcId = BTC_MAINNET_TOKEN.symbol.toLowerCase();
+	const btcId = nativeSwapTokenIdentifier({
+		networkId: BTC_MAINNET_TOKEN.network.id,
+		symbol: BTC_MAINNET_TOKEN.symbol
+	});
 
 	const noLookup: FindProviderSourceTokens = () => undefined;
 
@@ -225,8 +229,8 @@ describe('buildNearIntentsSupportedDestinations', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('matches the BTC source on its lowercased symbol', () => {
-			const supportedSourceTokens = new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]);
+		it('matches the BTC source on its network-qualified native identifier', () => {
+			const supportedSourceTokens = new Set([btcId]);
 
 			const result = btcFn({
 				sourceToken: BTC_MAINNET_TOKEN,

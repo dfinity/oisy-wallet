@@ -6,9 +6,10 @@
 	interface Props {
 		json?: unknown;
 		defaultExpandedLevel?: number;
-		// Entries of this node that start folded. Deliberately not handed down to the children: the
-		// caller chooses the entries it can name, and a key deeper in the tree that happens to carry
-		// the same name is somebody else's data, which must not be hidden by a rule meant for this level.
+		// Entries of this node that start folded, and are moved below the entries that stay open.
+		// Deliberately not handed down to the children: the caller chooses the entries it can name, and
+		// a key deeper in the tree that happens to carry the same name is somebody else's data, which
+		// must not be hidden by a rule meant for this level.
 		collapsedKeys?: string[];
 		_key?: string;
 		_level?: number;
@@ -54,9 +55,28 @@
 	let isExpandable = $derived(valueType === 'object');
 	let value = $derived(isExpandable ? json : stringifyJson({ value: json }));
 	let keyLabel = $derived(`${_key}${_key.length > 0 ? ': ' : ''}`);
-	let children = $derived(isExpandable ? Object.entries(json as object) : []);
-	let hasChildren = $derived(children.length > 0);
 	let isArray = $derived(Array.isArray(json));
+	// A folded entry still holds the width of a line where it sits, so leaving it in place keeps
+	// pushing down what the caller wanted read first. Order within each group is left untouched, and
+	// arrays are left alone entirely: their order is data, not presentation.
+	const collapsedLast = (entries: [string, unknown][]): [string, unknown][] => {
+		if (isArray) {
+			return entries;
+		}
+
+		const folded = new Set(collapsedKeys);
+		const open: [string, unknown][] = [];
+		const closed: [string, unknown][] = [];
+
+		for (const entry of entries) {
+			(folded.has(entry[0]) ? closed : open).push(entry);
+		}
+
+		return [...open, ...closed];
+	};
+
+	let children = $derived(isExpandable ? collapsedLast(Object.entries(json as object)) : []);
+	let hasChildren = $derived(children.length > 0);
 	let openBracket = $derived(isArray ? '[' : '{');
 	let closeBracket = $derived(isArray ? ']' : '}');
 	let root = $derived(_level === 1);

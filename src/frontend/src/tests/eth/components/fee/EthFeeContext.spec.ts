@@ -277,6 +277,44 @@ describe('EthFeeContext', () => {
 		});
 	});
 
+	describe('a chain the Gas API does not cover', () => {
+		// Arbitrum Sepolia answers 400, so the sample carries no tiers at all and
+		// `getEthFeeDataWithProvider` hands back `priorities: undefined`. The provider's own quote
+		// still has to reach the store, or the send stays blocked on "Gas fees not defined".
+		beforeEach(() => {
+			InfuraGasRest.prototype.getSuggestedFeeData = vi
+				.fn()
+				.mockRejectedValue(new Error('Fetching gas data with Infura Gas API failed.'));
+
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+		});
+
+		it('stores the provider fee instead of dereferencing the missing tiers', async () => {
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			expect(setFeeMock).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					gas: 21n,
+					maxFeePerGas: 10n,
+					maxPriorityFeePerGas: 5n,
+					baseFeePerGas: null
+				})
+			);
+		});
+
+		it('shows no "cannot fetch gas fee" toast', async () => {
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('a sample that comes back after observing stopped', () => {
 		// A hanging fetch that is still in flight when `observe` flips, which is the only way a
 		// sample can reach a consumer that has stopped observing.

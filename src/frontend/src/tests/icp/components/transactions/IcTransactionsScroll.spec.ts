@@ -1,24 +1,33 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { getTransactions } from '$icp/api/icp-index.api';
 import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
+import type * as IcTransactionsServices from '$icp/services/ic-transactions.services';
 import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	INTERSECTION_OBSERVER_ACTIVE_INTERVAL,
 	IntersectionObserverActive,
 	IntersectionObserverActiveInterval,
+	IntersectionObserverManual,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactions: vi.fn()
+}));
+
+vi.mock('$icp/api/icp-index.api', () => ({
+	getTransactions: vi.fn()
 }));
 
 describe('IcTransactionsScroll', () => {
@@ -118,7 +127,7 @@ describe('IcTransactionsScroll', () => {
 			vi.mocked(loadNextIcTransactions).mockImplementationOnce(
 				async ({ signalEnd }: { signalEnd: () => void }) => {
 					signalEnd();
-					return await Promise.resolve();
+					return await Promise.resolve({ success: true });
 				}
 			);
 
@@ -141,6 +150,81 @@ describe('IcTransactionsScroll', () => {
 			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
 
 			vi.useRealTimers();
+		});
+
+		// Driven through the real service against a failing Index canister, since the service is what
+		// used to end the scroll: its update-call error handler signalled the end.
+		describe('when a page fails', () => {
+			const { enterView } = IntersectionObserverManual;
+
+			beforeEach(async () => {
+				window.IntersectionObserver = IntersectionObserverManual;
+
+				const { loadNextIcTransactions: actualLoadNextIcTransactions } = await vi.importActual<
+					typeof IcTransactionsServices
+				>('$icp/services/ic-transactions.services');
+
+				vi.mocked(loadNextIcTransactions).mockImplementation(actualLoadNextIcTransactions);
+
+				vi.mocked(getTransactions).mockRejectedValue(new Error('Index canister unavailable'));
+
+				// Real block indexes, which the service needs as the cursor of the next page.
+				icTransactionsStore.reset(mockToken.id);
+				icTransactionsStore.append({
+					tokenId: mockToken.id,
+					transactions: createMockIcTransactionsUi(2).map((transaction) => ({
+						data: transaction,
+						certified: false
+					}))
+				});
+			});
+
+			afterEach(() => {
+				window.IntersectionObserver = IntersectionObserverActive;
+			});
+
+			it('should keep the scroll and ask again once the end comes back into view', async () => {
+				render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+				await waitFor(() => expect(getTransactions).toHaveBeenCalled());
+
+				await runResolvedPromises();
+
+				// Not asked again on its own, so a failing canister is not retried in a loop.
+				expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+
+				const requests = vi.mocked(getTransactions).mock.calls.length;
+
+				enterView();
+
+				await waitFor(() => expect(loadNextIcTransactions).toHaveBeenCalledTimes(2));
+
+				expect(vi.mocked(getTransactions).mock.calls.length).toBeGreaterThan(requests);
+			});
+
+			it('should still stop once the history runs out', async () => {
+				const emptyPage: Awaited<ReturnType<typeof getTransactions>> = {
+					balance: ZERO,
+					transactions: [],
+					oldest_tx_id: []
+				};
+
+				vi.mocked(getTransactions).mockResolvedValue(emptyPage);
+
+				render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+				await waitFor(() => expect(getTransactions).toHaveBeenCalled());
+
+				await runResolvedPromises();
+
+				const requests = vi.mocked(getTransactions).mock.calls.length;
+
+				enterView();
+
+				await runResolvedPromises();
+
+				expect(getTransactions).toHaveBeenCalledTimes(requests);
+			});
 		});
 	});
 });

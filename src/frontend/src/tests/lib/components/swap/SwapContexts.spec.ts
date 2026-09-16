@@ -140,7 +140,7 @@ describe('SwapContexts', () => {
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
 				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
-				// The vitest env maps to LOCAL, where the NEAR Intents BTC flag opens Bitcoin.
+				// Bitcoin joins the list as long as a provider reaches it: Chain Fusion or NEAR Intents.
 				BTC_MAINNET_NETWORK
 			]);
 		});

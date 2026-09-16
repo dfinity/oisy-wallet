@@ -162,6 +162,22 @@ The same warning appears on the token's own page, above its transaction list —
 
 This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
+### Loading older history
+
+The Activity list and a token's own page both load older transactions as the user scrolls to the end of the list. A page that fails to load (the explorer or RPC errors, the Index canister does not answer) is not taken as the start of the history: what is on screen stays, and the list asks again the next time its end is scrolled into view. It does not retry on its own while the end sits on screen. Only a chain that actually has nothing older stops the list for that token.
+
+On Ethereum and the EVM networks the retries are spaced out per wallet address and token, so an explorer that keeps failing is not asked on every scroll: after a failed page the token waits 5 seconds before asking again, doubling with each failure in a row up to a minute, and the first page served resets the wait. It never gives up for the session. A scroll that arrives during the wait loads nothing for that token, and the next one after it asks again.
+
+For IC tokens a failed page does not count towards the Index-canister outage warning above. That warning is still driven only by the regular 30-second check, so scrolling during an outage neither brings it on sooner nor clears it.
+
+### Solana history
+
+A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
+
+OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
+
+Scrolling back through Solana history works per network on the Activity page and per token on a token's own page. On the Activity page every token of a Solana network pages through the same merged list of the wallet's and its token accounts' signatures, so a transaction reaches every token it belongs to in the same step: both sides of a swap appear together, never one without the other. When that list runs out, every token of the network is marked as having no more history at once. A token's own page pages through that token's history only, so scrolling a token does not walk through the others' history. Each list remembers where it stopped on its own, never guessing from the transactions already on screen, and starts over after a change of wallet or of the network's enabled tokens. A page that could not be fetched is retried on the next scroll rather than read as the end of the history, and a page that brings nothing new does not stop the list: a few more are asked for in the same step. The data export reaches the full Solana history the same way.
+
 ---
 
 ## Exchange-rate sourcing

@@ -1,11 +1,9 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import { signature as solSignature } from '@solana/kit';
+import { nonNullish, toNullable } from '@dfinity/utils';
 
 export const mapSolTransactionToUserTransaction = (tx: SolTransactionUi): UserTransaction => ({
 	id: tx.id,
@@ -24,87 +22,10 @@ export const mapSolTransactionToUserTransaction = (tx: SolTransactionUi): UserTr
 });
 
 /**
- * Maps a backend `UserTransaction` (with Sol network data) back to a `SolTransactionUi`.
- * Requires the user's wallet address to determine the transaction direction (send/receive).
- */
-export const mapUserTransactionToSolTransaction = ({
-	transaction,
-	address
-}: {
-	transaction: UserTransaction;
-	address: SolAddress;
-}): SolTransactionUi => {
-	if (!('Sol' in transaction.network_data)) {
-		throw new Error('Expected Sol network data for Solana transaction mapping');
-	}
-
-	const {
-		id,
-		block_index,
-		timestamp,
-		from,
-		to: toOpt,
-		value,
-		network_data: { Sol: sol }
-	} = transaction;
-
-	const to = fromNullable(toOpt);
-	const fee = fromNullable(sol.fee);
-	const fromOwner = fromNullable(sol.from_owner);
-	const toOwner = fromNullable(sol.to_owner);
-
-	const [sig] = id.split('-');
-
-	const isSend = address === from || address === fromOwner;
-
-	return {
-		id,
-		signature: solSignature(sig),
-		blockNumber: Number(block_index),
-		timestamp,
-		from,
-		to,
-		value,
-		type: isSend ? 'send' : 'receive',
-		status: 'finalized',
-		...(nonNullish(fee) && { fee }),
-		...(nonNullish(fromOwner) && { fromOwner }),
-		...(nonNullish(toOwner) && { toOwner })
-	};
-};
-
-/**
  * A Solana transaction is finalized when its commitment status is `'finalized'`.
  */
 export const isSolTransactionFinalized = (tx: SolTransactionUi): boolean =>
 	tx.status === 'finalized';
-
-/**
- * Whether a stored record predates the summary derivation.
- *
- * The backend cache cannot carry the derived fields, and the raw transaction is not kept, so a
- * record without a summary can only be healed by fetching and deriving it again.
- */
-export const requiresStoredDerivationRefresh = ({
-	transaction: { summary }
-}: {
-	transaction: SolTransactionUi;
-}): boolean => isNullish(summary);
-
-export const requiresStoredSplOwnerRefresh = ({
-	transaction: { from, fromOwner, to, toOwner },
-	address,
-	tokenAddress
-}: {
-	transaction: SolTransactionUi;
-	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-}): boolean =>
-	nonNullish(tokenAddress) &&
-	from !== address &&
-	fromOwner !== address &&
-	to !== address &&
-	toOwner !== address;
 
 /**
  * Derives the backend `TokenId` from the Solana network type and optional SPL token address.

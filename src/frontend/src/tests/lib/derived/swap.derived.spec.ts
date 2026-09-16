@@ -17,6 +17,7 @@ import {
 } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -58,7 +59,7 @@ describe('swap.derived', () => {
 			expect(get(isPageTokenSwappable)).toBeTruthy();
 		});
 
-		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag opens Bitcoin.
+		// Bitcoin is swappable as long as a provider reaches it: Chain Fusion or NEAR Intents.
 		it('should return true for Bitcoin token', () => {
 			mockPage.mockToken(BTC_MAINNET_TOKEN);
 
@@ -180,7 +181,12 @@ describe('swap.derived', () => {
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: {
 							coverage: 'all',
-							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+							supportedTokenIds: new Set([
+								nativeSwapTokenIdentifier({
+									networkId: SOLANA_TOKEN.network.id,
+									symbol: SOLANA_TOKEN.symbol
+								})
+							])
 						},
 						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
@@ -263,7 +269,12 @@ describe('swap.derived', () => {
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: {
 							coverage: 'all',
-							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
+							supportedTokenIds: new Set([
+								nativeSwapTokenIdentifier({
+									networkId: SOLANA_TOKEN.network.id,
+									symbol: SOLANA_TOKEN.symbol
+								})
+							])
 						},
 						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
@@ -348,9 +359,8 @@ describe('swap.derived', () => {
 			setupUserNetworksStore('allEnabled');
 		});
 
-		// The vitest env maps to LOCAL, where the NEAR Intents BTC flag is on while
-		// Chain Fusion (STAGING-gated) is off.
-		it('should include the enabled mainnet Bitcoin token via the NEAR Intents BTC flag', () => {
+		// Both BTC providers are on in the default env; the cases below drop one flag at a time.
+		it('should include the enabled mainnet Bitcoin token under the default test env', () => {
 			const result = get(allSwapUniverseTokens);
 
 			expect(result.find(({ id }) => id === BTC_MAINNET_TOKEN.id)).toEqual({
@@ -361,6 +371,7 @@ describe('swap.derived', () => {
 
 		it('should exclude Bitcoin while no provider reaches it', async () => {
 			vi.resetModules();
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: false }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
@@ -386,6 +397,7 @@ describe('swap.derived', () => {
 
 				expect(result.find(({ id }) => id === bitcoin.id)).toBeUndefined();
 			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}
@@ -393,7 +405,6 @@ describe('swap.derived', () => {
 
 		it('should include the enabled mainnet Bitcoin token when only Chain Fusion is on', async () => {
 			vi.resetModules();
-			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
@@ -423,7 +434,6 @@ describe('swap.derived', () => {
 				});
 				expect(result.find(({ id }) => id === bitcoinTestnet.id)).toBeUndefined();
 			} finally {
-				vi.doUnmock('$env/chain-fusion-swap.env');
 				vi.doUnmock('$env/rest/near-intents.env');
 				vi.resetModules();
 			}
