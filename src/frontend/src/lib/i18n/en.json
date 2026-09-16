@@ -145,7 +145,8 @@
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
 			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
-			"notes": "Notes"
+			"notes": "Notes",
+			"issue_tip": "Give a tip"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -169,7 +170,8 @@
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances",
-			"notes": "Open notes"
+			"notes": "Open notes",
+			"issue_tip": "Give a tip anyone can claim with a link or QR code"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -768,7 +770,8 @@
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
-			"sol_wallet_error": "Error while loading SOL wallet information."
+			"sol_wallet_error": "Error while loading SOL wallet information.",
+			"xrp_wallet_error": "Error while loading XRP wallet information."
 		}
 	},
 	"hero": {
@@ -933,6 +936,14 @@
 				"solana_address_copied": "Solana address copied to clipboard",
 				"display_solana_address_qr": "Display Solana address as QR code"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "XRP Address",
+				"xrp_address_title": "XRP Ledger wallet address",
+				"xrp_address_copied": "XRP address copied to clipboard",
+				"display_xrp_address_qr": "Display XRP address as QR code"
+			}
 		}
 	},
 	"send": {
@@ -989,7 +1000,7 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
@@ -1045,6 +1056,7 @@
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
+			"ethereum_insufficient_funds": "Your balance is not sufficient to cover this transaction and its network fee. It may have changed since it was last displayed, so please check the amount and try again.",
 			"solana_transaction_expired": "Your transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
@@ -2828,6 +2840,130 @@
 				"discover": "Discover OISY",
 				"unavailable_title": "This link has expired or already been used"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "Tip with OISY Wallet",
+			"intro_heading": "Effortless Crypto Tipping",
+			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"select_token": "Select token to issue tip",
+			"create_title": "Issue Tip",
+			"share_title": "Tip is ready",
+			"preparing_title": "Preparing your tip...",
+			"empty_balance_title": "Your balance is empty",
+			"empty_balance_description": "You need at least one supported token to generate a tip.",
+			"no_supported_tokens_title": "No tippable tokens",
+			"no_supported_tokens_description": "Tips can only be issued in ICP and ck-assets, because those are the tokens whose ledgers let you reserve an amount without handing it over.",
+			"expiration": "Expiration",
+			"expiry_24h": "24 hours",
+			"expiry_3d": "3 days",
+			"expiry_7d": "7 days",
+			"message": "Message",
+			"message_placeholder": "Say thanks...",
+			"total_estimated_fee": "Total estimated fee",
+			"reserve_fee": "Fee to reserve",
+			"payout_fee": "Fee when claimed",
+			"fees_are_yours": "Both fees are paid by you. Whoever claims the tip receives the full amount.",
+			"lapse_notice": "If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"generate": "Generate",
+			"share_heading": "Your tip is ready",
+			"copy_link": "Copy the tip link",
+			"share_link": "Share the tip link",
+			"they_will_receive": "Tip amount",
+			"no_wallet_needed_title": "Scan to claim this tip",
+			"no_wallet_needed": "No wallet yet? Create one while claiming.",
+			"scan_or_photo": "Scan now, or take a photo to claim later.",
+			"expires_at": "Claim before $date",
+			"done": "Done",
+			"generating_link": "Reserving your tip and building the link. This takes a few seconds.",
+			"recovering_link": "Recovering your link. This takes a few seconds.",
+			"link_not_saved": "Copy this link now. We could not save a copy for you, so this is the only time you will see it.",
+			"reserve_failed": "The tip could not be reserved. Nothing has left your wallet, so try again.",
+			"status_title": "Tip Status",
+			"claim_title": "Claim tip",
+			"claim_amount": "You are claiming",
+			"claim_expires": "Claimable until $date",
+			"claim_ready_title": "Your $amount Tip is Ready!",
+			"claim_ready_title_plain": "Your Tip is Ready!",
+			"claim_ready_description": "Now, let's create your free OISY Wallet to access and manage your funds.",
+			"claim_token": "Token",
+			"claim_status": "Status",
+			"open_or_create": "Open or Create",
+			"open_or_create_hint": "You need an Internet Identity to receive this tip. Creating one takes seconds, with no seed phrase and no app to install.",
+			"claimer_disclosure": "The person who sent this tip will see that you claimed it.",
+			"claimed_title": "Tip received",
+			"claimed_description": "The tokens are in your OISY wallet.",
+			"claiming_title": "Claiming your tip",
+			"claiming_description": "Hold on while the funds move into your wallet.",
+			"claim_retry": "Try again",
+			"received_title": "$amount Received!",
+			"received_description": "The funds have been successfully added to your balance. You can now manage, send, or swap your tokens.",
+			"network": "Network",
+			"status_completed": "Completed",
+			"take_me_to_wallet": "Take me to the wallet",
+			"unavailable_title": "This tip is no longer available",
+			"unavailable_description": "It may already have been claimed, it may have expired, or the link may be incomplete. Ask whoever sent it for a new one.",
+			"uncovered_title": "This tip is no longer available",
+			"uncovered_description": "It cannot be claimed any more. Ask whoever sent it for a new one.",
+			"short_balance_title": "This tip could not be paid yet",
+			"short_balance_description": "Nothing was transferred and your link still works. Try again in a while, or let whoever sent it know.",
+			"claim_failed_title": "The claim did not go through",
+			"claim_failed": "We could not confirm the claim. Trying again is safe — a tip can only ever pay out once.",
+			"unreachable_title": "Could not load this tip",
+			"unreachable_description": "Something went wrong at our end rather than with the link. Try again.",
+			"history_title": "Tips History",
+			"history_empty": "You have not issued any tips yet.",
+			"history_failed": "Your past tips could not be loaded. Nothing has changed about them, so try again.",
+			"group_failed": "Needs attention",
+			"group_failed_hint": "Somebody tried to claim these and the payout did not go through — nothing has left your balance. Top up if the balance was short, issue a new tip if the reservation is gone; otherwise the same link can be tried again.",
+			"failure_uncovered": "Reservation revoked",
+			"failure_insufficient_funds": "Balance too low",
+			"failure_transfer_failed": "Transfer failed",
+			"group_open": "Open",
+			"group_claimed": "Claimed",
+			"group_expired": "Expired and cancelled",
+			"status_reserved": "Reserved",
+			"status_failed": "Failed",
+			"status_claimed": "Claimed",
+			"status_expired": "Expired",
+			"status_cancelled": "Cancelled",
+			"claimed_by": "Claimed by $principal",
+			"tip_amount": "Tip $amount",
+			"expires_in": "Expires in $duration",
+			"link_unavailable": "The link for this tip could not be recovered. The tip itself is unaffected, and you can still cancel it from here.",
+			"link_recovery_failed": "The link could not be recovered. Nothing has changed about the tip, so try again.",
+			"cancel_tip": "Cancel this tip",
+			"cancel_failed": "The tip could not be cancelled. Nothing has moved, so try again.",
+			"cancelled_toast": "Tip cancelled. The reservation has been revoked.",
+			"cancelled_allowance_kept": "Tip cancelled — nobody can claim it now. Withdrawing the leftover approval did not go through, but nothing is holding your balance and it lapses by itself at the tip's original expiry.",
+			"token_unavailable": "This tip is in a token that is no longer in your list. Add the token back to view or cancel it.",
+			"message_too_long": "Keep the message to $max characters or fewer.",
+			"learn_how_it_works": "Learn how it works",
+			"view_history": "Past tips",
+			"get_started": "Get Started",
+			"rate_limited": "You have done that a few times in quick succession. Wait about $duration and it will work again.",
+			"rate_limited_title": "Slow down a moment"
+		},
+		"alt": {
+			"intro_illustration": "A tip QR code being scanned",
+			"claim_illustration": "A stack of coins waiting to be claimed",
+			"claim_failed_illustration": "A tip that could not be claimed",
+			"welcome_illustration": "OISY Wallet open at oisy.com, surrounded by the tokens and features it supports"
+		},
+		"share": {
+			"title": "Someone sent you a tip",
+			"description": "Tap to claim it. No app to install, nothing to write down, and only you can move it."
+		},
+		"welcome": {
+			"title": "Welcome to OISY Wallet",
+			"heading": "Come back anytime at oisy.com",
+			"body": "Your tip is waiting in your web wallet. Sign in the same way you just did — nothing to install or write down.",
+			"point_access_title": "Only you can access it",
+			"point_access_text": "Not OISY Wallet, and not the person who sent it.",
+			"point_stay_title": "Your funds stay here",
+			"point_stay_text": "Come back whenever you want. Nothing expires.",
+			"cta": "Open my wallet"
 		}
 	}
 }

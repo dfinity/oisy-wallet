@@ -4,6 +4,17 @@ export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
+export const NAVIGATION_MENU_TIP_BUTTON = 'navigation-menu-tip-button';
+export const TIP_INTRO_GET_STARTED_BUTTON = 'tip-intro-get-started-button';
+export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
+export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
+export const TIP_CLAIM_RETRY_BUTTON = 'tip-claim-retry-button';
+export const TIP_RECEIVED_BUTTON = 'tip-received-button';
+export const TIP_WELCOME_MODAL = 'tip-welcome-modal';
+export const TIP_WELCOME_CTA_BUTTON = 'tip-welcome-cta-button';
+export const TIP_HISTORY_CANCEL_BUTTON = 'tip-history-cancel-button';
+export const TIP_HISTORY_ERROR = 'tip-history-error';
+export const TIP_HISTORY_ROW_BUTTON = 'tip-history-row-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
@@ -81,6 +92,7 @@ export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-sectio
 export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
+export const RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION = 'receive-tokens-modal-xrp-mainnet-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 
