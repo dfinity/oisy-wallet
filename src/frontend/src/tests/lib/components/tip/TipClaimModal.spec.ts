@@ -8,10 +8,11 @@ import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { userProfileCreated } from '$lib/stores/user-profile.store';
+import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
@@ -93,6 +94,9 @@ describe('TipClaimModal', () => {
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
 		userProfileCreated.set(false);
+		// Loaded by default. The handover waits for the profile before deciding
+		// anything, so without this every test would sit through that wait.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
 
 		// The failure paths log what went wrong on purpose, so the paths that fail
 		// have to expect it rather than leak it into the test output.
@@ -308,6 +312,75 @@ describe('TipClaimModal', () => {
 
 		// Remembered, so a second tip in the same session does not repeat it.
 		expect(remember).toHaveBeenCalledOnce();
+	});
+
+	it('waits for the profile rather than deciding before it lands', async () => {
+		// The race this closes. `TipClaimModal` is mounted by `Modals` inside
+		// `AuthGuard` — beside the loader tree, not beneath it — so nothing orders
+		// the two. A first-time claimer is both the person whose profile is still
+		// being created and the one most likely to tap straight through, so the
+		// welcome was skipped for exactly the person it exists for.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the point where the unguarded handover had already sampled both
+		// stores and closed. Setting the profile any earlier lets it win the race by
+		// luck, which is what made an earlier version of this test pass against the
+		// bug it was written for.
+		await vi.advanceTimersByTimeAsync(600);
+
+		// The profile lands only now — after the reader has already acknowledged.
+		userProfileCreated.set(true);
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		await vi.waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
+
+		vi.useRealTimers();
+	});
+
+	it('hands over anyway when the profile never arrives', async () => {
+		// Bounded, not indefinite: the claim is done and the money is theirs, so a
+		// profile that never loads must not trap the reader on a screen whose work
+		// is finished. The cost of giving up is a missed welcome, not a missed
+		// payout.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the whole retry budget without the profile ever arriving.
+		await vi.advanceTimersByTimeAsync(10_000);
+
+		await vi.waitFor(() => expect(get(modalStore)).toBeNull());
+
+		vi.useRealTimers();
 	});
 
 	it('spares an established user the introduction', async () => {

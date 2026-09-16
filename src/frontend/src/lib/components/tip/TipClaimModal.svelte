@@ -29,6 +29,7 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
@@ -43,6 +44,7 @@
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { waitReady } from '$lib/utils/timeout.utils';
 	import {
 		hasSeenTipWelcome,
 		isTipUnavailable,
@@ -54,6 +56,17 @@
 	}
 
 	let { pending }: Props = $props();
+
+	/**
+	 * How long the handover waits for the profile to land, as `waitReady` retries
+	 * at its default half-second interval — so about five seconds.
+	 *
+	 * Long enough for a canister call that is already in flight, short enough that
+	 * a claimer whose profile load has genuinely failed is not held on a screen
+	 * whose work is finished. The cost of giving up early is a missed welcome, not
+	 * a missed payout.
+	 */
+	const PROFILE_READY_RETRIES = 10;
 
 	/**
 	 * `unavailable` and `uncovered` come from different calls and mean different
@@ -184,6 +197,20 @@
 	// global busy overlay, which belongs over a transition and not over the
 	// celebration. By the time the wallet appears the balance is already there.
 	const leaveForWallet = async () => {
+		// Everything below reads state the loader tree is still filling in, and this
+		// modal is mounted by `Modals` inside `AuthGuard` — beside that tree, not
+		// beneath it — so nothing orders the two. A first-time claimer is both the
+		// person whose profile is still being created and the one most likely to tap
+		// straight through, which is how the welcome came to be skipped for exactly
+		// the person it exists for.
+		//
+		// Bounded rather than indefinite: if the profile never lands, the claim is
+		// still done and the money is still theirs, so the handover proceeds on what
+		// is known rather than trapping the reader on a screen they have finished
+		// with. Waiting first also gives the token list time to arrive, which is what
+		// decides whether `enableClaimedToken` enables a default or imports it.
+		await waitReady({ retries: PROFILE_READY_RETRIES, isDisabled: () => !$userProfileLoaded });
+
 		await enableClaimedToken();
 
 		// Whether this claimer needs OISY explained to them, read before `close()`
