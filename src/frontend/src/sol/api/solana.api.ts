@@ -1,4 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { consoleError } from '$lib/utils/console.utils';
+import {
+	getIdbSolTransactionDetail,
+	setIdbSolTransactionDetail
+} from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -149,6 +154,19 @@ export const fetchTransactionDetailForSignature = async ({
 		return cachedTransaction;
 	}
 
+	// Each realm holds its own map, so without this the network worker and the main thread fetch the
+	// same details once each, and every reload fetches them again.
+	const storedTransaction = await getIdbSolTransactionDetail({
+		network,
+		signature: signature.signature
+	});
+
+	if (nonNullish(storedTransaction)) {
+		networkCache.set(signature.signature, storedTransaction);
+
+		return storedTransaction;
+	}
+
 	const { confirmationStatus } = signature;
 
 	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
@@ -170,6 +188,11 @@ export const fetchTransactionDetailForSignature = async ({
 
 	if (confirmationStatus === 'finalized') {
 		networkCache.set(signature.signature, transaction);
+
+		// Not awaited: the transaction is already loaded, and keeping it is worth nothing to this call.
+		setIdbSolTransactionDetail({ network, transaction }).catch((err: unknown) =>
+			consoleError('Caching a Solana transaction detail failed:', err)
+		);
 	}
 
 	return transaction;

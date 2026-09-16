@@ -167,6 +167,20 @@ exist means zero. Today that takes one `getBalance` plus up to three calls per S
 (`isAtaAddress`, `checkIfAccountExists` and `getTokenAccountBalance`, in `loadSplTokenBalance`).
 Balances are still posted per token.
 
+### 3.9 One fetch of a transaction's details for every realm
+
+`fetchTransactionDetailForSignature` keeps the details of a finalized transaction in IndexedDB,
+per network and signature, and reads them back before asking the RPC. The in-memory map stays in
+front of it. Without it the network worker and the pagers of the main thread hold a map each, so
+each fetches the same details once, and a reload fetches them all again. Only finalized details
+are kept: a transaction that is not finalized can still be dropped by the network.
+
+The store keeps the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network, trimmed back
+to that size once it runs past it by `SOLANA_TRANSACTION_DETAILS_CACHE_SLACK`, and is cleared at
+sign-out with the other caches. Neither reading nor writing it may fail a
+load: a browser that refuses to store leaves the caller exactly where it was before the cache
+existed.
+
 ## 4. Does not do
 
 - No change to how a transaction is derived (`fetchSolTransactionsForSignature`, the summary,
@@ -300,6 +314,10 @@ Implementation, in order:
   only finalized ones, and only those that some session of this user happened to load. Treating it
   as a source would reopen the holes 3.3 closes. Re-deriving every restored record instead would
   cost the same RPC calls as not reading and keep more code.
+
+- **D5. The details of a finalized transaction are cached in IndexedDB.** The per-realm map alone
+  left the worker and the main thread fetching the same details once each, and a reload fetching
+  them again (3.9). Bounded per network and cleared at sign-out.
 
 ## 10. Notes for the implementation
 

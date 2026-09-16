@@ -6,6 +6,10 @@ import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
+	getIdbSolTransactionDetail,
+	setIdbSolTransactionDetail
+} from '$sol/api/idb-sol-transaction-details.api';
+import {
 	checkIfAccountExists,
 	estimatePriorityFee,
 	fetchSignatures,
@@ -41,6 +45,11 @@ import { address, lamports } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
+
+vi.mock('$sol/api/idb-sol-transaction-details.api', () => ({
+	getIdbSolTransactionDetail: vi.fn(),
+	setIdbSolTransactionDetail: vi.fn()
+}));
 
 describe('solana.api', () => {
 	let mockGetBalance: MockInstance;
@@ -501,6 +510,11 @@ describe('solana.api', () => {
 		let mockGetTransaction: MockInstance;
 
 		beforeEach(() => {
+			// Nothing kept from an earlier session, and keeping succeeds: each test that cares sets its
+			// own answer.
+			vi.mocked(getIdbSolTransactionDetail).mockResolvedValue(undefined);
+			vi.mocked(setIdbSolTransactionDetail).mockResolvedValue(undefined);
+
 			mockGetTransaction = vi.fn().mockReturnValue({
 				send: () => Promise.resolve(mockSolTransactionDetail)
 			});
@@ -572,6 +586,79 @@ describe('solana.api', () => {
 			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet });
 
 			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
+		});
+
+		// The worker and the main thread hold a map each, and neither survives a reload. What the one
+		// fetched is therefore read back by the other from IndexedDB rather than fetched again.
+		describe('the cache it shares with the other realms', () => {
+			it('should return what it kept, without asking the RPC', async () => {
+				const signature = mockSolSignatureResponse();
+
+				const stored = {
+					...mockSolTransactionDetail,
+					version: mockSolTransactionDetail.version,
+					confirmationStatus: 'finalized' as const,
+					id: signature.signature,
+					signature: signature.signature
+				};
+
+				vi.mocked(getIdbSolTransactionDetail).mockResolvedValue(stored);
+
+				const transaction = await fetchTransactionDetailForSignature({
+					signature,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(transaction).toEqual(stored);
+				expect(getIdbSolTransactionDetail).toHaveBeenCalledExactlyOnceWith({
+					network: SolanaNetworks.mainnet,
+					signature: signature.signature
+				});
+				expect(mockGetTransaction).not.toHaveBeenCalled();
+			});
+
+			it('should keep a finalized transaction it fetched', async () => {
+				const signature = mockSolSignatureResponse();
+
+				await fetchTransactionDetailForSignature({
+					signature,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(setIdbSolTransactionDetail).toHaveBeenCalledExactlyOnceWith({
+					network: SolanaNetworks.mainnet,
+					transaction: expect.objectContaining({
+						confirmationStatus: 'finalized',
+						signature: signature.signature
+					})
+				});
+			});
+
+			it('should not keep a transaction that is not finalized yet', async () => {
+				const signature = mockSolSignatureResponse({ confirmationStatus: 'confirmed' });
+
+				await fetchTransactionDetailForSignature({
+					signature,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(setIdbSolTransactionDetail).not.toHaveBeenCalled();
+			});
+
+			// The cache is worth nothing to the call that filled it, so a browser that refuses to store
+			// must not fail the load.
+			it('should load the transaction even when it cannot be kept', async () => {
+				vi.mocked(setIdbSolTransactionDetail).mockRejectedValue(new Error('Quota exceeded'));
+
+				const signature = mockSolSignatureResponse();
+
+				const transaction = await fetchTransactionDetailForSignature({
+					signature,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(transaction?.signature).toBe(signature.signature);
+			});
 		});
 	});
 
