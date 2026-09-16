@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, onMount } from 'svelte';
-	import { SEND_TRANSACTION_PRIORITY_ENABLED } from '$env/send-transaction-priority.env';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_REVIEW_EXPIRY_DELAY } from '$eth/constants/eth.constants';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -56,13 +55,9 @@
 
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
 	{#snippet fee()}
-		<EthFeeDisplay estimated={SEND_TRANSACTION_PRIORITY_ENABLED}>
+		<EthFeeDisplay estimated>
 			{#snippet label()}
-				<Html
-					text={SEND_TRANSACTION_PRIORITY_ENABLED
-						? $i18n.fee.text.estimated_fee_eth
-						: $i18n.fee.text.max_fee_eth}
-				/>
+				<Html text={$i18n.fee.text.estimated_fee_eth} />
 			{/snippet}
 		</EthFeeDisplay>
 	{/snippet}

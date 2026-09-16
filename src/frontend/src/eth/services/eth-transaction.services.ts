@@ -1,7 +1,7 @@
-import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import { nativeTokenOf } from '$eth/services/native-balance.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -151,9 +151,7 @@ const processMinedTransaction = async ({
 	// send against a balance that still holds the gas already spent: the amount plus the gas it
 	// reserves exceeds what the account has, and the chain rejects the transaction outright rather
 	// than trimming it.
-	const nativeToken = get(enabledEthEvmNativeTokens).find(
-		({ network: { id } }) => id === networkId
-	);
+	const nativeToken = nativeTokenOf(networkId);
 
 	const tokensToReload: Token[] = [
 		token,

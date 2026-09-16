@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -141,7 +145,8 @@
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
 			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
@@ -165,7 +170,8 @@
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
 			"show_balances": "إظهار الأرصدة المخفية",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -929,6 +935,14 @@
 				"solana_address_copied": "تم نسخ عنوان سولانا إلى الحافظة",
 				"display_solana_address_qr": "عرض عنوان سولانا كرمز QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1561,7 +1575,6 @@
 			"estimated_btc": "رسوم شبكة البيتكوين المقدرة",
 			"estimated_inter_network": "رسوم الشبكة البينية المقدرة",
 			"estimated_eth": "رسوم الإيثيريوم المقدرة",
-			"max_fee_eth": "الحد الأقصى للرسوم <small>(على الأرجح في < 30 ثانية)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
@@ -2825,6 +2838,101 @@
 				"discover": "",
 				"unavailable_title": ""
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }
