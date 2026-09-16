@@ -26,6 +26,20 @@ export const XRP_MAINNET_ENABLED =
 	!XRP_MAINNET_DISABLED_OVERRIDE &&
 	parseEnabledMainnetBoolEnvVar(import.meta.env.VITE_XRP_MAINNET_DISABLED);
 
+/**
+ * XRPL JSON-RPC endpoint.
+ *
+ * Set `VITE_XRP_RPC_URL_MAINNET` to a managed provider endpoint (e.g. a QuickNode
+ * XRPL cluster) before enabling XRP mainnet. The public XRP Ledger Foundation
+ * cluster is used only as a development fallback — per xrpl.org it is not for
+ * sustained or production use — so it is offered ONLY on non-user-facing builds.
+ * User-facing builds (`ic`/`beta`) resolve to `undefined` when no managed URL is
+ * configured; `xrpHttpRpcUrl` then throws rather than silently hitting the public cluster.
+ */
+export const XRP_RPC_HTTP_URL_MAINNET =
+	import.meta.env.VITE_XRP_RPC_URL_MAINNET ??
+	(PROD || BETA ? undefined : 'https://xrplcluster.com');
+
 export const XRP_MAINNET_NETWORK_SYMBOL = 'XRP';
 
 export const XRP_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(XRP_MAINNET_NETWORK_SYMBOL);
