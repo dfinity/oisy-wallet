@@ -122,6 +122,41 @@ describe('xrp-transaction.utils', () => {
 			expect(ui?.value).toBe(4_000_000n);
 		});
 
+		// XRPL returns this sentinel when the delivered amount was never recorded. It is a string, so
+		// it passed the old guard and reached `BigInt`, which throws — and the throw escapes the
+		// scheduler's `.map`, failing the whole sync and resetting the wallet store.
+		it('skips a payment whose delivered amount is unavailable', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						hash: 'H-UNAVAILABLE'
+					},
+					extra: { meta: { TransactionResult: 'tesSUCCESS', delivered_amount: 'unavailable' } }
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toBeUndefined();
+		});
+
+		it.each(['', '-1', '1.5', '0x10', '1e6'])(
+			'skips a payment whose delivered amount is not unsigned drops: %s',
+			(delivered_amount) => {
+				const ui = mapXrpTransaction({
+					transaction: paymentEntry({
+						tx: { Account: counterparty, Destination: wallet, Amount: '5000000', hash: 'H-BAD' },
+						extra: { meta: { TransactionResult: 'tesSUCCESS', delivered_amount } }
+					}),
+					xrpAddress: wallet
+				});
+
+				expect(ui).toBeUndefined();
+			}
+		);
+
 		it('includes the destination tag when present', () => {
 			const ui = mapXrpTransaction({
 				transaction: paymentEntry({

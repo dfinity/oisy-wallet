@@ -104,7 +104,10 @@ export const mapXrpTransaction = ({
 	// we do not display.
 	const amount = meta?.delivered_amount ?? tx.Amount;
 
-	if (typeof amount !== 'string') {
+	// XRPL reports `delivered_amount: "unavailable"` when the delivered amount was never recorded,
+	// so the string check alone is not enough — only unsigned drops convert. Skipping beats falling
+	// back to `Amount`, which is a partial payment's ceiling rather than what arrived.
+	if (typeof amount !== 'string' || !/^\d+$/.test(amount)) {
 		return undefined;
 	}
 
