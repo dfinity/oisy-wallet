@@ -611,7 +611,7 @@ export const loadNextEthTransactionsByOldest: LoadOlderTransactions = async ({
 
 	const address = get(addressStore);
 
-	const { hasMore } = isTokenErc20(token)
+	const { hasMore, err } = isTokenErc20(token)
 		? await loadNextErc20UserTransactions({
 				identity,
 				address,
@@ -632,6 +632,12 @@ export const loadNextEthTransactionsByOldest: LoadOlderTransactions = async ({
 					oldestLoadedBlockNumber
 				})
 			: { hasMore: false };
+
+	// Not the end of the history: signalling it would retire the token from the Activity list until
+	// the page is left. The error travels up instead, so the list asks again on a later scroll.
+	if (nonNullish(err)) {
+		return { success: false, err };
+	}
 
 	if (!hasMore) {
 		signalEnd();

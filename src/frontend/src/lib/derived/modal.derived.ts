@@ -8,6 +8,7 @@ import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
+import type { PendingTipClaim } from '$lib/types/tip';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -270,6 +271,20 @@ export const modalReferralCode: Readable<boolean> = derived(
 export const modalTip: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'tip'
+);
+export const modalTipWelcome: Readable<boolean> = derived(
+	[modalStore],
+	([$modalStore]) => $modalStore?.type === 'tip-welcome'
+);
+
+export const modalTipClaim: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'tip-claim'
+);
+export const modalTipClaimData: Readable<PendingTipClaim | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'tip-claim' ? ($modalStore?.data as PendingTipClaim) : undefined
 );
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,

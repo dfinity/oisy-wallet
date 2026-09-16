@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
 			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Chyba při načítání informací o peněžence XRP."
 		}
 	},
 	"hero": {
@@ -2881,14 +2881,64 @@
 			"done": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",
 			"get_started": "",
-			"rate_limited": ""
+			"rate_limited": "",
+			"rate_limited_title": ""
 		},
 		"alt": {
-			"intro_illustration": ""
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }
