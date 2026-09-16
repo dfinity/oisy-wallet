@@ -29,6 +29,7 @@
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
+	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
@@ -38,6 +39,7 @@
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
+	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
 	interface Props {
 		currentStep?: WizardStep;
@@ -65,7 +67,7 @@
 		onTokensList
 	}: Props = $props();
 
-	const { sendToken, sendTokenDecimals, sendXrpDestinationTag } =
+	const { sendToken, sendTokenDecimals, sendXrpDestinationTag, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let networkId = $derived($sendToken?.network.id);
@@ -145,6 +147,32 @@
 			return;
 		}
 
+		const amountDrops = parseToken({
+			value: `${amount}`,
+			unitName: $sendTokenDecimals
+		});
+
+		// The form validated the amount against the fee and reserve as they stood when it was
+		// typed, and `TokenInputContent` only revalidates when the amount or token changes — so the
+		// 10s fee poller can raise what the account must retain underneath an already-accepted
+		// amount. Re-assert it here rather than at the input, because the review step would be
+		// stale too.
+		if (
+			isNullish($sendBalance) ||
+			isNullish($reserveStore) ||
+			!isXrpAmountSendable({
+				amount: amountDrops,
+				balance: $sendBalance,
+				fee: $feeStore ?? XRP_DEFAULT_FEE_DROPS,
+				reserve: $reserveStore
+			})
+		) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.insufficient_funds_for_reserve }
+			});
+			return;
+		}
+
 		onNext();
 
 		const sendTrackingEventMetadata = {
@@ -160,10 +188,7 @@
 				network,
 				source,
 				destination,
-				amount: parseToken({
-					value: `${amount}`,
-					unitName: $sendTokenDecimals
-				}),
+				amount: amountDrops,
 				destinationTag: $sendXrpDestinationTag
 			});
 
