@@ -8,7 +8,7 @@ import { get } from 'svelte/store';
 const MAX_ERROR_DEPTH = 5;
 
 // The node refuses a transaction the account cannot pay for in two different ways, both delivered
-// as JSON-RPC -32000.
+// as a JSON-RPC -32000.
 //
 // "gas required exceeds allowance (N)" is the one that reads as a gas problem and is not: N is
 // `(balance - value) / maxFeePerGas`, the gas the balance left over can still buy, so the message
@@ -17,42 +17,59 @@ const MAX_ERROR_DEPTH = 5;
 // different fix and must not borrow this text.
 const INSUFFICIENT_BALANCE_PATTERN = /insufficient funds|gas required exceeds allowance/i;
 
+const JSON_RPC_SERVER_ERROR_CODE = -32000;
+
+// Older nodes answer a reverting call with -32000 as well, the contract's reason in the message.
+const EXECUTION_REVERTED_PATTERN = /execution reverted/i;
+
+// Ethers' own verdict that the node refused the account. It never gives this code to a revert,
+// which it reports as `CALL_EXCEPTION`.
 const ETHERS_INSUFFICIENT_FUNDS_CODE = 'INSUFFICIENT_FUNDS';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	nonNullish(value) && typeof value === 'object';
 
 /**
- * The messages and error codes an error carries, its own and those of every error it wraps.
+ * The error itself and every error it wraps.
  *
- * Ethers nests the node's answer under `error` and `info`, and re-serialises it into its own
- * message on the way out, so the same failure can be described at several levels at once. Reading
- * all of them means a match does not depend on which level a given provider chose to wrap.
+ * Ethers nests the node's answer under `error` and `info`, and a caller may wrap the whole thing in
+ * a `cause`. Records are kept whole rather than flattened into their messages: a message only means
+ * something next to the code of the record that carried it.
  */
-const collectErrorText = ({ err, depth = 0 }: { err: unknown; depth?: number }): string[] => {
-	if (typeof err === 'string') {
-		return [err];
-	}
-
+const collectErrorRecords = ({
+	err,
+	depth = 0
+}: {
+	err: unknown;
+	depth?: number;
+}): Record<string, unknown>[] => {
 	if (depth > MAX_ERROR_DEPTH || !isRecord(err)) {
 		return [];
 	}
 
-	const { message, shortMessage, code, cause, error, info } = err;
+	const { cause, error, info } = err;
 
 	return [
-		...(typeof message === 'string' ? [message] : []),
-		...(typeof shortMessage === 'string' ? [shortMessage] : []),
-		...(typeof code === 'string' ? [code] : []),
-		...collectErrorText({ err: cause, depth: depth + 1 }),
-		...collectErrorText({ err: error, depth: depth + 1 }),
-		...collectErrorText({ err: info, depth: depth + 1 })
+		err,
+		...collectErrorRecords({ err: cause, depth: depth + 1 }),
+		...collectErrorRecords({ err: error, depth: depth + 1 }),
+		...collectErrorRecords({ err: info, depth: depth + 1 })
 	];
 };
 
+// Only the node's own answer is read for these phrases. The same words can turn up anywhere else in
+// the chain: in the message ethers re-serialises around it, or in a contract's revert reason, where
+// they are the contract refusing the call and say nothing about whether the account can pay for gas.
+const isNodeInsufficientBalanceAnswer = ({ code, message }: Record<string, unknown>): boolean =>
+	code === JSON_RPC_SERVER_ERROR_CODE &&
+	typeof message === 'string' &&
+	INSUFFICIENT_BALANCE_PATTERN.test(message) &&
+	!EXECUTION_REVERTED_PATTERN.test(message);
+
 const isInsufficientBalanceError = (err: unknown): boolean =>
-	collectErrorText({ err }).some(
-		(text) => text === ETHERS_INSUFFICIENT_FUNDS_CODE || INSUFFICIENT_BALANCE_PATTERN.test(text)
+	collectErrorRecords({ err }).some(
+		(record) =>
+			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
 	);
 
 /**

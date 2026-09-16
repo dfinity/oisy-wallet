@@ -55,6 +55,34 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg(err)).toBeUndefined();
 		});
 
+		it('does not blame the balance for a contract that reverts with the same words', () => {
+			// The contract is refusing the call, for reasons of its own: the account may well hold
+			// enough to pay for gas, and telling it otherwise sends the user after the wrong fix.
+			const err = Object.assign(new Error('execution reverted: insufficient funds'), {
+				code: 'CALL_EXCEPTION',
+				reason: 'insufficient funds'
+			});
+
+			expect(mapEthereumErrorMsg(err)).toBeUndefined();
+		});
+
+		it('does not blame the balance for a revert the node reports as a server error', () => {
+			// Older nodes answer a reverting gas estimate with -32000 too, the revert reason in the
+			// message. The code alone therefore does not make it a rejection of the account.
+			const err = Object.assign(new Error('could not coalesce error'), {
+				code: 'UNKNOWN_ERROR',
+				error: { code: -32000, message: 'execution reverted: insufficient funds' }
+			});
+
+			expect(mapEthereumErrorMsg(err)).toBeUndefined();
+		});
+
+		it('trusts only the node answer, not wording that turns up elsewhere in the chain', () => {
+			const err = new Error('insufficient funds for gas * price + value');
+
+			expect(mapEthereumErrorMsg(err)).toBeUndefined();
+		});
+
 		it('leaves an error it cannot explain to the caller', () => {
 			expect(mapEthereumErrorMsg(new Error('nonce too low'))).toBeUndefined();
 
