@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { onMount, setContext } from 'svelte';
+	import type { MyTip } from '$declarations/backend/backend.did';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import TipCreate from '$lib/components/tip/TipCreate.svelte';
+	import TipHistory from '$lib/components/tip/TipHistory.svelte';
 	import TipIntro from '$lib/components/tip/TipIntro.svelte';
 	import TipShare from '$lib/components/tip/TipShare.svelte';
 	import TipTokensList from '$lib/components/tip/TipTokensList.svelte';
@@ -11,10 +13,18 @@
 	import { tipWizardSteps } from '$lib/config/tip.config';
 	import { DEFAULT_TIP_EXPIRY_MS, TIP_EXPIRY_OPTIONS } from '$lib/constants/tip.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
-	import { newTipDraft, reserveTip, type TipDraft, tipRateLimit } from '$lib/services/tip.services';
+	import {
+		cancelTip,
+		newTipDraft,
+		recoverTipLink,
+		reserveTip,
+		type TipDraft,
+		tipRateLimit
+	} from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -22,12 +32,13 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { tippableTokens } from '$lib/utils/tip.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let modal: WizardModal<WizardStepsTip> | undefined = $state();
@@ -35,6 +46,8 @@
 	let selectedToken: IcToken | undefined = $state();
 	let draft: TipDraft | undefined = $state();
 	let link: string | undefined = $state();
+	// Why there is no link, when there is not going to be one.
+	let linkMessage: string | undefined = $state();
 	let expiresAtNs: bigint | undefined = $state();
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
@@ -44,10 +57,16 @@
 	// is in flight — reading `selectedToken` on the share screen would let a
 	// change made mid-request relabel a link that was created for the old one.
 	let reservedToken: IcToken | undefined = $state();
+	// The History row currently open on the share step, if any. Distinguishes a
+	// freshly created tip (nothing to cancel yet from here) from a live one
+	// reopened for a second look.
+	let viewingTip = $state<MyTip | undefined>();
 	// The recoverable copy of the claim code could not be saved, so this link is
 	// the only one there will be.
 	let linkNotSaved = $state(false);
 	let busy = $state(false);
+	// True while a reservation is in flight and the share screen is already up.
+	let generating = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
 	let message = $state('');
@@ -60,6 +79,17 @@
 	// can act on, and it is already the vocabulary of the form.
 	const expiryLabel = (ms: number): string =>
 		TIP_EXPIRY_OPTIONS.find((option) => option.ms === ms)?.labelKey ?? `${ms}ms`;
+
+	// The one thing worth saying about a rate limit: how long the window is. Three
+	// surfaces on this screen can meet one, and they should not each phrase the
+	// wait their own way.
+	const rateLimitedMessage = (limit: { windowSeconds: bigint }): string =>
+		replacePlaceholders($i18n.tip.text.rate_limited, {
+			$duration: secondsToDuration({
+				seconds: limit.windowSeconds,
+				i18n: $i18n.temporal.seconds_to_duration
+			})
+		});
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
@@ -87,6 +117,162 @@
 		goToStep(WizardStepsTip.CREATE);
 	};
 
+	// Reuses the share step rather than building a second link screen: the QR, the
+	// copy and share actions and the deadline are all already there, and a
+	// recovered link is the same thing the sender saw when they created it.
+	let cancelling = $state(false);
+
+	const cancelViewedTip = async () => {
+		if (isNullish($authIdentity) || isNullish(viewingTip)) {
+			return;
+		}
+
+		cancelling = true;
+
+		try {
+			const { allowanceRevoked } = await cancelTip({
+				identity: $authIdentity,
+				tipId: viewingTip.tip_id,
+				ledgerCanisterId: viewingTip.ledger_canister_id.toText()
+			});
+			trackTip({
+				step: 'cancel',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				symbol: selectedToken?.symbol
+			});
+			// A cancellation either way — the tip is recorded as cancelled and nobody
+			// can claim it, which is the half the sender asked for and the half that
+			// cannot be retried. Only the release of the reserved amount is in
+			// question, so it is said as a warning rather than swallowed or dressed up
+			// as a failure that invites a retry the canister would refuse.
+			toastsShow(
+				allowanceRevoked
+					? { text: $i18n.tip.text.cancelled_toast, level: 'success' }
+					: { text: $i18n.tip.text.cancelled_allowance_kept, level: 'warn' }
+			);
+			viewingTip = undefined;
+			// Back to the list, which reloads on mount, so the cancelled row cannot
+			// linger claiming to be live.
+			goToStep(WizardStepsTip.HISTORY);
+		} catch (err: unknown) {
+			const limit = tipRateLimit(err);
+
+			trackTip({
+				step: 'cancel',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				symbol: selectedToken?.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
+			});
+			toastsError(
+				nonNullish(limit)
+					? { msg: { text: rateLimitedMessage(limit) } }
+					: { msg: { text: $i18n.tip.text.cancel_failed }, err }
+			);
+		} finally {
+			cancelling = false;
+		}
+	};
+
+	/**
+	 * Whether a finished recovery is still the one being waited for.
+	 *
+	 * Recovery takes seconds, and Back is available throughout, so a sender can
+	 * open row A, return to the list and open row B while A is still deriving. Both
+	 * completion paths write the same `link` and `linkMessage`, so without this the
+	 * late arrival would put A's claim code on B's share screen — handing over a
+	 * link for a tip other than the one on display.
+	 */
+	const isStaleRecovery = (tip: MyTip): boolean => viewingTip?.tip_id !== tip.tip_id;
+
+	/**
+	 * Opens a tip from its History row: transition first, link second.
+	 *
+	 * Everything the row already knew — token, amount, deadline — is enough to
+	 * draw the screen, so it opens on the click. Recovering the link derives a
+	 * vetKey and decrypts, which can take seconds; doing that before the
+	 * transition made the click look like it had missed, so it now happens with
+	 * the screen already up and its own loading state showing.
+	 *
+	 * A link that cannot be recovered leaves the screen standing rather than
+	 * bouncing back: the amount, the deadline and Cancel are all still useful, and
+	 * `linkMessage` says why the code is missing where the code would have been.
+	 */
+	const openTip = async (tip: MyTip) => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		const token = tippableTokens($tokens).find(
+			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
+		);
+
+		// A tip outlives the sender's token list: a custom ICRC token can be removed
+		// while a tip denominated in it is still live. Without it there is no
+		// symbol, no decimals and no logo, so the share screen cannot draw itself —
+		// and its render guard failing is not a silent condition, it dropped the
+		// reader on the intro step as though the click had gone somewhere. Said out
+		// loud instead, with the one action that fixes it. The tip is untouched:
+		// re-add the token and the row opens.
+		if (isNullish(token)) {
+			toastsError({ msg: { text: $i18n.tip.text.token_unavailable } });
+			return;
+		}
+
+		selectedToken = token;
+		reservedAmount = tip.amount;
+		reservedToken = token;
+		expiresAtNs = tip.expires_at_ns;
+		viewingTip = tip;
+		trackTip({ step: 'reopen', side: 'sender', symbol: token.symbol });
+		link = undefined;
+		linkMessage = undefined;
+		goToStep(WizardStepsTip.SHARE);
+
+		try {
+			const recovered = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
+
+			if (isStaleRecovery(tip)) {
+				return;
+			}
+
+			// Not an error: a tip created before the recovery store existed has no
+			// stored code, and no amount of retrying will conjure one.
+			linkMessage = isNullish(recovered) ? $i18n.tip.text.link_unavailable : undefined;
+			link = recovered;
+		} catch (err: unknown) {
+			// The likeliest failure on this path, and until now the only one it could
+			// not name. Recovery derives a vetKey, whose per-caller ceiling is
+			// deliberately low, so a sender walking back through several old tips can
+			// reach it without doing anything wrong — and trying again is the one
+			// piece of advice that cannot work until the window passes.
+			const limit = tipRateLimit(err);
+
+			// Reported even when nobody is looking at this tip any more: the recovery
+			// did fail, and that is a fact about the tip rather than about the screen.
+			// `token`, not `selectedToken`, which by now may belong to another row.
+			//
+			// The reopen itself was already reported as a plain step. This is the
+			// separate fact that it did not produce a link.
+			trackTip({
+				step: 'reopen',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				symbol: token.symbol,
+				...(nonNullish(limit) && { rateLimited: true })
+			});
+
+			if (isStaleRecovery(tip)) {
+				return;
+			}
+
+			linkMessage = nonNullish(limit)
+				? rateLimitedMessage(limit)
+				: $i18n.tip.text.link_recovery_failed;
+		}
+	};
+
 	const generate = async () => {
 		if (
 			isNullish($authIdentity) ||
@@ -98,19 +284,32 @@
 		}
 
 		busy = true;
+		generating = true;
+
+		const parsedAmount = parseToken({
+			value: `${amount}`,
+			unitName: selectedToken.decimals
+		});
+
+		// Client wall-clock is fine: the canister validates this against IC time
+		// and the 24h–7d options dwarf any client/replica skew. Decided here rather
+		// than inside `reserveTip` so the deadline is known without waiting for the
+		// reservation to finish.
+		const deadline = BigInt(Date.now() + durationMs) * 1_000_000n;
+
+		// Everything the share screen needs to draw itself is already known, so it
+		// opens on the click and the link lands in it. Before this the button just
+		// went inactive for an approve plus two canister calls while the form sat
+		// there, which reads as a dead click.
+		viewingTip = undefined;
+		reservedAmount = parsedAmount;
+		reservedToken = selectedToken;
+		expiresAtNs = deadline;
+		link = undefined;
+		linkMessage = undefined;
+		goToStep(WizardStepsTip.SHARE);
 
 		try {
-			const parsedAmount = parseToken({
-				value: `${amount}`,
-				unitName: selectedToken.decimals
-			});
-
-			// Client wall-clock is fine: the canister validates this against IC time
-			// and the 24h–7d options dwarf any client/replica skew. Decided here rather
-			// than inside `reserveTip` so the deadline is known without waiting for the
-			// reservation to finish.
-			const deadline = BigInt(Date.now() + durationMs) * 1_000_000n;
-
 			const reserved = await reserveTip({
 				identity: $authIdentity,
 				draft,
@@ -129,13 +328,13 @@
 				symbol: selectedToken.symbol
 			});
 
-			reservedAmount = parsedAmount;
-			reservedToken = selectedToken;
-			expiresAtNs = deadline;
 			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
-			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
+			// Back to the form. The tip does not exist, so a share screen for it must
+			// not stay up with skeletons that will never resolve.
+			goToStep(WizardStepsTip.CREATE);
+
 			// A rate limit is the one failure where the usual advice is wrong: every
 			// other reason here is worth retrying immediately, and this one cannot
 			// succeed until the window passes. Reported as its own flag so the funnel
@@ -155,20 +354,12 @@
 			// replaceable, or never happened. Either way nothing was transferred.
 			toastsError(
 				nonNullish(limit)
-					? {
-							msg: {
-								text: replacePlaceholders($i18n.tip.text.rate_limited, {
-									$duration: secondsToDuration({
-										seconds: limit.windowSeconds,
-										i18n: $i18n.temporal.seconds_to_duration
-									})
-								})
-							}
-						}
+					? { msg: { text: rateLimitedMessage(limit) } }
 					: { msg: { text: $i18n.tip.text.reserve_failed }, err }
 			);
 		} finally {
 			busy = false;
+			generating = false;
 		}
 	};
 </script>
@@ -188,8 +379,31 @@
 -->
 <div class="sm:[--dialog-max-height:80dvh]">
 	<TokenActionContext token={selectedToken}>
-		<WizardModal bind:this={modal} onClose={modalStore.close} {steps} bind:currentStep>
-			{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+		<!--
+			Locked down while a reservation or a cancellation is in flight, the way
+			`SendModal`, `SwapModal` and the claim modal lock their own money steps.
+			Disabling the footer was not enough on its own: the close button, the
+			backdrop and Escape all still worked, so a sender could leave while
+			`reserveTip` was running — and if the recoverable copy of the claim code
+			then failed to store, the link they left behind was the only one there was
+			ever going to be.
+		-->
+		<WizardModal
+			bind:this={modal}
+			disablePointerEvents={generating || cancelling}
+			onClose={modalStore.close}
+			{steps}
+			bind:currentStep
+		>
+			<!--
+				The title tracks the state, not just the step. A screen that opens on the
+				click and is still filling in should not already claim "Tip is ready" — the
+				tip is not reserved yet, and saying so is how the sender knows the wait is
+				expected rather than a stall.
+			-->
+			{#snippet title()}{generating
+					? $i18n.tip.text.preparing_title
+					: (currentStep?.title ?? '')}{/snippet}
 
 			{#if currentStep?.name === WizardStepsTip.TOKENS_LIST}
 				<TipTokensList onClose={() => goToStep(WizardStepsTip.INTRO)} {onSelectToken} />
@@ -204,17 +418,28 @@
 					bind:durationMs
 					bind:message
 				/>
-			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(reservedToken) && nonNullish(reservedAmount)}
+			{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(reservedToken) && nonNullish(reservedAmount)}
 				<TipShare
 					amount={reservedAmount}
+					{cancelling}
 					{expiresAtNs}
+					{generating}
 					{link}
+					{linkMessage}
 					{linkNotSaved}
-					onDone={modalStore.close}
+					onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
+					onDone={nonNullish(viewingTip)
+						? () => goToStep(WizardStepsTip.HISTORY)
+						: modalStore.close}
 					token={reservedToken}
 				/>
+			{:else if currentStep?.name === WizardStepsTip.HISTORY}
+				<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onOpenTip={openTip} />
 			{:else}
-				<TipIntro onGetStarted={enterTokensList} onViewHistory={modalStore.close} />
+				<TipIntro
+					onGetStarted={enterTokensList}
+					onViewHistory={() => goToStep(WizardStepsTip.HISTORY)}
+				/>
 			{/if}
 		</WizardModal>
 	</TokenActionContext>

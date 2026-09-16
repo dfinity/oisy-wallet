@@ -11,7 +11,10 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
-	import { TIP_SHARE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		TIP_HISTORY_CANCEL_BUTTON,
+		TIP_SHARE_COPY_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -24,11 +27,28 @@
 	import { canShare, shareText } from '$lib/utils/share.utils';
 
 	interface Props {
-		link: string;
+		/**
+		 * Absent while a link recovered from History is still being decrypted. The
+		 * screen opens the moment the row is clicked — vetKD derivation takes long
+		 * enough that waiting for it before transitioning read as a dead click — so
+		 * everything the row already knew is drawn immediately and only the link
+		 * arrives late.
+		 */
+		link?: string;
+		/** Shown where the link would be when there is not going to be one. */
+		linkMessage?: string;
 		expiresAtNs: bigint;
 		token: IcToken;
 		amount: bigint;
 		onDone: () => void;
+		/** Present when this screen is a live tip reopened from History. */
+		onCancel?: () => void;
+		/**
+		 * True while a reservation is still in flight, having opened this screen on
+		 * the click. It is what tells the reader the empty QR is on its way rather
+		 * than broken, and what stops them leaving before the link arrives.
+		 */
+		generating?: boolean;
 		/**
 		 * True when the recoverable copy of the claim code could not be stored. The
 		 * tip is real and claimable either way; what is lost is the sender's ability
@@ -36,9 +56,27 @@
 		 * front of them.
 		 */
 		linkNotSaved?: boolean;
+		cancelling?: boolean;
 	}
 
-	let { link, expiresAtNs, token, amount, onDone, linkNotSaved = false }: Props = $props();
+	let {
+		link,
+		linkMessage,
+		expiresAtNs,
+		token,
+		amount,
+		onDone,
+		onCancel,
+		cancelling = false,
+		generating = false,
+		linkNotSaved = false
+	}: Props = $props();
+
+	// Waiting for a link, as opposed to having one or having been told there will
+	// never be one. Everything on this screen that is about the link — the code to
+	// scan, the deadline to scan it by — is held back until then, so the wait shows
+	// one thing happening rather than three placeholders and a date.
+	let awaitingLink = $derived(isNullish(link) && isNullish(linkMessage));
 
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
@@ -127,79 +165,135 @@
 		without the outline the code floats instead of reading as something held up
 		to be scanned.
 	-->
-	<div
-		class="mx-auto mb-3 aspect-square h-48 max-h-[32vh] max-w-full rounded-2xl border border-secondary bg-white p-3"
-	>
-		<QrCode ariaLabel={$i18n.tip.text.share_heading} value={link}>
-			{#snippet logo()}
-				<div class="flex items-center justify-center rounded-full bg-white p-1">
-					<SeasonalIconAstronautHelmet />
-				</div>
-			{/snippet}
-		</QrCode>
-	</div>
+	{#if nonNullish(link)}
+		<div
+			class="mx-auto mb-3 aspect-square h-48 max-h-[32vh] max-w-full rounded-2xl border border-secondary bg-white p-3"
+		>
+			<QrCode ariaLabel={$i18n.tip.text.share_heading} value={link}>
+				{#snippet logo()}
+					<div class="flex items-center justify-center rounded-full bg-white p-1">
+						<SeasonalIconAstronautHelmet />
+					</div>
+				{/snippet}
+			</QrCode>
+		</div>
+	{:else if isNullish(linkMessage)}
+		<!-- Same box, so nothing below it moves when the real code lands in it. -->
+		<div
+			class="mx-auto mb-3 aspect-square h-48 max-h-[32vh] max-w-full animate-pulse rounded-2xl bg-disabled-alt"
+			aria-hidden="true"
+		></div>
+	{/if}
 
 	<!--
 		Not a `MessageBox`: that component is an icon beside left-aligned text, and
 		this block is neither. Centred and quiet on purpose — it is reassurance, so
 		it should be legible without competing with the amount above it.
+
+		Gone entirely once there is known to be no link. Every line in it is about a
+		code to scan, and `linkMessage` is already saying in a warning below that
+		there is no code — a box headed "Scan to claim this tip" above that warning
+		contradicted it.
 	-->
-	<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
-		<!--
-			`m-0` on both, then one explicit step between them. A bare `<p>` carries an
-			18px bottom margin in this app, which is more than this block's own padding
-			— so the heading sat further from its own paragraph than the paragraph sat
-			from the edge, and the whole box read bottom-heavy.
-		-->
-		<p class="m-0 font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
+	{#if isNullish(linkMessage)}
+		<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
+			<!--
+				`m-0` on both, then one explicit step between them. A bare `<p>` carries an
+				18px bottom margin in this app, which is more than this block's own padding
+				— so the heading sat further from its own paragraph than the paragraph sat
+				from the edge, and the whole box read bottom-heavy.
+			-->
+			<p class="m-0 font-bold">
+				{awaitingLink
+					? generating
+						? $i18n.tip.text.generating_link
+						: $i18n.tip.text.recovering_link
+					: $i18n.tip.text.no_wallet_needed_title}
+			</p>
 
-		<!--
-			Two lines, not one sentence: the first answers "can they even claim this",
-			the second says what to do with the code. `m-0` on the second so they read
-			as one paragraph broken for scanning, rather than two separate blocks.
-		-->
-		<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+			<!--
+				Held back until the code is actually on screen. These two lines tell the
+				reader to scan it and to photograph it for later, which is not something
+				anyone can do while the QR above is still a pulsing placeholder — and
+				during the wait the heading is carrying the whole message on its own.
 
-		<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
-	</div>
+				Two lines, not one sentence: the first answers "can they even claim this",
+				the second says what to do with the code. `m-0` on the second so they read
+				as one paragraph broken for scanning, rather than two separate blocks.
+			-->
+			{#if nonNullish(link)}
+				<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+
+				<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
+			{/if}
+		</div>
+	{/if}
 
 	<!--
 		Out of the box and on its own line: the deadline is the one fact on this
 		screen that changes what the reader should do next, and inside the reassuring
 		box it read as part of the reassurance.
 	-->
-	<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
-		<IconClock size="16" />
+	{#if !awaitingLink}
+		<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
+			<IconClock size="16" />
 
-		{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
-	</div>
+			{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
+		</div>
+	{/if}
 
-	<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
-		<output class="min-w-0 flex-1 truncate text-sm">{link}</output>
+	{#if nonNullish(link)}
+		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
+			<output class="min-w-0 flex-1 truncate text-sm">{link}</output>
 
-		<ReceiveCopy
-			address={link}
-			copyAriaLabel={$i18n.tip.text.copy_link}
-			onCopy={trackCopy}
-			testId={TIP_SHARE_COPY_BUTTON}
-		/>
+			<ReceiveCopy
+				address={link}
+				copyAriaLabel={$i18n.tip.text.copy_link}
+				onCopy={trackCopy}
+				testId={TIP_SHARE_COPY_BUTTON}
+			/>
 
-		{#if canShare()}
-			<ButtonIcon
-				ariaLabel={$i18n.tip.text.share_link}
-				link={false}
-				onclick={async () => {
-					trackTip({ step: 'share', side: 'sender', symbol: token.symbol });
+			{#if canShare()}
+				<ButtonIcon
+					ariaLabel={$i18n.tip.text.share_link}
+					link={false}
+					onclick={async () => {
+						trackTip({ step: 'share', side: 'sender', symbol: token.symbol });
 
-					await shareText(link);
-				}}
-			>
-				{#snippet icon()}
-					<IconShareArrow size="24" />
-				{/snippet}
-			</ButtonIcon>
-		{/if}
-	</div>
+						await shareText(link);
+					}}
+				>
+					{#snippet icon()}
+						<IconShareArrow size="24" />
+					{/snippet}
+				</ButtonIcon>
+			{/if}
+		</div>
+	{:else if nonNullish(linkMessage)}
+		<!--
+			The rest of the screen still earns its place without a link: this is the
+			one place the sender can see what a tip is worth, when it lapses, and
+			cancel it.
+		-->
+		<MessageBox level="warning">{linkMessage}</MessageBox>
+	{:else}
+		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
+			<span class="h-5 w-full animate-pulse rounded bg-disabled-alt" aria-hidden="true"></span>
+		</div>
+	{/if}
+
+	{#if nonNullish(onCancel)}
+		<Button
+			colorStyle="secondary-light"
+			disabled={cancelling}
+			fullWidth
+			onclick={onCancel}
+			styleClass="mt-4"
+			testId={TIP_HISTORY_CANCEL_BUTTON}
+		>
+			{$i18n.tip.text.cancel_tip}
+		</Button>
+	{/if}
 
 	<!--
 		Directly under the link, because it is about this link and it asks for
@@ -211,7 +305,19 @@
 	{/if}
 
 	{#snippet toolbar()}
-		<Button fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
+		<!--
+			"Back" when the tip was opened from History, because that is all this
+			button does — the footer is for leaving the screen. Cancelling lives in the
+			content above, next to the link it revokes, so the two are not adjacent
+			buttons a reader has to tell apart.
+		-->
+		<!--
+			Also disabled while generating: the tip may not exist yet, and leaving here
+			would drop the sender back into the wallet without the link they came for.
+		-->
+		<Button disabled={cancelling || generating} fullWidth onclick={onDone}>
+			{nonNullish(onCancel) ? $i18n.core.text.back : $i18n.tip.text.done}
+		</Button>
 	{/snippet}
 </ContentWithToolbar>
 
