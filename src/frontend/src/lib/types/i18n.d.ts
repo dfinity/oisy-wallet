@@ -755,6 +755,7 @@ interface I18nSend {
 		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		xrp_destination_tag_invalid: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_reserve: string;
 		insufficient_funds_for_gas: string;

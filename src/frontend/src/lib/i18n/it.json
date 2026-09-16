@@ -1020,6 +1020,7 @@
 			"unknown_cketh": "Il token ckETH non può essere recuperato.",
 			"destination_address_invalid": "L'indirizzo di destinazione non è valido.",
 			"amount_invalid": "L'importo non è valido.",
+			"xrp_destination_tag_invalid": "Il tag di destinazione deve essere un numero intero compreso tra 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",

@@ -8,7 +8,7 @@ import {
 	initReserveStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('XrpSendForm', () => {
@@ -50,5 +50,48 @@ describe('XrpSendForm', () => {
 
 		expect(container.querySelector('input')).not.toBeNull();
 		expect(container.querySelector(toolbarSelector)).not.toBeNull();
+	});
+
+	// A tag the user typed that does not parse must block the form: proceeding would send to an
+	// exchange deposit address without its tag, which is not auto-creditable.
+	describe('destination tag validity', () => {
+		const tagInput = (container: HTMLElement): HTMLInputElement => {
+			const input = container.querySelector<HTMLInputElement>('input[name="xrp-destination-tag"]');
+
+			expect(input).not.toBeNull();
+
+			return input as HTMLInputElement;
+		};
+
+		const nextButton = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		it('disables next while a non-empty tag is invalid', async () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(tagInput(container), { target: { value: 'abc' } });
+
+			expect(nextButton(container)?.disabled).toBeTruthy();
+		});
+
+		it('re-enables next once the invalid tag is cleared', async () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(tagInput(container), { target: { value: 'abc' } });
+
+			expect(nextButton(container)?.disabled).toBeTruthy();
+
+			await fireEvent.input(tagInput(container), { target: { value: '' } });
+
+			expect(nextButton(container)?.disabled).toBeFalsy();
+		});
+
+		it('keeps next enabled for a valid tag', async () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(tagInput(container), { target: { value: '12345' } });
+
+			expect(nextButton(container)?.disabled).toBeFalsy();
+		});
 	});
 });

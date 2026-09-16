@@ -39,11 +39,17 @@
 
 	let amountError = $state<XrpAmountAssertionError | undefined>();
 
+	// A tag the user typed but that does not parse must block the form rather than be dropped:
+	// sending to an exchange deposit address without its tag is not auto-creditable.
+	let invalidDestinationTag = $state(false);
+
 	let invalidDestination = $derived(
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
-	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
+	let invalid = $derived(
+		invalidDestination || invalidDestinationTag || nonNullish(amountError) || isNullish(amount)
+	);
 </script>
 
 <SendForm
@@ -61,7 +67,7 @@
 
 	{#snippet sendAmount()}
 		<XrpSendAmount {onTokensList} bind:amount bind:amountError />
-		<XrpSendDestinationTag />
+		<XrpSendDestinationTag bind:invalidDestinationTag />
 	{/snippet}
 
 	{#snippet fee()}
