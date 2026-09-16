@@ -35,6 +35,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { emit } from '$lib/utils/events.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -151,6 +152,17 @@
 					? { text: $i18n.tip.text.cancelled_toast, level: 'success' }
 					: { text: $i18n.tip.text.cancelled_allowance_kept, level: 'warn' }
 			);
+
+			// History reloads its own list on mount, but `tipsStore` — which feeds the
+			// overview on the intro screen and the dot on the menu icon — is loaded
+			// once at sign-in and never again. Cancelling a *failed* tip was the case
+			// that showed it: the sender dealt with the very thing the warning asked
+			// them to deal with, and the warning stayed up until a page reload.
+			//
+			// Emitted whichever way the revoke went: the tip is cancelled either way,
+			// so the count and the dot are stale either way.
+			emit({ message: 'oisyRefreshTips' });
+
 			viewingTip = undefined;
 			// Back to the list, which reloads on mount, so the cancelled row cannot
 			// linger claiming to be live.
@@ -330,6 +342,11 @@
 
 			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
+
+			// Same reason as the cancel path: the tip now exists, so it encumbers the
+			// balance and belongs in the overview's open count. Neither would have
+			// noticed until the next sign-in.
+			emit({ message: 'oisyRefreshTips' });
 		} catch (err: unknown) {
 			// Back to the form. The tip does not exist, so a share screen for it must
 			// not stay up with skeletons that will never resolve.
