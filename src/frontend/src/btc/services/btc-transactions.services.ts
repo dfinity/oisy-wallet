@@ -101,9 +101,9 @@ export const loadNextBtcTransactionsByOldest: LoadOlderTransactions = async ({
 		}
 
 		return { success: true };
-	} catch (_: unknown) {
-		// A failed page is not worth surfacing: the list keeps whatever it already has and the next
-		// intersection can try again.
-		return { success: false };
+	} catch (err: unknown) {
+		// A failed page is not worth surfacing: the list keeps whatever it already has. The error is
+		// still handed back, so the caller does not read it as an ordinary stop and asks again later.
+		return { success: false, err };
 	}
 };
