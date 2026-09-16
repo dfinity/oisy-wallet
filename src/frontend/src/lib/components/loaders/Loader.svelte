@@ -16,7 +16,8 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet
+		solAddressMainnet,
+		xrpAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -29,7 +30,8 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled
+		networkSolanaMainnetEnabled,
+		networkXrpMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -40,6 +42,7 @@
 		loadSolAddressLocal,
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
+	import { loadXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 
 	interface Props {
 		children: Snippet;
@@ -74,6 +77,8 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
+	const debounceLoadXrpAddressMainnet = debounce(loadXrpAddressMainnet);
+
 	$effect(() => {
 		if (progressDone) {
 			if (
@@ -89,6 +94,10 @@
 
 			if ($networkSolanaMainnetEnabled && isNullish($solAddressMainnet)) {
 				debounceLoadSolAddressMainnet();
+			}
+
+			if ($networkXrpMainnetEnabled && isNullish($xrpAddressMainnet)) {
+				debounceLoadXrpAddressMainnet();
 			}
 
 			if ($testnetsEnabled) {
