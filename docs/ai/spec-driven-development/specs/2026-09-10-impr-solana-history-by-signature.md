@@ -173,7 +173,9 @@ Balances are still posted per token.
 per network and signature, and reads them back before asking the RPC. The in-memory map stays in
 front of it. Without it the network worker and the pagers of the main thread hold a map each, so
 each fetches the same details once, and a reload fetches them all again. Only finalized details
-are kept: a transaction that is not finalized can still be dropped by the network.
+are kept: a transaction that is not finalized can still be dropped by the network. Two realms that
+ask for the same signature before either has kept it still fetch it twice; the cache spares the
+repeat, not the race.
 
 The store keeps the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network, trimmed back
 to that size once it runs past it by `SOLANA_TRANSACTION_DETAILS_CACHE_SLACK`, and is cleared at

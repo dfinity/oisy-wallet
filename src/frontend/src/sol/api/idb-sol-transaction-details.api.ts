@@ -18,6 +18,9 @@ import { clear, createStore, delMany, entries, get, keys, set, type UseStore } f
  */
 let stores: { details: UseStore; slots: UseStore } | undefined;
 
+// The writes nobody is waiting for, so that clearing the cache at sign-out can.
+const pendingWrites = new Set<Promise<void>>();
+
 // Opened on first use rather than at module load: the dapp is pre-rendered without IndexedDB, and
 // this module is reached from the worker realm as well.
 const idbStores = (): { details: UseStore; slots: UseStore } | undefined => {
@@ -106,26 +109,44 @@ const trimNetwork = async ({
  * finalized yet can still be dropped by the network, and its details would then never be asked for
  * again.
  */
-export const setIdbSolTransactionDetail = async ({
+export const setIdbSolTransactionDetail = ({
 	network,
 	transaction
 }: {
 	network: SolanaNetworkType;
 	transaction: SolRpcTransaction;
-}) => {
+}): Promise<void> => {
 	const idb = idbStores();
 
 	if (isNullish(idb) || transaction.confirmationStatus !== 'finalized') {
-		return;
+		return Promise.resolve();
 	}
 
+	const write = writeDetail({ network, transaction, idb });
+
+	pendingWrites.add(write);
+
+	return write.finally(() => pendingWrites.delete(write));
+};
+
+const writeDetail = async ({
+	network,
+	transaction,
+	idb
+}: {
+	network: SolanaNetworkType;
+	transaction: SolRpcTransaction;
+	idb: { details: UseStore; slots: UseStore };
+}) => {
 	const key = detailKey({ network, signature: transaction.signature });
 
 	// A cache write must never fail a load either, so a browser that refuses to store (private
 	// browsing, a full quota) leaves the loaded transaction exactly as it is.
 	try {
-		await set(key, transaction, idb.details);
+		// The slot goes first: trimming reads the slots, so a detail written without one would never
+		// be dropped, while a slot left without its detail is only an entry that trimming deletes.
 		await set(key, transaction.slot, idb.slots);
+		await set(key, transaction, idb.details);
 
 		await trimNetwork({ network, idb });
 	} catch (_err: unknown) {
@@ -135,6 +156,10 @@ export const setIdbSolTransactionDetail = async ({
 
 export const clearIdbSolTransactionDetails = async () => {
 	const idb = idbStores();
+
+	// Callers do not wait for a write, so one already on its way would land after the clear and leave
+	// the transactions of the session that is ending behind.
+	await Promise.allSettled([...pendingWrites]);
 
 	if (isNullish(idb)) {
 		return;

@@ -155,7 +155,8 @@ export const fetchTransactionDetailForSignature = async ({
 	}
 
 	// Each realm holds its own map, so without this the network worker and the main thread fetch the
-	// same details once each, and every reload fetches them again.
+	// same details once each, and every reload fetches them again. Two realms that ask for the same
+	// signature before either has kept it still fetch it twice: this spares the repeat, not the race.
 	const storedTransaction = await getIdbSolTransactionDetail({
 		network,
 		signature: signature.signature

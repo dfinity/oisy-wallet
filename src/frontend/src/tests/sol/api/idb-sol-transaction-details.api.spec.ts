@@ -156,6 +156,25 @@ describe('idb-sol-transaction-details.api', () => {
 		});
 	});
 
+	// The loaders do not wait for a write, so one on its way at sign-out would otherwise land after
+	// the clear and leave the transactions of the session that ended behind.
+	it('should not let a write that was already on its way outlive a clear', async () => {
+		const transaction = detailAt({ slot: 100n });
+
+		const write = setIdbSolTransactionDetail({ network: SolanaNetworks.mainnet, transaction });
+
+		await clearIdbSolTransactionDetails();
+
+		await write;
+
+		const stored = await getIdbSolTransactionDetail({
+			network: SolanaNetworks.mainnet,
+			signature: transaction.signature
+		});
+
+		expect(stored).toBeUndefined();
+	});
+
 	it('should hold nothing once it is cleared', async () => {
 		const transaction = detailAt({ slot: 100n });
 
