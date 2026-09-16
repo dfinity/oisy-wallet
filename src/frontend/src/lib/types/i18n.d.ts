@@ -18,6 +18,7 @@ interface I18nBorrow {
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
+	provider_unavailable: { title: string; description: string };
 }
 
 interface I18nBorrowings {
@@ -131,6 +132,7 @@ interface I18nNavigation {
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
 		notes: string;
+		issue_tip: string;
 	};
 	alt: {
 		tokens: string;
@@ -155,6 +157,7 @@ interface I18nNavigation {
 		hide_balances: string;
 		show_balances: string;
 		notes: string;
+		issue_tip: string;
 	};
 	short: { documentation: string };
 }
@@ -665,6 +668,14 @@ interface I18nReceive {
 			solana_local_address_title: string;
 			solana_address_copied: string;
 			display_solana_address_qr: string;
+		};
+	};
+	xrp: {
+		text: {
+			xrp_address: string;
+			xrp_address_title: string;
+			xrp_address_copied: string;
+			display_xrp_address_qr: string;
 		};
 	};
 }
@@ -1252,7 +1263,6 @@ interface I18nFee {
 		estimated_btc: string;
 		estimated_inter_network: string;
 		estimated_eth: string;
-		max_fee_eth: string;
 		estimated_fee_eth: string;
 		estimated: string;
 		priority: string;
@@ -2357,6 +2367,99 @@ interface I18nNotes {
 	};
 }
 
+interface I18nTip {
+	text: {
+		intro_title: string;
+		intro_heading: string;
+		intro_body: string;
+		select_token: string;
+		create_title: string;
+		share_title: string;
+		empty_balance_title: string;
+		empty_balance_description: string;
+		no_supported_tokens_title: string;
+		no_supported_tokens_description: string;
+		expiration: string;
+		expiry_24h: string;
+		expiry_3d: string;
+		expiry_7d: string;
+		message: string;
+		message_placeholder: string;
+		total_estimated_fee: string;
+		reserve_fee: string;
+		payout_fee: string;
+		fees_are_yours: string;
+		lapse_notice: string;
+		generate: string;
+		share_heading: string;
+		copy_link: string;
+		share_link: string;
+		they_will_receive: string;
+		no_wallet_needed_title: string;
+		no_wallet_needed: string;
+		scan_or_photo: string;
+		expires_at: string;
+		done: string;
+		link_not_saved: string;
+		reserve_failed: string;
+		status_title: string;
+		claim_title: string;
+		claim_amount: string;
+		claim_expires: string;
+		claim_ready_title: string;
+		claim_ready_title_plain: string;
+		claim_ready_description: string;
+		claim_token: string;
+		claim_status: string;
+		open_or_create: string;
+		open_or_create_hint: string;
+		claimer_disclosure: string;
+		claimed_title: string;
+		claimed_description: string;
+		claiming_title: string;
+		claiming_description: string;
+		claim_retry: string;
+		received_title: string;
+		received_description: string;
+		network: string;
+		status_completed: string;
+		take_me_to_wallet: string;
+		unavailable_title: string;
+		unavailable_description: string;
+		uncovered_title: string;
+		uncovered_description: string;
+		short_balance_title: string;
+		short_balance_description: string;
+		claim_failed_title: string;
+		claim_failed: string;
+		unreachable_title: string;
+		unreachable_description: string;
+		message_too_long: string;
+		learn_how_it_works: string;
+		view_history: string;
+		get_started: string;
+		rate_limited: string;
+		rate_limited_title: string;
+	};
+	alt: {
+		intro_illustration: string;
+		claim_illustration: string;
+		claim_failed_illustration: string;
+		welcome_illustration: string;
+	};
+	share: { title: string; description: string };
+	welcome: {
+		title: string;
+		heading: string;
+		body: string;
+		point_access_title: string;
+		point_access_text: string;
+		point_stay_title: string;
+		point_stay_text: string;
+		cta: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	borrow: I18nBorrow;
@@ -2415,4 +2518,5 @@ interface I18n {
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 	notes: I18nNotes;
+	tip: I18nTip;
 }

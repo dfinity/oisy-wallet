@@ -43,6 +43,10 @@ export default defineConfig((): UserConfig => ({
 				replacement: resolve(__dirname, 'src/frontend/src/sol')
 			},
 			{
+				find: '$xrp',
+				replacement: resolve(__dirname, 'src/frontend/src/xrp')
+			},
+			{
 				find: '$icp-eth',
 				replacement: resolve(__dirname, 'src/frontend/src/icp-eth')
 			},
@@ -100,7 +104,7 @@ export default defineConfig((): UserConfig => ({
 			thresholds: {
 				autoUpdate: true,
 				statements: 83.4,
-				branches: 77.0,
+				branches: 77.1,
 				functions: 81.6,
 				lines: 84.2
 			}
