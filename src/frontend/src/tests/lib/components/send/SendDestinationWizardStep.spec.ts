@@ -2,6 +2,7 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 import {
 	SEND_DESTINATION_WIZARD_CONTACT,
@@ -19,6 +20,7 @@ import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import SendDestinationWizardStepTestHost from '$tests/lib/components/send/SendDestinationWizardStepTestHost.svelte';
 import { getMockContacts, mockBackendContactAddressEth } from '$tests/mocks/contacts.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
@@ -35,6 +37,19 @@ const mockContacts = getMockContacts({
 
 contactsStore.addContact(mapToFrontendContact(mockContacts[0]));
 contactsStore.addContact(mapToFrontendContact(mockContacts[1]));
+
+// XRP is force-disabled under TEST, so `isNetworkIdXrp` would never match and the XRP branch
+// would be unreachable. Enable the catalog for this spec.
+vi.mock('$env/networks/networks.xrp.env', async () => {
+	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
+
+	return {
+		...actual,
+		XRP_MAINNET_ENABLED: true,
+		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
+		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
+	};
+});
 
 describe('SendDestinationWizardStep', () => {
 	const props = {
@@ -128,6 +143,41 @@ describe('SendDestinationWizardStep', () => {
 		expect(
 			getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${BASE_ETH_TOKEN.network.name}`)
 		).toBeInTheDocument();
+	});
+
+	// The XRP destination step is address entry only: contacts need a backend address type and
+	// known destinations need history, so the tabs could only ever show empty states.
+	describe('XRP', () => {
+		it('should display the XRP send destination components', () => {
+			const { getByTestId } = render(SendDestinationWizardStep, {
+				props,
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(
+				getByTestId(`${SEND_DESTINATION_WIZARD_STEP}-${XRP_TOKEN.network.name}`)
+			).toBeInTheDocument();
+		});
+
+		it('should not render the destination tabs', () => {
+			const { queryByText } = render(SendDestinationWizardStep, {
+				props,
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(queryByText(en.send.text.recently_used_tab)).toBeNull();
+			expect(queryByText(en.send.text.contacts_tab)).toBeNull();
+		});
+
+		// Navigation comes from the step's toolbar, not from the tabs.
+		it('should still offer the next button', () => {
+			const { getByTestId } = render(SendDestinationWizardStep, {
+				props,
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(getByTestId(SEND_FORM_DESTINATION_NEXT_BUTTON)).toBeInTheDocument();
+		});
 	});
 
 	it('should set selectedContact when a contact is selected', async () => {
