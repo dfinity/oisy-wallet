@@ -36,7 +36,7 @@ describe('xrp-wallet.scheduler', () => {
 		xrpNetwork: XrpNetworks.mainnet
 	};
 
-	const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}`;
+	const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}-${startData.address.data}`;
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncXrpWalletStatus',
@@ -144,5 +144,140 @@ describe('xrp-wallet.scheduler', () => {
 		expect(spyLoadBalance).toHaveBeenCalledTimes(2);
 
 		scheduler.stop();
+	});
+
+	// A job snapshots the address it was scheduled with. If the scheduler is re-keyed to another
+	// address while that job is in flight, its result belongs to the previous account and must not
+	// be merged into or posted against the new one.
+	describe('when the address changes mid-flight', () => {
+		const otherData: PostMessageDataRequestXrp = {
+			address: { data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: false },
+			xrpNetwork: XrpNetworks.mainnet
+		};
+
+		const postsOf = (msg: string) =>
+			postMessageMock.mock.calls.map(([message]) => message).filter((m) => m.msg === msg);
+
+		const rekey = (scheduler: XrpWalletScheduler) =>
+			(scheduler as unknown as { setRef: (d: PostMessageDataRequestXrp) => void }).setRef(
+				otherData
+			);
+
+		it('should discard a balance that resolves after the re-key', async () => {
+			let resolveBalance: ((balance: bigint) => void) | undefined;
+			spyLoadBalance.mockImplementation(
+				() =>
+					new Promise<bigint>((resolve) => {
+						resolveBalance = resolve;
+					})
+			);
+
+			const scheduler = new XrpWalletScheduler();
+			const promise = scheduler.trigger(startData);
+
+			// `trigger` awaits the identity before running the job, so let it reach `loadXrpBalance`
+			// first — otherwise the re-key happens before the request is even in flight.
+			await vi.advanceTimersByTimeAsync(100);
+
+			expect(spyLoadBalance).toHaveBeenCalled();
+
+			rekey(scheduler);
+			resolveBalance?.(mockBalance);
+
+			await vi.runAllTimersAsync();
+			await promise;
+
+			expect(postsOf('syncXrpWallet')).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		it('should not report an error for an address the scheduler moved on from', async () => {
+			spyLoadBalance.mockRejectedValue(new Error('test'));
+
+			const scheduler = new XrpWalletScheduler();
+			const promise = scheduler.trigger(startData);
+
+			rekey(scheduler);
+
+			await vi.runAllTimersAsync();
+			await promise;
+
+			expect(postsOf('syncXrpWalletError')).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		it('should still post a balance that resolves before any re-key', async () => {
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.trigger(startData);
+
+			expect(postsOf('syncXrpWallet')).toHaveLength(1);
+
+			scheduler.stop();
+		});
+	});
+
+	describe('on a failing balance load', () => {
+		const walletPosts = () =>
+			postMessageMock.mock.calls
+				.map(([message]) => message)
+				.filter(({ msg }) => msg === 'syncXrpWallet');
+
+		const triggerAndSettle = async (scheduler: XrpWalletScheduler) => {
+			const promise = scheduler.trigger(startData);
+
+			await vi.runAllTimersAsync();
+
+			await promise;
+		};
+
+		it('should postMessage syncXrpWalletError after exhausting the retries', async () => {
+			const error = new Error('test');
+			spyLoadBalance.mockRejectedValue(error);
+
+			const scheduler = new XrpWalletScheduler();
+
+			await triggerAndSettle(scheduler);
+
+			// first attempt + 10 retries
+			expect(spyLoadBalance).toHaveBeenCalledTimes(11);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncXrpWalletError',
+				ref,
+				data: { error }
+			});
+			expect(walletPosts()).toHaveLength(0);
+
+			scheduler.stop();
+		});
+
+		// `syncWalletData` short-circuits on an unchanged balance, so the failure branch clears the
+		// store. Without that reset the recovered sync would emit nothing and the UI would stay empty.
+		it('should postMessage the same balance again after a fatal error', async () => {
+			const scheduler = new XrpWalletScheduler();
+
+			await scheduler.trigger(startData);
+
+			expect(walletPosts()).toHaveLength(1);
+
+			spyLoadBalance.mockRejectedValue(new Error('Failed to fetch'));
+
+			await triggerAndSettle(scheduler);
+
+			spyLoadBalance.mockResolvedValue(mockBalance);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(startData);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(posts[0].data.wallet.balance).toEqual({ certified: false, data: mockBalance });
+
+			scheduler.stop();
+		});
 	});
 });

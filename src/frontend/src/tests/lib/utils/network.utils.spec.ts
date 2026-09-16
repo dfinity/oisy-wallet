@@ -41,7 +41,7 @@ import {
 	SUPPORTED_SOLANA_NETWORKS,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
-import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
+import { XRP_MAINNET_NETWORK, XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -80,6 +80,20 @@ import {
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
+
+// XRP is force-disabled under TEST, so `SUPPORTED_XRP_NETWORK_IDS` is empty and the
+// list-based XRP guards would return false for every input — passing their negative
+// assertions vacuously. Enable it for this spec so both branches discriminate.
+vi.mock('$env/networks/networks.xrp.env', async () => {
+	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
+
+	return {
+		...actual,
+		XRP_MAINNET_ENABLED: true,
+		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
+		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
+	};
+});
 
 describe('network utils', () => {
 	describe('isNetworkEthereum', () => {
@@ -131,7 +145,10 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkXrp', () => {
-		// XRP is disabled by default, so the id-list predicate is inert; assert the negative.
+		it('should return true for the XRP network', () => {
+			expect(isNetworkXrp(XRP_MAINNET_NETWORK)).toBeTruthy();
+		});
+
 		it('should return false for a non-XRP network', () => {
 			expect(isNetworkXrp(ETHEREUM_NETWORK)).toBeFalsy();
 			expect(isNetworkXrp(SOLANA_MAINNET_NETWORK)).toBeFalsy();
@@ -353,7 +370,10 @@ describe('network utils', () => {
 	});
 
 	describe('isNetworkIdXrp', () => {
-		// XRP is disabled by default (empty supported-id list), so this predicate is inert.
+		it('should return true for the XRP mainnet network ID', () => {
+			expect(isNetworkIdXrp(XRP_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
 		it('should return false for non-XRP network IDs', () => {
 			expect(isNetworkIdXrp(ICP_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdXrp(ETHEREUM_NETWORK_ID)).toBeFalsy();
