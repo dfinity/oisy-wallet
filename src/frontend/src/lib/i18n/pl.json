@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Błąd podczas ładowania informacji o portfelu BTC.",
 			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Błąd podczas ładowania informacji o portfelu XRP."
 		}
 	},
 	"hero": {
