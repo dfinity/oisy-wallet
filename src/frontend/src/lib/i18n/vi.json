@@ -171,7 +171,8 @@
 			"hide_balances": "Ẩn số dư hiển thị",
 			"show_balances": "Hiện số dư bị ẩn",
 			"notes": "Mở ghi chú",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Tài liệu"

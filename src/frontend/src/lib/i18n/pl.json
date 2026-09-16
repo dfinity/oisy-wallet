@@ -171,7 +171,8 @@
 			"hide_balances": "Ukryj wyświetlane salda",
 			"show_balances": "Pokaż ukryte salda",
 			"notes": "Otwórz notatki",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Dokumentacja"

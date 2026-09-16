@@ -171,7 +171,8 @@
 			"hide_balances": "إخفاء الأرصدة المعروضة",
 			"show_balances": "إظهار الأرصدة المخفية",
 			"notes": "",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "وثائق"

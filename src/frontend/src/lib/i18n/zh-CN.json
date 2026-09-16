@@ -171,7 +171,8 @@
 			"hide_balances": "隐藏当前显示的余额",
 			"show_balances": "显示已隐藏的余额",
 			"notes": "打开笔记",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "文档"

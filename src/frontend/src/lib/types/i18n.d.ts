@@ -158,6 +158,7 @@ interface I18nNavigation {
 		show_balances: string;
 		notes: string;
 		issue_tip: string;
+		issue_tip_attention: string;
 	};
 	short: { documentation: string };
 }

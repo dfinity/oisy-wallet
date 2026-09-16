@@ -171,7 +171,8 @@
 			"hide_balances": "Skrýt zobrazené zůstatky",
 			"show_balances": "Zobrazit skryté zůstatky",
 			"notes": "Otevřít poznámky",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Dokumentace"

@@ -171,7 +171,8 @@
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
 			"notes": "메모 열기",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "문서"
