@@ -57,9 +57,19 @@ const confirmXrpTransaction = async ({
 		// declare expiry for a payment that is about to validate.
 		const validatedLedgerIndex = await loadXrpValidatedLedgerIndex({ network });
 
-		// Past its LastLedgerSequence the transaction can never be applied, so this failure is
-		// final — and, unlike an early timeout, sending again is safe.
 		if (validatedLedgerIndex > lastLedgerSequence) {
+			// The `tx` lookup above and this index come from two separate calls, so the lookup may
+			// have missed a payment that validated in between. Expiry is only final if it survives
+			// a recheck against the newer ledger state — otherwise a succeeded payment would be
+			// reported as failed and the user invited to send a duplicate.
+			const recheck = await loadXrpTransactionOutcome({ hash, network });
+
+			if (recheck.validated) {
+				return recheck.transactionResult;
+			}
+
+			// Past its LastLedgerSequence the transaction can never be applied, so this failure is
+			// final — and, unlike an early timeout, sending again is safe.
 			throw new Error(
 				`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
 			);

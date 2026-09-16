@@ -4,7 +4,8 @@ import {
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResponseSchema,
 	XrplFeeResultSchema,
-	XrplLedgerCurrentResultSchema
+	XrplLedgerCurrentResultSchema,
+	XrplLedgerResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
@@ -208,14 +209,17 @@ export const loadXrpValidatedLedgerIndex = async ({
 		params: { ledger_index: 'validated' }
 	});
 
-	const ledgerIndex = (result.ledger_index ??
-		(result.ledger as { ledger_index?: number } | undefined)?.ledger_index) as number | undefined;
+	// A malformed HIGH index would declare a still-live payment expired, so this is validated
+	// rather than cast, and the response must actually describe a validated ledger.
+	const parsed = XrplLedgerResultSchema.safeParse(result);
 
-	if (isNullish(ledgerIndex)) {
+	if (!parsed.success) {
 		throw new Error('Unexpected XRPL ledger response: missing validated ledger_index');
 	}
 
-	return ledgerIndex;
+	const { data } = parsed;
+
+	return 'ledger_index' in data ? data.ledger_index : data.ledger.ledger_index;
 };
 
 /**

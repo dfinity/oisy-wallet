@@ -184,6 +184,46 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
 	});
 
+	// The `tx` lookup and the validated index come from two separate calls, so the lookup can miss
+	// a payment that validates in between. Expiry must survive a recheck.
+	it('returns the result when the recheck finds the payment validated after expiry', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	it('still expires when the recheck does not find the payment', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
+	});
+
+	// A validated failure found by the recheck must surface as a failure, not as an expiry.
+	it('reports a tec failure found by the recheck', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed');
+	});
+
 	// The open ledger runs ahead of validation, so comparing against it would report a final
 	// failure for a payment that is still about to validate — and invite a duplicate send.
 	it('does not report expiry while only the open ledger has passed LastLedgerSequence', async () => {
