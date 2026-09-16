@@ -34,16 +34,32 @@
 		cancel
 	}: Props = $props();
 
-	const { feeDecimalsStore, feeSymbolStore, feeTokenIdStore }: XrpFeeContext =
-		getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const {
+		feeDecimalsStore,
+		feeSymbolStore,
+		feeTokenIdStore,
+		reserveStore: reserve
+	}: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
 
 	let amountError = $state<XrpAmountAssertionError | undefined>();
+
+	// A tag the user typed but that does not parse must block the form rather than be dropped:
+	// sending to an exchange deposit address without its tag is not auto-creditable.
+	let invalidDestinationTag = $state(false);
 
 	let invalidDestination = $derived(
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
-	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
+	// The reserve is what the account must retain. While it is unknown no amount can be judged
+	// sendable, so the form is blocked outright rather than measured against a guessed figure.
+	let invalid = $derived(
+		invalidDestination ||
+			invalidDestinationTag ||
+			isNullish($reserve) ||
+			nonNullish(amountError) ||
+			isNullish(amount)
+	);
 </script>
 
 <SendForm
@@ -61,7 +77,7 @@
 
 	{#snippet sendAmount()}
 		<XrpSendAmount {onTokensList} bind:amount bind:amountError />
-		<XrpSendDestinationTag />
+		<XrpSendDestinationTag bind:invalidDestinationTag />
 	{/snippet}
 
 	{#snippet fee()}

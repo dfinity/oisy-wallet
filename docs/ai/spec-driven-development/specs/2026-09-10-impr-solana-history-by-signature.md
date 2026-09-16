@@ -167,6 +167,36 @@ exist means zero. Today that takes one `getBalance` plus up to three calls per S
 (`isAtaAddress`, `checkIfAccountExists` and `getTokenAccountBalance`, in `loadSplTokenBalance`).
 Balances are still posted per token.
 
+### 3.9 Transaction details survive a reload
+
+`fetchTransactionDetailForSignature` keeps the details of a finalized transaction in IndexedDB,
+per network and signature, and reads them back before asking the RPC. The in-memory map stays in
+front of it, but it is per realm and dies with the tab. Two derivations need a detail again:
+
+- **The worker's first page after a reload.** The worker skips only the signatures in its own set,
+  which starts empty, so every reload fetched its newest page again.
+- **A held record derived again.** A pager skips a signature only when every token it belongs to
+  holds it (3.6), and derives it again otherwise, for example after a token is enabled.
+
+Measured on the recorded mainnet wallet (169 signatures, pages of 10), `getTransaction` calls without
+and with the cache: the worker's first page after a reload, 9 and 0; deriving the newest page again,
+9 and 0; deriving the whole history again after a reload, 169 and 0. The overlap between the worker
+and the Activity list in one session is 0 either way, since the pagers skip what the stores hold.
+
+Only finalized details are kept: a transaction that is not finalized can still be dropped by the
+network. Two realms that ask for the same signature before either has kept it still fetch it twice;
+the cache spares the repeat, not the race.
+
+The cache is one object store, keyed by network, zero-padded slot and signature, so every change is
+a single IndexedDB transaction and nothing can be left half written. Trimming keeps the newest
+`SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network by reading the keys alone.
+
+It is cleared at sign-out with the other caches. Each realm reads the store's epoch when it loads,
+and a write checks it in the same transaction that writes. Clearing removes the epoch, so no realm of
+the session that ended, the network worker included, writes anything after sign-out; the realms of
+the next session start a new one. Neither reading nor writing may fail a load: a browser that
+refuses to store leaves the caller exactly where it was before the cache existed.
+
 ## 4. Does not do
 
 - No change to how a transaction is derived (`fetchSolTransactionsForSignature`, the summary,
@@ -309,6 +339,11 @@ Implementation, in order:
   only finalized ones, and only those that some session of this user happened to load. Treating it
   as a source would reopen the holes 3.3 closes. Re-deriving every restored record instead would
   cost the same RPC calls as not reading and keep more code.
+
+- **D5. The details of a finalized transaction are cached in IndexedDB, 200 per network.** The
+  per-realm map alone left every reload fetching the worker's first page again, and every
+  derivation of a held record for another token fetching its details again (3.9). 200 details are
+  about 2 MB. Cleared at sign-out.
 
 ## 10. Notes for the implementation
 

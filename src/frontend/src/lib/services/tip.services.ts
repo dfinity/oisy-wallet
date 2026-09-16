@@ -454,6 +454,24 @@ export const claimTip = ({
  * the tip being claimable, and only then is the allowance revoked. Revoking
  * first would leave a window where the tip still looks live but cannot pay out —
  * an `Uncovered` failure the sender caused and the recipient cannot explain.
+ *
+ * Only the first half can fail in a way worth calling a failed cancellation, so
+ * only the first half throws. Once the canister has recorded the cancellation
+ * the tip is not claimable by anyone, and `cancel_tip` refuses a second attempt
+ * with `NotCancellable` — so rethrowing a failed revoke reported "nothing has
+ * moved, so try again" for an operation that had already happened and that
+ * retrying could never complete. The revoke is reported instead, and the caller
+ * says so.
+ *
+ * What a failed revoke leaves behind is a standing approval and nothing else.
+ * Only the backend can draw on it, only through this tip's own subaccount, and
+ * `claim_tip` refuses a cancelled tip — so no one can spend it, and it lapses at
+ * the tip's deadline, which is the expiry {@link reserveTip} approved it with.
+ * Nor does it hold any of the sender's balance: an approval is a permission, not
+ * a transfer, and what a tip has promised away is read from the tip's own state
+ * rather than from the ledger — so a cancellation frees it the moment the
+ * canister records it. Which is why this is reported rather than retried: there
+ * is nothing for a retry to give back.
  */
 export const cancelTip = async ({
 	identity,
@@ -463,21 +481,29 @@ export const cancelTip = async ({
 	identity: Identity;
 	tipId: string;
 	ledgerCanisterId: CanisterIdText;
-}): Promise<void> => {
+}): Promise<{ allowanceRevoked: boolean }> => {
 	await cancelTipApi({ identity, tipId });
 
-	await approve({
-		identity,
-		ledgerCanisterId,
-		amount: ZERO,
-		spender: {
-			owner: Principal.fromText(BACKEND_CANISTER_ID),
-			subaccount: await tipSpenderSubaccount(tipId)
-		},
-		// An allowance of zero has nothing to expire; the ledger still requires the
-		// field, so this is the same deadline the reservation already carried.
-		expiresAt: BigInt(Date.now()) * 1_000_000n + 60_000_000_000n
-	});
+	try {
+		await approve({
+			identity,
+			ledgerCanisterId,
+			amount: ZERO,
+			spender: {
+				owner: Principal.fromText(BACKEND_CANISTER_ID),
+				subaccount: await tipSpenderSubaccount(tipId)
+			},
+			// An allowance of zero has nothing to expire; the ledger still requires the
+			// field, so this is the same deadline the reservation already carried.
+			expiresAt: BigInt(Date.now()) * 1_000_000n + 60_000_000_000n
+		});
+
+		return { allowanceRevoked: true };
+	} catch (err: unknown) {
+		consoleWarn('Could not revoke the allowance of a cancelled tip', err);
+
+		return { allowanceRevoked: false };
+	}
 };
 
 /** The caller's own tips, newest first, for History. */

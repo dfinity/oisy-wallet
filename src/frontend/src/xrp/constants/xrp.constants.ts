@@ -17,6 +17,12 @@ export const XRP_OWNER_RESERVE_DROPS = 200_000n;
 // Fallback per-transaction fee in drops, used when the node's fee estimate is unavailable.
 export const XRP_DEFAULT_FEE_DROPS = 10n;
 
+// Ceiling for the fee taken from the node's estimate. The estimate is untrusted input and
+// escalates with load, so it is bounded rather than signed as-is: 1000x the base fee leaves
+// room for real congestion while keeping a hostile value from being signed. For reference,
+// xrpl.js caps at 2 XRP (2_000_000 drops), which is far more than a wallet payment needs.
+export const XRP_MAX_FEE_DROPS = 10_000n;
+
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
 // long it can be included (~4s/ledger, so ~80s) before it definitively fails rather than
 // lingering.
