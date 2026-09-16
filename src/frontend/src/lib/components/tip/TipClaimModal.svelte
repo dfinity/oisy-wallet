@@ -12,10 +12,12 @@
 	import { onMount } from 'svelte';
 	import type { TipDetails } from '$declarations/backend/backend.did';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+	import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
+	import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 	import failedTipImg from '$lib/assets/failed-vip-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
@@ -33,9 +35,12 @@
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { userProfileCreated } from '$lib/stores/user-profile.store';
+	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { PendingTipClaim } from '$lib/types/tip';
 	import { consoleWarn } from '$lib/utils/console.utils';
+	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -100,25 +105,79 @@
 	 * nothing in their list. Same treatment a reward gets on the way out
 	 * (`VipRewardStateModal`) and a swap gives its ck destination.
 	 *
-	 * Nothing to do for ICP, which is never a custom token — the lookup simply
-	 * misses and `autoLoadSingleToken` skips. It also skips a token already
-	 * enabled, and it swallows and reports its own failures, so this can never turn
-	 * a successful claim into a failed one.
+	 * Three cases, and the third is the one that used to be missing. ICP is always
+	 * visible and never a custom token, so it is left alone. A token already in the
+	 * claimer's list is enabled. A token in neither — one the *sender* imported —
+	 * is registered from its ledger id, because `icrcTokens` is the defaults plus
+	 * the claimer's own imports and a stranger's token is in neither half.
+	 *
+	 * Every path reports its own failures and none rethrows: the money has already
+	 * moved by the time this runs, so nothing here may turn a successful claim into
+	 * a failed one.
 	 */
 	const enableClaimedToken = async () => {
-		if (isNullish(claimedLedgerId)) {
+		if (isNullish(claimedLedgerId) || isNullish($authIdentity)) {
 			return;
 		}
 
 		const ledgerCanisterId = claimedLedgerId.toText();
 
-		await autoLoadSingleToken({
-			token: $icrcTokens.find((token) => token.ledgerCanisterId === ledgerCanisterId),
-			identity: $authIdentity,
-			setToken: setCustomToken,
-			loadTokens: loadCustomTokens,
-			errorMessage: $i18n.init.error.icrc_custom_token
-		});
+		// ICP is never a custom token and is always visible, so there is nothing to
+		// enable and — more to the point — nothing to add. Checked before the branch
+		// below, which would otherwise read "not in the list" as "import it" and
+		// register the ICP ledger as though the claimer had pasted it in by hand.
+		if ([ICP_TOKEN, TESTICP_TOKEN].some(({ ledgerCanisterId: id }) => id === ledgerCanisterId)) {
+			return;
+		}
+
+		const held = $icrcTokens.find((token) => token.ledgerCanisterId === ledgerCanisterId);
+
+		// Already in their list: a default ck-asset, or one they hold. Enabling is
+		// all that is needed, and `autoLoadSingleToken` skips a token already on.
+		if (nonNullish(held)) {
+			await autoLoadSingleToken({
+				token: held,
+				identity: $authIdentity,
+				setToken: setCustomToken,
+				loadTokens: loadCustomTokens,
+				errorMessage: $i18n.init.error.icrc_custom_token
+			});
+
+			return;
+		}
+
+		// Not in their list at all, which is the case that used to end in silence:
+		// `icrcTokens` is the defaults plus the claimer's *own* imports, so a token
+		// the sender imported is absent, the lookup missed, and the claim finished
+		// with the tokens really theirs and nothing on screen to show for it.
+		//
+		// Registered from the ledger id alone — the only thing the save needs, since
+		// `toCustomToken` reduces an ICRC token to its ledger and index canisters,
+		// and `loadCustomTokens` reads the metadata back off the ledger afterwards.
+		// No index canister: the claimer has no reason to know of one, and without
+		// it the balance still shows, which is what was missing.
+		//
+		// Nothing is taken on trust here. The tip was created against this ledger,
+		// the canister just moved tokens through it with `icrc2_transfer_from`, and
+		// this screen has already read its metadata for the line above — so it is a
+		// working ICRC ledger on better evidence than the manual import flow has.
+		try {
+			await setCustomTokenApi({
+				identity: $authIdentity,
+				token: toCustomToken({
+					ledgerCanisterId,
+					enabled: true,
+					networkKey: 'Icrc'
+				} as SaveCustomTokenWithKey)
+			});
+
+			await loadCustomTokens({ identity: $authIdentity });
+		} catch (err: unknown) {
+			// Reported, never rethrown: the claim has already succeeded and the money
+			// has already moved. A token that did not get registered is a wallet the
+			// claimer has to add one row to, not a failed claim.
+			toastsError({ msg: { text: $i18n.init.error.icrc_custom_token }, err });
+		}
 	};
 
 	// On the way out rather than while the confirmation is up: enabling shows the

@@ -1,9 +1,13 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { loadCustomTokens } from '$icp/services/icrc.services';
+import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
 import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileCreated } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
@@ -20,6 +24,7 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
 // they are stubbed; what is asserted is which token is handed to
 // `autoLoadSingleToken`, since that is the decision this component makes.
 vi.mock('$icp/services/icrc.services', () => ({ loadCustomTokens: vi.fn() }));
+vi.mock('$lib/api/backend.api', () => ({ setCustomToken: vi.fn() }));
 vi.mock('$icp-eth/services/icrc-token.services', () => ({ setCustomToken: vi.fn() }));
 
 vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
@@ -40,7 +45,7 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 			{
 				...mockIcrcCustomToken,
 				id: parseTokenId('ckTest'),
-				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false,
 				symbol: 'ckTEST'
 			}
@@ -50,28 +55,40 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 
 describe('TipClaimModal', () => {
 	const pending = { tipId: 'the-tip-id', claimCode: 'the-claim-code' };
-	const ledgerCanisterId = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+	// ckBTC's ledger, not ICP's. The fixture used to be `ryjl3-…`, which *is* the
+	// ICP ledger — so a test named for a ck-asset the claimer has never held was
+	// quietly exercising the one token that is never a custom token at all.
+	const ledgerCanisterId = Principal.fromText('mxzaz-hqaaa-aaaar-qaada-cai');
 	const message = 'thanks for the help';
 
-	const mockDetails = () =>
+	const mockDetailsFor = (ledger: Principal) =>
 		vi.spyOn(tipServices, 'loadTipDetails').mockResolvedValue({
 			amount: 500_000n,
 			expires_at_ns: 1_800_000_000_000_000_000n,
 			message: [message],
-			ledger_canister_id: ledgerCanisterId
+			ledger_canister_id: ledger
 		});
 
-	const mockClaim = () =>
+	const mockClaimFor = (ledger: Principal) =>
 		vi.spyOn(tipServices, 'claimTip').mockResolvedValue({
 			amount: 500_000n,
 			block_index: 7n,
-			ledger_canister_id: ledgerCanisterId
+			ledger_canister_id: ledger
 		});
+
+	const mockDetails = () => mockDetailsFor(ledgerCanisterId);
+
+	const mockClaim = () => mockClaimFor(ledgerCanisterId);
 
 	let warnSpy: MockInstance<typeof consoleUtils.consoleWarn>;
 
 	beforeEach(async () => {
 		vi.restoreAllMocks();
+		// `restoreAllMocks` restores spies but leaves a module mock's `vi.fn()`
+		// holding its call history, so these two have to be cleared by hand or a
+		// "was not called" assertion reads the previous test's calls.
+		vi.mocked(setCustomTokenApi).mockReset();
+		vi.mocked(loadCustomTokens).mockReset();
 		modalStore.close();
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
@@ -335,9 +352,90 @@ describe('TipClaimModal', () => {
 			await waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
 
 			expect(autoLoad.mock.calls[0][0].token).toMatchObject({
-				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false
 			});
+		});
+
+		it('registers a token the claimer has never held', async () => {
+			// The case that used to end in silence. `icrcTokens` is the defaults plus
+			// the claimer's *own* imports, so a token the sender imported is in
+			// neither half: the lookup missed, nothing was enabled, and the claim
+			// finished with the tokens really theirs and nothing on screen.
+			const autoLoad = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
+
+			const stranger = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			mockDetailsFor(stranger);
+			mockClaimFor(stranger);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce());
+
+			// Registered from the ledger id alone, enabled, and the list reloaded so
+			// the metadata is read back off the ledger.
+			const [[{ token }]] = vi.mocked(setCustomTokenApi).mock.calls;
+
+			expect(token).toMatchObject({ enabled: true });
+			expect(vi.mocked(loadCustomTokens)).toHaveBeenCalled();
+
+			// Not the enable path: there was nothing in the list to enable.
+			expect(autoLoad).not.toHaveBeenCalled();
+		});
+
+		it('leaves ICP alone rather than importing the ICP ledger', async () => {
+			// ICP is always visible and never a custom token. Without this the branch
+			// above reads "not in the list" as "import it" and registers the ICP
+			// ledger as though the claimer had pasted it in by hand.
+			const autoLoad = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
+
+			mockDetailsFor(Principal.fromText(ICP_TOKEN.ledgerCanisterId));
+			mockClaimFor(Principal.fromText(ICP_TOKEN.ledgerCanisterId));
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(get(modalStore)).toBeNull());
+
+			expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+			expect(autoLoad).not.toHaveBeenCalled();
+		});
+
+		it('does not turn a failed registration into a failed claim', async () => {
+			// The money has already moved by the time this runs. A token that did not
+			// get registered is a wallet with one row to add by hand, not a claim
+			// that went wrong.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+			const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
+
+			const stranger = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			mockDetailsFor(stranger);
+			mockClaimFor(stranger);
+			vi.mocked(setCustomTokenApi).mockRejectedValueOnce(new Error('canister unreachable'));
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			// Reported, and the modal still closes onto the wallet.
+			await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+
+			expect(get(modalStore)).toBeNull();
 		});
 	});
 
