@@ -233,17 +233,45 @@ describe('xrpl.rest', () => {
 			expect(info.ownerCount).toBe(0);
 		});
 
-		// Defaulting a missing OwnerCount to zero would under-reserve and let `getXrpMaxAmount`
-		// return more than the ledger accepts, so it must fail instead.
-		it.each([undefined, '3', null, {}])('throws for an owner count of %j', async (OwnerCount) => {
+		// A negative owner count would LOWER the reserve and inflate the sendable maximum; a
+		// fractional one throws inside `BigInt()` with an opaque RangeError. Both are rejected at
+		// the boundary, along with the non-numeric forms.
+		it.each([undefined, '3', null, {}, -1, 1.5, Number.MAX_SAFE_INTEGER + 2])(
+			'throws for an owner count of %j',
+			async (OwnerCount) => {
+				mockFetchResponse({
+					body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
+				});
+
+				await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+					'Unexpected XRPL account_info response'
+				);
+			}
+		);
+
+		it.each([undefined, '42', null, -1, 1.5])('throws for a sequence of %j', async (Sequence) => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
+				body: { result: { account_data: { Balance: '30000000', Sequence, OwnerCount: 0 } } }
 			});
 
 			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'missing or invalid OwnerCount'
+				'Unexpected XRPL account_info response'
 			);
 		});
+
+		// `BigInt` would accept all of these and hand back a plausible-looking balance.
+		it.each(['-1', '0x10', '1.5', '1e3', ' 1', '', 30_000_000])(
+			'throws for a balance of %j',
+			async (Balance) => {
+				mockFetchResponse({
+					body: { result: { account_data: { Balance, Sequence: 42, OwnerCount: 0 } } }
+				});
+
+				await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+					'Unexpected XRPL account_info response'
+				);
+			}
+		);
 
 		it('throws for an unfunded account', async () => {
 			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
@@ -263,6 +291,15 @@ describe('xrpl.rest', () => {
 			expect(fee).toBe(15n);
 		});
 
+		// The fee is converted with `BigInt`, which would accept signed and hexadecimal forms.
+		it.each(['-1', '0x10', '1.5', ' 1', 15])('throws for an open-ledger fee of %j', async (fee) => {
+			mockFetchResponse({ body: { result: { drops: { open_ledger_fee: fee } } } });
+
+			await expect(
+				loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n })
+			).rejects.toThrow('Unexpected XRPL fee response');
+		});
+
 		it('falls back to the provided fee when the node omits it', async () => {
 			mockFetchResponse({ body: { result: { drops: {} } } });
 
@@ -278,6 +315,19 @@ describe('xrpl.rest', () => {
 
 			await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(987654);
 		});
+	});
+
+	describe('loadXrpLedgerIndex validation', () => {
+		it.each([undefined, '987654', null, -1, 1.5])(
+			'throws for a current ledger index of %j',
+			async (ledger_current_index) => {
+				mockFetchResponse({ body: { result: { ledger_current_index } } });
+
+				await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					'missing ledger_current_index'
+				);
+			}
+		);
 	});
 
 	describe('loadXrpValidatedLedgerIndex', () => {
