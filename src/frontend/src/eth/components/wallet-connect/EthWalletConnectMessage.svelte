@@ -111,6 +111,9 @@
 	// all the same chain and all hash alike. Comparing the text matched one form only.
 	let domainChainId = $derived(toTypedDataDomainChainId(chainId));
 
+	// The chain the domain binds the signature to, which is what makes the same struct a different
+	// signature on Ethereum and on Arbitrum. It is stated whether or not the schema is one OISY can
+	// summarize: a request whose contents cannot be described still says which chain it is for.
 	let domainNetwork = $derived(
 		nonNullish(domainChainId)
 			? [...$enabledEthereumNetworks, ...$enabledEvmNetworks].find(
@@ -270,12 +273,19 @@
 			</ul>
 		{/if}
 
+		<!-- Above the token rather than inside it: the token is only resolved for a schema OISY
+		     recognises, while the chain is known for every domain that states one. There is no second
+		     network to distinguish this one from, since a token is matched on this very chain id. -->
+		{#if nonNullish(domainNetwork)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
+			<p class="mb-4 font-normal" data-tid="wallet-connect-domain-network">
+				{domainNetwork.name}
+			</p>
+		{/if}
+
 		{#if nonNullish(token)}
 			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
 			<p class="mb-4 font-normal">{token.symbol}</p>
-
-			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
-			<p class="mb-4 font-normal">{token.network.name}</p>
 		{:else if nonNullish(address)}
 			<!-- A token OISY does not list is still the contract the allowance is over, so the address is
 	     shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->

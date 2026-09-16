@@ -6,7 +6,6 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { LEND_BORROW_ENABLED } from '$env/lend-borrow';
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -17,7 +16,8 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet
+		solAddressMainnet,
+		xrpAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -30,7 +30,8 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled
+		networkSolanaMainnetEnabled,
+		networkXrpMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -41,6 +42,7 @@
 		loadSolAddressLocal,
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
+	import { loadXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 
 	interface Props {
 		children: Snippet;
@@ -75,12 +77,12 @@
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
-	const isLiquidiumProviderEnabled = LEND_BORROW_ENABLED && LIQUIDIUM_ENABLED;
+	const debounceLoadXrpAddressMainnet = debounce(loadXrpAddressMainnet);
 
 	$effect(() => {
 		if (progressDone) {
 			if (
-				($networkEthereumEnabled || $networkEvmMainnetEnabled || isLiquidiumProviderEnabled) &&
+				($networkEthereumEnabled || $networkEvmMainnetEnabled || LIQUIDIUM_ENABLED) &&
 				isNullish($ethAddress)
 			) {
 				debounceLoadEthAddress();
@@ -92,6 +94,10 @@
 
 			if ($networkSolanaMainnetEnabled && isNullish($solAddressMainnet)) {
 				debounceLoadSolAddressMainnet();
+			}
+
+			if ($networkXrpMainnetEnabled && isNullish($xrpAddressMainnet)) {
+				debounceLoadXrpAddressMainnet();
 			}
 
 			if ($testnetsEnabled) {

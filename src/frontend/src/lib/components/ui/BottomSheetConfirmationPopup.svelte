@@ -44,10 +44,11 @@
 	</div>
 {/snippet}
 
-<!-- Mobile: a slide-up bottom sheet. The bottom sheet only renders as a real
-     sheet below 1024px; above it collapses to a transparent, position-relative
-     block, so on desktop we render the same content as a centered modal instead. -->
-<Responsive down="lg">
+<!-- Mobile: a slide-up bottom sheet, below the same `sm` breakpoint (640px) where
+     `Modal.svelte`'s own dialog switches from full-bleed to a centered card
+     (see `gix.scss`) — otherwise the underlying modal looks desktop-sized while
+     this popup still renders as a full-width mobile sheet. -->
+<Responsive down="sm">
 	<div class="fixed inset-0 z-50">
 		<BottomSheetContainer transition>
 			{@render body()}
@@ -58,7 +59,7 @@
 </Responsive>
 
 <!-- Desktop: a smaller modal stacked over the underlying modal. -->
-<Responsive up="1.5lg">
+<Responsive up="md">
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<Backdrop onClose={onCancel} />
 

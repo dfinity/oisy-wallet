@@ -29,7 +29,8 @@ describe('SwapDetailsOisyTrade', () => {
 		pair: {} as unknown as TradingPair,
 		price: 10_000_000n,
 		quantity: 200_000_000n,
-		depositAmount: 200_000_000n
+		depositAmount: 200_000_000n,
+		maxSourceRelease: ZERO
 	};
 
 	const makeProvider = (swapDetails: Partial<OisyTradeSwapDetails> = {}) => ({

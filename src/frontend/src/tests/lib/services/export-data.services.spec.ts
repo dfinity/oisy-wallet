@@ -15,7 +15,7 @@ import {
 	type TokenCsvRow,
 	type TransactionCsvRow
 } from '$lib/utils/export-data.utils';
-import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services';
+import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
@@ -23,8 +23,8 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
 }));
 
-vi.mock('$sol/services/sol-transactions.services', () => ({
-	loadNextSolTransactionsByOldest: vi.fn()
+vi.mock('$sol/services/sol-history-pagers.services', () => ({
+	loadOlderSolTransactions: vi.fn()
 }));
 
 vi.mock('$lib/stores/toasts.store', () => ({
@@ -120,7 +120,7 @@ const defaultTransactionParams = (): Parameters<typeof exportTransactionsCsv>[0]
 
 describe('export-data.services', () => {
 	const mockLoadNextIcTransactionsByOldest = vi.mocked(loadNextIcTransactionsByOldest);
-	const mockLoadNextSolTransactionsByOldest = vi.mocked(loadNextSolTransactionsByOldest);
+	const mockLoadOlderSolTransactions = vi.mocked(loadOlderSolTransactions);
 	const mockBuildTokenRows = vi.mocked(buildTokenRows);
 	const mockSortTokenRows = vi.mocked(sortTokenRows);
 	const mockBuildTransactionRows = vi.mocked(buildTransactionRows);
@@ -206,7 +206,7 @@ describe('export-data.services', () => {
 
 			expect(result).toBeFalsy();
 			expect(mockLoadNextIcTransactionsByOldest).not.toHaveBeenCalled();
-			expect(mockLoadNextSolTransactionsByOldest).not.toHaveBeenCalled();
+			expect(mockLoadOlderSolTransactions).not.toHaveBeenCalled();
 			expect(buildTransactions).not.toHaveBeenCalled();
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).not.toHaveBeenCalled();
@@ -230,7 +230,7 @@ describe('export-data.services', () => {
 
 				return Promise.resolve({ success: true });
 			});
-			mockLoadNextSolTransactionsByOldest.mockRejectedValue(new Error('sol loader failed'));
+			mockLoadOlderSolTransactions.mockRejectedValue(new Error('sol loader failed'));
 
 			const result = await exportTransactionsCsv({
 				...defaultTransactionParams(),
@@ -241,7 +241,7 @@ describe('export-data.services', () => {
 
 			expect(result).toBeTruthy();
 			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
-			expect(mockLoadNextSolTransactionsByOldest).toHaveBeenCalledOnce();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledOnce();
 			expect(buildTransactions).toHaveBeenCalledOnce();
 			expect(mockBuildTransactionRows).toHaveBeenCalledOnce();
 			expect(mockDownloadCsv).toHaveBeenCalledExactlyOnceWith({
@@ -255,6 +255,61 @@ describe('export-data.services', () => {
 			});
 			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
 				type: 'transactions_basic',
+				resultStatus: 'success'
+			});
+		});
+
+		it('fails the export when a Solana page fails, rather than exporting what came before it', async () => {
+			const error = new Error('RPC down');
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockResolvedValueOnce({ success: false, err: error });
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN],
+				buildTransactions
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+			expect(mockToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.settings.error.export_failed,
+				level: 'error',
+				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'error',
+				errorCode: 'build_failed',
+				error: 'RPC down'
+			});
+		});
+
+		it('exports once the Solana pager signals the end', async () => {
+			mockLoadOlderSolTransactions
+				.mockResolvedValueOnce({ success: true })
+				.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [SOLANA_TOKEN]
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadOlderSolTransactions).toHaveBeenCalledTimes(2);
+			expect(mockDownloadCsv).toHaveBeenCalledOnce();
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
 				resultStatus: 'success'
 			});
 		});

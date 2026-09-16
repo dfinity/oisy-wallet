@@ -18,6 +18,7 @@ import {
 	computeChainFusionReceiveAmount,
 	toChainFusionPairs
 } from '$lib/utils/chain-fusion-swap.utils';
+import { nativeSwapTokenIdentifier } from '$lib/utils/swap-tokens-filter.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 
@@ -96,6 +97,15 @@ const ckBtcToken = makeCkToken({
 });
 
 const importedUsdcToken: Token = { ...USDC_TOKEN, id: parseTokenId('USDC') };
+
+const ethereumIdentifier = nativeSwapTokenIdentifier({
+	networkId: ETHEREUM_TOKEN.network.id,
+	symbol: ETHEREUM_TOKEN.symbol
+});
+const btcIdentifier = nativeSwapTokenIdentifier({
+	networkId: BTC_MAINNET_TOKEN.network.id,
+	symbol: BTC_MAINNET_TOKEN.symbol
+});
 
 // `mockValidIcrcToken` carries the mainnet ckBTC ledger id, which is a ck ledger now that
 // the Bitcoin pair is enabled — so a genuinely unrelated ICRC token needs its own id.
@@ -180,14 +190,29 @@ describe('chain-fusion-swap.utils', () => {
 
 		it('should return the native identifier for the btc category', () => {
 			expect(chainFusionSupportedSourceTokens({ category: 'btc', pairs: PAIRS })).toStrictEqual(
-				new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()])
+				new Set([btcIdentifier])
 			);
 		});
 
 		it('should return the native identifiers for the evm category', () => {
 			expect(chainFusionSupportedSourceTokens({ category: 'evm', pairs: PAIRS })).toStrictEqual(
-				new Set([ETHEREUM_TOKEN.symbol.toLowerCase(), USDC_TOKEN.address.toLowerCase()])
+				new Set([ethereumIdentifier, USDC_TOKEN.address.toLowerCase()])
 			);
+		});
+
+		// The evm source set is network-flat, so an unqualified 'eth' would have made Base and
+		// Arbitrum ETH look Chain-Fusion-payable even though only mainnet ETH has a helper contract.
+		it('should not admit a same-symbol native token from another EVM network', () => {
+			const supported = chainFusionSupportedSourceTokens({ category: 'evm', pairs: PAIRS });
+
+			expect(
+				supported.has(
+					nativeSwapTokenIdentifier({
+						networkId: BASE_ETH_TOKEN.network.id,
+						symbol: BASE_ETH_TOKEN.symbol
+					})
+				)
+			).toBeFalsy();
 		});
 
 		it('should return nothing for an unrelated category', () => {
@@ -212,7 +237,7 @@ describe('chain-fusion-swap.utils', () => {
 		it('should narrow a ck source to its native twin', () => {
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ckEthToken, pairs: PAIRS })
-			).toStrictEqual({ evm: new Set([ETHEREUM_TOKEN.symbol.toLowerCase()]) });
+			).toStrictEqual({ evm: new Set([ethereumIdentifier]) });
 
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ckUsdcToken, pairs: PAIRS })
@@ -242,7 +267,7 @@ describe('chain-fusion-swap.utils', () => {
 		it('should narrow the Bitcoin pair in both directions', () => {
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ckBtcToken, pairs: PAIRS })
-			).toStrictEqual({ btc: new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]) });
+			).toStrictEqual({ btc: new Set([btcIdentifier]) });
 
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: BTC_MAINNET_TOKEN, pairs: PAIRS })

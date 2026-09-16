@@ -46,6 +46,7 @@ const order: OisyTradeOrderView = {
 	price: 2.5,
 	filledQuantity: 0,
 	status: 'Open',
+	timeInForce: 'GoodTilCanceled',
 	createdAt: ZERO
 };
 

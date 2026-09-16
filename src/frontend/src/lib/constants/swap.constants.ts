@@ -142,7 +142,6 @@ const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
 	: [];
 
 // NEAR Intents bridges BTC mainnet to and from every EVM and Solana chain in its map.
-// Local and staging only until the flag flips; production keeps today's matrix.
 const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];

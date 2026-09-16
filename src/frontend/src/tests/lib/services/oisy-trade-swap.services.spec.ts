@@ -25,7 +25,8 @@ import {
 	loadOisyTradeSwapPairs,
 	mapOisyTradeQuoteResult,
 	oisyTradeSwapPairTable,
-	settleOisyTradeSwap
+	settleOisyTradeSwap,
+	toOisyTradeSettlementBounds
 } from '$lib/services/oisy-trade-swap.services';
 import { fetchSwapAmounts } from '$lib/services/swap.services';
 import * as tradingAnalytics from '$lib/services/trading-analytics.services';
@@ -591,13 +592,20 @@ describe('oisy-trade-swap.services', () => {
 
 		// A zero baseline means nothing was on the DEX before the deposit, so everything
 		// free is this order's and the assertions below read as plain balances. The
-		// pre-existing-balance cases pass their own.
+		// pre-existing-balance cases pass their own. The bounds are likewise wide enough for
+		// every credit here, so these cases stay about the withdrawal rather than the
+		// ceilings — which have their own.
 		const settleParams = {
 			identity: mockIdentity,
 			orderId: ORDER_ID,
 			sourceToken: ICP,
 			destinationToken: CKUSDC,
-			baseline: { source: ZERO, destination: ZERO }
+			baseline: { source: ZERO, destination: ZERO },
+			bounds: {
+				filledSourceRelease: 200_000_000n,
+				filledDestinationCredit: undefined,
+				killedSourceReturn: 200_000_000n
+			}
 		};
 
 		const userOrder = (status: OrderStatus) =>
@@ -855,6 +863,130 @@ describe('oisy-trade-swap.services', () => {
 			});
 		});
 
+		// The baseline makes a delta this *flow's*, which is not the same as this *order's*.
+		// A swap crosses the same book the caller's own resting orders sit on, so those
+		// orders fill against it and their proceeds land on the same leg, in the same
+		// settling round — and at a zero maker fee they come to exactly the reserve the
+		// order spent. So the residue leg is additionally capped at what the order can
+		// possibly have released.
+		describe('a credit the order did not make', () => {
+			// The incident that found this (staging, 2026-09-08): a Buy of 2.94 ICP reserving
+			// 9.996 ckUSDT crossed two of the caller's own asks. It filled at 9.4542, released
+			// 0.5418 — and was credited the 9.4542 back as the maker, so the delta read the
+			// entire pay amount and settlement withdrew it. Only the release was ever the
+			// order's.
+			it('withdraws only the reserve the venue could release', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+				mockBalances({ source: 9_996_000n, destination: 2_000_000n });
+				const withdrawSpy = mockWithdraw();
+
+				const settlement = await settleOisyTradeSwap({
+					...settleParams,
+					bounds: { ...settleParams.bounds, filledSourceRelease: 541_800n }
+				});
+
+				expect(settlement.status).toBe('filled');
+				expect(withdrawSpy).toHaveBeenCalledTimes(2);
+				expect(withdrawSpy.mock.calls[1][0]).toEqual(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 541_800n })
+					})
+				);
+				// The rest stays at the venue, where the Trading tab shows it — not stranded,
+				// because it was never owed.
+				expect(settlement.residueStranded).toBeFalsy();
+			});
+
+			// A Sell reserves the quantity itself and a full fill transfers every base unit of
+			// it, so there is nothing to release: a source credit on a filled Sell can only
+			// have come from somewhere else.
+			it('withdraws no source residue when the order could release nothing', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+				mockBalances({ source: 300_000_000n, destination: 2_000_000n });
+				const withdrawSpy = mockWithdraw();
+
+				const settlement = await settleOisyTradeSwap({
+					...settleParams,
+					bounds: { ...settleParams.bounds, filledSourceRelease: ZERO }
+				});
+
+				expect(settlement.status).toBe('filled');
+				expect(withdrawSpy).toHaveBeenCalledOnce();
+				expect(ledgerOf(withdrawSpy.mock.calls[0][0])).toBe(CKUSDC_LEDGER);
+			});
+
+			// Zero execution, so the unreserve is the deposit and nothing more.
+			it('withdraws a killed order’s source back only up to the deposit', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Expired: null }));
+				mockBalances({ source: 500_000_000n, destination: ZERO });
+				const withdrawSpy = mockWithdraw();
+
+				const settlement = await settleOisyTradeSwap({
+					...settleParams,
+					bounds: { ...settleParams.bounds, killedSourceReturn: 300_000_000n }
+				});
+
+				expect(settlement.status).toBe('killed');
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 300_000_000n })
+					})
+				);
+			});
+
+			it('withdraws a filled Buy’s destination only up to the quantity', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+				mockBalances({ source: ZERO, destination: 5_000_000n });
+				const withdrawSpy = mockWithdraw();
+
+				const settlement = await settleOisyTradeSwap({
+					...settleParams,
+					bounds: { ...settleParams.bounds, filledDestinationCredit: 2_000_000n }
+				});
+
+				expect(settlement.status).toBe('filled');
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 2_000_000n })
+					})
+				);
+			});
+
+			// Maker prices, so the proceeds can exceed what the quote promised.
+			it('withdraws a filled Sell’s whole destination credit', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Filled: null }));
+				mockBalances({ source: ZERO, destination: 5_000_000n });
+				const withdrawSpy = mockWithdraw();
+
+				await settleOisyTradeSwap({
+					...settleParams,
+					bounds: { ...settleParams.bounds, filledDestinationCredit: undefined }
+				});
+
+				expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						request: expect.objectContaining({ amount: 5_000_000n })
+					})
+				);
+			});
+
+			// A killed order has zero execution, so it never credited the destination leg at
+			// all. Whatever is there arrived from something else and is not this swap's to
+			// move — the mirror of the source cap on the other outcome.
+			it('leaves a killed order’s destination credit at the venue', async () => {
+				vi.spyOn(oisyTradeApi, 'getMyOrders').mockResolvedValue(userOrder({ Expired: null }));
+				mockBalances({ source: 200_000_000n, destination: 5_000_000n });
+				const withdrawSpy = mockWithdraw();
+
+				const settlement = await settleOisyTradeSwap(settleParams);
+
+				expect(settlement.status).toBe('killed');
+				expect(withdrawSpy).toHaveBeenCalledOnce();
+				expect(ledgerOf(withdrawSpy.mock.calls[0][0])).toBe(ICP_LEDGER);
+				expect(settlement.residueStranded).toBeFalsy();
+			});
+		});
+
 		// An unknown ledger fee says nothing about whether the balance is withdrawable, so
 		// it must not share the dust skip: skipping would report the swap settled with the
 		// funds still in DEX custody. `IcTokenSchema` requires `fee`, so reaching this at
@@ -936,6 +1068,33 @@ describe('oisy-trade-swap.services', () => {
 		});
 	});
 
+	describe('toOisyTradeSettlementBounds', () => {
+		const facts = { quantity: 300_000_000n, depositAmount: 9_792_000n, maxSourceRelease: 541_800n };
+
+		it('bounds a Buy on every leg but a Sell’s destination', () => {
+			expect(toOisyTradeSettlementBounds({ side: 'buy', ...facts })).toEqual({
+				filledSourceRelease: 541_800n,
+				filledDestinationCredit: 300_000_000n,
+				killedSourceReturn: 9_792_000n
+			});
+
+			expect(toOisyTradeSettlementBounds({ side: 'sell', ...facts })).toEqual({
+				filledSourceRelease: 541_800n,
+				filledDestinationCredit: undefined,
+				killedSourceReturn: 9_792_000n
+			});
+		});
+
+		// The builder invents no ceiling it was not given. Only a Sell reaches it this way:
+		// the poller refuses a Buy row whose quantity ref will not parse.
+		it('leaves a Buy’s destination unbounded without a quantity', () => {
+			expect(
+				toOisyTradeSettlementBounds({ side: 'buy', ...facts, quantity: undefined })
+					.filledDestinationCredit
+			).toBeUndefined();
+		});
+	});
+
 	describe('fetchOisyTradeSwap', () => {
 		// Distinctive values, so the assertions below prove these were carried through from
 		// the reviewed quote rather than re-derived from the amount and the pair.
@@ -947,15 +1106,20 @@ describe('oisy-trade-swap.services', () => {
 			},
 			price: 1_234_000n,
 			quantity: 300_000_000n,
-			depositAmount: 300_000_000n
+			depositAmount: 300_000_000n,
+			// A Sell reserves the quantity itself and a full fill transfers all of it, so
+			// there is never a source release to withdraw back.
+			maxSourceRelease: ZERO
 		};
 
 		// A Buy spends the quote token, so the deposit is the order's reserve at the limit
-		// price — `price × quantity / 10^baseDecimals` — not the typed amount.
+		// price — `price × quantity / 10^baseDecimals` — not the typed amount. It reserves
+		// at that limit and fills at the book's, so part of the reserve can come back.
 		const buyOrder: OisyTradeResolvedOrder = {
 			...sellOrder,
 			side: 'buy',
-			depositAmount: 3_702_000n
+			depositAmount: 3_702_000n,
+			maxSourceRelease: 41_000n
 		};
 
 		const swapParams = {
@@ -1261,6 +1425,36 @@ describe('oisy-trade-swap.services', () => {
 					request: expect.objectContaining({ amount: buyOrder.depositAmount })
 				})
 			);
+			// Snapshotted from the reviewed offer, because the book it was derived from has
+			// moved by the time a later session settles this row.
+			expect(
+				toOisyTradeExternalRefsMap(
+					vi.mocked(createActiveUserTransaction).mock.calls[0][0].externalRefs
+				)[OISY_TRADE_EXTERNAL_REF_KEYS.MAX_SOURCE_RELEASE]
+			).toBe(`${buyOrder.maxSourceRelease}`);
+		});
+
+		// End to end: the reviewed order is what bounds settlement, not the balance read.
+		it('withdraws a filled Buy’s destination within the reviewed quantity', async () => {
+			resetBalanceReads()
+				.mockResolvedValueOnce([])
+				.mockResolvedValue([
+					{
+						token: { id: { ledger_id: Principal.fromText(CKUSDC_LEDGER) } },
+						balance: { free: buyOrder.quantity * 2n, reserved: ZERO }
+					}
+				] as unknown as UserTokenBalance[]);
+			const withdrawSpy = vi
+				.spyOn(oisyTradeApi, 'withdraw')
+				.mockResolvedValue({ block_index: 42n });
+
+			await run({ order: buyOrder });
+
+			expect(withdrawSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					request: expect.objectContaining({ amount: buyOrder.quantity })
+				})
+			);
 		});
 
 		it('walks the progress steps and enables the destination token', async () => {
@@ -1422,7 +1616,10 @@ describe('oisy-trade-swap.services', () => {
 				.mockImplementation(() => undefined);
 			const markSpy = vi.spyOn(activeUserTransactionsStore, 'markTerminalSideEffectsApplied');
 
-			// A filled Buy whose price improvement released part of the source reserve.
+			// A filled Buy whose price improvement released part of the source reserve. The
+			// balance holds more than that, as it would if another of the caller's orders had
+			// filled meanwhile, so what is attempted is the release the offer bounded —
+			// `buyOrder.maxSourceRelease`, above the ledger fee and so genuinely owed.
 			resetBalanceReads()
 				.mockResolvedValueOnce([])
 				.mockResolvedValue([
@@ -1444,7 +1641,7 @@ describe('oisy-trade-swap.services', () => {
 				.mockRejectedValue(residueError);
 
 			// The destination arrived, so the swap itself succeeded.
-			await expect(run()).resolves.toBeUndefined();
+			await expect(run({ order: buyOrder })).resolves.toBeUndefined();
 
 			expect(consoleErrorSpy).toHaveBeenCalledWith(residueError);
 			// No terminal write: the row is the poller's to finish, because retrying the

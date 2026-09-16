@@ -27,6 +27,7 @@ interface FixtureCase {
 		quantity?: string;
 		deposit?: string;
 		gross?: string;
+		maxSourceRelease?: string;
 		reason?: string;
 	};
 	expectReceive?: string;
@@ -125,7 +126,8 @@ describe('calculateOisyTradeOffer', () => {
 					price: BigInt(testCase.expect.price as string),
 					quantity: BigInt(testCase.expect.quantity as string),
 					deposit: BigInt(testCase.expect.deposit as string),
-					gross: BigInt(testCase.expect.gross as string)
+					gross: BigInt(testCase.expect.gross as string),
+					maxSourceRelease: BigInt(testCase.expect.maxSourceRelease as string)
 				}
 			});
 		});
@@ -137,7 +139,7 @@ describe('calculateOisyTradeOffer', () => {
 
 			assert(result.ok);
 
-			const { price, quantity, deposit, gross } = result.offer;
+			const { price, quantity, deposit, gross, maxSourceRelease } = result.offer;
 			const depth = toDepth(testCase.book ?? book);
 
 			if (testCase.side === 'sell') {
@@ -147,6 +149,9 @@ describe('calculateOisyTradeOffer', () => {
 
 				expect(filled).toBe(quantity);
 				expect(value).toBeGreaterThanOrEqual(gross);
+				// A Sell reserves the quantity and a full fill transfers all of it, so the
+				// venue has nothing of the source leg left to hand back.
+				expect(maxSourceRelease).toBe(ZERO);
 
 				return;
 			}
@@ -160,6 +165,9 @@ describe('calculateOisyTradeOffer', () => {
 			expect(gross).toBe(quantity);
 			// The reserve is taken at the limit price, so the real cost cannot exceed it.
 			expect(value).toBeLessThanOrEqual(deposit);
+			// And the reserve the venue releases is precisely the part the fill did not
+			// spend — the bound settlement withdraws the source residue within.
+			expect(maxSourceRelease).toBe(deposit - value);
 		});
 	});
 
@@ -230,7 +238,8 @@ describe('calculateOisyTradeOffer', () => {
 				price: 5_000_000n,
 				quantity: 20n,
 				deposit: 1n,
-				gross: 20n
+				gross: 20n,
+				maxSourceRelease: ZERO
 			});
 		});
 	});
