@@ -360,6 +360,28 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// The ledger header quotes its index, unlike the numeric top-level field.
+		it('reads a quoted index nested under ledger', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, ledger: { ledger_index: '987002' } } }
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				987_002
+			);
+		});
+
+		it.each(['-1', '1.5', '0x10', ' 1', '', '9007199254740993', null])(
+			'throws for a nested index of %j',
+			async (ledger_index) => {
+				mockFetchResponse({ body: { result: { validated: true, ledger: { ledger_index } } } });
+
+				await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					'missing validated ledger_index'
+				);
+			}
+		);
+
 		it('throws when the validated index is missing', async () => {
 			mockFetchResponse({ body: { result: {} } });
 
