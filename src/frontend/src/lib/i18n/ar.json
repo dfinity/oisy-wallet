@@ -770,7 +770,8 @@
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
-			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL."
+			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL.",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {
@@ -935,6 +936,14 @@
 				"solana_address_copied": "تم نسخ عنوان سولانا إلى الحافظة",
 				"display_solana_address_qr": "عرض عنوان سولانا كرمز QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1047,6 +1056,7 @@
 			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "لم تتم معالجة معاملتك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى المحاولة مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
 			"solana_insufficient_funds": "",
@@ -2840,6 +2850,7 @@
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2865,6 +2876,8 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2899,6 +2912,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",

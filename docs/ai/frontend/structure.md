@@ -61,6 +61,7 @@ src/frontend/src/
 ├── evm/                      workers, providers, rest, canisters, api,
 ├── icp/                      validation, assets, …
 ├── sol/                      (each chain mirrors a subset of lib/ subfolders)
+├── xrp/                    XRP Ledger (native XRP)
 ├── icp-eth/                ck-ETH / ck-ERC20 bridge code
 │
 ├── env/                    Environment, networks and tokens
@@ -137,6 +138,7 @@ The local rule `local-rules/no-relative-imports` is **`error`** under
 | `$evm`          | `src/frontend/src/evm`                                               |
 | `$icp`          | `src/frontend/src/icp`                                               |
 | `$sol`          | `src/frontend/src/sol`                                               |
+| `$xrp`          | `src/frontend/src/xrp`                                               |
 | `$icp-eth`      | `src/frontend/src/icp-eth`                                           |
 | `$env`          | `src/frontend/src/env`                                               |
 | `$declarations` | `src/declarations`                                                   |

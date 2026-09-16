@@ -31,6 +31,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -40,20 +41,23 @@ export const nativeTokens: Readable<Token[]> = derivedMemo(
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledEvmTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledXrpTokens
 	],
 	([
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledEvmTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledXrpTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
-		...$enabledEvmTokens
+		...$enabledEvmTokens,
+		...$enabledXrpTokens
 	],
 	tokenListEqual
 );
