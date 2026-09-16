@@ -17,6 +17,7 @@ import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-si
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
+import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
@@ -160,8 +161,10 @@ export const sendXrp = async ({
 		lastLedgerSequence
 	});
 
+	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
+	// validated the transaction and it failed, claiming the fee.
 	if (!isXrpTransactionSuccessful(transactionResult)) {
-		throw new Error(`XRP transaction failed: ${transactionResult}`);
+		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
 	}
 
 	progress?.(ProgressStepsSendXrp.DONE);

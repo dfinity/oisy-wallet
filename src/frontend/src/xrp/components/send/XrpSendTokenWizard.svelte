@@ -37,6 +37,7 @@
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
+	import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -206,6 +207,20 @@
 				name: TRACK_COUNT_XRP_SEND_ERROR,
 				metadata: sendTrackingEventMetadata
 			});
+
+			// Checked before the step, because a validated failure also happens at CONFIRM: the
+			// outcome IS known there, so the indeterminate "we did not receive a confirmation"
+			// advice would be wrong and would hide that the fee was charged.
+			if (err instanceof XrpTransactionFailedError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_transaction_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
 
 			if (sendProgressStep === ProgressStepsSendXrp.CONFIRM) {
 				toastsError({

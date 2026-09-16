@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Bieżąca sieć ($networkId) nie jest siecią Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "Transakcja została przetworzona przez sieć, ale nie powiodła się, więc środki nie zostały wysłane. Opłata sieciowa została jednak pobrana.",
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
 			"unable_to_retrieve_amount": "n/d (nie można pobrać)",

@@ -795,6 +795,7 @@ interface I18nSend {
 		no_solana_network_id: string;
 		no_xrp_network_id: string;
 		xrp_confirmation_failed: string;
+		xrp_transaction_failed: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;

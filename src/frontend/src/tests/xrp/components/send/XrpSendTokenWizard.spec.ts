@@ -6,9 +6,11 @@ import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+import * as toasts from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
@@ -17,6 +19,7 @@ import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import * as xrpSendServices from '$xrp/services/xrp-send.services';
 import { XrpNetworks } from '$xrp/types/network';
+import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -89,6 +92,8 @@ describe('XrpSendTokenWizard', () => {
 		vi.clearAllMocks();
 
 		mockAuthStore();
+
+		vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
 
 		vi.spyOn(addressesStore, 'xrpAddressMainnet', 'get').mockImplementation(() =>
 			readable(mockXrpAddress)
@@ -261,6 +266,38 @@ describe('XrpSendTokenWizard', () => {
 		await clickSend(container);
 
 		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+	});
+
+	// A validated `tec*` means confirmation WAS received and the payment definitively failed with
+	// the fee claimed — the indeterminate "check your transaction list" advice would be wrong.
+	it('should report a validated failure definitively, not as a missing confirmation', async () => {
+		vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+			new XrpTransactionFailedError('XRP transaction failed: tecUNFUNDED_PAYMENT')
+		);
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_transaction_failed } })
+		);
+	});
+
+	it('should still report an indeterminate confirmation as such', async () => {
+		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
+			progress?.(ProgressStepsSendXrp.CONFIRM);
+
+			return await Promise.reject(new Error('XRP transaction expired'));
+		});
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_confirmation_failed } })
+		);
 	});
 
 	it('should advance the wizard before sending', async () => {
