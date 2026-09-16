@@ -13,15 +13,18 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { reservedTipAmounts } from '$lib/derived/tips.derived';
+	import { reservedTipAmounts, tipsLoaded } from '$lib/derived/tips.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { tipFees } from '$lib/utils/tip.utils';
 
 	interface Props {
@@ -57,8 +60,13 @@
 	// ceiling can explain itself.
 	let reserved = $derived($reservedTipAmounts[token.id] ?? ZERO);
 
+	// True until the sender's own tips are known, so a ceiling is never computed
+	// from an empty record that only looks like "nothing reserved". Also covers a
+	// load that failed: unknown stays unknown rather than decaying to zero.
+	let reservationsUnknown = $derived(!$tipsLoaded);
+
 	/**
-	 * The ceiling for this form, and only this form.
+	 * What is left to tip, after the reservations and this tip's own two fees.
 	 *
 	 * Deliberately not done by reducing the balance store: that made the send flow,
 	 * the swap flow and every MAX control quietly offer less, misstated the
@@ -67,24 +75,68 @@
 	 * subtraction lives where the decision is actually made, and everywhere else
 	 * sees the real balance with the reservation shown as a status instead.
 	 *
-	 * `undefined` when nothing is reserved, so `StakeForm` keeps its own
-	 * fee-aware maximum rather than being handed a cap it does not need.
+	 * `undefined` while either half is unknown, which is what keeps the form shut
+	 * rather than uncapped.
 	 */
-	let maxAmount = $derived.by(() => {
-		if (reserved === ZERO) {
-			return undefined;
-		}
-
+	let spendable = $derived.by(() => {
 		const balance = $sendBalance;
 
-		if (isNullish(balance)) {
+		if (reservationsUnknown || isNullish(balance)) {
 			return undefined;
 		}
 
-		const spendable = balance - reserved - fees.total;
+		const left = balance - reserved - fees.total;
 
-		return spendable > ZERO ? spendable : ZERO;
+		return left > ZERO ? left : ZERO;
 	});
+
+	/**
+	 * The ceiling handed to the Max control.
+	 *
+	 * `undefined` when nothing is reserved, so `StakeForm` keeps its own fee-aware
+	 * maximum rather than being handed a cap it does not need.
+	 */
+	let maxAmount = $derived(reserved === ZERO ? undefined : spendable);
+
+	/**
+	 * Parsed through `tryParseToken` rather than gated on `Number`: an amount past
+	 * the Number range coerces to `Infinity`, which slips past a finiteness check
+	 * and would skip the ceiling altogether. `ZERO` for empty input; `undefined`
+	 * when the value cannot be represented, which counts as over the ceiling.
+	 */
+	let amountBaseUnits = $derived<bigint | undefined>(
+		!invalidAmount(amount) && Number(amount) > 0
+			? tryParseToken({ value: `${amount}`, unitName: token.decimals })
+			: ZERO
+	);
+
+	/**
+	 * Whether the amount in the field is more than the reservations leave.
+	 *
+	 * `maxAmount` alone did not enforce anything. `StakeForm` forwards it to
+	 * `MaxBalanceButton` and nowhere else — `TokenInput` never sees it and
+	 * validates against the raw balance — so the ceiling held for the sender who
+	 * pressed Max and not for the one who typed a number. Which is the whole point
+	 * of the ceiling: `icrc2_approve` does not check that the balance covers the
+	 * allowance, so an over-reserved tip is created happily and then fails at claim
+	 * time as `shortBalance`, on the recipient's screen rather than the sender's.
+	 *
+	 * Only bites when something is actually reserved. With nothing promised away
+	 * the form's own fee-aware validation is already the right answer, and a second
+	 * opinion on the same number could only disagree with it.
+	 */
+	let exceedsSpendable = $derived(
+		reserved > ZERO &&
+			nonNullish(spendable) &&
+			(isNullish(amountBaseUnits) || amountBaseUnits > spendable)
+	);
+
+	// Drives the field's red highlight. The Generate button reads `exceedsSpendable`
+	// directly instead of this, because `errorType` is debounced by 300ms and a
+	// button that stays enabled for a third of a second after the amount goes over
+	// is long enough to click. Same split as `TradingDepositForm`.
+	const onCustomValidate = (): TokenActionErrorType =>
+		exceedsSpendable ? 'insufficient-funds' : undefined;
 
 	/**
 	 * True until the ledger balance is known.
@@ -96,10 +148,11 @@
 	 * at claim time as `shortBalance`, on the recipient's screen rather than the
 	 * sender's.
 	 *
-	 * That ceiling reaches `StakeForm` as `providerFee` and is applied against
-	 * `$sendBalance`, so while the balance is unknown there is no cap and no
-	 * validation, and the first thing to push back is the ledger. The form does not
-	 * run until the number it depends on exists.
+	 * `providerFee` is this tip's two ledger fees, not the ceiling — the ceiling is
+	 * `maxAmount` for the Max control and {@link exceedsSpendable} for anything
+	 * typed. Neither can be computed without the balance, so while it is unknown
+	 * there is no cap and the first thing to push back would be the ledger. The
+	 * form does not run until the numbers it depends on exist.
 	 */
 	let balanceUnknown = $derived(isNullish($sendBalance));
 
@@ -135,12 +188,13 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={messageTooLong || busy || balanceUnknown}
+	disabled={messageTooLong || busy || balanceUnknown || reservationsUnknown || exceedsSpendable}
 	isSelectable
 	{maxAmount}
 	nextLabel={$i18n.tip.text.generate}
 	onClick={onSelectToken}
 	{onClose}
+	{onCustomValidate}
 	{onNext}
 	bind:amount
 	{...{ providerFee: fees.total }}

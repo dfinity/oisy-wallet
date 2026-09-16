@@ -1,5 +1,5 @@
 import type { MyTip } from '$declarations/backend/backend.did';
-import { reservedTipAmounts, tipsOverview } from '$lib/derived/tips.derived';
+import { reservedTipAmounts, tipsLoaded, tipsOverview } from '$lib/derived/tips.derived';
 import { tipsStore } from '$lib/stores/tips.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -193,5 +193,33 @@ describe('tipsOverview', () => {
 
 		expect(get(tipsOverview).claimedUsd).toBe(0);
 		expect(get(tipsOverview).claimed).toBe(1);
+	});
+});
+
+describe('tipsLoaded', () => {
+	beforeEach(() => {
+		tipsStore.reset();
+	});
+
+	it('separates "nothing reserved" from "nothing known yet"', () => {
+		// The distinction `reservedTipAmounts` cannot make: a `Record` has no
+		// not-loaded value, and a missing entry reads as zero. Anything using the
+		// sum as a ceiling needs this, or the window before the load lands looks
+		// exactly like a sender with nothing promised away.
+		expect(get(tipsLoaded)).toBeFalsy();
+
+		tipsStore.set([]);
+
+		expect(get(tipsLoaded)).toBeTruthy();
+		expect(get(reservedTipAmounts)).toEqual({});
+	});
+
+	it('goes back to unknown when a load fails', () => {
+		// `LoaderTips` resets rather than writing an empty list, so a failed refresh
+		// does not read as "the reservations are all gone".
+		tipsStore.set([]);
+		tipsStore.reset();
+
+		expect(get(tipsLoaded)).toBeFalsy();
 	});
 });

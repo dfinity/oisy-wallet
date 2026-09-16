@@ -10,6 +10,23 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
+ * Whether the sender's own tips are known yet.
+ *
+ * Separate from {@link reservedTipAmounts} because that one cannot express it: a
+ * `Record` has no "not loaded" value, and a missing entry reads as zero
+ * reserved. Anything using the sum as a ceiling has to know the difference —
+ * otherwise the window before the load lands, and every moment after one that
+ * failed, looks exactly like a sender with nothing promised away, which is the
+ * one reading that lets a tip be created against money already spoken for.
+ *
+ * False while `TIPS_ENABLED` is off, since the loader leaves the store alone
+ * then. Nothing that reads this is reachable with the flag off.
+ */
+export const tipsLoaded: Readable<boolean> = derived(tipsStore, ($tipsStore) =>
+	nonNullish($tipsStore)
+);
+
+/**
  * How much of each token the user's live tips have promised away, keyed by token.
  *
  * **Amount plus one fee, not just the amount.** The reservation the sender
@@ -18,9 +35,12 @@ import { derived, type Readable } from 'svelte/store';
  * their own tip can no longer be claimed — a failure the recipient sees as
  * `Uncovered`, caused by our arithmetic rather than by anything they did.
  *
+ * Read it with {@link tipsLoaded}: an empty record here means either "nothing
+ * reserved" or "nothing known yet", and only that flag tells them apart.
+ *
  * `Reserved` **and** `Failed` count. A failed tip is one somebody tried to claim
  * and could not: its allowance is still granted and its code still works, so it
- * encumbers the balance exactly as a untouched one does — and it is the case
+ * encumbers the balance exactly as an untouched one does — and it is the case
  * where the sender most needs the number to be right, since topping up is the
  * fix. Claimed, cancelled and expired tips hold nothing.
  *
