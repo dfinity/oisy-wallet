@@ -169,6 +169,21 @@ describe('xrpl.rest', () => {
 			expect(result.engineResult).toBe('terPRE_SEQ');
 		});
 
+		// `accepted` comes from an untrusted node, so it is validated rather than cast: a
+		// non-boolean would otherwise pass through and read as truthy.
+		it.each(['false', 'true', 1, 0, {}])(
+			'marks a non-boolean accepted value %j as not accepted',
+			async (accepted) => {
+				mockFetchResponse({
+					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
+				});
+
+				const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+				expect(result.accepted).toBeFalsy();
+			}
+		);
+
 		it('marks a response without an accepted flag as not accepted', async () => {
 			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
 
