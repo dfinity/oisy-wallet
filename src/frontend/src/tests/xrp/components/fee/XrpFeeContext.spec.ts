@@ -112,10 +112,11 @@ describe('XrpFeeContext', () => {
 			unmount();
 		});
 
-		// An unfunded account is not on-ledger and owns nothing, so the default already
-		// describes it — and the same conservative figure applies if the call fails.
-		it('keeps the owns-nothing default when account_info fails', async () => {
-			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('actNotFound'));
+		// An account that is not on-ledger owns nothing, so the base reserve genuinely describes it.
+		it('uses the owns-nothing reserve when the account is not found', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(
+				new xrplRest.XrpAccountNotFoundError('not found')
+			);
 
 			const { unmount } = renderContext();
 
@@ -124,6 +125,22 @@ describe('XrpFeeContext', () => {
 			});
 
 			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+		});
+
+		// Base-only is the SMALLEST reserve the ledger can demand, so falling back to it after an
+		// operational failure would overstate the sendable maximum for an account owning objects.
+		it('leaves the reserve unknown when account_info fails operationally', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('network down'));
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			expect(get(reserveStore)).toBeUndefined();
 
 			unmount();
 		});
@@ -138,7 +155,7 @@ describe('XrpFeeContext', () => {
 			});
 
 			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
-			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+			expect(get(reserveStore)).toBeUndefined();
 
 			unmount();
 		});
@@ -154,5 +171,77 @@ describe('XrpFeeContext', () => {
 		expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
 
 		unmount();
+	});
+
+	// The interval is installed only after the first request resolves, so an unmount or a rerun
+	// while it is pending must invalidate it — otherwise the resolving call installs a poller
+	// nothing can clear, and overlapping calls leave more than one running.
+	describe('poller lifecycle', () => {
+		const pendingFee = () => {
+			let resolve: (fee: bigint) => void = () => undefined;
+			const promise = new Promise<bigint>((res) => {
+				resolve = res;
+			});
+
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockReturnValue(promise);
+
+			return { resolve };
+		};
+
+		it('installs no poller when unmounted while the first request is pending', async () => {
+			vi.useFakeTimers();
+
+			const { resolve } = pendingFee();
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			unmount();
+			resolve(nodeFee);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			const callsAfterUnmount = vi.mocked(xrplRest.loadXrpOpenLedgerFee).mock.calls.length;
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(vi.mocked(xrplRest.loadXrpOpenLedgerFee).mock.calls).toHaveLength(callsAfterUnmount);
+
+			vi.useRealTimers();
+		});
+
+		it('runs exactly one poller after the component settles', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockClear();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalledOnce();
+
+			unmount();
+			vi.useRealTimers();
+		});
+
+		it('installs no poller while not observing', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext(false);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockClear();
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
+
+			unmount();
+			vi.useRealTimers();
+		});
 	});
 });

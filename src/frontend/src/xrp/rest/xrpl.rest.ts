@@ -1,6 +1,12 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
-import { XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
+import {
+	XrplAccountInfoFullResultSchema,
+	XrplAccountInfoResponseSchema,
+	XrplFeeResultSchema,
+	XrplLedgerCurrentResultSchema,
+	XrplLedgerResultSchema
+} from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
@@ -93,6 +99,12 @@ export const loadXrpBalance = async ({
  * `OwnerCount` is needed for the reserve: every ledger object the account owns raises the
  * amount it must retain beyond the base reserve.
  */
+/**
+ * The account is not on-ledger. Distinct from an operational failure: it means the account owns
+ * nothing, so the base reserve alone genuinely describes its requirement.
+ */
+export class XrpAccountNotFoundError extends Error {}
+
 export const loadXrpAccountInfo = async ({
 	address,
 	network
@@ -106,21 +118,32 @@ export const loadXrpAccountInfo = async ({
 		params: { account: address, ledger_index: 'validated' }
 	});
 
-	const accountData = result.account_data as
-		{ Balance: string; Sequence: number; OwnerCount?: number } | undefined;
+	// Checked before the schema: an `actNotFound` response carries no `account_data`, so parsing
+	// first would fail the shape check and mask the typed "owns nothing" error.
+	if (result.error === 'actNotFound') {
+		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
 
-	if (isNullish(accountData)) {
+	// Untrusted external JSON: `Balance` must be an unsigned decimal string and the counters
+	// non-negative safe integers. A negative `OwnerCount` would lower the reserve and inflate the
+	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
+	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
+
+	if (!parsed.success) {
 		throw new Error(
-			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'missing account_data'}`
+			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'it does not match the expected shape'}`
 		);
 	}
 
-	return {
-		balance: BigInt(accountData.Balance),
-		sequence: accountData.Sequence,
-		// Absent for an account that owns nothing.
-		ownerCount: accountData.OwnerCount ?? 0
-	};
+	const { data } = parsed;
+
+	if ('error' in data) {
+		throw new Error(`Unexpected XRPL account_info response: ${data.error}`);
+	}
+
+	const { Balance, Sequence, OwnerCount } = data.account_data;
+
+	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount };
 };
 
 /**
@@ -136,13 +159,25 @@ export const loadXrpOpenLedgerFee = async ({
 }): Promise<XrpBalance> => {
 	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
 
-	const drops = result.drops as { open_ledger_fee?: string; base_fee?: string } | undefined;
+	const parsed = XrplFeeResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL fee response: it does not match the expected shape');
+	}
+
+	const { drops } = parsed.data;
 	const fee = drops?.open_ledger_fee ?? drops?.base_fee;
 
 	return nonNullish(fee) ? BigInt(fee) : fallbackFee;
 };
 
 /** Current (in-progress) ledger index via `ledger_current`, used to set `LastLedgerSequence`. */
+/**
+ * Index of the ledger currently being built. This is the right base for choosing a
+ * `LastLedgerSequence` at signing time, but NOT for deciding that a transaction expired:
+ * the open index has already advanced past a closed ledger whose transactions are not yet
+ * validated. Use `loadXrpValidatedLedgerIndex` for that.
+ */
 export const loadXrpLedgerIndex = async ({
 	network
 }: {
@@ -150,13 +185,41 @@ export const loadXrpLedgerIndex = async ({
 }): Promise<number> => {
 	const result = await xrpJsonRpc({ network, method: 'ledger_current', params: {} });
 
-	const ledgerIndex = result.ledger_current_index as number | undefined;
+	const parsed = XrplLedgerCurrentResultSchema.safeParse(result);
 
-	if (isNullish(ledgerIndex)) {
+	if (!parsed.success) {
 		throw new Error('Unexpected XRPL ledger_current response: missing ledger_current_index');
 	}
 
-	return ledgerIndex;
+	return parsed.data.ledger_current_index;
+};
+
+/**
+ * Index of the latest validated ledger. A transaction can only be declared expired once
+ * this — not the open index — has passed its `LastLedgerSequence`.
+ */
+export const loadXrpValidatedLedgerIndex = async ({
+	network
+}: {
+	network: XrpNetworkType;
+}): Promise<number> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'ledger',
+		params: { ledger_index: 'validated' }
+	});
+
+	// A malformed HIGH index would declare a still-live payment expired, so this is validated
+	// rather than cast, and the response must actually describe a validated ledger.
+	const parsed = XrplLedgerResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL ledger response: missing validated ledger_index');
+	}
+
+	const { data } = parsed;
+
+	return 'ledger_index' in data ? data.ledger_index : data.ledger.ledger_index;
 };
 
 /**
@@ -220,7 +283,7 @@ export const submitXrpTransaction = async ({
 		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
 		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
 		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
-		accepted: (result.accepted as boolean | undefined) ?? false
+		accepted: result.accepted === true
 	};
 };
 

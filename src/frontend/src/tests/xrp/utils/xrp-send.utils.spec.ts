@@ -3,7 +3,8 @@ import { XRP_BASE_RESERVE_DROPS, XRP_OWNER_RESERVE_DROPS } from '$xrp/constants/
 import {
 	getXrpMaxAmount,
 	getXrpReserveDrops,
-	isInvalidDestinationXrp
+	isInvalidDestinationXrp,
+	isXrpAmountSendable
 } from '$xrp/utils/xrp-send.utils';
 
 describe('xrp-send.utils', () => {
@@ -52,6 +53,52 @@ describe('xrp-send.utils', () => {
 		it('is true for a malformed or nullish destination', () => {
 			expect(isInvalidDestinationXrp('not-an-address')).toBeTruthy();
 			expect(isInvalidDestinationXrp(undefined)).toBeTruthy();
+		});
+	});
+
+	// The form validates against the fee and reserve as they were when the amount was typed, and
+	// `TokenInputContent` revalidates on amount/token change only — so the fee poller can raise the
+	// requirement underneath an accepted amount. This is the guard re-applied at send time.
+	describe('isXrpAmountSendable', () => {
+		const balance = 5_000_000n;
+		const reserve = getXrpReserveDrops({ ownerCount: 0 });
+
+		it('accepts an amount that leaves the fee and the reserve', () => {
+			expect(
+				isXrpAmountSendable({ amount: balance - 10n - reserve, balance, fee: 10n, reserve })
+			).toBeTruthy();
+		});
+
+		it('refuses an amount one drop above the sendable maximum', () => {
+			expect(
+				isXrpAmountSendable({ amount: balance - 10n - reserve + 1n, balance, fee: 10n, reserve })
+			).toBeFalsy();
+		});
+
+		// The reported case: valid when typed at the base fee, invalid after escalation.
+		it('refuses an amount that was valid before the fee grew', () => {
+			const amount = balance - 10n - reserve;
+
+			expect(isXrpAmountSendable({ amount, balance, fee: 10n, reserve })).toBeTruthy();
+			expect(isXrpAmountSendable({ amount, balance, fee: 5_000n, reserve })).toBeFalsy();
+		});
+
+		it('refuses an amount that was valid before the reserve grew', () => {
+			const amount = balance - 10n - reserve;
+
+			expect(isXrpAmountSendable({ amount, balance, fee: 10n, reserve })).toBeTruthy();
+			expect(
+				isXrpAmountSendable({
+					amount,
+					balance,
+					fee: 10n,
+					reserve: getXrpReserveDrops({ ownerCount: 3 })
+				})
+			).toBeFalsy();
+		});
+
+		it('refuses any positive amount when the reserve already exceeds the balance', () => {
+			expect(isXrpAmountSendable({ amount: 1n, balance: reserve, fee: 10n, reserve })).toBeFalsy();
 		});
 	});
 });

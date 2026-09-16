@@ -1,5 +1,4 @@
 import type { TokenId } from '$lib/types/token';
-import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { writable, type Readable, type Writable } from 'svelte/store';
 
 export type FeeStoreData = bigint | undefined;
@@ -19,22 +18,27 @@ export const initFeeStore = (): FeeStore => {
 	};
 };
 
-export interface ReserveStore extends Readable<bigint> {
-	setReserve: (data: bigint) => void;
+export type ReserveStoreData = bigint | undefined;
+
+export interface ReserveStore extends Readable<ReserveStoreData> {
+	setReserve: (data: ReserveStoreData) => void;
 }
 
 /**
  * Drops the account must retain, so the send form can exclude them from the max amount.
  *
- * Starts at the requirement of an account that owns nothing — the UI always needs a usable
- * figure, and `account_info` only reports the real `OwnerCount` once it answers.
+ * `undefined` means the requirement is UNKNOWN, which is not the same as the base reserve:
+ * base-only is the smallest figure the ledger can demand, so defaulting to it would overstate
+ * the sendable maximum for any account that owns ledger objects. Only `account_info` reports
+ * the real `OwnerCount`, so until it answers — or when it fails for any reason other than the
+ * account being absent — the amount is left unknown and sending is blocked.
  */
 export const initReserveStore = (): ReserveStore => {
-	const { subscribe, set } = writable<bigint>(getXrpReserveDrops({ ownerCount: 0 }));
+	const { subscribe, set } = writable<ReserveStoreData>(undefined);
 
 	return {
 		subscribe,
-		setReserve: (data: bigint) => {
+		setReserve: (data: ReserveStoreData) => {
 			set(data);
 		}
 	};

@@ -4,13 +4,15 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_DEFAULT_FEE_DROPS,
-	XRP_LAST_LEDGER_SEQUENCE_OFFSET
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
+	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
@@ -50,11 +52,24 @@ const confirmXrpTransaction = async ({
 			return transactionResult;
 		}
 
-		const ledgerIndex = await loadXrpLedgerIndex({ network });
+		// The VALIDATED index, not the open one: the open ledger has already advanced past a
+		// closed ledger whose transactions are not yet validated, so comparing against it would
+		// declare expiry for a payment that is about to validate.
+		const validatedLedgerIndex = await loadXrpValidatedLedgerIndex({ network });
 
-		// Past its LastLedgerSequence the transaction can never be applied, so this failure is
-		// final — and, unlike an early timeout, sending again is safe.
-		if (ledgerIndex > lastLedgerSequence) {
+		if (validatedLedgerIndex > lastLedgerSequence) {
+			// The `tx` lookup above and this index come from two separate calls, so the lookup may
+			// have missed a payment that validated in between. Expiry is only final if it survives
+			// a recheck against the newer ledger state — otherwise a succeeded payment would be
+			// reported as failed and the user invited to send a duplicate.
+			const recheck = await loadXrpTransactionOutcome({ hash, network });
+
+			if (recheck.validated) {
+				return recheck.transactionResult;
+			}
+
+			// Past its LastLedgerSequence the transaction can never be applied, so this failure is
+			// final — and, unlike an early timeout, sending again is safe.
 			throw new Error(
 				`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
 			);
@@ -99,6 +114,16 @@ export const sendXrp = async ({
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
+
+	// The fee comes from the node and escalates with load, so it is bounded here: an escalated
+	// or hostile estimate must fail loudly rather than be signed for an amount the user never
+	// reviewed. The transaction is not yet bound to the reviewed fee — that arrives with the
+	// send wizard, which can pass it in.
+	if (fee > XRP_MAX_FEE_DROPS) {
+		throw new Error(
+			`XRP fee estimate ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`
+		);
+	}
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 
