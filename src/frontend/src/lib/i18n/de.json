@@ -171,7 +171,8 @@
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen",
 			"notes": "Notizen öffnen",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Doku"
@@ -770,7 +771,8 @@
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
-			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
+			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen.",
+			"xrp_wallet_error": "Fehler beim Laden der XRP-Wallet-Informationen."
 		}
 	},
 	"hero": {
@@ -935,6 +937,14 @@
 				"solana_address_copied": "Solana-Adresse in Zwischenablage kopiert",
 				"display_solana_address_qr": "Solana-Adresse als QR-Code anzeigen"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1047,6 +1057,7 @@
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Ihre Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, höchstwahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichend war. Wir haben sie auf den aktuell empfohlenen Betrag aktualisiert. Bitte versuchen Sie es erneut.",
 			"solana_confirmation_failed": "Wir haben keine Bestätigung für die soeben erstellte Transaktion erhalten. Bitte warten Sie einige Sekunden und prüfen Sie dann in der Transaktionsliste Ihres Tokens, ob Ihre Transaktion korrekt erstellt wurde.",
 			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
@@ -2837,9 +2848,15 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2854,6 +2871,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",
@@ -2865,6 +2883,8 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2899,6 +2919,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",

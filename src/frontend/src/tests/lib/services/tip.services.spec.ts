@@ -492,6 +492,35 @@ describe('tip.services', () => {
 				toHex(await tipSpenderSubaccount('the-id'))
 			);
 		});
+
+		it('reports a cancelled tip whose allowance could not be given back', async () => {
+			// Provokes the warning on purpose; the repo fails a test that leaves
+			// console output behind.
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+			vi.spyOn(backendApi, 'cancelTip').mockResolvedValue(undefined);
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(new Error('the ledger said no'));
+
+			// Emphatically not a throw. The canister has recorded the cancellation, so
+			// the tip is not claimable and `cancel_tip` would refuse a second attempt
+			// with `NotCancellable` — reporting this as a failed cancellation told the
+			// sender nothing had happened and to retry something that could never
+			// succeed.
+			await expect(
+				cancelTip({ identity: mockIdentity, tipId: 'the-id', ledgerCanisterId: LEDGER_ID })
+			).resolves.toEqual({ allowanceRevoked: false });
+		});
+
+		it('throws when the tip itself could not be cancelled, without touching the allowance', async () => {
+			vi.spyOn(backendApi, 'cancelTip').mockRejectedValue(new Error('NotYourTip'));
+			const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+
+			await expect(
+				cancelTip({ identity: mockIdentity, tipId: 'the-id', ledgerCanisterId: LEDGER_ID })
+			).rejects.toThrow('NotYourTip');
+
+			// The tip is still claimable, so its allowance still has something to back.
+			expect(approveSpy).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('the recoverable claim code', () => {

@@ -171,7 +171,8 @@
 			"hide_balances": "表示中の残高を非表示にする",
 			"show_balances": "非表示の残高を表示する",
 			"notes": "メモを開く",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"
@@ -770,7 +771,8 @@
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました。",
-			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。"
+			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。",
+			"xrp_wallet_error": "XRPウォレット情報の読み込み中にエラーが発生しました。"
 		}
 	},
 	"hero": {
@@ -935,6 +937,14 @@
 				"solana_address_copied": "Solanaアドレスをコピーしました。",
 				"display_solana_address_qr": "SolanaアドレスをQRコードで表示"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1047,6 +1057,7 @@
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
 			"unable_to_retrieve_amount": "n/a（取得できません）",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "お客様のトランザクションはSolanaネットワークで処理されず、期限切れになりました。これは、提供された優先手数料が不十分だったためと考えられます。最新の推奨額に更新しましたので、再度お試しください。",
 			"solana_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
@@ -2837,9 +2848,15 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2854,6 +2871,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",
@@ -2865,6 +2883,8 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2899,6 +2919,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",
