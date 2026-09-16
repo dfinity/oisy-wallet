@@ -27,41 +27,6 @@ import {
 } from '@solana/kit';
 import { SvelteMap } from 'svelte/reactivity';
 
-//lamports are like satoshis: https://solana.com/docs/terminology#lamport
-export const loadSolLamportsBalance = async ({
-	address,
-	network
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<Lamports> => {
-	const { getBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-
-	const { value: balance } = await getBalance(wallet).send();
-
-	return balance;
-};
-
-export const loadTokenBalance = async ({
-	ataAddress,
-	network
-}: {
-	ataAddress: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<bigint | undefined> => {
-	const { getTokenAccountBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(ataAddress);
-
-	const {
-		value: { amount }
-	} = await getTokenAccountBalance(wallet).send();
-
-	if (nonNullish(amount)) {
-		return BigInt(amount);
-	}
-};
-
 /**
  * Fetches signatures without an error for a given wallet address.
  */
