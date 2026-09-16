@@ -6,7 +6,7 @@ import {
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { OptionEthAddress } from '$eth/types/address';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import {
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
@@ -85,32 +85,44 @@ export const isEthBackendAtCapacity = (tokenId: TokenId): boolean =>
 	ethBackendAtCapacity.has(tokenId);
 
 /**
- * Per token, how many older pages in a row Etherscan failed to serve, and when it may be asked again.
+ * Per address and token, how many older pages in a row Etherscan failed to serve, and when it may be
+ * asked again.
  *
  * A failed page is not the end of the history, so the lists ask again on the next scroll into view.
  * Held here rather than in either list so the Activity list and the token page share one budget.
  * It never gives up: it only spaces the attempts out, and the first page served clears it.
+ *
+ * The address is part of the key because this outlives a session: the token ids are the same for
+ * everyone, so keying by token alone would hand the next wallet signed in on this tab the previous
+ * one's failure, and skip its first request without ever asking for its own address.
  */
 const etherscanOlderPageBackOff = new Map<
-	TokenId,
+	string,
 	{ failures: number; retryAt: number; err: unknown }
 >();
+
+const backOffKey = ({ address, tokenId }: { address: EthAddress; tokenId: TokenId }): string =>
+	`${address}:${String(tokenId)}`;
 
 export const resetEtherscanOlderPageBackOff = () => etherscanOlderPageBackOff.clear();
 
 /**
- * Runs an Etherscan request for older history, or skips it while the token is backing off from
- * earlier failures. A skipped request resolves with the last failure, so callers treat it exactly
- * like the failed page it stands in for.
+ * Runs an Etherscan request for older history, or skips it while the address and token are backing
+ * off from earlier failures. A skipped request resolves with the last failure, so callers treat it
+ * exactly like the failed page it stands in for.
  */
 export const requestOlderEtherscanPage = async <T>({
+	address,
 	tokenId,
 	request
 }: {
+	address: EthAddress;
 	tokenId: TokenId;
 	request: () => Promise<T>;
 }): Promise<{ page: T } | { err: unknown }> => {
-	const backOff = etherscanOlderPageBackOff.get(tokenId);
+	const key = backOffKey({ address, tokenId });
+
+	const backOff = etherscanOlderPageBackOff.get(key);
 
 	if (nonNullish(backOff) && Date.now() < backOff.retryAt) {
 		return { err: backOff.err };
@@ -119,7 +131,7 @@ export const requestOlderEtherscanPage = async <T>({
 	try {
 		const page = await request();
 
-		etherscanOlderPageBackOff.delete(tokenId);
+		etherscanOlderPageBackOff.delete(key);
 
 		return { page };
 	} catch (err: unknown) {
@@ -130,7 +142,7 @@ export const requestOlderEtherscanPage = async <T>({
 			ETH_OLDER_PAGE_RETRY_MAX_DELAY
 		);
 
-		etherscanOlderPageBackOff.set(tokenId, { failures, retryAt: Date.now() + delay, err });
+		etherscanOlderPageBackOff.set(key, { failures, retryAt: Date.now() + delay, err });
 
 		return { err };
 	}
@@ -337,6 +349,7 @@ const loadOlderFromEtherscan = async ({
 	}
 
 	const result = await requestOlderEtherscanPage({
+		address,
 		tokenId,
 		request: () => {
 			const { transactions: transactionsProvider } = etherscanProviders(networkId);

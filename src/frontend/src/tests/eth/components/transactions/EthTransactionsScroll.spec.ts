@@ -16,6 +16,7 @@ import {
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
@@ -145,8 +146,6 @@ describe('EthTransactionsScroll', () => {
 	describe('when the end of the list comes back into view', () => {
 		const { enterView } = IntersectionObserverManual;
 
-		const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
-
 		beforeEach(() => {
 			window.IntersectionObserver = IntersectionObserverManual;
 		});
@@ -162,7 +161,7 @@ describe('EthTransactionsScroll', () => {
 
 			await waitFor(() => expect(loadNextSpy).toHaveBeenCalledOnce());
 
-			await settle();
+			await runResolvedPromises();
 
 			enterView();
 
@@ -177,7 +176,7 @@ describe('EthTransactionsScroll', () => {
 
 			await waitFor(() => expect(loadNextSpy).toHaveBeenCalledOnce());
 
-			await settle();
+			await runResolvedPromises();
 
 			expect(loadNextSpy).toHaveBeenCalledOnce();
 
@@ -197,7 +196,7 @@ describe('EthTransactionsScroll', () => {
 
 			await waitFor(() => expect(loadNextErc20Spy).toHaveBeenCalledOnce());
 
-			await settle();
+			await runResolvedPromises();
 
 			enterView();
 

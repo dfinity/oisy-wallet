@@ -5,7 +5,7 @@ import type * as IcTransactionsServices from '$icp/services/ic-transactions.serv
 import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
@@ -18,6 +18,7 @@ import {
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -156,8 +157,6 @@ describe('IcTransactionsScroll', () => {
 		describe('when a page fails', () => {
 			const { enterView } = IntersectionObserverManual;
 
-			const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
-
 			beforeEach(async () => {
 				window.IntersectionObserver = IntersectionObserverManual;
 
@@ -189,7 +188,7 @@ describe('IcTransactionsScroll', () => {
 
 				await waitFor(() => expect(getTransactions).toHaveBeenCalled());
 
-				await settle();
+				await runResolvedPromises();
 
 				// Not asked again on its own, so a failing canister is not retried in a loop.
 				expect(loadNextIcTransactions).toHaveBeenCalledOnce();
@@ -204,21 +203,25 @@ describe('IcTransactionsScroll', () => {
 			});
 
 			it('should still stop once the history runs out', async () => {
-				vi.mocked(getTransactions).mockResolvedValue({
-					transactions: []
-				} as unknown as Awaited<ReturnType<typeof getTransactions>>);
+				const emptyPage: Awaited<ReturnType<typeof getTransactions>> = {
+					balance: ZERO,
+					transactions: [],
+					oldest_tx_id: []
+				};
+
+				vi.mocked(getTransactions).mockResolvedValue(emptyPage);
 
 				render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 				await waitFor(() => expect(getTransactions).toHaveBeenCalled());
 
-				await settle();
+				await runResolvedPromises();
 
 				const requests = vi.mocked(getTransactions).mock.calls.length;
 
 				enterView();
 
-				await settle();
+				await runResolvedPromises();
 
 				expect(getTransactions).toHaveBeenCalledTimes(requests);
 			});

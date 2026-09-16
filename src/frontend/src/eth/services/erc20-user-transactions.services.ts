@@ -240,6 +240,7 @@ export const loadNextErc20UserTransactions = async ({
 	}
 
 	const result = await requestOlderEtherscanPage({
+		address,
 		tokenId,
 		request: () =>
 			fetchErc20Transfers({

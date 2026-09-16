@@ -27,7 +27,7 @@ import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transaction
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
 import { get } from 'svelte/store';
@@ -650,10 +650,14 @@ describe('eth-user-transactions.services', () => {
 		it('returns the page and asks every time while Etherscan answers', async () => {
 			const request = vi.fn().mockResolvedValue(['page']);
 
-			await expect(requestOlderEtherscanPage({ tokenId: mockTokenId, request })).resolves.toEqual({
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
 				page: ['page']
 			});
-			await expect(requestOlderEtherscanPage({ tokenId: mockTokenId, request })).resolves.toEqual({
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
 				page: ['page']
 			});
 
@@ -663,13 +667,17 @@ describe('eth-user-transactions.services', () => {
 		it('skips the request with the last error until the back-off has passed', async () => {
 			const request = vi.fn().mockRejectedValue(mockError);
 
-			await expect(requestOlderEtherscanPage({ tokenId: mockTokenId, request })).resolves.toEqual({
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
 				err: mockError
 			});
 
 			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY - 1);
 
-			await expect(requestOlderEtherscanPage({ tokenId: mockTokenId, request })).resolves.toEqual({
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
 				err: mockError
 			});
 
@@ -677,7 +685,7 @@ describe('eth-user-transactions.services', () => {
 
 			vi.advanceTimersByTime(1);
 
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 
 			expect(request).toHaveBeenCalledTimes(2);
 		});
@@ -691,13 +699,13 @@ describe('eth-user-transactions.services', () => {
 
 			// Enough failures to reach the ceiling from the base delay.
 			for (let attempt = 0; attempt < 6; attempt++) {
-				await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+				await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 
 				waits.push(wait);
 
 				vi.advanceTimersByTime(wait - 1);
 
-				await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+				await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 
 				expect(request).toHaveBeenCalledTimes(attempt + 1);
 
@@ -716,21 +724,23 @@ describe('eth-user-transactions.services', () => {
 				.mockRejectedValueOnce(mockError)
 				.mockResolvedValue([]);
 
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY);
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY * 2);
 
-			await expect(requestOlderEtherscanPage({ tokenId: mockTokenId, request })).resolves.toEqual({
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
 				page: []
 			});
 
 			// Served, so the next failure starts again from the base delay rather than the longer one.
 			request.mockRejectedValueOnce(mockError);
 
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY);
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
 
 			expect(request).toHaveBeenCalledTimes(5);
 		});
@@ -738,8 +748,23 @@ describe('eth-user-transactions.services', () => {
 		it('backs off per token', async () => {
 			const request = vi.fn().mockRejectedValue(mockError);
 
-			await requestOlderEtherscanPage({ tokenId: mockTokenId, request });
-			await requestOlderEtherscanPage({ tokenId: parseTokenId('other-token'), request });
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({
+				address: mockEthAddress,
+				tokenId: parseTokenId('other-token'),
+				request
+			});
+
+			expect(request).toHaveBeenCalledTimes(2);
+		});
+
+		// The token ids are the same for every wallet, so a back-off kept by token alone would skip the
+		// first request of the next address signed in on this tab.
+		it('backs off per address', async () => {
+			const request = vi.fn().mockRejectedValue(mockError);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress2, tokenId: mockTokenId, request });
 
 			expect(request).toHaveBeenCalledTimes(2);
 		});
