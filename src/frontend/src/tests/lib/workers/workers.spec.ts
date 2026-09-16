@@ -12,6 +12,7 @@ import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import { messageToHandler } from '$lib/workers/workers';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
 import { createMockEvent } from '$tests/mocks/workers.mock';
+import { onXrpWalletMessage } from '$xrp/workers/xrp-wallet.worker';
 
 vi.mock('$lib/workers/auth.worker', () => ({
 	onAuthMessage: vi.fn()
@@ -57,6 +58,10 @@ vi.mock('$sol/workers/sol-wallet.worker', () => ({
 	onSolWalletMessage: vi.fn()
 }));
 
+vi.mock('$xrp/workers/xrp-wallet.worker', () => ({
+	onXrpWalletMessage: vi.fn()
+}));
+
 describe('workers', () => {
 	describe('onmessage', () => {
 		const mockEvent = createMockEvent('mock-event');
@@ -72,7 +77,8 @@ describe('workers', () => {
 			{ name: 'onIcpWalletMessage', onMessageFn: onIcpWalletMessage },
 			{ name: 'onIcrcWalletMessage', onMessageFn: onIcrcWalletMessage },
 			{ name: 'onDip20WalletMessage', onMessageFn: onDip20WalletMessage },
-			{ name: 'onSolWalletMessage', onMessageFn: onSolWalletMessage }
+			{ name: 'onSolWalletMessage', onMessageFn: onSolWalletMessage },
+			{ name: 'onXrpWalletMessage', onMessageFn: onXrpWalletMessage }
 		];
 
 		beforeEach(() => {
