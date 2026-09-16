@@ -1021,7 +1021,6 @@
 			"destination_address_invalid": "La dirección de destino es inválida.",
 			"amount_invalid": "La cantidad es inválida.",
 			"xrp_destination_tag_invalid": "La etiqueta de destino debe ser un número entero entre 0 y 4294967295.",
-			"xrp_reserve_unavailable": "Requisito de reserva no disponible. Inténtelo de nuevo.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",

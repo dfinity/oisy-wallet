@@ -1021,7 +1021,6 @@
 			"destination_address_invalid": "目标地址无效。",
 			"amount_invalid": "金额无效。",
 			"xrp_destination_tag_invalid": "目标标签必须是 0 到 4294967295 之间的整数。",
-			"xrp_reserve_unavailable": "无法获取储备金要求。请重试。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "燃料费不足",

@@ -1021,7 +1021,6 @@
 			"destination_address_invalid": "عنوان الوجهة غير صالح.",
 			"amount_invalid": "المبلغ غير صالح.",
 			"xrp_destination_tag_invalid": "",
-			"xrp_reserve_unavailable": "",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "أموال غير كافية للغاز",

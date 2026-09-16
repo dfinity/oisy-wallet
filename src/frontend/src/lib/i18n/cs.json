@@ -1021,7 +1021,6 @@
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
 			"xrp_destination_tag_invalid": "Cílový tag musí být celé číslo mezi 0 a 4294967295.",
-			"xrp_reserve_unavailable": "Požadavek na rezervu není k dispozici. Zkuste to prosím znovu.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",

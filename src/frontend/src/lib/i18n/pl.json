@@ -1021,7 +1021,6 @@
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
 			"xrp_destination_tag_invalid": "Tag docelowy musi być liczbą całkowitą od 0 do 4294967295.",
-			"xrp_reserve_unavailable": "Wymagana rezerwa jest niedostępna. Spróbuj ponownie.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",

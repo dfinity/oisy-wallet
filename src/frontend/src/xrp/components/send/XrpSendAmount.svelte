@@ -44,10 +44,6 @@
 	);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
-		if (isNullish($reserve)) {
-			return new XrpAmountAssertionError($i18n.send.assertion.xrp_reserve_unavailable);
-		}
-
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new XrpAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}

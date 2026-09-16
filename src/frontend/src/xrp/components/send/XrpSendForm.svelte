@@ -34,8 +34,12 @@
 		cancel
 	}: Props = $props();
 
-	const { feeDecimalsStore, feeSymbolStore, feeTokenIdStore }: XrpFeeContext =
-		getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
+	const {
+		feeDecimalsStore,
+		feeSymbolStore,
+		feeTokenIdStore,
+		reserveStore: reserve
+	}: XrpFeeContext = getContext<XrpFeeContext>(XRP_FEE_CONTEXT_KEY);
 
 	let amountError = $state<XrpAmountAssertionError | undefined>();
 
@@ -47,8 +51,14 @@
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
+	// The reserve is what the account must retain. While it is unknown no amount can be judged
+	// sendable, so the form is blocked outright rather than measured against a guessed figure.
 	let invalid = $derived(
-		invalidDestination || invalidDestinationTag || nonNullish(amountError) || isNullish(amount)
+		invalidDestination ||
+			invalidDestinationTag ||
+			isNullish($reserve) ||
+			nonNullish(amountError) ||
+			isNullish(amount)
 	);
 </script>
 
