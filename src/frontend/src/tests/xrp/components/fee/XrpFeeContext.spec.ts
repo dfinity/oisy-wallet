@@ -204,6 +204,34 @@ describe('XrpFeeContext', () => {
 			unmount();
 		});
 
+		// The store starts `undefined`, so only an address change can show that a previously loaded
+		// reserve is dropped rather than left usable for the new account.
+		it('clears a loaded reserve as soon as a new account starts loading', async () => {
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+			});
+
+			let resolve:
+				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
+				new Promise((res) => {
+					resolve = res;
+				})
+			);
+
+			xrpAddressMainnetStore.set({ data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: true });
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBeUndefined();
+			});
+
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3 });
+			unmount();
+		});
+
 		it('ignores a response that resolves after the component is destroyed', async () => {
 			let resolve:
 				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
