@@ -158,6 +158,7 @@ interface I18nNavigation {
 		show_balances: string;
 		notes: string;
 		issue_tip: string;
+		issue_tip_attention: string;
 	};
 	short: { documentation: string };
 }
@@ -2379,6 +2380,11 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		overview_window: string;
+		overview_failed: string;
+		overview_failed_hint: string;
+		overview_open: string;
+		overview_claimed: string;
 		select_token: string;
 		create_title: string;
 		share_title: string;
@@ -2397,6 +2403,7 @@ interface I18nTip {
 		reserve_fee: string;
 		payout_fee: string;
 		fees_are_yours: string;
+		reserved_by_tips: string;
 		lapse_notice: string;
 		generate: string;
 		share_heading: string;
