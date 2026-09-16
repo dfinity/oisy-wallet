@@ -9,9 +9,13 @@ import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
 export type SendData = Token;
+
+export interface SendXrpDestinationTagStore extends Readable<number | undefined> {
+	set: (tag: number | undefined) => void;
+}
 
 export interface SendStore extends Readable<SendData> {
 	set: (token: Token) => void;
@@ -76,7 +80,24 @@ export const initSendContext = ({
 
 	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
 	// but consumed at the send step, so it must survive the WizardModal step re-renders.
-	const sendXrpDestinationTag = writable<number | undefined>();
+	//
+	// It is stored WITH the destination it was entered for, and read back as `undefined` whenever
+	// the current destination differs. A destination tag routes funds to a sub-account at an
+	// exchange, so a tag inherited by a recipient the user changed to would silently credit the
+	// wrong beneficiary — the wizard's back navigation makes that sequence reachable.
+	const sendXrpDestinationTagData = writable<
+		{ destination: Address; tag: number | undefined } | undefined
+	>();
+
+	const sendXrpDestinationTag: SendXrpDestinationTagStore = {
+		subscribe: derived([sendXrpDestinationTagData, sendDestination], ([$data, $sendDestination]) =>
+			nonNullish($data) && $data.destination === $sendDestination ? $data.tag : undefined
+		).subscribe,
+
+		set: (tag: number | undefined) => {
+			sendXrpDestinationTagData.set({ destination: get(sendDestination), tag });
+		}
+	};
 
 	return {
 		sendToken,
@@ -108,7 +129,7 @@ export interface SendContext {
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
-	sendXrpDestinationTag: Writable<number | undefined>;
+	sendXrpDestinationTag: SendXrpDestinationTagStore;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

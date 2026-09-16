@@ -186,12 +186,6 @@
 		     later phase — so the destination step is address entry only for now. -->
 		<div data-tid={testId}>
 			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
-			<SendDestinationTabs
-				onNext={next}
-				bind:destination
-				bind:activeSendDestinationTab
-				bind:selectedContact
-			/>
 		</div>
 	{/if}
 

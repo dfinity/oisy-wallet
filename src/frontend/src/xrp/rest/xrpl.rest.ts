@@ -93,6 +93,12 @@ export const loadXrpBalance = async ({
  * `OwnerCount` is needed for the reserve: every ledger object the account owns raises the
  * amount it must retain beyond the base reserve.
  */
+/**
+ * The account is not on-ledger. Distinct from an operational failure: it means the account owns
+ * nothing, so the base reserve alone genuinely describes its requirement.
+ */
+export class XrpAccountNotFoundError extends Error {}
+
 export const loadXrpAccountInfo = async ({
 	address,
 	network
@@ -107,19 +113,28 @@ export const loadXrpAccountInfo = async ({
 	});
 
 	const accountData = result.account_data as
-		{ Balance: string; Sequence: number; OwnerCount?: number } | undefined;
+		{ Balance: string; Sequence: number; OwnerCount?: unknown } | undefined;
 
 	if (isNullish(accountData)) {
+		if (result.error === 'actNotFound') {
+			throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+		}
+
 		throw new Error(
 			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'missing account_data'}`
 		);
 	}
 
+	// `OwnerCount` drives the owner reserve, so a missing or non-numeric value must not be read
+	// as zero: that under-reserves and lets `getXrpMaxAmount` return more than the ledger accepts.
+	if (typeof accountData.OwnerCount !== 'number') {
+		throw new Error('Unexpected XRPL account_info response: missing or invalid OwnerCount');
+	}
+
 	return {
 		balance: BigInt(accountData.Balance),
 		sequence: accountData.Sequence,
-		// Absent for an account that owns nothing.
-		ownerCount: accountData.OwnerCount ?? 0
+		ownerCount: accountData.OwnerCount
 	};
 };
 
@@ -143,6 +158,12 @@ export const loadXrpOpenLedgerFee = async ({
 };
 
 /** Current (in-progress) ledger index via `ledger_current`, used to set `LastLedgerSequence`. */
+/**
+ * Index of the ledger currently being built. This is the right base for choosing a
+ * `LastLedgerSequence` at signing time, but NOT for deciding that a transaction expired:
+ * the open index has already advanced past a closed ledger whose transactions are not yet
+ * validated. Use `loadXrpValidatedLedgerIndex` for that.
+ */
 export const loadXrpLedgerIndex = async ({
 	network
 }: {
@@ -154,6 +175,31 @@ export const loadXrpLedgerIndex = async ({
 
 	if (isNullish(ledgerIndex)) {
 		throw new Error('Unexpected XRPL ledger_current response: missing ledger_current_index');
+	}
+
+	return ledgerIndex;
+};
+
+/**
+ * Index of the latest validated ledger. A transaction can only be declared expired once
+ * this — not the open index — has passed its `LastLedgerSequence`.
+ */
+export const loadXrpValidatedLedgerIndex = async ({
+	network
+}: {
+	network: XrpNetworkType;
+}): Promise<number> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'ledger',
+		params: { ledger_index: 'validated' }
+	});
+
+	const ledgerIndex = (result.ledger_index ??
+		(result.ledger as { ledger_index?: number } | undefined)?.ledger_index) as number | undefined;
+
+	if (isNullish(ledgerIndex)) {
+		throw new Error('Unexpected XRPL ledger response: missing validated ledger_index');
 	}
 
 	return ledgerIndex;
@@ -220,7 +266,7 @@ export const submitXrpTransaction = async ({
 		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
 		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
 		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
-		accepted: (result.accepted as boolean | undefined) ?? false
+		accepted: result.accepted === true
 	};
 };
 
