@@ -48,6 +48,7 @@
 		inputType="text"
 		{onInput}
 		placeholder={$i18n.send.placeholder.xrp_destination_tag}
+		required={false}
 		testId="xrp-destination-tag-input"
 		bind:value
 	>

@@ -59,6 +59,37 @@ describe('XrpSendForm', () => {
 		expect(container.querySelector(toolbarSelector)).not.toBeNull();
 	});
 
+	// The tag is optional, and `Input` defaults `required` to true. Inside SendForm's native form
+	// that makes browser constraint validation refuse to submit while the field is empty — which
+	// the `disabled` assertions cannot see, so this asserts form validity directly.
+	describe('native form validity', () => {
+		const tagInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector<HTMLInputElement>(
+				'input[name="xrp-destination-tag"]'
+			) as HTMLInputElement;
+
+		it('does not mark the optional destination tag as required', () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			expect(tagInput(container).required).toBeFalsy();
+		});
+
+		it('submits with the destination tag left empty', () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			expect(tagInput(container).value).toBe('');
+			expect(container.querySelector('form')?.checkValidity()).toBeTruthy();
+		});
+
+		it('still submits with a valid destination tag', async () => {
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(tagInput(container), { target: { value: '12345' } });
+
+			expect(container.querySelector('form')?.checkValidity()).toBeTruthy();
+		});
+	});
+
 	// With the reserve unknown nothing may be sent. The balance check alone does not cover it:
 	// that check is skipped when the balance is also unavailable, so the amount must be rejected
 	// on the unknown reserve itself.
