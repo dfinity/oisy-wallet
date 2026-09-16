@@ -52,12 +52,42 @@ export const newTipDraft = (): TipDraft => ({
 });
 
 /**
+ * The canonical claim path, fragment included.
+ *
+ * Split out of {@link buildTipLink} so the legacy `/tip/<id>` route can forward
+ * to it without restating the fragment's shape. There is one claim surface, and
+ * only this function knows how to address it.
+ *
+ * The code is optional because a forwarded link may not carry one: a fragment
+ * that was truncated on the way still deserves to reach the page that can say so
+ * properly, rather than being dropped here.
+ */
+export const buildTipClaimPath = ({
+	tipId,
+	claimCode
+}: {
+	tipId: string;
+	claimCode?: string;
+}): string => {
+	const fragment = new URLSearchParams({ [TIP_ID_FRAGMENT_KEY]: tipId });
+
+	if (nonNullish(claimCode)) {
+		fragment.set(CLAIM_CODE_FRAGMENT_KEY, claimCode);
+	}
+
+	// `URLSearchParams` percent-encodes what it must and leaves the rest alone,
+	// which matters here: the ids and codes are URL-safe base64, and escaping
+	// their `-` and `_` would change the value the page reads back.
+	return `${TIP_LINK_PATH}#${fragment}`;
+};
+
+/**
  * The shareable link. The claim code goes in the **fragment**, which browsers
  * never send to a server — so the code reaches the recipient without ever
  * touching the canister or any log along the way.
  */
 export const buildTipLink = ({ tipId, claimCode }: TipDraft): string =>
-	`${window.location.origin}${TIP_LINK_PATH}#${TIP_ID_FRAGMENT_KEY}=${tipId}&${CLAIM_CODE_FRAGMENT_KEY}=${claimCode}`;
+	`${window.location.origin}${buildTipClaimPath({ tipId, claimCode })}`;
 
 /**
  * Reads a value back out of a link fragment, tolerating a leading `#` and other

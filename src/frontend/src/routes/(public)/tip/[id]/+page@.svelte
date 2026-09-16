@@ -1,38 +1,46 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
-	import TipClaim from '$lib/components/tip/TipClaim.svelte';
+	import { buildTipClaimPath, parseClaimCodeFromFragment } from '$lib/services/tip.services';
 
 	// Only the id is in the path. The claim code stays in the fragment, which
 	// browsers never send to a server or put in a `Referer` header.
 	const tipId = $derived(page.params.id ?? '');
+
+	/**
+	 * Forwards to the canonical claim page rather than being a second one.
+	 *
+	 * This route is vestigial. Nothing produces links to it — `buildTipLink` only
+	 * ever emits `/tip#i=…&c=…` — and `../+page.ts` explains why: a link preview is
+	 * fetched by a crawler that never sends the fragment, and the asset canister
+	 * only returns a prerendered document for an exact path, so `/tip/<id>` could
+	 * never carry a card of its own. `/tip` exists precisely because this shape
+	 * could not work.
+	 *
+	 * Keeping it as a second claim surface meant maintaining the same flow twice,
+	 * and it had already drifted: the canonical page reloads when the fragment
+	 * changes, this one only when the id did — so replacing a truncated code in
+	 * the same tab left the previous tip on screen. Forwarding removes the
+	 * duplicate instead of fixing the same bug in both places, and a hand-made
+	 * link of this shape still lands somewhere that works.
+	 */
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		// Redirected client-side, not from a `load`: a browser never sends the
+		// fragment, so the server has no claim code to forward and only this side
+		// can carry it across. `replaceState`, so Back returns to wherever the
+		// reader came from rather than to a path that immediately forwards again.
+		void goto(
+			buildTipClaimPath({ tipId, claimCode: parseClaimCodeFromFragment(window.location.hash) }),
+			{ replaceState: true }
+		);
+	});
 </script>
 
 <svelte:head>
 	<meta name="referrer" content="no-referrer" />
 </svelte:head>
-
-<!--
-	A standalone page — `+page@` resets the layout hierarchy, the same way the
-	shared-note recipient page does. It cannot live under `(app)`: `AuthGuard`
-	swaps the whole route out for the marketing landing page whenever the visitor
-	is signed out, which is precisely the visitor a tip link arrives at. Nor under
-	`(public)`'s own layout, which is shaped for the legal documents.
--->
-<div class="flex min-h-dvh flex-col items-center px-4 py-8">
-	<div class="mb-8 flex items-center">
-		<OisyWalletLogo />
-	</div>
-
-	<main class="w-full max-w-[545px] rounded-3xl bg-primary p-6 shadow-lg md:p-8">
-		<!--
-			Keyed, because SvelteKit reuses this component across `/tip/<id>`
-			navigations: the prop changes, the child does not remount, and it went on
-			showing the previous tip's preview while the handover read the new id —
-			so the amount on screen and the tip being claimed could disagree.
-		-->
-		{#key tipId}
-			<TipClaim {tipId} />
-		{/key}
-	</main>
-</div>
