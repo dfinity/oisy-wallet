@@ -172,4 +172,76 @@ describe('XrpFeeContext', () => {
 
 		unmount();
 	});
+
+	// The interval is installed only after the first request resolves, so an unmount or a rerun
+	// while it is pending must invalidate it — otherwise the resolving call installs a poller
+	// nothing can clear, and overlapping calls leave more than one running.
+	describe('poller lifecycle', () => {
+		const pendingFee = () => {
+			let resolve: (fee: bigint) => void = () => undefined;
+			const promise = new Promise<bigint>((res) => {
+				resolve = res;
+			});
+
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockReturnValue(promise);
+
+			return { resolve };
+		};
+
+		it('installs no poller when unmounted while the first request is pending', async () => {
+			vi.useFakeTimers();
+
+			const { resolve } = pendingFee();
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			unmount();
+			resolve(nodeFee);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			const callsAfterUnmount = vi.mocked(xrplRest.loadXrpOpenLedgerFee).mock.calls.length;
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(vi.mocked(xrplRest.loadXrpOpenLedgerFee).mock.calls).toHaveLength(callsAfterUnmount);
+
+			vi.useRealTimers();
+		});
+
+		it('runs exactly one poller after the component settles', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockClear();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalledOnce();
+
+			unmount();
+			vi.useRealTimers();
+		});
+
+		it('installs no poller while not observing', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext(false);
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockClear();
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
+
+			unmount();
+			vi.useRealTimers();
+		});
+	});
 });

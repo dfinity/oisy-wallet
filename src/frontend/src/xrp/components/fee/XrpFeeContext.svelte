@@ -74,26 +74,45 @@
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 
+	// The interval is installed only AFTER the first request resolves, so the clear at the top of
+	// `updateFee` cannot cover it. Without a generation marker an unmount or a rerun during that
+	// request would leave the resolving call to install a poller nothing holds a handle to, and two
+	// overlapping calls would both assign `timer`, leaking the first interval.
+	let updateId = 0;
+
 	const clearTimer = () => clearInterval(timer);
 
 	const updateFee = async () => {
+		const id = ++updateId;
+
 		clearTimer();
 
+		if (!observe) {
+			return;
+		}
+
 		await estimateFee();
+
+		if (id !== updateId || !observe) {
+			return;
+		}
 
 		timer = setInterval(estimateFee, 10000);
 	};
 
 	$effect(() => {
-		[token, $xrpAddressMainnet];
+		[token, $xrpAddressMainnet, observe];
 
 		untrack(() => {
-			updateFee();
-			loadReserve();
+			void updateFee();
+			void loadReserve();
 		});
 	});
 
-	onDestroy(clearTimer);
+	onDestroy(() => {
+		updateId++;
+		clearTimer();
+	});
 </script>
 
 {@render children()}
