@@ -3,7 +3,6 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
-import type * as LendBorrowEnv from '$env/lend-borrow';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -15,7 +14,8 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore
+	solAddressMainnetStore,
+	xrpAddressMainnetStore
 } from '$lib/stores/address.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
@@ -33,27 +33,53 @@ import {
 	mockUserProfile,
 	mockUserSettings
 } from '$tests/mocks/user-profile.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { loadXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import type { Writable } from 'svelte/store';
 
-const { mockLendBorrowEnabled, mockLiquidiumEnabled } = vi.hoisted(() => ({
-	mockLendBorrowEnabled: { value: true },
+const { mockLiquidiumEnabled } = vi.hoisted(() => ({
 	mockLiquidiumEnabled: { value: true }
 }));
 
-vi.mock('$env/lend-borrow', async (importOriginal) => ({
-	...(await importOriginal<typeof LendBorrowEnv>()),
-	get LEND_BORROW_ENABLED() {
-		return mockLendBorrowEnabled.value;
-	}
-}));
+// XRP is force-disabled under TEST, so the enablement derived is mocked with a
+// toggle that individual tests can switch on to exercise the XRP loader branch.
+const mocks = vi.hoisted(() => {
+	let xrpMainnetEnabled!: Writable<boolean>;
+
+	return {
+		get xrpMainnetEnabled(): Writable<boolean> {
+			return xrpMainnetEnabled;
+		},
+		set xrpMainnetEnabled(value: Writable<boolean>) {
+			xrpMainnetEnabled = value;
+		}
+	};
+});
 
 vi.mock('$env/liquidium', () => ({
 	get LIQUIDIUM_ENABLED() {
 		return mockLiquidiumEnabled.value;
 	}
+}));
+
+vi.mock('$lib/derived/networks.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const actual = await vi.importActual<object>('$lib/derived/networks.derived');
+
+	mocks.xrpMainnetEnabled = writable(false);
+
+	return { ...actual, networkXrpMainnetEnabled: mocks.xrpMainnetEnabled };
+});
+
+vi.mock('$xrp/services/xrp-address.services', () => ({
+	loadXrpAddressMainnet: vi.fn(() => {
+		xrpAddressMainnetStore.set({ data: mockXrpAddress, certified: false });
+		return Promise.resolve({ success: true });
+	})
 }));
 
 vi.mock('@dfinity/utils', async () => {
@@ -138,7 +164,6 @@ describe('Loader', () => {
 
 			ethAddressStore.reset();
 
-			mockLendBorrowEnabled.value = true;
 			mockLiquidiumEnabled.value = true;
 		});
 
@@ -152,11 +177,8 @@ describe('Loader', () => {
 			});
 		});
 
-		it.each([
-			{ flag: 'the lend & borrow feature', disable: () => (mockLendBorrowEnabled.value = false) },
-			{ flag: 'the Liquidium provider', disable: () => (mockLiquidiumEnabled.value = false) }
-		])('should not load the ETH address when $flag is disabled', async ({ disable }) => {
-			disable();
+		it('should not load the ETH address when the Liquidium provider is disabled', async () => {
+			mockLiquidiumEnabled.value = false;
 
 			setupUserNetworksStore('allDisabled');
 
@@ -167,6 +189,50 @@ describe('Loader', () => {
 			});
 
 			expect(loadEthAddress).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('handling the XRP mainnet address', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			setupTestnetsStore('disabled');
+
+			xrpAddressMainnetStore.reset();
+
+			mocks.xrpMainnetEnabled.set(true);
+		});
+
+		afterEach(() => {
+			mocks.xrpMainnetEnabled.set(false);
+		});
+
+		it('should load the XRP address when XRP mainnet is enabled and not loaded yet', async () => {
+			render(Loader, { children: mockSnippet });
+
+			// Toggle the reactive statement
+			setupUserNetworksStore('allDisabled');
+			setupUserNetworksStore('onlyMainnets');
+
+			await waitFor(() => {
+				expect(loadXrpAddressMainnet).toHaveBeenCalledOnce();
+			});
+		});
+
+		it('should not load the XRP address when it is already loaded', async () => {
+			xrpAddressMainnetStore.set({ data: mockXrpAddress, certified: false });
+
+			render(Loader, { children: mockSnippet });
+
+			// Toggle the reactive statement
+			setupUserNetworksStore('allDisabled');
+			setupUserNetworksStore('onlyMainnets');
+
+			await waitFor(() => {
+				expect(initLoader).toHaveBeenCalledOnce();
+			});
+
+			expect(loadXrpAddressMainnet).not.toHaveBeenCalled();
 		});
 	});
 
