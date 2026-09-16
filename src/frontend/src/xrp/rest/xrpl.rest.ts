@@ -83,9 +83,9 @@ export const loadXrpBalance = async ({
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `engine_result` is the node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`);
- * a `tes`/`ter` code means the node accepted the transaction for processing, which is
- * not yet final validation. Callers should confirm finality by polling the tx hash.
+ * `engine_result` is the node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`),
+ * while `accepted` reports whether the node took the transaction for processing.
+ * Submission is not final validation; callers should confirm finality by polling the tx hash.
  */
 export const submitXrpTransaction = async ({
 	txBlob,
@@ -111,6 +111,6 @@ export const submitXrpTransaction = async ({
 		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
 		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
 		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
-		accepted: (result.accepted as boolean | undefined) ?? false
+		accepted: result.accepted === true
 	};
 };
