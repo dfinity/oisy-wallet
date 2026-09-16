@@ -4,6 +4,32 @@ import { XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
+import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import { isNullish } from '@dfinity/utils';
+
+const xrpJsonRpc = async ({
+	network,
+	method,
+	params
+}: {
+	network: XrpNetworkType;
+	method: string;
+	params: Record<string, unknown>;
+}): Promise<Record<string, unknown>> => {
+	const response = await fetch(xrpHttpRpcUrl(network), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ method, params: [params] })
+	});
+
+	if (!response.ok) {
+		throw new Error(`XRPL ${method} request failed with status ${response.status}`);
+	}
+
+	const { result }: { result: Record<string, unknown> } = await response.json();
+
+	return result;
+};
 
 /**
  * Native XRP balance in drops (1 XRP = 1,000,000 drops), via the XRP Ledger
@@ -52,4 +78,39 @@ export const loadXrpBalance = async ({
 	}
 
 	return BigInt(result.account_data.Balance);
+};
+
+/**
+ * Broadcasts a signed transaction blob via the XRPL `submit` method.
+ *
+ * `engine_result` is the node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`),
+ * while `accepted` reports whether the node took the transaction for processing.
+ * Submission is not final validation; callers should confirm finality by polling the tx hash.
+ */
+export const submitXrpTransaction = async ({
+	txBlob,
+	network
+}: {
+	txBlob: string;
+	network: XrpNetworkType;
+}): Promise<XrpSubmitResult> => {
+	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
+
+	const engineResult = result.engine_result as string | undefined;
+
+	if (isNullish(engineResult)) {
+		throw new Error(
+			`Unexpected XRPL submit response: ${(result.error as string) ?? 'no engine_result'}`
+		);
+	}
+
+	return {
+		engineResult,
+		engineResultMessage: result.engine_result_message as string | undefined,
+		txHash: (result.tx_json as { hash?: string } | undefined)?.hash,
+		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
+		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
+		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
+		accepted: result.accepted === true
+	};
 };
