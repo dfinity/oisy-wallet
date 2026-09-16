@@ -52,12 +52,42 @@ export const newTipDraft = (): TipDraft => ({
 });
 
 /**
+ * The canonical claim path, fragment included.
+ *
+ * Split out of {@link buildTipLink} so the legacy `/tip/<id>` route can forward
+ * to it without restating the fragment's shape. There is one claim surface, and
+ * only this function knows how to address it.
+ *
+ * The code is optional because a forwarded link may not carry one: a fragment
+ * that was truncated on the way still deserves to reach the page that can say so
+ * properly, rather than being dropped here.
+ */
+export const buildTipClaimPath = ({
+	tipId,
+	claimCode
+}: {
+	tipId: string;
+	claimCode?: string;
+}): string => {
+	const fragment = new URLSearchParams({ [TIP_ID_FRAGMENT_KEY]: tipId });
+
+	if (nonNullish(claimCode)) {
+		fragment.set(CLAIM_CODE_FRAGMENT_KEY, claimCode);
+	}
+
+	// `URLSearchParams` percent-encodes what it must and leaves the rest alone,
+	// which matters here: the ids and codes are URL-safe base64, and escaping
+	// their `-` and `_` would change the value the page reads back.
+	return `${TIP_LINK_PATH}#${fragment}`;
+};
+
+/**
  * The shareable link. The claim code goes in the **fragment**, which browsers
  * never send to a server — so the code reaches the recipient without ever
  * touching the canister or any log along the way.
  */
 export const buildTipLink = ({ tipId, claimCode }: TipDraft): string =>
-	`${window.location.origin}${TIP_LINK_PATH}#${TIP_ID_FRAGMENT_KEY}=${tipId}&${CLAIM_CODE_FRAGMENT_KEY}=${claimCode}`;
+	`${window.location.origin}${buildTipClaimPath({ tipId, claimCode })}`;
 
 /**
  * Reads a value back out of a link fragment, tolerating a leading `#` and other
@@ -165,6 +195,76 @@ export const tipRateLimit = (
 const isDuplicateTipId = (err: unknown): boolean =>
 	nonNullish(err) && typeof err === 'object' && 'DuplicateTipId' in err;
 
+/**
+ * The `create_tip` refusals a retry should keep its allowance for.
+ *
+ * A denylist rather than a list of refusals that clean up, and the inversion is
+ * the point. Every error `create_tip` returns is decided before `store_tip`:
+ * the id, claim-code, message and expiry validators, the duplicate check, the
+ * fee and allowance lookups, the coverage and cap checks — all of them return
+ * early, so a decoded `TipError` means nothing was written. Enumerating the
+ * cleanup cases instead meant a variant added later silently kept its
+ * allowance, which is exactly how `MessageTooLong` was missed.
+ *
+ * So these two are excluded on purpose, not for safety:
+ *
+ * - `RateLimited` is transient. The sender retries with the same draft and the
+ *   allowance is still the right one; revoking would cost a fee and force a
+ *   second approve for nothing.
+ * - `InternalError` says the canister broke rather than that it wrote nothing,
+ *   which is the one answer not to reason from.
+ *
+ * A transport failure never reaches here: `createTip` throws the decoded
+ * variant for a canister rejection and an `Error` otherwise, and a lost reply
+ * is precisely when the tip may exist — revoking then would strip the allowance
+ * from a live, claimable tip.
+ */
+const CREATE_REFUSALS_KEEPING_THE_ALLOWANCE = ['RateLimited', 'InternalError'] as const;
+
+const leavesNoTip = (err: unknown): boolean =>
+	nonNullish(err) &&
+	typeof err === 'object' &&
+	!CREATE_REFUSALS_KEEPING_THE_ALLOWANCE.some((variant) => variant in err) &&
+	// A bare `Error` has no variant key at all; only a decoded `TipError` proves
+	// the canister answered.
+	Object.keys(err).length > 0 &&
+	!(err instanceof Error);
+
+/**
+ * Gives back an allowance that is now backing nothing.
+ *
+ * Best-effort on purpose: the caller is already reporting a failed reservation,
+ * and the original reason is more useful to the sender than "and the cleanup
+ * also failed". A revoke that does not land leaves the allowance to lapse at its
+ * own deadline, which is what used to happen to every one of these.
+ */
+const revokeTipAllowance = async ({
+	identity,
+	ledgerCanisterId,
+	tipId
+}: {
+	identity: Identity;
+	ledgerCanisterId: CanisterIdText;
+	tipId: string;
+}): Promise<void> => {
+	try {
+		await approve({
+			identity,
+			ledgerCanisterId,
+			amount: ZERO,
+			spender: {
+				owner: Principal.fromText(BACKEND_CANISTER_ID),
+				subaccount: await tipSpenderSubaccount(tipId)
+			},
+			// An allowance of zero has nothing to expire; the ledger still wants the
+			// field, so this mirrors what `cancelTip` passes.
+			expiresAt: BigInt(Date.now()) * 1_000_000n + 60_000_000_000n
+		});
+	} catch (err: unknown) {
+		consoleWarn('Could not give back the allowance for a tip that was never created', err);
+	}
+};
+
 /** How long to wait before the one retry of the claim-code write. */
 const SECRET_RETRY_DELAY_MS = 1_500;
 
@@ -262,6 +362,13 @@ const storeClaimCode = async ({
  * is why the draft is the caller's to hold: generating a fresh one on retry
  * would strand the first allowance until it expired.
  *
+ * **A create the canister refuses outright gives the allowance back.** Those
+ * refusals are decided before anything is written, so the approve the sender
+ * just paid for is backing a tip that will never exist, with no route to it from
+ * the UI — cancelling goes through a tip record. Only the refusals that prove
+ * nothing was stored qualify; a lost response does not, because there the tip
+ * may well be real. See {@link CREATE_REFUSALS_LEAVING_NO_TIP}.
+ *
  * That read-back is a non-certified query, so it is weaker evidence than the
  * write it stands in for. Acceptable here because of what it decides: whether to
  * store a local recovery secret. A wrong answer costs a secret for a tip that is
@@ -343,6 +450,15 @@ export const reserveTip = async ({
 		});
 	} catch (err: unknown) {
 		if (!isDuplicateTipId(err)) {
+			// The approve landed and the tip did not, so the sender is left paying
+			// for an authorisation that is backing nothing. Nothing can ever spend
+			// it — a payout needs a tip record — but it sits on the ledger until its
+			// deadline, and there is no route to it from the UI, because cancelling
+			// goes through a tip that does not exist.
+			if (leavesNoTip(err)) {
+				await revokeTipAllowance({ identity, ledgerCanisterId, tipId: draft.tipId });
+			}
+
 			throw err;
 		}
 

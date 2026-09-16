@@ -253,6 +253,28 @@ The share funnel — dialog open, link created, and the recipient's open / revea
 
 ---
 
+## Tips
+
+A signed-in user can hand tokens to someone as a **link**. The recipient does not need an OISY account, a wallet, or any prior contact with the sender — opening the link and signing in with any Internet Identity is the whole flow. Reached from an **Issue Tip** item in the user menu.
+
+**Currently limited to local and staging builds.** The create surface is behind a rollout flag; beta and production do not show it. The claim route is deliberately **not** behind that flag, so a link already in someone's hands keeps working even while new tips cannot be made — closing the surface must never strand a reservation.
+
+- **No custody, ever.** A tip is an **ICRC-2 allowance**, not a transfer. The tokens stay in the sender's own account, authorised for this one tip under a spender subaccount derived from its id, and the canister holds nothing. If nobody claims, the authorisation simply lapses and the money was never anywhere else. This is also why only tokens whose ledger has an allowance primitive can be tipped — ICP and the ICRC assets — and never a native BTC, ETH or SOL balance.
+- **The sender pays two fees, the claimer none.** The ledger charges its transfer fee to the _allowance_ and credits the claimer the full amount, so a reservation has to cover the amount plus that fee — and the reservation itself costs a fee to create. Both are quoted in the sender's confirmation before anything is authorised.
+- **The claim code never travels as a URL.** It lives in the link's **fragment**, which browsers do not put on the wire, so it stays out of request paths, referrer headers, web-server logs and anything a crawler fetching the page can see. Two things reach the canister when the tip is created: the code's **SHA-256**, which is what every later check is made against, and an **end-to-end encrypted copy** of the code itself, which only the sender can decrypt and which exists so they can recover their own link later. From then on the plaintext code is sent by whoever holds the link — on the authenticated **review query** as well as the claim update, since comparing it against the stored hash is the only way to check it. So the fragment buys secrecy in transit, in logs and from crawlers; it does not keep the code from the canister once a holder opens the link.
+- **The deadline is the sender's choice** — 24 hours to 7 days. A reservation that would lapse before the tip does is refused rather than shipping a deadline that cannot be honoured.
+- **What an anonymous reader sees** is the amount, the token and the deadline, and nothing else: never the sender, never the claimer, never the message. The sender's message is revealed only to whoever holds the full link, after they have claimed.
+- **The claimer is disclosed to the sender**, and this is stated on the claim screen **before** sign-in — the last moment the recipient can decide whether that is a price they want to pay, and the first moment they can read it without having identified themselves.
+- **One link, one payout.** A tip pays out at most once, so retrying a claim whose response was lost is safe: it either collects or reports the tip already claimed. Unknown, expired, cancelled, already-claimed and wrong-code all answer **identically**, so links cannot be probed to learn which ones exist.
+- **Limits.** A sender may hold a capped number of live tips at once, and creating, claiming and cancelling are each rate-limited per caller. A tip below the ledger's fee cannot be created.
+- **A first-time claimer gets an introduction.** Someone whose OISY account was created by claiming a tip is shown a short welcome afterwards, once — not someone who has used OISY for months and happens to be claiming their first tip.
+
+The link is shown to the sender once, on the share screen, which is the moment to copy it. The wallet keeps an encrypted copy of the claim code so the sender can recover the link later; the surface for that arrives with tips History.
+
+The sender and claimer funnels are tracked via the `tip` Plausible event.
+
+---
+
 ## WalletConnect
 
 OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dApp proposes a session, OISY advertises one namespace per chain family for which the signed-in user has a loaded address, so each connection can span Ethereum, Solana, and Bitcoin at once. Multiple dApp connections can be open simultaneously (see [Multiple simultaneous connections](#multiple-simultaneous-connections)).

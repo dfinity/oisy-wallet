@@ -22,3 +22,35 @@ const XrplAccountInfoResultSchema = z.union([
 export const XrplAccountInfoResponseSchema = z.object({
 	result: XrplAccountInfoResultSchema
 });
+
+// Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
+// and inflate the sendable maximum, and a fractional one throws inside `BigInt()` — so both are
+// pinned to a non-negative safe integer rather than checked with `typeof`.
+export const XrpLedgerCounterSchema = z.number().int().nonnegative();
+
+// These three validate the `result` object, because `xrpJsonRpc` unwraps the envelope before
+// returning. Stricter than `XrplAccountInfoResponseSchema`, which only needs `Balance`: building a
+// payment also requires the sequence, and the reserve requires the owner count.
+const XrplAccountDataSchema = z.object({
+	Balance: XrpDropsSchema,
+	Sequence: XrpLedgerCounterSchema,
+	OwnerCount: XrpLedgerCounterSchema
+});
+
+export const XrplAccountInfoFullResultSchema = z.union([
+	z.object({ account_data: XrplAccountDataSchema, error: z.never().optional() }),
+	z.object({ error: z.string(), account_data: z.never().optional() })
+]);
+
+export const XrplFeeResultSchema = z.object({
+	drops: z
+		.object({
+			open_ledger_fee: XrpDropsSchema.optional(),
+			base_fee: XrpDropsSchema.optional()
+		})
+		.optional()
+});
+
+export const XrplLedgerCurrentResultSchema = z.object({
+	ledger_current_index: XrpLedgerCounterSchema
+});
