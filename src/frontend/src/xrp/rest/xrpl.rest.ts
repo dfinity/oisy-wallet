@@ -1,6 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
-import { XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
+import {
+	XrplAccountInfoFullResultSchema,
+	XrplAccountInfoResponseSchema,
+	XrplFeeResultSchema,
+	XrplLedgerCurrentResultSchema
+} from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
@@ -107,30 +112,32 @@ export const loadXrpAccountInfo = async ({
 		params: { account: address, ledger_index: 'validated' }
 	});
 
-	const accountData = result.account_data as
-		{ Balance: string; Sequence: number; OwnerCount?: unknown } | undefined;
+	// Checked before the schema: an `actNotFound` response carries no `account_data`, so parsing
+	// first would fail the shape check and mask the typed "owns nothing" error.
+	if (result.error === 'actNotFound') {
+		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
 
-	if (isNullish(accountData)) {
-		if (result.error === 'actNotFound') {
-			throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
-		}
+	// Untrusted external JSON: `Balance` must be an unsigned decimal string and the counters
+	// non-negative safe integers. A negative `OwnerCount` would lower the reserve and inflate the
+	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
+	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
 
+	if (!parsed.success) {
 		throw new Error(
-			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'missing account_data'}`
+			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'it does not match the expected shape'}`
 		);
 	}
 
-	// `OwnerCount` drives the owner reserve, so a missing or non-numeric value must not be read
-	// as zero: that under-reserves and lets `getXrpMaxAmount` return more than the ledger accepts.
-	if (typeof accountData.OwnerCount !== 'number') {
-		throw new Error('Unexpected XRPL account_info response: missing or invalid OwnerCount');
+	const { data } = parsed;
+
+	if ('error' in data) {
+		throw new Error(`Unexpected XRPL account_info response: ${data.error}`);
 	}
 
-	return {
-		balance: BigInt(accountData.Balance),
-		sequence: accountData.Sequence,
-		ownerCount: accountData.OwnerCount
-	};
+	const { Balance, Sequence, OwnerCount } = data.account_data;
+
+	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount };
 };
 
 /**
@@ -146,7 +153,13 @@ export const loadXrpOpenLedgerFee = async ({
 }): Promise<XrpBalance> => {
 	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
 
-	const drops = result.drops as { open_ledger_fee?: string; base_fee?: string } | undefined;
+	const parsed = XrplFeeResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL fee response: it does not match the expected shape');
+	}
+
+	const { drops } = parsed.data;
 	const fee = drops?.open_ledger_fee ?? drops?.base_fee;
 
 	return nonNullish(fee) ? BigInt(fee) : fallbackFee;
@@ -166,13 +179,13 @@ export const loadXrpLedgerIndex = async ({
 }): Promise<number> => {
 	const result = await xrpJsonRpc({ network, method: 'ledger_current', params: {} });
 
-	const ledgerIndex = result.ledger_current_index as number | undefined;
+	const parsed = XrplLedgerCurrentResultSchema.safeParse(result);
 
-	if (isNullish(ledgerIndex)) {
+	if (!parsed.success) {
 		throw new Error('Unexpected XRPL ledger_current response: missing ledger_current_index');
 	}
 
-	return ledgerIndex;
+	return parsed.data.ledger_current_index;
 };
 
 /**

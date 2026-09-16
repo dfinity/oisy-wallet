@@ -450,6 +450,126 @@ describe('tip.services', () => {
 				expect(detailsSpy).not.toHaveBeenCalled();
 			});
 		});
+
+		// The approve lands, the create does not, and the sender is left paying for
+		// an authorisation backing a tip that will never exist — with no route to it
+		// from the UI, because cancelling goes through a tip record.
+		describe('when the create is refused outright', () => {
+			// The revoke is an approve of zero at the tip's own subaccount, so it is
+			// the second `approve` call, not the first.
+			const revokeCall = (spy: ReturnType<typeof vi.spyOn>) =>
+				spy.mock.calls.length > 1 ? spy.mock.calls[1][0] : undefined;
+
+			// Every one of these is decided before `store_tip`, so the tip does not
+			// exist and the allowance is backing nothing. `MessageTooLong` is here
+			// because an allowlist missed it once — the guard is a denylist now, so
+			// a variant added later cleans up by default rather than silently not.
+			it.each([
+				{ refusal: 'TooManyTips' },
+				{ refusal: 'AmountTooSmall' },
+				{ refusal: 'InvalidExpiry' },
+				{ refusal: 'InvalidTipId' },
+				{ refusal: 'InvalidClaimCodeHash' },
+				{ refusal: 'MessageTooLong' },
+				{ refusal: 'TransferFailed' },
+				{ refusal: 'Uncovered' }
+			])('gives the allowance back after $refusal', async ({ refusal }) => {
+				const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ [refusal]: null });
+
+				const draft = newTipDraft();
+
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft,
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual({ [refusal]: null });
+
+				const revoked = revokeCall(approveSpy);
+
+				expect(revoked?.amount).toBe(ZERO);
+				// The same subaccount the reservation used, or it would be revoking
+				// somebody else's allowance and leaving this one standing.
+				expect(toHex(revoked?.spender.subaccount as Uint8Array)).toBe(
+					toHex(await tipSpenderSubaccount(draft.tipId))
+				);
+			});
+
+			// The dangerous case. A lost response is exactly when the tip may well
+			// exist — it is why `DuplicateTipId` is reconciled rather than thrown —
+			// so revoking here would strip the allowance from a live, claimable tip
+			// and leave the claimer unable to collect.
+			it('leaves the allowance alone when the create failed in transport', async () => {
+				const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue(new Error('agent exploded'));
+
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toThrow('agent exploded');
+
+				expect(approveSpy).toHaveBeenCalledOnce();
+			});
+
+			it.each([
+				{ refusal: 'RateLimited', err: { RateLimited: { max_calls: 5, window_ns: 60n } } },
+				{ refusal: 'InternalError', err: { InternalError: { msg: 'boom' } } }
+			])('leaves the allowance alone after $refusal', async ({ err }) => {
+				const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue(err);
+
+				// `RateLimited` is transient — the sender retries with the same draft
+				// and the allowance is still the right one. `InternalError` says the
+				// canister broke, not that it wrote nothing.
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual(err);
+
+				expect(approveSpy).toHaveBeenCalledOnce();
+			});
+
+			it('reports the original refusal even when the revoke fails', async () => {
+				const warnSpy = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+				vi.spyOn(icrcLedgerApi, 'approve')
+					.mockResolvedValueOnce(1n)
+					.mockRejectedValueOnce(new Error('ledger refused the revoke'));
+				vi.spyOn(backendApi, 'createTip').mockRejectedValue({ TooManyTips: null });
+
+				// The sender needs to know why their tip failed. Replacing that with a
+				// cleanup error would tell them nothing they can act on, and the
+				// allowance still lapses on its own.
+				await expect(
+					reserveTip({
+						identity: mockIdentity,
+						draft: newTipDraft(),
+						ledgerCanisterId: LEDGER_ID,
+						amount: AMOUNT,
+						fee: FEE,
+						expiresAtNs: EXPIRES_AT_NS
+					})
+				).rejects.toEqual({ TooManyTips: null });
+
+				expect(warnSpy).toHaveBeenCalledOnce();
+			});
+		});
 	});
 
 	describe('cancelTip', () => {
