@@ -1,12 +1,15 @@
 import type { MyTip } from '$declarations/backend/backend.did';
 import LoaderTips from '$lib/components/loaders/LoaderTips.svelte';
+import * as authDerived from '$lib/derived/auth.derived';
 import * as tipServices from '$lib/services/tip.services';
 import { tipsStore } from '$lib/stores/tips.store';
+import type { NullishIdentity } from '$lib/types/identity';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 // The loader is gated on the rollout flag, which is still off on the branch that
 // owns this file. The loading behaviour is what is under test, not the flag.
@@ -90,6 +93,96 @@ describe('LoaderTips', () => {
 		});
 
 		expect(get(tipsStore)).toBeUndefined();
+	});
+
+	describe('a reply that arrives too late', () => {
+		it('does not put the tips of a signed-out user back in the store', async () => {
+			// The disclosure this prevents: `loadMyTips` is a canister call, so signing
+			// out during one leaves the reply on its way. Applying it would put the
+			// previous user's tips — and so their reserved amounts — in front of
+			// whoever is signed in next.
+			//
+			// A writable identity rather than `mockAuthStore`, which hands out a fresh
+			// `readable` per call: replacing the getter after the component has
+			// subscribed notifies nobody, so the sign-out would never reach the effect
+			// and the test would pass without exercising anything.
+			const identity = writable<NullishIdentity>(mockIdentity);
+			vi.spyOn(authDerived, 'authIdentity', 'get').mockImplementation(() => identity);
+
+			let resolveFirst: (tips: MyTip[]) => void = () => {};
+
+			const spy = vi
+				.spyOn(tipServices, 'loadMyTips')
+				.mockImplementation(() => new Promise<MyTip[]>((resolve) => (resolveFirst = resolve)));
+
+			render(LoaderTips);
+
+			await waitFor(() => expect(spy).toHaveBeenCalledOnce());
+
+			// Signing out resets the store and disowns the request in flight.
+			identity.set(null);
+
+			resolveFirst([tip('the-previous-user')]);
+
+			// Flushed rather than awaited through `waitFor`, which would pass on its
+			// first attempt before the late reply could write anything.
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(get(tipsStore)).toBeUndefined();
+		});
+
+		it('does not let a slow first load overwrite a newer refresh', async () => {
+			// Same guard, without an identity change: the refresh event can fire while
+			// the sign-in load is still outstanding, and the reply order is not the
+			// request order.
+			let resolveFirst: (tips: MyTip[]) => void = () => {};
+
+			const spy = vi
+				.spyOn(tipServices, 'loadMyTips')
+				.mockImplementationOnce(() => new Promise<MyTip[]>((resolve) => (resolveFirst = resolve)))
+				.mockResolvedValueOnce([tip('fresh')]);
+
+			render(LoaderTips);
+
+			await waitFor(() => expect(spy).toHaveBeenCalledOnce());
+
+			emit({ message: 'oisyRefreshTips' });
+
+			await waitFor(() => expect(get(tipsStore)).toEqual([tip('fresh')]));
+
+			resolveFirst([tip('stale')]);
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(get(tipsStore)).toEqual([tip('fresh')]);
+		});
+
+		it('does not unload the store because an abandoned request failed', async () => {
+			// The failure path needs the same guard as the success path: a rejection
+			// from a request nobody is waiting for would otherwise reset a store that
+			// a newer load had already filled, and unloaded means "reservations
+			// unknown", which shuts the create form.
+			let rejectFirst: (err: Error) => void = () => {};
+
+			const spy = vi
+				.spyOn(tipServices, 'loadMyTips')
+				.mockImplementationOnce(() => new Promise<MyTip[]>((_, reject) => (rejectFirst = reject)))
+				.mockResolvedValueOnce([tip('fresh')]);
+
+			render(LoaderTips);
+
+			await waitFor(() => expect(spy).toHaveBeenCalledOnce());
+
+			emit({ message: 'oisyRefreshTips' });
+
+			await waitFor(() => expect(get(tipsStore)).toEqual([tip('fresh')]));
+
+			rejectFirst(new Error('boom'));
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(get(tipsStore)).toEqual([tip('fresh')]);
+		});
 	});
 
 	describe('when identity is nullish', () => {
