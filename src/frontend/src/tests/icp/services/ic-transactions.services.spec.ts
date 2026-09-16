@@ -12,6 +12,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import { loadIcrc3BlockLog, type Icrc3Block } from '$icp/services/icrc3.services';
+import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -187,6 +188,31 @@ describe('ic-transactions.services', () => {
 			certified: false
 		}));
 
+		const mockIcpIndexResponse = {
+			transactions: mockTransactions.map(
+				(transaction) =>
+					({
+						transaction: {
+							...transaction,
+							memo: ZERO,
+							icrc1_memo: [],
+							operation: {
+								Transfer: {
+									to: transaction.to,
+									fee: { e8s: 456n },
+									from: transaction.from,
+									amount: { e8s: transaction.value },
+									spender: []
+								}
+							},
+							timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
+							created_at_time: []
+						},
+						id: BigInt(transaction.id)
+					}) as IcpIndexDid.TransactionWithId
+			)
+		} as IcpIndexDid.GetAccountIdentifierTransactionsResponse;
+
 		const accountValue = (principal: typeof mockPrincipal): Value => ({
 			Map: [['owner', { Text: principal.toText() }]]
 		});
@@ -218,30 +244,7 @@ describe('ic-transactions.services', () => {
 			icTransactionsStore.reset(mockToken.id);
 			icTransactionsStore.reset(mockValidIcrc7Token.id);
 
-			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
-				transactions: mockTransactions.map(
-					(transaction) =>
-						({
-							transaction: {
-								...transaction,
-								memo: ZERO,
-								icrc1_memo: [],
-								operation: {
-									Transfer: {
-										to: transaction.to,
-										fee: { e8s: 456n },
-										from: transaction.from,
-										amount: { e8s: transaction.value },
-										spender: []
-									}
-								},
-								timestamp: toNullable({ timestamp_nanos: transaction.timestamp }),
-								created_at_time: []
-							},
-							id: BigInt(transaction.id)
-						}) as IcpIndexDid.TransactionWithId
-				)
-			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
+			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue(mockIcpIndexResponse);
 		});
 
 		it('should not load transactions if the last ID is not parseable', async () => {
@@ -474,7 +477,7 @@ describe('ic-transactions.services', () => {
 			const mockError = new Error('Test error');
 			vi.spyOn(icpIndexApi, 'getTransactions').mockRejectedValue(mockError);
 
-			await loadNextIcTransactions(mockParams);
+			const result = await loadNextIcTransactions(mockParams);
 
 			expect(get(icTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
 			expect(get(balancesStore)?.[mockToken.id]).toStrictEqual({
@@ -482,7 +485,57 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 
-			expect(signalEnd).toHaveBeenCalledOnce();
+			// A failed page is not the end of the history: the scroll must be able to ask again.
+			expect(result).toEqual({ success: false, err: mockError });
+			expect(signalEnd).not.toHaveBeenCalled();
+		});
+
+		it('should resolve success when a page loads', async () => {
+			const result = await loadNextIcTransactions(mockParams);
+
+			expect(result).toEqual({ success: true });
+		});
+
+		it('should resolve without an error when there is nothing to page', async () => {
+			const result = await loadNextIcTransactions({ ...mockParams, token: ETHEREUM_TOKEN });
+
+			expect(result).toEqual({ success: false });
+		});
+
+		it('should keep paging when only the update call fails after the query loaded the page', async () => {
+			const mockError = new Error('Update failed');
+
+			vi.mocked(getTransactionsIcp).mockImplementation(({ certified }) =>
+				certified ? Promise.reject(mockError) : Promise.resolve(mockIcpIndexResponse)
+			);
+
+			const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+			const result = await loadNextIcTransactions(mockParams);
+
+			// Let the update call settle after the race resolved on the query.
+			await vi.waitFor(() =>
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR })
+				)
+			);
+
+			expect(result).toEqual({ success: true });
+			expect(get(icTransactionsStore)?.[mockToken.id]).toStrictEqual(mockCertifiedTransactions);
+			expect(signalEnd).not.toHaveBeenCalled();
+		});
+
+		it('should not count a failed page towards an Index canister outage', async () => {
+			icTransactionsStatusStore.reset();
+
+			vi.spyOn(icpIndexApi, 'getTransactions').mockRejectedValue(new Error('Test error'));
+
+			await loadNextIcTransactions(mockParams);
+			await loadNextIcTransactions(mockParams);
+			await loadNextIcTransactions(mockParams);
+
+			// The outage is for the wallet's regular check to establish, on its own cadence.
+			expect(get(icTransactionsStatusStore)).toEqual({});
 		});
 
 		it('should keep loaded transactions and balance if loading the next ICRC-7 page raises an error', async () => {
@@ -499,9 +552,10 @@ describe('ic-transactions.services', () => {
 				data: { data: bn1Bi, certified: false }
 			});
 
-			vi.mocked(loadIcrc3BlockLog).mockRejectedValue(new Error('Test error'));
+			const mockError = new Error('Test error');
+			vi.mocked(loadIcrc3BlockLog).mockRejectedValue(mockError);
 
-			await loadNextIcTransactions({
+			const result = await loadNextIcTransactions({
 				...mockParams,
 				lastId: undefined,
 				token: mockValidIcrc7Token
@@ -513,7 +567,8 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 
-			expect(signalEnd).toHaveBeenCalledOnce();
+			expect(result).toEqual({ success: false, err: mockError });
+			expect(signalEnd).not.toHaveBeenCalled();
 		});
 	});
 
@@ -721,6 +776,27 @@ describe('ic-transactions.services', () => {
 				maxResults: WALLET_PAGINATION,
 				certified: true
 			});
+		});
+
+		it('should pass a failed page up without signalling the end', async () => {
+			const mockError = new Error('Index canister unavailable');
+			vi.mocked(getTransactionsIcp).mockRejectedValue(mockError);
+
+			const result = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: false, err: mockError });
+			expect(signalEnd).not.toHaveBeenCalled();
+		});
+
+		it('should still signal the end when the history runs out', async () => {
+			vi.mocked(getTransactionsIcp).mockResolvedValue({
+				transactions: [] as IcpIndexDid.TransactionWithId[]
+			} as IcpIndexDid.GetAccountIdentifierTransactionsResponse);
+
+			const result = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(result).toEqual({ success: true });
+			expect(signalEnd).toHaveBeenCalled();
 		});
 	});
 });
