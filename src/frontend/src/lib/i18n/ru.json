@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
 			"btc_wallet_error": "Ошибка при загрузке информации о кошельке BTC.",
 			"sol_wallet_error": "Ошибка при загрузке информации о кошельке SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Ошибка при загрузке информации о кошельке XRP."
 		}
 	},
 	"hero": {

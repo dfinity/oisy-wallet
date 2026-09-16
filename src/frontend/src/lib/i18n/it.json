@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Errore durante il caricamento delle informazioni del wallet XRP."
 		}
 	},
 	"hero": {

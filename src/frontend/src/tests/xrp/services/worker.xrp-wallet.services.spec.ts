@@ -43,7 +43,7 @@ vi.stubGlobal('crypto', {
 describe('worker.xrp-wallet.services', () => {
 	describe('XrpWalletWorker', () => {
 		const mockAddress = { data: mockXrpAddress, certified: true };
-		const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}`;
+		const ref = `${XRP_TOKEN.symbol}-${XrpNetworks.mainnet}-${mockXrpAddress}`;
 		const mockWalletData = { wallet: { balance: { data: 1_000_000n, certified: false } } };
 		const expectedData = { address: mockAddress, xrpNetwork: XrpNetworks.mainnet };
 
@@ -106,6 +106,120 @@ describe('worker.xrp-wallet.services', () => {
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 				msg: 'stopXrpWalletTimer',
 				workerId: mockId
+			});
+		});
+
+		// The address store is the single source of truth: the worker must never keep polling an
+		// address the store has moved on from.
+		describe('on an address change', () => {
+			const otherAddress = { data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: true };
+
+			// `WorkerQueue` serialises posts and releases its slot on a 100 ms timer, so a second
+			// message only reaches the worker after that delay.
+			const drainQueue = async () => await vi.advanceTimersByTimeAsync(200);
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should post the current address on start rather than the one captured at init', async () => {
+				const worker = await initWorker();
+
+				xrpAddressMainnetStore.set(otherAddress);
+				postMessageSpy.mockClear();
+
+				worker.start();
+
+				expect(postMessageSpy).toHaveBeenCalledWith({
+					msg: 'startXrpWalletTimer',
+					workerId: mockId,
+					data: { address: otherAddress, xrpNetwork: XrpNetworks.mainnet }
+				});
+			});
+
+			it('should post the current address on trigger rather than the one captured at init', async () => {
+				const worker = await initWorker();
+
+				xrpAddressMainnetStore.set(otherAddress);
+				postMessageSpy.mockClear();
+
+				worker.trigger();
+
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'triggerXrpWalletTimer',
+					workerId: mockId,
+					data: { address: otherAddress, xrpNetwork: XrpNetworks.mainnet }
+				});
+			});
+
+			// `SchedulerTimer.start` is a no-op while its timer exists, so a bare start would leave the
+			// timer polling the previous address under the new ref. The stop must come first.
+			it('should stop the timer before restarting it with the new address', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				postMessageSpy.mockClear();
+
+				xrpAddressMainnetStore.set(otherAddress);
+				await drainQueue();
+
+				expect(postMessageSpy.mock.calls.map(([{ msg }]) => msg)).toEqual([
+					'stopXrpWalletTimer',
+					'startXrpWalletTimer'
+				]);
+				expect(postMessageSpy).toHaveBeenLastCalledWith({
+					msg: 'startXrpWalletTimer',
+					workerId: mockId,
+					data: { address: otherAddress, xrpNetwork: XrpNetworks.mainnet }
+				});
+			});
+
+			it('should stop the timer when the address is reset', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				postMessageSpy.mockClear();
+
+				xrpAddressMainnetStore.reset();
+				await drainQueue();
+
+				expect(postMessageSpy).toHaveBeenCalledWith({
+					msg: 'stopXrpWalletTimer',
+					workerId: mockId
+				});
+			});
+
+			// `destroy` itself posts `stopXrpWalletTimer`, so this asserts the absence of a restart
+			// rather than the absence of any message.
+			it('should not restart on an address change after destroy', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				worker.destroy();
+				postMessageSpy.mockClear();
+
+				xrpAddressMainnetStore.set(otherAddress);
+				await drainQueue();
+
+				expect(postMessageSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ msg: 'startXrpWalletTimer' })
+				);
+			});
+
+			it('should not re-post for an unchanged address', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				postMessageSpy.mockClear();
+
+				xrpAddressMainnetStore.set({ ...mockAddress });
+				await drainQueue();
+
+				expect(postMessageSpy).not.toHaveBeenCalled();
 			});
 		});
 
