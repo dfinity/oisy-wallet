@@ -1021,6 +1021,7 @@
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
 			"xrp_destination_tag_invalid": "宛先タグは 0 から 4294967295 までの整数である必要があります。",
+			"xrp_reserve_unavailable": "必要準備金を取得できません。もう一度お試しください。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",

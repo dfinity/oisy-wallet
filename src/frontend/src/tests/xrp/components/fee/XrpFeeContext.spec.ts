@@ -112,10 +112,11 @@ describe('XrpFeeContext', () => {
 			unmount();
 		});
 
-		// An unfunded account is not on-ledger and owns nothing, so the default already
-		// describes it — and the same conservative figure applies if the call fails.
-		it('keeps the owns-nothing default when account_info fails', async () => {
-			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('actNotFound'));
+		// An account that is not on-ledger owns nothing, so the base reserve genuinely describes it.
+		it('uses the owns-nothing reserve when the account is not found', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(
+				new xrplRest.XrpAccountNotFoundError('not found')
+			);
 
 			const { unmount } = renderContext();
 
@@ -124,6 +125,22 @@ describe('XrpFeeContext', () => {
 			});
 
 			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+		});
+
+		// Base-only is the SMALLEST reserve the ledger can demand, so falling back to it after an
+		// operational failure would overstate the sendable maximum for an account owning objects.
+		it('leaves the reserve unknown when account_info fails operationally', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('network down'));
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			expect(get(reserveStore)).toBeUndefined();
 
 			unmount();
 		});
@@ -138,7 +155,7 @@ describe('XrpFeeContext', () => {
 			});
 
 			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
-			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+			expect(get(reserveStore)).toBeUndefined();
 
 			unmount();
 		});

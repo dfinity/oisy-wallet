@@ -1021,6 +1021,7 @@
 			"destination_address_invalid": "L'adresse de destination est invalide.",
 			"amount_invalid": "Le montant est invalide.",
 			"xrp_destination_tag_invalid": "Le tag de destination doit être un nombre entier entre 0 et 4294967295.",
+			"xrp_reserve_unavailable": "Exigence de réserve indisponible. Veuillez réessayer.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",

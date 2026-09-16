@@ -88,6 +88,29 @@ describe('XrpSendAmount', () => {
 		);
 	});
 
+	// Base-only is the smallest reserve the ledger can demand, so while the requirement is
+	// unknown nothing may be offered: any figure would risk a send the ledger rejects.
+	it('offers nothing while the reserve is unknown', () => {
+		reserveStore.setReserve(undefined);
+
+		const { container } = renderAmount();
+
+		expect(maxAmount(container)).toBe(0);
+	});
+
+	it('offers the spendable amount again once the reserve is known', () => {
+		reserveStore.setReserve(undefined);
+
+		expect(maxAmount(renderAmount().container)).toBe(0);
+
+		reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 1 }));
+
+		expect(maxAmount(renderAmount().container)).toBeCloseTo(
+			spendableXrp(getXrpReserveDrops({ ownerCount: 1 })),
+			6
+		);
+	});
+
 	it('offers less as the owner count grows', () => {
 		reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 0 }));
 

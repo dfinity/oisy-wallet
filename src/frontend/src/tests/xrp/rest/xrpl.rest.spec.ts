@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
@@ -217,12 +218,22 @@ describe('xrpl.rest', () => {
 			expect(info.ownerCount).toBe(0);
 		});
 
-		it('throws for an unfunded account', async () => {
+		// Typed so callers can tell "owns nothing" apart from an operational failure.
+		it('throws XrpAccountNotFoundError for an unfunded account', async () => {
 			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
 
 			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'actNotFound'
+				XrpAccountNotFoundError
 			);
+		});
+
+		it('throws a plain error for an operational failure', async () => {
+			mockFetchResponse({ body: { result: { error: 'internal' } } });
+
+			const promise = loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			await expect(promise).rejects.toThrow('internal');
+			await expect(promise).rejects.not.toBeInstanceOf(XrpAccountNotFoundError);
 		});
 	});
 

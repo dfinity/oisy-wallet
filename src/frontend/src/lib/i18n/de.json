@@ -1021,6 +1021,7 @@
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
 			"xrp_destination_tag_invalid": "Das Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
+			"xrp_reserve_unavailable": "Reserveanforderung nicht verfügbar. Bitte versuchen Sie es erneut.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",

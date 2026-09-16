@@ -1021,6 +1021,7 @@
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
 			"xrp_destination_tag_invalid": "Thẻ đích phải là số nguyên từ 0 đến 4294967295.",
+			"xrp_reserve_unavailable": "Không lấy được yêu cầu dự trữ. Vui lòng thử lại.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",

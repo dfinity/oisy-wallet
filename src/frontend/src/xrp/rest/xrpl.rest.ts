@@ -88,6 +88,12 @@ export const loadXrpBalance = async ({
  * `OwnerCount` is needed for the reserve: every ledger object the account owns raises the
  * amount it must retain beyond the base reserve.
  */
+/**
+ * The account is not on-ledger. Distinct from an operational failure: it means the account owns
+ * nothing, so the base reserve alone genuinely describes its requirement.
+ */
+export class XrpAccountNotFoundError extends Error {}
+
 export const loadXrpAccountInfo = async ({
 	address,
 	network
@@ -105,6 +111,10 @@ export const loadXrpAccountInfo = async ({
 		{ Balance: string; Sequence: number; OwnerCount?: number } | undefined;
 
 	if (isNullish(accountData)) {
+		if (result.error === 'actNotFound') {
+			throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+		}
+
 		throw new Error(
 			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'missing account_data'}`
 		);

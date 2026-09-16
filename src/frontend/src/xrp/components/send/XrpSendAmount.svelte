@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -34,9 +34,20 @@
 	// An XRPL account must retain its reserve — the base plus the owner reserve for every
 	// ledger object it owns. Neither that nor the fee is available to send, so both are
 	// subtracted from the max and required by the balance check.
-	let unavailable = $derived(($fee ?? ZERO) + $reserve);
+	//
+	// While the reserve is unknown NOTHING is offered as sendable: falling back to the base
+	// reserve would understate the requirement for an account owning objects, and falling back to
+	// zero would be worse still. The balance is therefore treated as entirely unavailable, which
+	// also renders Max as 0 rather than an amount the ledger would reject.
+	let unavailable = $derived(
+		isNullish($reserve) ? ($sendBalance ?? ZERO) : ($fee ?? ZERO) + $reserve
+	);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
+		if (isNullish($reserve)) {
+			return new XrpAmountAssertionError($i18n.send.assertion.xrp_reserve_unavailable);
+		}
+
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new XrpAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
