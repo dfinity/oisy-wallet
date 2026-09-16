@@ -82,8 +82,3 @@ export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
 // page is what the worker fetches again on every reload, and a few pages below it cover what a newly
 // enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
 export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;
-
-// How far over its size the cache is allowed to run before it is trimmed back to it. Trimming reads
-// the slot of everything it holds, so doing it on the write after the write that trimmed would read
-// them all again to drop a single transaction.
-export const SOLANA_TRANSACTION_DETAILS_CACHE_SLACK = 50;

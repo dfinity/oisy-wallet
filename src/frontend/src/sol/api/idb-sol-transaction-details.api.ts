@@ -1,11 +1,16 @@
-import {
-	SOLANA_TRANSACTION_DETAILS_CACHE_SIZE,
-	SOLANA_TRANSACTION_DETAILS_CACHE_SLACK
-} from '$sol/constants/sol.constants';
+import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
-import { clear, createStore, delMany, entries, get, keys, set, type UseStore } from 'idb-keyval';
+import {
+	clear,
+	createStore,
+	delMany,
+	get,
+	keys,
+	promisifyRequest,
+	type UseStore
+} from 'idb-keyval';
 
 /**
  * The details of a finalized Solana transaction, kept per network and signature.
@@ -14,35 +19,85 @@ import { clear, createStore, delMany, entries, get, keys, set, type UseStore } f
  * it: the worker's first page after a reload, whose own record of what it holds starts empty, and a
  * pager that derives a held record again for a token that does not hold it yet.
  *
- * The slots live in their own store so that trimming reads only the slots, never the details.
+ * Everything lives in one object store, so that each change is a single IndexedDB transaction: an
+ * entry is written or not, never half. The slot is part of the key, which lets trimming order the
+ * entries by reading their keys alone.
  */
-let stores: { details: UseStore; slots: UseStore } | undefined;
+const EPOCH_KEY = 'epoch';
 
-// The writes nobody is waiting for, so that clearing the cache at sign-out can.
-const pendingWrites = new Set<Promise<void>>();
+interface Idb {
+	store: UseStore;
+	// The session this realm writes for, read when the realm loads the module. Clearing the store
+	// removes it, so the realms of a session that ended (the network worker as much as the main
+	// thread) write nothing after sign-out, whether or not they were waiting on a fetch at the time.
+	epoch: Promise<string | undefined>;
+}
 
-// Opened on first use rather than at module load: the dapp is pre-rendered without IndexedDB, and
-// this module is reached from the worker realm as well.
-const idbStores = (): { details: UseStore; slots: UseStore } | undefined => {
+let idb: Idb | undefined;
+
+// An epoch is created by the first realm of a session that finds none, in the same transaction that
+// reads it, so that two realms starting together agree on one.
+const readEpoch = async (store: UseStore): Promise<string | undefined> => {
+	try {
+		return await store('readwrite', (objectStore) => {
+			const request = objectStore.get(EPOCH_KEY);
+
+			// Chained by hand rather than with promises, as `idb-keyval` does for `update`: a promise
+			// continuation can run after the transaction has closed.
+			return new Promise<string>((resolve, reject) => {
+				request.onsuccess = () => {
+					if (typeof request.result === 'string') {
+						resolve(request.result);
+
+						return;
+					}
+
+					const epoch = crypto.randomUUID();
+
+					objectStore.put(epoch, EPOCH_KEY);
+
+					resolve(epoch);
+				};
+
+				request.onerror = () => reject(request.error);
+			});
+		});
+	} catch (_err: unknown) {
+		// Without an epoch nothing is written, which is where the caller was before this cache existed.
+		return undefined;
+	}
+};
+
+const openIdb = (): Idb | undefined => {
+	// The dapp is pre-rendered without IndexedDB.
 	if (typeof indexedDB === 'undefined') {
 		return undefined;
 	}
 
-	stores ??= {
-		details: createStore('oisy-sol-transaction-details', 'details'),
-		slots: createStore('oisy-sol-transaction-detail-slots', 'slots')
-	};
+	if (isNullish(idb)) {
+		const store = createStore('oisy-sol-transaction-details', 'details');
 
-	return stores;
+		idb = { store, epoch: readEpoch(store) };
+	}
+
+	return idb;
 };
 
+// Opened as the module loads rather than on first use, so that a realm takes the epoch of the session
+// it started in: a worker that fetched nothing yet when the user signed out must not adopt the next
+// session's epoch on its first write.
+openIdb();
+
+// The slot is zero-padded to the 20 digits of a u64, so that the keys of a network sort by slot.
 const detailKey = ({
 	network,
-	signature
+	signature,
+	slot
 }: {
 	network: SolanaNetworkType;
 	signature: SolSignature['signature'];
-}): string => `${network}#${signature}`;
+	slot: SolSignature['slot'];
+}): string => `${network}#${slot.toString().padStart(20, '0')}#${signature}`;
 
 const networkPrefix = (network: SolanaNetworkType): string => `${network}#`;
 
@@ -52,119 +107,108 @@ const networkPrefix = (network: SolanaNetworkType): string => `${network}#`;
  */
 export const getIdbSolTransactionDetail = async ({
 	network,
-	signature
+	signature: { signature, slot }
 }: {
 	network: SolanaNetworkType;
-	signature: SolSignature['signature'];
+	signature: Pick<SolSignature, 'signature' | 'slot'>;
 }): Promise<SolRpcTransaction | undefined> => {
-	const idb = idbStores();
+	const current = openIdb();
 
-	if (isNullish(idb)) {
+	if (isNullish(current)) {
 		return undefined;
 	}
 
 	try {
-		return await get<SolRpcTransaction>(detailKey({ network, signature }), idb.details);
+		return await get<SolRpcTransaction>(detailKey({ network, signature, slot }), current.store);
 	} catch (_err: unknown) {
 		return undefined;
 	}
 };
 
-// Everything above the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots of the network is
-// dropped: the history a user scrolls back to is bounded, and an unbounded cache would grow with
-// every transaction ever looked at.
-const trimNetwork = async ({
-	network,
-	idb
-}: {
-	network: SolanaNetworkType;
-	idb: { details: UseStore; slots: UseStore };
-}) => {
+// Everything below the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots of the network is
+// dropped. The keys alone say which: an entry has no other part that could be left behind.
+const trimNetwork = async ({ network, store }: { network: SolanaNetworkType; store: UseStore }) => {
 	const prefix = networkPrefix(network);
 
-	const storedKeys = (await keys<string>(idb.slots)).filter((key) => key.startsWith(prefix));
+	const networkKeys = (await keys<string>(store)).filter((key) => key.startsWith(prefix)).sort();
 
-	if (
-		storedKeys.length <=
-		SOLANA_TRANSACTION_DETAILS_CACHE_SIZE + SOLANA_TRANSACTION_DETAILS_CACHE_SLACK
-	) {
-		return;
-	}
-
-	const storedSlots = (await entries<string, SolSignature['slot']>(idb.slots)).filter(([key]) =>
-		key.startsWith(prefix)
+	const staleKeys = networkKeys.slice(
+		0,
+		Math.max(0, networkKeys.length - SOLANA_TRANSACTION_DETAILS_CACHE_SIZE)
 	);
 
-	const staleKeys = storedSlots
-		.sort(([, a], [, b]) => (a === b ? 0 : a > b ? -1 : 1))
-		.slice(SOLANA_TRANSACTION_DETAILS_CACHE_SIZE)
-		.map(([key]) => key);
-
-	await delMany(staleKeys, idb.details);
-	await delMany(staleKeys, idb.slots);
+	if (staleKeys.length > 0) {
+		await delMany(staleKeys, store);
+	}
 };
 
 /**
  * Keeps the details of a finalized transaction. Nothing else may be kept: a transaction that is not
  * finalized yet can still be dropped by the network, and its details would then never be asked for
  * again.
+ *
+ * A cache write must never fail a load either, so a browser that refuses to store (private browsing,
+ * a full quota) leaves the loaded transaction exactly as it is.
  */
-export const setIdbSolTransactionDetail = ({
+export const setIdbSolTransactionDetail = async ({
 	network,
 	transaction
 }: {
 	network: SolanaNetworkType;
 	transaction: SolRpcTransaction;
 }): Promise<void> => {
-	const idb = idbStores();
+	const current = openIdb();
 
-	if (isNullish(idb) || transaction.confirmationStatus !== 'finalized') {
-		return Promise.resolve();
+	if (isNullish(current) || transaction.confirmationStatus !== 'finalized') {
+		return;
 	}
 
-	const write = writeDetail({ network, transaction, idb });
-
-	pendingWrites.add(write);
-
-	return write.finally(() => pendingWrites.delete(write));
-};
-
-const writeDetail = async ({
-	network,
-	transaction,
-	idb
-}: {
-	network: SolanaNetworkType;
-	transaction: SolRpcTransaction;
-	idb: { details: UseStore; slots: UseStore };
-}) => {
-	const key = detailKey({ network, signature: transaction.signature });
-
-	// A cache write must never fail a load either, so a browser that refuses to store (private
-	// browsing, a full quota) leaves the loaded transaction exactly as it is.
 	try {
-		// The slot goes first: trimming reads the slots, so a detail written without one would never
-		// be dropped, while a slot left without its detail is only an entry that trimming deletes.
-		await set(key, transaction.slot, idb.slots);
-		await set(key, transaction, idb.details);
+		const epoch = await current.epoch;
 
-		await trimNetwork({ network, idb });
+		if (isNullish(epoch)) {
+			return;
+		}
+
+		const key = detailKey({
+			network,
+			signature: transaction.signature,
+			slot: transaction.slot
+		});
+
+		// The epoch is checked in the transaction that writes, so a clear cannot slip in between.
+		await current.store('readwrite', (objectStore) => {
+			const request = objectStore.get(EPOCH_KEY);
+
+			return new Promise<void>((resolve, reject) => {
+				request.onsuccess = () => {
+					if (request.result === epoch) {
+						objectStore.put(transaction, key);
+					}
+
+					resolve(promisifyRequest(objectStore.transaction));
+				};
+
+				request.onerror = () => reject(request.error);
+			});
+		});
+
+		await trimNetwork({ network, store: current.store });
 	} catch (_err: unknown) {
 		// Nothing to recover: the detail is already loaded, and the next load fetches it again.
 	}
 };
 
+/**
+ * Empties the cache, epoch included. This realm keeps the epoch it started with, and so writes
+ * nothing more: sign-out reloads the page, and the realms of the next session start a new epoch.
+ */
 export const clearIdbSolTransactionDetails = async () => {
-	const idb = idbStores();
+	const current = openIdb();
 
-	// Callers do not wait for a write, so one already on its way would land after the clear and leave
-	// the transactions of the session that is ending behind.
-	await Promise.allSettled([...pendingWrites]);
-
-	if (isNullish(idb)) {
+	if (isNullish(current)) {
 		return;
 	}
 
-	await clear(idb.details);
-	await clear(idb.slots);
+	await clear(current.store);
 };

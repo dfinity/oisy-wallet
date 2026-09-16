@@ -187,11 +187,15 @@ Only finalized details are kept: a transaction that is not finalized can still b
 network. Two realms that ask for the same signature before either has kept it still fetch it twice;
 the cache spares the repeat, not the race.
 
-The store keeps the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network, trimmed back
-to that size once it runs past it by `SOLANA_TRANSACTION_DETAILS_CACHE_SLACK`, and is cleared at
-sign-out with the other caches. Neither reading nor writing it may fail a
-load: a browser that refuses to store leaves the caller exactly where it was before the cache
-existed.
+The cache is one object store, keyed by network, zero-padded slot and signature, so every change is
+a single IndexedDB transaction and nothing can be left half written. Trimming keeps the newest
+`SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network by reading the keys alone.
+
+It is cleared at sign-out with the other caches. Each realm reads the store's epoch when it loads,
+and a write checks it in the same transaction that writes. Clearing removes the epoch, so no realm of
+the session that ended, the network worker included, writes anything after sign-out; the realms of
+the next session start a new one. Neither reading nor writing may fail a load: a browser that
+refuses to store leaves the caller exactly where it was before the cache existed.
 
 ## 4. Does not do
 

@@ -481,7 +481,7 @@ describe('solana.api', () => {
 				expect(transaction).toEqual(stored);
 				expect(getIdbSolTransactionDetail).toHaveBeenCalledExactlyOnceWith({
 					network: SolanaNetworks.mainnet,
-					signature: signature.signature
+					signature
 				});
 				expect(mockGetTransaction).not.toHaveBeenCalled();
 			});

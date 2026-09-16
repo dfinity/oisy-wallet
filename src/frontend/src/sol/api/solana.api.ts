@@ -123,10 +123,7 @@ export const fetchTransactionDetailForSignature = async ({
 	// worker's newest page again, and every record derived again for another token fetches its
 	// details again. Two realms that ask for the same signature before either has kept it still fetch
 	// it twice: this spares the repeat, not the race.
-	const storedTransaction = await getIdbSolTransactionDetail({
-		network,
-		signature: signature.signature
-	});
+	const storedTransaction = await getIdbSolTransactionDetail({ network, signature });
 
 	if (nonNullish(storedTransaction)) {
 		networkCache.set(signature.signature, storedTransaction);
