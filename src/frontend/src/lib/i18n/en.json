@@ -171,7 +171,8 @@
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances",
 			"notes": "Open notes",
-			"issue_tip": "Give a tip anyone can claim with a link or QR code"
+			"issue_tip": "Give a tip anyone can claim with a link or QR code",
+			"issue_tip_attention": "Give a tip anyone can claim with a link or QR code. $count of your tips need attention"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2848,7 +2849,7 @@
 			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
 			"overview_window": "Recent activity",
 			"overview_failed": "Needs attention",
-			"overview_failed_hint": "Somebody tried to claim and the payout did not go through. The links still work.",
+			"overview_failed_hint": "Somebody tried to claim and the payout did not go through. Nothing left your balance — open your history to see what each one needs.",
 			"overview_open": "Waiting to be claimed",
 			"overview_claimed": "Claimed",
 			"select_token": "Select token to issue tip",
@@ -2869,7 +2870,7 @@
 			"reserve_fee": "Fee to reserve",
 			"payout_fee": "Fee when claimed",
 			"fees_are_yours": "Both fees are paid by you. Whoever claims the tip receives the full amount.",
-			"reserved_by_tips": "$amount is already promised to tips you have created and waiting to be claimed, so it cannot be tipped again. Cancel one from your history to free it up.",
+			"reserved_by_tips": "$amount is already promised to tips you have created that are waiting to be claimed, so it cannot be tipped again. Cancel one from your history to free it up.",
 			"lapse_notice": "If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
 			"generate": "Generate",
 			"share_heading": "Your tip is ready",

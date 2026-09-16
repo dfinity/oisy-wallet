@@ -171,7 +171,8 @@
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
 			"show_balances": "छिपी हुई शेष राशि दिखाएं",
 			"notes": "नोट्स खोलें",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"

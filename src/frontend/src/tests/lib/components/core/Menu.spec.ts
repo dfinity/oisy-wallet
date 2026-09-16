@@ -17,22 +17,26 @@ import {
 	NAVIGATION_MENU_SETTINGS_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_TIP_BADGE,
+	NAVIGATION_MENU_TIP_BUTTON,
 	NAVIGATION_MENU_TIP_COUNT,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { tipsStore } from '$lib/stores/tips.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getSymbol } from '$lib/utils/modal.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({
@@ -321,7 +325,7 @@ describe('Menu', () => {
 
 		it('says how many once the menu is open', async () => {
 			// The dot says "something"; the count says how much, where there is room
-			// for it and a screen reader will read it.
+			// for it.
 			tipsStore.set([tip({ Failed: null })]);
 
 			const { container, queryByTestId } = render(Menu);
@@ -329,6 +333,54 @@ describe('Menu', () => {
 			container.querySelector<HTMLButtonElement>(menuButtonSelector)?.click();
 
 			await waitFor(() => expect(queryByTestId(NAVIGATION_MENU_TIP_COUNT)).toBeInTheDocument());
+		});
+
+		it('puts the count in the accessible name, not only in the badge', async () => {
+			// `ButtonMenu` renders its own `aria-label`, which replaces everything
+			// inside the button as the accessible name — so the badge above is
+			// decoration by construction and the count was announced nowhere. Asserted
+			// on the label rather than on the badge, because the badge being present
+			// was never the part that was broken.
+			tipsStore.set([tip({ Failed: null }), { ...tip({ Failed: null }), tip_id: 'another' }]);
+
+			const { container } = render(Menu);
+
+			container.querySelector<HTMLButtonElement>(menuButtonSelector)?.click();
+
+			await waitFor(() =>
+				expect(
+					container.querySelector(`button[data-tid=${NAVIGATION_MENU_TIP_BUTTON}]`)
+				).toBeInTheDocument()
+			);
+
+			const label = container
+				.querySelector(`button[data-tid=${NAVIGATION_MENU_TIP_BUTTON}]`)
+				?.getAttribute('aria-label');
+
+			expect(label).toContain('2');
+			expect(label).toBe(
+				replacePlaceholders(get(i18n).navigation.alt.issue_tip_attention, { $count: '2' })
+			);
+		});
+
+		it('leaves the plain label alone when nothing needs attention', async () => {
+			tipsStore.set([tip({ Reserved: null })]);
+
+			const { container } = render(Menu);
+
+			container.querySelector<HTMLButtonElement>(menuButtonSelector)?.click();
+
+			await waitFor(() =>
+				expect(
+					container.querySelector(`button[data-tid=${NAVIGATION_MENU_TIP_BUTTON}]`)
+				).toBeInTheDocument()
+			);
+
+			expect(
+				container
+					.querySelector(`button[data-tid=${NAVIGATION_MENU_TIP_BUTTON}]`)
+					?.getAttribute('aria-label')
+			).toBe(get(i18n).navigation.alt.issue_tip);
 		});
 	});
 });

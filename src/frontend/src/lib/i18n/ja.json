@@ -171,7 +171,8 @@
 			"hide_balances": "表示中の残高を非表示にする",
 			"show_balances": "非表示の残高を表示する",
 			"notes": "メモを開く",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"

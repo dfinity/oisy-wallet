@@ -4,7 +4,7 @@ import { tokens } from '$lib/derived/tokens.derived';
 import { tipsStore } from '$lib/stores/tips.store';
 import type { TokenId } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { tipStatusKey } from '$lib/utils/tip-status.utils';
+import { tipFailureReasonKey, tipStatusKey } from '$lib/utils/tip-status.utils';
 import { tippableTokens } from '$lib/utils/tip.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -146,7 +146,18 @@ export const tipsOverview: Readable<TipsOverview> = derived(
 						: 0;
 
 				if (status === 'failed') {
-					return { ...acc, failed: acc.failed + 1, openUsd: acc.openUsd + usd };
+					// Counted in the attention row either way, but only money that can
+					// still pay out belongs in "waiting to be claimed". `Uncovered` means
+					// the reservation was reduced or revoked, so the link is dead and
+					// nothing is waiting — quoting it as open money would tell the sender
+					// a sum is still out there when only a new tip can send it.
+					const claimable = tipFailureReasonKey(tip) !== 'uncovered';
+
+					return {
+						...acc,
+						failed: acc.failed + 1,
+						openUsd: claimable ? acc.openUsd + usd : acc.openUsd
+					};
 				}
 
 				if (status === 'reserved') {

@@ -171,7 +171,8 @@
 			"hide_balances": "Nascondi i saldi visualizzati",
 			"show_balances": "Mostra i saldi nascosti",
 			"notes": "Apri le note",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Docs"

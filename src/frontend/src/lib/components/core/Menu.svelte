@@ -65,7 +65,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -131,6 +131,17 @@
 	const payDialogModalId = Symbol();
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
+
+	// `ButtonMenu` renders its own `aria-label`, which replaces the button's
+	// contents as the accessible name — so the count badge inside it is announced
+	// nowhere unless it is said here too.
+	let tipMenuLabel = $derived(
+		$tipsOverview.failed > 0
+			? replacePlaceholders($i18n.navigation.alt.issue_tip_attention, {
+					$count: `${$tipsOverview.failed}`
+				})
+			: $i18n.navigation.alt.issue_tip
+	);
 </script>
 
 <!--
@@ -143,7 +154,8 @@
 	and transaction-filter menus already put on a toolbar icon, so a dot up here
 	means one consistent thing instead of one thing per feature. It carries no text,
 	because a bare dot read out on its own says something is wrong without saying
-	what — the counted badge on the menu item below is what a screen reader gets.
+	what — the count reaches a screen reader through the tip entry's own
+	`aria-label` once the menu is open.
 -->
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
@@ -273,7 +285,7 @@
 
 			{#if TIPS_ENABLED}
 				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.issue_tip}
+					ariaLabel={tipMenuLabel}
 					onclick={() => modalStore.openTip(tipModalId)}
 					testId={NAVIGATION_MENU_TIP_BUTTON}
 				>
@@ -281,8 +293,13 @@
 
 					<!--
 						The count, where the dot on the icon only said "something". Inside the
-						menu there is room to say how many, and it is read out rather than
-						announced as a decoration.
+						menu there is room to say how many.
+
+						It reaches a screen reader through the button's `aria-label`, not from
+						here: `ButtonMenu` sets an explicit label, which replaces everything
+						inside it as the accessible name. So this badge is decoration by
+						construction, and the count has to be in the label or it is announced
+						nowhere.
 					-->
 					<span class="flex flex-1 items-center justify-between gap-2">
 						{$i18n.navigation.text.issue_tip}

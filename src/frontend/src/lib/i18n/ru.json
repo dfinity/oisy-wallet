@@ -171,7 +171,8 @@
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
 			"notes": "Открыть заметки",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Документы"
