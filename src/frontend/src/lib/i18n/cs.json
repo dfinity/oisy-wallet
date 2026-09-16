@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
 			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL.",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "Chyba při načítání informací o peněžence XRP."
 		}
 	},
 	"hero": {

@@ -771,7 +771,7 @@
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "BTC वॉलेट जानकारी लोड करते समय त्रुटि।",
 			"sol_wallet_error": "SOL वॉलेट जानकारी लोड करते समय त्रुटि।",
-			"xrp_wallet_error": ""
+			"xrp_wallet_error": "XRP वॉलेट जानकारी लोड करते समय त्रुटि।"
 		}
 	},
 	"hero": {
