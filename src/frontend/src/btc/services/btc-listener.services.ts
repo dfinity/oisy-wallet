@@ -27,14 +27,14 @@ export const syncWallet = ({
 		}
 	} = data;
 
-	// Only parse new transactions when certified is false (when we actually receive transaction data)
-	// When certified is true, newTransactions are not provided
-	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
-		? null
-		: JSON.parse(newTransactions, jsonReviver);
+	// The worker posts the new transactions on query and certified syncs alike: after the
+	// query-only warm-up, the certified sync is the only one still running.
+	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
+		newTransactions,
+		jsonReviver
+	);
 
-	// Only store transactions when we have actual transaction data (certified === false)
-	if (nonNullish(providerTransactions)) {
+	if (providerTransactions.length > 0) {
 		btcTransactionsStore.prepend({
 			tokenId,
 			transactions: providerTransactions
