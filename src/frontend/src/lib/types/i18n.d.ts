@@ -524,6 +524,7 @@ interface I18nInit {
 		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
+		xrp_wallet_error: string;
 	};
 }
 
@@ -681,6 +682,14 @@ interface I18nReceive {
 			display_solana_address_qr: string;
 		};
 	};
+	xrp: {
+		text: {
+			xrp_address: string;
+			xrp_address_title: string;
+			xrp_address_copied: string;
+			display_xrp_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
@@ -793,6 +802,7 @@ interface I18nSend {
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
+		ethereum_insufficient_funds: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -2377,6 +2387,7 @@ interface I18nTip {
 		select_token: string;
 		create_title: string;
 		share_title: string;
+		preparing_title: string;
 		empty_balance_title: string;
 		empty_balance_description: string;
 		no_supported_tokens_title: string;
@@ -2402,6 +2413,8 @@ interface I18nTip {
 		scan_or_photo: string;
 		expires_at: string;
 		done: string;
+		generating_link: string;
+		recovering_link: string;
 		link_not_saved: string;
 		reserve_failed: string;
 		status_title: string;
@@ -2436,6 +2449,32 @@ interface I18nTip {
 		claim_failed: string;
 		unreachable_title: string;
 		unreachable_description: string;
+		history_title: string;
+		history_empty: string;
+		history_failed: string;
+		group_failed: string;
+		group_failed_hint: string;
+		failure_uncovered: string;
+		failure_insufficient_funds: string;
+		failure_transfer_failed: string;
+		group_open: string;
+		group_claimed: string;
+		group_expired: string;
+		status_reserved: string;
+		status_failed: string;
+		status_claimed: string;
+		status_expired: string;
+		status_cancelled: string;
+		claimed_by: string;
+		tip_amount: string;
+		expires_in: string;
+		link_unavailable: string;
+		link_recovery_failed: string;
+		cancel_tip: string;
+		cancel_failed: string;
+		cancelled_toast: string;
+		cancelled_allowance_kept: string;
+		token_unavailable: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;

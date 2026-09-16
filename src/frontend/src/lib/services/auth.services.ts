@@ -40,6 +40,7 @@ import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
+import { clearIdbSolTransactionDetails } from '$sol/api/idb-sol-transaction-details.api';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -253,6 +254,9 @@ const clearIdbStoreList = [
 	clearIdbEthTransactions,
 	clearIdbIcTransactions,
 	clearIdbSolTransactions,
+	// The details a Solana record is derived from are chain data rather than the user's, but they
+	// say which transactions this wallet looked at, so they go with the rest of the session.
+	clearIdbSolTransactionDetails,
 	// Balances
 	clearIdbBalances
 ];
