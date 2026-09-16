@@ -26,7 +26,18 @@
 	// The reserve depends on how many ledger objects the account owns, which only
 	// `account_info` reports. It is fetched once per account rather than on the fee timer:
 	// unlike the fee it does not move while a send is being composed.
-	const loadReserve = async () => {
+	// One generation per effect run, captured by BOTH loaders so they cannot invalidate each
+	// other. It is what lets a resolving request tell whether it still owns the stores: for the
+	// fee poller the interval is installed only after the first request resolves, so the clear at
+	// the top of `updateFee` cannot cover it; for the reserve it keeps an older account's response
+	// from overwriting a newer one.
+	let generation = 0;
+
+	const loadReserve = async (id: number) => {
+		// Cleared up front so the previous account's reserve cannot be used while this loads:
+		// `undefined` is the "unknown" state that blocks the form.
+		reserveStore.setReserve(undefined);
+
 		if (!observe || isNullish(token)) {
 			return;
 		}
@@ -41,8 +52,16 @@
 		try {
 			const { ownerCount } = await loadXrpAccountInfo({ address, network });
 
+			if (id !== generation) {
+				return;
+			}
+
 			reserveStore.setReserve(getXrpReserveDrops({ ownerCount }));
 		} catch (err: unknown) {
+			if (id !== generation) {
+				return;
+			}
+
 			// An account that is not on-ledger owns nothing, so the base reserve genuinely describes
 			// it. Any other failure leaves the requirement unknown, and base-only is the SMALLEST
 			// figure the ledger can demand — using it would overstate the sendable maximum for an
@@ -74,17 +93,9 @@
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 
-	// The interval is installed only AFTER the first request resolves, so the clear at the top of
-	// `updateFee` cannot cover it. Without a generation marker an unmount or a rerun during that
-	// request would leave the resolving call to install a poller nothing holds a handle to, and two
-	// overlapping calls would both assign `timer`, leaking the first interval.
-	let updateId = 0;
-
 	const clearTimer = () => clearInterval(timer);
 
-	const updateFee = async () => {
-		const id = ++updateId;
-
+	const updateFee = async (id: number) => {
 		clearTimer();
 
 		if (!observe) {
@@ -93,7 +104,7 @@
 
 		await estimateFee();
 
-		if (id !== updateId || !observe) {
+		if (id !== generation || !observe) {
 			return;
 		}
 
@@ -104,13 +115,15 @@
 		[token, $xrpAddressMainnet, observe];
 
 		untrack(() => {
-			void updateFee();
-			void loadReserve();
+			const id = ++generation;
+
+			void updateFee(id);
+			void loadReserve(id);
 		});
 	});
 
 	onDestroy(() => {
-		updateId++;
+		generation++;
 		clearTimer();
 	});
 </script>
