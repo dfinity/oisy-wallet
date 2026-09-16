@@ -1,7 +1,7 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import XrpSendDestinationTag from '$xrp/components/send/XrpSendDestinationTag.svelte';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('XrpSendDestinationTag', () => {
@@ -13,14 +13,20 @@ describe('XrpSendDestinationTag', () => {
 		mockContext.set(SEND_CONTEXT_KEY, sendContext);
 	});
 
+	let lastContainer: HTMLElement;
+
 	const renderInput = (): HTMLInputElement => {
 		const { container } = render(XrpSendDestinationTag, { context: mockContext });
 		const input = container.querySelector('input');
 
 		expect(input).not.toBeNull();
 
+		lastContainer = container;
+
 		return input as HTMLInputElement;
 	};
+
+	const error = () => lastContainer.querySelector('[data-tid="xrp-destination-tag-error"]');
 
 	it('stores a valid destination tag', async () => {
 		const input = renderInput();
@@ -42,6 +48,47 @@ describe('XrpSendDestinationTag', () => {
 		const input = renderInput();
 
 		await fireEvent.input(input, { target: { value: '99999999999' } });
+
+		expect(get(sendContext.sendXrpDestinationTag)).toBeUndefined();
+	});
+
+	// A tag the user typed that does not parse must be reported, not silently dropped: sending to
+	// an exchange deposit address without its tag is not auto-creditable.
+	it.each(['abc', '-1', '1.5', '99999999999', '1e3', '0x10'])(
+		'reports %j as invalid instead of dropping it silently',
+		async (value) => {
+			const input = renderInput();
+
+			await fireEvent.input(input, { target: { value } });
+
+			expect(error()).not.toBeNull();
+			expect(get(sendContext.sendXrpDestinationTag)).toBeUndefined();
+		}
+	);
+
+	it.each(['0', '12345', '4294967295'])('reports no error for the valid tag %j', async (value) => {
+		const input = renderInput();
+
+		await fireEvent.input(input, { target: { value } });
+
+		expect(error()).toBeNull();
+		expect(get(sendContext.sendXrpDestinationTag)).toBe(Number(value));
+	});
+
+	// Empty means "no tag", which is a valid choice.
+	it('clears the error when the field is emptied', async () => {
+		const input = renderInput();
+
+		await fireEvent.input(input, { target: { value: 'abc' } });
+
+		expect(error()).not.toBeNull();
+
+		await fireEvent.input(input, { target: { value: '' } });
+
+		// The error element slides out, so it lingers in the DOM until the transition ends.
+		await waitFor(() => {
+			expect(error()).toBeNull();
+		});
 
 		expect(get(sendContext.sendXrpDestinationTag)).toBeUndefined();
 	});
