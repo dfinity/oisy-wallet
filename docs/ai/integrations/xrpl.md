@@ -72,7 +72,10 @@ no XRPL SDK dependency. The response's `accepted` boolean is **authoritative** f
 whether the node took the transaction (applied / queued / broadcast / kept). The
 `engine_result` string is provisional: its `ter` prefix is a retry class, so it is
 not on its own proof of acceptance — `isXrpSubmitAccepted` requires `accepted === true`
-**and** a `tes`/`ter` class before treating a submission as taken.
+**and** a `tes`/`ter`/`tec` class before treating a submission as taken. `tec` is in
+that list because it means the node _applied_ the transaction and claimed the fee:
+failing at submit would report an applied payment as rejected and skip the
+confirmation that knows which `tec` it was. `tem`/`tef`/`tel` were not applied at all.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 

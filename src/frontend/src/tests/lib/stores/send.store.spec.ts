@@ -53,13 +53,13 @@ describe('send.store', () => {
 			expect(get(context.sendXrpDestinationTag)).toBeUndefined();
 		});
 
-		// Going back and returning to the same recipient must not resurrect a dropped tag.
+		// The tag must be discarded, not merely hidden: without touching the tag field for B, going
+		// back to A must not resurrect A's tag.
 		it('should not restore the tag when the original destination is re-entered', () => {
 			context.sendDestination.set(destinationA);
 			context.sendXrpDestinationTag.set(12_345);
 
 			context.sendDestination.set(destinationB);
-			context.sendXrpDestinationTag.set(undefined);
 			context.sendDestination.set(destinationA);
 
 			expect(get(context.sendXrpDestinationTag)).toBeUndefined();
