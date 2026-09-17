@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Částka je neplatná.",
 			"xrp_destination_tag_invalid": "Cílový tag musí být celé číslo mezi 0 a 4294967295.",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "Nedostatek prostředků: částka musí ponechat dost na pokrytí poplatku a základní rezervy XRP.",
+			"insufficient_funds_for_reserve": "Nedostatek prostředků: částka musí ponechat dost na pokrytí poplatku a požadované rezervy účtu XRP.",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
 			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Nedostatek prostředků Ethereum k pokrytí poplatků",

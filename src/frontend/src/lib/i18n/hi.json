@@ -1024,7 +1024,7 @@
 			"amount_invalid": "राशि अमान्य है।",
 			"xrp_destination_tag_invalid": "डेस्टिनेशन टैग 0 और 4294967295 के बीच एक पूर्ण संख्या होनी चाहिए।",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "अपर्याप्त धन: राशि को शुल्क और XRP मूल रिज़र्व को कवर करने के लिए पर्याप्त शेष छोड़ना चाहिए।",
+			"insufficient_funds_for_reserve": "अपर्याप्त धन: राशि को शुल्क और आवश्यक XRP खाता रिज़र्व को कवर करने के लिए पर्याप्त शेष छोड़ना चाहिए।",
 			"insufficient_funds_for_gas": "गैस के लिए अपर्याप्त धन",
 			"insufficient_funds_for_amount": "राशि के लिए अपर्याप्त धन",
 			"insufficient_ethereum_funds_to_cover_the_fees": "शुल्क को कवर करने के लिए अपर्याप्त एथेरियम धन",

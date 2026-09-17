@@ -1024,7 +1024,7 @@
 			"amount_invalid": "금액이 유효하지 않습니다.",
 			"xrp_destination_tag_invalid": "목적지 태그는 0에서 4294967295 사이의 정수여야 합니다.",
 			"insufficient_funds_verbose_btc": "지정한 금액이 전송 가능한 금액보다 많습니다. 미확인 수신 비트코인은 확인 전까지 전송할 수 없습니다.",
-			"insufficient_funds_for_reserve": "잔액이 부족합니다. 수수료와 XRP 기본 준비금을 충당할 만큼 남기는 금액이어야 합니다.",
+			"insufficient_funds_for_reserve": "잔액이 부족합니다. 수수료와 XRP 계정에 필요한 준비금을 충당할 만큼 남기는 금액이어야 합니다.",
 			"insufficient_funds_for_gas": "가스 비용을 위한 잔액이 부족합니다",
 			"insufficient_funds_for_amount": "금액을 위한 잔액이 부족합니다",
 			"insufficient_ethereum_funds_to_cover_the_fees": "수수료를 충당할 이더리움 잔액이 부족합니다",

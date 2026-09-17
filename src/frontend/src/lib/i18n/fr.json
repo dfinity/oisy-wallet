@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Le montant est invalide.",
 			"xrp_destination_tag_invalid": "Le tag de destination doit être un nombre entier entre 0 et 4294967295.",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de base XRP.",
+			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de compte XRP requise.",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fonds Ethereum insuffisants pour couvrir les frais",

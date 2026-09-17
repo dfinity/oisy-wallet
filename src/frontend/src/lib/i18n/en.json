@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Amount is invalid.",
 			"xrp_destination_tag_invalid": "Destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
-			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the XRP base reserve.",
+			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",

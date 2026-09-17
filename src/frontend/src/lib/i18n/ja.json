@@ -1024,7 +1024,7 @@
 			"amount_invalid": "金額が無効です。",
 			"xrp_destination_tag_invalid": "宛先タグは 0 から 4294967295 までの整数である必要があります。",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPの基本準備金を賄える分を残す金額にしてください。",
+			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPアカウントに必要な準備金を賄える分を残す金額にしてください。",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
 			"insufficient_ethereum_funds_to_cover_the_fees": "手数料をカバーするEthereumの資金が不足しています。",

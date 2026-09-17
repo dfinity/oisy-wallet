@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Kwota jest nieprawidłowa.",
 			"xrp_destination_tag_invalid": "Tag docelowy musi być liczbą całkowitą od 0 do 4294967295.",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "Niewystarczające środki: kwota musi pozostawić dość na pokrycie opłaty i podstawowej rezerwy XRP.",
+			"insufficient_funds_for_reserve": "Niewystarczające środki: kwota musi pozostawić dość na pokrycie opłaty i wymaganej rezerwy konta XRP.",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
 			"insufficient_funds_for_amount": "Niewystarczające środki na kwotę",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Niewystarczające środki Ethereum na pokrycie opłat",

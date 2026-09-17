@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Betrag ist ungültig.",
 			"xrp_destination_tag_invalid": "Das Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die XRP-Grundreserve zu decken.",
+			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die erforderliche XRP-Kontoreserve zu decken.",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Unzureichende Ethereum-Mittel, um die Gebühren zu decken.",
