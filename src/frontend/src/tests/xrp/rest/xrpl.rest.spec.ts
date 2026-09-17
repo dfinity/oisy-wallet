@@ -201,6 +201,40 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// `engine_result` is read with `startsWith` outside the try that wraps this call, so a
+		// non-string would throw there — after the blob was broadcast — and turn an ambiguous submit
+		// into a reported failure. It must fail here instead, where the caller treats it as
+		// "go and confirm".
+		it.each([7, true, {}, ['tesSUCCESS'], null])(
+			'throws for the non-string engine_result %j',
+			async (engine_result) => {
+				mockFetchResponse({ body: { result: { engine_result, accepted: true } } });
+
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).rejects.toThrow('Unexpected XRPL submit response: no string engine_result');
+			}
+		);
+
+		// Cosmetic fields must not cost the send a minute of polling: the message only reaches an
+		// error string and the hash is derived locally.
+		it('tolerates malformed engine_result_message and tx_json', async () => {
+			mockFetchResponse({
+				body: {
+					result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json: 'nope' }
+				}
+			});
+
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).resolves.toEqual(
+				{
+					engineResult: 'tesSUCCESS',
+					engineResultMessage: undefined,
+					txHash: undefined,
+					accepted: false
+				}
+			);
+		});
+
 		it('throws when the response has no engine_result', async () => {
 			mockFetchResponse({ body: { result: { error: 'invalidTransaction' } } });
 

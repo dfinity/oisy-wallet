@@ -6,13 +6,14 @@ import {
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
+	XrplSubmitResultSchema,
 	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpAccountInfo, XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 const xrpJsonRpc = async ({
 	network,
@@ -272,21 +273,25 @@ export const submitXrpTransaction = async ({
 }): Promise<XrpSubmitResult> => {
 	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
 
-	const engineResult = result.engine_result as string | undefined;
+	const parsed = XrplSubmitResultSchema.safeParse(result);
 
-	if (isNullish(engineResult)) {
+	if (!parsed.success) {
 		throw new Error(
-			`Unexpected XRPL submit response: ${(result.error as string) ?? 'no engine_result'}`
+			`Unexpected XRPL submit response: ${
+				nonNullish(result.error) ? String(result.error) : 'no string engine_result'
+			}`
 		);
 	}
 
+	const { data } = parsed;
+
 	return {
-		engineResult,
-		engineResultMessage: result.engine_result_message as string | undefined,
-		txHash: (result.tx_json as { hash?: string } | undefined)?.hash,
-		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
-		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
-		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
-		accepted: result.accepted === true
+		engineResult: data.engine_result,
+		engineResultMessage: data.engine_result_message,
+		txHash: data.tx_json?.hash,
+		// Reported for the caller's record only. It says this node took the transaction
+		// (applied/queued/broadcast/kept), which is neither necessary nor sufficient for the send to
+		// have happened, so it does not gate anything — see `isXrpSubmitFinalFailure`.
+		accepted: data.accepted === true
 	};
 };

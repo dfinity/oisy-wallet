@@ -132,6 +132,22 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// A shape failure is indistinguishable from a lost response: the node may have taken the blob
+	// either way, so it must reach confirmation rather than being reported as a rejection.
+	it('still confirms when the submit response is malformed', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(
+			new Error('Unexpected XRPL submit response: no string engine_result')
+		);
+
+		const { txHash, submitResult } = await sendXrp(params);
+
+		expect(submitResult).toBeUndefined();
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
+			hash: txHash,
+			network: XrpNetworks.mainnet
+		});
+	});
+
 	it('reports expiry rather than failure when a lost submit never appears', async () => {
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
