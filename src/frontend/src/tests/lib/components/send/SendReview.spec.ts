@@ -59,15 +59,20 @@ describe('SendReview', () => {
 	});
 
 	it('still warns and gates when the destination is a saved contact', () => {
-		contactsStore.set(
-			getMockContactsUi({
-				n: 1,
-				name: 'Contact with Ethereum address',
-				addresses: [mockContactEthAddressUi]
-			})
-		);
+		// The contact reaches the review through two channels - the prop the wizard fills in and the
+		// store its destination card falls back to - so both are set, and an exemption written
+		// against either would fail here.
+		const [selectedContact] = getMockContactsUi({
+			n: 1,
+			name: 'Contact with Ethereum address',
+			addresses: [mockContactEthAddressUi]
+		});
+		contactsStore.set([selectedContact]);
 
-		const { getByTestId } = render(SendReview, { props, context: mockContext() });
+		const { getByTestId } = render(SendReview, {
+			props: { ...props, selectedContact },
+			context: mockContext()
+		});
 
 		expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
 		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
