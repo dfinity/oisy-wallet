@@ -16,6 +16,7 @@
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 	import failedTipImg from '$lib/assets/failed-vip-reward.svg';
@@ -94,6 +95,8 @@
 	// Kept from the claim so the token can be switched on for a claimer who has
 	// never held it.
 	let claimedLedgerId = $state<Principal | undefined>();
+	// True while the handover is running its canister writes.
+	let handingOff = $state(false);
 
 	const close = () => modalStore.close();
 
@@ -146,6 +149,19 @@
 			return;
 		}
 
+		// Absent from the *rendered* list is not the same as absent from the
+		// backend, and `set_custom_token` is a versioned upsert that **traps** on a
+		// mismatch rather than refusing politely (`token/service.rs`). `icrcTokens`
+		// hides testnet tokens whenever testnets are off, so a row the claimer
+		// really has can be missing from the lookup above — and a versionless save
+		// for it would take down the call. Asked of the unfiltered store, which is
+		// the closest thing on this side to what the canister holds, and its
+		// version is carried through so the upsert is an update rather than a
+		// collision.
+		const registered = ($icrcCustomTokensStore ?? [])
+			.map(({ data }) => data)
+			.find((token) => token.ledgerCanisterId === ledgerCanisterId);
+
 		// Not in their list at all, which is the case that used to end in silence:
 		// `icrcTokens` is the defaults plus the claimer's *own* imports, so a token
 		// the sender imported is absent, the lookup missed, and the claim finished
@@ -166,6 +182,10 @@
 				identity: $authIdentity,
 				token: toCustomToken({
 					ledgerCanisterId,
+					indexCanisterId: registered?.indexCanisterId,
+					// Absent for a token the backend has never seen, which is what tells
+					// it to insert rather than update.
+					version: registered?.version,
 					enabled: true,
 					networkKey: 'Icrc'
 				} as SaveCustomTokenWithKey)
@@ -184,28 +204,45 @@
 	// global busy overlay, which belongs over a transition and not over the
 	// celebration. By the time the wallet appears the balance is already there.
 	const leaveForWallet = async () => {
-		await enableClaimedToken();
+		// A second tap must not start a second handover. Without `autoLoadSingleToken`
+		// on the registration path there is no global busy overlay to sit in the way,
+		// so a double-click issued two saves — and the second met the first one's
+		// freshly written row with no version, which `set_custom_token` answers by
+		// trapping. The button is disabled from here too, so the guard is the
+		// backstop rather than the only defence.
+		if (handingOff) {
+			return;
+		}
 
-		// Whether this claimer needs OISY explained to them, read before `close()`
-		// resets the modal store.
-		//
-		// Two conditions, and both are needed. `$userProfileCreated` is the canister
-		// saying it had never seen this principal before this sign-in, which is what
-		// keeps the introduction away from someone who has used OISY for months and
-		// happens to be claiming their first tip. The stored flag then keeps it to
-		// once, because a signup session can claim more than one tip.
-		const principal = $authIdentity?.getPrincipal().toText();
-		const introduce = $userProfileCreated && nonNullish(principal) && !hasSeenTipWelcome(principal);
+		handingOff = true;
 
-		close();
+		try {
+			await enableClaimedToken();
 
-		// Opened after the close, not instead of it: the store holds one modal, so
-		// the welcome replaces the confirmation rather than racing it. The wallet is
-		// already underneath with the tip in it either way.
-		if (introduce && nonNullish(principal)) {
-			rememberTipWelcomeSeen(principal);
-			trackTip({ step: 'welcome', side: 'claimer' });
-			modalStore.openTipWelcome(Symbol());
+			// Whether this claimer needs OISY explained to them, read before `close()`
+			// resets the modal store.
+			//
+			// Two conditions, and both are needed. `$userProfileCreated` is the canister
+			// saying it had never seen this principal before this sign-in, which is what
+			// keeps the introduction away from someone who has used OISY for months and
+			// happens to be claiming their first tip. The stored flag then keeps it to
+			// once, because a signup session can claim more than one tip.
+			const principal = $authIdentity?.getPrincipal().toText();
+			const introduce =
+				$userProfileCreated && nonNullish(principal) && !hasSeenTipWelcome(principal);
+
+			close();
+
+			// Opened after the close, not instead of it: the store holds one modal, so
+			// the welcome replaces the confirmation rather than racing it. The wallet is
+			// already underneath with the tip in it either way.
+			if (introduce && nonNullish(principal)) {
+				rememberTipWelcomeSeen(principal);
+				trackTip({ step: 'welcome', side: 'claimer' });
+				modalStore.openTipWelcome(Symbol());
+			}
+		} finally {
+			handingOff = false;
 		}
 	};
 
@@ -509,8 +546,16 @@
 
 		{#snippet toolbar()}
 			{#if claimState === 'received'}
+				<!--
+					Disabled while the handover runs its canister writes. The registration
+					path does not go through `autoLoadSingleToken`, so there is no global
+					busy overlay in the way of a second tap — and a second save meets the
+					first one's freshly written row with no version, which
+					`set_custom_token` answers by trapping.
+				-->
 				<Button
 					colorStyle="secondary-light"
+					disabled={handingOff}
 					fullWidth
 					onclick={leaveForWallet}
 					testId={TIP_RECEIVED_BUTTON}
