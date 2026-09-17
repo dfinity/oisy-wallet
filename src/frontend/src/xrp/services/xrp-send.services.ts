@@ -193,9 +193,14 @@ const submitAndConfirmXrpTransaction = async ({
 };
 
 /**
- * Sends native XRP: fetches the account sequence, the open-ledger fee and the current
- * ledger index, builds and threshold-signs a Payment, submits it, and waits for the
- * transaction to be included in a validated ledger.
+ * Sends native XRP: fetches the account sequence and the current ledger index, builds and
+ * threshold-signs a Payment, submits it, and waits for the transaction to be included in a
+ * validated ledger.
+ *
+ * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
+ * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
+ * the user never saw. Fee estimation and review belong to the caller; this function only bounds
+ * what it is given.
  *
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
