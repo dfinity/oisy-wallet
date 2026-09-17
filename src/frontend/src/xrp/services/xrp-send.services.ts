@@ -1,13 +1,16 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
 import {
+	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
 	loadXrpAccountInfo,
+	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpTransactionOutcome,
 	loadXrpValidatedLedgerIndex,
@@ -193,14 +196,17 @@ const submitAndConfirmXrpTransaction = async ({
 };
 
 /**
- * Sends native XRP: fetches the account sequence and the current ledger index, builds and
- * threshold-signs a Payment, submits it, and waits for the transaction to be included in a
- * validated ledger.
+ * Sends native XRP: fetches the account sequence, the destination's balance and the current ledger
+ * index, builds and threshold-signs a Payment, submits it, and waits for the transaction to be
+ * included in a validated ledger.
  *
  * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
  * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
  * the user never saw. Fee estimation and review belong to the caller; this function only bounds
  * what it is given.
+ *
+ * The destination read is what declines a payment too small to create an account that does not
+ * exist yet — the ledger would apply that as `tecNO_DST_INSUF_XRP` and claim the fee.
  *
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
@@ -249,11 +255,26 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence }, ledgerIndex, signingPublicKey] = await Promise.all([
+	const [{ sequence }, destinationBalance, ledgerIndex, signingPublicKey] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network }),
+		loadXrpBalance({ address: destination, network }),
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
+
+	// An account that exists on-ledger always holds at least the base reserve, so a zero balance
+	// means the address is unfunded — `loadXrpBalance` maps the node's `actNotFound` to ZERO. XRPL
+	// answers a payment too small to create such an account with `tecNO_DST_INSUF_XRP`, which is
+	// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
+	// failure into a plain error.
+	//
+	// Advisory, not authoritative: the destination can be funded between this read and submission,
+	// so the validated result stays the final word. This only declines what is already known.
+	if (destinationBalance === ZERO && amount < XRP_BASE_RESERVE_DROPS) {
+		throw new Error(
+			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
+		);
+	}
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 
