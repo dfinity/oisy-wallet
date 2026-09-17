@@ -19,6 +19,27 @@ After enablement, the standard `VITE_XRP_MAINNET_DISABLED` flag will govern it.
 Later phases add `fee` and `account_tx` (history) — see the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md).
 
+## Failures arrive with HTTP 200
+
+XRPL JSON-RPC answers a **failed** request with HTTP `200` and puts the failure in
+the body, as `result.error` — for example `actNotFound`, `txnNotFound`, `tooBusy`,
+`noNetwork`. A successful HTTP status therefore says nothing about whether the call
+worked, and `xrpJsonRpc` returning normally is not evidence of a result.
+
+Every caller must inspect `result.error` before reading the payload, and decide
+per call which error is an expected state rather than a failure:
+
+| Method         | Expected error                      | Everything else |
+| -------------- | ----------------------------------- | --------------- |
+| `account_info` | `actNotFound` → zero balance        | throw           |
+| `account_tx`   | `actNotFound` → empty history       | throw           |
+| `tx`           | `txnNotFound` → not in a ledger yet | throw           |
+
+Getting this wrong is quiet rather than loud, because an unchecked error looks like
+a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
+`tx` reads as "not in a ledger" — which, past a transaction's `LastLedgerSequence`,
+is indistinguishable from expiry and can invite a duplicate payment.
+
 ## Balance (`account_info`)
 
 `loadXrpBalance` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs
