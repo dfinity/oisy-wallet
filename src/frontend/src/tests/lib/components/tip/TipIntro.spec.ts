@@ -6,6 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { tipsStore } from '$lib/stores/tips.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -78,6 +79,49 @@ describe('TipIntro', () => {
 
 			expect(getByText(get(i18n).tip.text.overview_failed)).toBeInTheDocument();
 			expect(getByText(get(i18n).tip.text.overview_failed_hint)).toBeInTheDocument();
+		});
+
+		it('never leaves a label standing over a blank', () => {
+			// What this closes: `fiat` returns nothing both for an empty group and for
+			// one whose tokens have no rate, so a label could sit over nothing at all.
+			// Reported for a sender with a claimed tip and no open one — and the worse
+			// case is a sender whose only tip failed, who lights the block through
+			// `hasAny` with both of these columns empty.
+			tipsStore.set([tip({ Failed: null })]);
+
+			const { getByText, getAllByText } = render(TipIntro, {
+				props: { onGetStarted: vi.fn(), onViewHistory: vi.fn() }
+			});
+
+			expect(getByText(get(i18n).tip.text.overview_open)).toBeInTheDocument();
+			expect(getByText(get(i18n).tip.text.overview_claimed)).toBeInTheDocument();
+
+			// Both figures say so rather than showing nothing.
+			expect(getAllByText(get(i18n).tip.text.overview_none)).toHaveLength(2);
+		});
+
+		it('falls back to the count when a group has no rate to price it', () => {
+			// The half that matters beyond tidiness. Without a rate the sum is zero, so
+			// a sender with an open tip in a newly listed or local token saw a blank
+			// under "Waiting to be claimed" — readable as nothing being out there,
+			// while their money was reserved. No exchange rate is mocked here, which is
+			// exactly that situation.
+			tipsStore.set([tip({ Reserved: null }), tip({ Claimed: null })]);
+
+			const { getAllByText, queryByText } = render(TipIntro, {
+				props: { onGetStarted: vi.fn(), onViewHistory: vi.fn() }
+			});
+
+			const { text } = get(i18n).tip;
+
+			// One waiting and one claimed, neither priceable — so both columns fall
+			// back to their count rather than one of them going blank.
+			expect(
+				getAllByText(replacePlaceholders(text.overview_count_one, { $count: '1' }))
+			).toHaveLength(2);
+
+			// Not "None" — there is something waiting, we just cannot price it.
+			expect(queryByText(text.overview_none)).toBeNull();
 		});
 
 		it('stays away when every tip has already lapsed', () => {
