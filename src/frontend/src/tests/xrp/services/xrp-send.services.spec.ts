@@ -90,6 +90,20 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// The check that the signing key belongs to its account lives in `getXrpSigningPublicKey`, so
+	// it is only worth the account handed to it. Asking with anything but the address the payment
+	// says it is from would check the key against the wrong account and pass a send that XRPL then
+	// rejects on a signature that cannot verify.
+	it('asks for a signing key bound to the account it sends from', async () => {
+		await sendXrp(params);
+
+		expect(xrpSignServices.getXrpSigningPublicKey).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			network: XrpNetworks.mainnet,
+			account: source
+		});
+	});
+
 	it('submits the signed blob and returns the accepted result', async () => {
 		const result = await sendXrp(params);
 
