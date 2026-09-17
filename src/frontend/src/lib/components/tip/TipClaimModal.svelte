@@ -14,7 +14,7 @@
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { icrcCustomTokensInitialized, icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
@@ -59,13 +59,14 @@
 	let { pending }: Props = $props();
 
 	/**
-	 * How long the handover waits for the profile to land, as `waitReady` retries
-	 * at its default half-second interval — so about five seconds.
+	 * How long the handover waits for the profile and the token list to land, as
+	 * `waitReady` retries at its default half-second interval — so about five
+	 * seconds.
 	 *
-	 * Long enough for a canister call that is already in flight, short enough that
-	 * a claimer whose profile load has genuinely failed is not held on a screen
-	 * whose work is finished. The cost of giving up early is a missed welcome, not
-	 * a missed payout.
+	 * Long enough for two canister loads that run in sequence, short enough that a
+	 * claimer whose load has genuinely failed is not held on a screen whose work is
+	 * finished. The cost of giving up early is a missed welcome or a token that
+	 * needs adding by hand, not a missed payout.
 	 */
 	const PROFILE_READY_RETRIES = 10;
 
@@ -238,13 +239,23 @@
 			// to tap straight through, which is how the welcome came to be skipped for
 			// exactly the person it exists for.
 			//
-			// Bounded rather than indefinite: if the profile never lands, the claim is
+			// Both signals, not just the profile. `LoaderTokens` is mounted *inside*
+			// `LoaderUserProfile`, so it does not even start until the profile store
+			// is ready — waiting on the profile alone would hand over before the token
+			// list had begun loading, which is the condition that decides whether
+			// `enableClaimedToken` enables a token or registers it. An empty list
+			// there reads as "never seen this token" and takes the registration path
+			// for a row the backend already has, and that is the versionless save
+			// `set_custom_token` answers by trapping.
+			//
+			// Bounded rather than indefinite: if either never lands, the claim is
 			// still done and the money is still theirs, so the handover proceeds on
 			// what is known rather than trapping the reader on a screen they have
-			// finished with. Waiting first also gives the token list time to arrive,
-			// which is what decides whether `enableClaimedToken` enables a default or
-			// registers it.
-			await waitReady({ retries: PROFILE_READY_RETRIES, isDisabled: () => !$userProfileLoaded });
+			// finished with.
+			await waitReady({
+				retries: PROFILE_READY_RETRIES,
+				isDisabled: () => !$userProfileLoaded || !$icrcCustomTokensInitialized
+			});
 
 			await enableClaimedToken();
 

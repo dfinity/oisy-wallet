@@ -18,7 +18,7 @@ import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
@@ -32,7 +32,7 @@ vi.mock('$icp-eth/services/icrc-token.services', () => ({ setCustomToken: vi.fn(
 
 vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
-	const { readable } = await import('svelte/store');
+	const { readable, writable } = await import('svelte/store');
 
 	const { mockIcrcCustomToken } = await import('$tests/mocks/icrc-custom-tokens.mock');
 	// `TokenId` is a branded symbol, so a bare `Symbol()` does not satisfy it.
@@ -44,6 +44,10 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	// is what made `npm run test` fail here before `vitest` could run at all.
 	return {
 		...actual,
+		// Writable, because the handover waits on it: `LoaderTokens` runs inside
+		// `LoaderUserProfile`, so a test needs to hold the list unloaded and then
+		// land it. Defaults to loaded so every other test skips the wait.
+		icrcCustomTokensInitialized: writable(true),
 		icrcTokens: readable([
 			{
 				...mockIcrcCustomToken,
@@ -85,8 +89,18 @@ describe('TipClaimModal', () => {
 
 	let warnSpy: MockInstance<typeof consoleUtils.consoleWarn>;
 
+	let tokensInitialized: Writable<boolean>;
+
+	beforeAll(async () => {
+		({ icrcCustomTokensInitialized: tokensInitialized } =
+			(await import('$icp/derived/icrc.derived')) as unknown as {
+				icrcCustomTokensInitialized: Writable<boolean>;
+			});
+	});
+
 	beforeEach(async () => {
 		vi.restoreAllMocks();
+		tokensInitialized.set(true);
 		// `restoreAllMocks` restores spies but leaves a module mock's `vi.fn()`
 		// holding its call history, so these two have to be cleared by hand or a
 		// "was not called" assertion reads the previous test's calls.
@@ -353,6 +367,65 @@ describe('TipClaimModal', () => {
 		await vi.advanceTimersByTimeAsync(1_000);
 
 		await vi.waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
+
+		vi.useRealTimers();
+	});
+
+	it('waits for the token list too, not just the profile', async () => {
+		// `LoaderTokens` is mounted *inside* `LoaderUserProfile`, so it does not even
+		// start until the profile store is ready. Gating on the profile alone handed
+		// over before the token list had begun loading — and an unloaded list reads
+		// as "never seen this token", which takes the registration path for a row
+		// the backend already has. That is the versionless save `set_custom_token`
+		// answers by trapping.
+		vi.useFakeTimers();
+
+		const autoLoad = vi
+			.spyOn(tokenServices, 'autoLoadSingleToken')
+			.mockResolvedValue({ result: 'loaded' });
+
+		// Profile ready, token list explicitly *not* loaded.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+		tokensInitialized.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		await vi.advanceTimersByTimeAsync(600);
+
+		// Nothing decided yet: neither path may run on an unloaded list.
+		expect(autoLoad).not.toHaveBeenCalled();
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+
+		// The list lands, carrying the claimed token as a disabled row.
+		tokensInitialized.set(true);
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockIcrcCustomToken,
+					ledgerCanisterId: ledgerCanisterId.toText(),
+					enabled: false,
+					version: 2n
+				},
+				certified: true
+			}
+		]);
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		// Enabled through the existing path, not registered from scratch — which is
+		// the whole point of waiting.
+		await vi.waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
+
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
 
 		vi.useRealTimers();
 	});
