@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -141,7 +145,8 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo de privacidad activado. Pulsa [P] para mostrar tus saldos de nuevo.",
 			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos.",
-			"notes": "Notas"
+			"notes": "Notas",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Ir a la vista de activos",
@@ -165,7 +170,9 @@
 			"address_book": "agenda",
 			"hide_balances": "Ocultar saldos ",
 			"show_balances": "Mostrar saldos",
-			"notes": "Abrir notas"
+			"notes": "Abrir notas",
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -764,7 +771,8 @@
 			"allow_signing": "Ocurrió un problema al configurar tu billetera para firmar. Has sido desconectado. Si el problema persiste, contacta con el soporte.",
 			"waiting_for_allowed_cycles_aborted": "Preparación del ledger de ciclos abortada. Por favor, intenta iniciar sesión más tarde",
 			"btc_wallet_error": "Error al cargar la información de la billetera BTC.",
-			"sol_wallet_error": "Error al cargar la información de la billetera SOL."
+			"sol_wallet_error": "Error al cargar la información de la billetera SOL.",
+			"xrp_wallet_error": "Error al cargar la información de la billetera XRP."
 		}
 	},
 	"hero": {
@@ -929,6 +937,14 @@
 				"solana_address_copied": "Dirección de Solana copiada al portapapeles",
 				"display_solana_address_qr": "Mostrar dirección de Solana como código QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1041,6 +1057,7 @@
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Su transacción no fue procesada por la red Solana y expiró, muy probablemente porque la tarifa de prioridad proporcionada no era suficiente. La hemos actualizado al importe recomendado más reciente, por lo que por favor inténtelo de nuevo.",
 			"solana_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
@@ -1561,7 +1578,6 @@
 			"estimated_btc": "Comisión de Red BTC Estimada",
 			"estimated_inter_network": "Comisión Inter-red Estimada",
 			"estimated_eth": "Comisión de Ethereum Estimada",
-			"max_fee_eth": "Comisión máx. <small>(probablemente en &lt; 30 segundos)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
@@ -2791,7 +2807,7 @@
 				"snapshot_caption": "Comparte una copia de la nota tal como está ahora. Editar o eliminar la nota después no cambiará este enlace.",
 				"cap_reached": "Has alcanzado el máximo de $max enlaces de compartición activos. Se liberan cuando expiran o se usan.",
 				"expires_after": "El enlace expira después de",
-				"expiry_1h": "1 hora",
+				"expiry_1h": "",
 				"expiry_24h": "24 horas",
 				"expiry_7d": "7 días",
 				"expiry_30d": "30 días",
@@ -2825,6 +2841,136 @@
 				"discover": "Descubre OISY",
 				"unavailable_title": "Este enlace ha expirado o ya se ha usado"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_claimed": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"preparing_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"reserved_by_tips": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }

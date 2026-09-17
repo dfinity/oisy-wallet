@@ -41,6 +41,7 @@ pub fn is_priceable_token_id(token_id: &TokenId) -> bool {
         | TokenId::IcpNative
         | TokenId::SolNativeMainnet
         | TokenId::BtcNativeMainnet
+        | TokenId::XrpNativeMainnet
         | TokenId::SplMainnet(_) => true,
         TokenId::Erc721(..)
         | TokenId::Erc1155(..)
@@ -114,6 +115,7 @@ mod tests {
         assert!(is_priceable_token_id(&TokenId::IcpNative));
         assert!(is_priceable_token_id(&TokenId::SolNativeMainnet));
         assert!(is_priceable_token_id(&TokenId::BtcNativeMainnet));
+        assert!(is_priceable_token_id(&TokenId::XrpNativeMainnet));
         assert!(is_priceable_token_id(
             &TokenId::Icrc(Principal::anonymous())
         ));

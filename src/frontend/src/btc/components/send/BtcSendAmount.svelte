@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+	import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
@@ -20,10 +21,11 @@
 	interface Props {
 		amount: OptionAmount;
 		amountError?: BtcAmountAssertionError;
+		source: string;
 		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
+	let { amount = $bindable(), amountError = $bindable(), source, onTokensList }: Props = $props();
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
@@ -38,6 +40,8 @@
 	let satoshisFee = $derived(utxosFee?.feeSatoshis);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
+
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
@@ -93,6 +97,7 @@
 					balance={$sendBalance}
 					error={nonNullish(amountError)}
 					fee={satoshisFee ?? ZERO}
+					maxAmount={$maxSendAmountStore}
 					token={$sendToken}
 					bind:amount
 					bind:amountSetToMax

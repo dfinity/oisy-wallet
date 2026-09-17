@@ -127,6 +127,25 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('"uint160"')).toBeInTheDocument();
 	});
 
+	it('should move the folded type schema below the entries that stay open', async () => {
+		const { getByRole, getByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		await openRawTab(getByRole);
+
+		// The payload declares `types` first, and a folded node still holds the line it sits on, so
+		// the schema would keep the domain, the type and the message a scroll away. It is moved last
+		// instead, wherever the application happens to have put it.
+		const entries = Array.from(
+			(getByTestId('json').parentElement as HTMLElement).querySelectorAll(':scope > ul > li')
+		).map((li) => li.textContent?.trim().split(':')[0]);
+
+		expect(entries).toEqual(['domain', 'primaryType', 'message', 'types']);
+	});
+
 	it.each(['Enter', ' '])(
 		'should open the folded type schema on %s, not by pointer alone',
 		async (key) => {

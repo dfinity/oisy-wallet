@@ -176,6 +176,11 @@ export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+
+// Most pages the Activity list fetches for one token in a single levelling run. A safety net for a
+// chain loader that keeps reporting progress without its oldest transaction moving, not a throttle:
+// a token it stops is picked up again by the next page the user scrolls to.
+export const ACTIVITY_LEVELLING_MAX_PAGES = 50;
 // How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
 // At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
 export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
@@ -183,6 +188,8 @@ export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
+// XRP wallets
+export const XRP_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;

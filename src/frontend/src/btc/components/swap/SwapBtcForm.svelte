@@ -5,6 +5,7 @@
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import SwapBtcFees from '$btc/components/swap/SwapBtcFees.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
+	import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 	import {
 		BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
@@ -72,6 +73,8 @@
 	let notOfferedExplained = $derived(
 		isNullish(utxosFee) || isInvalidUtxosFee(utxosFee) || nonNullish(errorType)
 	);
+
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
 
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 
@@ -154,6 +157,7 @@
 	{errorType}
 	fee={networkFee}
 	{isSwapAmountsLoading}
+	maxAmount={$maxSendAmountStore}
 	{notOfferedExplained}
 	{onClose}
 	onCustomValidate={customValidate}

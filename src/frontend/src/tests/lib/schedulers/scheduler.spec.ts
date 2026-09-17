@@ -105,6 +105,40 @@ describe('scheduler', () => {
 				expect(console.error).not.toHaveBeenCalled();
 			});
 
+			// A worker does not await one message before handling the next, so a stop can arrive while a
+			// start still awaits the identity.
+			it('should not start when stopped while it loads the identity', async () => {
+				let resolveIdentity: (identity: typeof mockIdentity) => void = () => {};
+
+				vi.spyOn(provider, 'loadIdentity').mockReturnValueOnce(
+					new Promise((resolve) => (resolveIdentity = resolve))
+				);
+
+				const startPromise = scheduler.start(mockParams);
+
+				scheduler.stop();
+
+				resolveIdentity(mockIdentity);
+
+				await startPromise;
+
+				await vi.advanceTimersByTimeAsync(mockInterval * 2);
+
+				expect(mockJob).not.toHaveBeenCalled();
+				expect(scheduler['timer']).toBeUndefined();
+			});
+
+			it('should start again once stopped and started anew', async () => {
+				await scheduler.start(mockParams);
+
+				scheduler.stop();
+
+				await scheduler.start(mockParams);
+
+				expect(mockJob).toHaveBeenCalledTimes(2);
+				expect(scheduler['timer']).toBeDefined();
+			});
+
 			it('should post initial and final status messages', async () => {
 				await scheduler.start(mockParams);
 
@@ -202,6 +236,83 @@ describe('scheduler', () => {
 				vi.advanceTimersByTime(mockInterval * 10);
 
 				expect(mockJob).toHaveBeenCalledOnce();
+			});
+		});
+
+		// `stop` does not cancel a job that is already awaiting, so a stop/start pair leaves the
+		// previous job running alongside the new one. The previous job must not report on the shared
+		// status once its generation has been superseded.
+		describe('when a stop/start overlaps a running job', () => {
+			const deferred = () => {
+				let resolve: () => void = () => undefined;
+				let reject: (err: unknown) => void = () => undefined;
+				const promise = new Promise<void>((res, rej) => {
+					resolve = res;
+					reject = rej;
+				});
+
+				return { promise, resolve, reject };
+			};
+
+			it('should keep the new job able to post after the previous one completes', async () => {
+				const first = deferred();
+				const second = deferred();
+
+				mockJob.mockImplementationOnce(() => first.promise);
+				mockJob.mockImplementationOnce(() => second.promise);
+
+				const firstStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				scheduler.stop();
+
+				const secondStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				// The superseded job lands first and must not flip the status to idle.
+				first.resolve();
+				await vi.advanceTimersByTimeAsync(0);
+
+				postMessageMock.mockClear();
+
+				scheduler.postMsg({
+					msg: 'syncIcpWallet',
+					ref: 'mock-ref',
+					data: { value: 'from-new-job' }
+				});
+
+				expect(postMessageMock).toHaveBeenCalledOnce();
+
+				second.resolve();
+				await Promise.all([firstStart, secondStart]);
+			});
+
+			it('should not stop the running timer when the superseded job fails', async () => {
+				const first = deferred();
+				const second = deferred();
+
+				mockJob.mockImplementationOnce(() => first.promise);
+				mockJob.mockImplementationOnce(() => second.promise);
+
+				const firstStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				scheduler.stop();
+
+				const secondStart = scheduler.start(mockParams);
+
+				await vi.advanceTimersByTimeAsync(0);
+
+				first.reject(new Error('superseded'));
+				await vi.advanceTimersByTimeAsync(0);
+
+				expect(scheduler['timer']).toBeDefined();
+
+				second.resolve();
+				await Promise.all([firstStart, secondStart]);
 			});
 		});
 

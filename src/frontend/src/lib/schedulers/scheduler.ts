@@ -33,6 +33,8 @@ export interface Scheduler<T> {
 export class SchedulerTimer {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
+	// Counts the stops, so that a start can tell whether it was stopped while it awaited the identity.
+	private stops = 0;
 
 	constructor(private statusMsg: PostMessageResponseStatus) {}
 
@@ -75,7 +77,15 @@ export class SchedulerTimer {
 			return;
 		}
 
+		const stopsBefore = this.stops;
+
 		const identity = await this.loadIdentityWithRetry();
+
+		// A worker handles its messages without awaiting one another, so a stop can arrive while this
+		// start awaits the identity. Starting the timer anyway would leave one that no stop can reach.
+		if (this.stops !== stopsBefore) {
+			return;
+		}
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
@@ -137,12 +147,27 @@ export class SchedulerTimer {
 
 		this.setStatus('in_progress');
 
+		// `stop` does not cancel a job that is already awaiting, so a stop/start pair can leave the
+		// previous job running alongside the new one. The stop counter identifies the generation this
+		// job belongs to: once it has moved on, this job no longer owns the shared status and must
+		// not report on it — otherwise its completion flips the status to `idle` under the running
+		// job, whose `postMsg` is then discarded, or its failure stops a timer it no longer owns.
+		const generation = this.stops;
+
 		try {
 			await job({ ...rest });
+
+			if (generation !== this.stops) {
+				return;
+			}
 
 			this.setStatus('idle');
 		} catch (err: unknown) {
 			consoleError(err);
+
+			if (generation !== this.stops) {
+				return;
+			}
 
 			// Once the status becomes "error", the job will no longer be called and the status will remain "error"
 			this.setStatus('error');
@@ -153,6 +178,7 @@ export class SchedulerTimer {
 	}
 
 	stop() {
+		this.stops++;
 		this.stopTimer();
 		this.setStatus('idle');
 	}

@@ -20,6 +20,10 @@
 				"description": "",
 				"action": ""
 			}
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"borrowings": {
@@ -141,7 +145,8 @@
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
 			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요.",
-			"notes": "메모"
+			"notes": "메모",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
@@ -165,7 +170,9 @@
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
-			"notes": "메모 열기"
+			"notes": "메모 열기",
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "문서"
@@ -764,7 +771,8 @@
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
 			"waiting_for_allowed_cycles_aborted": "사이클 레저 준비가 중단되었습니다. 나중에 다시 로그인을 시도해 주세요",
 			"btc_wallet_error": "BTC 지갑 정보를 불러오는 중 오류가 발생했습니다.",
-			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다."
+			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다.",
+			"xrp_wallet_error": "XRP 지갑 정보를 불러오는 중 오류가 발생했습니다."
 		}
 	},
 	"hero": {
@@ -929,6 +937,14 @@
 				"solana_address_copied": "솔라나 주소가 클립보드에 복사되었습니다",
 				"display_solana_address_qr": "솔라나 주소를 QR 코드로 표시"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1041,6 +1057,7 @@
 			"no_pending_bitcoin_transaction": "보류 중인 Bitcoin 트랜잭션을 불러오는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
 			"unexpected_utxos_fee": "트랜잭션 수수료를 계산하는 중에 오류가 발생했습니다.",
 			"unable_to_retrieve_amount": "n/a (가져올 수 없음)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "귀하의 트랜잭션은 Solana 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선순위 수수료가 충분하지 않았기 때문일 가능성이 높습니다. 최신 권장 금액으로 업데이트했으니 다시 시도해 주세요.",
 			"solana_confirmation_failed": "방금 생성하신 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 기다린 후 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
 			"solana_insufficient_funds": "이 트랜잭션을 완료하기에 토큰 잔액이 부족합니다. 잔액이 마지막으로 표시된 이후 변경되었을 수 있습니다.",
@@ -1561,7 +1578,6 @@
 			"estimated_btc": "예상 BTC 네트워크 수수료",
 			"estimated_inter_network": "예상 네트워크 간 수수료",
 			"estimated_eth": "예상 이더리움 수수료",
-			"max_fee_eth": "최대 수수료 <small>(보통 &lt; 30초 이내)</small>",
 			"estimated_fee_eth": "",
 			"estimated": "",
 			"priority": "",
@@ -2791,7 +2807,7 @@
 				"snapshot_caption": "현재 상태의 메모 사본을 공유합니다. 이후에 메모를 수정하거나 삭제해도 이 링크는 변경되지 않습니다.",
 				"cap_reached": "활성 공유 링크 최대 개수($max개)에 도달했습니다. 만료되거나 사용되면 다시 사용할 수 있게 됩니다.",
 				"expires_after": "링크 만료 시간",
-				"expiry_1h": "1시간",
+				"expiry_1h": "",
 				"expiry_24h": "24시간",
 				"expiry_7d": "7일",
 				"expiry_30d": "30일",
@@ -2825,6 +2841,136 @@
 				"discover": "OISY 알아보기",
 				"unavailable_title": "이 링크는 만료되었거나 이미 사용되었습니다"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_claimed": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"preparing_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
+			"expiration": "",
+			"expiry_24h": "",
+			"expiry_3d": "",
+			"expiry_7d": "",
+			"message": "",
+			"message_placeholder": "",
+			"total_estimated_fee": "",
+			"reserve_fee": "",
+			"payout_fee": "",
+			"fees_are_yours": "",
+			"reserved_by_tips": "",
+			"lapse_notice": "",
+			"generate": "",
+			"share_heading": "",
+			"copy_link": "",
+			"share_link": "",
+			"they_will_receive": "",
+			"no_wallet_needed_title": "",
+			"no_wallet_needed": "",
+			"scan_or_photo": "",
+			"expires_at": "",
+			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
+			"link_not_saved": "",
+			"reserve_failed": "",
+			"status_title": "",
+			"claim_title": "",
+			"claim_amount": "",
+			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
+			"claim_ready_description": "",
+			"claim_token": "",
+			"claim_status": "",
+			"open_or_create": "",
+			"open_or_create_hint": "",
+			"claimer_disclosure": "",
+			"claimed_title": "",
+			"claimed_description": "",
+			"claiming_title": "",
+			"claiming_description": "",
+			"claim_retry": "",
+			"received_title": "",
+			"received_description": "",
+			"network": "",
+			"status_completed": "",
+			"take_me_to_wallet": "",
+			"unavailable_title": "",
+			"unavailable_description": "",
+			"uncovered_title": "",
+			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
+			"claim_failed_title": "",
+			"claim_failed": "",
+			"unreachable_title": "",
+			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
+			"message_too_long": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": "",
+			"rate_limited": "",
+			"rate_limited_title": ""
+		},
+		"alt": {
+			"intro_illustration": "",
+			"claim_illustration": "",
+			"claim_failed_illustration": "",
+			"welcome_illustration": ""
+		},
+		"share": {
+			"title": "",
+			"description": ""
+		},
+		"welcome": {
+			"title": "",
+			"heading": "",
+			"body": "",
+			"point_access_title": "",
+			"point_access_text": "",
+			"point_stay_title": "",
+			"point_stay_text": "",
+			"cta": ""
 		}
 	}
 }
