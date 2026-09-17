@@ -334,6 +334,20 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('Unexpected XRPL fee response');
 		});
 
+		// Every field here is optional, so an error response parses with no `drops` and would be
+		// answered with the fallback — the base fee, which is what underprices a send on the very
+		// node that reported congestion.
+		it.each(['tooBusy', 'noNetwork', 'amendmentBlocked'])(
+			'throws for the XRPL error %s rather than falling back to the base fee',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n })
+				).rejects.toThrow(`Unexpected XRPL fee response: ${error}`);
+			}
+		);
+
 		it('falls back to the provided fee when the node omits it', async () => {
 			mockFetchResponse({ body: { result: { drops: {} } } });
 

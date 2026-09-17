@@ -144,6 +144,14 @@ export const loadXrpOpenLedgerFee = async ({
 }): Promise<XrpBalance> => {
 	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
 
+	// Before parsing: every field of the fee result is optional, so an error response parses
+	// happily with no `drops` and would be answered with the fallback — the base fee, which is
+	// exactly what underprices a send on the congested node that returned `tooBusy` in the first
+	// place. The fallback is for a successful response that omits the estimate, nothing else.
+	if (nonNullish(result.error)) {
+		throw new Error(`Unexpected XRPL fee response: ${String(result.error)}`);
+	}
+
 	const parsed = XrplFeeResultSchema.safeParse(result);
 
 	if (!parsed.success) {
