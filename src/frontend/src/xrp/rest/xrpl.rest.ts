@@ -269,11 +269,11 @@ export const loadXrpTransactionOutcome = async ({
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `accepted` reports whether the node took the transaction; `engine_result` is its
- * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither
- * alone means the payment will succeed — an applied `tec*` result is accepted too — so
- * callers must judge the result class (see `isXrpSubmitAccepted`) and then confirm
- * finality *and* success by polling the tx hash (see {@link loadXrpTransactionOutcome}).
+ * `accepted` reports whether THIS node took the transaction and `engine_result` is its
+ * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither is proof of
+ * anything final: an applied `tec*` is accepted yet failed, and a refusal may still be reapplied
+ * later. Only a malformed `tem*` result is conclusive (see `isXrpSubmitFinalFailure`); every other
+ * outcome is settled by polling the tx hash (see {@link loadXrpTransactionOutcome}).
  */
 export const submitXrpTransaction = async ({
 	txBlob,
