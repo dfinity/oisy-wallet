@@ -4,6 +4,7 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
@@ -86,6 +87,13 @@ const confirmXrpTransaction = async ({
 		}
 	};
 
+	// Expiry cannot happen until the validated index passes `LastLedgerSequence`, and the index only
+	// moves once per ledger close while this loop polls two to four times as often. Once a read
+	// tells us how many closes are still needed, asking again before roughly that many polls have
+	// passed cannot change the outcome — which is why the previous version spent a ledger call on
+	// every answered poll and almost none of them could decide anything.
+	let nextLedgerReadAttempt = 0;
+
 	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
 		const outcome = await tryOutcome();
 
@@ -95,11 +103,20 @@ const confirmXrpTransaction = async ({
 
 		// Expiry is only evaluated on a lookup the node actually answered; an unanswered one
 		// establishes nothing and simply costs an attempt.
-		if (nonNullish(outcome)) {
+		if (nonNullish(outcome) && attempt >= nextLedgerReadAttempt) {
 			// The VALIDATED index, not the open one: the open ledger has already advanced past a
 			// closed ledger whose transactions are not yet validated, so comparing against it would
 			// declare expiry for a payment that is about to validate.
 			const validatedLedgerIndex = await tryValidatedLedgerIndex();
+
+			// How far the ledger still has to travel, converted to polls. An unanswered read leaves
+			// this unchanged, so the next attempt asks again rather than backing off on no evidence.
+			if (nonNullish(validatedLedgerIndex)) {
+				nextLedgerReadAttempt =
+					attempt +
+					Math.max(lastLedgerSequence - validatedLedgerIndex, 0) *
+						XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE;
+			}
 
 			if (nonNullish(validatedLedgerIndex) && validatedLedgerIndex > lastLedgerSequence) {
 				// The `tx` lookup above and this index come from two separate calls, so the lookup may

@@ -30,6 +30,20 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
 const XRP_LEDGER_CLOSE_SECONDS = 4;
 
+// Longest interval `randomWait` can return. Used to convert "ledger closes remaining" into "polls
+// to wait": the LONGEST wait gives the FEWEST polls per close, so the conversion under-counts and
+// the confirmation loop asks again slightly early rather than slightly late — a wasted call costs
+// one request, asking late costs the definitive expiry answer.
+const XRP_CONFIRM_MAX_POLL_SECONDS = 2;
+
+// Polls to skip per ledger close still needed before expiry is even possible. Asking on every poll
+// made almost every one of those calls incapable of changing the outcome: expiry needs the
+// validated index to pass `LastLedgerSequence`, which is `XRP_LAST_LEDGER_SEQUENCE_OFFSET` closes
+// away, while the poll runs three times as often as the ledger advances.
+export const XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE = Math.floor(
+	XRP_LEDGER_CLOSE_SECONDS / XRP_CONFIRM_MAX_POLL_SECONDS
+);
+
 // Shortest interval `randomWait` can return, and so the conservative denominator below: the
 // fastest polling needs the most attempts to span the window.
 const XRP_CONFIRM_MIN_POLL_SECONDS = 1;

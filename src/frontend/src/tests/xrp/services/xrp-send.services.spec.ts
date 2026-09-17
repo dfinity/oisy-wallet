@@ -695,6 +695,65 @@ describe('xrp-send.services', () => {
 		);
 	});
 
+	describe('the validated-ledger read', () => {
+		// The index moves once per ~4s close while this loop polls every 1-2s, so asking on every
+		// answered poll spends calls that cannot change the outcome. One read says how many closes
+		// are still needed; the next is due only after roughly that many polls.
+		it('reads the ledger only as often as it can have moved', async () => {
+			const validatesOnAttempt = 50;
+			let attempts = 0;
+
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
+				attempts++;
+
+				return Promise.resolve(
+					attempts < validatesOnAttempt
+						? { validated: false, transactionResult: undefined }
+						: { validated: true, transactionResult: 'tesSUCCESS' }
+				);
+			});
+			// 20 closes short of expiry, so each read buys 40 polls of silence.
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+
+			expect(attempts).toBe(validatesOnAttempt);
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(2);
+		});
+
+		// Backing off on a read that never happened would delay the definitive expiry answer on the
+		// strength of no evidence at all.
+		it('does not back off after a read the node could not answer', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+				.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
+				.mockResolvedValue(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1);
+
+			await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
+
+			// Attempt 0 was refused, attempt 1 answered and settled it.
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(2);
+		});
+
+		// Once the index is past expiry there is nothing left to wait for.
+		it('still settles expiry on the first answered read', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
+
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledOnce();
+		});
+	});
+
 	// The fee is untrusted input and escalates with load, so an excessive estimate must not be
 	// signed for an amount the user never reviewed.
 	it('refuses to sign a fee above the maximum', async () => {
