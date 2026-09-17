@@ -424,13 +424,19 @@ describe('xrp-send.services', () => {
 	// The open ledger runs ahead of validation, so comparing against it would report a final
 	// failure for a payment that is still about to validate — and invite a duplicate send.
 	it('does not report expiry while only the open ledger has passed LastLedgerSequence', async () => {
+		// The payment is absent for two lookups and then validates. An implementation comparing
+		// against the open index would reach the expiry branch on the first lookup, find the hash
+		// still absent on its recheck, and throw — so the third lookup must be what decides.
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
 			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
 			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
 
-		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(
-			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 5
-		);
+		// The signing-time call sets LastLedgerSequence to 1020; any LATER read of the open index
+		// answers 1025, which is past it. The validated index — the only correct basis — is 1000.
+		vi.spyOn(xrplRest, 'loadXrpLedgerIndex')
+			.mockResolvedValueOnce(1000)
+			.mockResolvedValue(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 5);
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 
 		await expect(sendXrp(params)).resolves.toBeDefined();
