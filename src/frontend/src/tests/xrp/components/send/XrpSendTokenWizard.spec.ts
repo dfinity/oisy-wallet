@@ -109,10 +109,13 @@ describe('XrpSendTokenWizard', () => {
 			ownerCount
 		});
 		vi.spyOn(xrpSendServices, 'sendXrp').mockResolvedValue({
-			engineResult: 'tesSUCCESS',
-			engineResultMessage: 'The transaction was applied.',
 			txHash: 'HASH',
-			accepted: true
+			submitResult: {
+				engineResult: 'tesSUCCESS',
+				engineResultMessage: 'The transaction was applied.',
+				txHash: 'HASH',
+				accepted: true
+			}
 		});
 	});
 
