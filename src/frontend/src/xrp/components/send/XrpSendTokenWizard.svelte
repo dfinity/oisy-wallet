@@ -9,6 +9,7 @@
 		TRACK_COUNT_XRP_SEND_ERROR,
 		TRACK_COUNT_XRP_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -151,6 +152,17 @@
 			value: `${amount}`,
 			unitName: $sendTokenDecimals
 		});
+
+		// `invalidAmount` accepts zero and so does the review step, and the form's own rejection of
+		// it is debounced — which leaves a window where Next is still enabled. This is the last
+		// point before signing, and it asserts the drops actually being signed rather than the
+		// string that produced them.
+		if (amountDrops === ZERO) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.amount_invalid }
+			});
+			return;
+		}
 
 		// The form validated the amount against the fee and reserve as they stood when it was
 		// typed, and `TokenInputContent` only revalidates when the amount or token changes — so the
