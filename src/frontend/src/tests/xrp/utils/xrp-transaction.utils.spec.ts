@@ -52,9 +52,10 @@ describe('xrp-transaction.utils', () => {
 			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
 		});
 
-		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports an earlier
-		// submission already applied, and `tec` WAS applied — none of them is a failure to report
-		// here. The ledger decides by polling.
+		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports the blob is
+		// already in the open ledger, `tefPAST_SEQ` reports its sequence consumed — which is what a
+		// resubmitted send gets once the original landed — and `tec` WAS applied. None of them is a
+		// failure to report here; the ledger decides by polling.
 		it.each([
 			'tesSUCCESS',
 			'terQUEUED',

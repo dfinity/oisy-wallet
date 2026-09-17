@@ -5,8 +5,7 @@ import { nonNullish } from '@dfinity/utils';
 // Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
 // rules for a valid transaction change", while a `tef` "may still succeed or fail with a different
 // code after being reapplied" and `tel` transactions "may be automatically cached and retried
-// later" — `tefALREADY` even reports that an earlier submission of this exact blob already
-// applied. A "no" that may still become a yes must not be reported as a failure: the user would
+// later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that may still become a yes must not be reported as a failure: the user would
 // send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
 // thing that decides definitively.
 const XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX = 'tem';

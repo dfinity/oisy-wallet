@@ -18,8 +18,8 @@ export class XrpSendExpiredError extends Error {}
  * out of attempts before the ledger reached expiry. The payment may or may not have happened.
  *
  * The signed transaction travels with the error so a retry CAN resubmit THIS transaction instead
- * of building a new one — the difference between a retry the ledger deduplicates and a second
- * payment.
+ * of building a new one — the difference between a retry the ledger refuses on its already-consumed
+ * sequence and a second payment.
  *
  * Nothing consumes it yet, so the hazard is NOT closed. `pending` only survives as a field on the
  * rejected promise: nothing in the XRP folder persists it, and the send wizard reports the error

@@ -231,9 +231,10 @@ const submitAndConfirmXrpTransaction = async ({
  *
  * `pending` retries a send whose outcome was never established, from the
  * {@link XrpSendIndeterminateError} that reported it. The stored transaction is resubmitted
- * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, the
- * ledger rejects this one as already applied rather than making a second payment. Building a
- * fresh transaction in that situation is precisely what pays twice.
+ * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, its
+ * sequence is already consumed and the ledger refuses this one (`tefPAST_SEQ`) rather than making
+ * a second payment. Building a fresh transaction in that situation takes a NEW sequence, which is
+ * precisely what pays twice.
  */
 export const sendXrp = async ({
 	identity,

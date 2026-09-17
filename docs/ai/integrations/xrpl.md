@@ -92,9 +92,17 @@ Neither field in the response is proof of a final outcome. `accepted` says only 
 _this_ node took the blob, and `engine_result` is provisional. Per the XRPL reference a
 `tem` result is "final unless the rules for a valid transaction change", whereas a `tef`
 "may still succeed or fail with a different code after being reapplied" and `tel`
-transactions "may be automatically cached and retried later" — and `tefALREADY` reports
-that the same exact transaction has already been applied. A `tec*` result was applied and
+transactions "may be automatically cached and retried later", and `tefALREADY` reports
+that this exact transaction is already in the open ledger. A `tec*` result was applied and
 merely failed, claiming the fee.
+
+Note which result a resubmitted send actually gets. rippled's preclaim runs `checkSeqProxy`
+before `checkPriorTxAndLastLedger`, and only the latter produces `tefALREADY` — so once the
+original has been applied and its sequence consumed, a resubmission fails the sequence check
+first and returns `tefPAST_SEQ`. `tefALREADY` is reserved for a duplicate submitted inside the
+same open ledger. Either way the transaction is not applied twice, because a sequence can be
+consumed only once; that, rather than transaction-identity dedup, is what makes resubmitting a
+stored transaction safe.
 
 So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
 ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will

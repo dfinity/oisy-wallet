@@ -234,19 +234,23 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
 
-	// `tefALREADY` reports that an earlier submission of this exact blob already applied, so the
-	// send must reach confirmation: rejecting here would report a completed payment as unsent and
-	// invite a retry that pays a second time.
-	it('confirms tefALREADY instead of reporting the payment unsent', async () => {
-		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
-			engineResult: 'tefALREADY',
-			accepted: false
-		});
+	// Both results a resubmitted send can get: `tefPAST_SEQ` once the original landed and consumed
+	// the sequence, `tefALREADY` for a duplicate inside the same open ledger. Either must reach
+	// confirmation — rejecting here would report a completed payment as unsent and invite a retry
+	// that pays a second time.
+	it.each(['tefPAST_SEQ', 'tefALREADY'])(
+		'confirms %s instead of reporting the payment unsent',
+		async (engineResult) => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult,
+				accepted: false
+			});
 
-		await expect(sendXrp(params)).resolves.toBeDefined();
+			await expect(sendXrp(params)).resolves.toBeDefined();
 
-		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
-	});
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+		}
+	);
 
 	// `tef` may be reapplied and `tel` may be cached and retried, so neither is proof the payment
 	// will not happen. Reporting them as failed would invite a retry that pays twice; they are
@@ -415,7 +419,7 @@ describe('xrp-send.services', () => {
 		// called `sendXrp` twice, and on the second call every lookup rejected, so it exited through
 		// the attempt cap and asserted only that the cap's message lacks the word "expired".
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledTimes(2);
-		expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(1);
+		expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledOnce();
 
 		// The type is the assertion: an unanswered recheck leaves non-inclusion unestablished, so it
 		// must be indeterminate and must NOT be the expiry that tells the caller a resend is safe.
@@ -568,8 +572,9 @@ describe('xrp-send.services', () => {
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 		});
 
-		// The payoff: the first attempt did land. Resubmitting the same blob is refused as already
-		// applied, and the poll reports the original transaction's real outcome.
+		// The payoff: the first attempt did land, so its sequence is consumed and the resubmission is
+		// refused with `tefPAST_SEQ` rather than applied again. The poll then reports the original
+		// transaction's real outcome.
 		it('reports the original outcome when the resubmitted transaction already applied', async () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
@@ -579,13 +584,13 @@ describe('xrp-send.services', () => {
 			};
 
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
-				engineResult: 'tefALREADY',
+				engineResult: 'tefPAST_SEQ',
 				accepted: false
 			});
 
 			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
 				txHash: pending.txHash,
-				submitResult: { engineResult: 'tefALREADY', accepted: false }
+				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
 		});
 	});
