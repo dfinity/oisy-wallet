@@ -152,7 +152,7 @@ export const loadXrpAccountInfo = async ({
 	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
 	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
 
-	if (!parsed.success || 'error' in parsed.data) {
+	if (!parsed.success) {
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
