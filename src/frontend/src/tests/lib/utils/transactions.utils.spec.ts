@@ -1830,7 +1830,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
 		});
 
-		it('should correctly return an empty array if all txs do not have values', () => {
+		it('should correctly return an empty object if all txs do not have values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1840,7 +1840,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs have zero values', () => {
+		it('should correctly return an empty object if all txs have zero values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1850,7 +1850,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs are receive', () => {
+		it('should correctly return an empty object if all txs are receive', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
