@@ -72,3 +72,16 @@ export const XrplLedgerResultSchema = z.union([
 		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema })
 	})
 ]);
+
+// `validated` means FINAL, not successful, so a validated response must carry the result that
+// decides which it was. One that does not is malformed — and reading it as a missing result would
+// report an applied payment as failed, inviting a duplicate send — so the validated branch
+// requires a string `meta.TransactionResult` and anything else fails to parse. A still-pending
+// entry has no result yet, and reports `validated: false` or omits the flag.
+export const XrplTxResultSchema = z.union([
+	z.object({
+		validated: z.literal(true),
+		meta: z.object({ TransactionResult: z.string() })
+	}),
+	z.object({ validated: z.literal(false).optional() })
+]);
