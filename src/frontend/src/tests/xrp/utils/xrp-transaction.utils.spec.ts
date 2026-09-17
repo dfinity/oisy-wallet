@@ -316,22 +316,25 @@ describe('xrp-transaction.utils', () => {
 	});
 
 	describe('isXrpSubmitAccepted', () => {
-		it.each(['tesSUCCESS', 'terQUEUED'])(
+		// `tec` is included because the node APPLIED it: treating it as a rejection here would
+		// report an applied transaction as never sent and skip the confirmation that knows which
+		// `tec` it was. Whether the payment SUCCEEDED is decided by isXrpTransactionSuccessful.
+		it.each(['tesSUCCESS', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
 			'accepts %s when the node reports acceptance',
 			(engineResult) => {
 				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeTruthy();
 			}
 		);
 
-		// An applied fee-claiming tec result is "accepted" too, but the payment failed.
-		it.each(['tecUNFUNDED_PAYMENT', 'temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+		// These were never applied, so they are deterministic rejections.
+		it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
 			'rejects %s even when the node reports acceptance',
 			(engineResult) => {
 				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeFalsy();
 			}
 		);
 
-		it.each(['tesSUCCESS', 'terQUEUED'])(
+		it.each(['tesSUCCESS', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
 			'rejects %s when the node did not accept it',
 			(engineResult) => {
 				expect(isXrpSubmitAccepted({ engineResult, accepted: false })).toBeFalsy();
