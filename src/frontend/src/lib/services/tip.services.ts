@@ -17,10 +17,15 @@ import {
 	generateTipId,
 	tipSpenderSubaccount
 } from '$lib/services/tip.crypto';
-import { decryptClaimCode, encryptClaimCode } from '$lib/services/tip.vetkeys';
+import {
+	decryptClaimCode,
+	deriveTipKeyMaterial,
+	encryptClaimCodeWithKey
+} from '$lib/services/tip.vetkeys';
 import type { CanisterIdText } from '$lib/types/canister';
 import { consoleError, consoleWarn } from '$lib/utils/console.utils';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import type { DerivedKeyMaterial } from '@dfinity/vetkeys';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -280,15 +285,22 @@ const SECRET_RETRY_DELAY_MS = 1_500;
  *
  * Retried once, because the causes seen in the wild are transient: a boundary
  * node returning 503, or a rate limit that a moment's wait clears. Only once,
- * and only the write: an `encryptClaimCode` that fails may have spent a vetKD
- * derivation, and hammering a metered endpoint is how a blip becomes an outage.
+ * and only the write: a derivation that fails may have spent a metered vetKD
+ * call, and hammering a metered endpoint is how a blip becomes an outage.
+ *
+ * Takes the key material as a promise rather than deriving its own, because
+ * {@link reserveTip} starts that derivation before the approve — see there. The
+ * promise is awaited here and nowhere else, so a rejection is still observed
+ * exactly once and still costs one derivation.
  */
 const storeClaimCode = async ({
 	identity,
-	draft
+	draft,
+	keyMaterial
 }: {
 	identity: Identity;
 	draft: TipDraft;
+	keyMaterial: Promise<DerivedKeyMaterial>;
 }): Promise<boolean> => {
 	// Encrypted once, outside the retry. The comment above always said the retry
 	// was "only the write", but the derivation sat inside `attempt` and went
@@ -297,10 +309,10 @@ const storeClaimCode = async ({
 	let ciphertext: Uint8Array;
 
 	try {
-		ciphertext = await encryptClaimCode({
+		ciphertext = await encryptClaimCodeWithKey({
+			keyMaterial: await keyMaterial,
 			claimCode: draft.claimCode,
-			tipId: draft.tipId,
-			identity
+			tipId: draft.tipId
 		});
 	} catch (err: unknown) {
 		consoleWarn('Could not encrypt the recoverable claim code for this tip', err);
@@ -402,6 +414,25 @@ export const reserveTip = async ({
 	expiresAtNs: bigint;
 	message?: string;
 }): Promise<{ link: string; secretStored: boolean }> => {
+	// Started before the approve, and awaited only at the very end, in
+	// `storeClaimCode`. The derivation takes nothing but the identity — the tip id
+	// and the claim code are bound later, in the AES-GCM encryption — so there is
+	// nothing to wait for, and it is the slowest single step in this path: an
+	// update call whose reply waits on a threshold derivation. Running it under
+	// the approve and the create instead of after them is what it costs the
+	// sender, and only the first tip of a session pays it at all, because
+	// `deriveTipKeyMaterial` caches per principal. That was the asymmetry: a
+	// sender's first tip waited for a derivation and every later one did not.
+	//
+	// No extra canister call either way — a create that succeeds always derives.
+	const keyMaterial = deriveTipKeyMaterial({ identity });
+
+	// Attached now, not awaited. An approve that throws returns from this function
+	// before anything awaits the derivation, and an unobserved rejection is
+	// reported as unhandled by the runtime. Handling it here does not swallow it:
+	// `storeClaimCode` awaits the same promise and reports its own failure.
+	keyMaterial.catch(() => undefined);
+
 	const subaccount = await tipSpenderSubaccount(draft.tipId);
 
 	try {
@@ -498,7 +529,10 @@ export const reserveTip = async ({
 		}
 	}
 
-	return { link: buildTipLink(draft), secretStored: await storeClaimCode({ identity, draft }) };
+	return {
+		link: buildTipLink(draft),
+		secretStored: await storeClaimCode({ identity, draft, keyMaterial })
+	};
 };
 
 /**
