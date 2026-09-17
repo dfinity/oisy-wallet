@@ -81,13 +81,25 @@ export const initSendContext = ({
 	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
 	// but consumed at the send step, so it must survive the WizardModal step re-renders.
 	//
-	// It is stored WITH the destination it was entered for, and read back as `undefined` whenever
-	// the current destination differs. A destination tag routes funds to a sub-account at an
-	// exchange, so a tag inherited by a recipient the user changed to would silently credit the
-	// wrong beneficiary — the wizard's back navigation makes that sequence reachable.
+	// A destination tag routes funds to a sub-account at an exchange, so a tag inherited by a
+	// recipient the user changed to would silently credit the wrong beneficiary — and the wizard's
+	// back navigation makes that sequence reachable. So a tag belongs to one destination only: any
+	// change to the destination discards it, and the user re-enters one for the new recipient.
+	//
+	// Two independent guards, because the consequence of getting this wrong is a misdirected
+	// payment: the tag is dropped when the destination changes, AND it is stored with the
+	// destination it was entered for so that a stale pair can never be read back for another one.
 	const sendXrpDestinationTagData = writable<
 		{ destination: Address; tag: number | undefined } | undefined
 	>();
+
+	sendDestination.subscribe((destination) => {
+		const data = get(sendXrpDestinationTagData);
+
+		if (nonNullish(data) && data.destination !== destination) {
+			sendXrpDestinationTagData.set(undefined);
+		}
+	});
 
 	const sendXrpDestinationTag: SendXrpDestinationTagStore = {
 		subscribe: derived([sendXrpDestinationTagData, sendDestination], ([$data, $sendDestination]) =>
