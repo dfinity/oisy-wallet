@@ -1060,7 +1060,7 @@
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_xrp_network_id": "Mạng hiện tại ($networkId) không phải là mạng XRP Ledger.",
-			"xrp_confirmation_failed": "Chúng tôi không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây rồi kiểm tra danh sách giao dịch của token để xem giao dịch của bạn có được tạo chính xác không.",
+			"xrp_confirmation_failed": "Chúng tôi không thể xác nhận giao dịch đã được gửi hay chưa. Giao dịch vẫn có thể thành công, nên đừng gửi lại lúc này — số dư của bạn sẽ được cập nhật nếu thành công.",
 			"xrp_transaction_failed": "Giao dịch đã được mạng xử lý nhưng thất bại, nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
@@ -1071,7 +1071,8 @@
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
 			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
-			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
+			"xrp_send_expired": "Giao dịch chưa được gửi: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và bạn có thể tạo giao dịch mới một cách an toàn."
 		}
 	},
 	"mint": {

@@ -19,7 +19,7 @@ import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import * as xrpSendServices from '$xrp/services/xrp-send.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
+import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -296,7 +296,9 @@ describe('XrpSendTokenWizard', () => {
 		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
 			progress?.(ProgressStepsSendXrp.CONFIRM);
 
-			return await Promise.reject(new Error('XRP transaction expired'));
+			return await Promise.reject(
+				new Error('XRP transaction confirmation stopped before its ledger expiry was reached.')
+			);
 		});
 
 		const { container } = await renderSettled();
@@ -305,6 +307,26 @@ describe('XrpSendTokenWizard', () => {
 
 		expect(toasts.toastsError).toHaveBeenCalledWith(
 			expect.objectContaining({ msg: { text: en.send.error.xrp_confirmation_failed } })
+		);
+	});
+
+	// Expiry is settled: nothing was sent. Showing the indeterminate "we could not confirm" text
+	// would leave the user waiting on an outcome that already happened.
+	it('should report an expired send as definitively not sent', async () => {
+		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
+			progress?.(ProgressStepsSendXrp.CONFIRM);
+
+			return await Promise.reject(
+				new XrpSendExpiredError('XRP transaction expired: not included by ledger 1020')
+			);
+		});
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_send_expired } })
 		);
 	});
 

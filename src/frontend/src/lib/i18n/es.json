@@ -1060,7 +1060,7 @@
 			"no_btc_network_id": "La red actual ($networkId) no es una red Bitcoin.",
 			"no_solana_network_id": "La red actual ($networkId) no es una red Solana.",
 			"no_xrp_network_id": "La red actual ($networkId) no es una red XRP Ledger.",
-			"xrp_confirmation_failed": "No recibimos confirmación para la transacción que acaba de crear. Por favor, espere unos segundos y luego compruebe la lista de transacciones de su token para ver si su transacción se creó correctamente.",
+			"xrp_confirmation_failed": "No pudimos confirmar si la transacción se envió. Todavía puede completarse, así que no la envíes de nuevo por ahora — tu saldo se actualizará si se completa.",
 			"xrp_transaction_failed": "La red procesó la transacción, pero falló, por lo que no se enviaron tus fondos. La comisión de red se cobró igualmente.",
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
@@ -1071,7 +1071,8 @@
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
 			"solana_insufficient_funds_for_fee": "Su saldo de SOL no es suficiente para cubrir las tarifas de la transacción.",
 			"solana_insufficient_funds_for_rent": "Su saldo de SOL no es suficiente para cubrir el alquiler requerido para la creación de la cuenta.",
-			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible."
+			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible.",
+			"xrp_send_expired": "La transacción no se envió: la red no la incluyó a tiempo. Nada salió de tu billetera y es seguro crear una nueva."
 		}
 	},
 	"mint": {

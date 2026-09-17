@@ -1060,7 +1060,7 @@
 			"no_btc_network_id": "Bieżąca sieć ($networkId) nie jest siecią Bitcoin.",
 			"no_solana_network_id": "Bieżąca sieć ($networkId) nie jest siecią Solana.",
 			"no_xrp_network_id": "Bieżąca sieć ($networkId) nie jest siecią XRP Ledger.",
-			"xrp_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
+			"xrp_confirmation_failed": "Nie mogliśmy potwierdzić, czy transakcja została wysłana. Może jeszcze przejść, więc na razie nie wysyłaj jej ponownie — jeśli przejdzie, Twoje saldo zostanie zaktualizowane.",
 			"xrp_transaction_failed": "Transakcja została przetworzona przez sieć, ale nie powiodła się, więc środki nie zostały wysłane. Opłata sieciowa została jednak pobrana.",
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
@@ -1071,7 +1071,8 @@
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
 			"solana_insufficient_funds_for_fee": "Twoje saldo SOL jest niewystarczające do pokrycia opłat transakcyjnych.",
 			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
-			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany."
+			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany.",
+			"xrp_send_expired": "Transakcja nie została wysłana: sieć nie uwzględniła jej na czas. Nic nie opuściło Twojego portfela i można bezpiecznie utworzyć nową."
 		}
 	},
 	"mint": {

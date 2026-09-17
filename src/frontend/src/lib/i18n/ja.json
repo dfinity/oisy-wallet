@@ -1060,7 +1060,7 @@
 			"no_btc_network_id": "現在のネットワーク（$networkId）はBitcoinネットワークではありません。",
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
 			"no_xrp_network_id": "現在のネットワーク（$networkId）はXRP Ledgerネットワークではありません。",
-			"xrp_confirmation_failed": "作成されたトランザクションの確認を受信できませんでした。数秒お待ちいただいた後、トークンのトランザクション一覧でトランザクションが正しく作成されたかご確認ください。",
+			"xrp_confirmation_failed": "トランザクションが送信されたかどうかを確認できませんでした。まだ成立する可能性があるため、今は再送しないでください。成立した場合は残高が更新されます。",
 			"xrp_transaction_failed": "トランザクションはネットワークで処理されましたが失敗したため、資金は送信されていません。ネットワーク手数料は請求されました。",
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
@@ -1071,7 +1071,8 @@
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
 			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
 			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
-			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。",
+			"xrp_send_expired": "トランザクションは送信されませんでした。ネットワークが期限内に取り込まなかったためです。ウォレットから資金は出ておらず、新しく作成しても安全です。"
 		}
 	},
 	"mint": {
