@@ -105,9 +105,12 @@ When the destination has a previous send on record, nothing changes — no box, 
 is the worst outcome the confirmation exists to prevent, so a first-time minter address is
 warned about and gated like any other.
 
-**Minting is exempt** (`isIcMintingAccount`): there the user _is_ the minter and the
-destination is an ordinary recipient, so a history of previous sends says nothing useful.
-`SendReview` already relabels its button in that state.
+**Minting skips the review confirmation only** (`isIcMintingAccount`): there the user _is_ the
+minter and the destination is an ordinary recipient, so a history of previous sends says
+nothing useful, and `SendReview` already relabels its button in that state. The address-step
+warning still appears, since that check lives in `SendInputDestination` and knows nothing
+about minting. Minting is a rare path built for one user, so warning there is acceptable and
+not worth a second exemption.
 
 ### Negative guarantees (what it does _not_ do)
 
