@@ -22,7 +22,7 @@ import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction'
 import {
 	buildXrpPayment,
 	deriveXrpTransactionHash,
-	isXrpSubmitAccepted,
+	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -186,9 +186,10 @@ export const sendXrp = async ({
 		// blob, so fall through to confirmation rather than declaring failure here.
 	}
 
-	// A response we did understand is authoritative: a non-accepted engine result is a
-	// deterministic rejection, so it fails immediately.
-	if (nonNullish(result) && !isXrpSubmitAccepted(result)) {
+	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
+	// did not take the blob — may still end up applied, and reporting it as failed would invite a
+	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
+	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''

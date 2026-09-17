@@ -2,7 +2,7 @@ import { XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
-	isXrpSubmitAccepted,
+	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful,
 	mapXrpTransaction
 } from '$xrp/utils/xrp-transaction.utils';
@@ -374,31 +374,38 @@ describe('xrp-transaction.utils', () => {
 		});
 	});
 
-	describe('isXrpSubmitAccepted', () => {
-		// `tec` is included because the node APPLIED it: treating it as a rejection here would
-		// report an applied transaction as never sent and skip the confirmation that knows which
-		// `tec` it was. Whether the payment SUCCEEDED is decided by isXrpTransactionSuccessful.
-		it.each(['tesSUCCESS', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
-			'accepts %s when the node reports acceptance',
-			(engineResult) => {
-				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeTruthy();
-			}
-		);
+	describe('isXrpSubmitFinalFailure', () => {
+		// Malformed: the XRPL reference calls a `tem` result final, so this is the only class the
+		// send may report as failed without consulting the ledger.
+		it.each(['temBAD_FEE', 'temBAD_AMOUNT', 'temMALFORMED'])('rejects %s', (engineResult) => {
+			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
+		});
 
-		// These were never applied, so they are deterministic rejections.
-		it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
-			'rejects %s even when the node reports acceptance',
-			(engineResult) => {
-				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeFalsy();
-			}
-		);
+		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports an earlier
+		// submission already applied, and `tec` WAS applied — none of them is a failure to report
+		// here. The ledger decides by polling.
+		it.each([
+			'tesSUCCESS',
+			'terQUEUED',
+			'tecUNFUNDED_PAYMENT',
+			'tefALREADY',
+			'tefPAST_SEQ',
+			'tefMAX_LEDGER',
+			'telINSUF_FEE_P'
+		])('does not reject %s', (engineResult) => {
+			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+		});
 
-		it.each(['tesSUCCESS', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
-			'rejects %s when the node did not accept it',
-			(engineResult) => {
-				expect(isXrpSubmitAccepted({ engineResult, accepted: false })).toBeFalsy();
-			}
-		);
+		// A node's refusal to take the blob is not evidence that no ledger will include it, so it
+		// must not turn a non-final result into a reported failure.
+		it('ignores the accepted flag', () => {
+			expect(isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: false })).toBe(
+				isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: true })
+			);
+			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBe(
+				isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: false })
+			);
+		});
 	});
 
 	describe('isXrpTransactionSuccessful', () => {

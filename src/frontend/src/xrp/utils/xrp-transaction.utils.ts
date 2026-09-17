@@ -9,31 +9,28 @@ import type {
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued and `tec` was applied
-// but *failed*, claiming the fee — all three mean the node took the transaction. `tem`/`tef`/`tel`
-// were not applied at all.
-//
-// `tec` belongs here precisely because it WAS applied: failing on it at submit would report an
-// applied transaction as rejected and skip the confirmation that knows which `tec` it was and
-// that the fee was charged. Polling instead reaches the validated result and reports it
-// definitively. If this reading of `tec` is ever shown to be wrong, the cost is bounded: the poll
-// runs to `LastLedgerSequence` and ends with the indeterminate message rather than a false claim.
-const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter', 'tec'];
+// Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
+// rules for a valid transaction change", while a `tef` "may still succeed or fail with a different
+// code after being reapplied" and `tel` transactions "may be automatically cached and retried
+// later" — `tefALREADY` even reports that an earlier submission of this exact blob already
+// applied. A "no" that may still become a yes must not be reported as a failure: the user would
+// send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
+// thing that decides definitively.
+const XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX = 'tem';
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
 /**
- * Whether the node took a submitted transaction for processing.
+ * Whether a submit response definitively rejects the transaction.
  *
- * "Took it" is not "it succeeded": a `tec*` result is taken and applied yet the payment failed.
- * Success is decided later, from the validated `meta.TransactionResult` — see
- * {@link isXrpTransactionSuccessful}. Both facts are required here because `accepted` alone says
- * nothing about the engine result, and an engine result alone says nothing about whether this
- * node accepted the blob.
+ * Deliberately NOT a function of `accepted`: a node answering `tef`/`tel` reports
+ * `accepted: false`, and one server refusing to take the blob is not evidence that no ledger will
+ * ever include it — it may cache and reapply it. Only a malformed transaction can be called failed
+ * here; everything else, including an applied-but-failed `tec*`, is decided by polling the
+ * locally derived hash (see {@link isXrpTransactionSuccessful}).
  */
-export const isXrpSubmitAccepted = ({ accepted, engineResult }: XrpSubmitResult): boolean =>
-	accepted &&
-	XRP_PROCESSING_ENGINE_RESULT_PREFIXES.some((prefix) => engineResult.startsWith(prefix));
+export const isXrpSubmitFinalFailure = ({ engineResult }: XrpSubmitResult): boolean =>
+	engineResult.startsWith(XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX);
 
 /**
  * Whether a validated transaction actually succeeded.
