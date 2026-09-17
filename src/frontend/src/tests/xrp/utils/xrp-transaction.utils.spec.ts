@@ -122,6 +122,65 @@ describe('xrp-transaction.utils', () => {
 			expect(ui?.value).toBe(4_000_000n);
 		});
 
+		// `delivered_amount` is what the destination received. On a cross-currency payment the sender
+		// funded it with something else, so it is not XRP that left this wallet.
+		it('skips an outgoing payment funded by an issued currency', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: wallet,
+						Destination: counterparty,
+						Amount: '5000000',
+						SendMax: { currency: 'USD', issuer: counterparty, value: '10' },
+						Fee: '10',
+						hash: 'H-CROSS-CURRENCY'
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toBeUndefined();
+		});
+
+		// XRP-funded, so the payment really is ours to show.
+		it('still maps an outgoing payment whose SendMax is drops', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: wallet,
+						Destination: counterparty,
+						Amount: '5000000',
+						SendMax: '5000010',
+						Fee: '10',
+						hash: 'H-XRP-SENDMAX'
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui?.type).toBe('send');
+			expect(ui?.value).toBe(5_000_000n);
+		});
+
+		// The wallet is the destination: it genuinely received the XRP, whatever funded it.
+		it('still maps an incoming cross-currency payment that delivered XRP', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						SendMax: { currency: 'USD', issuer: counterparty, value: '10' },
+						hash: 'H-CROSS-IN'
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui?.type).toBe('receive');
+			expect(ui?.value).toBe(5_000_000n);
+		});
+
 		// `account_tx` returns everything that affected the account, so an entry between two other
 		// parties can reach the mapper. Booking it as our send would show a stranger's amount.
 		it('skips a payment the wallet neither sent nor received', () => {

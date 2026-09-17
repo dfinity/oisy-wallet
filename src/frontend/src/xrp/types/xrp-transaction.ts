@@ -54,6 +54,8 @@ export interface XrpAccountTransaction {
 	Account: string;
 	Destination?: string;
 	Amount?: string | Record<string, unknown>;
+	// Drops for an XRP-funded payment, an object when the sender spent an issued currency.
+	SendMax?: string | Record<string, unknown>;
 	Fee?: string;
 	DestinationTag?: number;
 	hash?: string;
