@@ -14,7 +14,7 @@
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { icrcCustomTokensInitialized, icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
@@ -30,6 +30,7 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails, tipRateLimit } from '$lib/services/tip.services';
@@ -44,6 +45,7 @@
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { waitReady } from '$lib/utils/timeout.utils';
 	import {
 		hasSeenTipWelcome,
 		isTipUnavailable,
@@ -55,6 +57,18 @@
 	}
 
 	let { pending }: Props = $props();
+
+	/**
+	 * How long the handover waits for the profile and the token list to land, as
+	 * `waitReady` retries at its default half-second interval — so about five
+	 * seconds.
+	 *
+	 * Long enough for two canister loads that run in sequence, short enough that a
+	 * claimer whose load has genuinely failed is not held on a screen whose work is
+	 * finished. The cost of giving up early is a missed welcome or a token that
+	 * needs adding by hand, not a missed payout.
+	 */
+	const PROFILE_READY_RETRIES = 10;
 
 	/**
 	 * `unavailable` and `uncovered` come from different calls and mean different
@@ -208,8 +222,9 @@
 		// on the registration path there is no global busy overlay to sit in the way,
 		// so a double-click issued two saves — and the second met the first one's
 		// freshly written row with no version, which `set_custom_token` answers by
-		// trapping. The button is disabled from here too, so the guard is the
-		// backstop rather than the only defence.
+		// trapping. Checked before the wait below, so a tap during it is turned away
+		// rather than queued behind it. The button is disabled from here too, so the
+		// guard is the backstop rather than the only defence.
 		if (handingOff) {
 			return;
 		}
@@ -217,6 +232,31 @@
 		handingOff = true;
 
 		try {
+			// Everything below reads state the loader tree is still filling in, and
+			// this modal is mounted by `Modals` inside `AuthGuard` — beside that tree,
+			// not beneath it — so nothing orders the two. A first-time claimer is both
+			// the person whose profile is still being created and the one most likely
+			// to tap straight through, which is how the welcome came to be skipped for
+			// exactly the person it exists for.
+			//
+			// Both signals, not just the profile. `LoaderTokens` is mounted *inside*
+			// `LoaderUserProfile`, so it does not even start until the profile store
+			// is ready — waiting on the profile alone would hand over before the token
+			// list had begun loading, which is the condition that decides whether
+			// `enableClaimedToken` enables a token or registers it. An empty list
+			// there reads as "never seen this token" and takes the registration path
+			// for a row the backend already has, and that is the versionless save
+			// `set_custom_token` answers by trapping.
+			//
+			// Bounded rather than indefinite: if either never lands, the claim is
+			// still done and the money is still theirs, so the handover proceeds on
+			// what is known rather than trapping the reader on a screen they have
+			// finished with.
+			await waitReady({
+				retries: PROFILE_READY_RETRIES,
+				isDisabled: () => !$userProfileLoaded || !$icrcCustomTokensInitialized
+			});
+
 			await enableClaimedToken();
 
 			// Whether this claimer needs OISY explained to them, read before `close()`
