@@ -128,7 +128,9 @@ describe('xrp-send.services', () => {
 
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -141,7 +143,9 @@ describe('xrp-send.services', () => {
 		expect(submitResult).toBeUndefined();
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -157,7 +161,9 @@ describe('xrp-send.services', () => {
 		expect(submitResult).toBeUndefined();
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -476,6 +482,8 @@ describe('xrp-send.services', () => {
 			expect((err as XrpSendIndeterminateError).pending).toEqual({
 				txBlob: signedBlob,
 				txHash: expect.stringMatching(/^[0-9A-F]{64}$/),
+				// The window a retry must poll: the open index at signing through its expiry.
+				firstLedgerSequence: 1000,
 				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 			});
 		});
@@ -501,6 +509,7 @@ describe('xrp-send.services', () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
 				txHash: 'A'.repeat(64),
+				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
 
@@ -512,7 +521,9 @@ describe('xrp-send.services', () => {
 			});
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 				hash: pending.txHash,
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: pending.firstLedgerSequence,
+				lastLedgerSequence: pending.lastLedgerSequence
 			});
 
 			// Nothing is fetched, rebuilt or re-signed: a new sequence would make this a different
@@ -528,6 +539,7 @@ describe('xrp-send.services', () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
 				txHash: 'B'.repeat(64),
+				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
 

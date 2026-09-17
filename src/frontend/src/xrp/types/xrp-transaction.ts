@@ -38,6 +38,10 @@ export interface XrpAccountInfo {
 export interface XrpPendingTransaction {
 	txBlob: string;
 	txHash: string;
+	// The inclusive ledger range the transaction can appear in: the open index when it was signed,
+	// through the `LastLedgerSequence` it was signed with. Confirmation needs it to ask `tx` for a
+	// definite answer — see `loadXrpTransactionOutcome`.
+	firstLedgerSequence: number;
 	lastLedgerSequence: number;
 }
 

@@ -506,20 +506,68 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({ body: { result: { error } } });
 
 				await expect(
-					loadXrpTransactionOutcome({ hash: 'HASH', network: XrpNetworks.mainnet })
+					loadXrpTransactionOutcome({
+						hash: 'HASH',
+						network: XrpNetworks.mainnet,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
 				).rejects.toThrow(`Unexpected XRPL tx response: ${error}`);
 			}
 		);
 
-		it('reports the transaction as not validated for txnNotFound', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound' } } });
+		// Absence is established only when the node confirms it searched the whole range.
+		it('reports the transaction as not validated for a fully searched txnNotFound', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
 
 			const outcome = await loadXrpTransactionOutcome({
 				hash: 'HASH',
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: 1000,
+				lastLedgerSequence: 1020
 			});
 
 			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
+		});
+
+		// `txnNotFound` also covers "the node does not have that ledger". Reading it as absence
+		// declares a settled payment expired and invites the duplicate send.
+		it.each([{ searched_all: false }, {}, { searched_all: 'true' }])(
+			'throws for a txnNotFound that did not search the whole range (%j)',
+			async (extra) => {
+				mockFetchResponse({ body: { result: { error: 'txnNotFound', ...extra } } });
+
+				await expect(
+					loadXrpTransactionOutcome({
+						hash: 'HASH',
+						network: XrpNetworks.mainnet,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+				).rejects.toThrow('Unexpected XRPL tx response: txnNotFound');
+			}
+		);
+
+		// The range is what makes the node report `searched_all` at all.
+		it('asks for the ledger range the transaction can be included in', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+
+			await loadXrpTransactionOutcome({
+				hash: 'HASH',
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: 1000,
+				lastLedgerSequence: 1020
+			});
+
+			expect(fetch).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					body: JSON.stringify({
+						method: 'tx',
+						params: [{ transaction: 'HASH', min_ledger: 1000, max_ledger: 1020 }]
+					})
+				})
+			);
 		});
 
 		it('reports the validated flag and the final transaction result', async () => {
@@ -528,7 +576,12 @@ describe('xrpl.rest', () => {
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
 		});
 
@@ -541,7 +594,12 @@ describe('xrpl.rest', () => {
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'abcdef', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'abcdef',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
 		});
 
@@ -559,7 +617,12 @@ describe('xrpl.rest', () => {
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'A'.repeat(64), network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'A'.repeat(64),
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).rejects.toThrow('answered for');
 		});
 
@@ -569,7 +632,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { validated: false, hash: 'B'.repeat(64) } } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'A'.repeat(64), network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'A'.repeat(64),
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).rejects.toThrow('answered for');
 		});
 
@@ -581,7 +649,12 @@ describe('xrpl.rest', () => {
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).rejects.toThrow('validated transaction without a result');
 		});
 
@@ -589,7 +662,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { validated: false } } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: false, transactionResult: undefined });
 		});
 
@@ -602,7 +680,12 @@ describe('xrpl.rest', () => {
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
 		});
 
@@ -617,7 +700,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).rejects.toThrow('Unexpected XRPL tx response: validated transaction without a result');
 		});
 
@@ -626,7 +714,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { meta: { TransactionResult: 'tesSUCCESS' } } } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: false, transactionResult: undefined });
 		});
 	});

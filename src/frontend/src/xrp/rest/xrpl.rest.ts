@@ -236,22 +236,41 @@ export const loadXrpValidatedLedgerIndex = async ({
  */
 export const loadXrpTransactionOutcome = async ({
 	hash,
-	network
+	network,
+	firstLedgerSequence,
+	lastLedgerSequence
 }: {
 	hash: string;
 	network: XrpNetworkType;
+	firstLedgerSequence: number;
+	lastLedgerSequence: number;
 }): Promise<{ validated: boolean; transactionResult: string | undefined }> => {
+	// The range is what makes a negative answer meaningful. Per the XRPL reference `txnNotFound`
+	// means "either the transaction does not exist, or it was part of an ledger version that xrpld
+	// does not have available", and so "a txnNotFound on its own is not enough to know the final
+	// outcome of a transaction". Supplying `min_ledger`/`max_ledger` makes the node report
+	// `searched_all`, which distinguishes the two. The window is the 21 ledgers the transaction can
+	// be included in, far inside the 1000-ledger limit that would give `excessiveLgrRange`.
 	const result = await xrpJsonRpc({
 		network,
 		method: 'tx',
-		params: { transaction: hash }
+		params: {
+			transaction: hash,
+			min_ledger: firstLedgerSequence,
+			max_ledger: lastLedgerSequence
+		}
 	});
 
 	// A node that cannot answer must not be read as the transaction being absent: the caller
 	// concludes expiry from a non-validated lookup, and telling it "not there" when the node
 	// merely said `tooBusy` would report a validated payment as never applied.
 	if (nonNullish(result.error)) {
-		if (result.error === 'txnNotFound') {
+		// Absence is only established when the node confirms it searched every ledger in the range.
+		// Without that, `txnNotFound` may mean the node simply lacks the ledger our payment is in —
+		// a resynced or history-gapped member of a load-balanced endpoint — and reading it as
+		// non-inclusion declares a settled payment expired, which invites the duplicate send that
+		// `XrpSendExpiredError` explicitly tells the caller is safe.
+		if (result.error === 'txnNotFound' && result.searched_all === true) {
 			return { validated: false, transactionResult: undefined };
 		}
 

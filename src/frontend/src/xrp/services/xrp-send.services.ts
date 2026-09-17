@@ -48,10 +48,12 @@ import { nonNullish } from '@dfinity/utils';
 const confirmXrpTransaction = async ({
 	hash,
 	network,
+	firstLedgerSequence,
 	lastLedgerSequence
 }: {
 	hash: string;
 	network: XrpNetworkType;
+	firstLedgerSequence: number;
 	lastLedgerSequence: number;
 }): Promise<string | undefined> => {
 	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
@@ -61,7 +63,12 @@ const confirmXrpTransaction = async ({
 		{ validated: boolean; transactionResult: string | undefined } | undefined
 	> => {
 		try {
-			return await loadXrpTransactionOutcome({ hash, network });
+			return await loadXrpTransactionOutcome({
+				hash,
+				network,
+				firstLedgerSequence,
+				lastLedgerSequence
+			});
 		} catch (_: unknown) {
 			return undefined;
 		}
@@ -99,7 +106,12 @@ const confirmXrpTransaction = async ({
 				// reported as failed and the user invited to send a duplicate. This one is not caught:
 				// a node that fails to answer here leaves non-inclusion unestablished, and the error
 				// must surface instead of being turned into a claim that the payment never applied.
-				const recheck = await loadXrpTransactionOutcome({ hash, network });
+				const recheck = await loadXrpTransactionOutcome({
+					hash,
+					network,
+					firstLedgerSequence,
+					lastLedgerSequence
+				});
 
 				if (recheck.validated) {
 					return recheck.transactionResult;
@@ -136,7 +148,7 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, txHash, lastLedgerSequence } = pending;
+	const { txBlob, txHash, firstLedgerSequence, lastLedgerSequence } = pending;
 
 	progress?.(ProgressStepsSendXrp.SEND);
 
@@ -165,7 +177,12 @@ const submitAndConfirmXrpTransaction = async ({
 	let transactionResult: string | undefined;
 
 	try {
-		transactionResult = await confirmXrpTransaction({ hash: txHash, network, lastLedgerSequence });
+		transactionResult = await confirmXrpTransaction({
+			hash: txHash,
+			network,
+			firstLedgerSequence,
+			lastLedgerSequence
+		});
 	} catch (err: unknown) {
 		// Expiry is the one confirmation failure that is definitive: the validated ledger passed
 		// `LastLedgerSequence` and the hash was still absent on recheck, so this transaction can
@@ -288,7 +305,7 @@ export const sendXrp = async ({
 
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, txHash, lastLedgerSequence },
+		pending: { txBlob, txHash, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
 		progress
 	});
 };
