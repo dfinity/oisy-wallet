@@ -5,7 +5,8 @@ import {
 	XrplAccountInfoResponseSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
-	XrplLedgerResultSchema
+	XrplLedgerResultSchema,
+	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
@@ -236,12 +237,21 @@ export const loadXrpTransactionOutcome = async ({
 		throw new Error(`Unexpected XRPL tx response: ${String(result.error)}`);
 	}
 
-	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
+	// A validated response missing its result is malformed, not a failed transaction: returning it
+	// as an absent result would end the poll and report a payment that may have succeeded as failed.
+	// Throwing instead keeps it indeterminate — ordinary polls retry, and the expiry recheck surfaces
+	// the RPC error rather than a claim of non-inclusion.
+	const parsed = XrplTxResultSchema.safeParse(result);
 
-	return {
-		validated: result.validated === true,
-		transactionResult: TransactionResult
-	};
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL tx response: validated transaction without a result');
+	}
+
+	const { data } = parsed;
+
+	return data.validated === true
+		? { validated: true, transactionResult: data.meta.TransactionResult }
+		: { validated: false, transactionResult: undefined };
 };
 
 /**

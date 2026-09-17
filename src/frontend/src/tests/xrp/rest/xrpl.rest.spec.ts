@@ -456,12 +456,28 @@ describe('xrpl.rest', () => {
 			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
 		});
 
-		it('tolerates a response without meta', async () => {
-			mockFetchResponse({ body: { result: { validated: true } } });
+		// `validated` is final, not successful, so a validated response owes a result. Reporting the
+		// result as absent would end the poll and call a possibly-applied payment failed.
+		it.each([
+			{ validated: true },
+			{ validated: true, meta: {} },
+			{ validated: true, meta: { TransactionResult: 7 } },
+			{ validated: true, meta: 'unavailable' }
+		])('throws for the validated response without a usable result %j', async (result) => {
+			mockFetchResponse({ body: { result } });
 
 			await expect(
 				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
-			).resolves.toEqual({ validated: true, transactionResult: undefined });
+			).rejects.toThrow('Unexpected XRPL tx response: validated transaction without a result');
+		});
+
+		// Absent, not false: the node omits the flag as well as reporting it.
+		it('reports a response without the validated flag as pending', async () => {
+			mockFetchResponse({ body: { result: { meta: { TransactionResult: 'tesSUCCESS' } } } });
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: false, transactionResult: undefined });
 		});
 	});
 });
