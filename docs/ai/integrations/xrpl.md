@@ -75,7 +75,10 @@ not on its own proof of acceptance — `isXrpSubmitAccepted` requires `accepted 
 **and** a `tes`/`ter`/`tec` class before treating a submission as taken. `tec` is in
 that list because it means the node _applied_ the transaction and claimed the fee:
 failing at submit would report an applied payment as rejected and skip the
-confirmation that knows which `tec` it was. `tem`/`tef`/`tel` were not applied at all.
+confirmation that knows which `tec` it was. `tem`/`tef`/`tel` were not applied by that
+submission — with one exception: `tefALREADY` means "the same exact transaction has already been
+applied", so it is confirmed rather than rejected, or a completed payment would be reported as
+unsent and the retry would pay twice.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 

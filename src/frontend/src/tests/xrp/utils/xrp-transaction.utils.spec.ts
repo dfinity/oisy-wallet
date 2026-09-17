@@ -56,12 +56,18 @@ describe('xrp-transaction.utils', () => {
 		);
 
 		// These were never applied, so they are deterministic rejections.
-		it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+		it.each(['temBAD_FEE', 'tefPAST_SEQ', 'tefMAX_LEDGER', 'telINSUF_FEE_P'])(
 			'rejects %s even when the node reports acceptance',
 			(engineResult) => {
 				expect(isXrpSubmitAccepted({ engineResult, accepted: true })).toBeFalsy();
 			}
 		);
+
+		// An earlier submission of the exact blob applied, so this must be confirmed rather than
+		// rejected — and the `accepted: false` that comes with a `tef` response must not veto it.
+		it('accepts tefALREADY even though the node did not accept this submission', () => {
+			expect(isXrpSubmitAccepted({ engineResult: 'tefALREADY', accepted: false })).toBeTruthy();
+		});
 
 		it.each(['tesSUCCESS', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
 			'rejects %s when the node did not accept it',
