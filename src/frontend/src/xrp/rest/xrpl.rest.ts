@@ -2,7 +2,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
-	XrplAccountInfoResponseSchema,
+	XrplAccountInfoResultSchema,
+	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
@@ -15,14 +16,41 @@ import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpAccountInfo, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import { nonNullish } from '@dfinity/utils';
 
+/**
+ * An XRPL method answered with `result.error`.
+ *
+ * Carries the code so a caller can act on a specific one without matching message text. Codes a
+ * helper treats as an expected state are named in its `expectedErrors` and returned to it instead
+ * of throwing.
+ */
+export class XrplRpcError extends Error {
+	readonly error: string;
+
+	constructor({ method, error }: { method: string; error: string }) {
+		super(`Unexpected XRPL ${method} response: ${error}`);
+		this.error = error;
+	}
+}
+
+/**
+ * One place that owns the JSON-RPC envelope.
+ *
+ * XRPL answers a failed request with HTTP 200 and the failure in the body, so `result.error` has
+ * to be inspected on every call. Doing that here rather than in each helper means the envelope is
+ * actually validated — a body without `result` used to reach the helpers as `undefined` and give a
+ * `TypeError` from `result.error`, not the intended message — and each helper is left to decide
+ * only which errors are an expected state for it.
+ */
 const xrpJsonRpc = async ({
 	network,
 	method,
-	params
+	params,
+	expectedErrors = []
 }: {
 	network: XrpNetworkType;
 	method: string;
 	params: Record<string, unknown>;
+	expectedErrors?: string[];
 }): Promise<Record<string, unknown>> => {
 	const response = await fetch(xrpHttpRpcUrl(network), {
 		method: 'POST',
@@ -34,7 +62,18 @@ const xrpJsonRpc = async ({
 		throw new Error(`XRPL ${method} request failed with status ${response.status}`);
 	}
 
-	const { result }: { result: Record<string, unknown> } = await response.json();
+	const parsed = XrplEnvelopeSchema.safeParse(await response.json());
+
+	if (!parsed.success) {
+		throw new Error(`Unexpected XRPL ${method} response: no result object`);
+	}
+
+	const { result } = parsed.data;
+	const { error } = result;
+
+	if (nonNullish(error) && !expectedErrors.includes(String(error))) {
+		throw new XrplRpcError({ method, error: String(error) });
+	}
 
 	return result;
 };
@@ -54,39 +93,31 @@ export const loadXrpBalance = async ({
 	address: XrpAddress;
 	network: XrpNetworkType;
 }): Promise<XrpBalance> => {
-	const response = await fetch(xrpHttpRpcUrl(network), {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			method: 'account_info',
-			params: [{ account: address, ledger_index: 'validated' }]
-		})
+	const result = await xrpJsonRpc({
+		network,
+		method: 'account_info',
+		params: { account: address, ledger_index: 'validated' },
+		expectedErrors: ['actNotFound']
 	});
-
-	if (!response.ok) {
-		throw new Error(`XRPL account_info request failed with status ${response.status}`);
-	}
 
 	// The response is untrusted external JSON: validate it before converting, so a malformed
 	// `Balance` cannot pass through `BigInt` as a plausible-looking amount.
-	const parsed = XrplAccountInfoResponseSchema.safeParse(await response.json());
+	const parsed = XrplAccountInfoResultSchema.safeParse(result);
 
 	if (!parsed.success) {
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { result } = parsed.data;
+	const { data } = parsed;
 
-	if ('error' in result) {
-		if (result.error === 'actNotFound') {
-			return ZERO;
-		}
-
-		throw new Error(`Unexpected XRPL account_info response: ${result.error}`);
-	}
-
-	return BigInt(result.account_data.Balance);
+	return 'error' in data ? ZERO : BigInt(data.account_data.Balance);
 };
+
+/**
+ * The account is not on-ledger. Distinct from an operational failure: it means the account owns
+ * nothing, so the base reserve alone genuinely describes its requirement.
+ */
+export class XrpAccountNotFoundError extends Error {}
 
 /**
  * Account balance (drops), current `Sequence` and `OwnerCount` for a funded account.
@@ -96,12 +127,6 @@ export const loadXrpBalance = async ({
  * `OwnerCount` is needed for the reserve: every ledger object the account owns raises the
  * amount it must retain beyond the base reserve.
  */
-/**
- * The account is not on-ledger. Distinct from an operational failure: it means the account owns
- * nothing, so the base reserve alone genuinely describes its requirement.
- */
-export class XrpAccountNotFoundError extends Error {}
-
 export const loadXrpAccountInfo = async ({
 	address,
 	network
@@ -112,10 +137,11 @@ export const loadXrpAccountInfo = async ({
 	const result = await xrpJsonRpc({
 		network,
 		method: 'account_info',
-		params: { account: address, ledger_index: 'validated' }
+		params: { account: address, ledger_index: 'validated' },
+		expectedErrors: ['actNotFound']
 	});
 
-	// Checked before the schema: an `actNotFound` response carries no `account_data`, so parsing
+	// Handled before the schema: an `actNotFound` response carries no `account_data`, so parsing
 	// first would fail the shape check and mask the typed "owns nothing" error.
 	if (result.error === 'actNotFound') {
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
@@ -126,19 +152,11 @@ export const loadXrpAccountInfo = async ({
 	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
 	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
 
-	if (!parsed.success) {
-		throw new Error(
-			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'it does not match the expected shape'}`
-		);
+	if (!parsed.success || 'error' in parsed.data) {
+		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { data } = parsed;
-
-	if ('error' in data) {
-		throw new Error(`Unexpected XRPL account_info response: ${data.error}`);
-	}
-
-	const { Balance, Sequence, OwnerCount } = data.account_data;
+	const { Balance, Sequence, OwnerCount } = parsed.data.account_data;
 
 	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount };
 };
@@ -156,14 +174,10 @@ export const loadXrpOpenLedgerFee = async ({
 }): Promise<XrpBalance> => {
 	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
 
-	// Before parsing: every field of the fee result is optional, so an error response parses
-	// happily with no `drops` and would be answered with the fallback — the base fee, which is
-	// exactly what underprices a send on the congested node that returned `tooBusy` in the first
-	// place. The fallback is for a successful response that omits the estimate, nothing else.
-	if (nonNullish(result.error)) {
-		throw new Error(`Unexpected XRPL fee response: ${String(result.error)}`);
-	}
-
+	// No `expectedErrors`: every field of this result is optional, so an error response would parse
+	// happily with no `drops` and be answered with the fallback — the base fee, which is exactly
+	// what underprices a send on the congested node that returned `tooBusy`. The envelope rejects
+	// it first. The fallback is for a successful response that omits the estimate, nothing else.
 	const parsed = XrplFeeResultSchema.safeParse(result);
 
 	if (!parsed.success) {
@@ -176,7 +190,6 @@ export const loadXrpOpenLedgerFee = async ({
 	return nonNullish(fee) ? BigInt(fee) : fallbackFee;
 };
 
-/** Current (in-progress) ledger index via `ledger_current`, used to set `LastLedgerSequence`. */
 /**
  * Index of the ledger currently being built. This is the right base for choosing a
  * `LastLedgerSequence` at signing time, but NOT for deciding that a transaction expired:
@@ -189,12 +202,6 @@ export const loadXrpLedgerIndex = async ({
 	network: XrpNetworkType;
 }): Promise<number> => {
 	const result = await xrpJsonRpc({ network, method: 'ledger_current', params: {} });
-
-	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
-	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
-	if (nonNullish(result.error)) {
-		throw new Error(`Unexpected XRPL ledger_current response: ${String(result.error)}`);
-	}
 
 	const parsed = XrplLedgerCurrentResultSchema.safeParse(result);
 
@@ -219,12 +226,6 @@ export const loadXrpValidatedLedgerIndex = async ({
 		method: 'ledger',
 		params: { ledger_index: 'validated' }
 	});
-
-	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
-	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
-	if (nonNullish(result.error)) {
-		throw new Error(`Unexpected XRPL ledger response: ${String(result.error)}`);
-	}
 
 	// A malformed HIGH index would declare a still-live payment expired, so this is validated
 	// rather than cast, and the response must actually describe a validated ledger.
@@ -270,23 +271,24 @@ export const loadXrpTransactionOutcome = async ({
 			transaction: hash,
 			min_ledger: firstLedgerSequence,
 			max_ledger: lastLedgerSequence
-		}
+		},
+		// Only `txnNotFound` can mean "not there", and the envelope throws on anything else: a node
+		// that merely said `tooBusy` must not be read as the transaction being absent, because the
+		// caller concludes expiry from a non-validated lookup.
+		expectedErrors: ['txnNotFound']
 	});
 
-	// A node that cannot answer must not be read as the transaction being absent: the caller
-	// concludes expiry from a non-validated lookup, and telling it "not there" when the node
-	// merely said `tooBusy` would report a validated payment as never applied.
 	if (nonNullish(result.error)) {
 		// Absence is only established when the node confirms it searched every ledger in the range.
 		// Without that, `txnNotFound` may mean the node simply lacks the ledger our payment is in —
 		// a resynced or history-gapped member of a load-balanced endpoint — and reading it as
 		// non-inclusion declares a settled payment expired, which invites the duplicate send that
 		// `XrpSendExpiredError` explicitly tells the caller is safe.
-		if (result.error === 'txnNotFound' && result.searched_all === true) {
+		if (result.searched_all === true) {
 			return { validated: false, transactionResult: undefined };
 		}
 
-		throw new Error(`Unexpected XRPL tx response: ${String(result.error)}`);
+		throw new XrplRpcError({ method: 'tx', error: String(result.error) });
 	}
 
 	// A validated response missing its result is malformed, not a failed transaction: returning it
@@ -336,20 +338,10 @@ export const submitXrpTransaction = async ({
 }): Promise<XrpSubmitResult> => {
 	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
 
-	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
-	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
-	if (nonNullish(result.error)) {
-		throw new Error(`Unexpected XRPL submit response: ${String(result.error)}`);
-	}
-
 	const parsed = XrplSubmitResultSchema.safeParse(result);
 
 	if (!parsed.success) {
-		throw new Error(
-			`Unexpected XRPL submit response: ${
-				nonNullish(result.error) ? String(result.error) : 'no string engine_result'
-			}`
-		);
+		throw new Error('Unexpected XRPL submit response: no string engine_result');
 	}
 
 	const { data } = parsed;

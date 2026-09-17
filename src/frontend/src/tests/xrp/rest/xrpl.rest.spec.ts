@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	XrpAccountNotFoundError,
+	XrplRpcError,
 	loadXrpAccountInfo,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
@@ -20,6 +21,7 @@ vi.mock('$xrp/providers/xrp-rpc.providers', () => ({
 
 describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
+	const network = XrpNetworks.mainnet;
 
 	const mockFetchResponse = ({
 		body,
@@ -42,6 +44,58 @@ describe('xrpl.rest', () => {
 
 	beforeEach(() => {
 		vi.unstubAllGlobals();
+	});
+
+	// The envelope is validated once, by `xrpJsonRpc`. Before that, every helper dereferenced
+	// `result.error` itself, so a body without a `result` object produced
+	// "TypeError: Cannot read properties of undefined" instead of the helper's own message —
+	// exactly the shape leak the per-helper guards existed to prevent.
+	describe('the JSON-RPC envelope', () => {
+		const callers: { name: string; call: () => Promise<unknown> }[] = [
+			{ name: 'loadXrpBalance', call: () => loadXrpBalance({ address, network }) },
+			{ name: 'loadXrpAccountInfo', call: () => loadXrpAccountInfo({ address, network }) },
+			{
+				name: 'loadXrpOpenLedgerFee',
+				call: () => loadXrpOpenLedgerFee({ network, fallbackFee: 10n })
+			},
+			{ name: 'loadXrpLedgerIndex', call: () => loadXrpLedgerIndex({ network }) },
+			{ name: 'loadXrpValidatedLedgerIndex', call: () => loadXrpValidatedLedgerIndex({ network }) },
+			{
+				name: 'loadXrpTransactionOutcome',
+				call: () =>
+					loadXrpTransactionOutcome({
+						hash: 'H',
+						network,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+			},
+			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
+		];
+
+		describe.each(callers)('$name', ({ call }) => {
+			it.each([{}, { result: null }, { jsonrpc: '2.0', error: 'gateway' }])(
+				'names the missing result object for the body %j',
+				async (body) => {
+					mockFetchResponse({ body });
+
+					await expect(call()).rejects.toThrow('no result object');
+				}
+			);
+
+			// One typed error, thrown in one place, carrying the code.
+			it('throws XrplRpcError carrying the code for an unexpected XRPL error', async () => {
+				mockFetchResponse({ body: { result: { error: 'tooBusy' } } });
+
+				const err = await call().then(
+					() => undefined,
+					(e: unknown) => e
+				);
+
+				expect(err).toBeInstanceOf(XrplRpcError);
+				expect((err as XrplRpcError).error).toBe('tooBusy');
+			});
+		});
 	});
 
 	describe('loadXrpBalance', () => {

@@ -8,7 +8,7 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
 // first branch that parses, so without forbidding the opposite variant's key a
 // response carrying both would be read as a balance and the error silently dropped.
-const XrplAccountInfoResultSchema = z.union([
+export const XrplAccountInfoResultSchema = z.union([
 	z.object({
 		account_data: z.object({ Balance: XrpDropsSchema }),
 		error: z.never().optional()
@@ -19,8 +19,11 @@ const XrplAccountInfoResultSchema = z.union([
 	})
 ]);
 
-export const XrplAccountInfoResponseSchema = z.object({
-	result: XrplAccountInfoResultSchema
+// The JSON-RPC envelope. `xrpJsonRpc` owns this so every helper receives a `result` object that
+// exists and carries no unhandled `error`; before, each helper dereferenced `result.error` itself
+// and a body without `result` produced a TypeError instead of the helper's own message.
+export const XrplEnvelopeSchema = z.object({
+	result: z.record(z.string(), z.unknown())
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
