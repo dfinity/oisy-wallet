@@ -71,7 +71,7 @@
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				<span class="capitalize">{$i18n.transaction.type[type]}</span>
 			{/snippet}
 			{#snippet title()}
 				{#if nonNullish(token) && nonNullish(value)}

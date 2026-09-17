@@ -27,6 +27,15 @@ describe('XrpTransactionModal', () => {
 		expect(container.textContent).toContain('42');
 	});
 
+	// The subtitle is user-visible, so it must come from the locale rather than the union literal.
+	it.each(['receive', 'send'] as const)('renders the localized label for a %s', (type) => {
+		const { getByText } = render(XrpTransactionModal, {
+			props: { transaction: { ...transaction, type }, token: XRP_TOKEN }
+		});
+
+		expect(getByText(get(i18n).transaction.type[type])).toBeTruthy();
+	});
+
 	// The mapper attributes a fee only to the sending account, so a fee present means an outgoing
 	// payment — and the detail view is the one place its full cost should be visible.
 	it('renders the fee of an outgoing payment', () => {
