@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
@@ -326,13 +327,30 @@ describe('xrpl.rest', () => {
 			}
 		);
 
-		it('throws for an unfunded account', async () => {
+		// Typed, so a caller can tell "this account owns nothing" from a node that could not answer.
+		// A zero balance cannot carry that meaning: the transaction cost can drain an existing
+		// account to nothing and it still exists on-ledger.
+		it('throws a typed error for an unfunded account', async () => {
 			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
 
-			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'actNotFound'
-			);
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })
+			).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 		});
+
+		it.each(['tooBusy', 'noNetwork'])(
+			'throws an untyped error for the operational failure %s',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				const err = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet }).catch(
+					(e: unknown) => e
+				);
+
+				expect(err).toBeInstanceOf(Error);
+				expect(err).not.toBeInstanceOf(XrpAccountNotFoundError);
+			}
+		);
 	});
 
 	describe('loadXrpOpenLedgerFee', () => {

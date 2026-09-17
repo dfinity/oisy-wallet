@@ -7,6 +7,7 @@ import {
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
+import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
@@ -556,11 +557,25 @@ describe('xrp-send.services', () => {
 	});
 
 	describe('an unfunded destination', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0 };
+
+		// The node's `actNotFound` for the destination is the only thing that means unfunded.
+		const mockDestination = (
+			destinationOutcome: () => Promise<never> | Promise<typeof sourceInfo>
+		) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockImplementation(async ({ address }) =>
+					address === destination ? await destinationOutcome() : sourceInfo
+				);
+
+		const notFound = () => Promise.reject(new XrpAccountNotFoundError('XRPL account not found'));
+
 		// XRPL answers a payment too small to create the account with `tecNO_DST_INSUF_XRP`, which is
 		// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
 		// failure into a plain error.
 		it('refuses an amount below the account reserve before signing', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+			mockDestination(notFound);
 
 			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
 				'does not exist yet'
@@ -571,18 +586,28 @@ describe('xrp-send.services', () => {
 		});
 
 		it('sends an amount that covers the account reserve', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+			mockDestination(notFound);
 
 			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
 		});
 
-		// Only an unfunded destination carries the restriction: an existing account always holds at
-		// least the base reserve, so any positive balance means the rule does not apply.
-		it('does not restrict the amount when the destination exists', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(1n);
+		// A drained account still exists, and receiving XRP carries no reserve requirement — so a
+		// zero balance must NOT be read as unfunded.
+		it('does not restrict the amount when the destination exists with a zero balance', async () => {
+			mockDestination(() => Promise.resolve({ ...sourceInfo, balance: ZERO }));
 
 			await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
 		});
+
+		// The check is advisory: failing to make it must not block a send to a well-funded address.
+		it.each(['tooBusy', 'XRPL account_info request failed with status 503'])(
+			'sends anyway when the destination read fails with %s',
+			async (message) => {
+				mockDestination(() => Promise.reject(new Error(message)));
+
+				await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
+			}
+		);
 	});
 
 	// The fee is untrusted input and escalates with load, so an excessive estimate must not be

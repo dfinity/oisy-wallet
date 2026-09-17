@@ -1,4 +1,3 @@
-import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
@@ -10,8 +9,8 @@ import {
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
+	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
-	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
@@ -250,23 +249,40 @@ export const sendXrp = async ({
 		return await submitAndConfirmXrpTransaction({ network, pending, progress });
 	}
 
-	const [{ sequence }, destinationBalance, fee, ledgerIndex, signingPublicKey] = await Promise.all([
+	// Advisory, and therefore never fatal: a check that could not run must not block a send to a
+	// well-funded address, so anything other than the node's own "account not found" leaves this
+	// `undefined` and the guard below is skipped.
+	//
+	// The node's error is the only thing that means unfunded. A zero balance does not: the
+	// transaction cost can take an existing account below its reserve, even to nothing, and the
+	// account still exists — at which point it can receive any amount, since receiving carries no
+	// reserve requirement of its own.
+	const tryDestinationExists = async (): Promise<boolean | undefined> => {
+		try {
+			await loadXrpAccountInfo({ address: destination, network });
+
+			return true;
+		} catch (err: unknown) {
+			return err instanceof XrpAccountNotFoundError ? false : undefined;
+		}
+	};
+
+	const [{ sequence }, destinationExists, fee, ledgerIndex, signingPublicKey] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network }),
-		loadXrpBalance({ address: destination, network }),
+		tryDestinationExists(),
 		loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }),
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
 
-	// An account that exists on-ledger always holds at least the base reserve, so a zero balance
-	// means the address is unfunded — `loadXrpBalance` maps the node's `actNotFound` to ZERO. XRPL
-	// answers a payment too small to create such an account with `tecNO_DST_INSUF_XRP`, which is
-	// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
-	// failure into a plain error.
+	// XRPL answers a payment too small to create an account that does not exist with
+	// `tecNO_DST_INSUF_XRP`, which is APPLIED: the payment fails and the fee is claimed. Refusing
+	// before signing turns a charged failure into a plain error.
 	//
-	// Advisory, not authoritative: the destination can be funded between this read and submission,
-	// so the validated result stays the final word. This only declines what is already known.
-	if (destinationBalance === ZERO && amount < XRP_BASE_RESERVE_DROPS) {
+	// Only `false` declines. `undefined` means the check could not be made, and the destination can
+	// be funded between this read and submission either way, so the validated result stays the
+	// final word — this declines only what the node positively reported.
+	if (destinationExists === false && amount < XRP_BASE_RESERVE_DROPS) {
 		throw new Error(
 			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
