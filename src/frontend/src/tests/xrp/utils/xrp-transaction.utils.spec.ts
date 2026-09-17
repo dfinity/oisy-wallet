@@ -108,6 +108,17 @@ describe('xrp-transaction.utils', () => {
 			await expect(deriveXrpTransactionHash(LEDGER_BLOB)).resolves.toBe(LEDGER_HASH);
 		});
 
+		// `Buffer.from(hex, 'hex')` truncates at the first non-hex character instead of rejecting, so
+		// before this guard `1200ZZ`, `1200xyz` and `1200 00` all hashed the bytes of `1200` and
+		// returned ONE identical id. A resubmission's blob comes from the caller, and a wrong id is
+		// polled to a false expiry.
+		it.each(['1200ZZ', '1200xyz', '1200 00', '1200-00', 'nonsense', '120', '', '0x1200'])(
+			'refuses the malformed blob %j instead of truncating it',
+			async (blob) => {
+				await expect(deriveXrpTransactionHash(blob)).rejects.toThrow('not whole bytes of hex');
+			}
+		);
+
 		// Lowercase hex is equally valid on the wire, and the id is canonically uppercase.
 		it('accepts a lowercase blob and returns uppercase hex', async () => {
 			await expect(deriveXrpTransactionHash(LEDGER_BLOB.toLowerCase())).resolves.toBe(LEDGER_HASH);

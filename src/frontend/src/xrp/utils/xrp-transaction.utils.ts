@@ -75,6 +75,13 @@ const XRP_TRANSACTION_ID_PREFIX = Uint8Array.from([0x54, 0x58, 0x4e, 0x00]);
 
 const XRP_TRANSACTION_ID_BYTES = 32;
 
+// A serialized transaction is whole bytes of hex. `Buffer.from(hex, 'hex')` does not reject
+// anything else — it stops at the first character that is not a hex digit and returns what it had,
+// so `1200ZZ`, `1200xyz` and `1200 00` all produce the bytes of `1200` and therefore one identical
+// id. That matters most for a resubmission, whose blob comes from the caller: a wrong id is polled
+// to a false expiry, which is the outcome this whole path exists to avoid.
+const XRP_HEX_BLOB_REGEX = /^(?:[0-9a-fA-F]{2})+$/;
+
 /**
  * Transaction ID of a signed blob: `SHA-512Half(0x54584E00 || blob)`.
  *
@@ -82,8 +89,16 @@ const XRP_TRANSACTION_ID_BYTES = 32;
  * response is not evidence of non-inclusion — the node may already have applied the transaction —
  * and without a hash of our own there would be nothing to poll, so the send would be reported as
  * failed and a retry would spend the funds again.
+ *
+ * `ripple-binary-codec` does ship this as `transactionID`, but only from `dist/hashes`, which its
+ * public entry point does not re-export — and the frontend deep-imports no package's `dist`. Kept
+ * here rather than being the first, since it is pinned to a real ledger vector.
  */
 export const deriveXrpTransactionHash = async (txBlob: string): Promise<string> => {
+	if (!XRP_HEX_BLOB_REGEX.test(txBlob)) {
+		throw new Error('Cannot derive an XRP transaction id: the blob is not whole bytes of hex.');
+	}
+
 	const blob = Uint8Array.from(Buffer.from(txBlob, 'hex'));
 
 	const message = new Uint8Array(XRP_TRANSACTION_ID_PREFIX.length + blob.length);
