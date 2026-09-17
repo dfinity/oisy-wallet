@@ -1892,7 +1892,7 @@ describe('transactions.utils', () => {
 			});
 		});
 
-		it('should correctly return an empty array if all txs are approvals', () => {
+		it('should correctly return an empty object if all txs are approvals', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
