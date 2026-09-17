@@ -64,3 +64,28 @@ export const buildXrpPayment = ({
 	...(nonNullish(destinationTag) && { DestinationTag: destinationTag }),
 	...(nonNullish(lastLedgerSequence) && { LastLedgerSequence: lastLedgerSequence })
 });
+
+// XRPL's transaction-ID hash prefix, 'TXN\0'.
+const XRP_TRANSACTION_ID_PREFIX = Uint8Array.from([0x54, 0x58, 0x4e, 0x00]);
+
+const XRP_TRANSACTION_ID_BYTES = 32;
+
+/**
+ * Transaction ID of a signed blob: `SHA-512Half(0x54584E00 || blob)`.
+ *
+ * Derived locally so confirmation does not depend on the submit response. A lost or malformed
+ * response is not evidence of non-inclusion — the node may already have applied the transaction —
+ * and without a hash of our own there would be nothing to poll, so the send would be reported as
+ * failed and a retry would spend the funds again.
+ */
+export const deriveXrpTransactionHash = async (txBlob: string): Promise<string> => {
+	const blob = Uint8Array.from(Buffer.from(txBlob, 'hex'));
+
+	const message = new Uint8Array(XRP_TRANSACTION_ID_PREFIX.length + blob.length);
+	message.set(XRP_TRANSACTION_ID_PREFIX);
+	message.set(blob, XRP_TRANSACTION_ID_PREFIX.length);
+
+	const digest = new Uint8Array(await crypto.subtle.digest('SHA-512', message));
+
+	return Buffer.from(digest.slice(0, XRP_TRANSACTION_ID_BYTES)).toString('hex').toUpperCase();
+};

@@ -14,6 +14,8 @@ describe('xrp-send.services', () => {
 	const source = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const destination = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
 	const signingPublicKey = 'ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A63';
+	// Must be real hex: the transaction id is derived from these bytes.
+	const signedBlob = '1200002280000000240000000761400000000098968068400000000000000C';
 
 	const params = {
 		identity: mockIdentity,
@@ -36,7 +38,7 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(1000);
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 		vi.spyOn(xrpSignServices, 'getXrpSigningPublicKey').mockResolvedValue(signingPublicKey);
-		vi.spyOn(xrpSignServices, 'signXrpTransaction').mockResolvedValue('SIGNED_BLOB');
+		vi.spyOn(xrpSignServices, 'signXrpTransaction').mockResolvedValue(signedBlob);
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tesSUCCESS',
 			accepted: true,
@@ -72,10 +74,26 @@ describe('xrp-send.services', () => {
 		const result = await sendXrp(params);
 
 		expect(xrplRest.submitXrpTransaction).toHaveBeenCalledWith({
-			txBlob: 'SIGNED_BLOB',
+			txBlob: signedBlob,
 			network: XrpNetworks.mainnet
 		});
-		expect(result.txHash).toBe('TXHASH');
+		expect(result.submitResult?.engineResult).toBe('tesSUCCESS');
+	});
+
+	// The hash must not come from the submit response: if that response is lost there would be
+	// nothing to poll, the send would be reported failed, and a retry would pay twice.
+	it('derives the transaction id from the blob rather than the response', async () => {
+		const { txHash } = await sendXrp(params);
+
+		expect(txHash).not.toBe('TXHASH');
+		expect(txHash).toMatch(/^[0-9A-F]{64}$/);
+	});
+
+	it('derives the same id for the same blob', async () => {
+		const first = await sendXrp(params);
+		const second = await sendXrp(params);
+
+		expect(second.txHash).toBe(first.txHash);
 	});
 
 	it('reports progress through the send steps', async () => {
@@ -93,12 +111,49 @@ describe('xrp-send.services', () => {
 	});
 
 	it('waits for the transaction to be validated', async () => {
-		await sendXrp(params);
+		const { txHash } = await sendXrp(params);
 
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
-			hash: 'TXHASH',
+			hash: txHash,
 			network: XrpNetworks.mainnet
 		});
+	});
+
+	// A transport or shape failure says nothing about whether the node applied the blob.
+	it('still confirms when the submit response is lost', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
+
+		const { txHash, submitResult } = await sendXrp(params);
+
+		expect(submitResult).toBeUndefined();
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
+			hash: txHash,
+			network: XrpNetworks.mainnet
+		});
+	});
+
+	it('reports expiry rather than failure when a lost submit never appears', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
+	});
+
+	// A response we understood is authoritative, so it must not be polled around.
+	it('fails immediately on a deterministic engine rejection', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			engineResult: 'temBAD_FEE',
+			accepted: false
+		});
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
+		expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 	});
 
 	it('throws when the node rejects the transaction', async () => {

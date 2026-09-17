@@ -19,13 +19,14 @@ import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-si
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
+	deriveXrpTransactionHash,
 	isXrpSubmitAccepted,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Waits for a submitted transaction to be validated, and reports its final result.
@@ -124,7 +125,7 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	destinationTag?: number;
 	progress?: (step: ProgressStepsSendXrp) => void;
-}): Promise<XrpSubmitResult> => {
+}): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
 
 	const [{ sequence }, fee, ledgerIndex, signingPublicKey] = await Promise.all([
@@ -160,10 +161,25 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
 
-	progress?.(ProgressStepsSendXrp.SEND);
-	const result = await submitXrpTransaction({ txBlob, network });
+	// Derived from the blob, not read from the submit response: if that response is lost the node
+	// may still have applied the transaction, and without a hash of our own there would be nothing
+	// to poll — the send would be reported as failed and a retry would spend the funds again.
+	const txHash = await deriveXrpTransactionHash(txBlob);
 
-	if (!isXrpSubmitAccepted(result)) {
+	progress?.(ProgressStepsSendXrp.SEND);
+
+	let result: XrpSubmitResult | undefined;
+
+	try {
+		result = await submitXrpTransaction({ txBlob, network });
+	} catch (_: unknown) {
+		// Ambiguous: a transport or shape failure says nothing about whether the node applied the
+		// blob, so fall through to confirmation rather than declaring failure here.
+	}
+
+	// A response we did understand is authoritative: a non-accepted engine result is a
+	// deterministic rejection, so it fails immediately.
+	if (nonNullish(result) && !isXrpSubmitAccepted(result)) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
@@ -172,8 +188,6 @@ export const sendXrp = async ({
 	}
 
 	progress?.(ProgressStepsSendXrp.CONFIRM);
-	const { txHash } = result;
-	assertNonNullish(txHash, 'XRP submit response did not include a transaction hash.');
 
 	const transactionResult = await confirmXrpTransaction({
 		hash: txHash,
@@ -187,5 +201,5 @@ export const sendXrp = async ({
 
 	progress?.(ProgressStepsSendXrp.DONE);
 
-	return result;
+	return { txHash, submitResult: result };
 };

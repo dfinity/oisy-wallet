@@ -26,3 +26,14 @@ export interface XrpAccountInfo {
 	// Number of ledger objects the account owns; each one raises the reserve it must retain.
 	ownerCount: number;
 }
+
+/**
+ * Outcome of a completed XRP send.
+ *
+ * `txHash` is derived from the signed blob, so it is present even when the submit response was
+ * lost — in which case `submitResult` is absent and inclusion was established by polling.
+ */
+export interface XrpSendResult {
+	txHash: string;
+	submitResult: XrpSubmitResult | undefined;
+}
