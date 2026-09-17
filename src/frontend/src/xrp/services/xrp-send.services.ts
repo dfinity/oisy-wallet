@@ -1,7 +1,9 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
 import {
+	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_DEFAULT_FEE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
@@ -9,6 +11,7 @@ import {
 } from '$xrp/constants/xrp.constants';
 import {
 	loadXrpAccountInfo,
+	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
@@ -227,12 +230,27 @@ export const sendXrp = async ({
 		return await submitAndConfirmXrpTransaction({ network, pending, progress });
 	}
 
-	const [{ sequence }, fee, ledgerIndex, signingPublicKey] = await Promise.all([
+	const [{ sequence }, destinationBalance, fee, ledgerIndex, signingPublicKey] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network }),
+		loadXrpBalance({ address: destination, network }),
 		loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }),
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
+
+	// An account that exists on-ledger always holds at least the base reserve, so a zero balance
+	// means the address is unfunded — `loadXrpBalance` maps the node's `actNotFound` to ZERO. XRPL
+	// answers a payment too small to create such an account with `tecNO_DST_INSUF_XRP`, which is
+	// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
+	// failure into a plain error.
+	//
+	// Advisory, not authoritative: the destination can be funded between this read and submission,
+	// so the validated result stays the final word. This only declines what is already known.
+	if (destinationBalance === ZERO && amount < XRP_BASE_RESERVE_DROPS) {
+		throw new Error(
+			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
+		);
+	}
 
 	// The fee comes from the node and escalates with load, so it is bounded here: an escalated
 	// or hostile estimate must fail loudly rather than be signed for an amount the user never

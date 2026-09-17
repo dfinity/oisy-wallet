@@ -1,6 +1,11 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { XRP_LAST_LEDGER_SEQUENCE_OFFSET, XRP_MAX_FEE_DROPS } from '$xrp/constants/xrp.constants';
+import {
+	XRP_BASE_RESERVE_DROPS,
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_MAX_FEE_DROPS
+} from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
@@ -30,11 +35,18 @@ describe('xrp-send.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		// Every RPC this path makes is mocked below; anything that slips through would otherwise
+		// reach the public cluster, since the test env resolves `XRP_RPC_HTTP_URL_MAINNET` to it.
+		vi.stubGlobal('fetch', () => Promise.reject(new Error('unexpected network call in a test')));
+
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
 			sequence: 7,
 			ownerCount: 0
 		});
+		// The destination is read before signing to refuse a payment too small to create an unfunded
+		// account. Funded by default, so only the tests that care set it to ZERO.
+		vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(30_000_000n);
 		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
 		vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(1000);
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
@@ -528,6 +540,36 @@ describe('xrp-send.services', () => {
 				txHash: pending.txHash,
 				submitResult: { engineResult: 'tefALREADY', accepted: false }
 			});
+		});
+	});
+
+	describe('an unfunded destination', () => {
+		// XRPL answers a payment too small to create the account with `tecNO_DST_INSUF_XRP`, which is
+		// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
+		// failure into a plain error.
+		it('refuses an amount below the account reserve before signing', async () => {
+			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
+				'does not exist yet'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('sends an amount that covers the account reserve', async () => {
+			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
+		});
+
+		// Only an unfunded destination carries the restriction: an existing account always holds at
+		// least the base reserve, so any positive balance means the rule does not apply.
+		it('does not restrict the amount when the destination exists', async () => {
+			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(1n);
+
+			await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
 		});
 	});
 
