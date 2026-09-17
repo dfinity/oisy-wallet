@@ -225,9 +225,10 @@ describe('XrpSendTokenWizard', () => {
 
 	// `invalidAmount` rejects nullish and negatives. It does NOT reject 0 — the form blocks that
 	// separately — so 0 is deliberately not asserted here.
-	// Zero passes `invalidAmount`, the review step and `isXrpAmountSendable`, so only the guard on
-	// the parsed drops stops a zero-value Payment from being signed.
-	it.each([-1, undefined, 0, '0.0', '0.000000'])(
+	// All of these pass `invalidAmount` and the review step. Zero also passes
+	// `isXrpAmountSendable`, while `1e400` and a sub-drop value make `parseToken` throw outside the
+	// try — so the guard on the parsed drops is what stops every one of them.
+	it.each([-1, undefined, 0, '0.0', '0.000000', '1e400', '0.0000001'])(
 		'should not call sendXrp with the amount %j',
 		async (amount) => {
 			const rendered = render(XrpSendTokenWizard, {
