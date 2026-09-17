@@ -122,6 +122,14 @@ export const mapXrpTransaction = ({
 	}
 
 	const isReceive = tx.Destination === xrpAddress;
+
+	// `account_tx` returns everything that *affected* the account, not only what it sent or
+	// received — an offer of ours consumed by someone else's payment, for instance. Mapping such an
+	// entry would book a stranger's amount, and their fee, as this wallet's own send.
+	if (!isReceive && tx.Account !== xrpAddress) {
+		return undefined;
+	}
+
 	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
 
 	return {
@@ -130,6 +138,7 @@ export const mapXrpTransaction = ({
 		// Unvalidated entries never get this far.
 		status: 'confirmed',
 		value: BigInt(amount),
+		// Guarded above, so not being the destination means being the sender.
 		...(!isReceive && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
 		from: tx.Account,
 		to: tx.Destination,

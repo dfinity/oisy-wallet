@@ -122,6 +122,43 @@ describe('xrp-transaction.utils', () => {
 			expect(ui?.value).toBe(4_000_000n);
 		});
 
+		// `account_tx` returns everything that affected the account, so an entry between two other
+		// parties can reach the mapper. Booking it as our send would show a stranger's amount.
+		it('skips a payment the wallet neither sent nor received', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: counterparty,
+						Destination: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
+						Amount: '5000000',
+						Fee: '10',
+						hash: 'H-THIRD-PARTY'
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toBeUndefined();
+		});
+
+		it('still maps a payment the wallet sent, with its fee', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: wallet,
+						Destination: counterparty,
+						Amount: '5000000',
+						Fee: '10',
+						hash: 'H-OWN-SEND'
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui?.type).toBe('send');
+			expect(ui?.fee).toBe(10n);
+		});
+
 		// Absence of a result is not evidence of success.
 		it('skips a payment that carries no result metadata', () => {
 			const ui = mapXrpTransaction({
