@@ -318,6 +318,17 @@ export const loadXrpTransactions = async ({
 		}
 	});
 
+	// A JSON-RPC failure comes back as HTTP 200 with the error inside `result`, so without this
+	// a rate-limit or server error would read as a genuine empty history and never be retried.
+	// An account that has never been funded has no transactions, which is not a failure.
+	if (nonNullish(result.error)) {
+		if (result.error === 'actNotFound') {
+			return { transactions: [] };
+		}
+
+		throw new Error(`Unexpected XRPL account_tx response: ${String(result.error)}`);
+	}
+
 	const transactions = (result.transactions as XrpAccountTransactionEntry[] | undefined) ?? [];
 
 	return { transactions, marker: result.marker };

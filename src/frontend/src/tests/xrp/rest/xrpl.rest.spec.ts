@@ -458,6 +458,30 @@ describe('xrpl.rest', () => {
 			expect(page.marker).toEqual({ ledger: 42, seq: 1 });
 		});
 
+		// The node answers a JSON-RPC failure with HTTP 200 and the error inside `result`, so
+		// without an explicit check these would read as a genuine empty history and never retry.
+		it.each(['slowDown', 'noNetwork', 'internal', 'invalidParams'])(
+			'throws for the XRPL error %s instead of reporting an empty history',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow(`Unexpected XRPL account_tx response: ${error}`);
+			}
+		);
+
+		// An account that was never funded does not exist on-ledger; it has no history rather than
+		// a failed lookup, matching how `loadXrpBalance` treats the same error.
+		it('returns an empty list for an account that does not exist', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
 		it('returns an empty list when the account has no transactions', async () => {
 			mockFetchResponse({ body: { result: {} } });
 
