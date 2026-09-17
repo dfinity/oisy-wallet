@@ -165,19 +165,39 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).rejects.toThrow('tecUNFUNDED_PAYMENT');
 	});
 
-	// `accepted` is also true for an applied fee-claiming `tec*` result, so acceptance alone
-	// must not let the send reach confirmation.
-	it('throws for an accepted tec result rather than confirming it', async () => {
+	// A `tec` at submit means the node APPLIED the transaction, so it must reach confirmation:
+	// failing here would call an applied transaction rejected and never report which `tec` it was
+	// or that the fee was charged.
+	it('confirms an accepted tec result instead of calling it rejected', async () => {
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tecUNFUNDED_PAYMENT',
 			accepted: true,
 			txHash: 'TXHASH'
 		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
 
-		await expect(sendXrp(params)).rejects.toThrow('tecUNFUNDED_PAYMENT');
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed: tecUNFUNDED_PAYMENT');
 
-		expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
+
+	// Never applied, so there is nothing to confirm.
+	it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+		'fails immediately on %s without confirming',
+		async (engineResult) => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult,
+				accepted: true
+			});
+
+			await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
+
+			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+		}
+	);
 
 	// A validated transaction is only final; `tec*` results are validated too.
 	it('throws when the transaction is validated with a failing result', async () => {

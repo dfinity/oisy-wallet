@@ -2,18 +2,27 @@ import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPayment, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import { nonNullish } from '@dfinity/utils';
 
-// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued, while `tec`
-// was applied but *failed* (claiming the fee) and `tem`/`tef`/`tel` were not applied.
-const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter'];
+// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued and `tec` was applied
+// but *failed*, claiming the fee — all three mean the node took the transaction. `tem`/`tef`/`tel`
+// were not applied at all.
+//
+// `tec` belongs here precisely because it WAS applied: failing on it at submit would report an
+// applied transaction as rejected and skip the confirmation that knows which `tec` it was and
+// that the fee was charged. Polling instead reaches the validated result and reports it
+// definitively. If this reading of `tec` is ever shown to be wrong, the cost is bounded: the poll
+// runs to `LastLedgerSequence` and ends with the indeterminate message rather than a false claim.
+const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter', 'tec'];
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
 /**
  * Whether the node took a submitted transaction for processing.
  *
- * Both facts are required: `accepted` alone only says the node applied, queued, broadcast
- * or kept it — an applied fee-claiming `tec*` result is "accepted" too, yet the payment
- * failed and must never enter confirmation.
+ * "Took it" is not "it succeeded": a `tec*` result is taken and applied yet the payment failed.
+ * Success is decided later, from the validated `meta.TransactionResult` — see
+ * {@link isXrpTransactionSuccessful}. Both facts are required here because `accepted` alone says
+ * nothing about the engine result, and an engine result alone says nothing about whether this
+ * node accepted the blob.
  */
 export const isXrpSubmitAccepted = ({ accepted, engineResult }: XrpSubmitResult): boolean =>
 	accepted &&
