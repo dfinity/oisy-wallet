@@ -30,6 +30,7 @@ describe('xrp-send.services', () => {
 		source,
 		destination,
 		amount: 25_000_000n,
+		fee: 12n,
 		destinationTag: 12345
 	};
 
@@ -613,15 +614,26 @@ describe('xrp-send.services', () => {
 	// The fee is untrusted input and escalates with load, so an excessive estimate must not be
 	// signed for an amount the user never reviewed.
 	it('refuses to sign a fee above the maximum', async () => {
-		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(XRP_MAX_FEE_DROPS + 1n);
-
-		await expect(sendXrp(params)).rejects.toThrow('exceeds the maximum');
+		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS + 1n })).rejects.toThrow(
+			'exceeds the maximum'
+		);
 	});
 
 	it('accepts a fee at the maximum', async () => {
-		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(XRP_MAX_FEE_DROPS);
+		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS })).resolves.toBeDefined();
+	});
 
-		await expect(sendXrp(params)).resolves.toBeDefined();
+	// The reviewed fee must be the signed fee: re-fetching it here would sign a figure the user
+	// never saw, and the caller's own max-amount arithmetic would no longer hold.
+	it('signs the fee it was given rather than an estimate', async () => {
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(9_999n);
+
+		await sendXrp({ ...params, fee: 7n });
+
+		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+			expect.objectContaining({ transaction: expect.objectContaining({ Fee: '7' }) })
+		);
+		expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
 	});
 
 	it('does not reach DONE when the transaction fails', async () => {

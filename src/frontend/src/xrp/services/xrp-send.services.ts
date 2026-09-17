@@ -4,7 +4,6 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
-	XRP_DEFAULT_FEE_DROPS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
@@ -12,7 +11,6 @@ import {
 	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
-	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
 	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
@@ -208,9 +206,14 @@ const submitAndConfirmXrpTransaction = async ({
 };
 
 /**
- * Sends native XRP: fetches the account sequence, the destination's balance, the open-ledger fee
- * and the current ledger index, builds and threshold-signs a Payment, submits it, and waits for
- * the transaction to be included in a validated ledger.
+ * Sends native XRP: fetches the account sequence, whether the destination exists and the current
+ * ledger index, builds and threshold-signs a Payment, submits it, and waits for the transaction to
+ * be included in a validated ledger.
+ *
+ * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
+ * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
+ * the user never saw. Fee estimation and review belong to the caller; this function only bounds
+ * what it is given.
  *
  * The destination read is what declines a payment too small to create an account that does not
  * exist yet — the ledger would apply that as `tecNO_DST_INSUF_XRP` and claim the fee.
@@ -230,6 +233,7 @@ export const sendXrp = async ({
 	source,
 	destination,
 	amount,
+	fee,
 	destinationTag,
 	pending,
 	progress
@@ -239,6 +243,7 @@ export const sendXrp = async ({
 	source: XrpAddress;
 	destination: XrpAddress;
 	amount: XrpBalance;
+	fee: XrpBalance;
 	destinationTag?: number;
 	pending?: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
@@ -267,10 +272,18 @@ export const sendXrp = async ({
 		}
 	};
 
-	const [{ sequence }, destinationExists, fee, ledgerIndex, signingPublicKey] = await Promise.all([
+	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
+	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
+	// total past the balance even though the caller's sendability check passed.
+	//
+	// Still bounded here, since the value reaching this point is ultimately node-derived.
+	if (fee > XRP_MAX_FEE_DROPS) {
+		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
+	}
+
+	const [{ sequence }, destinationExists, ledgerIndex, signingPublicKey] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network }),
 		tryDestinationExists(),
-		loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }),
 		loadXrpLedgerIndex({ network }),
 		getXrpSigningPublicKey({ identity, network })
 	]);
@@ -285,16 +298,6 @@ export const sendXrp = async ({
 	if (destinationExists === false && amount < XRP_BASE_RESERVE_DROPS) {
 		throw new Error(
 			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
-		);
-	}
-
-	// The fee comes from the node and escalates with load, so it is bounded here: an escalated
-	// or hostile estimate must fail loudly rather than be signed for an amount the user never
-	// reviewed. The transaction is not yet bound to the reviewed fee — that arrives with the
-	// send wizard, which can pass it in.
-	if (fee > XRP_MAX_FEE_DROPS) {
-		throw new Error(
-			`XRP fee estimate ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`
 		);
 	}
 
