@@ -211,6 +211,35 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
 	});
 
+	// The whole point of the recheck is to avoid inviting a duplicate payment. A node that cannot
+	// answer it has not established non-inclusion, so the error must surface instead of becoming a
+	// claim that the payment never applied — that claim is what tells the user a resend is safe.
+	it('does not declare expiry when the recheck cannot be answered', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockRejectedValue(new Error('Unexpected XRPL tx response: tooBusy'));
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('Unexpected XRPL tx response: tooBusy');
+
+		await expect(sendXrp(params)).rejects.not.toThrow('expired');
+	});
+
+	// A lookup the node could not answer establishes nothing, so it must cost an attempt rather
+	// than abort a confirmation that still has budget left.
+	it('keeps polling after a lookup the node could not answer', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockRejectedValueOnce(new Error('Unexpected XRPL tx response: tooBusy'))
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.
 	it('reports a tec failure found by the recheck', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')

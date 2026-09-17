@@ -403,6 +403,30 @@ describe('xrpl.rest', () => {
 	});
 
 	describe('loadXrpTransactionOutcome', () => {
+		// Only `txnNotFound` means the node looked and did not find it. Any other error means the
+		// node did not answer, and the caller concludes expiry from a non-validated lookup.
+		it.each(['tooBusy', 'noNetwork', 'amendmentBlocked'])(
+			'throws for the XRPL error %s rather than reporting the transaction absent',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactionOutcome({ hash: 'HASH', network: XrpNetworks.mainnet })
+				).rejects.toThrow(`Unexpected XRPL tx response: ${error}`);
+			}
+		);
+
+		it('reports the transaction as not validated for txnNotFound', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound' } } });
+
+			const outcome = await loadXrpTransactionOutcome({
+				hash: 'HASH',
+				network: XrpNetworks.mainnet
+			});
+
+			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
+		});
+
 		it('reports the validated flag and the final transaction result', async () => {
 			mockFetchResponse({
 				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
