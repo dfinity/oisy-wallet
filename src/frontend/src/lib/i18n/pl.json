@@ -1654,7 +1654,7 @@
 			"simulation_control_removed": "Usunięto",
 			"transfer_sources": "Źródła",
 			"transfer_party_own": "Twoje konto",
-			"transfer_parties_partial": "OISY nie może zasymulować tej transakcji, więc powyższa lista powstaje na podstawie tego, co podaje sama wiadomość, i może nie obejmować nawet tego w całości. Środki przenoszone w jej imieniu przez inny program nie są wymienione. Podpisz tylko wtedy, gdy ufasz tej aplikacji.",
+			"transfer_parties_partial": "OISY nie może zasymulować tej transakcji, więc poniższa lista powstaje na podstawie tego, co podaje sama wiadomość, i może nie obejmować nawet tego w całości. Środki przenoszone w jej imieniu przez inny program nie są wymienione. Podpisz tylko wtedy, gdy ufasz tej aplikacji.",
 			"dapp_prioritization_fee": "Opłata priorytetowa ustawiona przez dApp, nie przez OISY.",
 			"high_prioritization_fee": "Ta transakcja ustawia niezwykle wysoką opłatę priorytetową. Sprawdź ją dokładnie i podpisz tylko wtedy, gdy ufasz tej aplikacji.",
 			"dapp_gas_limit": "Limit gazu ustawiony przez aplikację, nie przez OISY. Maksymalna opłata powyżej to najwięcej, ile może kosztować ta transakcja.",
