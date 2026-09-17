@@ -1654,7 +1654,7 @@
 			"simulation_control_removed": "제거됨",
 			"transfer_sources": "출처",
 			"transfer_party_own": "내 계정",
-			"transfer_parties_partial": "OISY는 이 트랜잭션을 시뮬레이션할 수 없으므로, 위 목록에는 메시지 자체에 명시된 지침만 포함됩니다. 다른 프로그램이 대신 이동한 자금은 나열되지 않습니다. 이 앱을 신뢰하는 경우에만 서명하세요.",
+			"transfer_parties_partial": "OISY가 이 트랜잭션을 시뮬레이션할 수 없어, 아래 목록은 메시지 자체가 명시한 내용으로 작성되었으며 그중 전부를 담고 있지 않을 수도 있습니다. 다른 프로그램이 대신 옮기는 자금은 표시되지 않습니다. 이 앱을 신뢰할 때만 서명하세요.",
 			"dapp_prioritization_fee": "OISY가 아닌 dApp이 설정한 우선순위 수수료입니다.",
 			"high_prioritization_fee": "이 트랜잭션은 비정상적으로 높은 우선순위 수수료를 설정합니다. 신중히 확인하고 이 앱을 신뢰하는 경우에만 서명하세요.",
 			"dapp_gas_limit": "OISY가 아닌 앱이 설정한 가스 한도입니다. 위의 최대 수수료는 이 트랜잭션이 지불할 수 있는 최댓값입니다.",
