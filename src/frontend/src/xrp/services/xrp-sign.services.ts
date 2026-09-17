@@ -1,7 +1,8 @@
 import { XRP_KEY_ID } from '$env/networks/networks.xrp.env';
-import { getSchnorrPublicKey, signWithSchnorr } from '$lib/api/signer.api';
+import { signWithSchnorr } from '$lib/api/signer.api';
 import type { NullishIdentity } from '$lib/types/identity';
 import { XRP_DERIVATION_PATH_PREFIX } from '$xrp/constants/xrp.constants';
+import { getXrpPublicKey } from '$xrp/services/xrp-address.services';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpPayment } from '$xrp/types/xrp-transaction';
 import { encode, encodeForSigning } from 'ripple-binary-codec';
@@ -16,8 +17,16 @@ const xrpDerivationPath = (network: XrpNetworkType): string[] => [
 
 /**
  * The canonical Ed25519 public key (uppercase hex, `ED`-prefixed) that XRPL uses as
- * a transaction's `SigningPubKey`. Derived from the same signer key/path as the
- * account address, so the signature it produces verifies against this account.
+ * a transaction's `SigningPubKey`.
+ *
+ * Routed through `getXrpPublicKey`, the same derivation the account address uses, so the key is
+ * computed locally where the frontend can and the signer canister is the fallback rather than the
+ * default. It used to spend a certified update call on every send for a key the app already
+ * derives for free, and that call is the slowest leg of the pre-sign work.
+ *
+ * Note `getXrpPublicKey` prepends `XRP_DERIVATION_PATH_PREFIX` itself, so it takes `[network]`
+ * rather than the full path — passing the full one would derive a DIFFERENT key, and the
+ * transaction would carry a `SigningPubKey` the signature does not match.
  */
 export const getXrpSigningPublicKey = async ({
 	identity,
@@ -26,11 +35,7 @@ export const getXrpSigningPublicKey = async ({
 	identity: NullishIdentity;
 	network: XrpNetworkType;
 }): Promise<string> => {
-	const publicKey = await getSchnorrPublicKey({
-		identity,
-		keyId: XRP_KEY_ID,
-		derivationPath: xrpDerivationPath(network)
-	});
+	const publicKey = await getXrpPublicKey({ identity, derivationPath: [network] });
 
 	return `${XRP_ED25519_PREFIX_HEX}${Buffer.from(publicKey).toString('hex').toUpperCase()}`;
 };

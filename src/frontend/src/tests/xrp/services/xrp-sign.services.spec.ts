@@ -2,6 +2,7 @@ import { XRP_KEY_ID } from '$env/networks/networks.xrp.env';
 import * as signerApi from '$lib/api/signer.api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { XRP_DERIVATION_PATH_PREFIX } from '$xrp/constants/xrp.constants';
+import { getXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
 import { buildXrpPayment } from '$xrp/utils/xrp-transaction.utils';
@@ -29,6 +30,38 @@ describe('xrp-sign.services', () => {
 			});
 
 			expect(key).toBe(canonicalPublicKey);
+		});
+
+		// The key must come from the SAME path as the account address, and `getXrpPublicKey`
+		// prepends the `XRP` prefix itself — so handing it the full path would derive a different
+		// key and the transaction would carry a `SigningPubKey` its signature does not match.
+		// XRPL would reject that, but only after the send had been signed and submitted.
+		it('derives from the account path, unchanged by the shared derivation', async () => {
+			const spy = vi.spyOn(signerApi, 'getSchnorrPublicKey').mockResolvedValue(rawPublicKey);
+
+			await getXrpSigningPublicKey({ identity: mockIdentity, network: XrpNetworks.mainnet });
+
+			expect(spy).toHaveBeenCalledWith(
+				expect.objectContaining({ derivationPath: ['XRP', XrpNetworks.mainnet] })
+			);
+		});
+
+		// Same path, same key id, so the signing key and the receive address are the same key.
+		it('uses the same derivation as the account address', async () => {
+			const spy = vi.spyOn(signerApi, 'getSchnorrPublicKey').mockResolvedValue(rawPublicKey);
+
+			await getXrpAddressMainnet(mockIdentity);
+
+			const [[addressCall]] = spy.mock.calls;
+
+			spy.mockClear();
+
+			await getXrpSigningPublicKey({ identity: mockIdentity, network: XrpNetworks.mainnet });
+
+			const [[signingCall]] = spy.mock.calls;
+
+			expect(signingCall.derivationPath).toEqual(addressCall.derivationPath);
+			expect(signingCall.keyId).toEqual(addressCall.keyId);
 		});
 	});
 
