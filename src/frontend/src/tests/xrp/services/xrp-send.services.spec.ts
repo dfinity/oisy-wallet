@@ -41,8 +41,9 @@ describe('xrp-send.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		// Every RPC this path makes is mocked below; anything that slips through would otherwise
-		// reach the public cluster, since the test env resolves `XRP_RPC_HTTP_URL_MAINNET` to it.
+		// Every RPC this path makes is mocked below. The env resolves `XRP_RPC_HTTP_URL_MAINNET` to
+		// `undefined` under vitest, so a missing mock already fails on the endpoint assertion; this
+		// stub is the second line, and catches anything that acquires an endpoint of its own.
 		vi.stubGlobal('fetch', () => Promise.reject(new Error('unexpected network call in a test')));
 
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
@@ -407,9 +408,20 @@ describe('xrp-send.services', () => {
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 		);
 
-		await expect(sendXrp(params)).rejects.toThrow('Unexpected XRPL tx response: tooBusy');
+		const err = await sendXrp(params).catch((e: unknown) => e);
 
-		await expect(sendXrp(params)).rejects.not.toThrow('expired');
+		// Exactly two lookups: the poll, then the recheck inside the expiry branch. Any other count
+		// means the branch this test exists for was never entered — the earlier version of this test
+		// called `sendXrp` twice, and on the second call every lookup rejected, so it exited through
+		// the attempt cap and asserted only that the cap's message lacks the word "expired".
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledTimes(2);
+		expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(1);
+
+		// The type is the assertion: an unanswered recheck leaves non-inclusion unestablished, so it
+		// must be indeterminate and must NOT be the expiry that tells the caller a resend is safe.
+		expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+		expect((err as Error).message).toContain('tooBusy');
 	});
 
 	// A lookup the node could not answer establishes nothing, so it must cost an attempt rather
