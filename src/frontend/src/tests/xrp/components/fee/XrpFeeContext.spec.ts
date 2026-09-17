@@ -2,6 +2,7 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
 import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
@@ -171,6 +172,112 @@ describe('XrpFeeContext', () => {
 		expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
 
 		unmount();
+	});
+
+	// The reserve is published asynchronously and the effect reruns on an address change, so an
+	// older account's response must not land on the newer account.
+	describe('reserve generation', () => {
+		it('leaves the reserve unknown while a load is pending', async () => {
+			let resolve:
+				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
+				new Promise((res) => {
+					resolve = res;
+				})
+			);
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			expect(get(reserveStore)).toBeUndefined();
+
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 0 });
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+			});
+
+			unmount();
+		});
+
+		// The store starts `undefined`, so only an address change can show that a previously loaded
+		// reserve is dropped rather than left usable for the new account.
+		it('clears a loaded reserve as soon as a new account starts loading', async () => {
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+			});
+
+			let resolve:
+				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
+				new Promise((res) => {
+					resolve = res;
+				})
+			);
+
+			xrpAddressMainnetStore.set({ data: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', certified: true });
+
+			await waitFor(() => {
+				expect(get(reserveStore)).toBeUndefined();
+			});
+
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3 });
+			unmount();
+		});
+
+		it('ignores a response that resolves after the component is destroyed', async () => {
+			let resolve:
+				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
+				new Promise((res) => {
+					resolve = res;
+				})
+			);
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			unmount();
+
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 5 });
+			await runResolvedPromises();
+
+			expect(get(reserveStore)).toBeUndefined();
+		});
+
+		it('ignores a superseded failure', async () => {
+			let reject: ((err: Error) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
+				new Promise((_res, rej) => {
+					reject = rej;
+				})
+			);
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
+
+			unmount();
+
+			reject?.(new Error('network down'));
+			await runResolvedPromises();
+
+			expect(get(reserveStore)).toBeUndefined();
+		});
 	});
 
 	// The interval is installed only after the first request resolves, so an unmount or a rerun

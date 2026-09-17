@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_xrp_network_id": "Current network ($networkId) is not an XRP Ledger network.",
 			"xrp_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"xrp_transaction_failed": "The transaction was processed by the network but failed, so your funds were not sent. The network fee was still charged.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",

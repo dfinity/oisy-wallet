@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Aktuální síť ($networkId) není sítí Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "Transakce byla sítí zpracována, ale selhala, takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později.",
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",

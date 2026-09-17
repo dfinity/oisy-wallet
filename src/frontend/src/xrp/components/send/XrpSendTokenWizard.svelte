@@ -29,7 +29,6 @@
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
-	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
@@ -38,6 +37,7 @@
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
+	import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -157,13 +157,16 @@
 		// 10s fee poller can raise what the account must retain underneath an already-accepted
 		// amount. Re-assert it here rather than at the input, because the review step would be
 		// stale too.
+		// The reviewed fee is required, not defaulted: a nullish one means nothing was priced, and
+		// the same value is both checked here and signed below.
 		if (
 			isNullish($sendBalance) ||
 			isNullish($reserveStore) ||
+			isNullish($feeStore) ||
 			!isXrpAmountSendable({
 				amount: amountDrops,
 				balance: $sendBalance,
-				fee: $feeStore ?? XRP_DEFAULT_FEE_DROPS,
+				fee: $feeStore,
 				reserve: $reserveStore
 			})
 		) {
@@ -189,6 +192,7 @@
 				source,
 				destination,
 				amount: amountDrops,
+				fee: $feeStore,
 				destinationTag: $sendXrpDestinationTag
 			});
 
@@ -203,6 +207,20 @@
 				name: TRACK_COUNT_XRP_SEND_ERROR,
 				metadata: sendTrackingEventMetadata
 			});
+
+			// Checked before the step, because a validated failure also happens at CONFIRM: the
+			// outcome IS known there, so the indeterminate "we did not receive a confirmation"
+			// advice would be wrong and would hide that the fee was charged.
+			if (err instanceof XrpTransactionFailedError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_transaction_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
 
 			if (sendProgressStep === ProgressStepsSendXrp.CONFIRM) {
 				toastsError({

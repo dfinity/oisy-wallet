@@ -5,6 +5,7 @@ import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
+import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -21,6 +22,7 @@ describe('xrp-send.services', () => {
 		source,
 		destination,
 		amount: 25_000_000n,
+		fee: 12n,
 		destinationTag: 12345
 	};
 
@@ -48,7 +50,7 @@ describe('xrp-send.services', () => {
 		});
 	});
 
-	it('builds the payment from fetched sequence/fee/ledger and threshold-signs it', async () => {
+	it('builds the payment from the reviewed fee and fetched sequence/ledger, then signs it', async () => {
 		await sendXrp(params);
 
 		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith({
@@ -184,6 +186,75 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
 	});
 
+	// The `tx` lookup and the validated index come from two separate calls, so the lookup can miss
+	// a payment that validates in between. Expiry must survive a recheck.
+	it('returns the result when the recheck finds the payment validated after expiry', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	it('still expires when the recheck does not find the payment', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
+	});
+
+	// The whole point of the recheck is to avoid inviting a duplicate payment. A node that cannot
+	// answer it has not established non-inclusion, so the error must surface instead of becoming a
+	// claim that the payment never applied — that claim is what tells the user a resend is safe.
+	it('does not declare expiry when the recheck cannot be answered', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockRejectedValue(new Error('Unexpected XRPL tx response: tooBusy'));
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('Unexpected XRPL tx response: tooBusy');
+
+		await expect(sendXrp(params)).rejects.not.toThrow('expired');
+	});
+
+	// A lookup the node could not answer establishes nothing, so it must cost an attempt rather
+	// than abort a confirmation that still has budget left.
+	it('keeps polling after a lookup the node could not answer', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockRejectedValueOnce(new Error('Unexpected XRPL tx response: tooBusy'))
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	// A validated failure found by the recheck must surface as a failure, not as an expiry.
+	it('reports a tec failure found by the recheck', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed');
+	});
+
 	// The open ledger runs ahead of validation, so comparing against it would report a final
 	// failure for a payment that is still about to validate — and invite a duplicate send.
 	it('does not report expiry while only the open ledger has passed LastLedgerSequence', async () => {
@@ -202,15 +273,52 @@ describe('xrp-send.services', () => {
 	// The fee is untrusted input and escalates with load, so an excessive estimate must not be
 	// signed for an amount the user never reviewed.
 	it('refuses to sign a fee above the maximum', async () => {
-		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(XRP_MAX_FEE_DROPS + 1n);
+		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS + 1n })).rejects.toThrow(
+			'exceeds the maximum'
+		);
+	});
 
-		await expect(sendXrp(params)).rejects.toThrow('exceeds the maximum');
+	// The reviewed fee must be the signed fee: re-fetching here would sign a figure the user
+	// never saw and could push the total past the balance despite the caller's check.
+	it('signs the fee it was given rather than fetching one', async () => {
+		const spyFee = vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee');
+
+		await sendXrp({ ...params, fee: 4_321n });
+
+		expect(spyFee).not.toHaveBeenCalled();
+		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+			expect.objectContaining({ transaction: expect.objectContaining({ Fee: '4321' }) })
+		);
 	});
 
 	it('accepts a fee at the maximum', async () => {
-		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(XRP_MAX_FEE_DROPS);
+		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS })).resolves.toBeDefined();
+	});
 
-		await expect(sendXrp(params)).resolves.toBeDefined();
+	// Typed so the wizard can tell a validated failure from an indeterminate confirmation: both
+	// happen at the CONFIRM step, so the step alone cannot separate them.
+	it('rejects a validated tec failure with XrpTransactionFailedError', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpTransactionFailedError);
+	});
+
+	it('does not use that type for an indeterminate expiry', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		);
+
+		const promise = sendXrp(params);
+
+		await expect(promise).rejects.toThrow('XRP transaction expired');
+		await expect(promise).rejects.not.toBeInstanceOf(XrpTransactionFailedError);
 	});
 
 	it('does not reach DONE when the transaction fails', async () => {

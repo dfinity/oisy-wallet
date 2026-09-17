@@ -345,7 +345,7 @@ describe('applyTransactionsFilter', () => {
 				value: 100n,
 				timestamp: ZERO
 			}
-		} as unknown as AllTransactionUiWithCmp;
+		} satisfies AllTransactionUiWithCmp;
 
 		const xrpContact: ContactUi = {
 			name: 'Xrp Friend',
