@@ -28,6 +28,20 @@ export interface XrpAccountInfo {
 }
 
 /**
+ * A signed transaction whose outcome is not known.
+ *
+ * Resubmitting exactly this, rather than rebuilding from a freshly fetched sequence, is what makes
+ * a retry safe: the ledger applies a given signed transaction at most once, so a resubmission of
+ * one that already landed is rejected as `tefALREADY` instead of paying a second time. A rebuilt
+ * transaction has a new sequence and is therefore a second, independent payment.
+ */
+export interface XrpPendingTransaction {
+	txBlob: string;
+	txHash: string;
+	lastLedgerSequence: number;
+}
+
+/**
  * Outcome of a completed XRP send.
  *
  * `txHash` is derived from the signed blob, so it is present even when the submit response was
