@@ -4,7 +4,8 @@ import { nonNullish } from '@dfinity/utils';
 
 // XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued and `tec` was applied
 // but *failed*, claiming the fee — all three mean the node took the transaction. `tem`/`tef`/`tel`
-// were not applied at all.
+// were not applied BY THIS SUBMISSION; see `XRP_ALREADY_APPLIED_ENGINE_RESULT` for the code that
+// reports an earlier one did apply.
 //
 // `tec` belongs here precisely because it WAS applied: failing on it at submit would report an
 // applied transaction as rejected and skip the confirmation that knows which `tec` it was and
@@ -12,6 +13,13 @@ import { nonNullish } from '@dfinity/utils';
 // definitively. If this reading of `tec` is ever shown to be wrong, the cost is bounded: the poll
 // runs to `LastLedgerSequence` and ends with the indeterminate message rather than a false claim.
 const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter', 'tec'];
+
+// The one `tef` that is not a statement about this submission: per the XRPL reference it means
+// "the same exact transaction has already been applied", i.e. an earlier submission of this very
+// blob is in a ledger. Calling that a rejection would report a completed payment as unsent and
+// invite a retry that pays a second time, so it is polled like an accepted result — the hash is
+// derived locally, so there is always something to poll.
+const XRP_ALREADY_APPLIED_ENGINE_RESULT = 'tefALREADY';
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
@@ -23,10 +31,16 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  * {@link isXrpTransactionSuccessful}. Both facts are required here because `accepted` alone says
  * nothing about the engine result, and an engine result alone says nothing about whether this
  * node accepted the blob.
+ *
+ * `tefALREADY` is the exception to both: it reports that an earlier submission of this exact blob
+ * already applied, which is a reason to confirm rather than to reject.
  */
 export const isXrpSubmitAccepted = ({ accepted, engineResult }: XrpSubmitResult): boolean =>
-	accepted &&
-	XRP_PROCESSING_ENGINE_RESULT_PREFIXES.some((prefix) => engineResult.startsWith(prefix));
+	// Not conjoined with `accepted`: a `tef` response reports `accepted: false`, and this code is
+	// about a previous submission having applied rather than about this node taking the blob.
+	engineResult === XRP_ALREADY_APPLIED_ENGINE_RESULT ||
+	(accepted &&
+		XRP_PROCESSING_ENGINE_RESULT_PREFIXES.some((prefix) => engineResult.startsWith(prefix)));
 
 /**
  * Whether a validated transaction actually succeeded.

@@ -186,8 +186,22 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
 
+	// `tefALREADY` reports that an earlier submission of this exact blob already applied, so the
+	// send must reach confirmation: rejecting here would report a completed payment as unsent and
+	// invite a retry that pays a second time.
+	it('confirms tefALREADY instead of reporting the payment unsent', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			engineResult: 'tefALREADY',
+			accepted: false
+		});
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+	});
+
 	// Never applied, so there is nothing to confirm.
-	it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+	it.each(['temBAD_FEE', 'tefPAST_SEQ', 'tefMAX_LEDGER', 'telINSUF_FEE_P'])(
 		'fails immediately on %s without confirming',
 		async (engineResult) => {
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
