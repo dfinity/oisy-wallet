@@ -122,6 +122,48 @@ describe('xrp-transaction.utils', () => {
 			expect(ui?.value).toBe(4_000_000n);
 		});
 
+		// Absence of a result is not evidence of success.
+		it('skips a payment that carries no result metadata', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: { Account: counterparty, Destination: wallet, Amount: '5000000', hash: 'H-NOMETA' },
+					extra: { meta: undefined }
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toBeUndefined();
+		});
+
+		// The scheduler caches by hash, and the hash does not change when the entry is validated —
+		// so a row stored while pending would never be replaced by its settled form.
+		it('skips a payment that is not validated yet', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: { Account: counterparty, Destination: wallet, Amount: '5000000', hash: 'H-PENDING' },
+					extra: { validated: false }
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toBeUndefined();
+		});
+
+		// `validated` is optional on the entry, and `account_tx` searches validated ledgers anyway.
+		// Requiring it to be exactly `true` would drop the whole history on a node that omits it.
+		it('still maps a successful payment when the entry omits the validated flag', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: { Account: counterparty, Destination: wallet, Amount: '5000000', hash: 'H-NOFLAG' },
+					extra: { validated: undefined }
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui?.status).toBe('confirmed');
+			expect(ui?.value).toBe(5_000_000n);
+		});
+
 		// XRPL returns this sentinel when the delivered amount was never recorded. It is a string, so
 		// it passed the old guard and reached `BigInt`, which throws — and the throw escapes the
 		// scheduler's `.map`, failing the whole sync and resetting the wallet store.

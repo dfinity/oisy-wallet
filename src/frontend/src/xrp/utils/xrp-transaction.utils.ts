@@ -95,7 +95,11 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
-	if (nonNullish(meta?.TransactionResult) && !isXrpTransactionSuccessful(meta.TransactionResult)) {
+	// Absence of a result is not evidence of success, so anything but an explicit `tesSUCCESS` is
+	// skipped. Unvalidated entries are skipped too: the scheduler caches by transaction hash, which
+	// does not change once the entry is validated, so a row stored while pending would never be
+	// replaced by its settled form.
+	if (validated === false || !isXrpTransactionSuccessful(meta?.TransactionResult)) {
 		return undefined;
 	}
 
@@ -123,7 +127,8 @@ export const mapXrpTransaction = ({
 	return {
 		id: hash,
 		type: isReceive ? 'receive' : 'send',
-		status: validated === false ? 'pending' : 'confirmed',
+		// Unvalidated entries never get this far.
+		status: 'confirmed',
 		value: BigInt(amount),
 		...(!isReceive && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
 		from: tx.Account,
