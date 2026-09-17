@@ -202,6 +202,18 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// A failed request that also carried a plausible `engine_result` used to parse, dropping the
+		// error. The send would then act on a result the node never really produced.
+		it('throws for an error response that also carries an engine_result', async () => {
+			mockFetchResponse({
+				body: { result: { error: 'tooBusy', engine_result: 'tesSUCCESS', accepted: true } }
+			});
+
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL submit response: tooBusy'
+			);
+		});
+
 		// `engine_result` is read with `startsWith` outside the try that wraps this call, so a
 		// non-string would throw there — after the blob was broadcast — and turn an ambiguous submit
 		// into a reported failure. It must fail here instead, where the caller treats it as
@@ -377,6 +389,19 @@ describe('xrpl.rest', () => {
 	});
 
 	describe('loadXrpLedgerIndex validation', () => {
+		// A failed request that also carried an index used to parse, dropping the error — and this
+		// index sets `LastLedgerSequence`.
+		it.each(['tooBusy', 'noNetwork'])(
+			'throws for the XRPL error %s even alongside an index',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error, ledger_current_index: 987_654 } } });
+
+				await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					`Unexpected XRPL ledger_current response: ${error}`
+				);
+			}
+		);
+
 		it.each([undefined, '987654', null, -1, 1.5])(
 			'throws for a current ledger index of %j',
 			async (ledger_current_index) => {
@@ -418,6 +443,21 @@ describe('xrpl.rest', () => {
 				987_002
 			);
 		});
+
+		// The worst version of a dropped error: a bogus index past `LastLedgerSequence` sends
+		// confirmation into the expiry branch, which tells the user a resend is safe.
+		it.each(['tooBusy', 'noNetwork'])(
+			'throws for the XRPL error %s even alongside a validated index',
+			async (error) => {
+				mockFetchResponse({
+					body: { result: { error, validated: true, ledger_index: 999_999_999 } }
+				});
+
+				await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					`Unexpected XRPL ledger response: ${error}`
+				);
+			}
+		);
 
 		it.each(['-1', '1.5', '0x10', ' 1', '', '9007199254740993', null])(
 			'throws for a nested index of %j',
