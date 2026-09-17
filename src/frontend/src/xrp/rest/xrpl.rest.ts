@@ -5,7 +5,9 @@ import {
 	XrplAccountInfoResponseSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
-	XrplLedgerResultSchema
+	XrplLedgerResultSchema,
+	XrplSubmitResultSchema,
+	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
@@ -16,7 +18,7 @@ import type {
 	XrpSubmitResult,
 	XrpTransactionsPage
 } from '$xrp/types/xrp-transaction';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 const xrpJsonRpc = async ({
 	network,
@@ -159,6 +161,14 @@ export const loadXrpOpenLedgerFee = async ({
 }): Promise<XrpBalance> => {
 	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
 
+	// Before parsing: every field of the fee result is optional, so an error response parses
+	// happily with no `drops` and would be answered with the fallback — the base fee, which is
+	// exactly what underprices a send on the congested node that returned `tooBusy` in the first
+	// place. The fallback is for a successful response that omits the estimate, nothing else.
+	if (nonNullish(result.error)) {
+		throw new Error(`Unexpected XRPL fee response: ${String(result.error)}`);
+	}
+
 	const parsed = XrplFeeResultSchema.safeParse(result);
 
 	if (!parsed.success) {
@@ -253,22 +263,31 @@ export const loadXrpTransactionOutcome = async ({
 		throw new Error(`Unexpected XRPL tx response: ${String(result.error)}`);
 	}
 
-	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
+	// A validated response missing its result is malformed, not a failed transaction: returning it
+	// as an absent result would end the poll and report a payment that may have succeeded as failed.
+	// Throwing instead keeps it indeterminate — ordinary polls retry, and the expiry recheck surfaces
+	// the RPC error rather than a claim of non-inclusion.
+	const parsed = XrplTxResultSchema.safeParse(result);
 
-	return {
-		validated: result.validated === true,
-		transactionResult: TransactionResult
-	};
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL tx response: validated transaction without a result');
+	}
+
+	const { data } = parsed;
+
+	return data.validated === true
+		? { validated: true, transactionResult: data.meta.TransactionResult }
+		: { validated: false, transactionResult: undefined };
 };
 
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `accepted` reports whether the node took the transaction; `engine_result` is its
- * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither
- * alone means the payment will succeed — an applied `tec*` result is accepted too — so
- * callers must judge the result class (see `isXrpSubmitAccepted`) and then confirm
- * finality *and* success by polling the tx hash (see {@link loadXrpTransactionOutcome}).
+ * `accepted` reports whether THIS node took the transaction and `engine_result` is its
+ * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither is proof of
+ * anything final: an applied `tec*` is accepted yet failed, and a refusal may still be reapplied
+ * later. Only a malformed `tem*` result is conclusive (see `isXrpSubmitFinalFailure`); every other
+ * outcome is settled by polling the tx hash (see {@link loadXrpTransactionOutcome}).
  */
 export const submitXrpTransaction = async ({
 	txBlob,
@@ -279,22 +298,26 @@ export const submitXrpTransaction = async ({
 }): Promise<XrpSubmitResult> => {
 	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
 
-	const engineResult = result.engine_result as string | undefined;
+	const parsed = XrplSubmitResultSchema.safeParse(result);
 
-	if (isNullish(engineResult)) {
+	if (!parsed.success) {
 		throw new Error(
-			`Unexpected XRPL submit response: ${(result.error as string) ?? 'no engine_result'}`
+			`Unexpected XRPL submit response: ${
+				nonNullish(result.error) ? String(result.error) : 'no string engine_result'
+			}`
 		);
 	}
 
+	const { data } = parsed;
+
 	return {
-		engineResult,
-		engineResultMessage: result.engine_result_message as string | undefined,
-		txHash: (result.tx_json as { hash?: string } | undefined)?.hash,
-		// The node reports whether it took the transaction (applied/queued/broadcast/kept) in the
-		// authoritative `accepted` flag. The `engine_result` prefix is NOT a reliable proxy: `ter`
-		// is a retry class where e.g. `terPRE_SEQ`/`terNO_ACCOUNT` are not queued.
-		accepted: result.accepted === true
+		engineResult: data.engine_result,
+		engineResultMessage: data.engine_result_message,
+		txHash: data.tx_json?.hash,
+		// Reported for the caller's record only. It says this node took the transaction
+		// (applied/queued/broadcast/kept), which is neither necessary nor sufficient for the send to
+		// have happened, so it does not gate anything — see `isXrpSubmitFinalFailure`.
+		accepted: data.accepted === true
 	};
 };
 

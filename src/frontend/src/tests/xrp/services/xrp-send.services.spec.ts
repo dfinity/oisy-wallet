@@ -134,6 +134,22 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// A shape failure is indistinguishable from a lost response: the node may have taken the blob
+	// either way, so it must reach confirmation rather than being reported as a rejection.
+	it('still confirms when the submit response is malformed', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(
+			new Error('Unexpected XRPL submit response: no string engine_result')
+		);
+
+		const { txHash, submitResult } = await sendXrp(params);
+
+		expect(submitResult).toBeUndefined();
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
+			hash: txHash,
+			network: XrpNetworks.mainnet
+		});
+	});
+
 	it('reports expiry rather than failure when a lost submit never appears', async () => {
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
@@ -158,13 +174,21 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 	});
 
-	it('throws when the node rejects the transaction', async () => {
+	// `accepted: false` says this node did not take the blob; it does not say no ledger will include
+	// it. So the result still comes from confirmation, and a `tec` reported there is a real failure.
+	it('confirms a tec result the node did not accept rather than rejecting it', async () => {
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tecUNFUNDED_PAYMENT',
 			accepted: false
 		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
 
-		await expect(sendXrp(params)).rejects.toThrow('tecUNFUNDED_PAYMENT');
+		await expect(sendXrp(params)).rejects.toThrow('XRP transaction failed: tecUNFUNDED_PAYMENT');
+
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
 
 	// A `tec` at submit means the node APPLIED the transaction, so it must reach confirmation:
@@ -186,8 +210,47 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
 
-	// Never applied, so there is nothing to confirm.
-	it.each(['temBAD_FEE', 'tefPAST_SEQ', 'telINSUF_FEE_P'])(
+	// `tefALREADY` reports that an earlier submission of this exact blob already applied, so the
+	// send must reach confirmation: rejecting here would report a completed payment as unsent and
+	// invite a retry that pays a second time.
+	it('confirms tefALREADY instead of reporting the payment unsent', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			engineResult: 'tefALREADY',
+			accepted: false
+		});
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+	});
+
+	// `tef` may be reapplied and `tel` may be cached and retried, so neither is proof the payment
+	// will not happen. Reporting them as failed would invite a retry that pays twice; they are
+	// polled to expiry instead, which is definitive and safe to send again after.
+	it.each(['tefPAST_SEQ', 'tefMAX_LEDGER', 'telINSUF_FEE_P'])(
+		'polls %s to expiry rather than reporting it rejected',
+		async (engineResult) => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult,
+				accepted: false
+			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			await expect(sendXrp(params)).rejects.toThrow('XRP transaction expired');
+
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+		}
+	);
+
+	// Malformed is the only class the XRPL reference calls final, so it is the only one reported as
+	// failed without asking the ledger.
+	it.each(['temBAD_FEE', 'temBAD_AMOUNT'])(
 		'fails immediately on %s without confirming',
 		async (engineResult) => {
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
@@ -315,6 +378,36 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 
 		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	// The blob may already be accepted by the time this runs, so aborting on a failed ledger call
+	// would report a payment that can still validate as failed.
+	it('keeps polling after a validated-ledger call the node could not answer', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+			.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
+			.mockResolvedValue(1000);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	// An unanswered ledger call establishes nothing, so it must not skip the expiry it would have
+	// established either: the run ends in the indeterminate error, not in a claim of failure.
+	it('ends indeterminate when the validated-ledger call is never answered', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockRejectedValue(
+			new Error('XRPL ledger request failed with status 503')
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow(
+			'XRP transaction confirmation stopped before its ledger expiry was reached.'
+		);
 	});
 
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.

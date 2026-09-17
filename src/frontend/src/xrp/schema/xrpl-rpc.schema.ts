@@ -72,3 +72,35 @@ export const XrplLedgerResultSchema = z.union([
 		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema })
 	})
 ]);
+
+// `validated` means FINAL, not successful, so a validated response must carry the result that
+// decides which it was. One that does not is malformed — and reading it as a missing result would
+// report an applied payment as failed, inviting a duplicate send — so the validated branch
+// requires a string `meta.TransactionResult` and anything else fails to parse. A still-pending
+// entry has no result yet, and reports `validated: false` or omits the flag.
+export const XrplTxResultSchema = z.union([
+	z.object({
+		validated: z.literal(true),
+		meta: z.object({ TransactionResult: z.string() })
+	}),
+	z.object({ validated: z.literal(false).optional() })
+]);
+
+// `engine_result` is the only field the send still reads, and it is read with `startsWith` outside
+// the try that wraps the submit — so a non-string would throw there, after the blob was broadcast,
+// and turn an ambiguous submit into a reported failure. Validating it here keeps that failure
+// inside the caught call, where it correctly means "go and confirm". The rest is optional because
+// none of it decides anything: the hash is derived locally and `accepted` no longer gates.
+export const XrplSubmitResultSchema = z.object({
+	engine_result: z.string(),
+	// Strict only where the decision reads. These three are cosmetic or unused — the message is
+	// interpolated into an error, the hash is derived locally and `accepted` is compared to `true`
+	// — so a malformed one must not fail the parse: that would throw, and the send would poll for a
+	// minute over a field it never consults.
+	engine_result_message: z.string().optional().catch(undefined),
+	accepted: z.unknown().optional(),
+	tx_json: z
+		.object({ hash: z.string().optional().catch(undefined) })
+		.optional()
+		.catch(undefined)
+});

@@ -225,20 +225,25 @@ describe('XrpSendTokenWizard', () => {
 
 	// `invalidAmount` rejects nullish and negatives. It does NOT reject 0 — the form blocks that
 	// separately — so 0 is deliberately not asserted here.
-	it.each([-1, undefined])('should not call sendXrp with the amount %j', async (amount) => {
-		const rendered = render(XrpSendTokenWizard, {
-			props: { ...props, amount },
-			context: mockContext()
-		});
+	// Zero passes `invalidAmount`, the review step and `isXrpAmountSendable`, so only the guard on
+	// the parsed drops stops a zero-value Payment from being signed.
+	it.each([-1, undefined, 0, '0.0', '0.000000'])(
+		'should not call sendXrp with the amount %j',
+		async (amount) => {
+			const rendered = render(XrpSendTokenWizard, {
+				props: { ...props, amount },
+				context: mockContext()
+			});
 
-		await waitFor(() => {
-			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
-		});
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+			});
 
-		await clickSend(rendered.container);
+			await clickSend(rendered.container);
 
-		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
-	});
+			expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+		}
+	);
 
 	// The form validated the amount against the fee and reserve as they were when it was typed, so
 	// the send path re-checks it against the current figures.

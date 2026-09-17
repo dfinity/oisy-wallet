@@ -31,7 +31,7 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { from, value, timestamp, id, blockNumber, to, type, status, destinationTag } =
+	let { from, value, timestamp, id, blockNumber, to, type, status, destinationTag, fee } =
 		$derived(transaction);
 
 	// XRPScan explorer URLs are built directly: unlike other chains its base URL carries no
@@ -71,7 +71,7 @@
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				<span class="capitalize">{$i18n.transaction.type[type]}</span>
 			{/snippet}
 			{#snippet title()}
 				{#if nonNullish(token) && nonNullish(value)}
@@ -102,6 +102,19 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
 			{#if nonNullish(token?.network)}
 				<ListItem>
 					<span>

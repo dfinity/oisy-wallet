@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Send
+
+### First-time destination addresses
+
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+
+Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
+
+The send flow says so twice. On the address step, entering such an address raises a warning that it appears to be the first send to it and asks the user to verify the address; the hedge is deliberate, since the claim rests on the history that happens to be loaded. It does not block moving on. On the review step the same box returns, its copy reworded in the first person as the statement the user is agreeing to, with a **confirmation checkbox, and the send button stays disabled until it is ticked** — the same layout as the confirmation for a swap that would lose significant value, kept at warning level rather than error: a first send to a new recipient is routine, and red spent on the routine case stops being read. The confirmation belongs to that address and that visit: going back, changing the destination and returning asks again. It is never remembered — there is no "don't warn me about this address", and the only thing that retires the warning is a real send.
+
+Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
+
+Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+---
+
 ## Activity
 
 ### IC transactions and Index-canister outages

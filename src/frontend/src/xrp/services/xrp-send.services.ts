@@ -22,7 +22,7 @@ import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction'
 import {
 	buildXrpPayment,
 	deriveXrpTransactionHash,
-	isXrpSubmitAccepted,
+	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -58,6 +58,16 @@ const confirmXrpTransaction = async ({
 		}
 	};
 
+	// Same reasoning: this call runs after the blob may already have been accepted, so letting a
+	// transient failure escape would abort the send for a payment that can still validate.
+	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
+		try {
+			return await loadXrpValidatedLedgerIndex({ network });
+		} catch (_: unknown) {
+			return undefined;
+		}
+	};
+
 	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
 		const outcome = await tryOutcome();
 
@@ -71,9 +81,9 @@ const confirmXrpTransaction = async ({
 			// The VALIDATED index, not the open one: the open ledger has already advanced past a
 			// closed ledger whose transactions are not yet validated, so comparing against it would
 			// declare expiry for a payment that is about to validate.
-			const validatedLedgerIndex = await loadXrpValidatedLedgerIndex({ network });
+			const validatedLedgerIndex = await tryValidatedLedgerIndex();
 
-			if (validatedLedgerIndex > lastLedgerSequence) {
+			if (nonNullish(validatedLedgerIndex) && validatedLedgerIndex > lastLedgerSequence) {
 				// The `tx` lookup above and this index come from two separate calls, so the lookup may
 				// have missed a payment that validated in between. Expiry is only final if it survives
 				// a recheck against the newer ledger state — otherwise a succeeded payment would be
@@ -176,9 +186,10 @@ export const sendXrp = async ({
 		// blob, so fall through to confirmation rather than declaring failure here.
 	}
 
-	// A response we did understand is authoritative: a non-accepted engine result is a
-	// deterministic rejection, so it fails immediately.
-	if (nonNullish(result) && !isXrpSubmitAccepted(result)) {
+	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
+	// did not take the blob — may still end up applied, and reporting it as failed would invite a
+	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
+	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''

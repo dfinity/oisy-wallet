@@ -40,6 +40,13 @@ per call which error is an expected state rather than a failure:
 | `account_info` | `actNotFound` → zero balance        | throw           |
 | `account_tx`   | `actNotFound` → empty history       | throw           |
 | `tx`           | `txnNotFound` → not in a ledger yet | throw           |
+| `fee`          | none                                | throw           |
+
+`ledger`, `ledger_current` and `submit` need no explicit check because their schemas
+require a field an error response cannot carry, so an error fails the parse. `fee` does
+need one: every field of its result is optional, so an error response parses with no
+`drops` and would be answered with the fallback base fee — which underprices the send on
+the very node that reported congestion.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
@@ -70,11 +77,21 @@ hex-encoded transaction blob:
 
 The blob is serialized client-side with `ripple-binary-codec` (`encodeForSigning`
 then `encode`, in `src/frontend/src/xrp/services/xrp-sign.services.ts`) — there is
-no XRPL SDK dependency. The response's `accepted` boolean is **authoritative** for
-whether the node took the transaction (applied / queued / broadcast / kept). The
-`engine_result` string is provisional: its `ter` prefix is a retry class, so it is
-not on its own proof of acceptance — `isXrpSubmitAccepted` requires `accepted === true`
-**and** a `tes`/`ter` class before treating a submission as taken.
+no XRPL SDK dependency.
+
+Neither field in the response is proof of a final outcome. `accepted` says only that
+_this_ node took the blob, and `engine_result` is provisional. Per the XRPL reference a
+`tem` result is "final unless the rules for a valid transaction change", whereas a `tef`
+"may still succeed or fail with a different code after being reapplied" and `tel`
+transactions "may be automatically cached and retried later" — and `tefALREADY` reports
+that the same exact transaction has already been applied. A `tec*` result was applied and
+merely failed, claiming the fee.
+
+So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
+ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will
+include it. Everything else goes to confirmation, which polls to `LastLedgerSequence` and
+reports either the validated result or an expiry. Reporting a "no" that may still become a
+yes would invite a retry that pays a second time.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 

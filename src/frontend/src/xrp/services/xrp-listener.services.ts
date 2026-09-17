@@ -40,6 +40,18 @@ export const syncWallet = ({
 	});
 };
 
+/**
+ * Drops what the UI holds for a token, so the next sync starts from nothing.
+ *
+ * `syncWallet` prepends, so a first page synced for a newly derived address would otherwise be
+ * merged into the rows of the address before it — showing, and exporting, another account's
+ * history as this one's.
+ */
+export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
+	balancesStore.reset(tokenId);
+	xrpTransactionsStore.reset(tokenId);
+};
+
 export const syncWalletError = ({
 	tokenId,
 	error: err,
