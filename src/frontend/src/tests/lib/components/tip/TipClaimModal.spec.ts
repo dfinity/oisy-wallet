@@ -9,15 +9,16 @@ import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { userProfileCreated } from '$lib/stores/user-profile.store';
+import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
+import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
@@ -31,7 +32,7 @@ vi.mock('$icp-eth/services/icrc-token.services', () => ({ setCustomToken: vi.fn(
 
 vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
-	const { readable } = await import('svelte/store');
+	const { readable, writable } = await import('svelte/store');
 
 	const { mockIcrcCustomToken } = await import('$tests/mocks/icrc-custom-tokens.mock');
 	// `TokenId` is a branded symbol, so a bare `Symbol()` does not satisfy it.
@@ -43,6 +44,10 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	// is what made `npm run test` fail here before `vitest` could run at all.
 	return {
 		...actual,
+		// Writable, because the handover waits on it: `LoaderTokens` runs inside
+		// `LoaderUserProfile`, so a test needs to hold the list unloaded and then
+		// land it. Defaults to loaded so every other test skips the wait.
+		icrcCustomTokensInitialized: writable(true),
 		icrcTokens: readable([
 			{
 				...mockIcrcCustomToken,
@@ -84,8 +89,18 @@ describe('TipClaimModal', () => {
 
 	let warnSpy: MockInstance<typeof consoleUtils.consoleWarn>;
 
+	let tokensInitialized: Writable<boolean>;
+
+	beforeAll(async () => {
+		({ icrcCustomTokensInitialized: tokensInitialized } =
+			(await import('$icp/derived/icrc.derived')) as unknown as {
+				icrcCustomTokensInitialized: Writable<boolean>;
+			});
+	});
+
 	beforeEach(async () => {
 		vi.restoreAllMocks();
+		tokensInitialized.set(true);
 		// `restoreAllMocks` restores spies but leaves a module mock's `vi.fn()`
 		// holding its call history, so these two have to be cleared by hand or a
 		// "was not called" assertion reads the previous test's calls.
@@ -96,6 +111,9 @@ describe('TipClaimModal', () => {
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
 		userProfileCreated.set(false);
+		// Loaded by default. The handover waits for the profile before deciding
+		// anything, so without this every test would sit through that wait.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
 
 		// The failure paths log what went wrong on purpose, so the paths that fail
 		// have to expect it rather than leak it into the test output.
@@ -311,6 +329,134 @@ describe('TipClaimModal', () => {
 
 		// Remembered, so a second tip in the same session does not repeat it.
 		expect(remember).toHaveBeenCalledOnce();
+	});
+
+	it('waits for the profile rather than deciding before it lands', async () => {
+		// The race this closes. `TipClaimModal` is mounted by `Modals` inside
+		// `AuthGuard` — beside the loader tree, not beneath it — so nothing orders
+		// the two. A first-time claimer is both the person whose profile is still
+		// being created and the one most likely to tap straight through, so the
+		// welcome was skipped for exactly the person it exists for.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the point where the unguarded handover had already sampled both
+		// stores and closed. Setting the profile any earlier lets it win the race by
+		// luck, which is what made an earlier version of this test pass against the
+		// bug it was written for.
+		await vi.advanceTimersByTimeAsync(600);
+
+		// The profile lands only now — after the reader has already acknowledged.
+		userProfileCreated.set(true);
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		await vi.waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
+
+		vi.useRealTimers();
+	});
+
+	it('waits for the token list too, not just the profile', async () => {
+		// `LoaderTokens` is mounted *inside* `LoaderUserProfile`, so it does not even
+		// start until the profile store is ready. Gating on the profile alone handed
+		// over before the token list had begun loading — and an unloaded list reads
+		// as "never seen this token", which takes the registration path for a row
+		// the backend already has. That is the versionless save `set_custom_token`
+		// answers by trapping.
+		vi.useFakeTimers();
+
+		const autoLoad = vi
+			.spyOn(tokenServices, 'autoLoadSingleToken')
+			.mockResolvedValue({ result: 'loaded' });
+
+		// Profile ready, token list explicitly *not* loaded.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+		tokensInitialized.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		await vi.advanceTimersByTimeAsync(600);
+
+		// Nothing decided yet: neither path may run on an unloaded list.
+		expect(autoLoad).not.toHaveBeenCalled();
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+
+		// The list lands, carrying the claimed token as a disabled row.
+		tokensInitialized.set(true);
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockIcrcCustomToken,
+					ledgerCanisterId: ledgerCanisterId.toText(),
+					enabled: false,
+					version: 2n
+				},
+				certified: true
+			}
+		]);
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		// Enabled through the existing path, not registered from scratch — which is
+		// the whole point of waiting.
+		await vi.waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
+
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+
+		vi.useRealTimers();
+	});
+
+	it('hands over anyway when the profile never arrives', async () => {
+		// Bounded, not indefinite: the claim is done and the money is theirs, so a
+		// profile that never loads must not trap the reader on a screen whose work
+		// is finished. The cost of giving up is a missed welcome, not a missed
+		// payout.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the whole retry budget without the profile ever arriving.
+		await vi.advanceTimersByTimeAsync(10_000);
+
+		await vi.waitFor(() => expect(get(modalStore)).toBeNull());
+
+		vi.useRealTimers();
 	});
 
 	it('spares an established user the introduction', async () => {
