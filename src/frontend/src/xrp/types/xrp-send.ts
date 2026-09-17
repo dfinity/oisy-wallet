@@ -17,9 +17,17 @@ export class XrpSendExpiredError extends Error {}
  * The send's outcome could not be established — the node stopped answering, or confirmation ran
  * out of attempts before the ledger reached expiry. The payment may or may not have happened.
  *
- * The signed transaction travels with the error so a retry can resubmit THIS transaction instead
- * of building a new one. That is the difference between a retry the ledger deduplicates and a
- * second payment.
+ * The signed transaction travels with the error so a retry CAN resubmit THIS transaction instead
+ * of building a new one — the difference between a retry the ledger deduplicates and a second
+ * payment.
+ *
+ * Nothing consumes it yet, so the hazard is NOT closed. `pending` only survives as a field on the
+ * rejected promise: nothing in the XRP folder persists it, and the send wizard reports the error
+ * and closes, after which it is unreachable. A user who dismisses that and sends again still
+ * builds a fresh transaction, which is the second payment this is meant to prevent. Consuming it
+ * needs a surface that resolves an unconfirmed send, which belongs with transaction history; the
+ * in-repo precedent is BTC, which persists pending send state server-side via
+ * `addPendingBtcTransaction` so it survives a reload and reaches other devices.
  */
 export class XrpSendIndeterminateError extends Error {
 	readonly pending: XrpPendingTransaction;
