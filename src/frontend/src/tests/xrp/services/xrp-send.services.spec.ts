@@ -5,7 +5,11 @@ import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
+import {
+	XrpSendExpiredError,
+	XrpSendIndeterminateError,
+	XrpTransactionFailedError
+} from '$xrp/types/xrp-send';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -290,8 +294,12 @@ describe('xrp-send.services', () => {
 	// polling rather than give up on a fixed budget and report a false failure — which would
 	// invite the user to send a duplicate. The count deliberately exceeds the ten retries the
 	// previous implementation allowed.
-	it('keeps polling beyond ten attempts while the transaction can still be included', async () => {
-		const validatesOnAttempt = 15;
+	// The attempt cap is derived from the ~80s validity window (20 ledgers at ~4s) so that it
+	// cannot fire before the ledger has had its chance: reaching it is the one exit that ends a
+	// send with an unknown outcome. Validating at the far end of that window must therefore still
+	// succeed — at the fastest 1s polling, 80 attempts span it.
+	it('keeps polling for the whole ledger validity window', async () => {
+		const validatesOnAttempt = XRP_LAST_LEDGER_SEQUENCE_OFFSET * 4;
 		let attempts = 0;
 
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
@@ -442,6 +450,90 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 
 		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	describe('retrying an indeterminate send', () => {
+		// The whole point: a retry must be able to resubmit THIS transaction. If the outcome is
+		// unknown and the error does not carry it, the only possible retry builds a new transaction
+		// from a fresh sequence — a second, independent payment.
+		it('hands back the signed transaction when the outcome is never established', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+			expect((err as XrpSendIndeterminateError).pending).toEqual({
+				txBlob: signedBlob,
+				txHash: expect.stringMatching(/^[0-9A-F]{64}$/),
+				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
+			});
+		});
+
+		// Expiry is the opposite case: the transaction can never apply, so a retry MUST build a new
+		// one and carrying this one would be wrong.
+		it('reports expiry as its own error, with nothing to resubmit', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpSendExpiredError);
+			expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
+		});
+
+		it('resubmits the stored transaction instead of building a new one', async () => {
+			const pending = {
+				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
+				txHash: 'A'.repeat(64),
+				lastLedgerSequence: 4321
+			};
+
+			await sendXrp({ ...params, pending });
+
+			expect(xrplRest.submitXrpTransaction).toHaveBeenCalledExactlyOnceWith({
+				txBlob: pending.txBlob,
+				network: XrpNetworks.mainnet
+			});
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
+				hash: pending.txHash,
+				network: XrpNetworks.mainnet
+			});
+
+			// Nothing is fetched, rebuilt or re-signed: a new sequence would make this a different
+			// transaction, which is the duplicate payment this exists to prevent.
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// The payoff: the first attempt did land. Resubmitting the same blob is refused as already
+		// applied, and the poll reports the original transaction's real outcome.
+		it('reports the original outcome when the resubmitted transaction already applied', async () => {
+			const pending = {
+				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
+				txHash: 'B'.repeat(64),
+				lastLedgerSequence: 4321
+			};
+
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult: 'tefALREADY',
+				accepted: false
+			});
+
+			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
+				txHash: pending.txHash,
+				submitResult: { engineResult: 'tefALREADY', accepted: false }
+			});
+		});
 	});
 
 	// The fee is untrusted input and escalates with load, so an excessive estimate must not be

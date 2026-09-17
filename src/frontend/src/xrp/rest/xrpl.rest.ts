@@ -195,6 +195,12 @@ export const loadXrpLedgerIndex = async ({
 }): Promise<number> => {
 	const result = await xrpJsonRpc({ network, method: 'ledger_current', params: {} });
 
+	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
+	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
+	if (nonNullish(result.error)) {
+		throw new Error(`Unexpected XRPL ledger_current response: ${String(result.error)}`);
+	}
+
 	const parsed = XrplLedgerCurrentResultSchema.safeParse(result);
 
 	if (!parsed.success) {
@@ -218,6 +224,12 @@ export const loadXrpValidatedLedgerIndex = async ({
 		method: 'ledger',
 		params: { ledger_index: 'validated' }
 	});
+
+	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
+	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
+	if (nonNullish(result.error)) {
+		throw new Error(`Unexpected XRPL ledger response: ${String(result.error)}`);
+	}
 
 	// A malformed HIGH index would declare a still-live payment expired, so this is validated
 	// rather than cast, and the response must actually describe a validated ledger.
@@ -297,6 +309,12 @@ export const submitXrpTransaction = async ({
 	network: XrpNetworkType;
 }): Promise<XrpSubmitResult> => {
 	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
+
+	// Before parsing, so the message names the XRPL error rather than reporting a shape mismatch.
+	// The schema forbids a mixed error/result response as well, which is the case this cannot see.
+	if (nonNullish(result.error)) {
+		throw new Error(`Unexpected XRPL submit response: ${String(result.error)}`);
+	}
 
 	const parsed = XrplSubmitResultSchema.safeParse(result);
 
