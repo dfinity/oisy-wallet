@@ -25,12 +25,19 @@ describe('TipIntro', () => {
 		expect(container.querySelector(historySelector)).toBeInTheDocument();
 	});
 
-	it('promises that unclaimed funds lapse rather than being refunded', () => {
+	it('says the amount stays in the wallet rather than being refunded', () => {
 		// The design's copy said unclaimed tokens "are automatically returned to
 		// your available balance", which the no-custody model makes untrue: nothing
 		// ever leaves the wallet, so nothing is returned. Asserted because it is a
 		// claim about where someone's money goes, and a plausible-sounding
 		// regression would be easy to reintroduce from the mock.
+		//
+		// Matched on "stays in your wallet" rather than the old "never leave your
+		// wallet": the sentence changed because the previous one also claimed the
+		// *funds* never leave, which contradicted the reserve fee itemised on the
+		// create form — that fee is spent at `icrc2_approve` whether anyone claims
+		// or not. What is asserted is the part that was always true and is the
+		// point of the line: the amount does not move.
 		const { getByText } = render(TipIntro, {
 			props: { onGetStarted: vi.fn(), onViewHistory: vi.fn() }
 		});
@@ -38,7 +45,7 @@ describe('TipIntro', () => {
 
 		expect(getByText(body)).toBeInTheDocument();
 		expect(body).not.toMatch(/refund|returned/i);
-		expect(body).toMatch(/never leave your wallet/i);
+		expect(body).toMatch(/stays in your wallet/i);
 	});
 
 	describe('the overview', () => {
