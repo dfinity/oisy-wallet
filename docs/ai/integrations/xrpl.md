@@ -31,14 +31,18 @@ the body, as `result.error` — for example `actNotFound`, `txnNotFound`, `tooBu
 worked, and `xrpJsonRpc` returning normally is not evidence of a result.
 
 Every caller must inspect `result.error` before reading the payload, and decide
-per call which error is an expected state rather than a failure:
+per call which error is an expected state rather than a failure. The rule belongs to
+the helper, not to the method: the same method can carry different rules depending on
+what its caller needs from the response, so look up your helper rather than your
+method.
 
-| Method         | Expected error                      | Everything else |
-| -------------- | ----------------------------------- | --------------- |
-| `account_info` | `actNotFound` → zero balance        | throw           |
-| `account_tx`   | `actNotFound` → empty history       | throw           |
-| `tx`           | `txnNotFound` → not in a ledger yet | throw           |
-| `fee`          | none                                | throw           |
+| Helper                      | Method         | Expected error                      | Everything else |
+| --------------------------- | -------------- | ----------------------------------- | --------------- |
+| `loadXrpBalance`            | `account_info` | `actNotFound` → zero balance        | throw           |
+| `loadXrpAccountInfo`        | `account_info` | none — a send needs the `Sequence`  | throw           |
+| _(a later phase)_           | `account_tx`   | `actNotFound` → empty history       | throw           |
+| `loadXrpTransactionOutcome` | `tx`           | `txnNotFound` → not in a ledger yet | throw           |
+| `loadXrpOpenLedgerFee`      | `fee`          | none                                | throw           |
 
 `ledger`, `ledger_current` and `submit` need no explicit check because their schemas
 require a field an error response cannot carry, so an error fails the parse. `fee` does

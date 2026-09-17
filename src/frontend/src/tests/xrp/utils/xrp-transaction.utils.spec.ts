@@ -2,6 +2,7 @@ import { XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
+	deriveXrpTransactionHash,
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful,
 	mapXrpTransaction
@@ -415,6 +416,30 @@ describe('xrp-transaction.utils', () => {
 
 		it.each(['tecUNFUNDED_PAYMENT', 'terQUEUED', undefined])('is false for %j', (result) => {
 			expect(isXrpTransactionSuccessful(result)).toBeFalsy();
+		});
+	});
+
+	describe('deriveXrpTransactionHash', () => {
+		// A known answer from the ledger itself, so this tests the formula rather than this
+		// codebase's reading of it. Mainnet transaction
+		// 01AB846C49D6A0C0AC6AF2D7A38D6751FAC8F173AB8CC61E4B4C9C0AD9AE800C, validated in ledger
+		// 107047673, fetched with `{"method":"tx","params":[{"transaction":"01AB84…","binary":true}]}`
+		// — the response's `tx` is the signed blob and `hash` is the id it is stored under.
+		//
+		// Without this, a wrong prefix, digest algorithm or digest half still produces deterministic
+		// 64-char hex: confirmation would then poll an id no ledger contains and report a successful
+		// payment as expired.
+		const LEDGER_BLOB =
+			'120007220001000024000000002A323FF526201B06616B0B20290533651164D408DB5ECB6CD00000000000000000000000000042544300000000000A20B3C85F482532A9578DBB3950B85CA06594D165D546C6C14FCBAD80524C555344000000000000000000000000000000E5E961C6A025C9404AA7B662DD1DF975BE75D13E68400000000000000A7321ED2639E0869A74D7F5FEC402C343FABB29BF58754926DFFDA2C1338F9CFF8C85F77440809E5DB6D61C548D6148CE420F0ACCB725679E3A1AAF03A152F0EE59CB1A2BDA8100A6F67B9F567D105636186E28E187FFBDD8F10D1085BB7C3CD617CFF6F2038114DBDCCEC12FA9F832CB83A099B28B39B00CBB0C11';
+		const LEDGER_HASH = '01AB846C49D6A0C0AC6AF2D7A38D6751FAC8F173AB8CC61E4B4C9C0AD9AE800C';
+
+		it('reproduces the id the ledger stored a real transaction under', async () => {
+			await expect(deriveXrpTransactionHash(LEDGER_BLOB)).resolves.toBe(LEDGER_HASH);
+		});
+
+		// Lowercase hex is equally valid on the wire, and the id is canonically uppercase.
+		it('accepts a lowercase blob and returns uppercase hex', async () => {
+			await expect(deriveXrpTransactionHash(LEDGER_BLOB.toLowerCase())).resolves.toBe(LEDGER_HASH);
 		});
 	});
 });
