@@ -30,11 +30,17 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
 const XRP_LEDGER_CLOSE_SECONDS = 4;
 
-// Longest interval `randomWait` can return. Used to convert "ledger closes remaining" into "polls
-// to wait": the LONGEST wait gives the FEWEST polls per close, so the conversion under-counts and
-// the confirmation loop asks again slightly early rather than slightly late — a wasted call costs
-// one request, asking late costs the definitive expiry answer.
-const XRP_CONFIRM_MAX_POLL_SECONDS = 2;
+// The confirmation poll's interval, passed to `randomWait` rather than left to its defaults: the
+// two derivations below are only correct if this is what the loop actually waits, and mirroring
+// another module's defaults would let a change there make them silently wrong.
+export const XRP_CONFIRM_MIN_POLL_MS = 1000;
+export const XRP_CONFIRM_MAX_POLL_MS = 2000;
+
+// Longest interval the poll can wait. Used to convert "ledger closes remaining" into "polls to
+// wait": the LONGEST wait gives the FEWEST polls per close, so the conversion under-counts and the
+// confirmation loop asks again slightly early rather than slightly late — a wasted call costs one
+// request, asking late costs the definitive expiry answer.
+const XRP_CONFIRM_MAX_POLL_SECONDS = XRP_CONFIRM_MAX_POLL_MS / 1000;
 
 // Polls to skip per ledger close still needed before expiry is even possible. Asking on every poll
 // made almost every one of those calls incapable of changing the outcome: expiry needs the
@@ -44,9 +50,9 @@ export const XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE = Math.floor(
 	XRP_LEDGER_CLOSE_SECONDS / XRP_CONFIRM_MAX_POLL_SECONDS
 );
 
-// Shortest interval `randomWait` can return, and so the conservative denominator below: the
-// fastest polling needs the most attempts to span the window.
-const XRP_CONFIRM_MIN_POLL_SECONDS = 1;
+// Shortest interval the poll can wait, and so the conservative denominator below: the fastest
+// polling needs the most attempts to span the window.
+const XRP_CONFIRM_MIN_POLL_SECONDS = XRP_CONFIRM_MIN_POLL_MS / 1000;
 
 // Twice the window rather than exactly it, so a slower-than-usual ledger pace cannot end the poll
 // before the ledger has decided.

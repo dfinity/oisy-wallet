@@ -1,8 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+import { randomWait } from '$lib/utils/time.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
+	XRP_CONFIRM_MAX_POLL_MS,
+	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
@@ -707,6 +710,22 @@ describe('xrp-send.services', () => {
 				await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
 			}
 		);
+	});
+
+	// `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read skip are both computed from this interval, so
+	// they are only correct if the loop actually waits it. Leaving it to `randomWait`'s defaults
+	// would make the two agree by coincidence, and a change there would break them silently.
+	it('waits the interval its derived budgets assume', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		await sendXrp(params);
+
+		expect(randomWait).toHaveBeenCalledWith({
+			min: XRP_CONFIRM_MIN_POLL_MS,
+			max: XRP_CONFIRM_MAX_POLL_MS
+		});
 	});
 
 	describe('the validated-ledger read', () => {

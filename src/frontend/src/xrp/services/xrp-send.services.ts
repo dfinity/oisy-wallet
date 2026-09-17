@@ -4,6 +4,8 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_POLL_MS,
+	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
@@ -146,7 +148,9 @@ const confirmXrpTransaction = async ({
 			}
 		}
 
-		await randomWait({});
+		// Explicit rather than `randomWait`'s defaults: `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read
+		// skip are both derived from this interval, so the loop has to wait what they assume.
+		await randomWait({ min: XRP_CONFIRM_MIN_POLL_MS, max: XRP_CONFIRM_MAX_POLL_MS });
 	}
 
 	throw new Error('XRP transaction confirmation stopped before its ledger expiry was reached.');
