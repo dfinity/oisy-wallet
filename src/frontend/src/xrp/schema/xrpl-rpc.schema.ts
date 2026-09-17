@@ -51,8 +51,14 @@ export const XrplFeeResultSchema = z.object({
 		.optional()
 });
 
+// `error: z.never()` on every branch below, for the reason the account-info union already
+// documents: zod strips unknown keys, so without forbidding it a failed response that also
+// carried a plausible index would parse as a result and the error would be dropped. That matters
+// most for the validated index — a bogus one past `LastLedgerSequence` makes confirmation declare
+// expiry and tell the user a resend is safe.
 export const XrplLedgerCurrentResultSchema = z.object({
-	ledger_current_index: XrpLedgerCounterSchema
+	ledger_current_index: XrpLedgerCounterSchema,
+	error: z.never().optional()
 });
 
 // The `ledger` command reports the index either at the top level or nested under `ledger`,
@@ -66,10 +72,15 @@ const XrpNestedLedgerIndexSchema = z.union([
 ]);
 
 export const XrplLedgerResultSchema = z.union([
-	z.object({ validated: z.literal(true), ledger_index: XrpLedgerCounterSchema }),
 	z.object({
 		validated: z.literal(true),
-		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema })
+		ledger_index: XrpLedgerCounterSchema,
+		error: z.never().optional()
+	}),
+	z.object({
+		validated: z.literal(true),
+		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }),
+		error: z.never().optional()
 	})
 ]);
 
@@ -93,6 +104,7 @@ export const XrplTxResultSchema = z.union([
 // none of it decides anything: the hash is derived locally and `accepted` no longer gates.
 export const XrplSubmitResultSchema = z.object({
 	engine_result: z.string(),
+	error: z.never().optional(),
 	// Strict only where the decision reads. These three are cosmetic or unused — the message is
 	// interpolated into an error, the hash is derived locally and `accepted` is compared to `true`
 	// — so a malformed one must not fail the parse: that would throw, and the send would poll for a

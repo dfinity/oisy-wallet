@@ -17,8 +17,16 @@ import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-si
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
-import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import {
+	XrpSendExpiredError,
+	XrpSendIndeterminateError,
+	XrpTransactionFailedError
+} from '$xrp/types/xrp-send';
+import type {
+	XrpPendingTransaction,
+	XrpSendResult,
+	XrpSubmitResult
+} from '$xrp/types/xrp-transaction';
 import {
 	buildXrpPayment,
 	deriveXrpTransactionHash,
@@ -97,8 +105,10 @@ const confirmXrpTransaction = async ({
 				}
 
 				// Past its LastLedgerSequence the transaction can never be applied, so this failure is
-				// final — and, unlike an early timeout, sending again is safe.
-				throw new Error(
+				// final — and, unlike an early timeout, sending again is safe. Its own error type,
+				// because that distinction decides whether a retry may resubmit this transaction or
+				// must build a new one.
+				throw new XrpSendExpiredError(
 					`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
 				);
 			}
@@ -111,12 +121,90 @@ const confirmXrpTransaction = async ({
 };
 
 /**
+ * Submits a signed transaction and resolves its outcome from the ledger.
+ *
+ * Shared by a first attempt and by a retry, which is the point: a retry runs exactly these steps
+ * over the same stored transaction, so it cannot become a second payment.
+ */
+const submitAndConfirmXrpTransaction = async ({
+	network,
+	pending,
+	progress
+}: {
+	network: XrpNetworkType;
+	pending: XrpPendingTransaction;
+	progress?: (step: ProgressStepsSendXrp) => void;
+}): Promise<XrpSendResult> => {
+	const { txBlob, txHash, lastLedgerSequence } = pending;
+
+	progress?.(ProgressStepsSendXrp.SEND);
+
+	let result: XrpSubmitResult | undefined;
+
+	try {
+		result = await submitXrpTransaction({ txBlob, network });
+	} catch (_: unknown) {
+		// Ambiguous: a transport or shape failure says nothing about whether the node applied the
+		// blob, so fall through to confirmation rather than declaring failure here.
+	}
+
+	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
+	// did not take the blob — may still end up applied, and reporting it as failed would invite a
+	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
+	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
+		throw new Error(
+			`XRP transaction rejected: ${result.engineResult}${
+				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
+			}`
+		);
+	}
+
+	progress?.(ProgressStepsSendXrp.CONFIRM);
+
+	let transactionResult: string | undefined;
+
+	try {
+		transactionResult = await confirmXrpTransaction({ hash: txHash, network, lastLedgerSequence });
+	} catch (err: unknown) {
+		// Expiry is the one confirmation failure that is definitive: the validated ledger passed
+		// `LastLedgerSequence` and the hash was still absent on recheck, so this transaction can
+		// never apply and a retry must build a new one. Everything else leaves the outcome unknown,
+		// so the signed transaction is handed back with the error — a retry resubmits it, and the
+		// ledger, not this code, decides whether it was already applied.
+		if (err instanceof XrpSendExpiredError) {
+			throw err;
+		}
+
+		throw new XrpSendIndeterminateError({
+			message: err instanceof Error ? err.message : `${err}`,
+			pending
+		});
+	}
+
+	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
+	// validated the transaction and it failed, claiming the fee.
+	if (!isXrpTransactionSuccessful(transactionResult)) {
+		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
+	}
+
+	progress?.(ProgressStepsSendXrp.DONE);
+
+	return { txHash, submitResult: result };
+};
+
+/**
  * Sends native XRP: fetches the account sequence, the open-ledger fee and the current
  * ledger index, builds and threshold-signs a Payment, submits it, and waits for the
  * transaction to be included in a validated ledger.
  *
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
+ *
+ * `pending` retries a send whose outcome was never established, from the
+ * {@link XrpSendIndeterminateError} that reported it. The stored transaction is resubmitted
+ * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, the
+ * ledger rejects this one as already applied rather than making a second payment. Building a
+ * fresh transaction in that situation is precisely what pays twice.
  */
 export const sendXrp = async ({
 	identity,
@@ -126,6 +214,7 @@ export const sendXrp = async ({
 	amount,
 	fee,
 	destinationTag,
+	pending,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -135,9 +224,16 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	fee: XrpBalance;
 	destinationTag?: number;
+	pending?: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
+
+	// Before the fee bound: a resubmission prices nothing, and its fee was already bounded when the
+	// blob was signed.
+	if (nonNullish(pending)) {
+		return await submitAndConfirmXrpTransaction({ network, pending, progress });
+	}
 
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
 	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
@@ -175,43 +271,9 @@ export const sendXrp = async ({
 	// to poll — the send would be reported as failed and a retry would spend the funds again.
 	const txHash = await deriveXrpTransactionHash(txBlob);
 
-	progress?.(ProgressStepsSendXrp.SEND);
-
-	let result: XrpSubmitResult | undefined;
-
-	try {
-		result = await submitXrpTransaction({ txBlob, network });
-	} catch (_: unknown) {
-		// Ambiguous: a transport or shape failure says nothing about whether the node applied the
-		// blob, so fall through to confirmation rather than declaring failure here.
-	}
-
-	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
-	// did not take the blob — may still end up applied, and reporting it as failed would invite a
-	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
-	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
-		throw new Error(
-			`XRP transaction rejected: ${result.engineResult}${
-				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
-			}`
-		);
-	}
-
-	progress?.(ProgressStepsSendXrp.CONFIRM);
-
-	const transactionResult = await confirmXrpTransaction({
-		hash: txHash,
+	return await submitAndConfirmXrpTransaction({
 		network,
-		lastLedgerSequence
+		pending: { txBlob, txHash, lastLedgerSequence },
+		progress
 	});
-
-	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
-	// validated the transaction and it failed, claiming the fee.
-	if (!isXrpTransactionSuccessful(transactionResult)) {
-		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
-	}
-
-	progress?.(ProgressStepsSendXrp.DONE);
-
-	return { txHash, submitResult: result };
 };
