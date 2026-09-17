@@ -557,6 +557,52 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	describe("the sender's own reserve", () => {
+		// XRPL applies a payment that would leave the account below its reserve as
+		// `tecUNFUNDED_PAYMENT`: fee destroyed, sequence burned, nothing delivered. The balance and
+		// `OwnerCount` needed to refuse it are already in hand from the account load.
+		const sourceWith = ({ balance, ownerCount }: { balance: bigint; ownerCount: number }) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockResolvedValue({ balance, sequence: 7, ownerCount });
+
+		it('refuses an amount that would leave the account below its reserve', async () => {
+			// 2 XRP held, 2 ledger objects: reserve 1_000_000 + 2 x 200_000 = 1_400_000, so with a
+			// 10-drop fee only 599_990 is sendable.
+			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
+
+			await expect(sendXrp({ ...params, amount: 900_000n, fee: 10n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('sends exactly the sendable maximum', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
+
+			await expect(sendXrp({ ...params, amount: 599_990n, fee: 10n })).resolves.toBeDefined();
+		});
+
+		// The owner reserve is what makes this account-specific: the same balance and amount are
+		// sendable with no ledger objects and not sendable with two.
+		it('scales the reserve with OwnerCount', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 0 });
+
+			await expect(sendXrp({ ...params, amount: 900_000n, fee: 10n })).resolves.toBeDefined();
+		});
+
+		// The fee is part of what must fit, not an afterthought.
+		it('counts the fee against the sendable maximum', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 0 });
+
+			await expect(sendXrp({ ...params, amount: 1_000_000n, fee: 1n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+	});
+
 	describe('an unfunded destination', () => {
 		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0 };
 

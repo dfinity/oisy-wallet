@@ -25,6 +25,7 @@ import type {
 	XrpSendResult,
 	XrpSubmitResult
 } from '$xrp/types/xrp-transaction';
+import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
 	deriveXrpTransactionHash,
@@ -281,12 +282,24 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence }, destinationExists, ledgerIndex, signingPublicKey] = await Promise.all([
-		loadXrpAccountInfo({ address: source, network }),
-		tryDestinationExists(),
-		loadXrpLedgerIndex({ network }),
-		getXrpSigningPublicKey({ identity, network })
-	]);
+	const [{ sequence, balance, ownerCount }, destinationExists, ledgerIndex, signingPublicKey] =
+		await Promise.all([
+			loadXrpAccountInfo({ address: source, network }),
+			tryDestinationExists(),
+			loadXrpLedgerIndex({ network }),
+			getXrpSigningPublicKey({ identity, network })
+		]);
+
+	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
+	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the
+	// sequence is burned, nothing is delivered, and the failure only surfaces after the poll. The
+	// spec makes this client-side check an acceptance criterion, and `getXrpMaxAmount` — which the
+	// caller uses to offer a maximum — had no runtime caller until now.
+	if (amount > getXrpMaxAmount({ balance, fee, ownerCount })) {
+		throw new Error(
+			`XRP amount ${amount} drops exceeds the sendable maximum for this account, which must retain ${getXrpReserveDrops({ ownerCount })} drops of reserve plus the ${fee} drops fee.`
+		);
+	}
 
 	// XRPL answers a payment too small to create an account that does not exist with
 	// `tecNO_DST_INSUF_XRP`, which is APPLIED: the payment fails and the fee is claimed. Refusing
