@@ -312,7 +312,7 @@ export const sendXrp = async ({
 			loadXrpAccountInfo({ address: source, network }),
 			tryDestinationExists(),
 			loadXrpLedgerIndex({ network }),
-			getXrpSigningPublicKey({ identity, network })
+			getXrpSigningPublicKey({ identity, network, account: source })
 		]);
 
 	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
