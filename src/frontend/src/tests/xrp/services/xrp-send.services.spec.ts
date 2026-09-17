@@ -289,8 +289,12 @@ describe('xrp-send.services', () => {
 	// polling rather than give up on a fixed budget and report a false failure — which would
 	// invite the user to send a duplicate. The count deliberately exceeds the ten retries the
 	// previous implementation allowed.
-	it('keeps polling beyond ten attempts while the transaction can still be included', async () => {
-		const validatesOnAttempt = 15;
+	// The attempt cap is derived from the ~80s validity window (20 ledgers at ~4s) so that it
+	// cannot fire before the ledger has had its chance: reaching it is the one exit that ends a
+	// send with an unknown outcome. Validating at the far end of that window must therefore still
+	// succeed — at the fastest 1s polling, 80 attempts span it.
+	it('keeps polling for the whole ledger validity window', async () => {
+		const validatesOnAttempt = XRP_LAST_LEDGER_SEQUENCE_OFFSET * 4;
 		let attempts = 0;
 
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {

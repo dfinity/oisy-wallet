@@ -24,11 +24,24 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 export const XRP_MAX_FEE_DROPS = 10_000n;
 
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
-// long it can be included (~4s/ledger, so ~80s) before it definitively fails rather than
-// lingering.
+// long it can be included before it definitively fails rather than lingering.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 
-// Safety net for the confirmation poll only: the real bound is the transaction's
-// LastLedgerSequence, so this merely stops the loop if a node never advances its ledger
-// index. Generous next to the ~80s validity window at a 1-2s poll interval.
-export const XRP_CONFIRM_MAX_ATTEMPTS = 120;
+// Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
+const XRP_LEDGER_CLOSE_SECONDS = 4;
+
+// Shortest interval `randomWait` can return, and so the conservative denominator below: the
+// fastest polling needs the most attempts to span the window.
+const XRP_CONFIRM_MIN_POLL_SECONDS = 1;
+
+// Twice the window rather than exactly it, so a slower-than-usual ledger pace cannot end the poll
+// before the ledger has decided.
+const XRP_CONFIRM_WINDOW_MARGIN = 2;
+
+// Derived from the validity window, not chosen. Reaching this cap is the one exit that ends a send
+// with its outcome unknown — the ledger may still have applied it, and a rebuilt retry would then
+// pay twice — so it must outlast the window in every case. Expiry, which IS definitive, is what
+// normally ends the loop.
+export const XRP_CONFIRM_MAX_ATTEMPTS =
+	(XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN) /
+	XRP_CONFIRM_MIN_POLL_SECONDS;
