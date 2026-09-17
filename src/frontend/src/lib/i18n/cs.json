@@ -1654,7 +1654,7 @@
 			"simulation_control_removed": "Odebráno",
 			"transfer_sources": "Zdroje",
 			"transfer_party_own": "Váš účet",
-			"transfer_parties_partial": "OISY nedokázal tuto transakci simulovat, takže seznamy výše zahrnují pouze instrukce uvedené přímo ve zprávě. Prostředky přesunuté jiným programem jejím jménem nejsou uvedeny. Podepište pouze v případě, že této aplikaci důvěřujete.",
+			"transfer_parties_partial": "OISY nemůže tuto transakci simulovat, takže výše uvedený seznam vychází z toho, co uvádí samotná zpráva, a nemusí zachytit ani všechno z toho. Prostředky, které v jejím zastoupení přesouvá jiný program, uvedeny nejsou. Podepisujte pouze tehdy, pokud této aplikaci věříte.",
 			"dapp_prioritization_fee": "Prioritní poplatek nastavený dApp, nikoli OISY.",
 			"high_prioritization_fee": "Tato transakce nastavuje neobvykle vysoký prioritní poplatek. Pečlivě ji zkontrolujte a podepište pouze v případě, že této aplikaci důvěřujete.",
 			"dapp_gas_limit": "Limit gasu nastavený aplikací, nikoli OISY. Maximální poplatek uvedený výše je nejvíce, kolik tato transakce může stát.",
