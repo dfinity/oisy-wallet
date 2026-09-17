@@ -1,7 +1,7 @@
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
+import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
@@ -78,6 +78,33 @@ describe('xrp-listener.services', () => {
 			expect(get(xrpTransactionsStore)?.[tokenId]).toEqual([
 				{ data: mockTransaction, certified: false }
 			]);
+		});
+	});
+
+	describe('resetWallet', () => {
+		// Called when the worker observes a new address. `syncWallet` prepends, so without this the
+		// first page synced for the new address merges into the previous address's rows.
+		it('clears both stores so a later sync starts from nothing', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
+
+			resetWallet({ tokenId });
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toBeNull();
+			expect(get(balancesStore)?.[tokenId]).toBeNull();
+		});
+
+		it('leaves a later sync holding only the new rows', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
+
+			resetWallet({ tokenId });
+
+			const newTransaction = { ...mockTransaction, id: 'HASH2' };
+			syncWallet({ data: mockPostMessage({ transactions: [newTransaction] }), tokenId });
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
+			expect(get(xrpTransactionsStore)?.[tokenId]?.[0].data.id).toBe('HASH2');
 		});
 	});
 

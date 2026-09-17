@@ -9,7 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
+import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
@@ -21,7 +21,7 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 
 	private constructor(
 		worker: WorkerData,
-		tokenId: TokenId,
+		private readonly tokenId: TokenId,
 		private readonly xrpNetwork: XrpNetworkType
 	) {
 		super(worker);
@@ -111,6 +111,12 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 			// `SchedulerTimer.start` is a no-op while its timer exists, so the running timer has to be
 			// cleared first or it would keep polling the previous address under the new ref.
 			this.stopTimer();
+
+			// The scheduler drops its own cache on the new ref, so its next sync reports the new
+			// address's first page as new rows. They must not be prepended onto the rows still held
+			// for the previous address.
+			resetWallet({ tokenId: this.tokenId });
+
 			this.start();
 		});
 	};
