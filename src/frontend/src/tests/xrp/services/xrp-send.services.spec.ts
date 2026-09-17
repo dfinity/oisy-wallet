@@ -315,6 +315,36 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).resolves.toBeDefined();
 	});
 
+	// The blob may already be accepted by the time this runs, so aborting on a failed ledger call
+	// would report a payment that can still validate as failed.
+	it('keeps polling after a validated-ledger call the node could not answer', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+			.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
+			.mockResolvedValue(1000);
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	// An unanswered ledger call establishes nothing, so it must not skip the expiry it would have
+	// established either: the run ends in the indeterminate error, not in a claim of failure.
+	it('ends indeterminate when the validated-ledger call is never answered', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: false,
+			transactionResult: undefined
+		});
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockRejectedValue(
+			new Error('XRPL ledger request failed with status 503')
+		);
+
+		await expect(sendXrp(params)).rejects.toThrow(
+			'XRP transaction confirmation stopped before its ledger expiry was reached.'
+		);
+	});
+
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.
 	it('reports a tec failure found by the recheck', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
