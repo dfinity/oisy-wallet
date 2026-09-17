@@ -19,7 +19,11 @@ import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-si
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import { XrpSendExpiredError, XrpSendIndeterminateError } from '$xrp/types/xrp-send';
+import {
+	XrpSendExpiredError,
+	XrpSendIndeterminateError,
+	XrpTransactionFailedError
+} from '$xrp/types/xrp-send';
 import type {
 	XrpPendingTransaction,
 	XrpSendResult,
@@ -197,8 +201,11 @@ const submitAndConfirmXrpTransaction = async ({
 		});
 	}
 
+	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
+	// validated the transaction and it failed, claiming the fee. Both are thrown at the CONFIRM
+	// step, so the progress step alone cannot separate "known failure" from "unknown".
 	if (!isXrpTransactionSuccessful(transactionResult)) {
-		throw new Error(`XRP transaction failed: ${transactionResult}`);
+		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
 	}
 
 	progress?.(ProgressStepsSendXrp.DONE);

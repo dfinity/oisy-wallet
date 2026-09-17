@@ -11,7 +11,11 @@ import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XrpSendExpiredError, XrpSendIndeterminateError } from '$xrp/types/xrp-send';
+import {
+	XrpSendExpiredError,
+	XrpSendIndeterminateError,
+	XrpTransactionFailedError
+} from '$xrp/types/xrp-send';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -282,6 +286,23 @@ describe('xrp-send.services', () => {
 			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 		}
 	);
+
+	// Both this and the indeterminate error are thrown at the CONFIRM step, so the type is the only
+	// thing a caller can use to tell a settled failure — fee charged, funds not sent — from an
+	// outcome nobody knows yet. Getting that backwards tells the user to keep waiting for a balance
+	// that will never move.
+	it('types a validated failure distinctly from an indeterminate one', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		expect(err).toBeInstanceOf(XrpTransactionFailedError);
+		expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
+		expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+	});
 
 	// A validated transaction is only final; `tec*` results are validated too.
 	it('throws when the transaction is validated with a failing result', async () => {

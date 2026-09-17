@@ -1,6 +1,12 @@
 import type { XrpPendingTransaction } from '$xrp/types/xrp-transaction';
 
 /**
+ * The transaction reached a validated ledger and failed there — a `tec*` result, which claims the
+ * fee. Distinct from an indeterminate confirmation: the outcome is known and final.
+ */
+export class XrpTransactionFailedError extends Error {}
+
+/**
  * The ledger advanced past the transaction's `LastLedgerSequence` without including it, so it can
  * never be applied. Definitive: sending again is safe, and must build a new transaction because
  * this one is now unusable.
