@@ -243,6 +243,12 @@ describe('XrpSendTokenWizard', () => {
 			await clickSend(rendered.container);
 
 			expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+
+			// Not calling `sendXrp` is also what a crash looks like, so the rejection has to be the
+			// reported one: `parseToken` throwing out of the handler would satisfy the line above.
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.assertion.amount_invalid } })
+			);
 		}
 	);
 
