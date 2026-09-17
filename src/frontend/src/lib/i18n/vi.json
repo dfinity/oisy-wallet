@@ -1641,6 +1641,7 @@
 			"tab_operations": "Thao tác",
 			"unreviewed_instructions": "OISY không thể giải mã một số chỉ dẫn này, vì vậy phần xem xét bên dưới có thể chưa đầy đủ.",
 			"unreviewed_instructions_simulated": "Giao dịch này chứa các thao tác từ một nguồn bên ngoài mà OISY không thể giải mã, vì vậy OISY đã chạy mô phỏng cho nó. Hãy đảm bảo bạn tin tưởng ứng dụng này và xem lại các thay đổi số dư được mô phỏng cùng các thao tác trước khi ký. Lưu ý rằng kết quả thực tế có thể khác với mô phỏng.",
+			"cannot_be_shown": "Giao dịch này bao gồm các hành động không thể hiển thị đầy đủ và chính xác để xem xét, nên OISY sẽ không ký. Hãy từ chối và yêu cầu ứng dụng gửi một yêu cầu đơn giản hơn.",
 			"simulated_instructions": "Chỉ dẫn được mô phỏng",
 			"multiple_operations": "Giao dịch này chứa nhiều thao tác ảnh hưởng đến ví của bạn. Hãy kiểm tra các thay đổi số dư được mô phỏng và các chỉ dẫn chứa trong đó, và chỉ phê duyệt giao dịch này nếu bạn cũng tin tưởng ứng dụng.",
 			"simulated_review": "Phần xem xét bên dưới là những gì mô phỏng giao dịch này đối với trạng thái hiện tại của mạng dự đoán. Kết quả khi thực sự chạy có thể khác.",

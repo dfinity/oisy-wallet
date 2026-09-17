@@ -52,6 +52,8 @@
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
 		isApproval?: boolean;
+		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
+		ambiguous?: boolean;
 		unreviewed?: boolean;
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
@@ -84,6 +86,7 @@
 		prioritizationFee,
 		prioritizationFeeEstimate,
 		isApproval = false,
+		ambiguous = false,
 		unreviewed = false,
 		preview,
 		instructions,
@@ -228,14 +231,20 @@
 {/snippet}
 
 <ContentWithToolbar>
-	<!-- One notice, whichever fits. A message OISY could not decode is a warning either way, and
+	<!-- One notice, whichever fits, and the refusal comes first: a message the signing flow will not
+	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
+	     on. It is the only notice here that is an error rather than a warning, because it describes
+	     what the wallet has already decided rather than something for the user to weigh.
+	     A message OISY could not decode is a warning either way, and
 	     says the review is simulated only when a simulation was in fact obtained, since one can
 	     fail. A message that decoded but does not reduce to a send, a receive or a swap the run
 	     agrees with is the case the user has to read the detail for, so it says so; it names the
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
-	{#if unreviewed}
+	{#if ambiguous}
+		<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
 				? $i18n.wallet_connect.text.unreviewed_instructions_simulated

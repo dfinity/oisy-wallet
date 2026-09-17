@@ -1641,6 +1641,7 @@
 			"tab_operations": "Operacje",
 			"unreviewed_instructions": "OISY nie może zdekodować niektórych z tych instrukcji, więc poniższy przegląd może być niepełny.",
 			"unreviewed_instructions_simulated": "Ta transakcja zawiera operacje z zewnętrznego źródła, których OISY nie może zdekodować, dlatego OISY przeprowadził ich symulację. Upewnij się, że ufasz aplikacji, i przed podpisaniem sprawdź symulowane zmiany salda oraz operacje. Pamiętaj, że rzeczywisty wynik może różnić się od symulacji.",
+			"cannot_be_shown": "Ta transakcja zawiera działania, których nie da się w całości dokładnie pokazać do sprawdzenia, więc OISY jej nie podpisze. Odrzuć ją i poproś aplikację o prostsze żądanie.",
 			"simulated_instructions": "Symulowane instrukcje",
 			"multiple_operations": "Ta transakcja zawiera wiele operacji wpływających na Twój portfel. Zweryfikuj symulowane zmiany salda oraz zawarte instrukcje i zatwierdź tę transakcję tylko wtedy, gdy ufasz również aplikacji.",
 			"simulated_review": "Poniższy przegląd to przewidywanie symulacji tej transakcji względem aktualnego stanu sieci. To, co faktycznie nastąpi podczas wykonania, może się różnić.",

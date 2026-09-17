@@ -1641,6 +1641,7 @@
 			"tab_operations": "操作",
 			"unreviewed_instructions": "OISY 无法解码其中部分指令，因此以下审查可能不完整。",
 			"unreviewed_instructions_simulated": "此交易包含来自外部来源的操作，OISY 无法解码，因此 OISY 对其运行了模拟。请确保您信任该应用程序，并在签名前查看模拟的余额变化和操作。请注意，实际结果可能与模拟不同。",
+			"cannot_be_shown": "此交易包含无法全部准确显示以供审核的操作，因此 OISY 不会签名。请拒绝，并要求该应用发送更简单的请求。",
 			"simulated_instructions": "模拟指令",
 			"multiple_operations": "此交易包含多个影响您钱包的操作。请核实模拟的余额变化和包含的指令，仅在您也信任该应用程序时才批准此交易。",
 			"simulated_review": "以下审查是根据网络当前状态模拟此交易所预测的结果。实际执行时的结果可能与此不同。",

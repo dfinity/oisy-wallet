@@ -1641,6 +1641,7 @@
 			"tab_operations": "Operationen",
 			"unreviewed_instructions": "OISY kann einige dieser Anweisungen nicht entschlüsseln, daher ist die Überprüfung unten möglicherweise unvollständig.",
 			"unreviewed_instructions_simulated": "Diese Transaktion enthält Operationen aus einer externen Quelle, die OISY nicht entschlüsseln kann, daher hat OISY eine Simulation davon durchgeführt. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie vor dem Signieren die simulierten Guthabenänderungen und Operationen. Beachten Sie, dass das tatsächliche Ergebnis von der Simulation abweichen kann.",
+			"cannot_be_shown": "Diese Transaktion enthält Aktionen, die sich nicht alle korrekt zur Prüfung anzeigen lassen – OISY signiert sie daher nicht. Lehnen Sie sie ab und bitten Sie die App um eine einfachere Anfrage.",
 			"simulated_instructions": "Simulierte Anweisungen",
 			"multiple_operations": "Diese Transaktion enthält mehrere Operationen, die Ihre Wallet betreffen. Überprüfen Sie die simulierten Guthabenänderungen und die enthaltenen Anweisungen, und genehmigen Sie diese Transaktion nur, wenn Sie auch der Anwendung vertrauen.",
 			"simulated_review": "Die Überprüfung unten zeigt, was die Simulation dieser Transaktion gegen den aktuellen Netzwerkzustand vorhersagt. Was beim tatsächlichen Ausführen passiert, kann davon abweichen.",
