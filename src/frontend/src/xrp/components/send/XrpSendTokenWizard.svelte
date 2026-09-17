@@ -38,7 +38,7 @@
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
-	import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
+	import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -226,6 +226,20 @@
 			if (err instanceof XrpTransactionFailedError) {
 				toastsError({
 					msg: { text: $i18n.send.error.xrp_transaction_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
+			// Definitive, and the opposite of the message below: the ledger passed the transaction's
+			// LastLedgerSequence without including it, so nothing was sent and a new one is safe.
+			// Reporting that as "we don't know" would leave the user stuck on a settled outcome.
+			if (err instanceof XrpSendExpiredError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_send_expired },
 					err
 				});
 
