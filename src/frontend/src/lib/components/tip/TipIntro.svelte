@@ -64,16 +64,16 @@
 	 * a sender whose only tip failed lights the block through `hasAny` with both of
 	 * these columns empty.
 	 */
-	const figure = ({ fiat, count }: { fiat: string | undefined; count: number }): string => {
-		if (nonNullish(fiat)) {
-			return fiat;
+	const figure = ({ priced, count }: { priced: string | undefined; count: number }): string => {
+		if (nonNullish(priced)) {
+			return priced;
 		}
 
 		return count > 0 ? countLabel(count) : $i18n.tip.text.overview_none;
 	};
 
-	let openFigure = $derived(figure({ fiat: openFiat, count: $tipsOverview.open }));
-	let claimedFigure = $derived(figure({ fiat: claimedFiat, count: $tipsOverview.claimed }));
+	let openFigure = $derived(figure({ priced: openFiat, count: $tipsOverview.open }));
+	let claimedFigure = $derived(figure({ priced: claimedFiat, count: $tipsOverview.claimed }));
 </script>
 
 <ContentWithToolbar>
