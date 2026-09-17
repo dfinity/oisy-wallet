@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "La rete attuale ($networkId) non è una rete Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "La transazione è stata elaborata dalla rete ma è fallita, quindi i tuoi fondi non sono stati inviati. La commissione di rete è stata comunque addebitata.",
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Si è verificato un errore durante il calcolo della commissione di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",

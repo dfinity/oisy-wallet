@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "La red actual ($networkId) no es una red Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "La red procesó la transacción, pero falló, por lo que no se enviaron tus fondos. La comisión de red se cobró igualmente.",
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",

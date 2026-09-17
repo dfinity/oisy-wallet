@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "Die Transaktion wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
