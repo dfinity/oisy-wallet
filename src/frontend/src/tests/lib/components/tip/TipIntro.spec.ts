@@ -25,7 +25,7 @@ describe('TipIntro', () => {
 		expect(container.querySelector(historySelector)).toBeInTheDocument();
 	});
 
-	it('promises that unclaimed funds lapse rather than being refunded', () => {
+	it('says the amount stays in the wallet rather than being refunded', () => {
 		// The design's copy said unclaimed tokens "are automatically returned to
 		// your available balance", which the no-custody model makes untrue: nothing
 		// ever leaves the wallet, so nothing is returned. Asserted because it is a

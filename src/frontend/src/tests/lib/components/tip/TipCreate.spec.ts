@@ -171,6 +171,12 @@ describe('TipCreate', () => {
 		expect(getByText(notice)).toBeInTheDocument();
 		expect(notice).not.toMatch(/funds never leave|never leave your wallet/i);
 		expect(notice).toMatch(/amount stays in your wallet/i);
+
+		// The other half of the promise, and the one that took verifying: the payout
+		// fee is only spent by `icrc2_transfer_from`, so an unclaimed tip is never
+		// charged it. Asserted separately because it could be dropped or reversed
+		// while the amount clause above stayed true.
+		expect(notice).toMatch(/claim fee is never charged/i);
 	});
 
 	it('says nothing about reservations when there are none', () => {
