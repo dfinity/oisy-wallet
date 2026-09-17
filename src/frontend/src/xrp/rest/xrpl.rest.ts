@@ -270,6 +270,18 @@ export const loadXrpTransactionOutcome = async ({
 
 	const { data } = parsed;
 
+	// The answer must be about the transaction we asked for. Nothing else in the response identifies
+	// it, so without this a validated record for ANY transaction — another account's, or a proxy's
+	// mismatched reply — is read as this payment's outcome, and a `tesSUCCESS` belonging to someone
+	// else resolves the send as though the funds had moved. That is the only failure mode on this
+	// path that reports success rather than failing closed.
+	//
+	// A mismatch tells us nothing about our own transaction, so it is indeterminate rather than a
+	// failure: the poll retries it and the expiry recheck surfaces it.
+	if (nonNullish(data.hash) && data.hash.toUpperCase() !== hash.toUpperCase()) {
+		throw new Error(`Unexpected XRPL tx response: answered for ${data.hash}, asked for ${hash}`);
+	}
+
 	return data.validated === true
 		? { validated: true, transactionResult: data.meta.TransactionResult }
 		: { validated: false, transactionResult: undefined };

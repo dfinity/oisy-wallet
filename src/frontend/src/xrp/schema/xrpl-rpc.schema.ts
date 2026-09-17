@@ -89,12 +89,18 @@ export const XrplLedgerResultSchema = z.union([
 // report an applied payment as failed, inviting a duplicate send — so the validated branch
 // requires a string `meta.TransactionResult` and anything else fails to parse. A still-pending
 // entry has no result yet, and reports `validated: false` or omits the flag.
+// `hash` is what binds the answer to the question. `tx` echoes the id it looked up, and the
+// validated branch requires it: that branch ends the poll and decides the outcome, so accepting
+// one that identifies a different transaction would report someone else's `tesSUCCESS` as this
+// payment's. The pending branch accepts its absence but still carries it, so a mismatch there can
+// be caught without making a legitimate pending answer unparseable.
 export const XrplTxResultSchema = z.union([
 	z.object({
 		validated: z.literal(true),
+		hash: z.string(),
 		meta: z.object({ TransactionResult: z.string() })
 	}),
-	z.object({ validated: z.literal(false).optional() })
+	z.object({ validated: z.literal(false).optional(), hash: z.string().optional() })
 ]);
 
 // `engine_result` is the only field the send still reads, and it is read with `startsWith` outside

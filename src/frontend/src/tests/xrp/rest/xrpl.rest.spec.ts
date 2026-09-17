@@ -524,12 +524,65 @@ describe('xrpl.rest', () => {
 
 		it('reports the validated flag and the final transaction result', async () => {
 			mockFetchResponse({
-				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
+				body: { result: { validated: true, hash: 'H', meta: { TransactionResult: 'tesSUCCESS' } } }
 			});
 
 			await expect(
 				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
 			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
+
+		// XRPL renders ids uppercase; a caller-supplied one need not be.
+		it('matches the echoed hash case-insensitively', async () => {
+			mockFetchResponse({
+				body: {
+					result: { validated: true, hash: 'ABCDEF', meta: { TransactionResult: 'tesSUCCESS' } }
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'abcdef', network: XrpNetworks.mainnet })
+			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
+
+		// The one failure mode on this path that would report SUCCESS: a validated record for some
+		// other transaction, read as this payment's outcome. It must be indeterminate, not an answer.
+		it('throws when the node answers about a different transaction', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						hash: 'B'.repeat(64),
+						meta: { TransactionResult: 'tesSUCCESS' }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'A'.repeat(64), network: XrpNetworks.mainnet })
+			).rejects.toThrow('answered for');
+		});
+
+		// Same for a pending answer: reading another transaction's "not yet" as ours would keep the
+		// poll running on a hash the node never spoke about.
+		it('throws when a pending answer identifies a different transaction', async () => {
+			mockFetchResponse({ body: { result: { validated: false, hash: 'B'.repeat(64) } } });
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'A'.repeat(64), network: XrpNetworks.mainnet })
+			).rejects.toThrow('answered for');
+		});
+
+		// A validated response that does not say which transaction it describes cannot be bound to
+		// ours, so it is malformed rather than an outcome.
+		it('throws for a validated response without a hash', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+			).rejects.toThrow('validated transaction without a result');
 		});
 
 		it('is not validated while the transaction is still pending', async () => {
@@ -543,7 +596,9 @@ describe('xrpl.rest', () => {
 		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
 		it('reports a validated failure with its tec result', async () => {
 			mockFetchResponse({
-				body: { result: { validated: true, meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } } }
+				body: {
+					result: { validated: true, hash: 'H', meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } }
+				}
 			});
 
 			await expect(
