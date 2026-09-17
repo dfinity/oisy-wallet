@@ -1,6 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import { nativeTokenOf } from '$eth/services/native-balance.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -142,6 +143,20 @@ const processMinedTransaction = async ({
 
 	await reloadEthereumTransactions({ identity, tokenId, networkId, chainId, standard });
 
-	// Reload balance as a transaction has been mined
-	await reloadEthereumBalance(token);
+	// Reload balance as a transaction has been mined.
+	//
+	// The gas is paid in the network's native coin whatever the transaction moved, so an ERC-20
+	// transfer leaves that balance overstated as well, not only the balance of the token it sent.
+	// Nothing else corrects it until the next balance poll, and in that window "Max" prices a native
+	// send against a balance that still holds the gas already spent: the amount plus the gas it
+	// reserves exceeds what the account has, and the chain rejects the transaction outright rather
+	// than trimming it.
+	const nativeToken = nativeTokenOf(networkId);
+
+	const tokensToReload: Token[] = [
+		token,
+		...(nonNullish(nativeToken) && nativeToken.id !== tokenId ? [nativeToken] : [])
+	];
+
+	await Promise.all(tokensToReload.map((tokenToReload) => reloadEthereumBalance(tokenToReload)));
 };

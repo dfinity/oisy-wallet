@@ -171,7 +171,8 @@
 			"hide_balances": "Ukryj wyświetlane salda",
 			"show_balances": "Pokaż ukryte salda",
 			"notes": "Otwórz notatki",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Dokumentacja"
@@ -770,7 +771,8 @@
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Błąd podczas ładowania informacji o portfelu BTC.",
-			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL."
+			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL.",
+			"xrp_wallet_error": "Błąd podczas ładowania informacji o portfelu XRP."
 		}
 	},
 	"hero": {
@@ -935,6 +937,14 @@
 				"solana_address_copied": "Adres Solana skopiowany do schowka",
 				"display_solana_address_qr": "Wyświetl adres Solana jako kod QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -1048,6 +1058,7 @@
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
 			"unable_to_retrieve_amount": "n/d (nie można pobrać)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Twoja transakcja nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa była niewystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia dla właśnie utworzonej transakcji. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, czy Twoja transakcja została utworzona poprawnie.",
 			"solana_insufficient_funds": "Saldo Twojego tokena jest niewystarczające do zrealizowania tej transakcji. Twoje saldo mogło się zmienić od ostatniego wyświetlenia.",
@@ -2838,9 +2849,15 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2855,6 +2872,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",
@@ -2866,6 +2884,8 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"generating_link": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2900,6 +2920,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",
