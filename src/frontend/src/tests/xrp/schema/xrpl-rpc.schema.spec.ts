@@ -1,4 +1,10 @@
-import { XrpDropsSchema, XrplAccountInfoResponseSchema } from '$xrp/schema/xrpl-rpc.schema';
+import {
+	XrpDropsSchema,
+	XrplAccountInfoResponseSchema,
+	XrplLedgerCurrentResultSchema,
+	XrplLedgerResultSchema,
+	XrplSubmitResultSchema
+} from '$xrp/schema/xrpl-rpc.schema';
 
 describe('xrpl-rpc.schema', () => {
 	describe('XrpDropsSchema', () => {
@@ -55,6 +61,38 @@ describe('xrpl-rpc.schema', () => {
 
 		it('should fail validation for a missing result', () => {
 			expect(XrplAccountInfoResponseSchema.safeParse({}).success).toBeFalsy();
+		});
+	});
+
+	// Zod strips unknown keys, so without forbidding `error` a failed response that also carried a
+	// plausible result would parse and the error would be silently dropped. The consequence differs
+	// per schema but is worst for the validated index: a bogus one past `LastLedgerSequence` makes
+	// confirmation declare expiry and tell the user a resend is safe.
+	describe('rejecting a mixed error/result response', () => {
+		it.each([
+			{
+				name: 'XrplLedgerCurrentResultSchema',
+				schema: XrplLedgerCurrentResultSchema,
+				result: { ledger_current_index: 5 }
+			},
+			{
+				name: 'XrplLedgerResultSchema (top-level index)',
+				schema: XrplLedgerResultSchema,
+				result: { validated: true, ledger_index: 5 }
+			},
+			{
+				name: 'XrplLedgerResultSchema (nested index)',
+				schema: XrplLedgerResultSchema,
+				result: { validated: true, ledger: { ledger_index: 5 } }
+			},
+			{
+				name: 'XrplSubmitResultSchema',
+				schema: XrplSubmitResultSchema,
+				result: { engine_result: 'tesSUCCESS' }
+			}
+		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
+			expect(schema.safeParse(result).success).toBeTruthy();
+			expect(schema.safeParse({ ...result, error: 'tooBusy' }).success).toBeFalsy();
 		});
 	});
 });

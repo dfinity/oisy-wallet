@@ -44,11 +44,18 @@ method.
 | `loadXrpTransactionOutcome` | `tx`           | `txnNotFound` → not in a ledger yet | throw           |
 | `loadXrpOpenLedgerFee`      | `fee`          | none                                | throw           |
 
-`ledger`, `ledger_current` and `submit` need no explicit check because their schemas
-require a field an error response cannot carry, so an error fails the parse. `fee` does
-need one: every field of its result is optional, so an error response parses with no
-`drops` and would be answered with the fallback base fee — which underprices the send on
-the very node that reported congestion.
+Two mechanisms enforce this, and neither is optional. Every helper rejects `result.error`
+before reading the payload, and every schema additionally forbids `error` on its success
+branches (`error: z.never().optional()`). The schema is what catches a response carrying
+_both_ an error and a plausible result: Zod strips unknown keys, so without that branch
+the error would be silently dropped and the bogus result used. `fee` shows why the
+call-site check is needed too — every field of its result is optional, so an error
+response would otherwise parse with no `drops` and be answered with the fallback base
+fee, underpricing the send on the very node that reported congestion.
+
+The worst consequence sits behind `ledger`: a bogus validated index past a transaction's
+`LastLedgerSequence` sends confirmation into the expiry branch, which reports the send as
+failed and implies a resend is safe.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
