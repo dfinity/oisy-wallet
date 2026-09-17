@@ -9,7 +9,7 @@ import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { Token } from '$lib/types/token';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -45,6 +45,19 @@ describe('SendReview', () => {
 		await fireEvent.click(getByTestId('checkbox'));
 
 		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+	});
+
+	it('re-arms the gate when the destination changes', async () => {
+		const { getByTestId, rerender } = render(SendReview, { props, context: mockContext() });
+
+		await fireEvent.click(getByTestId('checkbox'));
+
+		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeEnabled();
+
+		await rerender({ ...props, destination: mockEthAddress2 });
+
+		expect(getByTestId('checkbox')).not.toBeChecked();
+		expect(getByTestId(REVIEW_FORM_SEND_BUTTON)).toBeDisabled();
 	});
 
 	it('keeps the send button disabled when the caller disables it, even once confirmed', async () => {
