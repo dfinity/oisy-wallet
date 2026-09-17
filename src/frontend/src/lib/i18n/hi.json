@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "वर्तमान नेटवर्क ($networkId) Solana नेटवर्क नहीं है।",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "लेनदेन नेटवर्क द्वारा प्रोसेस हुआ लेकिन विफल रहा, इसलिए आपकी राशि नहीं भेजी गई। नेटवर्क शुल्क फिर भी लिया गया।",
 			"no_pending_bitcoin_transaction": "लंबित Bitcoin लेनदेन लोड करते समय एक त्रुटि हुई। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected_utxos_fee": "लेनदेन शुल्क की गणना करते समय कुछ गलत हो गया।",
 			"unable_to_retrieve_amount": "n/a (प्राप्त करने में असमर्थ)",

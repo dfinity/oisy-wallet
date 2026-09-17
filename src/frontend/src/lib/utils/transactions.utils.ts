@@ -489,10 +489,27 @@ export const areTransactionsStoresLoaded = (
 		isTransactionsStoreInitialized(transactionsStore)
 	);
 
+/**
+ * Drops the transfers an approved spender pulled (ICRC-2 `transfer_from`). Such a transfer debits
+ * the account like a send, but the owner never picked the destination, the spender did. Swaps and
+ * dApp deposits work that way, so their pool or backend accounts must not be offered as previously
+ * used destinations in the send flow.
+ *
+ * Only IC transactions carry the information today: the index exposes the spender on the transfer
+ * itself. An EVM ERC-20 `transferFrom` has the same shape, but the outer transaction signer is not
+ * part of the indexed data we keep, so it cannot be told apart here yet.
+ */
+const excludeSpenderInitiated = (
+	transactions: AnyTransactionUiWithToken[]
+): AnyTransactionUiWithToken[] =>
+	transactions.filter(
+		(transaction) => !('transferSpender' in transaction && nonNullish(transaction.transferSpender))
+	);
+
 export const getKnownDestinations = (
 	transactions: AnyTransactionUiWithToken[]
 ): KnownDestinations =>
-	transactions.reduce<KnownDestinations>(
+	excludeSpenderInitiated(transactions).reduce<KnownDestinations>(
 		(acc, { timestamp, value, to, type, token }) =>
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {

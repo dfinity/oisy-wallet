@@ -361,6 +361,28 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// The ledger header quotes its index, unlike the numeric top-level field.
+		it('reads a quoted index nested under ledger', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, ledger: { ledger_index: '987002' } } }
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				987_002
+			);
+		});
+
+		it.each(['-1', '1.5', '0x10', ' 1', '', '9007199254740993', null])(
+			'throws for a nested index of %j',
+			async (ledger_index) => {
+				mockFetchResponse({ body: { result: { validated: true, ledger: { ledger_index } } } });
+
+				await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+					'missing validated ledger_index'
+				);
+			}
+		);
+
 		it('throws when the validated index is missing', async () => {
 			mockFetchResponse({ body: { result: {} } });
 
@@ -393,6 +415,30 @@ describe('xrpl.rest', () => {
 	});
 
 	describe('loadXrpTransactionOutcome', () => {
+		// Only `txnNotFound` means the node looked and did not find it. Any other error means the
+		// node did not answer, and the caller concludes expiry from a non-validated lookup.
+		it.each(['tooBusy', 'noNetwork', 'amendmentBlocked'])(
+			'throws for the XRPL error %s rather than reporting the transaction absent',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactionOutcome({ hash: 'HASH', network: XrpNetworks.mainnet })
+				).rejects.toThrow(`Unexpected XRPL tx response: ${error}`);
+			}
+		);
+
+		it('reports the transaction as not validated for txnNotFound', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound' } } });
+
+			const outcome = await loadXrpTransactionOutcome({
+				hash: 'HASH',
+				network: XrpNetworks.mainnet
+			});
+
+			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
+		});
+
 		it('reports the validated flag and the final transaction result', async () => {
 			mockFetchResponse({
 				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
@@ -456,6 +502,30 @@ describe('xrpl.rest', () => {
 
 			expect(page.transactions).toEqual([entry]);
 			expect(page.marker).toEqual({ ledger: 42, seq: 1 });
+		});
+
+		// The node answers a JSON-RPC failure with HTTP 200 and the error inside `result`, so
+		// without an explicit check these would read as a genuine empty history and never retry.
+		it.each(['slowDown', 'noNetwork', 'internal', 'invalidParams'])(
+			'throws for the XRPL error %s instead of reporting an empty history',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow(`Unexpected XRPL account_tx response: ${error}`);
+			}
+		);
+
+		// An account that was never funded does not exist on-ledger; it has no history rather than
+		// a failed lookup, matching how `loadXrpBalance` treats the same error.
+		it('returns an empty list for an account that does not exist', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
 		});
 
 		it('returns an empty list when the account has no transactions', async () => {

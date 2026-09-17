@@ -242,6 +242,17 @@ export const loadXrpTransactionOutcome = async ({
 		params: { transaction: hash }
 	});
 
+	// A node that cannot answer must not be read as the transaction being absent: the caller
+	// concludes expiry from a non-validated lookup, and telling it "not there" when the node
+	// merely said `tooBusy` would report a validated payment as never applied.
+	if (nonNullish(result.error)) {
+		if (result.error === 'txnNotFound') {
+			return { validated: false, transactionResult: undefined };
+		}
+
+		throw new Error(`Unexpected XRPL tx response: ${String(result.error)}`);
+	}
+
 	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
 
 	return {
@@ -317,6 +328,17 @@ export const loadXrpTransactions = async ({
 			...(nonNullish(marker) && { marker })
 		}
 	});
+
+	// A JSON-RPC failure comes back as HTTP 200 with the error inside `result`, so without this
+	// a rate-limit or server error would read as a genuine empty history and never be retried.
+	// An account that has never been funded has no transactions, which is not a failure.
+	if (nonNullish(result.error)) {
+		if (result.error === 'actNotFound') {
+			return { transactions: [] };
+		}
+
+		throw new Error(`Unexpected XRPL account_tx response: ${String(result.error)}`);
+	}
 
 	const transactions = (result.transactions as XrpAccountTransactionEntry[] | undefined) ?? [];
 

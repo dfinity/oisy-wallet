@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "トランザクションはネットワークで処理されましたが失敗したため、資金は送信されていません。ネットワーク手数料は請求されました。",
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
 			"unable_to_retrieve_amount": "n/a（取得できません）",

@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "Giao dịch đã được mạng xử lý nhưng thất bại, nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "n/a (không thể lấy được)",

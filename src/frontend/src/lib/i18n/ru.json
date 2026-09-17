@@ -1060,6 +1060,7 @@
 			"no_solana_network_id": "Текущая сеть ($networkId) не является сетью Solana.",
 			"no_xrp_network_id": "",
 			"xrp_confirmation_failed": "",
+			"xrp_transaction_failed": "Транзакция была обработана сетью, но не выполнена, поэтому средства не отправлены. Сетевой сбор всё равно списан.",
 			"no_pending_bitcoin_transaction": "При загрузке ожидающих транзакций Bitcoin произошла ошибка. Пожалуйста, повторите попытку позже.",
 			"unexpected_utxos_fee": "При расчёте комиссии за транзакцию произошла ошибка.",
 			"unable_to_retrieve_amount": "н/д (не удаётся получить)",

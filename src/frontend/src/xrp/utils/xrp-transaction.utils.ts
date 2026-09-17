@@ -95,7 +95,11 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
-	if (nonNullish(meta?.TransactionResult) && !isXrpTransactionSuccessful(meta.TransactionResult)) {
+	// Absence of a result is not evidence of success, so anything but an explicit `tesSUCCESS` is
+	// skipped. Unvalidated entries are skipped too: the scheduler caches by transaction hash, which
+	// does not change once the entry is validated, so a row stored while pending would never be
+	// replaced by its settled form.
+	if (validated === false || !isXrpTransactionSuccessful(meta?.TransactionResult)) {
 		return undefined;
 	}
 
@@ -104,7 +108,10 @@ export const mapXrpTransaction = ({
 	// we do not display.
 	const amount = meta?.delivered_amount ?? tx.Amount;
 
-	if (typeof amount !== 'string') {
+	// XRPL reports `delivered_amount: "unavailable"` when the delivered amount was never recorded,
+	// so the string check alone is not enough — only unsigned drops convert. Skipping beats falling
+	// back to `Amount`, which is a partial payment's ceiling rather than what arrived.
+	if (typeof amount !== 'string' || !/^\d+$/.test(amount)) {
 		return undefined;
 	}
 
@@ -115,13 +122,23 @@ export const mapXrpTransaction = ({
 	}
 
 	const isReceive = tx.Destination === xrpAddress;
+
+	// `account_tx` returns everything that *affected* the account, not only what it sent or
+	// received — an offer of ours consumed by someone else's payment, for instance. Mapping such an
+	// entry would book a stranger's amount, and their fee, as this wallet's own send.
+	if (!isReceive && tx.Account !== xrpAddress) {
+		return undefined;
+	}
+
 	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
 
 	return {
 		id: hash,
 		type: isReceive ? 'receive' : 'send',
-		status: validated === false ? 'pending' : 'confirmed',
+		// Unvalidated entries never get this far.
+		status: 'confirmed',
 		value: BigInt(amount),
+		// Guarded above, so not being the destination means being the sender.
 		...(!isReceive && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
 		from: tx.Account,
 		to: tx.Destination,

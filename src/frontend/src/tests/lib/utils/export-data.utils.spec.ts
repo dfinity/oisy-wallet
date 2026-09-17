@@ -1130,7 +1130,7 @@ describe('export-data.utils', () => {
 				fee: 12n,
 				timestamp: 1n,
 				blockNumber: 42
-			} as unknown as XrpTransactionUi;
+			} satisfies XrpTransactionUi;
 
 			const [row] = buildTransactionRows({
 				transactions: [{ component: 'xrp', transaction: xrpTx, token: XRP_TOKEN }],
