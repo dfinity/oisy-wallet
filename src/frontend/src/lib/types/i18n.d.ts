@@ -1326,6 +1326,8 @@ interface I18nWallet_connect {
 		multiple_operations: string;
 		simulated_review: string;
 		simulated_changes: string;
+		balance_changes: string;
+		balance_changes_unknown: string;
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;

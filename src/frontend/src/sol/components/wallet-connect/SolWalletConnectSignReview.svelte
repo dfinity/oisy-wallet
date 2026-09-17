@@ -321,8 +321,22 @@
 					<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
 				{/if}
 
+				<!-- What the transaction would do to the user's own accounts, and the one section that must
+				     be here whether or not there is an answer. An absent section is indistinguishable
+				     from a transaction that moves nothing, which is the most dangerous thing this review
+				     could imply; the label says which of the two this is, and the missing answer is
+				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{:else}
+					<WalletConnectModalValue
+						label={$i18n.wallet_connect.text.balance_changes}
+						ref="balance-changes"
+					>
+						<MessageBox level="error">
+							{$i18n.wallet_connect.text.balance_changes_unknown}
+						</MessageBox>
+					</WalletConnectModalValue>
 				{/if}
 
 				<!-- Where the transaction would run. A program is the closest thing a Solana message has to
