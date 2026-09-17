@@ -38,6 +38,13 @@ per call which error is an expected state rather than a failure:
 | `account_info` | `actNotFound` → zero balance        | throw           |
 | `account_tx`   | `actNotFound` → empty history       | throw           |
 | `tx`           | `txnNotFound` → not in a ledger yet | throw           |
+| `fee`          | none                                | throw           |
+
+`ledger`, `ledger_current` and `submit` need no explicit check because their schemas
+require a field an error response cannot carry, so an error fails the parse. `fee` does
+need one: every field of its result is optional, so an error response parses with no
+`drops` and would be answered with the fallback base fee — which underprices the send on
+the very node that reported congestion.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed

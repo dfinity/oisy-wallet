@@ -202,6 +202,40 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// `engine_result` is read with `startsWith` outside the try that wraps this call, so a
+		// non-string would throw there — after the blob was broadcast — and turn an ambiguous submit
+		// into a reported failure. It must fail here instead, where the caller treats it as
+		// "go and confirm".
+		it.each([7, true, {}, ['tesSUCCESS'], null])(
+			'throws for the non-string engine_result %j',
+			async (engine_result) => {
+				mockFetchResponse({ body: { result: { engine_result, accepted: true } } });
+
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).rejects.toThrow('Unexpected XRPL submit response: no string engine_result');
+			}
+		);
+
+		// Cosmetic fields must not cost the send a minute of polling: the message only reaches an
+		// error string and the hash is derived locally.
+		it('tolerates malformed engine_result_message and tx_json', async () => {
+			mockFetchResponse({
+				body: {
+					result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json: 'nope' }
+				}
+			});
+
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).resolves.toEqual(
+				{
+					engineResult: 'tesSUCCESS',
+					engineResultMessage: undefined,
+					txHash: undefined,
+					accepted: false
+				}
+			);
+		});
+
 		it('throws when the response has no engine_result', async () => {
 			mockFetchResponse({ body: { result: { error: 'invalidTransaction' } } });
 
@@ -310,6 +344,20 @@ describe('xrpl.rest', () => {
 				loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n })
 			).rejects.toThrow('Unexpected XRPL fee response');
 		});
+
+		// Every field here is optional, so an error response parses with no `drops` and would be
+		// answered with the fallback — the base fee, which is what underprices a send on the very
+		// node that reported congestion.
+		it.each(['tooBusy', 'noNetwork', 'amendmentBlocked'])(
+			'throws for the XRPL error %s rather than falling back to the base fee',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n })
+				).rejects.toThrow(`Unexpected XRPL fee response: ${error}`);
+			}
+		);
 
 		it('falls back to the provided fee when the node omits it', async () => {
 			mockFetchResponse({ body: { result: { drops: {} } } });
