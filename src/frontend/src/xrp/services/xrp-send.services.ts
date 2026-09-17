@@ -24,7 +24,7 @@ import {
 	isXrpSubmitAccepted,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Waits for a submitted transaction to be validated, and reports its final result.
@@ -44,34 +44,53 @@ const confirmXrpTransaction = async ({
 	network: XrpNetworkType;
 	lastLedgerSequence: number;
 }): Promise<string | undefined> => {
-	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
-		const { validated, transactionResult } = await loadXrpTransactionOutcome({ hash, network });
+	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
+	// retried; what must never happen is concluding expiry from it, so the recheck below is
+	// deliberately left to throw.
+	const tryOutcome = async (): Promise<
+		{ validated: boolean; transactionResult: string | undefined } | undefined
+	> => {
+		try {
+			return await loadXrpTransactionOutcome({ hash, network });
+		} catch (_: unknown) {
+			return undefined;
+		}
+	};
 
-		if (validated) {
-			return transactionResult;
+	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
+		const outcome = await tryOutcome();
+
+		if (outcome?.validated) {
+			return outcome.transactionResult;
 		}
 
-		// The VALIDATED index, not the open one: the open ledger has already advanced past a
-		// closed ledger whose transactions are not yet validated, so comparing against it would
-		// declare expiry for a payment that is about to validate.
-		const validatedLedgerIndex = await loadXrpValidatedLedgerIndex({ network });
+		// Expiry is only evaluated on a lookup the node actually answered; an unanswered one
+		// establishes nothing and simply costs an attempt.
+		if (nonNullish(outcome)) {
+			// The VALIDATED index, not the open one: the open ledger has already advanced past a
+			// closed ledger whose transactions are not yet validated, so comparing against it would
+			// declare expiry for a payment that is about to validate.
+			const validatedLedgerIndex = await loadXrpValidatedLedgerIndex({ network });
 
-		if (validatedLedgerIndex > lastLedgerSequence) {
-			// The `tx` lookup above and this index come from two separate calls, so the lookup may
-			// have missed a payment that validated in between. Expiry is only final if it survives
-			// a recheck against the newer ledger state — otherwise a succeeded payment would be
-			// reported as failed and the user invited to send a duplicate.
-			const recheck = await loadXrpTransactionOutcome({ hash, network });
+			if (validatedLedgerIndex > lastLedgerSequence) {
+				// The `tx` lookup above and this index come from two separate calls, so the lookup may
+				// have missed a payment that validated in between. Expiry is only final if it survives
+				// a recheck against the newer ledger state — otherwise a succeeded payment would be
+				// reported as failed and the user invited to send a duplicate. This one is not caught:
+				// a node that fails to answer here leaves non-inclusion unestablished, and the error
+				// must surface instead of being turned into a claim that the payment never applied.
+				const recheck = await loadXrpTransactionOutcome({ hash, network });
 
-			if (recheck.validated) {
-				return recheck.transactionResult;
+				if (recheck.validated) {
+					return recheck.transactionResult;
+				}
+
+				// Past its LastLedgerSequence the transaction can never be applied, so this failure is
+				// final — and, unlike an early timeout, sending again is safe.
+				throw new Error(
+					`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
+				);
 			}
-
-			// Past its LastLedgerSequence the transaction can never be applied, so this failure is
-			// final — and, unlike an early timeout, sending again is safe.
-			throw new Error(
-				`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
-			);
 		}
 
 		await randomWait({});

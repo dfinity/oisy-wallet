@@ -237,6 +237,17 @@ export const loadXrpTransactionOutcome = async ({
 		params: { transaction: hash }
 	});
 
+	// A node that cannot answer must not be read as the transaction being absent: the caller
+	// concludes expiry from a non-validated lookup, and telling it "not there" when the node
+	// merely said `tooBusy` would report a validated payment as never applied.
+	if (nonNullish(result.error)) {
+		if (result.error === 'txnNotFound') {
+			return { validated: false, transactionResult: undefined };
+		}
+
+		throw new Error(`Unexpected XRPL tx response: ${String(result.error)}`);
+	}
+
 	const { TransactionResult } = (result.meta ?? {}) as { TransactionResult?: string };
 
 	return {
