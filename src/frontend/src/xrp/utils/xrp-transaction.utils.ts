@@ -9,18 +9,27 @@ import type {
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued, while `tec`
-// was applied but *failed* (claiming the fee) and `tem`/`tef`/`tel` were not applied.
-const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter'];
+// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued and `tec` was applied
+// but *failed*, claiming the fee — all three mean the node took the transaction. `tem`/`tef`/`tel`
+// were not applied at all.
+//
+// `tec` belongs here precisely because it WAS applied: failing on it at submit would report an
+// applied transaction as rejected and skip the confirmation that knows which `tec` it was and
+// that the fee was charged. Polling instead reaches the validated result and reports it
+// definitively. If this reading of `tec` is ever shown to be wrong, the cost is bounded: the poll
+// runs to `LastLedgerSequence` and ends with the indeterminate message rather than a false claim.
+const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter', 'tec'];
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
 /**
  * Whether the node took a submitted transaction for processing.
  *
- * Both facts are required: `accepted` alone only says the node applied, queued, broadcast
- * or kept it — an applied fee-claiming `tec*` result is "accepted" too, yet the payment
- * failed and must never enter confirmation.
+ * "Took it" is not "it succeeded": a `tec*` result is taken and applied yet the payment failed.
+ * Success is decided later, from the validated `meta.TransactionResult` — see
+ * {@link isXrpTransactionSuccessful}. Both facts are required here because `accepted` alone says
+ * nothing about the engine result, and an engine result alone says nothing about whether this
+ * node accepted the blob.
  */
 export const isXrpSubmitAccepted = ({ accepted, engineResult }: XrpSubmitResult): boolean =>
 	accepted &&
@@ -146,4 +155,29 @@ export const mapXrpTransaction = ({
 		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
 		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag })
 	};
+};
+
+// XRPL's transaction-ID hash prefix, 'TXN\0'.
+const XRP_TRANSACTION_ID_PREFIX = Uint8Array.from([0x54, 0x58, 0x4e, 0x00]);
+
+const XRP_TRANSACTION_ID_BYTES = 32;
+
+/**
+ * Transaction ID of a signed blob: `SHA-512Half(0x54584E00 || blob)`.
+ *
+ * Derived locally so confirmation does not depend on the submit response. A lost or malformed
+ * response is not evidence of non-inclusion — the node may already have applied the transaction —
+ * and without a hash of our own there would be nothing to poll, so the send would be reported as
+ * failed and a retry would spend the funds again.
+ */
+export const deriveXrpTransactionHash = async (txBlob: string): Promise<string> => {
+	const blob = Uint8Array.from(Buffer.from(txBlob, 'hex'));
+
+	const message = new Uint8Array(XRP_TRANSACTION_ID_PREFIX.length + blob.length);
+	message.set(XRP_TRANSACTION_ID_PREFIX);
+	message.set(blob, XRP_TRANSACTION_ID_PREFIX.length);
+
+	const digest = new Uint8Array(await crypto.subtle.digest('SHA-512', message));
+
+	return Buffer.from(digest.slice(0, XRP_TRANSACTION_ID_BYTES)).toString('hex').toUpperCase();
 };
