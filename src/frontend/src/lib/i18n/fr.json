@@ -1024,7 +1024,7 @@
 			"amount_invalid": "Le montant est invalide.",
 			"xrp_destination_tag_invalid": "Le tag de destination doit être un nombre entier entre 0 et 4294967295.",
 			"insufficient_funds_verbose_btc": "",
-			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de base XRP.",
+			"insufficient_funds_for_reserve": "Fonds insuffisants : le montant doit laisser de quoi couvrir les frais et la réserve de compte XRP requise.",
 			"insufficient_funds_for_gas": "Fonds insuffisants pour le gaz",
 			"insufficient_funds_for_amount": "Fonds insuffisants pour le montant",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fonds Ethereum insuffisants pour couvrir les frais",
@@ -1060,7 +1060,7 @@
 			"no_btc_network_id": "Le réseau actuel ($networkId) n'est pas un réseau Bitcoin.",
 			"no_solana_network_id": "Le réseau actuel ($networkId) n'est pas un réseau Solana.",
 			"no_xrp_network_id": "Le réseau actuel ($networkId) n'est pas un réseau XRP Ledger.",
-			"xrp_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez attendre quelques secondes, puis vérifier la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
+			"xrp_confirmation_failed": "Nous n'avons pas pu confirmer si la transaction a été envoyée. Elle peut encore aboutir, ne la renvoyez donc pas pour le moment — votre solde sera mis à jour si elle aboutit.",
 			"xrp_transaction_failed": "La transaction a été traitée par le réseau mais a échoué : vos fonds n’ont pas été envoyés. Les frais de réseau ont tout de même été prélevés.",
 			"no_pending_bitcoin_transaction": "Une erreur s'est produite lors du chargement des transactions Bitcoin en attente. Veuillez réessayer plus tard.",
 			"unexpected_utxos_fee": "Une erreur s'est produite lors du calcul des frais de transaction.",
@@ -1071,7 +1071,8 @@
 			"solana_insufficient_funds": "Le solde de votre token est insuffisant pour effectuer cette transaction. Votre solde a peut-être changé depuis son dernier affichage.",
 			"solana_insufficient_funds_for_fee": "Votre solde SOL est insuffisant pour couvrir les frais de transaction.",
 			"solana_insufficient_funds_for_rent": "Votre solde SOL est insuffisant pour couvrir le loyer requis pour la création du compte.",
-			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge."
+			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge.",
+			"xrp_send_expired": "La transaction n'a pas été envoyée : le réseau ne l'a pas incluse à temps. Rien n'a quitté votre portefeuille et vous pouvez en créer une nouvelle en toute sécurité."
 		}
 	},
 	"mint": {

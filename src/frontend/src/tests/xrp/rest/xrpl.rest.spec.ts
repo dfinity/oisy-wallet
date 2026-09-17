@@ -12,6 +12,13 @@ import {
 } from '$xrp/rest/xrpl.rest';
 import { XrpNetworks } from '$xrp/types/network';
 
+// The env resolves the endpoint to `undefined` under vitest, so a spec that forgets to mock an RPC
+// call fails instead of reaching the public cluster. These tests DO exercise the RPC helpers, so
+// they supply an endpoint of their own — the responses are stubbed on `fetch` below.
+vi.mock('$xrp/providers/xrp-rpc.providers', () => ({
+	xrpHttpRpcUrl: () => 'https://rpc.test'
+}));
+
 describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 
