@@ -19,7 +19,7 @@ import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import * as xrpSendServices from '$xrp/services/xrp-send.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
+import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -225,9 +225,10 @@ describe('XrpSendTokenWizard', () => {
 
 	// `invalidAmount` rejects nullish and negatives. It does NOT reject 0 — the form blocks that
 	// separately — so 0 is deliberately not asserted here.
-	// Zero passes `invalidAmount`, the review step and `isXrpAmountSendable`, so only the guard on
-	// the parsed drops stops a zero-value Payment from being signed.
-	it.each([-1, undefined, 0, '0.0', '0.000000'])(
+	// All of these pass `invalidAmount` and the review step. Zero also passes
+	// `isXrpAmountSendable`, while `1e400` and a sub-drop value make `parseToken` throw outside the
+	// try — so the guard on the parsed drops is what stops every one of them.
+	it.each([-1, undefined, 0, '0.0', '0.000000', '1e400', '0.0000001'])(
 		'should not call sendXrp with the amount %j',
 		async (amount) => {
 			const rendered = render(XrpSendTokenWizard, {
@@ -242,6 +243,12 @@ describe('XrpSendTokenWizard', () => {
 			await clickSend(rendered.container);
 
 			expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+
+			// Not calling `sendXrp` is also what a crash looks like, so the rejection has to be the
+			// reported one: `parseToken` throwing out of the handler would satisfy the line above.
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.assertion.amount_invalid } })
+			);
 		}
 	);
 
@@ -296,7 +303,9 @@ describe('XrpSendTokenWizard', () => {
 		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
 			progress?.(ProgressStepsSendXrp.CONFIRM);
 
-			return await Promise.reject(new Error('XRP transaction expired'));
+			return await Promise.reject(
+				new Error('XRP transaction confirmation stopped before its ledger expiry was reached.')
+			);
 		});
 
 		const { container } = await renderSettled();
@@ -305,6 +314,26 @@ describe('XrpSendTokenWizard', () => {
 
 		expect(toasts.toastsError).toHaveBeenCalledWith(
 			expect.objectContaining({ msg: { text: en.send.error.xrp_confirmation_failed } })
+		);
+	});
+
+	// Expiry is settled: nothing was sent. Showing the indeterminate "we could not confirm" text
+	// would leave the user waiting on an outcome that already happened.
+	it('should report an expired send as definitively not sent', async () => {
+		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
+			progress?.(ProgressStepsSendXrp.CONFIRM);
+
+			return await Promise.reject(
+				new XrpSendExpiredError('XRP transaction expired: not included by ledger 1020')
+			);
+		});
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_send_expired } })
 		);
 	});
 
