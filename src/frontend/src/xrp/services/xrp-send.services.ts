@@ -192,9 +192,12 @@ const submitAndConfirmXrpTransaction = async ({
 };
 
 /**
- * Sends native XRP: fetches the account sequence, the open-ledger fee and the current
- * ledger index, builds and threshold-signs a Payment, submits it, and waits for the
- * transaction to be included in a validated ledger.
+ * Sends native XRP: fetches the account sequence, the destination's balance, the open-ledger fee
+ * and the current ledger index, builds and threshold-signs a Payment, submits it, and waits for
+ * the transaction to be included in a validated ledger.
+ *
+ * The destination read is what declines a payment too small to create an account that does not
+ * exist yet — the ledger would apply that as `tecNO_DST_INSUF_XRP` and claim the fee.
  *
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
