@@ -37,6 +37,28 @@ describe('SolWalletConnectSignReview', () => {
 		exchangeStore.reset();
 	});
 
+	describe('balance changes', () => {
+		it('should state that it could not determine them when there is no simulation', () => {
+			// An absent section is indistinguishable from a transaction that moves nothing.
+			const { getByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(getByText(en.wallet_connect.text.balance_changes)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.balance_changes_unknown)).toBeInTheDocument();
+		});
+
+		it('should not say so once a simulation answered', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+		});
+	});
+
 	it('should say a message it will not sign cannot be shown', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: { ...props, ambiguous: true }
