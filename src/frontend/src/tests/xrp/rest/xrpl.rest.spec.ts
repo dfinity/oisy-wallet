@@ -146,6 +146,69 @@ describe('xrpl.rest', () => {
 			await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
 		});
 
+		// `result.status` is on every real response and was previously ignored, so a FAILED response
+		// could still deliver a plausible result: the method schemas strip `status` as an unknown
+		// key, and a bogus `ledger_current_index` beside `status: 'error'` came back as an index.
+		describe('the result status', () => {
+			it.each([
+				{
+					name: 'an error status with no code',
+					result: { status: 'error', ledger_current_index: 999_999_999 },
+					message: 'error status without an error code'
+				},
+				{
+					name: 'an error status with a non-string code',
+					result: { status: 'error', error: ['tooBusy'] },
+					message: 'error status without an error code'
+				},
+				{
+					name: 'a success status carrying an error',
+					result: { status: 'success', error: 'tooBusy' },
+					message: 'success status with error'
+				},
+				{
+					name: 'a status that is neither',
+					result: { status: 'pending', ledger_current_index: 5 },
+					message: 'invalid status pending'
+				}
+			])('rejects $name', async ({ result, message }) => {
+				mockFetchResponse({ body: { result } });
+
+				await expect(loadXrpLedgerIndex({ network })).rejects.toThrow(message);
+			});
+
+			it('accepts a success status', async () => {
+				mockFetchResponse({ body: { result: { status: 'success', ledger_current_index: 5 } } });
+
+				await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+			});
+
+			// The regression this could most easily introduce. Both expected states arrive with
+			// `status: 'error'` — verified against the configured endpoint — so the success-with-error
+			// check must not touch them, or every absence lookup would throw and expiry detection
+			// would go with it.
+			it('still reads actNotFound as an expected state', async () => {
+				mockFetchResponse({ body: { result: { status: 'error', error: 'actNotFound' } } });
+
+				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
+			});
+
+			it('still reads a fully searched txnNotFound as absence', async () => {
+				mockFetchResponse({
+					body: { result: { status: 'error', error: 'txnNotFound', searched_all: true } }
+				});
+
+				await expect(
+					loadXrpTransactionOutcome({
+						hash: 'H',
+						network,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+				).resolves.toEqual({ state: 'absent' });
+			});
+		});
+
 		describe.each(callers)('$name', ({ call }) => {
 			it.each([{}, { result: null }, { jsonrpc: '2.0' }])(
 				'names the missing result object for the body %j',
@@ -435,6 +498,34 @@ describe('xrpl.rest', () => {
 			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
 				'invalidTransaction'
 			);
+		});
+	});
+
+	// The two account reads deliberately ask different ledgers, and a later tidy-up unifying them
+	// would break one or the other: the sequence has to come from the OPEN ledger or a transaction
+	// already in it leaves this one signing a consumed sequence, while the displayed balance has to
+	// come from the VALIDATED one or the figure shown can roll back.
+	describe('which ledger each account read asks for', () => {
+		const ledgerIndexOf = (): unknown =>
+			JSON.parse(String((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body)).params[0]
+				.ledger_index;
+
+		it('asks the open ledger for the sequence-bearing read', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
+			});
+
+			await loadXrpAccountInfo({ address, network });
+
+			expect(ledgerIndexOf()).toBe('current');
+		});
+
+		it('asks the validated ledger for the display balance', async () => {
+			mockFetchResponse({ body: { result: { account_data: { Balance: '1' } } } });
+
+			await loadXrpBalance({ address, network });
+
+			expect(ledgerIndexOf()).toBe('validated');
 		});
 	});
 

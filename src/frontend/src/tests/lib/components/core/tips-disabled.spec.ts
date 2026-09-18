@@ -16,10 +16,10 @@ import { render, waitFor } from '@testing-library/svelte';
 // mocks the flag **on** to exercise the surface, and `vi.mock` is hoisted per
 // module, so one file cannot assert both states.
 //
-// Mocked explicitly rather than relying on the value in the branch: this must
-// keep testing the off state on the PR that flips the line to `true`, which is
-// the moment the assertion stops being trivially satisfied and starts being the
-// thing that catches a surface shipping early.
+// Mocked explicitly rather than relying on what a test run happens to read from
+// the environment. This has to keep testing the off state once the flag is on
+// somewhere, which is the moment the assertion stops being trivially satisfied
+// and starts being the thing that catches a surface shipping early.
 vi.mock('$env/tips.env', () => ({ TIPS_ENABLED: false }));
 
 vi.mock('$app/navigation', () => ({

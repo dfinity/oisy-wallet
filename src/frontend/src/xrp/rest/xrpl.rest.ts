@@ -89,7 +89,32 @@ const xrpJsonRpc = async ({
 	}
 
 	const { result } = parsed.data;
-	const { error } = result;
+	const { error, status } = result;
+
+	// `result.status` is on every real response — `'success'`, or `'error'` alongside `error`,
+	// `error_code` and `error_message` — and was previously ignored, so a FAILED response could
+	// still deliver a plausible-looking result: the method schemas strip `status` as an unknown key,
+	// and `{ status: 'error', ledger_current_index: <bogus> }` came back as an index. That is the
+	// one payload the confirmation loop cannot defend against by arithmetic, because the first
+	// validated index a run reads has nothing to corroborate it.
+	//
+	// Only these two values exist. Gated on presence, so a node that omits the field is still fine.
+	if ('status' in result && status !== 'success' && status !== 'error') {
+		throw new XrplRpcError({ method, error: `invalid status ${String(status)}` });
+	}
+
+	// An error status has to say WHICH error, or `expectedErrors` below cannot judge it and a
+	// failure would pass as a result.
+	if (status === 'error' && typeof error !== 'string') {
+		throw new XrplRpcError({ method, error: 'error status without an error code' });
+	}
+
+	// Contradictory: one of the two is wrong and there is no way to tell which. Note this does NOT
+	// catch the expected states — `actNotFound` and `txnNotFound` both arrive with
+	// `status: 'error'`, verified against the configured endpoint, so the absence path is untouched.
+	if (status === 'success' && 'error' in result) {
+		throw new XrplRpcError({ method, error: `success status with error ${String(error)}` });
+	}
 
 	// A present `error` must be a string. `String(error)` let a malformed value coerce into an
 	// expected code — `['txnNotFound']` matching `'txnNotFound'` — and `nonNullish` read a present
@@ -163,10 +188,23 @@ export const loadXrpAccountInfo = async ({
 	address: XrpAddress;
 	network: XrpNetworkType;
 }): Promise<XrpAccountInfo> => {
+	// The OPEN ledger, not the validated one, because this read supplies the `Sequence` a new
+	// transaction is built with. A transaction already in the open ledger — another device, or this
+	// user's own send moments earlier — has consumed the next sequence without being validated yet,
+	// and signing with the validated one means XRPL answers `tefPAST_SEQ`: nothing charged, since
+	// `tef` is not applied, but the send is lost to the poll rather than reported.
+	//
+	// The provider is Clio, which serves validated data only — `ledger_index: 'current'` is how its
+	// own warning says to reach rippled instead, and the response comes back `forwarded: true`.
+	//
+	// It makes the reserve inputs non-validated too, which errs conservative in both directions
+	// that matter: an open-ledger `Balance` already reflects pending spends, so `getXrpMaxAmount`
+	// offers less rather than more, and an open-ledger sequence that turns out too HIGH after a
+	// rollback gives `terPRE_SEQ` — a `ter`, which this code declines to treat as final anyway.
 	const result = await xrpJsonRpc({
 		network,
 		method: 'account_info',
-		params: { account: address, ledger_index: 'validated' },
+		params: { account: address, ledger_index: 'current' },
 		expectedErrors: ['actNotFound']
 	});
 

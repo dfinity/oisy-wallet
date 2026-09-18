@@ -154,7 +154,20 @@ export const XrplTxResultSchema = z.union([
 	z.object({
 		validated: z.literal(true),
 		hash: z.string(),
-		meta: z.object({ TransactionResult: z.string() }),
+		// Only `tes` and `tec` results are ever APPLIED to a ledger — which is why they are the ones
+		// that claim the fee and consume the sequence — so a validated record carrying anything else
+		// is malformed. It matters because the caller turns every non-`tesSUCCESS` value into
+		// `XrpTransactionFailedError`, a definitive "your payment failed"; rejecting instead leaves
+		// the run indeterminate, which hands back the blob rather than asserting an outcome.
+		//
+		// `tesSUCCESS` is the whole `tes` class, and the pattern was checked against
+		// `ripple-binary-codec`'s own `TRANSACTION_RESULTS`: it matches all 82 `tec` codes and none
+		// of the 106 `tef`/`tel`/`tem`/`ter` ones. A pattern rather than that list, because the list
+		// lives only in the package's `dist` and nothing here deep-imports a `dist` — and a pattern
+		// keeps matching if the protocol adds an 83rd.
+		meta: z.object({
+			TransactionResult: z.union([z.literal('tesSUCCESS'), z.string().regex(/^tec[A-Z0-9_]+$/)])
+		}),
 		error: z.never().optional()
 	}),
 	// Absent: the node confirms it searched every ledger in the requested range. This is the only
