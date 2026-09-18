@@ -129,6 +129,37 @@ export const formatNanosecondsToDate = ({
 	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
+/**
+ * A deadline split into its date and its time, for a sentence that joins the two with
+ * a word of its own.
+ *
+ * One `toLocaleString` call cannot give that sentence what it needs: the separator it
+ * puts between the halves belongs to the locale — a comma here, the word "at" there —
+ * so a string that wants to say "at" in its own language has to be handed the halves
+ * and join them itself.
+ *
+ * Day and month order is left to the locale rather than fixed, which is the whole
+ * point of going through `Intl`: there are fifteen of them and only one puts the month
+ * second.
+ */
+export const formatNanosecondsToDateAndTime = ({
+	nanoseconds,
+	language
+}: {
+	nanoseconds: bigint;
+	language?: Languages;
+}): { date: string; time: string } => {
+	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	const locale = language ?? Languages.ENGLISH;
+
+	return {
+		date: date.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
+		// Seconds left out on purpose. This is a deadline days away; to the second is
+		// a precision the reader has no use for and one more thing to read past.
+		time: date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
+	};
+};
+
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.getTime();
