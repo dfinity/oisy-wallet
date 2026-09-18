@@ -71,6 +71,26 @@ describe('xrp-transaction.utils', () => {
 			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
 		});
 
+		// The complete code shape, not a `tem` prefix. `engine_result` is `z.string()` in the submit
+		// schema, so these can arrive — and the decision is made AFTER the blob was broadcast, so
+		// reading one as definitive reports a transaction that may still land as rejected, which is
+		// what invites a second payment. Each has to be polled instead.
+		it.each(['temporary', 'tem', 'temBAD_fee', 'tem BAD_FEE extra', 'temBAD_FEE ', ' temBAD_FEE'])(
+			'does not reject the malformed %j',
+			(engineResult) => {
+				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+			}
+		);
+
+		// Every `tem` code the protocol defines still is final: checked against
+		// `ripple-binary-codec`'s own list, which is where the pattern came from.
+		it.each(['temBAD_SEND_XRP_LIMIT', 'temREDUNDANT', 'temINVALID_FLAG', 'temUNCERTAIN'])(
+			'still rejects the real code %s',
+			(engineResult) => {
+				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
+			}
+		);
+
 		// A node's refusal to take the blob is not evidence that no ledger will include it, so it
 		// must not turn a non-final result into a reported failure.
 		it('ignores the accepted flag', () => {

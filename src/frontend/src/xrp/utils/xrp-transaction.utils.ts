@@ -10,7 +10,15 @@ import { decode } from 'ripple-binary-codec';
 // later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that may still become a yes must not be reported as a failure: the user would
 // send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
 // thing that decides definitively.
-const XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX = 'tem';
+// The COMPLETE code shape, not a prefix: `startsWith('tem')` also matched `temporary`, `tem`,
+// `temBAD_fee` and `tem BAD_FEE extra`, and `engine_result` is `z.string()` in the submit schema,
+// so any of them can arrive. Each read as a definitive rejection — which is decided AFTER the blob
+// has been broadcast, so a transaction that may still land was reported as rejected and the user
+// invited to send again.
+//
+// Checked against `ripple-binary-codec`'s own `TRANSACTION_RESULTS`: all 51 `tem` codes match, and
+// no code from the other five classes does.
+const XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN = /^tem[A-Z0-9_]+$/;
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
@@ -24,7 +32,7 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  * locally derived hash (see {@link isXrpTransactionSuccessful}).
  */
 export const isXrpSubmitFinalFailure = ({ engineResult }: XrpSubmitResult): boolean =>
-	engineResult.startsWith(XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX);
+	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult);
 
 /**
  * Whether a validated transaction actually succeeded.
