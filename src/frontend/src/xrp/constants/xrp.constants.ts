@@ -81,3 +81,18 @@ const XRP_CONFIRM_WINDOW_MARGIN = 2;
 export const XRP_CONFIRM_MAX_ATTEMPTS =
 	(XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN) /
 	XRP_CONFIRM_MIN_POLL_SECONDS;
+
+// The same give-up point expressed in time, because the attempt count alone does not bound one.
+// Each attempt costs an interval plus however long its two requests take, and with
+// `XRP_RPC_TIMEOUT_MS` per request the cap above can stretch to many times the window it was
+// derived from — leaving the user on the CONFIRM step with no answer, definitive or otherwise.
+//
+// The window the attempt count was sized for, at the SLOWEST interval the loop can wait, so an
+// ordinary send never reaches it: whichever of the two limits comes first ends the poll, and it
+// should be the attempts whenever the node is answering at all.
+export const XRP_CONFIRM_MAX_DURATION_MS =
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET *
+	XRP_LEDGER_CLOSE_SECONDS *
+	XRP_CONFIRM_WINDOW_MARGIN *
+	1000 +
+	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;

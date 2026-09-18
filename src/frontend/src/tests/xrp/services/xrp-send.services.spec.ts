@@ -4,6 +4,8 @@ import { randomWait } from '$lib/utils/time.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
+	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_DURATION_MS,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
@@ -48,6 +50,9 @@ describe('xrp-send.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// `clearAllMocks` keeps implementations, and a test that makes `randomWait` advance fake
+		// timers would otherwise do so in every test after it.
+		vi.mocked(randomWait).mockReset();
 
 		// Every RPC this path makes is mocked below. The env resolves `XRP_RPC_HTTP_URL_MAINNET` to
 		// `undefined` under vitest, so a missing mock already fails on the endpoint assertion; this
@@ -473,9 +478,38 @@ describe('xrp-send.services', () => {
 			new Error('XRPL ledger request failed with status 503')
 		);
 
+		// The message names which of the two limits ended it, so an operator can tell "the ledger
+		// never decided" from "the node was too slow to let it".
 		await expect(sendXrp(params)).rejects.toThrow(
-			'XRP transaction confirmation stopped before its ledger expiry was reached.'
+			`stopped before its ledger expiry was reached: ${XRP_CONFIRM_MAX_ATTEMPTS} attempts made`
 		);
+	});
+
+	// The attempt count is not a time bound: each attempt costs an interval plus however long its
+	// requests take, so a node answering slowly stretches 160 attempts far past the window they
+	// were derived from, and the user waits on CONFIRM with no answer of any kind.
+	it('gives up on the deadline when the attempts would take too long', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+		vi.useFakeTimers();
+
+		// Each poll now costs a tenth of the whole budget, so the deadline is reached long before
+		// the attempts are.
+		vi.mocked(randomWait).mockImplementation(() => {
+			vi.advanceTimersByTime(XRP_CONFIRM_MAX_DURATION_MS / 10);
+
+			return Promise.resolve();
+		});
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		vi.useRealTimers();
+
+		expect((err as Error).message).toContain(`${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`);
+		// Ten polls span the budget, against a cap of 160.
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledTimes(10);
+		expect(XRP_CONFIRM_MAX_ATTEMPTS).toBe(160);
 	});
 
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.

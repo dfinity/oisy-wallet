@@ -6,6 +6,7 @@ import {
 	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_DURATION_MS,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
@@ -98,7 +99,13 @@ const confirmXrpTransaction = async ({
 	// every answered poll and almost none of them could decide anything.
 	let nextLedgerReadAttempt = 0;
 
-	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
+	// Two limits on the same exit, because the attempt count does not bound one on its own: each
+	// attempt costs an interval plus however long its requests take, so a node answering slowly
+	// stretches the count far past the window it was derived from. Whichever comes first ends the
+	// poll, and for a node that answers at all that is the attempts.
+	const deadline = Date.now() + XRP_CONFIRM_MAX_DURATION_MS;
+
+	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS && Date.now() < deadline; attempt++) {
 		const outcome = await tryOutcome();
 
 		if (outcome?.state === 'validated') {
@@ -167,7 +174,16 @@ const confirmXrpTransaction = async ({
 		await randomWait({ min: XRP_CONFIRM_MIN_POLL_MS, max: XRP_CONFIRM_MAX_POLL_MS });
 	}
 
-	throw new Error('XRP transaction confirmation stopped before its ledger expiry was reached.');
+	// Which limit ended it is worth saying: one means the ledger never decided, the other that the
+	// node was too slow to let it. Both leave the outcome unknown, and the caller treats them the
+	// same — the signed transaction goes back with the error either way.
+	throw new Error(
+		`XRP transaction confirmation stopped before its ledger expiry was reached: ${
+			Date.now() < deadline
+				? `${XRP_CONFIRM_MAX_ATTEMPTS} attempts made`
+				: `${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`
+		}.`
+	);
 };
 
 /**
