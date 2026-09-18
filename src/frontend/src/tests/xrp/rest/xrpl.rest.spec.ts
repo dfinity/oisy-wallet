@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { XRP_RPC_TIMEOUT_MS } from '$xrp/constants/xrp.constants';
 import {
 	XrpAccountNotFoundError,
 	XrplRpcError,
@@ -73,8 +74,80 @@ describe('xrpl.rest', () => {
 			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
 		];
 
+		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
+		// settles, and the confirmation loop bounds ATTEMPTS rather than time — so one hung request
+		// suspends the whole send and `sendXrp` never rejects with the blob a retry needs.
+		//
+		// The signal is substituted rather than waited out: vitest's fake timers do not drive
+		// `AbortSignal.timeout`, and the real one would make this an eight-second test. Aborting a
+		// controller by hand exercises the same three links — the deadline reaches
+		// `AbortSignal.timeout`, its signal reaches `fetch`, and an abort surfaces as a rejection.
+		describe('the request deadline', () => {
+			let controller: AbortController;
+
+			beforeEach(() => {
+				controller = new AbortController();
+				vi.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal);
+
+				// Answers only when its signal aborts, so a missing signal hangs the test rather than
+				// passing it.
+				vi.stubGlobal(
+					'fetch',
+					vi.fn((...[, init]: Parameters<typeof fetch>) => {
+						const signal = (init as RequestInit | undefined)?.signal;
+
+						return new Promise((_resolve, reject) => {
+							signal?.addEventListener('abort', () => reject(signal.reason));
+						});
+					})
+				);
+			});
+
+			afterEach(() => {
+				vi.restoreAllMocks();
+			});
+
+			it.each(callers)('$name aborts a stalled request', async ({ call }) => {
+				const outcome = call().then(
+					() => 'resolved',
+					(err: unknown) => (err as Error).name
+				);
+
+				controller.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+
+				await expect(outcome).resolves.toBe('TimeoutError');
+			});
+
+			// Two ledger closes. Longer and a hung request outlives the poll it belongs to; shorter
+			// and a healthy node under load loses attempts it should have been given.
+			it('asks for the configured deadline and not some other figure', () => {
+				void loadXrpLedgerIndex({ network }).catch(() => undefined);
+
+				expect(AbortSignal.timeout).toHaveBeenCalledWith(XRP_RPC_TIMEOUT_MS);
+
+				controller.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+			});
+		});
+
+		// `z.never().optional()` on `error` rather than a strict object: the configured provider is a
+		// Clio endpoint and every response it sends carries these beside the result, with a warning
+		// on literally every call. Rejecting unknown keys wholesale would reject them all.
+		it('accepts the top-level keys a real provider sends', async () => {
+			mockFetchResponse({
+				body: {
+					result: { ledger_current_index: 5 },
+					status: 'success',
+					type: 'response',
+					forwarded: true,
+					warnings: [{ id: 2001, message: 'This is a clio server.' }]
+				}
+			});
+
+			await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+		});
+
 		describe.each(callers)('$name', ({ call }) => {
-			it.each([{}, { result: null }, { jsonrpc: '2.0', error: 'gateway' }])(
+			it.each([{}, { result: null }, { jsonrpc: '2.0' }])(
 				'names the missing result object for the body %j',
 				async (body) => {
 					mockFetchResponse({ body });
@@ -82,6 +155,33 @@ describe('xrpl.rest', () => {
 					await expect(call()).rejects.toThrow('no result object');
 				}
 			);
+
+			// A top-level `error` is the node reporting on the call rather than on the ledger, so it
+			// is surfaced as the code it is. "No result object" would name the wrong problem — and for
+			// the both-keys body below it would be plainly false.
+			it.each([
+				{ jsonrpc: '2.0', error: 'gateway' },
+				{ error: 'gateway', result: { ledger_current_index: 999_999_999 } }
+			])('reports the top-level error for the body %j', async (body) => {
+				mockFetchResponse({ body });
+
+				const failure = await call().catch((err: unknown) => err);
+
+				expect(failure).toBeInstanceOf(XrplRpcError);
+				expect((failure as XrplRpcError).error).toBe('gateway');
+			});
+
+			// The whole point of the both-keys case: zod strips unknown keys, so this parsed with the
+			// error dropped and the helpers — which inspect `result.error`, a different field — got a
+			// bogus ledger index from a FAILED response. Past `LastLedgerSequence` that is read as
+			// established non-inclusion, which is the answer that invites a second payment.
+			it('does not deliver a result that came with a top-level error', async () => {
+				mockFetchResponse({
+					body: { error: 'gateway', result: { ledger_current_index: 999_999_999 } }
+				});
+
+				await expect(call()).rejects.toThrow();
+			});
 
 			// A present `error` has to be a string. Coercion let `['tooBusy']` become `'tooBusy'`, so a
 			// malformed value could match a code the helper declared as an expected state; a present
@@ -446,6 +546,31 @@ describe('xrpl.rest', () => {
 			).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 		});
 
+		// Absence is decided AFTER the parse, so a response claiming both must not be read as
+		// absence. It used to be: the pre-parse check threw the typed error and `Flags` were
+		// discarded, which in `sendXrp` leaves the destination `absent` — ignored above the reserve,
+		// so the required-destination-tag guard never fires and the payment takes
+		// `tecDST_TAG_NEEDED`.
+		it('rejects a response carrying both actNotFound and account_data as malformed', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+					}
+				}
+			});
+
+			const failure = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet
+			}).catch((err: unknown) => err);
+
+			expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
+			expect(failure).toBeInstanceOf(Error);
+			expect((failure as Error).message).toContain('Unexpected XRPL account_info response');
+		});
+
 		it.each(['tooBusy', 'noNetwork'])(
 			'throws an untyped error for the operational failure %s',
 			async (error) => {
@@ -563,6 +688,40 @@ describe('xrpl.rest', () => {
 
 			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
 				987_002
+			);
+		});
+
+		// What the configured provider actually sends: both forms, in one response, the nested one
+		// quoted. Mutually exclusive branches would therefore reject every real response.
+		it('accepts both forms when they agree', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						ledger_index: 107_065_791,
+						ledger: { ledger_index: '107065791' }
+					}
+				}
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				107_065_791
+			);
+		});
+
+		// A union took the first branch that parsed and stripped the other as an unknown key, so two
+		// contradictory indices were accepted and the top-level one read. A high index past
+		// `LastLedgerSequence` is what makes confirmation declare expiry and call a resend safe.
+		it.each([
+			{ top: 999_999_999, nested: '5' },
+			{ top: 5, nested: '999999999' }
+		])('rejects a top-level $top disagreeing with a nested $nested', async ({ top, nested }) => {
+			mockFetchResponse({
+				body: { result: { validated: true, ledger_index: top, ledger: { ledger_index: nested } } }
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+				'missing validated ledger_index'
 			);
 		});
 
