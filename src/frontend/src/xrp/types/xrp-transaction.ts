@@ -54,6 +54,19 @@ export interface XrpPendingTransaction {
 }
 
 /**
+ * What a `tx` lookup established about a submitted transaction.
+ *
+ * Three states rather than a boolean, because only one of them may end confirmation as
+ * non-inclusion. `absent` is the node reporting `txnNotFound` having searched the whole ledger
+ * range; `pending` is the node positively holding the transaction in a ledger that is not
+ * validated yet. Collapsing the two lets the expiry recheck declare that a transaction the node
+ * just handed back can never apply — and expiry, unlike every other confirmation failure, tells a
+ * retry to build a NEW transaction, which takes a fresh sequence and pays a second time.
+ */
+export type XrpTransactionOutcome =
+	{ state: 'validated'; transactionResult: string } | { state: 'pending' } | { state: 'absent' };
+
+/**
  * Outcome of a completed XRP send.
  *
  * `txHash` is derived from the signed blob, so it is present even when the submit response was

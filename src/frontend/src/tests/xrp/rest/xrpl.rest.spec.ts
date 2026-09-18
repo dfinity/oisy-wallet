@@ -619,7 +619,7 @@ describe('xrpl.rest', () => {
 				lastLedgerSequence: 1020
 			});
 
-			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
+			expect(outcome).toEqual({ state: 'absent' });
 		});
 
 		// `txnNotFound` also covers "the node does not have that ledger". Reading it as absence
@@ -718,7 +718,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tesSUCCESS' });
 		});
 
 		// XRPL renders ids uppercase; a caller-supplied one need not be.
@@ -736,7 +736,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tesSUCCESS' });
 		});
 
 		// The one failure mode on this path that would report SUCCESS: a validated record for some
@@ -794,7 +794,9 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('neither a validated result, a pending transaction');
 		});
 
-		it('is not validated while the transaction is still pending', async () => {
+		// `pending` and `absent` must stay distinguishable: only absence may end confirmation as
+		// non-inclusion, and a transaction the node hands back is the opposite of absent.
+		it('reports a found-but-unvalidated transaction as pending, not absent', async () => {
 			mockFetchResponse({ body: { result: { validated: false, hash: 'H' } } });
 
 			await expect(
@@ -804,7 +806,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: false, transactionResult: undefined });
+			).resolves.toEqual({ state: 'pending' });
 		});
 
 		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
@@ -822,7 +824,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tecUNFUNDED_PAYMENT' });
 		});
 
 		// `validated` is final, not successful, so a validated response owes a result. Reporting the

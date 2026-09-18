@@ -30,7 +30,8 @@ import {
 import type {
 	XrpPendingTransaction,
 	XrpSendResult,
-	XrpSubmitResult
+	XrpSubmitResult,
+	XrpTransactionOutcome
 } from '$xrp/types/xrp-transaction';
 import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
@@ -64,9 +65,7 @@ const confirmXrpTransaction = async ({
 	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
 	// retried; what must never happen is concluding expiry from it, so the recheck below is
 	// deliberately left to throw.
-	const tryOutcome = async (): Promise<
-		{ validated: boolean; transactionResult: string | undefined } | undefined
-	> => {
+	const tryOutcome = async (): Promise<XrpTransactionOutcome | undefined> => {
 		try {
 			return await loadXrpTransactionOutcome({
 				hash,
@@ -99,7 +98,7 @@ const confirmXrpTransaction = async ({
 	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
 		const outcome = await tryOutcome();
 
-		if (outcome?.validated) {
+		if (outcome?.state === 'validated') {
 			return outcome.transactionResult;
 		}
 
@@ -134,8 +133,20 @@ const confirmXrpTransaction = async ({
 					lastLedgerSequence
 				});
 
-				if (recheck.validated) {
+				if (recheck.state === 'validated') {
 					return recheck.transactionResult;
+				}
+
+				// A node that hands the transaction back, unvalidated, is not reporting non-inclusion —
+				// it is reporting that the transaction exists. Nothing there supports "it can never
+				// apply", and the two calls above can reach different members of a load-balanced
+				// endpoint, so this is indeterminate: it escapes as a plain error, which the caller
+				// wraps with the signed blob so a retry resubmits THIS transaction on its already
+				// consumed sequence rather than building one with a new sequence.
+				if (recheck.state === 'pending') {
+					throw new Error(
+						`XRP transaction outcome unresolved: ledger ${validatedLedgerIndex} is past ${lastLedgerSequence}, yet the node still reports the transaction as not validated.`
+					);
 				}
 
 				// Past its LastLedgerSequence the transaction can never be applied, so this failure is
