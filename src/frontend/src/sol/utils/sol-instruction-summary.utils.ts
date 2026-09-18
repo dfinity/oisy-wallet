@@ -113,13 +113,25 @@ const flatten = ({
 }: {
 	instructions: readonly unknown[];
 	innerInstructions: readonly SolInstructionGroup[];
-}): { parentIndex: number; instruction: SolParsedRpcInstruction }[] =>
+}): { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[] =>
 	instructions.flatMap((instruction, parentIndex) => {
 		const inner = innerInstructions.find(({ index }) => index === parentIndex)?.instructions ?? [];
 
-		return [instruction, ...inner]
-			.filter(isParsed)
-			.map((parsed) => ({ parentIndex, instruction: parsed }));
+		// Which of the two an instruction is has to survive the flattening: an account the message
+		// itself opens is one the user is paying for, while the same call made inside a program is
+		// that program's own plumbing and is already described by the instruction that caused it.
+		// Marked before the parse filter, so an unreadable top-level call does not promote its first
+		// inner one.
+		return [
+			{ instruction, topLevel: true },
+			...inner.map((nested) => ({ instruction: nested, topLevel: false }))
+		]
+			.filter(({ instruction: candidate }) => isParsed(candidate))
+			.map(({ instruction: parsed, topLevel }) => ({
+				parentIndex,
+				topLevel,
+				instruction: parsed as SolParsedRpcInstruction
+			}));
 	});
 
 /**
@@ -243,12 +255,15 @@ const toEffect = ({
 		program,
 		parsed: { type, info }
 	},
+	topLevel,
 	owned,
 	accountMints,
 	accountLamports,
 	flattened
 }: {
 	instruction: SolParsedRpcInstruction;
+	// Whether the message states this instruction itself, rather than a program having made it.
+	topLevel: boolean;
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
@@ -277,6 +292,25 @@ const toEffect = ({
 		}
 
 		return { kind: 'createTokenAccount', account, ...(nonNullish(mint) && { tokenAddress: mint }) };
+	}
+
+	// An account the message opens for the token program, read as the token account it is about to
+	// become: the mint comes from the initialisation that follows, which states it. Without this the
+	// list called a creation the wallet had decoded "unrecognised", and named the System program as
+	// the whole of what it knew.
+	//
+	// Top level only. The associated token account program opens its accounts with the same call
+	// made inside itself, and that creation is already the line the program's own instruction
+	// produces - counting both would open one account twice.
+	if (program === 'system' && type === 'createAccount' && topLevel) {
+		const account = address({ info, key: 'newAccount' });
+		const tokenAddress = nonNullish(account) ? accountMints[account] : undefined;
+
+		// Only an account of the user's. This list is what a transaction does to what they hold, and
+		// a counterparty opening its own account is the transaction's business, not theirs.
+		return nonNullish(account) && nonNullish(tokenAddress) && owned.has(account)
+			? { kind: 'createTokenAccount', account, tokenAddress }
+			: undefined;
 	}
 
 	if (program === 'system' && type === 'transfer') {
@@ -611,8 +645,15 @@ export const mapSolInstructionSummaries = ({
 		return nonNullish(program) ? { ...acc, [index]: program } : acc;
 	}, {});
 
-	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, instruction }) => {
-		const effect = toEffect({ instruction, owned, accountMints, accountLamports, flattened });
+	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, topLevel, instruction }) => {
+		const effect = toEffect({
+			instruction,
+			topLevel,
+			owned,
+			accountMints,
+			accountLamports,
+			flattened
+		});
 
 		if (isNullish(effect)) {
 			return acc;
