@@ -11,6 +11,7 @@ import {
 	setTipSecret
 } from '$lib/api/backend.api';
 import { BACKEND_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
+import { ProgressStepsTip } from '$lib/enums/progress-steps';
 import {
 	claimCodeHash,
 	generateClaimCode,
@@ -404,7 +405,8 @@ export const reserveTip = async ({
 	amount,
 	fee,
 	expiresAtNs,
-	message
+	message,
+	progress
 }: {
 	identity: Identity;
 	draft: TipDraft;
@@ -413,6 +415,12 @@ export const reserveTip = async ({
 	fee: bigint;
 	expiresAtNs: bigint;
 	message?: string;
+	/**
+	 * Called as each of the three stages below starts, so the share screen can
+	 * say which one the sender is waiting on. Optional and never awaited: a
+	 * reservation must not depend on anyone listening.
+	 */
+	progress?: (step: ProgressStepsTip) => void;
 }): Promise<{ link: string; secretStored: boolean }> => {
 	// Started before the approve, and awaited only at the very end, in
 	// `storeClaimCode`. The derivation takes nothing but the identity — the tip id
@@ -432,6 +440,8 @@ export const reserveTip = async ({
 	// reported as unhandled by the runtime. Handling it here does not swallow it:
 	// `storeClaimCode` awaits the same promise and reports its own failure.
 	keyMaterial.catch(() => undefined);
+
+	progress?.(ProgressStepsTip.RESERVE);
 
 	const subaccount = await tipSpenderSubaccount(draft.tipId);
 
@@ -468,6 +478,8 @@ export const reserveTip = async ({
 
 		throw err;
 	}
+
+	progress?.(ProgressStepsTip.CREATE);
 
 	try {
 		await createTipApi({
@@ -529,10 +541,13 @@ export const reserveTip = async ({
 		}
 	}
 
-	return {
-		link: buildTipLink(draft),
-		secretStored: await storeClaimCode({ identity, draft, keyMaterial })
-	};
+	progress?.(ProgressStepsTip.SAVE);
+
+	const secretStored = await storeClaimCode({ identity, draft, keyMaterial });
+
+	progress?.(ProgressStepsTip.DONE);
+
+	return { link: buildTipLink(draft), secretStored };
 };
 
 /**

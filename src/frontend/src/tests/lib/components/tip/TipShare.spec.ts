@@ -3,6 +3,7 @@ import {
 	TIP_HISTORY_CANCEL_BUTTON,
 	TIP_SHARE_COPY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { ProgressStepsTip } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -211,7 +212,7 @@ describe('TipShare', () => {
 
 			expect(queryByText(text.no_wallet_needed)).toBeNull();
 			expect(queryByText(text.scan_or_photo)).toBeNull();
-			expect(queryByText(text.generating_link)).toBeInTheDocument();
+			expect(queryByText(text.step_reserving)).toBeInTheDocument();
 		});
 
 		it('go away entirely once there is known to be no code', () => {
@@ -256,10 +257,50 @@ describe('TipShare', () => {
 		// on the form for an approve plus two canister calls.
 		const generatingProps = { ...props, link: undefined, generating: true };
 
-		it('says the link is being built rather than leaving the reader to guess', () => {
+		it('names all three stages, so the wait has a shape', () => {
+			// It used to be one sentence — "Reserving your tip and building the link.
+			// This takes a few seconds." — over a pulsing square, for what is three
+			// canister calls and can run past ten seconds. One sentence cannot say
+			// which of them is running, so the whole wait looked identical from the
+			// first second to the last.
 			const { getByText } = render(TipShare, { props: generatingProps });
 
-			expect(getByText(get(i18n).tip.text.generating_link)).toBeInTheDocument();
+			const { text } = get(i18n).tip;
+
+			expect(getByText(text.step_reserving)).toBeInTheDocument();
+			expect(getByText(text.step_creating)).toBeInTheDocument();
+			expect(getByText(text.step_saving)).toBeInTheDocument();
+		});
+
+		it('marks the stage it is actually on', () => {
+			// The point of the stepper rather than a list: `progressStep` drives which
+			// row carries the spinner, and it is fed from `reserveTip`'s own progress
+			// callback, so the rows move when the calls do and not on a timer.
+			const { getByText } = render(TipShare, {
+				props: { ...generatingProps, progressStep: ProgressStepsTip.CREATE }
+			});
+
+			const { text } = get(i18n).tip;
+
+			// The state each row shows the reader, rather than the class it carries.
+			const state = (label: string) =>
+				getByText(label).closest('.step')?.querySelector('.state')?.textContent?.trim();
+
+			expect(state(text.step_creating)).toBe(get(i18n).progress.in_progress);
+			expect(state(text.step_reserving)).toBe(get(i18n).progress.completed);
+
+			// Not started yet, so it says nothing rather than claiming a state.
+			expect(state(text.step_saving)).toBeUndefined();
+		});
+
+		it('does not warn against closing the browser', () => {
+			// `InProgressWizard`, which every other money flow uses, heads its stepper
+			// with that warning. Here it would be false: the tip is created and its
+			// link is recoverable from History, so closing this modal costs nothing.
+			// `InProgress` is the same stepper without the warning.
+			const { queryByText } = render(TipShare, { props: generatingProps });
+
+			expect(queryByText(get(i18n).core.warning.do_not_close)).toBeNull();
 		});
 
 		it('still states the amount, which is already known', () => {
@@ -279,24 +320,27 @@ describe('TipShare', () => {
 			expect(queryByText(/Claim before/)).toBeNull();
 		});
 
-		it('says what is happening where the scanning instructions go', () => {
-			// One statement instead of two: the box used to head itself "Scan to claim
-			// this tip" over a grey square while a separate line at the bottom said the
-			// code was still being built.
+		it('takes the box the scanning instructions use, rather than adding one', () => {
+			// Both live in the same block, so the stepper gives way to the instructions
+			// in place and nothing below the QR moves when the link lands.
 			const { getByText, queryByText } = render(TipShare, { props: generatingProps });
 
-			expect(getByText(get(i18n).tip.text.generating_link)).toBeInTheDocument();
+			expect(getByText(get(i18n).tip.text.step_reserving)).toBeInTheDocument();
 			expect(queryByText(get(i18n).tip.text.no_wallet_needed_title)).toBeNull();
 		});
 
 		it('names the wait differently when a link is being recovered, not reserved', () => {
 			// Same skeletons, different thing being waited on: this one is History
 			// decrypting a code that already exists.
-			const { getByText } = render(TipShare, {
+			const { getByText, queryByText } = render(TipShare, {
 				props: { ...props, link: undefined, generating: false }
 			});
 
 			expect(getByText(get(i18n).tip.text.recovering_link)).toBeInTheDocument();
+
+			// And no stepper: recovery is one call and a decrypt, so there are no
+			// stages to report. Three rows here would describe work nobody is doing.
+			expect(queryByText(get(i18n).tip.text.step_reserving)).toBeNull();
 		});
 
 		it('will not let the sender leave before the link arrives', () => {
@@ -312,7 +356,7 @@ describe('TipShare', () => {
 				props: { ...props, generating: false }
 			});
 
-			expect(queryByText(get(i18n).tip.text.generating_link)).toBeNull();
+			expect(queryByText(get(i18n).tip.text.step_reserving)).toBeNull();
 			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
 			expect(getByText(/Claim before/)).toBeInTheDocument();
 		});
