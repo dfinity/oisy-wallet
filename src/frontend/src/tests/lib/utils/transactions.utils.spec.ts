@@ -62,6 +62,7 @@ import {
 } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import { mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 
 describe('transactions.utils', () => {
@@ -1829,7 +1830,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
 		});
 
-		it('should correctly return an empty array if all txs do not have values', () => {
+		it('should correctly return an empty object if all txs do not have values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1839,7 +1840,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs have zero values', () => {
+		it('should correctly return an empty object if all txs have zero values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1849,11 +1850,54 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs are receive', () => {
+		it('should correctly return an empty object if all txs are receive', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
 				type: 'receive' as IcTransactionType
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should ignore transfers that were pulled by a spender', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map((transaction) => ({
+				...transaction,
+				token: ICP_TOKEN,
+				transferSpender: mockPrincipalText
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should keep the destinations the user picked when a spender pulled other transfers', () => {
+			const [userInitiated, spenderInitiated] = createMockIcTransactionsUi(2);
+
+			const transactions = [
+				{ ...userInitiated, token: ICP_TOKEN },
+				{
+					...spenderInitiated,
+					token: ICP_TOKEN,
+					to: mockPrincipalText2,
+					transferSpender: mockPrincipalText
+				}
+			];
+
+			expect(getKnownDestinations(transactions)).toEqual({
+				[userInitiated.to as string]: {
+					amounts: [{ value: userInitiated.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.timestamp),
+					address: userInitiated.to
+				}
+			});
+		});
+
+		it('should correctly return an empty object if all txs are approvals', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
+				...rest,
+				token: ICP_TOKEN,
+				type: 'approve' as IcTransactionType,
+				approveSpender: mockPrincipalText
 			}));
 
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});

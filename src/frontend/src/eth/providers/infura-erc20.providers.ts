@@ -1,10 +1,11 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI, ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
+import type { EthersProviderNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
@@ -12,14 +13,14 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
 import { TypedDataEncoder } from 'ethers/hash';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
+import type { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
-	protected readonly provider: InfuraProvider;
+	protected readonly provider: JsonRpcProvider;
 
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
+	constructor(private readonly network: EthersProviderNetwork) {
+		this.provider = ethersProvider(this.network);
 	}
 
 	metadata = async ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> => {
@@ -175,7 +176,7 @@ const providers: Record<NetworkId, InfuraErc20Provider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, InfuraErc20Provider>>(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20Provider(infura) }),
+	(acc, network) => ({ ...acc, [network.id]: new InfuraErc20Provider(network) }),
 	{}
 );
 

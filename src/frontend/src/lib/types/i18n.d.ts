@@ -158,6 +158,7 @@ interface I18nNavigation {
 		show_balances: string;
 		notes: string;
 		issue_tip: string;
+		issue_tip_attention: string;
 	};
 	short: { documentation: string };
 }
@@ -513,6 +514,7 @@ interface I18nInit {
 		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
+		xrp_wallet_error: string;
 	};
 }
 
@@ -670,6 +672,14 @@ interface I18nReceive {
 			display_solana_address_qr: string;
 		};
 	};
+	xrp: {
+		text: {
+			xrp_address: string;
+			xrp_address_title: string;
+			xrp_address_copied: string;
+			display_xrp_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
@@ -725,7 +735,8 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		unknown_destination: string;
+		first_time_destination: string;
+		first_time_destination_confirm: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
@@ -782,6 +793,7 @@ interface I18nSend {
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
+		ethereum_insufficient_funds: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
 		solana_insufficient_funds: string;
@@ -2363,9 +2375,18 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		overview_window: string;
+		overview_failed: string;
+		overview_failed_hint: string;
+		overview_open: string;
+		overview_none: string;
+		overview_count_one: string;
+		overview_count_other: string;
+		overview_claimed: string;
 		select_token: string;
 		create_title: string;
 		share_title: string;
+		preparing_title: string;
 		empty_balance_title: string;
 		empty_balance_description: string;
 		no_supported_tokens_title: string;
@@ -2380,6 +2401,7 @@ interface I18nTip {
 		reserve_fee: string;
 		payout_fee: string;
 		fees_are_yours: string;
+		reserved_by_tips: string;
 		lapse_notice: string;
 		generate: string;
 		share_heading: string;
@@ -2391,6 +2413,10 @@ interface I18nTip {
 		scan_or_photo: string;
 		expires_at: string;
 		done: string;
+		step_reserving: string;
+		step_creating: string;
+		step_saving: string;
+		recovering_link: string;
 		link_not_saved: string;
 		reserve_failed: string;
 		status_title: string;
@@ -2425,6 +2451,32 @@ interface I18nTip {
 		claim_failed: string;
 		unreachable_title: string;
 		unreachable_description: string;
+		history_title: string;
+		history_empty: string;
+		history_failed: string;
+		group_failed: string;
+		group_failed_hint: string;
+		failure_uncovered: string;
+		failure_insufficient_funds: string;
+		failure_transfer_failed: string;
+		group_open: string;
+		group_claimed: string;
+		group_expired: string;
+		status_reserved: string;
+		status_failed: string;
+		status_claimed: string;
+		status_expired: string;
+		status_cancelled: string;
+		claimed_by: string;
+		tip_amount: string;
+		expires_in: string;
+		link_unavailable: string;
+		link_recovery_failed: string;
+		cancel_tip: string;
+		cancel_failed: string;
+		cancelled_toast: string;
+		cancelled_allowance_kept: string;
+		token_unavailable: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;

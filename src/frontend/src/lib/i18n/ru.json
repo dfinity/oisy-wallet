@@ -171,7 +171,8 @@
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
 			"notes": "Открыть заметки",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "Документы"
@@ -770,7 +771,8 @@
 			"allow_signing": "Проблема с настройкой вашего кошелька для подписи. Вы были выведены из системы. Если проблема не исчезнет, обратитесь в службу поддержки.",
 			"waiting_for_allowed_cycles_aborted": "Пожалуйста, попробуйте войти позже",
 			"btc_wallet_error": "Ошибка при загрузке информации о кошельке BTC.",
-			"sol_wallet_error": "Ошибка при загрузке информации о кошельке SOL."
+			"sol_wallet_error": "Ошибка при загрузке информации о кошельке SOL.",
+			"xrp_wallet_error": "Ошибка при загрузке информации о кошельке XRP."
 		}
 	},
 	"hero": {
@@ -935,6 +937,14 @@
 				"solana_address_copied": "Адрес Solana скопирован в буфер обмена",
 				"display_solana_address_qr": "Показать адрес Solana в виде QR-кода"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -990,7 +1000,8 @@
 			"cketh_certified": "Пожалуйста, подождите, пока параметры ckETH будут сертифицированы.",
 			"pending_bitcoin_transaction": "Вы можете отправить еще одну транзакцию Биткойн после завершения текущей ожидающей.",
 			"no_available_utxos": "У вас не будет доступных UTXO для выполнения этой транзакции.",
-			"unknown_destination": "Вы не взаимодействовали с этим адресом раньше. Пожалуйста, убедитесь, что знаете получателя.",
+			"first_time_destination": "Похоже, вы никогда не отправляли токены на этот адрес. Внимательно проверьте адрес.",
+			"first_time_destination_confirm": "Я отправляю токены на этот адрес впервые, и адрес внимательно проверен.",
 			"fee_expired": "",
 			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Отсканированный код содержал только адрес получателя. Убедитесь, что вы выбрали правильный токен, ввели нужную сумму и внимательно проверили адрес получателя!",
@@ -1047,6 +1058,7 @@
 			"no_pending_bitcoin_transaction": "При загрузке ожидающих транзакций Bitcoin произошла ошибка. Пожалуйста, повторите попытку позже.",
 			"unexpected_utxos_fee": "При расчёте комиссии за транзакцию произошла ошибка.",
 			"unable_to_retrieve_amount": "н/д (не удаётся получить)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "Ваша транзакция не была обработана сетью Solana и истекла, скорее всего, потому что указанная приоритетная комиссия была недостаточной. Мы обновили её до последней рекомендованной суммы, поэтому повторите попытку.",
 			"solana_confirmation_failed": "Мы не получили подтверждения для только что созданной вами транзакции. Подождите несколько секунд, а затем проверьте список транзакций вашего токена, чтобы убедиться, что транзакция была создана корректно.",
 			"solana_insufficient_funds": "Баланс вашего токена недостаточен для выполнения этой транзакции. Ваш баланс мог измениться с момента последнего отображения.",
@@ -2837,9 +2849,18 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
+			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2854,6 +2875,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",
@@ -2865,6 +2887,10 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"step_reserving": "",
+			"step_creating": "",
+			"step_saving": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2899,6 +2925,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",

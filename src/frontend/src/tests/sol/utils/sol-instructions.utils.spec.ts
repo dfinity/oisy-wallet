@@ -1194,6 +1194,41 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		it('should fail closed on a `CreateAccount` instruction that funds beyond the rent of its size', () => {
+			// A token account opened, initialised and closed in one message hands its whole balance to
+			// whoever the close names, so anything above rent is a payment the creation states no
+			// destination for. 165 bytes cost (128 + 165) * 3480 * 2 = 2_039_280 lamports.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a rent-exact creation over-funded by a single lamport', () => {
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_281n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
 		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
 			const instruction = getWithdrawNonceAccountInstruction({
 				nonceAccount: address(mockSolAddress2),
