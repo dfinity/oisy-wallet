@@ -153,6 +153,18 @@ failure for a payment that is about to validate — and invite a duplicate send.
 | RPC URL env var | `VITE_XRP_RPC_URL_MAINNET` (`src/frontend/src/env/networks/networks.xrp.env.ts`)                |
 | Endpoint        | Selected per network by `xrpHttpRpcUrl` (`src/frontend/src/xrp/providers/xrp-rpc.providers.ts`) |
 | Dev fallback    | `https://xrplcluster.com` (XRP Ledger Foundation public cluster)                                |
+| Deployment      | `VITE_XRP_RPC_URL_MAINNET_STAGING` / `_BETA` secrets, forwarded by `deploy-to-environment.yml`  |
+
+An empty value counts as unconfigured: a `.env` copied from `.env.example`, or a
+secret that has not been created, falls back exactly as an absent var does
+rather than building an empty endpoint into the bundle.
+
+On `test_*` and `audit` the URL can be supplied per run through the workflow's
+`env-override` dispatch input instead of a secret, which masks it in the logs.
+Note that it is still a build-time constant inlined into the published bundle,
+readable by anyone who loads that canister — the same exposure every other
+`VITE_*` provider credential in this repo has, and the reason the provider
+endpoint should be scoped at the provider.
 
 ## Provider choice
 
