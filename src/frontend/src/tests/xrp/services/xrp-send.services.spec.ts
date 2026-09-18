@@ -472,19 +472,34 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).resolves.toBeDefined();
 	});
 
-	// `UInt32` bounds the number system, not the ledger: `0xFFFFFFFF` is around forty times the
-	// current mainnet index, so a value the schema accepts can still be wildly outside this
-	// transaction's window. Treated as no answer at all, so the run ends indeterminate — which hands
-	// back the same blob — instead of declaring the expiry that tells a retry to build a new one.
+	// The bound is on how far the ledger appears to MOVE while one run watches, measured from the
+	// first index that run read. The first read is accepted as given — nothing in the run can
+	// corroborate it — so a high one still reaches the expiry conclusion, which is what a genuinely
+	// expired send needs.
 	it.each([
-		{ name: 'a UInt32-max index', index: 0xffff_ffff },
+		{ name: 'just past the transaction window', index: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1 },
 		{
-			name: 'an index just past the lookahead',
-			index: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD + 1
+			name: 'far past it, as a delayed retry sees',
+			index: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD * 10
 		}
-	])('does not declare expiry from $name', async ({ index }) => {
+	])('declares expiry from a first index $name', async ({ index }) => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(index);
+
+		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
+	});
+
+	// What the bound does catch: an index that jumps further mid-run than the ledger could have
+	// travelled. The first read is one close short of expiry, so no conclusion is available yet;
+	// the second is implausible and is discarded like a read the node refused, leaving the run
+	// indeterminate rather than concluding expiry from a number that cannot be right.
+	it('does not declare expiry from an implausible mid-run jump', async () => {
+		const lastLedgerSequence = 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+			.mockResolvedValueOnce(lastLedgerSequence - 1)
+			.mockResolvedValue(lastLedgerSequence - 1 + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD + 1);
 
 		const err = await sendXrp(params).catch((e: unknown) => e);
 
@@ -493,13 +508,15 @@ describe('xrp-send.services', () => {
 		expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 	});
 
-	// The other side of the bound: an index inside the lookahead is a real answer and must still
-	// reach the expiry conclusion, or a genuinely expired send would never resolve.
-	it('still declares expiry from an index inside the lookahead', async () => {
+	// The other side of that: a jump exactly at the bound is still movement the ledger could have
+	// made, so it is a real answer and expiry follows.
+	it('declares expiry from a mid-run move that is exactly at the bound', async () => {
+		const lastLedgerSequence = 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
-		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
-			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD
-		);
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+			.mockResolvedValueOnce(lastLedgerSequence - 1)
+			.mockResolvedValue(lastLedgerSequence - 1 + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD);
 
 		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
 	});
