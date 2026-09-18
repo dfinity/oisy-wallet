@@ -83,6 +83,26 @@ describe('xrpl.rest', () => {
 				}
 			);
 
+			// A present `error` has to be a string. Coercion let `['tooBusy']` become `'tooBusy'`, so a
+			// malformed value could match a code the helper declared as an expected state; a present
+			// `null` was read as no error at all, which made `loadXrpOpenLedgerFee` answer a failed
+			// response with its fallback base fee.
+			it.each([null, ['tooBusy'], 7, { code: 'tooBusy' }, true])(
+				'throws for the non-string error %j',
+				async (error) => {
+					mockFetchResponse({ body: { result: { error } } });
+
+					await expect(call()).rejects.toBeInstanceOf(XrplRpcError);
+				}
+			);
+
+			// A malformed value must not reach an expected code by coercing to it.
+			it('does not let a coerced value match an expected code', async () => {
+				mockFetchResponse({ body: { result: { error: ['actNotFound'] } } });
+
+				await expect(call()).rejects.toBeInstanceOf(XrplRpcError);
+			});
+
 			// One typed error, thrown in one place, carrying the code.
 			it('throws XrplRpcError carrying the code for an unexpected XRPL error', async () => {
 				mockFetchResponse({ body: { result: { error: 'tooBusy' } } });

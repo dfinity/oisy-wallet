@@ -71,8 +71,17 @@ const xrpJsonRpc = async ({
 	const { result } = parsed.data;
 	const { error } = result;
 
-	if (nonNullish(error) && !expectedErrors.includes(String(error))) {
+	// A present `error` must be a string. `String(error)` let a malformed value coerce into an
+	// expected code — `['txnNotFound']` matching `'txnNotFound'` — and `nonNullish` read a present
+	// `null` as no error at all, which is how `loadXrpOpenLedgerFee` came to answer a failed
+	// response with its fallback base fee: the underpricing that check exists to prevent.
+	if ('error' in result && typeof error !== 'string') {
 		throw new XrplRpcError({ method, error: String(error) });
+	}
+
+	// Compared raw, so only the code the node actually sent can be an expected state.
+	if (typeof error === 'string' && !expectedErrors.includes(error)) {
+		throw new XrplRpcError({ method, error });
 	}
 
 	return result;
