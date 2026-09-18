@@ -29,8 +29,12 @@ describe('xrp-send.services', () => {
 	const source = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const destination = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
 	const signingPublicKey = 'ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A63';
-	// Must be real hex: the transaction id is derived from these bytes.
-	const signedBlob = '1200002280000000240000000761400000000098968068400000000000000C';
+	// A real encoded Payment, not a placeholder: both the transaction id and the ledger window
+	// confirmation polls are derived from these bytes, so a blob that does not really carry
+	// `LastLedgerSequence: 1020` would be asserting a window nothing signed. Sequence 7,
+	// LastLedgerSequence 1020 — the window [1000, 1020] every expectation below uses.
+	const signedBlob =
+		'1200002400000007201B000003FC61400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8';
 
 	const params = {
 		identity: mockIdentity,
@@ -518,14 +522,10 @@ describe('xrp-send.services', () => {
 			const err = await sendXrp(params).catch((e: unknown) => e);
 
 			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
-			// No transaction id: it is a pure function of the blob, and carrying it separately let a
-			// retry submit one transaction while polling another id.
-			expect((err as XrpSendIndeterminateError).pending).toEqual({
-				txBlob: signedBlob,
-				// The window a retry must poll: the open index at signing through its expiry.
-				firstLedgerSequence: 1000,
-				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
-			});
+			// The blob and nothing else. The transaction id and the ledger window a retry polls are
+			// both pure functions of it, and carrying either let a retry act on one transaction while
+			// describing another.
+			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 		});
 
 		// Expiry is the opposite case: the transaction can never apply, so a retry MUST build a new
@@ -557,18 +557,14 @@ describe('xrp-send.services', () => {
 
 			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
 			expect(err).not.toBeInstanceOf(XrpSendExpiredError);
-			expect((err as XrpSendIndeterminateError).pending).toEqual({
-				txBlob: signedBlob,
-				firstLedgerSequence: 1000,
-				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
-			});
+			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 		});
 
 		it('resubmits the stored transaction instead of building a new one', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
@@ -579,11 +575,13 @@ describe('xrp-send.services', () => {
 				txBlob: pending.txBlob,
 				network: XrpNetworks.mainnet
 			});
+			// Literal, not read back off `pending`: the window has to come out of the blob, and
+			// comparing it against a field of the same object would pass whatever was handed in.
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 				hash: blobHash,
 				network: XrpNetworks.mainnet,
-				firstLedgerSequence: pending.firstLedgerSequence,
-				lastLedgerSequence: pending.lastLedgerSequence
+				firstLedgerSequence: 4320 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				lastLedgerSequence: 4320
 			});
 
 			// Nothing is fetched, rebuilt or re-signed: a new sequence would make this a different
@@ -599,18 +597,36 @@ describe('xrp-send.services', () => {
 		// `'A'.repeat(64)` for a blob deriving to BF3F06…4590, and every test still passed.
 		it('polls the id its blob derives to, not one it was handed', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
 			await sendXrp({ ...params, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
-					hash: 'BF3F06A593EFFF25FB677254106025C66980AC891C8FE63C89FC725964154590'
+					hash: 'DF525DC5393BD6A354BDABD7DB411D3381D01C04C74BFA3CD22F0F2E64ADC81E'
 				})
 			);
+		});
+
+		// Refused before anything is broadcast. Without a signed expiry the transaction can never
+		// expire, so confirmation could never reach a definitive answer about it and no retry for it
+		// could be called safe — and broadcasting first would put an unbounded payment on the wire.
+		it('refuses a stored blob with no signed expiry, without broadcasting it', async () => {
+			const pending = {
+				// The same Payment as above with `LastLedgerSequence` left out.
+				txBlob:
+					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
+			};
+
+			await expect(sendXrp({ ...params, pending })).rejects.toThrow(
+				'carries no LastLedgerSequence'
+			);
+
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 		});
 
 		// The payoff: the first attempt did land, so its sequence is consumed and the resubmission is
@@ -618,9 +634,9 @@ describe('xrp-send.services', () => {
 		// transaction's real outcome.
 		it('reports the original outcome when the resubmitted transaction already applied', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);

@@ -1,9 +1,12 @@
+import { XRP_LAST_LEDGER_SEQUENCE_OFFSET } from '$xrp/constants/xrp.constants';
 import {
 	buildXrpPayment,
+	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
+import { encode } from 'ripple-binary-codec';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -87,6 +90,35 @@ describe('xrp-transaction.utils', () => {
 
 		it.each(['tecUNFUNDED_PAYMENT', 'terQUEUED', undefined])('is false for %j', (result) => {
 			expect(isXrpTransactionSuccessful(result)).toBeFalsy();
+		});
+	});
+
+	describe('deriveXrpLedgerWindow', () => {
+		const blobWith = (lastLedgerSequence?: number): string =>
+			encode(buildXrpPayment({ ...base, lastLedgerSequence }));
+
+		// The blob is what the ledger acts on, so the window has to come out of it rather than
+		// travel beside it. A window that disagrees with the signed one makes the `tx` search miss
+		// the ledger the payment is in, and confirmation reports a live transaction as expired.
+		it('reads the window out of the signed blob', () => {
+			expect(deriveXrpLedgerWindow(blobWith(1020))).toEqual({
+				firstLedgerSequence: 1020 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				lastLedgerSequence: 1020
+			});
+		});
+
+		it('derives the lower bound from the signed expiry, not from any other source', () => {
+			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(987_654));
+
+			expect(lastLedgerSequence).toBe(987_654);
+			expect(firstLedgerSequence).toBe(987_654 - XRP_LAST_LEDGER_SEQUENCE_OFFSET);
+		});
+
+		// Refused rather than given an open-ended window: such a transaction can never expire, so
+		// no retry for it could ever be called safe. `sendXrp` never signs one without it, so a blob
+		// like this did not come from this code path.
+		it('refuses a blob that carries no LastLedgerSequence', () => {
+			expect(() => deriveXrpLedgerWindow(blobWith())).toThrow('carries no LastLedgerSequence');
 		});
 	});
 

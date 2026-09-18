@@ -36,9 +36,11 @@ export interface XrpAccountInfo {
  * `tefPAST_SEQ` and is never applied. A rebuilt transaction carries a NEW sequence and is
  * therefore a second, independent payment.
  *
- * The transaction id is deliberately NOT a field here. It is a pure function of `txBlob`, and
- * carrying it separately meant a retry could submit one transaction while polling another id —
- * concluding that the second expired, which reports a settled payment as safe to resend.
+ * Nothing travels beside the blob. The transaction id and the ledger range confirmation polls are
+ * both pure functions of it — see `deriveXrpTransactionHash` and `deriveXrpLedgerWindow` — and
+ * carrying either as a field made it a second claim that could disagree with what was signed. A
+ * mismatched id polls a different transaction; a mismatched range searches the wrong ledgers. Both
+ * end in a settled payment being reported as expired and safe to resend.
  *
  * `tefALREADY` is a narrower case, not this one: rippled reaches it only via
  * `checkPriorTxAndLastLedger`, which runs after `checkSeqProxy`, so it fires for a duplicate
@@ -46,11 +48,6 @@ export interface XrpAccountInfo {
  */
 export interface XrpPendingTransaction {
 	txBlob: string;
-	// The inclusive ledger range the transaction can appear in: the open index when it was signed,
-	// through the `LastLedgerSequence` it was signed with. Confirmation needs it to ask `tx` for a
-	// definite answer — see `loadXrpTransactionOutcome`.
-	firstLedgerSequence: number;
-	lastLedgerSequence: number;
 }
 
 /**

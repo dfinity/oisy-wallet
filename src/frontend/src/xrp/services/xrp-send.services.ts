@@ -36,6 +36,7 @@ import type {
 import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
+	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
@@ -182,7 +183,12 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, firstLedgerSequence, lastLedgerSequence } = pending;
+	const { txBlob } = pending;
+
+	// Before anything is broadcast: the window comes out of the blob, so it cannot describe a
+	// different transaction than the one submitted, and an unbounded blob is refused here rather
+	// than polled to a false expiry.
+	const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
 
 	// Derived here, from the blob about to be broadcast, so the id polled below cannot be anything
 	// but this transaction's. When it travelled as a field alongside the blob, a retry could submit
@@ -390,7 +396,7 @@ export const sendXrp = async ({
 
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
+		pending: { txBlob },
 		progress
 	});
 };
