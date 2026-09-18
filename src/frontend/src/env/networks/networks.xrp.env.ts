@@ -2,7 +2,7 @@ import type { SchnorrKeyId } from '$declarations/signer/signer.did';
 import { XRP_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import xrpMainnetIcon from '$lib/assets/networks/xrp-mainnet.svg';
-import { BETA, PROD } from '$lib/constants/app.constants';
+import { BETA, PROD, TEST } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';

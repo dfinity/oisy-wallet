@@ -1,16 +1,18 @@
-import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_POLL_MS,
+	XRP_CONFIRM_MIN_POLL_MS,
+	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
+	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
-	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpTransactionOutcome,
 	loadXrpValidatedLedgerIndex,
@@ -30,6 +32,7 @@ import type {
 	XrpSendResult,
 	XrpSubmitResult
 } from '$xrp/types/xrp-transaction';
+import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
 	deriveXrpTransactionHash,
@@ -50,10 +53,12 @@ import { nonNullish } from '@dfinity/utils';
 const confirmXrpTransaction = async ({
 	hash,
 	network,
+	firstLedgerSequence,
 	lastLedgerSequence
 }: {
 	hash: string;
 	network: XrpNetworkType;
+	firstLedgerSequence: number;
 	lastLedgerSequence: number;
 }): Promise<string | undefined> => {
 	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
@@ -63,7 +68,12 @@ const confirmXrpTransaction = async ({
 		{ validated: boolean; transactionResult: string | undefined } | undefined
 	> => {
 		try {
-			return await loadXrpTransactionOutcome({ hash, network });
+			return await loadXrpTransactionOutcome({
+				hash,
+				network,
+				firstLedgerSequence,
+				lastLedgerSequence
+			});
 		} catch (_: unknown) {
 			return undefined;
 		}
@@ -79,6 +89,13 @@ const confirmXrpTransaction = async ({
 		}
 	};
 
+	// Expiry cannot happen until the validated index passes `LastLedgerSequence`, and the index only
+	// moves once per ledger close while this loop polls two to four times as often. Once a read
+	// tells us how many closes are still needed, asking again before roughly that many polls have
+	// passed cannot change the outcome — which is why the previous version spent a ledger call on
+	// every answered poll and almost none of them could decide anything.
+	let nextLedgerReadAttempt = 0;
+
 	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
 		const outcome = await tryOutcome();
 
@@ -88,11 +105,20 @@ const confirmXrpTransaction = async ({
 
 		// Expiry is only evaluated on a lookup the node actually answered; an unanswered one
 		// establishes nothing and simply costs an attempt.
-		if (nonNullish(outcome)) {
+		if (nonNullish(outcome) && attempt >= nextLedgerReadAttempt) {
 			// The VALIDATED index, not the open one: the open ledger has already advanced past a
 			// closed ledger whose transactions are not yet validated, so comparing against it would
 			// declare expiry for a payment that is about to validate.
 			const validatedLedgerIndex = await tryValidatedLedgerIndex();
+
+			// How far the ledger still has to travel, converted to polls. An unanswered read leaves
+			// this unchanged, so the next attempt asks again rather than backing off on no evidence.
+			if (nonNullish(validatedLedgerIndex)) {
+				nextLedgerReadAttempt =
+					attempt +
+					Math.max(lastLedgerSequence - validatedLedgerIndex, 0) *
+						XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE;
+			}
 
 			if (nonNullish(validatedLedgerIndex) && validatedLedgerIndex > lastLedgerSequence) {
 				// The `tx` lookup above and this index come from two separate calls, so the lookup may
@@ -101,7 +127,12 @@ const confirmXrpTransaction = async ({
 				// reported as failed and the user invited to send a duplicate. This one is not caught:
 				// a node that fails to answer here leaves non-inclusion unestablished, and the error
 				// must surface instead of being turned into a claim that the payment never applied.
-				const recheck = await loadXrpTransactionOutcome({ hash, network });
+				const recheck = await loadXrpTransactionOutcome({
+					hash,
+					network,
+					firstLedgerSequence,
+					lastLedgerSequence
+				});
 
 				if (recheck.validated) {
 					return recheck.transactionResult;
@@ -117,7 +148,9 @@ const confirmXrpTransaction = async ({
 			}
 		}
 
-		await randomWait({});
+		// Explicit rather than `randomWait`'s defaults: `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read
+		// skip are both derived from this interval, so the loop has to wait what they assume.
+		await randomWait({ min: XRP_CONFIRM_MIN_POLL_MS, max: XRP_CONFIRM_MAX_POLL_MS });
 	}
 
 	throw new Error('XRP transaction confirmation stopped before its ledger expiry was reached.');
@@ -138,7 +171,7 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, txHash, lastLedgerSequence } = pending;
+	const { txBlob, txHash, firstLedgerSequence, lastLedgerSequence } = pending;
 
 	progress?.(ProgressStepsSendXrp.SEND);
 
@@ -167,7 +200,12 @@ const submitAndConfirmXrpTransaction = async ({
 	let transactionResult: string | undefined;
 
 	try {
-		transactionResult = await confirmXrpTransaction({ hash: txHash, network, lastLedgerSequence });
+		transactionResult = await confirmXrpTransaction({
+			hash: txHash,
+			network,
+			firstLedgerSequence,
+			lastLedgerSequence
+		});
 	} catch (err: unknown) {
 		// Expiry is the one confirmation failure that is definitive: the validated ledger passed
 		// `LastLedgerSequence` and the hash was still absent on recheck, so this transaction can
@@ -185,7 +223,8 @@ const submitAndConfirmXrpTransaction = async ({
 	}
 
 	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
-	// validated the transaction and it failed, claiming the fee.
+	// validated the transaction and it failed, claiming the fee. Both are thrown at the CONFIRM
+	// step, so the progress step alone cannot separate "known failure" from "unknown".
 	if (!isXrpTransactionSuccessful(transactionResult)) {
 		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
 	}
@@ -196,9 +235,9 @@ const submitAndConfirmXrpTransaction = async ({
 };
 
 /**
- * Sends native XRP: fetches the account sequence, the destination's balance and the current ledger
- * index, builds and threshold-signs a Payment, submits it, and waits for the transaction to be
- * included in a validated ledger.
+ * Sends native XRP: fetches the account sequence, whether the destination exists and the current
+ * ledger index, builds and threshold-signs a Payment, submits it, and waits for the transaction to
+ * be included in a validated ledger.
  *
  * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
  * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
@@ -213,9 +252,10 @@ const submitAndConfirmXrpTransaction = async ({
  *
  * `pending` retries a send whose outcome was never established, from the
  * {@link XrpSendIndeterminateError} that reported it. The stored transaction is resubmitted
- * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, the
- * ledger rejects this one as already applied rather than making a second payment. Building a
- * fresh transaction in that situation is precisely what pays twice.
+ * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, its
+ * sequence is already consumed and the ledger refuses this one (`tefPAST_SEQ`) rather than making
+ * a second payment. Building a fresh transaction in that situation takes a NEW sequence, which is
+ * precisely what pays twice.
  */
 export const sendXrp = async ({
 	identity,
@@ -246,6 +286,24 @@ export const sendXrp = async ({
 		return await submitAndConfirmXrpTransaction({ network, pending, progress });
 	}
 
+	// Advisory, and therefore never fatal: a check that could not run must not block a send to a
+	// well-funded address, so anything other than the node's own "account not found" leaves this
+	// `undefined` and the guard below is skipped.
+	//
+	// The node's error is the only thing that means unfunded. A zero balance does not: the
+	// transaction cost can take an existing account below its reserve, even to nothing, and the
+	// account still exists — at which point it can receive any amount, since receiving carries no
+	// reserve requirement of its own.
+	const tryDestinationExists = async (): Promise<boolean | undefined> => {
+		try {
+			await loadXrpAccountInfo({ address: destination, network });
+
+			return true;
+		} catch (err: unknown) {
+			return err instanceof XrpAccountNotFoundError ? false : undefined;
+		}
+	};
+
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
 	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
 	// total past the balance even though the caller's sendability check passed.
@@ -255,22 +313,33 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence }, destinationBalance, ledgerIndex, signingPublicKey] = await Promise.all([
-		loadXrpAccountInfo({ address: source, network }),
-		loadXrpBalance({ address: destination, network }),
-		loadXrpLedgerIndex({ network }),
-		getXrpSigningPublicKey({ identity, network })
-	]);
+	const [{ sequence, balance, ownerCount }, destinationExists, ledgerIndex, signingPublicKey] =
+		await Promise.all([
+			loadXrpAccountInfo({ address: source, network }),
+			tryDestinationExists(),
+			loadXrpLedgerIndex({ network }),
+			getXrpSigningPublicKey({ identity, network, account: source })
+		]);
 
-	// An account that exists on-ledger always holds at least the base reserve, so a zero balance
-	// means the address is unfunded — `loadXrpBalance` maps the node's `actNotFound` to ZERO. XRPL
-	// answers a payment too small to create such an account with `tecNO_DST_INSUF_XRP`, which is
-	// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
-	// failure into a plain error.
+	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
+	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the
+	// sequence is burned, nothing is delivered, and the failure only surfaces after the poll. The
+	// spec makes this client-side check an acceptance criterion, and `getXrpMaxAmount` — which the
+	// caller uses to offer a maximum — had no runtime caller until now.
+	if (amount > getXrpMaxAmount({ balance, fee, ownerCount })) {
+		throw new Error(
+			`XRP amount ${amount} drops exceeds the sendable maximum for this account, which must retain ${getXrpReserveDrops({ ownerCount })} drops of reserve plus the ${fee} drops fee.`
+		);
+	}
+
+	// XRPL answers a payment too small to create an account that does not exist with
+	// `tecNO_DST_INSUF_XRP`, which is APPLIED: the payment fails and the fee is claimed. Refusing
+	// before signing turns a charged failure into a plain error.
 	//
-	// Advisory, not authoritative: the destination can be funded between this read and submission,
-	// so the validated result stays the final word. This only declines what is already known.
-	if (destinationBalance === ZERO && amount < XRP_BASE_RESERVE_DROPS) {
+	// Only `false` declines. `undefined` means the check could not be made, and the destination can
+	// be funded between this read and submission either way, so the validated result stays the
+	// final word — this declines only what the node positively reported.
+	if (destinationExists === false && amount < XRP_BASE_RESERVE_DROPS) {
 		throw new Error(
 			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
@@ -299,7 +368,7 @@ export const sendXrp = async ({
 
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, txHash, lastLedgerSequence },
+		pending: { txBlob, txHash, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
 		progress
 	});
 };

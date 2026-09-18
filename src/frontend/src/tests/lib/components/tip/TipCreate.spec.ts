@@ -158,6 +158,27 @@ describe('TipCreate', () => {
 		});
 	});
 
+	it('does not promise that the funds never leave the wallet', () => {
+		// It used to say exactly that, two rows under the "Fee to reserve" it
+		// itemises — a fee `reserveTip` spends at `icrc2_approve` whether anyone
+		// claims or not, so the screen contradicted itself. The amount does not
+		// move; that fee does. Asserted because it is a claim about where someone's
+		// money goes, on the screen where they decide to commit it.
+		const { getByText } = render(TipCreate, { props, context });
+
+		const notice = get(i18n).tip.text.lapse_notice;
+
+		expect(getByText(notice)).toBeInTheDocument();
+		expect(notice).not.toMatch(/funds never leave|never leave your wallet/i);
+		expect(notice).toMatch(/amount stays in your wallet/i);
+
+		// The other half of the promise, and the one that took verifying: the payout
+		// fee is only spent by `icrc2_transfer_from`, so an unclaimed tip is never
+		// charged it. Asserted separately because it could be dropped or reversed
+		// while the amount clause above stayed true.
+		expect(notice).toMatch(/claim fee is never charged/i);
+	});
+
 	it('says nothing about reservations when there are none', () => {
 		// Most senders have no live tips. A warning panel on every visit would be
 		// noise that trains people to ignore the one time it matters.
