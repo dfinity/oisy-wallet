@@ -824,6 +824,63 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// The three guards that need account state cannot run before the reads, so the key fetch has to
+	// come after THEM — not merely after the argument checks. `Promise.all` rejects on the first
+	// rejection, so a key failure sharing that call would win a race against whichever of these
+	// diagnoses the user can actually act on.
+	describe('when the key is derived', () => {
+		it('derives it for a send that passes every guard', async () => {
+			await sendXrp(params);
+
+			expect(xrpSignServices.getXrpSigningPublicKey).toHaveBeenCalledOnce();
+		});
+
+		it('does not derive it when the amount exceeds the sendable maximum', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+				balance: XRP_BASE_RESERVE_DROPS,
+				sequence: 7,
+				ownerCount: 0,
+				flags: undefined
+			});
+
+			await expect(sendXrp({ ...params, amount: 25_000_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+		});
+
+		it('does not derive it for a below-reserve payment to a destination that does not exist', async () => {
+			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(async ({ address }) =>
+				address === destination
+					? await Promise.reject(new XrpAccountNotFoundError('XRPL account not found'))
+					: await Promise.resolve(sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
+				'does not exist yet'
+			);
+
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+		});
+
+		it('does not derive it for an untagged payment to a destination that requires a tag', async () => {
+			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address }) =>
+				Promise.resolve(address === destination ? { ...sourceInfo, flags: 0x00020000 } : sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'requires a destination tag'
+			);
+
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+		});
+	});
+
 	describe('the amount and fee bounds', () => {
 		// Refused from the arguments, before any RPC or signing. `Amount: '0'` encodes fine, so this
 		// otherwise costs a threshold signature and a submit to learn `temBAD_AMOUNT` from the

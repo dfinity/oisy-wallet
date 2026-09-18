@@ -417,13 +417,15 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex, signingPublicKey] =
-		await Promise.all([
-			loadXrpAccountInfo({ address: source, network }),
-			tryDestination(),
-			loadXrpLedgerIndex({ network }),
-			getXrpSigningPublicKey({ identity, network, account: source })
-		]);
+	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
+	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
+	// would win a race against whichever of those diagnoses was the useful one. A key mismatch is a
+	// broken deployment; an insufficient balance is something the user can act on.
+	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex] = await Promise.all([
+		loadXrpAccountInfo({ address: source, network }),
+		tryDestination(),
+		loadXrpLedgerIndex({ network })
+	]);
 
 	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
 	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the
@@ -479,6 +481,13 @@ export const sendXrp = async ({
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
 	}
+
+	// After every guard, so a send that was going to be refused does not derive a key first. On a
+	// deployed build that costs only local hashing — `deriveTokenAddress` derives locally whenever
+	// `FRONTEND_DERIVATION_ENABLED`, which is `!LOCAL` — so serialising it here buys the clearer
+	// error at the price of one overlapped call in local development, where the signer-canister
+	// fallback is the one that actually runs.
+	const signingPublicKey = await getXrpSigningPublicKey({ identity, network, account: source });
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 
