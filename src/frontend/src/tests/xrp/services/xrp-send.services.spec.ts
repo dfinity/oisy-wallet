@@ -4,6 +4,8 @@ import { randomWait } from '$lib/utils/time.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
+	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_DURATION_MS,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
@@ -11,7 +13,7 @@ import {
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
-import { sendXrp } from '$xrp/services/xrp-send.services';
+import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
 import {
@@ -48,6 +50,9 @@ describe('xrp-send.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// `clearAllMocks` keeps implementations, and a test that makes `randomWait` advance fake
+		// timers would otherwise do so in every test after it.
+		vi.mocked(randomWait).mockReset();
 
 		// Every RPC this path makes is mocked below. The env resolves `XRP_RPC_HTTP_URL_MAINNET` to
 		// `undefined` under vitest, so a missing mock already fails on the endpoint assertion; this
@@ -473,9 +478,38 @@ describe('xrp-send.services', () => {
 			new Error('XRPL ledger request failed with status 503')
 		);
 
+		// The message names which of the two limits ended it, so an operator can tell "the ledger
+		// never decided" from "the node was too slow to let it".
 		await expect(sendXrp(params)).rejects.toThrow(
-			'XRP transaction confirmation stopped before its ledger expiry was reached.'
+			`stopped before its ledger expiry was reached: ${XRP_CONFIRM_MAX_ATTEMPTS} attempts made`
 		);
+	});
+
+	// The attempt count is not a time bound: each attempt costs an interval plus however long its
+	// requests take, so a node answering slowly stretches 160 attempts far past the window they
+	// were derived from, and the user waits on CONFIRM with no answer of any kind.
+	it('gives up on the deadline when the attempts would take too long', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+		vi.useFakeTimers();
+
+		// Each poll now costs a tenth of the whole budget, so the deadline is reached long before
+		// the attempts are.
+		vi.mocked(randomWait).mockImplementation(() => {
+			vi.advanceTimersByTime(XRP_CONFIRM_MAX_DURATION_MS / 10);
+
+			return Promise.resolve();
+		});
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		vi.useRealTimers();
+
+		expect((err as Error).message).toContain(`${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`);
+		// Ten polls span the budget, against a cap of 160.
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledTimes(10);
+		expect(XRP_CONFIRM_MAX_ATTEMPTS).toBe(160);
 	});
 
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.
@@ -561,6 +595,24 @@ describe('xrp-send.services', () => {
 			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 		});
 
+		// The signature is the guarantee. A retry takes no identity, addresses, amount or fee, so a
+		// caller cannot review one payment and resubmit another — and none of the fresh-send work
+		// can run on this path even by accident.
+		it('reads nothing and signs nothing', async () => {
+			const pending = {
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
+			};
+
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
 		it('resubmits the stored transaction instead of building a new one', async () => {
 			const pending = {
 				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
@@ -570,7 +622,7 @@ describe('xrp-send.services', () => {
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
-			await sendXrp({ ...params, pending });
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
 
 			expect(xrplRest.submitXrpTransaction).toHaveBeenCalledExactlyOnceWith({
 				txBlob: pending.txBlob,
@@ -603,7 +655,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await sendXrp({ ...params, pending });
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -622,7 +674,7 @@ describe('xrp-send.services', () => {
 					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await expect(sendXrp({ ...params, pending })).rejects.toThrow(
+			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).rejects.toThrow(
 				'carries no LastLedgerSequence'
 			);
 
@@ -647,7 +699,7 @@ describe('xrp-send.services', () => {
 				accepted: false
 			});
 
-			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
+			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).resolves.toEqual({
 				txHash: blobHash,
 				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
@@ -696,6 +748,49 @@ describe('xrp-send.services', () => {
 
 			await expect(sendXrp({ ...params, amount: 1_000_000n, fee: 1n })).rejects.toThrow(
 				'exceeds the sendable maximum'
+			);
+		});
+	});
+
+	describe('the amount and fee bounds', () => {
+		// Refused from the arguments, before any RPC or signing. `Amount: '0'` encodes fine, so this
+		// otherwise costs a threshold signature and a submit to learn `temBAD_AMOUNT` from the
+		// ledger; a negative one throws `-5 is an illegal amount` out of the codec, which tells the
+		// user nothing.
+		it.each([ZERO, -1n])('refuses the amount %s drops before any work', async (amount) => {
+			await expect(sendXrp({ ...params, amount })).rejects.toThrow(
+				'XRP amount must be greater than zero'
+			);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it.each([ZERO, -1n])('refuses the fee %s drops before any work', async (fee) => {
+			await expect(sendXrp({ ...params, fee })).rejects.toThrow(
+				'XRP fee must be greater than zero'
+			);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// The reason the fee bound is not merely tidiness: the fee is SUBTRACTED in
+		// `getXrpMaxAmount`, so a negative one raises the maximum the reserve guard enforces. Here
+		// the balance is the reserve exactly, so nothing is sendable — and a -10_000_000 fee would
+		// make 9 XRP look sendable.
+		it('does not let a negative fee raise the sendable maximum', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+				balance: XRP_BASE_RESERVE_DROPS,
+				sequence: 7,
+				ownerCount: 0,
+				flags: undefined
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n, fee: -10_000_000n })).rejects.toThrow(
+				'XRP fee must be greater than zero'
 			);
 		});
 	});

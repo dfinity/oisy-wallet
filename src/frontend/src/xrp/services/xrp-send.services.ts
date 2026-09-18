@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
@@ -5,6 +6,7 @@ import {
 	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
+	XRP_CONFIRM_MAX_DURATION_MS,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
@@ -97,7 +99,13 @@ const confirmXrpTransaction = async ({
 	// every answered poll and almost none of them could decide anything.
 	let nextLedgerReadAttempt = 0;
 
-	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
+	// Two limits on the same exit, because the attempt count does not bound one on its own: each
+	// attempt costs an interval plus however long its requests take, so a node answering slowly
+	// stretches the count far past the window it was derived from. Whichever comes first ends the
+	// poll, and for a node that answers at all that is the attempts.
+	const deadline = Date.now() + XRP_CONFIRM_MAX_DURATION_MS;
+
+	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS && Date.now() < deadline; attempt++) {
 		const outcome = await tryOutcome();
 
 		if (outcome?.state === 'validated') {
@@ -166,7 +174,16 @@ const confirmXrpTransaction = async ({
 		await randomWait({ min: XRP_CONFIRM_MIN_POLL_MS, max: XRP_CONFIRM_MAX_POLL_MS });
 	}
 
-	throw new Error('XRP transaction confirmation stopped before its ledger expiry was reached.');
+	// Which limit ended it is worth saying: one means the ledger never decided, the other that the
+	// node was too slow to let it. Both leave the outcome unknown, and the caller treats them the
+	// same — the signed transaction goes back with the error either way.
+	throw new Error(
+		`XRP transaction confirmation stopped before its ledger expiry was reached: ${
+			Date.now() < deadline
+				? `${XRP_CONFIRM_MAX_ATTEMPTS} attempts made`
+				: `${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`
+		}.`
+	);
 };
 
 /**
@@ -273,12 +290,9 @@ const submitAndConfirmXrpTransaction = async ({
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  *
- * `pending` retries a send whose outcome was never established, from the
- * {@link XrpSendIndeterminateError} that reported it. The stored transaction is resubmitted
- * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, its
- * sequence is already consumed and the ledger refuses this one (`tefPAST_SEQ`) rather than making
- * a second payment. Building a fresh transaction in that situation takes a NEW sequence, which is
- * precisely what pays twice.
+ * A retry of a send whose outcome was never established is {@link retryXrpSend}, not this
+ * function: the two share only the network and the progress callback, and nothing here applies to
+ * an already-signed transaction.
  */
 export const sendXrp = async ({
 	identity,
@@ -288,7 +302,6 @@ export const sendXrp = async ({
 	amount,
 	fee,
 	destinationTag,
-	pending,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -298,16 +311,9 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	fee: XrpBalance;
 	destinationTag?: number;
-	pending?: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
-
-	// Before the fee bound: a resubmission prices nothing, and its fee was already bounded when the
-	// blob was signed.
-	if (nonNullish(pending)) {
-		return await submitAndConfirmXrpTransaction({ network, pending, progress });
-	}
 
 	// The node's error is the only thing that means unfunded. A zero balance does not: the
 	// transaction cost can take an existing account below its reserve, even to nothing, and the
@@ -336,6 +342,25 @@ export const sendXrp = async ({
 			return { state: 'unavailable', error: err instanceof Error ? err : new Error(String(err)) };
 		}
 	};
+
+	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
+	// and the two ends fail in different places: `ripple-binary-codec` encodes `Amount: '0'`
+	// happily, so a zero-amount payment spent a threshold signature and a submit to learn
+	// `temBAD_AMOUNT` from the ledger, while a negative amount or fee throws `-5 is an illegal
+	// amount` from inside the codec — after the account read, the ledger read and the signing-key
+	// call. Neither reaches the ledger and neither is charged, since `tem*` is not applied; both
+	// are knowable from the arguments alone.
+	//
+	// A negative fee is the one that also corrupts a guard rather than just failing late: it is
+	// subtracted in `getXrpMaxAmount`, so it RAISES the sendable maximum that exists to keep the
+	// account above its reserve.
+	if (amount <= ZERO) {
+		throw new Error(`XRP amount must be greater than zero, got ${amount} drops.`);
+	}
+
+	if (fee <= ZERO) {
+		throw new Error(`XRP fee must be greater than zero, got ${fee} drops.`);
+	}
 
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
 	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
@@ -430,4 +455,33 @@ export const sendXrp = async ({
 		pending: { txBlob },
 		progress
 	});
+};
+
+/**
+ * Resubmits a send whose outcome was never established, from the
+ * {@link XrpSendIndeterminateError} that reported it.
+ *
+ * The stored transaction goes back unchanged — nothing is fetched, rebuilt or re-signed — so if the
+ * first attempt did land, its sequence is already consumed and the ledger refuses this one
+ * (`tefPAST_SEQ`) rather than making a second payment. Building a fresh transaction in that
+ * situation takes a NEW sequence, which is precisely what pays twice.
+ *
+ * Separate from {@link sendXrp} rather than a `pending` field on it, because the two have almost
+ * nothing in common: this takes no identity, no addresses, no amount and no fee, and a signature
+ * that accepted them would accept a reviewed payment alongside a stored blob and silently act on
+ * the blob. The window they are polled over is not a parameter either — it is read out of the blob
+ * by `deriveXrpLedgerWindow`.
+ */
+export const retryXrpSend = async ({
+	network,
+	pending,
+	progress
+}: {
+	network: XrpNetworkType;
+	pending: XrpPendingTransaction;
+	progress?: (step: ProgressStepsSendXrp) => void;
+}): Promise<XrpSendResult> => {
+	progress?.(ProgressStepsSendXrp.INITIALIZATION);
+
+	return await submitAndConfirmXrpTransaction({ network, pending, progress });
 };

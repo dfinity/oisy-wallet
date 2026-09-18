@@ -1,5 +1,6 @@
 import {
 	XrpDropsSchema,
+	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
 	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
@@ -79,6 +80,82 @@ describe('xrpl-rpc.schema', () => {
 	// plausible result would parse and the error would be silently dropped. The consequence differs
 	// per schema but is worst for the validated index: a bogus one past `LastLedgerSequence` makes
 	// confirmation declare expiry and tell the user a resend is safe.
+	describe('XrplAccountInfoFullResultSchema', () => {
+		const accountData = { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 };
+
+		it('parses account data alone', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
+			).toBeTruthy();
+		});
+
+		// The branch that lets the caller decide absence after parsing rather than before it.
+		it('parses a lone actNotFound', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ error: 'actNotFound' }).success
+			).toBeTruthy();
+		});
+
+		// `xrpJsonRpc` throws every other error before this schema runs, so a branch for one would
+		// describe a case that cannot arrive — and accepting it here would let it be mistaken for
+		// the "owns nothing" answer.
+		it.each(['tooBusy', 'noNetwork'])('rejects the operational failure %s', (error) => {
+			expect(XrplAccountInfoFullResultSchema.safeParse({ error }).success).toBeFalsy();
+		});
+
+		it('rejects actNotFound alongside account data', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					error: 'actNotFound',
+					account_data: accountData
+				}).success
+			).toBeFalsy();
+		});
+	});
+
+	describe('XrplLedgerResultSchema', () => {
+		it('normalises whichever form is present to one index', () => {
+			expect(XrplLedgerResultSchema.safeParse({ validated: true, ledger_index: 5 }).data).toEqual({
+				ledgerIndex: 5
+			});
+			expect(
+				XrplLedgerResultSchema.safeParse({ validated: true, ledger: { ledger_index: '5' } }).data
+			).toEqual({ ledgerIndex: 5 });
+		});
+
+		// Both forms in one response is the normal case for the configured provider, so this must
+		// parse — rejecting it would reject every real `ledger` response.
+		it('accepts both forms when they agree, across the type difference', () => {
+			expect(
+				XrplLedgerResultSchema.safeParse({
+					validated: true,
+					ledger_index: 5,
+					ledger: { ledger_index: '5' }
+				}).data
+			).toEqual({ ledgerIndex: 5 });
+		});
+
+		it('rejects two indices that disagree', () => {
+			expect(
+				XrplLedgerResultSchema.safeParse({
+					validated: true,
+					ledger_index: 999_999_999,
+					ledger: { ledger_index: '5' }
+				}).success
+			).toBeFalsy();
+		});
+
+		it('rejects a response carrying neither form', () => {
+			expect(XrplLedgerResultSchema.safeParse({ validated: true }).success).toBeFalsy();
+		});
+
+		// A non-validated ledger's index can be ahead of the last validated one, which is the
+		// confusion this call exists to avoid.
+		it.each([false, undefined])('rejects validated: %j', (validated) => {
+			expect(XrplLedgerResultSchema.safeParse({ validated, ledger_index: 5 }).success).toBeFalsy();
+		});
+	});
+
 	describe('rejecting a mixed error/result response', () => {
 		it.each([
 			{
@@ -100,6 +177,11 @@ describe('xrpl-rpc.schema', () => {
 				name: 'XrplSubmitResultSchema',
 				schema: XrplSubmitResultSchema,
 				result: { engine_result: 'tesSUCCESS' }
+			},
+			{
+				name: 'XrplAccountInfoFullResultSchema',
+				schema: XrplAccountInfoFullResultSchema,
+				result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } }
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
 			expect(schema.safeParse(result).success).toBeTruthy();
