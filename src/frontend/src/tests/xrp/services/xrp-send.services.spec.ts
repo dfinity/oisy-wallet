@@ -6,6 +6,7 @@ import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_CONFIRM_MAX_DURATION_MS,
+	XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
@@ -468,6 +469,38 @@ describe('xrp-send.services', () => {
 			.mockResolvedValue(1000);
 
 		await expect(sendXrp(params)).resolves.toBeDefined();
+	});
+
+	// `UInt32` bounds the number system, not the ledger: `0xFFFFFFFF` is around forty times the
+	// current mainnet index, so a value the schema accepts can still be wildly outside this
+	// transaction's window. Treated as no answer at all, so the run ends indeterminate — which hands
+	// back the same blob — instead of declaring the expiry that tells a retry to build a new one.
+	it.each([
+		{ name: 'a UInt32-max index', index: 0xffff_ffff },
+		{
+			name: 'an index just past the lookahead',
+			index: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD + 1
+		}
+	])('does not declare expiry from $name', async ({ index }) => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(index);
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+		expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
+	});
+
+	// The other side of the bound: an index inside the lookahead is a real answer and must still
+	// reach the expiry conclusion, or a genuinely expired send would never resolve.
+	it('still declares expiry from an index inside the lookahead', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD
+		);
+
+		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
 	});
 
 	// An unanswered ledger call establishes nothing, so it must not skip the expiry it would have

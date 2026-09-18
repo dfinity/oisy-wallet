@@ -1,5 +1,6 @@
 import {
 	XrpDropsSchema,
+	XrpLedgerCounterSchema,
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
 	XrplEnvelopeSchema,
@@ -110,6 +111,21 @@ describe('xrpl-rpc.schema', () => {
 					account_data: accountData
 				}).success
 			).toBeFalsy();
+		});
+	});
+
+	describe('XrpLedgerCounterSchema', () => {
+		// `Sequence`, `OwnerCount`, `Flags` and a ledger index are all protocol `UInt32`, so nothing
+		// above this can be a real value. Zod's `.int()` alone stops at `Number.MAX_SAFE_INTEGER`,
+		// two million times further out — and the value that matters most is the validated ledger
+		// index, where an out-of-range one past `LastLedgerSequence` makes confirmation declare
+		// expiry and tell the user a resend is safe.
+		it.each([0, 1, 107_065_791, 0xffff_ffff])('accepts the UInt32 value %j', (value) => {
+			expect(XrpLedgerCounterSchema.safeParse(value).success).toBeTruthy();
+		});
+
+		it.each([0xffff_ffff + 1, 9_007_199_254_740_991, -1, 1.5])('rejects %j', (value) => {
+			expect(XrpLedgerCounterSchema.safeParse(value).success).toBeFalsy();
 		});
 	});
 

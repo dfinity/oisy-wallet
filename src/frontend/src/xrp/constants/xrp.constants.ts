@@ -93,3 +93,16 @@ export const XRP_CONFIRM_MAX_ATTEMPTS =
 export const XRP_CONFIRM_MAX_DURATION_MS =
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
 	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;
+
+// How far past `LastLedgerSequence` a validated index can legitimately have travelled by the time
+// this poll reads it: the whole confirmation budget converted to ledger closes, plus the validity
+// window itself. Beyond that the node is reporting something the ledger cannot have reached while
+// we were watching, and refusing to conclude is the safe direction — the indeterminate path
+// resubmits the same blob and lets the ledger decide, whereas expiry tells the caller to build a
+// new transaction on a new sequence.
+//
+// `XrpLedgerCounterSchema` bounds the number system at `UInt32`; this bounds the ledger. The two
+// are far apart: `0xFFFFFFFF` is around forty times the current mainnet index, so a value inside
+// the protocol's range is still wildly outside this transaction's.
+export const XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD =
+	XRP_CONFIRM_MAX_DURATION_MS / 1000 / XRP_LEDGER_CLOSE_SECONDS + XRP_LAST_LEDGER_SEQUENCE_OFFSET;

@@ -40,8 +40,17 @@ export const XrplEnvelopeSchema = z.object({
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
 // and inflate the sendable maximum, and a fractional one throws inside `BigInt()` — so both are
-// pinned to a non-negative safe integer rather than checked with `typeof`.
-export const XrpLedgerCounterSchema = z.number().int().nonnegative();
+// pinned rather than checked with `typeof`.
+//
+// Bounded to `UInt32`, which is what every field using this actually is: `Sequence` and
+// `OwnerCount` per the AccountRoot reference, `Flags` and a ledger index likewise. Zod's `.int()`
+// already stops at `Number.MAX_SAFE_INTEGER`, two million times more than the protocol can
+// express, and the value that matters most is the validated ledger index — an out-of-range one
+// past `LastLedgerSequence` makes confirmation declare expiry and tell the user a resend is safe.
+//
+// This bounds the number system, not the ledger: `0xFFFFFFFF` is still ~40x the current mainnet
+// index, so `confirmXrpTransaction` also checks the index against the transaction's own window.
+export const XrpLedgerCounterSchema = z.number().int().nonnegative().max(0xffff_ffff);
 
 // These three validate the `result` object, because `xrpJsonRpc` unwraps the envelope before
 // returning. Stricter than `XrplAccountInfoResponseSchema`, which only needs `Balance`: building a

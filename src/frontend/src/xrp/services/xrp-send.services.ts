@@ -7,6 +7,7 @@ import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_CONFIRM_MAX_DURATION_MS,
+	XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
@@ -86,7 +87,16 @@ const confirmXrpTransaction = async ({
 	// transient failure escape would abort the send for a payment that can still validate.
 	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
 		try {
-			return await loadXrpValidatedLedgerIndex({ network });
+			const index = await loadXrpValidatedLedgerIndex({ network });
+
+			// An index further past this transaction's window than the ledger could have travelled
+			// while we were watching is not an answer about it. Returned as `undefined`, so it is
+			// handled exactly like a read the node refused: the poll continues and ends indeterminate,
+			// rather than concluding the expiry that tells a retry to build a new transaction.
+			//
+			// The schema bounds these to `UInt32`, but that is the number system, not the ledger —
+			// `0xFFFFFFFF` is around forty times the current mainnet index.
+			return index > lastLedgerSequence + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
 		} catch (_: unknown) {
 			return undefined;
 		}
