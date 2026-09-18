@@ -85,13 +85,23 @@ export const shortenWithMiddleEllipsis = ({
 		: text;
 };
 
-const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	month: 'short',
 	day: 'numeric',
-	year: 'numeric',
+	year: 'numeric'
+};
+
+const TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour: '2-digit',
 	minute: '2-digit',
 	hour12: false
+};
+
+// Composed from the two halves rather than restated, so a caller that wants only
+// one of them cannot drift from the app's date style.
+const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+	...DATE_FORMAT_OPTIONS,
+	...TIME_FORMAT_OPTIONS
 };
 
 export const formatSecondsToDate = ({
@@ -139,8 +149,8 @@ export const formatNanosecondsToDate = ({
  * and join them itself.
  *
  * Day and month order is left to the locale rather than fixed, which is the whole
- * point of going through `Intl`: there are fifteen of them and only one puts the month
- * second.
+ * point of going through `Intl`. Of the fifteen languages here, twelve lead with the
+ * day, three with the year, and English alone with the month.
  */
 export const formatNanosecondsToDateAndTime = ({
 	nanoseconds,
@@ -149,14 +159,17 @@ export const formatNanosecondsToDateAndTime = ({
 	nanoseconds: bigint;
 	language?: Languages;
 }): { date: string; time: string } => {
-	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	// Not `date`, which is what the field below is called: one of the two would have
+	// been read as the other.
+	const instant = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	const locale = language ?? Languages.ENGLISH;
 
 	return {
-		date: date.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }),
-		// Seconds left out on purpose. This is a deadline days away; to the second is
-		// a precision the reader has no use for and one more thing to read past.
-		time: date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })
+		date: instant.toLocaleDateString(locale, DATE_FORMAT_OPTIONS),
+		// Seconds are not in `TIME_FORMAT_OPTIONS` and are not wanted here either:
+		// this is a deadline days away, so to the second is a precision the reader
+		// has no use for and one more thing to read past.
+		time: instant.toLocaleTimeString(locale, TIME_FORMAT_OPTIONS)
 	};
 };
 
