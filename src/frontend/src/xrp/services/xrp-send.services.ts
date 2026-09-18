@@ -274,12 +274,9 @@ const submitAndConfirmXrpTransaction = async ({
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  *
- * `pending` retries a send whose outcome was never established, from the
- * {@link XrpSendIndeterminateError} that reported it. The stored transaction is resubmitted
- * unchanged — nothing is fetched, rebuilt or re-signed — so if the first attempt did land, its
- * sequence is already consumed and the ledger refuses this one (`tefPAST_SEQ`) rather than making
- * a second payment. Building a fresh transaction in that situation takes a NEW sequence, which is
- * precisely what pays twice.
+ * A retry of a send whose outcome was never established is {@link retryXrpSend}, not this
+ * function: the two share only the network and the progress callback, and nothing here applies to
+ * an already-signed transaction.
  */
 export const sendXrp = async ({
 	identity,
@@ -289,7 +286,6 @@ export const sendXrp = async ({
 	amount,
 	fee,
 	destinationTag,
-	pending,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -299,14 +295,9 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	fee: XrpBalance;
 	destinationTag?: number;
-	pending?: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
-
-	if (nonNullish(pending)) {
-		return await submitAndConfirmXrpTransaction({ network, pending, progress });
-	}
 
 	// The node's error is the only thing that means unfunded. A zero balance does not: the
 	// transaction cost can take an existing account below its reserve, even to nothing, and the
@@ -448,4 +439,33 @@ export const sendXrp = async ({
 		pending: { txBlob },
 		progress
 	});
+};
+
+/**
+ * Resubmits a send whose outcome was never established, from the
+ * {@link XrpSendIndeterminateError} that reported it.
+ *
+ * The stored transaction goes back unchanged — nothing is fetched, rebuilt or re-signed — so if the
+ * first attempt did land, its sequence is already consumed and the ledger refuses this one
+ * (`tefPAST_SEQ`) rather than making a second payment. Building a fresh transaction in that
+ * situation takes a NEW sequence, which is precisely what pays twice.
+ *
+ * Separate from {@link sendXrp} rather than a `pending` field on it, because the two have almost
+ * nothing in common: this takes no identity, no addresses, no amount and no fee, and a signature
+ * that accepted them would accept a reviewed payment alongside a stored blob and silently act on
+ * the blob. The window they are polled over is not a parameter either — it is read out of the blob
+ * by `deriveXrpLedgerWindow`.
+ */
+export const retryXrpSend = async ({
+	network,
+	pending,
+	progress
+}: {
+	network: XrpNetworkType;
+	pending: XrpPendingTransaction;
+	progress?: (step: ProgressStepsSendXrp) => void;
+}): Promise<XrpSendResult> => {
+	progress?.(ProgressStepsSendXrp.INITIALIZATION);
+
+	return await submitAndConfirmXrpTransaction({ network, pending, progress });
 };

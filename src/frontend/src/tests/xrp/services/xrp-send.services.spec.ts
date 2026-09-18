@@ -11,7 +11,7 @@ import {
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
-import { sendXrp } from '$xrp/services/xrp-send.services';
+import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
 import {
@@ -561,6 +561,24 @@ describe('xrp-send.services', () => {
 			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 		});
 
+		// The signature is the guarantee. A retry takes no identity, addresses, amount or fee, so a
+		// caller cannot review one payment and resubmit another — and none of the fresh-send work
+		// can run on this path even by accident.
+		it('reads nothing and signs nothing', async () => {
+			const pending = {
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
+			};
+
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
 		it('resubmits the stored transaction instead of building a new one', async () => {
 			const pending = {
 				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
@@ -570,7 +588,7 @@ describe('xrp-send.services', () => {
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
-			await sendXrp({ ...params, pending });
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
 
 			expect(xrplRest.submitXrpTransaction).toHaveBeenCalledExactlyOnceWith({
 				txBlob: pending.txBlob,
@@ -603,7 +621,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await sendXrp({ ...params, pending });
+			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -622,7 +640,7 @@ describe('xrp-send.services', () => {
 					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await expect(sendXrp({ ...params, pending })).rejects.toThrow(
+			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).rejects.toThrow(
 				'carries no LastLedgerSequence'
 			);
 
@@ -647,7 +665,7 @@ describe('xrp-send.services', () => {
 				accepted: false
 			});
 
-			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
+			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).resolves.toEqual({
 				txHash: blobHash,
 				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
@@ -740,17 +758,6 @@ describe('xrp-send.services', () => {
 			await expect(sendXrp({ ...params, amount: 9_000_000n, fee: -10_000_000n })).rejects.toThrow(
 				'XRP fee must be greater than zero'
 			);
-		});
-
-		// The retry path takes these arguments and ignores them by design, so the bounds must not
-		// be what decides whether a stored blob can be resubmitted.
-		it('does not apply the bounds to a retry', async () => {
-			const pending = {
-				txBlob:
-					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
-			};
-
-			await expect(sendXrp({ ...params, amount: ZERO, fee: ZERO, pending })).resolves.toBeDefined();
 		});
 	});
 
