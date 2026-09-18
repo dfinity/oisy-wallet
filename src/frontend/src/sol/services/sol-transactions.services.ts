@@ -15,8 +15,6 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { mapSolNetBalanceChanges } from '$sol/utils/sol-net-changes.utils';
 import { deriveSolTransactionSummary } from '$sol/utils/sol-transaction-summary.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/kit';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
@@ -64,15 +62,11 @@ export const fetchSolTransactionsForSignature = async ({
 	signature,
 	network,
 	address,
-	tokenAddress,
-	tokenOwnerAddress,
 	ownedTokenAccounts = []
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
 	// Token accounts of the user that may hold no balance yet, known without deriving them here: a
 	// caller resolving a signature for every token of a network passes all their accounts at once.
 	ownedTokenAccounts?: SolAddress[];
@@ -106,26 +100,16 @@ export const fetchSolTransactionsForSignature = async ({
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	const [ataAddress] =
-		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
-			? await findAssociatedTokenPda({
-					owner: solAddress(address),
-					tokenProgram: solAddress(tokenOwnerAddress),
-					mint: solAddress(tokenAddress)
-				})
-			: [undefined];
-
 	const { addressToOwner, addressToToken } = tokenBalanceMetadata;
 
 	// The accounts the user owns going in: the wallet, every token account the balances name as
-	// theirs, and the associated token accounts the caller asked about, which may hold no balance
-	// yet. Accounts the transaction itself opens for the user are learnt by the derivation.
+	// theirs, and the token accounts the caller names, which may hold no balance yet. Accounts the
+	// transaction itself opens for the user are learnt by the derivation.
 	const ownedAddresses = [
 		address,
 		...Object.entries(addressToOwner)
 			.filter(([, owner]) => owner === address)
 			.map(([account]) => account),
-		...(nonNullish(ataAddress) ? [ataAddress] : []),
 		...ownedTokenAccounts
 	];
 

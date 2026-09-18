@@ -1194,6 +1194,80 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		it('should fail closed on a `CreateAccount` instruction that funds beyond the rent of its size', () => {
+			// A token account opened, initialised and closed in one message hands its whole balance to
+			// whoever the close names, so anything above rent is a payment the creation states no
+			// destination for. 165 bytes cost (128 + 165) * 3480 * 2 = 2_039_280 lamports.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a rent-exact creation over-funded by a single lamport', () => {
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_281n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
+		it('should fail closed on a `CreateAccountWithSeed` instruction that funds beyond its rent', () => {
+			// The seed form pays out the same way the plain one does, so the bound has to hold here too:
+			// stating an over-funded creation as rent would call a payment the cost of an operation.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that funds beyond its rent', () => {
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
 		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
 			const instruction = getWithdrawNonceAccountInstruction({
 				nonceAccount: address(mockSolAddress2),

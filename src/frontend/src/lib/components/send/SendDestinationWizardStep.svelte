@@ -106,7 +106,6 @@
 			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
-					networkContacts={$ethNetworkContacts}
 					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
@@ -126,7 +125,6 @@
 		<div data-tid={testId}>
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$icNetworkContacts}
 				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
@@ -145,7 +143,6 @@
 		<div data-tid={testId}>
 			<BtcSendDestination
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 				{onQRCodeScan}
 				bind:destination
@@ -164,7 +161,6 @@
 		<div data-tid={testId}>
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$solNetworkContacts}
 				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination

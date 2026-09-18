@@ -40,6 +40,10 @@ export const modalSolReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-receive'
 );
+export const modalXrpReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-receive'
+);
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
