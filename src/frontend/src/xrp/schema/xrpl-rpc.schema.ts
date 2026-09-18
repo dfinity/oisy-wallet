@@ -37,7 +37,12 @@ export const XrpLedgerCounterSchema = z.number().int().nonnegative();
 const XrplAccountDataSchema = z.object({
 	Balance: XrpDropsSchema,
 	Sequence: XrpLedgerCounterSchema,
-	OwnerCount: XrpLedgerCounterSchema
+	OwnerCount: XrpLedgerCounterSchema,
+	// The AccountRoot flag bits. `lsfRequireDestTag` is the one the send path reads: without it a
+	// payment to an account that requires a destination tag is applied as `tecDST_TAG_NEEDED`,
+	// which claims the fee and consumes the sequence. Optional so a node that omits the field
+	// leaves the flags unknown rather than failing the whole read.
+	Flags: XrpLedgerCounterSchema.optional()
 });
 
 // Success only. `xrpJsonRpc` throws for every error this method can return except `actNotFound`,

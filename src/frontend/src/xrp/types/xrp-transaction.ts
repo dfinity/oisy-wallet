@@ -25,6 +25,9 @@ export interface XrpAccountInfo {
 	sequence: number;
 	// Number of ledger objects the account owns; each one raises the reserve it must retain.
 	ownerCount: number;
+	// AccountRoot flag bits, or `undefined` when the node omitted them — which is not the same as
+	// no flags being set, and is why the send path only declines on a bit it positively saw.
+	flags: number | undefined;
 }
 
 /**

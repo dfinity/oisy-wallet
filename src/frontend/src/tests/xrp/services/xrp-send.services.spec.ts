@@ -57,7 +57,8 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
 			sequence: 7,
-			ownerCount: 0
+			ownerCount: 0,
+			flags: undefined
 		});
 		// The destination is read before signing to refuse a payment too small to create an unfunded
 		// account. Funded by default, so only the tests that care set it to ZERO.
@@ -660,7 +661,7 @@ describe('xrp-send.services', () => {
 		const sourceWith = ({ balance, ownerCount }: { balance: bigint; ownerCount: number }) =>
 			vi
 				.spyOn(xrplRest, 'loadXrpAccountInfo')
-				.mockResolvedValue({ balance, sequence: 7, ownerCount });
+				.mockResolvedValue({ balance, sequence: 7, ownerCount, flags: undefined });
 
 		it('refuses an amount that would leave the account below its reserve', async () => {
 			// 2 XRP held, 2 ledger objects: reserve 1_000_000 + 2 x 200_000 = 1_400_000, so with a
@@ -699,8 +700,72 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	describe('a destination that requires a tag', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+		// `lsfRequireDestTag`. Set by exchanges and other shared accounts, where the tag is what
+		// credits the payment to a customer.
+		const REQUIRE_DEST_TAG = 0x00020000;
+		// `lsfDefaultRipple` — an unrelated bit, so a flags value being truthy is not enough.
+		const OTHER_FLAG = 0x00800000;
+
+		const mockDestinationFlags = (flags: number | undefined) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockImplementation(({ address }) =>
+					Promise.resolve(address === destination ? { ...sourceInfo, flags } : sourceInfo)
+				);
+
+		// XRPL applies an untagged payment to such an account as `tecDST_TAG_NEEDED`: the fee is
+		// destroyed and the sequence consumed, out of a response the send already had in hand.
+		it('refuses an untagged payment before signing', async () => {
+			mockDestinationFlags(REQUIRE_DEST_TAG);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'requires a destination tag'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('sends when the tag the destination requires is supplied', async () => {
+			mockDestinationFlags(REQUIRE_DEST_TAG);
+
+			await expect(sendXrp({ ...params, destinationTag: 12345 })).resolves.toBeDefined();
+		});
+
+		// A bit test, not a truthiness test: an account with unrelated flags set requires nothing.
+		it('sends untagged when the flags do not include the required-tag bit', async () => {
+			mockDestinationFlags(OTHER_FLAG);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// Flags the node did not report are unknown, not zero — but unknown is no basis to decline.
+		it('sends untagged when the node reported no flags', async () => {
+			mockDestinationFlags(undefined);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// Deliberately advisory here, unlike the reserve check: almost every send omits the tag, so
+		// declining on an unanswered lookup would let a busy node stop ordinary sends — while the
+		// failure it would avoid costs only the fee, on a rejection that is the ledger protecting
+		// the user from an untagged deposit.
+		it('sends untagged when the destination lookup could not be made', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(async ({ address }) =>
+				address === destination
+					? await Promise.reject(new Error('tooBusy'))
+					: await Promise.resolve(sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+	});
+
 	describe('an unfunded destination', () => {
-		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0 };
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
 
 		// The node's `actNotFound` for the destination is the only thing that means unfunded.
 		const mockDestination = (

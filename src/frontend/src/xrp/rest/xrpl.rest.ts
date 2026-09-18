@@ -169,9 +169,9 @@ export const loadXrpAccountInfo = async ({
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { Balance, Sequence, OwnerCount } = parsed.data.account_data;
+	const { Balance, Sequence, OwnerCount, Flags } = parsed.data.account_data;
 
-	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount };
+	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
 };
 
 /**
