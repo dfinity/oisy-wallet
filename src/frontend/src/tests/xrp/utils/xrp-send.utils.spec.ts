@@ -50,9 +50,15 @@ describe('xrp-send.utils', () => {
 			expect(isInvalidDestinationXrp('rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD')).toBeFalsy();
 		});
 
-		it('is true for a malformed or nullish destination', () => {
+		it('is true for a malformed destination', () => {
 			expect(isInvalidDestinationXrp('not-an-address')).toBeTruthy();
-			expect(isInvalidDestinationXrp(undefined)).toBeTruthy();
+		});
+
+		// Unfilled is not invalid, and required-field validation belongs to the form. The three peer
+		// validators — Sol, Btc, ICP — all answer `false` here, so answering `true` for one chain
+		// would hand any consumer without its own length gate a different answer for XRP.
+		it.each([undefined, ''])('is false for the unfilled destination %j', (destination) => {
+			expect(isInvalidDestinationXrp(destination)).toBeFalsy();
 		});
 	});
 });
