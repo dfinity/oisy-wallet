@@ -1,4 +1,4 @@
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 
 // Feature flag for the tips surface (the Tips menu entry and its modals).
 //
@@ -8,7 +8,11 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 // in step in CI, nothing depends on a repository secret, and the set of places
 // tips are on is one line anyone can read.
 //
-// `STAGING` already covers `test_fe_*`, audit and e2e, so this reaches fe1
-// through fe4 without a per-deploy override. Beta and production are left out
-// until the feature is ready for them, and widening is one more term.
-export const TIPS_ENABLED = LOCAL || STAGING;
+// That set is now every environment, production included. Kept as the four
+// terms rather than collapsed to `true`, because they are what a narrowing
+// edits: dropping `PROD` turns the feature off in production on the next
+// deploy, with nothing else to change and no flag to reintroduce. It is the
+// kill-switch, and it reads as one.
+//
+// `STAGING` covers `test_fe_*`, audit and e2e as well as staging itself.
+export const TIPS_ENABLED = LOCAL || STAGING || BETA || PROD;
