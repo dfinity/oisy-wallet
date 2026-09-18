@@ -19,6 +19,7 @@ import {
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
+import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -535,9 +536,10 @@ describe('xrp-send.services', () => {
 			const err = await sendXrp(params).catch((e: unknown) => e);
 
 			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+			// No transaction id: it is a pure function of the blob, and carrying it separately let a
+			// retry submit one transaction while polling another id.
 			expect((err as XrpSendIndeterminateError).pending).toEqual({
 				txBlob: signedBlob,
-				txHash: expect.stringMatching(/^[0-9A-F]{64}$/),
 				// The window a retry must poll: the open index at signing through its expiry.
 				firstLedgerSequence: 1000,
 				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
@@ -564,10 +566,11 @@ describe('xrp-send.services', () => {
 		it('resubmits the stored transaction instead of building a new one', async () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				txHash: 'A'.repeat(64),
 				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
+			// The id that blob derives to — the only one a retry may poll.
+			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
 			await sendXrp({ ...params, pending });
 
@@ -576,7 +579,7 @@ describe('xrp-send.services', () => {
 				network: XrpNetworks.mainnet
 			});
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
-				hash: pending.txHash,
+				hash: blobHash,
 				network: XrpNetworks.mainnet,
 				firstLedgerSequence: pending.firstLedgerSequence,
 				lastLedgerSequence: pending.lastLedgerSequence
@@ -589,16 +592,37 @@ describe('xrp-send.services', () => {
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 		});
 
+		// The id polled on a retry must be the blob's own. When it travelled as a separate field, a
+		// mismatch meant submitting one transaction and concluding a different one had expired —
+		// which reports a settled payment as safe to resend. The fixture that caught this carried
+		// `'A'.repeat(64)` for a blob deriving to BF3F06…4590, and every test still passed.
+		it('polls the id its blob derives to, not one it was handed', async () => {
+			const pending = {
+				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
+				firstLedgerSequence: 4300,
+				lastLedgerSequence: 4321
+			};
+
+			await sendXrp({ ...params, pending });
+
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
+				expect.objectContaining({
+					hash: 'BF3F06A593EFFF25FB677254106025C66980AC891C8FE63C89FC725964154590'
+				})
+			);
+		});
+
 		// The payoff: the first attempt did land, so its sequence is consumed and the resubmission is
 		// refused with `tefPAST_SEQ` rather than applied again. The poll then reports the original
 		// transaction's real outcome.
 		it('reports the original outcome when the resubmitted transaction already applied', async () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				txHash: 'B'.repeat(64),
 				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
+			// The id that blob derives to — the only one a retry may poll.
+			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 				engineResult: 'tefPAST_SEQ',
@@ -606,7 +630,7 @@ describe('xrp-send.services', () => {
 			});
 
 			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
-				txHash: pending.txHash,
+				txHash: blobHash,
 				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
 		});
@@ -701,15 +725,30 @@ describe('xrp-send.services', () => {
 			await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
 		});
 
-		// The check is advisory: failing to make it must not block a send to a well-funded address.
+		// At or above the reserve the destination's existence changes nothing, so failing to read it
+		// must not block the send.
 		it.each(['tooBusy', 'XRPL account_info request failed with status 503'])(
 			'sends anyway when the destination read fails with %s',
 			async (message) => {
 				mockDestination(() => Promise.reject(new Error(message)));
 
-				await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
+				await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
 			}
 		);
+
+		// Below the reserve the answer decides the outcome, so an unavailable lookup must not be read
+		// as "exists": proceeding takes the `tecNO_DST_INSUF_XRP` that claims the fee and burns the
+		// sequence.
+		it('refuses an amount below the account reserve when the destination read fails', async () => {
+			mockDestination(() => Promise.reject(new Error('tooBusy')));
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
+				'tooBusy'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
 	});
 
 	// `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read skip are both computed from this interval, so

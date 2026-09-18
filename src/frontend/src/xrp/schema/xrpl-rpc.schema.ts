@@ -101,12 +101,31 @@ export const XrplLedgerResultSchema = z.union([
 // payment's. The pending branch accepts its absence but still carries it, so a mismatch there can
 // be caught without making a legitimate pending answer unparseable.
 export const XrplTxResultSchema = z.union([
+	// Validated: final, and it must say WHICH transaction and WHAT happened.
 	z.object({
 		validated: z.literal(true),
 		hash: z.string(),
-		meta: z.object({ TransactionResult: z.string() })
+		meta: z.object({ TransactionResult: z.string() }),
+		error: z.never().optional()
 	}),
-	z.object({ validated: z.literal(false).optional(), hash: z.string().optional() })
+	// Absent: the node confirms it searched every ledger in the requested range. This is the only
+	// shape that may be read as non-inclusion, because non-inclusion is what ends the send.
+	z.object({
+		error: z.literal('txnNotFound'),
+		searched_all: z.literal(true),
+		validated: z.never().optional(),
+		meta: z.never().optional()
+	}),
+	// Pending: in a ledger but not yet validated. It has to say so POSITIVELY — when the pending
+	// branch was "everything optional", `{}` and `{ anything: 1 }` both parsed as pending, and at
+	// the expiry recheck pending means "the ledger passed LastLedgerSequence without including it",
+	// which throws `XrpSendExpiredError` and tells the caller a resend is safe. `hash` is required
+	// so the identity comparison cannot be skipped by omitting it.
+	z.object({
+		validated: z.literal(false),
+		hash: z.string(),
+		error: z.never().optional()
+	})
 ]);
 
 // `engine_result` is the only field the send still reads, and it is read with `startsWith` outside
