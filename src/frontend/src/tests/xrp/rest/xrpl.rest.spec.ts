@@ -129,8 +129,25 @@ describe('xrpl.rest', () => {
 			});
 		});
 
+		// `z.never().optional()` on `error` rather than a strict object: the configured provider is a
+		// Clio endpoint and every response it sends carries these beside the result, with a warning
+		// on literally every call. Rejecting unknown keys wholesale would reject them all.
+		it('accepts the top-level keys a real provider sends', async () => {
+			mockFetchResponse({
+				body: {
+					result: { ledger_current_index: 5 },
+					status: 'success',
+					type: 'response',
+					forwarded: true,
+					warnings: [{ id: 2001, message: 'This is a clio server.' }]
+				}
+			});
+
+			await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+		});
+
 		describe.each(callers)('$name', ({ call }) => {
-			it.each([{}, { result: null }, { jsonrpc: '2.0', error: 'gateway' }])(
+			it.each([{}, { result: null }, { jsonrpc: '2.0' }])(
 				'names the missing result object for the body %j',
 				async (body) => {
 					mockFetchResponse({ body });
@@ -138,6 +155,33 @@ describe('xrpl.rest', () => {
 					await expect(call()).rejects.toThrow('no result object');
 				}
 			);
+
+			// A top-level `error` is the node reporting on the call rather than on the ledger, so it
+			// is surfaced as the code it is. "No result object" would name the wrong problem — and for
+			// the both-keys body below it would be plainly false.
+			it.each([
+				{ jsonrpc: '2.0', error: 'gateway' },
+				{ error: 'gateway', result: { ledger_current_index: 999_999_999 } }
+			])('reports the top-level error for the body %j', async (body) => {
+				mockFetchResponse({ body });
+
+				const failure = await call().catch((err: unknown) => err);
+
+				expect(failure).toBeInstanceOf(XrplRpcError);
+				expect((failure as XrplRpcError).error).toBe('gateway');
+			});
+
+			// The whole point of the both-keys case: zod strips unknown keys, so this parsed with the
+			// error dropped and the helpers — which inspect `result.error`, a different field — got a
+			// bogus ledger index from a FAILED response. Past `LastLedgerSequence` that is read as
+			// established non-inclusion, which is the answer that invites a second payment.
+			it('does not deliver a result that came with a top-level error', async () => {
+				mockFetchResponse({
+					body: { error: 'gateway', result: { ledger_current_index: 999_999_999 } }
+				});
+
+				await expect(call()).rejects.toThrow();
+			});
 
 			// A present `error` has to be a string. Coercion let `['tooBusy']` become `'tooBusy'`, so a
 			// malformed value could match a code the helper declared as an expected state; a present

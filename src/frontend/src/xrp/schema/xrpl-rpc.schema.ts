@@ -22,8 +22,19 @@ export const XrplAccountInfoResultSchema = z.union([
 // The JSON-RPC envelope. `xrpJsonRpc` owns this so every helper receives a `result` object that
 // exists and carries no unhandled `error`; before, each helper dereferenced `result.error` itself
 // and a body without `result` produced a TypeError instead of the helper's own message.
+//
+// `error: z.never().optional()` for the same reason the result schemas below carry it, one level
+// up: zod strips unknown keys, so a body with BOTH a top-level `error` and a `result` parsed with
+// the error silently dropped, and the helpers inspect `result.error` — a different field. A failed
+// response could therefore deliver a bogus `ledger_current_index`, which is exactly what makes
+// confirmation declare expiry and tell the user a resend is safe.
+//
+// NOT `z.strictObject`: the configured provider is a Clio endpoint, and every response it sends
+// carries `status`, `type`, `forwarded` and a `warnings` array beside the result. Rejecting unknown
+// keys wholesale would reject every real response.
 export const XrplEnvelopeSchema = z.object({
-	result: z.record(z.string(), z.unknown())
+	result: z.record(z.string(), z.unknown()),
+	error: z.never().optional()
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve

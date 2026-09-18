@@ -70,9 +70,21 @@ const xrpJsonRpc = async ({
 		throw new Error(`XRPL ${method} request failed with status ${response.status}`);
 	}
 
-	const parsed = XrplEnvelopeSchema.safeParse(await response.json());
+	const body: unknown = await response.json();
+	const parsed = XrplEnvelopeSchema.safeParse(body);
 
 	if (!parsed.success) {
+		// A top-level `error` is the node reporting on the call itself rather than on the ledger, so
+		// it is surfaced as the code it is — and routed through the same `expectedErrors` check as an
+		// error inside `result`, which no caller declares, so it always throws. Reporting it as a
+		// missing result would name the wrong problem, and for a body that carries both an error and
+		// a result it would be plainly false.
+		const topLevelError = (body as { error?: unknown } | null)?.error;
+
+		if (typeof topLevelError === 'string') {
+			throw new XrplRpcError({ method, error: topLevelError });
+		}
+
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 
