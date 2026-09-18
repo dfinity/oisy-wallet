@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { XRP_RPC_TIMEOUT_MS } from '$xrp/constants/xrp.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
@@ -59,7 +60,10 @@ const xrpJsonRpc = async ({
 	const response = await fetch(xrpHttpRpcUrl(network), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ method, params: [params] })
+		body: JSON.stringify({ method, params: [params] }),
+		// Without this a stalled connection never settles, and every caller that treats a failed
+		// lookup as one lost attempt waits forever instead.
+		signal: AbortSignal.timeout(XRP_RPC_TIMEOUT_MS)
 	});
 
 	if (!response.ok) {

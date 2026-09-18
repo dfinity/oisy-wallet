@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { XRP_RPC_TIMEOUT_MS } from '$xrp/constants/xrp.constants';
 import {
 	XrpAccountNotFoundError,
 	XrplRpcError,
@@ -72,6 +73,61 @@ describe('xrpl.rest', () => {
 			},
 			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
 		];
+
+		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
+		// settles, and the confirmation loop bounds ATTEMPTS rather than time — so one hung request
+		// suspends the whole send and `sendXrp` never rejects with the blob a retry needs.
+		//
+		// The signal is substituted rather than waited out: vitest's fake timers do not drive
+		// `AbortSignal.timeout`, and the real one would make this an eight-second test. Aborting a
+		// controller by hand exercises the same three links — the deadline reaches
+		// `AbortSignal.timeout`, its signal reaches `fetch`, and an abort surfaces as a rejection.
+		describe('the request deadline', () => {
+			let controller: AbortController;
+
+			beforeEach(() => {
+				controller = new AbortController();
+				vi.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal);
+
+				// Answers only when its signal aborts, so a missing signal hangs the test rather than
+				// passing it.
+				vi.stubGlobal(
+					'fetch',
+					vi.fn((_url: string, init: RequestInit) => {
+						const { signal } = init;
+
+						return new Promise((_resolve, reject) => {
+							signal?.addEventListener('abort', () => reject(signal.reason));
+						});
+					})
+				);
+			});
+
+			afterEach(() => {
+				vi.restoreAllMocks();
+			});
+
+			it.each(callers)('$name aborts a stalled request', async ({ call }) => {
+				const outcome = call().then(
+					() => 'resolved',
+					(err: unknown) => (err as Error).name
+				);
+
+				controller.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+
+				await expect(outcome).resolves.toBe('TimeoutError');
+			});
+
+			// Two ledger closes. Longer and a hung request outlives the poll it belongs to; shorter
+			// and a healthy node under load loses attempts it should have been given.
+			it('asks for the configured deadline and not some other figure', async () => {
+				void loadXrpLedgerIndex({ network }).catch(() => undefined);
+
+				expect(AbortSignal.timeout).toHaveBeenCalledWith(XRP_RPC_TIMEOUT_MS);
+
+				controller.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+			});
+		});
 
 		describe.each(callers)('$name', ({ call }) => {
 			it.each([{}, { result: null }, { jsonrpc: '2.0', error: 'gateway' }])(
