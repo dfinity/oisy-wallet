@@ -103,15 +103,14 @@ export const XRP_CONFIRM_MAX_DURATION_MS =
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
 	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;
 
-// How far past `LastLedgerSequence` a validated index can legitimately have travelled by the time
-// this poll reads it: the whole confirmation budget converted to ledger closes, plus the validity
-// window itself. Beyond that the node is reporting something the ledger cannot have reached while
-// we were watching, and refusing to conclude is the safe direction — the indeterminate path
-// resubmits the same blob and lets the ledger decide, whereas expiry tells the caller to build a
-// new transaction on a new sequence.
+// How far a validated index can legitimately move while one confirmation run watches: the whole
+// confirmation budget converted to ledger closes, plus the validity window as slack. Measured
+// against the FIRST index that run read, not against `LastLedgerSequence` — for a retry the latter
+// comes out of the stored blob and is an expiry already in the past, which made every legitimate
+// index look implausible and left the retry path unable to ever establish expiry.
 //
-// `XrpLedgerCounterSchema` bounds the number system at `UInt32`; this bounds the ledger. The two
-// are far apart: `0xFFFFFFFF` is around forty times the current mainnet index, so a value inside
-// the protocol's range is still wildly outside this transaction's.
+// This bounds movement, not plausibility: the first read of a run is accepted as given, because
+// nothing in the run can corroborate it. What guards expiry against an absurd first read is that
+// `tx` must independently report `searched_all` absence across the blob's own ledger range.
 export const XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD =
 	XRP_CONFIRM_MAX_DURATION_MS / 1000 / XRP_LEDGER_CLOSE_SECONDS + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
