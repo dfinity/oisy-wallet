@@ -93,8 +93,8 @@ describe('xrpl.rest', () => {
 				// passing it.
 				vi.stubGlobal(
 					'fetch',
-					vi.fn((_url: string, init: RequestInit) => {
-						const { signal } = init;
+					vi.fn((...[, init]: Parameters<typeof fetch>) => {
+						const signal = (init as RequestInit | undefined)?.signal;
 
 						return new Promise((_resolve, reject) => {
 							signal?.addEventListener('abort', () => reject(signal.reason));
@@ -120,7 +120,7 @@ describe('xrpl.rest', () => {
 
 			// Two ledger closes. Longer and a hung request outlives the poll it belongs to; shorter
 			// and a healthy node under load loses attempts it should have been given.
-			it('asks for the configured deadline and not some other figure', async () => {
+			it('asks for the configured deadline and not some other figure', () => {
 				void loadXrpLedgerIndex({ network }).catch(() => undefined);
 
 				expect(AbortSignal.timeout).toHaveBeenCalledWith(XRP_RPC_TIMEOUT_MS);
