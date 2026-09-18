@@ -86,18 +86,33 @@ const confirmXrpTransaction = async ({
 
 	// Same reasoning: this call runs after the blob may already have been accepted, so letting a
 	// transient failure escape would abort the send for a payment that can still validate.
+	// The first validated index this run reads, kept as the reference every later one is measured
+	// against. It has nothing to corroborate it and is accepted as given — a run has to start
+	// somewhere — so this bounds how far the ledger appears to MOVE while the poll watches, not
+	// whether it was in a sane place to begin with. An absurd first read is caught by what already
+	// guards expiry: `tx` must also report `searched_all` absence over the blob's own ledger range,
+	// which is a claim about exactly those 21 ledgers, on a different method.
+	//
+	// Measured from the run and NOT from `lastLedgerSequence`, which is where this went wrong
+	// before: for a retry that value comes out of the stored blob, so it is an expiry already in
+	// the past, and any retry more than `XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD` closes later had every
+	// legitimate index rejected — leaving the retry path with no way to ever establish expiry.
+	let baselineLedgerIndex: number | undefined;
+
 	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
 		try {
 			const index = await loadXrpValidatedLedgerIndex({ network });
 
-			// An index further past this transaction's window than the ledger could have travelled
-			// while we were watching is not an answer about it. Returned as `undefined`, so it is
-			// handled exactly like a read the node refused: the poll continues and ends indeterminate,
-			// rather than concluding the expiry that tells a retry to build a new transaction.
-			//
-			// The schema bounds these to `UInt32`, but that is the number system, not the ledger —
-			// `0xFFFFFFFF` is around forty times the current mainnet index.
-			return index > lastLedgerSequence + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
+			if (isNullish(baselineLedgerIndex)) {
+				baselineLedgerIndex = index;
+
+				return index;
+			}
+
+			// Returned as `undefined`, so an implausible jump is handled exactly like a read the node
+			// refused: the poll continues and ends indeterminate, rather than concluding the expiry
+			// that tells a retry to build a new transaction on a new sequence.
+			return index > baselineLedgerIndex + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
 		} catch (_: unknown) {
 			return undefined;
 		}
@@ -402,13 +417,15 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex, signingPublicKey] =
-		await Promise.all([
-			loadXrpAccountInfo({ address: source, network }),
-			tryDestination(),
-			loadXrpLedgerIndex({ network }),
-			getXrpSigningPublicKey({ identity, network, account: source })
-		]);
+	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
+	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
+	// would win a race against whichever of those diagnoses was the useful one. A key mismatch is a
+	// broken deployment; an insufficient balance is something the user can act on.
+	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex] = await Promise.all([
+		loadXrpAccountInfo({ address: source, network }),
+		tryDestination(),
+		loadXrpLedgerIndex({ network })
+	]);
 
 	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
 	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the
@@ -464,6 +481,13 @@ export const sendXrp = async ({
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
 	}
+
+	// After every guard, so a send that was going to be refused does not derive a key first. On a
+	// deployed build that costs only local hashing — `deriveTokenAddress` derives locally whenever
+	// `FRONTEND_DERIVATION_ENABLED`, which is `!LOCAL` — so serialising it here buys the clearer
+	// error at the price of one overlapped call in local development, where the signer-canister
+	// fallback is the one that actually runs.
+	const signingPublicKey = await getXrpSigningPublicKey({ identity, network, account: source });
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 

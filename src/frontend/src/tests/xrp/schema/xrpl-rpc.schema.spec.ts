@@ -6,7 +6,8 @@ import {
 	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
-	XrplSubmitResultSchema
+	XrplSubmitResultSchema,
+	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
 
 describe('xrpl-rpc.schema', () => {
@@ -169,6 +170,39 @@ describe('xrpl-rpc.schema', () => {
 		// confusion this call exists to avoid.
 		it.each([false, undefined])('rejects validated: %j', (validated) => {
 			expect(XrplLedgerResultSchema.safeParse({ validated, ledger_index: 5 }).success).toBeFalsy();
+		});
+	});
+
+	describe('XrplTxResultSchema validated results', () => {
+		const validated = (TransactionResult: unknown) => ({
+			validated: true,
+			hash: 'H',
+			meta: { TransactionResult }
+		});
+
+		// Only `tes` and `tec` are ever applied to a ledger. `tesSUCCESS` is the entire `tes` class,
+		// and the `tec` pattern was checked against `ripple-binary-codec`'s own list — all 82 match.
+		it.each(['tesSUCCESS', 'tecUNFUNDED_PAYMENT', 'tecDST_TAG_NEEDED', 'tecNO_PERMISSION'])(
+			'accepts the ledger-recorded result %s',
+			(result) => {
+				expect(XrplTxResultSchema.safeParse(validated(result)).success).toBeTruthy();
+			}
+		);
+
+		// None of these can be in a validated ledger, so a record claiming one is malformed — and
+		// the caller would otherwise turn it into a definitive `XrpTransactionFailedError`.
+		it.each([
+			'tefPAST_SEQ',
+			'telINSUF_FEE_P',
+			'temBAD_AMOUNT',
+			'terQUEUED',
+			'tesFAILURE',
+			'tecnotupper',
+			'tec',
+			'',
+			'anything'
+		])('rejects the non-ledger result %j', (result) => {
+			expect(XrplTxResultSchema.safeParse(validated(result)).success).toBeFalsy();
 		});
 	});
 
