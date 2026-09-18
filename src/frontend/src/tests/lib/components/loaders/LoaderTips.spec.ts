@@ -14,10 +14,8 @@ import { get, writable } from 'svelte/store';
 // The loader is gated on the rollout flag, which is still off on the branch that
 // owns this file. The loading behaviour is what is under test, not the flag.
 //
-// The string form of `vi.mock` on purpose: `vi.mock(import('$env/tips.env'), …)`
-// makes the factory's return type check against the module's *literal* type, and
-// `TIPS_ENABLED` is literally `false` here — so returning `true` does not
-// type-check. Two existing specs already trip that.
+// Pinned on rather than inherited: `TIPS_ENABLED` reads `VITE_TIPS_ENABLED`, and
+// no `.env` file a test run loads sets it.
 vi.mock('$env/tips.env', () => ({ TIPS_ENABLED: true }));
 
 describe('LoaderTips', () => {
