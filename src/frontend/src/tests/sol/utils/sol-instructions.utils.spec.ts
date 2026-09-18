@@ -1229,6 +1229,45 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
+		it('should fail closed on a `CreateAccountWithSeed` instruction that funds beyond its rent', () => {
+			// The seed form pays out the same way the plain one does, so the bound has to hold here too:
+			// stating an over-funded creation as rent would call a payment the cost of an operation.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that funds beyond its rent', () => {
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
 		it('should state a `WithdrawNonceAccount` instruction as the transfer it is', () => {
 			const instruction = getWithdrawNonceAccountInstruction({
 				nonceAccount: address(mockSolAddress2),

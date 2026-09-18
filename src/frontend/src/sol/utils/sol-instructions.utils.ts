@@ -489,13 +489,13 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// is read here: everything else about this instruction stays unread, as it already was.
 	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
 		const {
-			data: { amount, programAddress: owner },
+			data: { amount, space, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
 			return unfaithfulInstruction();
 		}
 
@@ -512,11 +512,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// when the new account prefunds itself.
 	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
 		const {
-			data: { lamports, programAddress: owner },
+			data: { lamports, space, programAddress: owner },
 			accounts: { payer }
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
 			return unfaithfulInstruction();
 		}
 
