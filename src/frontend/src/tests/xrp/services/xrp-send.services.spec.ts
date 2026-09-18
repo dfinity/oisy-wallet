@@ -29,8 +29,12 @@ describe('xrp-send.services', () => {
 	const source = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const destination = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
 	const signingPublicKey = 'ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A63';
-	// Must be real hex: the transaction id is derived from these bytes.
-	const signedBlob = '1200002280000000240000000761400000000098968068400000000000000C';
+	// A real encoded Payment, not a placeholder: both the transaction id and the ledger window
+	// confirmation polls are derived from these bytes, so a blob that does not really carry
+	// `LastLedgerSequence: 1020` would be asserting a window nothing signed. Sequence 7,
+	// LastLedgerSequence 1020 — the window [1000, 1020] every expectation below uses.
+	const signedBlob =
+		'1200002400000007201B000003FC61400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8';
 
 	const params = {
 		identity: mockIdentity,
@@ -53,7 +57,8 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
 			sequence: 7,
-			ownerCount: 0
+			ownerCount: 0,
+			flags: undefined
 		});
 		// The destination is read before signing to refuse a payment too small to create an unfunded
 		// account. Funded by default, so only the tests that care set it to ZERO.
@@ -69,7 +74,7 @@ describe('xrp-send.services', () => {
 			txHash: 'TXHASH'
 		});
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tesSUCCESS'
 		});
 	});
@@ -194,10 +199,7 @@ describe('xrp-send.services', () => {
 
 	it('reports expiry rather than failure when a lost submit never appears', async () => {
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: false,
-			transactionResult: undefined
-		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 		);
@@ -224,7 +226,7 @@ describe('xrp-send.services', () => {
 			accepted: false
 		});
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 
@@ -243,7 +245,7 @@ describe('xrp-send.services', () => {
 			txHash: 'TXHASH'
 		});
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 
@@ -280,10 +282,7 @@ describe('xrp-send.services', () => {
 				engineResult,
 				accepted: false
 			});
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				validated: false,
-				transactionResult: undefined
-			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 			);
@@ -316,7 +315,7 @@ describe('xrp-send.services', () => {
 	// that will never move.
 	it('types a validated failure distinctly from an indeterminate one', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 
@@ -330,7 +329,7 @@ describe('xrp-send.services', () => {
 	// A validated transaction is only final; `tec*` results are validated too.
 	it('throws when the transaction is validated with a failing result', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 
@@ -340,7 +339,7 @@ describe('xrp-send.services', () => {
 	// The failure is terminal, so it must surface at once instead of being retried.
 	it('does not retry a validated failure', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 
@@ -366,8 +365,8 @@ describe('xrp-send.services', () => {
 
 			return Promise.resolve(
 				attempts < validatesOnAttempt
-					? { validated: false, transactionResult: undefined }
-					: { validated: true, transactionResult: 'tesSUCCESS' }
+					? { state: 'absent' }
+					: { state: 'validated', transactionResult: 'tesSUCCESS' }
 			);
 		});
 
@@ -378,10 +377,7 @@ describe('xrp-send.services', () => {
 
 	// Only once the ledger has passed the LastLedgerSequence is non-inclusion final.
 	it('fails once the transaction can no longer be included', async () => {
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: false,
-			transactionResult: undefined
-		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 		// The payment is built at 1000 (LastLedgerSequence 1020); expiry is only final once the
 		// VALIDATED index passes it.
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
@@ -395,8 +391,8 @@ describe('xrp-send.services', () => {
 	// a payment that validates in between. Expiry must survive a recheck.
 	it('returns the result when the recheck finds the payment validated after expiry', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tesSUCCESS' });
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
@@ -406,10 +402,7 @@ describe('xrp-send.services', () => {
 	});
 
 	it('still expires when the recheck does not find the payment', async () => {
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: false,
-			transactionResult: undefined
-		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
@@ -423,7 +416,7 @@ describe('xrp-send.services', () => {
 	// claim that the payment never applied — that claim is what tells the user a resend is safe.
 	it('does not declare expiry when the recheck cannot be answered', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValueOnce({ state: 'absent' })
 			.mockRejectedValue(new Error('Unexpected XRPL tx response: tooBusy'));
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
@@ -451,7 +444,7 @@ describe('xrp-send.services', () => {
 	it('keeps polling after a lookup the node could not answer', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
 			.mockRejectedValueOnce(new Error('Unexpected XRPL tx response: tooBusy'))
-			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tesSUCCESS' });
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 
@@ -462,8 +455,8 @@ describe('xrp-send.services', () => {
 	// would report a payment that can still validate as failed.
 	it('keeps polling after a validated-ledger call the node could not answer', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tesSUCCESS' });
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
 			.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
@@ -475,10 +468,7 @@ describe('xrp-send.services', () => {
 	// An unanswered ledger call establishes nothing, so it must not skip the expiry it would have
 	// established either: the run ends in the indeterminate error, not in a claim of failure.
 	it('ends indeterminate when the validated-ledger call is never answered', async () => {
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: false,
-			transactionResult: undefined
-		});
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockRejectedValue(
 			new Error('XRPL ledger request failed with status 503')
 		);
@@ -491,8 +481,8 @@ describe('xrp-send.services', () => {
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.
 	it('reports a tec failure found by the recheck', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValue({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tecUNFUNDED_PAYMENT' });
 
 		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
@@ -508,9 +498,9 @@ describe('xrp-send.services', () => {
 		// against the open index would reach the expiry branch on the first lookup, find the hash
 		// still absent on its recheck, and throw — so the third lookup must be what decides.
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tesSUCCESS' });
 
 		// The signing-time call sets LastLedgerSequence to 1020; any LATER read of the open index
 		// answers 1025, which is past it. The validated index — the only correct basis — is 1000.
@@ -527,32 +517,22 @@ describe('xrp-send.services', () => {
 		// unknown and the error does not carry it, the only possible retry builds a new transaction
 		// from a fresh sequence — a second, independent payment.
 		it('hands back the signed transaction when the outcome is never established', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				validated: false,
-				transactionResult: undefined
-			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
 
 			const err = await sendXrp(params).catch((e: unknown) => e);
 
 			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
-			// No transaction id: it is a pure function of the blob, and carrying it separately let a
-			// retry submit one transaction while polling another id.
-			expect((err as XrpSendIndeterminateError).pending).toEqual({
-				txBlob: signedBlob,
-				// The window a retry must poll: the open index at signing through its expiry.
-				firstLedgerSequence: 1000,
-				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
-			});
+			// The blob and nothing else. The transaction id and the ledger window a retry polls are
+			// both pure functions of it, and carrying either let a retry act on one transaction while
+			// describing another.
+			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
 		});
 
 		// Expiry is the opposite case: the transaction can never apply, so a retry MUST build a new
 		// one and carrying this one would be wrong.
 		it('reports expiry as its own error, with nothing to resubmit', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				validated: false,
-				transactionResult: undefined
-			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 			);
@@ -563,11 +543,29 @@ describe('xrp-send.services', () => {
 			expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
 		});
 
+		// The recheck and the ledger read are two separate calls, so on a load-balanced endpoint one
+		// member can report an index past expiry while another still holds the transaction
+		// unvalidated. A node handing the transaction back is the opposite of absence, so this must
+		// not become expiry — which would tell a retry to build a new transaction on a fresh
+		// sequence, and pay twice if the original did land.
+		it('does not declare expiry when the recheck still finds the transaction pending', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'pending' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+			expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+			expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
+		});
+
 		it('resubmits the stored transaction instead of building a new one', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
@@ -578,11 +576,13 @@ describe('xrp-send.services', () => {
 				txBlob: pending.txBlob,
 				network: XrpNetworks.mainnet
 			});
+			// Literal, not read back off `pending`: the window has to come out of the blob, and
+			// comparing it against a field of the same object would pass whatever was handed in.
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 				hash: blobHash,
 				network: XrpNetworks.mainnet,
-				firstLedgerSequence: pending.firstLedgerSequence,
-				lastLedgerSequence: pending.lastLedgerSequence
+				firstLedgerSequence: 4320 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				lastLedgerSequence: 4320
 			});
 
 			// Nothing is fetched, rebuilt or re-signed: a new sequence would make this a different
@@ -598,18 +598,36 @@ describe('xrp-send.services', () => {
 		// `'A'.repeat(64)` for a blob deriving to BF3F06…4590, and every test still passed.
 		it('polls the id its blob derives to, not one it was handed', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
 			await sendXrp({ ...params, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
-					hash: 'BF3F06A593EFFF25FB677254106025C66980AC891C8FE63C89FC725964154590'
+					hash: 'DF525DC5393BD6A354BDABD7DB411D3381D01C04C74BFA3CD22F0F2E64ADC81E'
 				})
 			);
+		});
+
+		// Refused before anything is broadcast. Without a signed expiry the transaction can never
+		// expire, so confirmation could never reach a definitive answer about it and no retry for it
+		// could be called safe — and broadcasting first would put an unbounded payment on the wire.
+		it('refuses a stored blob with no signed expiry, without broadcasting it', async () => {
+			const pending = {
+				// The same Payment as above with `LastLedgerSequence` left out.
+				txBlob:
+					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
+			};
+
+			await expect(sendXrp({ ...params, pending })).rejects.toThrow(
+				'carries no LastLedgerSequence'
+			);
+
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 		});
 
 		// The payoff: the first attempt did land, so its sequence is consumed and the resubmission is
@@ -617,9 +635,9 @@ describe('xrp-send.services', () => {
 		// transaction's real outcome.
 		it('reports the original outcome when the resubmitted transaction already applied', async () => {
 			const pending = {
-				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
-				firstLedgerSequence: 4300,
-				lastLedgerSequence: 4321
+				// Sequence 8, LastLedgerSequence 4320 — window [4300, 4320], derived, not declared.
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
@@ -643,7 +661,7 @@ describe('xrp-send.services', () => {
 		const sourceWith = ({ balance, ownerCount }: { balance: bigint; ownerCount: number }) =>
 			vi
 				.spyOn(xrplRest, 'loadXrpAccountInfo')
-				.mockResolvedValue({ balance, sequence: 7, ownerCount });
+				.mockResolvedValue({ balance, sequence: 7, ownerCount, flags: undefined });
 
 		it('refuses an amount that would leave the account below its reserve', async () => {
 			// 2 XRP held, 2 ledger objects: reserve 1_000_000 + 2 x 200_000 = 1_400_000, so with a
@@ -682,8 +700,72 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	describe('a destination that requires a tag', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+		// `lsfRequireDestTag`. Set by exchanges and other shared accounts, where the tag is what
+		// credits the payment to a customer.
+		const REQUIRE_DEST_TAG = 0x00020000;
+		// `lsfDefaultRipple` — an unrelated bit, so a flags value being truthy is not enough.
+		const OTHER_FLAG = 0x00800000;
+
+		const mockDestinationFlags = (flags: number | undefined) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockImplementation(({ address }) =>
+					Promise.resolve(address === destination ? { ...sourceInfo, flags } : sourceInfo)
+				);
+
+		// XRPL applies an untagged payment to such an account as `tecDST_TAG_NEEDED`: the fee is
+		// destroyed and the sequence consumed, out of a response the send already had in hand.
+		it('refuses an untagged payment before signing', async () => {
+			mockDestinationFlags(REQUIRE_DEST_TAG);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'requires a destination tag'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('sends when the tag the destination requires is supplied', async () => {
+			mockDestinationFlags(REQUIRE_DEST_TAG);
+
+			await expect(sendXrp({ ...params, destinationTag: 12345 })).resolves.toBeDefined();
+		});
+
+		// A bit test, not a truthiness test: an account with unrelated flags set requires nothing.
+		it('sends untagged when the flags do not include the required-tag bit', async () => {
+			mockDestinationFlags(OTHER_FLAG);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// Flags the node did not report are unknown, not zero — but unknown is no basis to decline.
+		it('sends untagged when the node reported no flags', async () => {
+			mockDestinationFlags(undefined);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// Deliberately advisory here, unlike the reserve check: almost every send omits the tag, so
+		// declining on an unanswered lookup would let a busy node stop ordinary sends — while the
+		// failure it would avoid costs only the fee, on a rejection that is the ledger protecting
+		// the user from an untagged deposit.
+		it('sends untagged when the destination lookup could not be made', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(async ({ address }) =>
+				address === destination
+					? await Promise.reject(new Error('tooBusy'))
+					: await Promise.resolve(sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+	});
+
 	describe('an unfunded destination', () => {
-		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0 };
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
 
 		// The node's `actNotFound` for the destination is the only thing that means unfunded.
 		const mockDestination = (
@@ -756,8 +838,8 @@ describe('xrp-send.services', () => {
 	// would make the two agree by coincidence, and a change there would break them silently.
 	it('waits the interval its derived budgets assume', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
-			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
-			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+			.mockResolvedValueOnce({ state: 'absent' })
+			.mockResolvedValue({ state: 'validated', transactionResult: 'tesSUCCESS' });
 
 		await sendXrp(params);
 
@@ -780,8 +862,8 @@ describe('xrp-send.services', () => {
 
 				return Promise.resolve(
 					attempts < validatesOnAttempt
-						? { validated: false, transactionResult: undefined }
-						: { validated: true, transactionResult: 'tesSUCCESS' }
+						? { state: 'absent' }
+						: { state: 'validated', transactionResult: 'tesSUCCESS' }
 				);
 			});
 			// 20 closes short of expiry, so each read buys 40 polls of silence.
@@ -796,10 +878,7 @@ describe('xrp-send.services', () => {
 		// Backing off on a read that never happened would delay the definitive expiry answer on the
 		// strength of no evidence at all.
 		it('does not back off after a read the node could not answer', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				validated: false,
-				transactionResult: undefined
-			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
 				.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
 				.mockResolvedValue(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1);
@@ -812,10 +891,7 @@ describe('xrp-send.services', () => {
 
 		// Once the index is past expiry there is nothing left to wait for.
 		it('still settles expiry on the first answered read', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				validated: false,
-				transactionResult: undefined
-			});
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 			);
@@ -855,7 +931,7 @@ describe('xrp-send.services', () => {
 		const progress = vi.fn();
 
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
+			state: 'validated',
 			transactionResult: 'tecUNFUNDED_PAYMENT'
 		});
 

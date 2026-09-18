@@ -13,6 +13,7 @@ import {
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { XrpNetworks } from '$xrp/types/network';
+import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
@@ -57,7 +58,8 @@ describe('XrpFeeContext', () => {
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 			balance: 50_000_000n,
 			sequence: 7,
-			ownerCount: 0
+			ownerCount: 0,
+			flags: undefined
 		});
 	});
 
@@ -96,7 +98,8 @@ describe('XrpFeeContext', () => {
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
 				balance: 50_000_000n,
 				sequence: 7,
-				ownerCount: 3
+				ownerCount: 3,
+				flags: undefined
 			});
 
 			const { unmount } = renderContext();
@@ -178,8 +181,7 @@ describe('XrpFeeContext', () => {
 	// older account's response must not land on the newer account.
 	describe('reserve generation', () => {
 		it('leaves the reserve unknown while a load is pending', async () => {
-			let resolve:
-				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+			let resolve: ((info: XrpAccountInfo) => void) | undefined;
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
 				new Promise((res) => {
@@ -195,7 +197,7 @@ describe('XrpFeeContext', () => {
 
 			expect(get(reserveStore)).toBeUndefined();
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 0 });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined });
 
 			await waitFor(() => {
 				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
@@ -213,8 +215,7 @@ describe('XrpFeeContext', () => {
 				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
 			});
 
-			let resolve:
-				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+			let resolve: ((info: XrpAccountInfo) => void) | undefined;
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
 				new Promise((res) => {
@@ -228,13 +229,12 @@ describe('XrpFeeContext', () => {
 				expect(get(reserveStore)).toBeUndefined();
 			});
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3 });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3, flags: undefined });
 			unmount();
 		});
 
 		it('ignores a response that resolves after the component is destroyed', async () => {
-			let resolve:
-				((info: { balance: bigint; sequence: number; ownerCount: number }) => void) | undefined;
+			let resolve: ((info: XrpAccountInfo) => void) | undefined;
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockReturnValue(
 				new Promise((res) => {
@@ -250,7 +250,7 @@ describe('XrpFeeContext', () => {
 
 			unmount();
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 5 });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 5, flags: undefined });
 			await runResolvedPromises();
 
 			expect(get(reserveStore)).toBeUndefined();

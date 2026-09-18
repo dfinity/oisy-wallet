@@ -353,7 +353,41 @@ describe('xrpl.rest', () => {
 
 			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
 
-			expect(info).toEqual({ balance: 30_000_000n, sequence: 42, ownerCount: 3 });
+			expect(info).toEqual({
+				balance: 30_000_000n,
+				sequence: 42,
+				ownerCount: 3,
+				flags: undefined
+			});
+		});
+
+		// The send path reads `lsfRequireDestTag` out of these bits, so dropping them at the
+		// boundary would leave an untagged payment to be applied as `tecDST_TAG_NEEDED`.
+		it('returns the account flags when the node reports them', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+					}
+				}
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info.flags).toBe(131_072);
+		});
+
+		// Absent flags are not the same claim as no flags being set, so they stay `undefined`
+		// rather than becoming zero — and a node that omits the field must not fail the read,
+		// which the send path needs for the sequence and the reserve.
+		it('leaves the flags undefined when the node omits them', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } } }
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info.flags).toBeUndefined();
 		});
 
 		it('returns a zero owner count when the account owns nothing', async () => {
@@ -624,7 +658,7 @@ describe('xrpl.rest', () => {
 				lastLedgerSequence: 1020
 			});
 
-			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
+			expect(outcome).toEqual({ state: 'absent' });
 		});
 
 		// `txnNotFound` also covers "the node does not have that ledger". Reading it as absence
@@ -723,7 +757,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tesSUCCESS' });
 		});
 
 		// XRPL renders ids uppercase; a caller-supplied one need not be.
@@ -741,7 +775,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tesSUCCESS' });
 		});
 
 		// The one failure mode on this path that would report SUCCESS: a validated record for some
@@ -799,7 +833,9 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('neither a validated result, a pending transaction');
 		});
 
-		it('is not validated while the transaction is still pending', async () => {
+		// `pending` and `absent` must stay distinguishable: only absence may end confirmation as
+		// non-inclusion, and a transaction the node hands back is the opposite of absent.
+		it('reports a found-but-unvalidated transaction as pending, not absent', async () => {
 			mockFetchResponse({ body: { result: { validated: false, hash: 'H' } } });
 
 			await expect(
@@ -809,7 +845,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: false, transactionResult: undefined });
+			).resolves.toEqual({ state: 'pending' });
 		});
 
 		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
@@ -827,7 +863,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
+			).resolves.toEqual({ state: 'validated', transactionResult: 'tecUNFUNDED_PAYMENT' });
 		});
 
 		// `validated` is final, not successful, so a validated response owes a result. Reporting the
