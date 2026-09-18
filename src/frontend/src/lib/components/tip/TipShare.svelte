@@ -24,6 +24,8 @@
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
+	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -87,6 +89,32 @@
 	// scan, the deadline to scan it by — is held back until then, so the wait shows
 	// one thing happening rather than three placeholders and a date.
 	let awaitingLink = $derived(isNullish(link) && isNullish(linkMessage));
+
+	// The two guards `InProgressWizard` installs — `beforeunload` for a tab close
+	// or reload, `dirtyWizardState` for an in-app navigation such as the back
+	// button — without the warning box it bundles with them. That box reads
+	// "Don't close this tab until the transaction is done", and a tip is not a
+	// transaction: nothing is transferred here, which is the one thing this
+	// feature's copy has been careful never to imply.
+	//
+	// The guards themselves are not optional. Between `create_tip` landing and
+	// `set_tip_secret` landing there is a window where the tip exists and no copy
+	// of its claim code does, and leaving during it hands the sender a tip in
+	// History whose link nobody — themselves included — can ever recover. The
+	// money is not lost, because that tip can still be cancelled. The link is.
+	$effect(() => {
+		if (!generating) {
+			return;
+		}
+
+		dirtyWizardState.set(true);
+		confirmToCloseBrowser(true);
+
+		return () => {
+			dirtyWizardState.set(false);
+			confirmToCloseBrowser(false);
+		};
+	});
 
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
@@ -213,9 +241,10 @@
 			column their numbers sit in.
 
 			`InProgress` rather than `InProgressWizard`, which is what the send and
-			swap flows use: that one adds a "do not close the browser" warning, and
-			here it would be false. Closing this modal loses nothing — the tip is
-			created, and its link is recoverable from History.
+			swap flows use: that one heads the stepper with "Don't close this tab
+			until the transaction is done", and a tip is not a transaction. Its two
+			guards are installed above instead, where they can be read next to the
+			reason they are needed.
 		-->
 		<div class="mb-3 rounded-xl bg-secondary px-4 pt-3">
 			<InProgress {progressStep} steps={tipSteps($i18n)} />
