@@ -892,6 +892,7 @@ type NetworkSettingsFor = variant {
 	SolanaDevnet;
 	PolygonAmoy;
 	EthereumSepolia;
+	RobinhoodMainnet;
 	BitcoinTestnet;
 	BaseMainnet;
 	BscMainnet;

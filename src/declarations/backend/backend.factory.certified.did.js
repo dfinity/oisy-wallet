@@ -483,6 +483,7 @@ export const idlFactory = ({ IDL }) => {
 		SolanaDevnet: IDL.Null,
 		PolygonAmoy: IDL.Null,
 		EthereumSepolia: IDL.Null,
+		RobinhoodMainnet: IDL.Null,
 		BitcoinTestnet: IDL.Null,
 		BaseMainnet: IDL.Null,
 		BscMainnet: IDL.Null,
