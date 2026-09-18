@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
@@ -334,6 +335,25 @@ export const sendXrp = async ({
 			return { state: 'unavailable', error: err instanceof Error ? err : new Error(String(err)) };
 		}
 	};
+
+	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
+	// and the two ends fail in different places: `ripple-binary-codec` encodes `Amount: '0'`
+	// happily, so a zero-amount payment spent a threshold signature and a submit to learn
+	// `temBAD_AMOUNT` from the ledger, while a negative amount or fee throws `-5 is an illegal
+	// amount` from inside the codec — after the account read, the ledger read and the signing-key
+	// call. Neither reaches the ledger and neither is charged, since `tem*` is not applied; both
+	// are knowable from the arguments alone.
+	//
+	// A negative fee is the one that also corrupts a guard rather than just failing late: it is
+	// subtracted in `getXrpMaxAmount`, so it RAISES the sendable maximum that exists to keep the
+	// account above its reserve.
+	if (amount <= ZERO) {
+		throw new Error(`XRP amount must be greater than zero, got ${amount} drops.`);
+	}
+
+	if (fee <= ZERO) {
+		throw new Error(`XRP fee must be greater than zero, got ${fee} drops.`);
+	}
 
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
 	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the

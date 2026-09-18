@@ -700,6 +700,60 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	describe('the amount and fee bounds', () => {
+		// Refused from the arguments, before any RPC or signing. `Amount: '0'` encodes fine, so this
+		// otherwise costs a threshold signature and a submit to learn `temBAD_AMOUNT` from the
+		// ledger; a negative one throws `-5 is an illegal amount` out of the codec, which tells the
+		// user nothing.
+		it.each([ZERO, -1n])('refuses the amount %s drops before any work', async (amount) => {
+			await expect(sendXrp({ ...params, amount })).rejects.toThrow(
+				'XRP amount must be greater than zero'
+			);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it.each([ZERO, -1n])('refuses the fee %s drops before any work', async (fee) => {
+			await expect(sendXrp({ ...params, fee })).rejects.toThrow(
+				'XRP fee must be greater than zero'
+			);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// The reason the fee bound is not merely tidiness: the fee is SUBTRACTED in
+		// `getXrpMaxAmount`, so a negative one raises the maximum the reserve guard enforces. Here
+		// the balance is the reserve exactly, so nothing is sendable — and a -10_000_000 fee would
+		// make 9 XRP look sendable.
+		it('does not let a negative fee raise the sendable maximum', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+				balance: XRP_BASE_RESERVE_DROPS,
+				sequence: 7,
+				ownerCount: 0,
+				flags: undefined
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n, fee: -10_000_000n })).rejects.toThrow(
+				'XRP fee must be greater than zero'
+			);
+		});
+
+		// The retry path takes these arguments and ignores them by design, so the bounds must not
+		// be what decides whether a stored blob can be resubmitted.
+		it('does not apply the bounds to a retry', async () => {
+			const pending = {
+				txBlob:
+					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
+			};
+
+			await expect(sendXrp({ ...params, amount: ZERO, fee: ZERO, pending })).resolves.toBeDefined();
+		});
+	});
+
 	describe('a destination that requires a tag', () => {
 		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
 
