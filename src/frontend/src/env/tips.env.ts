@@ -1,18 +1,13 @@
-// Feature flag for the tips surface (the Issue Tip menu entry and its modals).
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
+
+// Feature flag for the tips surface (the Tips menu entry and its modals).
 //
-// Off until the flow is complete. Tips ship across several PRs — sender UI,
-// recipient claim, History, reserved balance — and a half-built money flow is
-// worse than no flow at all: a user who reserves a tip they cannot yet cancel
-// has an encumbered balance and no way out. The flag lets each PR land on main
-// on its own, and one line turns the feature on once the last one is in.
-// TODO: enable once the recipient flow, History and reserved balance have landed.
-//
-// Widened to `boolean` on purpose. Left to infer, this is the literal type
-// `false`, and `vi.mock` type-checks its factory against that literal — so a
-// spec mocking the flag the other way stops compiling, which took a whole spec
-// project down once. Widening also means the spec that asserts the surface
-// stays dark survives the line flipping to `true`.
-//
-// A cast rather than a `: boolean` annotation because `no-inferrable-types`
-// strips the annotation on `npm run format`.
-export const TIPS_ENABLED = false as boolean;
+// Per environment rather than a literal, which is how every other in-progress
+// feature here is gated. `vite.config.ts` picks the `.env` file from
+// `DFX_NETWORK`: `ic` reads `.env.production`, `beta` and `staging` read their
+// own, and everything else — local dev and the `test_fe_*` frontends — reads
+// `.env.development`. Only the last two list `VITE_TIPS_ENABLED`, so tips are
+// on where the feature is being tested and off in production and beta, with no
+// branch to keep alive and no line to flip at release. An undefined variable
+// parses to `false`, which is what production and beta get.
+export const TIPS_ENABLED = parseBoolEnvVar(import.meta.env.VITE_TIPS_ENABLED);
