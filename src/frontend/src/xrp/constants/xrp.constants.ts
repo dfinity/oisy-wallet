@@ -23,19 +23,19 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 // xrpl.js caps at 2 XRP (2_000_000 drops), which is far more than a wallet payment needs.
 export const XRP_MAX_FEE_DROPS = 10_000n;
 
-// Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
-// long it can be included before it definitively fails rather than lingering.
-// `lsfRequireDestTag` in the AccountRoot flags: payments to this account must carry a
-// `DestinationTag`. Set by exchanges and other shared accounts, where the tag is what credits the
-// payment to a customer. A payment without one is applied as `tecDST_TAG_NEEDED` — the fee is
-// destroyed and the sequence consumed — so it is refused before signing instead.
 // A `DestinationTag` is a protocol `UInt32`, and both ends are real tags: `0` is a tag rather than
 // an absent one, and so is `0xFFFFFFFF`. Anything outside dies inside `ripple-binary-codec`, well
 // past the point where the arguments could have said so.
 export const XRP_MAX_DESTINATION_TAG = 0xffff_ffff;
 
+// `lsfRequireDestTag` in the AccountRoot flags: payments to this account must carry a
+// `DestinationTag`. Set by exchanges and other shared accounts, where the tag is what credits the
+// payment to a customer. A payment without one is applied as `tecDST_TAG_NEEDED` — the fee is
+// destroyed and the sequence consumed — so it is refused before signing instead.
 export const XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG = 0x00020000;
 
+// Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
+// long it can be included before it definitively fails rather than lingering.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
