@@ -171,7 +171,12 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, txHash, firstLedgerSequence, lastLedgerSequence } = pending;
+	const { txBlob, firstLedgerSequence, lastLedgerSequence } = pending;
+
+	// Derived here, from the blob about to be broadcast, so the id polled below cannot be anything
+	// but this transaction's. When it travelled as a field alongside the blob, a retry could submit
+	// one transaction and poll another id.
+	const txHash = await deriveXrpTransactionHash(txBlob);
 
 	progress?.(ProgressStepsSendXrp.SEND);
 
@@ -359,14 +364,9 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
 
-	// Derived from the blob, not read from the submit response: if that response is lost the node
-	// may still have applied the transaction, and without a hash of our own there would be nothing
-	// to poll — the send would be reported as failed and a retry would spend the funds again.
-	const txHash = await deriveXrpTransactionHash(txBlob);
-
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, txHash, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
+		pending: { txBlob, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
 		progress
 	});
 };
