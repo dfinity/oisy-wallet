@@ -1,4 +1,7 @@
-import { XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
+import {
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_RIPPLE_EPOCH_OFFSET
+} from '$xrp/constants/xrp.constants';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
@@ -8,6 +11,7 @@ import type {
 	XrpTransactionUi
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { decode } from 'ripple-binary-codec';
 
 // Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
 // rules for a valid transaction change", while a `tef` "may still succeed or fail with a different
@@ -157,6 +161,39 @@ export const mapXrpTransaction = ({
 		...(nonNullish(tx.date) && { timestamp: BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET) }),
 		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
 		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag })
+	};
+};
+
+/**
+ * The inclusive ledger range a signed transaction can be included in, read out of the blob.
+ *
+ * Not carried as fields, for the same reason the transaction id is not (see
+ * {@link XrpPendingTransaction}): the blob is what the ledger acts on, so anything travelling
+ * beside it is a second claim that can disagree. A window wider than the signed one lets the `tx`
+ * search miss the ledger the payment is in; a narrower one does the same. Either way confirmation
+ * reports a live transaction as expired — and expiry is the one result that tells a retry to build
+ * a new transaction, on a new sequence.
+ *
+ * A blob with no `LastLedgerSequence` is rejected rather than given an open-ended window. Such a
+ * transaction can never expire, so no retry for it could ever be called safe, and `sendXrp` never
+ * signs one without it.
+ */
+export const deriveXrpLedgerWindow = (
+	txBlob: string
+): { firstLedgerSequence: number; lastLedgerSequence: number } => {
+	const { LastLedgerSequence: lastLedgerSequence } = decode(txBlob);
+
+	if (typeof lastLedgerSequence !== 'number') {
+		throw new Error(
+			'Cannot derive the XRP ledger window: the signed transaction carries no LastLedgerSequence, so it can never expire.'
+		);
+	}
+
+	return {
+		// The open index the transaction was signed against, which is what `LastLedgerSequence` was
+		// offset from.
+		firstLedgerSequence: lastLedgerSequence - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+		lastLedgerSequence
 	};
 };
 

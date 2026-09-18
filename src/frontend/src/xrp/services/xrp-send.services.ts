@@ -2,6 +2,7 @@ import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
 import { randomWait } from '$lib/utils/time.utils';
 import {
+	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_CONFIRM_MAX_POLL_MS,
@@ -30,16 +31,18 @@ import {
 import type {
 	XrpPendingTransaction,
 	XrpSendResult,
-	XrpSubmitResult
+	XrpSubmitResult,
+	XrpTransactionOutcome
 } from '$xrp/types/xrp-transaction';
 import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
+	deriveXrpLedgerWindow,
 	deriveXrpTransactionHash,
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Waits for a submitted transaction to be validated, and reports its final result.
@@ -64,9 +67,7 @@ const confirmXrpTransaction = async ({
 	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
 	// retried; what must never happen is concluding expiry from it, so the recheck below is
 	// deliberately left to throw.
-	const tryOutcome = async (): Promise<
-		{ validated: boolean; transactionResult: string | undefined } | undefined
-	> => {
+	const tryOutcome = async (): Promise<XrpTransactionOutcome | undefined> => {
 		try {
 			return await loadXrpTransactionOutcome({
 				hash,
@@ -99,7 +100,7 @@ const confirmXrpTransaction = async ({
 	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS; attempt++) {
 		const outcome = await tryOutcome();
 
-		if (outcome?.validated) {
+		if (outcome?.state === 'validated') {
 			return outcome.transactionResult;
 		}
 
@@ -134,8 +135,20 @@ const confirmXrpTransaction = async ({
 					lastLedgerSequence
 				});
 
-				if (recheck.validated) {
+				if (recheck.state === 'validated') {
 					return recheck.transactionResult;
+				}
+
+				// A node that hands the transaction back, unvalidated, is not reporting non-inclusion —
+				// it is reporting that the transaction exists. Nothing there supports "it can never
+				// apply", and the two calls above can reach different members of a load-balanced
+				// endpoint, so this is indeterminate: it escapes as a plain error, which the caller
+				// wraps with the signed blob so a retry resubmits THIS transaction on its already
+				// consumed sequence rather than building one with a new sequence.
+				if (recheck.state === 'pending') {
+					throw new Error(
+						`XRP transaction outcome unresolved: ledger ${validatedLedgerIndex} is past ${lastLedgerSequence}, yet the node still reports the transaction as not validated.`
+					);
 				}
 
 				// Past its LastLedgerSequence the transaction can never be applied, so this failure is
@@ -171,7 +184,12 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, firstLedgerSequence, lastLedgerSequence } = pending;
+	const { txBlob } = pending;
+
+	// Before anything is broadcast: the window comes out of the blob, so it cannot describe a
+	// different transaction than the one submitted, and an unbounded blob is refused here rather
+	// than polled to a false expiry.
+	const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
 
 	// Derived here, from the blob about to be broadcast, so the id polled below cannot be anything
 	// but this transaction's. When it travelled as a field alongside the blob, a retry could submit
@@ -296,19 +314,26 @@ export const sendXrp = async ({
 	// account still exists — at which point it can receive any amount, since receiving carries no
 	// reserve requirement of its own.
 	//
-	// A lookup that could not run keeps its error instead of discarding it. Whether that matters
-	// depends on the amount, and only the guard below knows it.
-	const tryDestinationExists = async (): Promise<boolean | Error> => {
-		try {
-			await loadXrpAccountInfo({ address: destination, network });
+	// Three states, not a boolean: "it is not there" and "I could not ask" lead to different
+	// decisions, and an unavailable lookup keeps its error rather than discarding it, because
+	// whether that matters depends on the amount and only the guards below know it. The flags come
+	// back with it — they are in the same response, so reading them costs nothing.
+	type XrpDestinationLookup =
+		| { state: 'exists'; flags: number | undefined }
+		| { state: 'absent' }
+		| { state: 'unavailable'; error: Error };
 
-			return true;
+	const tryDestination = async (): Promise<XrpDestinationLookup> => {
+		try {
+			const { flags } = await loadXrpAccountInfo({ address: destination, network });
+
+			return { state: 'exists', flags };
 		} catch (err: unknown) {
 			if (err instanceof XrpAccountNotFoundError) {
-				return false;
+				return { state: 'absent' };
 			}
 
-			return err instanceof Error ? err : new Error(String(err));
+			return { state: 'unavailable', error: err instanceof Error ? err : new Error(String(err)) };
 		}
 	};
 
@@ -321,10 +346,10 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence, balance, ownerCount }, destinationExists, ledgerIndex, signingPublicKey] =
+	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex, signingPublicKey] =
 		await Promise.all([
 			loadXrpAccountInfo({ address: source, network }),
-			tryDestinationExists(),
+			tryDestination(),
 			loadXrpLedgerIndex({ network }),
 			getXrpSigningPublicKey({ identity, network, account: source })
 		]);
@@ -351,15 +376,36 @@ export const sendXrp = async ({
 	// charged failure either.
 	const requiresExistingDestination = amount < XRP_BASE_RESERVE_DROPS;
 
-	if (requiresExistingDestination && destinationExists instanceof Error) {
-		throw destinationExists;
+	if (requiresExistingDestination && destinationLookup.state === 'unavailable') {
+		throw destinationLookup.error;
 	}
 
 	// The destination can still be funded between this read and submission, so the validated result
 	// stays the final word — this declines only what the node positively reported.
-	if (requiresExistingDestination && destinationExists === false) {
+	if (requiresExistingDestination && destinationLookup.state === 'absent') {
 		throw new Error(
 			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
+		);
+	}
+
+	// An exchange or other shared account sets `lsfRequireDestTag` because the tag is what credits
+	// the payment to a customer. Without one XRPL applies the payment as `tecDST_TAG_NEEDED`:
+	// another fee destroyed and sequence consumed for nothing delivered, out of the same response
+	// the reserve guard above already read.
+	//
+	// Three conditions, and all of them positive. A supplied tag satisfies the requirement whatever
+	// the flags say; a destination that is absent or could not be read tells us nothing, and unlike
+	// the reserve case an unavailable lookup must not decline here — almost every send omits the
+	// tag, so that would let a busy node stop ordinary sends, while the failure it would prevent is
+	// the ledger protecting the user from an untagged deposit and costs only the fee.
+	if (
+		destinationLookup.state === 'exists' &&
+		isNullish(destinationTag) &&
+		nonNullish(destinationLookup.flags) &&
+		(destinationLookup.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+	) {
+		throw new Error(
+			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
 	}
 
@@ -381,7 +427,7 @@ export const sendXrp = async ({
 
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
+		pending: { txBlob },
 		progress
 	});
 };
