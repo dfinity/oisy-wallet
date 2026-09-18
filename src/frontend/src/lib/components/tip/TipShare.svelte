@@ -8,9 +8,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
+	import { tipSteps } from '$lib/constants/steps.constants';
 	import {
 		TIP_HISTORY_CANCEL_BUTTON,
 		TIP_SHARE_COPY_BUTTON
@@ -18,11 +20,18 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
+	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatCurrency,
+		formatNanosecondsToDateAndTime,
+		formatToken
+	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { canShare, shareText } from '$lib/utils/share.utils';
 
@@ -57,6 +66,12 @@
 		 */
 		linkNotSaved?: boolean;
 		cancelling?: boolean;
+		/**
+		 * Which of the three reservation stages is running. Only read while
+		 * {@link generating}; a link reopened from History has one call to make and
+		 * nothing to narrate.
+		 */
+		progressStep?: string;
 	}
 
 	let {
@@ -69,7 +84,8 @@
 		onCancel,
 		cancelling = false,
 		generating = false,
-		linkNotSaved = false
+		linkNotSaved = false,
+		progressStep = ProgressStepsTip.RESERVE
 	}: Props = $props();
 
 	// Waiting for a link, as opposed to having one or having been told there will
@@ -78,6 +94,32 @@
 	// one thing happening rather than three placeholders and a date.
 	let awaitingLink = $derived(isNullish(link) && isNullish(linkMessage));
 
+	// The two guards `InProgressWizard` installs — `beforeunload` for a tab close
+	// or reload, `dirtyWizardState` for an in-app navigation such as the back
+	// button — without the warning box it bundles with them. That box reads
+	// "Don't close this tab until the transaction is done", and a tip is not a
+	// transaction: nothing is transferred here, which is the one thing this
+	// feature's copy has been careful never to imply.
+	//
+	// The guards themselves are not optional. Between `create_tip` landing and
+	// `set_tip_secret` landing there is a window where the tip exists and no copy
+	// of its claim code does, and leaving during it hands the sender a tip in
+	// History whose link nobody — themselves included — can ever recover. The
+	// money is not lost, because that tip can still be cancelled. The link is.
+	$effect(() => {
+		if (!generating) {
+			return;
+		}
+
+		dirtyWizardState.set(true);
+		confirmToCloseBrowser(true);
+
+		return () => {
+			dirtyWizardState.set(false);
+			confirmToCloseBrowser(false);
+		};
+	});
+
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
 	// the only way to know which of the three earns its place on this screen.
@@ -85,16 +127,13 @@
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
-	// "30 Aug, 15:30" rather than a full locale timestamp. The year and the seconds
-	// were noise on a line whose only job is to tell the sender roughly how long
-	// they have, and the long form crowded the one number that matters above it.
+	//
+	// Through the shared helper so this reads the same as the deadline the recipient
+	// is shown on the claim screen. The two used to disagree — this one dropped the
+	// year while that one printed a full locale timestamp down to the second — for
+	// one deadline on one tip.
 	let expiresAt = $derived(
-		new Date(Number(expiresAtNs / 1_000_000n)).toLocaleString($currentLanguage, {
-			day: 'numeric',
-			month: 'short',
-			hour: '2-digit',
-			minute: '2-digit'
-		})
+		formatNanosecondsToDateAndTime({ nanoseconds: expiresAtNs, language: $currentLanguage })
 	);
 
 	// The reserved amount, not the text that was typed — this line is the sender's
@@ -195,7 +234,23 @@
 		there is no code — a box headed "Scan to claim this tip" above that warning
 		contradicted it.
 	-->
-	{#if isNullish(linkMessage)}
+	{#if isNullish(linkMessage) && generating && awaitingLink}
+		<!--
+			The same box the reassurance text uses, so nothing below it moves when the
+			link lands and the two swap over. Not centred: `ProgressSteps` lays its
+			rows out on a grid, and centring the box would pull the labels off the
+			column their numbers sit in.
+
+			`InProgress` rather than `InProgressWizard`, which is what the send and
+			swap flows use: that one heads the stepper with "Don't close this tab
+			until the transaction is done", and a tip is not a transaction. Its two
+			guards are installed above instead, where they can be read next to the
+			reason they are needed.
+		-->
+		<div class="mb-3 rounded-xl bg-secondary px-4 pt-3">
+			<InProgress {progressStep} steps={tipSteps($i18n)} />
+		</div>
+	{:else if isNullish(linkMessage)}
 		<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
 			<!--
 				`m-0` on both, then one explicit step between them. A bare `<p>` carries an
@@ -204,11 +259,7 @@
 				from the edge, and the whole box read bottom-heavy.
 			-->
 			<p class="m-0 font-bold">
-				{awaitingLink
-					? generating
-						? $i18n.tip.text.generating_link
-						: $i18n.tip.text.recovering_link
-					: $i18n.tip.text.no_wallet_needed_title}
+				{awaitingLink ? $i18n.tip.text.recovering_link : $i18n.tip.text.no_wallet_needed_title}
 			</p>
 
 			<!--
@@ -238,7 +289,10 @@
 		<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
 			<IconClock size="16" />
 
-			{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
+			{replacePlaceholders($i18n.tip.text.expires_at, {
+				$date: expiresAt.date,
+				$time: expiresAt.time
+			})}
 		</div>
 	{/if}
 

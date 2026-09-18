@@ -1,6 +1,7 @@
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import * as backendApi from '$lib/api/backend.api';
 import { BACKEND_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
+import { ProgressStepsTip } from '$lib/enums/progress-steps';
 import { tipSpenderSubaccount } from '$lib/services/tip.crypto';
 import {
 	buildTipLink,
@@ -188,6 +189,61 @@ describe('tip.services', () => {
 			mockDerivation();
 			mockEncryption();
 			vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+		});
+
+		it('reports each stage as it starts, so the share screen can name the wait', async () => {
+			// Three canister calls, one of which is itself two cross-subnet calls, and
+			// the whole thing can run past ten seconds. The share screen used to cover
+			// all of it with a single sentence, which says the same thing in the first
+			// second and the tenth. These are the stages it narrates.
+			//
+			// Reported before each call rather than after, so a row is marked running
+			// while it runs rather than once it is already done.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+
+			const progress = vi.fn();
+
+			await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS,
+				progress
+			});
+
+			expect(progress.mock.calls.flat()).toEqual([
+				ProgressStepsTip.RESERVE,
+				ProgressStepsTip.CREATE,
+				ProgressStepsTip.SAVE,
+				ProgressStepsTip.DONE
+			]);
+		});
+
+		it('stops reporting where it fails, leaving the stage that broke as the last one', async () => {
+			// A refused approve must not advance the stepper past the row it died on:
+			// the modal drops back to the form, and a reservation that got no further
+			// than the approve should not have claimed to be creating a link.
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(new Error('InsufficientFunds'));
+
+			const progress = vi.fn();
+
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft: newTipDraft(),
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					expiresAtNs: EXPIRES_AT_NS,
+					progress
+				})
+			).rejects.toThrow('InsufficientFunds');
+
+			expect(progress.mock.calls.flat()).toEqual([ProgressStepsTip.RESERVE]);
 		});
 
 		it('starts the vetKD derivation before the approve rather than after the create', async () => {
