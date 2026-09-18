@@ -353,7 +353,7 @@ describe('TipShare', () => {
 			// about it.
 			const { queryByText } = render(TipShare, { props: generatingProps });
 
-			expect(queryByText(/Claim before/)).toBeNull();
+			expect(queryByText(/Claim by/)).toBeNull();
 		});
 
 		it('takes the box the scanning instructions use, rather than adding one', () => {
@@ -394,7 +394,7 @@ describe('TipShare', () => {
 
 			expect(queryByText(get(i18n).tip.text.step_reserving)).toBeNull();
 			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
-			expect(getByText(/Claim before/)).toBeInTheDocument();
+			expect(getByText(/Claim by/)).toBeInTheDocument();
 		});
 	});
 });
