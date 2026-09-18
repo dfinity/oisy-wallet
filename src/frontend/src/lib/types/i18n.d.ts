@@ -158,6 +158,7 @@ interface I18nNavigation {
 		show_balances: string;
 		notes: string;
 		issue_tip: string;
+		issue_tip_attention: string;
 	};
 	short: { documentation: string };
 }
@@ -745,7 +746,8 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		unknown_destination: string;
+		first_time_destination: string;
+		first_time_destination_confirm: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
@@ -2384,6 +2386,14 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		overview_window: string;
+		overview_failed: string;
+		overview_failed_hint: string;
+		overview_open: string;
+		overview_none: string;
+		overview_count_one: string;
+		overview_count_other: string;
+		overview_claimed: string;
 		select_token: string;
 		create_title: string;
 		share_title: string;
@@ -2402,6 +2412,7 @@ interface I18nTip {
 		reserve_fee: string;
 		payout_fee: string;
 		fees_are_yours: string;
+		reserved_by_tips: string;
 		lapse_notice: string;
 		generate: string;
 		share_heading: string;
@@ -2413,7 +2424,9 @@ interface I18nTip {
 		scan_or_photo: string;
 		expires_at: string;
 		done: string;
-		generating_link: string;
+		step_reserving: string;
+		step_creating: string;
+		step_saving: string;
 		recovering_link: string;
 		link_not_saved: string;
 		reserve_failed: string;

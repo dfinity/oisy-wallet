@@ -25,7 +25,11 @@ describe('erc4626-exchange.services', () => {
 			assetAddress: '0xAssetAddress',
 			assetDecimals: 6,
 			exchange: { coingeckoId: 'ethereum' },
-			infura: 'mainnet'
+			network: {
+				name: 'Ethereum',
+				chainId: 1n,
+				providers: { infura: 'mainnet', alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2' }
+			}
 		};
 
 		const mockErc20Prices: CoingeckoSimpleTokenPriceResponse = {
@@ -109,7 +113,14 @@ describe('erc4626-exchange.services', () => {
 				assetAddress: '0xAssetAddress',
 				assetDecimals: 6,
 				exchange: { coingeckoId: 'ethereum' },
-				infura: 'mainnet'
+				network: {
+					name: 'Ethereum',
+					chainId: 1n,
+					providers: {
+						infura: 'mainnet',
+						alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
+					}
+				}
 			};
 
 			mockConvertToAssets.mockResolvedValueOnce(1050000n).mockResolvedValueOnce(2000000n);

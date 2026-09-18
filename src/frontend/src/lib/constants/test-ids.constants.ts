@@ -5,6 +5,8 @@ export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_TIP_BUTTON = 'navigation-menu-tip-button';
+export const NAVIGATION_MENU_TIP_BADGE = 'navigation-menu-tip-badge';
+export const NAVIGATION_MENU_TIP_COUNT = 'navigation-menu-tip-count';
 export const TIP_INTRO_GET_STARTED_BUTTON = 'tip-intro-get-started-button';
 export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
 export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
@@ -111,6 +113,8 @@ export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-not
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+export const SEND_FIRST_TIME_DESTINATION_WARNING = 'send-first-time-destination-warning';
+export const SEND_FIRST_TIME_DESTINATION_CONFIRM = 'send-first-time-destination-confirm';
 export const REVIEW_FORM_FEE_EXPIRED = 'review-form-fee-expired';
 
 export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';

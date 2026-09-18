@@ -171,7 +171,8 @@
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances",
 			"notes": "Open notes",
-			"issue_tip": "Give a tip anyone can claim with a link or QR code"
+			"issue_tip": "Give a tip anyone can claim with a link or QR code",
+			"issue_tip_attention": "Give a tip anyone can claim with a link or QR code. $count of your tips need attention"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -1012,8 +1013,9 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
+			"first_time_destination": "It appears you have never sent tokens to this address before. Verify the address carefully.",
+			"first_time_destination_confirm": "This is the first time I send tokens to this address and I have verified the address carefully.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
@@ -2859,7 +2861,15 @@
 		"text": {
 			"intro_title": "Tip with OISY Wallet",
 			"intro_heading": "Effortless Crypto Tipping",
-			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"intro_body": "Create a tip, share the link or QR, and the amount stays in your wallet until someone claims it.",
+			"overview_window": "Recent activity",
+			"overview_failed": "Needs attention",
+			"overview_failed_hint": "Somebody tried to claim and the payout did not go through. Nothing left your balance — open your history to see what each one needs.",
+			"overview_open": "Waiting to be claimed",
+			"overview_none": "None",
+			"overview_count_one": "$count tip",
+			"overview_count_other": "$count tips",
+			"overview_claimed": "Claimed",
 			"select_token": "Select token to issue tip",
 			"create_title": "Issue Tip",
 			"share_title": "Tip is ready",
@@ -2878,7 +2888,8 @@
 			"reserve_fee": "Fee to reserve",
 			"payout_fee": "Fee when claimed",
 			"fees_are_yours": "Both fees are paid by you. Whoever claims the tip receives the full amount.",
-			"lapse_notice": "If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"reserved_by_tips": "$amount is already promised to tips you have created that are waiting to be claimed, so it cannot be tipped again. Cancel one from your history to free it up.",
+			"lapse_notice": "If nobody claims it, the amount stays in your wallet and the claim fee is never charged.",
 			"generate": "Generate",
 			"share_heading": "Your tip is ready",
 			"copy_link": "Copy the tip link",
@@ -2889,7 +2900,9 @@
 			"scan_or_photo": "Scan now, or take a photo to claim later.",
 			"expires_at": "Claim before $date",
 			"done": "Done",
-			"generating_link": "Reserving your tip and building the link. This takes a few seconds.",
+			"step_reserving": "Setting the amount aside",
+			"step_creating": "Creating the tip link",
+			"step_saving": "Saving it to your history",
 			"recovering_link": "Recovering your link. This takes a few seconds.",
 			"link_not_saved": "Copy this link now. We could not save a copy for you, so this is the only time you will see it.",
 			"reserve_failed": "The tip could not be reserved. Nothing has left your wallet, so try again.",
@@ -2966,7 +2979,7 @@
 		},
 		"share": {
 			"title": "Someone sent you a tip",
-			"description": "Tap to claim it. No app to install, nothing to write down, and only you can move it."
+			"description": "Open to claim it. OISY is a wallet that runs in your browser — sign in with your face or fingerprint and the tip is yours."
 		},
 		"welcome": {
 			"title": "Welcome to OISY Wallet",

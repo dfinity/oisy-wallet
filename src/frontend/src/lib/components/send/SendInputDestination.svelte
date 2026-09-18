@@ -1,23 +1,21 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { debounce, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
+	import FirstTimeDestinationWarning from '$lib/components/send/FirstTimeDestinationWarning.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { KnownDestinations } from '$lib/types/transactions';
-	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
+	import { isFirstTimeDestination } from '$lib/utils/known-destinations.utils';
 
 	interface Props {
 		destination: string;
@@ -27,7 +25,6 @@
 		onInvalidDestination?: () => boolean;
 		onQRButtonClick?: () => void;
 		knownDestinations?: KnownDestinations;
-		networkContacts?: NetworkContacts;
 	}
 
 	let {
@@ -37,8 +34,7 @@
 		inputPlaceholder,
 		onInvalidDestination,
 		onQRButtonClick,
-		knownDestinations,
-		networkContacts
+		knownDestinations
 	}: Props = $props();
 
 	const validate = () => (invalidDestination = onInvalidDestination?.() ?? false);
@@ -78,28 +74,12 @@
 		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
 	);
 
-	let isNotKnownDestination = $derived(
-		nonNullish(knownDestinations) &&
-			nonNullish(destinationNetworkId) &&
-			isNullish(
-				getKnownDestination({
-					knownDestinations,
-					address: destination,
-					networkId: destinationNetworkId
-				})
-			)
-	);
-
-	let isNotNetworkContact = $derived(
-		nonNullish(networkContacts) &&
-			nonNullish(destinationNetworkId) &&
-			isNullish(
-				getNetworkContact({
-					networkContacts,
-					address: destination,
-					networkId: destinationNetworkId
-				})
-			)
+	let firstTimeDestination = $derived(
+		isFirstTimeDestination({
+			destination,
+			networkId: destinationNetworkId,
+			knownDestinations
+		})
 	);
 </script>
 
@@ -152,11 +132,9 @@
 	</div>
 </div>
 
-{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
+{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && firstTimeDestination}
 	<div transition:slide={SLIDE_DURATION}>
-		<MessageBox level="warning" styleClass="mt-4">
-			{$i18n.send.info.unknown_destination}
-		</MessageBox>
+		<FirstTimeDestinationWarning styleClass="mt-4" />
 	</div>
 {/if}
 
