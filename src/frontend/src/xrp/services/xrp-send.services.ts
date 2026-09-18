@@ -350,30 +350,59 @@ export const sendXrp = async ({
 	// decisions, and an unavailable lookup keeps its error rather than discarding it, because
 	// whether that matters depends on the amount and only the guards below know it. The flags come
 	// back with it — they are in the same response, so reading them costs nothing.
-	type XrpDestinationLookup =
-		| { state: 'exists'; flags: number | undefined }
-		| { state: 'absent' }
-		| { state: 'unavailable'; error: Error };
+	// Both snapshots, reduced to the three facts the guards below actually need. A creation, a
+	// deletion or an `lsfRequireDestTag` change that lives only in the open ledger may never
+	// validate, and trusting it lets a below-reserve or untagged payment through to a fee-claiming
+	// `tec*` — which is the outcome this function declines payments before signing to avoid.
+	//
+	// The pessimistic reading in both directions. `settled` requires the account in BOTH, so a
+	// creation that has not validated and a deletion that has not validated are equally unsettled
+	// without needing a rule each. `requiresTag` fires if EITHER snapshot has the bit, because a
+	// tag that turns out not to have been needed costs nothing — XRPL simply carries it — while a
+	// missing one claims the fee.
+	//
+	// A false decline here is cheap and actionable: it says the amount must reach the account
+	// reserve, before anything is signed. That is the trade this file makes everywhere else.
+	interface XrpDestinationFacts {
+		settled: boolean;
+		requiresTag: boolean;
+		// Kept rather than thrown, because whether an unanswerable lookup matters depends on the
+		// amount and only the guards know it.
+		unavailable: Error | undefined;
+	}
 
-	const tryDestination = async (): Promise<XrpDestinationLookup> => {
+	type XrpDestinationRead =
+		{ exists: true; flags: number | undefined } | { exists: false } | { error: Error };
+
+	const readDestination = async (
+		ledgerIndex: 'current' | 'validated'
+	): Promise<XrpDestinationRead> => {
 		try {
-			// The open ledger, so an account created moments ago reads as existing. The pessimistic
-			// alternative would decline a below-reserve payment to a genuinely new account, which is
-			// the false decline an earlier round here fixed.
-			const { flags } = await loadXrpAccountInfo({
-				address: destination,
-				network,
-				ledgerIndex: 'current'
-			});
+			const { flags } = await loadXrpAccountInfo({ address: destination, network, ledgerIndex });
 
-			return { state: 'exists', flags };
+			return { exists: true, flags };
 		} catch (err: unknown) {
 			if (err instanceof XrpAccountNotFoundError) {
-				return { state: 'absent' };
+				return { exists: false };
 			}
 
-			return { state: 'unavailable', error: err instanceof Error ? err : new Error(String(err)) };
+			return { error: err instanceof Error ? err : new Error(String(err)) };
 		}
+	};
+
+	const tryDestination = async (): Promise<XrpDestinationFacts> => {
+		const reads = await Promise.all([readDestination('current'), readDestination('validated')]);
+
+		return {
+			settled: reads.every((read) => 'exists' in read && read.exists),
+			requiresTag: reads.some(
+				(read) =>
+					'flags' in read &&
+					nonNullish(read.flags) &&
+					(read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+			),
+			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
+		};
 	};
 
 	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
@@ -469,15 +498,18 @@ export const sendXrp = async ({
 	// charged failure either.
 	const requiresExistingDestination = amount < XRP_BASE_RESERVE_DROPS;
 
-	if (requiresExistingDestination && destinationLookup.state === 'unavailable') {
-		throw destinationLookup.error;
+	if (requiresExistingDestination && nonNullish(destinationLookup.unavailable)) {
+		throw destinationLookup.unavailable;
 	}
 
 	// The destination can still be funded between this read and submission, so the validated result
 	// stays the final word — this declines only what the node positively reported.
-	if (requiresExistingDestination && destinationLookup.state === 'absent') {
+	// "Not settled" rather than "absent": a destination created in the open ledger but not yet
+	// validated is in the same position as one that does not exist at all, because the creation can
+	// still be rolled back and the payment would then be applied as `tecNO_DST_INSUF_XRP`.
+	if (requiresExistingDestination && !destinationLookup.settled) {
 		throw new Error(
-			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
+			`XRP destination ${destination} does not exist yet in settled ledger state, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
 	}
 
@@ -491,12 +523,7 @@ export const sendXrp = async ({
 	// the reserve case an unavailable lookup must not decline here — almost every send omits the
 	// tag, so that would let a busy node stop ordinary sends, while the failure it would prevent is
 	// the ledger protecting the user from an untagged deposit and costs only the fee.
-	if (
-		destinationLookup.state === 'exists' &&
-		isNullish(destinationTag) &&
-		nonNullish(destinationLookup.flags) &&
-		(destinationLookup.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
-	) {
+	if (isNullish(destinationTag) && destinationLookup.requiresTag) {
 		throw new Error(
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);

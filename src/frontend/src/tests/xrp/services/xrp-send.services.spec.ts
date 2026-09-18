@@ -24,6 +24,7 @@ import {
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
+import { isNullish } from '@dfinity/utils';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -833,6 +834,112 @@ describe('xrp-send.services', () => {
 	// the open ledger reflects pending CREDITS as well as debits, so a maximum sized against an
 	// unvalidated credit offers money the account may not keep — `tecUNFUNDED_PAYMENT`, fee
 	// destroyed and sequence consumed, which is what the reserve guard exists to prevent.
+	// The destination is read from both ledgers for the same reason the sender is: a creation, a
+	// deletion or an `lsfRequireDestTag` change living only in the open ledger may never validate,
+	// and trusting it lets a below-reserve or untagged payment through to a fee-claiming `tec*`.
+	describe('the two destination snapshots', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+		const belowReserve = XRP_BASE_RESERVE_DROPS - 1n;
+
+		// `undefined` means the node answered `actNotFound`; an Error means it could not answer.
+		const destinationIn = ({
+			current,
+			validated
+		}: {
+			current: number | undefined | Error;
+			validated: number | undefined | Error;
+		}) =>
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address, ledgerIndex }) => {
+				if (address !== destination) {
+					return Promise.resolve(sourceInfo);
+				}
+
+				const answer = ledgerIndex === 'current' ? current : validated;
+
+				if (answer instanceof Error) {
+					return Promise.reject(answer);
+				}
+
+				if (isNullish(answer)) {
+					return Promise.reject(new XrpAccountNotFoundError('XRPL account not found'));
+				}
+
+				return Promise.resolve({ ...sourceInfo, flags: answer });
+			});
+
+		it('sends below the reserve to a destination settled in both ledgers', async () => {
+			destinationIn({ current: 0, validated: 0 });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).resolves.toBeDefined();
+		});
+
+		// A creation that has not validated can still be rolled back, at which point the payment is
+		// applied as `tecNO_DST_INSUF_XRP`.
+		it('declines below the reserve when the creation has not validated', async () => {
+			destinationIn({ current: 0, validated: undefined });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow(
+				'does not exist yet'
+			);
+		});
+
+		// The mirror direction, which requiring BOTH covers without a rule of its own: a deletion
+		// that has not validated leaves the account equally unsettled.
+		it('declines below the reserve when a deletion has not validated', async () => {
+			destinationIn({ current: undefined, validated: 0 });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow(
+				'does not exist yet'
+			);
+		});
+
+		// Either snapshot setting the bit is enough: a tag that turns out not to have been needed
+		// costs nothing, while a missing one claims the fee.
+		it.each([
+			{ name: 'only the open ledger', current: 0x00020000, validated: 0 },
+			{ name: 'only the validated ledger', current: 0, validated: 0x00020000 }
+		])('requires a tag when $name sets the bit', async ({ current, validated }) => {
+			destinationIn({ current, validated });
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'requires a destination tag'
+			);
+		});
+
+		// The tag requirement does NOT depend on the destination being settled: if the open ledger
+		// says a tag is needed, one is needed as soon as that state validates, and asking for it
+		// costs nothing. Sent above the reserve so the settled check is not what declines.
+		it('requires a tag even when the destination is not settled', async () => {
+			destinationIn({ current: 0x00020000, validated: undefined });
+
+			await expect(
+				sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS, destinationTag: undefined })
+			).rejects.toThrow('requires a destination tag');
+		});
+
+		it('does not require a tag when neither snapshot sets the bit', async () => {
+			destinationIn({ current: 0, validated: 0 });
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// One unanswerable read is enough to make the pair unusable, and below the reserve that has
+		// to propagate rather than be read as absence.
+		it('propagates a one-sided unavailable read below the reserve', async () => {
+			destinationIn({ current: 0, validated: new Error('tooBusy') });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow('tooBusy');
+		});
+
+		// At or above the reserve the destination decides nothing, so an unanswerable read must not
+		// block the send — the advisory half this guard has always had.
+		it('ignores a one-sided unavailable read at or above the reserve', async () => {
+			destinationIn({ current: 0, validated: new Error('tooBusy') });
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
+		});
+	});
+
 	describe('the two sender snapshots', () => {
 		const snapshots = ({
 			open,
