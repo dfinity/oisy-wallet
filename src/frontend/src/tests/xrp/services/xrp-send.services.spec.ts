@@ -10,6 +10,7 @@ import {
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
@@ -824,6 +825,63 @@ describe('xrp-send.services', () => {
 
 			await expect(sendXrp({ ...params, amount: 9_000_000n, fee: -10_000_000n })).rejects.toThrow(
 				'XRP fee must be greater than zero'
+			);
+		});
+	});
+
+	describe('the destination tag bounds', () => {
+		// All of these are type-legal `number`s that die inside `ripple-binary-codec` — after the
+		// account read, the ledger read and the threshold signing-key call.
+		it.each([-1, 1.5, NaN, Infinity, XRP_MAX_DESTINATION_TAG + 1])(
+			'refuses the tag %j before any work',
+			async (destinationTag) => {
+				await expect(sendXrp({ ...params, destinationTag })).rejects.toThrow(
+					'XRP destination tag must be an unsigned 32-bit integer'
+				);
+
+				expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+				expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+				expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+				expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			}
+		);
+
+		// Both ends are real tags. `0` in particular is not an absent tag — `buildXrpPayment` goes
+		// out of its way to keep an omitted one from becoming `0`.
+		it.each([0, 1, XRP_MAX_DESTINATION_TAG])('sends with the valid tag %j', async (tag) => {
+			await sendXrp({ ...params, destinationTag: tag });
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					transaction: expect.objectContaining({ DestinationTag: tag })
+				})
+			);
+		});
+
+		// An omitted tag must still omit the field rather than send `0`.
+		it('omits the field when no tag is given', async () => {
+			await sendXrp({ ...params, destinationTag: undefined });
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					transaction: expect.not.objectContaining({ DestinationTag: expect.anything() })
+				})
+			);
+		});
+
+		// The sharper half of the finding: the required-tag guard asks only whether a tag is
+		// nullish, so a value that cannot become a tag was counting as having supplied one and
+		// suppressing the decline. Now it never gets that far.
+		it('does not let a bogus tag satisfy a destination that requires one', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+				balance: 50_000_000n,
+				sequence: 7,
+				ownerCount: 0,
+				flags: 0x00020000
+			});
+
+			await expect(sendXrp({ ...params, destinationTag: NaN })).rejects.toThrow(
+				'XRP destination tag must be an unsigned 32-bit integer'
 			);
 		});
 	});

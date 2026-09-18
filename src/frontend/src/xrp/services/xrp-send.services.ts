@@ -12,6 +12,7 @@ import {
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
@@ -370,6 +371,26 @@ export const sendXrp = async ({
 
 	if (fee <= ZERO) {
 		throw new Error(`XRP fee must be greater than zero, got ${fee} drops.`);
+	}
+
+	// The tag is caller input typed `number`, so negative, fractional, non-finite and
+	// above-`UInt32` values are all type-legal and all die inside `ripple-binary-codec` — after the
+	// account read, the ledger read and the signing-key call. Worse, the required-destination-tag
+	// guard below asks only whether a tag is nullish, so `NaN` counts as having supplied one and
+	// suppresses the decline: a guard satisfied by a value that cannot become a tag.
+	//
+	// Inclusive at both ends. `0` is a real tag rather than an absent one, which is why
+	// `buildXrpPayment` refuses to let an omitted tag become `0`, and `0xFFFFFFFF` is a real tag
+	// too. `Number.isInteger` rejects `NaN` and `Infinity` on its own.
+	if (
+		nonNullish(destinationTag) &&
+		(!Number.isInteger(destinationTag) ||
+			destinationTag < 0 ||
+			destinationTag > XRP_MAX_DESTINATION_TAG)
+	) {
+		throw new Error(
+			`XRP destination tag must be an unsigned 32-bit integer, got ${destinationTag}.`
+		);
 	}
 
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
