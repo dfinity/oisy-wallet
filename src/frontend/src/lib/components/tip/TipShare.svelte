@@ -8,9 +8,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
+	import { tipSteps } from '$lib/constants/steps.constants';
 	import {
 		TIP_HISTORY_CANCEL_BUTTON,
 		TIP_SHARE_COPY_BUTTON
@@ -18,9 +20,12 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
+	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -57,6 +62,12 @@
 		 */
 		linkNotSaved?: boolean;
 		cancelling?: boolean;
+		/**
+		 * Which of the three reservation stages is running. Only read while
+		 * {@link generating}; a link reopened from History has one call to make and
+		 * nothing to narrate.
+		 */
+		progressStep?: string;
 	}
 
 	let {
@@ -69,7 +80,8 @@
 		onCancel,
 		cancelling = false,
 		generating = false,
-		linkNotSaved = false
+		linkNotSaved = false,
+		progressStep = ProgressStepsTip.RESERVE
 	}: Props = $props();
 
 	// Waiting for a link, as opposed to having one or having been told there will
@@ -77,6 +89,32 @@
 	// scan, the deadline to scan it by — is held back until then, so the wait shows
 	// one thing happening rather than three placeholders and a date.
 	let awaitingLink = $derived(isNullish(link) && isNullish(linkMessage));
+
+	// The two guards `InProgressWizard` installs — `beforeunload` for a tab close
+	// or reload, `dirtyWizardState` for an in-app navigation such as the back
+	// button — without the warning box it bundles with them. That box reads
+	// "Don't close this tab until the transaction is done", and a tip is not a
+	// transaction: nothing is transferred here, which is the one thing this
+	// feature's copy has been careful never to imply.
+	//
+	// The guards themselves are not optional. Between `create_tip` landing and
+	// `set_tip_secret` landing there is a window where the tip exists and no copy
+	// of its claim code does, and leaving during it hands the sender a tip in
+	// History whose link nobody — themselves included — can ever recover. The
+	// money is not lost, because that tip can still be cancelled. The link is.
+	$effect(() => {
+		if (!generating) {
+			return;
+		}
+
+		dirtyWizardState.set(true);
+		confirmToCloseBrowser(true);
+
+		return () => {
+			dirtyWizardState.set(false);
+			confirmToCloseBrowser(false);
+		};
+	});
 
 	// Copy and share are tracked separately: which one a sender reaches for says
 	// whether the QR, the link or the share sheet is doing the work, and that is
@@ -195,7 +233,23 @@
 		there is no code — a box headed "Scan to claim this tip" above that warning
 		contradicted it.
 	-->
-	{#if isNullish(linkMessage)}
+	{#if isNullish(linkMessage) && generating && awaitingLink}
+		<!--
+			The same box the reassurance text uses, so nothing below it moves when the
+			link lands and the two swap over. Not centred: `ProgressSteps` lays its
+			rows out on a grid, and centring the box would pull the labels off the
+			column their numbers sit in.
+
+			`InProgress` rather than `InProgressWizard`, which is what the send and
+			swap flows use: that one heads the stepper with "Don't close this tab
+			until the transaction is done", and a tip is not a transaction. Its two
+			guards are installed above instead, where they can be read next to the
+			reason they are needed.
+		-->
+		<div class="mb-3 rounded-xl bg-secondary px-4 pt-3">
+			<InProgress {progressStep} steps={tipSteps($i18n)} />
+		</div>
+	{:else if isNullish(linkMessage)}
 		<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
 			<!--
 				`m-0` on both, then one explicit step between them. A bare `<p>` carries an
@@ -204,11 +258,7 @@
 				from the edge, and the whole box read bottom-heavy.
 			-->
 			<p class="m-0 font-bold">
-				{awaitingLink
-					? generating
-						? $i18n.tip.text.generating_link
-						: $i18n.tip.text.recovering_link
-					: $i18n.tip.text.no_wallet_needed_title}
+				{awaitingLink ? $i18n.tip.text.recovering_link : $i18n.tip.text.no_wallet_needed_title}
 			</p>
 
 			<!--

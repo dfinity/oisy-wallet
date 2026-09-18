@@ -15,6 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import {
@@ -68,6 +69,11 @@
 	let busy = $state(false);
 	// True while a reservation is in flight and the share screen is already up.
 	let generating = $state(false);
+	// Which of the three reservation stages the share screen is narrating. Reset
+	// on every attempt, because the form stays editable after a failure and a
+	// retry has to start its stepper from the top rather than from wherever the
+	// last one stopped.
+	let progressStep = $state<string>(ProgressStepsTip.RESERVE);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
 	let message = $state('');
@@ -297,6 +303,7 @@
 
 		busy = true;
 		generating = true;
+		progressStep = ProgressStepsTip.RESERVE;
 
 		const parsedAmount = parseToken({
 			value: `${amount}`,
@@ -329,7 +336,8 @@
 				amount: parsedAmount,
 				fee: selectedToken.fee,
 				expiresAtNs: deadline,
-				message: message === '' ? undefined : message
+				message: message === '' ? undefined : message,
+				progress: (step) => (progressStep = step)
 			});
 
 			trackTip({
@@ -448,6 +456,7 @@
 					onDone={nonNullish(viewingTip)
 						? () => goToStep(WizardStepsTip.HISTORY)
 						: modalStore.close}
+					{progressStep}
 					token={reservedToken}
 				/>
 			{:else if currentStep?.name === WizardStepsTip.HISTORY}
