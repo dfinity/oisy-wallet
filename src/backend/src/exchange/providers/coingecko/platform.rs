@@ -7,6 +7,7 @@ pub fn coingecko_platform(chain_id: u64) -> Option<&'static str> {
         1 => Some("ethereum"),
         56 => Some("binance-smart-chain"),
         137 => Some("polygon-pos"),
+        4663 => Some("robinhood"),
         8453 => Some("base"),
         42161 => Some("arbitrum-one"),
         _ => None,
@@ -17,7 +18,7 @@ pub fn coingecko_platform(chain_id: u64) -> Option<&'static str> {
 /// used in the `/simple/price` endpoint.
 pub fn coingecko_native_coin(chain_id: u64) -> Option<&'static str> {
     match chain_id {
-        1 | 8453 | 42161 => Some("ethereum"),
+        1 | 4663 | 8453 | 42161 => Some("ethereum"),
         56 => Some("binancecoin"),
         137 => Some("polygon-ecosystem-token"),
         _ => None,
@@ -70,6 +71,7 @@ mod tests {
         assert_eq!(coingecko_platform(137), Some("polygon-pos"));
         assert_eq!(coingecko_platform(8453), Some("base"));
         assert_eq!(coingecko_platform(42161), Some("arbitrum-one"));
+        assert_eq!(coingecko_platform(4663), Some("robinhood"));
     }
 
     #[test]
@@ -83,6 +85,7 @@ mod tests {
         assert_eq!(coingecko_native_coin(1), Some("ethereum"));
         assert_eq!(coingecko_native_coin(8453), Some("ethereum"));
         assert_eq!(coingecko_native_coin(42161), Some("ethereum"));
+        assert_eq!(coingecko_native_coin(4663), Some("ethereum"));
     }
 
     #[test]
@@ -110,8 +113,10 @@ mod tests {
         assert!(is_priceable_token_id(&TokenId::EvmNative(137)));
         assert!(is_priceable_token_id(&TokenId::EvmNative(8453)));
         assert!(is_priceable_token_id(&TokenId::EvmNative(42161)));
+        assert!(is_priceable_token_id(&TokenId::EvmNative(4663)));
         assert!(is_priceable_token_id(&erc("0xabc", 1)));
         assert!(is_priceable_token_id(&erc("0xabc", 42161)));
+        assert!(is_priceable_token_id(&erc("0xabc", 4663)));
         assert!(is_priceable_token_id(&TokenId::IcpNative));
         assert!(is_priceable_token_id(&TokenId::SolNativeMainnet));
         assert!(is_priceable_token_id(&TokenId::BtcNativeMainnet));

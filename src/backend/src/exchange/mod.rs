@@ -73,6 +73,7 @@ fn native_token_ids() -> Vec<StoredTokenId> {
         StoredTokenId(TokenId::EvmNative(1)),
         StoredTokenId(TokenId::EvmNative(56)),
         StoredTokenId(TokenId::EvmNative(137)),
+        StoredTokenId(TokenId::EvmNative(4663)),
         StoredTokenId(TokenId::EvmNative(8453)),
         StoredTokenId(TokenId::EvmNative(42161)),
         StoredTokenId(TokenId::IcpNative),
@@ -779,6 +780,18 @@ mod tests {
         let candidates = refresh_candidates(vec![], true);
 
         assert!(candidates.contains(&StoredTokenId(TokenId::XrpNativeMainnet)));
+    }
+
+    /// Robinhood Chain needs its own pin for the same reason as XRP, plus one of its own:
+    /// `EvmNative(4663)` groups under the `ethereum` coin id, so dropping it still leaves the
+    /// outcall intact — Ethereum, Base and Arbitrum already request it. What disappears is the
+    /// rate keyed to *this* token id, leaving native ETH on Robinhood with no USD value while
+    /// the same asset is priced on every other chain.
+    #[test]
+    fn refresh_candidates_always_include_native_robinhood() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::EvmNative(4663))));
     }
 
     #[test]

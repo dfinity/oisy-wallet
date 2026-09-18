@@ -266,6 +266,7 @@ mod tests {
     fn classify_tokens_groups_native_tokens_by_coingecko_coin_id() {
         let eth = StoredTokenId(TokenId::EvmNative(1));
         let base_eth = StoredTokenId(TokenId::EvmNative(8453));
+        let robinhood_eth = StoredTokenId(TokenId::EvmNative(4663));
         let bnb = StoredTokenId(TokenId::EvmNative(56));
         let icp = StoredTokenId(TokenId::IcpNative);
         let sol = StoredTokenId(TokenId::SolNativeMainnet);
@@ -278,6 +279,7 @@ mod tests {
         let tokens = [
             eth.clone(),
             base_eth.clone(),
+            robinhood_eth.clone(),
             bnb.clone(),
             icp.clone(),
             sol.clone(),
@@ -291,7 +293,7 @@ mod tests {
 
         assert_eq!(
             classified.native_coins.get("ethereum"),
-            Some(&vec![eth, base_eth])
+            Some(&vec![eth, base_eth, robinhood_eth])
         );
         assert_eq!(classified.native_coins.get("binancecoin"), Some(&vec![bnb]));
         assert_eq!(

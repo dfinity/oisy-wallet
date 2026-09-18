@@ -1324,6 +1324,7 @@ export type NetworkSettingsFor =
 	| { SolanaDevnet: null }
 	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
+	| { RobinhoodMainnet: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }
 	| { BscMainnet: null }
