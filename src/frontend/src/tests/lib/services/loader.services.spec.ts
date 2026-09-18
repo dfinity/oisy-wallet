@@ -2,6 +2,7 @@ import * as addressEnv from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -24,7 +25,33 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
+import type { Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+// XRP is force-disabled under TEST, so the enablement derived is mocked with a toggle that
+// defaults to disabled — the existing ID-list assertions stay valid — and that the XRP case
+// switches on.
+const mocks = vi.hoisted(() => {
+	let xrpMainnetEnabled!: Writable<boolean>;
+
+	return {
+		get xrpMainnetEnabled(): Writable<boolean> {
+			return xrpMainnetEnabled;
+		},
+		set xrpMainnetEnabled(value: Writable<boolean>) {
+			xrpMainnetEnabled = value;
+		}
+	};
+});
+
+vi.mock('$lib/derived/networks.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const actual = await vi.importActual<object>('$lib/derived/networks.derived');
+
+	mocks.xrpMainnetEnabled = writable(false);
+
+	return { ...actual, networkXrpMainnetEnabled: mocks.xrpMainnetEnabled };
+});
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
 	loadUserProfile: vi.fn(() => Promise.resolve({ success: true, profileCreated: false }))
@@ -233,6 +260,24 @@ describe('loader.services', () => {
 				ETHEREUM_NETWORK_ID,
 				SOLANA_MAINNET_NETWORK_ID
 			]);
+		});
+
+		// XRP must load in the aggregated initialization path, so a derivation failure is caught by
+		// the `addressSuccess` handling instead of leaving a permanent receive-address skeleton.
+		it('should load the XRP address when XRP mainnet is enabled', async () => {
+			mocks.xrpMainnetEnabled.set(true);
+
+			await initLoader(mockParams);
+
+			expect(loadAddresses).toHaveBeenCalledOnce();
+			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
+				BTC_MAINNET_NETWORK_ID,
+				ETHEREUM_NETWORK_ID,
+				SOLANA_MAINNET_NETWORK_ID,
+				XRP_MAINNET_NETWORK_ID
+			]);
+
+			mocks.xrpMainnetEnabled.set(false);
 		});
 
 		it('should load addresses from the backend only for enabled networks', async () => {

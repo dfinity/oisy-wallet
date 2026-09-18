@@ -1,4 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { consoleError } from '$lib/utils/console.utils';
+import {
+	getIdbSolTransactionDetail,
+	setIdbSolTransactionDetail
+} from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
@@ -26,41 +31,6 @@ import {
 	type TransactionError
 } from '@solana/kit';
 import { SvelteMap } from 'svelte/reactivity';
-
-//lamports are like satoshis: https://solana.com/docs/terminology#lamport
-export const loadSolLamportsBalance = async ({
-	address,
-	network
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<Lamports> => {
-	const { getBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-
-	const { value: balance } = await getBalance(wallet).send();
-
-	return balance;
-};
-
-export const loadTokenBalance = async ({
-	ataAddress,
-	network
-}: {
-	ataAddress: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<bigint | undefined> => {
-	const { getTokenAccountBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(ataAddress);
-
-	const {
-		value: { amount }
-	} = await getTokenAccountBalance(wallet).send();
-
-	if (nonNullish(amount)) {
-		return BigInt(amount);
-	}
-};
 
 /**
  * Fetches signatures without an error for a given wallet address.
@@ -149,6 +119,18 @@ export const fetchTransactionDetailForSignature = async ({
 		return cachedTransaction;
 	}
 
+	// The map above is per realm and dies with the tab, so without this every reload fetches the
+	// worker's newest page again, and every record derived again for another token fetches its
+	// details again. Two realms that ask for the same signature before either has kept it still fetch
+	// it twice: this spares the repeat, not the race.
+	const storedTransaction = await getIdbSolTransactionDetail({ network, signature });
+
+	if (nonNullish(storedTransaction)) {
+		networkCache.set(signature.signature, storedTransaction);
+
+		return storedTransaction;
+	}
+
 	const { confirmationStatus } = signature;
 
 	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
@@ -170,6 +152,11 @@ export const fetchTransactionDetailForSignature = async ({
 
 	if (confirmationStatus === 'finalized') {
 		networkCache.set(signature.signature, transaction);
+
+		// Not awaited: the transaction is already loaded, and keeping it is worth nothing to this call.
+		setIdbSolTransactionDetail({ network, transaction }).catch((err: unknown) =>
+			consoleError('Caching a Solana transaction detail failed:', err)
+		);
 	}
 
 	return transaction;
