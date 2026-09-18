@@ -176,7 +176,7 @@ describe('TipCreate', () => {
 		// fee is only spent by `icrc2_transfer_from`, so an unclaimed tip is never
 		// charged it. Asserted separately because it could be dropped or reversed
 		// while the amount clause above stayed true.
-		expect(notice).toMatch(/claim fee is never charged/i);
+		expect(notice).toMatch(/claim fee is not charged/i);
 	});
 
 	it('says nothing about reservations when there are none', () => {
