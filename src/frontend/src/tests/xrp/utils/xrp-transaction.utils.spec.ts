@@ -382,9 +382,10 @@ describe('xrp-transaction.utils', () => {
 			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
 		});
 
-		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports an earlier
-		// submission already applied, and `tec` WAS applied — none of them is a failure to report
-		// here. The ledger decides by polling.
+		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports the blob is
+		// already in the open ledger, `tefPAST_SEQ` reports its sequence consumed — which is what a
+		// resubmitted send gets once the original landed — and `tec` WAS applied. None of them is a
+		// failure to report here; the ledger decides by polling.
 		it.each([
 			'tesSUCCESS',
 			'terQUEUED',
@@ -436,6 +437,17 @@ describe('xrp-transaction.utils', () => {
 		it('reproduces the id the ledger stored a real transaction under', async () => {
 			await expect(deriveXrpTransactionHash(LEDGER_BLOB)).resolves.toBe(LEDGER_HASH);
 		});
+
+		// `Buffer.from(hex, 'hex')` truncates at the first non-hex character instead of rejecting, so
+		// before this guard `1200ZZ`, `1200xyz` and `1200 00` all hashed the bytes of `1200` and
+		// returned ONE identical id. A resubmission's blob comes from the caller, and a wrong id is
+		// polled to a false expiry.
+		it.each(['1200ZZ', '1200xyz', '1200 00', '1200-00', 'nonsense', '120', '', '0x1200'])(
+			'refuses the malformed blob %j instead of truncating it',
+			async (blob) => {
+				await expect(deriveXrpTransactionHash(blob)).rejects.toThrow('not whole bytes of hex');
+			}
+		);
 
 		// Lowercase hex is equally valid on the wire, and the id is canonically uppercase.
 		it('accepts a lowercase blob and returns uppercase hex', async () => {

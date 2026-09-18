@@ -34,7 +34,7 @@ import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.util
 import { mapSolInstruction, mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	getCloseLookupTableInstruction,
@@ -55,6 +55,13 @@ import {
 	getWithdrawInstruction,
 	StakeAuthorize
 } from '@solana-program/stake';
+import {
+	getAssignInstruction,
+	getAssignWithSeedInstruction,
+	getCreateAccountAllowPrefundInstruction,
+	getCreateAccountInstruction,
+	getCreateAccountWithSeedInstruction
+} from '@solana-program/system';
 import {
 	AuthorityType,
 	getApproveCheckedInstruction,
@@ -1004,6 +1011,214 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccount` instruction that opens a System-owned account', () => {
+			// Nothing governs such an account but the key it is opened at, so its lamports are spendable
+			// by whoever holds that key. The review has no counterparty to name it as, which is what let
+			// it ride along inside a neighbouring transfer's figure.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should state the rent of a `CreateAccount` instruction that opens an account for a program', () => {
+			// How a dApp legitimately asks for an account: a swap routed through Whirlpool opens its
+			// wrapped SOL account this way before initialising it. The token program governs what leaves
+			// it, so the lamports are the rent of that operation rather than a transfer.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 2_039_280n,
+				payer: mockSolAddress
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountWithSeed` instruction that opens a System-owned account', () => {
+			// No key signs for a derived address, but System `transferSolWithSeed` spends such an account
+			// against a signature from its base, so this funds a native wallet just as a plain creation
+			// does - and the review can name it no better.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should leave a `CreateAccountWithSeed` instruction that opens an account for a program unread', () => {
+			// The owning program governs what leaves it, so this is not a wallet. Nothing else about the
+			// instruction is displayable, which is the reading it already had.
+			const instruction = getCreateAccountWithSeedInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: address(mockSolAddress2),
+				base: address(mockSolAddress3),
+				baseAccount: createNoopSigner(address(mockSolAddress3)),
+				seed: 'vault',
+				amount: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that opens a System-owned account', () => {
+			// A third opcode onto the same spendable account. It needs no payer of its own, which is why
+			// only the owner is read.
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction that states no payer', () => {
+			// The account prefunds itself, so there is no payer meta at all. The refusal must not depend
+			// on reading one.
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: ZERO,
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should leave a `CreateAccountAllowPrefund` instruction that opens an account for a program unread', () => {
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
+		});
+
+		it('should fail closed on an `Assign` instruction, which hands an account to a program', () => {
+			// The account is the instruction's only meta and a required signer, and the connected wallet
+			// signs every message it is sent, so a request can name the wallet itself. The System
+			// program's version of the authority change already refused for a token account.
+			const instruction = getAssignInstruction({
+				account: createNoopSigner(address(mockSolAddress)),
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on an `AssignWithSeed` instruction', () => {
+			const instruction = getAssignWithSeedInstruction({
+				account: address(mockSolAddress2),
+				baseAccount: createNoopSigner(address(mockSolAddress)),
+				base: address(mockSolAddress),
+				seed: 'vault',
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `CreateAccount` instruction that funds beyond the rent of its size', () => {
+			// A token account opened, initialised and closed in one message hands its whole balance to
+			// whoever the close names, so anything above rent is a payment the creation states no
+			// destination for. 165 bytes cost (128 + 165) * 3480 * 2 = 2_039_280 lamports.
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 1_000_000_000n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a rent-exact creation over-funded by a single lamport', () => {
+			const instruction = getCreateAccountInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				lamports: 2_039_281n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 		});
 
 		it('should map a valid Token instruction', () => {

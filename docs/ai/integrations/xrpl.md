@@ -30,32 +30,41 @@ the body, as `result.error` — for example `actNotFound`, `txnNotFound`, `tooBu
 `noNetwork`. A successful HTTP status therefore says nothing about whether the call
 worked, and `xrpJsonRpc` returning normally is not evidence of a result.
 
-Every caller must inspect `result.error` before reading the payload, and decide
-per call which error is an expected state rather than a failure. The rule belongs to
-the helper, not to the method: the same method can carry different rules depending on
-what its caller needs from the response, so look up your helper rather than your
-method.
+`xrpJsonRpc` owns this. It validates the envelope with `XrplEnvelopeSchema`, then throws a
+typed `XrplRpcError` carrying the code for any `result.error` the caller has not declared
+as an expected state. Helpers no longer guard it themselves — when they did, a body without
+a `result` object reached them as `undefined` and dereferencing `result.error` produced a
+`TypeError` instead of the intended message.
 
-| Helper                      | Method         | Expected error                      | Everything else |
-| --------------------------- | -------------- | ----------------------------------- | --------------- |
-| `loadXrpBalance`            | `account_info` | `actNotFound` → zero balance        | throw           |
-| `loadXrpAccountInfo`        | `account_info` | none — a send needs the `Sequence`  | throw           |
-| _(a later phase)_           | `account_tx`   | `actNotFound` → empty history       | throw           |
-| `loadXrpTransactionOutcome` | `tx`           | `txnNotFound` → not in a ledger yet | throw           |
-| `loadXrpOpenLedgerFee`      | `fee`          | none                                | throw           |
+Each helper declares only the codes that are an expected state FOR IT, in `expectedErrors`.
+The rule therefore belongs to the helper, not to the method: the same method can carry
+different rules depending on what its caller needs from the response, so look up your
+helper rather than your method.
 
-Two mechanisms enforce this, and neither is optional. Every helper rejects `result.error`
-before reading the payload, and every schema additionally forbids `error` on its success
-branches (`error: z.never().optional()`). The schema is what catches a response carrying
-_both_ an error and a plausible result: Zod strips unknown keys, so without that branch
-the error would be silently dropped and the bogus result used. `fee` shows why the
-call-site check is needed too — every field of its result is optional, so an error
-response would otherwise parse with no `drops` and be answered with the fallback base
-fee, underpricing the send on the very node that reported congestion.
+| Helper                        | Method           | Expected errors                             |
+| ----------------------------- | ---------------- | ------------------------------------------- |
+| `loadXrpBalance`              | `account_info`   | `actNotFound` → zero balance                |
+| `loadXrpAccountInfo`          | `account_info`   | `actNotFound` → `XrpAccountNotFoundError`   |
+| `loadXrpOpenLedgerFee`        | `fee`            | none                                        |
+| `loadXrpLedgerIndex`          | `ledger_current` | none                                        |
+| `loadXrpValidatedLedgerIndex` | `ledger`         | none                                        |
+| `loadXrpTransactionOutcome`   | `tx`             | `txnNotFound`, and only with `searched_all` |
+| `submitXrpTransaction`        | `submit`         | none                                        |
+| `loadXrpTransactions`         | `account_tx`     | `actNotFound` → empty history               |
 
-The worst consequence sits behind `ledger`: a bogus validated index past a transaction's
-`LastLedgerSequence` sends confirmation into the expiry branch, which reports the send as
-failed and implies a resend is safe.
+Declaring nothing is the safe default, and `fee` shows why the check cannot be skipped:
+every field of its result is optional, so an error response would otherwise parse with no
+`drops` and be answered with the fallback base fee — underpricing the send on the very node
+that reported congestion. The worst consequence sits behind `ledger`: a bogus validated
+index past a transaction's `LastLedgerSequence` sends confirmation into the expiry branch,
+which reports the send as failed and implies a resend is safe.
+
+Most schemas additionally forbid `error` on their success branches
+(`error: z.never().optional()`), which catches a response carrying _both_ an error and a
+plausible result. That is now belt-and-braces rather than the primary defence, since the
+envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` and
+`XrplTxResultSchema` do not carry it, because both have a declared or all-optional shape
+that makes the envelope check the only thing standing between them and a dropped error.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
@@ -92,9 +101,17 @@ Neither field in the response is proof of a final outcome. `accepted` says only 
 _this_ node took the blob, and `engine_result` is provisional. Per the XRPL reference a
 `tem` result is "final unless the rules for a valid transaction change", whereas a `tef`
 "may still succeed or fail with a different code after being reapplied" and `tel`
-transactions "may be automatically cached and retried later" — and `tefALREADY` reports
-that the same exact transaction has already been applied. A `tec*` result was applied and
+transactions "may be automatically cached and retried later", and `tefALREADY` reports
+that this exact transaction is already in the open ledger. A `tec*` result was applied and
 merely failed, claiming the fee.
+
+Note which result a resubmitted send actually gets. rippled's preclaim runs `checkSeqProxy`
+before `checkPriorTxAndLastLedger`, and only the latter produces `tefALREADY` — so once the
+original has been applied and its sequence consumed, a resubmission fails the sequence check
+first and returns `tefPAST_SEQ`. `tefALREADY` is reserved for a duplicate submitted inside the
+same open ledger. Either way the transaction is not applied twice, because a sequence can be
+consumed only once; that, rather than transaction-identity dedup, is what makes resubmitting a
+stored transaction safe.
 
 So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
 ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will

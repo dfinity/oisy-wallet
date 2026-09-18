@@ -2387,6 +2387,9 @@ interface I18nTip {
 		overview_failed: string;
 		overview_failed_hint: string;
 		overview_open: string;
+		overview_none: string;
+		overview_count_one: string;
+		overview_count_other: string;
 		overview_claimed: string;
 		select_token: string;
 		create_title: string;
