@@ -1,12 +1,16 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+import { randomWait } from '$lib/utils/time.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
+	XRP_CONFIRM_MAX_POLL_MS,
+	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
+import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
@@ -40,8 +44,9 @@ describe('xrp-send.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		// Every RPC this path makes is mocked below; anything that slips through would otherwise
-		// reach the public cluster, since the test env resolves `XRP_RPC_HTTP_URL_MAINNET` to it.
+		// Every RPC this path makes is mocked below. The env resolves `XRP_RPC_HTTP_URL_MAINNET` to
+		// `undefined` under vitest, so a missing mock already fails on the endpoint assertion; this
+		// stub is the second line, and catches anything that acquires an endpoint of its own.
 		vi.stubGlobal('fetch', () => Promise.reject(new Error('unexpected network call in a test')));
 
 		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
@@ -85,6 +90,20 @@ describe('xrp-send.services', () => {
 				DestinationTag: 12345,
 				LastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 			}
+		});
+	});
+
+	// The check that the signing key belongs to its account lives in `getXrpSigningPublicKey`, so
+	// it is only worth the account handed to it. Asking with anything but the address the payment
+	// says it is from would check the key against the wrong account and pass a send that XRPL then
+	// rejects on a signature that cannot verify.
+	it('asks for a signing key bound to the account it sends from', async () => {
+		await sendXrp(params);
+
+		expect(xrpSignServices.getXrpSigningPublicKey).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			network: XrpNetworks.mainnet,
+			account: source
 		});
 	});
 
@@ -133,7 +152,9 @@ describe('xrp-send.services', () => {
 
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -146,7 +167,9 @@ describe('xrp-send.services', () => {
 		expect(submitResult).toBeUndefined();
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -162,7 +185,9 @@ describe('xrp-send.services', () => {
 		expect(submitResult).toBeUndefined();
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
-			network: XrpNetworks.mainnet
+			network: XrpNetworks.mainnet,
+			firstLedgerSequence: 1000,
+			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
 
@@ -226,19 +251,23 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 	});
 
-	// `tefALREADY` reports that an earlier submission of this exact blob already applied, so the
-	// send must reach confirmation: rejecting here would report a completed payment as unsent and
-	// invite a retry that pays a second time.
-	it('confirms tefALREADY instead of reporting the payment unsent', async () => {
-		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
-			engineResult: 'tefALREADY',
-			accepted: false
-		});
+	// Both results a resubmitted send can get: `tefPAST_SEQ` once the original landed and consumed
+	// the sequence, `tefALREADY` for a duplicate inside the same open ledger. Either must reach
+	// confirmation — rejecting here would report a completed payment as unsent and invite a retry
+	// that pays a second time.
+	it.each(['tefPAST_SEQ', 'tefALREADY'])(
+		'confirms %s instead of reporting the payment unsent',
+		async (engineResult) => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult,
+				accepted: false
+			});
 
-		await expect(sendXrp(params)).resolves.toBeDefined();
+			await expect(sendXrp(params)).resolves.toBeDefined();
 
-		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
-	});
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+		}
+	);
 
 	// `tef` may be reapplied and `tel` may be cached and retried, so neither is proof the payment
 	// will not happen. Reporting them as failed would invite a retry that pays twice; they are
@@ -279,6 +308,23 @@ describe('xrp-send.services', () => {
 			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 		}
 	);
+
+	// Both this and the indeterminate error are thrown at the CONFIRM step, so the type is the only
+	// thing a caller can use to tell a settled failure — fee charged, funds not sent — from an
+	// outcome nobody knows yet. Getting that backwards tells the user to keep waiting for a balance
+	// that will never move.
+	it('types a validated failure distinctly from an indeterminate one', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+			validated: true,
+			transactionResult: 'tecUNFUNDED_PAYMENT'
+		});
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		expect(err).toBeInstanceOf(XrpTransactionFailedError);
+		expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
+		expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+	});
 
 	// A validated transaction is only final; `tec*` results are validated too.
 	it('throws when the transaction is validated with a failing result', async () => {
@@ -383,9 +429,20 @@ describe('xrp-send.services', () => {
 			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
 		);
 
-		await expect(sendXrp(params)).rejects.toThrow('Unexpected XRPL tx response: tooBusy');
+		const err = await sendXrp(params).catch((e: unknown) => e);
 
-		await expect(sendXrp(params)).rejects.not.toThrow('expired');
+		// Exactly two lookups: the poll, then the recheck inside the expiry branch. Any other count
+		// means the branch this test exists for was never entered — the earlier version of this test
+		// called `sendXrp` twice, and on the second call every lookup rejected, so it exited through
+		// the attempt cap and asserted only that the cap's message lacks the word "expired".
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledTimes(2);
+		expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledOnce();
+
+		// The type is the assertion: an unanswered recheck leaves non-inclusion unestablished, so it
+		// must be indeterminate and must NOT be the expiry that tells the caller a resend is safe.
+		expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+		expect((err as Error).message).toContain('tooBusy');
 	});
 
 	// A lookup the node could not answer establishes nothing, so it must cost an attempt rather
@@ -481,6 +538,8 @@ describe('xrp-send.services', () => {
 			expect((err as XrpSendIndeterminateError).pending).toEqual({
 				txBlob: signedBlob,
 				txHash: expect.stringMatching(/^[0-9A-F]{64}$/),
+				// The window a retry must poll: the open index at signing through its expiry.
+				firstLedgerSequence: 1000,
 				lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 			});
 		});
@@ -506,6 +565,7 @@ describe('xrp-send.services', () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
 				txHash: 'A'.repeat(64),
+				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
 
@@ -517,7 +577,9 @@ describe('xrp-send.services', () => {
 			});
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 				hash: pending.txHash,
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: pending.firstLedgerSequence,
+				lastLedgerSequence: pending.lastLedgerSequence
 			});
 
 			// Nothing is fetched, rebuilt or re-signed: a new sequence would make this a different
@@ -527,33 +589,95 @@ describe('xrp-send.services', () => {
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 		});
 
-		// The payoff: the first attempt did land. Resubmitting the same blob is refused as already
-		// applied, and the poll reports the original transaction's real outcome.
+		// The payoff: the first attempt did land, so its sequence is consumed and the resubmission is
+		// refused with `tefPAST_SEQ` rather than applied again. The poll then reports the original
+		// transaction's real outcome.
 		it('reports the original outcome when the resubmitted transaction already applied', async () => {
 			const pending = {
 				txBlob: '1200002280000000240000000861400000000098968068400000000000000C',
 				txHash: 'B'.repeat(64),
+				firstLedgerSequence: 4300,
 				lastLedgerSequence: 4321
 			};
 
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
-				engineResult: 'tefALREADY',
+				engineResult: 'tefPAST_SEQ',
 				accepted: false
 			});
 
 			await expect(sendXrp({ ...params, pending })).resolves.toEqual({
 				txHash: pending.txHash,
-				submitResult: { engineResult: 'tefALREADY', accepted: false }
+				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
 		});
 	});
 
+	describe("the sender's own reserve", () => {
+		// XRPL applies a payment that would leave the account below its reserve as
+		// `tecUNFUNDED_PAYMENT`: fee destroyed, sequence burned, nothing delivered. The balance and
+		// `OwnerCount` needed to refuse it are already in hand from the account load.
+		const sourceWith = ({ balance, ownerCount }: { balance: bigint; ownerCount: number }) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockResolvedValue({ balance, sequence: 7, ownerCount });
+
+		it('refuses an amount that would leave the account below its reserve', async () => {
+			// 2 XRP held, 2 ledger objects: reserve 1_000_000 + 2 x 200_000 = 1_400_000, so with a
+			// 10-drop fee only 599_990 is sendable.
+			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
+
+			await expect(sendXrp({ ...params, amount: 900_000n, fee: 10n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('sends exactly the sendable maximum', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
+
+			await expect(sendXrp({ ...params, amount: 599_990n, fee: 10n })).resolves.toBeDefined();
+		});
+
+		// The owner reserve is what makes this account-specific: the same balance and amount are
+		// sendable with no ledger objects and not sendable with two.
+		it('scales the reserve with OwnerCount', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 0 });
+
+			await expect(sendXrp({ ...params, amount: 900_000n, fee: 10n })).resolves.toBeDefined();
+		});
+
+		// The fee is part of what must fit, not an afterthought.
+		it('counts the fee against the sendable maximum', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 0 });
+
+			await expect(sendXrp({ ...params, amount: 1_000_000n, fee: 1n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+	});
+
 	describe('an unfunded destination', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0 };
+
+		// The node's `actNotFound` for the destination is the only thing that means unfunded.
+		const mockDestination = (
+			destinationOutcome: () => Promise<never> | Promise<typeof sourceInfo>
+		) =>
+			vi
+				.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockImplementation(async ({ address }) =>
+					address === destination ? await destinationOutcome() : sourceInfo
+				);
+
+		const notFound = () => Promise.reject(new XrpAccountNotFoundError('XRPL account not found'));
+
 		// XRPL answers a payment too small to create the account with `tecNO_DST_INSUF_XRP`, which is
 		// APPLIED: the payment fails and the fee is claimed. Refusing before signing turns a charged
 		// failure into a plain error.
 		it('refuses an amount below the account reserve before signing', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+			mockDestination(notFound);
 
 			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
 				'does not exist yet'
@@ -564,17 +688,102 @@ describe('xrp-send.services', () => {
 		});
 
 		it('sends an amount that covers the account reserve', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(ZERO);
+			mockDestination(notFound);
 
 			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
 		});
 
-		// Only an unfunded destination carries the restriction: an existing account always holds at
-		// least the base reserve, so any positive balance means the rule does not apply.
-		it('does not restrict the amount when the destination exists', async () => {
-			vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(1n);
+		// A drained account still exists, and receiving XRP carries no reserve requirement — so a
+		// zero balance must NOT be read as unfunded.
+		it('does not restrict the amount when the destination exists with a zero balance', async () => {
+			mockDestination(() => Promise.resolve({ ...sourceInfo, balance: ZERO }));
 
 			await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
+		});
+
+		// The check is advisory: failing to make it must not block a send to a well-funded address.
+		it.each(['tooBusy', 'XRPL account_info request failed with status 503'])(
+			'sends anyway when the destination read fails with %s',
+			async (message) => {
+				mockDestination(() => Promise.reject(new Error(message)));
+
+				await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
+			}
+		);
+	});
+
+	// `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read skip are both computed from this interval, so
+	// they are only correct if the loop actually waits it. Leaving it to `randomWait`'s defaults
+	// would make the two agree by coincidence, and a change there would break them silently.
+	it('waits the interval its derived budgets assume', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+			.mockResolvedValueOnce({ validated: false, transactionResult: undefined })
+			.mockResolvedValue({ validated: true, transactionResult: 'tesSUCCESS' });
+
+		await sendXrp(params);
+
+		expect(randomWait).toHaveBeenCalledWith({
+			min: XRP_CONFIRM_MIN_POLL_MS,
+			max: XRP_CONFIRM_MAX_POLL_MS
+		});
+	});
+
+	describe('the validated-ledger read', () => {
+		// The index moves once per ~4s close while this loop polls every 1-2s, so asking on every
+		// answered poll spends calls that cannot change the outcome. One read says how many closes
+		// are still needed; the next is due only after roughly that many polls.
+		it('reads the ledger only as often as it can have moved', async () => {
+			const validatesOnAttempt = 50;
+			let attempts = 0;
+
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
+				attempts++;
+
+				return Promise.resolve(
+					attempts < validatesOnAttempt
+						? { validated: false, transactionResult: undefined }
+						: { validated: true, transactionResult: 'tesSUCCESS' }
+				);
+			});
+			// 20 closes short of expiry, so each read buys 40 polls of silence.
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(1000);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+
+			expect(attempts).toBe(validatesOnAttempt);
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(2);
+		});
+
+		// Backing off on a read that never happened would delay the definitive expiry answer on the
+		// strength of no evidence at all.
+		it('does not back off after a read the node could not answer', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex')
+				.mockRejectedValueOnce(new Error('XRPL ledger request failed with status 503'))
+				.mockResolvedValue(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1);
+
+			await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
+
+			// Attempt 0 was refused, attempt 1 answered and settled it.
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledTimes(2);
+		});
+
+		// Once the index is past expiry there is nothing left to wait for.
+		it('still settles expiry on the first answered read', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				validated: false,
+				transactionResult: undefined
+			});
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpSendExpiredError);
+
+			expect(xrplRest.loadXrpValidatedLedgerIndex).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -586,47 +795,21 @@ describe('xrp-send.services', () => {
 		);
 	});
 
-	// The reviewed fee must be the signed fee: re-fetching here would sign a figure the user
-	// never saw and could push the total past the balance despite the caller's check.
-	it('signs the fee it was given rather than fetching one', async () => {
-		const spyFee = vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee');
-
-		await sendXrp({ ...params, fee: 4_321n });
-
-		expect(spyFee).not.toHaveBeenCalled();
-		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
-			expect.objectContaining({ transaction: expect.objectContaining({ Fee: '4321' }) })
-		);
-	});
-
 	it('accepts a fee at the maximum', async () => {
 		await expect(sendXrp({ ...params, fee: XRP_MAX_FEE_DROPS })).resolves.toBeDefined();
 	});
 
-	// Typed so the wizard can tell a validated failure from an indeterminate confirmation: both
-	// happen at the CONFIRM step, so the step alone cannot separate them.
-	it('rejects a validated tec failure with XrpTransactionFailedError', async () => {
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: true,
-			transactionResult: 'tecUNFUNDED_PAYMENT'
-		});
+	// The reviewed fee must be the signed fee: re-fetching it here would sign a figure the user
+	// never saw, and the caller's own max-amount arithmetic would no longer hold.
+	it('signs the fee it was given rather than an estimate', async () => {
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(9_999n);
 
-		await expect(sendXrp(params)).rejects.toBeInstanceOf(XrpTransactionFailedError);
-	});
+		await sendXrp({ ...params, fee: 7n });
 
-	it('does not use that type for an indeterminate expiry', async () => {
-		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-			validated: false,
-			transactionResult: undefined
-		});
-		vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
-			1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+			expect.objectContaining({ transaction: expect.objectContaining({ Fee: '7' }) })
 		);
-
-		const promise = sendXrp(params);
-
-		await expect(promise).rejects.toThrow('XRP transaction expired');
-		await expect(promise).rejects.not.toBeInstanceOf(XrpTransactionFailedError);
+		expect(xrplRest.loadXrpOpenLedgerFee).not.toHaveBeenCalled();
 	});
 
 	it('does not reach DONE when the transaction fails', async () => {

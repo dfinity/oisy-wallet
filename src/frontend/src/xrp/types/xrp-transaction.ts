@@ -31,13 +31,22 @@ export interface XrpAccountInfo {
  * A signed transaction whose outcome is not known.
  *
  * Resubmitting exactly this, rather than rebuilding from a freshly fetched sequence, is what makes
- * a retry safe: the ledger applies a given signed transaction at most once, so a resubmission of
- * one that already landed is rejected as `tefALREADY` instead of paying a second time. A rebuilt
- * transaction has a new sequence and is therefore a second, independent payment.
+ * a retry safe — and the guarantee is the SEQUENCE, not transaction-identity dedup. A sequence can
+ * be consumed only once, so if the original landed, the resubmission fails `checkSeqProxy` with
+ * `tefPAST_SEQ` and is never applied. A rebuilt transaction carries a NEW sequence and is
+ * therefore a second, independent payment.
+ *
+ * `tefALREADY` is a narrower case, not this one: rippled reaches it only via
+ * `checkPriorTxAndLastLedger`, which runs after `checkSeqProxy`, so it fires for a duplicate
+ * submitted inside the same open ledger — before the sequence was consumed.
  */
 export interface XrpPendingTransaction {
 	txBlob: string;
 	txHash: string;
+	// The inclusive ledger range the transaction can appear in: the open index when it was signed,
+	// through the `LastLedgerSequence` it was signed with. Confirmation needs it to ask `tx` for a
+	// definite answer — see `loadXrpTransactionOutcome`.
+	firstLedgerSequence: number;
 	lastLedgerSequence: number;
 }
 

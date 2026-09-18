@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	XrpAccountNotFoundError,
+	XrplRpcError,
 	loadXrpAccountInfo,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
@@ -20,6 +21,7 @@ vi.mock('$xrp/providers/xrp-rpc.providers', () => ({
 
 describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
+	const network = XrpNetworks.mainnet;
 
 	const mockFetchResponse = ({
 		body,
@@ -42,6 +44,58 @@ describe('xrpl.rest', () => {
 
 	beforeEach(() => {
 		vi.unstubAllGlobals();
+	});
+
+	// The envelope is validated once, by `xrpJsonRpc`. Before that, every helper dereferenced
+	// `result.error` itself, so a body without a `result` object produced
+	// "TypeError: Cannot read properties of undefined" instead of the helper's own message —
+	// exactly the shape leak the per-helper guards existed to prevent.
+	describe('the JSON-RPC envelope', () => {
+		const callers: { name: string; call: () => Promise<unknown> }[] = [
+			{ name: 'loadXrpBalance', call: () => loadXrpBalance({ address, network }) },
+			{ name: 'loadXrpAccountInfo', call: () => loadXrpAccountInfo({ address, network }) },
+			{
+				name: 'loadXrpOpenLedgerFee',
+				call: () => loadXrpOpenLedgerFee({ network, fallbackFee: 10n })
+			},
+			{ name: 'loadXrpLedgerIndex', call: () => loadXrpLedgerIndex({ network }) },
+			{ name: 'loadXrpValidatedLedgerIndex', call: () => loadXrpValidatedLedgerIndex({ network }) },
+			{
+				name: 'loadXrpTransactionOutcome',
+				call: () =>
+					loadXrpTransactionOutcome({
+						hash: 'H',
+						network,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+			},
+			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
+		];
+
+		describe.each(callers)('$name', ({ call }) => {
+			it.each([{}, { result: null }, { jsonrpc: '2.0', error: 'gateway' }])(
+				'names the missing result object for the body %j',
+				async (body) => {
+					mockFetchResponse({ body });
+
+					await expect(call()).rejects.toThrow('no result object');
+				}
+			);
+
+			// One typed error, thrown in one place, carrying the code.
+			it('throws XrplRpcError carrying the code for an unexpected XRPL error', async () => {
+				mockFetchResponse({ body: { result: { error: 'tooBusy' } } });
+
+				const err = await call().then(
+					() => undefined,
+					(e: unknown) => e
+				);
+
+				expect(err).toBeInstanceOf(XrplRpcError);
+				expect((err as XrplRpcError).error).toBe('tooBusy');
+			});
+		});
 	});
 
 	describe('loadXrpBalance', () => {
@@ -327,23 +381,30 @@ describe('xrpl.rest', () => {
 			}
 		);
 
-		// Typed so callers can tell "owns nothing" apart from an operational failure.
-		it('throws XrpAccountNotFoundError for an unfunded account', async () => {
+		// Typed, so a caller can tell "this account owns nothing" from a node that could not answer.
+		// A zero balance cannot carry that meaning: the transaction cost can drain an existing
+		// account to nothing and it still exists on-ledger.
+		it('throws a typed error for an unfunded account', async () => {
 			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
 
-			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-				XrpAccountNotFoundError
-			);
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })
+			).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 		});
 
-		it('throws a plain error for an operational failure', async () => {
-			mockFetchResponse({ body: { result: { error: 'internal' } } });
+		it.each(['tooBusy', 'noNetwork'])(
+			'throws an untyped error for the operational failure %s',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
 
-			const promise = loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+				const err = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet }).catch(
+					(e: unknown) => e
+				);
 
-			await expect(promise).rejects.toThrow('internal');
-			await expect(promise).rejects.not.toBeInstanceOf(XrpAccountNotFoundError);
-		});
+				expect(err).toBeInstanceOf(Error);
+				expect(err).not.toBeInstanceOf(XrpAccountNotFoundError);
+			}
+		);
 	});
 
 	describe('loadXrpOpenLedgerFee', () => {
@@ -517,48 +578,186 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({ body: { result: { error } } });
 
 				await expect(
-					loadXrpTransactionOutcome({ hash: 'HASH', network: XrpNetworks.mainnet })
+					loadXrpTransactionOutcome({
+						hash: 'HASH',
+						network: XrpNetworks.mainnet,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
 				).rejects.toThrow(`Unexpected XRPL tx response: ${error}`);
 			}
 		);
 
-		it('reports the transaction as not validated for txnNotFound', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound' } } });
+		// Absence is established only when the node confirms it searched the whole range.
+		it('reports the transaction as not validated for a fully searched txnNotFound', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
 
 			const outcome = await loadXrpTransactionOutcome({
 				hash: 'HASH',
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: 1000,
+				lastLedgerSequence: 1020
 			});
 
 			expect(outcome).toEqual({ validated: false, transactionResult: undefined });
 		});
 
+		// `txnNotFound` also covers "the node does not have that ledger". Reading it as absence
+		// declares a settled payment expired and invites the duplicate send.
+		it.each([{ searched_all: false }, {}, { searched_all: 'true' }])(
+			'throws for a txnNotFound that did not search the whole range (%j)',
+			async (extra) => {
+				mockFetchResponse({ body: { result: { error: 'txnNotFound', ...extra } } });
+
+				await expect(
+					loadXrpTransactionOutcome({
+						hash: 'HASH',
+						network: XrpNetworks.mainnet,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+				).rejects.toThrow('Unexpected XRPL tx response: txnNotFound');
+			}
+		);
+
+		// The range is what makes the node report `searched_all` at all.
+		it('asks for the ledger range the transaction can be included in', async () => {
+			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+
+			await loadXrpTransactionOutcome({
+				hash: 'HASH',
+				network: XrpNetworks.mainnet,
+				firstLedgerSequence: 1000,
+				lastLedgerSequence: 1020
+			});
+
+			expect(fetch).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					body: JSON.stringify({
+						method: 'tx',
+						params: [{ transaction: 'HASH', min_ledger: 1000, max_ledger: 1020 }]
+					})
+				})
+			);
+		});
+
 		it('reports the validated flag and the final transaction result', async () => {
+			mockFetchResponse({
+				body: { result: { validated: true, hash: 'H', meta: { TransactionResult: 'tesSUCCESS' } } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
+
+		// XRPL renders ids uppercase; a caller-supplied one need not be.
+		it('matches the echoed hash case-insensitively', async () => {
+			mockFetchResponse({
+				body: {
+					result: { validated: true, hash: 'ABCDEF', meta: { TransactionResult: 'tesSUCCESS' } }
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'abcdef',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+		});
+
+		// The one failure mode on this path that would report SUCCESS: a validated record for some
+		// other transaction, read as this payment's outcome. It must be indeterminate, not an answer.
+		it('throws when the node answers about a different transaction', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						hash: 'B'.repeat(64),
+						meta: { TransactionResult: 'tesSUCCESS' }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'A'.repeat(64),
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('answered for');
+		});
+
+		// Same for a pending answer: reading another transaction's "not yet" as ours would keep the
+		// poll running on a hash the node never spoke about.
+		it('throws when a pending answer identifies a different transaction', async () => {
+			mockFetchResponse({ body: { result: { validated: false, hash: 'B'.repeat(64) } } });
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'A'.repeat(64),
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('answered for');
+		});
+
+		// A validated response that does not say which transaction it describes cannot be bound to
+		// ours, so it is malformed rather than an outcome.
+		it('throws for a validated response without a hash', async () => {
 			mockFetchResponse({
 				body: { result: { validated: true, meta: { TransactionResult: 'tesSUCCESS' } } }
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
-			).resolves.toEqual({ validated: true, transactionResult: 'tesSUCCESS' });
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('validated transaction without a result');
 		});
 
 		it('is not validated while the transaction is still pending', async () => {
 			mockFetchResponse({ body: { result: { validated: false } } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: false, transactionResult: undefined });
 		});
 
 		// A fee-claiming `tec*` transaction is validated too — the result is what decides.
 		it('reports a validated failure with its tec result', async () => {
 			mockFetchResponse({
-				body: { result: { validated: true, meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } } }
+				body: {
+					result: { validated: true, hash: 'H', meta: { TransactionResult: 'tecUNFUNDED_PAYMENT' } }
+				}
 			});
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: true, transactionResult: 'tecUNFUNDED_PAYMENT' });
 		});
 
@@ -573,7 +772,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).rejects.toThrow('Unexpected XRPL tx response: validated transaction without a result');
 		});
 
@@ -582,7 +786,12 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { meta: { TransactionResult: 'tesSUCCESS' } } } });
 
 			await expect(
-				loadXrpTransactionOutcome({ hash: 'H', network: XrpNetworks.mainnet })
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network: XrpNetworks.mainnet,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
 			).resolves.toEqual({ validated: false, transactionResult: undefined });
 		});
 	});

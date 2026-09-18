@@ -1,6 +1,7 @@
 import {
 	XrpDropsSchema,
-	XrplAccountInfoResponseSchema,
+	XrplAccountInfoResultSchema,
+	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
 	XrplSubmitResultSchema
@@ -25,43 +26,53 @@ describe('xrpl-rpc.schema', () => {
 		});
 	});
 
-	describe('XrplAccountInfoResponseSchema', () => {
-		it('should validate a funded account response', () => {
-			const result = XrplAccountInfoResponseSchema.safeParse({
-				result: { account_data: { Balance: '25000000' } }
+	describe('XrplAccountInfoResultSchema', () => {
+		it('should validate a funded account result', () => {
+			const result = XrplAccountInfoResultSchema.safeParse({
+				account_data: { Balance: '25000000' }
 			});
 
 			expect(result.success).toBeTruthy();
-			expect(result.data).toEqual({ result: { account_data: { Balance: '25000000' } } });
+			expect(result.data).toEqual({ account_data: { Balance: '25000000' } });
 		});
 
-		it('should validate an error response', () => {
-			const result = XrplAccountInfoResponseSchema.safeParse({
-				result: { error: 'actNotFound' }
-			});
+		it('should validate an error result', () => {
+			const result = XrplAccountInfoResultSchema.safeParse({ error: 'actNotFound' });
 
 			expect(result.success).toBeTruthy();
-			expect(result.data).toEqual({ result: { error: 'actNotFound' } });
+			expect(result.data).toEqual({ error: 'actNotFound' });
 		});
 
 		// The union branches must be mutually exclusive. Zod strips unknown keys and returns the
 		// first branch that parses, so an ambiguous response would otherwise validate as a balance
 		// with the error discarded.
-		it('should fail validation for a response carrying both account_data and an error', () => {
+		it('should fail validation for a result carrying both account_data and an error', () => {
 			expect(
-				XrplAccountInfoResponseSchema.safeParse({
-					result: { account_data: { Balance: '1' }, error: 'actNotFound' }
+				XrplAccountInfoResultSchema.safeParse({
+					account_data: { Balance: '1' },
+					error: 'actNotFound'
 				}).success
 			).toBeFalsy();
 		});
 
-		it('should fail validation for a response with neither account_data nor an error', () => {
-			expect(XrplAccountInfoResponseSchema.safeParse({ result: {} }).success).toBeFalsy();
+		it('should fail validation for a result with neither account_data nor an error', () => {
+			expect(XrplAccountInfoResultSchema.safeParse({}).success).toBeFalsy();
+		});
+	});
+
+	// The envelope `xrpJsonRpc` owns. A body without a `result` object used to reach the helpers as
+	// `undefined`, where dereferencing `result.error` gave a TypeError instead of their own message.
+	describe('XrplEnvelopeSchema', () => {
+		it('should validate a body carrying a result object', () => {
+			expect(XrplEnvelopeSchema.safeParse({ result: { anything: 1 } }).success).toBeTruthy();
 		});
 
-		it('should fail validation for a missing result', () => {
-			expect(XrplAccountInfoResponseSchema.safeParse({}).success).toBeFalsy();
-		});
+		it.each([{}, { result: null }, { result: 'nope' }, { jsonrpc: '2.0', error: 'gateway' }])(
+			'should fail validation for the body %j',
+			(body) => {
+				expect(XrplEnvelopeSchema.safeParse(body).success).toBeFalsy();
+			}
+		);
 	});
 
 	// Zod strips unknown keys, so without forbidding `error` a failed response that also carried a

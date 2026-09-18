@@ -8,7 +8,7 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
 // first branch that parses, so without forbidding the opposite variant's key a
 // response carrying both would be read as a balance and the error silently dropped.
-const XrplAccountInfoResultSchema = z.union([
+export const XrplAccountInfoResultSchema = z.union([
 	z.object({
 		account_data: z.object({ Balance: XrpDropsSchema }),
 		error: z.never().optional()
@@ -19,8 +19,11 @@ const XrplAccountInfoResultSchema = z.union([
 	})
 ]);
 
-export const XrplAccountInfoResponseSchema = z.object({
-	result: XrplAccountInfoResultSchema
+// The JSON-RPC envelope. `xrpJsonRpc` owns this so every helper receives a `result` object that
+// exists and carries no unhandled `error`; before, each helper dereferenced `result.error` itself
+// and a body without `result` produced a TypeError instead of the helper's own message.
+export const XrplEnvelopeSchema = z.object({
+	result: z.record(z.string(), z.unknown())
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
@@ -37,10 +40,13 @@ const XrplAccountDataSchema = z.object({
 	OwnerCount: XrpLedgerCounterSchema
 });
 
-export const XrplAccountInfoFullResultSchema = z.union([
-	z.object({ account_data: XrplAccountDataSchema, error: z.never().optional() }),
-	z.object({ error: z.string(), account_data: z.never().optional() })
-]);
+// Success only. `xrpJsonRpc` throws for every error this method can return except `actNotFound`,
+// which its one caller handles before parsing — so by the time this runs the response cannot carry
+// an `error`, and a union branch for one would describe a case that cannot reach it.
+export const XrplAccountInfoFullResultSchema = z.object({
+	account_data: XrplAccountDataSchema,
+	error: z.never().optional()
+});
 
 export const XrplFeeResultSchema = z.object({
 	drops: z
@@ -89,12 +95,18 @@ export const XrplLedgerResultSchema = z.union([
 // report an applied payment as failed, inviting a duplicate send — so the validated branch
 // requires a string `meta.TransactionResult` and anything else fails to parse. A still-pending
 // entry has no result yet, and reports `validated: false` or omits the flag.
+// `hash` is what binds the answer to the question. `tx` echoes the id it looked up, and the
+// validated branch requires it: that branch ends the poll and decides the outcome, so accepting
+// one that identifies a different transaction would report someone else's `tesSUCCESS` as this
+// payment's. The pending branch accepts its absence but still carries it, so a mismatch there can
+// be caught without making a legitimate pending answer unparseable.
 export const XrplTxResultSchema = z.union([
 	z.object({
 		validated: z.literal(true),
+		hash: z.string(),
 		meta: z.object({ TransactionResult: z.string() })
 	}),
-	z.object({ validated: z.literal(false).optional() })
+	z.object({ validated: z.literal(false).optional(), hash: z.string().optional() })
 ]);
 
 // `engine_result` is the only field the send still reads, and it is read with `startsWith` outside
