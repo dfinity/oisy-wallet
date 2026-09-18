@@ -171,7 +171,12 @@ const submitAndConfirmXrpTransaction = async ({
 	pending: XrpPendingTransaction;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
-	const { txBlob, txHash, firstLedgerSequence, lastLedgerSequence } = pending;
+	const { txBlob, firstLedgerSequence, lastLedgerSequence } = pending;
+
+	// Derived here, from the blob about to be broadcast, so the id polled below cannot be anything
+	// but this transaction's. When it travelled as a field alongside the blob, a retry could submit
+	// one transaction and poll another id.
+	const txHash = await deriveXrpTransactionHash(txBlob);
 
 	progress?.(ProgressStepsSendXrp.SEND);
 
@@ -286,21 +291,24 @@ export const sendXrp = async ({
 		return await submitAndConfirmXrpTransaction({ network, pending, progress });
 	}
 
-	// Advisory, and therefore never fatal: a check that could not run must not block a send to a
-	// well-funded address, so anything other than the node's own "account not found" leaves this
-	// `undefined` and the guard below is skipped.
-	//
 	// The node's error is the only thing that means unfunded. A zero balance does not: the
 	// transaction cost can take an existing account below its reserve, even to nothing, and the
 	// account still exists — at which point it can receive any amount, since receiving carries no
 	// reserve requirement of its own.
-	const tryDestinationExists = async (): Promise<boolean | undefined> => {
+	//
+	// A lookup that could not run keeps its error instead of discarding it. Whether that matters
+	// depends on the amount, and only the guard below knows it.
+	const tryDestinationExists = async (): Promise<boolean | Error> => {
 		try {
 			await loadXrpAccountInfo({ address: destination, network });
 
 			return true;
 		} catch (err: unknown) {
-			return err instanceof XrpAccountNotFoundError ? false : undefined;
+			if (err instanceof XrpAccountNotFoundError) {
+				return false;
+			}
+
+			return err instanceof Error ? err : new Error(String(err));
 		}
 	};
 
@@ -336,10 +344,20 @@ export const sendXrp = async ({
 	// `tecNO_DST_INSUF_XRP`, which is APPLIED: the payment fails and the fee is claimed. Refusing
 	// before signing turns a charged failure into a plain error.
 	//
-	// Only `false` declines. `undefined` means the check could not be made, and the destination can
-	// be funded between this read and submission either way, so the validated result stays the
-	// final word — this declines only what the node positively reported.
-	if (destinationExists === false && amount < XRP_BASE_RESERVE_DROPS) {
+	// The destination's existence only decides anything below the reserve: at or above it the
+	// payment creates the account if it has to, and an account that already exists can receive any
+	// amount. So the lookup is required exactly here and ignored everywhere else — a node that
+	// could not answer must not block a well-funded send, but must not wave this one through into a
+	// charged failure either.
+	const requiresExistingDestination = amount < XRP_BASE_RESERVE_DROPS;
+
+	if (requiresExistingDestination && destinationExists instanceof Error) {
+		throw destinationExists;
+	}
+
+	// The destination can still be funded between this read and submission, so the validated result
+	// stays the final word — this declines only what the node positively reported.
+	if (requiresExistingDestination && destinationExists === false) {
 		throw new Error(
 			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
@@ -361,14 +379,9 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
 
-	// Derived from the blob, not read from the submit response: if that response is lost the node
-	// may still have applied the transaction, and without a hash of our own there would be nothing
-	// to poll — the send would be reported as failed and a retry would spend the funds again.
-	const txHash = await deriveXrpTransactionHash(txBlob);
-
 	return await submitAndConfirmXrpTransaction({
 		network,
-		pending: { txBlob, txHash, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
+		pending: { txBlob, firstLedgerSequence: ledgerIndex, lastLedgerSequence },
 		progress
 	});
 };

@@ -71,8 +71,17 @@ const xrpJsonRpc = async ({
 	const { result } = parsed.data;
 	const { error } = result;
 
-	if (nonNullish(error) && !expectedErrors.includes(String(error))) {
+	// A present `error` must be a string. `String(error)` let a malformed value coerce into an
+	// expected code — `['txnNotFound']` matching `'txnNotFound'` — and `nonNullish` read a present
+	// `null` as no error at all, which is how `loadXrpOpenLedgerFee` came to answer a failed
+	// response with its fallback base fee: the underpricing that check exists to prevent.
+	if ('error' in result && typeof error !== 'string') {
 		throw new XrplRpcError({ method, error: String(error) });
+	}
+
+	// Compared raw, so only the code the node actually sent can be an expected state.
+	if (typeof error === 'string' && !expectedErrors.includes(error)) {
+		throw new XrplRpcError({ method, error });
 	}
 
 	return result;
@@ -278,30 +287,34 @@ export const loadXrpTransactionOutcome = async ({
 		expectedErrors: ['txnNotFound']
 	});
 
-	if (nonNullish(result.error)) {
-		// Absence is only established when the node confirms it searched every ledger in the range.
-		// Without that, `txnNotFound` may mean the node simply lacks the ledger our payment is in —
-		// a resynced or history-gapped member of a load-balanced endpoint — and reading it as
-		// non-inclusion declares a settled payment expired, which invites the duplicate send that
-		// `XrpSendExpiredError` explicitly tells the caller is safe.
-		if (result.searched_all === true) {
-			return { validated: false, transactionResult: undefined };
-		}
-
-		throw new XrplRpcError({ method: 'tx', error: String(result.error) });
-	}
-
-	// A validated response missing its result is malformed, not a failed transaction: returning it
-	// as an absent result would end the poll and report a payment that may have succeeded as failed.
-	// Throwing instead keeps it indeterminate — ordinary polls retry, and the expiry recheck surfaces
-	// the RPC error rather than a claim of non-inclusion.
+	// Parsed BEFORE anything is concluded, absence included. The schema's three variants — validated,
+	// pending, fully-searched absence — are mutually exclusive, so a shape that is none of them
+	// cannot be mistaken for one: a malformed or empty result stays indeterminate instead of ending
+	// the send. Deciding absence from `result.error` ahead of the parse also meant a payload
+	// carrying both `txnNotFound` and validated transaction data was read as absence.
+	//
+	// A `txnNotFound` WITHOUT `searched_all` matches no variant and so lands here too, which is
+	// right: it may mean the node simply lacks the ledger our payment is in — a resynced or
+	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion declares
+	// a settled payment expired, inviting the duplicate send `XrpSendExpiredError` calls safe.
 	const parsed = XrplTxResultSchema.safeParse(result);
 
 	if (!parsed.success) {
-		throw new Error('Unexpected XRPL tx response: validated transaction without a result');
+		throw new XrplRpcError({
+			method: 'tx',
+			error: nonNullish(result.error)
+				? String(result.error)
+				: 'neither a validated result, a pending transaction, nor a fully searched absence'
+		});
 	}
 
 	const { data } = parsed;
+
+	// The fully-searched absence variant: the node looked everywhere in the range and it is not
+	// there. The only shape allowed to end the poll as non-inclusion.
+	if ('error' in data) {
+		return { validated: false, transactionResult: undefined };
+	}
 
 	// The answer must be about the transaction we asked for. Nothing else in the response identifies
 	// it, so without this a validated record for ANY transaction — another account's, or a proxy's
@@ -311,7 +324,7 @@ export const loadXrpTransactionOutcome = async ({
 	//
 	// A mismatch tells us nothing about our own transaction, so it is indeterminate rather than a
 	// failure: the poll retries it and the expiry recheck surfaces it.
-	if (nonNullish(data.hash) && data.hash.toUpperCase() !== hash.toUpperCase()) {
+	if (data.hash.toUpperCase() !== hash.toUpperCase()) {
 		throw new Error(`Unexpected XRPL tx response: answered for ${data.hash}, asked for ${hash}`);
 	}
 

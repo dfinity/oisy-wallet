@@ -83,6 +83,26 @@ describe('xrpl.rest', () => {
 				}
 			);
 
+			// A present `error` has to be a string. Coercion let `['tooBusy']` become `'tooBusy'`, so a
+			// malformed value could match a code the helper declared as an expected state; a present
+			// `null` was read as no error at all, which made `loadXrpOpenLedgerFee` answer a failed
+			// response with its fallback base fee.
+			it.each([null, ['tooBusy'], 7, { code: 'tooBusy' }, true])(
+				'throws for the non-string error %j',
+				async (error) => {
+					mockFetchResponse({ body: { result: { error } } });
+
+					await expect(call()).rejects.toBeInstanceOf(XrplRpcError);
+				}
+			);
+
+			// A malformed value must not reach an expected code by coercing to it.
+			it('does not let a coerced value match an expected code', async () => {
+				mockFetchResponse({ body: { result: { error: ['actNotFound'] } } });
+
+				await expect(call()).rejects.toBeInstanceOf(XrplRpcError);
+			});
+
 			// One typed error, thrown in one place, carrying the code.
 			it('throws XrplRpcError carrying the code for an unexpected XRPL error', async () => {
 				mockFetchResponse({ body: { result: { error: 'tooBusy' } } });
@@ -620,6 +640,50 @@ describe('xrpl.rest', () => {
 			}
 		);
 
+		// Before the three variants were mutually exclusive, every field of the pending branch was
+		// optional — so an empty or junk `result` parsed as "pending", and at the expiry recheck
+		// pending is what produces `XrpSendExpiredError` and tells the caller a resend is safe.
+		it.each([{}, { anything: 1 }, { validated: false }, { hash: 'H' }])(
+			'refuses to read the shapeless result %j as pending',
+			async (result) => {
+				mockFetchResponse({ body: { result } });
+
+				await expect(
+					loadXrpTransactionOutcome({
+						hash: 'H',
+						network,
+						firstLedgerSequence: 1000,
+						lastLedgerSequence: 1020
+					})
+				).rejects.toThrow('neither a validated result, a pending transaction');
+			}
+		);
+
+		// Absence is decided from the parsed variant, so a payload that also carries validated
+		// transaction data is no longer read as absence.
+		it('refuses a payload that claims both absence and a validated result', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'txnNotFound',
+						searched_all: true,
+						validated: true,
+						hash: 'H',
+						meta: { TransactionResult: 'tesSUCCESS' }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('txnNotFound');
+		});
+
 		// The range is what makes the node report `searched_all` at all.
 		it('asks for the ledger range the transaction can be included in', async () => {
 			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
@@ -727,11 +791,11 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).rejects.toThrow('validated transaction without a result');
+			).rejects.toThrow('neither a validated result, a pending transaction');
 		});
 
 		it('is not validated while the transaction is still pending', async () => {
-			mockFetchResponse({ body: { result: { validated: false } } });
+			mockFetchResponse({ body: { result: { validated: false, hash: 'H' } } });
 
 			await expect(
 				loadXrpTransactionOutcome({
@@ -778,11 +842,15 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).rejects.toThrow('Unexpected XRPL tx response: validated transaction without a result');
+			).rejects.toThrow('neither a validated result, a pending transaction');
 		});
 
-		// Absent, not false: the node omits the flag as well as reporting it.
-		it('reports a response without the validated flag as pending', async () => {
+		// Inverted deliberately. This used to assert that an omitted `validated` flag means pending,
+		// on my assumption that the node may leave it out — but pending is the answer that ends the
+		// send at the expiry recheck, so it has to be stated rather than inferred from an absence.
+		// If some node does omit it, the cost is an indeterminate outcome and a retry, not a wrong
+		// one: we never observe pending, so expiry is never concluded either.
+		it('refuses to infer pending from an omitted validated flag', async () => {
 			mockFetchResponse({ body: { result: { meta: { TransactionResult: 'tesSUCCESS' } } } });
 
 			await expect(
@@ -792,7 +860,7 @@ describe('xrpl.rest', () => {
 					firstLedgerSequence: 1000,
 					lastLedgerSequence: 1020
 				})
-			).resolves.toEqual({ validated: false, transactionResult: undefined });
+			).rejects.toThrow('neither a validated result, a pending transaction');
 		});
 	});
 });
