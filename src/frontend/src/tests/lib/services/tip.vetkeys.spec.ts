@@ -13,6 +13,44 @@ vi.mock('$lib/api/backend.api', () => ({
 	getTipVetkeyPublicKey: vi.fn()
 }));
 
+// Most of this file drives a derivation that fails to verify, which is what the
+// junk bytes below are for. One describe needs the opposite — a derivation that
+// succeeds, so the session cache has something to hold — and `vi.mock` is
+// hoisted above the imports, so the switch has to be hoisted with it.
+const vetkd = vi.hoisted(() => ({ verifies: false }));
+
+// The real `DerivedKeyMaterial` is kept, so the AES-GCM path stays real; only
+// the three vetKD transport primitives are stubbed, since there is no vetKD
+// round-trip to be had here.
+vi.mock(import('@dfinity/vetkeys'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	const derivedKeyMaterial = async (): Promise<DerivedKeyMaterial> => {
+		const raw = new Uint8Array(32).fill(7);
+		const key = await globalThis.crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveKey']);
+		return actual.DerivedKeyMaterial.fromCryptoKey(key);
+	};
+
+	return {
+		...actual,
+		TransportSecretKey: {
+			random: () => ({ publicKeyBytes: () => new Uint8Array([1, 2, 3]) })
+		},
+		DerivedPublicKey: { deserialize: () => ({}) },
+		EncryptedVetKey: {
+			deserialize: () => ({
+				decryptAndVerify: () => {
+					if (!vetkd.verifies) {
+						throw new Error('the vetKey did not verify');
+					}
+
+					return { asDerivedKeyMaterial: derivedKeyMaterial };
+				}
+			})
+		}
+	} as unknown as typeof actual;
+});
+
 const VERIFICATION_KEY_STORAGE_KEY = 'oisy-tip-vetkey-verification-key';
 
 describe('tip.vetkeys', () => {
@@ -66,6 +104,53 @@ describe('tip.vetkeys', () => {
 		await expect(
 			decryptClaimCodeWithKey({ keyMaterial: await buildKeyMaterial(2), encrypted, tipId })
 		).rejects.toThrow();
+	});
+
+	// What the "start the derivation before the approve" trade-off rests on. The
+	// derivation is metered — five a minute and ten an hour per caller, a hundred
+	// an hour across everyone — and starting it earlier means a reservation that
+	// is later refused has spent one. It matters a great deal whether that is one
+	// per session or one per attempt.
+	describe('the per-session derivation cache', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+			resetTipKeyCache();
+			sessionStorage.clear();
+
+			vetkd.verifies = true;
+			vi.mocked(getTipEncryptedVetkey).mockResolvedValue(new Uint8Array(32).fill(7));
+			vi.mocked(getTipVetkeyPublicKey).mockResolvedValue(new Uint8Array(48).fill(9));
+		});
+
+		afterEach(() => {
+			vetkd.verifies = false;
+		});
+
+		it('derives once however many times a session asks', async () => {
+			// So a sender who is refused three times and succeeds on the fourth has
+			// spent one derivation, not four. Without this the earlier start would
+			// turn a run of failed reservations into a rate-limit lockout.
+			const first = await deriveTipKeyMaterial({ identity: mockIdentity });
+
+			await deriveTipKeyMaterial({ identity: mockIdentity });
+
+			const last = await deriveTipKeyMaterial({ identity: mockIdentity });
+
+			expect(getTipEncryptedVetkey).toHaveBeenCalledOnce();
+			expect(last).toBe(first);
+		});
+
+		it('serves callers that arrive together from one derivation', async () => {
+			// They share the cached promise rather than each starting their own, so
+			// the count holds even when nothing has resolved yet.
+			const [first, second] = await Promise.all([
+				deriveTipKeyMaterial({ identity: mockIdentity }),
+				deriveTipKeyMaterial({ identity: mockIdentity })
+			]);
+
+			expect(getTipEncryptedVetkey).toHaveBeenCalledOnce();
+			expect(second).toBe(first);
+		});
 	});
 
 	// The verification key is a canister-wide public constant, so it is cached in
