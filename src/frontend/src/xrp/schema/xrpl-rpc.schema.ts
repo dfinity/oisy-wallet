@@ -1,3 +1,4 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
 // XRPL reports `Balance` as an **unsigned decimal** string of drops. `BigInt` would also
@@ -91,28 +92,43 @@ export const XrplLedgerCurrentResultSchema = z.object({
 	error: z.never().optional()
 });
 
-// The `ledger` command reports the index either at the top level or nested under `ledger`,
-// depending on the node. `validated` must be true: a non-validated ledger's index can be ahead
-// of the last validated one, which is the open-vs-validated confusion this call exists to avoid.
-// The ledger header quotes its `ledger_index`, unlike the numeric top-level field, so the nested
-// branch accepts either form and normalises to a number.
+// The `ledger` command reports the index at the top level, nested under `ledger`, or — as the
+// configured provider does — both. `validated` must be true: a non-validated ledger's index can be
+// ahead of the last validated one, which is the open-vs-validated confusion this call exists to
+// avoid. The ledger header quotes its `ledger_index`, unlike the numeric top-level field, so the
+// nested form accepts either and normalises to a number.
 const XrpNestedLedgerIndexSchema = z.union([
 	XrpLedgerCounterSchema,
 	XrpDropsSchema.transform(Number).pipe(XrpLedgerCounterSchema)
 ]);
 
-export const XrplLedgerResultSchema = z.union([
-	z.object({
+// One object with both forms optional, NOT a union of the two. A union returns the first branch
+// that parses and strips the other field as unknown, so a response carrying two CONTRADICTORY
+// indices was accepted and the higher one could be the one read — and a high index past
+// `LastLedgerSequence` is what makes confirmation declare expiry and tell the user a resend is
+// safe. Mutually exclusive branches would be the wrong cure: carrying both is the NORMAL case for
+// this provider, so rejecting it would reject every real response. Only disagreement is suspicious,
+// and it is compared after normalising, since the two forms differ in type.
+export const XrplLedgerResultSchema = z
+	.object({
 		validated: z.literal(true),
-		ledger_index: XrpLedgerCounterSchema,
-		error: z.never().optional()
-	}),
-	z.object({
-		validated: z.literal(true),
-		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }),
+		ledger_index: XrpLedgerCounterSchema.optional(),
+		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }).optional(),
 		error: z.never().optional()
 	})
-]);
+	.refine(
+		({ ledger_index: topLevel, ledger }) => nonNullish(topLevel) || nonNullish(ledger),
+		'neither a top-level nor a nested ledger_index'
+	)
+	.refine(
+		({ ledger_index: topLevel, ledger }) =>
+			isNullish(topLevel) || isNullish(ledger) || topLevel === ledger.ledger_index,
+		'the top-level and nested ledger_index disagree'
+	)
+	// Normalised here so the caller has one index to read rather than a shape to choose between.
+	.transform(({ ledger_index: topLevel, ledger }) => ({
+		ledgerIndex: topLevel ?? (ledger?.ledger_index as number)
+	}));
 
 // `validated` means FINAL, not successful, so a validated response must carry the result that
 // decides which it was. One that does not is malformed — and reading it as a missing result would

@@ -271,9 +271,7 @@ export const loadXrpValidatedLedgerIndex = async ({
 		throw new Error('Unexpected XRPL ledger response: missing validated ledger_index');
 	}
 
-	const { data } = parsed;
-
-	return 'ledger_index' in data ? data.ledger_index : data.ledger.ledger_index;
+	return parsed.data.ledgerIndex;
 };
 
 /**

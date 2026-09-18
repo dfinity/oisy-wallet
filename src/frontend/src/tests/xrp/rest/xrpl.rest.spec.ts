@@ -691,6 +691,40 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// What the configured provider actually sends: both forms, in one response, the nested one
+		// quoted. Mutually exclusive branches would therefore reject every real response.
+		it('accepts both forms when they agree', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						ledger_index: 107_065_791,
+						ledger: { ledger_index: '107065791' }
+					}
+				}
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(
+				107_065_791
+			);
+		});
+
+		// A union took the first branch that parsed and stripped the other as an unknown key, so two
+		// contradictory indices were accepted and the top-level one read. A high index past
+		// `LastLedgerSequence` is what makes confirmation declare expiry and call a resend safe.
+		it.each([
+			{ top: 999_999_999, nested: '5' },
+			{ top: 5, nested: '999999999' }
+		])('rejects a top-level $top disagreeing with a nested $nested', async ({ top, nested }) => {
+			mockFetchResponse({
+				body: { result: { validated: true, ledger_index: top, ledger: { ledger_index: nested } } }
+			});
+
+			await expect(loadXrpValidatedLedgerIndex({ network: XrpNetworks.mainnet })).rejects.toThrow(
+				'missing validated ledger_index'
+			);
+		});
+
 		// The worst version of a dropped error: a bogus index past `LastLedgerSequence` sends
 		// confirmation into the expiry branch, which tells the user a resend is safe.
 		it.each(['tooBusy', 'noNetwork'])(

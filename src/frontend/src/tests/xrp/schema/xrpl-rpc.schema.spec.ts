@@ -113,6 +113,49 @@ describe('xrpl-rpc.schema', () => {
 		});
 	});
 
+	describe('XrplLedgerResultSchema', () => {
+		it('normalises whichever form is present to one index', () => {
+			expect(XrplLedgerResultSchema.safeParse({ validated: true, ledger_index: 5 }).data).toEqual({
+				ledgerIndex: 5
+			});
+			expect(
+				XrplLedgerResultSchema.safeParse({ validated: true, ledger: { ledger_index: '5' } }).data
+			).toEqual({ ledgerIndex: 5 });
+		});
+
+		// Both forms in one response is the normal case for the configured provider, so this must
+		// parse — rejecting it would reject every real `ledger` response.
+		it('accepts both forms when they agree, across the type difference', () => {
+			expect(
+				XrplLedgerResultSchema.safeParse({
+					validated: true,
+					ledger_index: 5,
+					ledger: { ledger_index: '5' }
+				}).data
+			).toEqual({ ledgerIndex: 5 });
+		});
+
+		it('rejects two indices that disagree', () => {
+			expect(
+				XrplLedgerResultSchema.safeParse({
+					validated: true,
+					ledger_index: 999_999_999,
+					ledger: { ledger_index: '5' }
+				}).success
+			).toBeFalsy();
+		});
+
+		it('rejects a response carrying neither form', () => {
+			expect(XrplLedgerResultSchema.safeParse({ validated: true }).success).toBeFalsy();
+		});
+
+		// A non-validated ledger's index can be ahead of the last validated one, which is the
+		// confusion this call exists to avoid.
+		it.each([false, undefined])('rejects validated: %j', (validated) => {
+			expect(XrplLedgerResultSchema.safeParse({ validated, ledger_index: 5 }).success).toBeFalsy();
+		});
+	});
+
 	describe('rejecting a mixed error/result response', () => {
 		it.each([
 			{
