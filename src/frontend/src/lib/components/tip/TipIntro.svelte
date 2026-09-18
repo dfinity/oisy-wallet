@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import tipIntroImg from '$lib/assets/tip-intro-img.webp';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
@@ -18,6 +18,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		onGetStarted: () => void;
@@ -41,6 +42,38 @@
 
 	let openFiat = $derived(fiat($tipsOverview.openUsd));
 	let claimedFiat = $derived(fiat($tipsOverview.claimedUsd));
+
+	const countLabel = (count: number): string =>
+		replacePlaceholders(
+			count === 1 ? $i18n.tip.text.overview_count_one : $i18n.tip.text.overview_count_other,
+			{ $count: `${count}` }
+		);
+
+	/**
+	 * Three states under each label, where there used to be two.
+	 *
+	 * `fiat` returns nothing both when a group is empty and when its tokens have no
+	 * rate loaded, and the two rendered identically — as a label with a blank under
+	 * it. That is not only untidy: a sender whose open tip is in a newly listed or
+	 * local token saw nothing under "Waiting to be claimed" and could reasonably
+	 * read it as nothing being out there, while their money was reserved.
+	 *
+	 * So an unpriced group falls back to its count, which is the fact we do have,
+	 * and only a genuinely empty one says so. Something is always under the label —
+	 * which also covers the case this was reported for, and the worse one behind it:
+	 * a sender whose only tip failed lights the block through `hasAny` with both of
+	 * these columns empty.
+	 */
+	const figure = ({ priced, count }: { priced: string | undefined; count: number }): string => {
+		if (nonNullish(priced)) {
+			return priced;
+		}
+
+		return count > 0 ? countLabel(count) : $i18n.tip.text.overview_none;
+	};
+
+	let openFigure = $derived(figure({ priced: openFiat, count: $tipsOverview.open }));
+	let claimedFigure = $derived(figure({ priced: claimedFiat, count: $tipsOverview.claimed }));
 </script>
 
 <ContentWithToolbar>
@@ -121,17 +154,30 @@
 				<div class="min-w-0 pr-3">
 					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
 
-					{#if nonNullish(openFiat)}
-						<span class="block text-sm font-semibold">{openFiat}</span>
-					{/if}
+					<!--
+						Always rendered, so a label never stands over a blank. Lighter when it
+						is not a sum: a count or "None" is context, and it must not compete
+						with the figure in the other column.
+					-->
+					<span
+						class="block text-sm"
+						class:font-semibold={nonNullish(openFiat)}
+						class:text-tertiary={isNullish(openFiat)}
+					>
+						{openFigure}
+					</span>
 				</div>
 
 				<div class="min-w-0 border-l border-secondary pl-3">
 					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
 
-					{#if nonNullish(claimedFiat)}
-						<span class="block text-sm font-semibold">{claimedFiat}</span>
-					{/if}
+					<span
+						class="block text-sm"
+						class:font-semibold={nonNullish(claimedFiat)}
+						class:text-tertiary={isNullish(claimedFiat)}
+					>
+						{claimedFigure}
+					</span>
 				</div>
 			</div>
 		</div>
