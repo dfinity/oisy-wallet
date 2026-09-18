@@ -438,6 +438,34 @@ describe('xrpl.rest', () => {
 		});
 	});
 
+	// The two account reads deliberately ask different ledgers, and a later tidy-up unifying them
+	// would break one or the other: the sequence has to come from the OPEN ledger or a transaction
+	// already in it leaves this one signing a consumed sequence, while the displayed balance has to
+	// come from the VALIDATED one or the figure shown can roll back.
+	describe('which ledger each account read asks for', () => {
+		const ledgerIndexOf = (): unknown =>
+			JSON.parse(String((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body)).params[0]
+				.ledger_index;
+
+		it('asks the open ledger for the sequence-bearing read', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
+			});
+
+			await loadXrpAccountInfo({ address, network });
+
+			expect(ledgerIndexOf()).toBe('current');
+		});
+
+		it('asks the validated ledger for the display balance', async () => {
+			mockFetchResponse({ body: { result: { account_data: { Balance: '1' } } } });
+
+			await loadXrpBalance({ address, network });
+
+			expect(ledgerIndexOf()).toBe('validated');
+		});
+	});
+
 	describe('loadXrpAccountInfo', () => {
 		it('returns the balance and sequence for a funded account', async () => {
 			mockFetchResponse({
