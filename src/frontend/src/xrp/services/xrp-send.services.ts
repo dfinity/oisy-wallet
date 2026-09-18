@@ -7,10 +7,12 @@ import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_CONFIRM_MAX_DURATION_MS,
+	XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS
 } from '$xrp/constants/xrp.constants';
 import {
@@ -86,7 +88,16 @@ const confirmXrpTransaction = async ({
 	// transient failure escape would abort the send for a payment that can still validate.
 	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
 		try {
-			return await loadXrpValidatedLedgerIndex({ network });
+			const index = await loadXrpValidatedLedgerIndex({ network });
+
+			// An index further past this transaction's window than the ledger could have travelled
+			// while we were watching is not an answer about it. Returned as `undefined`, so it is
+			// handled exactly like a read the node refused: the poll continues and ends indeterminate,
+			// rather than concluding the expiry that tells a retry to build a new transaction.
+			//
+			// The schema bounds these to `UInt32`, but that is the number system, not the ledger —
+			// `0xFFFFFFFF` is around forty times the current mainnet index.
+			return index > lastLedgerSequence + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
 		} catch (_: unknown) {
 			return undefined;
 		}
@@ -360,6 +371,26 @@ export const sendXrp = async ({
 
 	if (fee <= ZERO) {
 		throw new Error(`XRP fee must be greater than zero, got ${fee} drops.`);
+	}
+
+	// The tag is caller input typed `number`, so negative, fractional, non-finite and
+	// above-`UInt32` values are all type-legal and all die inside `ripple-binary-codec` — after the
+	// account read, the ledger read and the signing-key call. Worse, the required-destination-tag
+	// guard below asks only whether a tag is nullish, so `NaN` counts as having supplied one and
+	// suppresses the decline: a guard satisfied by a value that cannot become a tag.
+	//
+	// Inclusive at both ends. `0` is a real tag rather than an absent one, which is why
+	// `buildXrpPayment` refuses to let an omitted tag become `0`, and `0xFFFFFFFF` is a real tag
+	// too. `Number.isInteger` rejects `NaN` and `Infinity` on its own.
+	if (
+		nonNullish(destinationTag) &&
+		(!Number.isInteger(destinationTag) ||
+			destinationTag < 0 ||
+			destinationTag > XRP_MAX_DESTINATION_TAG)
+	) {
+		throw new Error(
+			`XRP destination tag must be an unsigned 32-bit integer, got ${destinationTag}.`
+		);
 	}
 
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than

@@ -40,11 +40,20 @@ export const XrplEnvelopeSchema = z.object({
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
 // and inflate the sendable maximum, and a fractional one throws inside `BigInt()` — so both are
-// pinned to a non-negative safe integer rather than checked with `typeof`.
-export const XrpLedgerCounterSchema = z.number().int().nonnegative();
+// pinned rather than checked with `typeof`.
+//
+// Bounded to `UInt32`, which is what every field using this actually is: `Sequence` and
+// `OwnerCount` per the AccountRoot reference, `Flags` and a ledger index likewise. Zod's `.int()`
+// already stops at `Number.MAX_SAFE_INTEGER`, two million times more than the protocol can
+// express, and the value that matters most is the validated ledger index — an out-of-range one
+// past `LastLedgerSequence` makes confirmation declare expiry and tell the user a resend is safe.
+//
+// This bounds the number system, not the ledger: `0xFFFFFFFF` is still ~40x the current mainnet
+// index, so `confirmXrpTransaction` also checks the index against the transaction's own window.
+export const XrpLedgerCounterSchema = z.number().int().nonnegative().max(0xffff_ffff);
 
 // These three validate the `result` object, because `xrpJsonRpc` unwraps the envelope before
-// returning. Stricter than `XrplAccountInfoResponseSchema`, which only needs `Balance`: building a
+// returning. Stricter than `XrplAccountInfoResultSchema`, which only needs `Balance`: building a
 // payment also requires the sequence, and the reserve requires the owner count.
 const XrplAccountDataSchema = z.object({
 	Balance: XrpDropsSchema,
@@ -134,12 +143,12 @@ export const XrplLedgerResultSchema = z
 // decides which it was. One that does not is malformed — and reading it as a missing result would
 // report an applied payment as failed, inviting a duplicate send — so the validated branch
 // requires a string `meta.TransactionResult` and anything else fails to parse. A still-pending
-// entry has no result yet, and reports `validated: false` or omits the flag.
-// `hash` is what binds the answer to the question. `tx` echoes the id it looked up, and the
-// validated branch requires it: that branch ends the poll and decides the outcome, so accepting
-// one that identifies a different transaction would report someone else's `tesSUCCESS` as this
-// payment's. The pending branch accepts its absence but still carries it, so a mismatch there can
-// be caught without making a legitimate pending answer unparseable.
+// entry has no result yet and says so with an explicit `validated: false`.
+// `hash` is what binds the answer to the question. `tx` echoes the id it looked up, and BOTH
+// branches require it: the validated one ends the poll and decides the outcome, so accepting a
+// record that identifies a different transaction would report someone else's `tesSUCCESS` as this
+// payment's, and requiring it on the pending branch too means the identity comparison cannot be
+// skipped by omitting the field.
 export const XrplTxResultSchema = z.union([
 	// Validated: final, and it must say WHICH transaction and WHAT happened.
 	z.object({

@@ -62,9 +62,11 @@ which reports the send as failed and implies a resend is safe.
 Most schemas additionally forbid `error` on their success branches
 (`error: z.never().optional()`), which catches a response carrying _both_ an error and a
 plausible result. That is now belt-and-braces rather than the primary defence, since the
-envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` and
-`XrplTxResultSchema` do not carry it, because both have a declared or all-optional shape
-that makes the envelope check the only thing standing between them and a dropped error.
+envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` is the
+one that does not carry it: every field is optional, so the envelope check is the only thing
+standing between it and a dropped error. `XrplTxResultSchema` does carry it — `error:
+z.never().optional()` on the validated and pending branches, and `error: z.literal('txnNotFound')`
+on the absence branch, which is what lets absence be decided from the parsed value.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
@@ -124,9 +126,11 @@ yes would invite a retry that pays a second time.
 ## Fee (`fee`)
 
 `loadXrpOpenLedgerFee` reads `result.drops.open_ledger_fee`, falling back to
-`base_fee` and then to a built-in default. The value escalates with network load
-and is untrusted input, so it is capped by `XRP_MAX_FEE_DROPS` and the send is
-aborted rather than signed when the estimate exceeds it.
+`base_fee` and then to the `fallbackFee` its caller must supply — there is no
+implicit default. `sendXrp` does not call it: the fee is a parameter, so the
+figure signed is the one the user reviewed. The value escalates with network
+load and is untrusted input, so the send caps it at `XRP_MAX_FEE_DROPS` and
+aborts rather than signing when it is exceeded.
 
 ## Finality (`tx`, `ledger`, `ledger_current`)
 
