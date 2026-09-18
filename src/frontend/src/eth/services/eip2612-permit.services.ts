@@ -1,6 +1,6 @@
-import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { EIP2612_TYPES, PERMIT_DEADLINE_SECONDS } from '$eth/constants/eip2612.constants';
 import { ERC20_PERMIT_ABI } from '$eth/constants/erc20.constants';
+import { ethersProvider } from '$eth/providers/ethers.providers';
 import type {
 	CreateEIP2612TypedDataParams,
 	EIP2612Domain,
@@ -14,7 +14,6 @@ import { signPrehash } from '$lib/api/signer.api';
 import { Contract } from 'ethers/contract';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
-import { InfuraProvider } from 'ethers/providers';
 import { concat, toBeHex, zeroPadValue } from 'ethers/utils';
 
 const createDeadline = ({
@@ -89,7 +88,7 @@ const createPermitHash = async ({
 	value,
 	deadline
 }: Omit<PermitParams, 'identity'>): Promise<{ hash: string; metadata: PermitMetadata }> => {
-	const provider = new InfuraProvider(token.network.chainId, INFURA_API_KEY);
+	const provider = ethersProvider(token.network);
 	const tokenContract = new Contract(token.address, ERC20_PERMIT_ABI, provider);
 
 	const metadata = await fetchPermitMetadata({

@@ -4,11 +4,12 @@ import { ETH_FEE_REVIEW_EXPIRY_DELAY } from '$eth/constants/eth.constants';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import {
 	REVIEW_FORM_FEE_EXPIRED,
-	REVIEW_FORM_SEND_BUTTON
+	REVIEW_FORM_SEND_BUTTON,
+	SEND_FIRST_TIME_DESTINATION_CONFIRM
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthSendReview', () => {
@@ -53,6 +54,11 @@ describe('EthSendReview', () => {
 
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
+	// A destination the user never sent to gates the send button behind a confirmation of its own,
+	// which would make the fee assertions below pass or fail for the wrong reason.
+	const confirmFirstTimeDestination = (getByTestId: (testId: string) => HTMLElement) =>
+		fireEvent.click(getByTestId(SEND_FIRST_TIME_DESTINATION_CONFIRM));
+
 	it('should render all fields', () => {
 		const { container, getByText } = render(EthSendReview, {
 			props,
@@ -90,6 +96,8 @@ describe('EthSendReview', () => {
 				props,
 				context: mockContext()
 			});
+
+			await confirmFirstTimeDestination(getByTestId);
 
 			await vi.advanceTimersByTimeAsync(ETH_FEE_REVIEW_EXPIRY_DELAY - 1_000);
 

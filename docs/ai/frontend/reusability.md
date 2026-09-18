@@ -63,6 +63,7 @@
 | `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.                                                                               |
 | `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                                                                                     |
 | `GoToButton`                         | `$lib/components/common/`  | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`. |
+| `FirstTimeDestinationWarning`        | `$lib/components/send/`    | Warning that no send to an address is on record; gates its consumer's action when given an `onConfirm` callback.  |
 | `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.                                                                          |
 | `icons/`                             | `$lib/components/icons/`   | Project's icon set.                                                                                               |
 
