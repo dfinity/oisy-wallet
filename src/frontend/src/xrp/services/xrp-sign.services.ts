@@ -44,12 +44,21 @@ export const getXrpSigningPublicKey = async ({
 }): Promise<string> => {
 	const publicKey = await getXrpPublicKey({ identity, derivationPath: [network] });
 
-	// This key is derived locally while the signature comes from the signer canister, so the two
-	// can disagree — a master public key that is wrong for the environment, or a change to the
-	// shared derivation. Nothing would then reject the transaction until XRPL did, on a signature
-	// that cannot verify, after the send was submitted. The account is derivable from the key, so
-	// the mismatch is knowable here: deriving it makes that a named pre-sign failure, and also
-	// catches a caller asking to send from an account this key cannot sign for.
+	// The account is derivable from the key, so this pair is checkable without asking anything: it
+	// proves the key and `account` agree, and catches a caller asking to send from an account this
+	// key cannot sign for, plus the derivation-path mistake described above — which is decided in
+	// this file and nowhere else.
+	//
+	// It does NOT prove the key matches what the signer canister signs with. Under
+	// `FRONTEND_DERIVATION_ENABLED` both sides of this comparison come from the same local
+	// derivation, since `account` reaches the caller from the address store that `getXrpPublicKey`
+	// filled. Establishing that agreement per send would mean `getSchnorrPublicKey`, the certified
+	// update call this function exists to remove. The residual is a `deriveTokenAddress` property
+	// shared with Solana rather than anything XRP-specific: `XRP_KEY_ID.name` and the master key
+	// are both `SIGNER_ROOT_KEY_NAME`, so they cannot diverge by configuration, and the one
+	// remaining vector — a wrong hardcoded master public key — is a constant every network shares,
+	// so it makes every address in the app wrong and the account shows no balance long before a
+	// send is attempted.
 	const derivedAccount = mapEd25519PublicKeyToClassicAddress(publicKey);
 
 	if (derivedAccount !== account) {
