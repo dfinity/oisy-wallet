@@ -597,6 +597,27 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp(params)).resolves.toBeDefined();
 	});
 
+	// A validated record can only carry `tes` or `tec`, so one claiming anything else is malformed.
+	// The caller turns every non-`tesSUCCESS` result into a definitive `XrpTransactionFailedError`,
+	// so the schema rejecting it is what keeps a malformed response from becoming a confident "your
+	// payment failed": the outcome read throws, the poll treats it as unanswered, and the run ends
+	// indeterminate with the blob handed back.
+	it.each(['tefPAST_SEQ', 'anything'])(
+		'does not report a validated %s as a transaction failure',
+		async (transactionResult) => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(
+				new Error(
+					`Unexpected XRPL tx response: neither a validated result, a pending transaction, nor a fully searched absence (${transactionResult})`
+				)
+			);
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).not.toBeInstanceOf(XrpTransactionFailedError);
+			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		}
+	);
+
 	describe('retrying an indeterminate send', () => {
 		// The whole point: a retry must be able to resubmit THIS transaction. If the outcome is
 		// unknown and the error does not carry it, the only possible retry builds a new transaction
