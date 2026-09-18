@@ -197,7 +197,11 @@
 			modalNext: modal.next,
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
-			identity: $authIdentity
+			identity: $authIdentity,
+			// The parties are the one thing the decode always returns, and they say which half of the
+			// review this is: a simulated run leaves them complete, while falling back to the
+			// instructions the message states itself marks them partial.
+			simulated: parties?.partial === false
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
