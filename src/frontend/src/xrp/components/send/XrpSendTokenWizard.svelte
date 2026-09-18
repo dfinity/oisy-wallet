@@ -9,6 +9,7 @@
 		TRACK_COUNT_XRP_SEND_ERROR,
 		TRACK_COUNT_XRP_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -24,7 +25,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdXrp } from '$lib/utils/network.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 	import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
@@ -37,7 +38,7 @@
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
-	import { XrpTransactionFailedError } from '$xrp/types/xrp-send';
+	import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -147,10 +148,25 @@
 			return;
 		}
 
-		const amountDrops = parseToken({
+		// `tryParseToken`, not `parseToken`: this runs outside the try below, and `parseToken` throws
+		// for an amount `invalidAmount` accepts — `1e400` overflows, a sub-drop value has too many
+		// decimals — which would reject out of the click handler instead of showing the error.
+		const amountDrops = tryParseToken({
 			value: `${amount}`,
 			unitName: $sendTokenDecimals
 		});
+
+		// One guard for both, because they are the same mistake seen twice: `invalidAmount` and the
+		// review step accept an amount the ledger cannot take, and the form's own rejection of it is
+		// debounced — which leaves a window where Next is still enabled. This is the last point
+		// before signing, and it judges the drops actually being signed rather than the string that
+		// produced them.
+		if (isNullish(amountDrops) || amountDrops === ZERO) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.amount_invalid }
+			});
+			return;
+		}
 
 		// The form validated the amount against the fee and reserve as they stood when it was
 		// typed, and `TokenInputContent` only revalidates when the amount or token changes — so the
@@ -214,6 +230,20 @@
 			if (err instanceof XrpTransactionFailedError) {
 				toastsError({
 					msg: { text: $i18n.send.error.xrp_transaction_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
+			// Definitive, and the opposite of the message below: the ledger passed the transaction's
+			// LastLedgerSequence without including it, so nothing was sent and a new one is safe.
+			// Reporting that as "we don't know" would leave the user stuck on a settled outcome.
+			if (err instanceof XrpSendExpiredError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_send_expired },
 					err
 				});
 

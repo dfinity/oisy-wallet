@@ -25,6 +25,54 @@ See the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
 for how these fit together.
 
+## Failures arrive with HTTP 200
+
+XRPL JSON-RPC answers a **failed** request with HTTP `200` and puts the failure in
+the body, as `result.error` — for example `actNotFound`, `txnNotFound`, `tooBusy`,
+`noNetwork`. A successful HTTP status therefore says nothing about whether the call
+worked, and `xrpJsonRpc` returning normally is not evidence of a result.
+
+`xrpJsonRpc` owns this. It validates the envelope with `XrplEnvelopeSchema`, then throws a
+typed `XrplRpcError` carrying the code for any `result.error` the caller has not declared
+as an expected state. Helpers no longer guard it themselves — when they did, a body without
+a `result` object reached them as `undefined` and dereferencing `result.error` produced a
+`TypeError` instead of the intended message.
+
+Each helper declares only the codes that are an expected state FOR IT, in `expectedErrors`.
+The rule therefore belongs to the helper, not to the method: the same method can carry
+different rules depending on what its caller needs from the response, so look up your
+helper rather than your method.
+
+| Helper                        | Method           | Expected errors                             |
+| ----------------------------- | ---------------- | ------------------------------------------- |
+| `loadXrpBalance`              | `account_info`   | `actNotFound` → zero balance                |
+| `loadXrpAccountInfo`          | `account_info`   | `actNotFound` → `XrpAccountNotFoundError`   |
+| `loadXrpOpenLedgerFee`        | `fee`            | none                                        |
+| `loadXrpLedgerIndex`          | `ledger_current` | none                                        |
+| `loadXrpValidatedLedgerIndex` | `ledger`         | none                                        |
+| `loadXrpTransactionOutcome`   | `tx`             | `txnNotFound`, and only with `searched_all` |
+| `submitXrpTransaction`        | `submit`         | none                                        |
+| `loadXrpTransactions`         | `account_tx`     | `actNotFound` → empty history               |
+
+Declaring nothing is the safe default, and `fee` shows why the check cannot be skipped:
+every field of its result is optional, so an error response would otherwise parse with no
+`drops` and be answered with the fallback base fee — underpricing the send on the very node
+that reported congestion. The worst consequence sits behind `ledger`: a bogus validated
+index past a transaction's `LastLedgerSequence` sends confirmation into the expiry branch,
+which reports the send as failed and implies a resend is safe.
+
+Most schemas additionally forbid `error` on their success branches
+(`error: z.never().optional()`), which catches a response carrying _both_ an error and a
+plausible result. That is now belt-and-braces rather than the primary defence, since the
+envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` and
+`XrplTxResultSchema` do not carry it, because both have a declared or all-optional shape
+that makes the envelope check the only thing standing between them and a dropped error.
+
+Getting this wrong is quiet rather than loud, because an unchecked error looks like
+a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
+`tx` reads as "not in a ledger" — which, past a transaction's `LastLedgerSequence`,
+is indistinguishable from expiry and can invite a duplicate payment.
+
 ## Balance (`account_info`)
 
 `loadXrpBalance` (`src/frontend/src/xrp/rest/xrpl.rest.ts`) POSTs
@@ -49,11 +97,29 @@ hex-encoded transaction blob:
 
 The blob is serialized client-side with `ripple-binary-codec` (`encodeForSigning`
 then `encode`, in `src/frontend/src/xrp/services/xrp-sign.services.ts`) — there is
-no XRPL SDK dependency. The response's `accepted` boolean is **authoritative** for
-whether the node took the transaction (applied / queued / broadcast / kept). The
-`engine_result` string is provisional: its `ter` prefix is a retry class, so it is
-not on its own proof of acceptance — `isXrpSubmitAccepted` requires `accepted === true`
-**and** a `tes`/`ter` class before treating a submission as taken.
+no XRPL SDK dependency.
+
+Neither field in the response is proof of a final outcome. `accepted` says only that
+_this_ node took the blob, and `engine_result` is provisional. Per the XRPL reference a
+`tem` result is "final unless the rules for a valid transaction change", whereas a `tef`
+"may still succeed or fail with a different code after being reapplied" and `tel`
+transactions "may be automatically cached and retried later", and `tefALREADY` reports
+that this exact transaction is already in the open ledger. A `tec*` result was applied and
+merely failed, claiming the fee.
+
+Note which result a resubmitted send actually gets. rippled's preclaim runs `checkSeqProxy`
+before `checkPriorTxAndLastLedger`, and only the latter produces `tefALREADY` — so once the
+original has been applied and its sequence consumed, a resubmission fails the sequence check
+first and returns `tefPAST_SEQ`. `tefALREADY` is reserved for a duplicate submitted inside the
+same open ledger. Either way the transaction is not applied twice, because a sequence can be
+consumed only once; that, rather than transaction-identity dedup, is what makes resubmitting a
+stored transaction safe.
+
+So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
+ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will
+include it. Everything else goes to confirmation, which polls to `LastLedgerSequence` and
+reports either the validated result or an expiry. Reporting a "no" that may still become a
+yes would invite a retry that pays a second time.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 
@@ -87,6 +153,18 @@ failure for a payment that is about to validate — and invite a duplicate send.
 | RPC URL env var | `VITE_XRP_RPC_URL_MAINNET` (`src/frontend/src/env/networks/networks.xrp.env.ts`)                |
 | Endpoint        | Selected per network by `xrpHttpRpcUrl` (`src/frontend/src/xrp/providers/xrp-rpc.providers.ts`) |
 | Dev fallback    | `https://xrplcluster.com` (XRP Ledger Foundation public cluster)                                |
+| Deployment      | `VITE_XRP_RPC_URL_MAINNET_STAGING` / `_BETA` secrets, forwarded by `deploy-to-environment.yml`  |
+
+An empty value counts as unconfigured: a `.env` copied from `.env.example`, or a
+secret that has not been created, falls back exactly as an absent var does
+rather than building an empty endpoint into the bundle.
+
+On `test_*` and `audit` the URL can be supplied per run through the workflow's
+`env-override` dispatch input instead of a secret, which masks it in the logs.
+Note that it is still a build-time constant inlined into the published bundle,
+readable by anyone who loads that canister — the same exposure every other
+`VITE_*` provider credential in this repo has, and the reason the provider
+endpoint should be scoped at the provider.
 
 ## Provider choice
 

@@ -1002,7 +1002,8 @@
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
+			"first_time_destination": "It appears you have never sent tokens to this address before. Verify the address carefully.",
+			"first_time_destination_confirm": "This is the first time I send tokens to this address and I have verified the address carefully.",
 			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
@@ -1023,7 +1024,7 @@
 			"amount_invalid": "Amount is invalid.",
 			"xrp_destination_tag_invalid": "Destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
-			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the XRP base reserve.",
+			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
@@ -1059,7 +1060,7 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_xrp_network_id": "Current network ($networkId) is not an XRP Ledger network.",
-			"xrp_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"xrp_confirmation_failed": "We could not confirm whether the transaction was sent. It may still go through, so do not send it again yet — your balance will update if it does.",
 			"xrp_transaction_failed": "The transaction was processed by the network but failed, so your funds were not sent. The network fee was still charged.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
@@ -1070,7 +1071,8 @@
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
-			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
+			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
+			"xrp_send_expired": "The transaction was not sent: the network did not include it in time. Nothing left your wallet, and it is safe to create a new one."
 		}
 	},
 	"mint": {
@@ -2854,11 +2856,14 @@
 		"text": {
 			"intro_title": "Tip with OISY Wallet",
 			"intro_heading": "Effortless Crypto Tipping",
-			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"intro_body": "Create a tip, share the link or QR, and the amount stays in your wallet until someone claims it.",
 			"overview_window": "Recent activity",
 			"overview_failed": "Needs attention",
 			"overview_failed_hint": "Somebody tried to claim and the payout did not go through. Nothing left your balance — open your history to see what each one needs.",
 			"overview_open": "Waiting to be claimed",
+			"overview_none": "None",
+			"overview_count_one": "$count tip",
+			"overview_count_other": "$count tips",
 			"overview_claimed": "Claimed",
 			"select_token": "Select token to issue tip",
 			"create_title": "Issue Tip",
@@ -2879,7 +2884,7 @@
 			"payout_fee": "Fee when claimed",
 			"fees_are_yours": "Both fees are paid by you. Whoever claims the tip receives the full amount.",
 			"reserved_by_tips": "$amount is already promised to tips you have created that are waiting to be claimed, so it cannot be tipped again. Cancel one from your history to free it up.",
-			"lapse_notice": "If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"lapse_notice": "If nobody claims it, the amount stays in your wallet and the claim fee is never charged.",
 			"generate": "Generate",
 			"share_heading": "Your tip is ready",
 			"copy_link": "Copy the tip link",
@@ -2967,7 +2972,7 @@
 		},
 		"share": {
 			"title": "Someone sent you a tip",
-			"description": "Tap to claim it. No app to install, nothing to write down, and only you can move it."
+			"description": "Open to claim it. OISY is a wallet that runs in your browser — sign in with your face or fingerprint and the tip is yours."
 		},
 		"welcome": {
 			"title": "Welcome to OISY Wallet",

@@ -1002,7 +1002,8 @@
 			"cketh_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckETH.",
 			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
-			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
+			"first_time_destination": "",
+			"first_time_destination_confirm": "",
 			"fee_expired": "",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
@@ -1070,7 +1071,8 @@
 			"solana_insufficient_funds": "",
 			"solana_insufficient_funds_for_fee": "",
 			"solana_insufficient_funds_for_rent": "",
-			"fee_calc_unsupported_standard": ""
+			"fee_calc_unsupported_standard": "",
+			"xrp_send_expired": ""
 		}
 	},
 	"mint": {
@@ -2859,6 +2861,9 @@
 			"overview_failed": "",
 			"overview_failed_hint": "",
 			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
 			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",

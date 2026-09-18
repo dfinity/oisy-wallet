@@ -24,14 +24,76 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 export const XRP_MAX_FEE_DROPS = 10_000n;
 
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
-// long it can be included (~4s/ledger, so ~80s) before it definitively fails rather than
-// lingering.
+// long it can be included before it definitively fails rather than lingering.
+// `lsfRequireDestTag` in the AccountRoot flags: payments to this account must carry a
+// `DestinationTag`. Set by exchanges and other shared accounts, where the tag is what credits the
+// payment to a customer. A payment without one is applied as `tecDST_TAG_NEEDED` — the fee is
+// destroyed and the sequence consumed — so it is refused before signing instead.
+export const XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG = 0x00020000;
+
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 
 // Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
 // XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
 export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
-// Safety net for the confirmation poll only: the real bound is the transaction's
-// LastLedgerSequence, so this merely stops the loop if a node never advances its ledger
-// index. Generous next to the ~80s validity window at a 1-2s poll interval.
-export const XRP_CONFIRM_MAX_ATTEMPTS = 120;
+
+// Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
+const XRP_LEDGER_CLOSE_SECONDS = 4;
+
+// Deadline on every XRPL request, because `fetch` has none of its own: a connection that stalls
+// instead of rejecting never settles, and the confirmation loop bounds ATTEMPTS rather than time —
+// so one hung request suspends the whole send indefinitely, and `sendXrp` never rejects with the
+// signed blob a retry needs.
+//
+// Two ledger closes rather than a figure picked for feel: a request that outlives that cannot tell
+// the poll anything the next one will not, since the ledger itself has moved on. Aborting makes a
+// stall a rejected fetch, which the loop already treats as one consumed attempt.
+export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
+
+// The confirmation poll's interval, passed to `randomWait` rather than left to its defaults: the
+// two derivations below are only correct if this is what the loop actually waits, and mirroring
+// another module's defaults would let a change there make them silently wrong.
+export const XRP_CONFIRM_MIN_POLL_MS = 1000;
+export const XRP_CONFIRM_MAX_POLL_MS = 2000;
+
+// Longest interval the poll can wait. Used to convert "ledger closes remaining" into "polls to
+// wait": the LONGEST wait gives the FEWEST polls per close, so the conversion under-counts and the
+// confirmation loop asks again slightly early rather than slightly late — a wasted call costs one
+// request, asking late costs the definitive expiry answer.
+const XRP_CONFIRM_MAX_POLL_SECONDS = XRP_CONFIRM_MAX_POLL_MS / 1000;
+
+// Polls to skip per ledger close still needed before expiry is even possible. Asking on every poll
+// made almost every one of those calls incapable of changing the outcome: expiry needs the
+// validated index to pass `LastLedgerSequence`, which is `XRP_LAST_LEDGER_SEQUENCE_OFFSET` closes
+// away, while the poll runs three times as often as the ledger advances.
+export const XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE = Math.floor(
+	XRP_LEDGER_CLOSE_SECONDS / XRP_CONFIRM_MAX_POLL_SECONDS
+);
+
+// Shortest interval the poll can wait, and so the conservative denominator below: the fastest
+// polling needs the most attempts to span the window.
+const XRP_CONFIRM_MIN_POLL_SECONDS = XRP_CONFIRM_MIN_POLL_MS / 1000;
+
+// Twice the window rather than exactly it, so a slower-than-usual ledger pace cannot end the poll
+// before the ledger has decided.
+const XRP_CONFIRM_WINDOW_MARGIN = 2;
+
+// Derived from the validity window, not chosen. Reaching this cap is the one exit that ends a send
+// with its outcome unknown — the ledger may still have applied it, and a rebuilt retry would then
+// pay twice — so it must outlast the window in every case. Expiry, which IS definitive, is what
+// normally ends the loop.
+export const XRP_CONFIRM_MAX_ATTEMPTS =
+	(XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN) /
+	XRP_CONFIRM_MIN_POLL_SECONDS;
+
+// The same give-up point expressed in time, because the attempt count alone does not bound one.
+// Each attempt costs an interval plus however long its two requests take, and with
+// `XRP_RPC_TIMEOUT_MS` per request the cap above can stretch to many times the window it was
+// derived from — leaving the user on the CONFIRM step with no answer, definitive or otherwise.
+//
+// The window the attempt count was sized for, at the SLOWEST interval the loop can wait, so an
+// ordinary send never reaches it: whichever of the two limits comes first ends the poll, and it
+// should be the attempts whenever the node is answering at all.
+export const XRP_CONFIRM_MAX_DURATION_MS =
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
+	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;

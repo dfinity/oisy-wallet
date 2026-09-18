@@ -737,7 +737,8 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		unknown_destination: string;
+		first_time_destination: string;
+		first_time_destination_confirm: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
@@ -806,6 +807,7 @@ interface I18nSend {
 		solana_insufficient_funds_for_fee: string;
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
+		xrp_send_expired: string;
 	};
 }
 
@@ -2385,6 +2387,9 @@ interface I18nTip {
 		overview_failed: string;
 		overview_failed_hint: string;
 		overview_open: string;
+		overview_none: string;
+		overview_count_one: string;
+		overview_count_other: string;
 		overview_claimed: string;
 		select_token: string;
 		create_title: string;

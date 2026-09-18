@@ -1,4 +1,7 @@
-import { XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
+import {
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_RIPPLE_EPOCH_OFFSET
+} from '$xrp/constants/xrp.constants';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
@@ -8,23 +11,29 @@ import type {
 	XrpTransactionUi
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { decode } from 'ripple-binary-codec';
 
-// XRPL groups results by prefix: `tes` succeeded, `ter` is retried/queued, while `tec`
-// was applied but *failed* (claiming the fee) and `tem`/`tef`/`tel` were not applied.
-const XRP_PROCESSING_ENGINE_RESULT_PREFIXES = ['tes', 'ter'];
+// Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
+// rules for a valid transaction change", while a `tef` "may still succeed or fail with a different
+// code after being reapplied" and `tel` transactions "may be automatically cached and retried
+// later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that may still become a yes must not be reported as a failure: the user would
+// send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
+// thing that decides definitively.
+const XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX = 'tem';
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
 /**
- * Whether the node took a submitted transaction for processing.
+ * Whether a submit response definitively rejects the transaction.
  *
- * Both facts are required: `accepted` alone only says the node applied, queued, broadcast
- * or kept it — an applied fee-claiming `tec*` result is "accepted" too, yet the payment
- * failed and must never enter confirmation.
+ * Deliberately NOT a function of `accepted`: a node answering `tef`/`tel` reports
+ * `accepted: false`, and one server refusing to take the blob is not evidence that no ledger will
+ * ever include it — it may cache and reapply it. Only a malformed transaction can be called failed
+ * here; everything else, including an applied-but-failed `tec*`, is decided by polling the
+ * locally derived hash (see {@link isXrpTransactionSuccessful}).
  */
-export const isXrpSubmitAccepted = ({ accepted, engineResult }: XrpSubmitResult): boolean =>
-	accepted &&
-	XRP_PROCESSING_ENGINE_RESULT_PREFIXES.some((prefix) => engineResult.startsWith(prefix));
+export const isXrpSubmitFinalFailure = ({ engineResult }: XrpSubmitResult): boolean =>
+	engineResult.startsWith(XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX);
 
 /**
  * Whether a validated transaction actually succeeded.
@@ -130,6 +139,13 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
+	// `delivered_amount` is what the destination received. On a cross-currency payment the sender
+	// funds it with something else — `SendMax` as an object — so crediting it as XRP leaving this
+	// wallet would be wrong: only the fee did. Receiving stays valid, the XRP really did arrive.
+	if (!isReceive && nonNullish(tx.SendMax) && typeof tx.SendMax !== 'string') {
+		return undefined;
+	}
+
 	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
 
 	return {
@@ -146,4 +162,77 @@ export const mapXrpTransaction = ({
 		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
 		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag })
 	};
+};
+
+/**
+ * The inclusive ledger range a signed transaction can be included in, read out of the blob.
+ *
+ * Not carried as fields, for the same reason the transaction id is not (see
+ * {@link XrpPendingTransaction}): the blob is what the ledger acts on, so anything travelling
+ * beside it is a second claim that can disagree. A window wider than the signed one lets the `tx`
+ * search miss the ledger the payment is in; a narrower one does the same. Either way confirmation
+ * reports a live transaction as expired — and expiry is the one result that tells a retry to build
+ * a new transaction, on a new sequence.
+ *
+ * A blob with no `LastLedgerSequence` is rejected rather than given an open-ended window. Such a
+ * transaction can never expire, so no retry for it could ever be called safe, and `sendXrp` never
+ * signs one without it.
+ */
+export const deriveXrpLedgerWindow = (
+	txBlob: string
+): { firstLedgerSequence: number; lastLedgerSequence: number } => {
+	const { LastLedgerSequence: lastLedgerSequence } = decode(txBlob);
+
+	if (typeof lastLedgerSequence !== 'number') {
+		throw new Error(
+			'Cannot derive the XRP ledger window: the signed transaction carries no LastLedgerSequence, so it can never expire.'
+		);
+	}
+
+	return {
+		// The open index the transaction was signed against, which is what `LastLedgerSequence` was
+		// offset from.
+		firstLedgerSequence: lastLedgerSequence - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+		lastLedgerSequence
+	};
+};
+
+// XRPL's transaction-ID hash prefix, 'TXN\0'.
+const XRP_TRANSACTION_ID_PREFIX = Uint8Array.from([0x54, 0x58, 0x4e, 0x00]);
+
+const XRP_TRANSACTION_ID_BYTES = 32;
+
+// A serialized transaction is whole bytes of hex. `Buffer.from(hex, 'hex')` does not reject
+// anything else — it stops at the first character that is not a hex digit and returns what it had,
+// so `1200ZZ`, `1200xyz` and `1200 00` all produce the bytes of `1200` and therefore one identical
+// id. That matters most for a resubmission, whose blob comes from the caller: a wrong id is polled
+// to a false expiry, which is the outcome this whole path exists to avoid.
+const XRP_HEX_BLOB_REGEX = /^(?:[0-9a-fA-F]{2})+$/;
+
+/**
+ * Transaction ID of a signed blob: `SHA-512Half(0x54584E00 || blob)`.
+ *
+ * Derived locally so confirmation does not depend on the submit response. A lost or malformed
+ * response is not evidence of non-inclusion — the node may already have applied the transaction —
+ * and without a hash of our own there would be nothing to poll, so the send would be reported as
+ * failed and a retry would spend the funds again.
+ *
+ * `ripple-binary-codec` does ship this as `transactionID`, but only from `dist/hashes`, which its
+ * public entry point does not re-export — and the frontend deep-imports no package's `dist`. Kept
+ * here rather than being the first, since it is pinned to a real ledger vector.
+ */
+export const deriveXrpTransactionHash = async (txBlob: string): Promise<string> => {
+	if (!XRP_HEX_BLOB_REGEX.test(txBlob)) {
+		throw new Error('Cannot derive an XRP transaction id: the blob is not whole bytes of hex.');
+	}
+
+	const blob = Uint8Array.from(Buffer.from(txBlob, 'hex'));
+
+	const message = new Uint8Array(XRP_TRANSACTION_ID_PREFIX.length + blob.length);
+	message.set(XRP_TRANSACTION_ID_PREFIX);
+	message.set(blob, XRP_TRANSACTION_ID_PREFIX.length);
+
+	const digest = new Uint8Array(await crypto.subtle.digest('SHA-512', message));
+
+	return Buffer.from(digest.slice(0, XRP_TRANSACTION_ID_BYTES)).toString('hex').toUpperCase();
 };
