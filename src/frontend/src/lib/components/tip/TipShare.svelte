@@ -8,9 +8,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
+	import { tipSteps } from '$lib/constants/steps.constants';
 	import {
 		TIP_HISTORY_CANCEL_BUTTON,
 		TIP_SHARE_COPY_BUTTON
@@ -18,6 +20,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { ProgressStepsTip } from '$lib/enums/progress-steps';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -57,6 +60,12 @@
 		 */
 		linkNotSaved?: boolean;
 		cancelling?: boolean;
+		/**
+		 * Which of the three reservation stages is running. Only read while
+		 * {@link generating}; a link reopened from History has one call to make and
+		 * nothing to narrate.
+		 */
+		progressStep?: string;
 	}
 
 	let {
@@ -69,7 +78,8 @@
 		onCancel,
 		cancelling = false,
 		generating = false,
-		linkNotSaved = false
+		linkNotSaved = false,
+		progressStep = ProgressStepsTip.RESERVE
 	}: Props = $props();
 
 	// Waiting for a link, as opposed to having one or having been told there will
@@ -195,7 +205,22 @@
 		there is no code — a box headed "Scan to claim this tip" above that warning
 		contradicted it.
 	-->
-	{#if isNullish(linkMessage)}
+	{#if isNullish(linkMessage) && generating && awaitingLink}
+		<!--
+			The same box the reassurance text uses, so nothing below it moves when the
+			link lands and the two swap over. Not centred: `ProgressSteps` lays its
+			rows out on a grid, and centring the box would pull the labels off the
+			column their numbers sit in.
+
+			`InProgress` rather than `InProgressWizard`, which is what the send and
+			swap flows use: that one adds a "do not close the browser" warning, and
+			here it would be false. Closing this modal loses nothing — the tip is
+			created, and its link is recoverable from History.
+		-->
+		<div class="mb-3 rounded-xl bg-secondary px-4 pt-3">
+			<InProgress {progressStep} steps={tipSteps($i18n)} />
+		</div>
+	{:else if isNullish(linkMessage)}
 		<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
 			<!--
 				`m-0` on both, then one explicit step between them. A bare `<p>` carries an
@@ -204,11 +229,7 @@
 				from the edge, and the whole box read bottom-heavy.
 			-->
 			<p class="m-0 font-bold">
-				{awaitingLink
-					? generating
-						? $i18n.tip.text.generating_link
-						: $i18n.tip.text.recovering_link
-					: $i18n.tip.text.no_wallet_needed_title}
+				{awaitingLink ? $i18n.tip.text.recovering_link : $i18n.tip.text.no_wallet_needed_title}
 			</p>
 
 			<!--
