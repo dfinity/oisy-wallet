@@ -1,13 +1,14 @@
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
 // Feature flag for the tips surface (the Tips menu entry and its modals).
 //
-// Per environment rather than a literal, which is how every other in-progress
-// feature here is gated. `vite.config.ts` picks the `.env` file from
-// `DFX_NETWORK`: `ic` reads `.env.production`, `beta` and `staging` read their
-// own, and everything else — local dev and the `test_fe_*` frontends — reads
-// `.env.development`. Only the last two list `VITE_TIPS_ENABLED`, so tips are
-// on where the feature is being tested and off in production and beta, with no
-// branch to keep alive and no line to flip at release. An undefined variable
-// parses to `false`, which is what production and beta get.
-export const TIPS_ENABLED = parseBoolEnvVar(import.meta.env.VITE_TIPS_ENABLED);
+// The environments are listed here rather than carried by a `VITE_` variable,
+// which is how the other environment-gated features in this folder are written:
+// see `BACKEND_EXCHANGE_ENABLED` and `ONRAMPER_ENABLED`. Nothing has to be kept
+// in step in CI, nothing depends on a repository secret, and the set of places
+// tips are on is one line anyone can read.
+//
+// `STAGING` already covers `test_fe_*`, audit and e2e, so this reaches fe1
+// through fe4 without a per-deploy override. Beta and production are left out
+// until the feature is ready for them, and widening is one more term.
+export const TIPS_ENABLED = LOCAL || STAGING;
