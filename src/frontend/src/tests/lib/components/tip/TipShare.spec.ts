@@ -5,8 +5,10 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { ProgressStepsTip } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
+import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, type Writable } from 'svelte/store';
 
 // Mocked rather than spied on: the component reads a module-level `derived`,
@@ -293,14 +295,48 @@ describe('TipShare', () => {
 			expect(state(text.step_saving)).toBeUndefined();
 		});
 
-		it('does not warn against closing the browser', () => {
-			// `InProgressWizard`, which every other money flow uses, heads its stepper
-			// with that warning. Here it would be false: the tip is created and its
-			// link is recoverable from History, so closing this modal costs nothing.
-			// `InProgress` is the same stepper without the warning.
+		it('does not borrow the send flow warning, which describes a transfer', () => {
+			// `InProgressWizard` heads its stepper with "Don't close this tab until
+			// the transaction is done". A tip transfers nothing — the amount stays
+			// put until someone claims — and this feature's copy has been careful
+			// never to imply otherwise. `InProgress` is the same stepper without it.
 			const { queryByText } = render(TipShare, { props: generatingProps });
 
 			expect(queryByText(get(i18n).core.warning.do_not_close)).toBeNull();
+		});
+
+		it('still holds the browser back, which the warning was bundled with', async () => {
+			// Dropping the box must not drop the guards. Between `create_tip` landing
+			// and `set_tip_secret` landing the tip exists and no copy of its claim
+			// code does, so leaving during this window hands the sender a tip in
+			// History whose link nobody — themselves included — can ever recover.
+			// Cancellable, so the money comes back; the link does not.
+			const listen = vi.spyOn(window, 'addEventListener');
+
+			const { unmount } = render(TipShare, { props: generatingProps });
+
+			await tick();
+
+			// The back button and an in-app navigation.
+			expect(get(dirtyWizardState)).toBeTruthy();
+
+			// A tab close or a reload.
+			expect(listen.mock.calls.map(([event]) => event)).toContain('beforeunload');
+
+			unmount();
+			await tick();
+
+			expect(get(dirtyWizardState)).toBeFalsy();
+		});
+
+		it('lets go once there is a link to keep', async () => {
+			// The recovery wait is one call and a decrypt against a tip that already
+			// exists, so there is nothing half-made to protect.
+			render(TipShare, { props: { ...props, link: undefined, generating: false } });
+
+			await tick();
+
+			expect(get(dirtyWizardState)).toBeFalsy();
 		});
 
 		it('still states the amount, which is already known', () => {
