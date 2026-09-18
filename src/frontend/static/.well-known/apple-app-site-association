@@ -1,0 +1,16 @@
+{
+	"applinks": {
+		"apps": [],
+		"details": [
+			{
+				"appIDs": ["7FY8G6QYKD.com.oisy.wallet"],
+				"components": [
+					{
+						"/": "/signer-callback",
+						"comment": "ICRC-167 delegation callback for the OISY mobile app"
+					}
+				]
+			}
+		]
+	}
+}
