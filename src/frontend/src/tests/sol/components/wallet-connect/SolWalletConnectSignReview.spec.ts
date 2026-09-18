@@ -37,6 +37,23 @@ describe('SolWalletConnectSignReview', () => {
 		exchangeStore.reset();
 	});
 
+	it('should say a message it will not sign cannot be shown', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+	});
+
+	it('should say nothing else about a message it will not sign', () => {
+		// The caveats below the refusal qualify a review nobody is going to act on.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true, unreviewed: true }
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+	});
+
 	it('should render the unreviewed instructions warning', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {

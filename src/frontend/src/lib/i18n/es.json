@@ -1653,6 +1653,7 @@
 			"tab_operations": "Operaciones",
 			"unreviewed_instructions": "OISY no puede decodificar algunas de estas instrucciones, por lo que la revisión a continuación puede estar incompleta.",
 			"unreviewed_instructions_simulated": "Esta transacción contiene operaciones de una fuente externa que OISY no puede decodificar, por lo que OISY ejecutó una simulación de ella. Asegúrese de confiar en la aplicación y revise los cambios de saldo simulados y las operaciones antes de firmar. Tenga en cuenta que el resultado real puede diferir de la simulación.",
+			"cannot_be_shown": "Esta transacción incluye acciones que no pueden mostrarse todas con precisión para su revisión, por lo que OISY no la firmará. Recházala y pide a la aplicación una solicitud más sencilla.",
 			"simulated_instructions": "Instrucciones simuladas",
 			"multiple_operations": "Esta transacción contiene múltiples operaciones que afectan a su billetera. Verifique los cambios de saldo simulados y las instrucciones incluidas, y apruebe esta transacción solo si también confía en la aplicación.",
 			"simulated_review": "La revisión a continuación es lo que predice la simulación de esta transacción contra el estado actual de la red. Lo que ocurra al ejecutarse realmente puede diferir.",
