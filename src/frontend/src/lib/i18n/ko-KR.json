@@ -171,7 +171,8 @@
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
 			"notes": "메모 열기",
-			"issue_tip": ""
+			"issue_tip": "",
+			"issue_tip_attention": ""
 		},
 		"short": {
 			"documentation": "문서"
@@ -770,7 +771,8 @@
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
 			"waiting_for_allowed_cycles_aborted": "사이클 레저 준비가 중단되었습니다. 나중에 다시 로그인을 시도해 주세요",
 			"btc_wallet_error": "BTC 지갑 정보를 불러오는 중 오류가 발생했습니다.",
-			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다."
+			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다.",
+			"xrp_wallet_error": "XRP 지갑 정보를 불러오는 중 오류가 발생했습니다."
 		}
 	},
 	"hero": {
@@ -935,6 +937,14 @@
 				"solana_address_copied": "솔라나 주소가 클립보드에 복사되었습니다",
 				"display_solana_address_qr": "솔라나 주소를 QR 코드로 표시"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
@@ -990,7 +1000,8 @@
 			"cketh_certified": "ckETH 파라미터가 인증될 때까지 기다려 주세요.",
 			"pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션이 완료된 후 다른 트랜잭션을 보낼 수 있습니다.",
 			"no_available_utxos": "이 트랜잭션을 수행할 사용 가능한 UTXO가 없습니다.",
-			"unknown_destination": "이 주소와 이전에 거래한 적이 없습니다. 수신자를 확인해 주세요.",
+			"first_time_destination": "이 주소로 토큰을 보낸 적이 없는 것으로 보입니다. 주소를 꼼꼼히 확인하세요.",
+			"first_time_destination_confirm": "이 주소로 토큰을 보내는 것은 처음이며, 주소를 꼼꼼히 확인했습니다.",
 			"fee_expired": "",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
@@ -1047,6 +1058,7 @@
 			"no_pending_bitcoin_transaction": "보류 중인 Bitcoin 트랜잭션을 불러오는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
 			"unexpected_utxos_fee": "트랜잭션 수수료를 계산하는 중에 오류가 발생했습니다.",
 			"unable_to_retrieve_amount": "n/a (가져올 수 없음)",
+			"ethereum_insufficient_funds": "",
 			"solana_transaction_expired": "귀하의 트랜잭션은 Solana 네트워크에서 처리되지 않고 만료되었습니다. 제공된 우선순위 수수료가 충분하지 않았기 때문일 가능성이 높습니다. 최신 권장 금액으로 업데이트했으니 다시 시도해 주세요.",
 			"solana_confirmation_failed": "방금 생성하신 트랜잭션에 대한 확인을 받지 못했습니다. 몇 초 기다린 후 토큰의 트랜잭션 목록에서 트랜잭션이 올바르게 생성되었는지 확인해 주세요.",
 			"solana_insufficient_funds": "이 트랜잭션을 완료하기에 토큰 잔액이 부족합니다. 잔액이 마지막으로 표시된 이후 변경되었을 수 있습니다.",
@@ -2837,9 +2849,18 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"overview_window": "",
+			"overview_failed": "",
+			"overview_failed_hint": "",
+			"overview_open": "",
+			"overview_none": "",
+			"overview_count_one": "",
+			"overview_count_other": "",
+			"overview_claimed": "",
 			"select_token": "",
 			"create_title": "",
 			"share_title": "",
+			"preparing_title": "",
 			"empty_balance_title": "",
 			"empty_balance_description": "",
 			"no_supported_tokens_title": "",
@@ -2854,6 +2875,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",
@@ -2865,6 +2887,10 @@
 			"scan_or_photo": "",
 			"expires_at": "",
 			"done": "",
+			"step_reserving": "",
+			"step_creating": "",
+			"step_saving": "",
+			"recovering_link": "",
 			"link_not_saved": "",
 			"reserve_failed": "",
 			"status_title": "",
@@ -2899,6 +2925,32 @@
 			"claim_failed": "",
 			"unreachable_title": "",
 			"unreachable_description": "",
+			"history_title": "",
+			"history_empty": "",
+			"history_failed": "",
+			"group_failed": "",
+			"group_failed_hint": "",
+			"failure_uncovered": "",
+			"failure_insufficient_funds": "",
+			"failure_transfer_failed": "",
+			"group_open": "",
+			"group_claimed": "",
+			"group_expired": "",
+			"status_reserved": "",
+			"status_failed": "",
+			"status_claimed": "",
+			"status_expired": "",
+			"status_cancelled": "",
+			"claimed_by": "",
+			"tip_amount": "",
+			"expires_in": "",
+			"link_unavailable": "",
+			"link_recovery_failed": "",
+			"cancel_tip": "",
+			"cancel_failed": "",
+			"cancelled_toast": "",
+			"cancelled_allowance_kept": "",
+			"token_unavailable": "",
 			"message_too_long": "",
 			"learn_how_it_works": "",
 			"view_history": "",

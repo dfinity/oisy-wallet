@@ -322,7 +322,7 @@ describe('EIP2612 Permit Services', () => {
 	});
 
 	describe('createPermitHash', () => {
-		it('should initialize InfuraProvider with correct parameters', async () => {
+		it('should build the provider for the token network, not from its bare chain id', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
@@ -347,8 +347,10 @@ describe('EIP2612 Permit Services', () => {
 				identity: mockIdentity
 			});
 
+			// A bare chain id only resolves for networks ethers ships; the network's own Infura name
+			// is what reaches every chain Infura hosts.
 			expect(InfuraProvider).toHaveBeenCalledWith(
-				mockValidErc20Token.network.chainId,
+				mockValidErc20Token.network.providers.infura,
 				INFURA_API_KEY
 			);
 		});
@@ -546,12 +548,13 @@ describe('EIP2612 Permit Services', () => {
 			expect(toBeHex).toHaveBeenCalledWith(zeroValue, 32);
 		});
 
-		it('should work with different chain IDs', async () => {
+		it('should work with different networks', async () => {
 			const polygonToken = {
 				...mockValidErc20Token,
 				network: {
 					...mockValidErc20Token.network,
-					chainId: BigInt(137)
+					chainId: BigInt(137),
+					providers: { ...mockValidErc20Token.network.providers, infura: 'matic' as const }
 				}
 			};
 
@@ -563,7 +566,7 @@ describe('EIP2612 Permit Services', () => {
 				identity: mockIdentity
 			});
 
-			expect(InfuraProvider).toHaveBeenCalledWith(BigInt(137), INFURA_API_KEY);
+			expect(InfuraProvider).toHaveBeenCalledWith('matic', INFURA_API_KEY);
 		});
 	});
 

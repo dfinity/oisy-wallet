@@ -291,6 +291,47 @@ describe('export-data.services', () => {
 			});
 		});
 
+		it('fails the export when an ICP page fails, rather than exporting what came before it', async () => {
+			const error = new Error('Index canister unavailable');
+			const buildTransactions = vi.fn(() => []);
+
+			mockLoadNextIcTransactionsByOldest
+				.mockResolvedValueOnce({ success: true })
+				.mockResolvedValueOnce({ success: false, err: error });
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [ICP_TOKEN],
+				buildTransactions
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
+			expect(buildTransactions).not.toHaveBeenCalled();
+			expect(mockDownloadCsv).not.toHaveBeenCalled();
+			expect(mockConsoleError).toHaveBeenCalledExactlyOnceWith(error);
+		});
+
+		// The end of the history comes through `signalEnd`, and stops the walk without an error.
+		it('exports once the ICP loader signals the end', async () => {
+			mockLoadNextIcTransactionsByOldest
+				.mockResolvedValueOnce({ success: true })
+				.mockImplementationOnce(({ signalEnd }) => {
+					signalEnd();
+
+					return Promise.resolve({ success: false });
+				});
+
+			const result = await exportTransactionsCsv({
+				...defaultTransactionParams(),
+				tokens: [ICP_TOKEN]
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockLoadNextIcTransactionsByOldest).toHaveBeenCalledTimes(2);
+			expect(mockDownloadCsv).toHaveBeenCalledOnce();
+		});
+
 		it('exports once the Solana pager signals the end', async () => {
 			mockLoadOlderSolTransactions
 				.mockResolvedValueOnce({ success: true })

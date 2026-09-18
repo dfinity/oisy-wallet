@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Send
+
+### First-time destination addresses
+
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+
+Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
+
+The send flow says so twice. On the address step, entering such an address raises a warning that it appears to be the first send to it and asks the user to verify the address; the hedge is deliberate, since the claim rests on the history that happens to be loaded. It does not block moving on. On the review step the same box returns, its copy reworded in the first person as the statement the user is agreeing to, with a **confirmation checkbox, and the send button stays disabled until it is ticked** — the same layout as the confirmation for a swap that would lose significant value, kept at warning level rather than error: a first send to a new recipient is routine, and red spent on the routine case stops being read. The confirmation belongs to that address and that visit: going back, changing the destination and returning asks again. It is never remembered — there is no "don't warn me about this address", and the only thing that retires the warning is a real send.
+
+Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
+
+Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+---
+
 ## Activity
 
 ### IC transactions and Index-canister outages
@@ -162,9 +178,19 @@ The same warning appears on the token's own page, above its transaction list —
 
 This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
+### Loading older history
+
+The Activity list and a token's own page both load older transactions as the user scrolls to the end of the list. A page that fails to load (the explorer or RPC errors, the Index canister does not answer) is not taken as the start of the history: what is on screen stays, and the list asks again the next time its end is scrolled into view. It does not retry on its own while the end sits on screen. Only a chain that actually has nothing older stops the list for that token.
+
+On Ethereum and the EVM networks the retries are spaced out per wallet address and token, so an explorer that keeps failing is not asked on every scroll: after a failed page the token waits 5 seconds before asking again, doubling with each failure in a row up to a minute, and the first page served resets the wait. It never gives up for the session. A scroll that arrives during the wait loads nothing for that token, and the next one after it asks again.
+
+For IC tokens a failed page does not count towards the Index-canister outage warning above. That warning is still driven only by the regular 30-second check, so scrolling during an outage neither brings it on sooner nor clears it.
+
 ### Solana history
 
 A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
+
+The details of the newest Solana transactions are kept in the browser once read from the network, so reloading the app, or enabling a token whose history the wallet already loaded, does not fetch them again. Only transactions the network has finalized are kept, the newest 200 per network, and signing out clears them along with the rest of the session.
 
 OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
 
@@ -240,6 +266,28 @@ From an open note, the user can create a **share link** that lets anyone holding
 - **Limit.** A user may hold up to **100 active share links** at a time. At the cap the Share dialog disables link creation and explains that links free up as they expire or are used; existing shares are never evicted.
 
 The share funnel — dialog open, link created, and the recipient's open / reveal / copy / close / unavailable / discover steps — is tracked via the `personal_note_share` Plausible event; see [Analytics → Personal notes tracking](#personal-notes-tracking).
+
+---
+
+## Tips
+
+A signed-in user can hand tokens to someone as a **link**. The recipient does not need an OISY account, a wallet, or any prior contact with the sender — opening the link and signing in with any Internet Identity is the whole flow. Reached from an **Issue Tip** item in the user menu.
+
+**Currently limited to local and staging builds.** The create surface is behind a rollout flag; beta and production do not show it. The claim route is deliberately **not** behind that flag, so a link already in someone's hands keeps working even while new tips cannot be made — closing the surface must never strand a reservation.
+
+- **No custody, ever.** A tip is an **ICRC-2 allowance**, not a transfer. The tokens stay in the sender's own account, authorised for this one tip under a spender subaccount derived from its id, and the canister holds nothing. If nobody claims, the authorisation simply lapses and the money was never anywhere else. This is also why only tokens whose ledger has an allowance primitive can be tipped — ICP and the ICRC assets — and never a native BTC, ETH or SOL balance.
+- **The sender pays two fees, the claimer none.** The ledger charges its transfer fee to the _allowance_ and credits the claimer the full amount, so a reservation has to cover the amount plus that fee — and the reservation itself costs a fee to create. Both are quoted in the sender's confirmation before anything is authorised.
+- **The claim code never travels as a URL.** It lives in the link's **fragment**, which browsers do not put on the wire, so it stays out of request paths, referrer headers, web-server logs and anything a crawler fetching the page can see. Two things reach the canister when the tip is created: the code's **SHA-256**, which is what every later check is made against, and an **end-to-end encrypted copy** of the code itself, which only the sender can decrypt and which exists so they can recover their own link later. From then on the plaintext code is sent by whoever holds the link — on the authenticated **review query** as well as the claim update, since comparing it against the stored hash is the only way to check it. So the fragment buys secrecy in transit, in logs and from crawlers; it does not keep the code from the canister once a holder opens the link.
+- **The deadline is the sender's choice** — 24 hours to 7 days. A reservation that would lapse before the tip does is refused rather than shipping a deadline that cannot be honoured.
+- **What an anonymous reader sees** is the amount, the token and the deadline, and nothing else: never the sender, never the claimer, never the message. The sender's message is revealed only to whoever holds the full link, after they have claimed.
+- **The claimer is disclosed to the sender**, and this is stated on the claim screen **before** sign-in — the last moment the recipient can decide whether that is a price they want to pay, and the first moment they can read it without having identified themselves.
+- **One link, one payout.** A tip pays out at most once, so retrying a claim whose response was lost is safe: it either collects or reports the tip already claimed. Unknown, expired, cancelled, already-claimed and wrong-code all answer **identically**, so links cannot be probed to learn which ones exist.
+- **Limits.** A sender may hold a capped number of live tips at once, and creating, claiming and cancelling are each rate-limited per caller. A tip below the ledger's fee cannot be created.
+- **A first-time claimer gets an introduction.** Someone whose OISY account was created by claiming a tip is shown a short welcome afterwards, once — not someone who has used OISY for months and happens to be claiming their first tip.
+
+The link is shown to the sender once, on the share screen, which is the moment to copy it. The wallet keeps an encrypted copy of the claim code so the sender can recover the link later; the surface for that arrives with tips History.
+
+The sender and claimer funnels are tracked via the `tip` Plausible event.
 
 ---
 

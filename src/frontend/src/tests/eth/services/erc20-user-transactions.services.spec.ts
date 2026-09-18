@@ -15,6 +15,7 @@ import {
 } from '$eth/services/erc20-user-transactions.services';
 import {
 	isEthBackendAtCapacity,
+	resetEtherscanOlderPageBackOff,
 	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
@@ -87,6 +88,7 @@ describe('erc20-user-transactions.services', () => {
 
 		setEthBackendPaginationCursor({ tokenId: USDC_TOKEN.id, nextStart: undefined });
 		setEthBackendAtCapacity({ tokenId: USDC_TOKEN.id, totalStored: undefined });
+		resetEtherscanOlderPageBackOff();
 
 		const backendApi = await import('$lib/api/backend.api');
 		mockGetUserTransactions = vi.mocked(backendApi.getUserTransactions);
@@ -469,6 +471,58 @@ describe('erc20-user-transactions.services', () => {
 
 			expect(hasMore).toBeFalsy();
 			expect(mockErc20Transactions).not.toHaveBeenCalled();
+		});
+
+		describe('when Etherscan fails', () => {
+			const mockError = new Error('Etherscan rate limit');
+
+			const params = {
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			};
+
+			// The Etherscan request retries with a random wait before giving up.
+			const loadWithTimers = async () => {
+				const promise = loadNextErc20UserTransactions(params);
+
+				await vi.runAllTimersAsync();
+
+				return await promise;
+			};
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+
+				mockErc20Transactions.mockRejectedValue(mockError);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			it('should return the error rather than report the start of the history', async () => {
+				await expect(loadWithTimers()).resolves.toEqual({ hasMore: false, err: mockError });
+
+				expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toBeUndefined();
+			});
+
+			it('should not ask Etherscan again while backing off from the failure', async () => {
+				await loadWithTimers();
+
+				const calls = mockErc20Transactions.mock.calls.length;
+
+				await expect(loadNextErc20UserTransactions(params)).resolves.toEqual({
+					hasMore: false,
+					err: mockError
+				});
+
+				expect(mockErc20Transactions).toHaveBeenCalledTimes(calls);
+			});
 		});
 	});
 });

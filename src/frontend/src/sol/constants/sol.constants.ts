@@ -89,3 +89,8 @@ export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.
 export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
+
+// How many transaction details are kept per network in IndexedDB, the newest slots first. The newest
+// page is what the worker fetches again on every reload, and a few pages below it cover what a newly
+// enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
+export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;
