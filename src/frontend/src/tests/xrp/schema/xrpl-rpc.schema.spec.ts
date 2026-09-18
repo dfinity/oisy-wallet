@@ -1,5 +1,6 @@
 import {
 	XrpDropsSchema,
+	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
 	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
@@ -79,6 +80,39 @@ describe('xrpl-rpc.schema', () => {
 	// plausible result would parse and the error would be silently dropped. The consequence differs
 	// per schema but is worst for the validated index: a bogus one past `LastLedgerSequence` makes
 	// confirmation declare expiry and tell the user a resend is safe.
+	describe('XrplAccountInfoFullResultSchema', () => {
+		const accountData = { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 };
+
+		it('parses account data alone', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
+			).toBeTruthy();
+		});
+
+		// The branch that lets the caller decide absence after parsing rather than before it.
+		it('parses a lone actNotFound', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ error: 'actNotFound' }).success
+			).toBeTruthy();
+		});
+
+		// `xrpJsonRpc` throws every other error before this schema runs, so a branch for one would
+		// describe a case that cannot arrive — and accepting it here would let it be mistaken for
+		// the "owns nothing" answer.
+		it.each(['tooBusy', 'noNetwork'])('rejects the operational failure %s', (error) => {
+			expect(XrplAccountInfoFullResultSchema.safeParse({ error }).success).toBeFalsy();
+		});
+
+		it('rejects actNotFound alongside account data', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					error: 'actNotFound',
+					account_data: accountData
+				}).success
+			).toBeFalsy();
+		});
+	});
+
 	describe('rejecting a mixed error/result response', () => {
 		it.each([
 			{
@@ -100,6 +134,11 @@ describe('xrpl-rpc.schema', () => {
 				name: 'XrplSubmitResultSchema',
 				schema: XrplSubmitResultSchema,
 				result: { engine_result: 'tesSUCCESS' }
+			},
+			{
+				name: 'XrplAccountInfoFullResultSchema',
+				schema: XrplAccountInfoFullResultSchema,
+				result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } }
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
 			expect(schema.safeParse(result).success).toBeTruthy();

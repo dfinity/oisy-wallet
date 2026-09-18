@@ -154,22 +154,29 @@ export const loadXrpAccountInfo = async ({
 		expectedErrors: ['actNotFound']
 	});
 
-	// Handled before the schema: an `actNotFound` response carries no `account_data`, so parsing
-	// first would fail the shape check and mask the typed "owns nothing" error.
-	if (result.error === 'actNotFound') {
-		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
-	}
-
 	// Untrusted external JSON: `Balance` must be an unsigned decimal string and the counters
 	// non-negative safe integers. A negative `OwnerCount` would lower the reserve and inflate the
 	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
+	//
+	// Parsed BEFORE absence is concluded. The schema's two variants are mutually exclusive, so a
+	// response carrying both `actNotFound` and `account_data` matches neither and stays a malformed
+	// response — rather than being read as absence, which discards the `Flags` the send path needs
+	// and lets an untagged payment through to `tecDST_TAG_NEEDED`.
 	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
 
 	if (!parsed.success) {
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { Balance, Sequence, OwnerCount, Flags } = parsed.data.account_data;
+	const { data } = parsed;
+
+	// The account is not on-ledger: a typed error, because owning nothing is a legitimate answer
+	// the destination check reads, not an operational failure.
+	if ('error' in data) {
+		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
+
+	const { Balance, Sequence, OwnerCount, Flags } = data.account_data;
 
 	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
 };

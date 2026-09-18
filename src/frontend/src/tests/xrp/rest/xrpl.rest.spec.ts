@@ -446,6 +446,31 @@ describe('xrpl.rest', () => {
 			).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 		});
 
+		// Absence is decided AFTER the parse, so a response claiming both must not be read as
+		// absence. It used to be: the pre-parse check threw the typed error and `Flags` were
+		// discarded, which in `sendXrp` leaves the destination `absent` — ignored above the reserve,
+		// so the required-destination-tag guard never fires and the payment takes
+		// `tecDST_TAG_NEEDED`.
+		it('rejects a response carrying both actNotFound and account_data as malformed', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+					}
+				}
+			});
+
+			const failure = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet
+			}).catch((err: unknown) => err);
+
+			expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
+			expect(failure).toBeInstanceOf(Error);
+			expect((failure as Error).message).toContain('Unexpected XRPL account_info response');
+		});
+
 		it.each(['tooBusy', 'noNetwork'])(
 			'throws an untyped error for the operational failure %s',
 			async (error) => {

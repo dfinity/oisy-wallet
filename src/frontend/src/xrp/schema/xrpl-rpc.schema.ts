@@ -45,13 +45,21 @@ const XrplAccountDataSchema = z.object({
 	Flags: XrpLedgerCounterSchema.optional()
 });
 
-// Success only. `xrpJsonRpc` throws for every error this method can return except `actNotFound`,
-// which its one caller handles before parsing — so by the time this runs the response cannot carry
-// an `error`, and a union branch for one would describe a case that cannot reach it.
-export const XrplAccountInfoFullResultSchema = z.object({
-	account_data: XrplAccountDataSchema,
-	error: z.never().optional()
-});
+// Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`
+// XOR the one error that can reach here. `xrpJsonRpc` throws for every other error this method can
+// return, so `actNotFound` is literally the only alternative — and giving it a branch is what lets
+// the caller decide absence AFTER parsing. Deciding it beforehand meant a response carrying both
+// `actNotFound` and `account_data` was read as absence, discarding the `Flags` the send path reads.
+export const XrplAccountInfoFullResultSchema = z.union([
+	z.object({
+		account_data: XrplAccountDataSchema,
+		error: z.never().optional()
+	}),
+	z.object({
+		error: z.literal('actNotFound'),
+		account_data: z.never().optional()
+	})
+]);
 
 export const XrplFeeResultSchema = z.object({
 	drops: z
