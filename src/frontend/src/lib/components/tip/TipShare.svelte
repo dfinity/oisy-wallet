@@ -27,7 +27,11 @@
 	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatCurrency,
+		formatNanosecondsToDateAndTime,
+		formatToken
+	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { canShare, shareText } from '$lib/utils/share.utils';
 
@@ -123,16 +127,13 @@
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
-	// "30 Aug, 15:30" rather than a full locale timestamp. The year and the seconds
-	// were noise on a line whose only job is to tell the sender roughly how long
-	// they have, and the long form crowded the one number that matters above it.
+	//
+	// Through the shared helper so this reads the same as the deadline the recipient
+	// is shown on the claim screen. The two used to disagree — this one dropped the
+	// year while that one printed a full locale timestamp down to the second — for
+	// one deadline on one tip.
 	let expiresAt = $derived(
-		new Date(Number(expiresAtNs / 1_000_000n)).toLocaleString($currentLanguage, {
-			day: 'numeric',
-			month: 'short',
-			hour: '2-digit',
-			minute: '2-digit'
-		})
+		formatNanosecondsToDateAndTime({ nanoseconds: expiresAtNs, language: $currentLanguage })
 	);
 
 	// The reserved amount, not the text that was typed — this line is the sender's
@@ -288,7 +289,10 @@
 		<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
 			<IconClock size="16" />
 
-			{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
+			{replacePlaceholders($i18n.tip.text.expires_at, {
+				$date: expiresAt.date,
+				$time: expiresAt.time
+			})}
 		</div>
 	{/if}
 
