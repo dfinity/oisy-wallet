@@ -357,7 +357,14 @@ export const sendXrp = async ({
 
 	const tryDestination = async (): Promise<XrpDestinationLookup> => {
 		try {
-			const { flags } = await loadXrpAccountInfo({ address: destination, network });
+			// The open ledger, so an account created moments ago reads as existing. The pessimistic
+			// alternative would decline a below-reserve payment to a genuinely new account, which is
+			// the false decline an earlier round here fixed.
+			const { flags } = await loadXrpAccountInfo({
+				address: destination,
+				network,
+				ledgerIndex: 'current'
+			});
 
 			return { state: 'exists', flags };
 		} catch (err: unknown) {
@@ -421,11 +428,24 @@ export const sendXrp = async ({
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
 	// would win a race against whichever of those diagnoses was the useful one. A key mismatch is a
 	// broken deployment; an insufficient balance is something the user can act on.
-	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex] = await Promise.all([
-		loadXrpAccountInfo({ address: source, network }),
+	// Both snapshots of the sender, because neither is safe alone. `Sequence` has to be the open
+	// one or this signs a sequence the ledger has already consumed; the reserve inputs have to be
+	// the pessimistic pair, since the open ledger reflects pending CREDITS as well as debits and a
+	// maximum sized against an unvalidated credit offers money the account may not keep.
+	const [openAccount, validatedAccount, destinationLookup, ledgerIndex] = await Promise.all([
+		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
+		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
 		tryDestination(),
 		loadXrpLedgerIndex({ network })
 	]);
+
+	const { sequence } = openAccount;
+
+	// The lower balance and the higher owner count: a pending credit must not raise what can be
+	// sent, and an object created in the open ledger must not have its reserve ignored.
+	const balance =
+		openAccount.balance < validatedAccount.balance ? openAccount.balance : validatedAccount.balance;
+	const ownerCount = Math.max(openAccount.ownerCount, validatedAccount.ownerCount);
 
 	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
 	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the

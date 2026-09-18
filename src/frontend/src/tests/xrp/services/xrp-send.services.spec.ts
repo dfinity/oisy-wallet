@@ -828,6 +828,102 @@ describe('xrp-send.services', () => {
 	// come after THEM — not merely after the argument checks. `Promise.all` rejects on the first
 	// rejection, so a key failure sharing that call would win a race against whichever of these
 	// diagnoses the user can actually act on.
+	// Neither snapshot of the sender is safe alone. `Sequence` has to be the open one, or this signs
+	// a sequence the ledger already consumed. The reserve inputs have to be the pessimistic pair:
+	// the open ledger reflects pending CREDITS as well as debits, so a maximum sized against an
+	// unvalidated credit offers money the account may not keep — `tecUNFUNDED_PAYMENT`, fee
+	// destroyed and sequence consumed, which is what the reserve guard exists to prevent.
+	describe('the two sender snapshots', () => {
+		const snapshots = ({
+			open,
+			validated
+		}: {
+			open: Partial<{ balance: bigint; ownerCount: number; sequence: number }>;
+			validated: Partial<{ balance: bigint; ownerCount: number }>;
+		}) => {
+			const base = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address, ledgerIndex }) =>
+				Promise.resolve(
+					address === destination
+						? base
+						: { ...base, ...(ledgerIndex === 'current' ? open : validated) }
+				)
+			);
+		};
+
+		it('reads the sender from both ledgers', async () => {
+			await sendXrp(params);
+
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
+			});
+		});
+
+		// An incoming payment sitting in the open ledger. Sizing against it would offer 9 XRP the
+		// account does not yet own.
+		it('does not let an unvalidated credit raise the sendable maximum', async () => {
+			snapshots({
+				open: { balance: 11_000_000n },
+				validated: { balance: 2_000_000n }
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// The other direction, and the reason this is the LOWER of the two rather than simply the
+		// validated one: a pending outgoing payment makes the open balance the conservative figure,
+		// and sizing against validated state would offer money already committed.
+		it('does not let a validated balance ignore an unvalidated debit', async () => {
+			snapshots({
+				open: { balance: 2_000_000n },
+				validated: { balance: 11_000_000n }
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// The mirror case: an object created in the open ledger raises the real reserve, so the
+		// validated count understates it.
+		it('does not let a validated owner count understate the reserve', async () => {
+			snapshots({
+				open: { balance: 2_000_000n, ownerCount: 4 },
+				validated: { balance: 2_000_000n, ownerCount: 0 }
+			});
+
+			// Reserve with 4 owned objects is 1_000_000 + 4 x 200_000 = 1_800_000, leaving under
+			// 200_000 sendable; with the validated count of 0 it would have looked like 1_000_000.
+			await expect(sendXrp({ ...params, amount: 900_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// And the sequence still comes from the open ledger, which is why that read exists.
+		it('signs the open-ledger sequence', async () => {
+			snapshots({
+				open: { sequence: 42 },
+				validated: {}
+			});
+
+			await sendXrp(params);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 42 }) })
+			);
+		});
+	});
+
 	describe('when the key is derived', () => {
 		it('derives it for a send that passes every guard', async () => {
 			await sendXrp(params);
