@@ -2421,7 +2421,9 @@ interface I18nTip {
 		scan_or_photo: string;
 		expires_at: string;
 		done: string;
-		generating_link: string;
+		step_reserving: string;
+		step_creating: string;
+		step_saving: string;
 		recovering_link: string;
 		link_not_saved: string;
 		reserve_failed: string;

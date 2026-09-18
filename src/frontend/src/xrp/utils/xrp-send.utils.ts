@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { Address } from '$lib/types/address';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { XRP_BASE_RESERVE_DROPS, XRP_OWNER_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import { invalidXrpAddress } from '$xrp/utils/xrp-address.utils';
@@ -32,8 +33,22 @@ export const getXrpMaxAmount = ({
 	return max > ZERO ? max : ZERO;
 };
 
-export const isInvalidDestinationXrp = (destination: Address | undefined): boolean =>
-	invalidXrpAddress(destination);
+/**
+ * Whether a destination is present but not a valid XRPL address.
+ *
+ * An absent or empty one is NOT invalid: it is unfilled, and required-field validation belongs to
+ * the form. Same contract as `isInvalidDestinationSol`, `isInvalidDestinationBtc` and the ICP
+ * validator, all of which return `false` for that case — a shared-shaped helper that answered
+ * differently for one chain would give any consumer without a length gate of its own a different
+ * answer for XRP than for everything else.
+ */
+export const isInvalidDestinationXrp = (destination: Address | undefined): boolean => {
+	if (isNullishOrEmpty(destination)) {
+		return false;
+	}
+
+	return invalidXrpAddress(destination);
+};
 
 /**
  * Whether `amount` still fits once the fee and the reserve the account must retain are set aside.
