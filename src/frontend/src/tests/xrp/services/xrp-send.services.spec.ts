@@ -725,15 +725,30 @@ describe('xrp-send.services', () => {
 			await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
 		});
 
-		// The check is advisory: failing to make it must not block a send to a well-funded address.
+		// At or above the reserve the destination's existence changes nothing, so failing to read it
+		// must not block the send.
 		it.each(['tooBusy', 'XRPL account_info request failed with status 503'])(
 			'sends anyway when the destination read fails with %s',
 			async (message) => {
 				mockDestination(() => Promise.reject(new Error(message)));
 
-				await expect(sendXrp({ ...params, amount: 1n })).resolves.toBeDefined();
+				await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
 			}
 		);
+
+		// Below the reserve the answer decides the outcome, so an unavailable lookup must not be read
+		// as "exists": proceeding takes the `tecNO_DST_INSUF_XRP` that claims the fee and burns the
+		// sequence.
+		it('refuses an amount below the account reserve when the destination read fails', async () => {
+			mockDestination(() => Promise.reject(new Error('tooBusy')));
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS - 1n })).rejects.toThrow(
+				'tooBusy'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
 	});
 
 	// `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read skip are both computed from this interval, so
