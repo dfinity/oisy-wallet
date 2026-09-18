@@ -13,7 +13,11 @@ import {
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpAccountInfo, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import type {
+	XrpAccountInfo,
+	XrpSubmitResult,
+	XrpTransactionOutcome
+} from '$xrp/types/xrp-transaction';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -165,9 +169,9 @@ export const loadXrpAccountInfo = async ({
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { Balance, Sequence, OwnerCount } = parsed.data.account_data;
+	const { Balance, Sequence, OwnerCount, Flags } = parsed.data.account_data;
 
-	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount };
+	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
 };
 
 /**
@@ -266,7 +270,7 @@ export const loadXrpTransactionOutcome = async ({
 	network: XrpNetworkType;
 	firstLedgerSequence: number;
 	lastLedgerSequence: number;
-}): Promise<{ validated: boolean; transactionResult: string | undefined }> => {
+}): Promise<XrpTransactionOutcome> => {
 	// The range is what makes a negative answer meaningful. Per the XRPL reference `txnNotFound`
 	// means "either the transaction does not exist, or it was part of an ledger version that xrpld
 	// does not have available", and so "a txnNotFound on its own is not enough to know the final
@@ -311,9 +315,10 @@ export const loadXrpTransactionOutcome = async ({
 	const { data } = parsed;
 
 	// The fully-searched absence variant: the node looked everywhere in the range and it is not
-	// there. The only shape allowed to end the poll as non-inclusion.
+	// there. The only state allowed to end the poll as non-inclusion, which is why it is reported
+	// as its own rather than sharing `pending`'s shape.
 	if ('error' in data) {
-		return { validated: false, transactionResult: undefined };
+		return { state: 'absent' };
 	}
 
 	// The answer must be about the transaction we asked for. Nothing else in the response identifies
@@ -328,9 +333,12 @@ export const loadXrpTransactionOutcome = async ({
 		throw new Error(`Unexpected XRPL tx response: answered for ${data.hash}, asked for ${hash}`);
 	}
 
+	// `pending` carries nothing: the node holds the transaction but its ledger is not validated, so
+	// there is no outcome to report yet — only the fact that the transaction exists, which is
+	// precisely what rules out expiry.
 	return data.validated === true
-		? { validated: true, transactionResult: data.meta.TransactionResult }
-		: { validated: false, transactionResult: undefined };
+		? { state: 'validated', transactionResult: data.meta.TransactionResult }
+		: { state: 'pending' };
 };
 
 /**
