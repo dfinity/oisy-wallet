@@ -293,7 +293,7 @@ export const loadXrpTransactionOutcome = async ({
 	lastLedgerSequence: number;
 }): Promise<XrpTransactionOutcome> => {
 	// The range is what makes a negative answer meaningful. Per the XRPL reference `txnNotFound`
-	// means "either the transaction does not exist, or it was part of an ledger version that xrpld
+	// means "either the transaction does not exist, or it was part of a ledger version that xrpld
 	// does not have available", and so "a txnNotFound on its own is not enough to know the final
 	// outcome of a transaction". Supplying `min_ledger`/`max_ledger` makes the node report
 	// `searched_all`, which distinguishes the two. The window is the 21 ledgers the transaction can
@@ -321,7 +321,7 @@ export const loadXrpTransactionOutcome = async ({
 	// A `txnNotFound` WITHOUT `searched_all` matches no variant and so lands here too, which is
 	// right: it may mean the node simply lacks the ledger our payment is in — a resynced or
 	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion declares
-	// a settled payment expired, inviting the duplicate send `XrpSendExpiredError` calls safe.
+	// a settled payment expired, inviting the duplicate send that `XrpSendExpiredError` calls safe.
 	const parsed = XrplTxResultSchema.safeParse(result);
 
 	if (!parsed.success) {
