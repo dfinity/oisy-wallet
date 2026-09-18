@@ -15,13 +15,14 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { loadTipPreview, parseClaimCodeFromFragment } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatNanosecondsToDateAndTime, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isTipUnavailable } from '$lib/utils/tip.utils';
 
@@ -243,9 +244,15 @@
 			: undefined
 	);
 
+	// A bare `toLocaleString()` before this: no locale, so it followed the browser
+	// rather than the language the rest of the screen is in, and it printed the
+	// seconds of a deadline days away.
 	let expiresAt = $derived.by(() =>
 		nonNullish(preview)
-			? new Date(Number(preview.expires_at_ns / 1_000_000n)).toLocaleString()
+			? formatNanosecondsToDateAndTime({
+					nanoseconds: preview.expires_at_ns,
+					language: $currentLanguage
+				})
 			: undefined
 	);
 </script>
@@ -263,7 +270,10 @@
 
 	{#if nonNullish(expiresAt)}
 		<p class="mb-2 text-center text-sm text-tertiary">
-			{replacePlaceholders($i18n.tip.text.claim_expires, { $date: expiresAt })}
+			{replacePlaceholders($i18n.tip.text.claim_expires, {
+				$date: expiresAt.date,
+				$time: expiresAt.time
+			})}
 		</p>
 	{/if}
 
