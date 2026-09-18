@@ -195,7 +195,14 @@ describe('erc4626.derived', () => {
 					assetAddress: mockErc4626CustomEthereumToken.assetAddress,
 					assetDecimals: mockErc4626CustomEthereumToken.assetDecimals,
 					exchange: ETHEREUM_NETWORK.exchange,
-					infura: ETHEREUM_NETWORK.providers.infura
+					network: {
+						name: ETHEREUM_NETWORK.name,
+						chainId: ETHEREUM_NETWORK.chainId,
+						providers: {
+							infura: ETHEREUM_NETWORK.providers.infura,
+							alchemyJsonRpcUrl: ETHEREUM_NETWORK.providers.alchemyJsonRpcUrl
+						}
+					}
 				}
 			]);
 		});
@@ -214,7 +221,14 @@ describe('erc4626.derived', () => {
 					assetAddress: mockErc4626CustomEthereumToken.assetAddress,
 					assetDecimals: mockErc4626CustomEthereumToken.assetDecimals,
 					exchange: ETHEREUM_NETWORK.exchange,
-					infura: ETHEREUM_NETWORK.providers.infura
+					network: {
+						name: ETHEREUM_NETWORK.name,
+						chainId: ETHEREUM_NETWORK.chainId,
+						providers: {
+							infura: ETHEREUM_NETWORK.providers.infura,
+							alchemyJsonRpcUrl: ETHEREUM_NETWORK.providers.alchemyJsonRpcUrl
+						}
+					}
 				}
 			]);
 		});
