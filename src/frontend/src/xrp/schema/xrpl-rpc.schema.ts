@@ -1,3 +1,4 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
 // XRPL reports `Balance` as an **unsigned decimal** string of drops. `BigInt` would also
@@ -22,8 +23,19 @@ export const XrplAccountInfoResultSchema = z.union([
 // The JSON-RPC envelope. `xrpJsonRpc` owns this so every helper receives a `result` object that
 // exists and carries no unhandled `error`; before, each helper dereferenced `result.error` itself
 // and a body without `result` produced a TypeError instead of the helper's own message.
+//
+// `error: z.never().optional()` for the same reason the result schemas below carry it, one level
+// up: zod strips unknown keys, so a body with BOTH a top-level `error` and a `result` parsed with
+// the error silently dropped, and the helpers inspect `result.error` — a different field. A failed
+// response could therefore deliver a bogus `ledger_current_index`, which is exactly what makes
+// confirmation declare expiry and tell the user a resend is safe.
+//
+// NOT `z.strictObject`: the configured provider is a Clio endpoint, and every response it sends
+// carries `status`, `type`, `forwarded` and a `warnings` array beside the result. Rejecting unknown
+// keys wholesale would reject every real response.
 export const XrplEnvelopeSchema = z.object({
-	result: z.record(z.string(), z.unknown())
+	result: z.record(z.string(), z.unknown()),
+	error: z.never().optional()
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
@@ -45,13 +57,21 @@ const XrplAccountDataSchema = z.object({
 	Flags: XrpLedgerCounterSchema.optional()
 });
 
-// Success only. `xrpJsonRpc` throws for every error this method can return except `actNotFound`,
-// which its one caller handles before parsing — so by the time this runs the response cannot carry
-// an `error`, and a union branch for one would describe a case that cannot reach it.
-export const XrplAccountInfoFullResultSchema = z.object({
-	account_data: XrplAccountDataSchema,
-	error: z.never().optional()
-});
+// Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`
+// XOR the one error that can reach here. `xrpJsonRpc` throws for every other error this method can
+// return, so `actNotFound` is literally the only alternative — and giving it a branch is what lets
+// the caller decide absence AFTER parsing. Deciding it beforehand meant a response carrying both
+// `actNotFound` and `account_data` was read as absence, discarding the `Flags` the send path reads.
+export const XrplAccountInfoFullResultSchema = z.union([
+	z.object({
+		account_data: XrplAccountDataSchema,
+		error: z.never().optional()
+	}),
+	z.object({
+		error: z.literal('actNotFound'),
+		account_data: z.never().optional()
+	})
+]);
 
 export const XrplFeeResultSchema = z.object({
 	drops: z
@@ -72,28 +92,43 @@ export const XrplLedgerCurrentResultSchema = z.object({
 	error: z.never().optional()
 });
 
-// The `ledger` command reports the index either at the top level or nested under `ledger`,
-// depending on the node. `validated` must be true: a non-validated ledger's index can be ahead
-// of the last validated one, which is the open-vs-validated confusion this call exists to avoid.
-// The ledger header quotes its `ledger_index`, unlike the numeric top-level field, so the nested
-// branch accepts either form and normalises to a number.
+// The `ledger` command reports the index at the top level, nested under `ledger`, or — as the
+// configured provider does — both. `validated` must be true: a non-validated ledger's index can be
+// ahead of the last validated one, which is the open-vs-validated confusion this call exists to
+// avoid. The ledger header quotes its `ledger_index`, unlike the numeric top-level field, so the
+// nested form accepts either and normalises to a number.
 const XrpNestedLedgerIndexSchema = z.union([
 	XrpLedgerCounterSchema,
 	XrpDropsSchema.transform(Number).pipe(XrpLedgerCounterSchema)
 ]);
 
-export const XrplLedgerResultSchema = z.union([
-	z.object({
+// One object with both forms optional, NOT a union of the two. A union returns the first branch
+// that parses and strips the other field as unknown, so a response carrying two CONTRADICTORY
+// indices was accepted and the higher one could be the one read — and a high index past
+// `LastLedgerSequence` is what makes confirmation declare expiry and tell the user a resend is
+// safe. Mutually exclusive branches would be the wrong cure: carrying both is the NORMAL case for
+// this provider, so rejecting it would reject every real response. Only disagreement is suspicious,
+// and it is compared after normalising, since the two forms differ in type.
+export const XrplLedgerResultSchema = z
+	.object({
 		validated: z.literal(true),
-		ledger_index: XrpLedgerCounterSchema,
-		error: z.never().optional()
-	}),
-	z.object({
-		validated: z.literal(true),
-		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }),
+		ledger_index: XrpLedgerCounterSchema.optional(),
+		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }).optional(),
 		error: z.never().optional()
 	})
-]);
+	.refine(
+		({ ledger_index: topLevel, ledger }) => nonNullish(topLevel) || nonNullish(ledger),
+		'neither a top-level nor a nested ledger_index'
+	)
+	.refine(
+		({ ledger_index: topLevel, ledger }) =>
+			isNullish(topLevel) || isNullish(ledger) || topLevel === ledger.ledger_index,
+		'the top-level and nested ledger_index disagree'
+	)
+	// Normalised here so the caller has one index to read rather than a shape to choose between.
+	.transform(({ ledger_index: topLevel, ledger }) => ({
+		ledgerIndex: topLevel ?? (ledger?.ledger_index as number)
+	}));
 
 // `validated` means FINAL, not successful, so a validated response must carry the result that
 // decides which it was. One that does not is malformed — and reading it as a missing result would

@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { XRP_RPC_TIMEOUT_MS } from '$xrp/constants/xrp.constants';
 import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
@@ -61,16 +62,31 @@ const xrpJsonRpc = async ({
 	const response = await fetch(xrpHttpRpcUrl(network), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ method, params: [params] })
+		body: JSON.stringify({ method, params: [params] }),
+		// Without this a stalled connection never settles, and every caller that treats a failed
+		// lookup as one lost attempt waits forever instead.
+		signal: AbortSignal.timeout(XRP_RPC_TIMEOUT_MS)
 	});
 
 	if (!response.ok) {
 		throw new Error(`XRPL ${method} request failed with status ${response.status}`);
 	}
 
-	const parsed = XrplEnvelopeSchema.safeParse(await response.json());
+	const body: unknown = await response.json();
+	const parsed = XrplEnvelopeSchema.safeParse(body);
 
 	if (!parsed.success) {
+		// A top-level `error` is the node reporting on the call itself rather than on the ledger, so
+		// it is surfaced as the code it is — and routed through the same `expectedErrors` check as an
+		// error inside `result`, which no caller declares, so it always throws. Reporting it as a
+		// missing result would name the wrong problem, and for a body that carries both an error and
+		// a result it would be plainly false.
+		const topLevelError = (body as { error?: unknown } | null)?.error;
+
+		if (typeof topLevelError === 'string') {
+			throw new XrplRpcError({ method, error: topLevelError });
+		}
+
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 
@@ -156,22 +172,29 @@ export const loadXrpAccountInfo = async ({
 		expectedErrors: ['actNotFound']
 	});
 
-	// Handled before the schema: an `actNotFound` response carries no `account_data`, so parsing
-	// first would fail the shape check and mask the typed "owns nothing" error.
-	if (result.error === 'actNotFound') {
-		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
-	}
-
 	// Untrusted external JSON: `Balance` must be an unsigned decimal string and the counters
 	// non-negative safe integers. A negative `OwnerCount` would lower the reserve and inflate the
 	// sendable maximum; a fractional one throws inside `BigInt()` with an opaque RangeError.
+	//
+	// Parsed BEFORE absence is concluded. The schema's two variants are mutually exclusive, so a
+	// response carrying both `actNotFound` and `account_data` matches neither and stays a malformed
+	// response — rather than being read as absence, which discards the `Flags` the send path needs
+	// and lets an untagged payment through to `tecDST_TAG_NEEDED`.
 	const parsed = XrplAccountInfoFullResultSchema.safeParse(result);
 
 	if (!parsed.success) {
 		throw new Error('Unexpected XRPL account_info response: it does not match the expected shape');
 	}
 
-	const { Balance, Sequence, OwnerCount, Flags } = parsed.data.account_data;
+	const { data } = parsed;
+
+	// The account is not on-ledger: a typed error, because owning nothing is a legitimate answer
+	// the destination check reads, not an operational failure.
+	if ('error' in data) {
+		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
+
+	const { Balance, Sequence, OwnerCount, Flags } = data.account_data;
 
 	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
 };
@@ -250,9 +273,7 @@ export const loadXrpValidatedLedgerIndex = async ({
 		throw new Error('Unexpected XRPL ledger response: missing validated ledger_index');
 	}
 
-	const { data } = parsed;
-
-	return 'ledger_index' in data ? data.ledger_index : data.ledger.ledger_index;
+	return parsed.data.ledgerIndex;
 };
 
 /**

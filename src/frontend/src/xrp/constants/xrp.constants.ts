@@ -40,6 +40,16 @@ export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
 const XRP_LEDGER_CLOSE_SECONDS = 4;
 
+// Deadline on every XRPL request, because `fetch` has none of its own: a connection that stalls
+// instead of rejecting never settles, and the confirmation loop bounds ATTEMPTS rather than time —
+// so one hung request suspends the whole send indefinitely, and `sendXrp` never rejects with the
+// signed blob a retry needs.
+//
+// Two ledger closes rather than a figure picked for feel: a request that outlives that cannot tell
+// the poll anything the next one will not, since the ledger itself has moved on. Aborting makes a
+// stall a rejected fetch, which the loop already treats as one consumed attempt.
+export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
+
 // The confirmation poll's interval, passed to `randomWait` rather than left to its defaults: the
 // two derivations below are only correct if this is what the loop actually waits, and mirroring
 // another module's defaults would let a change there make them silently wrong.
@@ -75,3 +85,15 @@ const XRP_CONFIRM_WINDOW_MARGIN = 2;
 export const XRP_CONFIRM_MAX_ATTEMPTS =
 	(XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN) /
 	XRP_CONFIRM_MIN_POLL_SECONDS;
+
+// The same give-up point expressed in time, because the attempt count alone does not bound one.
+// Each attempt costs an interval plus however long its two requests take, and with
+// `XRP_RPC_TIMEOUT_MS` per request the cap above can stretch to many times the window it was
+// derived from — leaving the user on the CONFIRM step with no answer, definitive or otherwise.
+//
+// The window the attempt count was sized for, at the SLOWEST interval the loop can wait, so an
+// ordinary send never reaches it: whichever of the two limits comes first ends the poll, and it
+// should be the attempts whenever the node is answering at all.
+export const XRP_CONFIRM_MAX_DURATION_MS =
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
+	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;
