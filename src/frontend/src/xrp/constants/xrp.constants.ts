@@ -91,8 +91,5 @@ export const XRP_CONFIRM_MAX_ATTEMPTS =
 // ordinary send never reaches it: whichever of the two limits comes first ends the poll, and it
 // should be the attempts whenever the node is answering at all.
 export const XRP_CONFIRM_MAX_DURATION_MS =
-	XRP_LAST_LEDGER_SEQUENCE_OFFSET *
-	XRP_LEDGER_CLOSE_SECONDS *
-	XRP_CONFIRM_WINDOW_MARGIN *
-	1000 +
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
 	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;
