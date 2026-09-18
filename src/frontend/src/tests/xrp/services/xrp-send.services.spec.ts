@@ -11,7 +11,8 @@ import {
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
-	XRP_MAX_FEE_DROPS
+	XRP_MAX_FEE_DROPS,
+	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
@@ -1029,6 +1030,40 @@ describe('xrp-send.services', () => {
 				expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 42 }) })
 			);
 		});
+	});
+
+	// `LastLedgerSequence` is the index plus the offset, and that sum has to stay a `UInt32` even
+	// though the index alone already is one. Otherwise the failure comes from inside the codec —
+	// `must be >= 0 and <= 4294967295` — after the reads and the key derivation, and says nothing
+	// about the index that caused it. Not reachable from a real ledger; this guards a node
+	// reporting an index it has no business reporting.
+	describe('the LastLedgerSequence ceiling', () => {
+		const highest = XRP_MAX_UINT32 - XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
+		it('signs at the highest index that still forms a UInt32', async () => {
+			vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(highest);
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(highest);
+
+			await sendXrp(params);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					transaction: expect.objectContaining({ LastLedgerSequence: XRP_MAX_UINT32 })
+				})
+			);
+		});
+
+		it.each([highest + 1, XRP_MAX_UINT32])(
+			'refuses the index %i before deriving a key',
+			async (ledgerIndex) => {
+				vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(ledgerIndex);
+
+				await expect(sendXrp(params)).rejects.toThrow('cannot form a UInt32 LastLedgerSequence');
+
+				expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+				expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			}
+		);
 	});
 
 	describe('when the key is derived', () => {

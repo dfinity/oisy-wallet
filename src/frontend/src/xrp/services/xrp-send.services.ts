@@ -13,7 +13,8 @@ import {
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
-	XRP_MAX_FEE_DROPS
+	XRP_MAX_FEE_DROPS,
+	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import {
 	XrpAccountNotFoundError,
@@ -534,6 +535,21 @@ export const sendXrp = async ({
 	// `FRONTEND_DERIVATION_ENABLED`, which is `!LOCAL` — so serialising it here buys the clearer
 	// error at the price of one overlapped call in local development, where the signer-canister
 	// fallback is the one that actually runs.
+	// `LastLedgerSequence` is `ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET`, and that sum has to
+	// stay a `UInt32` even though the index alone is already bounded to one. Checked here because
+	// this is the earliest point `ledgerIndex` exists, and before the key derivation so a doomed
+	// send does not pay for one: otherwise the failure arrives from inside `ripple-binary-codec`,
+	// as `must be >= 0 and <= 4294967295`, which says nothing about the ledger index that caused it.
+	//
+	// Not reachable from a real ledger — mainnet is around 107 million and this trips near 4.29
+	// billion, some five centuries of closes away — so this is a guard against a node reporting an
+	// index it has no business reporting, like the others on this path.
+	if (ledgerIndex > XRP_MAX_UINT32 - XRP_LAST_LEDGER_SEQUENCE_OFFSET) {
+		throw new Error(
+			`XRP ledger index ${ledgerIndex} cannot form a UInt32 LastLedgerSequence with the ${XRP_LAST_LEDGER_SEQUENCE_OFFSET} ledger offset.`
+		);
+	}
+
 	const signingPublicKey = await getXrpSigningPublicKey({ identity, network, account: source });
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
