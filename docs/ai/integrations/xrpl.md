@@ -134,6 +134,22 @@ all, and `binary: true`. If a provider ever adds one more, absence stops parsing
 outcome is indeterminate: the poll keeps running and cannot conclude expiry, which is the
 direction this path has to fail in.
 
+Every reader on this path is bound to the question it asked, and that is the invariant most
+worth preserving through a refactor. A funded `account_info` snapshot must name the address in
+`account_data.Account` and the ledger in `validated`; an `actNotFound` names neither, so it is
+bound by the echoed `request` — account and `ledger_index` both, because the two destination
+reads differ _only_ in the ledger and the address cannot tell them apart. A validated `tx`
+record is bound by `hash`; an absence carries none, so it too is bound by the echo, over the
+transaction **and** the ledger range, since `searched_all` is a claim about the ledgers actually
+searched. Identities are compared raw, never through `String(...)`: the echo's parameters are
+`unknown`, so coercing first makes anything whose string form matches pass — the same mistake
+`result.error` once had, where `['txnNotFound']` coerced into a declared expected code.
+
+An unbindable response is indeterminate, not absent. That distinction is the whole point: for
+the destination read it becomes an unavailable lookup, which declines a below-reserve or untagged
+send rather than waving it through; for the `tx` poll it keeps polling rather than concluding the
+expiry that tells a caller a fresh payment is safe.
+
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
 `tx` reads as "not in a ledger" — which, past a transaction's `LastLedgerSequence`,
@@ -181,11 +197,30 @@ same open ledger. Either way the transaction is not applied twice, because a seq
 consumed only once; that, rather than transaction-identity dedup, is what makes resubmitting a
 stored transaction safe.
 
-So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
-ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will
-include it. Everything else goes to confirmation, which polls to `LastLedgerSequence` and
-reports either the validated result or an expiry. Reporting a "no" that may still become a
-yes would invite a retry that pays a second time.
+So `isXrpSubmitFinalFailure` treats a result as a rejection only when **all three** of the
+following hold, and sends everything else to confirmation, which polls to `LastLedgerSequence`
+and reports either the validated result or an expiry. Reporting a "no" that may still become a
+yes would invite a retry that pays a second time — and this is the one decision on the whole
+path taken _after_ the blob is already broadcast, which is why it is the most guarded.
+
+1. **The code is a whole `tem` code.** Matched as `/^tem[A-Z0-9_]+$/`, not a `tem` prefix:
+   `engine_result` is `z.string()`, so `temporary`, `tem`, `temBAD_fee` and `tem BAD_FEE extra`
+   all arrive and all used to count. Checked against `ripple-binary-codec`'s own
+   `TRANSACTION_RESULTS` — all 51 `tem` codes match, no code from the other five classes does.
+2. **The node did not also claim to have taken the blob.** `accepted: false` on its own still
+   never creates a failure — a node refusing the blob is no evidence that no ledger will include
+   it, which is the original reason this ignored the field. But `accepted: true` beside a `tem*`
+   is a response contradicting itself, since nothing can be both malformed and accepted, and a
+   self-contradicting response is no basis for a definitive failure. It falls through to the poll.
+3. **The response names the blob we sent.** `tx_json.hash` must equal the locally derived id,
+   compared case-insensitively because it is hex. Required only here, not on every submit: the id
+   is derived locally precisely so a lost or partial response stays survivable, and demanding it
+   everywhere would turn that property into a poll on every send. A missing or mismatched hash
+   therefore confirms rather than rejects.
+
+`accepted` is a required boolean and `tx_json.hash` is shaped as 64 hex characters for the same
+reason: both stopped being cosmetic the moment a decision read them, and a malformed value must
+not be able to satisfy a check that ends a send.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 
