@@ -11,7 +11,10 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
 // response carrying both would be read as a balance and the error silently dropped.
 export const XrplAccountInfoResultSchema = z.union([
 	z.object({
-		account_data: z.object({ Balance: XrpDropsSchema }),
+		// `Account` for the same reason the full snapshot carries it: nothing else in the result says
+		// whose balance this is, so a stale or misrouted answer would otherwise be displayed as this
+		// account's. Only `Balance` is needed beyond that — this feeds the balance store, not a send.
+		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
 		error: z.never().optional()
 	}),
 	z.object({
@@ -56,14 +59,27 @@ export const XrpLedgerCounterSchema = z.number().int().nonnegative().max(0xffff_
 // returning. Stricter than `XrplAccountInfoResultSchema`, which only needs `Balance`: building a
 // payment also requires the sequence, and the reserve requires the owner count.
 const XrplAccountDataSchema = z.object({
+	// The account the snapshot is about, required so the caller can compare it with the address it
+	// asked for. Nothing else in an `account_info` result identifies the subject, and every field
+	// below is read as that account's state — so a snapshot of a DIFFERENT account is the same
+	// hazard `loadXrpTransactionOutcome` already guards with `hash`, on the read it was missing
+	// from. An AccountRoot always carries it.
+	Account: z.string(),
 	Balance: XrpDropsSchema,
 	Sequence: XrpLedgerCounterSchema,
 	OwnerCount: XrpLedgerCounterSchema,
 	// The AccountRoot flag bits. `lsfRequireDestTag` is the one the send path reads: without it a
 	// payment to an account that requires a destination tag is applied as `tecDST_TAG_NEEDED`,
-	// which claims the fee and consumes the sequence. Optional so a node that omits the field
-	// leaves the flags unknown rather than failing the whole read.
-	Flags: XrpLedgerCounterSchema.optional()
+	// which claims the fee and consumes the sequence.
+	//
+	// Required, because the protocol requires it: `Flags` is a mandatory AccountRoot field and an
+	// account with none set reports `Flags: 0` rather than omitting it — confirmed against the
+	// configured endpoint, on flagged and unflagged accounts alike. It was optional so an omission
+	// left the flags merely unknown, but that turned a malformed response into a snapshot claiming
+	// no requirement, which is the one reading of it that spends a fee. A response missing it is
+	// now malformed, which the sender read fails closed on and the destination read reports as an
+	// unanswerable lookup.
+	Flags: XrpLedgerCounterSchema
 });
 
 // Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`
@@ -172,11 +188,26 @@ export const XrplTxResultSchema = z.union([
 	}),
 	// Absent: the node confirms it searched every ledger in the requested range. This is the only
 	// shape that may be read as non-inclusion, because non-inclusion is what ends the send.
+	//
+	// And therefore the branch that must contradict itself the least. Zod strips unknown keys, so
+	// every field that would DISPUTE absence has to be forbidden by name or it is simply dropped:
+	// a payload carrying `txnNotFound` and `searched_all` beside a transaction still parsed here,
+	// and past `LastLedgerSequence` this branch is what throws `XrpSendExpiredError` and tells the
+	// caller a resend is safe. `validated` and `meta` were already named; `hash`, `tx` and
+	// `tx_json` are the three ways a `tx` result reports the transaction itself, and the other two
+	// branches require `hash` precisely because it is what binds an answer to the question.
+	//
+	// Nothing real is rejected: a `txnNotFound` from the configured endpoint carries `error`,
+	// `error_code`, `error_message`, `searched_all`, `request`, `status` and `type` — none of the
+	// three, and the rest are stripped as the unknown keys they are.
 	z.object({
 		error: z.literal('txnNotFound'),
 		searched_all: z.literal(true),
 		validated: z.never().optional(),
-		meta: z.never().optional()
+		meta: z.never().optional(),
+		hash: z.never().optional(),
+		tx: z.never().optional(),
+		tx_json: z.never().optional()
 	}),
 	// Pending: in a ledger but not yet validated. It has to say so POSITIVELY — when the pending
 	// branch was "everything optional", `{}` and `{ anything: 1 }` both parsed as pending, and at
