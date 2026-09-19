@@ -190,11 +190,21 @@ const isXrpAccountErrorForAddress = ({
 	account?: string;
 	request?: Record<string, unknown>;
 }): boolean => {
-	// Raw, like the `Account` comparison: a classic address is base58 over a checksummed payload,
-	// so case is significant.
-	const echoed = [account, request?.account].filter((value) => typeof value === 'string');
+	// Everything the response CARRIES, not everything it could parse. Filtering to strings first
+	// discarded a present-but-malformed identity before the comparison saw it, so
+	// `{ account: <requested>, request: { account: 123 } }` passed on the strength of the good half
+	// — a guard that gets weaker the more malformed the response is, which is backwards.
+	//
+	// `!== undefined` and NOT `nonNullish`: an explicit `null` is a malformed identity that has to
+	// fail, and `nonNullish` would drop it back out of the comparison. Absent is the only thing
+	// that may be skipped.
+	const echoed = [account, request?.account].filter((value) => value !== undefined);
 
-	return echoed.length > 0 && echoed.every((value) => value === address);
+	// Raw comparison, like the `Account` one: a classic address is base58 over a checksummed
+	// payload, so case is significant.
+	return (
+		echoed.length > 0 && echoed.every((value) => typeof value === 'string' && value === address)
+	);
 };
 
 /**

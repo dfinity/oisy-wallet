@@ -797,7 +797,28 @@ describe('xrpl.rest', () => {
 						name: 'the two echoes disagree',
 						result: { account: address, request: { command: 'account_info', account: other } }
 					},
-					{ name: 'nothing identifies it', result: {} }
+					{ name: 'nothing identifies it', result: {} },
+					// A present identity that cannot be compared must FAIL the comparison rather than be
+					// dropped from it. Filtering to strings first meant the good half of a half-malformed
+					// response carried it.
+					{
+						name: 'the echoed account is not a string',
+						result: { account: address, request: { command: 'account_info', account: 123 } }
+					},
+					{
+						name: 'the forwarded account is not a string',
+						result: { account: 123, request: { command: 'account_info', account: address } }
+					},
+					// `null` rather than a wrong type, because `nonNullish` would drop it back out of the
+					// comparison and reintroduce the same hole.
+					{
+						name: 'the echoed account is null',
+						result: { account: address, request: { command: 'account_info', account: null } }
+					},
+					{
+						name: 'the forwarded account is null',
+						result: { account: null, request: { command: 'account_info', account: address } }
+					}
 				])('is untyped when $name', async ({ result }) => {
 					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
 
@@ -807,9 +828,13 @@ describe('xrpl.rest', () => {
 						ledgerIndex: 'current'
 					}).catch((err: unknown) => err);
 
+					// The requirement is that absence is not CLAIMED, not which layer refuses it: a
+					// malformed top-level `account` is caught by the schema, while one inside the
+					// echo — which is `unknown` under the catchall — reaches the identity check.
+					// Both fail closed, and the untyped error is what the send path reads as an
+					// unavailable lookup rather than as a destination that does not exist.
 					expect(failure).toBeInstanceOf(Error);
 					expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
-					expect((failure as Error).message).toContain('does not identify');
 				});
 
 				// The two shapes the provider actually sends: Clio answers `validated` itself and
