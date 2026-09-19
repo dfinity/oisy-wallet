@@ -87,6 +87,23 @@ const xrpJsonRpc = async ({
 			throw new XrplRpcError({ method, error: topLevelError });
 		}
 
+		// A top-level status the envelope refused is a failure the body stated plainly, so it is
+		// named as one rather than reported as a missing result — the same reasoning as the
+		// top-level error above, for the other field that can say the call did not work.
+		//
+		// Presence, not `nonNullish`: a `status: null` is a malformed status rather than an absent
+		// one, and it is the message that distinguishes them. Absent is the normal case — every
+		// non-forwarded response and every error omits the field — so only a status that is present
+		// and not `'success'` is reported here.
+		if (
+			typeof body === 'object' &&
+			nonNullish(body) &&
+			'status' in body &&
+			body.status !== 'success'
+		) {
+			throw new XrplRpcError({ method, error: `top-level status ${String(body.status)}` });
+		}
+
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 
@@ -135,6 +152,38 @@ const xrpJsonRpc = async ({
 };
 
 /**
+ * Whether an `account_info` error response is about the account that was asked for.
+ *
+ * A success names its subject in `account_data.Account`; `actNotFound` names nothing, and it is
+ * the answer read as "this account does not exist". Unbound, a stale or misrouted one reports the
+ * WRONG account as absent — which for the destination read means `requiresTag` never fires and an
+ * untagged payment goes to `tecDST_TAG_NEEDED`, fee claimed.
+ *
+ * Both echoes are checked because the provider answers `ledger_index: 'validated'` itself and
+ * forwards `'current'` to rippled: the first carries only `request`, the second carries `account`
+ * as well. Either one matching is enough — they are two views of the same request.
+ *
+ * Returns false when nothing identifies the response, so the caller can treat an unbindable answer
+ * as unavailable rather than as absence. Verified against the configured endpoint that at least
+ * one echo is always present, on both ledgers.
+ */
+const isXrpAccountErrorForAddress = ({
+	address,
+	account,
+	request
+}: {
+	address: XrpAddress;
+	account?: string;
+	request?: Record<string, unknown>;
+}): boolean => {
+	// Raw, like the `Account` comparison: a classic address is base58 over a checksummed payload,
+	// so case is significant.
+	const echoed = [account, request?.account].filter((value) => typeof value === 'string');
+
+	return echoed.length > 0 && echoed.every((value) => value === address);
+};
+
+/**
  * Native XRP balance in drops (1 XRP = 1,000,000 drops), via the XRP Ledger
  * JSON-RPC `account_info` method.
  *
@@ -167,6 +216,14 @@ export const loadXrpBalance = async ({
 	const { data } = parsed;
 
 	if ('error' in data) {
+		// Bound like the funded branch below. A misrouted `actNotFound` would otherwise display
+		// another account's non-existence as this one's zero balance.
+		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+			throw new Error(
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+			);
+		}
+
 		return ZERO;
 	}
 
@@ -246,7 +303,19 @@ export const loadXrpAccountInfo = async ({
 
 	// The account is not on-ledger: a typed error, because owning nothing is a legitimate answer
 	// the destination check reads, not an operational failure.
+	//
+	// Only when the response identifies the account we asked about. An unbindable `actNotFound` is
+	// an UNTYPED error on purpose: `readDestination` maps the typed one to "does not exist", which
+	// above the reserve leaves `requiresTag` false and sends untagged into `tecDST_TAG_NEEDED`,
+	// while the untyped one becomes an unavailable lookup that the tag guard now declines on.
+	// Absence is a claim about a specific account; a response that names none makes no claim.
 	if ('error' in data) {
+		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+			throw new Error(
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+			);
+		}
+
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
 	}
 
@@ -415,7 +484,32 @@ export const loadXrpTransactionOutcome = async ({
 	// The fully-searched absence variant: the node looked everywhere in the range and it is not
 	// there. The only state allowed to end the poll as non-inclusion, which is why it is reported
 	// as its own rather than sharing `pending`'s shape.
-	if ('error' in data) {
+	//
+	// And therefore the one that must be bound to the question. The validated and pending branches
+	// carry a `hash` to compare; absence carries none, so the echoed request is the only identity
+	// available — and without it a stale or misrouted `txnNotFound`, for another hash or another
+	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that is
+	// `XrpSendExpiredError`, which tells the caller a fresh payment is safe to build.
+	//
+	// The range is compared too, not just the hash: absence only means anything over the ledgers
+	// that were actually searched, so an answer about a different window says nothing about this
+	// one even when it names the right transaction.
+	// Narrowed on the error literal, not on `'error' in data`: the other two branches declare
+	// `error?: undefined`, so the `in` check does not discriminate them and `request` is not
+	// reachable through it.
+	if (data.error === 'txnNotFound') {
+		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = data.request;
+
+		if (
+			String(transaction).toUpperCase() !== hash.toUpperCase() ||
+			minLedger !== firstLedgerSequence ||
+			maxLedger !== lastLedgerSequence
+		) {
+			throw new Error(
+				`Unexpected XRPL tx response: a txnNotFound for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
+			);
+		}
+
 		return { state: 'absent' };
 	}
 

@@ -424,15 +424,26 @@ describe('xrp-transaction.utils', () => {
 			}
 		);
 
-		// A node's refusal to take the blob is not evidence that no ledger will include it, so it
-		// must not turn a non-final result into a reported failure.
-		it('ignores the accepted flag', () => {
-			expect(isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: false })).toBe(
-				isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: true })
-			);
-			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBe(
-				isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: false })
-			);
+		// A node's refusal to take the blob is not evidence that no ledger will include it, so
+		// `accepted: false` must never turn a non-final result into a reported failure.
+		it.each(['tesSUCCESS', 'tefPAST_SEQ', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
+			'does not reject %s whether or not it was accepted',
+			(engineResult) => {
+				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+				expect(isXrpSubmitFinalFailure({ engineResult, accepted: true })).toBeFalsy();
+			}
+		);
+
+		// Not the mirror of the above. A `tem` transaction is one NO node can take, so a response
+		// claiming both that it is malformed and that this node took it contradicts itself — and a
+		// self-contradicting response is no basis for the only definitive failure declared after
+		// the blob is broadcast. It falls through to the poll instead.
+		it('does not reject a tem that the node claims to have accepted', () => {
+			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBeFalsy();
+		});
+
+		it('still rejects the same code when the node did not accept it', () => {
+			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: false })).toBeTruthy();
 		});
 	});
 
