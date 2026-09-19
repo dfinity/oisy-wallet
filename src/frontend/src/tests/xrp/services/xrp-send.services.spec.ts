@@ -164,6 +164,55 @@ describe('xrp-send.services', () => {
 		]);
 	});
 
+	// Past the broadcast a progress observer must not be able to change what happened to the blob.
+	// Unguarded, a throw at CONFIRM escaped as a plain error with no `pending` attached — which a
+	// caller cannot tell from a pre-broadcast failure, so it rebuilds on a new sequence and pays
+	// twice — and a throw at DONE reported a validated `tesSUCCESS` as a rejection, where a resend
+	// is unambiguously a duplicate.
+	describe('a progress observer that throws', () => {
+		const throwingAt = (step: ProgressStepsSendXrp) =>
+			vi.fn((reported: ProgressStepsSendXrp) => {
+				if (reported === step) {
+					throw new Error(`observer failed at ${reported}`);
+				}
+			});
+
+		it.each([ProgressStepsSendXrp.CONFIRM, ProgressStepsSendXrp.DONE])(
+			'cannot change the outcome when it throws at %s',
+			async (step) => {
+				const progress = throwingAt(step);
+
+				await expect(sendXrp({ ...params, progress })).resolves.toBeDefined();
+			}
+		);
+
+		// Both post-broadcast steps are still reported, so one observer failing does not silence
+		// the other.
+		it('still reports DONE when the observer threw at CONFIRM', async () => {
+			const progress = throwingAt(ProgressStepsSendXrp.CONFIRM);
+
+			await sendXrp({ ...params, progress });
+
+			expect(progress.mock.calls.map(([reported]) => reported)).toContain(
+				ProgressStepsSendXrp.DONE
+			);
+		});
+
+		// The other half of the contract. Before the broadcast there is nothing on the wire, so an
+		// observer throwing must still abort — wrapping those calls would swallow a real caller
+		// failure at the one moment it is free to fail.
+		it.each([ProgressStepsSendXrp.INITIALIZATION, ProgressStepsSendXrp.SIGN])(
+			'still aborts the send when it throws at %s',
+			async (step) => {
+				const progress = throwingAt(step);
+
+				await expect(sendXrp({ ...params, progress })).rejects.toThrow('observer failed');
+
+				expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			}
+		);
+	});
+
 	it('waits for the transaction to be validated', async () => {
 		const { txHash } = await sendXrp(params);
 
