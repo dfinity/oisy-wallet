@@ -55,7 +55,10 @@ describe('xrpl.rest', () => {
 	describe('the JSON-RPC envelope', () => {
 		const callers: { name: string; call: () => Promise<unknown> }[] = [
 			{ name: 'loadXrpBalance', call: () => loadXrpBalance({ address, network }) },
-			{ name: 'loadXrpAccountInfo', call: () => loadXrpAccountInfo({ address, network }) },
+			{
+				name: 'loadXrpAccountInfo',
+				call: () => loadXrpAccountInfo({ address, network, ledgerIndex: 'current' })
+			},
 			{
 				name: 'loadXrpOpenLedgerFee',
 				call: () => loadXrpOpenLedgerFee({ network, fallbackFee: 10n })
@@ -515,15 +518,18 @@ describe('xrpl.rest', () => {
 			JSON.parse(String((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body)).params[0]
 				.ledger_index;
 
-		it('asks the open ledger for the sequence-bearing read', async () => {
-			mockFetchResponse({
-				body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
-			});
+		it.each(['current', 'validated'] as const)(
+			'asks for the %s ledger when told to',
+			async (ledgerIndex) => {
+				mockFetchResponse({
+					body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
+				});
 
-			await loadXrpAccountInfo({ address, network });
+				await loadXrpAccountInfo({ address, network, ledgerIndex });
 
-			expect(ledgerIndexOf()).toBe('current');
-		});
+				expect(ledgerIndexOf()).toBe(ledgerIndex);
+			}
+		);
 
 		it('asks the validated ledger for the display balance', async () => {
 			mockFetchResponse({ body: { result: { account_data: { Balance: '1' } } } });
@@ -542,7 +548,11 @@ describe('xrpl.rest', () => {
 				}
 			});
 
-			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+			const info = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
 
 			expect(info).toEqual({
 				balance: 30_000_000n,
@@ -563,7 +573,11 @@ describe('xrpl.rest', () => {
 				}
 			});
 
-			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+			const info = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
 
 			expect(info.flags).toBe(131_072);
 		});
@@ -576,7 +590,11 @@ describe('xrpl.rest', () => {
 				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } } }
 			});
 
-			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+			const info = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
 
 			expect(info.flags).toBeUndefined();
 		});
@@ -586,7 +604,11 @@ describe('xrpl.rest', () => {
 				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 0 } } }
 			});
 
-			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+			const info = await loadXrpAccountInfo({
+				address,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
 
 			expect(info.ownerCount).toBe(0);
 		});
@@ -601,9 +623,9 @@ describe('xrpl.rest', () => {
 					body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
 				});
 
-				await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-					'Unexpected XRPL account_info response'
-				);
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('Unexpected XRPL account_info response');
 			}
 		);
 
@@ -612,9 +634,9 @@ describe('xrpl.rest', () => {
 				body: { result: { account_data: { Balance: '30000000', Sequence, OwnerCount: 0 } } }
 			});
 
-			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'Unexpected XRPL account_info response'
-			);
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+			).rejects.toThrow('Unexpected XRPL account_info response');
 		});
 
 		// `BigInt` would accept all of these and hand back a plausible-looking balance.
@@ -625,9 +647,9 @@ describe('xrpl.rest', () => {
 					body: { result: { account_data: { Balance, Sequence: 42, OwnerCount: 0 } } }
 				});
 
-				await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
-					'Unexpected XRPL account_info response'
-				);
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('Unexpected XRPL account_info response');
 			}
 		);
 
@@ -638,7 +660,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
 
 			await expect(
-				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
 			).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 		});
 
@@ -659,7 +681,8 @@ describe('xrpl.rest', () => {
 
 			const failure = await loadXrpAccountInfo({
 				address,
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
 			}).catch((err: unknown) => err);
 
 			expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
@@ -672,9 +695,11 @@ describe('xrpl.rest', () => {
 			async (error) => {
 				mockFetchResponse({ body: { result: { error } } });
 
-				const err = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet }).catch(
-					(e: unknown) => e
-				);
+				const err = await loadXrpAccountInfo({
+					address,
+					network: XrpNetworks.mainnet,
+					ledgerIndex: 'current'
+				}).catch((e: unknown) => e);
 
 				expect(err).toBeInstanceOf(Error);
 				expect(err).not.toBeInstanceOf(XrpAccountNotFoundError);

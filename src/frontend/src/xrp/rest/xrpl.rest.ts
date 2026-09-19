@@ -185,28 +185,33 @@ export class XrpAccountNotFoundError extends Error {}
  */
 export const loadXrpAccountInfo = async ({
 	address,
-	network
+	network,
+	ledgerIndex
 }: {
 	address: XrpAddress;
 	network: XrpNetworkType;
+	ledgerIndex: 'current' | 'validated';
 }): Promise<XrpAccountInfo> => {
-	// The OPEN ledger, not the validated one, because this read supplies the `Sequence` a new
-	// transaction is built with. A transaction already in the open ledger — another device, or this
-	// user's own send moments earlier — has consumed the next sequence without being validated yet,
-	// and signing with the validated one means XRPL answers `tefPAST_SEQ`: nothing charged, since
-	// `tef` is not applied, but the send is lost to the poll rather than reported.
+	// The ledger is the caller's choice because the two snapshots answer different questions and
+	// neither is safe for all of them.
+	//
+	// `Sequence` must come from the OPEN ledger: a transaction already in it — another device, or
+	// this user's own send moments earlier — has consumed the next sequence without being validated
+	// yet, and signing the validated one means XRPL answers `tefPAST_SEQ`.
+	//
+	// The reserve inputs must NOT come from one snapshot alone. The open ledger reflects pending
+	// credits as well as debits, so `Balance` can sit ABOVE validated state and a maximum sized
+	// against it offers money the account may not keep — `tecUNFUNDED_PAYMENT`, fee destroyed and
+	// sequence consumed, which is the outcome the reserve guard exists to prevent. `OwnerCount`
+	// fails the other way, since an object created in the open ledger raises the real reserve that
+	// validated state understates. So the send reads both and takes the pessimistic value of each.
 	//
 	// The provider is Clio, which serves validated data only — `ledger_index: 'current'` is how its
-	// own warning says to reach rippled instead, and the response comes back `forwarded: true`.
-	//
-	// It makes the reserve inputs non-validated too, which errs conservative in both directions
-	// that matter: an open-ledger `Balance` already reflects pending spends, so `getXrpMaxAmount`
-	// offers less rather than more, and an open-ledger sequence that turns out too HIGH after a
-	// rollback gives `terPRE_SEQ` — a `ter`, which this code declines to treat as final anyway.
+	// own warning says to reach rippled instead, and that response comes back `forwarded: true`.
 	const result = await xrpJsonRpc({
 		network,
 		method: 'account_info',
-		params: { account: address, ledger_index: 'current' },
+		params: { account: address, ledger_index: ledgerIndex },
 		expectedErrors: ['actNotFound']
 	});
 
