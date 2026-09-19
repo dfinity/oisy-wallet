@@ -285,8 +285,44 @@ describe('xrpl.rest', () => {
 	});
 
 	describe('loadXrpBalance', () => {
+		// Bound to the address asked for, like the full snapshot. This read cannot cause a bad send —
+		// `sendXrp` reads its own figures through `loadXrpAccountInfo` — but it is the balance the
+		// user sees and decides on, and it was the only unbound read left on this path.
+		it('throws when the snapshot is for a different account', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						account_data: { Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv', Balance: '25000000' }
+					}
+				}
+			});
+
+			await expect(loadXrpBalance({ address, network })).rejects.toThrow(
+				'answered for rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv'
+			);
+		});
+
+		// A classic address is base58 over a checksummed payload, so case is significant and two
+		// forms differing only in case are not the same account.
+		it('throws for an address differing only in case', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Account: address.toUpperCase(), Balance: '1' } } }
+			});
+
+			await expect(loadXrpBalance({ address, network })).rejects.toThrow('answered for');
+		});
+
+		// The unfunded answer carries no `account_data` to bind, and still maps to zero.
+		it('still maps actNotFound to a zero balance', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
+		});
+
 		it('returns the balance in drops as a bigint', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Balance: '25000000' } } } });
+			mockFetchResponse({
+				body: { result: { account_data: { Account: address, Balance: '25000000' } } }
+			});
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
 
@@ -297,7 +333,8 @@ describe('xrpl.rest', () => {
 			const fetchMock = vi.fn().mockResolvedValue({
 				ok: true,
 				status: 200,
-				json: () => Promise.resolve({ result: { account_data: { Balance: '1' } } })
+				json: () =>
+					Promise.resolve({ result: { account_data: { Account: address, Balance: '1' } } })
 			});
 			vi.stubGlobal('fetch', fetchMock);
 
@@ -347,7 +384,7 @@ describe('xrpl.rest', () => {
 		// keys, so without mutual exclusion the error would be discarded and `1` returned.
 		it('throws on a response carrying both account_data and an error', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '1' }, error: 'actNotFound' } }
+				body: { result: { account_data: { Account: address, Balance: '1' }, error: 'actNotFound' } }
 			});
 
 			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
@@ -360,7 +397,7 @@ describe('xrpl.rest', () => {
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
 			'throws instead of converting the invalid balance %j',
 			async (Balance) => {
-				mockFetchResponse({ body: { result: { account_data: { Balance } } } });
+				mockFetchResponse({ body: { result: { account_data: { Account: address, Balance } } } });
 
 				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
 					'Unexpected XRPL account_info response'
@@ -531,7 +568,7 @@ describe('xrpl.rest', () => {
 		);
 
 		it('asks the validated ledger for the display balance', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Balance: '1' } } } });
+			mockFetchResponse({ body: { result: { account_data: { Account: address, Balance: '1' } } } });
 
 			await loadXrpBalance({ address, network });
 

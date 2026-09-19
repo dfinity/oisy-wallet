@@ -11,7 +11,10 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
 // response carrying both would be read as a balance and the error silently dropped.
 export const XrplAccountInfoResultSchema = z.union([
 	z.object({
-		account_data: z.object({ Balance: XrpDropsSchema }),
+		// `Account` for the same reason the full snapshot carries it: nothing else in the result says
+		// whose balance this is, so a stale or misrouted answer would otherwise be displayed as this
+		// account's. Only `Balance` is needed beyond that — this feeds the balance store, not a send.
+		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
 		error: z.never().optional()
 	}),
 	z.object({

@@ -164,7 +164,20 @@ export const loadXrpBalance = async ({
 
 	const { data } = parsed;
 
-	return 'error' in data ? ZERO : BigInt(data.account_data.Balance);
+	if ('error' in data) {
+		return ZERO;
+	}
+
+	// Bound to the address asked for, like the full snapshot. This one cannot cause a bad send —
+	// `sendXrp` reads its own figures through `loadXrpAccountInfo` — but it is the balance the user
+	// sees and decides on, and an unbound read would be the only one left on this path.
+	if (data.account_data.Account !== address) {
+		throw new Error(
+			`Unexpected XRPL account_info response: answered for ${data.account_data.Account}, asked for ${address}`
+		);
+	}
+
+	return BigInt(data.account_data.Balance);
 };
 
 /**

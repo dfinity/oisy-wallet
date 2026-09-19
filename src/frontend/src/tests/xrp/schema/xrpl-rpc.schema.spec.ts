@@ -32,11 +32,13 @@ describe('xrpl-rpc.schema', () => {
 	describe('XrplAccountInfoResultSchema', () => {
 		it('should validate a funded account result', () => {
 			const result = XrplAccountInfoResultSchema.safeParse({
-				account_data: { Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
 			});
 
 			expect(result.success).toBeTruthy();
-			expect(result.data).toEqual({ account_data: { Balance: '25000000' } });
+			expect(result.data).toEqual({
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+			});
 		});
 
 		it('should validate an error result', () => {
@@ -52,7 +54,7 @@ describe('xrpl-rpc.schema', () => {
 		it('should fail validation for a result carrying both account_data and an error', () => {
 			expect(
 				XrplAccountInfoResultSchema.safeParse({
-					account_data: { Balance: '1' },
+					account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '1' },
 					error: 'actNotFound'
 				}).success
 			).toBeFalsy();
