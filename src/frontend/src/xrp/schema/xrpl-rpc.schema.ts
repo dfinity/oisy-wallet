@@ -331,8 +331,19 @@ export const XrplSubmitResultSchema = z.object({
 	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
 	// where the hash decides. That is the direction this path has to fail in.
 	accepted: z.boolean(),
+	// The hash the node echoes back. Optional on purpose — the id is derived locally precisely so a
+	// lost or partial submit response stays survivable, and requiring it would turn a node that
+	// omits `tx_json` into a poll on every send. But SHAPED, because it is no longer only
+	// cosmetic: the rejection branch compares it with the locally derived id before treating a
+	// `tem*` as definitive, and a malformed value must not be able to satisfy that comparison.
 	tx_json: z
-		.object({ hash: z.string().optional().catch(undefined) })
+		.object({
+			hash: z
+				.string()
+				.regex(/^[0-9a-fA-F]{64}$/)
+				.optional()
+				.catch(undefined)
+		})
 		.optional()
 		.catch(undefined)
 });

@@ -547,7 +547,7 @@ describe('xrpl.rest', () => {
 					result: {
 						engine_result: 'tesSUCCESS',
 						engine_result_message: 'The transaction was applied.',
-						tx_json: { hash: 'ABCDEF' },
+						tx_json: { hash: 'A'.repeat(64) },
 						accepted: true
 					}
 				}
@@ -558,7 +558,7 @@ describe('xrpl.rest', () => {
 			expect(result).toEqual({
 				engineResult: 'tesSUCCESS',
 				engineResultMessage: 'The transaction was applied.',
-				txHash: 'ABCDEF',
+				txHash: 'A'.repeat(64),
 				accepted: true
 			});
 		});

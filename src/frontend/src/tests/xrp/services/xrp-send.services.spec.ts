@@ -228,10 +228,13 @@ describe('xrp-send.services', () => {
 
 	// A response we understood is authoritative, so it must not be polled around.
 	it('fails immediately on a deterministic engine rejection', async () => {
-		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+		// The response echoes the hash of the blob it was given, as a node does — the rejection
+		// branch is definitive only for a response that names this transaction.
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockImplementation(async ({ txBlob }) => ({
 			engineResult: 'temBAD_FEE',
-			accepted: false
-		});
+			accepted: false,
+			txHash: await deriveXrpTransactionHash(txBlob)
+		}));
 
 		await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
 		expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
@@ -280,10 +283,11 @@ describe('xrp-send.services', () => {
 	it.each(['tefPAST_SEQ', 'tefALREADY'])(
 		'confirms %s instead of reporting the payment unsent',
 		async (engineResult) => {
-			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockImplementation(async ({ txBlob }) => ({
 				engineResult,
-				accepted: false
-			});
+				accepted: false,
+				txHash: await deriveXrpTransactionHash(txBlob)
+			}));
 
 			await expect(sendXrp(params)).resolves.toBeDefined();
 
@@ -297,10 +301,11 @@ describe('xrp-send.services', () => {
 	it.each(['tefPAST_SEQ', 'tefMAX_LEDGER', 'telINSUF_FEE_P'])(
 		'polls %s to expiry rather than reporting it rejected',
 		async (engineResult) => {
-			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockImplementation(async ({ txBlob }) => ({
 				engineResult,
-				accepted: false
-			});
+				accepted: false,
+				txHash: await deriveXrpTransactionHash(txBlob)
+			}));
 			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
 			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
 				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
@@ -317,16 +322,36 @@ describe('xrp-send.services', () => {
 	it.each(['temBAD_FEE', 'temBAD_AMOUNT'])(
 		'fails immediately on %s without confirming',
 		async (engineResult) => {
-			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockImplementation(async ({ txBlob }) => ({
 				engineResult,
-				accepted: false
-			});
+				accepted: false,
+				txHash: await deriveXrpTransactionHash(txBlob)
+			}));
 
 			await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
 
 			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
 		}
 	);
+
+	// The submit response is the last answer on this path that was acted on without being tied to
+	// the blob it answered. A `tem*` naming a different transaction — or naming none — is not
+	// evidence about THIS one, and the rejection it would produce is the report that tells a caller
+	// to rebuild on a new sequence, which is a second payment.
+	it.each([
+		{ name: 'names another transaction', txHash: 'B'.repeat(64) },
+		{ name: 'names no transaction', txHash: undefined }
+	])('confirms a temBAD_FEE whose response $name', async ({ txHash }) => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+			engineResult: 'temBAD_FEE',
+			accepted: false,
+			txHash
+		});
+
+		await expect(sendXrp(params)).resolves.toBeDefined();
+
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+	});
 
 	// Unless the same response also claims the node took the blob. Nothing can be both malformed
 	// and accepted — no node applies a `tem` — so the response contradicts itself, and this is the
