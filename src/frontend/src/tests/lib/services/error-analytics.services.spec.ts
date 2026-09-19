@@ -28,7 +28,7 @@ describe('error-analytics.services', () => {
 
 		// The key is a candid variant name, i.e. public chain vocabulary — never user data.
 		it('carries no property beyond the documented set', () => {
-			trackUnmappedNetworkSettingsKey({ key: 'XrpMainnet' });
+			trackUnmappedNetworkSettingsKey({ key: 'PropertyCheckMainnet' });
 
 			const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
 
@@ -39,6 +39,23 @@ describe('error-analytics.services', () => {
 				'event_value',
 				'result_error_severity'
 			]);
+		});
+
+		// Both call sites run repeatedly — the profile is decoded on every load, and the settings
+		// derived recomputes on every write — so the same key would otherwise be reported endlessly.
+		it('reports the same key only once per session', () => {
+			trackUnmappedNetworkSettingsKey({ key: 'RepeatedMainnet' });
+			trackUnmappedNetworkSettingsKey({ key: 'RepeatedMainnet' });
+			trackUnmappedNetworkSettingsKey({ key: 'RepeatedMainnet' });
+
+			expect(trackEvent).toHaveBeenCalledOnce();
+		});
+
+		it('still reports a different key', () => {
+			trackUnmappedNetworkSettingsKey({ key: 'FirstMainnet' });
+			trackUnmappedNetworkSettingsKey({ key: 'SecondMainnet' });
+
+			expect(trackEvent).toHaveBeenCalledTimes(2);
 		});
 	});
 });
