@@ -482,7 +482,32 @@ export const loadXrpTransactionOutcome = async ({
 	// The fully-searched absence variant: the node looked everywhere in the range and it is not
 	// there. The only state allowed to end the poll as non-inclusion, which is why it is reported
 	// as its own rather than sharing `pending`'s shape.
-	if ('error' in data) {
+	//
+	// And therefore the one that must be bound to the question. The validated and pending branches
+	// carry a `hash` to compare; absence carries none, so the echoed request is the only identity
+	// available — and without it a stale or misrouted `txnNotFound`, for another hash or another
+	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that is
+	// `XrpSendExpiredError`, which tells the caller a fresh payment is safe to build.
+	//
+	// The range is compared too, not just the hash: absence only means anything over the ledgers
+	// that were actually searched, so an answer about a different window says nothing about this
+	// one even when it names the right transaction.
+	// Narrowed on the error literal, not on `'error' in data`: the other two branches declare
+	// `error?: undefined`, so the `in` check does not discriminate them and `request` is not
+	// reachable through it.
+	if (data.error === 'txnNotFound') {
+		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = data.request;
+
+		if (
+			String(transaction).toUpperCase() !== hash.toUpperCase() ||
+			minLedger !== firstLedgerSequence ||
+			maxLedger !== lastLedgerSequence
+		) {
+			throw new Error(
+				`Unexpected XRPL tx response: a txnNotFound for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
+			);
+		}
+
 		return { state: 'absent' };
 	}
 

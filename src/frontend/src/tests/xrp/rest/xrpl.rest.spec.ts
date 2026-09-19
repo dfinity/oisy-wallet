@@ -31,6 +31,23 @@ describe('xrpl.rest', () => {
 		request: { command: 'account_info', account, ledger_index: 'validated' }
 	});
 
+	// The `tx` echo, which is the only identity a `txnNotFound` carries: absence has no `hash` to
+	// be compared against, and it is the answer that ends the send.
+	const txEchoOf = ({
+		transaction,
+		minLedger = 1000,
+		maxLedger = 1020
+	}: {
+		transaction: string;
+		minLedger?: number;
+		maxLedger?: number;
+	}) => ({
+		request: {
+			method: 'tx',
+			params: [{ transaction, min_ledger: minLedger, max_ledger: maxLedger }]
+		}
+	});
+
 	const mockFetchResponse = ({
 		body,
 		ok = true,
@@ -246,7 +263,14 @@ describe('xrpl.rest', () => {
 
 			it('still reads a fully searched txnNotFound as absence', async () => {
 				mockFetchResponse({
-					body: { result: { status: 'error', error: 'txnNotFound', searched_all: true } }
+					body: {
+						result: {
+							status: 'error',
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'H' })
+						}
+					}
 				});
 
 				await expect(
@@ -1211,7 +1235,11 @@ describe('xrpl.rest', () => {
 
 		// Absence is established only when the node confirms it searched the whole range.
 		it('reports the transaction as not validated for a fully searched txnNotFound', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+			mockFetchResponse({
+				body: {
+					result: { error: 'txnNotFound', searched_all: true, ...txEchoOf({ transaction: 'HASH' }) }
+				}
+			});
 
 			const outcome = await loadXrpTransactionOutcome({
 				hash: 'HASH',
@@ -1325,7 +1353,10 @@ describe('xrpl.rest', () => {
 						error_code: 29,
 						error_message: 'Transaction not found.',
 						searched_all: true,
-						request: { method: 'tx', params: [{ transaction: 'H' }] },
+						request: {
+							method: 'tx',
+							params: [{ transaction: 'H', min_ledger: 1000, max_ledger: 1020 }]
+						},
 						status: 'error',
 						type: 'response'
 					}
@@ -1342,9 +1373,84 @@ describe('xrpl.rest', () => {
 			).resolves.toEqual({ state: 'absent' });
 		});
 
+		// Absence is the one variant with no `hash` to be bound by, and the one that ends the send:
+		// past `LastLedgerSequence` it becomes `XrpSendExpiredError` and tells the caller a fresh
+		// payment is safe. The echoed request is the only identity it carries.
+		describe('binding an absence to the question asked', () => {
+			const ask = () =>
+				loadXrpTransactionOutcome({
+					hash: 'HASH',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				});
+
+			it.each([
+				{ name: 'another transaction', echo: txEchoOf({ transaction: 'OTHERHASH' }) },
+				{ name: 'another lower bound', echo: txEchoOf({ transaction: 'HASH', minLedger: 900 }) },
+				{ name: 'another upper bound', echo: txEchoOf({ transaction: 'HASH', maxLedger: 1120 }) },
+				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } }
+			])('refuses an absence answering for $name', async ({ echo }) => {
+				mockFetchResponse({
+					body: { result: { error: 'txnNotFound', searched_all: true, ...echo } }
+				});
+
+				await expect(ask()).rejects.toThrow('asked for HASH over 1000-1020');
+			});
+
+			// A missing echo leaves the answer unidentifiable, so it cannot be read as absence — the
+			// schema requires it rather than letting the comparison be skipped by omission. It fails
+			// the parse, so it surfaces as the node's own code rather than as a mismatch, and what
+			// matters is that it does not come back as `absent`.
+			it('refuses an absence carrying no echo', async () => {
+				mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+
+				const outcome = await ask().catch((err: unknown) => err);
+
+				expect(outcome).toBeInstanceOf(XrplRpcError);
+				expect(outcome).not.toEqual({ state: 'absent' });
+			});
+
+			// The range matters as much as the hash: absence only means anything over the ledgers
+			// that were actually searched.
+			it('accepts an absence answering for exactly this transaction and range', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'HASH' })
+						}
+					}
+				});
+
+				await expect(ask()).resolves.toEqual({ state: 'absent' });
+			});
+
+			// The hash is hex, so case is not significant — unlike the base58 addresses compared
+			// elsewhere in this file.
+			it('accepts an echo that differs from the asked hash only in case', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'hash' })
+						}
+					}
+				});
+
+				await expect(ask()).resolves.toEqual({ state: 'absent' });
+			});
+		});
+
 		// The range is what makes the node report `searched_all` at all.
 		it('asks for the ledger range the transaction can be included in', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+			mockFetchResponse({
+				body: {
+					result: { error: 'txnNotFound', searched_all: true, ...txEchoOf({ transaction: 'HASH' }) }
+				}
+			});
 
 			await loadXrpTransactionOutcome({
 				hash: 'HASH',

@@ -264,7 +264,12 @@ export const XrplTxResultSchema = z.union([
 		// anything claiming otherwise is not the error response this branch describes.
 		error_code: z.unknown().optional(),
 		error_message: z.unknown().optional(),
-		request: z.unknown().optional(),
+		// Required and parsed, not waved through as arbitrary data: it is the ONLY identity this
+		// branch can carry. The validated and pending branches are bound by `hash`; absence has no
+		// hash to be bound by, and it is the variant that ends the send — a stale or misrouted
+		// `txnNotFound` read as this payment's absence becomes `XrpSendExpiredError` past
+		// `LastLedgerSequence`, which tells the caller a fresh payment is safe to build.
+		request: XrplRequestEchoSchema,
 		status: z.literal('error').optional(),
 		type: z.unknown().optional()
 	}),
