@@ -579,9 +579,18 @@ export const loadXrpTransactionOutcome = async ({
 		const { operation, params } = data.request;
 		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = params;
 
+		// `typeof` before the comparison, NOT `String(...)`: the echo's parameters are `unknown` by
+		// design, so coercing first means anything whose string form is the hash matches —
+		// `[hash]` being the obvious one. This file already learned that with `String(error)`,
+		// where `['txnNotFound']` coerced into a declared expected code (see `xrpJsonRpc`), and
+		// this binding is the only identity an absence carries.
+		//
+		// The two ledger comparisons below need no such guard: `!==` does not coerce, so a
+		// `'1000'` is already unequal to `1000` and refuses.
 		if (
 			operation !== 'tx' ||
-			String(transaction).toUpperCase() !== hash.toUpperCase() ||
+			typeof transaction !== 'string' ||
+			transaction.toUpperCase() !== hash.toUpperCase() ||
 			minLedger !== firstLedgerSequence ||
 			maxLedger !== lastLedgerSequence
 		) {
