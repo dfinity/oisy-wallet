@@ -251,7 +251,12 @@ describe('xrpl-rpc.schema', () => {
 	// real absence contains is small and knowable, while the set it must not contain is every field
 	// a `tx` result can carry, now and in future.
 	describe('XrplTxResultSchema absence', () => {
-		const absent = { error: 'txnNotFound', searched_all: true };
+		const absent = {
+			error: 'txnNotFound',
+			searched_all: true,
+			// The only identity this branch can carry, so it is required rather than optional.
+			request: { method: 'tx', params: [{ transaction: 'H' }] }
+		};
 
 		it('accepts a fully searched absence', () => {
 			expect(XrplTxResultSchema.safeParse(absent).success).toBeTruthy();
@@ -295,7 +300,6 @@ describe('xrpl-rpc.schema', () => {
 					...absent,
 					error_code: 29,
 					error_message: 'Transaction not found.',
-					request: { method: 'tx', params: [{ transaction: 'H' }] },
 					status: 'error',
 					type: 'response'
 				}).success

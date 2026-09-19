@@ -6,6 +6,30 @@ import * as z from 'zod';
 // is pinned here rather than left to the conversion.
 export const XrpDropsSchema = z.string().regex(/^\d+$/);
 
+/**
+ * The request a node echoes back inside `result.request`.
+ *
+ * It is the only identity an ERROR response carries. A successful `account_info` names its subject
+ * in `account_data.Account` and a validated `tx` names it in `hash`, but `actNotFound` and
+ * `txnNotFound` carry neither — and those are precisely the answers this client reads as "the
+ * account does not exist" and "the payment is not in any ledger". Unbound, a stale or misrouted
+ * one of either is believed about the wrong subject.
+ *
+ * Two shapes, because the provider answers some methods itself and forwards others to rippled, and
+ * the two echo differently — verified against the configured endpoint:
+ *   Clio:    `{ method: 'account_info', params: [{ account, ledger_index }] }`
+ *   rippled: `{ command: 'account_info', account, ledger_index }`
+ * Both are accepted and reduced to the same flat record, so a caller compares values rather than
+ * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
+ * response means, and for both readers above it means indeterminate rather than absent.
+ */
+export const XrplRequestEchoSchema = z.union([
+	z
+		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
+		.transform(({ params }) => params[0]),
+	z.object({ command: z.string() }).catchall(z.unknown())
+]);
+
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
 // first branch that parses, so without forbidding the opposite variant's key a
 // response carrying both would be read as a balance and the error silently dropped.
@@ -17,9 +41,13 @@ export const XrplAccountInfoResultSchema = z.union([
 		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
 		error: z.never().optional()
 	}),
+	// `actNotFound` carries no `account_data` to name its subject, so the identity has to come from
+	// what the node echoed back. See `XrplRequestEchoSchema`.
 	z.object({
 		error: z.string(),
-		account_data: z.never().optional()
+		account_data: z.never().optional(),
+		account: z.string().optional(),
+		request: XrplRequestEchoSchema.optional()
 	})
 ]);
 
@@ -36,9 +64,22 @@ export const XrplAccountInfoResultSchema = z.union([
 // NOT `z.strictObject`: the configured provider is a Clio endpoint, and every response it sends
 // carries `status`, `type`, `forwarded` and a `warnings` array beside the result. Rejecting unknown
 // keys wholesale would reject every real response.
+//
+// `status` is the one of those four that decides something, so it is pinned rather than stripped.
+// `xrpJsonRpc` checks `result.status` — a DIFFERENT field, one level down — so a top-level status
+// was dropped as an unknown key and a body saying `status: 'error'` beside a plausible
+// `ledger_current_index` passed as a successful index, which is the payload that drives
+// confirmation into a definitive expiry.
+//
+// `'success'` and not a union of both, because that is the whole contract this provider has: a
+// top-level `status` appears only on FORWARDED successes and is always `'success'` — on every
+// error, including `actNotFound` and `invalidParams`, there is no top-level status at all and the
+// error lives in `result`. So a top-level status that is not `'success'` is not a response this
+// endpoint produces.
 export const XrplEnvelopeSchema = z.object({
 	result: z.record(z.string(), z.unknown()),
-	error: z.never().optional()
+	error: z.never().optional(),
+	status: z.literal('success').optional()
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
@@ -94,7 +135,12 @@ export const XrplAccountInfoFullResultSchema = z.union([
 	}),
 	z.object({
 		error: z.literal('actNotFound'),
-		account_data: z.never().optional()
+		account_data: z.never().optional(),
+		// The only identity this branch can carry, and the one the destination read depends on: an
+		// unbound `actNotFound` reports SOME account as absent, and above the reserve that skips the
+		// required-destination-tag check and sends untagged into `tecDST_TAG_NEEDED`.
+		account: z.string().optional(),
+		request: XrplRequestEchoSchema.optional()
 	})
 ]);
 
@@ -218,7 +264,12 @@ export const XrplTxResultSchema = z.union([
 		// anything claiming otherwise is not the error response this branch describes.
 		error_code: z.unknown().optional(),
 		error_message: z.unknown().optional(),
-		request: z.unknown().optional(),
+		// Required and parsed, not waved through as arbitrary data: it is the ONLY identity this
+		// branch can carry. The validated and pending branches are bound by `hash`; absence has no
+		// hash to be bound by, and it is the variant that ends the send — a stale or misrouted
+		// `txnNotFound` read as this payment's absence becomes `XrpSendExpiredError` past
+		// `LastLedgerSequence`, which tells the caller a fresh payment is safe to build.
+		request: XrplRequestEchoSchema,
 		status: z.literal('error').optional(),
 		type: z.unknown().optional()
 	}),

@@ -24,6 +24,30 @@ describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const network = XrpNetworks.mainnet;
 
+	// Every real `account_info` error echoes the request it answered — `request` always, plus a
+	// top-level `account` on the forwarded path. It is the only identity an `actNotFound` carries,
+	// and the helpers now refuse one that does not name the address they asked about.
+	const echoOf = (account: string) => ({
+		request: { command: 'account_info', account, ledger_index: 'validated' }
+	});
+
+	// The `tx` echo, which is the only identity a `txnNotFound` carries: absence has no `hash` to
+	// be compared against, and it is the answer that ends the send.
+	const txEchoOf = ({
+		transaction,
+		minLedger = 1000,
+		maxLedger = 1020
+	}: {
+		transaction: string;
+		minLedger?: number;
+		maxLedger?: number;
+	}) => ({
+		request: {
+			method: 'tx',
+			params: [{ transaction, min_ledger: minLedger, max_ledger: maxLedger }]
+		}
+	});
+
 	const mockFetchResponse = ({
 		body,
 		ok = true,
@@ -149,6 +173,45 @@ describe('xrpl.rest', () => {
 			await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
 		});
 
+		// The status BESIDE the result, not the one inside it. `xrpJsonRpc` checks `result.status`,
+		// a different field one level down, so a top-level one was stripped as an unknown key and a
+		// body stating failure could still deliver a plausible index — the payload that drives
+		// confirmation into a definitive expiry. Pinned to `'success'` because that is the whole
+		// contract: the provider sends a top-level status only on forwarded successes.
+		describe('the top-level status', () => {
+			it.each(['error', 'pending', '', 1, null])(
+				'rejects a top-level status of %j carrying a plausible result',
+				async (status) => {
+					mockFetchResponse({
+						body: { result: { ledger_current_index: 999_999_999 }, status }
+					});
+
+					await expect(loadXrpLedgerIndex({ network })).rejects.toThrow('top-level status');
+				}
+			);
+
+			// Absent is the normal case: every non-forwarded response and every error omits it.
+			it('accepts a body with no top-level status at all', async () => {
+				mockFetchResponse({ body: { result: { ledger_current_index: 5 } } });
+
+				await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+			});
+
+			// The regression this could introduce: `actNotFound` and `txnNotFound` arrive with no
+			// top-level status and `result.status: 'error'`, so the expected-state paths must be
+			// untouched by a check on the outer field.
+			it('still reads actNotFound as an expected state', async () => {
+				mockFetchResponse({
+					body: {
+						result: { status: 'error', error: 'actNotFound', ...echoOf(address) },
+						warnings: [{ id: 2001 }]
+					}
+				});
+
+				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
+			});
+		});
+
 		// `result.status` is on every real response and was previously ignored, so a FAILED response
 		// could still deliver a plausible result: the method schemas strip `status` as an unknown
 		// key, and a bogus `ledger_current_index` beside `status: 'error'` came back as an index.
@@ -191,14 +254,23 @@ describe('xrpl.rest', () => {
 			// check must not touch them, or every absence lookup would throw and expiry detection
 			// would go with it.
 			it('still reads actNotFound as an expected state', async () => {
-				mockFetchResponse({ body: { result: { status: 'error', error: 'actNotFound' } } });
+				mockFetchResponse({
+					body: { result: { status: 'error', error: 'actNotFound', ...echoOf(address) } }
+				});
 
 				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
 			});
 
 			it('still reads a fully searched txnNotFound as absence', async () => {
 				mockFetchResponse({
-					body: { result: { status: 'error', error: 'txnNotFound', searched_all: true } }
+					body: {
+						result: {
+							status: 'error',
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'H' })
+						}
+					}
 				});
 
 				await expect(
@@ -314,7 +386,7 @@ describe('xrpl.rest', () => {
 
 		// The unfunded answer carries no `account_data` to bind, and still maps to zero.
 		it('still maps actNotFound to a zero balance', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
 		});
@@ -349,7 +421,7 @@ describe('xrpl.rest', () => {
 		});
 
 		it('maps an unfunded account (actNotFound) to a zero balance', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
 
@@ -659,13 +731,72 @@ describe('xrpl.rest', () => {
 			});
 
 			// The identity check must not cost the typed absence answer the destination read depends
-			// on: `actNotFound` carries no `account_data` to compare.
+			// on: `actNotFound` carries no `account_data`, so it is bound by the echoed request.
 			it('still reports an unfunded account as absent rather than as a mismatch', async () => {
-				mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+				mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 				await expect(
 					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
 				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+
+			// Absence is a claim about a SPECIFIC account. An `actNotFound` naming another one, or
+			// naming none, makes no claim about this address — and the typed error is what
+			// `readDestination` maps to "does not exist", which above the reserve leaves
+			// `requiresTag` false and sends untagged into `tecDST_TAG_NEEDED`. So these stay
+			// untyped, which the send path reads as an unavailable lookup and declines on.
+			describe('an actNotFound that does not identify the account asked about', () => {
+				const other = 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv';
+
+				it.each([
+					{ name: 'the request echoes another account', result: { ...echoOf(other) } },
+					{ name: 'the forwarded account is another one', result: { account: other } },
+					{
+						name: 'the two echoes disagree',
+						result: { account: address, request: { command: 'account_info', account: other } }
+					},
+					{ name: 'nothing identifies it', result: {} }
+				])('is untyped when $name', async ({ result }) => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
+
+					const failure = await loadXrpAccountInfo({
+						address,
+						network: XrpNetworks.mainnet,
+						ledgerIndex: 'current'
+					}).catch((err: unknown) => err);
+
+					expect(failure).toBeInstanceOf(Error);
+					expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
+					expect((failure as Error).message).toContain('does not identify');
+				});
+
+				// The two shapes the provider actually sends: Clio answers `validated` itself and
+				// nests the request under `params`, while a forwarded `current` flattens it and adds
+				// a top-level `account`. Either one naming this address is enough.
+				it.each([
+					{
+						name: 'the Clio shape',
+						result: { request: { method: 'account_info', params: [{ account: address }] } }
+					},
+					{
+						name: 'the forwarded shape',
+						result: { account: address, request: { command: 'account_info', account: address } }
+					}
+				])('accepts absence bound by $name', async ({ result }) => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
+
+					await expect(
+						loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+					).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+				});
+
+				// Same binding on the displayed balance, where an unbound `actNotFound` would show
+				// another account's non-existence as this one's zero.
+				it('refuses to read an unidentified actNotFound as a zero balance', async () => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+					await expect(loadXrpBalance({ address, network })).rejects.toThrow('does not identify');
+				});
 			});
 		});
 
@@ -831,7 +962,7 @@ describe('xrpl.rest', () => {
 		// A zero balance cannot carry that meaning: the transaction cost can drain an existing
 		// account to nothing and it still exists on-ledger.
 		it('throws a typed error for an unfunded account', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			await expect(
 				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
@@ -1104,7 +1235,11 @@ describe('xrpl.rest', () => {
 
 		// Absence is established only when the node confirms it searched the whole range.
 		it('reports the transaction as not validated for a fully searched txnNotFound', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+			mockFetchResponse({
+				body: {
+					result: { error: 'txnNotFound', searched_all: true, ...txEchoOf({ transaction: 'HASH' }) }
+				}
+			});
 
 			const outcome = await loadXrpTransactionOutcome({
 				hash: 'HASH',
@@ -1218,7 +1353,10 @@ describe('xrpl.rest', () => {
 						error_code: 29,
 						error_message: 'Transaction not found.',
 						searched_all: true,
-						request: { method: 'tx', params: [{ transaction: 'H' }] },
+						request: {
+							method: 'tx',
+							params: [{ transaction: 'H', min_ledger: 1000, max_ledger: 1020 }]
+						},
 						status: 'error',
 						type: 'response'
 					}
@@ -1235,9 +1373,84 @@ describe('xrpl.rest', () => {
 			).resolves.toEqual({ state: 'absent' });
 		});
 
+		// Absence is the one variant with no `hash` to be bound by, and the one that ends the send:
+		// past `LastLedgerSequence` it becomes `XrpSendExpiredError` and tells the caller a fresh
+		// payment is safe. The echoed request is the only identity it carries.
+		describe('binding an absence to the question asked', () => {
+			const ask = () =>
+				loadXrpTransactionOutcome({
+					hash: 'HASH',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				});
+
+			it.each([
+				{ name: 'another transaction', echo: txEchoOf({ transaction: 'OTHERHASH' }) },
+				{ name: 'another lower bound', echo: txEchoOf({ transaction: 'HASH', minLedger: 900 }) },
+				{ name: 'another upper bound', echo: txEchoOf({ transaction: 'HASH', maxLedger: 1120 }) },
+				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } }
+			])('refuses an absence answering for $name', async ({ echo }) => {
+				mockFetchResponse({
+					body: { result: { error: 'txnNotFound', searched_all: true, ...echo } }
+				});
+
+				await expect(ask()).rejects.toThrow('asked for HASH over 1000-1020');
+			});
+
+			// A missing echo leaves the answer unidentifiable, so it cannot be read as absence — the
+			// schema requires it rather than letting the comparison be skipped by omission. It fails
+			// the parse, so it surfaces as the node's own code rather than as a mismatch, and what
+			// matters is that it does not come back as `absent`.
+			it('refuses an absence carrying no echo', async () => {
+				mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+
+				const outcome = await ask().catch((err: unknown) => err);
+
+				expect(outcome).toBeInstanceOf(XrplRpcError);
+				expect(outcome).not.toEqual({ state: 'absent' });
+			});
+
+			// The range matters as much as the hash: absence only means anything over the ledgers
+			// that were actually searched.
+			it('accepts an absence answering for exactly this transaction and range', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'HASH' })
+						}
+					}
+				});
+
+				await expect(ask()).resolves.toEqual({ state: 'absent' });
+			});
+
+			// The hash is hex, so case is not significant — unlike the base58 addresses compared
+			// elsewhere in this file.
+			it('accepts an echo that differs from the asked hash only in case', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'txnNotFound',
+							searched_all: true,
+							...txEchoOf({ transaction: 'hash' })
+						}
+					}
+				});
+
+				await expect(ask()).resolves.toEqual({ state: 'absent' });
+			});
+		});
+
 		// The range is what makes the node report `searched_all` at all.
 		it('asks for the ledger range the transaction can be included in', async () => {
-			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });
+			mockFetchResponse({
+				body: {
+					result: { error: 'txnNotFound', searched_all: true, ...txEchoOf({ transaction: 'HASH' }) }
+				}
+			});
 
 			await loadXrpTransactionOutcome({
 				hash: 'HASH',

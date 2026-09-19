@@ -319,12 +319,31 @@ describe('xrp-send.services', () => {
 		async (engineResult) => {
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 				engineResult,
-				accepted: true
+				accepted: false
 			});
 
 			await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
 
 			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+		}
+	);
+
+	// Unless the same response also claims the node took the blob. Nothing can be both malformed
+	// and accepted — no node applies a `tem` — so the response contradicts itself, and this is the
+	// one place that declares a definitive failure after the blob is already broadcast. It polls
+	// instead, which costs a validity window on a transaction that will never land and avoids
+	// reporting a contradictory answer as this payment's rejection.
+	it.each(['temBAD_FEE', 'temBAD_AMOUNT'])(
+		'confirms %s when the node claims to have accepted it',
+		async (engineResult) => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult,
+				accepted: true
+			});
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
 		}
 	);
 
