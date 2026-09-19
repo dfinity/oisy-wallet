@@ -32,11 +32,13 @@ describe('xrpl-rpc.schema', () => {
 	describe('XrplAccountInfoResultSchema', () => {
 		it('should validate a funded account result', () => {
 			const result = XrplAccountInfoResultSchema.safeParse({
-				account_data: { Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
 			});
 
 			expect(result.success).toBeTruthy();
-			expect(result.data).toEqual({ account_data: { Balance: '25000000' } });
+			expect(result.data).toEqual({
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+			});
 		});
 
 		it('should validate an error result', () => {
@@ -52,7 +54,7 @@ describe('xrpl-rpc.schema', () => {
 		it('should fail validation for a result carrying both account_data and an error', () => {
 			expect(
 				XrplAccountInfoResultSchema.safeParse({
-					account_data: { Balance: '1' },
+					account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '1' },
 					error: 'actNotFound'
 				}).success
 			).toBeFalsy();
@@ -83,11 +85,48 @@ describe('xrpl-rpc.schema', () => {
 	// per schema but is worst for the validated index: a bogus one past `LastLedgerSequence` makes
 	// confirmation declare expiry and tell the user a resend is safe.
 	describe('XrplAccountInfoFullResultSchema', () => {
-		const accountData = { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 };
+		const accountData = {
+			Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+			Balance: '30000000',
+			Sequence: 42,
+			OwnerCount: 3,
+			Flags: 131_072
+		};
 
 		it('parses account data alone', () => {
 			expect(
 				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
+			).toBeTruthy();
+		});
+
+		// Required, so the caller's comparison against the address it asked for cannot be skipped by
+		// a response that simply omits the field. An AccountRoot always carries it.
+		it.each([undefined, null, 42, {}])('rejects account data with an Account of %j', (Account) => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					account_data: { ...accountData, Account }
+				}).success
+			).toBeFalsy();
+		});
+
+		// `Flags` is mandatory on an AccountRoot, so an omission is a malformed response rather than
+		// an account with unknown flags. Read as unknown it became "no destination tag required",
+		// which is the one reading of it that lets a payment through to `tecDST_TAG_NEEDED`.
+		it('rejects account data without Flags', () => {
+			const { Flags: _Flags, ...withoutFlags } = accountData;
+
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: withoutFlags }).success
+			).toBeFalsy();
+		});
+
+		// Zero is the value an account with nothing set actually reports, and it must stay a
+		// positive answer rather than being conflated with the omission above.
+		it('accepts zero flags', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					account_data: { ...accountData, Flags: 0 }
+				}).success
 			).toBeTruthy();
 		});
 
@@ -206,6 +245,45 @@ describe('xrpl-rpc.schema', () => {
 		});
 	});
 
+	// The only variant that may be read as non-inclusion, and so the only one whose contradictions
+	// end a live send. Zod strips unknown keys, so anything that would dispute absence has to be
+	// forbidden by name or it is simply dropped and the payload parses as a settled "not there".
+	describe('XrplTxResultSchema absence', () => {
+		const absent = { error: 'txnNotFound', searched_all: true };
+
+		it('accepts a fully searched absence', () => {
+			expect(XrplTxResultSchema.safeParse(absent).success).toBeTruthy();
+		});
+
+		// `hash`, `tx` and `tx_json` are the three ways a `tx` result reports the transaction
+		// itself; `validated` and `meta` were already named.
+		it.each([
+			{ name: 'hash', extra: { hash: 'H' } },
+			{ name: 'tx', extra: { tx: { TransactionType: 'Payment' } } },
+			{ name: 'tx_json', extra: { tx_json: { TransactionType: 'Payment' } } },
+			{ name: 'validated', extra: { validated: true } },
+			{ name: 'meta', extra: { meta: { TransactionResult: 'tesSUCCESS' } } }
+		])('rejects an absence contradicted by $name', ({ extra }) => {
+			expect(XrplTxResultSchema.safeParse({ ...absent, ...extra }).success).toBeFalsy();
+		});
+
+		// What a real `txnNotFound` from the configured endpoint carries beside the two fields
+		// above. These are ordinary unknown keys and must keep being stripped, or every genuine
+		// absence would fail to parse.
+		it('accepts the keys a real provider sends alongside absence', () => {
+			expect(
+				XrplTxResultSchema.safeParse({
+					...absent,
+					error_code: 29,
+					error_message: 'Transaction not found.',
+					request: { method: 'tx', params: [{ transaction: 'H' }] },
+					status: 'error',
+					type: 'response'
+				}).success
+			).toBeTruthy();
+		});
+	});
+
 	describe('rejecting a mixed error/result response', () => {
 		it.each([
 			{
@@ -231,7 +309,15 @@ describe('xrpl-rpc.schema', () => {
 			{
 				name: 'XrplAccountInfoFullResultSchema',
 				schema: XrplAccountInfoFullResultSchema,
-				result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } }
+				result: {
+					account_data: {
+						Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+						Balance: '1',
+						Sequence: 1,
+						OwnerCount: 0,
+						Flags: 0
+					}
+				}
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
 			expect(schema.safeParse(result).success).toBeTruthy();

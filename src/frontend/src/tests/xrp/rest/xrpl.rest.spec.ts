@@ -285,8 +285,44 @@ describe('xrpl.rest', () => {
 	});
 
 	describe('loadXrpBalance', () => {
+		// Bound to the address asked for, like the full snapshot. This read cannot cause a bad send —
+		// `sendXrp` reads its own figures through `loadXrpAccountInfo` — but it is the balance the
+		// user sees and decides on, and it was the only unbound read left on this path.
+		it('throws when the snapshot is for a different account', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						account_data: { Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv', Balance: '25000000' }
+					}
+				}
+			});
+
+			await expect(loadXrpBalance({ address, network })).rejects.toThrow(
+				'answered for rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv'
+			);
+		});
+
+		// A classic address is base58 over a checksummed payload, so case is significant and two
+		// forms differing only in case are not the same account.
+		it('throws for an address differing only in case', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Account: address.toUpperCase(), Balance: '1' } } }
+			});
+
+			await expect(loadXrpBalance({ address, network })).rejects.toThrow('answered for');
+		});
+
+		// The unfunded answer carries no `account_data` to bind, and still maps to zero.
+		it('still maps actNotFound to a zero balance', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
+		});
+
 		it('returns the balance in drops as a bigint', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Balance: '25000000' } } } });
+			mockFetchResponse({
+				body: { result: { account_data: { Account: address, Balance: '25000000' } } }
+			});
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
 
@@ -297,7 +333,8 @@ describe('xrpl.rest', () => {
 			const fetchMock = vi.fn().mockResolvedValue({
 				ok: true,
 				status: 200,
-				json: () => Promise.resolve({ result: { account_data: { Balance: '1' } } })
+				json: () =>
+					Promise.resolve({ result: { account_data: { Account: address, Balance: '1' } } })
 			});
 			vi.stubGlobal('fetch', fetchMock);
 
@@ -347,7 +384,7 @@ describe('xrpl.rest', () => {
 		// keys, so without mutual exclusion the error would be discarded and `1` returned.
 		it('throws on a response carrying both account_data and an error', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '1' }, error: 'actNotFound' } }
+				body: { result: { account_data: { Account: address, Balance: '1' }, error: 'actNotFound' } }
 			});
 
 			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
@@ -360,7 +397,7 @@ describe('xrpl.rest', () => {
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
 			'throws instead of converting the invalid balance %j',
 			async (Balance) => {
-				mockFetchResponse({ body: { result: { account_data: { Balance } } } });
+				mockFetchResponse({ body: { result: { account_data: { Account: address, Balance } } } });
 
 				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
 					'Unexpected XRPL account_info response'
@@ -517,7 +554,11 @@ describe('xrpl.rest', () => {
 			'asks for the %s ledger when told to',
 			async (ledgerIndex) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
+					body: {
+						result: {
+							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
+						}
+					}
 				});
 
 				await loadXrpAccountInfo({ address, network, ledgerIndex });
@@ -527,7 +568,7 @@ describe('xrpl.rest', () => {
 		);
 
 		it('asks the validated ledger for the display balance', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Balance: '1' } } } });
+			mockFetchResponse({ body: { result: { account_data: { Account: address, Balance: '1' } } } });
 
 			await loadXrpBalance({ address, network });
 
@@ -539,7 +580,15 @@ describe('xrpl.rest', () => {
 		it('returns the balance and sequence for a funded account', async () => {
 			mockFetchResponse({
 				body: {
-					result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } }
+					result: {
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0
+						}
+					}
 				}
 			});
 
@@ -553,7 +602,70 @@ describe('xrpl.rest', () => {
 				balance: 30_000_000n,
 				sequence: 42,
 				ownerCount: 3,
-				flags: undefined
+				flags: 0
+			});
+		});
+
+		// The answer has to be about the account that was asked for. Nothing else in the response
+		// identifies it, so a stale or misrouted snapshot is otherwise read as this account's state
+		// — and each field then misleads a different guard: a foreign `Sequence` signs a payment the
+		// ledger answers `terPRE_SEQ`, and foreign reserve inputs end in `tecUNFUNDED_PAYMENT`,
+		// which claims the fee.
+		describe('the account the snapshot is about', () => {
+			const accountData = {
+				Account: address,
+				Balance: '30000000',
+				Sequence: 42,
+				OwnerCount: 3,
+				Flags: 131_072
+			};
+
+			it('throws when the node answers for a different account', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							account_data: { ...accountData, Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv' }
+						}
+					}
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('answered for rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv');
+			});
+
+			// A classic address is base58 over a checksummed payload, so case is significant —
+			// unlike the hex transaction hash, which is compared case-insensitively.
+			it('throws for an account that differs from the requested one only in case', async () => {
+				mockFetchResponse({
+					body: { result: { account_data: { ...accountData, Account: address.toUpperCase() } } }
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow(`answered for ${address.toUpperCase()}`);
+			});
+
+			// Omitted rather than wrong: an AccountRoot always carries it, and accepting the omission
+			// would leave the comparison above skippable by leaving the field out.
+			it.each([undefined, null, 42, {}])('throws for an account of %j', async (Account) => {
+				mockFetchResponse({
+					body: { result: { account_data: { ...accountData, Account } } }
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('Unexpected XRPL account_info response');
+			});
+
+			// The identity check must not cost the typed absence answer the destination read depends
+			// on: `actNotFound` carries no `account_data` to compare.
+			it('still reports an unfunded account as absent rather than as a mismatch', async () => {
+				mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
 			});
 		});
 
@@ -563,7 +675,13 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
-						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 131_072
+						}
 					}
 				}
 			});
@@ -577,12 +695,39 @@ describe('xrpl.rest', () => {
 			expect(info.flags).toBe(131_072);
 		});
 
-		// Absent flags are not the same claim as no flags being set, so they stay `undefined`
-		// rather than becoming zero — and a node that omits the field must not fail the read,
-		// which the send path needs for the sequence and the reserve.
-		it('leaves the flags undefined when the node omits them', async () => {
+		// `Flags` is a mandatory AccountRoot field, so its absence describes a malformed response
+		// rather than an account with nothing to say. Accepting the omission made it the ONE
+		// reading that spends a fee: the send path takes unknown flags as no requirement and lets
+		// an untagged payment through to `tecDST_TAG_NEEDED`.
+		it('throws when the node omits the flags', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } } }
+				body: {
+					result: {
+						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+			).rejects.toThrow('Unexpected XRPL account_info response');
+		});
+
+		// Zero is a positive answer, not an absent one: it is what an account with no flags set
+		// actually reports.
+		it('returns zero flags as zero rather than as unknown', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0
+						}
+					}
+				}
 			});
 
 			const info = await loadXrpAccountInfo({
@@ -591,12 +736,22 @@ describe('xrpl.rest', () => {
 				ledgerIndex: 'current'
 			});
 
-			expect(info.flags).toBeUndefined();
+			expect(info.flags).toBe(0);
 		});
 
 		it('returns a zero owner count when the account owns nothing', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 0 } } }
+				body: {
+					result: {
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 0,
+							Flags: 0
+						}
+					}
+				}
 			});
 
 			const info = await loadXrpAccountInfo({
@@ -615,7 +770,17 @@ describe('xrpl.rest', () => {
 			'throws for an owner count of %j',
 			async (OwnerCount) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
+					body: {
+						result: {
+							account_data: {
+								Account: address,
+								Balance: '30000000',
+								Sequence: 42,
+								OwnerCount,
+								Flags: 0
+							}
+						}
+					}
 				});
 
 				await expect(
@@ -626,7 +791,17 @@ describe('xrpl.rest', () => {
 
 		it.each([undefined, '42', null, -1, 1.5])('throws for a sequence of %j', async (Sequence) => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence, OwnerCount: 0 } } }
+				body: {
+					result: {
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence,
+							OwnerCount: 0,
+							Flags: 0
+						}
+					}
+				}
 			});
 
 			await expect(
@@ -639,7 +814,11 @@ describe('xrpl.rest', () => {
 			'throws for a balance of %j',
 			async (Balance) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance, Sequence: 42, OwnerCount: 0 } } }
+					body: {
+						result: {
+							account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0, Flags: 0 }
+						}
+					}
 				});
 
 				await expect(
@@ -669,7 +848,13 @@ describe('xrpl.rest', () => {
 				body: {
 					result: {
 						error: 'actNotFound',
-						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 131_072
+						}
 					}
 				}
 			});
@@ -991,6 +1176,57 @@ describe('xrpl.rest', () => {
 					lastLedgerSequence: 1020
 				})
 			).rejects.toThrow('txnNotFound');
+		});
+
+		// `validated` and `meta` were forbidden by name, but zod strips every OTHER unknown key —
+		// so a payload claiming absence while carrying the transaction itself still parsed as
+		// absence, which past `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the
+		// caller is told is safe. These are the three ways a `tx` result reports the transaction.
+		it.each([
+			{ name: 'a hash', extra: { hash: 'H' } },
+			{ name: 'a tx payload', extra: { tx: { TransactionType: 'Payment' } } },
+			{ name: 'a tx_json payload', extra: { tx_json: { TransactionType: 'Payment' } } }
+		])('refuses an absence that also carries $name', async ({ extra }) => {
+			mockFetchResponse({
+				body: { result: { error: 'txnNotFound', searched_all: true, ...extra } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('txnNotFound');
+		});
+
+		// The keys a real `txnNotFound` from the configured endpoint actually carries. Forbidding
+		// the contradicting fields above must not turn these into a rejection, or every genuine
+		// absence would throw and expiry detection would go with it.
+		it('still reads a real provider txnNotFound as absence', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'txnNotFound',
+						error_code: 29,
+						error_message: 'Transaction not found.',
+						searched_all: true,
+						request: { method: 'tx', params: [{ transaction: 'H' }] },
+						status: 'error',
+						type: 'response'
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).resolves.toEqual({ state: 'absent' });
 		});
 
 		// The range is what makes the node report `searched_all` at all.
