@@ -235,7 +235,26 @@ export const loadXrpAccountInfo = async ({
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
 	}
 
-	const { Balance, Sequence, OwnerCount, Flags } = data.account_data;
+	const { Account, Balance, Sequence, OwnerCount, Flags } = data.account_data;
+
+	// The snapshot must be about the account we asked for. Nothing else in the response identifies
+	// it, so without this a stale or misrouted answer — a proxy's mismatched reply, a cached one for
+	// the previously requested address — is read as this account's state, and every consumer is then
+	// working from another account's figures: a foreign `Sequence` signs a payment the ledger answers
+	// `terPRE_SEQ`, which queues rather than fails and so outlives the poll that declares the send
+	// expired and a resend safe; a foreign `Balance`/`OwnerCount` satisfies the reserve guard on
+	// figures that are not this account's, and XRPL applies the result as `tecUNFUNDED_PAYMENT` —
+	// fee claimed, sequence consumed; a foreign `Flags` decides the required-destination-tag guard
+	// for the wrong account, which ends the same way as `tecDST_TAG_NEEDED`.
+	//
+	// Compared RAW, unlike the hex hash in `loadXrpTransactionOutcome`: a classic address is base58
+	// over a checksummed payload, so case is significant and two forms differing only in case are
+	// not the same account.
+	if (Account !== address) {
+		throw new Error(
+			`Unexpected XRPL account_info response: answered for ${Account}, asked for ${address}`
+		);
+	}
 
 	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
 };

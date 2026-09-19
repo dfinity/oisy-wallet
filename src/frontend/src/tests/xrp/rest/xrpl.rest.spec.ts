@@ -517,7 +517,11 @@ describe('xrpl.rest', () => {
 			'asks for the %s ledger when told to',
 			async (ledgerIndex) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } } }
+					body: {
+						result: {
+							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0 }
+						}
+					}
 				});
 
 				await loadXrpAccountInfo({ address, network, ledgerIndex });
@@ -539,7 +543,9 @@ describe('xrpl.rest', () => {
 		it('returns the balance and sequence for a funded account', async () => {
 			mockFetchResponse({
 				body: {
-					result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } }
+					result: {
+						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
+					}
 				}
 			});
 
@@ -557,13 +563,82 @@ describe('xrpl.rest', () => {
 			});
 		});
 
+		// The answer has to be about the account that was asked for. Nothing else in the response
+		// identifies it, so a stale or misrouted snapshot is otherwise read as this account's state
+		// — and each field then misleads a different guard: a foreign `Sequence` signs a payment the
+		// ledger answers `terPRE_SEQ`, and foreign reserve inputs end in `tecUNFUNDED_PAYMENT`,
+		// which claims the fee.
+		describe('the account the snapshot is about', () => {
+			const accountData = {
+				Account: address,
+				Balance: '30000000',
+				Sequence: 42,
+				OwnerCount: 3,
+				Flags: 131_072
+			};
+
+			it('throws when the node answers for a different account', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							account_data: { ...accountData, Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv' }
+						}
+					}
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('answered for rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv');
+			});
+
+			// A classic address is base58 over a checksummed payload, so case is significant —
+			// unlike the hex transaction hash, which is compared case-insensitively.
+			it('throws for an account that differs from the requested one only in case', async () => {
+				mockFetchResponse({
+					body: { result: { account_data: { ...accountData, Account: address.toUpperCase() } } }
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow(`answered for ${address.toUpperCase()}`);
+			});
+
+			// Omitted rather than wrong: an AccountRoot always carries it, and accepting the omission
+			// would leave the comparison above skippable by leaving the field out.
+			it.each([undefined, null, 42, {}])('throws for an account of %j', async (Account) => {
+				mockFetchResponse({
+					body: { result: { account_data: { ...accountData, Account } } }
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toThrow('Unexpected XRPL account_info response');
+			});
+
+			// The identity check must not cost the typed absence answer the destination read depends
+			// on: `actNotFound` carries no `account_data` to compare.
+			it('still reports an unfunded account as absent rather than as a mismatch', async () => {
+				mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+				await expect(
+					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+		});
+
 		// The send path reads `lsfRequireDestTag` out of these bits, so dropping them at the
 		// boundary would leave an untagged payment to be applied as `tecDST_TAG_NEEDED`.
 		it('returns the account flags when the node reports them', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
-						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 131_072
+						}
 					}
 				}
 			});
@@ -582,7 +657,11 @@ describe('xrpl.rest', () => {
 		// which the send path needs for the sequence and the reserve.
 		it('leaves the flags undefined when the node omits them', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3 } } }
+				body: {
+					result: {
+						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
+					}
+				}
 			});
 
 			const info = await loadXrpAccountInfo({
@@ -596,7 +675,11 @@ describe('xrpl.rest', () => {
 
 		it('returns a zero owner count when the account owns nothing', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 0 } } }
+				body: {
+					result: {
+						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 0 }
+					}
+				}
 			});
 
 			const info = await loadXrpAccountInfo({
@@ -615,7 +698,11 @@ describe('xrpl.rest', () => {
 			'throws for an owner count of %j',
 			async (OwnerCount) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance: '30000000', Sequence: 42, OwnerCount } } }
+					body: {
+						result: {
+							account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount }
+						}
+					}
 				});
 
 				await expect(
@@ -626,7 +713,11 @@ describe('xrpl.rest', () => {
 
 		it.each([undefined, '42', null, -1, 1.5])('throws for a sequence of %j', async (Sequence) => {
 			mockFetchResponse({
-				body: { result: { account_data: { Balance: '30000000', Sequence, OwnerCount: 0 } } }
+				body: {
+					result: {
+						account_data: { Account: address, Balance: '30000000', Sequence, OwnerCount: 0 }
+					}
+				}
 			});
 
 			await expect(
@@ -639,7 +730,9 @@ describe('xrpl.rest', () => {
 			'throws for a balance of %j',
 			async (Balance) => {
 				mockFetchResponse({
-					body: { result: { account_data: { Balance, Sequence: 42, OwnerCount: 0 } } }
+					body: {
+						result: { account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0 } }
+					}
 				});
 
 				await expect(
@@ -669,7 +762,13 @@ describe('xrpl.rest', () => {
 				body: {
 					result: {
 						error: 'actNotFound',
-						account_data: { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 131_072
+						}
 					}
 				}
 			});

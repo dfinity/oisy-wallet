@@ -83,12 +83,28 @@ describe('xrpl-rpc.schema', () => {
 	// per schema but is worst for the validated index: a bogus one past `LastLedgerSequence` makes
 	// confirmation declare expiry and tell the user a resend is safe.
 	describe('XrplAccountInfoFullResultSchema', () => {
-		const accountData = { Balance: '30000000', Sequence: 42, OwnerCount: 3, Flags: 131_072 };
+		const accountData = {
+			Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+			Balance: '30000000',
+			Sequence: 42,
+			OwnerCount: 3,
+			Flags: 131_072
+		};
 
 		it('parses account data alone', () => {
 			expect(
 				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
 			).toBeTruthy();
+		});
+
+		// Required, so the caller's comparison against the address it asked for cannot be skipped by
+		// a response that simply omits the field. An AccountRoot always carries it.
+		it.each([undefined, null, 42, {}])('rejects account data with an Account of %j', (Account) => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					account_data: { ...accountData, Account }
+				}).success
+			).toBeFalsy();
 		});
 
 		// The branch that lets the caller decide absence after parsing rather than before it.
@@ -231,7 +247,14 @@ describe('xrpl-rpc.schema', () => {
 			{
 				name: 'XrplAccountInfoFullResultSchema',
 				schema: XrplAccountInfoFullResultSchema,
-				result: { account_data: { Balance: '1', Sequence: 1, OwnerCount: 0 } }
+				result: {
+					account_data: {
+						Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+						Balance: '1',
+						Sequence: 1,
+						OwnerCount: 0
+					}
+				}
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
 			expect(schema.safeParse(result).success).toBeTruthy();

@@ -56,6 +56,12 @@ export const XrpLedgerCounterSchema = z.number().int().nonnegative().max(0xffff_
 // returning. Stricter than `XrplAccountInfoResultSchema`, which only needs `Balance`: building a
 // payment also requires the sequence, and the reserve requires the owner count.
 const XrplAccountDataSchema = z.object({
+	// The account the snapshot is about, required so the caller can compare it with the address it
+	// asked for. Nothing else in an `account_info` result identifies the subject, and every field
+	// below is read as that account's state — so a snapshot of a DIFFERENT account is the same
+	// hazard `loadXrpTransactionOutcome` already guards with `hash`, on the read it was missing
+	// from. An AccountRoot always carries it.
+	Account: z.string(),
 	Balance: XrpDropsSchema,
 	Sequence: XrpLedgerCounterSchema,
 	OwnerCount: XrpLedgerCounterSchema,
