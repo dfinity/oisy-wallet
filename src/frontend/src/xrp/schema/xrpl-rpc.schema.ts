@@ -19,15 +19,25 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
  * the two echo differently — verified against the configured endpoint:
  *   Clio:    `{ method: 'account_info', params: [{ account, ledger_index }] }`
  *   rippled: `{ command: 'account_info', account, ledger_index }`
- * Both are accepted and reduced to the same flat record, so a caller compares values rather than
+ * Both are accepted and normalised to the same pair, so a caller compares values rather than
  * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
  * response means, and for both readers above it means indeterminate rather than absent.
+ *
+ * `operation` rather than parameters alone, because an echo says two things and only one of them
+ * was being kept: what was asked, and what it was asked OF. The Clio branch discarded `method`
+ * outright. On its own that is defence in depth — a `tx` echo carries no `account` and an
+ * `account_info` echo carries no `transaction`, so neither can satisfy the other reader's
+ * comparison by accident — but it is a second, independent assertion on the only identity an error
+ * response has, and both shapes already state it.
  */
 export const XrplRequestEchoSchema = z.union([
 	z
 		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
-		.transform(({ params }) => params[0]),
-	z.object({ command: z.string() }).catchall(z.unknown())
+		.transform(({ method, params }) => ({ operation: method, params: params[0] })),
+	z
+		.object({ command: z.string() })
+		.catchall(z.unknown())
+		.transform(({ command, ...params }) => ({ operation: command, params }))
 ]);
 
 // The branches must be mutually exclusive: zod strips unknown keys and returns the

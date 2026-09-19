@@ -832,6 +832,13 @@ describe('xrpl.rest', () => {
 						result: { account: address, request: { command: 'account_info', account: other } }
 					},
 					{ name: 'nothing identifies it', result: {} },
+					// A well-formed echo for the OTHER operation, carrying the right address. Defence in
+					// depth rather than a live hole — a real `tx` echo has no `account` — but the echo is
+					// the only identity an error response has, so it asserts both things it states.
+					{
+						name: 'the echo is for a different operation',
+						result: { request: { command: 'tx', account: address } }
+					},
 					// A present identity that cannot be compared must FAIL the comparison rather than be
 					// dropped from it. Filtering to strings first meant the good half of a half-malformed
 					// response carried it.
@@ -1579,7 +1586,17 @@ describe('xrpl.rest', () => {
 				{ name: 'another transaction', echo: txEchoOf({ transaction: 'OTHERHASH' }) },
 				{ name: 'another lower bound', echo: txEchoOf({ transaction: 'HASH', minLedger: 900 }) },
 				{ name: 'another upper bound', echo: txEchoOf({ transaction: 'HASH', maxLedger: 1120 }) },
-				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } }
+				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } },
+				// Same, the other way round: an `account_info` echo carrying this transaction and range.
+				{
+					name: 'a different operation',
+					echo: {
+						request: {
+							method: 'account_info',
+							params: [{ transaction: 'HASH', min_ledger: 1000, max_ledger: 1020 }]
+						}
+					}
+				}
 			])('refuses an absence answering for $name', async ({ echo }) => {
 				mockFetchResponse({
 					body: { result: { error: 'txnNotFound', searched_all: true, ...echo } }

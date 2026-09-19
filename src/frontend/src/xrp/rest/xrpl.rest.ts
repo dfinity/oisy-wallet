@@ -206,8 +206,15 @@ const isXrpAccountErrorForAddress = ({
 }: {
 	address: XrpAddress;
 	account?: string;
-	request?: Record<string, unknown>;
+	request?: { operation: string; params: Record<string, unknown> };
 }): boolean => {
+	// The echo must be an `account_info` echo. On its own this is defence in depth — a `tx` echo
+	// carries no `account` to match — but it is a second assertion on the only identity an error
+	// response has, and the echo already states it.
+	if (nonNullish(request) && request.operation !== 'account_info') {
+		return false;
+	}
+
 	// Everything the response CARRIES, not everything it could parse. Filtering to strings first
 	// discarded a present-but-malformed identity before the comparison saw it, so
 	// `{ account: <requested>, request: { account: 123 } }` passed on the strength of the good half
@@ -216,7 +223,7 @@ const isXrpAccountErrorForAddress = ({
 	// `!== undefined` and NOT `nonNullish`: an explicit `null` is a malformed identity that has to
 	// fail, and `nonNullish` would drop it back out of the comparison. Absent is the only thing
 	// that may be skipped.
-	const echoed = [account, request?.account].filter((value) => value !== undefined);
+	const echoed = [account, request?.params.account].filter((value) => value !== undefined);
 
 	// Raw comparison, like the `Account` one: a classic address is base58 over a checksummed
 	// payload, so case is significant.
@@ -556,15 +563,17 @@ export const loadXrpTransactionOutcome = async ({
 	// `error?: undefined`, so the `in` check does not discriminate them and `request` is not
 	// reachable through it.
 	if (data.error === 'txnNotFound') {
-		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = data.request;
+		const { operation, params } = data.request;
+		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = params;
 
 		if (
+			operation !== 'tx' ||
 			String(transaction).toUpperCase() !== hash.toUpperCase() ||
 			minLedger !== firstLedgerSequence ||
 			maxLedger !== lastLedgerSequence
 		) {
 			throw new Error(
-				`Unexpected XRPL tx response: a txnNotFound for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
+				`Unexpected XRPL tx response: a txnNotFound from ${operation} for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
 			);
 		}
 

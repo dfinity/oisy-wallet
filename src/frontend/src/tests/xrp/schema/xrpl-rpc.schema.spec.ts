@@ -6,6 +6,7 @@ import {
 	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
+	XrplRequestEchoSchema,
 	XrplSubmitResultSchema,
 	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
@@ -156,6 +157,42 @@ describe('xrpl-rpc.schema', () => {
 				}).success
 			).toBeFalsy();
 		});
+	});
+
+	// The echo says two things — what was asked, and what it was asked OF — and the Clio branch
+	// used to discard the second. Both real shapes normalise to the same pair.
+	describe('XrplRequestEchoSchema', () => {
+		it('normalises the Clio shape', () => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					method: 'account_info',
+					params: [{ account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'validated' }]
+				}).data
+			).toEqual({
+				operation: 'account_info',
+				params: { account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'validated' }
+			});
+		});
+
+		it('normalises the forwarded rippled shape', () => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					command: 'account_info',
+					account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+					ledger_index: 'current'
+				}).data
+			).toEqual({
+				operation: 'account_info',
+				params: { account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'current' }
+			});
+		});
+
+		it.each([{}, { method: 'tx' }, { params: [{}] }, { command: 42 }])(
+			'rejects the echo %j, which states no operation',
+			(echo) => {
+				expect(XrplRequestEchoSchema.safeParse(echo).success).toBeFalsy();
+			}
+		);
 	});
 
 	describe('XrpLedgerCounterSchema', () => {
