@@ -254,7 +254,10 @@ const submitAndConfirmXrpTransaction = async ({
 	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
 	// did not take the blob — may still end up applied, and reporting it as failed would invite a
 	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
-	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
+	if (
+		nonNullish(result) &&
+		isXrpSubmitFinalFailure({ submitResult: result, transactionId: txHash })
+	) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''

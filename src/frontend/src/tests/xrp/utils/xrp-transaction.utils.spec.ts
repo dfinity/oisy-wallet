@@ -382,10 +382,31 @@ describe('xrp-transaction.utils', () => {
 	});
 
 	describe('isXrpSubmitFinalFailure', () => {
+		// The id the blob derives to. Supplied on both sides by default so the existing cases keep
+		// testing the engine result, and varied explicitly in the identity cases below.
+		const ID = 'A'.repeat(64);
+
+		// `txHash` is read with `in` rather than defaulted, so a case can state that the response
+		// named NO transaction — which a default would silently turn back into a match.
+		const finalFailure = (args: {
+			engineResult: string;
+			accepted?: boolean;
+			txHash?: string;
+			transactionId?: string;
+		}) =>
+			isXrpSubmitFinalFailure({
+				submitResult: {
+					engineResult: args.engineResult,
+					accepted: args.accepted ?? false,
+					txHash: 'txHash' in args ? args.txHash : ID
+				},
+				transactionId: args.transactionId ?? ID
+			});
+
 		// Malformed: the XRPL reference calls a `tem` result final, so this is the only class the
 		// send may report as failed without consulting the ledger.
 		it.each(['temBAD_FEE', 'temBAD_AMOUNT', 'temMALFORMED'])('rejects %s', (engineResult) => {
-			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
+			expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
 		});
 
 		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports the blob is
@@ -401,7 +422,7 @@ describe('xrp-transaction.utils', () => {
 			'tefMAX_LEDGER',
 			'telINSUF_FEE_P'
 		])('does not reject %s', (engineResult) => {
-			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
 		});
 
 		// The complete code shape, not a `tem` prefix. `engine_result` is `z.string()` in the submit
@@ -411,7 +432,7 @@ describe('xrp-transaction.utils', () => {
 		it.each(['temporary', 'tem', 'temBAD_fee', 'tem BAD_FEE extra', 'temBAD_FEE ', ' temBAD_FEE'])(
 			'does not reject the malformed %j',
 			(engineResult) => {
-				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
 			}
 		);
 
@@ -420,7 +441,7 @@ describe('xrp-transaction.utils', () => {
 		it.each(['temBAD_SEND_XRP_LIMIT', 'temREDUNDANT', 'temINVALID_FLAG', 'temUNCERTAIN'])(
 			'still rejects the real code %s',
 			(engineResult) => {
-				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
+				expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
 			}
 		);
 
@@ -429,8 +450,8 @@ describe('xrp-transaction.utils', () => {
 		it.each(['tesSUCCESS', 'tefPAST_SEQ', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
 			'does not reject %s whether or not it was accepted',
 			(engineResult) => {
-				expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
-				expect(isXrpSubmitFinalFailure({ engineResult, accepted: true })).toBeFalsy();
+				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
+				expect(finalFailure({ engineResult, accepted: true })).toBeFalsy();
 			}
 		);
 
@@ -439,11 +460,26 @@ describe('xrp-transaction.utils', () => {
 		// self-contradicting response is no basis for the only definitive failure declared after
 		// the blob is broadcast. It falls through to the poll instead.
 		it('does not reject a tem that the node claims to have accepted', () => {
-			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBeFalsy();
+			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBeFalsy();
 		});
 
 		it('still rejects the same code when the node did not accept it', () => {
-			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: false })).toBeTruthy();
+			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: false })).toBeTruthy();
+		});
+
+		// The response has to be about the blob we broadcast. Nothing else on the submit path ties
+		// it to the transaction, and this is the only branch that reports a definitive failure after
+		// the blob is on the wire — the report that tells a caller to rebuild, on a new sequence.
+		it.each([
+			{ name: 'names another transaction', txHash: 'B'.repeat(64) },
+			{ name: 'names no transaction', txHash: undefined }
+		])('does not reject a tem whose response $name', ({ txHash }) => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash })).toBeFalsy();
+		});
+
+		// Hex, so case is not significant — unlike the base58 addresses bound elsewhere.
+		it('rejects a tem whose response names this transaction in the other case', () => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash: ID.toLowerCase() })).toBeTruthy();
 		});
 	});
 
