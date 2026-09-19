@@ -19,7 +19,7 @@ import type {
 	XrpSubmitResult,
 	XrpTransactionOutcome
 } from '$xrp/types/xrp-transaction';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * An XRPL method answered with `result.error`.
@@ -201,17 +201,30 @@ const isXrpSnapshotForLedger = ({
  */
 const isXrpAccountErrorForAddress = ({
 	address,
+	ledgerIndex,
 	account,
 	request
 }: {
 	address: XrpAddress;
+	ledgerIndex: 'current' | 'validated';
 	account?: string;
 	request?: { operation: string; params: Record<string, unknown> };
 }): boolean => {
-	// The echo must be an `account_info` echo. On its own this is defence in depth — a `tx` echo
-	// carries no `account` to match — but it is a second assertion on the only identity an error
-	// response has, and the echo already states it.
-	if (nonNullish(request) && request.operation !== 'account_info') {
+	// The echo is required, not merely checked when present. It is the only thing that names the
+	// LEDGER, and a top-level `account` alone cannot: `tryDestination` reads the same destination
+	// from `current` and `validated` concurrently, so those two requests differ only in
+	// `ledger_index` and the address is identical by construction. One absence answering both makes
+	// the destination absent in both snapshots — `settled` false, `requiresTag` false — and an
+	// untagged payment at or above the reserve goes to `tecDST_TAG_NEEDED`.
+	//
+	// Safe to require: verified against the configured endpoint that `request` is on an
+	// `actNotFound` from both paths, the direct one carrying only `request` and the forwarded one
+	// carrying `account` as well, and that it echoes the literal `ledger_index` that was sent.
+	if (isNullish(request)) {
+		return false;
+	}
+
+	if (request.operation !== 'account_info' || request.params.ledger_index !== ledgerIndex) {
 		return false;
 	}
 
@@ -267,9 +280,9 @@ export const loadXrpBalance = async ({
 	if ('error' in data) {
 		// Bound like the funded branch below. A misrouted `actNotFound` would otherwise display
 		// another account's non-existence as this one's zero balance.
-		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+		if (!isXrpAccountErrorForAddress({ address, ledgerIndex: 'validated', ...data })) {
 			throw new Error(
-				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address} on the validated ledger`
 			);
 		}
 
@@ -367,9 +380,9 @@ export const loadXrpAccountInfo = async ({
 	// while the untyped one becomes an unavailable lookup that the tag guard now declines on.
 	// Absence is a claim about a specific account; a response that names none makes no claim.
 	if ('error' in data) {
-		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+		if (!isXrpAccountErrorForAddress({ address, ledgerIndex, ...data })) {
 			throw new Error(
-				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address} on the ${ledgerIndex} ledger`
 			);
 		}
 
