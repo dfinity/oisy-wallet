@@ -59,7 +59,7 @@ describe('XrpFeeContext', () => {
 			balance: 50_000_000n,
 			sequence: 7,
 			ownerCount: 0,
-			flags: undefined
+			flags: 0
 		});
 	});
 
@@ -99,7 +99,7 @@ describe('XrpFeeContext', () => {
 				balance: 50_000_000n,
 				sequence: 7,
 				ownerCount: 3,
-				flags: undefined
+				flags: 0
 			});
 
 			const { unmount } = renderContext();
@@ -108,9 +108,13 @@ describe('XrpFeeContext', () => {
 				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 3 }));
 			});
 
+			// The validated ledger, like the balance this reserve is displayed beside. It can therefore
+			// sit below the count `sendXrp` uses, which takes the higher of both snapshots — a wrinkle
+			// rather than a hazard, since the authoritative check runs at send time.
 			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
 				address: mockXrpAddress,
-				network: XrpNetworks.mainnet
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
 			});
 
 			unmount();
@@ -197,7 +201,7 @@ describe('XrpFeeContext', () => {
 
 			expect(get(reserveStore)).toBeUndefined();
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 });
 
 			await waitFor(() => {
 				expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
@@ -229,7 +233,7 @@ describe('XrpFeeContext', () => {
 				expect(get(reserveStore)).toBeUndefined();
 			});
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3, flags: undefined });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 3, flags: 0 });
 			unmount();
 		});
 
@@ -250,7 +254,7 @@ describe('XrpFeeContext', () => {
 
 			unmount();
 
-			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 5, flags: undefined });
+			resolve?.({ balance: 50_000_000n, sequence: 7, ownerCount: 5, flags: 0 });
 			await runResolvedPromises();
 
 			expect(get(reserveStore)).toBeUndefined();
