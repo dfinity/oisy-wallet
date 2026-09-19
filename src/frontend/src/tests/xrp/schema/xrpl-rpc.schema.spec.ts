@@ -246,8 +246,10 @@ describe('xrpl-rpc.schema', () => {
 	});
 
 	// The only variant that may be read as non-inclusion, and so the only one whose contradictions
-	// end a live send. Zod strips unknown keys, so anything that would dispute absence has to be
-	// forbidden by name or it is simply dropped and the payload parses as a settled "not there".
+	// end a live send. Zod strips unknown keys, so anything disputing absence is dropped unless the
+	// schema accounts for it — which is why this branch is strict and the others are not: the set a
+	// real absence contains is small and knowable, while the set it must not contain is every field
+	// a `tx` result can carry, now and in future.
 	describe('XrplTxResultSchema absence', () => {
 		const absent = { error: 'txnNotFound', searched_all: true };
 
@@ -255,9 +257,18 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrplTxResultSchema.safeParse(absent).success).toBeTruthy();
 		});
 
-		// `hash`, `tx` and `tx_json` are the three ways a `tx` result reports the transaction
-		// itself; `validated` and `meta` were already named.
+		// A `tx` result carries the transaction at the TOP LEVEL of `result`, so these are not
+		// exotic — they are what a validated payment answers with, beside the ones an earlier
+		// version of this branch forbade by name. Naming them was the wrong shape; the branch is
+		// strict now, so the question is what absence MAY contain rather than what it may not.
 		it.each([
+			{ name: 'TransactionType', extra: { TransactionType: 'Payment' } },
+			{ name: 'Account', extra: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD' } },
+			{ name: 'Sequence', extra: { Sequence: 42 } },
+			{ name: 'ledger_index', extra: { ledger_index: 107_065_791 } },
+			{ name: 'inLedger', extra: { inLedger: 107_065_791 } },
+			{ name: 'ctid', extra: { ctid: 'C660E4BF00000000' } },
+			{ name: 'LastLedgerSequence', extra: { LastLedgerSequence: 107_065_811 } },
 			{ name: 'hash', extra: { hash: 'H' } },
 			{ name: 'tx', extra: { tx: { TransactionType: 'Payment' } } },
 			{ name: 'tx_json', extra: { tx_json: { TransactionType: 'Payment' } } },
@@ -267,9 +278,17 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrplTxResultSchema.safeParse({ ...absent, ...extra }).success).toBeFalsy();
 		});
 
-		// What a real `txnNotFound` from the configured endpoint carries beside the two fields
-		// above. These are ordinary unknown keys and must keep being stripped, or every genuine
-		// absence would fail to parse.
+		// `status` is pinned rather than merely allowed: `xrpJsonRpc` established that
+		// `txnNotFound` arrives as `status: 'error'`, so a payload claiming success is not the
+		// error response this branch describes.
+		it('rejects an absence claiming a success status', () => {
+			expect(XrplTxResultSchema.safeParse({ ...absent, status: 'success' }).success).toBeFalsy();
+		});
+
+		// The complete key set the configured endpoint returns, verified across the ranged request
+		// this code sends, a far-past range, no range at all, and `binary: true`. The regression a
+		// strict branch could most easily introduce is rejecting every genuine absence, which would
+		// take expiry detection with it.
 		it('accepts the keys a real provider sends alongside absence', () => {
 			expect(
 				XrplTxResultSchema.safeParse({
