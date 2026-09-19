@@ -10,6 +10,7 @@ import {
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_LEDGER_SEARCH_LOOKBACK,
 	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS,
 	XRP_MAX_UINT32
@@ -168,7 +169,10 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
 			network: XrpNetworks.mainnet,
-			firstLedgerSequence: 1000,
+			// The SEARCH bound, which is deliberately not the signing offset: only
+			// `LastLedgerSequence` is in the blob, so the lower bound is reconstructed and must not
+			// move when the signing offset does.
+			firstLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET - XRP_LEDGER_SEARCH_LOOKBACK,
 			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
@@ -183,7 +187,10 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
 			network: XrpNetworks.mainnet,
-			firstLedgerSequence: 1000,
+			// The SEARCH bound, which is deliberately not the signing offset: only
+			// `LastLedgerSequence` is in the blob, so the lower bound is reconstructed and must not
+			// move when the signing offset does.
+			firstLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET - XRP_LEDGER_SEARCH_LOOKBACK,
 			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
@@ -201,7 +208,10 @@ describe('xrp-send.services', () => {
 		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 			hash: txHash,
 			network: XrpNetworks.mainnet,
-			firstLedgerSequence: 1000,
+			// The SEARCH bound, which is deliberately not the signing offset: only
+			// `LastLedgerSequence` is in the blob, so the lower bound is reconstructed and must not
+			// move when the signing offset does.
+			firstLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET - XRP_LEDGER_SEARCH_LOOKBACK,
 			lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
 		});
 	});
@@ -707,7 +717,7 @@ describe('xrp-send.services', () => {
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith({
 				hash: blobHash,
 				network: XrpNetworks.mainnet,
-				firstLedgerSequence: 4320 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				firstLedgerSequence: 4320 - XRP_LEDGER_SEARCH_LOOKBACK,
 				lastLedgerSequence: 4320
 			});
 
