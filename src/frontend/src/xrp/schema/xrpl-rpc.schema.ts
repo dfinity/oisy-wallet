@@ -40,6 +40,12 @@ export const XrpDropsSchema = z
  * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
  * response means, and for both readers above it means indeterminate rather than absent.
  *
+ * The branches are mutually exclusive, the rule this file already applies to `account_data` XOR
+ * `error` and to the three `tx` variants: zod strips unknown keys, so a branch that does not
+ * forbid the opposite discriminator silently drops it and parses anyway — and a payload carrying
+ * BOTH `method` and `command` was accepted under whichever branch came first, contradiction and
+ * all, on the two answers that end a send.
+ *
  * `operation` rather than parameters alone, because an echo says two things and only one of them
  * was being kept: what was asked, and what it was asked OF. The Clio branch discarded `method`
  * outright. On its own that is defence in depth — a `tx` echo carries no `account` and an
@@ -49,12 +55,23 @@ export const XrpDropsSchema = z
  */
 export const XrplRequestEchoSchema = z.union([
 	z
-		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
+		.object({
+			method: z.string(),
+			params: z.tuple([z.record(z.string(), z.unknown())]),
+			command: z.never().optional()
+		})
 		.transform(({ method, params }) => ({ operation: method, params: params[0] })),
 	z
-		.object({ command: z.string() })
+		.object({
+			command: z.string(),
+			method: z.never().optional(),
+			params: z.never().optional()
+		})
 		.catchall(z.unknown())
-		.transform(({ command, ...params }) => ({ operation: command, params }))
+		.transform(({ command, method: _method, params: _params, ...params }) => ({
+			operation: command,
+			params
+		}))
 ]);
 
 // The branches must be mutually exclusive: zod strips unknown keys and returns the

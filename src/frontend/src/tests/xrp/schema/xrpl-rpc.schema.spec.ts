@@ -202,6 +202,27 @@ describe('xrpl-rpc.schema', () => {
 			});
 		});
 
+		// The branches are mutually exclusive, like `account_data` XOR `error` and the three `tx`
+		// variants. Zod strips unknown keys, so without forbidding the opposite discriminator a
+		// payload carrying BOTH was accepted under whichever branch came first — contradiction
+		// dropped — on the two answers that end a send.
+		it.each([
+			{
+				name: 'the JSON-RPC shape also carrying a command',
+				echo: { method: 'tx', params: [{ transaction: 'H' }], command: 'account_info' }
+			},
+			{
+				name: 'the forwarded shape also carrying a method',
+				echo: { command: 'account_info', account: 'r1', method: 'tx' }
+			},
+			{
+				name: 'the forwarded shape also carrying params',
+				echo: { command: 'account_info', account: 'r1', params: [{ transaction: 'H' }] }
+			}
+		])('rejects $name', ({ echo }) => {
+			expect(XrplRequestEchoSchema.safeParse(echo).success).toBeFalsy();
+		});
+
 		it.each([{}, { method: 'tx' }, { params: [{}] }, { command: 42 }])(
 			'rejects the echo %j, which states no operation',
 			(echo) => {
