@@ -190,6 +190,48 @@ describe('xrpl.rest', () => {
 				}
 			);
 
+			// The outer claim against the inner one. `xrpJsonRpc` reconciled only the inner pair, so a
+			// body claiming success at the TOP while `result` carried a DECLARED error reached
+			// `expectedErrors` and was honoured as a state — for `txnNotFound`, absence and then a
+			// definitive expiry. Both expected codes are covered because those are the two that get
+			// honoured rather than thrown.
+			it.each([
+				{
+					name: 'txnNotFound',
+					result: { error: 'txnNotFound', searched_all: true },
+					call: () =>
+						loadXrpTransactionOutcome({
+							hash: 'H',
+							network,
+							firstLedgerSequence: 1000,
+							lastLedgerSequence: 1020
+						})
+				},
+				{
+					name: 'actNotFound',
+					result: { error: 'actNotFound', ...echoOf(address) },
+					call: () => loadXrpBalance({ address, network })
+				}
+			])('refuses a top-level success carrying $name', async ({ result, call }) => {
+				mockFetchResponse({ body: { result, status: 'success' } });
+
+				await expect(call()).rejects.toThrow('top-level success status with error');
+			});
+
+			// The shape this could most easily break: a forwarded success genuinely carries a
+			// top-level `status: 'success'`, and nothing about it may be refused.
+			it('still accepts a forwarded success that carries no error', async () => {
+				mockFetchResponse({
+					body: {
+						result: { ledger_current_index: 5, status: 'success' },
+						status: 'success',
+						forwarded: true
+					}
+				});
+
+				await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+			});
+
 			// Absent is the normal case: every non-forwarded response and every error omits it.
 			it('accepts a body with no top-level status at all', async () => {
 				mockFetchResponse({ body: { result: { ledger_current_index: 5 } } });

@@ -105,8 +105,24 @@ const xrpJsonRpc = async ({
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 
-	const { result } = parsed.data;
+	const { result, status: envelopeStatus } = parsed.data;
 	const { error, status } = result;
+
+	// The outer claim against the inner one. The envelope validated `status` beside the result, and
+	// the contradiction check further down compares `result.status` — a different field one level
+	// down — so a body claiming success at the TOP while `result` carries an error satisfied every
+	// check and reached `expectedErrors`, where a declared code is honoured as a state. For
+	// `txnNotFound` that is `{ state: 'absent' }` and, past `LastLedgerSequence`, a definitive
+	// expiry telling the caller a resend is safe.
+	//
+	// Before the expected-errors check rather than beside it: honouring a declared error after the
+	// body has already claimed the call succeeded is the ordering that makes this reachable.
+	if (envelopeStatus === 'success' && 'error' in result) {
+		throw new XrplRpcError({
+			method,
+			error: `top-level success status with error ${String(error)}`
+		});
+	}
 
 	// `result.status` is on every real response — `'success'`, or `'error'` alongside `error`,
 	// `error_code` and `error_message` — and was previously ignored, so a FAILED response could
