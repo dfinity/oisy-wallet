@@ -22,6 +22,21 @@ describe('xrpl-rpc.schema', () => {
 			});
 		});
 
+		// The protocol ceiling, not a chosen one: 10^17 drops is the entire XRP supply, and
+		// `ripple-binary-codec` refuses an `Amount` above it with "is an illegal amount". An
+		// unbounded `Balance` inflates the reserve-aware maximum, so a send above the real balance
+		// passes the guard written to stop it and XRPL charges the fee for a `tecUNFUNDED_PAYMENT`.
+		it('accepts the largest number of drops that can exist', () => {
+			expect(XrpDropsSchema.safeParse('100000000000000000').success).toBeTruthy();
+		});
+
+		it.each(['100000000000000001', '999999999999999999999999999999'])(
+			'rejects the out-of-range value %s',
+			(drops) => {
+				expect(XrpDropsSchema.safeParse(drops).success).toBeFalsy();
+			}
+		);
+
 		// `BigInt` alone would accept every one of these and hand back a plausible balance.
 		it('should fail validation for signed, hexadecimal, fractional and numeric forms', () => {
 			[1, '-1', '0x10', '1.5', '1e3', '', ' 1'].forEach((drops) => {

@@ -1,10 +1,27 @@
+import { XRP_MAX_DROPS } from '$xrp/constants/xrp.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
 // XRPL reports `Balance` as an **unsigned decimal** string of drops. `BigInt` would also
 // accept signed (`"-1"`), hexadecimal (`"0x10"`) and numeric (`1`) forms, so the contract
 // is pinned here rather than left to the conversion.
-export const XrpDropsSchema = z.string().regex(/^\d+$/);
+//
+// Bounded as well as shaped, which is the rule `XrpLedgerCounterSchema` already applies to every
+// counter: any run of digits parsed, `BigInt` converted it happily, and an inflated `Balance` runs
+// through `getXrpMaxAmount` into the reserve guard — so a send far above the real balance passes
+// the check written to stop exactly that, and XRPL applies it as `tecUNFUNDED_PAYMENT`.
+//
+// Compared through `BigInt`, since the value can exceed `Number`'s safe range. The shape is
+// re-tested inside the check rather than relied on from the `regex` above it: zod evaluates both,
+// so a `'1.5'` that already failed the regex would still reach `BigInt` and throw OUT of
+// `safeParse` instead of being reported as invalid. A shape the regex rejects passes this check
+// and fails on its own issue.
+const XRP_DROPS_PATTERN = /^\d+$/;
+
+export const XrpDropsSchema = z
+	.string()
+	.regex(XRP_DROPS_PATTERN)
+	.refine((drops) => !XRP_DROPS_PATTERN.test(drops) || BigInt(drops) <= XRP_MAX_DROPS);
 
 /**
  * The request a node echoes back inside `result.request`.

@@ -556,6 +556,35 @@ describe('xrpl.rest', () => {
 			);
 		});
 
+		// Bounded as well as shaped. An inflated balance is not only a wrong display: it runs
+		// through `getXrpMaxAmount` into the reserve guard, so a send above the real balance
+		// passes the check meant to stop it and is applied as `tecUNFUNDED_PAYMENT`.
+		it('returns the largest balance that can exist', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						validated: true,
+						account_data: { Account: address, Balance: '100000000000000000' }
+					}
+				}
+			});
+
+			await expect(loadXrpBalance({ address, network })).resolves.toBe(100_000_000_000_000_000n);
+		});
+
+		it.each(['100000000000000001', '999999999999999999999999999999'])(
+			'throws for the out-of-range balance %s',
+			async (Balance) => {
+				mockFetchResponse({
+					body: { result: { validated: true, account_data: { Account: address, Balance } } }
+				});
+
+				await expect(loadXrpBalance({ address, network })).rejects.toThrow(
+					'Unexpected XRPL account_info response'
+				);
+			}
+		);
+
 		// XRPL reports drops as an unsigned decimal string; `BigInt` alone would accept all of these
 		// and hand back a plausible-looking balance.
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(

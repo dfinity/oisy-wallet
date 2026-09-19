@@ -26,6 +26,14 @@ export const XRP_MAX_FEE_DROPS = 10_000n;
 // XRPL's `UInt32` ceiling. Named once because several distinct fields share it — a
 // `DestinationTag`, a ledger index, a `LastLedgerSequence` — and a bare literal in each place
 // would hide that they are the same protocol bound for the same reason.
+// The largest number of drops that can exist: 10^17, the entire XRP supply of 100 billion XRP at
+// 1,000,000 drops each. A protocol ceiling rather than a chosen one, and checked against
+// `ripple-binary-codec` — an `Amount` of `100000000000000000` encodes, `100000000000000001` throws
+// "is an illegal amount". Nothing larger can be a real value on any ledger, so a node reporting one
+// is reporting a figure that inflates a displayed balance and, through `getXrpMaxAmount`, the
+// reserve-aware maximum the send guard compares against.
+export const XRP_MAX_DROPS = 100_000_000_000_000_000n;
+
 export const XRP_MAX_UINT32 = 0xffff_ffff;
 
 // A `DestinationTag` is a protocol `UInt32`, and both ends are real tags: `0` is a tag rather than
