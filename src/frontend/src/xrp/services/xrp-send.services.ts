@@ -460,10 +460,8 @@ export const sendXrp = async ({
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
 	// would win a race against whichever of those diagnoses was the useful one. A key mismatch is a
 	// broken deployment; an insufficient balance is something the user can act on.
-	// Both snapshots of the sender, because neither is safe alone. `Sequence` has to be the open
-	// one or this signs a sequence the ledger has already consumed; the reserve inputs have to be
-	// the pessimistic pair, since the open ledger reflects pending CREDITS as well as debits and a
-	// maximum sized against an unvalidated credit offers money the account may not keep.
+	// Both snapshots of the sender, because neither is safe alone, and every value below takes the
+	// direction that cannot hurt: the higher sequence, the lower balance, the higher owner count.
 	const [openAccount, validatedAccount, destinationLookup, ledgerIndex] = await Promise.all([
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
 		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
@@ -471,7 +469,22 @@ export const sendXrp = async ({
 		loadXrpLedgerIndex({ network })
 	]);
 
-	const { sequence } = openAccount;
+	// The HIGHER sequence, not the open one. The open ledger is ahead of the validated one at any
+	// single instant, but these are two concurrent calls that do not share an instant: if `current`
+	// is answered while a transaction is still unapplied it reports N, and if a ledger close
+	// validates that transaction before `validated` is answered, that read reports N+1. Signing the
+	// open one then signs a sequence already consumed, which XRPL answers `tefPAST_SEQ`.
+	//
+	// The maximum cannot overshoot, which is what makes it safe rather than merely safer — a gapped
+	// sequence is the failure this file works hardest to avoid. Validated state at an instant is a
+	// subset of open state at that same instant, so `validated(t2) <= open(t2)`, and the sequence
+	// only ever increases, so `open(t1) <= open(t2)`. The larger of the two observations is
+	// therefore bounded above by the true open sequence at the later read: it can close the gap the
+	// race opens and cannot invent one.
+	//
+	// Neither snapshot sees rippled's transaction queue, so this does not address the queued
+	// sequence recorded in the PR caveats — that one is not a race between these two reads.
+	const sequence = Math.max(openAccount.sequence, validatedAccount.sequence);
 
 	// The lower balance and the higher owner count: a pending credit must not raise what can be
 	// sent, and an object created in the open ledger must not have its reserve ignored.
