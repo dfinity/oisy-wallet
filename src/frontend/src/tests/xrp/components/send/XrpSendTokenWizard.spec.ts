@@ -107,7 +107,7 @@ describe('XrpSendTokenWizard', () => {
 			balance,
 			sequence: 7,
 			ownerCount,
-			flags: undefined
+			flags: 0
 		});
 		vi.spyOn(xrpSendServices, 'sendXrp').mockResolvedValue({
 			txHash: 'HASH',
