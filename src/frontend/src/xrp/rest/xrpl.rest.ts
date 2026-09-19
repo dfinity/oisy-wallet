@@ -150,6 +150,38 @@ const xrpJsonRpc = async ({
 };
 
 /**
+ * Whether an `account_info` error response is about the account that was asked for.
+ *
+ * A success names its subject in `account_data.Account`; `actNotFound` names nothing, and it is
+ * the answer read as "this account does not exist". Unbound, a stale or misrouted one reports the
+ * WRONG account as absent — which for the destination read means `requiresTag` never fires and an
+ * untagged payment goes to `tecDST_TAG_NEEDED`, fee claimed.
+ *
+ * Both echoes are checked because the provider answers `ledger_index: 'validated'` itself and
+ * forwards `'current'` to rippled: the first carries only `request`, the second carries `account`
+ * as well. Either one matching is enough — they are two views of the same request.
+ *
+ * Returns false when nothing identifies the response, so the caller can treat an unbindable answer
+ * as unavailable rather than as absence. Verified against the configured endpoint that at least
+ * one echo is always present, on both ledgers.
+ */
+const isXrpAccountErrorForAddress = ({
+	address,
+	account,
+	request
+}: {
+	address: XrpAddress;
+	account?: string;
+	request?: Record<string, unknown>;
+}): boolean => {
+	// Raw, like the `Account` comparison: a classic address is base58 over a checksummed payload,
+	// so case is significant.
+	const echoed = [account, request?.account].filter((value) => typeof value === 'string');
+
+	return echoed.length > 0 && echoed.every((value) => value === address);
+};
+
+/**
  * Native XRP balance in drops (1 XRP = 1,000,000 drops), via the XRP Ledger
  * JSON-RPC `account_info` method.
  *
@@ -182,6 +214,14 @@ export const loadXrpBalance = async ({
 	const { data } = parsed;
 
 	if ('error' in data) {
+		// Bound like the funded branch below. A misrouted `actNotFound` would otherwise display
+		// another account's non-existence as this one's zero balance.
+		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+			throw new Error(
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+			);
+		}
+
 		return ZERO;
 	}
 
@@ -261,7 +301,19 @@ export const loadXrpAccountInfo = async ({
 
 	// The account is not on-ledger: a typed error, because owning nothing is a legitimate answer
 	// the destination check reads, not an operational failure.
+	//
+	// Only when the response identifies the account we asked about. An unbindable `actNotFound` is
+	// an UNTYPED error on purpose: `readDestination` maps the typed one to "does not exist", which
+	// above the reserve leaves `requiresTag` false and sends untagged into `tecDST_TAG_NEEDED`,
+	// while the untyped one becomes an unavailable lookup that the tag guard now declines on.
+	// Absence is a claim about a specific account; a response that names none makes no claim.
 	if ('error' in data) {
+		if (!isXrpAccountErrorForAddress({ address, ...data })) {
+			throw new Error(
+				`Unexpected XRPL account_info response: an ${data.error} that does not identify ${address}`
+			);
+		}
+
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
 	}
 

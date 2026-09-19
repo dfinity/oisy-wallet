@@ -6,6 +6,30 @@ import * as z from 'zod';
 // is pinned here rather than left to the conversion.
 export const XrpDropsSchema = z.string().regex(/^\d+$/);
 
+/**
+ * The request a node echoes back inside `result.request`.
+ *
+ * It is the only identity an ERROR response carries. A successful `account_info` names its subject
+ * in `account_data.Account` and a validated `tx` names it in `hash`, but `actNotFound` and
+ * `txnNotFound` carry neither — and those are precisely the answers this client reads as "the
+ * account does not exist" and "the payment is not in any ledger". Unbound, a stale or misrouted
+ * one of either is believed about the wrong subject.
+ *
+ * Two shapes, because the provider answers some methods itself and forwards others to rippled, and
+ * the two echo differently — verified against the configured endpoint:
+ *   Clio:    `{ method: 'account_info', params: [{ account, ledger_index }] }`
+ *   rippled: `{ command: 'account_info', account, ledger_index }`
+ * Both are accepted and reduced to the same flat record, so a caller compares values rather than
+ * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
+ * response means, and for both readers above it means indeterminate rather than absent.
+ */
+export const XrplRequestEchoSchema = z
+	.union([
+		z.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) }),
+		z.object({ command: z.string() }).catchall(z.unknown())
+	])
+	.transform((echo) => ('params' in echo ? echo.params[0] : echo));
+
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
 // first branch that parses, so without forbidding the opposite variant's key a
 // response carrying both would be read as a balance and the error silently dropped.
@@ -17,9 +41,13 @@ export const XrplAccountInfoResultSchema = z.union([
 		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
 		error: z.never().optional()
 	}),
+	// `actNotFound` carries no `account_data` to name its subject, so the identity has to come from
+	// what the node echoed back. See `XrplRequestEchoSchema`.
 	z.object({
 		error: z.string(),
-		account_data: z.never().optional()
+		account_data: z.never().optional(),
+		account: z.string().optional(),
+		request: XrplRequestEchoSchema.optional()
 	})
 ]);
 
@@ -107,7 +135,12 @@ export const XrplAccountInfoFullResultSchema = z.union([
 	}),
 	z.object({
 		error: z.literal('actNotFound'),
-		account_data: z.never().optional()
+		account_data: z.never().optional(),
+		// The only identity this branch can carry, and the one the destination read depends on: an
+		// unbound `actNotFound` reports SOME account as absent, and above the reserve that skips the
+		// required-destination-tag check and sends untagged into `tecDST_TAG_NEEDED`.
+		account: z.string().optional(),
+		request: XrplRequestEchoSchema.optional()
 	})
 ]);
 

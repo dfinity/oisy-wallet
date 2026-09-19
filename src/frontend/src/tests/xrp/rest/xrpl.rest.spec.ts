@@ -24,6 +24,13 @@ describe('xrpl.rest', () => {
 	const address = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
 	const network = XrpNetworks.mainnet;
 
+	// Every real `account_info` error echoes the request it answered — `request` always, plus a
+	// top-level `account` on the forwarded path. It is the only identity an `actNotFound` carries,
+	// and the helpers now refuse one that does not name the address they asked about.
+	const echoOf = (account: string) => ({
+		request: { command: 'account_info', account, ledger_index: 'validated' }
+	});
+
 	const mockFetchResponse = ({
 		body,
 		ok = true,
@@ -178,7 +185,10 @@ describe('xrpl.rest', () => {
 			// untouched by a check on the outer field.
 			it('still reads actNotFound as an expected state', async () => {
 				mockFetchResponse({
-					body: { result: { status: 'error', error: 'actNotFound' }, warnings: [{ id: 2001 }] }
+					body: {
+						result: { status: 'error', error: 'actNotFound', ...echoOf(address) },
+						warnings: [{ id: 2001 }]
+					}
 				});
 
 				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
@@ -227,7 +237,9 @@ describe('xrpl.rest', () => {
 			// check must not touch them, or every absence lookup would throw and expiry detection
 			// would go with it.
 			it('still reads actNotFound as an expected state', async () => {
-				mockFetchResponse({ body: { result: { status: 'error', error: 'actNotFound' } } });
+				mockFetchResponse({
+					body: { result: { status: 'error', error: 'actNotFound', ...echoOf(address) } }
+				});
 
 				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
 			});
@@ -350,7 +362,7 @@ describe('xrpl.rest', () => {
 
 		// The unfunded answer carries no `account_data` to bind, and still maps to zero.
 		it('still maps actNotFound to a zero balance', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
 		});
@@ -385,7 +397,7 @@ describe('xrpl.rest', () => {
 		});
 
 		it('maps an unfunded account (actNotFound) to a zero balance', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
 
@@ -695,13 +707,72 @@ describe('xrpl.rest', () => {
 			});
 
 			// The identity check must not cost the typed absence answer the destination read depends
-			// on: `actNotFound` carries no `account_data` to compare.
+			// on: `actNotFound` carries no `account_data`, so it is bound by the echoed request.
 			it('still reports an unfunded account as absent rather than as a mismatch', async () => {
-				mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+				mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 				await expect(
 					loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
 				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+
+			// Absence is a claim about a SPECIFIC account. An `actNotFound` naming another one, or
+			// naming none, makes no claim about this address — and the typed error is what
+			// `readDestination` maps to "does not exist", which above the reserve leaves
+			// `requiresTag` false and sends untagged into `tecDST_TAG_NEEDED`. So these stay
+			// untyped, which the send path reads as an unavailable lookup and declines on.
+			describe('an actNotFound that does not identify the account asked about', () => {
+				const other = 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv';
+
+				it.each([
+					{ name: 'the request echoes another account', result: { ...echoOf(other) } },
+					{ name: 'the forwarded account is another one', result: { account: other } },
+					{
+						name: 'the two echoes disagree',
+						result: { account: address, request: { command: 'account_info', account: other } }
+					},
+					{ name: 'nothing identifies it', result: {} }
+				])('is untyped when $name', async ({ result }) => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
+
+					const failure = await loadXrpAccountInfo({
+						address,
+						network: XrpNetworks.mainnet,
+						ledgerIndex: 'current'
+					}).catch((err: unknown) => err);
+
+					expect(failure).toBeInstanceOf(Error);
+					expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
+					expect((failure as Error).message).toContain('does not identify');
+				});
+
+				// The two shapes the provider actually sends: Clio answers `validated` itself and
+				// nests the request under `params`, while a forwarded `current` flattens it and adds
+				// a top-level `account`. Either one naming this address is enough.
+				it.each([
+					{
+						name: 'the Clio shape',
+						result: { request: { method: 'account_info', params: [{ account: address }] } }
+					},
+					{
+						name: 'the forwarded shape',
+						result: { account: address, request: { command: 'account_info', account: address } }
+					}
+				])('accepts absence bound by $name', async ({ result }) => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
+
+					await expect(
+						loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+					).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+				});
+
+				// Same binding on the displayed balance, where an unbound `actNotFound` would show
+				// another account's non-existence as this one's zero.
+				it('refuses to read an unidentified actNotFound as a zero balance', async () => {
+					mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+					await expect(loadXrpBalance({ address, network })).rejects.toThrow('does not identify');
+				});
 			});
 		});
 
@@ -867,7 +938,7 @@ describe('xrpl.rest', () => {
 		// A zero balance cannot carry that meaning: the transaction cost can drain an existing
 		// account to nothing and it still exists on-ledger.
 		it('throws a typed error for an unfunded account', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+			mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
 
 			await expect(
 				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
