@@ -50,7 +50,18 @@
 		}
 
 		try {
-			const { ownerCount } = await loadXrpAccountInfo({ address, network });
+			// The validated ledger, like the balance this reserve is displayed beside: a shown figure
+			// that can roll back is worse than one a few seconds stale, and two numbers the user does
+			// arithmetic on should come from the same ledger.
+			//
+			// It can therefore sit below the count `sendXrp` uses — that one takes the higher of both
+			// snapshots — so the form may accept an amount the send then refuses. A wrinkle rather
+			// than a hazard: the authoritative check runs at send time and fails closed.
+			const { ownerCount } = await loadXrpAccountInfo({
+				address,
+				network,
+				ledgerIndex: 'validated'
+			});
 
 			if (id !== generation) {
 				return;
