@@ -6,6 +6,7 @@ import {
 	XrplEnvelopeSchema,
 	XrplLedgerCurrentResultSchema,
 	XrplLedgerResultSchema,
+	XrplRequestEchoSchema,
 	XrplSubmitResultSchema,
 	XrplTxResultSchema
 } from '$xrp/schema/xrpl-rpc.schema';
@@ -32,12 +33,14 @@ describe('xrpl-rpc.schema', () => {
 	describe('XrplAccountInfoResultSchema', () => {
 		it('should validate a funded account result', () => {
 			const result = XrplAccountInfoResultSchema.safeParse({
-				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' },
+				validated: true
 			});
 
 			expect(result.success).toBeTruthy();
 			expect(result.data).toEqual({
-				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' },
+				validated: true
 			});
 		});
 
@@ -95,7 +98,8 @@ describe('xrpl-rpc.schema', () => {
 
 		it('parses account data alone', () => {
 			expect(
-				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData, validated: true })
+					.success
 			).toBeTruthy();
 		});
 
@@ -125,7 +129,8 @@ describe('xrpl-rpc.schema', () => {
 		it('accepts zero flags', () => {
 			expect(
 				XrplAccountInfoFullResultSchema.safeParse({
-					account_data: { ...accountData, Flags: 0 }
+					account_data: { ...accountData, Flags: 0 },
+					validated: true
 				}).success
 			).toBeTruthy();
 		});
@@ -152,6 +157,42 @@ describe('xrpl-rpc.schema', () => {
 				}).success
 			).toBeFalsy();
 		});
+	});
+
+	// The echo says two things — what was asked, and what it was asked OF — and the Clio branch
+	// used to discard the second. Both real shapes normalise to the same pair.
+	describe('XrplRequestEchoSchema', () => {
+		it('normalises the Clio shape', () => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					method: 'account_info',
+					params: [{ account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'validated' }]
+				}).data
+			).toEqual({
+				operation: 'account_info',
+				params: { account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'validated' }
+			});
+		});
+
+		it('normalises the forwarded rippled shape', () => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					command: 'account_info',
+					account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+					ledger_index: 'current'
+				}).data
+			).toEqual({
+				operation: 'account_info',
+				params: { account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', ledger_index: 'current' }
+			});
+		});
+
+		it.each([{}, { method: 'tx' }, { params: [{}] }, { command: 42 }])(
+			'rejects the echo %j, which states no operation',
+			(echo) => {
+				expect(XrplRequestEchoSchema.safeParse(echo).success).toBeFalsy();
+			}
+		);
 	});
 
 	describe('XrpLedgerCounterSchema', () => {
@@ -327,7 +368,7 @@ describe('xrpl-rpc.schema', () => {
 			{
 				name: 'XrplSubmitResultSchema',
 				schema: XrplSubmitResultSchema,
-				result: { engine_result: 'tesSUCCESS' }
+				result: { engine_result: 'tesSUCCESS', accepted: true }
 			},
 			{
 				name: 'XrplAccountInfoFullResultSchema',
@@ -339,7 +380,8 @@ describe('xrpl-rpc.schema', () => {
 						Sequence: 1,
 						OwnerCount: 0,
 						Flags: 0
-					}
+					},
+					validated: true
 				}
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
