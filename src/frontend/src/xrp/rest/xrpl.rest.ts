@@ -166,6 +166,24 @@ const xrpJsonRpc = async ({
 };
 
 /**
+ * Whether an `account_info` response answered for the snapshot that was asked for.
+ *
+ * `validated` is the field that says which one: `true` for the validated ledger, `false` for the
+ * open one. The address check cannot tell the two apart, and `sendXrp` reads BOTH to take the lower
+ * balance and the higher owner count — a pessimism that only holds if the two answers really are
+ * two different ledgers. Two open answers size the maximum against an unvalidated credit that can
+ * roll back (`tecUNFUNDED_PAYMENT`); two validated ones sign a sequence the open ledger has already
+ * consumed (`tefPAST_SEQ`).
+ */
+const isXrpSnapshotForLedger = ({
+	ledgerIndex,
+	validated
+}: {
+	ledgerIndex: 'current' | 'validated';
+	validated: boolean;
+}): boolean => validated === (ledgerIndex === 'validated');
+
+/**
  * Whether an `account_info` error response is about the account that was asked for.
  *
  * A success names its subject in `account_data.Account`; `actNotFound` names nothing, and it is
@@ -249,6 +267,14 @@ export const loadXrpBalance = async ({
 		}
 
 		return ZERO;
+	}
+
+	// Asked for the validated ledger precisely so a displayed figure cannot roll back, so an
+	// open-ledger answer accepted here defeats the reason this read is validated at all.
+	if (!isXrpSnapshotForLedger({ ledgerIndex: 'validated', validated: data.validated })) {
+		throw new Error(
+			'Unexpected XRPL account_info response: an open-ledger snapshot for a validated read'
+		);
 	}
 
 	// Bound to the address asked for, like the full snapshot. This one cannot cause a bad send —
@@ -341,6 +367,14 @@ export const loadXrpAccountInfo = async ({
 		}
 
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
+
+	// The answer must be about the snapshot we asked for, not only the account. See
+	// `isXrpSnapshotForLedger` for what rides on it.
+	if (!isXrpSnapshotForLedger({ ledgerIndex, validated: data.validated })) {
+		throw new Error(
+			`Unexpected XRPL account_info response: a ${data.validated ? 'validated' : 'open'}-ledger snapshot for a ${ledgerIndex} read`
+		);
 	}
 
 	const { Account, Balance, Sequence, OwnerCount, Flags } = data.account_data;

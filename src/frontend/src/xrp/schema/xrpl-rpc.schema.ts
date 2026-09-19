@@ -39,6 +39,7 @@ export const XrplAccountInfoResultSchema = z.union([
 		// whose balance this is, so a stale or misrouted answer would otherwise be displayed as this
 		// account's. Only `Balance` is needed beyond that — this feeds the balance store, not a send.
 		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
+		validated: z.boolean(),
 		error: z.never().optional()
 	}),
 	// `actNotFound` carries no `account_data` to name its subject, so the identity has to come from
@@ -128,9 +129,21 @@ const XrplAccountDataSchema = z.object({
 // return, so `actNotFound` is literally the only alternative — and giving it a branch is what lets
 // the caller decide absence AFTER parsing. Deciding it beforehand meant a response carrying both
 // `actNotFound` and `account_data` was read as absence, discarding the `Flags` the send path reads.
+// `validated` says WHICH snapshot answered, and it is the only field that does so on both forms:
+// a validated response carries `validated: true` with `ledger_index` and `ledger_hash`, an open one
+// `validated: false` with `ledger_current_index`. The caller asks for one of the two and the address
+// check cannot tell them apart, so without this a response for the other snapshot passes — and
+// `sendXrp` reads BOTH to take the lower balance and the higher owner count, a pessimism that only
+// holds if the two answers really are two ledgers.
+//
+// On the funded branch only. An `actNotFound` from the direct path carries no ledger metadata at
+// all, so requiring it there would refuse every real absence on the validated ledger — and that
+// branch has no `Balance`, `Sequence` or `OwnerCount` to be wrong about, which is where both
+// consequences live.
 export const XrplAccountInfoFullResultSchema = z.union([
 	z.object({
 		account_data: XrplAccountDataSchema,
+		validated: z.boolean(),
 		error: z.never().optional()
 	}),
 	z.object({

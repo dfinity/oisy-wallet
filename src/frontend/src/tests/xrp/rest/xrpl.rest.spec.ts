@@ -406,6 +406,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: true,
 						account_data: { Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv', Balance: '25000000' }
 					}
 				}
@@ -420,7 +421,12 @@ describe('xrpl.rest', () => {
 		// forms differing only in case are not the same account.
 		it('throws for an address differing only in case', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address.toUpperCase(), Balance: '1' } } }
+				body: {
+					result: {
+						validated: true,
+						account_data: { Account: address.toUpperCase(), Balance: '1' }
+					}
+				}
 			});
 
 			await expect(loadXrpBalance({ address, network })).rejects.toThrow('answered for');
@@ -435,7 +441,9 @@ describe('xrpl.rest', () => {
 
 		it('returns the balance in drops as a bigint', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address, Balance: '25000000' } } }
+				body: {
+					result: { validated: true, account_data: { Account: address, Balance: '25000000' } }
+				}
 			});
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
@@ -448,7 +456,9 @@ describe('xrpl.rest', () => {
 				ok: true,
 				status: 200,
 				json: () =>
-					Promise.resolve({ result: { account_data: { Account: address, Balance: '1' } } })
+					Promise.resolve({
+						result: { validated: true, account_data: { Account: address, Balance: '1' } }
+					})
 			});
 			vi.stubGlobal('fetch', fetchMock);
 
@@ -498,7 +508,13 @@ describe('xrpl.rest', () => {
 		// keys, so without mutual exclusion the error would be discarded and `1` returned.
 		it('throws on a response carrying both account_data and an error', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address, Balance: '1' }, error: 'actNotFound' } }
+				body: {
+					result: {
+						validated: true,
+						account_data: { Account: address, Balance: '1' },
+						error: 'actNotFound'
+					}
+				}
 			});
 
 			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
@@ -511,7 +527,9 @@ describe('xrpl.rest', () => {
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
 			'throws instead of converting the invalid balance %j',
 			async (Balance) => {
-				mockFetchResponse({ body: { result: { account_data: { Account: address, Balance } } } });
+				mockFetchResponse({
+					body: { result: { validated: true, account_data: { Account: address, Balance } } }
+				});
 
 				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
 					'Unexpected XRPL account_info response'
@@ -670,6 +688,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: ledgerIndex === 'validated',
 							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
 						}
 					}
@@ -682,7 +701,9 @@ describe('xrpl.rest', () => {
 		);
 
 		it('asks the validated ledger for the display balance', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Account: address, Balance: '1' } } } });
+			mockFetchResponse({
+				body: { result: { validated: true, account_data: { Account: address, Balance: '1' } } }
+			});
 
 			await loadXrpBalance({ address, network });
 
@@ -695,6 +716,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -738,6 +760,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: { ...accountData, Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv' }
 						}
 					}
@@ -752,7 +775,12 @@ describe('xrpl.rest', () => {
 			// unlike the hex transaction hash, which is compared case-insensitively.
 			it('throws for an account that differs from the requested one only in case', async () => {
 				mockFetchResponse({
-					body: { result: { account_data: { ...accountData, Account: address.toUpperCase() } } }
+					body: {
+						result: {
+							validated: false,
+							account_data: { ...accountData, Account: address.toUpperCase() }
+						}
+					}
 				});
 
 				await expect(
@@ -764,7 +792,7 @@ describe('xrpl.rest', () => {
 			// would leave the comparison above skippable by leaving the field out.
 			it.each([undefined, null, 42, {}])('throws for an account of %j', async (Account) => {
 				mockFetchResponse({
-					body: { result: { account_data: { ...accountData, Account } } }
+					body: { result: { validated: false, account_data: { ...accountData, Account } } }
 				});
 
 				await expect(
@@ -867,12 +895,94 @@ describe('xrpl.rest', () => {
 			});
 		});
 
+		// The caller asks for one snapshot and the address check cannot tell the two apart, so a
+		// response for the OTHER one passed. `sendXrp` reads both to take the lower balance and the
+		// higher owner count — a pessimism that only holds if the answers really are two ledgers.
+		describe('the ledger snapshot the response answered for', () => {
+			const funded = (validated: boolean) => ({
+				body: {
+					result: {
+						validated,
+						account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
+					}
+				}
+			});
+
+			it.each([
+				{
+					asked: 'current' as const,
+					answered: true,
+					name: 'a validated snapshot for an open read'
+				},
+				{
+					asked: 'validated' as const,
+					answered: false,
+					name: 'an open snapshot for a validated read'
+				}
+			])('refuses $name', async ({ asked, answered }) => {
+				mockFetchResponse(funded(answered));
+
+				await expect(loadXrpAccountInfo({ address, network, ledgerIndex: asked })).rejects.toThrow(
+					'snapshot for a'
+				);
+			});
+
+			it.each(['current', 'validated'] as const)(
+				'accepts the %s snapshot it asked for',
+				async (asked) => {
+					mockFetchResponse(funded(asked === 'validated'));
+
+					await expect(
+						loadXrpAccountInfo({ address, network, ledgerIndex: asked })
+					).resolves.toEqual(expect.objectContaining({ sequence: 1 }));
+				}
+			);
+
+			// Required, so the comparison cannot be skipped by omitting the field.
+			it.each([undefined, null, 'true', 1])('refuses a validated flag of %j', async (validated) => {
+				mockFetchResponse({
+					body: {
+						result: {
+							validated,
+							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
+						}
+					}
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network, ledgerIndex: 'current' })
+				).rejects.toThrow('does not match the expected shape');
+			});
+
+			// The regression this could introduce: an `actNotFound` from the direct path carries no
+			// ledger metadata at all, so absence on the validated ledger must stay readable.
+			it('still reads an actNotFound with no ledger metadata as absence', async () => {
+				mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
+
+				await expect(
+					loadXrpAccountInfo({ address, network, ledgerIndex: 'validated' })
+				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+
+			// Same reason the balance read asks for the validated ledger in the first place.
+			it('refuses an open-ledger snapshot for the displayed balance', async () => {
+				mockFetchResponse({
+					body: { result: { validated: false, account_data: { Account: address, Balance: '1' } } }
+				});
+
+				await expect(loadXrpBalance({ address, network })).rejects.toThrow(
+					'open-ledger snapshot for a validated read'
+				);
+			});
+		});
+
 		// The send path reads `lsfRequireDestTag` out of these bits, so dropping them at the
 		// boundary would leave an untagged payment to be applied as `tecDST_TAG_NEEDED`.
 		it('returns the account flags when the node reports them', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -901,6 +1011,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
 					}
 				}
@@ -917,6 +1028,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -941,6 +1053,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -970,6 +1083,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: {
 								Account: address,
 								Balance: '30000000',
@@ -991,6 +1105,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -1014,6 +1129,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0, Flags: 0 }
 						}
 					}
@@ -1045,6 +1161,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						error: 'actNotFound',
 						account_data: {
 							Account: address,

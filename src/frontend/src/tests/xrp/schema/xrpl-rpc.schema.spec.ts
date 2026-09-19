@@ -32,12 +32,14 @@ describe('xrpl-rpc.schema', () => {
 	describe('XrplAccountInfoResultSchema', () => {
 		it('should validate a funded account result', () => {
 			const result = XrplAccountInfoResultSchema.safeParse({
-				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' },
+				validated: true
 			});
 
 			expect(result.success).toBeTruthy();
 			expect(result.data).toEqual({
-				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' }
+				account_data: { Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', Balance: '25000000' },
+				validated: true
 			});
 		});
 
@@ -95,7 +97,8 @@ describe('xrpl-rpc.schema', () => {
 
 		it('parses account data alone', () => {
 			expect(
-				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData }).success
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: accountData, validated: true })
+					.success
 			).toBeTruthy();
 		});
 
@@ -125,7 +128,8 @@ describe('xrpl-rpc.schema', () => {
 		it('accepts zero flags', () => {
 			expect(
 				XrplAccountInfoFullResultSchema.safeParse({
-					account_data: { ...accountData, Flags: 0 }
+					account_data: { ...accountData, Flags: 0 },
+					validated: true
 				}).success
 			).toBeTruthy();
 		});
@@ -339,7 +343,8 @@ describe('xrpl-rpc.schema', () => {
 						Sequence: 1,
 						OwnerCount: 0,
 						Flags: 0
-					}
+					},
+					validated: true
 				}
 			}
 		])('$name parses the result alone but rejects it alongside an error', ({ schema, result }) => {
