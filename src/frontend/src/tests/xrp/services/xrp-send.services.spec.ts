@@ -67,7 +67,7 @@ describe('xrp-send.services', () => {
 			balance: 50_000_000n,
 			sequence: 7,
 			ownerCount: 0,
-			flags: undefined
+			flags: 0
 		});
 		// The destination is read before signing to refuse a payment too small to create an unfunded
 		// account. Funded by default, so only the tests that care set it to ZERO.
@@ -787,7 +787,7 @@ describe('xrp-send.services', () => {
 		const sourceWith = ({ balance, ownerCount }: { balance: bigint; ownerCount: number }) =>
 			vi
 				.spyOn(xrplRest, 'loadXrpAccountInfo')
-				.mockResolvedValue({ balance, sequence: 7, ownerCount, flags: undefined });
+				.mockResolvedValue({ balance, sequence: 7, ownerCount, flags: 0 });
 
 		it('refuses an amount that would leave the account below its reserve', async () => {
 			// 2 XRP held, 2 ledger objects: reserve 1_000_000 + 2 x 200_000 = 1_400_000, so with a
@@ -839,7 +839,7 @@ describe('xrp-send.services', () => {
 	// deletion or an `lsfRequireDestTag` change living only in the open ledger may never validate,
 	// and trusting it lets a below-reserve or untagged payment through to a fee-claiming `tec*`.
 	describe('the two destination snapshots', () => {
-		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 		const belowReserve = XRP_BASE_RESERVE_DROPS - 1n;
 
 		// `undefined` means the node answered `actNotFound`; an Error means it could not answer.
@@ -949,7 +949,7 @@ describe('xrp-send.services', () => {
 			open: Partial<{ balance: bigint; ownerCount: number; sequence: number }>;
 			validated: Partial<{ balance: bigint; ownerCount: number }>;
 		}) => {
-			const base = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+			const base = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address, ledgerIndex }) =>
 				Promise.resolve(
@@ -1078,7 +1078,7 @@ describe('xrp-send.services', () => {
 				balance: XRP_BASE_RESERVE_DROPS,
 				sequence: 7,
 				ownerCount: 0,
-				flags: undefined
+				flags: 0
 			});
 
 			await expect(sendXrp({ ...params, amount: 25_000_000n })).rejects.toThrow(
@@ -1089,7 +1089,7 @@ describe('xrp-send.services', () => {
 		});
 
 		it('does not derive it for a below-reserve payment to a destination that does not exist', async () => {
-			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(async ({ address }) =>
 				address === destination
@@ -1105,7 +1105,7 @@ describe('xrp-send.services', () => {
 		});
 
 		it('does not derive it for an untagged payment to a destination that requires a tag', async () => {
-			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+			const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address }) =>
 				Promise.resolve(address === destination ? { ...sourceInfo, flags: 0x00020000 } : sourceInfo)
@@ -1153,7 +1153,7 @@ describe('xrp-send.services', () => {
 				balance: XRP_BASE_RESERVE_DROPS,
 				sequence: 7,
 				ownerCount: 0,
-				flags: undefined
+				flags: 0
 			});
 
 			await expect(sendXrp({ ...params, amount: 9_000_000n, fee: -10_000_000n })).rejects.toThrow(
@@ -1220,7 +1220,7 @@ describe('xrp-send.services', () => {
 	});
 
 	describe('a destination that requires a tag', () => {
-		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
 		// `lsfRequireDestTag`. Set by exchanges and other shared accounts, where the tag is what
 		// credits the payment to a customer.
@@ -1228,7 +1228,7 @@ describe('xrp-send.services', () => {
 		// `lsfDefaultRipple` — an unrelated bit, so a flags value being truthy is not enough.
 		const OTHER_FLAG = 0x00800000;
 
-		const mockDestinationFlags = (flags: number | undefined) =>
+		const mockDestinationFlags = (flags: number) =>
 			vi
 				.spyOn(xrplRest, 'loadXrpAccountInfo')
 				.mockImplementation(({ address }) =>
@@ -1261,9 +1261,11 @@ describe('xrp-send.services', () => {
 			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
 		});
 
-		// Flags the node did not report are unknown, not zero — but unknown is no basis to decline.
-		it('sends untagged when the node reported no flags', async () => {
-			mockDestinationFlags(undefined);
+		// What an account with nothing set actually reports. A node that OMITS `Flags` no longer
+		// reaches here at all: the response fails the parse, so the destination read reports an
+		// unanswerable lookup rather than a snapshot claiming no requirement — the case below.
+		it('sends untagged when the destination sets no flags at all', async () => {
+			mockDestinationFlags(0);
 
 			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
 		});
@@ -1284,7 +1286,7 @@ describe('xrp-send.services', () => {
 	});
 
 	describe('an unfunded destination', () => {
-		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
 		// The node's `actNotFound` for the destination is the only thing that means unfunded.
 		const mockDestination = (

@@ -372,8 +372,10 @@ export const sendXrp = async ({
 		unavailable: Error | undefined;
 	}
 
-	type XrpDestinationRead =
-		{ exists: true; flags: number | undefined } | { exists: false } | { error: Error };
+	// `flags` is a number on the `exists` branch, not an optional one: `Flags` is a mandatory
+	// AccountRoot field, so a response without it fails the parse and lands on `error` — an
+	// unanswerable lookup — rather than arriving here as a snapshot with nothing to say.
+	type XrpDestinationRead = { exists: true; flags: number } | { exists: false } | { error: Error };
 
 	const readDestination = async (
 		ledgerIndex: 'current' | 'validated'
@@ -397,10 +399,7 @@ export const sendXrp = async ({
 		return {
 			settled: reads.every((read) => 'exists' in read && read.exists),
 			requiresTag: reads.some(
-				(read) =>
-					'flags' in read &&
-					nonNullish(read.flags) &&
-					(read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+				(read) => 'flags' in read && (read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
 			),
 			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
 		};

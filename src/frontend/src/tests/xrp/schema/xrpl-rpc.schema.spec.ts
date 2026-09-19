@@ -107,6 +107,27 @@ describe('xrpl-rpc.schema', () => {
 			).toBeFalsy();
 		});
 
+		// `Flags` is mandatory on an AccountRoot, so an omission is a malformed response rather than
+		// an account with unknown flags. Read as unknown it became "no destination tag required",
+		// which is the one reading of it that lets a payment through to `tecDST_TAG_NEEDED`.
+		it('rejects account data without Flags', () => {
+			const { Flags: _Flags, ...withoutFlags } = accountData;
+
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({ account_data: withoutFlags }).success
+			).toBeFalsy();
+		});
+
+		// Zero is the value an account with nothing set actually reports, and it must stay a
+		// positive answer rather than being conflated with the omission above.
+		it('accepts zero flags', () => {
+			expect(
+				XrplAccountInfoFullResultSchema.safeParse({
+					account_data: { ...accountData, Flags: 0 }
+				}).success
+			).toBeTruthy();
+		});
+
 		// The branch that lets the caller decide absence after parsing rather than before it.
 		it('parses a lone actNotFound', () => {
 			expect(
@@ -252,7 +273,8 @@ describe('xrpl-rpc.schema', () => {
 						Account: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
 						Balance: '1',
 						Sequence: 1,
-						OwnerCount: 0
+						OwnerCount: 0,
+						Flags: 0
 					}
 				}
 			}

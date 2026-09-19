@@ -67,9 +67,16 @@ const XrplAccountDataSchema = z.object({
 	OwnerCount: XrpLedgerCounterSchema,
 	// The AccountRoot flag bits. `lsfRequireDestTag` is the one the send path reads: without it a
 	// payment to an account that requires a destination tag is applied as `tecDST_TAG_NEEDED`,
-	// which claims the fee and consumes the sequence. Optional so a node that omits the field
-	// leaves the flags unknown rather than failing the whole read.
-	Flags: XrpLedgerCounterSchema.optional()
+	// which claims the fee and consumes the sequence.
+	//
+	// Required, because the protocol requires it: `Flags` is a mandatory AccountRoot field and an
+	// account with none set reports `Flags: 0` rather than omitting it — confirmed against the
+	// configured endpoint, on flagged and unflagged accounts alike. It was optional so an omission
+	// left the flags merely unknown, but that turned a malformed response into a snapshot claiming
+	// no requirement, which is the one reading of it that spends a fee. A response missing it is
+	// now malformed, which the sender read fails closed on and the destination read reports as an
+	// unanswerable lookup.
+	Flags: XrpLedgerCounterSchema
 });
 
 // Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`

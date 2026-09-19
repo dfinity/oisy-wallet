@@ -519,7 +519,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
-							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0 }
+							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
 						}
 					}
 				});
@@ -544,7 +544,13 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
-						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0
+						}
 					}
 				}
 			});
@@ -559,7 +565,7 @@ describe('xrpl.rest', () => {
 				balance: 30_000_000n,
 				sequence: 42,
 				ownerCount: 3,
-				flags: undefined
+				flags: 0
 			});
 		});
 
@@ -652,14 +658,37 @@ describe('xrpl.rest', () => {
 			expect(info.flags).toBe(131_072);
 		});
 
-		// Absent flags are not the same claim as no flags being set, so they stay `undefined`
-		// rather than becoming zero — and a node that omits the field must not fail the read,
-		// which the send path needs for the sequence and the reserve.
-		it('leaves the flags undefined when the node omits them', async () => {
+		// `Flags` is a mandatory AccountRoot field, so its absence describes a malformed response
+		// rather than an account with nothing to say. Accepting the omission made it the ONE
+		// reading that spends a fee: the send path takes unknown flags as no requirement and lets
+		// an untagged payment through to `tecDST_TAG_NEEDED`.
+		it('throws when the node omits the flags', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
 						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpAccountInfo({ address, network: XrpNetworks.mainnet, ledgerIndex: 'current' })
+			).rejects.toThrow('Unexpected XRPL account_info response');
+		});
+
+		// Zero is a positive answer, not an absent one: it is what an account with no flags set
+		// actually reports.
+		it('returns zero flags as zero rather than as unknown', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 3,
+							Flags: 0
+						}
 					}
 				}
 			});
@@ -670,14 +699,20 @@ describe('xrpl.rest', () => {
 				ledgerIndex: 'current'
 			});
 
-			expect(info.flags).toBeUndefined();
+			expect(info.flags).toBe(0);
 		});
 
 		it('returns a zero owner count when the account owns nothing', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
-						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 0 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence: 42,
+							OwnerCount: 0,
+							Flags: 0
+						}
 					}
 				}
 			});
@@ -700,7 +735,13 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
-							account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount }
+							account_data: {
+								Account: address,
+								Balance: '30000000',
+								Sequence: 42,
+								OwnerCount,
+								Flags: 0
+							}
 						}
 					}
 				});
@@ -715,7 +756,13 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
-						account_data: { Account: address, Balance: '30000000', Sequence, OwnerCount: 0 }
+						account_data: {
+							Account: address,
+							Balance: '30000000',
+							Sequence,
+							OwnerCount: 0,
+							Flags: 0
+						}
 					}
 				}
 			});
@@ -731,7 +778,9 @@ describe('xrpl.rest', () => {
 			async (Balance) => {
 				mockFetchResponse({
 					body: {
-						result: { account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0 } }
+						result: {
+							account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0, Flags: 0 }
+						}
 					}
 				});
 
