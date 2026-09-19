@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import type { NullishIdentity } from '$lib/types/identity';
+import { consoleError } from '$lib/utils/console.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
@@ -265,7 +266,31 @@ const submitAndConfirmXrpTransaction = async ({
 		);
 	}
 
-	progress?.(ProgressStepsSendXrp.CONFIRM);
+	// Past this point the blob is on the wire, and a progress observer must not be able to change
+	// what happened to it. The two calls below are the only ones that run after the broadcast —
+	// `INITIALIZATION`, `SIGN` and `SEND` all precede `submitXrpTransaction`, where an observer
+	// throwing aborts with nothing submitted, which is correct and must keep working.
+	//
+	// Unguarded, each rewrote an outcome it had no part in. A throw at `CONFIRM` escaped as a plain
+	// error with no `pending` attached — indistinguishable from a pre-broadcast failure, so a
+	// caller rebuilds on a new sequence and pays twice. A throw at `DONE` was worse: it runs on a
+	// validated `tesSUCCESS`, so it reported a payment that definitively landed as a rejection,
+	// where a resend is unambiguously a duplicate rather than merely possibly one.
+	//
+	// Logged rather than discarded: an observer throwing is a caller bug, and the only thing that
+	// changes here is that it can no longer decide the send.
+	const reportPostBroadcastProgress = (step: ProgressStepsSendXrp) => {
+		try {
+			progress?.(step);
+		} catch (err: unknown) {
+			consoleError(
+				`XRP send progress observer threw at ${step}; the transaction outcome is unaffected.`,
+				err
+			);
+		}
+	};
+
+	reportPostBroadcastProgress(ProgressStepsSendXrp.CONFIRM);
 
 	let transactionResult: string | undefined;
 
@@ -299,7 +324,7 @@ const submitAndConfirmXrpTransaction = async ({
 		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
 	}
 
-	progress?.(ProgressStepsSendXrp.DONE);
+	reportPostBroadcastProgress(ProgressStepsSendXrp.DONE);
 
 	return { txHash, submitResult: result };
 };
