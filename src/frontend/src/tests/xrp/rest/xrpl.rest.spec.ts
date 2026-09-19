@@ -1141,6 +1141,57 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('txnNotFound');
 		});
 
+		// `validated` and `meta` were forbidden by name, but zod strips every OTHER unknown key —
+		// so a payload claiming absence while carrying the transaction itself still parsed as
+		// absence, which past `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the
+		// caller is told is safe. These are the three ways a `tx` result reports the transaction.
+		it.each([
+			{ name: 'a hash', extra: { hash: 'H' } },
+			{ name: 'a tx payload', extra: { tx: { TransactionType: 'Payment' } } },
+			{ name: 'a tx_json payload', extra: { tx_json: { TransactionType: 'Payment' } } }
+		])('refuses an absence that also carries $name', async ({ extra }) => {
+			mockFetchResponse({
+				body: { result: { error: 'txnNotFound', searched_all: true, ...extra } }
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).rejects.toThrow('txnNotFound');
+		});
+
+		// The keys a real `txnNotFound` from the configured endpoint actually carries. Forbidding
+		// the contradicting fields above must not turn these into a rejection, or every genuine
+		// absence would throw and expiry detection would go with it.
+		it('still reads a real provider txnNotFound as absence', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'txnNotFound',
+						error_code: 29,
+						error_message: 'Transaction not found.',
+						searched_all: true,
+						request: { method: 'tx', params: [{ transaction: 'H' }] },
+						status: 'error',
+						type: 'response'
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactionOutcome({
+					hash: 'H',
+					network,
+					firstLedgerSequence: 1000,
+					lastLedgerSequence: 1020
+				})
+			).resolves.toEqual({ state: 'absent' });
+		});
+
 		// The range is what makes the node report `searched_all` at all.
 		it('asks for the ledger range the transaction can be included in', async () => {
 			mockFetchResponse({ body: { result: { error: 'txnNotFound', searched_all: true } } });

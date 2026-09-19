@@ -243,6 +243,45 @@ describe('xrpl-rpc.schema', () => {
 		});
 	});
 
+	// The only variant that may be read as non-inclusion, and so the only one whose contradictions
+	// end a live send. Zod strips unknown keys, so anything that would dispute absence has to be
+	// forbidden by name or it is simply dropped and the payload parses as a settled "not there".
+	describe('XrplTxResultSchema absence', () => {
+		const absent = { error: 'txnNotFound', searched_all: true };
+
+		it('accepts a fully searched absence', () => {
+			expect(XrplTxResultSchema.safeParse(absent).success).toBeTruthy();
+		});
+
+		// `hash`, `tx` and `tx_json` are the three ways a `tx` result reports the transaction
+		// itself; `validated` and `meta` were already named.
+		it.each([
+			{ name: 'hash', extra: { hash: 'H' } },
+			{ name: 'tx', extra: { tx: { TransactionType: 'Payment' } } },
+			{ name: 'tx_json', extra: { tx_json: { TransactionType: 'Payment' } } },
+			{ name: 'validated', extra: { validated: true } },
+			{ name: 'meta', extra: { meta: { TransactionResult: 'tesSUCCESS' } } }
+		])('rejects an absence contradicted by $name', ({ extra }) => {
+			expect(XrplTxResultSchema.safeParse({ ...absent, ...extra }).success).toBeFalsy();
+		});
+
+		// What a real `txnNotFound` from the configured endpoint carries beside the two fields
+		// above. These are ordinary unknown keys and must keep being stripped, or every genuine
+		// absence would fail to parse.
+		it('accepts the keys a real provider sends alongside absence', () => {
+			expect(
+				XrplTxResultSchema.safeParse({
+					...absent,
+					error_code: 29,
+					error_message: 'Transaction not found.',
+					request: { method: 'tx', params: [{ transaction: 'H' }] },
+					status: 'error',
+					type: 'response'
+				}).success
+			).toBeTruthy();
+		});
+	});
+
 	describe('rejecting a mixed error/result response', () => {
 		it.each([
 			{

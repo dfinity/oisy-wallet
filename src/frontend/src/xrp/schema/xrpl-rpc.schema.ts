@@ -185,11 +185,26 @@ export const XrplTxResultSchema = z.union([
 	}),
 	// Absent: the node confirms it searched every ledger in the requested range. This is the only
 	// shape that may be read as non-inclusion, because non-inclusion is what ends the send.
+	//
+	// And therefore the branch that must contradict itself the least. Zod strips unknown keys, so
+	// every field that would DISPUTE absence has to be forbidden by name or it is simply dropped:
+	// a payload carrying `txnNotFound` and `searched_all` beside a transaction still parsed here,
+	// and past `LastLedgerSequence` this branch is what throws `XrpSendExpiredError` and tells the
+	// caller a resend is safe. `validated` and `meta` were already named; `hash`, `tx` and
+	// `tx_json` are the three ways a `tx` result reports the transaction itself, and the other two
+	// branches require `hash` precisely because it is what binds an answer to the question.
+	//
+	// Nothing real is rejected: a `txnNotFound` from the configured endpoint carries `error`,
+	// `error_code`, `error_message`, `searched_all`, `request`, `status` and `type` — none of the
+	// three, and the rest are stripped as the unknown keys they are.
 	z.object({
 		error: z.literal('txnNotFound'),
 		searched_all: z.literal(true),
 		validated: z.never().optional(),
-		meta: z.never().optional()
+		meta: z.never().optional(),
+		hash: z.never().optional(),
+		tx: z.never().optional(),
+		tx_json: z.never().optional()
 	}),
 	// Pending: in a ledger but not yet validated. It has to say so POSITIVELY — when the pending
 	// branch was "everything optional", `{}` and `{ anything: 1 }` both parsed as pending, and at
