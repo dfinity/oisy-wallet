@@ -5,7 +5,8 @@ import type { NavigationBarSlot, NavigationSection } from '$lib/types/navigation
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
 	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
-	{ id: 'more', items: ['notes', 'explore', 'rewards', 'settings'] }
+	// 'testing' is the harness entry - DO NOT MERGE. Last, below Settings.
+	{ id: 'more', items: ['notes', 'explore', 'rewards', 'settings', 'testing'] }
 ];
 
 // Mobile bottom-bar information architecture: five slots, two of which are
@@ -17,5 +18,5 @@ export const MOBILE_NAVIGATION_BAR: NavigationBarSlot[] = [
 	{ type: 'item', id: 'activity' },
 	{ type: 'group', id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ type: 'item', id: 'notes' },
-	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'settings'] }
+	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'settings', 'testing'] }
 ];
