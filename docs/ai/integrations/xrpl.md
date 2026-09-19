@@ -115,14 +115,24 @@ standing between it and a dropped error. `XrplTxResultSchema` does carry it — 
 z.never().optional()` on the validated and pending branches, and `error: z.literal('txnNotFound')`
 on the absence branch, which is what lets absence be decided from the parsed value.
 
-Forbidding a key by name is the only way to reject it. Zod strips every unknown key, so a
-branch that does not name a contradicting field simply drops it and parses anyway. That
-matters most on `XrplTxResultSchema`'s absence branch, the one variant a caller may read as
-non-inclusion: it forbids `validated`, `meta`, `hash`, `tx` and `tx_json`, so a payload
-claiming `txnNotFound` while carrying the transaction itself stays malformed instead of
-becoming a settled "not there" that ends the send. A real `txnNotFound` carries none of
-them — `error`, `error_code`, `error_message`, `searched_all`, `request`, `status` and
-`type` — and those are stripped as the unknown keys they are.
+Zod strips every unknown key, so a branch that does not account for a contradicting field
+simply drops it and parses anyway. On `XrplTxResultSchema`'s absence branch — the one variant
+a caller may read as non-inclusion — that is settled with `z.strictObject` rather than a list
+of forbidden fields, because a `tx` result carries the transaction at the **top level** of
+`result`: a validated payment answers with `Account`, `Sequence`, `TransactionType`,
+`ledger_index`, `inLedger`, `ctid`, `hash`, `meta`, `validated` and more, side by side.
+Forbidding those one at a time is an open-ended question that grows with the protocol;
+listing what an absence MAY contain is the closed one.
+
+Strict **there** and not on the envelope, which looks like the same call and is not. The
+envelope wraps every response and this provider sends `status`, `type`, `forwarded` and
+`warnings` beside every result, so strictness there would reject all of them. The absence
+branch is a narrow error shape whose complete key set is `error`, `error_code`,
+`error_message`, `searched_all`, `request`, `status` and `type` — verified against the
+configured endpoint across the ranged request the code sends, a far-past range, no range at
+all, and `binary: true`. If a provider ever adds one more, absence stops parsing and the
+outcome is indeterminate: the poll keeps running and cannot conclude expiry, which is the
+direction this path has to fail in.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
