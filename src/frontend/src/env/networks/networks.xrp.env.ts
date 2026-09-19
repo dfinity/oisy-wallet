@@ -8,23 +8,13 @@ import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { XrpNetwork } from '$xrp/types/network';
+import { notEmptyString } from '@dfinity/utils';
 
 // XRP Ledger uses the same enablement convention as every other chain — the
 // `VITE_XRP_MAINNET_DISABLED` env var, which defaults to *enabled*.
-//
-// TEMPORARY: while the integration is in progress this override force-disables XRP on
-// the user-facing environments (prod `ic` and beta) regardless of the env var, so the
-// half-built chain never ships there, while leaving it enabled on real local and
-// staging/test_fe builds so it can be exercised. `TEST` is included so the vitest suite
-// keeps evaluating XRP as disabled — the unit-test env runs as `local`, and enabling XRP
-// there would surface it in suite-wide network/token expectations that only get updated
-// in the final "enable" PR. Remove this override (and the `!… &&` below) in that PR —
-// XRP then behaves exactly like BTC/ETH/SOL.
-const XRP_MAINNET_DISABLED_OVERRIDE = PROD || BETA || TEST;
-
-export const XRP_MAINNET_ENABLED =
-	!XRP_MAINNET_DISABLED_OVERRIDE &&
-	parseEnabledMainnetBoolEnvVar(import.meta.env.VITE_XRP_MAINNET_DISABLED);
+export const XRP_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
+	import.meta.env.VITE_XRP_MAINNET_DISABLED
+);
 
 /**
  * XRPL JSON-RPC endpoint.
@@ -40,10 +30,18 @@ export const XRP_MAINNET_ENABLED =
  * mock an RPC call would otherwise reach the public cluster for real and pass, making the suite
  * network-dependent and the omission invisible. Resolving to `undefined` turns that into an
  * immediate, named failure. Any spec that needs an endpoint mocks the module.
+ *
+ * An empty value counts as unconfigured, not as a configured endpoint. `??` alone would keep
+ * `''`, which is not nullish: `xrpHttpRpcUrl` would then pass its `assertNonNullish` and return
+ * an empty URL, and every request would resolve against the app's own origin instead of failing.
+ * A var that is declared but unset is the normal case for both of the ways this arrives — a
+ * `.env` copied from `.env.example`, and a deployment secret that has not been created yet.
  */
-export const XRP_RPC_HTTP_URL_MAINNET =
-	import.meta.env.VITE_XRP_RPC_URL_MAINNET ??
-	(PROD || BETA || TEST ? undefined : 'https://xrplcluster.com');
+export const XRP_RPC_HTTP_URL_MAINNET = notEmptyString(import.meta.env.VITE_XRP_RPC_URL_MAINNET)
+	? import.meta.env.VITE_XRP_RPC_URL_MAINNET
+	: PROD || BETA || TEST
+		? undefined
+		: 'https://xrplcluster.com';
 
 export const XRP_MAINNET_NETWORK_SYMBOL = 'XRP';
 
