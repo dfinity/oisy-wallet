@@ -1178,11 +1178,16 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('txnNotFound');
 		});
 
-		// `validated` and `meta` were forbidden by name, but zod strips every OTHER unknown key —
-		// so a payload claiming absence while carrying the transaction itself still parsed as
-		// absence, which past `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the
-		// caller is told is safe. These are the three ways a `tx` result reports the transaction.
+		// A `tx` result reports the transaction at the TOP LEVEL of `result`, so a payload claiming
+		// absence while carrying transaction fields used to parse as absence — which past
+		// `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the caller is told is
+		// safe. Forbidding the fields one by one only covered the ones that were named; the branch
+		// is strict now, so any of these leaves the outcome indeterminate.
 		it.each([
+			{ name: 'a transaction type', extra: { TransactionType: 'Payment' } },
+			{ name: 'an account', extra: { Account: address } },
+			{ name: 'a sequence', extra: { Sequence: 42 } },
+			{ name: 'a ledger index', extra: { ledger_index: 1010 } },
 			{ name: 'a hash', extra: { hash: 'H' } },
 			{ name: 'a tx payload', extra: { tx: { TransactionType: 'Payment' } } },
 			{ name: 'a tx_json payload', extra: { tx_json: { TransactionType: 'Payment' } } }
@@ -1201,8 +1206,9 @@ describe('xrpl.rest', () => {
 			).rejects.toThrow('txnNotFound');
 		});
 
-		// The keys a real `txnNotFound` from the configured endpoint actually carries. Forbidding
-		// the contradicting fields above must not turn these into a rejection, or every genuine
+		// The complete key set a real `txnNotFound` from the configured endpoint carries, verified
+		// across the ranged request this code sends, a far-past range, no range at all, and
+		// `binary: true`. A strict branch must not turn these into a rejection, or every genuine
 		// absence would throw and expiry detection would go with it.
 		it('still reads a real provider txnNotFound as absence', async () => {
 			mockFetchResponse({
