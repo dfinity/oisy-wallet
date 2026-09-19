@@ -347,6 +347,21 @@ describe('xrp-send.services', () => {
 		}
 	);
 
+	// The end of the same argument, one layer down: a malformed `accepted` used to collapse to
+	// `false`, which made a `tem*` a definitive rejection on the strength of a field the response
+	// never actually stated. It now fails the submit parse, and a submit that throws is already
+	// treated as a lost response — so the hash decides instead of the malformed flag.
+	it('confirms rather than rejecting when the submit response has a malformed accepted flag', async () => {
+		vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(
+			new Error('Unexpected XRPL submit response: it does not match the expected shape')
+		);
+
+		const { submitResult } = await sendXrp(params);
+
+		expect(submitResult).toBeUndefined();
+		expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+	});
+
 	// Both this and the indeterminate error are thrown at the CONFIRM step, so the type is the only
 	// thing a caller can use to tell a settled failure — fee charged, funds not sent — from an
 	// outcome nobody knows yet. Getting that backwards tells the user to keep waiting for a balance

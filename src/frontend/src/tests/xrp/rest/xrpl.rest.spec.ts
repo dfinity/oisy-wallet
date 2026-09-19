@@ -586,28 +586,29 @@ describe('xrpl.rest', () => {
 			expect(result.engineResult).toBe('terPRE_SEQ');
 		});
 
-		// `accepted` comes from an untrusted node, so it is validated rather than cast: a
-		// non-boolean would otherwise pass through and read as truthy.
-		it.each(['false', 'true', 1, 0, {}])(
-			'marks a non-boolean accepted value %j as not accepted',
+		// `accepted` decides, alongside `engine_result`, whether a `tem*` is a definitive rejection,
+		// so a malformed one must not collapse to `false` — that read a contradictory response as a
+		// rejection reported AFTER the blob was broadcast. It now fails the parse, which the send
+		// treats exactly as a lost response and answers by confirming the hash.
+		it.each(['false', 'true', 1, 0, {}, null])(
+			'refuses a non-boolean accepted value of %j',
 			async (accepted) => {
 				mockFetchResponse({
 					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
 				});
 
-				const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-				expect(result.accepted).toBeFalsy();
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).rejects.toThrow('Unexpected XRPL submit response');
 			}
 		);
 
-		it('marks a response without an accepted flag as not accepted', async () => {
+		it('refuses a response without an accepted flag', async () => {
 			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
 
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeFalsy();
-			expect(result.engineResult).toBe('tecUNFUNDED_PAYMENT');
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL submit response'
+			);
 		});
 
 		it('throws on a non-ok HTTP response', async () => {
@@ -650,7 +651,12 @@ describe('xrpl.rest', () => {
 		it('tolerates malformed engine_result_message and tx_json', async () => {
 			mockFetchResponse({
 				body: {
-					result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json: 'nope' }
+					result: {
+						engine_result: 'tesSUCCESS',
+						accepted: true,
+						engine_result_message: 7,
+						tx_json: 'nope'
+					}
 				}
 			});
 
@@ -659,7 +665,7 @@ describe('xrpl.rest', () => {
 					engineResult: 'tesSUCCESS',
 					engineResultMessage: undefined,
 					txHash: undefined,
-					accepted: false
+					accepted: true
 				}
 			);
 		});

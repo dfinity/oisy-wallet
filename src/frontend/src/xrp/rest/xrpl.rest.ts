@@ -621,9 +621,14 @@ export const submitXrpTransaction = async ({
 		engineResult: data.engine_result,
 		engineResultMessage: data.engine_result_message,
 		txHash: data.tx_json?.hash,
-		// Reported for the caller's record only. It says this node took the transaction
-		// (applied/queued/broadcast/kept), which is neither necessary nor sufficient for the send to
-		// have happened, so it does not gate anything — see `isXrpSubmitFinalFailure`.
-		accepted: data.accepted === true
+		// It says this node took the transaction (applied/queued/broadcast/kept), which is neither
+		// necessary nor sufficient for the send to have happened — so `accepted: false` never
+		// creates a failure. It does decide one thing: a `tem*` is only a definitive rejection when
+		// the node did NOT also claim to have taken the blob, because nothing can be both malformed
+		// and accepted. See `isXrpSubmitFinalFailure`.
+		//
+		// Passed through rather than compared to `true`: the schema requires a boolean, so the
+		// comparison would only be re-deriving what the parse already guarantees.
+		accepted: data.accepted
 	};
 };

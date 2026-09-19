@@ -306,12 +306,21 @@ export const XrplTxResultSchema = z.union([
 export const XrplSubmitResultSchema = z.object({
 	engine_result: z.string(),
 	error: z.never().optional(),
-	// Strict only where the decision reads. These three are cosmetic or unused — the message is
-	// interpolated into an error, the hash is derived locally and `accepted` is compared to `true`
-	// — so a malformed one must not fail the parse: that would throw, and the send would poll for a
-	// minute over a field it never consults.
+	// Strict only where the decision reads. These two are cosmetic — the message is interpolated
+	// into an error and the hash is derived locally — so a malformed one must not fail the parse:
+	// that would throw, and the send would poll for a minute over a field it never consults.
 	engine_result_message: z.string().optional().catch(undefined),
-	accepted: z.unknown().optional(),
+	// `accepted` is not one of them any more. It decides, alongside `engine_result`, whether a
+	// `tem*` is a definitive rejection: only a node that did NOT claim to take the blob makes that
+	// claim credible. Left as `z.unknown().optional()` and normalised with `=== true`, every
+	// malformed value — `'true'`, `1`, `null`, or the field missing — collapsed to `false` and
+	// turned a contradictory response into a reported rejection AFTER the blob was broadcast,
+	// which is the outcome that check exists to avoid.
+	//
+	// Required, so a malformed one fails the parse instead. `submitXrpTransaction` then throws,
+	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
+	// where the hash decides. That is the direction this path has to fail in.
+	accepted: z.boolean(),
 	tx_json: z
 		.object({ hash: z.string().optional().catch(undefined) })
 		.optional()
