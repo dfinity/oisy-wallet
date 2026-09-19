@@ -9,7 +9,7 @@ import {
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
-import { encode } from 'ripple-binary-codec';
+import { DEFAULT_DEFINITIONS, encode } from 'ripple-binary-codec';
 
 describe('xrp-transaction.utils', () => {
 	const base = {
@@ -95,16 +95,23 @@ describe('xrp-transaction.utils', () => {
 			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
 		});
 
-		// The complete code shape, not a `tem` prefix. `engine_result` is `z.string()` in the submit
+		// Membership, not a `tem`-shaped pattern. `engine_result` is `z.string()` in the submit
 		// schema, so these can arrive — and the decision is made AFTER the blob was broadcast, so
 		// reading one as definitive reports a transaction that may still land as rejected, which is
-		// what invites a second payment. Each has to be polled instead.
-		it.each(['temporary', 'tem', 'temBAD_fee', 'tem BAD_FEE extra', 'temBAD_FEE ', ' temBAD_FEE'])(
-			'does not reject the malformed %j',
-			(engineResult) => {
-				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
-			}
-		);
+		// what invites a second payment. `temFAKE` is the one a pattern accepted: correctly shaped
+		// and not a code the protocol defines.
+		it.each([
+			'temporary',
+			'tem',
+			'temBAD_fee',
+			'tem BAD_FEE extra',
+			'temBAD_FEE ',
+			' temBAD_FEE',
+			'temFAKE',
+			'temNOT_A_REAL_CODE'
+		])('does not reject the malformed %j', (engineResult) => {
+			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
+		});
 
 		// Every `tem` code the protocol defines still is final: checked against
 		// `ripple-binary-codec`'s own list, which is where the pattern came from.
@@ -150,6 +157,43 @@ describe('xrp-transaction.utils', () => {
 		// Hex, so case is not significant — unlike the base58 addresses bound elsewhere.
 		it('rejects a tem whose response names this transaction in the other case', () => {
 			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash: ID.toLowerCase() })).toBeTruthy();
+		});
+
+		// The set is generated from `ripple-binary-codec`'s `TRANSACTION_RESULTS` and written out by
+		// hand, so this is what stops a typo or a drift from silently shrinking it.
+		describe('the tem set matches the protocol', () => {
+			// `DEFAULT_DEFINITIONS.transactionResult` is a `BytesLookup` whose name keys are
+			// enumerable at runtime but absent from its type, so reading them needs the cast — and
+			// that cast is one of the reasons the source holds a written-out set instead. Confined
+			// to a test it costs nothing. Filtered to the name direction, since the same object
+			// also stores the ordinals so it can decode.
+			const protocolResults = Object.keys(
+				DEFAULT_DEFINITIONS.transactionResult as unknown as Record<string, number>
+			).filter((code) => /^[a-z]{3}[A-Z0-9_]*$/.test(code));
+
+			const protocolTem = protocolResults.filter((code) => code.startsWith('tem')).sort();
+
+			it('treats every tem code the protocol defines as final', () => {
+				const notFinal = protocolTem.filter(
+					(engineResult) => !finalFailure({ engineResult, accepted: false })
+				);
+
+				expect(notFinal).toEqual([]);
+			});
+
+			// The other direction: nothing outside the `tem` class may be final, so a drift that pasted
+			// a `tec` or `tef` code into the set fails here.
+			it('treats no code from another class as final', () => {
+				const wronglyFinal = protocolResults
+					.filter((code) => !code.startsWith('tem'))
+					.filter((engineResult) => finalFailure({ engineResult, accepted: false }));
+
+				expect(wronglyFinal).toEqual([]);
+			});
+
+			it('is exactly as large as the protocol class', () => {
+				expect(protocolTem).toHaveLength(51);
+			});
 		});
 	});
 

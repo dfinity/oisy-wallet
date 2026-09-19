@@ -49,26 +49,47 @@ rather than assumed: it accepts a `DestinationTag` of `-1`, `1.5`, `NaN` or abov
 `LastLedgerSequence` beyond `UInt32` — none of the argument classes `sendXrp`
 refuses. The guards here are stricter than the library's.
 
-### And not its result-code enums
+### And its result-code enums, in one direction only
 
 `ripple-binary-codec` exports `DEFAULT_DEFINITIONS`, whose `transactionResult`
-does hold every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`,
-1 `tes`. It is tempting to test membership against that list instead of the
-`/^tem[A-Z0-9_]+$/` and `/^tec[A-Z0-9_]+$/` patterns used in
-`xrp-transaction.utils.ts` and `xrpl-rpc.schema.ts`. Deliberately not done:
+holds every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`, 1
+`tes`. Whether to test membership against that list or to match a shape
+(`/^tem[A-Z0-9_]+$/`, `/^tec[A-Z0-9_]+$/`) is answered differently for the two
+sets, because their failure directions are opposite.
+
+**`tem` is a set.** `isXrpSubmitFinalFailure` holds the 51 codes explicitly. A
+pattern accepted an invented `temFAKE`, and that decision is a definitive
+rejection taken _after_ the blob is broadcast — the one report that tells a
+caller to rebuild on a new sequence and pay twice.
+
+**`tec` stays a pattern**, in `XrplTxResultSchema`. Staleness is why: any list
+here eventually lags the protocol, and amendments add `tec` codes routinely
+where they almost never add `tem` ones. An unknown `tem` is simply not final, so
+the send polls, the malformed transaction never lands and it expires — the right
+answer, eighty seconds later. An unknown `tec` would stop the validated branch
+parsing and report a payment that _was_ applied and _did_ claim the fee as
+"outcome unknown". A false positive runs the other way too: a fake `tec` is
+harmless, because any validated result that is not `tesSUCCESS` means the payment
+did not deliver, whatever the code is called.
+
+So membership sits where staleness is safe and the error is expensive, and the
+pattern sits where staleness is expensive and the error is harmless.
+
+The `tem` set is **generated from that enum and written out**, not imported from
+it:
 
 - `transactionResult` is typed `BytesLookup`, a class. The name keys are
   enumerable at runtime but the type does not expose them, so reading the list
   needs a cast.
 - That class stores names and ordinals in the same object so it can decode. The
   name direction is an implementation detail, not a documented surface.
-- The dependency is range-pinned (`^2.8.0`), so CI can resolve a different minor
-  than anything verified locally.
-- Most importantly, it buys very little. A hostile node wanting to fake a
-  definitive rejection sends a **real** code; the list only rejects garbage that
-  happens to be shaped like one. The patterns were verified once against that
-  enum — all 51 `tem` and all 82 `tec` codes match, and no code from another
-  class does — and that verification is recorded where each pattern is defined.
+- The list lives in the package's `dist`, and the dependency is range-pinned
+  (`^2.8.0`), so CI can resolve a different minor than anything verified locally.
+
+A test does the deep import — where it costs nothing — and pins the set against
+the enum in both directions: every `tem` code the protocol defines must be final,
+and no code from another class may be. A typo or a drift fails there rather than
+silently shrinking what counts as a rejection.
 
 ## Failures arrive with HTTP 200
 
