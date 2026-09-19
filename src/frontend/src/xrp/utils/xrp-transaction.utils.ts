@@ -31,14 +31,22 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 /**
  * Whether a submit response definitively rejects the transaction.
  *
- * Deliberately NOT a function of `accepted`: a node answering `tef`/`tel` reports
- * `accepted: false`, and one server refusing to take the blob is not evidence that no ledger will
- * ever include it — it may cache and reapply it. Only a malformed transaction can be called failed
- * here; everything else, including an applied-but-failed `tec*`, is decided by polling the
- * locally derived hash (see {@link isXrpTransactionSuccessful}).
+ * `accepted: false` is deliberately NOT enough: a node answering `tef`/`tel` reports it, and one
+ * server refusing to take the blob is not evidence that no ledger will ever include it — it may
+ * cache and reapply it. Only a malformed transaction can be called failed here; everything else,
+ * including an applied-but-failed `tec*`, is decided by polling the locally derived hash (see
+ * {@link isXrpTransactionSuccessful}).
+ *
+ * `accepted: true` alongside a `tem` is the separate case, and it is not the mirror of the above.
+ * A malformed transaction is one no node can take, so a response saying both that it is malformed
+ * and that this node took it contradicts itself — and a response that contradicts itself is not
+ * evidence of anything, least of all on the ONE path here that declares a definitive failure after
+ * the blob has been broadcast. So it is treated as ambiguous: the send falls through to the
+ * confirmation poll, which costs a validity window on a transaction that will never land, and
+ * avoids reporting someone else's rejection as this payment's.
  */
-export const isXrpSubmitFinalFailure = ({ engineResult }: XrpSubmitResult): boolean =>
-	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult);
+export const isXrpSubmitFinalFailure = ({ engineResult, accepted }: XrpSubmitResult): boolean =>
+	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult) && !accepted;
 
 /**
  * Whether a validated transaction actually succeeded.
