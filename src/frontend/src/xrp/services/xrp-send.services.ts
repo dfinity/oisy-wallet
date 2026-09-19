@@ -372,8 +372,10 @@ export const sendXrp = async ({
 		unavailable: Error | undefined;
 	}
 
-	type XrpDestinationRead =
-		{ exists: true; flags: number | undefined } | { exists: false } | { error: Error };
+	// `flags` is a number on the `exists` branch, not an optional one: `Flags` is a mandatory
+	// AccountRoot field, so a response without it fails the parse and lands on `error` — an
+	// unanswerable lookup — rather than arriving here as a snapshot with nothing to say.
+	type XrpDestinationRead = { exists: true; flags: number } | { exists: false } | { error: Error };
 
 	const readDestination = async (
 		ledgerIndex: 'current' | 'validated'
@@ -397,10 +399,7 @@ export const sendXrp = async ({
 		return {
 			settled: reads.every((read) => 'exists' in read && read.exists),
 			requiresTag: reads.some(
-				(read) =>
-					'flags' in read &&
-					nonNullish(read.flags) &&
-					(read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+				(read) => 'flags' in read && (read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
 			),
 			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
 		};
@@ -519,15 +518,28 @@ export const sendXrp = async ({
 	// another fee destroyed and sequence consumed for nothing delivered, out of the same response
 	// the reserve guard above already read.
 	//
-	// Three conditions, and all of them positive. A supplied tag satisfies the requirement whatever
-	// the flags say; a destination that is absent or could not be read tells us nothing, and unlike
-	// the reserve case an unavailable lookup must not decline here — almost every send omits the
-	// tag, so that would let a busy node stop ordinary sends, while the failure it would prevent is
-	// the ledger protecting the user from an untagged deposit and costs only the fee.
+	// A supplied tag satisfies the requirement whatever the flags say, so both guards below only
+	// concern a send without one.
 	if (isNullish(destinationTag) && destinationLookup.requiresTag) {
 		throw new Error(
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
+	}
+
+	// A tag requirement can only be ruled OUT by an answer, and an unavailable read is not one.
+	// This guard started advisory, on the argument that almost every send omits a tag so declining
+	// here would let a busy node stop ordinary sends. That argument covered a node that did not
+	// reply; it did not cover a node that replied with something unusable, which lands in exactly
+	// the same place and was letting an untagged payment through to `tecDST_TAG_NEEDED` — fee
+	// claimed, sequence consumed. The two are indistinguishable from here, so the honest reading is
+	// that the flags are unknown, and unknown is not "no".
+	//
+	// Strict for the same reason the reserve guard is strict where the answer decides: the cost is
+	// that untagged sends are refused while the destination read is failing, which beats a fee the
+	// user pays to learn what the read would have told them. The node's own error is propagated
+	// rather than restated, so the reason reaching the caller is the real one.
+	if (isNullish(destinationTag) && nonNullish(destinationLookup.unavailable)) {
+		throw destinationLookup.unavailable;
 	}
 
 	// After every guard, so a send that was going to be refused does not derive a key first. On a

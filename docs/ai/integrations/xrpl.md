@@ -117,6 +117,15 @@ standing between it and a dropped error. `XrplTxResultSchema` does carry it — 
 z.never().optional()` on the validated and pending branches, and `error: z.literal('txnNotFound')`
 on the absence branch, which is what lets absence be decided from the parsed value.
 
+Forbidding a key by name is the only way to reject it. Zod strips every unknown key, so a
+branch that does not name a contradicting field simply drops it and parses anyway. That
+matters most on `XrplTxResultSchema`'s absence branch, the one variant a caller may read as
+non-inclusion: it forbids `validated`, `meta`, `hash`, `tx` and `tx_json`, so a payload
+claiming `txnNotFound` while carrying the transaction itself stays malformed instead of
+becoming a settled "not there" that ends the send. A real `txnNotFound` carries none of
+them — `error`, `error_code`, `error_message`, `searched_all`, `request`, `status` and
+`type` — and those are stripped as the unknown keys they are.
+
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
 `tx` reads as "not in a ledger" — which, past a transaction's `LastLedgerSequence`,
