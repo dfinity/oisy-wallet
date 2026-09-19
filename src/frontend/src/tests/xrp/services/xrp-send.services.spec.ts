@@ -1270,18 +1270,50 @@ describe('xrp-send.services', () => {
 			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
 		});
 
-		// Deliberately advisory here, unlike the reserve check: almost every send omits the tag, so
-		// declining on an unanswered lookup would let a busy node stop ordinary sends — while the
-		// failure it would avoid costs only the fee, on a rejection that is the ledger protecting
-		// the user from an untagged deposit.
-		it('sends untagged when the destination lookup could not be made', async () => {
-			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(async ({ address }) =>
-				address === destination
-					? await Promise.reject(new Error('tooBusy'))
-					: await Promise.resolve(sourceInfo)
+		// This guard was advisory once, on the argument that almost every send omits a tag so
+		// declining on an unanswered lookup would let a busy node stop ordinary sends. That covered
+		// a node which did not reply; it did not cover one replying with something unusable, which
+		// arrives here identically and was letting an untagged payment through to
+		// `tecDST_TAG_NEEDED`. A requirement can only be ruled OUT by an answer, so unknown is not
+		// "no" — and the node's own error is what reaches the caller.
+		it('refuses an untagged send when the destination lookup could not be made', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address }) =>
+				address === destination ? Promise.reject(new Error('tooBusy')) : Promise.resolve(sourceInfo)
 			);
 
-			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow('tooBusy');
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// The specific shape the required-`Flags` change produces: a snapshot the schema rejects
+		// arrives as an unusable read, not as a snapshot claiming no requirement.
+		it('refuses an untagged send when a destination snapshot is malformed', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address }) =>
+				address === destination
+					? Promise.reject(
+							new Error(
+								'Unexpected XRPL account_info response: it does not match the expected shape'
+							)
+						)
+					: Promise.resolve(sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'does not match the expected shape'
+			);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// A supplied tag settles the requirement whatever the flags say, so an unusable read must
+		// not block a send that already carries one.
+		it('sends with a tag even when the destination lookup could not be made', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address }) =>
+				address === destination ? Promise.reject(new Error('tooBusy')) : Promise.resolve(sourceInfo)
+			);
+
+			await expect(sendXrp({ ...params, destinationTag: 12345 })).resolves.toBeDefined();
 		});
 	});
 
