@@ -970,6 +970,7 @@
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
+			"xrp_destination_tag": "Ziel-Tag",
 			"initializing_transaction": "Transaktion initialisieren",
 			"convert_to_native_icp": "In natives ICP umwandeln",
 			"open_qr_modal": "QR-Code-Scan für Transaktionsdetails starten",
@@ -992,6 +993,7 @@
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
+			"xrp_destination_tag": "Gib Ziel-Tag ein (optional)",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "Sammlerstücke suchen"
 		},
@@ -1020,7 +1022,9 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
+			"xrp_destination_tag_invalid": "Das Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die erforderliche XRP-Kontoreserve zu decken.",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
 			"insufficient_funds_for_amount": "Unzureichende Mittel für den Betrag.",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Unzureichende Ethereum-Mittel, um die Gebühren zu decken.",
@@ -1055,6 +1059,9 @@
 			"incompatible_token": "Der Token ist inkompatibel. Bitte versuchen Sie es erneut mit einem kompatiblen Token.",
 			"no_btc_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
 			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
+			"no_xrp_network_id": "Das aktuelle Netzwerk ($networkId) ist kein XRP Ledger-Netzwerk.",
+			"xrp_confirmation_failed": "Wir konnten nicht bestätigen, ob die Transaktion gesendet wurde. Sie kann noch durchgehen, senden Sie sie daher noch nicht erneut — Ihr Guthaben wird aktualisiert, falls sie durchgeht.",
+			"xrp_transaction_failed": "Die Transaktion wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
@@ -1064,7 +1071,8 @@
 			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
-			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird."
+			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
+			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen."
 		}
 	},
 	"mint": {

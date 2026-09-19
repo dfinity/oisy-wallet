@@ -970,6 +970,7 @@
 			"network": "Rete",
 			"source_network": "Rete di origine",
 			"destination_network": "Rete di destinazione",
+			"xrp_destination_tag": "Tag di destinazione",
 			"initializing_transaction": "Inizializzazione transazione",
 			"convert_to_native_icp": "Converti in ICP nativo",
 			"open_qr_modal": "Avvia scansione codice QR per dettagli transazione",
@@ -992,6 +993,7 @@
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
+			"xrp_destination_tag": "Inserisci il tag di destinazione (facoltativo)",
 			"select_network": "Seleziona rete",
 			"search_nfts": ""
 		},
@@ -1020,7 +1022,9 @@
 			"unknown_cketh": "Il token ckETH non può essere recuperato.",
 			"destination_address_invalid": "L'indirizzo di destinazione non è valido.",
 			"amount_invalid": "L'importo non è valido.",
+			"xrp_destination_tag_invalid": "Il tag di destinazione deve essere un numero intero compreso tra 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Saldo insufficiente: l’importo deve lasciare abbastanza per coprire la commissione e la riserva di conto XRP richiesta.",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",
 			"insufficient_funds_for_amount": "Saldo insufficiente",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Saldo Ethereum insufficiente per coprire le fee",
@@ -1055,6 +1059,9 @@
 			"incompatible_token": "Il token non è compatibile. Riprova con un token compatibile.",
 			"no_btc_network_id": "La rete attuale ($networkId) non è una rete Bitcoin.",
 			"no_solana_network_id": "La rete attuale ($networkId) non è una rete Solana.",
+			"no_xrp_network_id": "La rete attuale ($networkId) non è una rete XRP Ledger.",
+			"xrp_confirmation_failed": "Non abbiamo potuto confermare se la transazione è stata inviata. Potrebbe ancora andare a buon fine, quindi non inviarla di nuovo per ora — il tuo saldo si aggiornerà se ci riesce.",
+			"xrp_transaction_failed": "La transazione è stata elaborata dalla rete ma è fallita, quindi i tuoi fondi non sono stati inviati. La commissione di rete è stata comunque addebitata.",
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Si è verificato un errore durante il calcolo della commissione di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
@@ -1064,7 +1071,8 @@
 			"solana_insufficient_funds": "Il saldo del tuo token non è sufficiente per completare questa transazione. Il tuo saldo potrebbe essere cambiato dall'ultima volta che è stato visualizzato.",
 			"solana_insufficient_funds_for_fee": "Il tuo saldo SOL non è sufficiente per coprire le commissioni di transazione.",
 			"solana_insufficient_funds_for_rent": "Il tuo saldo SOL non è sufficiente per coprire l'affitto richiesto per la creazione dell'account.",
-			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato."
+			"fee_calc_unsupported_standard": "Impossibile calcolare la commissione poiché lo standard token fornito non è supportato.",
+			"xrp_send_expired": "La transazione non è stata inviata: la rete non l’ha inclusa in tempo. Nulla ha lasciato il tuo wallet ed è sicuro crearne una nuova."
 		}
 	},
 	"mint": {

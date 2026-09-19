@@ -970,6 +970,7 @@
 			"network": "Síť",
 			"source_network": "Zdrojová síť",
 			"destination_network": "Cílová síť",
+			"xrp_destination_tag": "Cílový tag",
 			"initializing_transaction": "Inicializace transakce",
 			"convert_to_native_icp": "Převést na nativní ICP",
 			"open_qr_modal": "Spustit skenování QR kódu pro podrobnosti transakce",
@@ -992,6 +993,7 @@
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
+			"xrp_destination_tag": "Zadejte cílový tag (nepovinné)",
 			"select_network": "Vybrat síť",
 			"search_nfts": "Hledat sběratelské předměty"
 		},
@@ -1020,7 +1022,9 @@
 			"unknown_cketh": "Token ckETH nelze získat.",
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
+			"xrp_destination_tag_invalid": "Cílový tag musí být celé číslo mezi 0 a 4294967295.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Nedostatek prostředků: částka musí ponechat dost na pokrytí poplatku a požadované rezervy účtu XRP.",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
 			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Nedostatek prostředků Ethereum k pokrytí poplatků",
@@ -1055,6 +1059,9 @@
 			"incompatible_token": "Token je nekompatibilní. Zkuste to prosím znovu s kompatibilním tokenem.",
 			"no_btc_network_id": "Aktuální síť ($networkId) není sítí Bitcoin.",
 			"no_solana_network_id": "Aktuální síť ($networkId) není sítí Solana.",
+			"no_xrp_network_id": "Aktuální síť ($networkId) není sítí XRP Ledger.",
+			"xrp_confirmation_failed": "Nepodařilo se nám potvrdit, zda byla transakce odeslána. Stále může projít, proto ji zatím neposílejte znovu — pokud projde, váš zůstatek se aktualizuje.",
+			"xrp_transaction_failed": "Transakce byla sítí zpracována, ale selhala, takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později.",
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",
@@ -1064,7 +1071,8 @@
 			"solana_insufficient_funds": "Zůstatek vašeho tokenu není dostatečný k dokončení této transakce. Váš zůstatek se mohl od posledního zobrazení změnit.",
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
-			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován."
+			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
+			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou."
 		}
 	},
 	"mint": {

@@ -89,7 +89,7 @@ describe('xrp-send.services', () => {
 		});
 	});
 
-	it('builds the payment from fetched sequence/fee/ledger and threshold-signs it', async () => {
+	it('builds the payment from the reviewed fee and fetched sequence/ledger, then signs it', async () => {
 		await sendXrp(params);
 
 		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith({

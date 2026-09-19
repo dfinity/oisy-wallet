@@ -970,6 +970,7 @@
 			"network": "ネットワーク",
 			"source_network": "送信元ネットワーク",
 			"destination_network": "宛先ネットワーク",
+			"xrp_destination_tag": "宛先タグ",
 			"initializing_transaction": "トランザクション初期化中",
 			"convert_to_native_icp": "ネイティブICPに変換",
 			"open_qr_modal": "トランザクション詳細のQRコードをスキャン開始",
@@ -992,6 +993,7 @@
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
+			"xrp_destination_tag": "宛先タグを入力（任意）",
 			"select_network": "ネットワークを選択",
 			"search_nfts": "コレクティブルを検索"
 		},
@@ -1020,7 +1022,9 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
+			"xrp_destination_tag_invalid": "宛先タグは 0 から 4294967295 までの整数である必要があります。",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPアカウントに必要な準備金を賄える分を残す金額にしてください。",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
 			"insufficient_funds_for_amount": "送金額に対して残高が不足しています。",
 			"insufficient_ethereum_funds_to_cover_the_fees": "手数料をカバーするEthereumの資金が不足しています。",
@@ -1055,6 +1059,9 @@
 			"incompatible_token": "トークンに互換性がありません。互換性のあるトークンで再度お試しください。",
 			"no_btc_network_id": "現在のネットワーク（$networkId）はBitcoinネットワークではありません。",
 			"no_solana_network_id": "現在のネットワーク（$networkId）はSolanaネットワークではありません。",
+			"no_xrp_network_id": "現在のネットワーク（$networkId）はXRP Ledgerネットワークではありません。",
+			"xrp_confirmation_failed": "トランザクションが送信されたかどうかを確認できませんでした。まだ成立する可能性があるため、今は再送しないでください。成立した場合は残高が更新されます。",
+			"xrp_transaction_failed": "トランザクションはネットワークで処理されましたが失敗したため、資金は送信されていません。ネットワーク手数料は請求されました。",
 			"no_pending_bitcoin_transaction": "保留中のBitcoinトランザクションの読み込み中にエラーが発生しました。後ほど再度お試しください。",
 			"unexpected_utxos_fee": "トランザクション手数料の計算中にエラーが発生しました。",
 			"unable_to_retrieve_amount": "n/a（取得できません）",
@@ -1064,7 +1071,8 @@
 			"solana_insufficient_funds": "このトランザクションを完了するためのトークン残高が不足しています。残高は最後に表示されてから変わっている可能性があります。",
 			"solana_insufficient_funds_for_fee": "トランザクション手数料を賄うためのSOL残高が不足しています。",
 			"solana_insufficient_funds_for_rent": "アカウント作成に必要なレントを賄うためのSOL残高が不足しています。",
-			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。"
+			"fee_calc_unsupported_standard": "指定されたトークン標準がサポートされていないため、手数料を計算できませんでした。",
+			"xrp_send_expired": "トランザクションは送信されませんでした。ネットワークが期限内に取り込まなかったためです。ウォレットから資金は出ておらず、新しく作成しても安全です。"
 		}
 	},
 	"mint": {

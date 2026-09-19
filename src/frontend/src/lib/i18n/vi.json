@@ -970,6 +970,7 @@
 			"network": "Mạng",
 			"source_network": "Mạng nguồn",
 			"destination_network": "Mạng đích",
+			"xrp_destination_tag": "Thẻ đích",
 			"initializing_transaction": "Đang khởi tạo giao dịch",
 			"convert_to_native_icp": "Chuyển đổi sang ICP",
 			"open_qr_modal": "Bắt đầu quét mã QR để xem chi tiết giao dịch",
@@ -992,6 +993,7 @@
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
+			"xrp_destination_tag": "Nhập thẻ đích (không bắt buộc)",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
 		},
@@ -1020,7 +1022,9 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
+			"xrp_destination_tag_invalid": "Thẻ đích phải là số nguyên từ 0 đến 4294967295.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Không đủ tiền: số tiền phải để lại đủ để trang trải phí và khoản dự trữ tài khoản XRP bắt buộc.",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
 			"insufficient_funds_for_amount": "Không đủ tiền cho số lượng",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Không đủ tiền Ethereum để trả phí",
@@ -1055,6 +1059,9 @@
 			"incompatible_token": "Token không tương thích. Vui lòng thử lại với token tương thích.",
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
+			"no_xrp_network_id": "Mạng hiện tại ($networkId) không phải là mạng XRP Ledger.",
+			"xrp_confirmation_failed": "Chúng tôi không thể xác nhận giao dịch đã được gửi hay chưa. Giao dịch vẫn có thể thành công, nên đừng gửi lại lúc này — số dư của bạn sẽ được cập nhật nếu thành công.",
+			"xrp_transaction_failed": "Giao dịch đã được mạng xử lý nhưng thất bại, nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
@@ -1064,7 +1071,8 @@
 			"solana_insufficient_funds": "Số dư token của bạn không đủ để hoàn tất giao dịch này. Số dư của bạn có thể đã thay đổi kể từ lần hiển thị cuối cùng.",
 			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
-			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
+			"xrp_send_expired": "Giao dịch chưa được gửi: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và bạn có thể tạo giao dịch mới một cách an toàn."
 		}
 	},
 	"mint": {
