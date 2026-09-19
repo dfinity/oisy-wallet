@@ -31,6 +31,8 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  * including an applied-but-failed `tec*`, is decided by polling the locally derived hash (see
  * {@link isXrpTransactionSuccessful}).
  *
+ * It also has to be about THIS transaction: see the identity check in the body.
+ *
  * `accepted: true` alongside a `tem` is the separate case, and it is not the mirror of the above.
  * A malformed transaction is one no node can take, so a response saying both that it is malformed
  * and that this node took it contradicts itself — and a response that contradicts itself is not
@@ -39,8 +41,27 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  * confirmation poll, which costs a validity window on a transaction that will never land, and
  * avoids reporting someone else's rejection as this payment's.
  */
-export const isXrpSubmitFinalFailure = ({ engineResult, accepted }: XrpSubmitResult): boolean =>
-	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult) && !accepted;
+export const isXrpSubmitFinalFailure = ({
+	submitResult: { engineResult, accepted, txHash },
+	transactionId
+}: {
+	submitResult: XrpSubmitResult;
+	transactionId: string;
+}): boolean =>
+	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult) &&
+	!accepted &&
+	// The answer has to be about the blob we broadcast. Nothing else on this path ties the submit
+	// response to the transaction, and this is the only branch that reports a definitive failure
+	// AFTER the blob is on the wire — the report that tells a caller to rebuild, on a new sequence,
+	// which is a second payment rather than a retry of the first.
+	//
+	// Only here, not on every submit: the id is derived locally so a lost or partial response stays
+	// survivable, and demanding it everywhere would turn that property into a poll on every send. A
+	// missing or mismatched hash therefore falls through to confirmation instead of rejecting.
+	//
+	// Hex, so compared case-insensitively — unlike the base58 addresses bound elsewhere.
+	nonNullish(txHash) &&
+	txHash.toUpperCase() === transactionId.toUpperCase();
 
 /**
  * Whether a validated transaction actually succeeded.

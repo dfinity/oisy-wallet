@@ -1,10 +1,27 @@
+import { XRP_MAX_DROPS } from '$xrp/constants/xrp.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
 // XRPL reports `Balance` as an **unsigned decimal** string of drops. `BigInt` would also
 // accept signed (`"-1"`), hexadecimal (`"0x10"`) and numeric (`1`) forms, so the contract
 // is pinned here rather than left to the conversion.
-export const XrpDropsSchema = z.string().regex(/^\d+$/);
+//
+// Bounded as well as shaped, which is the rule `XrpLedgerCounterSchema` already applies to every
+// counter: any run of digits parsed, `BigInt` converted it happily, and an inflated `Balance` runs
+// through `getXrpMaxAmount` into the reserve guard — so a send far above the real balance passes
+// the check written to stop exactly that, and XRPL applies it as `tecUNFUNDED_PAYMENT`.
+//
+// Compared through `BigInt`, since the value can exceed `Number`'s safe range. The shape is
+// re-tested inside the check rather than relied on from the `regex` above it: zod evaluates both,
+// so a `'1.5'` that already failed the regex would still reach `BigInt` and throw OUT of
+// `safeParse` instead of being reported as invalid. A shape the regex rejects passes this check
+// and fails on its own issue.
+const XRP_DROPS_PATTERN = /^\d+$/;
+
+export const XrpDropsSchema = z
+	.string()
+	.regex(XRP_DROPS_PATTERN)
+	.refine((drops) => !XRP_DROPS_PATTERN.test(drops) || BigInt(drops) <= XRP_MAX_DROPS);
 
 /**
  * The request a node echoes back inside `result.request`.
@@ -23,6 +40,12 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
  * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
  * response means, and for both readers above it means indeterminate rather than absent.
  *
+ * The branches are mutually exclusive, the rule this file already applies to `account_data` XOR
+ * `error` and to the three `tx` variants: zod strips unknown keys, so a branch that does not
+ * forbid the opposite discriminator silently drops it and parses anyway — and a payload carrying
+ * BOTH `method` and `command` was accepted under whichever branch came first, contradiction and
+ * all, on the two answers that end a send.
+ *
  * `operation` rather than parameters alone, because an echo says two things and only one of them
  * was being kept: what was asked, and what it was asked OF. The Clio branch discarded `method`
  * outright. On its own that is defence in depth — a `tx` echo carries no `account` and an
@@ -32,12 +55,23 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
  */
 export const XrplRequestEchoSchema = z.union([
 	z
-		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
+		.object({
+			method: z.string(),
+			params: z.tuple([z.record(z.string(), z.unknown())]),
+			command: z.never().optional()
+		})
 		.transform(({ method, params }) => ({ operation: method, params: params[0] })),
 	z
-		.object({ command: z.string() })
+		.object({
+			command: z.string(),
+			method: z.never().optional(),
+			params: z.never().optional()
+		})
 		.catchall(z.unknown())
-		.transform(({ command, ...params }) => ({ operation: command, params }))
+		.transform(({ command, method: _method, params: _params, ...params }) => ({
+			operation: command,
+			params
+		}))
 ]);
 
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
@@ -331,8 +365,19 @@ export const XrplSubmitResultSchema = z.object({
 	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
 	// where the hash decides. That is the direction this path has to fail in.
 	accepted: z.boolean(),
+	// The hash the node echoes back. Optional on purpose — the id is derived locally precisely so a
+	// lost or partial submit response stays survivable, and requiring it would turn a node that
+	// omits `tx_json` into a poll on every send. But SHAPED, because it is no longer only
+	// cosmetic: the rejection branch compares it with the locally derived id before treating a
+	// `tem*` as definitive, and a malformed value must not be able to satisfy that comparison.
 	tx_json: z
-		.object({ hash: z.string().optional().catch(undefined) })
+		.object({
+			hash: z
+				.string()
+				.regex(/^[0-9a-fA-F]{64}$/)
+				.optional()
+				.catch(undefined)
+		})
 		.optional()
 		.catch(undefined)
 });
