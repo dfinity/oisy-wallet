@@ -85,6 +85,23 @@ const xrpJsonRpc = async ({
 			throw new XrplRpcError({ method, error: topLevelError });
 		}
 
+		// A top-level status the envelope refused is a failure the body stated plainly, so it is
+		// named as one rather than reported as a missing result — the same reasoning as the
+		// top-level error above, for the other field that can say the call did not work.
+		//
+		// Presence, not `nonNullish`: a `status: null` is a malformed status rather than an absent
+		// one, and it is the message that distinguishes them. Absent is the normal case — every
+		// non-forwarded response and every error omits the field — so only a status that is present
+		// and not `'success'` is reported here.
+		if (
+			typeof body === 'object' &&
+			nonNullish(body) &&
+			'status' in body &&
+			body.status !== 'success'
+		) {
+			throw new XrplRpcError({ method, error: `top-level status ${String(body.status)}` });
+		}
+
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 

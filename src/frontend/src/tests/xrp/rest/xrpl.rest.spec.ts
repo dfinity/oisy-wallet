@@ -149,6 +149,42 @@ describe('xrpl.rest', () => {
 			await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
 		});
 
+		// The status BESIDE the result, not the one inside it. `xrpJsonRpc` checks `result.status`,
+		// a different field one level down, so a top-level one was stripped as an unknown key and a
+		// body stating failure could still deliver a plausible index — the payload that drives
+		// confirmation into a definitive expiry. Pinned to `'success'` because that is the whole
+		// contract: the provider sends a top-level status only on forwarded successes.
+		describe('the top-level status', () => {
+			it.each(['error', 'pending', '', 1, null])(
+				'rejects a top-level status of %j carrying a plausible result',
+				async (status) => {
+					mockFetchResponse({
+						body: { result: { ledger_current_index: 999_999_999 }, status }
+					});
+
+					await expect(loadXrpLedgerIndex({ network })).rejects.toThrow('top-level status');
+				}
+			);
+
+			// Absent is the normal case: every non-forwarded response and every error omits it.
+			it('accepts a body with no top-level status at all', async () => {
+				mockFetchResponse({ body: { result: { ledger_current_index: 5 } } });
+
+				await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+			});
+
+			// The regression this could introduce: `actNotFound` and `txnNotFound` arrive with no
+			// top-level status and `result.status: 'error'`, so the expected-state paths must be
+			// untouched by a check on the outer field.
+			it('still reads actNotFound as an expected state', async () => {
+				mockFetchResponse({
+					body: { result: { status: 'error', error: 'actNotFound' }, warnings: [{ id: 2001 }] }
+				});
+
+				await expect(loadXrpBalance({ address, network })).resolves.toBe(ZERO);
+			});
+		});
+
 		// `result.status` is on every real response and was previously ignored, so a FAILED response
 		// could still deliver a plausible result: the method schemas strip `status` as an unknown
 		// key, and a bogus `ledger_current_index` beside `status: 'error'` came back as an index.

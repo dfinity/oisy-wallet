@@ -36,9 +36,22 @@ export const XrplAccountInfoResultSchema = z.union([
 // NOT `z.strictObject`: the configured provider is a Clio endpoint, and every response it sends
 // carries `status`, `type`, `forwarded` and a `warnings` array beside the result. Rejecting unknown
 // keys wholesale would reject every real response.
+//
+// `status` is the one of those four that decides something, so it is pinned rather than stripped.
+// `xrpJsonRpc` checks `result.status` — a DIFFERENT field, one level down — so a top-level status
+// was dropped as an unknown key and a body saying `status: 'error'` beside a plausible
+// `ledger_current_index` passed as a successful index, which is the payload that drives
+// confirmation into a definitive expiry.
+//
+// `'success'` and not a union of both, because that is the whole contract this provider has: a
+// top-level `status` appears only on FORWARDED successes and is always `'success'` — on every
+// error, including `actNotFound` and `invalidParams`, there is no top-level status at all and the
+// error lives in `result`. So a top-level status that is not `'success'` is not a response this
+// endpoint produces.
 export const XrplEnvelopeSchema = z.object({
 	result: z.record(z.string(), z.unknown()),
-	error: z.never().optional()
+	error: z.never().optional(),
+	status: z.literal('success').optional()
 });
 
 // Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
