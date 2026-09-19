@@ -1,4 +1,7 @@
-import { XRP_LAST_LEDGER_SEQUENCE_OFFSET } from '$xrp/constants/xrp.constants';
+import {
+	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_LEDGER_SEARCH_LOOKBACK
+} from '$xrp/constants/xrp.constants';
 import {
 	buildXrpPayment,
 	deriveXrpLedgerWindow,
@@ -122,7 +125,7 @@ describe('xrp-transaction.utils', () => {
 		// the ledger the payment is in, and confirmation reports a live transaction as expired.
 		it('reads the window out of the signed blob', () => {
 			expect(deriveXrpLedgerWindow(blobWith(1020))).toEqual({
-				firstLedgerSequence: 1020 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				firstLedgerSequence: 1020 - XRP_LEDGER_SEARCH_LOOKBACK,
 				lastLedgerSequence: 1020
 			});
 		});
@@ -131,7 +134,45 @@ describe('xrp-transaction.utils', () => {
 			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(987_654));
 
 			expect(lastLedgerSequence).toBe(987_654);
-			expect(firstLedgerSequence).toBe(987_654 - XRP_LAST_LEDGER_SEQUENCE_OFFSET);
+			expect(firstLedgerSequence).toBe(987_654 - XRP_LEDGER_SEARCH_LOOKBACK);
+		});
+
+		// The point of the separate constant. Only `LastLedgerSequence` is signed; the lower bound is
+		// reconstructed, so deriving it from the SIGNING offset meant reducing that offset raised
+		// `min_ledger` for blobs signed under the old one — a `searched_all` over a range that
+		// excludes ledgers the payment can be in, which is a false absence and then a false expiry.
+		it('searches from at or below the index a blob was signed against, whatever offset was used', () => {
+			// A blob signed when the offset was larger than today's: its true signing index is
+			// further below `LastLedgerSequence` than the current offset would suggest.
+			const legacyOffset = XRP_LAST_LEDGER_SEQUENCE_OFFSET + 60;
+			const signingIndex = 500_000;
+
+			const { firstLedgerSequence } = deriveXrpLedgerWindow(blobWith(signingIndex + legacyOffset));
+
+			expect(firstLedgerSequence).toBeLessThanOrEqual(signingIndex);
+		});
+
+		// Decoupled, not merely different: the search range must not move when the signing offset
+		// does, which is the whole reason the two are separate constants.
+		it('does not derive the lower bound from the signing offset', () => {
+			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(1020));
+
+			expect(lastLedgerSequence - firstLedgerSequence).not.toBe(XRP_LAST_LEDGER_SEQUENCE_OFFSET);
+			expect(lastLedgerSequence - firstLedgerSequence).toBe(XRP_LEDGER_SEARCH_LOOKBACK);
+		});
+
+		// `tx` answers `excessiveLgrRange` above a 1000-ledger span, so a lookback that grows past
+		// it would make every lookup fail — and an unanswerable lookup can never establish expiry.
+		it('stays within the range the tx method accepts', () => {
+			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(500_000));
+
+			expect(lastLedgerSequence - firstLedgerSequence).toBeLessThanOrEqual(1000);
+		});
+
+		// The subtraction must not produce a negative `min_ledger`. Unreachable from a real ledger,
+		// but the codec accepts any UInt32 as `LastLedgerSequence`.
+		it('clamps the lower bound at zero for an index below the lookback', () => {
+			expect(deriveXrpLedgerWindow(blobWith(5)).firstLedgerSequence).toBe(0);
 		});
 
 		// Refused rather than given an open-ended window: such a transaction can never expire, so

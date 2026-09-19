@@ -1,4 +1,4 @@
-import { XRP_LAST_LEDGER_SEQUENCE_OFFSET } from '$xrp/constants/xrp.constants';
+import { XRP_LEDGER_SEARCH_LOOKBACK } from '$xrp/constants/xrp.constants';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPayment, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import { nonNullish } from '@dfinity/utils';
@@ -85,10 +85,23 @@ export const buildXrpPayment = ({
  *
  * Not carried as fields, for the same reason the transaction id is not (see
  * {@link XrpPendingTransaction}): the blob is what the ledger acts on, so anything travelling
- * beside it is a second claim that can disagree. A window wider than the signed one lets the `tx`
- * search miss the ledger the payment is in; a narrower one does the same. Either way confirmation
- * reports a live transaction as expired — and expiry is the one result that tells a retry to build
- * a new transaction, on a new sequence.
+ * beside it is a second claim that can disagree — and a stored lower bound that disagreed would
+ * search the wrong ledgers, which is precisely the failure this window exists to avoid.
+ *
+ * The two ends are therefore established differently, because only one of them is signed.
+ * `LastLedgerSequence` comes out of the blob and is exact. The lower bound cannot: nothing in the
+ * blob records the index it was signed against, so it is reconstructed from
+ * `XRP_LEDGER_SEARCH_LOOKBACK` — a constant that exists separately from the signing offset for
+ * exactly this reason, and may never decrease. Deriving it from `XRP_LAST_LEDGER_SEQUENCE_OFFSET`
+ * meant reducing the validity window also moved the search bound for blobs signed under the old
+ * one, putting `min_ledger` above their true signing index.
+ *
+ * The two directions are not symmetric, which is what makes a conservative lower bound safe. Too
+ * LOW is a superset of the signed window: the node may decline `searched_all` over it, which leaves
+ * the outcome indeterminate and the poll running. Too HIGH excludes ledgers the payment can be in
+ * while the node still reports `searched_all`, so confirmation reports a live transaction as
+ * expired — and expiry is the one result that tells a retry to build a new transaction, on a new
+ * sequence.
  *
  * A blob with no `LastLedgerSequence` is rejected rather than given an open-ended window. Such a
  * transaction can never expire, so no retry for it could ever be called safe, and `sendXrp` never
@@ -106,9 +119,11 @@ export const deriveXrpLedgerWindow = (
 	}
 
 	return {
-		// The open index the transaction was signed against, which is what `LastLedgerSequence` was
-		// offset from.
-		firstLedgerSequence: lastLedgerSequence - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+		// At or below the open index the transaction was signed against, whatever signing offset was
+		// in force when it was signed. Clamped at zero because the subtraction must not produce a
+		// negative `min_ledger` for an index below the lookback, which no real ledger reaches but the
+		// codec's own bounds allow.
+		firstLedgerSequence: Math.max(lastLedgerSequence - XRP_LEDGER_SEARCH_LOOKBACK, 0),
 		lastLedgerSequence
 	};
 };

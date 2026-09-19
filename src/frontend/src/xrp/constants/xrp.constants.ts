@@ -41,7 +41,31 @@ export const XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG = 0x00020000;
 
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
 // long it can be included before it definitively fails rather than lingering.
+//
+// This governs SIGNING only. How far back a `tx` lookup searches is `XRP_LEDGER_SEARCH_LOOKBACK`
+// below, deliberately a separate constant — see the reasoning there.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
+
+// How far below a blob's `LastLedgerSequence` a `tx` lookup starts searching.
+//
+// Separate from the offset above, and MUST NEVER DECREASE. The two answer different questions —
+// how long a transaction stays valid, versus how far back we look for it — and a blob only encodes
+// the first. `deriveXrpLedgerWindow` reconstructs the lower bound from a constant, so deriving it
+// from the signing offset meant a *reduced* offset moved the bound for transactions signed under
+// the old one: `min_ledger` above the index they were actually signed against, the node reporting
+// `searched_all` over a range that excludes ledgers the payment could be in, and absence concluded
+// from a search that never looked where it was. Past `LastLedgerSequence` that is
+// `XrpSendExpiredError` — a definitive "it never landed" that invites a duplicate payment.
+//
+// A lower bound that is too LOW is not the mirror of one that is too high, which is why a fixed
+// conservative value is a fix rather than a trade: it is a superset of the true window, so it can
+// only make `searched_all` harder for the node to grant, leaving the outcome indeterminate and the
+// poll running. Only a bound that is too high can manufacture a false absence.
+//
+// 100 is five times the current signing offset and ten times inside the ceiling: `tx` answers
+// `excessiveLgrRange` above a 1000-ledger span, and the configured endpoint still returns
+// `searched_all: true` at 20, 100, 500, 999 and 1000.
+export const XRP_LEDGER_SEARCH_LOOKBACK = 100;
 
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
 const XRP_LEDGER_CLOSE_SECONDS = 4;
