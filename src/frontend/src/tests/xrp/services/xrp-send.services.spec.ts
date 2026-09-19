@@ -25,6 +25,7 @@ import {
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
+import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
 import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish } from '@dfinity/utils';
 
@@ -1015,8 +1016,10 @@ describe('xrp-send.services', () => {
 			open,
 			validated
 		}: {
-			open: Partial<{ balance: bigint; ownerCount: number; sequence: number }>;
-			validated: Partial<{ balance: bigint; ownerCount: number }>;
+			// Both sides take the same fields: the sequence is now read from both snapshots, and the
+			// validated one leading is exactly the case worth being able to express.
+			open: Partial<XrpAccountInfo>;
+			validated: Partial<XrpAccountInfo>;
 		}) => {
 			const base = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: 0 };
 
@@ -1086,17 +1089,38 @@ describe('xrp-send.services', () => {
 			);
 		});
 
-		// And the sequence still comes from the open ledger, which is why that read exists.
-		it('signs the open-ledger sequence', async () => {
+		// And the sequence takes the higher of the two. The ordinary case is the open ledger being
+		// ahead, which is why that read exists.
+		it('signs the open-ledger sequence when it leads', async () => {
 			snapshots({
 				open: { sequence: 42 },
-				validated: {}
+				validated: { sequence: 41 }
 			});
 
 			await sendXrp(params);
 
 			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
 				expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 42 }) })
+			);
+		});
+
+		// The two reads are concurrent calls that do not share an instant, so they can land either
+		// side of a ledger close: `current` answered while a transaction is still unapplied reports
+		// the old sequence, and `validated` answered after that close reports the new one. Signing
+		// the open value then signs a sequence already consumed, which XRPL answers `tefPAST_SEQ`.
+		//
+		// Taking the maximum cannot overshoot — validated state is a subset of open state at any
+		// one instant, and the sequence only increases — so it closes the gap without inventing one.
+		it('signs the validated sequence when the reads crossed a ledger close', async () => {
+			snapshots({
+				open: { sequence: 42 },
+				validated: { sequence: 43 }
+			});
+
+			await sendXrp(params);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 43 }) })
 			);
 		});
 	});
