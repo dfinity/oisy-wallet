@@ -23,12 +23,12 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
  * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
  * response means, and for both readers above it means indeterminate rather than absent.
  */
-export const XrplRequestEchoSchema = z
-	.union([
-		z.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) }),
-		z.object({ command: z.string() }).catchall(z.unknown())
-	])
-	.transform((echo) => ('params' in echo ? echo.params[0] : echo));
+export const XrplRequestEchoSchema = z.union([
+	z
+		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
+		.transform(({ params }) => params[0]),
+	z.object({ command: z.string() }).catchall(z.unknown())
+]);
 
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
 // first branch that parses, so without forbidding the opposite variant's key a
