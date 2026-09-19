@@ -1755,6 +1755,31 @@ describe('xrpl.rest', () => {
 				await expect(ask()).rejects.toThrow('asked for HASH over 1000-1020');
 			});
 
+			// Coercion, not comparison: the echo's parameters are `unknown`, so `String(...)` before
+			// comparing made anything whose string form is the hash a match. The same mistake this
+			// file already fixed on `result.error`, where `['txnNotFound']` coerced into a declared
+			// expected code — and here it is the only identity an absence carries.
+			it.each([
+				{ name: 'an array wrapping it', transaction: ['HASH'] },
+				{ name: 'a number', transaction: 1234 },
+				{ name: 'an object', transaction: { toString: () => 'HASH' } }
+			])('refuses an absence whose echoed transaction is $name', async ({ transaction }) => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'txnNotFound',
+							searched_all: true,
+							request: {
+								method: 'tx',
+								params: [{ transaction, min_ledger: 1000, max_ledger: 1020 }]
+							}
+						}
+					}
+				});
+
+				await expect(ask()).rejects.toThrow('asked for HASH over 1000-1020');
+			});
+
 			// A missing echo leaves the answer unidentifiable, so it cannot be read as absence — the
 			// schema requires it rather than letting the comparison be skipped by omission. It fails
 			// the parse, so it surfaces as the node's own code rather than as a mismatch, and what
