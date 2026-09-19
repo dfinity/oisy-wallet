@@ -11,7 +11,8 @@ import {
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
-	XRP_MAX_FEE_DROPS
+	XRP_MAX_FEE_DROPS,
+	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
@@ -24,6 +25,7 @@ import {
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
+import { isNullish } from '@dfinity/utils';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -828,6 +830,242 @@ describe('xrp-send.services', () => {
 	// come after THEM — not merely after the argument checks. `Promise.all` rejects on the first
 	// rejection, so a key failure sharing that call would win a race against whichever of these
 	// diagnoses the user can actually act on.
+	// Neither snapshot of the sender is safe alone. `Sequence` has to be the open one, or this signs
+	// a sequence the ledger already consumed. The reserve inputs have to be the pessimistic pair:
+	// the open ledger reflects pending CREDITS as well as debits, so a maximum sized against an
+	// unvalidated credit offers money the account may not keep — `tecUNFUNDED_PAYMENT`, fee
+	// destroyed and sequence consumed, which is what the reserve guard exists to prevent.
+	// The destination is read from both ledgers for the same reason the sender is: a creation, a
+	// deletion or an `lsfRequireDestTag` change living only in the open ledger may never validate,
+	// and trusting it lets a below-reserve or untagged payment through to a fee-claiming `tec*`.
+	describe('the two destination snapshots', () => {
+		const sourceInfo = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+		const belowReserve = XRP_BASE_RESERVE_DROPS - 1n;
+
+		// `undefined` means the node answered `actNotFound`; an Error means it could not answer.
+		const destinationIn = ({
+			current,
+			validated
+		}: {
+			current: number | undefined | Error;
+			validated: number | undefined | Error;
+		}) =>
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address, ledgerIndex }) => {
+				if (address !== destination) {
+					return Promise.resolve(sourceInfo);
+				}
+
+				const answer = ledgerIndex === 'current' ? current : validated;
+
+				if (answer instanceof Error) {
+					return Promise.reject(answer);
+				}
+
+				if (isNullish(answer)) {
+					return Promise.reject(new XrpAccountNotFoundError('XRPL account not found'));
+				}
+
+				return Promise.resolve({ ...sourceInfo, flags: answer });
+			});
+
+		it('sends below the reserve to a destination settled in both ledgers', async () => {
+			destinationIn({ current: 0, validated: 0 });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).resolves.toBeDefined();
+		});
+
+		// A creation that has not validated can still be rolled back, at which point the payment is
+		// applied as `tecNO_DST_INSUF_XRP`.
+		it('declines below the reserve when the creation has not validated', async () => {
+			destinationIn({ current: 0, validated: undefined });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow(
+				'does not exist yet'
+			);
+		});
+
+		// The mirror direction, which requiring BOTH covers without a rule of its own: a deletion
+		// that has not validated leaves the account equally unsettled.
+		it('declines below the reserve when a deletion has not validated', async () => {
+			destinationIn({ current: undefined, validated: 0 });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow(
+				'does not exist yet'
+			);
+		});
+
+		// Either snapshot setting the bit is enough: a tag that turns out not to have been needed
+		// costs nothing, while a missing one claims the fee.
+		it.each([
+			{ name: 'only the open ledger', current: 0x00020000, validated: 0 },
+			{ name: 'only the validated ledger', current: 0, validated: 0x00020000 }
+		])('requires a tag when $name sets the bit', async ({ current, validated }) => {
+			destinationIn({ current, validated });
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toThrow(
+				'requires a destination tag'
+			);
+		});
+
+		// The tag requirement does NOT depend on the destination being settled: if the open ledger
+		// says a tag is needed, one is needed as soon as that state validates, and asking for it
+		// costs nothing. Sent above the reserve so the settled check is not what declines.
+		it('requires a tag even when the destination is not settled', async () => {
+			destinationIn({ current: 0x00020000, validated: undefined });
+
+			await expect(
+				sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS, destinationTag: undefined })
+			).rejects.toThrow('requires a destination tag');
+		});
+
+		it('does not require a tag when neither snapshot sets the bit', async () => {
+			destinationIn({ current: 0, validated: 0 });
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).resolves.toBeDefined();
+		});
+
+		// One unanswerable read is enough to make the pair unusable, and below the reserve that has
+		// to propagate rather than be read as absence.
+		it('propagates a one-sided unavailable read below the reserve', async () => {
+			destinationIn({ current: 0, validated: new Error('tooBusy') });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toThrow('tooBusy');
+		});
+
+		// At or above the reserve the destination decides nothing, so an unanswerable read must not
+		// block the send — the advisory half this guard has always had.
+		it('ignores a one-sided unavailable read at or above the reserve', async () => {
+			destinationIn({ current: 0, validated: new Error('tooBusy') });
+
+			await expect(sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS })).resolves.toBeDefined();
+		});
+	});
+
+	describe('the two sender snapshots', () => {
+		const snapshots = ({
+			open,
+			validated
+		}: {
+			open: Partial<{ balance: bigint; ownerCount: number; sequence: number }>;
+			validated: Partial<{ balance: bigint; ownerCount: number }>;
+		}) => {
+			const base = { balance: 50_000_000n, sequence: 7, ownerCount: 0, flags: undefined };
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockImplementation(({ address, ledgerIndex }) =>
+				Promise.resolve(
+					address === destination
+						? base
+						: { ...base, ...(ledgerIndex === 'current' ? open : validated) }
+				)
+			);
+		};
+
+		it('reads the sender from both ledgers', async () => {
+			await sendXrp(params);
+
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'current'
+			});
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledWith({
+				address: source,
+				network: XrpNetworks.mainnet,
+				ledgerIndex: 'validated'
+			});
+		});
+
+		// An incoming payment sitting in the open ledger. Sizing against it would offer 9 XRP the
+		// account does not yet own.
+		it('does not let an unvalidated credit raise the sendable maximum', async () => {
+			snapshots({
+				open: { balance: 11_000_000n },
+				validated: { balance: 2_000_000n }
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// The other direction, and the reason this is the LOWER of the two rather than simply the
+		// validated one: a pending outgoing payment makes the open balance the conservative figure,
+		// and sizing against validated state would offer money already committed.
+		it('does not let a validated balance ignore an unvalidated debit', async () => {
+			snapshots({
+				open: { balance: 2_000_000n },
+				validated: { balance: 11_000_000n }
+			});
+
+			await expect(sendXrp({ ...params, amount: 9_000_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// The mirror case: an object created in the open ledger raises the real reserve, so the
+		// validated count understates it.
+		it('does not let a validated owner count understate the reserve', async () => {
+			snapshots({
+				open: { balance: 2_000_000n, ownerCount: 4 },
+				validated: { balance: 2_000_000n, ownerCount: 0 }
+			});
+
+			// Reserve with 4 owned objects is 1_000_000 + 4 x 200_000 = 1_800_000, leaving under
+			// 200_000 sendable; with the validated count of 0 it would have looked like 1_000_000.
+			await expect(sendXrp({ ...params, amount: 900_000n })).rejects.toThrow(
+				'exceeds the sendable maximum'
+			);
+		});
+
+		// And the sequence still comes from the open ledger, which is why that read exists.
+		it('signs the open-ledger sequence', async () => {
+			snapshots({
+				open: { sequence: 42 },
+				validated: {}
+			});
+
+			await sendXrp(params);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 42 }) })
+			);
+		});
+	});
+
+	// `LastLedgerSequence` is the index plus the offset, and that sum has to stay a `UInt32` even
+	// though the index alone already is one. Otherwise the failure comes from inside the codec —
+	// `must be >= 0 and <= 4294967295` — after the reads and the key derivation, and says nothing
+	// about the index that caused it. Not reachable from a real ledger; this guards a node
+	// reporting an index it has no business reporting.
+	describe('the LastLedgerSequence ceiling', () => {
+		const highest = XRP_MAX_UINT32 - XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
+		it('signs at the highest index that still forms a UInt32', async () => {
+			vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(highest);
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(highest);
+
+			await sendXrp(params);
+
+			expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					transaction: expect.objectContaining({ LastLedgerSequence: XRP_MAX_UINT32 })
+				})
+			);
+		});
+
+		it.each([highest + 1, XRP_MAX_UINT32])(
+			'refuses the index %i before deriving a key',
+			async (ledgerIndex) => {
+				vi.spyOn(xrplRest, 'loadXrpLedgerIndex').mockResolvedValue(ledgerIndex);
+
+				await expect(sendXrp(params)).rejects.toThrow('cannot form a UInt32 LastLedgerSequence');
+
+				expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+				expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			}
+		);
+	});
+
 	describe('when the key is derived', () => {
 		it('derives it for a send that passes every guard', async () => {
 			await sendXrp(params);

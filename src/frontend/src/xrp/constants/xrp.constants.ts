@@ -23,10 +23,15 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 // xrpl.js caps at 2 XRP (2_000_000 drops), which is far more than a wallet payment needs.
 export const XRP_MAX_FEE_DROPS = 10_000n;
 
+// XRPL's `UInt32` ceiling. Named once because several distinct fields share it — a
+// `DestinationTag`, a ledger index, a `LastLedgerSequence` — and a bare literal in each place
+// would hide that they are the same protocol bound for the same reason.
+export const XRP_MAX_UINT32 = 0xffff_ffff;
+
 // A `DestinationTag` is a protocol `UInt32`, and both ends are real tags: `0` is a tag rather than
-// an absent one, and so is `0xFFFFFFFF`. Anything outside dies inside `ripple-binary-codec`, well
+// an absent one, and so is the ceiling. Anything outside dies inside `ripple-binary-codec`, well
 // past the point where the arguments could have said so.
-export const XRP_MAX_DESTINATION_TAG = 0xffff_ffff;
+export const XRP_MAX_DESTINATION_TAG = XRP_MAX_UINT32;
 
 // `lsfRequireDestTag` in the AccountRoot flags: payments to this account must carry a
 // `DestinationTag`. Set by exchanges and other shared accounts, where the tag is what credits the

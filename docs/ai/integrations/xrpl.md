@@ -25,6 +25,53 @@ See the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
 for how these fit together.
 
+## Why not `xrpl.js`
+
+There **is** an official JavaScript client — [`xrpl`](https://github.com/XRPLF/xrpl.js),
+maintained by the XRP Ledger Foundation — and `ripple-address-codec` and
+`ripple-binary-codec`, which this integration does depend on, are packages inside
+that same monorepo. So the choice was to take its codecs and not its client. Two
+reasons, either sufficient:
+
+- **Its `Client` cannot reach our endpoint.** `new Client('https://…')` throws:
+  _"server URI must start with `wss://`, `ws://`, `wss+unix://`, or
+  `ws+unix://`"_. We speak HTTP JSON-RPC to a method-whitelisted provider and
+  open no WebSocket. That puts `autofill()` and `submitAndWait()` — which are
+  exactly the sequence, expiry and confirmation-poll logic implemented here — out
+  of reach, because both are methods on that client.
+- **It assumes a local seed.** `ripple-keypairs` is one of its dependencies and
+  `Wallet` expects key material in the page. Our signing key only ever exists
+  inside the signer canister, which is why `xrp-sign.services.ts` serializes with
+  `encodeForSigning`, hands the bytes to `signWithSchnorr` and reassembles the
+  blob itself.
+
+Its standalone `validate()` is importable without a client, and was measured
+rather than assumed: it accepts a `DestinationTag` of `-1`, `1.5`, `NaN` or above
+`UInt32`, an `Amount` of `0` or `-5`, a negative `Fee`, and a
+`LastLedgerSequence` beyond `UInt32` — none of the argument classes `sendXrp`
+refuses. The guards here are stricter than the library's.
+
+### And not its result-code enums
+
+`ripple-binary-codec` exports `DEFAULT_DEFINITIONS`, whose `transactionResult`
+does hold every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`,
+1 `tes`. It is tempting to test membership against that list instead of the
+`/^tem[A-Z0-9_]+$/` and `/^tec[A-Z0-9_]+$/` patterns used in
+`xrp-transaction.utils.ts` and `xrpl-rpc.schema.ts`. Deliberately not done:
+
+- `transactionResult` is typed `BytesLookup`, a class. The name keys are
+  enumerable at runtime but the type does not expose them, so reading the list
+  needs a cast.
+- That class stores names and ordinals in the same object so it can decode. The
+  name direction is an implementation detail, not a documented surface.
+- The dependency is range-pinned (`^2.8.0`), so CI can resolve a different minor
+  than anything verified locally.
+- Most importantly, it buys very little. A hostile node wanting to fake a
+  definitive rejection sends a **real** code; the list only rejects garbage that
+  happens to be shaped like one. The patterns were verified once against that
+  enum — all 51 `tem` and all 82 `tec` codes match, and no code from another
+  class does — and that verification is recorded where each pattern is defined.
+
 ## Failures arrive with HTTP 200
 
 XRPL JSON-RPC answers a **failed** request with HTTP `200` and puts the failure in
