@@ -1,7 +1,4 @@
-import {
-	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
-	XRP_RIPPLE_EPOCH_OFFSET
-} from '$xrp/constants/xrp.constants';
+import { XRP_LEDGER_SEARCH_LOOKBACK, XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
@@ -19,21 +16,58 @@ import { decode } from 'ripple-binary-codec';
 // later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that may still become a yes must not be reported as a failure: the user would
 // send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
 // thing that decides definitively.
-const XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX = 'tem';
+// The COMPLETE code shape, not a prefix: `startsWith('tem')` also matched `temporary`, `tem`,
+// `temBAD_fee` and `tem BAD_FEE extra`, and `engine_result` is `z.string()` in the submit schema,
+// so any of them can arrive. Each read as a definitive rejection — which is decided AFTER the blob
+// has been broadcast, so a transaction that may still land was reported as rejected and the user
+// invited to send again.
+//
+// Checked against `ripple-binary-codec`'s own `TRANSACTION_RESULTS`: all 51 `tem` codes match, and
+// no code from the other five classes does.
+const XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN = /^tem[A-Z0-9_]+$/;
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
 /**
  * Whether a submit response definitively rejects the transaction.
  *
- * Deliberately NOT a function of `accepted`: a node answering `tef`/`tel` reports
- * `accepted: false`, and one server refusing to take the blob is not evidence that no ledger will
- * ever include it — it may cache and reapply it. Only a malformed transaction can be called failed
- * here; everything else, including an applied-but-failed `tec*`, is decided by polling the
- * locally derived hash (see {@link isXrpTransactionSuccessful}).
+ * `accepted: false` is deliberately NOT enough: a node answering `tef`/`tel` reports it, and one
+ * server refusing to take the blob is not evidence that no ledger will ever include it — it may
+ * cache and reapply it. Only a malformed transaction can be called failed here; everything else,
+ * including an applied-but-failed `tec*`, is decided by polling the locally derived hash (see
+ * {@link isXrpTransactionSuccessful}).
+ *
+ * It also has to be about THIS transaction: see the identity check in the body.
+ *
+ * `accepted: true` alongside a `tem` is the separate case, and it is not the mirror of the above.
+ * A malformed transaction is one no node can take, so a response saying both that it is malformed
+ * and that this node took it contradicts itself — and a response that contradicts itself is not
+ * evidence of anything, least of all on the ONE path here that declares a definitive failure after
+ * the blob has been broadcast. So it is treated as ambiguous: the send falls through to the
+ * confirmation poll, which costs a validity window on a transaction that will never land, and
+ * avoids reporting someone else's rejection as this payment's.
  */
-export const isXrpSubmitFinalFailure = ({ engineResult }: XrpSubmitResult): boolean =>
-	engineResult.startsWith(XRP_FINAL_FAILURE_ENGINE_RESULT_PREFIX);
+export const isXrpSubmitFinalFailure = ({
+	submitResult: { engineResult, accepted, txHash },
+	transactionId
+}: {
+	submitResult: XrpSubmitResult;
+	transactionId: string;
+}): boolean =>
+	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult) &&
+	!accepted &&
+	// The answer has to be about the blob we broadcast. Nothing else on this path ties the submit
+	// response to the transaction, and this is the only branch that reports a definitive failure
+	// AFTER the blob is on the wire — the report that tells a caller to rebuild, on a new sequence,
+	// which is a second payment rather than a retry of the first.
+	//
+	// Only here, not on every submit: the id is derived locally so a lost or partial response stays
+	// survivable, and demanding it everywhere would turn that property into a poll on every send. A
+	// missing or mismatched hash therefore falls through to confirmation instead of rejecting.
+	//
+	// Hex, so compared case-insensitively — unlike the base58 addresses bound elsewhere.
+	nonNullish(txHash) &&
+	txHash.toUpperCase() === transactionId.toUpperCase();
 
 /**
  * Whether a validated transaction actually succeeded.
@@ -169,10 +203,23 @@ export const mapXrpTransaction = ({
  *
  * Not carried as fields, for the same reason the transaction id is not (see
  * {@link XrpPendingTransaction}): the blob is what the ledger acts on, so anything travelling
- * beside it is a second claim that can disagree. A window wider than the signed one lets the `tx`
- * search miss the ledger the payment is in; a narrower one does the same. Either way confirmation
- * reports a live transaction as expired — and expiry is the one result that tells a retry to build
- * a new transaction, on a new sequence.
+ * beside it is a second claim that can disagree — and a stored lower bound that disagreed would
+ * search the wrong ledgers, which is precisely the failure this window exists to avoid.
+ *
+ * The two ends are therefore established differently, because only one of them is signed.
+ * `LastLedgerSequence` comes out of the blob and is exact. The lower bound cannot: nothing in the
+ * blob records the index it was signed against, so it is reconstructed from
+ * `XRP_LEDGER_SEARCH_LOOKBACK` — a constant that exists separately from the signing offset for
+ * exactly this reason, and may never decrease. Deriving it from `XRP_LAST_LEDGER_SEQUENCE_OFFSET`
+ * meant reducing the validity window also moved the search bound for blobs signed under the old
+ * one, putting `min_ledger` above their true signing index.
+ *
+ * The two directions are not symmetric, which is what makes a conservative lower bound safe. Too
+ * LOW is a superset of the signed window: the node may decline `searched_all` over it, which leaves
+ * the outcome indeterminate and the poll running. Too HIGH excludes ledgers the payment can be in
+ * while the node still reports `searched_all`, so confirmation reports a live transaction as
+ * expired — and expiry is the one result that tells a retry to build a new transaction, on a new
+ * sequence.
  *
  * A blob with no `LastLedgerSequence` is rejected rather than given an open-ended window. Such a
  * transaction can never expire, so no retry for it could ever be called safe, and `sendXrp` never
@@ -190,9 +237,11 @@ export const deriveXrpLedgerWindow = (
 	}
 
 	return {
-		// The open index the transaction was signed against, which is what `LastLedgerSequence` was
-		// offset from.
-		firstLedgerSequence: lastLedgerSequence - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+		// At or below the open index the transaction was signed against, whatever signing offset was
+		// in force when it was signed. Clamped at zero because the subtraction must not produce a
+		// negative `min_ledger` for an index below the lookback, which no real ledger reaches but the
+		// codec's own bounds allow.
+		firstLedgerSequence: Math.max(lastLedgerSequence - XRP_LEDGER_SEARCH_LOOKBACK, 0),
 		lastLedgerSequence
 	};
 };

@@ -1,6 +1,7 @@
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import * as backendApi from '$lib/api/backend.api';
 import { BACKEND_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
+import { ProgressStepsTip } from '$lib/enums/progress-steps';
 import { tipSpenderSubaccount } from '$lib/services/tip.crypto';
 import {
 	buildTipLink,
@@ -14,6 +15,7 @@ import {
 import * as tipVetkeys from '$lib/services/tip.vetkeys';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { DerivedKeyMaterial } from '@dfinity/vetkeys';
 import { Principal } from '@icp-sdk/core/principal';
 
 const LEDGER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
@@ -23,6 +25,20 @@ const EXPIRES_AT_NS = 1_800_000_000_000_000_000n;
 
 const toHex = (bytes: Uint8Array): string =>
 	[...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+
+// A real `DerivedKeyMaterial` from a known HKDF key rather than a cast, so
+// whatever is handed it encrypts for real. Mirrors `tip.vetkeys.spec.ts`.
+const buildKeyMaterial = async (): Promise<DerivedKeyMaterial> => {
+	const raw = new Uint8Array(32).fill(7);
+	const key = await globalThis.crypto.subtle.importKey('raw', raw, 'HKDF', false, ['deriveKey']);
+	return DerivedKeyMaterial.fromCryptoKey(key);
+};
+
+const mockDerivation = () =>
+	vi.spyOn(tipVetkeys, 'deriveTipKeyMaterial').mockImplementation(buildKeyMaterial);
+
+const mockEncryption = (ciphertext = new Uint8Array([1, 2, 3])) =>
+	vi.spyOn(tipVetkeys, 'encryptClaimCodeWithKey').mockResolvedValue(ciphertext);
 
 describe('tip.services', () => {
 	beforeEach(() => {
@@ -83,7 +99,8 @@ describe('tip.services', () => {
 
 	describe('when the ledger refuses the approval', () => {
 		beforeEach(() => {
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1]));
+			mockDerivation();
+			mockEncryption(new Uint8Array([1]));
 			vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
 		});
 
@@ -169,8 +186,126 @@ describe('tip.services', () => {
 		// best-effort `catch` turns that into a warning on a test that is not about
 		// recovery at all.
 		beforeEach(() => {
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			mockDerivation();
+			mockEncryption();
 			vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+		});
+
+		it('reports each stage as it starts, so the share screen can name the wait', async () => {
+			// Three canister calls, one of which is itself two cross-subnet calls, and
+			// the whole thing can run past ten seconds. The share screen used to cover
+			// all of it with a single sentence, which says the same thing in the first
+			// second and the tenth. These are the stages it narrates.
+			//
+			// Reported before each call rather than after, so a row is marked running
+			// while it runs rather than once it is already done.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+
+			const progress = vi.fn();
+
+			await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS,
+				progress
+			});
+
+			expect(progress.mock.calls.flat()).toEqual([
+				ProgressStepsTip.RESERVE,
+				ProgressStepsTip.CREATE,
+				ProgressStepsTip.SAVE,
+				ProgressStepsTip.DONE
+			]);
+		});
+
+		it('stops reporting where it fails, leaving the stage that broke as the last one', async () => {
+			// A refused approve must not advance the stepper past the row it died on:
+			// the modal drops back to the form, and a reservation that got no further
+			// than the approve should not have claimed to be creating a link.
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(new Error('InsufficientFunds'));
+
+			const progress = vi.fn();
+
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft: newTipDraft(),
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					expiresAtNs: EXPIRES_AT_NS,
+					progress
+				})
+			).rejects.toThrow('InsufficientFunds');
+
+			expect(progress.mock.calls.flat()).toEqual([ProgressStepsTip.RESERVE]);
+		});
+
+		it('starts the vetKD derivation before the approve rather than after the create', async () => {
+			// Why the first tip of a session took so much longer than every one after
+			// it. The derivation is the slowest step in this path — an update call
+			// whose reply waits on a threshold derivation — and it used to run last,
+			// once two ingress calls had already finished. It consumes nothing they
+			// produce, so it now runs underneath them, and only the first tip of a
+			// session pays for it at all because `deriveTipKeyMaterial` caches.
+			//
+			// Asserted as an order rather than as a duration: the ordering is the
+			// property, and a timing assertion here would measure the mocks.
+			const order: string[] = [];
+
+			vi.spyOn(tipVetkeys, 'deriveTipKeyMaterial').mockImplementation(() => {
+				order.push('derive');
+				return buildKeyMaterial();
+			});
+			vi.spyOn(icrcLedgerApi, 'approve').mockImplementation(() => {
+				order.push('approve');
+				return Promise.resolve(1n);
+			});
+			vi.spyOn(backendApi, 'createTip').mockImplementation(() => {
+				order.push('create');
+				return Promise.resolve(undefined);
+			});
+
+			await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(order).toEqual(['derive', 'approve', 'create']);
+		});
+
+		it('reports the refused approval, not a derivation that failed alongside it', async () => {
+			// Both are in flight at once now, so both can fail in the same attempt.
+			// The sender needs to hear why their money was refused; a derivation that
+			// broke at the same time is not that answer, and it must not replace it.
+			//
+			// This also covers the rejection itself being handled. `reserveTip`
+			// returns before anything awaits the derivation on this path, and an
+			// unobserved rejection is reported as unhandled — from a test that
+			// otherwise passes.
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => {});
+			vi.spyOn(tipVetkeys, 'deriveTipKeyMaterial').mockRejectedValue(new Error('InvalidKeyName'));
+			vi.spyOn(icrcLedgerApi, 'approve').mockRejectedValue(new Error('InsufficientFunds'));
+
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft: newTipDraft(),
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					expiresAtNs: EXPIRES_AT_NS
+				})
+			).rejects.toThrow('InsufficientFunds');
 		});
 
 		it('approves the amount plus one fee, and records only the amount', async () => {
@@ -655,7 +790,8 @@ describe('tip.services', () => {
 			// its recoverable link permanently, with nothing on screen to say so.
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			mockDerivation();
+			mockEncryption();
 			const setSpy = vi
 				.spyOn(backendApi, 'setTipSecret')
 				.mockRejectedValue(new Error('no_healthy_nodes'));
@@ -681,9 +817,8 @@ describe('tip.services', () => {
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
 
-			const encryptSpy = vi
-				.spyOn(tipVetkeys, 'encryptClaimCode')
-				.mockResolvedValue(new Uint8Array([1, 2, 3]));
+			const deriveSpy = mockDerivation();
+			const encryptSpy = mockEncryption();
 			const setSpy = vi
 				.spyOn(backendApi, 'setTipSecret')
 				.mockRejectedValueOnce(new Error('503'))
@@ -701,6 +836,9 @@ describe('tip.services', () => {
 			expect(secretStored).toBeTruthy();
 			expect(setSpy).toHaveBeenCalledTimes(2);
 			expect(encryptSpy).toHaveBeenCalledOnce();
+			// The metered half. `reserveTip` starts it and `storeClaimCode` awaits
+			// that same promise, so the retry cannot open a second one.
+			expect(deriveSpy).toHaveBeenCalledOnce();
 		});
 
 		it('does not retry at all when the derivation itself failed', async () => {
@@ -708,7 +846,7 @@ describe('tip.services', () => {
 			// be the second metered call the cap exists to prevent.
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockRejectedValue(new Error('InvalidKeyName'));
+			vi.spyOn(tipVetkeys, 'deriveTipKeyMaterial').mockRejectedValue(new Error('InvalidKeyName'));
 
 			const setSpy = vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
 
@@ -728,7 +866,8 @@ describe('tip.services', () => {
 		it('reports success when the retry lands', async () => {
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			mockDerivation();
+			mockEncryption();
 			vi.spyOn(backendApi, 'setTipSecret')
 				.mockRejectedValueOnce(new Error('503'))
 				.mockResolvedValueOnce(undefined);
@@ -750,7 +889,10 @@ describe('tip.services', () => {
 			// the whole reservation here would be much worse than saying so.
 			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
-			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockRejectedValue(new Error('InvalidKeyName'));
+			mockDerivation();
+			vi.spyOn(tipVetkeys, 'encryptClaimCodeWithKey').mockRejectedValue(
+				new Error('OperationError')
+			);
 
 			const { link, secretStored } = await reserveTip({
 				identity: mockIdentity,

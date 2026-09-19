@@ -25,6 +25,53 @@ See the
 [XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
 for how these fit together.
 
+## Why not `xrpl.js`
+
+There **is** an official JavaScript client — [`xrpl`](https://github.com/XRPLF/xrpl.js),
+maintained by the XRP Ledger Foundation — and `ripple-address-codec` and
+`ripple-binary-codec`, which this integration does depend on, are packages inside
+that same monorepo. So the choice was to take its codecs and not its client. Two
+reasons, either sufficient:
+
+- **Its `Client` cannot reach our endpoint.** `new Client('https://…')` throws:
+  _"server URI must start with `wss://`, `ws://`, `wss+unix://`, or
+  `ws+unix://`"_. We speak HTTP JSON-RPC to a method-whitelisted provider and
+  open no WebSocket. That puts `autofill()` and `submitAndWait()` — which are
+  exactly the sequence, expiry and confirmation-poll logic implemented here — out
+  of reach, because both are methods on that client.
+- **It assumes a local seed.** `ripple-keypairs` is one of its dependencies and
+  `Wallet` expects key material in the page. Our signing key only ever exists
+  inside the signer canister, which is why `xrp-sign.services.ts` serializes with
+  `encodeForSigning`, hands the bytes to `signWithSchnorr` and reassembles the
+  blob itself.
+
+Its standalone `validate()` is importable without a client, and was measured
+rather than assumed: it accepts a `DestinationTag` of `-1`, `1.5`, `NaN` or above
+`UInt32`, an `Amount` of `0` or `-5`, a negative `Fee`, and a
+`LastLedgerSequence` beyond `UInt32` — none of the argument classes `sendXrp`
+refuses. The guards here are stricter than the library's.
+
+### And not its result-code enums
+
+`ripple-binary-codec` exports `DEFAULT_DEFINITIONS`, whose `transactionResult`
+does hold every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`,
+1 `tes`. It is tempting to test membership against that list instead of the
+`/^tem[A-Z0-9_]+$/` and `/^tec[A-Z0-9_]+$/` patterns used in
+`xrp-transaction.utils.ts` and `xrpl-rpc.schema.ts`. Deliberately not done:
+
+- `transactionResult` is typed `BytesLookup`, a class. The name keys are
+  enumerable at runtime but the type does not expose them, so reading the list
+  needs a cast.
+- That class stores names and ordinals in the same object so it can decode. The
+  name direction is an implementation detail, not a documented surface.
+- The dependency is range-pinned (`^2.8.0`), so CI can resolve a different minor
+  than anything verified locally.
+- Most importantly, it buys very little. A hostile node wanting to fake a
+  definitive rejection sends a **real** code; the list only rejects garbage that
+  happens to be shaped like one. The patterns were verified once against that
+  enum — all 51 `tem` and all 82 `tec` codes match, and no code from another
+  class does — and that verification is recorded where each pattern is defined.
+
 ## Failures arrive with HTTP 200
 
 XRPL JSON-RPC answers a **failed** request with HTTP `200` and puts the failure in
@@ -64,9 +111,30 @@ which reports the send as failed and implies a resend is safe.
 Most schemas additionally forbid `error` on their success branches
 (`error: z.never().optional()`), which catches a response carrying _both_ an error and a
 plausible result. That is now belt-and-braces rather than the primary defence, since the
-envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` and
-`XrplTxResultSchema` do not carry it, because both have a declared or all-optional shape
-that makes the envelope check the only thing standing between them and a dropped error.
+envelope rejects an undeclared error before any schema runs. `XrplFeeResultSchema` is the
+one that does not carry it: every field is optional, so the envelope check is the only thing
+standing between it and a dropped error. `XrplTxResultSchema` does carry it — `error:
+z.never().optional()` on the validated and pending branches, and `error: z.literal('txnNotFound')`
+on the absence branch, which is what lets absence be decided from the parsed value.
+
+Zod strips every unknown key, so a branch that does not account for a contradicting field
+simply drops it and parses anyway. On `XrplTxResultSchema`'s absence branch — the one variant
+a caller may read as non-inclusion — that is settled with `z.strictObject` rather than a list
+of forbidden fields, because a `tx` result carries the transaction at the **top level** of
+`result`: a validated payment answers with `Account`, `Sequence`, `TransactionType`,
+`ledger_index`, `inLedger`, `ctid`, `hash`, `meta`, `validated` and more, side by side.
+Forbidding those one at a time is an open-ended question that grows with the protocol;
+listing what an absence MAY contain is the closed one.
+
+Strict **there** and not on the envelope, which looks like the same call and is not. The
+envelope wraps every response and this provider sends `status`, `type`, `forwarded` and
+`warnings` beside every result, so strictness there would reject all of them. The absence
+branch is a narrow error shape whose complete key set is `error`, `error_code`,
+`error_message`, `searched_all`, `request`, `status` and `type` — verified against the
+configured endpoint across the ranged request the code sends, a far-past range, no range at
+all, and `binary: true`. If a provider ever adds one more, absence stops parsing and the
+outcome is indeterminate: the poll keeps running and cannot conclude expiry, which is the
+direction this path has to fail in.
 
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
@@ -126,9 +194,11 @@ yes would invite a retry that pays a second time.
 ## Fee (`fee`)
 
 `loadXrpOpenLedgerFee` reads `result.drops.open_ledger_fee`, falling back to
-`base_fee` and then to a built-in default. The value escalates with network load
-and is untrusted input, so it is capped by `XRP_MAX_FEE_DROPS` and the send is
-aborted rather than signed when the estimate exceeds it.
+`base_fee` and then to the `fallbackFee` its caller must supply — there is no
+implicit default. `sendXrp` does not call it: the fee is a parameter, so the
+figure signed is the one the user reviewed. The value escalates with network
+load and is untrusted input, so the send caps it at `XRP_MAX_FEE_DROPS` and
+aborts rather than signing when it is exceeded.
 
 ## Finality (`tx`, `ledger`, `ledger_current`)
 

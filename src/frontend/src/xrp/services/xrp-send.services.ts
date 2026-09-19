@@ -7,11 +7,14 @@ import {
 	XRP_BASE_RESERVE_DROPS,
 	XRP_CONFIRM_MAX_ATTEMPTS,
 	XRP_CONFIRM_MAX_DURATION_MS,
+	XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD,
 	XRP_CONFIRM_MAX_POLL_MS,
 	XRP_CONFIRM_MIN_POLL_MS,
 	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
-	XRP_MAX_FEE_DROPS
+	XRP_MAX_DESTINATION_TAG,
+	XRP_MAX_FEE_DROPS,
+	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
 import {
 	XrpAccountNotFoundError,
@@ -84,9 +87,33 @@ const confirmXrpTransaction = async ({
 
 	// Same reasoning: this call runs after the blob may already have been accepted, so letting a
 	// transient failure escape would abort the send for a payment that can still validate.
+	// The first validated index this run reads, kept as the reference every later one is measured
+	// against. It has nothing to corroborate it and is accepted as given — a run has to start
+	// somewhere — so this bounds how far the ledger appears to MOVE while the poll watches, not
+	// whether it was in a sane place to begin with. An absurd first read is caught by what already
+	// guards expiry: `tx` must also report `searched_all` absence over the blob's own ledger range,
+	// which is a claim about exactly those 21 ledgers, on a different method.
+	//
+	// Measured from the run and NOT from `lastLedgerSequence`, which is where this went wrong
+	// before: for a retry that value comes out of the stored blob, so it is an expiry already in
+	// the past, and any retry more than `XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD` closes later had every
+	// legitimate index rejected — leaving the retry path with no way to ever establish expiry.
+	let baselineLedgerIndex: number | undefined;
+
 	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
 		try {
-			return await loadXrpValidatedLedgerIndex({ network });
+			const index = await loadXrpValidatedLedgerIndex({ network });
+
+			if (isNullish(baselineLedgerIndex)) {
+				baselineLedgerIndex = index;
+
+				return index;
+			}
+
+			// Returned as `undefined`, so an implausible jump is handled exactly like a read the node
+			// refused: the poll continues and ends indeterminate, rather than concluding the expiry
+			// that tells a retry to build a new transaction on a new sequence.
+			return index > baselineLedgerIndex + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
 		} catch (_: unknown) {
 			return undefined;
 		}
@@ -227,7 +254,10 @@ const submitAndConfirmXrpTransaction = async ({
 	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
 	// did not take the blob — may still end up applied, and reporting it as failed would invite a
 	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
-	if (nonNullish(result) && isXrpSubmitFinalFailure(result)) {
+	if (
+		nonNullish(result) &&
+		isXrpSubmitFinalFailure({ submitResult: result, transactionId: txHash })
+	) {
 		throw new Error(
 			`XRP transaction rejected: ${result.engineResult}${
 				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
@@ -324,23 +354,58 @@ export const sendXrp = async ({
 	// decisions, and an unavailable lookup keeps its error rather than discarding it, because
 	// whether that matters depends on the amount and only the guards below know it. The flags come
 	// back with it — they are in the same response, so reading them costs nothing.
-	type XrpDestinationLookup =
-		| { state: 'exists'; flags: number | undefined }
-		| { state: 'absent' }
-		| { state: 'unavailable'; error: Error };
+	// Both snapshots, reduced to the three facts the guards below actually need. A creation, a
+	// deletion or an `lsfRequireDestTag` change that lives only in the open ledger may never
+	// validate, and trusting it lets a below-reserve or untagged payment through to a fee-claiming
+	// `tec*` — which is the outcome this function declines payments before signing to avoid.
+	//
+	// The pessimistic reading in both directions. `settled` requires the account in BOTH, so a
+	// creation that has not validated and a deletion that has not validated are equally unsettled
+	// without needing a rule each. `requiresTag` fires if EITHER snapshot has the bit, because a
+	// tag that turns out not to have been needed costs nothing — XRPL simply carries it — while a
+	// missing one claims the fee.
+	//
+	// A false decline here is cheap and actionable: it says the amount must reach the account
+	// reserve, before anything is signed. That is the trade this file makes everywhere else.
+	interface XrpDestinationFacts {
+		settled: boolean;
+		requiresTag: boolean;
+		// Kept rather than thrown, because whether an unanswerable lookup matters depends on the
+		// amount and only the guards know it.
+		unavailable: Error | undefined;
+	}
 
-	const tryDestination = async (): Promise<XrpDestinationLookup> => {
+	// `flags` is a number on the `exists` branch, not an optional one: `Flags` is a mandatory
+	// AccountRoot field, so a response without it fails the parse and lands on `error` — an
+	// unanswerable lookup — rather than arriving here as a snapshot with nothing to say.
+	type XrpDestinationRead = { exists: true; flags: number } | { exists: false } | { error: Error };
+
+	const readDestination = async (
+		ledgerIndex: 'current' | 'validated'
+	): Promise<XrpDestinationRead> => {
 		try {
-			const { flags } = await loadXrpAccountInfo({ address: destination, network });
+			const { flags } = await loadXrpAccountInfo({ address: destination, network, ledgerIndex });
 
-			return { state: 'exists', flags };
+			return { exists: true, flags };
 		} catch (err: unknown) {
 			if (err instanceof XrpAccountNotFoundError) {
-				return { state: 'absent' };
+				return { exists: false };
 			}
 
-			return { state: 'unavailable', error: err instanceof Error ? err : new Error(String(err)) };
+			return { error: err instanceof Error ? err : new Error(String(err)) };
 		}
+	};
+
+	const tryDestination = async (): Promise<XrpDestinationFacts> => {
+		const reads = await Promise.all([readDestination('current'), readDestination('validated')]);
+
+		return {
+			settled: reads.every((read) => 'exists' in read && read.exists),
+			requiresTag: reads.some(
+				(read) => 'flags' in read && (read.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
+			),
+			unavailable: reads.find((read): read is { error: Error } => 'error' in read)?.error
+		};
 	};
 
 	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
@@ -362,6 +427,26 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee must be greater than zero, got ${fee} drops.`);
 	}
 
+	// The tag is caller input typed `number`, so negative, fractional, non-finite and
+	// above-`UInt32` values are all type-legal and all die inside `ripple-binary-codec` — after the
+	// account read, the ledger read and the signing-key call. Worse, the required-destination-tag
+	// guard below asks only whether a tag is nullish, so `NaN` counts as having supplied one and
+	// suppresses the decline: a guard satisfied by a value that cannot become a tag.
+	//
+	// Inclusive at both ends. `0` is a real tag rather than an absent one, which is why
+	// `buildXrpPayment` refuses to let an omitted tag become `0`, and `0xFFFFFFFF` is a real tag
+	// too. `Number.isInteger` rejects `NaN` and `Infinity` on its own.
+	if (
+		nonNullish(destinationTag) &&
+		(!Number.isInteger(destinationTag) ||
+			destinationTag < 0 ||
+			destinationTag > XRP_MAX_DESTINATION_TAG)
+	) {
+		throw new Error(
+			`XRP destination tag must be an unsigned 32-bit integer, got ${destinationTag}.`
+		);
+	}
+
 	// `fee` is the figure the amount was priced and reviewed against, passed in rather than
 	// re-fetched: signing a fresh estimate would sign a fee the user never saw and could push the
 	// total past the balance even though the caller's sendability check passed.
@@ -371,13 +456,28 @@ export const sendXrp = async ({
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
 
-	const [{ sequence, balance, ownerCount }, destinationLookup, ledgerIndex, signingPublicKey] =
-		await Promise.all([
-			loadXrpAccountInfo({ address: source, network }),
-			tryDestination(),
-			loadXrpLedgerIndex({ network }),
-			getXrpSigningPublicKey({ identity, network, account: source })
-		]);
+	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
+	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
+	// would win a race against whichever of those diagnoses was the useful one. A key mismatch is a
+	// broken deployment; an insufficient balance is something the user can act on.
+	// Both snapshots of the sender, because neither is safe alone. `Sequence` has to be the open
+	// one or this signs a sequence the ledger has already consumed; the reserve inputs have to be
+	// the pessimistic pair, since the open ledger reflects pending CREDITS as well as debits and a
+	// maximum sized against an unvalidated credit offers money the account may not keep.
+	const [openAccount, validatedAccount, destinationLookup, ledgerIndex] = await Promise.all([
+		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'current' }),
+		loadXrpAccountInfo({ address: source, network, ledgerIndex: 'validated' }),
+		tryDestination(),
+		loadXrpLedgerIndex({ network })
+	]);
+
+	const { sequence } = openAccount;
+
+	// The lower balance and the higher owner count: a pending credit must not raise what can be
+	// sent, and an object created in the open ledger must not have its reserve ignored.
+	const balance =
+		openAccount.balance < validatedAccount.balance ? openAccount.balance : validatedAccount.balance;
+	const ownerCount = Math.max(openAccount.ownerCount, validatedAccount.ownerCount);
 
 	// The sender's own reserve, from the balance and `OwnerCount` this call already returned.
 	// Without it, XRPL applies the payment as `tecUNFUNDED_PAYMENT`: the fee is destroyed, the
@@ -401,15 +501,18 @@ export const sendXrp = async ({
 	// charged failure either.
 	const requiresExistingDestination = amount < XRP_BASE_RESERVE_DROPS;
 
-	if (requiresExistingDestination && destinationLookup.state === 'unavailable') {
-		throw destinationLookup.error;
+	if (requiresExistingDestination && nonNullish(destinationLookup.unavailable)) {
+		throw destinationLookup.unavailable;
 	}
 
 	// The destination can still be funded between this read and submission, so the validated result
 	// stays the final word — this declines only what the node positively reported.
-	if (requiresExistingDestination && destinationLookup.state === 'absent') {
+	// "Not settled" rather than "absent": a destination created in the open ledger but not yet
+	// validated is in the same position as one that does not exist at all, because the creation can
+	// still be rolled back and the payment would then be applied as `tecNO_DST_INSUF_XRP`.
+	if (requiresExistingDestination && !destinationLookup.settled) {
 		throw new Error(
-			`XRP destination ${destination} does not exist yet, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
+			`XRP destination ${destination} does not exist yet in settled ledger state, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
 	}
 
@@ -418,21 +521,51 @@ export const sendXrp = async ({
 	// another fee destroyed and sequence consumed for nothing delivered, out of the same response
 	// the reserve guard above already read.
 	//
-	// Three conditions, and all of them positive. A supplied tag satisfies the requirement whatever
-	// the flags say; a destination that is absent or could not be read tells us nothing, and unlike
-	// the reserve case an unavailable lookup must not decline here — almost every send omits the
-	// tag, so that would let a busy node stop ordinary sends, while the failure it would prevent is
-	// the ledger protecting the user from an untagged deposit and costs only the fee.
-	if (
-		destinationLookup.state === 'exists' &&
-		isNullish(destinationTag) &&
-		nonNullish(destinationLookup.flags) &&
-		(destinationLookup.flags & XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG) !== 0
-	) {
+	// A supplied tag satisfies the requirement whatever the flags say, so both guards below only
+	// concern a send without one.
+	if (isNullish(destinationTag) && destinationLookup.requiresTag) {
 		throw new Error(
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
 	}
+
+	// A tag requirement can only be ruled OUT by an answer, and an unavailable read is not one.
+	// This guard started advisory, on the argument that almost every send omits a tag so declining
+	// here would let a busy node stop ordinary sends. That argument covered a node that did not
+	// reply; it did not cover a node that replied with something unusable, which lands in exactly
+	// the same place and was letting an untagged payment through to `tecDST_TAG_NEEDED` — fee
+	// claimed, sequence consumed. The two are indistinguishable from here, so the honest reading is
+	// that the flags are unknown, and unknown is not "no".
+	//
+	// Strict for the same reason the reserve guard is strict where the answer decides: the cost is
+	// that untagged sends are refused while the destination read is failing, which beats a fee the
+	// user pays to learn what the read would have told them. The node's own error is propagated
+	// rather than restated, so the reason reaching the caller is the real one.
+	if (isNullish(destinationTag) && nonNullish(destinationLookup.unavailable)) {
+		throw destinationLookup.unavailable;
+	}
+
+	// After every guard, so a send that was going to be refused does not derive a key first. On a
+	// deployed build that costs only local hashing — `deriveTokenAddress` derives locally whenever
+	// `FRONTEND_DERIVATION_ENABLED`, which is `!LOCAL` — so serialising it here buys the clearer
+	// error at the price of one overlapped call in local development, where the signer-canister
+	// fallback is the one that actually runs.
+	// `LastLedgerSequence` is `ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET`, and that sum has to
+	// stay a `UInt32` even though the index alone is already bounded to one. Checked here because
+	// this is the earliest point `ledgerIndex` exists, and before the key derivation so a doomed
+	// send does not pay for one: otherwise the failure arrives from inside `ripple-binary-codec`,
+	// as `must be >= 0 and <= 4294967295`, which says nothing about the ledger index that caused it.
+	//
+	// Not reachable from a real ledger — mainnet is around 107 million and this trips near 4.29
+	// billion, some five centuries of closes away — so this is a guard against a node reporting an
+	// index it has no business reporting, like the others on this path.
+	if (ledgerIndex > XRP_MAX_UINT32 - XRP_LAST_LEDGER_SEQUENCE_OFFSET) {
+		throw new Error(
+			`XRP ledger index ${ledgerIndex} cannot form a UInt32 LastLedgerSequence with the ${XRP_LAST_LEDGER_SEQUENCE_OFFSET} ledger offset.`
+		);
+	}
+
+	const signingPublicKey = await getXrpSigningPublicKey({ identity, network, account: source });
 
 	const lastLedgerSequence = ledgerIndex + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
 

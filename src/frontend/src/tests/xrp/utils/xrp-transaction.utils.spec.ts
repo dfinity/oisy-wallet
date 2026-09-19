@@ -1,5 +1,6 @@
 import {
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+	XRP_LEDGER_SEARCH_LOOKBACK,
 	XRP_RIPPLE_EPOCH_OFFSET
 } from '$xrp/constants/xrp.constants';
 import type { XrpAccountTransaction, XrpAccountTransactionEntry } from '$xrp/types/xrp-transaction';
@@ -381,10 +382,31 @@ describe('xrp-transaction.utils', () => {
 	});
 
 	describe('isXrpSubmitFinalFailure', () => {
+		// The id the blob derives to. Supplied on both sides by default so the existing cases keep
+		// testing the engine result, and varied explicitly in the identity cases below.
+		const ID = 'A'.repeat(64);
+
+		// `txHash` is read with `in` rather than defaulted, so a case can state that the response
+		// named NO transaction — which a default would silently turn back into a match.
+		const finalFailure = (args: {
+			engineResult: string;
+			accepted?: boolean;
+			txHash?: string;
+			transactionId?: string;
+		}) =>
+			isXrpSubmitFinalFailure({
+				submitResult: {
+					engineResult: args.engineResult,
+					accepted: args.accepted ?? false,
+					txHash: 'txHash' in args ? args.txHash : ID
+				},
+				transactionId: args.transactionId ?? ID
+			});
+
 		// Malformed: the XRPL reference calls a `tem` result final, so this is the only class the
 		// send may report as failed without consulting the ledger.
 		it.each(['temBAD_FEE', 'temBAD_AMOUNT', 'temMALFORMED'])('rejects %s', (engineResult) => {
-			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeTruthy();
+			expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
 		});
 
 		// `tef` may be reapplied, `tel` may be cached and retried, `tefALREADY` reports the blob is
@@ -400,18 +422,64 @@ describe('xrp-transaction.utils', () => {
 			'tefMAX_LEDGER',
 			'telINSUF_FEE_P'
 		])('does not reject %s', (engineResult) => {
-			expect(isXrpSubmitFinalFailure({ engineResult, accepted: false })).toBeFalsy();
+			expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
 		});
 
-		// A node's refusal to take the blob is not evidence that no ledger will include it, so it
-		// must not turn a non-final result into a reported failure.
-		it('ignores the accepted flag', () => {
-			expect(isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: false })).toBe(
-				isXrpSubmitFinalFailure({ engineResult: 'tesSUCCESS', accepted: true })
-			);
-			expect(isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBe(
-				isXrpSubmitFinalFailure({ engineResult: 'temBAD_FEE', accepted: false })
-			);
+		// The complete code shape, not a `tem` prefix. `engine_result` is `z.string()` in the submit
+		// schema, so these can arrive — and the decision is made AFTER the blob was broadcast, so
+		// reading one as definitive reports a transaction that may still land as rejected, which is
+		// what invites a second payment. Each has to be polled instead.
+		it.each(['temporary', 'tem', 'temBAD_fee', 'tem BAD_FEE extra', 'temBAD_FEE ', ' temBAD_FEE'])(
+			'does not reject the malformed %j',
+			(engineResult) => {
+				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
+			}
+		);
+
+		// Every `tem` code the protocol defines still is final: checked against
+		// `ripple-binary-codec`'s own list, which is where the pattern came from.
+		it.each(['temBAD_SEND_XRP_LIMIT', 'temREDUNDANT', 'temINVALID_FLAG', 'temUNCERTAIN'])(
+			'still rejects the real code %s',
+			(engineResult) => {
+				expect(finalFailure({ engineResult, accepted: false })).toBeTruthy();
+			}
+		);
+
+		// A node's refusal to take the blob is not evidence that no ledger will include it, so
+		// `accepted: false` must never turn a non-final result into a reported failure.
+		it.each(['tesSUCCESS', 'tefPAST_SEQ', 'terQUEUED', 'tecUNFUNDED_PAYMENT'])(
+			'does not reject %s whether or not it was accepted',
+			(engineResult) => {
+				expect(finalFailure({ engineResult, accepted: false })).toBeFalsy();
+				expect(finalFailure({ engineResult, accepted: true })).toBeFalsy();
+			}
+		);
+
+		// Not the mirror of the above. A `tem` transaction is one NO node can take, so a response
+		// claiming both that it is malformed and that this node took it contradicts itself — and a
+		// self-contradicting response is no basis for the only definitive failure declared after
+		// the blob is broadcast. It falls through to the poll instead.
+		it('does not reject a tem that the node claims to have accepted', () => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: true })).toBeFalsy();
+		});
+
+		it('still rejects the same code when the node did not accept it', () => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', accepted: false })).toBeTruthy();
+		});
+
+		// The response has to be about the blob we broadcast. Nothing else on the submit path ties
+		// it to the transaction, and this is the only branch that reports a definitive failure after
+		// the blob is on the wire — the report that tells a caller to rebuild, on a new sequence.
+		it.each([
+			{ name: 'names another transaction', txHash: 'B'.repeat(64) },
+			{ name: 'names no transaction', txHash: undefined }
+		])('does not reject a tem whose response $name', ({ txHash }) => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash })).toBeFalsy();
+		});
+
+		// Hex, so case is not significant — unlike the base58 addresses bound elsewhere.
+		it('rejects a tem whose response names this transaction in the other case', () => {
+			expect(finalFailure({ engineResult: 'temBAD_FEE', txHash: ID.toLowerCase() })).toBeTruthy();
 		});
 	});
 
@@ -434,7 +502,7 @@ describe('xrp-transaction.utils', () => {
 		// the ledger the payment is in, and confirmation reports a live transaction as expired.
 		it('reads the window out of the signed blob', () => {
 			expect(deriveXrpLedgerWindow(blobWith(1020))).toEqual({
-				firstLedgerSequence: 1020 - XRP_LAST_LEDGER_SEQUENCE_OFFSET,
+				firstLedgerSequence: 1020 - XRP_LEDGER_SEARCH_LOOKBACK,
 				lastLedgerSequence: 1020
 			});
 		});
@@ -443,7 +511,45 @@ describe('xrp-transaction.utils', () => {
 			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(987_654));
 
 			expect(lastLedgerSequence).toBe(987_654);
-			expect(firstLedgerSequence).toBe(987_654 - XRP_LAST_LEDGER_SEQUENCE_OFFSET);
+			expect(firstLedgerSequence).toBe(987_654 - XRP_LEDGER_SEARCH_LOOKBACK);
+		});
+
+		// The point of the separate constant. Only `LastLedgerSequence` is signed; the lower bound is
+		// reconstructed, so deriving it from the SIGNING offset meant reducing that offset raised
+		// `min_ledger` for blobs signed under the old one — a `searched_all` over a range that
+		// excludes ledgers the payment can be in, which is a false absence and then a false expiry.
+		it('searches from at or below the index a blob was signed against, whatever offset was used', () => {
+			// A blob signed when the offset was larger than today's: its true signing index is
+			// further below `LastLedgerSequence` than the current offset would suggest.
+			const legacyOffset = XRP_LAST_LEDGER_SEQUENCE_OFFSET + 60;
+			const signingIndex = 500_000;
+
+			const { firstLedgerSequence } = deriveXrpLedgerWindow(blobWith(signingIndex + legacyOffset));
+
+			expect(firstLedgerSequence).toBeLessThanOrEqual(signingIndex);
+		});
+
+		// Decoupled, not merely different: the search range must not move when the signing offset
+		// does, which is the whole reason the two are separate constants.
+		it('does not derive the lower bound from the signing offset', () => {
+			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(1020));
+
+			expect(lastLedgerSequence - firstLedgerSequence).not.toBe(XRP_LAST_LEDGER_SEQUENCE_OFFSET);
+			expect(lastLedgerSequence - firstLedgerSequence).toBe(XRP_LEDGER_SEARCH_LOOKBACK);
+		});
+
+		// `tx` answers `excessiveLgrRange` above a 1000-ledger span, so a lookback that grows past
+		// it would make every lookup fail — and an unanswerable lookup can never establish expiry.
+		it('stays within the range the tx method accepts', () => {
+			const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(blobWith(500_000));
+
+			expect(lastLedgerSequence - firstLedgerSequence).toBeLessThanOrEqual(1000);
+		});
+
+		// The subtraction must not produce a negative `min_ledger`. Unreachable from a real ledger,
+		// but the codec accepts any UInt32 as `LastLedgerSequence`.
+		it('clamps the lower bound at zero for an index below the lookback', () => {
+			expect(deriveXrpLedgerWindow(blobWith(5)).firstLedgerSequence).toBe(0);
 		});
 
 		// Refused rather than given an open-ended window: such a transaction can never expire, so

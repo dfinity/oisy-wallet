@@ -23,15 +23,57 @@ export const XRP_DEFAULT_FEE_DROPS = 10n;
 // xrpl.js caps at 2 XRP (2_000_000 drops), which is far more than a wallet payment needs.
 export const XRP_MAX_FEE_DROPS = 10_000n;
 
-// Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
-// long it can be included before it definitively fails rather than lingering.
+// XRPL's `UInt32` ceiling. Named once because several distinct fields share it — a
+// `DestinationTag`, a ledger index, a `LastLedgerSequence` — and a bare literal in each place
+// would hide that they are the same protocol bound for the same reason.
+// The largest number of drops that can exist: 10^17, the entire XRP supply of 100 billion XRP at
+// 1,000,000 drops each. A protocol ceiling rather than a chosen one, and checked against
+// `ripple-binary-codec` — an `Amount` of `100000000000000000` encodes, `100000000000000001` throws
+// "is an illegal amount". Nothing larger can be a real value on any ledger, so a node reporting one
+// is reporting a figure that inflates a displayed balance and, through `getXrpMaxAmount`, the
+// reserve-aware maximum the send guard compares against.
+export const XRP_MAX_DROPS = 100_000_000_000_000_000n;
+
+export const XRP_MAX_UINT32 = 0xffff_ffff;
+
+// A `DestinationTag` is a protocol `UInt32`, and both ends are real tags: `0` is a tag rather than
+// an absent one, and so is the ceiling. Anything outside dies inside `ripple-binary-codec`, well
+// past the point where the arguments could have said so.
+export const XRP_MAX_DESTINATION_TAG = XRP_MAX_UINT32;
+
 // `lsfRequireDestTag` in the AccountRoot flags: payments to this account must carry a
 // `DestinationTag`. Set by exchanges and other shared accounts, where the tag is what credits the
 // payment to a customer. A payment without one is applied as `tecDST_TAG_NEEDED` — the fee is
 // destroyed and the sequence consumed — so it is refused before signing instead.
 export const XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG = 0x00020000;
 
+// Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
+// long it can be included before it definitively fails rather than lingering.
+//
+// This governs SIGNING only. How far back a `tx` lookup searches is `XRP_LEDGER_SEARCH_LOOKBACK`
+// below, deliberately a separate constant — see the reasoning there.
 export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
+
+// How far below a blob's `LastLedgerSequence` a `tx` lookup starts searching.
+//
+// Separate from the offset above, and MUST NEVER DECREASE. The two answer different questions —
+// how long a transaction stays valid, versus how far back we look for it — and a blob only encodes
+// the first. `deriveXrpLedgerWindow` reconstructs the lower bound from a constant, so deriving it
+// from the signing offset meant a *reduced* offset moved the bound for transactions signed under
+// the old one: `min_ledger` above the index they were actually signed against, the node reporting
+// `searched_all` over a range that excludes ledgers the payment could be in, and absence concluded
+// from a search that never looked where it was. Past `LastLedgerSequence` that is
+// `XrpSendExpiredError` — a definitive "it never landed" that invites a duplicate payment.
+//
+// A lower bound that is too LOW is not the mirror of one that is too high, which is why a fixed
+// conservative value is a fix rather than a trade: it is a superset of the true window, so it can
+// only make `searched_all` harder for the node to grant, leaving the outcome indeterminate and the
+// poll running. Only a bound that is too high can manufacture a false absence.
+//
+// 100 is five times the current signing offset and ten times inside the ceiling: `tx` answers
+// `excessiveLgrRange` above a 1000-ledger span, and the configured endpoint still returns
+// `searched_all: true` at 20, 100, 500, 999 and 1000.
+export const XRP_LEDGER_SEARCH_LOOKBACK = 100;
 
 // Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
 // XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
@@ -97,3 +139,15 @@ export const XRP_CONFIRM_MAX_ATTEMPTS =
 export const XRP_CONFIRM_MAX_DURATION_MS =
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET * XRP_LEDGER_CLOSE_SECONDS * XRP_CONFIRM_WINDOW_MARGIN * 1000 +
 	XRP_CONFIRM_MAX_ATTEMPTS * XRP_CONFIRM_MAX_POLL_MS;
+
+// How far a validated index can legitimately move while one confirmation run watches: the whole
+// confirmation budget converted to ledger closes, plus the validity window as slack. Measured
+// against the FIRST index that run read, not against `LastLedgerSequence` — for a retry the latter
+// comes out of the stored blob and is an expiry already in the past, which made every legitimate
+// index look implausible and left the retry path unable to ever establish expiry.
+//
+// This bounds movement, not plausibility: the first read of a run is accepted as given, because
+// nothing in the run can corroborate it. What guards expiry against an absurd first read is that
+// `tx` must independently report `searched_all` absence across the blob's own ledger range.
+export const XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD =
+	XRP_CONFIRM_MAX_DURATION_MS / 1000 / XRP_LEDGER_CLOSE_SECONDS + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
