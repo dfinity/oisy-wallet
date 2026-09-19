@@ -97,7 +97,7 @@ helper rather than your method.
 | `loadXrpValidatedLedgerIndex` | `ledger`         | none                                        |
 | `loadXrpTransactionOutcome`   | `tx`             | `txnNotFound`, and only with `searched_all` |
 | `submitXrpTransaction`        | `submit`         | none                                        |
-| _(a later phase)_             | `account_tx`     | `actNotFound` → empty history               |
+| `loadXrpTransactions`         | `account_tx`     | `actNotFound` → empty history               |
 
 Declaring nothing is the safe default, and `fee` shows why the check cannot be skipped:
 every field of its result is optional, so an error response would otherwise parse with no

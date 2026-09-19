@@ -8,6 +8,7 @@ import {
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
+	loadXrpTransactions,
 	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
@@ -105,7 +106,11 @@ describe('xrpl.rest', () => {
 						lastLedgerSequence: 1020
 					})
 			},
-			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
+			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) },
+			{
+				name: 'loadXrpTransactions',
+				call: () => loadXrpTransactions({ address, network, limit: 10 })
+			}
 		];
 
 		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
@@ -2004,6 +2009,114 @@ describe('xrpl.rest', () => {
 					lastLedgerSequence: 1020
 				})
 			).rejects.toThrow('neither a validated result, a pending transaction');
+		});
+	});
+
+	describe('loadXrpTransactions', () => {
+		const entry = {
+			tx: {
+				TransactionType: 'Payment',
+				Account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
+				Destination: address,
+				Amount: '5000000',
+				Fee: '10',
+				hash: 'HASH1',
+				ledger_index: 42,
+				date: 1
+			},
+			meta: { TransactionResult: 'tesSUCCESS', delivered_amount: '5000000' },
+			validated: true
+		};
+
+		it('returns the transactions and the pagination marker', async () => {
+			mockFetchResponse({
+				body: { result: { transactions: [entry], marker: { ledger: 42, seq: 1 } } }
+			});
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([entry]);
+			expect(page.marker).toEqual({ ledger: 42, seq: 1 });
+		});
+
+		// The node answers a JSON-RPC failure with HTTP 200 and the error inside `result`, so
+		// without an explicit check these would read as a genuine empty history and never retry.
+		it.each(['slowDown', 'noNetwork', 'internal', 'invalidParams'])(
+			'throws for the XRPL error %s instead of reporting an empty history',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow(`Unexpected XRPL account_tx response: ${error}`);
+			}
+		);
+
+		// An account that was never funded does not exist on-ledger; it has no history rather than
+		// a failed lookup, matching how `loadXrpBalance` treats the same error.
+		it('returns an empty list for an account that does not exist', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
+		it('returns an empty list when the account has no transactions', async () => {
+			mockFetchResponse({ body: { result: {} } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
+		it('sends an account_tx request over the full ledger range, newest first', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			const [[, options]] = fetchMock.mock.calls;
+
+			expect(JSON.parse(options.body as string)).toEqual({
+				method: 'account_tx',
+				params: [
+					{
+						account: address,
+						ledger_index_min: -1,
+						ledger_index_max: -1,
+						limit: 10,
+						forward: false
+					}
+				]
+			});
+		});
+
+		it('forwards the pagination marker when provided', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({
+				address,
+				network: XrpNetworks.mainnet,
+				limit: 10,
+				marker: { ledger: 42, seq: 1 }
+			});
+
+			const [[, options]] = fetchMock.mock.calls;
+			const { params } = JSON.parse(options.body as string);
+
+			expect(params[0].marker).toEqual({ ledger: 42, seq: 1 });
 		});
 	});
 });

@@ -1,7 +1,13 @@
-import { XRP_LEDGER_SEARCH_LOOKBACK } from '$xrp/constants/xrp.constants';
+import { XRP_LEDGER_SEARCH_LOOKBACK, XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
+import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpPayment, XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import { nonNullish } from '@dfinity/utils';
+import type {
+	XrpAccountTransactionEntry,
+	XrpPayment,
+	XrpSubmitResult,
+	XrpTransactionUi
+} from '$xrp/types/xrp-transaction';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode } from 'ripple-binary-codec';
 
 // Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
@@ -108,6 +114,89 @@ export const buildXrpPayment = ({
 	...(nonNullish(destinationTag) && { DestinationTag: destinationTag }),
 	...(nonNullish(lastLedgerSequence) && { LastLedgerSequence: lastLedgerSequence })
 });
+
+/**
+ * Maps one XRPL `account_tx` entry to a UI transaction, or `undefined` when it is not
+ * a settled native-XRP payment we display.
+ *
+ * v1 shows only successful native-XRP `Payment`s relative to `xrpAddress`: non-`Payment`
+ * types (offers, trust lines, …), issued-currency payments (`Amount` an object, not a
+ * drops string) and failed transactions (`TransactionResult` other than `tesSUCCESS`)
+ * are skipped. The fee is attributed to the sending account only.
+ */
+export const mapXrpTransaction = ({
+	transaction,
+	xrpAddress
+}: {
+	transaction: XrpAccountTransactionEntry;
+	xrpAddress: XrpAddress;
+}): XrpTransactionUi | undefined => {
+	const { meta, validated } = transaction;
+	const tx = transaction.tx ?? transaction.tx_json;
+
+	if (isNullish(tx) || tx.TransactionType !== 'Payment') {
+		return undefined;
+	}
+
+	// Absence of a result is not evidence of success, so anything but an explicit `tesSUCCESS` is
+	// skipped. Unvalidated entries are skipped too: the scheduler caches by transaction hash, which
+	// does not change once the entry is validated, so a row stored while pending would never be
+	// replaced by its settled form.
+	if (validated === false || !isXrpTransactionSuccessful(meta?.TransactionResult)) {
+		return undefined;
+	}
+
+	// The actually delivered amount (a partial payment can deliver less than `Amount`).
+	// For native XRP it is a drops string; for issued currencies it is an object, which
+	// we do not display.
+	const amount = meta?.delivered_amount ?? tx.Amount;
+
+	// XRPL reports `delivered_amount: "unavailable"` when the delivered amount was never recorded,
+	// so the string check alone is not enough — only unsigned drops convert. Skipping beats falling
+	// back to `Amount`, which is a partial payment's ceiling rather than what arrived.
+	if (typeof amount !== 'string' || !/^\d+$/.test(amount)) {
+		return undefined;
+	}
+
+	const hash = tx.hash ?? transaction.hash;
+
+	if (isNullish(hash)) {
+		return undefined;
+	}
+
+	const isReceive = tx.Destination === xrpAddress;
+
+	// `account_tx` returns everything that *affected* the account, not only what it sent or
+	// received — an offer of ours consumed by someone else's payment, for instance. Mapping such an
+	// entry would book a stranger's amount, and their fee, as this wallet's own send.
+	if (!isReceive && tx.Account !== xrpAddress) {
+		return undefined;
+	}
+
+	// `delivered_amount` is what the destination received. On a cross-currency payment the sender
+	// funds it with something else — `SendMax` as an object — so crediting it as XRP leaving this
+	// wallet would be wrong: only the fee did. Receiving stays valid, the XRP really did arrive.
+	if (!isReceive && nonNullish(tx.SendMax) && typeof tx.SendMax !== 'string') {
+		return undefined;
+	}
+
+	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
+
+	return {
+		id: hash,
+		type: isReceive ? 'receive' : 'send',
+		// Unvalidated entries never get this far.
+		status: 'confirmed',
+		value: BigInt(amount),
+		// Guarded above, so not being the destination means being the sender.
+		...(!isReceive && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
+		from: tx.Account,
+		to: tx.Destination,
+		...(nonNullish(tx.date) && { timestamp: BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET) }),
+		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
+		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag })
+	};
+};
 
 /**
  * The inclusive ledger range a signed transaction can be included in, read out of the blob.

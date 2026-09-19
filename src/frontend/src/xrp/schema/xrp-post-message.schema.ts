@@ -1,10 +1,14 @@
-import { PostMessageDataResponseSchema } from '$lib/schema/post-message.schema';
+import {
+	JsonTransactionsTextSchema,
+	PostMessageDataResponseSchema
+} from '$lib/schema/post-message.schema';
 import type { CertifiedData } from '$lib/types/store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import * as z from 'zod';
 
 const XrpPostMessageWalletDataSchema = z.object({
-	balance: z.custom<CertifiedData<XrpBalance | null>>()
+	balance: z.custom<CertifiedData<XrpBalance | null>>(),
+	newTransactions: JsonTransactionsTextSchema
 });
 
 export const XrpPostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({

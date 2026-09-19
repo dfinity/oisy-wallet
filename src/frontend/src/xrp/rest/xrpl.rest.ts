@@ -16,8 +16,10 @@ import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
 	XrpAccountInfo,
+	XrpAccountTransactionEntry,
 	XrpSubmitResult,
-	XrpTransactionOutcome
+	XrpTransactionOutcome,
+	XrpTransactionsPage
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -662,4 +664,48 @@ export const submitXrpTransaction = async ({
 		// comparison would only be re-deriving what the parse already guarantees.
 		accepted: data.accepted
 	};
+};
+
+/**
+ * Native XRP transaction history via the XRPL `account_tx` method.
+ *
+ * `ledger_index_min` / `ledger_index_max` of `-1` mean "the full available range";
+ * `forward: false` returns newest-first. `marker` is the opaque pagination cursor
+ * returned by a previous page — pass it back to fetch the next (older) page.
+ */
+export const loadXrpTransactions = async ({
+	address,
+	network,
+	limit,
+	marker
+}: {
+	address: XrpAddress;
+	network: XrpNetworkType;
+	limit: number;
+	marker?: unknown;
+}): Promise<XrpTransactionsPage> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'account_tx',
+		params: {
+			account: address,
+			ledger_index_min: -1,
+			ledger_index_max: -1,
+			limit,
+			forward: false,
+			...(nonNullish(marker) && { marker })
+		},
+		// An account that has never been funded has no transactions, which is not a failure. Every
+		// other error is: a rate limit or a server fault read as a genuine empty history would look
+		// like a wallet with no activity and never be retried, so the envelope throws for those.
+		expectedErrors: ['actNotFound']
+	});
+
+	if (nonNullish(result.error)) {
+		return { transactions: [] };
+	}
+
+	const transactions = (result.transactions as XrpAccountTransactionEntry[] | undefined) ?? [];
+
+	return { transactions, marker: result.marker };
 };
