@@ -190,6 +190,48 @@ describe('xrpl.rest', () => {
 				}
 			);
 
+			// The outer claim against the inner one. `xrpJsonRpc` reconciled only the inner pair, so a
+			// body claiming success at the TOP while `result` carried a DECLARED error reached
+			// `expectedErrors` and was honoured as a state — for `txnNotFound`, absence and then a
+			// definitive expiry. Both expected codes are covered because those are the two that get
+			// honoured rather than thrown.
+			it.each([
+				{
+					name: 'txnNotFound',
+					result: { error: 'txnNotFound', searched_all: true },
+					call: () =>
+						loadXrpTransactionOutcome({
+							hash: 'H',
+							network,
+							firstLedgerSequence: 1000,
+							lastLedgerSequence: 1020
+						})
+				},
+				{
+					name: 'actNotFound',
+					result: { error: 'actNotFound', ...echoOf(address) },
+					call: () => loadXrpBalance({ address, network })
+				}
+			])('refuses a top-level success carrying $name', async ({ result, call }) => {
+				mockFetchResponse({ body: { result, status: 'success' } });
+
+				await expect(call()).rejects.toThrow('top-level success status with error');
+			});
+
+			// The shape this could most easily break: a forwarded success genuinely carries a
+			// top-level `status: 'success'`, and nothing about it may be refused.
+			it('still accepts a forwarded success that carries no error', async () => {
+				mockFetchResponse({
+					body: {
+						result: { ledger_current_index: 5, status: 'success' },
+						status: 'success',
+						forwarded: true
+					}
+				});
+
+				await expect(loadXrpLedgerIndex({ network })).resolves.toBe(5);
+			});
+
 			// Absent is the normal case: every non-forwarded response and every error omits it.
 			it('accepts a body with no top-level status at all', async () => {
 				mockFetchResponse({ body: { result: { ledger_current_index: 5 } } });
@@ -364,6 +406,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: true,
 						account_data: { Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv', Balance: '25000000' }
 					}
 				}
@@ -378,7 +421,12 @@ describe('xrpl.rest', () => {
 		// forms differing only in case are not the same account.
 		it('throws for an address differing only in case', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address.toUpperCase(), Balance: '1' } } }
+				body: {
+					result: {
+						validated: true,
+						account_data: { Account: address.toUpperCase(), Balance: '1' }
+					}
+				}
 			});
 
 			await expect(loadXrpBalance({ address, network })).rejects.toThrow('answered for');
@@ -393,7 +441,9 @@ describe('xrpl.rest', () => {
 
 		it('returns the balance in drops as a bigint', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address, Balance: '25000000' } } }
+				body: {
+					result: { validated: true, account_data: { Account: address, Balance: '25000000' } }
+				}
 			});
 
 			const balance = await loadXrpBalance({ address, network: XrpNetworks.mainnet });
@@ -406,7 +456,9 @@ describe('xrpl.rest', () => {
 				ok: true,
 				status: 200,
 				json: () =>
-					Promise.resolve({ result: { account_data: { Account: address, Balance: '1' } } })
+					Promise.resolve({
+						result: { validated: true, account_data: { Account: address, Balance: '1' } }
+					})
 			});
 			vi.stubGlobal('fetch', fetchMock);
 
@@ -456,7 +508,13 @@ describe('xrpl.rest', () => {
 		// keys, so without mutual exclusion the error would be discarded and `1` returned.
 		it('throws on a response carrying both account_data and an error', async () => {
 			mockFetchResponse({
-				body: { result: { account_data: { Account: address, Balance: '1' }, error: 'actNotFound' } }
+				body: {
+					result: {
+						validated: true,
+						account_data: { Account: address, Balance: '1' },
+						error: 'actNotFound'
+					}
+				}
 			});
 
 			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
@@ -469,7 +527,9 @@ describe('xrpl.rest', () => {
 		it.each([1, '-1', '0x10', '1.5', '1e3', '', ' 1'])(
 			'throws instead of converting the invalid balance %j',
 			async (Balance) => {
-				mockFetchResponse({ body: { result: { account_data: { Account: address, Balance } } } });
+				mockFetchResponse({
+					body: { result: { validated: true, account_data: { Account: address, Balance } } }
+				});
 
 				await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
 					'Unexpected XRPL account_info response'
@@ -526,28 +586,29 @@ describe('xrpl.rest', () => {
 			expect(result.engineResult).toBe('terPRE_SEQ');
 		});
 
-		// `accepted` comes from an untrusted node, so it is validated rather than cast: a
-		// non-boolean would otherwise pass through and read as truthy.
-		it.each(['false', 'true', 1, 0, {}])(
-			'marks a non-boolean accepted value %j as not accepted',
+		// `accepted` decides, alongside `engine_result`, whether a `tem*` is a definitive rejection,
+		// so a malformed one must not collapse to `false` — that read a contradictory response as a
+		// rejection reported AFTER the blob was broadcast. It now fails the parse, which the send
+		// treats exactly as a lost response and answers by confirming the hash.
+		it.each(['false', 'true', 1, 0, {}, null])(
+			'refuses a non-boolean accepted value of %j',
 			async (accepted) => {
 				mockFetchResponse({
 					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
 				});
 
-				const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-				expect(result.accepted).toBeFalsy();
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).rejects.toThrow('Unexpected XRPL submit response');
 			}
 		);
 
-		it('marks a response without an accepted flag as not accepted', async () => {
+		it('refuses a response without an accepted flag', async () => {
 			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
 
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeFalsy();
-			expect(result.engineResult).toBe('tecUNFUNDED_PAYMENT');
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'Unexpected XRPL submit response'
+			);
 		});
 
 		it('throws on a non-ok HTTP response', async () => {
@@ -590,7 +651,12 @@ describe('xrpl.rest', () => {
 		it('tolerates malformed engine_result_message and tx_json', async () => {
 			mockFetchResponse({
 				body: {
-					result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json: 'nope' }
+					result: {
+						engine_result: 'tesSUCCESS',
+						accepted: true,
+						engine_result_message: 7,
+						tx_json: 'nope'
+					}
 				}
 			});
 
@@ -599,7 +665,7 @@ describe('xrpl.rest', () => {
 					engineResult: 'tesSUCCESS',
 					engineResultMessage: undefined,
 					txHash: undefined,
-					accepted: false
+					accepted: true
 				}
 			);
 		});
@@ -628,6 +694,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: ledgerIndex === 'validated',
 							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
 						}
 					}
@@ -640,7 +707,9 @@ describe('xrpl.rest', () => {
 		);
 
 		it('asks the validated ledger for the display balance', async () => {
-			mockFetchResponse({ body: { result: { account_data: { Account: address, Balance: '1' } } } });
+			mockFetchResponse({
+				body: { result: { validated: true, account_data: { Account: address, Balance: '1' } } }
+			});
 
 			await loadXrpBalance({ address, network });
 
@@ -653,6 +722,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -696,6 +766,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: { ...accountData, Account: 'rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv' }
 						}
 					}
@@ -710,7 +781,12 @@ describe('xrpl.rest', () => {
 			// unlike the hex transaction hash, which is compared case-insensitively.
 			it('throws for an account that differs from the requested one only in case', async () => {
 				mockFetchResponse({
-					body: { result: { account_data: { ...accountData, Account: address.toUpperCase() } } }
+					body: {
+						result: {
+							validated: false,
+							account_data: { ...accountData, Account: address.toUpperCase() }
+						}
+					}
 				});
 
 				await expect(
@@ -722,7 +798,7 @@ describe('xrpl.rest', () => {
 			// would leave the comparison above skippable by leaving the field out.
 			it.each([undefined, null, 42, {}])('throws for an account of %j', async (Account) => {
 				mockFetchResponse({
-					body: { result: { account_data: { ...accountData, Account } } }
+					body: { result: { validated: false, account_data: { ...accountData, Account } } }
 				});
 
 				await expect(
@@ -755,7 +831,35 @@ describe('xrpl.rest', () => {
 						name: 'the two echoes disagree',
 						result: { account: address, request: { command: 'account_info', account: other } }
 					},
-					{ name: 'nothing identifies it', result: {} }
+					{ name: 'nothing identifies it', result: {} },
+					// A well-formed echo for the OTHER operation, carrying the right address. Defence in
+					// depth rather than a live hole — a real `tx` echo has no `account` — but the echo is
+					// the only identity an error response has, so it asserts both things it states.
+					{
+						name: 'the echo is for a different operation',
+						result: { request: { command: 'tx', account: address } }
+					},
+					// A present identity that cannot be compared must FAIL the comparison rather than be
+					// dropped from it. Filtering to strings first meant the good half of a half-malformed
+					// response carried it.
+					{
+						name: 'the echoed account is not a string',
+						result: { account: address, request: { command: 'account_info', account: 123 } }
+					},
+					{
+						name: 'the forwarded account is not a string',
+						result: { account: 123, request: { command: 'account_info', account: address } }
+					},
+					// `null` rather than a wrong type, because `nonNullish` would drop it back out of the
+					// comparison and reintroduce the same hole.
+					{
+						name: 'the echoed account is null',
+						result: { account: address, request: { command: 'account_info', account: null } }
+					},
+					{
+						name: 'the forwarded account is null',
+						result: { account: null, request: { command: 'account_info', account: address } }
+					}
 				])('is untyped when $name', async ({ result }) => {
 					mockFetchResponse({ body: { result: { error: 'actNotFound', ...result } } });
 
@@ -765,9 +869,13 @@ describe('xrpl.rest', () => {
 						ledgerIndex: 'current'
 					}).catch((err: unknown) => err);
 
+					// The requirement is that absence is not CLAIMED, not which layer refuses it: a
+					// malformed top-level `account` is caught by the schema, while one inside the
+					// echo — which is `unknown` under the catchall — reaches the identity check.
+					// Both fail closed, and the untyped error is what the send path reads as an
+					// unavailable lookup rather than as a destination that does not exist.
 					expect(failure).toBeInstanceOf(Error);
 					expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
-					expect((failure as Error).message).toContain('does not identify');
 				});
 
 				// The two shapes the provider actually sends: Clio answers `validated` itself and
@@ -800,12 +908,94 @@ describe('xrpl.rest', () => {
 			});
 		});
 
+		// The caller asks for one snapshot and the address check cannot tell the two apart, so a
+		// response for the OTHER one passed. `sendXrp` reads both to take the lower balance and the
+		// higher owner count — a pessimism that only holds if the answers really are two ledgers.
+		describe('the ledger snapshot the response answered for', () => {
+			const funded = (validated: boolean) => ({
+				body: {
+					result: {
+						validated,
+						account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
+					}
+				}
+			});
+
+			it.each([
+				{
+					asked: 'current' as const,
+					answered: true,
+					name: 'a validated snapshot for an open read'
+				},
+				{
+					asked: 'validated' as const,
+					answered: false,
+					name: 'an open snapshot for a validated read'
+				}
+			])('refuses $name', async ({ asked, answered }) => {
+				mockFetchResponse(funded(answered));
+
+				await expect(loadXrpAccountInfo({ address, network, ledgerIndex: asked })).rejects.toThrow(
+					'snapshot for a'
+				);
+			});
+
+			it.each(['current', 'validated'] as const)(
+				'accepts the %s snapshot it asked for',
+				async (asked) => {
+					mockFetchResponse(funded(asked === 'validated'));
+
+					await expect(
+						loadXrpAccountInfo({ address, network, ledgerIndex: asked })
+					).resolves.toEqual(expect.objectContaining({ sequence: 1 }));
+				}
+			);
+
+			// Required, so the comparison cannot be skipped by omitting the field.
+			it.each([undefined, null, 'true', 1])('refuses a validated flag of %j', async (validated) => {
+				mockFetchResponse({
+					body: {
+						result: {
+							validated,
+							account_data: { Account: address, Balance: '1', Sequence: 1, OwnerCount: 0, Flags: 0 }
+						}
+					}
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network, ledgerIndex: 'current' })
+				).rejects.toThrow('does not match the expected shape');
+			});
+
+			// The regression this could introduce: an `actNotFound` from the direct path carries no
+			// ledger metadata at all, so absence on the validated ledger must stay readable.
+			it('still reads an actNotFound with no ledger metadata as absence', async () => {
+				mockFetchResponse({ body: { result: { error: 'actNotFound', ...echoOf(address) } } });
+
+				await expect(
+					loadXrpAccountInfo({ address, network, ledgerIndex: 'validated' })
+				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+
+			// Same reason the balance read asks for the validated ledger in the first place.
+			it('refuses an open-ledger snapshot for the displayed balance', async () => {
+				mockFetchResponse({
+					body: { result: { validated: false, account_data: { Account: address, Balance: '1' } } }
+				});
+
+				await expect(loadXrpBalance({ address, network })).rejects.toThrow(
+					'open-ledger snapshot for a validated read'
+				);
+			});
+		});
+
 		// The send path reads `lsfRequireDestTag` out of these bits, so dropping them at the
 		// boundary would leave an untagged payment to be applied as `tecDST_TAG_NEEDED`.
 		it('returns the account flags when the node reports them', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -834,6 +1024,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: { Account: address, Balance: '30000000', Sequence: 42, OwnerCount: 3 }
 					}
 				}
@@ -850,6 +1041,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -874,6 +1066,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -903,6 +1096,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: {
 								Account: address,
 								Balance: '30000000',
@@ -924,6 +1118,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						account_data: {
 							Account: address,
 							Balance: '30000000',
@@ -947,6 +1142,7 @@ describe('xrpl.rest', () => {
 				mockFetchResponse({
 					body: {
 						result: {
+							validated: false,
 							account_data: { Account: address, Balance, Sequence: 42, OwnerCount: 0, Flags: 0 }
 						}
 					}
@@ -978,6 +1174,7 @@ describe('xrpl.rest', () => {
 			mockFetchResponse({
 				body: {
 					result: {
+						validated: false,
 						error: 'actNotFound',
 						account_data: {
 							Account: address,
@@ -1389,7 +1586,17 @@ describe('xrpl.rest', () => {
 				{ name: 'another transaction', echo: txEchoOf({ transaction: 'OTHERHASH' }) },
 				{ name: 'another lower bound', echo: txEchoOf({ transaction: 'HASH', minLedger: 900 }) },
 				{ name: 'another upper bound', echo: txEchoOf({ transaction: 'HASH', maxLedger: 1120 }) },
-				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } }
+				{ name: 'no transaction at all', echo: { request: { method: 'tx', params: [{}] } } },
+				// Same, the other way round: an `account_info` echo carrying this transaction and range.
+				{
+					name: 'a different operation',
+					echo: {
+						request: {
+							method: 'account_info',
+							params: [{ transaction: 'HASH', min_ledger: 1000, max_ledger: 1020 }]
+						}
+					}
+				}
 			])('refuses an absence answering for $name', async ({ echo }) => {
 				mockFetchResponse({
 					body: { result: { error: 'txnNotFound', searched_all: true, ...echo } }

@@ -19,15 +19,25 @@ export const XrpDropsSchema = z.string().regex(/^\d+$/);
  * the two echo differently — verified against the configured endpoint:
  *   Clio:    `{ method: 'account_info', params: [{ account, ledger_index }] }`
  *   rippled: `{ command: 'account_info', account, ledger_index }`
- * Both are accepted and reduced to the same flat record, so a caller compares values rather than
+ * Both are accepted and normalised to the same pair, so a caller compares values rather than
  * choosing a shape. Neither matching is not an error here: the caller decides what an unbindable
  * response means, and for both readers above it means indeterminate rather than absent.
+ *
+ * `operation` rather than parameters alone, because an echo says two things and only one of them
+ * was being kept: what was asked, and what it was asked OF. The Clio branch discarded `method`
+ * outright. On its own that is defence in depth — a `tx` echo carries no `account` and an
+ * `account_info` echo carries no `transaction`, so neither can satisfy the other reader's
+ * comparison by accident — but it is a second, independent assertion on the only identity an error
+ * response has, and both shapes already state it.
  */
 export const XrplRequestEchoSchema = z.union([
 	z
 		.object({ method: z.string(), params: z.tuple([z.record(z.string(), z.unknown())]) })
-		.transform(({ params }) => params[0]),
-	z.object({ command: z.string() }).catchall(z.unknown())
+		.transform(({ method, params }) => ({ operation: method, params: params[0] })),
+	z
+		.object({ command: z.string() })
+		.catchall(z.unknown())
+		.transform(({ command, ...params }) => ({ operation: command, params }))
 ]);
 
 // The branches must be mutually exclusive: zod strips unknown keys and returns the
@@ -39,6 +49,7 @@ export const XrplAccountInfoResultSchema = z.union([
 		// whose balance this is, so a stale or misrouted answer would otherwise be displayed as this
 		// account's. Only `Balance` is needed beyond that — this feeds the balance store, not a send.
 		account_data: z.object({ Account: z.string(), Balance: XrpDropsSchema }),
+		validated: z.boolean(),
 		error: z.never().optional()
 	}),
 	// `actNotFound` carries no `account_data` to name its subject, so the identity has to come from
@@ -128,9 +139,21 @@ const XrplAccountDataSchema = z.object({
 // return, so `actNotFound` is literally the only alternative — and giving it a branch is what lets
 // the caller decide absence AFTER parsing. Deciding it beforehand meant a response carrying both
 // `actNotFound` and `account_data` was read as absence, discarding the `Flags` the send path reads.
+// `validated` says WHICH snapshot answered, and it is the only field that does so on both forms:
+// a validated response carries `validated: true` with `ledger_index` and `ledger_hash`, an open one
+// `validated: false` with `ledger_current_index`. The caller asks for one of the two and the address
+// check cannot tell them apart, so without this a response for the other snapshot passes — and
+// `sendXrp` reads BOTH to take the lower balance and the higher owner count, a pessimism that only
+// holds if the two answers really are two ledgers.
+//
+// On the funded branch only. An `actNotFound` from the direct path carries no ledger metadata at
+// all, so requiring it there would refuse every real absence on the validated ledger — and that
+// branch has no `Balance`, `Sequence` or `OwnerCount` to be wrong about, which is where both
+// consequences live.
 export const XrplAccountInfoFullResultSchema = z.union([
 	z.object({
 		account_data: XrplAccountDataSchema,
+		validated: z.boolean(),
 		error: z.never().optional()
 	}),
 	z.object({
@@ -293,12 +316,21 @@ export const XrplTxResultSchema = z.union([
 export const XrplSubmitResultSchema = z.object({
 	engine_result: z.string(),
 	error: z.never().optional(),
-	// Strict only where the decision reads. These three are cosmetic or unused — the message is
-	// interpolated into an error, the hash is derived locally and `accepted` is compared to `true`
-	// — so a malformed one must not fail the parse: that would throw, and the send would poll for a
-	// minute over a field it never consults.
+	// Strict only where the decision reads. These two are cosmetic — the message is interpolated
+	// into an error and the hash is derived locally — so a malformed one must not fail the parse:
+	// that would throw, and the send would poll for a minute over a field it never consults.
 	engine_result_message: z.string().optional().catch(undefined),
-	accepted: z.unknown().optional(),
+	// `accepted` is not one of them any more. It decides, alongside `engine_result`, whether a
+	// `tem*` is a definitive rejection: only a node that did NOT claim to take the blob makes that
+	// claim credible. Left as `z.unknown().optional()` and normalised with `=== true`, every
+	// malformed value — `'true'`, `1`, `null`, or the field missing — collapsed to `false` and
+	// turned a contradictory response into a reported rejection AFTER the blob was broadcast,
+	// which is the outcome that check exists to avoid.
+	//
+	// Required, so a malformed one fails the parse instead. `submitXrpTransaction` then throws,
+	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
+	// where the hash decides. That is the direction this path has to fail in.
+	accepted: z.boolean(),
 	tx_json: z
 		.object({ hash: z.string().optional().catch(undefined) })
 		.optional()

@@ -105,8 +105,24 @@ const xrpJsonRpc = async ({
 		throw new Error(`Unexpected XRPL ${method} response: no result object`);
 	}
 
-	const { result } = parsed.data;
+	const { result, status: envelopeStatus } = parsed.data;
 	const { error, status } = result;
+
+	// The outer claim against the inner one. The envelope validated `status` beside the result, and
+	// the contradiction check further down compares `result.status` — a different field one level
+	// down — so a body claiming success at the TOP while `result` carries an error satisfied every
+	// check and reached `expectedErrors`, where a declared code is honoured as a state. For
+	// `txnNotFound` that is `{ state: 'absent' }` and, past `LastLedgerSequence`, a definitive
+	// expiry telling the caller a resend is safe.
+	//
+	// Before the expected-errors check rather than beside it: honouring a declared error after the
+	// body has already claimed the call succeeded is the ordering that makes this reachable.
+	if (envelopeStatus === 'success' && 'error' in result) {
+		throw new XrplRpcError({
+			method,
+			error: `top-level success status with error ${String(error)}`
+		});
+	}
 
 	// `result.status` is on every real response — `'success'`, or `'error'` alongside `error`,
 	// `error_code` and `error_message` — and was previously ignored, so a FAILED response could
@@ -150,6 +166,24 @@ const xrpJsonRpc = async ({
 };
 
 /**
+ * Whether an `account_info` response answered for the snapshot that was asked for.
+ *
+ * `validated` is the field that says which one: `true` for the validated ledger, `false` for the
+ * open one. The address check cannot tell the two apart, and `sendXrp` reads BOTH to take the lower
+ * balance and the higher owner count — a pessimism that only holds if the two answers really are
+ * two different ledgers. Two open answers size the maximum against an unvalidated credit that can
+ * roll back (`tecUNFUNDED_PAYMENT`); two validated ones sign a sequence the open ledger has already
+ * consumed (`tefPAST_SEQ`).
+ */
+const isXrpSnapshotForLedger = ({
+	ledgerIndex,
+	validated
+}: {
+	ledgerIndex: 'current' | 'validated';
+	validated: boolean;
+}): boolean => validated === (ledgerIndex === 'validated');
+
+/**
  * Whether an `account_info` error response is about the account that was asked for.
  *
  * A success names its subject in `account_data.Account`; `actNotFound` names nothing, and it is
@@ -172,13 +206,30 @@ const isXrpAccountErrorForAddress = ({
 }: {
 	address: XrpAddress;
 	account?: string;
-	request?: Record<string, unknown>;
+	request?: { operation: string; params: Record<string, unknown> };
 }): boolean => {
-	// Raw, like the `Account` comparison: a classic address is base58 over a checksummed payload,
-	// so case is significant.
-	const echoed = [account, request?.account].filter((value) => typeof value === 'string');
+	// The echo must be an `account_info` echo. On its own this is defence in depth — a `tx` echo
+	// carries no `account` to match — but it is a second assertion on the only identity an error
+	// response has, and the echo already states it.
+	if (nonNullish(request) && request.operation !== 'account_info') {
+		return false;
+	}
 
-	return echoed.length > 0 && echoed.every((value) => value === address);
+	// Everything the response CARRIES, not everything it could parse. Filtering to strings first
+	// discarded a present-but-malformed identity before the comparison saw it, so
+	// `{ account: <requested>, request: { account: 123 } }` passed on the strength of the good half
+	// — a guard that gets weaker the more malformed the response is, which is backwards.
+	//
+	// `!== undefined` and NOT `nonNullish`: an explicit `null` is a malformed identity that has to
+	// fail, and `nonNullish` would drop it back out of the comparison. Absent is the only thing
+	// that may be skipped.
+	const echoed = [account, request?.params.account].filter((value) => value !== undefined);
+
+	// Raw comparison, like the `Account` one: a classic address is base58 over a checksummed
+	// payload, so case is significant.
+	return (
+		echoed.length > 0 && echoed.every((value) => typeof value === 'string' && value === address)
+	);
 };
 
 /**
@@ -223,6 +274,14 @@ export const loadXrpBalance = async ({
 		}
 
 		return ZERO;
+	}
+
+	// Asked for the validated ledger precisely so a displayed figure cannot roll back, so an
+	// open-ledger answer accepted here defeats the reason this read is validated at all.
+	if (!isXrpSnapshotForLedger({ ledgerIndex: 'validated', validated: data.validated })) {
+		throw new Error(
+			'Unexpected XRPL account_info response: an open-ledger snapshot for a validated read'
+		);
 	}
 
 	// Bound to the address asked for, like the full snapshot. This one cannot cause a bad send —
@@ -315,6 +374,14 @@ export const loadXrpAccountInfo = async ({
 		}
 
 		throw new XrpAccountNotFoundError(`XRPL account not found: ${address}`);
+	}
+
+	// The answer must be about the snapshot we asked for, not only the account. See
+	// `isXrpSnapshotForLedger` for what rides on it.
+	if (!isXrpSnapshotForLedger({ ledgerIndex, validated: data.validated })) {
+		throw new Error(
+			`Unexpected XRPL account_info response: a ${data.validated ? 'validated' : 'open'}-ledger snapshot for a ${ledgerIndex} read`
+		);
 	}
 
 	const { Account, Balance, Sequence, OwnerCount, Flags } = data.account_data;
@@ -496,15 +563,17 @@ export const loadXrpTransactionOutcome = async ({
 	// `error?: undefined`, so the `in` check does not discriminate them and `request` is not
 	// reachable through it.
 	if (data.error === 'txnNotFound') {
-		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = data.request;
+		const { operation, params } = data.request;
+		const { transaction, min_ledger: minLedger, max_ledger: maxLedger } = params;
 
 		if (
+			operation !== 'tx' ||
 			String(transaction).toUpperCase() !== hash.toUpperCase() ||
 			minLedger !== firstLedgerSequence ||
 			maxLedger !== lastLedgerSequence
 		) {
 			throw new Error(
-				`Unexpected XRPL tx response: a txnNotFound for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
+				`Unexpected XRPL tx response: a txnNotFound from ${operation} for ${String(transaction)} over ${String(minLedger)}-${String(maxLedger)}, asked for ${hash} over ${firstLedgerSequence}-${lastLedgerSequence}`
 			);
 		}
 
@@ -561,9 +630,14 @@ export const submitXrpTransaction = async ({
 		engineResult: data.engine_result,
 		engineResultMessage: data.engine_result_message,
 		txHash: data.tx_json?.hash,
-		// Reported for the caller's record only. It says this node took the transaction
-		// (applied/queued/broadcast/kept), which is neither necessary nor sufficient for the send to
-		// have happened, so it does not gate anything — see `isXrpSubmitFinalFailure`.
-		accepted: data.accepted === true
+		// It says this node took the transaction (applied/queued/broadcast/kept), which is neither
+		// necessary nor sufficient for the send to have happened — so `accepted: false` never
+		// creates a failure. It does decide one thing: a `tem*` is only a definitive rejection when
+		// the node did NOT also claim to have taken the blob, because nothing can be both malformed
+		// and accepted. See `isXrpSubmitFinalFailure`.
+		//
+		// Passed through rather than compared to `true`: the schema requires a boolean, so the
+		// comparison would only be re-deriving what the parse already guarantees.
+		accepted: data.accepted
 	};
 };
