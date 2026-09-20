@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
@@ -142,8 +142,17 @@
 			return;
 		}
 
-		// This should not happen, it is just a safety check for types
-		assertNonNullish(source);
+		// Was `assertNonNullish`, which throws out of this handler — outside the try below — so an
+		// address that had not derived produced an unhandled rejection: no toast, no progress, a
+		// Send button that did nothing. `SendModal` now gates XRP on `xrpAddressMainnetNotLoaded`
+		// like the other chains, so this should be unreachable; it fails closed and says so rather
+		// than trusting that, since the address can also go away while the wizard is open.
+		if (isNullish(source)) {
+			toastsError({
+				msg: { text: $i18n.send.error.xrp_account_state_unavailable }
+			});
+			return;
+		}
 
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
@@ -217,6 +226,13 @@
 			toastsError({
 				msg: { text: $i18n.send.assertion.insufficient_funds_for_reserve }
 			});
+
+			// Same reason as the typed pre-sign refusals below: this runs before `onNext`, so the
+			// user is on REVIEW, and the message names an amount that only the form can change. The
+			// trigger is exactly a figure moving while they sit on review, which is what this check
+			// exists to catch.
+			onSendForm();
+
 			return;
 		}
 

@@ -321,6 +321,36 @@ describe('XrpFeeContext', () => {
 	// Unknown blocks Max and Next, correctly — but nothing asked again, so one dropped request cost
 	// the whole form with no error and no retry the user could see. Failure-only: the normal path
 	// still fetches once, because the reserve does not move while a send is composed.
+	// Pins the outcome, not the mechanism, and deliberately so: `rerender` flushes the effect, which
+	// bumps the generation before the quote resolves, so this passes with or without the `!observe`
+	// term added alongside it. The window that term closes — `observe` false but the effect not yet
+	// run — is not reachable from a component test. It is kept because it fails if the generation
+	// check is removed, which is the other half of the same guard.
+	it('does not publish a quote that resolves after observation stops', async () => {
+		let resolveQuote: ((fee: bigint) => void) | undefined;
+
+		vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockReturnValue(
+			new Promise((res) => {
+				resolveQuote = res;
+			})
+		);
+
+		const { rerender, unmount } = renderContext();
+
+		await waitFor(() => {
+			expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
+		});
+
+		await rerender({ token: XRP_TOKEN, observe: false, children: mockSnippet });
+
+		resolveQuote?.(nodeFee);
+		await runResolvedPromises();
+
+		expect(get(feeStore)).toBeUndefined();
+
+		unmount();
+	});
+
 	describe('reserve retry', () => {
 		it('asks again after an operational failure and publishes once it succeeds', async () => {
 			vi.useFakeTimers();

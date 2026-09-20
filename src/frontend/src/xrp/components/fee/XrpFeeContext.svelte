@@ -143,7 +143,12 @@
 			// `send()` reads the fee twice, once to validate the amount against it and once to sign,
 			// so a late write lands between them and signs a figure neither the guard nor the user
 			// saw. Freezing the fee for the duration of a send is the whole reason `observe` exists.
-			if (id !== generation) {
+			//
+			// `observe` is read again here rather than left to the generation alone: the generation
+			// only moves when the effect reruns, and effects run asynchronously, so a quote resolving
+			// between `observe` going false and that rerun would still match and write. That window is
+			// the send starting — the one case this guard was added for.
+			if (id !== generation || !observe) {
 				return;
 			}
 

@@ -6,9 +6,11 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-
-	// XRPL destination tags are 32-bit unsigned integers.
-	const MAX_DESTINATION_TAG = 4_294_967_295;
+	// The same bound `sendXrp` enforces before signing, not a second copy of it: a tag is a
+	// protocol-level UInt32, so a local literal could not legitimately diverge — but nothing
+	// would have shown a reader that the form's limit and the signer's were meant to be one
+	// number. Aliased so the call site below reads unchanged.
+	import { XRP_MAX_DESTINATION_TAG as MAX_DESTINATION_TAG } from '$xrp/constants/xrp.constants';
 
 	interface Props {
 		invalidDestinationTag?: boolean;
