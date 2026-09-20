@@ -262,6 +262,10 @@ describe('XrpSendTokenWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: { text: en.send.assertion.amount_invalid } })
 			);
+
+			// And on the step that has an amount field: this runs before `onNext`, so the user is
+			// still on REVIEW.
+			expect(onSendForm).toHaveBeenCalled();
 		}
 	);
 
