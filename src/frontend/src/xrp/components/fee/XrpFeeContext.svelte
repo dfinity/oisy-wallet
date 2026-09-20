@@ -84,7 +84,7 @@
 		}
 	};
 
-	const estimateFee = async () => {
+	const estimateFee = async (id: number) => {
 		if (!observe || isNullish(token)) {
 			return;
 		}
@@ -110,6 +110,18 @@
 			// Out of range is then treated as the catch treats a throw — unknown on the first load,
 			// last valid estimate retained afterwards — so there is one rule rather than two.
 			if (quote <= ZERO || quote > XRP_MAX_FEE_DROPS) {
+				return;
+			}
+
+			// Checked immediately before the write, not after the await in `updateFee` — that check
+			// runs once the store has already been changed. A request still in flight when the effect
+			// reruns, when `observe` goes false as the send starts, or when the component is destroyed
+			// would otherwise publish anyway.
+			//
+			// `send()` reads the fee twice, once to validate the amount against it and once to sign,
+			// so a late write lands between them and signs a figure neither the guard nor the user
+			// saw. Freezing the fee for the duration of a send is the whole reason `observe` exists.
+			if (id !== generation) {
 				return;
 			}
 
@@ -139,13 +151,15 @@
 			return;
 		}
 
-		await estimateFee();
+		await estimateFee(id);
 
 		if (id !== generation || !observe) {
 			return;
 		}
 
-		timer = setInterval(estimateFee, 10000);
+		// The poller carries the generation it was installed under, so a poll resolving after this
+		// timer has been superseded is rejected by the same check as the first request.
+		timer = setInterval(() => void estimateFee(id), 10000);
 	};
 
 	$effect(() => {

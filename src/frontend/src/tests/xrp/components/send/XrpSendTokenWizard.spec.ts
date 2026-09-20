@@ -450,6 +450,45 @@ describe('XrpSendTokenWizard', () => {
 		});
 	});
 
+	// A figure that never loaded is not a shortfall: no comparison happened. Telling the user to
+	// lower the amount cannot fix a read that failed, and it is the last thing said before giving up.
+	it('reports unreadable account state as such, not as insufficient funds', async () => {
+		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('network down'));
+
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_account_state_unavailable } })
+		);
+		expect(toasts.toastsError).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				msg: { text: en.send.assertion.insufficient_funds_for_reserve }
+			})
+		);
+	});
+
+	// `NetworkId` is a branded symbol: a bare template literal throws instead of printing, so the
+	// substitution has to go through `.description`. Asserted on the rendered text, since a raw
+	// message would ship the placeholder to the user.
+	it('names the network in the non-XRP guard instead of showing the placeholder', async () => {
+		const { container } = render(XrpSendTokenWizard, {
+			props,
+			context: mockContext({ token: ETHEREUM_TOKEN })
+		});
+
+		await clickSend(container);
+
+		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+
+		const [{ msg }] = vi.mocked(toasts.toastsError).mock.calls.at(-1) ?? [{ msg: { text: '' } }];
+
+		expect(msg.text).toContain(`${ETHEREUM_TOKEN.network.id.description}`);
+		expect(msg.text).not.toContain('$networkId');
+	});
+
 	it('should advance the wizard before sending', async () => {
 		const { container } = await renderSettled();
 
