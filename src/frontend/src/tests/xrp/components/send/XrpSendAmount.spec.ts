@@ -10,7 +10,7 @@ import {
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('XrpSendAmount', () => {
@@ -134,6 +134,59 @@ describe('XrpSendAmount', () => {
 			spendableXrp(getXrpReserveDrops({ ownerCount: 0 })),
 			6
 		);
+	});
+
+	// `MaxBalanceButton` re-maxes when the fee moves, and clears that intent when the user types —
+	// but only if the input and the button share the flag. Unbound they each keep a copy, the
+	// button's stays set, and the next poll overwrites what was typed.
+	describe('Max followed by typing', () => {
+		const input = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const clickMax = async (container: HTMLElement) => {
+			const button = container.querySelector(`[data-tid="${MAX_BUTTON}"]`);
+
+			expect(button).not.toBeNull();
+
+			await fireEvent.click(button as HTMLElement);
+		};
+
+		it('keeps a typed amount when the fee changes afterwards', async () => {
+			vi.useFakeTimers();
+
+			const { container } = renderAmount();
+
+			await clickMax(container);
+			await fireEvent.input(input(container), { target: { value: '1' } });
+
+			feeStore.setFee(fee * 2n);
+
+			await vi.advanceTimersByTimeAsync(2_000);
+
+			expect(input(container).value).toBe('1');
+
+			vi.useRealTimers();
+		});
+
+		// The other half: with Max still the user's intent, a fee change must still re-max, or the
+		// shared flag would have bought correctness by disabling the feature.
+		it('re-maxes when the fee changes and nothing was typed', async () => {
+			vi.useFakeTimers();
+
+			const { container } = renderAmount();
+
+			await clickMax(container);
+
+			const atFirstFee = input(container).value;
+
+			feeStore.setFee(fee * 1000n);
+
+			await vi.advanceTimersByTimeAsync(2_000);
+
+			expect(input(container).value).not.toBe(atFirstFee);
+
+			vi.useRealTimers();
+		});
 	});
 
 	it('offers less as the owner count grows', () => {
