@@ -1,10 +1,11 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
-import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
+import { XRP_DEFAULT_FEE_DROPS, XRP_MAX_FEE_DROPS } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import {
 	XRP_FEE_CONTEXT_KEY,
@@ -95,6 +96,47 @@ describe('XrpFeeContext', () => {
 			expect(get(feeStore)).toBeUndefined();
 
 			unmount();
+		});
+
+		// A quote `sendXrp` would refuse is worse than no quote: it opens the form, is shown as the
+		// reviewed fee, and fails only after the wizard has advanced. The upper bound is not merely
+		// a malformed answer — the open-ledger fee escalates with queue occupancy, so a congested
+		// node can quote above the maximum legitimately.
+		it.each([
+			{ name: 'zero', quote: ZERO },
+			{ name: 'above the maximum', quote: XRP_MAX_FEE_DROPS + 1n }
+		])('leaves the fee unknown when the node quotes $name', async ({ quote }) => {
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(quote);
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
+			});
+
+			expect(get(feeStore)).toBeUndefined();
+
+			unmount();
+		});
+
+		// Out of range is treated exactly as a throw, so a later one retains rather than clears.
+		it('keeps the last estimate when a later poll quotes out of range', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(get(feeStore)).toBe(nodeFee);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockResolvedValue(XRP_MAX_FEE_DROPS + 1n);
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(get(feeStore)).toBe(nodeFee);
+
+			unmount();
+			vi.useRealTimers();
 		});
 
 		// Ten seconds stale beats both a guess and a blank field, so a failing poll keeps what the

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import type { Token } from '$lib/types/token';
-	import { XRP_DEFAULT_FEE_DROPS } from '$xrp/constants/xrp.constants';
+	import { XRP_DEFAULT_FEE_DROPS, XRP_MAX_FEE_DROPS } from '$xrp/constants/xrp.constants';
 	import {
 		XrpAccountNotFoundError,
 		loadXrpAccountInfo,
@@ -95,7 +96,24 @@
 		}
 
 		try {
-			feeStore.setFee(await loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }));
+			const quote = await loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS });
+
+			// Bounded against the same constants `sendXrp` enforces. A quote it would refuse is worse
+			// than no quote at all: the schema accepts zero and anything up to the drops ceiling, so it
+			// opens the form, is shown as the reviewed fee, and the send dies only after the wizard has
+			// advanced — as a plain error, reported as an unexpected failure.
+			//
+			// The high end is not only a malformed answer. The open-ledger fee escalates with the
+			// square of queue occupancy by design, so a congested node can quote above the maximum
+			// legitimately, and that is exactly when a send is being composed.
+			//
+			// Out of range is then treated as the catch treats a throw — unknown on the first load,
+			// last valid estimate retained afterwards — so there is one rule rather than two.
+			if (quote <= ZERO || quote > XRP_MAX_FEE_DROPS) {
+				return;
+			}
+
+			feeStore.setFee(quote);
 		} catch (_: unknown) {
 			// Nothing is published. `loadXrpOpenLedgerFee` already applies the fallback to the one case
 			// it fits — a successful response that omits the estimate — and throws for everything else,
