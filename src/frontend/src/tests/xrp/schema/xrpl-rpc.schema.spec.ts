@@ -30,6 +30,46 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrpDropsSchema.safeParse('100000000000000000').success).toBeTruthy();
 		});
 
+		// A padded value is still a legal amount, so leading zeros are stripped rather than counted —
+		// the length bound must not turn one drop into an out-of-range one.
+		it.each([
+			{ name: 'a padded one drop', drops: `${'0'.repeat(40)}1` },
+			{ name: 'a padded maximum', drops: `${'0'.repeat(40)}100000000000000000` },
+			{ name: 'nothing but zeros', drops: '0'.repeat(10_000) }
+		])('accepts $name', ({ drops }) => {
+			expect(XrpDropsSchema.safeParse(drops).success).toBeTruthy();
+		});
+
+		// What LEAVES the schema is what every caller converts — `loadXrpBalance`,
+		// `loadXrpAccountInfo` and `loadXrpOpenLedgerFee` all call `BigInt` on it. Validating the
+		// stripped form while returning the original left a padded value to be converted at full
+		// length downstream, so the output is asserted rather than only the verdict.
+		it.each([
+			{ name: 'a padded one drop', drops: `${'0'.repeat(40)}1`, canonical: '1' },
+			{
+				name: 'a padded maximum',
+				drops: `${'0'.repeat(40)}100000000000000000`,
+				canonical: '100000000000000000'
+			},
+			{ name: 'nothing but zeros', drops: '0'.repeat(10_000), canonical: '0' },
+			{ name: 'a single zero', drops: '0', canonical: '0' },
+			{ name: 'a value needing nothing', drops: '25000000', canonical: '25000000' }
+		])('canonicalises $name on the way out', ({ drops, canonical }) => {
+			expect(XrpDropsSchema.safeParse(drops).data).toBe(canonical);
+		});
+
+		// The length answers before the value does. `BigInt` is superlinear in the digit count and
+		// this parses untrusted provider JSON on the main thread, so an oversized field must be
+		// rejected without being converted first.
+		it('rejects a very long value without converting it', () => {
+			const started = performance.now();
+
+			expect(XrpDropsSchema.safeParse('9'.repeat(1_000_000)).success).toBeFalsy();
+
+			// Converting a million digits costs tens of milliseconds; the length check is immediate.
+			expect(performance.now() - started).toBeLessThan(10);
+		});
+
 		it.each(['100000000000000001', '999999999999999999999999999999'])(
 			'rejects the out-of-range value %s',
 			(drops) => {

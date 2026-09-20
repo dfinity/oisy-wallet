@@ -26,10 +26,13 @@ export const XRP_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
  * User-facing builds (`ic`/`beta`) resolve to `undefined` when no managed URL is
  * configured; `xrpHttpRpcUrl` then throws rather than silently hitting the public cluster.
  *
- * `TEST` is included for the same reason, with a different beneficiary: a spec that forgets to
- * mock an RPC call would otherwise reach the public cluster for real and pass, making the suite
- * network-dependent and the omission invisible. Resolving to `undefined` turns that into an
- * immediate, named failure. Any spec that needs an endpoint mocks the module.
+ * `TEST` resolves to `undefined` unconditionally, and that is why it is checked FIRST rather than
+ * sharing the fallback arm: a spec that forgets to mock an RPC call would otherwise reach a real
+ * endpoint and pass, making the suite network-dependent and the omission invisible. Folded into
+ * the fallback it did not hold — a configured `VITE_XRP_RPC_URL_MAINNET` resolves before the
+ * fallback is ever evaluated, so a developer with that variable in their local env got a live
+ * provider from a forgotten mock, which is the one thing this is here to prevent. Any spec that
+ * needs an endpoint mocks the module.
  *
  * An empty value counts as unconfigured, not as a configured endpoint. `??` alone would keep
  * `''`, which is not nullish: `xrpHttpRpcUrl` would then pass its `assertNonNullish` and return
@@ -37,11 +40,13 @@ export const XRP_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
  * A var that is declared but unset is the normal case for both of the ways this arrives — a
  * `.env` copied from `.env.example`, and a deployment secret that has not been created yet.
  */
-export const XRP_RPC_HTTP_URL_MAINNET = notEmptyString(import.meta.env.VITE_XRP_RPC_URL_MAINNET)
-	? import.meta.env.VITE_XRP_RPC_URL_MAINNET
-	: PROD || BETA || TEST
-		? undefined
-		: 'https://xrplcluster.com';
+export const XRP_RPC_HTTP_URL_MAINNET = TEST
+	? undefined
+	: notEmptyString(import.meta.env.VITE_XRP_RPC_URL_MAINNET)
+		? import.meta.env.VITE_XRP_RPC_URL_MAINNET
+		: PROD || BETA
+			? undefined
+			: 'https://xrplcluster.com';
 
 export const XRP_MAINNET_NETWORK_SYMBOL = 'XRP';
 
