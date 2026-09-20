@@ -101,4 +101,27 @@ describe('XrpSendDestinationTag', () => {
 
 		expect(get(sendContext.sendXrpDestinationTag)).toBeUndefined();
 	});
+
+	// The wizard keys its step subtree on the step name, so returning from review destroys and
+	// recreates this input. Seeding the field from the stored tag is the only thing that puts it
+	// back on screen, and losing it would be invisible: the tag stays in the context and is still
+	// sent, while the field reads empty and the user concludes none is attached.
+	describe('initialization from the stored tag', () => {
+		it('shows a tag already held in the context', () => {
+			sendContext.sendXrpDestinationTag.set(12345);
+
+			expect(renderInput().value).toBe('12345');
+		});
+
+		// Zero is a valid tag and a falsy value: a truthiness check here would blank it.
+		it('shows a stored tag of zero', () => {
+			sendContext.sendXrpDestinationTag.set(0);
+
+			expect(renderInput().value).toBe('0');
+		});
+
+		it('starts empty when no tag is stored', () => {
+			expect(renderInput().value).toBe('');
+		});
+	});
 });
