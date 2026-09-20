@@ -38,6 +38,7 @@
 		onClose: () => void;
 		onNext: () => void;
 		onSendBack: () => void;
+		onSendForm: () => void;
 		onTokensList: () => void;
 	}
 
@@ -52,6 +53,7 @@
 		onClose,
 		onNext,
 		onSendBack,
+		onSendForm,
 		onTokensList
 	}: Props = $props();
 
@@ -146,6 +148,7 @@
 		{onClose}
 		{onNext}
 		{onSendBack}
+		{onSendForm}
 		{onTokensList}
 		{selectedContact}
 		bind:amount
