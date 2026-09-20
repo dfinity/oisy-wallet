@@ -35,12 +35,16 @@
 	// ledger object it owns. Neither that nor the fee is available to send, so both are
 	// subtracted from the max and required by the balance check.
 	//
-	// While the reserve is unknown NOTHING is offered as sendable: falling back to the base
-	// reserve would understate the requirement for an account owning objects, and falling back to
-	// zero would be worse still. The balance is therefore treated as entirely unavailable, which
-	// also renders Max as 0 rather than an amount the ledger would reject.
+	// While EITHER is unknown NOTHING is offered as sendable: the balance is treated as entirely
+	// unavailable, which renders Max as 0 rather than an amount the ledger would reject. Falling
+	// back to the base reserve would understate the requirement for an account owning objects,
+	// and falling back to zero would be worse still. The fee is the same mistake one value over —
+	// `XrpFeeContext` loads the two independently, so `account_info` can answer first, and a zero
+	// fee would offer a max that is over by exactly the fee. That outlasts the race:
+	// `TokenInputContent` revalidates on amount/token change alone, so an amount accepted while
+	// the fee was unknown would stay accepted once it arrived.
 	let unavailable = $derived(
-		isNullish($reserve) ? ($sendBalance ?? ZERO) : ($fee ?? ZERO) + $reserve
+		isNullish($reserve) || isNullish($fee) ? ($sendBalance ?? ZERO) : $fee + $reserve
 	);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
