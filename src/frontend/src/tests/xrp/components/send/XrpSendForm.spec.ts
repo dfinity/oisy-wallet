@@ -200,6 +200,41 @@ describe('XrpSendForm', () => {
 		});
 	});
 
+	// The poller runs for as long as the form is open, so a fee that spikes and settles is ordinary.
+	// Without `revalidateKey` the rejection outlives the decrease and Next stays disabled until the
+	// amount is edited, with nothing on screen saying why.
+	describe('a fee that falls again', () => {
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		it('re-enables next once the fee drops, without the amount being edited', async () => {
+			vi.useFakeTimers();
+
+			// 5 XRP held, 1 XRP base reserve. At the maximum fee 3.99 XRP is sendable, so 3.995 is
+			// over; at 12 drops it is not.
+			feeStore.setFee(10_000n);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '3.995' } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			feeStore.setFee(12n);
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+
+			vi.useRealTimers();
+		});
+	});
+
 	// The third figure the amount is measured against. `XrpSendAmount` skips its funds comparison
 	// when the balance is nullish, so without this gate a positive amount reaches review and is
 	// refused only after Send — with the reserve message, naming the one thing that was known.
