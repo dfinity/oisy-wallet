@@ -492,14 +492,14 @@ describe('xrp-transaction.utils', () => {
 		// The set is generated from `ripple-binary-codec`'s `TRANSACTION_RESULTS` and written out by
 		// hand, so this is what stops a typo or a drift from silently shrinking it.
 		describe('the tem set matches the protocol', () => {
-			// `DEFAULT_DEFINITIONS.transactionResult` is a `BytesLookup` whose name keys are
-			// enumerable at runtime but absent from its type, so reading them needs the cast — and
-			// that cast is one of the reasons the source holds a written-out set instead. Confined
-			// to a test it costs nothing. Filtered to the name direction, since the same object
-			// also stores the ordinals so it can decode.
-			const protocolResults = Object.keys(
-				DEFAULT_DEFINITIONS.transactionResult as unknown as Record<string, number>
-			).filter((code) => /^[a-z]{3}[A-Z0-9_]*$/.test(code));
+			// Filtered to the name direction: `DEFAULT_DEFINITIONS.transactionResult` is a
+			// `BytesLookup` that stores names and ordinals in the same object so it can decode both
+			// ways, and only the names are codes. That the name direction is an implementation
+			// detail rather than a documented surface is why the source holds a written-out set and
+			// this read lives in a test.
+			const protocolResults = Object.keys(DEFAULT_DEFINITIONS.transactionResult).filter((code) =>
+				/^[a-z]{3}[A-Z0-9_]*$/.test(code)
+			);
 
 			const protocolTem = protocolResults.filter((code) => code.startsWith('tem')).sort();
 
