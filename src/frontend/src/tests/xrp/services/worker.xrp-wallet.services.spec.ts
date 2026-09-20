@@ -215,6 +215,39 @@ describe('worker.xrp-wallet.services', () => {
 				});
 			});
 
+			// Losing the address used to stop the timer and return, leaving the previous address's rows
+			// in the store for the next address's first page to be prepended onto.
+			it('should reset the token stores when the address is lost', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				vi.mocked(resetWallet).mockClear();
+
+				xrpAddressMainnetStore.reset();
+				await drainQueue();
+
+				expect(resetWallet).toHaveBeenCalledWith({ tokenId: XRP_TOKEN.id });
+
+				worker.destroy();
+			});
+
+			// A worker constructed while an address is already set seeds `previous` from it and skips
+			// the first emission — it has to, or acting on that synchronous emission would recurse
+			// into `start`. So the reset has to happen when the watcher is installed, or the new
+			// worker silently adopts whatever rows the previous one left in the store.
+			it('should reset the token stores when a fresh worker starts on an existing address', async () => {
+				const worker = await initWorker();
+
+				vi.mocked(resetWallet).mockClear();
+
+				worker.start();
+				await drainQueue();
+
+				expect(resetWallet).toHaveBeenCalledWith({ tokenId: XRP_TOKEN.id });
+
+				worker.destroy();
+			});
+
 			// `destroy` itself posts `stopXrpWalletTimer`, so this asserts the absence of a restart
 			// rather than the absence of any message.
 			it('should not restart on an address change after destroy', async () => {

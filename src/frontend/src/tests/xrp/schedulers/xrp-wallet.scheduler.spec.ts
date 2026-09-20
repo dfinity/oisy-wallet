@@ -189,6 +189,35 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// The UI store is cleared whenever this scheduler is stopped — every caller that stops it is
+	// handing ownership over. The cache has to go with it: `setRef` only clears on a CHANGED ref, so
+	// a restart on the same address would diff its first page against a full cache, report nothing
+	// new, and leave that cleared store empty. The account's history would just disappear.
+	it('should report its rows again after a stop and a same-address restart', async () => {
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		scheduler.stop();
+		postMessageMock.mockClear();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+		const transactions = JSON.parse(walletCall?.[0].data.wallet.newTransactions, jsonReviver);
+
+		expect(transactions).toHaveLength(1);
+		expect(transactions[0].data.id).toBe('HASH1');
+
+		scheduler.stop();
+	});
+
 	// A job snapshots the address it was scheduled with. If the scheduler is re-keyed to another
 	// address while that job is in flight, its result belongs to the previous account and must not
 	// be merged into or posted against the new one.
