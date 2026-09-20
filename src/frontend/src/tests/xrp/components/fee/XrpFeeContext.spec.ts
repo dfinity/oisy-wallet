@@ -79,17 +79,43 @@ describe('XrpFeeContext', () => {
 			unmount();
 		});
 
-		// The fee is best-effort: the form always needs a figure to subtract.
-		it('falls back to the default fee when the node call fails', async () => {
+		// `loadXrpOpenLedgerFee` resolves with the fallback when a successful response omits the
+		// estimate and throws otherwise, so reaching the catch means no node quoted a fee. Publishing
+		// the base fee there would underprice the send on the congested node that refused to quote,
+		// and would open a form the unknown fee exists to keep shut.
+		it('leaves the fee unknown when the first request fails', async () => {
 			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockRejectedValue(new Error('rpc down'));
 
 			const { unmount } = renderContext();
 
 			await waitFor(() => {
-				expect(get(feeStore)).toBe(XRP_DEFAULT_FEE_DROPS);
+				expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
 			});
 
+			expect(get(feeStore)).toBeUndefined();
+
 			unmount();
+		});
+
+		// Ten seconds stale beats both a guess and a blank field, so a failing poll keeps what the
+		// last successful one published rather than clearing it.
+		it('keeps the last estimate when a later poll fails', async () => {
+			vi.useFakeTimers();
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(get(feeStore)).toBe(nodeFee);
+
+			vi.mocked(xrplRest.loadXrpOpenLedgerFee).mockRejectedValue(new Error('rpc down'));
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(get(feeStore)).toBe(nodeFee);
+
+			unmount();
+			vi.useRealTimers();
 		});
 	});
 
