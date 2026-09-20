@@ -99,6 +99,64 @@ describe('xrp-transaction.utils', () => {
 			});
 		});
 
+		// XRPL allows paying your own account — the standard cross-currency conversion. The wallet is
+		// then `Account` and `Destination` at once, so `isReceive` is true while the wallet is still
+		// the signer that paid the fee. Keyed on `!isReceive` the cost was dropped and export
+		// understated what the account paid.
+		it('keeps the fee on a payment to the wallet itself', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: wallet,
+						Destination: wallet,
+						Amount: '5000000',
+						Fee: '10',
+						hash: 'HSELF',
+						ledger_index: 77,
+						date: 3
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui).toEqual({
+				id: 'HSELF',
+				type: 'receive',
+				status: 'confirmed',
+				value: 5_000_000n,
+				fee: 10n,
+				from: wallet,
+				to: wallet,
+				timestamp: BigInt(3 + XRP_RIPPLE_EPOCH_OFFSET),
+				blockNumber: 77
+			});
+		});
+
+		// The XRP really did arrive, so the row stays — the issued-currency side simply is not XRP
+		// and is not this history's business. The `SendMax` guard deliberately does not fire here:
+		// it exists to stop a cross-currency amount being read as XRP *leaving* the wallet.
+		it('keeps a self cross-currency conversion, with its fee', () => {
+			const ui = mapXrpTransaction({
+				transaction: paymentEntry({
+					tx: {
+						Account: wallet,
+						Destination: wallet,
+						Amount: '5000000',
+						SendMax: { currency: 'USD', issuer: counterparty, value: '10' },
+						Fee: '12',
+						hash: 'HCONV',
+						ledger_index: 78,
+						date: 4
+					}
+				}),
+				xrpAddress: wallet
+			});
+
+			expect(ui?.type).toBe('receive');
+			expect(ui?.fee).toBe(12n);
+			expect(ui?.value).toBe(5_000_000n);
+		});
+
 		it('maps an outgoing payment as a send carrying the fee', () => {
 			const ui = mapXrpTransaction({
 				transaction: paymentEntry({

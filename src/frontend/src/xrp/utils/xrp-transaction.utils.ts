@@ -231,10 +231,14 @@ export const mapXrpTransaction = ({
 
 	const isReceive = tx.Destination === xrpAddress;
 
+	// Not `!isReceive`: the two are not opposites. XRPL allows a payment to your own account — the
+	// standard cross-currency conversion — where this wallet is both sides at once.
+	const isSender = tx.Account === xrpAddress;
+
 	// `account_tx` returns everything that *affected* the account, not only what it sent or
 	// received — an offer of ours consumed by someone else's payment, for instance. Mapping such an
 	// entry would book a stranger's amount, and their fee, as this wallet's own send.
-	if (!isReceive && tx.Account !== xrpAddress) {
+	if (!isReceive && !isSender) {
 		return undefined;
 	}
 
@@ -253,8 +257,10 @@ export const mapXrpTransaction = ({
 		// Unvalidated entries never get this far.
 		status: 'confirmed',
 		value: BigInt(amount),
-		// Guarded above, so not being the destination means being the sender.
-		...(!isReceive && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
+		// Whoever signed paid the fee, which on a payment to ourselves is this wallet even though the
+		// row is a receive. Keyed on `!isReceive` this dropped the cost of a self-conversion, and
+		// export understated what the account paid.
+		...(isSender && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
 		from: tx.Account,
 		to: tx.Destination,
 		...(nonNullish(tx.date) && { timestamp: BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET) }),
