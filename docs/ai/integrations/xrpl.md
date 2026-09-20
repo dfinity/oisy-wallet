@@ -224,10 +224,11 @@ and reports either the validated result or an expiry. Reporting a "no" that may 
 yes would invite a retry that pays a second time — and this is the one decision on the whole
 path taken _after_ the blob is already broadcast, which is why it is the most guarded.
 
-1. **The code is a whole `tem` code.** Matched as `/^tem[A-Z0-9_]+$/`, not a `tem` prefix:
-   `engine_result` is `z.string()`, so `temporary`, `tem`, `temBAD_fee` and `tem BAD_FEE extra`
-   all arrive and all used to count. Checked against `ripple-binary-codec`'s own
-   `TRANSACTION_RESULTS` — all 51 `tem` codes match, no code from the other five classes does.
+1. **The code is a known `tem` code.** Checked by membership in the explicit 51-code set, not by
+   a shape or prefix: `engine_result` is `z.string()`, so malformed or invented values such as
+   `temporary`, `tem`, `temBAD_fee`, `tem BAD_FEE extra` and `temFAKE` can arrive but are not
+   treated as final. A test pins the set against `ripple-binary-codec`'s `TRANSACTION_RESULTS` in
+   both directions.
 2. **The node did not also claim to have taken the blob.** `accepted: false` on its own still
    never creates a failure — a node refusing the blob is no evidence that no ledger will include
    it, which is the original reason this ignored the field. But `accepted: true` beside a `tem*`
