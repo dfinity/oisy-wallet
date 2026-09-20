@@ -993,6 +993,7 @@
 			"enter_eth_address": "Insira endereço público (0x), nome ou alias",
 			"enter_recipient_address": "Insira o endereço do destinatário, nome ou alias",
 			"enter_wallet_address": "Insira o endereço da carteira, nome ou alias",
+			"enter_xrp_address": "Insira o endereço XRP",
 			"xrp_destination_tag": "Insira a tag de destino (opcional)",
 			"select_network": "Selecionar rede",
 			"search_nfts": ""
