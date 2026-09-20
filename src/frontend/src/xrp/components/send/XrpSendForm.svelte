@@ -4,6 +4,7 @@
 	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -34,6 +35,8 @@
 		cancel
 	}: Props = $props();
 
+	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	const {
 		feeDecimalsStore,
 		feeStore: fee,
@@ -52,15 +55,19 @@
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
-	// The reserve is what the account must retain, the fee is what leaves with the payment, and
-	// neither is available to send. While either is unknown no amount can be judged sendable, so
-	// the form is blocked outright rather than measured against a guessed figure — which also
-	// keeps Next from reaching a review step that would price the send without showing a fee.
+	// The three figures an amount is measured against: what the account must retain, what leaves
+	// with the payment, and what it has. While any of them is unknown no amount can be judged
+	// sendable, so the form is blocked outright rather than measured against a guessed figure —
+	// which also keeps Next from reaching a review step that would price the send without showing
+	// a fee. The balance belongs here for the same reason as the other two and is the one that can
+	// also go missing later, on any failed reload: `XrpSendAmount` skips its funds comparison when
+	// the balance is nullish, so nothing else would stop the amount.
 	let invalid = $derived(
 		invalidDestination ||
 			invalidDestinationTag ||
 			isNullish($reserve) ||
 			isNullish($fee) ||
+			isNullish($sendBalance) ||
 			nonNullish(amountError) ||
 			isNullish(amount)
 	);
