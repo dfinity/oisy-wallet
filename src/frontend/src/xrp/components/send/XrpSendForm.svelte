@@ -36,6 +36,7 @@
 
 	const {
 		feeDecimalsStore,
+		feeStore: fee,
 		feeSymbolStore,
 		feeTokenIdStore,
 		reserveStore: reserve
@@ -51,12 +52,15 @@
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
-	// The reserve is what the account must retain. While it is unknown no amount can be judged
-	// sendable, so the form is blocked outright rather than measured against a guessed figure.
+	// The reserve is what the account must retain, the fee is what leaves with the payment, and
+	// neither is available to send. While either is unknown no amount can be judged sendable, so
+	// the form is blocked outright rather than measured against a guessed figure — which also
+	// keeps Next from reaching a review step that would price the send without showing a fee.
 	let invalid = $derived(
 		invalidDestination ||
 			invalidDestinationTag ||
 			isNullish($reserve) ||
+			isNullish($fee) ||
 			nonNullish(amountError) ||
 			isNullish(amount)
 	);

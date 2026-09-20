@@ -111,6 +111,31 @@ describe('XrpSendAmount', () => {
 		);
 	});
 
+	// The fee and the reserve arrive from separate requests, so the reserve can be known while the
+	// fee is not. Treating that fee as zero would advertise a max over by exactly the fee, which
+	// the send then refuses — and it would stick, since the amount is revalidated only when the
+	// amount or token changes, not when the fee lands.
+	it('offers nothing while the fee is unknown', () => {
+		feeStore.setFee(undefined);
+
+		const { container } = renderAmount();
+
+		expect(maxAmount(container)).toBe(0);
+	});
+
+	it('offers the spendable amount again once the fee is known', () => {
+		feeStore.setFee(undefined);
+
+		expect(maxAmount(renderAmount().container)).toBe(0);
+
+		feeStore.setFee(fee);
+
+		expect(maxAmount(renderAmount().container)).toBeCloseTo(
+			spendableXrp(getXrpReserveDrops({ ownerCount: 0 })),
+			6
+		);
+	});
+
 	it('offers less as the owner count grows', () => {
 		reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 0 }));
 
