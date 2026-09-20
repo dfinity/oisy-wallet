@@ -455,6 +455,20 @@ export const sendXrp = async ({
 		};
 	};
 
+	// A payment to yourself is refused from the arguments alone, for the reason the bounds below
+	// are: the ledger rejects it — rippled's `Payment::preflight` answers `temREDUNDANT` for a
+	// payment whose destination is its sender — but only after this has spent five RPC reads, a
+	// signing-key derivation and a threshold signature from the signer canister, and put the blob
+	// on the wire. Nothing is charged, since `tem*` is never applied, and nothing about the
+	// account state is needed to know it.
+	//
+	// Compared raw, like the `Account` binding in the reads: a classic address is base58 over a
+	// checksummed payload, so case is significant and two forms differing in it are not one
+	// address.
+	if (source === destination) {
+		throw new Error(`XRP destination ${destination} is the sending account.`);
+	}
+
 	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
 	// and the two ends fail in different places: `ripple-binary-codec` encodes `Amount: '0'`
 	// happily, so a zero-amount payment spent a threshold signature and a submit to learn

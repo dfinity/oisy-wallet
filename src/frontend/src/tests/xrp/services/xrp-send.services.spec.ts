@@ -1330,6 +1330,31 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// The ledger refuses a payment to its own sender — rippled's `Payment::preflight` answers
+	// `temREDUNDANT` — but only after five RPC reads, a signing-key derivation, a threshold
+	// signature and a broadcast. Nothing about the account state is needed to know it.
+	describe('a payment to the sending account', () => {
+		it('is refused before any work', async () => {
+			await expect(sendXrp({ ...params, destination: params.source })).rejects.toThrow(
+				'is the sending account'
+			);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// Raw comparison, like the `Account` binding in the reads: a classic address is base58 over
+		// a checksummed payload, so two forms differing only in case are not one address.
+		it('does not refuse a destination differing from the source in case', async () => {
+			await expect(
+				sendXrp({ ...params, destination: params.source.toUpperCase() })
+			).resolves.toBeDefined();
+		});
+	});
+
 	describe('the amount and fee bounds', () => {
 		// Refused from the arguments, before any RPC or signing. `Amount: '0'` encodes fine, so this
 		// otherwise costs a threshold signature and a submit to learn `temBAD_AMOUNT` from the
