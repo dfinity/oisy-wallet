@@ -58,9 +58,12 @@
 
 		{#snippet bottom()}
 			{#if invalidDestinationTag}
+				<!-- `role="alert"` because this appears on input and blocks the form: without a live
+				region a screen-reader user gets a form that refuses to advance and no reason why. -->
 				<p
 					class="mt-4 mb-0 text-error-primary"
 					data-tid="xrp-destination-tag-error"
+					role="alert"
 					transition:slide={SLIDE_DURATION}
 				>
 					{$i18n.send.assertion.xrp_destination_tag_invalid}

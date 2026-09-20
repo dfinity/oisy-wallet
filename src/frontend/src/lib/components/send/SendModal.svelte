@@ -323,6 +323,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onSendForm={() => goToStep(WizardStepsSend.SEND)}
 				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				{selectedContact}
 				bind:amount

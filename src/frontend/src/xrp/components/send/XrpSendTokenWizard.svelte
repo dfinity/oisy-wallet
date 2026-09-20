@@ -61,6 +61,7 @@
 		onClose: () => void;
 		onNext: () => void;
 		onSendBack: () => void;
+		onSendForm: () => void;
 		onTokensList: () => void;
 	}
 
@@ -74,6 +75,7 @@
 		onClose,
 		onNext,
 		onSendBack,
+		onSendForm,
 		onTokensList
 	}: Props = $props();
 
@@ -276,44 +278,38 @@
 			// while progress is still INITIALIZATION, so nothing was signed and nothing left the
 			// wallet. They exist to spare the user a `tec` that claims the fee and burns the sequence,
 			// which makes "unexpected error" the opposite of what happened — the wallet worked, and
-			// the send is correctable. Back to the form in each case, since that is where the amount
-			// and the tag are.
-			if (err instanceof XrpAmountExceedsSendableError) {
-				toastsError({
-					msg: { text: $i18n.send.error.xrp_amount_exceeds_sendable },
-					err
-				});
+			// the send is correctable.
+			//
+			// `onSendForm` rather than `onBack`, because each message names a field to change and
+			// only the form has them. `onNext` already ran before the await, so this is caught on
+			// SENDING and one step back is REVIEW — advice the user could follow only after pressing
+			// back a second time.
+			const correctOnForm = (text: string) => {
+				toastsError({ msg: { text }, err });
 
-				onBack();
+				onSendForm();
+			};
+			if (err instanceof XrpAmountExceedsSendableError) {
+				correctOnForm($i18n.send.error.xrp_amount_exceeds_sendable);
 
 				return;
 			}
 
 			if (err instanceof XrpDestinationUnfundedError) {
-				toastsError({
-					msg: {
-						text: replacePlaceholders($i18n.send.error.xrp_destination_unfunded, {
-							$reserve: formatToken({
-								value: XRP_BASE_RESERVE_DROPS,
-								unitName: $sendTokenDecimals
-							})
+				correctOnForm(
+					replacePlaceholders($i18n.send.error.xrp_destination_unfunded, {
+						$reserve: formatToken({
+							value: XRP_BASE_RESERVE_DROPS,
+							unitName: $sendTokenDecimals
 						})
-					},
-					err
-				});
-
-				onBack();
+					})
+				);
 
 				return;
 			}
 
 			if (err instanceof XrpDestinationTagRequiredError) {
-				toastsError({
-					msg: { text: $i18n.send.error.xrp_destination_tag_required },
-					err
-				});
-
-				onBack();
+				correctOnForm($i18n.send.error.xrp_destination_tag_required);
 
 				return;
 			}

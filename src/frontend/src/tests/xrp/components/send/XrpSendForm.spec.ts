@@ -122,6 +122,7 @@ describe('XrpSendForm', () => {
 			expect(nextBtn(container)?.disabled).toBeTruthy();
 
 			reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 0 }));
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 5_000_000n, certified: true } });
 
 			await fireEvent.input(amountInput(container), { target: { value: '1' } });
 
@@ -191,6 +192,44 @@ describe('XrpSendForm', () => {
 			expect(nextBtn(container)?.disabled).toBeTruthy();
 
 			feeStore.setFee(12n);
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 5_000_000n, certified: true } });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+		});
+	});
+
+	// The third figure the amount is measured against. `XrpSendAmount` skips its funds comparison
+	// when the balance is nullish, so without this gate a positive amount reaches review and is
+	// refused only after Send — with the reserve message, naming the one thing that was known.
+	describe('unknown balance', () => {
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		it('disables next while the balance is unknown, with the fee and reserve known', async () => {
+			balancesStore.reset(XRP_TOKEN.id);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+		});
+
+		it('enables next once the balance loads', async () => {
+			balancesStore.reset(XRP_TOKEN.id);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 5_000_000n, certified: true } });
 
 			await fireEvent.input(amountInput(container), { target: { value: '1' } });
 
