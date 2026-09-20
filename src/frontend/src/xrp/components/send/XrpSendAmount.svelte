@@ -47,13 +47,14 @@
 		isNullish($reserve) || isNullish($fee) ? ($sendBalance ?? ZERO) : $fee + $reserve
 	);
 
-	// The fee and the reserve decide the verdict below, and a decrease can make a rejected amount
-	// sendable again — the poller runs every ten seconds for as long as the form is open, so a fee
-	// that spikes and settles is ordinary. Without this the error outlives the change and Next
-	// stays disabled until the amount is edited, with nothing on screen saying why.
+	// All three figures the verdict below is measured against, which is the same list the form
+	// gates on — they have to agree. A fee decrease can make a rejected amount sendable again, and
+	// a balance arriving turns a skipped check into a real one; without either, the stale verdict
+	// outlives the change and the form is wrong in one direction or the other until the amount is
+	// edited, with nothing on screen saying why.
 	//
-	// A string rather than the values, so an unchanged pair compares equal and nothing reruns.
-	let revalidateKey = $derived(`${$fee}:${$reserve}`);
+	// A string rather than the values, so an unchanged set compares equal and nothing reruns.
+	let revalidateKey = $derived(`${$fee}:${$reserve}:${$sendBalance}`);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
