@@ -469,6 +469,52 @@ describe('XrpFeeContext', () => {
 			unmount();
 		});
 
+		// The case the generation check actually exists for, and the one `clears a loaded reserve as
+		// soon as a new account starts loading` looks like it covers but does not — that test resolves
+		// the NEW account's request and unmounts, so the old response never lands. Here only A's
+		// promise resolves in the first phase; resolving both would let B's own answer satisfy the
+		// assertion and the test would pass whether or not the guard works.
+		it('drops a superseded account response and still publishes the current one', async () => {
+			let resolveA: ((info: XrpAccountInfo) => void) | undefined;
+			let resolveB: ((info: XrpAccountInfo) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo')
+				.mockReturnValueOnce(
+					new Promise((res) => {
+						resolveA = res;
+					})
+				)
+				.mockReturnValueOnce(
+					new Promise((res) => {
+						resolveB = res;
+					})
+				);
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledOnce();
+			});
+
+			xrpAddressMainnetStore.set({ data: `${mockXrpAddress}2`, certified: true });
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalledTimes(2);
+			});
+
+			resolveA?.({ balance: 50_000_000n, sequence: 7, ownerCount: 9, flags: 0 });
+			await runResolvedPromises();
+
+			expect(get(reserveStore)).toBeUndefined();
+
+			resolveB?.({ balance: 50_000_000n, sequence: 7, ownerCount: 2, flags: 0 });
+			await runResolvedPromises();
+
+			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 2 }));
+
+			unmount();
+		});
+
 		it('ignores a response that resolves after the component is destroyed', async () => {
 			let resolve: ((info: XrpAccountInfo) => void) | undefined;
 

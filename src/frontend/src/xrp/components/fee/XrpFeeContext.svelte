@@ -46,6 +46,16 @@
 	const clearReserveRetry = () => clearTimeout(reserveRetry);
 
 	const loadReserve = async (id: number) => {
+		// Before the timer handle or the store is touched, not only around the response. Today no
+		// stale call can get here — both generation bumps clear the retry synchronously, the effect
+		// by calling this very function straight after `++generation` — but that safety lives two
+		// functions away and nothing states it. A bump added elsewhere would let a stale retry blank
+		// a good reserve and then drop its own result, leaving the form blocked with nothing
+		// scheduled to recover it.
+		if (id !== generation) {
+			return;
+		}
+
 		clearReserveRetry();
 
 		// Cleared up front so the previous account's reserve cannot be used while this loads:

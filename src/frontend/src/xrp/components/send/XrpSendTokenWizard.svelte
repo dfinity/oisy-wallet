@@ -161,10 +161,15 @@
 			return;
 		}
 
+		// Same treatment as its counterpart below, which judges the parsed drops rather than the
+		// string: both report an amount the user has to retype, and only the form can take it.
 		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
+
+			onSendForm();
+
 			return;
 		}
 
@@ -192,6 +197,13 @@
 			toastsError({
 				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
+
+			// Like the sendability check below and the typed refusals further down: this runs before
+			// `onNext`, so the user is on REVIEW, and an invalid amount can only be corrected on the
+			// form. This guard exists because input validation is debounced, which is exactly how a
+			// value the field has not rejected yet reaches review.
+			onSendForm();
+
 			return;
 		}
 
