@@ -201,10 +201,15 @@ describe('xrp-wallet.scheduler', () => {
 		const postsOf = (msg: string) =>
 			postMessageMock.mock.calls.map(([message]) => message).filter((m) => m.msg === msg);
 
-		const rekey = (scheduler: XrpWalletScheduler) =>
-			(scheduler as unknown as { setRef: (d: PostMessageDataRequestXrp) => void }).setRef(
-				otherData
-			);
+		// `setRef` is protected, and a subclass is the language's own way to reach it — no cast, and
+		// the signature stays checked.
+		class RekeyableXrpWalletScheduler extends XrpWalletScheduler {
+			rekey(data: PostMessageDataRequestXrp) {
+				this.setRef(data);
+			}
+		}
+
+		const rekey = (scheduler: RekeyableXrpWalletScheduler) => scheduler.rekey(otherData);
 
 		it('should discard a balance that resolves after the re-key', async () => {
 			let resolveBalance: ((balance: bigint) => void) | undefined;
@@ -215,7 +220,7 @@ describe('xrp-wallet.scheduler', () => {
 					})
 			);
 
-			const scheduler = new XrpWalletScheduler();
+			const scheduler = new RekeyableXrpWalletScheduler();
 			const promise = scheduler.trigger(startData);
 
 			// `trigger` awaits the identity before running the job, so let it reach `loadXrpBalance`
@@ -238,7 +243,7 @@ describe('xrp-wallet.scheduler', () => {
 		it('should not report an error for an address the scheduler moved on from', async () => {
 			spyLoadBalance.mockRejectedValue(new Error('test'));
 
-			const scheduler = new XrpWalletScheduler();
+			const scheduler = new RekeyableXrpWalletScheduler();
 			const promise = scheduler.trigger(startData);
 
 			rekey(scheduler);

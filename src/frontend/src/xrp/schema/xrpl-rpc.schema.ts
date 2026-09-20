@@ -18,10 +18,41 @@ import * as z from 'zod';
 // and fails on its own issue.
 const XRP_DROPS_PATTERN = /^\d+$/;
 
+// Derived rather than written: 18 today, and still right if the ceiling ever moves.
+const XRP_MAX_DROPS_DIGITS = `${XRP_MAX_DROPS}`.length;
+
 export const XrpDropsSchema = z
 	.string()
 	.regex(XRP_DROPS_PATTERN)
-	.refine((drops) => !XRP_DROPS_PATTERN.test(drops) || BigInt(drops) <= XRP_MAX_DROPS);
+	// Canonicalised BEFORE the bound is checked, so the value that LEAVES this schema is the one
+	// the bound was applied to. Validating the stripped form while returning the original was the
+	// gap: every caller converts what the schema returns — `loadXrpBalance`,
+	// `loadXrpAccountInfo` and `loadXrpOpenLedgerFee` all call `BigInt` on it — so a zero-padded
+	// field passed the length bound on its few significant digits and was then converted
+	// downstream at full length.
+	//
+	// `^0+(?=\d)` and not `^0+`: the lookahead keeps the last digit, so `'0'` and a million zeros
+	// both canonicalise to `'0'` rather than to the empty string `BigInt` would reject.
+	//
+	// Stripping here rather than again inside the check means the string is scanned once. The cost
+	// this removes is modest — leading zeros cannot make a large number, so it is a linear scan
+	// (~0.4ms per million) rather than the superlinear arithmetic a million nines costs (~40ms),
+	// and that case the bound below already rejects. The point is the invariant: what comes out is
+	// what a caller can safely convert, with no reasoning about whether a long-but-small number
+	// happens to be cheap in this engine.
+	.transform((drops) => (XRP_DROPS_PATTERN.test(drops) ? drops.replace(/^0+(?=\d)/, '') : drops))
+	.refine((drops) => {
+		// zod evaluates this even when the regex already failed, so a non-decimal string must leave
+		// before it reaches any conversion.
+		if (!XRP_DROPS_PATTERN.test(drops)) {
+			return true;
+		}
+
+		// Length before value, on a string the transform has already canonicalised: nothing longer
+		// than the ceiling can be within it, so only a bounded string is ever converted — now true
+		// of the caller's conversion as well as this one.
+		return drops.length <= XRP_MAX_DROPS_DIGITS && BigInt(drops) <= XRP_MAX_DROPS;
+	});
 
 /**
  * The request a node echoes back inside `result.request`.
