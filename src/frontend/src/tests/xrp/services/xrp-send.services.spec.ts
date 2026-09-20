@@ -684,6 +684,75 @@ describe('xrp-send.services', () => {
 		expect(XRP_CONFIRM_MAX_ATTEMPTS).toBe(160);
 	});
 
+	// The loop condition reads the deadline only BETWEEN iterations, so an iteration entered just
+	// under it could still start a ledger read, an expiry recheck and a poll — each request bounded
+	// by its own timeout — and overshoot the documented budget by three of them.
+	describe('the deadline bounds the work inside an iteration, not only between them', () => {
+		// Spends the whole budget inside the first `tx` lookup, the way a node answering at its
+		// timeout does.
+		const spendBudgetOnTheLookup = () =>
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
+				vi.advanceTimersByTime(XRP_CONFIRM_MAX_DURATION_MS);
+
+				return Promise.resolve({ state: 'absent' });
+			});
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('starts no validated-ledger read once the budget is spent', async () => {
+			spendBudgetOnTheLookup();
+
+			await expect(sendXrp(params)).rejects.toThrow(`${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`);
+
+			expect(xrplRest.loadXrpValidatedLedgerIndex).not.toHaveBeenCalled();
+		});
+
+		it('takes no poll interval once the budget is spent', async () => {
+			spendBudgetOnTheLookup();
+
+			await sendXrp(params).catch(() => undefined);
+
+			expect(randomWait).not.toHaveBeenCalled();
+		});
+
+		// The recheck is what keeps a stale lookup from becoming a false expiry, so a budget spent
+		// before it must skip the conclusion too: indeterminate, which hands the blob back, rather
+		// than asserting that a payment which may have landed never did.
+		it('concludes no expiry when the budget runs out before the recheck', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockImplementation(() => {
+				vi.advanceTimersByTime(XRP_CONFIRM_MAX_DURATION_MS);
+
+				return Promise.resolve(1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1);
+			});
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).not.toBeInstanceOf(XrpSendExpiredError);
+			expect((err as Error).message).toContain(`${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`);
+			// The first lookup only — the recheck is the second call, and it was never started.
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledOnce();
+		});
+
+		// A definitive answer already in hand is still returned: the budget bounds new work, not
+		// the result of work already done.
+		it('still returns a validated result found on the last allowed lookup', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockImplementation(() => {
+				vi.advanceTimersByTime(XRP_CONFIRM_MAX_DURATION_MS);
+
+				return Promise.resolve({ state: 'validated', transactionResult: 'tesSUCCESS' });
+			});
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+	});
+
 	// A validated failure found by the recheck must surface as a failure, not as an expiry.
 	it('reports a tec failure found by the recheck', async () => {
 		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
