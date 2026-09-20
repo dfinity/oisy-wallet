@@ -30,6 +30,28 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrpDropsSchema.safeParse('100000000000000000').success).toBeTruthy();
 		});
 
+		// A padded value is still a legal amount, so leading zeros are stripped rather than counted —
+		// the length bound must not turn one drop into an out-of-range one.
+		it.each([
+			{ name: 'a padded one drop', drops: `${'0'.repeat(40)}1` },
+			{ name: 'a padded maximum', drops: `${'0'.repeat(40)}100000000000000000` },
+			{ name: 'nothing but zeros', drops: '0'.repeat(10_000) }
+		])('accepts $name', ({ drops }) => {
+			expect(XrpDropsSchema.safeParse(drops).success).toBeTruthy();
+		});
+
+		// The length answers before the value does. `BigInt` is superlinear in the digit count and
+		// this parses untrusted provider JSON on the main thread, so an oversized field must be
+		// rejected without being converted first.
+		it('rejects a very long value without converting it', () => {
+			const started = performance.now();
+
+			expect(XrpDropsSchema.safeParse('9'.repeat(1_000_000)).success).toBeFalsy();
+
+			// Converting a million digits costs tens of milliseconds; the length check is immediate.
+			expect(performance.now() - started).toBeLessThan(10);
+		});
+
 		it.each(['100000000000000001', '999999999999999999999999999999'])(
 			'rejects the out-of-range value %s',
 			(drops) => {

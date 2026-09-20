@@ -18,10 +18,37 @@ import * as z from 'zod';
 // and fails on its own issue.
 const XRP_DROPS_PATTERN = /^\d+$/;
 
+// Derived rather than written: 18 today, and still right if the ceiling ever moves.
+const XRP_MAX_DROPS_DIGITS = `${XRP_MAX_DROPS}`.length;
+
 export const XrpDropsSchema = z
 	.string()
 	.regex(XRP_DROPS_PATTERN)
-	.refine((drops) => !XRP_DROPS_PATTERN.test(drops) || BigInt(drops) <= XRP_MAX_DROPS);
+	.refine((drops) => {
+		// See above: zod evaluates this even when the regex already failed, so a non-decimal string
+		// must leave before it reaches any conversion.
+		if (!XRP_DROPS_PATTERN.test(drops)) {
+			return true;
+		}
+
+		// Length before value, and on the SIGNIFICANT digits. This parses untrusted provider JSON on
+		// the main thread, and `BigInt` is superlinear in the digit count — a million-digit field
+		// costs ~40ms to convert before the comparison can reject it, which a hostile endpoint gets
+		// for free on every field. Nothing longer than the ceiling can be within it, so the length
+		// answers first and only a bounded string is ever converted.
+		//
+		// Leading zeros are stripped rather than counted, because the regex accepts them and a
+		// padded value is still a legal amount: `'0000000000000000001'` is one drop, not an
+		// out-of-range one. Stripping also covers the all-zeros case, which would otherwise carry an
+		// arbitrarily long string into `BigInt` while being worth nothing.
+		const significant = drops.replace(/^0+/, '');
+
+		if (significant === '') {
+			return true;
+		}
+
+		return significant.length <= XRP_MAX_DROPS_DIGITS && BigInt(significant) <= XRP_MAX_DROPS;
+	});
 
 /**
  * The request a node echoes back inside `result.request`.
