@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "The transaction was not sent: the network did not include it in time. Nothing left your wallet, and it is safe to create a new one.",
 			"xrp_amount_exceeds_sendable": "The amount no longer fits. Your account must keep its XRP reserve plus the network fee, and both can change while you review. Nothing was sent — use Max to take the current limit.",
 			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
-			"xrp_destination_tag_required": "This address requires a destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again."
+			"xrp_destination_tag_required": "This address requires a destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
+			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment."
 		}
 	},
 	"mint": {

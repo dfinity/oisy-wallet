@@ -130,7 +130,13 @@
 
 		if (isNullish(networkId) || !isNetworkIdXrp(networkId) || isNullish(network)) {
 			toastsError({
-				msg: { text: $i18n.send.error.no_xrp_network_id }
+				// `NetworkId` is a branded symbol, so it cannot go into a template literal — that
+				// throws rather than printing. `.description` is how the rest of the file reads one.
+				msg: {
+					text: replacePlaceholders($i18n.send.error.no_xrp_network_id, {
+						$networkId: networkId?.description ?? ''
+					})
+				}
 			});
 			return;
 		}
@@ -179,17 +185,27 @@
 			return;
 		}
 
-		// The form validated the amount against the fee and reserve as they stood when it was
-		// typed, and `TokenInputContent` only revalidates when the amount or token changes — so the
-		// 10s fee poller can raise what the account must retain underneath an already-accepted
-		// amount. Re-assert it here rather than at the input, because the review step would be
-		// stale too.
+		// Separate from the funds check below, because a missing figure is not a shortfall — no
+		// comparison happened at all. The form gates all three, so reaching here means one went
+		// missing after it, most plainly a balance reload that failed while the user was on review.
+		// Telling them to lower the amount cannot fix that, and it is the last thing the wallet says
+		// before giving up.
+		//
 		// The reviewed fee is required, not defaulted: a nullish one means nothing was priced, and
 		// the same value is both checked here and signed below.
+		if (isNullish($sendBalance) || isNullish($reserveStore) || isNullish($feeStore)) {
+			toastsError({
+				msg: { text: $i18n.send.error.xrp_account_state_unavailable }
+			});
+			return;
+		}
+
+		// The form validated the amount against the fee and reserve as they stood when it was
+		// typed. `TokenInputContent` now reruns that check when they change, but only while the form
+		// is on screen — the review step has no input to revalidate, so the poller can still raise
+		// what the account must retain underneath an amount that was accepted. Re-assert it here,
+		// which is the last point before signing.
 		if (
-			isNullish($sendBalance) ||
-			isNullish($reserveStore) ||
-			isNullish($feeStore) ||
 			!isXrpAmountSendable({
 				amount: amountDrops,
 				balance: $sendBalance,

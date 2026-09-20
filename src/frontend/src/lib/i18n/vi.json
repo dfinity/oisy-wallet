@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "Giao dịch chưa được gửi: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và bạn có thể tạo giao dịch mới một cách an toàn.",
 			"xrp_amount_exceeds_sendable": "Số tiền này không còn vừa nữa. Tài khoản của bạn phải giữ lại khoản dự trữ XRP cùng phí mạng, và cả hai đều có thể thay đổi trong lúc bạn xem lại. Chưa có gì được gửi — dùng «Tối đa» để lấy hạn mức hiện tại.",
 			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP. Chưa có gì được gửi — hãy tăng số tiền, hoặc gửi tới một địa chỉ đã được kích hoạt.",
-			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại."
+			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",
+			"xrp_account_state_unavailable": "Ví không đọc được thông tin tài khoản của bạn, nên không thể kiểm tra số tiền. Chưa có gì được gửi — vui lòng thử lại sau giây lát."
 		}
 	},
 	"mint": {

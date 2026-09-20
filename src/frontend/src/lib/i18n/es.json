@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "La transacción no se envió: la red no la incluyó a tiempo. Nada salió de tu billetera y es seguro crear una nueva.",
 			"xrp_amount_exceeds_sendable": "El importe ya no cabe. Tu cuenta debe conservar su reserva de XRP más la comisión de red, y ambas pueden cambiar mientras revisas. No se envió nada: usa «Máximo» para tomar el límite actual.",
 			"xrp_destination_unfunded": "Esta dirección aún no tiene una cuenta de XRP. Crearla requiere un primer pago de al menos $reserve XRP. No se envió nada: aumenta el importe o envía a una dirección que ya esté financiada.",
-			"xrp_destination_tag_required": "Esta dirección requiere una etiqueta de destino. No se envió nada: añade la etiqueta que te dio el servicio al que pagas y vuelve a enviar."
+			"xrp_destination_tag_required": "Esta dirección requiere una etiqueta de destino. No se envió nada: añade la etiqueta que te dio el servicio al que pagas y vuelve a enviar.",
+			"xrp_account_state_unavailable": "La billetera no pudo leer los datos de tu cuenta, por lo que no se pudo comprobar el importe. No se envió nada: vuelve a intentarlo en un momento."
 		}
 	},
 	"mint": {

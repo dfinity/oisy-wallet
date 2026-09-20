@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "La transazione non è stata inviata: la rete non l’ha inclusa in tempo. Nulla ha lasciato il tuo wallet ed è sicuro crearne una nuova.",
 			"xrp_amount_exceeds_sendable": "L’importo non rientra più. Il tuo conto deve mantenere la sua riserva di XRP più la commissione di rete, ed entrambe possono cambiare mentre controlli. Non è stato inviato nulla: usa «Max» per prendere il limite attuale.",
 			"xrp_destination_unfunded": "Questo indirizzo non ha ancora un conto XRP. Per crearlo serve un primo pagamento di almeno $reserve XRP. Non è stato inviato nulla: aumenta l’importo oppure invia a un indirizzo già finanziato.",
-			"xrp_destination_tag_required": "Questo indirizzo richiede un tag di destinazione. Non è stato inviato nulla: aggiungi il tag fornito dal servizio a cui stai pagando e invia di nuovo."
+			"xrp_destination_tag_required": "Questo indirizzo richiede un tag di destinazione. Non è stato inviato nulla: aggiungi il tag fornito dal servizio a cui stai pagando e invia di nuovo.",
+			"xrp_account_state_unavailable": "Il wallet non è riuscito a leggere i dati del tuo conto, quindi l’importo non ha potuto essere verificato. Non è stato inviato nulla: riprova tra un momento."
 		}
 	},
 	"mint": {

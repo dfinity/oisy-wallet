@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou.",
 			"xrp_amount_exceeds_sendable": "Částka už se nevejde. Váš účet si musí ponechat rezervu XRP a navíc síťový poplatek, a obojí se může během kontroly změnit. Nic nebylo odesláno – tlačítkem „Max“ převezmete aktuální limit.",
 			"xrp_destination_unfunded": "Tato adresa zatím nemá účet XRP. Jeho vytvoření vyžaduje první platbu alespoň $reserve XRP. Nic nebylo odesláno – zvyšte částku nebo odešlete na adresu, která už je financovaná.",
-			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu."
+			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu.",
+			"xrp_account_state_unavailable": "Peněženka nedokázala načíst údaje o vašem účtu, takže částku nešlo ověřit. Nic nebylo odesláno – zkuste to prosím za chvíli znovu."
 		}
 	},
 	"mint": {

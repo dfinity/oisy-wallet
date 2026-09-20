@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "Transakcja nie została wysłana: sieć nie uwzględniła jej na czas. Nic nie opuściło Twojego portfela i można bezpiecznie utworzyć nową.",
 			"xrp_amount_exceeds_sendable": "Ta kwota już się nie mieści. Twoje konto musi zachować rezerwę XRP oraz opłatę sieciową, a obie mogą się zmienić podczas sprawdzania. Nic nie zostało wysłane — użyj przycisku „Maks.”, aby wpisać aktualny limit.",
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
-			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie."
+			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
+			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę."
 		}
 	},
 	"mint": {

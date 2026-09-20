@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "A transação não foi enviada: a rede não a incluiu em tempo. Nada saiu da sua carteira e é seguro criar uma nova.",
 			"xrp_amount_exceeds_sendable": "O valor já não cabe. Sua conta precisa manter a reserva de XRP mais a taxa de rede, e ambas podem mudar enquanto você confere. Nada foi enviado — use «Máx.» para pegar o limite atual.",
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
-			"xrp_destination_tag_required": "Este endereço exige uma tag de destino. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente."
+			"xrp_destination_tag_required": "Este endereço exige uma tag de destino. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
+			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes."
 		}
 	},
 	"mint": {

@@ -1075,7 +1075,8 @@
 			"xrp_send_expired": "",
 			"xrp_amount_exceeds_sendable": "",
 			"xrp_destination_unfunded": "",
-			"xrp_destination_tag_required": ""
+			"xrp_destination_tag_required": "",
+			"xrp_account_state_unavailable": ""
 		}
 	},
 	"mint": {
