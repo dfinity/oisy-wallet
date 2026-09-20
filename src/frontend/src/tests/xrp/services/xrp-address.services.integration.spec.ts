@@ -1,3 +1,4 @@
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { getAddressDecoder } from '@solana/kit';
@@ -96,9 +97,12 @@ describe('xrp-address.services integration', () => {
 		describe.each(testCases)(
 			'for principal $principal',
 			({ principal, expected, expectedSol, envs }) => {
-				const identity = {
+				// Spread from the shared mock, which is already an `Identity`, so overriding the one
+				// member this test varies keeps the whole thing typed.
+				const identity: Identity = {
+					...mockIdentity,
 					getPrincipal: () => Principal.fromText(principal)
-				} as unknown as Identity;
+				};
 
 				it.each(envs)(
 					'should return the correct derived address in $env env',
