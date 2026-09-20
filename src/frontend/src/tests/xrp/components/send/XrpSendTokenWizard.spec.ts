@@ -58,6 +58,7 @@ describe('XrpSendTokenWizard', () => {
 	const onClose = vi.fn();
 	const onNext = vi.fn();
 	const onSendBack = vi.fn();
+	const onSendForm = vi.fn();
 	const onTokensList = vi.fn();
 
 	const props = {
@@ -69,6 +70,7 @@ describe('XrpSendTokenWizard', () => {
 		onClose,
 		onNext,
 		onSendBack,
+		onSendForm,
 		onTokensList
 	};
 
@@ -374,6 +376,32 @@ describe('XrpSendTokenWizard', () => {
 			);
 		});
 
+		// The message names a field, so it has to land on the step that has one. `onNext` runs before
+		// the await, so the refusal is caught on SENDING and plain `onBack` would stop at REVIEW.
+		it.each([
+			{
+				name: 'an amount over the sendable maximum',
+				error: () => new XrpAmountExceedsSendableError('XRP amount 900000 drops exceeds')
+			},
+			{
+				name: 'a destination with no settled account',
+				error: () => new XrpDestinationUnfundedError('XRP destination does not exist yet')
+			},
+			{
+				name: 'a destination that requires a tag',
+				error: () => new XrpDestinationTagRequiredError('XRP destination requires a tag')
+			}
+		])('returns to the form step after $name', async ({ error }) => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(error());
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(onSendForm).toHaveBeenCalled();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
 		// The one message carrying a figure: without the substitution the user is shown a literal
 		// `$reserve` in place of the amount that would make the send succeed.
 		it('names the account reserve when the destination has no account yet', async () => {
@@ -407,6 +435,18 @@ describe('XrpSendTokenWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: { text: en.send.error.unexpected } })
 			);
+		});
+
+		// Nothing to correct, so the generic branch keeps the ordinary one step back.
+		it('steps back normally for an unrecognised failure', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(new Error('something else'));
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(onBack).toHaveBeenCalled();
+			expect(onSendForm).not.toHaveBeenCalled();
 		});
 	});
 
