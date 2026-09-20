@@ -15,6 +15,7 @@ import {
 	XRP_MAX_FEE_DROPS,
 	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
+import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
@@ -809,6 +810,39 @@ describe('xrp-send.services', () => {
 	);
 
 	describe('retrying an indeterminate send', () => {
+		// `retryXrpSend` enters with a stored blob and makes NO earlier call, so the submit is its
+		// first request — and the first place a missing endpoint can surface. Swallowed as
+		// ambiguous, it would spend the whole confirmation budget polling the same unreachable
+		// endpoint and report an indeterminate outcome for a blob that was definitely never sent.
+		describe('an endpoint that is not configured', () => {
+			const notConfigured = new XrpRpcNotConfiguredError('No XRPL RPC endpoint is configured');
+
+			it('surfaces as itself on the retry path rather than as an indeterminate send', async () => {
+				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(notConfigured);
+
+				const err = await retryXrpSend({
+					network: XrpNetworks.mainnet,
+					pending: { txBlob: signedBlob }
+				}).catch((e: unknown) => e);
+
+				expect(err).toBe(notConfigured);
+				expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
+				expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+			});
+
+			// The other side of the same catch: a failure that FOLLOWS a request may have been
+			// processed, so it still falls through to confirmation.
+			it('still confirms after a transport failure', async () => {
+				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
+
+				await expect(
+					retryXrpSend({ network: XrpNetworks.mainnet, pending: { txBlob: signedBlob } })
+				).resolves.toBeDefined();
+
+				expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
+			});
+		});
+
 		// The whole point: a retry must be able to resubmit THIS transaction. If the outcome is
 		// unknown and the error does not carry it, the only possible retry builds a new transaction
 		// from a fresh sequence — a second, independent payment.

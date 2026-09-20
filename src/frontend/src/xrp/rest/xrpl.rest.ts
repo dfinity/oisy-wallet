@@ -203,13 +203,24 @@ const isXrpAccountErrorForAddress = ({
 	address,
 	ledgerIndex,
 	account,
+	validated,
 	request
 }: {
 	address: XrpAddress;
 	ledgerIndex: 'current' | 'validated';
 	account?: string;
+	validated?: boolean;
 	request?: { operation: string; params: Record<string, unknown> };
 }): boolean => {
+	// A snapshot claim the response carried rather than one it was required to make: the forwarded
+	// path answers `validated: false` for an open-ledger absence and the direct path omits the
+	// field, so it is compared when present and ignored when not. Stripping it would have let
+	// `{ error: 'actNotFound', validated: true, request: <a current request> }` pass — a response
+	// naming two different snapshots, read as this one's absence.
+	if (nonNullish(validated) && !isXrpSnapshotForLedger({ ledgerIndex, validated })) {
+		return false;
+	}
+
 	// The echo is required, not merely checked when present. It is the only thing that names the
 	// LEDGER, and a top-level `account` alone cannot: `tryDestination` reads the same destination
 	// from `current` and `validated` concurrently, so those two requests differ only in
