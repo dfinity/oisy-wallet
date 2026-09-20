@@ -103,19 +103,21 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 
 			previous = address?.data;
 
-			if (isNullish(address)) {
-				this.stopTimer();
-				return;
-			}
-
 			// `SchedulerTimer.start` is a no-op while its timer exists, so the running timer has to be
-			// cleared first or it would keep polling the previous address under the new ref.
+			// cleared first or it would keep polling the previous address under the new ref. Stopping
+			// also drops the scheduler's cache, which matters for a restart on the SAME address:
+			// without it the first page would diff against a full cache, report nothing new, and
+			// leave the store below permanently empty.
 			this.stopTimer();
 
-			// The scheduler drops its own cache on the new ref, so its next sync reports the new
-			// address's first page as new rows. They must not be prepended onto the rows still held
-			// for the previous address.
+			// Losing the address is an ownership change like any other, and used not to reset: the
+			// previous address's rows survived, and the next address's first page — reported as new,
+			// because the scheduler re-keys on its ref — was prepended onto them.
 			resetWallet({ tokenId: this.tokenId });
+
+			if (isNullish(address)) {
+				return;
+			}
 
 			this.start();
 		});
@@ -135,6 +137,14 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 		}
 
 		if (isNullish(this.#unsubscribeAddress)) {
+			// A fresh worker owns none of the rows already in the store. `#watchAddress` seeds
+			// `previous` from the current address — it has to, since the subscription fires
+			// synchronously from here and acting on that first emission would recurse into `start` —
+			// so an address unchanged since the previous worker skips it and would otherwise inherit
+			// whatever that worker left behind. `WalletWorkers` recreates workers on token-list
+			// changes, so that gap is reachable.
+			resetWallet({ tokenId: this.tokenId });
+
 			this.#watchAddress();
 		}
 

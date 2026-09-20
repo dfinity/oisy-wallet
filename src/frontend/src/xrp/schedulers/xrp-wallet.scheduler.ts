@@ -38,6 +38,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 
 	stop() {
 		this.timer.stop();
+
+		// The cache goes with the timer. Every caller that stops this scheduler is handing ownership
+		// over — a changed address, a lost one, or a destroyed worker — and each one also clears the
+		// UI store. Keeping the cache would make a restart on the SAME address diff its first page
+		// against a full cache, report nothing new, and leave that cleared store empty: the account's
+		// history would simply disappear until something else re-keyed the ref.
+		this.setRef(undefined);
 	}
 
 	// The address is part of the ref, so a scheduler re-keyed to another address does not filter its
