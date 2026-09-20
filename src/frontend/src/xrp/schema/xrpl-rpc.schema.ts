@@ -58,9 +58,25 @@ export const XrplRequestEchoSchema = z.union([
 		.object({
 			method: z.string(),
 			params: z.tuple([z.record(z.string(), z.unknown())]),
-			command: z.never().optional()
+			command: z.never().optional(),
+			// The identity belongs inside `params[0]` on this shape, so a copy BESIDE it is a second
+			// claim that can disagree — and `z.object` strips what it does not name, which kept the
+			// half that matched and dropped the half that did not. These five are exactly the fields
+			// the two bindings compare, so a contradictory claim about which account or which
+			// transaction the response answers for is refused rather than half-read.
+			//
+			// Named rather than `z.strictObject`: a JSON-RPC echo may legitimately carry `id` or
+			// `jsonrpc`, and rejecting every unexpected sibling would stop absence parsing the first
+			// time one appeared — which takes expiry detection with it.
+			account: z.never().optional(),
+			ledger_index: z.never().optional(),
+			transaction: z.never().optional(),
+			min_ledger: z.never().optional(),
+			max_ledger: z.never().optional()
 		})
 		.transform(({ method, params }) => ({ operation: method, params: params[0] })),
+	// Flat, so the identity fields ARE the siblings and there is no second place for a duplicate to
+	// hide — `params` being forbidden is what keeps it that way.
 	z
 		.object({
 			command: z.string(),

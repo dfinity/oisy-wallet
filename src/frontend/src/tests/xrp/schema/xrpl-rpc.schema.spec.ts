@@ -223,6 +223,39 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrplRequestEchoSchema.safeParse(echo).success).toBeFalsy();
 		});
 
+		// One level below the discriminators: the identity belongs inside `params[0]` on the Clio
+		// shape, so a copy beside it is a second claim that can disagree — and `z.object` strips
+		// what it does not name, keeping the half that matched. These five are the fields the two
+		// bindings compare.
+		it.each([
+			{ name: 'a sibling account', extra: { account: 'rOther' } },
+			{ name: 'a sibling ledger_index', extra: { ledger_index: 'validated' } },
+			{ name: 'a sibling transaction', extra: { transaction: 'OTHERHASH' } },
+			{ name: 'a sibling min_ledger', extra: { min_ledger: 1 } },
+			{ name: 'a sibling max_ledger', extra: { max_ledger: 9 } }
+		])('rejects a Clio echo carrying $name beside its params', ({ extra }) => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					method: 'tx',
+					params: [{ transaction: 'HASH', min_ledger: 1000, max_ledger: 1020 }],
+					...extra
+				}).success
+			).toBeFalsy();
+		});
+
+		// Targeted, not strict: a JSON-RPC echo may legitimately carry these, and rejecting every
+		// unexpected sibling would stop absence parsing the first time one appeared.
+		it('ignores a harmless sibling that claims no identity', () => {
+			expect(
+				XrplRequestEchoSchema.safeParse({
+					method: 'tx',
+					params: [{ transaction: 'HASH' }],
+					id: 7,
+					jsonrpc: '2.0'
+				}).data
+			).toEqual({ operation: 'tx', params: { transaction: 'HASH' } });
+		});
+
 		it.each([{}, { method: 'tx' }, { params: [{}] }, { command: 42 }])(
 			'rejects the echo %j, which states no operation',
 			(echo) => {
