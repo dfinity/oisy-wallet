@@ -47,6 +47,14 @@
 		isNullish($reserve) || isNullish($fee) ? ($sendBalance ?? ZERO) : $fee + $reserve
 	);
 
+	// The fee and the reserve decide the verdict below, and a decrease can make a rejected amount
+	// sendable again — the poller runs every ten seconds for as long as the form is open, so a fee
+	// that spikes and settles is ordinary. Without this the error outlives the change and Next
+	// stays disabled until the amount is edited, with nothing on screen saying why.
+	//
+	// A string rather than the values, so an unchanged pair compares equal and nothing reruns.
+	let revalidateKey = $derived(`${$fee}:${$reserve}`);
+
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new XrpAmountAssertionError($i18n.send.assertion.amount_invalid);
@@ -78,6 +86,7 @@
 		exchangeRate={$sendTokenExchangeRate}
 		onClick={onTokensList}
 		onCustomErrorValidate={customValidate}
+		{revalidateKey}
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
