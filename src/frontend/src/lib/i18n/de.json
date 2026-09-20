@@ -1072,7 +1072,10 @@
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
 			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
-			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen."
+			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen.",
+			"xrp_amount_exceeds_sendable": "Der Betrag passt nicht mehr. Ihr Konto muss seine XRP-Reserve zuzüglich der Netzwerkgebühr behalten, und beides kann sich während der Prüfung ändern. Es wurde nichts gesendet – mit „Max“ übernehmen Sie das aktuelle Limit.",
+			"xrp_destination_unfunded": "Diese Adresse hat noch kein XRP-Konto. Dessen Erstellung erfordert eine erste Zahlung von mindestens $reserve XRP. Es wurde nichts gesendet – erhöhen Sie den Betrag oder senden Sie an eine bereits finanzierte Adresse.",
+			"xrp_destination_tag_required": "Diese Adresse erfordert ein Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut."
 		}
 	},
 	"mint": {
