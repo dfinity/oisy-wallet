@@ -49,26 +49,47 @@ rather than assumed: it accepts a `DestinationTag` of `-1`, `1.5`, `NaN` or abov
 `LastLedgerSequence` beyond `UInt32` — none of the argument classes `sendXrp`
 refuses. The guards here are stricter than the library's.
 
-### And not its result-code enums
+### And its result-code enums, in one direction only
 
 `ripple-binary-codec` exports `DEFAULT_DEFINITIONS`, whose `transactionResult`
-does hold every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`,
-1 `tes`. It is tempting to test membership against that list instead of the
-`/^tem[A-Z0-9_]+$/` and `/^tec[A-Z0-9_]+$/` patterns used in
-`xrp-transaction.utils.ts` and `xrpl-rpc.schema.ts`. Deliberately not done:
+holds every code name — 82 `tec`, 51 `tem`, 22 `tef`, 17 `tel`, 16 `ter`, 1
+`tes`. Whether to test membership against that list or to match a shape
+(`/^tem[A-Z0-9_]+$/`, `/^tec[A-Z0-9_]+$/`) is answered differently for the two
+sets, because their failure directions are opposite.
+
+**`tem` is a set.** `isXrpSubmitFinalFailure` holds the 51 codes explicitly. A
+pattern accepted an invented `temFAKE`, and that decision is a definitive
+rejection taken _after_ the blob is broadcast — the one report that tells a
+caller to rebuild on a new sequence and pay twice.
+
+**`tec` stays a pattern**, in `XrplTxResultSchema`. Staleness is why: any list
+here eventually lags the protocol, and amendments add `tec` codes routinely
+where they almost never add `tem` ones. An unknown `tem` is simply not final, so
+the send polls, the malformed transaction never lands and it expires — the right
+answer, eighty seconds later. An unknown `tec` would stop the validated branch
+parsing and report a payment that _was_ applied and _did_ claim the fee as
+"outcome unknown". A false positive runs the other way too: a fake `tec` is
+harmless, because any validated result that is not `tesSUCCESS` means the payment
+did not deliver, whatever the code is called.
+
+So membership sits where staleness is safe and the error is expensive, and the
+pattern sits where staleness is expensive and the error is harmless.
+
+The `tem` set is **generated from that enum and written out**, not imported from
+it:
 
 - `transactionResult` is typed `BytesLookup`, a class. The name keys are
   enumerable at runtime but the type does not expose them, so reading the list
   needs a cast.
 - That class stores names and ordinals in the same object so it can decode. The
   name direction is an implementation detail, not a documented surface.
-- The dependency is range-pinned (`^2.8.0`), so CI can resolve a different minor
-  than anything verified locally.
-- Most importantly, it buys very little. A hostile node wanting to fake a
-  definitive rejection sends a **real** code; the list only rejects garbage that
-  happens to be shaped like one. The patterns were verified once against that
-  enum — all 51 `tem` and all 82 `tec` codes match, and no code from another
-  class does — and that verification is recorded where each pattern is defined.
+- The list lives in the package's `dist`, and the dependency is range-pinned
+  (`^2.8.0`), so CI can resolve a different minor than anything verified locally.
+
+A test does the deep import — where it costs nothing — and pins the set against
+the enum in both directions: every `tem` code the protocol defines must be final,
+and no code from another class may be. A typo or a drift fails there rather than
+silently shrinking what counts as a rejection.
 
 ## Failures arrive with HTTP 200
 
@@ -134,6 +155,22 @@ all, and `binary: true`. If a provider ever adds one more, absence stops parsing
 outcome is indeterminate: the poll keeps running and cannot conclude expiry, which is the
 direction this path has to fail in.
 
+Every reader on this path is bound to the question it asked, and that is the invariant most
+worth preserving through a refactor. A funded `account_info` snapshot must name the address in
+`account_data.Account` and the ledger in `validated`; an `actNotFound` names neither, so it is
+bound by the echoed `request` — account and `ledger_index` both, because the two destination
+reads differ _only_ in the ledger and the address cannot tell them apart. A validated `tx`
+record is bound by `hash`; an absence carries none, so it too is bound by the echo, over the
+transaction **and** the ledger range, since `searched_all` is a claim about the ledgers actually
+searched. Identities are compared raw, never through `String(...)`: the echo's parameters are
+`unknown`, so coercing first makes anything whose string form matches pass — the same mistake
+`result.error` once had, where `['txnNotFound']` coerced into a declared expected code.
+
+An unbindable response is indeterminate, not absent. That distinction is the whole point: for
+the destination read it becomes an unavailable lookup, which declines a below-reserve or untagged
+send rather than waving it through; for the `tx` poll it keeps polling rather than concluding the
+expiry that tells a caller a fresh payment is safe.
+
 Getting this wrong is quiet rather than loud, because an unchecked error looks like
 a legitimate answer: a failed `account_tx` reads as "no transactions", and a failed
 `tx` reads as "not in a ledger" — which, past a transaction's `LastLedgerSequence`,
@@ -181,11 +218,30 @@ same open ledger. Either way the transaction is not applied twice, because a seq
 consumed only once; that, rather than transaction-identity dedup, is what makes resubmitting a
 stored transaction safe.
 
-So `isXrpSubmitFinalFailure` treats only a `tem*` result as a rejection, and deliberately
-ignores `accepted`: a node's refusal to take the blob is not evidence that no ledger will
-include it. Everything else goes to confirmation, which polls to `LastLedgerSequence` and
-reports either the validated result or an expiry. Reporting a "no" that may still become a
-yes would invite a retry that pays a second time.
+So `isXrpSubmitFinalFailure` treats a result as a rejection only when **all three** of the
+following hold, and sends everything else to confirmation, which polls to `LastLedgerSequence`
+and reports either the validated result or an expiry. Reporting a "no" that may still become a
+yes would invite a retry that pays a second time — and this is the one decision on the whole
+path taken _after_ the blob is already broadcast, which is why it is the most guarded.
+
+1. **The code is a whole `tem` code.** Matched as `/^tem[A-Z0-9_]+$/`, not a `tem` prefix:
+   `engine_result` is `z.string()`, so `temporary`, `tem`, `temBAD_fee` and `tem BAD_FEE extra`
+   all arrive and all used to count. Checked against `ripple-binary-codec`'s own
+   `TRANSACTION_RESULTS` — all 51 `tem` codes match, no code from the other five classes does.
+2. **The node did not also claim to have taken the blob.** `accepted: false` on its own still
+   never creates a failure — a node refusing the blob is no evidence that no ledger will include
+   it, which is the original reason this ignored the field. But `accepted: true` beside a `tem*`
+   is a response contradicting itself, since nothing can be both malformed and accepted, and a
+   self-contradicting response is no basis for a definitive failure. It falls through to the poll.
+3. **The response names the blob we sent.** `tx_json.hash` must equal the locally derived id,
+   compared case-insensitively because it is hex. Required only here, not on every submit: the id
+   is derived locally precisely so a lost or partial response stays survivable, and demanding it
+   everywhere would turn that property into a poll on every send. A missing or mismatched hash
+   therefore confirms rather than rejects.
+
+`accepted` is a required boolean and `tx_json.hash` is shaped as 64 hex characters for the same
+reason: both stopped being cosmetic the moment a decision read them, and a malformed value must
+not be able to satisfy a check that ends a send.
 
 `submit` is a **preliminary** result, so finality is confirmed separately.
 

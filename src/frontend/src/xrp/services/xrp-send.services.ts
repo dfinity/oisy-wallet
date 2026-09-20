@@ -140,6 +140,15 @@ const confirmXrpTransaction = async ({
 			return outcome.transactionResult;
 		}
 
+		// The deadline is a wall clock, and the loop condition only reads it BETWEEN iterations. One
+		// entered just under it could still start a validated-ledger read, an expiry recheck and a
+		// poll interval — each request bounded by `XRP_RPC_TIMEOUT_MS` of its own — and overshoot
+		// the documented budget by three timeouts. A definitive answer already in hand is returned
+		// above; past the deadline, no further work is started.
+		if (Date.now() >= deadline) {
+			break;
+		}
+
 		// Expiry is only evaluated on a lookup the node actually answered; an unanswered one
 		// establishes nothing and simply costs an attempt.
 		if (nonNullish(outcome) && attempt >= nextLedgerReadAttempt) {
@@ -158,6 +167,14 @@ const confirmXrpTransaction = async ({
 			}
 
 			if (nonNullish(validatedLedgerIndex) && validatedLedgerIndex > lastLedgerSequence) {
+				// Never on a spent budget. The recheck is what keeps a stale lookup from becoming a
+				// false expiry, so skipping it must skip the conclusion too — the loop ends
+				// indeterminate, which hands the blob back, rather than asserting a payment that
+				// may have landed never did.
+				if (Date.now() >= deadline) {
+					break;
+				}
+
 				// The `tx` lookup above and this index come from two separate calls, so the lookup may
 				// have missed a payment that validated in between. Expiry is only final if it survives
 				// a recheck against the newer ledger state — otherwise a succeeded payment would be
@@ -195,6 +212,11 @@ const confirmXrpTransaction = async ({
 					`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
 				);
 			}
+		}
+
+		// Nothing follows a wait that outlives the budget it is waiting inside, so it is not taken.
+		if (Date.now() >= deadline) {
+			break;
 		}
 
 		// Explicit rather than `randomWait`'s defaults: `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read
