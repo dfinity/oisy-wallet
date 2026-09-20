@@ -789,6 +789,7 @@ const finalizeRow = ({
 	row,
 	isSelfTransfer,
 	isStandaloneRoundTrip,
+	userPaidFeeOverride,
 	contacts
 }: {
 	row: TransactionCsvRow;
@@ -798,6 +799,10 @@ const finalizeRow = ({
 	// ICRC self-transfers are emitted by the indexer as a paired in + out, where the IN
 	// duplicate's +Credit cancels the OUT's -Amount; for that case this flag is false.
 	isStandaloneRoundTrip: boolean;
+	// Overrides the direction-based default when a chain can say outright whether this wallet paid
+	// the fee. XRP needs it: its self-transfers are a single INCOMING row, so the default would
+	// discard a fee the wallet demonstrably paid.
+	userPaidFeeOverride?: boolean;
 	contacts: ContactUi[];
 }): TransactionCsvRow => {
 	const isApprove = row.type === 'approve';
@@ -807,7 +812,7 @@ const finalizeRow = ({
 	// The user paid the fee only on the outgoing row. ICRC self-transfers are emitted twice
 	// by the indexer (one 'out' + one 'in' for the same on-chain tx); attributing the fee to
 	// the outgoing row only keeps the sum honest. Non-self incoming rows: the sender paid.
-	const userPaidFee = isOutgoing;
+	const userPaidFee = userPaidFeeOverride ?? isOutgoing;
 
 	// Signed change to the user's main-asset balance for this row.
 	// Approve and self-transfer rows contribute zero — approve doesn't move the asset, and a
@@ -927,6 +932,7 @@ export const buildTransactionRows = ({
 		// exception — it emits a paired in + out, so the OUT row should NOT zero its asset
 		// portion (the IN duplicate's +Credit balances it).
 		let isStandaloneRoundTrip = false;
+		let userPaidFeeOverride: boolean | undefined;
 
 		switch (entry.component) {
 			case 'bitcoin':
@@ -983,14 +989,27 @@ export const buildTransactionRows = ({
 					token: entry.token,
 					exportedAt: exportedAtIso
 				});
-				isSelfTransfer = addressesEqual({
-					a: entry.transaction.from,
-					b: entry.transaction.to
-				});
+				// A conversion is not a round trip. XRPL lets an account pay itself to convert an
+				// issued currency into XRP: `from === to`, but the XRP genuinely arrives funded by
+				// something else, so zeroing the credit would erase a real balance change.
+				isSelfTransfer =
+					addressesEqual({
+						a: entry.transaction.from,
+						b: entry.transaction.to
+					}) && entry.transaction.crossCurrency !== true;
 				isStandaloneRoundTrip = isSelfTransfer;
+				// The mapper records a fee only when this wallet signed, so a row carrying one paid
+				// it — including a self row, which is incoming and would otherwise lose it.
+				userPaidFeeOverride = nonNullish(entry.transaction.fee);
 				break;
 		}
 
-		return finalizeRow({ row, isSelfTransfer, isStandaloneRoundTrip, contacts });
+		return finalizeRow({
+			row,
+			isSelfTransfer,
+			isStandaloneRoundTrip,
+			userPaidFeeOverride,
+			contacts
+		});
 	});
 };

@@ -242,10 +242,13 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
+	// `SendMax` as an object means the delivered XRP was funded by an issued currency.
+	const crossCurrency = nonNullish(tx.SendMax) && typeof tx.SendMax !== 'string';
+
 	// `delivered_amount` is what the destination received. On a cross-currency payment the sender
-	// funds it with something else — `SendMax` as an object — so crediting it as XRP leaving this
-	// wallet would be wrong: only the fee did. Receiving stays valid, the XRP really did arrive.
-	if (!isReceive && nonNullish(tx.SendMax) && typeof tx.SendMax !== 'string') {
+	// funds it with something else, so crediting it as XRP leaving this wallet would be wrong:
+	// only the fee did. Receiving stays valid, the XRP really did arrive.
+	if (!isReceive && crossCurrency) {
 		return undefined;
 	}
 
@@ -265,7 +268,10 @@ export const mapXrpTransaction = ({
 		to: tx.Destination,
 		...(nonNullish(tx.date) && { timestamp: BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET) }),
 		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
-		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag })
+		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag }),
+		// Carried so the export can tell a self-conversion from a self-send: the first is a real
+		// credit, the second cancels itself out.
+		...(crossCurrency && { crossCurrency: true })
 	};
 };
 

@@ -1152,6 +1152,66 @@ describe('export-data.utils', () => {
 			expect(row.explorer_url).toBe(`${XRP_TOKEN.network.explorerUrl}/tx/XRPHASH1`);
 		});
 
+		// XRPL lets an account pay itself to convert an issued currency into XRP. `from === to`, but
+		// the XRP genuinely arrives funded by something else, so treating it as a round trip erased
+		// the credit — and because the row is incoming, the direction-based fee rule also discarded
+		// a fee the wallet demonstrably paid. The CSV reported neither balance change.
+		it('keeps the credit and the fee for an XRP self-conversion', () => {
+			const xrpSelfConversion = {
+				id: 'XRPCONV',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rSelfAddress',
+				value: 5_000_000n,
+				fee: 12n,
+				crossCurrency: true,
+				timestamp: 1n,
+				blockNumber: 77
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpSelfConversion, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('in');
+			expect(row.fee).toBe('0.000012');
+			expect(row.effective_token).toBe('4.999988');
+		});
+
+		// A same-asset round trip really does net to zero on the asset — but the fee still left, and
+		// it was dropped for the same reason: the single row XRP emits for a self-transfer is
+		// incoming, which is the one case the outgoing-only fee rule does not fit.
+		it('keeps the fee for a plain XRP self-send while netting the asset to zero', () => {
+			const xrpSelfSend = {
+				id: 'XRPSELF',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rSelfAddress',
+				value: 5_000_000n,
+				fee: 12n,
+				timestamp: 1n,
+				blockNumber: 78
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpSelfSend, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.direction).toBe('in');
+			expect(row.fee).toBe('0.000012');
+			expect(row.effective_token).toBe('-0.000012');
+		});
+
 		it('constructs the Solana explorer URL from the network template when txExplorerUrl is missing', () => {
 			// SolTransactionUi doesn't pre-populate txExplorerUrl; the adapter substitutes
 			// `$args` in the network's explorer template the same way SolTransactionModal does.

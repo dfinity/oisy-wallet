@@ -48,6 +48,11 @@ export interface XrpTransactionUi extends TransactionUiCommon {
 	// XRPL destination tag — a numeric routing memo recipients such as exchanges use to
 	// credit the right customer. Present only when the payment carried one.
 	destinationTag?: number;
+	// The delivered XRP was funded by something other than XRP — `SendMax` names an issued
+	// currency. Only ever true on a receive, since the mapper drops the outgoing side of a
+	// cross-currency payment. It is what tells a consumer that `from === to` is a conversion
+	// rather than a round trip: the XRP really arrived, so the credit is not self-cancelling.
+	crossCurrency?: boolean;
 }
 
 // Raw XRPL `account_tx` result shapes (native XRP only). `tx` is the classic
