@@ -161,6 +161,72 @@ describe('XrpFeeContext', () => {
 		});
 	});
 
+	// The reserve has had these two cases since it was written; the fee had the check only after the
+	// await in `updateFee`, which runs once the store has already been written. It matters most when
+	// `observe` goes false as a send starts: `send()` reads the fee to validate the amount and again
+	// to sign it, so a late write lands between them and signs a figure neither saw.
+	describe('fee generation', () => {
+		const pendingFee = () => {
+			let resolve: ((fee: bigint) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockReturnValue(
+				new Promise((res) => {
+					resolve = res;
+				})
+			);
+
+			return { resolve: (fee: bigint) => resolve?.(fee) };
+		};
+
+		it('ignores a quote that resolves after the component is destroyed', async () => {
+			const { resolve } = pendingFee();
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
+			});
+
+			unmount();
+
+			resolve(nodeFee);
+			await runResolvedPromises();
+
+			expect(get(feeStore)).toBeUndefined();
+		});
+
+		// Only the FIRST request resolves. Handing the same promise to both would let the reload's
+		// own request settle too, and its quote is current — the assertion would then pass or fail
+		// on the wrong call.
+		it('ignores a quote superseded by a new account', async () => {
+			let resolveSuperseded: ((fee: bigint) => void) | undefined;
+
+			vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee')
+				.mockReturnValueOnce(
+					new Promise((res) => {
+						resolveSuperseded = res;
+					})
+				)
+				.mockReturnValue(new Promise(() => undefined));
+
+			const { unmount } = renderContext();
+
+			await waitFor(() => {
+				expect(xrplRest.loadXrpOpenLedgerFee).toHaveBeenCalled();
+			});
+
+			xrpAddressMainnetStore.set({ data: `${mockXrpAddress}2`, certified: true });
+			await runResolvedPromises();
+
+			resolveSuperseded?.(nodeFee);
+			await runResolvedPromises();
+
+			expect(get(feeStore)).toBeUndefined();
+
+			unmount();
+		});
+	});
+
 	describe('the reserve', () => {
 		it('publishes the reserve for the number of ledger objects the account owns', async () => {
 			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
