@@ -993,6 +993,7 @@
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
+			"enter_xrp_address": "输入 XRP 地址",
 			"xrp_destination_tag": "输入目标标签（可选）",
 			"select_network": "选择网络",
 			"search_nfts": "搜索收藏品"

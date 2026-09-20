@@ -993,6 +993,7 @@
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
+			"enter_xrp_address": "XRP アドレスを入力",
 			"xrp_destination_tag": "宛先タグを入力（任意）",
 			"select_network": "ネットワークを選択",
 			"search_nfts": "コレクティブルを検索"

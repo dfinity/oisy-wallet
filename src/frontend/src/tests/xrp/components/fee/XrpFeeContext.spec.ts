@@ -7,6 +7,7 @@ import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
 import { XRP_DEFAULT_FEE_DROPS, XRP_MAX_FEE_DROPS } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
+import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
@@ -317,6 +318,73 @@ describe('XrpFeeContext', () => {
 
 	// The reserve is published asynchronously and the effect reruns on an address change, so an
 	// older account's response must not land on the newer account.
+	// Unknown blocks Max and Next, correctly — but nothing asked again, so one dropped request cost
+	// the whole form with no error and no retry the user could see. Failure-only: the normal path
+	// still fetches once, because the reserve does not move while a send is composed.
+	describe('reserve retry', () => {
+		it('asks again after an operational failure and publishes once it succeeds', async () => {
+			vi.useFakeTimers();
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValueOnce(new Error('network down'));
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(get(reserveStore)).toBeUndefined();
+
+			await vi.advanceTimersByTimeAsync(10_000);
+
+			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+			vi.useRealTimers();
+		});
+
+		// Settled, not a failure: an account that is not on-ledger owns nothing, so the base reserve
+		// is the answer and asking again would only repeat it.
+		it('does not retry an account that is not on-ledger', async () => {
+			vi.useFakeTimers();
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new XrpAccountNotFoundError());
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			const callsAfterFirst = vi.mocked(xrplRest.loadXrpAccountInfo).mock.calls.length;
+
+			await vi.advanceTimersByTimeAsync(30_000);
+
+			expect(vi.mocked(xrplRest.loadXrpAccountInfo).mock.calls).toHaveLength(callsAfterFirst);
+			expect(get(reserveStore)).toBe(getXrpReserveDrops({ ownerCount: 0 }));
+
+			unmount();
+			vi.useRealTimers();
+		});
+
+		it('stops retrying once the component is destroyed', async () => {
+			vi.useFakeTimers();
+
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(new Error('network down'));
+
+			const { unmount } = renderContext();
+
+			await vi.advanceTimersByTimeAsync(0);
+
+			unmount();
+
+			const callsAtUnmount = vi.mocked(xrplRest.loadXrpAccountInfo).mock.calls.length;
+
+			await vi.advanceTimersByTimeAsync(30_000);
+
+			expect(vi.mocked(xrplRest.loadXrpAccountInfo).mock.calls).toHaveLength(callsAtUnmount);
+			expect(get(reserveStore)).toBeUndefined();
+
+			vi.useRealTimers();
+		});
+	});
+
 	describe('reserve generation', () => {
 		it('leaves the reserve unknown while a load is pending', async () => {
 			let resolve: ((info: XrpAccountInfo) => void) | undefined;

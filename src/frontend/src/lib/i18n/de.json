@@ -993,6 +993,7 @@
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
+			"enter_xrp_address": "XRP-Adresse eingeben",
 			"xrp_destination_tag": "Gib Ziel-Tag ein (optional)",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "Sammlerstücke suchen"

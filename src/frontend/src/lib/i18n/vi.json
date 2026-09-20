@@ -993,6 +993,7 @@
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
+			"enter_xrp_address": "Nhập địa chỉ XRP",
 			"xrp_destination_tag": "Nhập thẻ đích (không bắt buộc)",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
