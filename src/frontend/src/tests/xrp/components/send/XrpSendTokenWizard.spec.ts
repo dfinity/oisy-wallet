@@ -284,6 +284,49 @@ describe('XrpSendTokenWizard', () => {
 		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
 	});
 
+	// This check runs before `onNext`, so the user is still on REVIEW and the message names an
+	// amount only the form can change — the same mismatch 5faa2c145 removed for the typed refusals.
+	it('returns to the form when the review-step amount check fails', async () => {
+		const overMax = Number(balance - nodeFee - getXrpReserveDrops({ ownerCount })) / 1_000_000 + 1;
+
+		const rendered = render(XrpSendTokenWizard, {
+			props: { ...props, amount: overMax },
+			context: mockContext()
+		});
+
+		await waitFor(() => {
+			expect(xrplRest.loadXrpAccountInfo).toHaveBeenCalled();
+		});
+
+		await clickSend(rendered.container);
+
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({
+				msg: { text: en.send.assertion.insufficient_funds_for_reserve }
+			})
+		);
+		expect(onSendForm).toHaveBeenCalled();
+	});
+
+	// Was `assertNonNullish`, which throws outside the try and surfaces as an unhandled rejection:
+	// a Send button that does nothing at all.
+	it('fails closed with a message when the source address is unavailable', async () => {
+		vi.spyOn(addressesStore, 'xrpAddressMainnet', 'get').mockImplementation(() =>
+			readable(undefined)
+		);
+
+		// Not `renderSettled`: without an address `loadReserve` returns before calling
+		// `loadXrpAccountInfo`, so the settle condition never arrives.
+		const { container } = render(XrpSendTokenWizard, { props, context: mockContext() });
+
+		await clickSend(container);
+
+		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
+		expect(toasts.toastsError).toHaveBeenCalledWith(
+			expect.objectContaining({ msg: { text: en.send.error.xrp_account_state_unavailable } })
+		);
+	});
+
 	// An operational `account_info` failure leaves the reserve unknown, and no amount can be judged
 	// sendable against a figure that is not known.
 	it('should not call sendXrp while the reserve is unknown', async () => {
