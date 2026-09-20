@@ -202,16 +202,21 @@ describe('xrp-send.services', () => {
 		// The other half of the contract. Before the broadcast there is nothing on the wire, so an
 		// observer throwing must still abort — wrapping those calls would swallow a real caller
 		// failure at the one moment it is free to fail.
-		it.each([ProgressStepsSendXrp.INITIALIZATION, ProgressStepsSendXrp.SIGN])(
-			'still aborts the send when it throws at %s',
-			async (step) => {
-				const progress = throwingAt(step);
+		//
+		// `SEND` matters most of the three: it is emitted immediately before `submitXrpTransaction`,
+		// so it is the pre-broadcast step a refactor would most plausibly move to the wrong side of
+		// the line, and the only one whose neighbour on the other side is already swallowed.
+		it.each([
+			ProgressStepsSendXrp.INITIALIZATION,
+			ProgressStepsSendXrp.SIGN,
+			ProgressStepsSendXrp.SEND
+		])('still aborts the send when it throws at %s', async (step) => {
+			const progress = throwingAt(step);
 
-				await expect(sendXrp({ ...params, progress })).rejects.toThrow('observer failed');
+			await expect(sendXrp({ ...params, progress })).rejects.toThrow('observer failed');
 
-				expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
-			}
-		);
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
 	});
 
 	it('waits for the transaction to be validated', async () => {
