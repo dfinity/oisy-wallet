@@ -7,7 +7,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import XrpFeeDisplay from '$xrp/components/fee/XrpFeeDisplay.svelte';
 	import XrpSendAmount from '$xrp/components/send/XrpSendAmount.svelte';
 	import XrpSendDestinationTag from '$xrp/components/send/XrpSendDestinationTag.svelte';
@@ -55,6 +55,12 @@
 		isNullishOrEmpty(destination) || invalidXrpAddress(destination)
 	);
 
+	// `invalidAmount`, not `isNullish`, and it subsumes it. `TokenInputContent` treats an empty
+	// string and a negative number as nothing to judge — it clears the error and returns — so
+	// neither sets `amountError`, and neither is nullish. Without this they leave the step for a
+	// review whose Send is disabled by the same predicate, with no message saying why. The send
+	// guards cannot help there: they run on a click that cannot happen.
+	//
 	// The three figures an amount is measured against: what the account must retain, what leaves
 	// with the payment, and what it has. While any of them is unknown no amount can be judged
 	// sendable, so the form is blocked outright rather than measured against a guessed figure —
@@ -69,7 +75,7 @@
 			isNullish($fee) ||
 			isNullish($sendBalance) ||
 			nonNullish(amountError) ||
-			isNullish(amount)
+			invalidAmount(amount)
 	);
 </script>
 
