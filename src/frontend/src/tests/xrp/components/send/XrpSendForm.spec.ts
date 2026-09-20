@@ -235,6 +235,41 @@ describe('XrpSendForm', () => {
 		});
 	});
 
+	// Pins the behaviour, not the predicate: this passes with `isNullish(amount)` too, because the
+	// currency input hands the form `undefined` for a cleared field rather than an empty string.
+	// `invalidAmount` is there so the form, the review step and both send guards share one
+	// definition of an unusable amount — it subsumes the nullish case rather than adding to it.
+	describe('an amount the input declines to judge', () => {
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		// Only the emptied field. `invalidAmount` also covers a negative number, but this input
+		// refuses one — typing `-1` over `22` leaves `22` in the field — so that branch cannot be
+		// reached from here at all, and a case asserting it would be testing the input's filter.
+		it('keeps next disabled once the amount field is emptied', async () => {
+			vi.useFakeTimers();
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+
+			await fireEvent.input(amountInput(container), { target: { value: '' } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			vi.useRealTimers();
+		});
+	});
+
 	// The poller runs for as long as the form is open, so a fee that spikes and settles is ordinary.
 	// Without `revalidateKey` the rejection outlives the decrease and Next stays disabled until the
 	// amount is edited, with nothing on screen saying why.
