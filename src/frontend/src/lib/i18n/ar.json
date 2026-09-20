@@ -1077,6 +1077,7 @@
 			"xrp_amount_exceeds_sendable": "",
 			"xrp_destination_unfunded": "",
 			"xrp_destination_tag_required": "",
+			"xrp_destination_is_source": "",
 			"xrp_account_state_unavailable": ""
 		}
 	},

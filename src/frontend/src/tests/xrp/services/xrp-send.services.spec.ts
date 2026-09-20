@@ -25,6 +25,7 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpSelfDestinationError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
@@ -1443,6 +1444,14 @@ describe('xrp-send.services', () => {
 			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// Typed like the other pre-sign refusals: the wizard matches on it to show a message naming
+		// the correction and to go back to where the recipient is chosen.
+		it('carries its own type', async () => {
+			await expect(sendXrp({ ...params, destination: params.source })).rejects.toBeInstanceOf(
+				XrpSelfDestinationError
+			);
 		});
 
 		// Raw comparison, like the `Account` binding in the reads: a classic address is base58 over
