@@ -45,6 +45,7 @@
 		XrpAmountExceedsSendableError,
 		XrpDestinationTagRequiredError,
 		XrpDestinationUnfundedError,
+		XrpSelfDestinationError,
 		XrpSendExpiredError,
 		XrpTransactionFailedError
 	} from '$xrp/types/xrp-send';
@@ -305,6 +306,20 @@
 
 				onSendForm();
 			};
+
+			// The one pre-sign refusal the form cannot fix: no amount makes a payment to yourself
+			// deliverable, so it goes back to where the recipient is chosen. `onSendBack` already
+			// targets that step.
+			if (err instanceof XrpSelfDestinationError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_destination_is_source },
+					err
+				});
+
+				onSendBack();
+
+				return;
+			}
 			if (err instanceof XrpAmountExceedsSendableError) {
 				correctOnForm($i18n.send.error.xrp_amount_exceeds_sendable);
 

@@ -1074,9 +1074,10 @@
 			"solana_insufficient_funds_for_rent": "Votre solde SOL est insuffisant pour couvrir le loyer requis pour la création du compte.",
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge.",
 			"xrp_send_expired": "La transaction n'a pas été envoyée : le réseau ne l'a pas incluse à temps. Rien n'a quitté votre portefeuille et vous pouvez en créer une nouvelle en toute sécurité.",
-			"xrp_amount_exceeds_sendable": "Le montant ne passe plus. Votre compte doit conserver sa réserve XRP ainsi que les frais de réseau, et les deux peuvent changer pendant que vous vérifiez. Rien n’a été envoyé : utilisez « Max » pour reprendre la limite actuelle.",
+			"xrp_amount_exceeds_sendable": "Le montant ne passe plus. Votre compte doit conserver sa réserve XRP ainsi que les frais de réseau, et les deux peuvent changer pendant que vous vérifiez. Rien n’a été envoyé : réduisez le montant ou réessayez une fois les informations de votre compte actualisées.",
 			"xrp_destination_unfunded": "Cette adresse n’a pas encore de compte XRP. Sa création exige un premier paiement d’au moins $reserve XRP. Rien n’a été envoyé : augmentez le montant ou envoyez vers une adresse déjà approvisionnée.",
 			"xrp_destination_tag_required": "Cette adresse exige un tag de destination. Rien n’a été envoyé : ajoutez le tag fourni par le service que vous payez, puis renvoyez.",
+			"xrp_destination_is_source": "Il s’agit de votre propre adresse XRP. Rien n’a été envoyé : choisissez un autre destinataire.",
 			"xrp_account_state_unavailable": "Le portefeuille n’a pas pu lire les informations de votre compte, le montant n’a donc pas pu être vérifié. Rien n’a été envoyé : réessayez dans un instant."
 		}
 	},

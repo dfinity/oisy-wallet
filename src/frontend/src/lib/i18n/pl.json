@@ -1074,9 +1074,10 @@
 			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
 			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany.",
 			"xrp_send_expired": "Transakcja nie została wysłana: sieć nie uwzględniła jej na czas. Nic nie opuściło Twojego portfela i można bezpiecznie utworzyć nową.",
-			"xrp_amount_exceeds_sendable": "Ta kwota już się nie mieści. Twoje konto musi zachować rezerwę XRP oraz opłatę sieciową, a obie mogą się zmienić podczas sprawdzania. Nic nie zostało wysłane — użyj przycisku „Maks.”, aby wpisać aktualny limit.",
+			"xrp_amount_exceeds_sendable": "Ta kwota już się nie mieści. Twoje konto musi zachować rezerwę XRP oraz opłatę sieciową, a obie mogą się zmienić podczas sprawdzania. Nic nie zostało wysłane — zmniejsz kwotę lub spróbuj ponownie, gdy dane konta się odświeżą.",
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
 			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
+			"xrp_destination_is_source": "To Twój własny adres XRP. Nic nie zostało wysłane — wybierz innego odbiorcę.",
 			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę."
 		}
 	},

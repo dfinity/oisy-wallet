@@ -23,6 +23,13 @@
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
+	// One flag for the input and the button, as `EthSendAmount` does. Left unbound they each keep a
+	// private copy: typing clears the input's, the button's stays set, and `MaxBalanceButton` then
+	// re-maxes on the next fee change — overwriting what was just typed. Its own re-check exists to
+	// stop precisely that and can only work if both read the same state. XRP is where it bites,
+	// because `fee` below is the fee plus the reserve and the poller moves it every ten seconds.
+	let amountSetToMax = $state(false);
+
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendToken, sendBalance, sendTokenExchangeRate } =
@@ -90,6 +97,7 @@
 		{revalidateKey}
 		token={$sendToken}
 		bind:amount
+		bind:amountSetToMax
 		bind:error={amountError}
 	>
 		{#snippet title()}{$i18n.core.text.amount}{/snippet}
@@ -115,6 +123,7 @@
 					fee={unavailable}
 					token={$sendToken}
 					bind:amount
+					bind:amountSetToMax
 				/>
 			{/if}
 		{/snippet}
