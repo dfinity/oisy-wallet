@@ -129,6 +129,48 @@ describe('XrpSendForm', () => {
 		});
 	});
 
+	// The fee and the reserve are loaded by two independent requests, so `account_info` can answer
+	// first and leave the fee unknown. Next must wait for it: the review step prices the send
+	// against the fee and `XrpFeeDisplay` renders nothing without one, so proceeding would show a
+	// review with no fee at all. The balance is cleared for the same reason as above — with the
+	// fee unknown the whole balance is unavailable, so the amount error would fire and mask which
+	// term actually disabled the button.
+	describe('unknown fee', () => {
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		it('disables next while the fee is unknown, even with the reserve known', async () => {
+			feeStore.setFee(undefined);
+			balancesStore.reset(XRP_TOKEN.id);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+		});
+
+		it('enables next once the fee is known', async () => {
+			feeStore.setFee(undefined);
+			balancesStore.reset(XRP_TOKEN.id);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			feeStore.setFee(12n);
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+		});
+	});
+
 	// A tag the user typed that does not parse must block the form: proceeding would send to an
 	// exchange deposit address without its tag, which is not auto-creditable.
 	describe('destination tag validity', () => {
