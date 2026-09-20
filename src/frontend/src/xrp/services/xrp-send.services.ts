@@ -17,6 +17,7 @@ import {
 	XRP_MAX_FEE_DROPS,
 	XRP_MAX_UINT32
 } from '$xrp/constants/xrp.constants';
+import { XrpRpcNotConfiguredError } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
@@ -269,9 +270,22 @@ const submitAndConfirmXrpTransaction = async ({
 
 	try {
 		result = await submitXrpTransaction({ txBlob, network });
-	} catch (_: unknown) {
-		// Ambiguous: a transport or shape failure says nothing about whether the node applied the
-		// blob, so fall through to confirmation rather than declaring failure here.
+	} catch (err: unknown) {
+		// The one failure that provably precedes the request: the endpoint comes from a build-time
+		// constant, so nothing was broadcast and nothing can have been. It is rethrown rather than
+		// swallowed — otherwise confirmation spends its whole budget polling the same unreachable
+		// endpoint and reports an indeterminate outcome for a blob that was definitely never sent.
+		//
+		// `retryXrpSend` is why this matters here rather than only in `sendXrp`. That path enters
+		// with a stored blob and makes NO earlier call, so the submit is its first request and this
+		// is the first place the missing endpoint can surface. `sendXrp` fails five reads earlier.
+		if (err instanceof XrpRpcNotConfiguredError) {
+			throw err;
+		}
+
+		// Everything else is ambiguous: a rejected `fetch`, a non-ok status and a malformed body all
+		// follow a request that may already have been processed, so they say nothing about whether
+		// the node applied the blob and fall through to confirmation.
 	}
 
 	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
