@@ -24,30 +24,34 @@ const XRP_MAX_DROPS_DIGITS = `${XRP_MAX_DROPS}`.length;
 export const XrpDropsSchema = z
 	.string()
 	.regex(XRP_DROPS_PATTERN)
+	// Canonicalised BEFORE the bound is checked, so the value that LEAVES this schema is the one
+	// the bound was applied to. Validating the stripped form while returning the original was the
+	// gap: every caller converts what the schema returns — `loadXrpBalance`,
+	// `loadXrpAccountInfo` and `loadXrpOpenLedgerFee` all call `BigInt` on it — so a zero-padded
+	// field passed the length bound on its few significant digits and was then converted
+	// downstream at full length.
+	//
+	// `^0+(?=\d)` and not `^0+`: the lookahead keeps the last digit, so `'0'` and a million zeros
+	// both canonicalise to `'0'` rather than to the empty string `BigInt` would reject.
+	//
+	// Stripping here rather than again inside the check means the string is scanned once. The cost
+	// this removes is modest — leading zeros cannot make a large number, so it is a linear scan
+	// (~0.4ms per million) rather than the superlinear arithmetic a million nines costs (~40ms),
+	// and that case the bound below already rejects. The point is the invariant: what comes out is
+	// what a caller can safely convert, with no reasoning about whether a long-but-small number
+	// happens to be cheap in this engine.
+	.transform((drops) => (XRP_DROPS_PATTERN.test(drops) ? drops.replace(/^0+(?=\d)/, '') : drops))
 	.refine((drops) => {
-		// See above: zod evaluates this even when the regex already failed, so a non-decimal string
-		// must leave before it reaches any conversion.
+		// zod evaluates this even when the regex already failed, so a non-decimal string must leave
+		// before it reaches any conversion.
 		if (!XRP_DROPS_PATTERN.test(drops)) {
 			return true;
 		}
 
-		// Length before value, and on the SIGNIFICANT digits. This parses untrusted provider JSON on
-		// the main thread, and `BigInt` is superlinear in the digit count — a million-digit field
-		// costs ~40ms to convert before the comparison can reject it, which a hostile endpoint gets
-		// for free on every field. Nothing longer than the ceiling can be within it, so the length
-		// answers first and only a bounded string is ever converted.
-		//
-		// Leading zeros are stripped rather than counted, because the regex accepts them and a
-		// padded value is still a legal amount: `'0000000000000000001'` is one drop, not an
-		// out-of-range one. Stripping also covers the all-zeros case, which would otherwise carry an
-		// arbitrarily long string into `BigInt` while being worth nothing.
-		const significant = drops.replace(/^0+/, '');
-
-		if (significant === '') {
-			return true;
-		}
-
-		return significant.length <= XRP_MAX_DROPS_DIGITS && BigInt(significant) <= XRP_MAX_DROPS;
+		// Length before value, on a string the transform has already canonicalised: nothing longer
+		// than the ceiling can be within it, so only a bounded string is ever converted — now true
+		// of the caller's conversion as well as this one.
+		return drops.length <= XRP_MAX_DROPS_DIGITS && BigInt(drops) <= XRP_MAX_DROPS;
 	});
 
 /**

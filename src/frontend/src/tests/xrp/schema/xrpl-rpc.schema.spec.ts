@@ -40,6 +40,24 @@ describe('xrpl-rpc.schema', () => {
 			expect(XrpDropsSchema.safeParse(drops).success).toBeTruthy();
 		});
 
+		// What LEAVES the schema is what every caller converts — `loadXrpBalance`,
+		// `loadXrpAccountInfo` and `loadXrpOpenLedgerFee` all call `BigInt` on it. Validating the
+		// stripped form while returning the original left a padded value to be converted at full
+		// length downstream, so the output is asserted rather than only the verdict.
+		it.each([
+			{ name: 'a padded one drop', drops: `${'0'.repeat(40)}1`, canonical: '1' },
+			{
+				name: 'a padded maximum',
+				drops: `${'0'.repeat(40)}100000000000000000`,
+				canonical: '100000000000000000'
+			},
+			{ name: 'nothing but zeros', drops: '0'.repeat(10_000), canonical: '0' },
+			{ name: 'a single zero', drops: '0', canonical: '0' },
+			{ name: 'a value needing nothing', drops: '25000000', canonical: '25000000' }
+		])('canonicalises $name on the way out', ({ drops, canonical }) => {
+			expect(XrpDropsSchema.safeParse(drops).data).toBe(canonical);
+		});
+
 		// The length answers before the value does. `BigInt` is superlinear in the digit count and
 		// this parses untrusted provider JSON on the main thread, so an oversized field must be
 		// rejected without being converted first.
