@@ -200,6 +200,41 @@ describe('XrpSendForm', () => {
 		});
 	});
 
+	// The balance is the third figure the verdict depends on, and the one that turns a skipped check
+	// into a real one. While it is unknown the comparison declines to judge, and the form's own
+	// nullish gate is what holds Next — so if the arrival does not re-judge, that gate simply lifts
+	// and an amount over the balance walks through to review.
+	describe('a balance that arrives late', () => {
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		it('rejects an over-balance amount once the balance loads, without an edit', async () => {
+			vi.useFakeTimers();
+
+			balancesStore.reset(XRP_TOKEN.id);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			// 10 XRP against a balance that will arrive as 5.
+			await fireEvent.input(amountInput(container), { target: { value: '10' } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 5_000_000n, certified: true } });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			vi.useRealTimers();
+		});
+	});
+
 	// The poller runs for as long as the form is open, so a fee that spikes and settles is ordinary.
 	// Without `revalidateKey` the rejection outlives the decrease and Next stays disabled until the
 	// amount is edited, with nothing on screen saying why.

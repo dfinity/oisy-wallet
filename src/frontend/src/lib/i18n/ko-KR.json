@@ -993,6 +993,7 @@
 			"enter_eth_address": "공개 주소 (0x), 이름 또는 별칭 입력",
 			"enter_recipient_address": "수신자 주소, 이름 또는 별칭 입력",
 			"enter_wallet_address": "지갑 주소, 이름 또는 별칭 입력",
+			"enter_xrp_address": "XRP 주소 입력",
 			"xrp_destination_tag": "목적지 태그 입력 (선택 사항)",
 			"select_network": "네트워크 선택",
 			"search_nfts": "컬렉터블 검색"

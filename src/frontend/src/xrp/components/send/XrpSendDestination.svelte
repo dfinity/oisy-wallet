@@ -21,8 +21,13 @@
 	const isInvalidDestination = (): boolean => isInvalidDestinationXrp(destination);
 </script>
 
+<!-- Address only, unlike the BTC and SOL inputs that share `enter_recipient_address`. Nothing
+	resolves a name here: XRP has no contacts yet, and `SendDestinationWizardStep` renders this
+	without `knownDestinations`, so the prop below is never filled. Prompting for a name would
+	steer the user into an invalid-address error. Switch back to the shared string once either
+	source is wired. -->
 <SendInputDestination
-	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
+	inputPlaceholder={$i18n.send.placeholder.enter_xrp_address}
 	{knownDestinations}
 	onInvalidDestination={isInvalidDestination}
 	onQRButtonClick={onQRCodeScan}
