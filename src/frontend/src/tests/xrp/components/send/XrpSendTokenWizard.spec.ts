@@ -8,6 +8,8 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -16,10 +18,17 @@ import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
+import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import * as xrpSendServices from '$xrp/services/xrp-send.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
+import {
+	XrpAmountExceedsSendableError,
+	XrpDestinationTagRequiredError,
+	XrpDestinationUnfundedError,
+	XrpSendExpiredError,
+	XrpTransactionFailedError
+} from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -336,6 +345,69 @@ describe('XrpSendTokenWizard', () => {
 		expect(toasts.toastsError).toHaveBeenCalledWith(
 			expect.objectContaining({ msg: { text: en.send.error.xrp_send_expired } })
 		);
+	});
+
+	// These three refuse before anything is signed, so nothing left the wallet and the user can fix
+	// the input and send again. Reporting them with the generic text would describe a guard that
+	// worked — and exists to avoid a `tec` that claims the fee — as a malfunction.
+	describe('actionable pre-sign refusals', () => {
+		it.each([
+			{
+				name: 'an amount over the sendable maximum',
+				error: () => new XrpAmountExceedsSendableError('XRP amount 900000 drops exceeds'),
+				text: () => en.send.error.xrp_amount_exceeds_sendable
+			},
+			{
+				name: 'a destination that requires a tag',
+				error: () => new XrpDestinationTagRequiredError('XRP destination requires a tag'),
+				text: () => en.send.error.xrp_destination_tag_required
+			}
+		])('reports $name with its own message', async ({ error, text }) => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(error());
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: text() } })
+			);
+		});
+
+		// The one message carrying a figure: without the substitution the user is shown a literal
+		// `$reserve` in place of the amount that would make the send succeed.
+		it('names the account reserve when the destination has no account yet', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+				new XrpDestinationUnfundedError('XRP destination does not exist yet')
+			);
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			const expected = replacePlaceholders(en.send.error.xrp_destination_unfunded, {
+				$reserve: formatToken({ value: XRP_BASE_RESERVE_DROPS, unitName: XRP_TOKEN.decimals })
+			});
+
+			expect(expected).not.toContain('$reserve');
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: expected } })
+			);
+		});
+
+		// The generic branch still has to exist: only the guards above are correctable, and anything
+		// else must not be dressed up as advice the user can act on.
+		it('still reports an unrecognised failure as unexpected', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(new Error('something else'));
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.unexpected } })
+			);
+		});
 	});
 
 	it('should advance the wizard before sending', async () => {

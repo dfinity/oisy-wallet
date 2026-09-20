@@ -23,6 +23,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdXrp } from '$lib/utils/network.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
@@ -30,6 +32,7 @@
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
+	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 	import { sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
@@ -38,7 +41,13 @@
 		XRP_FEE_CONTEXT_KEY,
 		type XrpFeeContext as XrpFeeContextType
 	} from '$xrp/stores/xrp-fee.store';
-	import { XrpSendExpiredError, XrpTransactionFailedError } from '$xrp/types/xrp-send';
+	import {
+		XrpAmountExceedsSendableError,
+		XrpDestinationTagRequiredError,
+		XrpDestinationUnfundedError,
+		XrpSendExpiredError,
+		XrpTransactionFailedError
+	} from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -259,6 +268,52 @@
 				});
 
 				setTimeout(() => close(), 750);
+
+				return;
+			}
+
+			// Pre-sign refusals, and the reason they are matched before the generic branch: each fires
+			// while progress is still INITIALIZATION, so nothing was signed and nothing left the
+			// wallet. They exist to spare the user a `tec` that claims the fee and burns the sequence,
+			// which makes "unexpected error" the opposite of what happened — the wallet worked, and
+			// the send is correctable. Back to the form in each case, since that is where the amount
+			// and the tag are.
+			if (err instanceof XrpAmountExceedsSendableError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_amount_exceeds_sendable },
+					err
+				});
+
+				onBack();
+
+				return;
+			}
+
+			if (err instanceof XrpDestinationUnfundedError) {
+				toastsError({
+					msg: {
+						text: replacePlaceholders($i18n.send.error.xrp_destination_unfunded, {
+							$reserve: formatToken({
+								value: XRP_BASE_RESERVE_DROPS,
+								unitName: $sendTokenDecimals
+							})
+						})
+					},
+					err
+				});
+
+				onBack();
+
+				return;
+			}
+
+			if (err instanceof XrpDestinationTagRequiredError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_destination_tag_required },
+					err
+				});
+
+				onBack();
 
 				return;
 			}

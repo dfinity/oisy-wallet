@@ -153,6 +153,33 @@ describe('XrpSendForm', () => {
 			expect(nextBtn(container)?.disabled).toBeTruthy();
 		});
 
+		// The amount is typed while the fee is still loading and then left alone. `unavailable` is
+		// the whole balance in that window, so the balance comparison would reject the amount — and
+		// `TokenInputContent` validates from an effect tracking `[amount, token]`, so nothing would
+		// clear that error when the fee lands. Next has to enable on its own.
+		it('strands no error from an amount typed before the fee arrived', async () => {
+			vi.useFakeTimers();
+
+			feeStore.setFee(undefined);
+
+			const { container } = render(XrpSendForm, { props, context: mockContext });
+
+			await fireEvent.input(amountInput(container), { target: { value: '1' } });
+
+			// Past the validation debounce, so any error the placeholder records has been recorded.
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+
+			feeStore.setFee(12n);
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+
+			vi.useRealTimers();
+		});
+
 		it('enables next once the fee is known', async () => {
 			feeStore.setFee(undefined);
 			balancesStore.reset(XRP_TOKEN.id);
