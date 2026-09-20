@@ -1330,6 +1330,36 @@ describe('xrp-send.services', () => {
 		});
 	});
 
+	// A failure that provably precedes the broadcast must surface as itself, not as an ambiguous
+	// send. The submit catch deliberately swallows transport and shape failures — those say nothing
+	// about whether the node applied the blob — but nothing reaches it that is knowable beforehand:
+	// the endpoint is resolved inside every RPC call, so an unconfigured one fails at the FIRST
+	// account read, five calls before the submit.
+	describe('a failure before anything is broadcast', () => {
+		const configError = new Error(
+			'No XRPL RPC endpoint is configured for this build. Set VITE_XRP_RPC_URL_MAINNET to a managed provider endpoint.'
+		);
+
+		it('surfaces as itself rather than as an indeterminate send', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(configError);
+
+			const err = await sendXrp(params).catch((e: unknown) => e);
+
+			expect(err).toBe(configError);
+			expect(err).not.toBeInstanceOf(XrpSendIndeterminateError);
+		});
+
+		it('signs nothing, submits nothing and confirms nothing', async () => {
+			vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockRejectedValue(configError);
+
+			await sendXrp(params).catch(() => undefined);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpTransactionOutcome).not.toHaveBeenCalled();
+		});
+	});
+
 	// The ledger refuses a payment to its own sender — rippled's `Payment::preflight` answers
 	// `temREDUNDANT` — but only after five RPC reads, a signing-key derivation, a threshold
 	// signature and a broadcast. Nothing about the account state is needed to know it.
