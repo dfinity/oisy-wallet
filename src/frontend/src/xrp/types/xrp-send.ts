@@ -3,6 +3,29 @@ import type { XrpPendingTransaction } from '$xrp/types/xrp-transaction';
 export class XrpAmountAssertionError extends Error {}
 
 /**
+ * A pre-sign refusal the caller can present as a correction rather than a fault. All three fire
+ * before anything is signed or submitted, so nothing left the wallet and the user can fix the
+ * input and send again.
+ *
+ * Separate types rather than one with a code, because the corrections have nothing in common —
+ * lower the amount, raise it, or supply a tag — and a caller that handles only some of them
+ * should fail to compile against the rest rather than share a branch that fits none of them.
+ */
+export class XrpAmountExceedsSendableError extends Error {}
+
+/**
+ * The destination holds no settled account, so the payment must itself fund one: below the account
+ * reserve XRPL answers `tecNO_DST_INSUF_XRP`, which is applied and claims the fee.
+ */
+export class XrpDestinationUnfundedError extends Error {}
+
+/**
+ * The destination sets `RequireDest`, so a payment without a tag cannot be credited. Exchanges and
+ * custodians set it precisely because an untagged deposit cannot be attributed to a customer.
+ */
+export class XrpDestinationTagRequiredError extends Error {}
+
+/**
  * The transaction reached a validated ledger and failed there — a `tec*` result, which claims the
  * fee. Distinct from an indeterminate confirmation: the outcome is known and final.
  */

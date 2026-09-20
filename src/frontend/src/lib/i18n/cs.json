@@ -1072,7 +1072,10 @@
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
 			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
-			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou."
+			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou.",
+			"xrp_amount_exceeds_sendable": "Částka už se nevejde. Váš účet si musí ponechat rezervu XRP a navíc síťový poplatek, a obojí se může během kontroly změnit. Nic nebylo odesláno – tlačítkem „Max“ převezmete aktuální limit.",
+			"xrp_destination_unfunded": "Tato adresa zatím nemá účet XRP. Jeho vytvoření vyžaduje první platbu alespoň $reserve XRP. Nic nebylo odesláno – zvyšte částku nebo odešlete na adresu, která už je financovaná.",
+			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu."
 		}
 	},
 	"mint": {

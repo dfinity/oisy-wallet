@@ -97,8 +97,16 @@
 		try {
 			feeStore.setFee(await loadXrpOpenLedgerFee({ network, fallbackFee: XRP_DEFAULT_FEE_DROPS }));
 		} catch (_: unknown) {
-			// The fee is best-effort; fall back to the default so the UI always has a value.
-			feeStore.setFee(XRP_DEFAULT_FEE_DROPS);
+			// Nothing is published. `loadXrpOpenLedgerFee` already applies the fallback to the one case
+			// it fits — a successful response that omits the estimate — and throws for everything else,
+			// so reaching here means no node quoted a fee. Answering that with the base fee is what its
+			// own comment warns against: it underprices the send on exactly the congested node that
+			// refused to quote, and it would open a form the unknown fee is meant to keep shut.
+			//
+			// So the first failure leaves the fee unknown, and a later one keeps the last estimate: ten
+			// seconds stale beats both a guess and a blank field. `loadReserve` clears instead, because
+			// a reserve belongs to one account and must not survive into another; the fee is a property
+			// of the network and does not.
 		}
 	};
 

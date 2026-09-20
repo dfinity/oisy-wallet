@@ -52,7 +52,20 @@
 			return new XrpAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (nonNullish($sendBalance) && userAmount + unavailable > $sendBalance) {
+		// Skipped while either requirement is unknown. `unavailable` is then the whole balance, a
+		// placeholder that rejects every amount — and the rejection would outlive the load, because
+		// `TokenInputContent` validates from an effect tracking `[amount, token]` through a debounce,
+		// so the fee and reserve are read in a timer callback where nothing tracks them. The user
+		// would be left with an error they can only clear by editing the amount again.
+		//
+		// Nothing is lost by waiting: the form blocks Next while either value is unknown, and
+		// `sendXrp` re-reads both and refuses before signing.
+		if (
+			nonNullish($sendBalance) &&
+			nonNullish($reserve) &&
+			nonNullish($fee) &&
+			userAmount + unavailable > $sendBalance
+		) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_reserve);
 		}
 	};

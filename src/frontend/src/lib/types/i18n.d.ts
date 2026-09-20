@@ -808,6 +808,9 @@ interface I18nSend {
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 		xrp_send_expired: string;
+		xrp_amount_exceeds_sendable: string;
+		xrp_destination_unfunded: string;
+		xrp_destination_tag_required: string;
 	};
 }
 
