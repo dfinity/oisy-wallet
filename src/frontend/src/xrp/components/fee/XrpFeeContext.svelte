@@ -34,7 +34,20 @@
 	// from overwriting a newer one.
 	let generation = 0;
 
+	// Shared by the fee poller and the reserve's failure retry, so "the same cadence" stays true.
+	const POLL_INTERVAL_MS = 10_000;
+
+	// Only ever set after a failure. The reserve is fetched once because it does not move while a
+	// send is composed — but that is a reason not to poll it, not a reason to stop asking after one
+	// dropped request. Left unknown it blocks Max and Next, with no error and no retry the user can
+	// see, so a single failure costs the whole form until the step is left and re-entered.
+	let reserveRetry = $state<NodeJS.Timeout | undefined>();
+
+	const clearReserveRetry = () => clearTimeout(reserveRetry);
+
 	const loadReserve = async (id: number) => {
+		clearReserveRetry();
+
 		// Cleared up front so the previous account's reserve cannot be used while this loads:
 		// `undefined` is the "unknown" state that blocks the form.
 		reserveStore.setReserve(undefined);
@@ -75,12 +88,21 @@
 			}
 
 			// An account that is not on-ledger owns nothing, so the base reserve genuinely describes
-			// it. Any other failure leaves the requirement unknown, and base-only is the SMALLEST
-			// figure the ledger can demand — using it would overstate the sendable maximum for an
-			// account that owns objects, so the reserve is marked unavailable and the send blocked.
-			reserveStore.setReserve(
-				err instanceof XrpAccountNotFoundError ? getXrpReserveDrops({ ownerCount: 0 }) : undefined
-			);
+			// it. Settled, and nothing to retry.
+			if (err instanceof XrpAccountNotFoundError) {
+				reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 0 }));
+				return;
+			}
+
+			// Any other failure leaves the requirement unknown, and base-only is the SMALLEST figure
+			// the ledger can demand — using it would overstate the sendable maximum for an account
+			// that owns objects, so the reserve is marked unavailable and the send blocked.
+			reserveStore.setReserve(undefined);
+
+			// Then asked again, carrying this generation so a retry outliving its account is dropped
+			// by the same check above. Cleared at the top of every attempt, so success ends it and a
+			// run of failures never stacks up timers.
+			reserveRetry = setTimeout(() => void loadReserve(id), POLL_INTERVAL_MS);
 		}
 	};
 
@@ -159,7 +181,7 @@
 
 		// The poller carries the generation it was installed under, so a poll resolving after this
 		// timer has been superseded is rejected by the same check as the first request.
-		timer = setInterval(() => void estimateFee(id), 10000);
+		timer = setInterval(() => void estimateFee(id), POLL_INTERVAL_MS);
 	};
 
 	$effect(() => {
@@ -176,6 +198,7 @@
 	onDestroy(() => {
 		generation++;
 		clearTimer();
+		clearReserveRetry();
 	});
 </script>
 
