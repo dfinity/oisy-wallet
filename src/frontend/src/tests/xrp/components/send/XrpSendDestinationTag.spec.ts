@@ -102,6 +102,17 @@ describe('XrpSendDestinationTag', () => {
 		expect(get(sendContext.sendXrpDestinationTag)).toBeUndefined();
 	});
 
+	// The error appears on input and blocks the form. Without a live region a screen-reader user
+	// gets a form that will not advance and no statement of why.
+	it('announces the error to screen readers', async () => {
+		const input = renderInput();
+
+		await fireEvent.input(input, { target: { value: 'abc' } });
+
+		expect(error()).not.toBeNull();
+		expect(error()?.getAttribute('role')).toBe('alert');
+	});
+
 	// The wizard keys its step subtree on the step name, so returning from review destroys and
 	// recreates this input. Seeding the field from the stored tag is the only thing that puts it
 	// back on screen, and losing it would be invisible: the tag stays in the context and is still
