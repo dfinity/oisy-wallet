@@ -1103,6 +1103,52 @@ describe('xrpl.rest', () => {
 				}
 			);
 
+			// The snapshot claim the response carries in its own right, beside the one in the echo.
+			// The forwarded path answers `validated: false` for an open-ledger absence and the direct
+			// path omits the field — so it is compared when present and ignored when not. Stripped, a
+			// response naming two different snapshots was read as this one's absence.
+			it.each([
+				{ asked: 'current' as const, claimed: true },
+				{ asked: 'validated' as const, claimed: false }
+			])(
+				'is untyped when a $asked absence claims validated=$claimed',
+				async ({ asked, claimed }) => {
+					mockFetchResponse({
+						body: {
+							result: {
+								error: 'actNotFound',
+								validated: claimed,
+								...echoOf({ account: address, ledgerIndex: asked })
+							}
+						}
+					});
+
+					const failure = await absenceFor(asked);
+
+					expect(failure).toBeInstanceOf(Error);
+					expect(failure).not.toBeInstanceOf(XrpAccountNotFoundError);
+				}
+			);
+
+			// The shape the provider actually sends on the forwarded path. Requiring the field would
+			// reject it, and forbidding it would too — both would refuse every real open-ledger
+			// absence, which is the destination read for `current`.
+			it('reads a current absence that carries validated=false', async () => {
+				mockFetchResponse({
+					body: {
+						result: {
+							error: 'actNotFound',
+							validated: false,
+							...echoOf({ account: address, ledgerIndex: 'current' })
+						}
+					}
+				});
+
+				await expect(
+					loadXrpAccountInfo({ address, network, ledgerIndex: 'current' })
+				).rejects.toBeInstanceOf(XrpAccountNotFoundError);
+			});
+
 			// A top-level `account` names the account and nothing else, so it cannot stand in for the
 			// echo — that is exactly the pair of reads it cannot distinguish.
 			it('is untyped when only a top-level account identifies it', async () => {

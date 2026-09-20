@@ -108,7 +108,10 @@ export const XrplAccountInfoResultSchema = z.union([
 		error: z.string(),
 		account_data: z.never().optional(),
 		account: z.string().optional(),
-		request: XrplRequestEchoSchema.optional()
+		request: XrplRequestEchoSchema.optional(),
+		// See the note on the full schema's `actNotFound` branch: accepted so a forwarded absence
+		// parses, compared by the caller so a contradictory one cannot pass as this snapshot.
+		validated: z.boolean().optional()
 	})
 ]);
 
@@ -213,7 +216,14 @@ export const XrplAccountInfoFullResultSchema = z.union([
 		// unbound `actNotFound` reports SOME account as absent, and above the reserve that skips the
 		// required-destination-tag check and sends untagged into `tecDST_TAG_NEEDED`.
 		account: z.string().optional(),
-		request: XrplRequestEchoSchema.optional()
+		request: XrplRequestEchoSchema.optional(),
+		// Carried on the forwarded path and absent on the direct one — verified against the
+		// configured endpoint, which answers `validated: false` for a `current` absence and omits the
+		// field entirely for a `validated` one. So it is accepted, not required and not forbidden:
+		// requiring it would reject every real open-ledger absence, and forbidding it would do the
+		// same. Stripping it silently was the third option and the wrong one — it is a claim about
+		// WHICH snapshot answered, and the caller compares it with the ledger it asked for.
+		validated: z.boolean().optional()
 	})
 ]);
 
