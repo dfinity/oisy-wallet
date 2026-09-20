@@ -13,18 +13,83 @@ import { decode } from 'ripple-binary-codec';
 // Only `tem` is a definitive rejection. The XRPL reference calls a `tem` result "final unless the
 // rules for a valid transaction change", while a `tef` "may still succeed or fail with a different
 // code after being reapplied" and `tel` transactions "may be automatically cached and retried
-// later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that may still become a yes must not be reported as a failure: the user would
-// send again and pay twice. Everything else is polled to `LastLedgerSequence`, which is the only
-// thing that decides definitively.
-// The COMPLETE code shape, not a prefix: `startsWith('tem')` also matched `temporary`, `tem`,
-// `temBAD_fee` and `tem BAD_FEE extra`, and `engine_result` is `z.string()` in the submit schema,
-// so any of them can arrive. Each read as a definitive rejection — which is decided AFTER the blob
-// has been broadcast, so a transaction that may still land was reported as rejected and the user
-// invited to send again.
+// later", and `tefALREADY` reports that this exact blob is already in the open ledger. A "no" that
+// may still become a yes must not be reported as a failure: the user would send again and pay
+// twice. Everything else is polled to `LastLedgerSequence`, which is the only thing that decides
+// definitively.
 //
-// Checked against `ripple-binary-codec`'s own `TRANSACTION_RESULTS`: all 51 `tem` codes match, and
-// no code from the other five classes does.
-const XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN = /^tem[A-Z0-9_]+$/;
+// MEMBERSHIP, not a `tem`-shaped pattern. `engine_result` is `z.string()`, so `temporary`, `tem`,
+// `temBAD_fee`, `tem BAD_FEE extra` and an invented `temFAKE` all arrive, and a pattern accepted
+// the last of those as final — a definitive rejection decided AFTER the blob is broadcast, which
+// tells a caller to rebuild on a new sequence and pay twice.
+//
+// The `tec` pattern in `XrplTxResultSchema` deliberately stays a pattern, and the asymmetry is the
+// whole reason this one is a set. Staleness is the axis, since the protocol adds codes and any
+// list here will eventually lag: an unknown `tem` is simply not final, so the send polls, the
+// malformed transaction never lands and it expires — right answer, eighty seconds later. An
+// unknown `tec` would stop the validated branch parsing and report a payment that was applied and
+// did claim the fee as "outcome unknown", and amendments add `tec` codes routinely where they
+// almost never add `tem` ones. A false positive runs the other way too: a fake `tem` is the worst
+// outcome in this file, while a fake `tec` is harmless, because any validated result that is not
+// `tesSUCCESS` means the payment did not deliver whatever the code is called.
+//
+// Generated once from `ripple-binary-codec`'s `TRANSACTION_RESULTS` and written out rather than
+// imported from it: the list lives in the package's `dist`, it is typed as a class whose name
+// direction is an implementation detail, and the dependency is range-pinned so CI can resolve a
+// minor nobody verified. A test pins this set against that enum so a typo or a drift fails loudly.
+const XRP_FINAL_FAILURE_ENGINE_RESULTS = new Set([
+	'temARRAY_EMPTY',
+	'temARRAY_TOO_LARGE',
+	'temBAD_AMM_TOKENS',
+	'temBAD_AMOUNT',
+	'temBAD_CURRENCY',
+	'temBAD_EXPIRATION',
+	'temBAD_FEE',
+	'temBAD_ISSUER',
+	'temBAD_LIMIT',
+	'temBAD_MPT',
+	'temBAD_NFTOKEN_TRANSFER_FEE',
+	'temBAD_OFFER',
+	'temBAD_PATH',
+	'temBAD_PATH_LOOP',
+	'temBAD_QUORUM',
+	'temBAD_REGKEY',
+	'temBAD_SEND_XRP_LIMIT',
+	'temBAD_SEND_XRP_MAX',
+	'temBAD_SEND_XRP_NO_DIRECT',
+	'temBAD_SEND_XRP_PARTIAL',
+	'temBAD_SEND_XRP_PATHS',
+	'temBAD_SEQUENCE',
+	'temBAD_SIGNATURE',
+	'temBAD_SIGNER',
+	'temBAD_SRC_ACCOUNT',
+	'temBAD_TICK_SIZE',
+	'temBAD_TRANSFER_FEE',
+	'temBAD_TRANSFER_RATE',
+	'temBAD_WEIGHT',
+	'temCANNOT_PREAUTH_SELF',
+	'temDISABLED',
+	'temDST_IS_SRC',
+	'temDST_NEEDED',
+	'temEMPTY_DID',
+	'temINVALID',
+	'temINVALID_ACCOUNT_ID',
+	'temINVALID_COUNT',
+	'temINVALID_FLAG',
+	'temINVALID_INNER_BATCH',
+	'temMALFORMED',
+	'temREDUNDANT',
+	'temRIPPLE_EMPTY',
+	'temSEQ_AND_TICKET',
+	'temUNCERTAIN',
+	'temUNKNOWN',
+	'temXCHAIN_BAD_PROOF',
+	'temXCHAIN_BRIDGE_BAD_ISSUES',
+	'temXCHAIN_BRIDGE_BAD_MIN_ACCOUNT_CREATE_AMOUNT',
+	'temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT',
+	'temXCHAIN_BRIDGE_NONDOOR_OWNER',
+	'temXCHAIN_EQUAL_DOOR_ACCOUNTS'
+]);
 
 const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
 
@@ -54,7 +119,7 @@ export const isXrpSubmitFinalFailure = ({
 	submitResult: XrpSubmitResult;
 	transactionId: string;
 }): boolean =>
-	XRP_FINAL_FAILURE_ENGINE_RESULT_PATTERN.test(engineResult) &&
+	XRP_FINAL_FAILURE_ENGINE_RESULTS.has(engineResult) &&
 	!accepted &&
 	// The answer has to be about the blob we broadcast. Nothing else on this path ties the submit
 	// response to the transaction, and this is the only branch that reports a definitive failure
