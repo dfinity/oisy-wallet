@@ -31,6 +31,10 @@ import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import {
+	XrpAmountExceedsSendableError,
+	XrpDestinationTagRequiredError,
+	XrpDestinationUnfundedError,
+	XrpSelfDestinationError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
@@ -480,7 +484,7 @@ export const sendXrp = async ({
 	// checksummed payload, so case is significant and two forms differing in it are not one
 	// address.
 	if (source === destination) {
-		throw new Error(`XRP destination ${destination} is the sending account.`);
+		throw new XrpSelfDestinationError(`XRP destination ${destination} is the sending account.`);
 	}
 
 	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,
@@ -573,7 +577,7 @@ export const sendXrp = async ({
 	// spec makes this client-side check an acceptance criterion, and `getXrpMaxAmount` — which the
 	// caller uses to offer a maximum — had no runtime caller until now.
 	if (amount > getXrpMaxAmount({ balance, fee, ownerCount })) {
-		throw new Error(
+		throw new XrpAmountExceedsSendableError(
 			`XRP amount ${amount} drops exceeds the sendable maximum for this account, which must retain ${getXrpReserveDrops({ ownerCount })} drops of reserve plus the ${fee} drops fee.`
 		);
 	}
@@ -599,7 +603,7 @@ export const sendXrp = async ({
 	// validated is in the same position as one that does not exist at all, because the creation can
 	// still be rolled back and the payment would then be applied as `tecNO_DST_INSUF_XRP`.
 	if (requiresExistingDestination && !destinationLookup.settled) {
-		throw new Error(
+		throw new XrpDestinationUnfundedError(
 			`XRP destination ${destination} does not exist yet in settled ledger state, so the amount must be at least the ${XRP_BASE_RESERVE_DROPS} drops account reserve to create it.`
 		);
 	}
@@ -612,7 +616,7 @@ export const sendXrp = async ({
 	// A supplied tag satisfies the requirement whatever the flags say, so both guards below only
 	// concern a send without one.
 	if (isNullish(destinationTag) && destinationLookup.requiresTag) {
-		throw new Error(
+		throw new XrpDestinationTagRequiredError(
 			`XRP destination ${destination} requires a destination tag, so a payment without one cannot be delivered.`
 		);
 	}

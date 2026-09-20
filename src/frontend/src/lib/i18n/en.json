@@ -970,6 +970,7 @@
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
+			"xrp_destination_tag": "Destination tag",
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
@@ -992,6 +993,8 @@
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
+			"enter_xrp_address": "Enter XRP address",
+			"xrp_destination_tag": "Enter destination tag (optional)",
 			"select_network": "Select network",
 			"search_nfts": "Search collectibles"
 		},
@@ -1020,7 +1023,9 @@
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
+			"xrp_destination_tag_invalid": "Destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
+			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
@@ -1055,6 +1060,9 @@
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
+			"no_xrp_network_id": "Current network ($networkId) is not an XRP Ledger network.",
+			"xrp_confirmation_failed": "We could not confirm whether the transaction was sent. It may still go through, so do not send it again yet — your balance will update if it does.",
+			"xrp_transaction_failed": "The transaction was processed by the network but failed, so your funds were not sent. The network fee was still charged.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
@@ -1064,7 +1072,13 @@
 			"solana_insufficient_funds": "Your token balance is not sufficient to complete this transaction. Your balance may have changed since it was last displayed.",
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
-			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
+			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
+			"xrp_send_expired": "The transaction was not sent: the network did not include it in time. Nothing left your wallet, and it is safe to create a new one.",
+			"xrp_amount_exceeds_sendable": "The amount no longer fits. Your account must keep its XRP reserve plus the network fee, and both can change while you review. Nothing was sent — lower the amount, or try again once your account details refresh.",
+			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
+			"xrp_destination_tag_required": "This address requires a destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
+			"xrp_destination_is_source": "This is your own XRP address. Nothing was sent — choose a different recipient.",
+			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment."
 		}
 	},
 	"mint": {
