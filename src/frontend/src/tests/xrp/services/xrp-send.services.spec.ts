@@ -22,6 +22,10 @@ import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
 import {
+	XrpAmountExceedsSendableError,
+	XrpDestinationTagRequiredError,
+	XrpDestinationUnfundedError,
+	XrpSelfDestinationError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
@@ -91,7 +95,7 @@ describe('xrp-send.services', () => {
 		});
 	});
 
-	it('builds the payment from fetched sequence/fee/ledger and threshold-signs it', async () => {
+	it('builds the payment from the reviewed fee and fetched sequence/ledger, then signs it', async () => {
 		await sendXrp(params);
 
 		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith({
@@ -1029,6 +1033,17 @@ describe('xrp-send.services', () => {
 			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
 		});
 
+		// The type is the contract, not decoration: the wizard matches on it to show a message that
+		// names the correction. A plain `Error` reaches the generic branch and reports a guard that
+		// worked exactly as designed as an unexpected failure.
+		it('types the over-maximum refusal', async () => {
+			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
+
+			await expect(sendXrp({ ...params, amount: 900_000n, fee: 10n })).rejects.toBeInstanceOf(
+				XrpAmountExceedsSendableError
+			);
+		});
+
 		it('sends exactly the sendable maximum', async () => {
 			sourceWith({ balance: 2_000_000n, ownerCount: 2 });
 
@@ -1121,6 +1136,14 @@ describe('xrp-send.services', () => {
 			);
 		});
 
+		it('types the unsettled-destination refusal', async () => {
+			destinationIn({ current: 0, validated: undefined });
+
+			await expect(sendXrp({ ...params, amount: belowReserve })).rejects.toBeInstanceOf(
+				XrpDestinationUnfundedError
+			);
+		});
+
 		// Either snapshot setting the bit is enough: a tag that turns out not to have been needed
 		// costs nothing, while a missing one claims the fee.
 		it.each([
@@ -1143,6 +1166,14 @@ describe('xrp-send.services', () => {
 			await expect(
 				sendXrp({ ...params, amount: XRP_BASE_RESERVE_DROPS, destinationTag: undefined })
 			).rejects.toThrow('requires a destination tag');
+		});
+
+		it('types the missing-tag refusal', async () => {
+			destinationIn({ current: 0x00020000, validated: 0 });
+
+			await expect(sendXrp({ ...params, destinationTag: undefined })).rejects.toBeInstanceOf(
+				XrpDestinationTagRequiredError
+			);
 		});
 
 		it('does not require a tag when neither snapshot sets the bit', async () => {
@@ -1413,6 +1444,14 @@ describe('xrp-send.services', () => {
 			expect(xrpSignServices.getXrpSigningPublicKey).not.toHaveBeenCalled();
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// Typed like the other pre-sign refusals: the wizard matches on it to show a message naming
+		// the correction and to go back to where the recipient is chosen.
+		it('carries its own type', async () => {
+			await expect(sendXrp({ ...params, destination: params.source })).rejects.toBeInstanceOf(
+				XrpSelfDestinationError
+			);
 		});
 
 		// Raw comparison, like the `Account` binding in the reads: a classic address is base58 over

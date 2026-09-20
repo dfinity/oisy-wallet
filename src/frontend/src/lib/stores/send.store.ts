@@ -9,9 +9,13 @@ import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 
 export type SendData = Token;
+
+export interface SendXrpDestinationTagStore extends Readable<number | undefined> {
+	set: (tag: number | undefined) => void;
+}
 
 export interface SendStore extends Readable<SendData> {
 	set: (token: Token) => void;
@@ -74,6 +78,39 @@ export const initSendContext = ({
 	// re-render, so it cannot be a prop.
 	const sendEthFeePriority = writable<EthFeePriority>(EthFeePriority.STANDARD);
 
+	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
+	// but consumed at the send step, so it must survive the WizardModal step re-renders.
+	//
+	// A destination tag routes funds to a sub-account at an exchange, so a tag inherited by a
+	// recipient the user changed to would silently credit the wrong beneficiary — and the wizard's
+	// back navigation makes that sequence reachable. So a tag belongs to one destination only: any
+	// change to the destination discards it, and the user re-enters one for the new recipient.
+	//
+	// Two independent guards, because the consequence of getting this wrong is a misdirected
+	// payment: the tag is dropped when the destination changes, AND it is stored with the
+	// destination it was entered for so that a stale pair can never be read back for another one.
+	const sendXrpDestinationTagData = writable<
+		{ destination: Address; tag: number | undefined } | undefined
+	>();
+
+	sendDestination.subscribe((destination) => {
+		const data = get(sendXrpDestinationTagData);
+
+		if (nonNullish(data) && data.destination !== destination) {
+			sendXrpDestinationTagData.set(undefined);
+		}
+	});
+
+	const sendXrpDestinationTag: SendXrpDestinationTagStore = {
+		subscribe: derived([sendXrpDestinationTagData, sendDestination], ([$data, $sendDestination]) =>
+			nonNullish($data) && $data.destination === $sendDestination ? $data.tag : undefined
+		).subscribe,
+
+		set: (tag: number | undefined) => {
+			sendXrpDestinationTagData.set({ destination: get(sendDestination), tag });
+		}
+	};
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -86,7 +123,8 @@ export const initSendContext = ({
 		sendDestination,
 		isIcBurning,
 		sendEthCustomNonce,
-		sendEthFeePriority
+		sendEthFeePriority,
+		sendXrpDestinationTag
 	};
 };
 
@@ -103,6 +141,7 @@ export interface SendContext {
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
 	sendEthFeePriority: Writable<EthFeePriority>;
+	sendXrpDestinationTag: SendXrpDestinationTagStore;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

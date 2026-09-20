@@ -49,3 +49,22 @@ export const isInvalidDestinationXrp = (destination: Address | undefined): boole
 
 	return invalidXrpAddress(destination);
 };
+
+/**
+ * Whether `amount` still fits once the fee and the reserve the account must retain are set aside.
+ *
+ * Checked again at send time, not only at input: `TokenInputContent` revalidates on amount/token
+ * change alone, so the fee poller can raise the requirement underneath an already-accepted amount
+ * and the review step would be stale too.
+ */
+export const isXrpAmountSendable = ({
+	amount,
+	balance,
+	fee,
+	reserve
+}: {
+	amount: XrpBalance;
+	balance: XrpBalance;
+	fee: XrpBalance;
+	reserve: XrpBalance;
+}): boolean => amount <= balance - fee - reserve;
