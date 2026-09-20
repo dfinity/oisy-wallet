@@ -34,6 +34,7 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpSelfDestinationError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
 	XrpTransactionFailedError
@@ -483,7 +484,7 @@ export const sendXrp = async ({
 	// checksummed payload, so case is significant and two forms differing in it are not one
 	// address.
 	if (source === destination) {
-		throw new Error(`XRP destination ${destination} is the sending account.`);
+		throw new XrpSelfDestinationError(`XRP destination ${destination} is the sending account.`);
 	}
 
 	// Bounded from below before anything is fetched or signed. Only the upper ends were checked,

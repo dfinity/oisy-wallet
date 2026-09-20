@@ -812,6 +812,7 @@ interface I18nSend {
 		xrp_amount_exceeds_sendable: string;
 		xrp_destination_unfunded: string;
 		xrp_destination_tag_required: string;
+		xrp_destination_is_source: string;
 		xrp_account_state_unavailable: string;
 	};
 }

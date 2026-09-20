@@ -26,6 +26,7 @@ import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
+	XrpSelfDestinationError,
 	XrpSendExpiredError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
@@ -435,6 +436,25 @@ describe('XrpSendTokenWizard', () => {
 			expect(toasts.toastsError).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: { text: en.send.error.unexpected } })
 			);
+		});
+
+		// No amount makes a payment to yourself deliverable, so this one goes back to where the
+		// recipient is chosen rather than to the form the other three return to.
+		it('sends a self-payment back to the destination step with its own message', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+				new XrpSelfDestinationError('XRP destination is the sending account')
+			);
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.xrp_destination_is_source } })
+			);
+			expect(onSendBack).toHaveBeenCalled();
+			expect(onSendForm).not.toHaveBeenCalled();
+			expect(onBack).not.toHaveBeenCalled();
 		});
 
 		// Nothing to correct, so the generic branch keeps the ordinary one step back.

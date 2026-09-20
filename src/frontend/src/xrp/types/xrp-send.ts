@@ -26,6 +26,13 @@ export class XrpDestinationUnfundedError extends Error {}
 export class XrpDestinationTagRequiredError extends Error {}
 
 /**
+ * The destination is the sending account. XRPL applies such a payment as `temREDUNDANT`, and there
+ * is nothing to deliver in any case — the correction is a different recipient, not a different
+ * amount, so it routes to the destination step rather than the form.
+ */
+export class XrpSelfDestinationError extends Error {}
+
+/**
  * The transaction reached a validated ledger and failed there — a `tec*` result, which claims the
  * fee. Distinct from an indeterminate confirmation: the outcome is known and final.
  */
