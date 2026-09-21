@@ -84,10 +84,11 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
 	identity: NullishIdentity;
-	// Whether the review in front of the user was built from a simulated run. The decode already
-	// made the call, so its outcome is handed on rather than repeated here: asking again would put
-	// a second round trip on the critical path, and a simulation that landed after the user pressed
-	// approve would describe a review they never read.
+	// Whether a simulated run described anything the review could show. The decode already made the
+	// call, so its outcome is handed on rather than repeated here: asking again would put a second
+	// round trip on the critical path, and a run that landed after the user pressed approve would
+	// describe a review they never read. A run that completed and reported nothing is not a
+	// description - an effect outside what the preview measures produces exactly that.
 	simulated: boolean;
 };
 
