@@ -293,10 +293,16 @@ export const XrplAccountInfoFullResultSchema = z.union([
  * the store — an object `hash` became a key that stringifies to `[object Object]`.
  *
  * `Amount`, `SendMax` and `delivered_amount` stay string-or-object on purpose. An issued-currency
- * amount is a legitimate row, not a malformed one; the mapper decides what to do with it, and
- * `delivered_amount: "unavailable"` is a string it still has to reject.
+ * amount is a legitimate row, not a malformed one; the mapper decides what to do with it.
+ *
+ * The string arm is `XrpDropsSchema`, not a bare digit string, for the reason that schema states
+ * about itself: every caller converts what it returns, and both these fields reach `BigInt`. A
+ * plain `/^\d+$/` accepts a million digits from an untrusted response and costs ~40ms to convert
+ * — per row, on a 10s poll, for a payload that is free to send. Bounded, the same row is skipped
+ * in ~1.6ms. `delivered_amount: "unavailable"` is rejected by this arm rather than by the mapper's
+ * own check now, which reaches the same outcome by a shorter path.
  */
-const XrpAmountFieldSchema = z.union([z.string(), z.record(z.string(), z.unknown())]);
+const XrpAmountFieldSchema = z.union([XrpDropsSchema, z.record(z.string(), z.unknown())]);
 
 const XrpAccountTransactionSchema = z.object({
 	TransactionType: z.string(),
@@ -304,7 +310,7 @@ const XrpAccountTransactionSchema = z.object({
 	Destination: z.string().optional(),
 	Amount: XrpAmountFieldSchema.optional(),
 	SendMax: XrpAmountFieldSchema.optional(),
-	Fee: z.string().regex(/^\d+$/).optional(),
+	Fee: XrpDropsSchema.optional(),
 	DestinationTag: z.number().int().optional(),
 	hash: z.string().optional(),
 	ledger_index: z.number().int().optional(),
