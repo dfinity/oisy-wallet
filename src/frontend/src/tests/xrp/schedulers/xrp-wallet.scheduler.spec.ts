@@ -248,6 +248,24 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// The history request sat inside the retried function, so a balance outage re-issued a
+	// perfectly good `account_tx` on every attempt — eleven calls for one tick, aimed at a provider
+	// that is already failing.
+	it('asks for the history once even while the balance is retried', async () => {
+		spyLoadBalance.mockRejectedValue(new Error('account_info down'));
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		expect(vi.mocked(spyLoadBalance).mock.calls.length).toBeGreaterThan(1);
+		expect(spyLoadTransactions).toHaveBeenCalledOnce();
+
+		scheduler.stop();
+	});
+
 	// The UI store is cleared whenever this scheduler is stopped — every caller that stops it is
 	// handing ownership over. The cache has to go with it: `setRef` only clears on a CHANGED ref, so
 	// a restart on the same address would diff its first page against a full cache, report nothing
