@@ -257,7 +257,7 @@ Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OIS
 
 That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
 
-The instruction list reads an account the message opens for the user as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction.
+The instruction list reads an account the message opens for the user as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction. Nor is an instruction the wallet read and chose not to state — initialising an account it just opened, syncing a wrapped balance — listed as one it could not read: those are absent from the list because they say nothing, not because nothing understood them.
 
 Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
 
