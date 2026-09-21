@@ -8,12 +8,14 @@ import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
+	NAVIGATION_ITEM_GITHUB,
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
-	NAVIGATION_ITEM_TRADE
+	NAVIGATION_ITEM_TRADE,
+	NAVIGATION_ITEM_X
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
@@ -60,10 +62,65 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
-		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
 		// asserted here.
+		//
+		// Settings is not here either: it renders in the page footer now, which is
+		// the `footer` layout below.
+	});
+
+	describe('the utility items', () => {
+		it('keeps Settings out of the sidebar', () => {
+			// It moved to the footer's left cluster. Asserted rather than merely
+			// dropped from the list above, because a stray descriptor left in a
+			// desktop section would put it in both places at once.
+			const { queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
+		});
+
+		it('renders Settings in the footer layout', () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
+
+			expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+		});
+
+		it('renders nothing but the footer items in that layout', () => {
+			// The footer cluster is a narrow strip beside the DFINITY credit, so it
+			// takes the named list and not whatever else the descriptors hold.
+			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
+
+			expect(queryByTestId(NAVIGATION_ITEM_TOKENS)).toBeNull();
+			expect(queryByTestId(NAVIGATION_ITEM_X)).toBeNull();
+		});
+
+		it('puts the social links in the sidebar, where the utility items were', () => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_X)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_GITHUB)).toBeInTheDocument();
+		});
+
+		it('opens the social links in a new tab, with noopener', () => {
+			// They were `ExternalLinkIcon`s in the footer, which sets both. A plain
+			// `NavigationItem` would have taken the whole app to x.com in the same
+			// tab and handed the opened page a `window.opener` handle.
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			for (const testId of [NAVIGATION_ITEM_X, NAVIGATION_ITEM_GITHUB]) {
+				const link = getByTestId(testId);
+
+				expect(link.getAttribute('target')).toBe('_blank');
+				expect(link.getAttribute('rel')).toContain('noopener');
+			}
+		});
+
+		it('leaves in-app items routing in the same tab', () => {
+			const { getByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_REWARDS).getAttribute('target')).toBeNull();
+		});
 	});
 
 	it('renders the desktop section headings', () => {

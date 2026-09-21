@@ -5,6 +5,7 @@
 	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -35,21 +36,36 @@
 		<div
 			class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
 		>
-			<div class="flex items-center gap-4">
-				<ExternalLinkIcon
-					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
-					href={OISY_TWITTER_URL}
-				>
-					<IconTwitter />
-				</ExternalLinkIcon>
+			<!--
+				Signed in, this is where the utility destinations live: the footer holds
+				the places inside the app and the nav holds everything else, rather than
+				the two sharing one row of unlabelled icons.
 
-				<ExternalLinkIcon
-					ariaLabel={$i18n.navigation.text.source_code_on_github}
-					href={OISY_REPO_URL}
-				>
-					<IconGixGitHub />
-				</ExternalLinkIcon>
-			</div>
+				Signed out, the social links stay exactly where they were. They moved
+				into the sidebar's MORE group, and that sidebar is inside `AuthGuard` —
+				so handing this slot to Settings unconditionally would both offer a
+				stranger a link into an app they cannot open, and take the only two
+				outbound links off the landing page.
+			-->
+			{#if $authSignedIn}
+				<NavigationMenuMainItems layout="footer" testIdPrefix="footer" />
+			{:else}
+				<div class="flex items-center gap-4">
+					<ExternalLinkIcon
+						ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
+						href={OISY_TWITTER_URL}
+					>
+						<IconTwitter />
+					</ExternalLinkIcon>
+
+					<ExternalLinkIcon
+						ariaLabel={$i18n.navigation.text.source_code_on_github}
+						href={OISY_REPO_URL}
+					>
+						<IconGixGitHub />
+					</ExternalLinkIcon>
+				</div>
+			{/if}
 		</div>
 
 		{#if $aiAssistantConsoleOpen}

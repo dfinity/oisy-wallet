@@ -118,6 +118,8 @@ interface I18nNavigation {
 		pay: string;
 		wallet_connect: string;
 		source_code_on_github: string;
+		x: string;
+		github: string;
 		view_on_explorer: string;
 		source_code: string;
 		documentation: string;

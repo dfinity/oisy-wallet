@@ -1,12 +1,21 @@
-import type { NavigationBarSlot, NavigationSection } from '$lib/types/navigation';
+import type { NavigationBarSlot, NavigationItemId, NavigationSection } from '$lib/types/navigation';
 
 // Desktop sidebar information architecture: every section is always visible
 // under its heading (headings render from PR 2 on).
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
 	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
-	{ id: 'more', items: ['notes', 'explore', 'rewards', 'settings'] }
+	{ id: 'more', items: ['notes', 'explore', 'rewards', 'x', 'github'] }
 ];
+
+// Rendered in the page footer's left cluster rather than in the sidebar: these
+// are the utility destinations, and the bottom left is where people reach for
+// them. A named list rather than a hard-coded item so adding one is an edit
+// here and nowhere else — the Help page (#14019) is the next entry.
+//
+// Desktop only. The footer cluster is `hidden md:flex` off the home page, and
+// mobile keeps Settings in its own More sheet (`MOBILE_NAVIGATION_BAR` below).
+export const DESKTOP_NAVIGATION_FOOTER_ITEMS: NavigationItemId[] = ['settings'];
 
 // Mobile bottom-bar information architecture: five slots, two of which are
 // groups that open bottom sheets (the cradle + sheets render from PR 3 on).

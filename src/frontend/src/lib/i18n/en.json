@@ -132,6 +132,8 @@
 			"pay": "$oisy_short PAY",
 			"wallet_connect": "WalletConnect",
 			"source_code_on_github": "Source code on GitHub",
+			"x": "X",
+			"github": "GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"documentation": "Documentation",
