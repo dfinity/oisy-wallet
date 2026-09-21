@@ -9,7 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
+import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
@@ -21,7 +21,7 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 
 	private constructor(
 		worker: WorkerData,
-		tokenId: TokenId,
+		private readonly tokenId: TokenId,
 		private readonly xrpNetwork: XrpNetworkType
 	) {
 		super(worker);
@@ -103,14 +103,22 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 
 			previous = address?.data;
 
+			// `SchedulerTimer.start` is a no-op while its timer exists, so the running timer has to be
+			// cleared first or it would keep polling the previous address under the new ref. Stopping
+			// also drops the scheduler's cache, which matters for a restart on the SAME address:
+			// without it the first page would diff against a full cache, report nothing new, and
+			// leave the store below permanently empty.
+			this.stopTimer();
+
+			// Losing the address is an ownership change like any other, and used not to reset: the
+			// previous address's rows survived, and the next address's first page — reported as new,
+			// because the scheduler re-keys on its ref — was prepended onto them.
+			resetWallet({ tokenId: this.tokenId });
+
 			if (isNullish(address)) {
-				this.stopTimer();
 				return;
 			}
 
-			// `SchedulerTimer.start` is a no-op while its timer exists, so the running timer has to be
-			// cleared first or it would keep polling the previous address under the new ref.
-			this.stopTimer();
 			this.start();
 		});
 	};
@@ -129,6 +137,14 @@ export class XrpWalletWorker extends AppWorker implements WalletWorker {
 		}
 
 		if (isNullish(this.#unsubscribeAddress)) {
+			// A fresh worker owns none of the rows already in the store. `#watchAddress` seeds
+			// `previous` from the current address — it has to, since the subscription fires
+			// synchronously from here and acting on that first emission would recurse into `start` —
+			// so an address unchanged since the previous worker skips it and would otherwise inherit
+			// whatever that worker left behind. `WalletWorkers` recreates workers on token-list
+			// changes, so that gap is reachable.
+			resetWallet({ tokenId: this.tokenId });
+
 			this.#watchAddress();
 		}
 

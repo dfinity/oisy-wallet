@@ -127,6 +127,7 @@ describe('SolWalletConnectSignModal', () => {
 		// regression hard-coding it would leave those green and disable the refusal.
 		const approve = async (decoded: Awaited<ReturnType<typeof decode>>) => {
 			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValueOnce({ success: false });
 			vi.mocked(decode).mockResolvedValueOnce(decoded);
 
 			const { getByRole } = render(SolWalletConnectSignModal, {
@@ -148,22 +149,39 @@ describe('SolWalletConnectSignModal', () => {
 			return vi.mocked(sign).mock.calls[0][0];
 		};
 
-		it('should be true when the run described something', async () => {
+		it('should be true when the run accounted for every instruction', async () => {
+			// A routed swap's router instruction is unreadable and still covered: the transfers its own
+			// invocations make carry its index, so the run leaves nothing unknown.
 			const args = await approve({
 				amount: 1n,
-				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
+				simulatedInstructions: true,
+				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: false }
 			});
 
 			expect(args).toEqual(expect.objectContaining({ simulated: true }));
 		});
 
-		it('should be false when a run completed but described nothing', async () => {
-			// A stake delegation is the case: the run succeeds and leaves the parties complete, yet
-			// changes nothing the preview measures, so nothing describes the instruction nobody read.
+		it('should be false when the run left an instruction unaccounted for', async () => {
+			// A stake delegation is the case: the run succeeds, the user's lamports still move by the
+			// fee so the preview is not empty, and nothing anywhere describes the delegation.
 			const args = await approve({
 				amount: 1n,
+				simulatedInstructions: true,
+				instructions: [{ kind: 'unknown' }],
+				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
 				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
+
+		it('should be false when the list came from the message rather than a run', async () => {
+			const args = await approve({
+				amount: 1n,
+				simulatedInstructions: false,
+				instructions: [{ kind: 'send', amount: 1n }],
+				parties: { sources: [], destinations: [], partial: true }
 			});
 
 			expect(args).toEqual(expect.objectContaining({ simulated: false }));

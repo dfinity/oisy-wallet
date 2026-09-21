@@ -8,6 +8,7 @@ import {
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
 	loadXrpTransactionOutcome,
+	loadXrpTransactions,
 	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
@@ -105,7 +106,11 @@ describe('xrpl.rest', () => {
 						lastLedgerSequence: 1020
 					})
 			},
-			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) }
+			{ name: 'submitXrpTransaction', call: () => submitXrpTransaction({ txBlob: '12', network }) },
+			{
+				name: 'loadXrpTransactions',
+				call: () => loadXrpTransactions({ address, network, limit: 10 })
+			}
 		];
 
 		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
@@ -2050,6 +2055,218 @@ describe('xrpl.rest', () => {
 					lastLedgerSequence: 1020
 				})
 			).rejects.toThrow('neither a validated result, a pending transaction');
+		});
+	});
+
+	describe('loadXrpTransactions', () => {
+		const entry = {
+			tx: {
+				TransactionType: 'Payment',
+				Account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
+				Destination: address,
+				Amount: '5000000',
+				Fee: '10',
+				hash: 'HASH1',
+				ledger_index: 42,
+				date: 1
+			},
+			meta: { TransactionResult: 'tesSUCCESS', delivered_amount: '5000000' },
+			validated: true
+		};
+
+		it('returns the transactions and the pagination marker', async () => {
+			mockFetchResponse({
+				body: {
+					result: { account: address, transactions: [entry], marker: { ledger: 42, seq: 1 } }
+				}
+			});
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([entry]);
+			expect(page.marker).toEqual({ ledger: 42, seq: 1 });
+		});
+
+		// The node answers a JSON-RPC failure with HTTP 200 and the error inside `result`, so
+		// without an explicit check these would read as a genuine empty history and never retry.
+		it.each(['slowDown', 'noNetwork', 'internal', 'invalidParams'])(
+			'throws for the XRPL error %s instead of reporting an empty history',
+			async (error) => {
+				mockFetchResponse({ body: { result: { error } } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow(`Unexpected XRPL account_tx response: ${error}`);
+			}
+		);
+
+		// An account that was never funded does not exist on-ledger; it has no history rather than
+		// a failed lookup, matching how `loadXrpBalance` treats the same error. Bound to the address,
+		// for the same reason: an absence is a positive claim about an account, so it has to be this
+		// account's. Named either way the node offers it — top level, or through the echo.
+		it.each([
+			{ name: 'a top-level account', result: { error: 'actNotFound', account: 'ADDR' } },
+			{
+				name: 'an echoed request',
+				result: {
+					error: 'actNotFound',
+					request: { method: 'account_tx', params: [{ account: 'ADDR' }] }
+				}
+			}
+		])('returns an empty list for an absence identified by $name', async ({ result }) => {
+			mockFetchResponse({
+				body: { result: JSON.parse(JSON.stringify(result).replaceAll('ADDR', address)) }
+			});
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
+		// The two schemas are a discriminated pair. A response carrying both markers is malformed,
+		// and the caller tests `error` first — so without the exclusion it took the error path and
+		// recorded an empty history while the node had supplied one in the same payload. Recorded,
+		// not retried, which is the part that makes it worse than a rejection.
+		it('throws for a response carrying both an error and transactions', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account: address,
+						transactions: [{ tx: { TransactionType: 'Payment' } }]
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
+		});
+
+		// The echo has to name this request, not just this account. `loadBalance` and
+		// `loadTransactions` run concurrently against the same node for the same address, so those
+		// two in-flight requests differ only in operation — an `account_info` absence would
+		// otherwise be written as this account's history being empty.
+		it('throws for an actNotFound echoing a different operation', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account: address,
+						request: { method: 'account_info', params: [{ account: address }] }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
+		});
+
+		// Unbound or misrouted: an empty history would be written to the store as a settled fact
+		// about an account nobody confirmed was ours.
+		it.each([
+			{ name: 'names nobody', result: { error: 'actNotFound' } },
+			{ name: 'names another account', result: { error: 'actNotFound', account: 'rSomeoneElse' } },
+			{
+				name: 'echoes another account',
+				result: {
+					error: 'actNotFound',
+					request: { method: 'account_tx', params: [{ account: 'rSomeoneElse' }] }
+				}
+			}
+		])('throws for an actNotFound that $name', async ({ result }) => {
+			mockFetchResponse({ body: { result } });
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
+		});
+
+		it('returns an empty list for a funded account with no matching transactions', async () => {
+			mockFetchResponse({ body: { result: { account: address, transactions: [] } } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
+		// The same hazard as the error cases above, arriving as a success. A result that never
+		// names its transactions used to be read as a genuine empty history — a wallet with no
+		// activity, never retried — which is what the `expectedErrors` check exists to prevent.
+		it.each([
+			{ name: 'no transactions field', result: { account: address } },
+			{ name: 'transactions that are not an array', result: { account: address, transactions: {} } }
+		])(
+			'throws for a success with $name rather than reporting an empty history',
+			async ({ result }) => {
+				mockFetchResponse({ body: { result } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow('does not match the expected shape');
+			}
+		);
+
+		// Every other reader in this file binds the answer to the question it asked; this one did
+		// not, so a misrouted page would have been shown as this account's activity.
+		it('throws when the page belongs to a different account', async () => {
+			mockFetchResponse({
+				body: { result: { account: `${address}X`, transactions: [] } }
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('it is for a different account');
+		});
+
+		it('sends an account_tx request over the full ledger range, newest first', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { account: address, transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			const [[, options]] = fetchMock.mock.calls;
+
+			expect(JSON.parse(options.body as string)).toEqual({
+				method: 'account_tx',
+				params: [
+					{
+						account: address,
+						ledger_index_min: -1,
+						ledger_index_max: -1,
+						limit: 10,
+						forward: false
+					}
+				]
+			});
+		});
+
+		it('forwards the pagination marker when provided', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { account: address, transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({
+				address,
+				network: XrpNetworks.mainnet,
+				limit: 10,
+				marker: { ledger: 42, seq: 1 }
+			});
+
+			const [[, options]] = fetchMock.mock.calls;
+			const { params } = JSON.parse(options.body as string);
+
+			expect(params[0].marker).toEqual({ ledger: 42, seq: 1 });
 		});
 	});
 });
