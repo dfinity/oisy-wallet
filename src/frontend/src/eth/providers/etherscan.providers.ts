@@ -49,6 +49,10 @@ interface EtherscanFetcher {
 
 const ETHERSCAN_V2_API_URL = 'https://api.etherscan.io/v2/api';
 
+// Mirrors the library's own `THROTTLE` (`provider-etherscan.js`): how long to stall before
+// retrying a request Etherscan answered with a rate-limit payload.
+const ETHERSCAN_THROTTLE_MS = 2000;
+
 /**
  * Etherscan transport for a chain `ethers` does not list.
  *
@@ -59,10 +63,12 @@ const ETHERSCAN_V2_API_URL = 'https://api.etherscan.io/v2/api';
  * deprecated and unused for v2. `Network.register` does not help, because the assert reads the
  * literal array rather than the network registry.
  *
- * So the URL is built the same way ethers builds it, over the same `FetchRequest` — which is
- * what keeps the throttle-and-retry behaviour on Etherscan's shared key identical to every other
- * chain. Only the non-`proxy` response shape is handled, because that is all this module asks
- * for; `proxy` would need the JSON-RPC envelope checks as well.
+ * So the URL is built the same way ethers builds it, over the same `FetchRequest`, and with the
+ * same rate-limit `processFunc` — the throttling behaviour has to be mirrored deliberately, not
+ * merely inherited from `FetchRequest`, because Etherscan reports throttling as a 200.
+ *
+ * Only the non-`proxy` response shape is handled, because that is all this module asks for;
+ * `proxy` would need the JSON-RPC envelope checks as well.
  */
 class EtherscanV2Provider implements EtherscanFetcher {
 	constructor(private readonly chainId: EthereumChainId) {}
@@ -83,6 +89,24 @@ class EtherscanV2Provider implements EtherscanFetcher {
 			`${ETHERSCAN_V2_API_URL}?chainid=${this.chainId}&module=${module}${query}&apikey=${ETHERSCAN_API_KEY}`
 		);
 		request.setThrottleParams({ slotInterval: 1000 });
+
+		// Etherscan signals throttling with **HTTP 200** and a rate-limit string in `result`, so
+		// `assertOk` below never sees it and the status check would turn a retryable condition
+		// into a hard failure. `throwThrottleError` from inside `processFunc` is what makes
+		// `FetchRequest` wait and retry instead — it handles the throttle error itself, without
+		// consulting `retryFunc`, which is why the library's `retryFunc` is not mirrored here.
+		// This matters in practice: one Etherscan key is shared across every chain, at 5 req/s.
+		// The two positional parameters are `FetchRequest`'s callback shape, not ours to choose.
+		// eslint-disable-next-line local-rules/prefer-object-params
+		request.processFunc = (_req, response) => {
+			const { result }: { result?: unknown } = response.hasBody() ? response.bodyJson : {};
+
+			if (typeof result === 'string' && result.toLowerCase().includes('rate limit')) {
+				response.throwThrottleError(result, ETHERSCAN_THROTTLE_MS);
+			}
+
+			return Promise.resolve(response);
+		};
 
 		const response = await request.send();
 

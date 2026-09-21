@@ -26,9 +26,19 @@ The wrapper builds its transport with `etherscanFetcher`, which picks one of two
   distinct from OISY's wrapper of the same name) — for every chain ethers lists.
   This is the path all currently supported networks take.
 - **`EtherscanV2Provider`** — OISY's own stand-in, for a chain ethers does **not**
-  list. It issues the identical v2 request over the same ethers `FetchRequest`, so
-  throttling and retry behave the same; it handles only the non-`proxy` response
-  shape, which is all this module asks for.
+  list. It issues the identical v2 request over the same ethers `FetchRequest`, and
+  mirrors the library's rate-limit `processFunc` so throttling behaves the same; it
+  handles only the non-`proxy` response shape, which is all this module asks for.
+
+  The `processFunc` is not optional politeness. Etherscan signals throttling with
+  **HTTP 200** and a rate-limit string in `result`, so it slips past both the HTTP
+  check and, without this, straight into the status check — turning a retryable
+  condition into a hard failure. Since one API key is shared across every chain at
+  5 req/s, that would break history on the unlisted chain whenever the key is busy,
+  while every other chain quietly retried. `throwThrottleError` from inside
+  `processFunc` is what makes `FetchRequest` stall and retry; it handles that error
+  itself without consulting `retryFunc`, which is why the library's `retryFunc` is
+  not mirrored.
 
 The stand-in exists because ethers' constructor asserts the chain id against a
 hardcoded array in `provider-etherscan.js`, and that array trails newly launched

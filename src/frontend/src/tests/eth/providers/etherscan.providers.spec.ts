@@ -29,24 +29,31 @@ vi.mock('$env/rest/etherscan.env', () => ({
 
 // `ethers/utils` is not mocked globally (unlike `ethers/providers`), so the fallback's real
 // request-building runs here; only the transport is swapped out, to capture the URL it targets.
-const { mockFetchRequest, mockSend, requestedUrls } = vi.hoisted(() => {
+const { mockFetchRequest, mockSend, requestedUrls, requests } = vi.hoisted(() => {
 	const requestedUrls: string[] = [];
 	const mockSend = vi.fn();
 	// A class, not a function: the production code does `new FetchRequest(...)`, and the repo's
 	// eslint autofix rewrites plain functions into arrows, which are not constructible — so a
 	// function here silently stops working the next time `npm run format` runs.
+	// Instances are captured so a test can pull the `processFunc` the code under test assigned
+	// and run it against a canned response, exactly as `FetchRequest.send` would.
+	const requests: { processFunc?: (req: unknown, response: unknown) => Promise<unknown> }[] = [];
+
 	const mockFetchRequest = vi.fn(
 		class {
 			setThrottleParams = vi.fn();
 			send = mockSend;
+			// Declared so the instance satisfies the captured type; the code under test assigns it.
+			processFunc?: (req: unknown, response: unknown) => Promise<unknown>;
 
 			constructor(url: string) {
 				requestedUrls.push(url);
+				requests.push(this);
 			}
 		}
 	);
 
-	return { mockFetchRequest, mockSend, requestedUrls };
+	return { mockFetchRequest, mockSend, requestedUrls, requests };
 });
 
 vi.mock('ethers/utils', async (importOriginal) => ({
@@ -107,6 +114,7 @@ describe('etherscan.providers', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			requestedUrls.length = 0;
+			requests.length = 0;
 			originalPrototypeFetch = vi.mocked(EtherscanProviderLib).prototype.fetch;
 		});
 
@@ -157,6 +165,55 @@ describe('etherscan.providers', () => {
 				await expect(provider.transactions({ address: mockEthAddress })).resolves.toEqual([]);
 			}
 		);
+
+		// Etherscan answers a throttled request with **HTTP 200** and a rate-limit string in
+		// `result`, so nothing below `send()` would notice: the status check would turn a
+		// retryable condition into a hard failure, and history would break on this chain whenever
+		// the shared key is busy — while every other chain quietly retries. The library solves
+		// this in `processFunc`, and the fallback has to mirror it rather than inherit it.
+		it('should turn a rate-limit payload into a retry rather than an error', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			expect(requests[0].processFunc).toBeDefined();
+
+			const throwThrottleError = vi.fn();
+			const throttled = {
+				hasBody: () => true,
+				bodyJson: { status: '0', message: 'NOTOK', result: 'Max rate limit reached' },
+				throwThrottleError
+			};
+
+			await requests[0].processFunc?.(undefined, throttled);
+
+			// 2000ms mirrors the library's own `THROTTLE`; `FetchRequest` handles the resulting
+			// error itself and stalls for that long before retrying.
+			expect(throwThrottleError).toHaveBeenCalledExactlyOnceWith('Max rate limit reached', 2000);
+		});
+
+		it('should leave a normal response untouched in the response processor', async () => {
+			rejectUnlistedChain();
+			respondWith({ status: '1', message: 'OK', result: [] });
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await provider.transactions({ address: mockEthAddress });
+
+			const throwThrottleError = vi.fn();
+			const ok = {
+				hasBody: () => true,
+				bodyJson: { status: '1', message: 'OK', result: [] },
+				throwThrottleError
+			};
+
+			await expect(requests[0].processFunc?.(undefined, ok)).resolves.toBe(ok);
+
+			expect(throwThrottleError).not.toHaveBeenCalled();
+		});
 
 		it('should throw on a genuine error response', async () => {
 			rejectUnlistedChain();
