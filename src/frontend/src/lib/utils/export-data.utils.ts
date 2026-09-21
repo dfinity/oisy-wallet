@@ -998,11 +998,14 @@ export const buildTransactionRows = ({
 				// A conversion is not a round trip. XRPL lets an account pay itself to convert an
 				// issued currency into XRP: `from === to`, but the XRP genuinely arrives funded by
 				// something else, so zeroing the credit would erase a real balance change.
+				// Not `addressesEqual`, which lowercases: a classic XRP address is base58 over a
+				// checksummed payload, so case is significant, and `xrpl.rest.ts` and
+				// `mapXrpTransaction` both compare raw for that reason. This is the one place in the
+				// XRP path that treated case as noise.
 				isSelfTransfer =
-					addressesEqual({
-						a: entry.transaction.from,
-						b: entry.transaction.to
-					}) && entry.transaction.crossCurrency !== true;
+					nonNullish(entry.transaction.from) &&
+					entry.transaction.from === entry.transaction.to &&
+					entry.transaction.crossCurrency !== true;
 				isStandaloneRoundTrip = isSelfTransfer;
 				// The mapper records a fee only when this wallet signed, so a row carrying one paid
 				// it — including a self row, which is incoming and would otherwise lose it.

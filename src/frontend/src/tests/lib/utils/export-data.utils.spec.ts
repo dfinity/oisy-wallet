@@ -1190,6 +1190,33 @@ describe('export-data.utils', () => {
 			expect(row.debit_raw).toBe(-12n);
 		});
 
+		// Classic XRP addresses are base58 over a checksummed payload, so case is significant — the
+		// RPC layer and the mapper both compare raw. Lowercasing here would read two distinct
+		// addresses as one wallet and suppress a real credit.
+		it('does not treat case-variant XRP addresses as a self-transfer', () => {
+			const xrpCaseVariant = {
+				id: 'XRPCASE',
+				type: 'receive',
+				status: 'confirmed',
+				from: 'rSelfAddress',
+				to: 'rselfaddress',
+				value: 5_000_000n,
+				timestamp: 1n,
+				blockNumber: 79
+			} satisfies XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpCaseVariant, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.credit).toBe('5.0');
+			expect(row.effective_token).toBe('5.0');
+		});
+
 		// A same-asset round trip really does net to zero on the asset — but the fee still left, and
 		// it was dropped for the same reason: the single row XRP emits for a self-transfer is
 		// incoming, which is the one case the outgoing-only fee rule does not fit.
