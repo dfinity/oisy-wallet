@@ -1,4 +1,4 @@
-import { XRP_MAX_DROPS } from '$xrp/constants/xrp.constants';
+import { XRP_MAX_DROPS, XRP_MAX_UINT32 } from '$xrp/constants/xrp.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as z from 'zod';
 
@@ -6,7 +6,7 @@ import * as z from 'zod';
 // accept signed (`"-1"`), hexadecimal (`"0x10"`) and numeric (`1`) forms, so the contract
 // is pinned here rather than left to the conversion.
 //
-// Bounded as well as shaped, which is the rule `XrpLedgerCounterSchema` already applies to every
+// Bounded as well as shaped, which is the rule `XrpUInt32Schema` already applies to every
 // counter: any run of digits parsed, `BigInt` converted it happily, and an inflated `Balance` runs
 // through `getXrpMaxAmount` into the reserve guard — so a send far above the real balance passes
 // the check written to stop exactly that, and XRPL applies it as `tecUNFUNDED_PAYMENT`.
@@ -177,19 +177,24 @@ export const XrplEnvelopeSchema = z.object({
 	status: z.literal('success').optional()
 });
 
-// Counters the node reports as JSON numbers. A negative `OwnerCount` would *lower* the reserve
-// and inflate the sendable maximum, and a fractional one throws inside `BigInt()` — so both are
-// pinned rather than checked with `typeof`.
+// XRPL's `UInt32`, the protocol type behind every numeric field in this file that is not drops:
+// `Sequence` and `OwnerCount` per the AccountRoot reference, `Flags`, a ledger index, a
+// `DestinationTag`. Zod's `.int()` already stops at `Number.MAX_SAFE_INTEGER`, two million times
+// more than the protocol can express, and admits negatives — a negative `OwnerCount` would
+// *lower* the reserve and inflate the sendable maximum, and a fractional one throws inside
+// `BigInt()`, so both ends are pinned rather than checked with `typeof`.
 //
-// Bounded to `UInt32`, which is what every field using this actually is: `Sequence` and
-// `OwnerCount` per the AccountRoot reference, `Flags` and a ledger index likewise. Zod's `.int()`
-// already stops at `Number.MAX_SAFE_INTEGER`, two million times more than the protocol can
-// express, and the value that matters most is the validated ledger index — an out-of-range one
-// past `LastLedgerSequence` makes confirmation declare expiry and tell the user a resend is safe.
+// Named for the type and not for any one of its fields. As `XrpUInt32Schema` it read as
+// something only a counter would want, which is why `DestinationTag` was bounded a round late and
+// why `Flags` — a bitfield, not a counter — already sat under a name that did not describe it.
+// `XRP_MAX_UINT32` in the constants makes the same point: one name, because the fields sharing
+// this bound share it for the same reason.
 //
-// This bounds the number system, not the ledger: `0xFFFFFFFF` is still ~40x the current mainnet
-// index, so `confirmXrpTransaction` also checks the index against the transaction's own window.
-export const XrpLedgerCounterSchema = z.number().int().nonnegative().max(0xffff_ffff);
+// The value that matters most is still the validated ledger index — an out-of-range one past
+// `LastLedgerSequence` makes confirmation declare expiry and tell the user a resend is safe. This
+// bounds the number system, not the ledger: `0xFFFFFFFF` is ~40x the current mainnet index, so
+// `confirmXrpTransaction` also checks the index against the transaction's own window.
+export const XrpUInt32Schema = z.number().int().nonnegative().max(XRP_MAX_UINT32);
 
 // These three validate the `result` object, because `xrpJsonRpc` unwraps the envelope before
 // returning. Stricter than `XrplAccountInfoResultSchema`, which only needs `Balance`: building a
@@ -202,8 +207,8 @@ const XrplAccountDataSchema = z.object({
 	// from. An AccountRoot always carries it.
 	Account: z.string(),
 	Balance: XrpDropsSchema,
-	Sequence: XrpLedgerCounterSchema,
-	OwnerCount: XrpLedgerCounterSchema,
+	Sequence: XrpUInt32Schema,
+	OwnerCount: XrpUInt32Schema,
 	// The AccountRoot flag bits. `lsfRequireDestTag` is the one the send path reads: without it a
 	// payment to an account that requires a destination tag is applied as `tecDST_TAG_NEEDED`,
 	// which claims the fee and consumes the sequence.
@@ -215,7 +220,7 @@ const XrplAccountDataSchema = z.object({
 	// no requirement, which is the one reading of it that spends a fee. A response missing it is
 	// now malformed, which the sender read fails closed on and the destination read reports as an
 	// unanswerable lookup.
-	Flags: XrpLedgerCounterSchema
+	Flags: XrpUInt32Schema
 });
 
 // Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`
@@ -258,6 +263,112 @@ export const XrplAccountInfoFullResultSchema = z.union([
 	})
 ]);
 
+/**
+ * `account_tx`, success only — the `actNotFound` branch is handled by `expectedErrors` on the
+ * envelope and synthesises an empty page without reaching here.
+ *
+ * Two things are required and nothing else is: the account the result belongs to, and an array of
+ * entries. The entries themselves stay `unknown` on purpose — `mapXrpTransaction` already drops
+ * anything it cannot read, field by field, and duplicating that here would be a second set of
+ * rules to keep in step with the first.
+ *
+ * `account` is required for the reason stated on the balance schemas: nothing else in the result
+ * says whose history this is, and an unbound answer read as this account's would show one wallet's
+ * activity under another's. `transactions` is required because its absence is what silently became
+ * an empty history — the one outcome the `expectedErrors` note on the caller exists to prevent.
+ */
+/**
+ * `account_tx`, error branch — in practice only `actNotFound`, the one error the caller declares as
+ * expected. Nothing here is required: the identity may arrive as the top-level `account`, as the
+ * echoed request, or not at all, and the caller decides what that means. It is parsed rather than
+ * read off `unknown` so a malformed identity reaches the comparison instead of being dropped by a
+ * type filter before it gets there.
+ */
+/**
+ * One `account_tx` row, constrained to exactly the fields `mapXrpTransaction` consumes.
+ *
+ * Defined here with the other RPC shapes but applied in the mapper, not at the RPC boundary: the
+ * mapper is what decides whether a row is readable, and a row it rejects is skipped rather than
+ * failing the page. Three review rounds arrived at this — guards were added field by field and the
+ * next unguarded one was found the same way each time, because a list of `if`s is exhaustive only
+ * by inspection.
+ *
+ * Permissive about what it does not consume: unmodelled fields are stripped, not rejected, so a
+ * node adding one does not empty a history. Strict about what it does, because those values reach
+ * the store — an object `hash` became a key that stringifies to `[object Object]`.
+ *
+ * `Amount`, `SendMax` and `delivered_amount` stay string-or-object on purpose. An issued-currency
+ * amount is a legitimate row, not a malformed one; the mapper decides what to do with it.
+ *
+ * The string arm is `XrpDropsSchema`, not a bare digit string, for the reason that schema states
+ * about itself: every caller converts what it returns, and both these fields reach `BigInt`. A
+ * plain `/^\d+$/` accepts a million digits from an untrusted response and costs ~40ms to convert
+ * — per row, on a 10s poll, for a payload that is free to send. Bounded, the same row is skipped
+ * in ~1.6ms. `delivered_amount: "unavailable"` is rejected by this arm rather than by the mapper's
+ * own check now, which reaches the same outcome by a shorter path.
+ */
+const XrpAmountFieldSchema = z.union([XrpDropsSchema, z.record(z.string(), z.unknown())]);
+
+const XrpAccountTransactionSchema = z.object({
+	TransactionType: z.string(),
+	Account: z.string(),
+	Destination: z.string().optional(),
+	Amount: XrpAmountFieldSchema.optional(),
+	SendMax: XrpAmountFieldSchema.optional(),
+	Fee: XrpDropsSchema.optional(),
+	DestinationTag: XrpUInt32Schema.optional(),
+	hash: z.string().optional(),
+	// All three are XRPL UInt32s, and a bare `int()` admits anything up to `Number.MAX_SAFE_INTEGER`
+	// as well as negatives. `date` becomes a bigint timestamp the UI turns back into a `Date`: out
+	// of range that is an Invalid Date, and `toISOString` and `Intl.DateTimeFormat.format` both
+	// throw `RangeError: Invalid time value` — in a render path, so one row takes the whole list
+	// and the CSV with it rather than just being wrong itself.
+	//
+	// `DestinationTag` is quieter: nothing converts or formats it, it is rendered as-is in the
+	// detail modal. Unbounded it displays a tag that cannot exist on any ledger, and one the send
+	// path would refuse — `XRP_MAX_DESTINATION_TAG` is this same bound — so a user re-sending to
+	// the tag we showed them is rejected by our own form.
+	ledger_index: XrpUInt32Schema.optional(),
+	date: XrpUInt32Schema.optional()
+});
+
+export const XrpAccountTransactionEntrySchema = z.object({
+	tx: XrpAccountTransactionSchema.optional(),
+	tx_json: XrpAccountTransactionSchema.optional(),
+	meta: z
+		.object({
+			TransactionResult: z.string().optional(),
+			delivered_amount: XrpAmountFieldSchema.optional()
+		})
+		.optional(),
+	validated: z.boolean().optional(),
+	hash: z.string().optional(),
+	ledger_index: XrpUInt32Schema.optional(),
+	close_time_iso: z.string().optional()
+});
+
+export const XrplAccountTxErrorSchema = z.object({
+	error: z.string(),
+	account: z.string().optional(),
+	request: XrplRequestEchoSchema.optional(),
+	// The two `account_tx` schemas are a discriminated pair, like every other result in this file.
+	// Without this, `{ error: 'actNotFound', transactions: [...] }` parses here — objects strip
+	// unknown keys — and the caller, which branches on `error` before parsing anything, returns an
+	// empty page while the node supplied history in the same payload. Worse than a rejected
+	// response, because an empty page is recorded as settled rather than retried.
+	transactions: z.never().optional()
+});
+
+export const XrplAccountTxResultSchema = z.object({
+	account: z.string(),
+	transactions: z.array(z.unknown()),
+	marker: z.unknown().optional(),
+	// The other half of the pair. Redundant today, since the caller tests `error` first and never
+	// reaches this schema with one — which is exactly the kind of fact that stops being true, and
+	// the reason every other result schema here carries it anyway.
+	error: z.never().optional()
+});
+
 export const XrplFeeResultSchema = z.object({
 	drops: z
 		.object({
@@ -273,7 +384,7 @@ export const XrplFeeResultSchema = z.object({
 // most for the validated index — a bogus one past `LastLedgerSequence` makes confirmation declare
 // expiry and tell the user a resend is safe.
 export const XrplLedgerCurrentResultSchema = z.object({
-	ledger_current_index: XrpLedgerCounterSchema,
+	ledger_current_index: XrpUInt32Schema,
 	error: z.never().optional()
 });
 
@@ -283,8 +394,8 @@ export const XrplLedgerCurrentResultSchema = z.object({
 // avoid. The ledger header quotes its `ledger_index`, unlike the numeric top-level field, so the
 // nested form accepts either and normalises to a number.
 const XrpNestedLedgerIndexSchema = z.union([
-	XrpLedgerCounterSchema,
-	XrpDropsSchema.transform(Number).pipe(XrpLedgerCounterSchema)
+	XrpUInt32Schema,
+	XrpDropsSchema.transform(Number).pipe(XrpUInt32Schema)
 ]);
 
 // One object with both forms optional, NOT a union of the two. A union returns the first branch
@@ -297,7 +408,7 @@ const XrpNestedLedgerIndexSchema = z.union([
 export const XrplLedgerResultSchema = z
 	.object({
 		validated: z.literal(true),
-		ledger_index: XrpLedgerCounterSchema.optional(),
+		ledger_index: XrpUInt32Schema.optional(),
 		ledger: z.object({ ledger_index: XrpNestedLedgerIndexSchema }).optional(),
 		error: z.never().optional()
 	})

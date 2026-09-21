@@ -13,6 +13,8 @@ import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { derived, type Readable } from 'svelte/store';
 
 export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[]> = derived(
@@ -27,7 +29,9 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		enabledErc4626Tokens,
 		enabledIcTokens,
 		enabledSolanaTokens,
-		enabledSplTokens
+		enabledSplTokens,
+		xrpTransactionsStore,
+		enabledXrpTokens
 	],
 	([
 		$btcTransactionsStore,
@@ -40,7 +44,9 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		$enabledErc4626Tokens,
 		$enabledIcTokens,
 		$enabledSolanaTokens,
-		$enabledSplTokens
+		$enabledSplTokens,
+		$xrpTransactionsStore,
+		$enabledXrpTokens
 	]) => [
 		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
 		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
@@ -55,6 +61,12 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 		{
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
-		}
+		},
+		// Only participate in the loading check once XRP is actually enabled. While it is
+		// disabled nothing ever writes the store, so its permanently nullish data would
+		// count as "still loading" and keep the activity skeletons up forever.
+		...($enabledXrpTokens.length > 0
+			? [{ transactionsStoreData: $xrpTransactionsStore, tokens: $enabledXrpTokens }]
+			: [])
 	]
 );
