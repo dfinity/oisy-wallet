@@ -1,8 +1,12 @@
-import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
+import {
+	SOLANA_DETAILS_IDB_DEADLINE_MILLIS,
+	SOLANA_TRANSACTION_DETAILS_CACHE_SIZE
+} from '$sol/constants/sol.constants';
 import { type SolanaNetworkType, SolanaNetworks } from '$sol/types/network';
 import type { SolRpcTransaction } from '$sol/types/sol-transaction';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolTransactionDetail } from '$tests/mocks/sol-transactions.mock';
+import type * as IdbKeyval from 'idb-keyval';
 
 // The suite mocks `idb-keyval` away for every spec. This one is about what actually survives a
 // round trip through IndexedDB, so it runs against the real thing on `fake-indexeddb`.
@@ -209,6 +213,72 @@ describe('idb-sol-transaction-details.api', () => {
 			await next.setIdbSolTransactionDetail({ network: SolanaNetworks.mainnet, transaction });
 
 			await expect(read({ realm: next, transaction })).resolves.toEqual(transaction);
+		});
+	});
+
+	// The defect this module was hardened for: IndexedDB can answer nothing at all, and everything
+	// queued behind it waits for the life of the page. A read that hangs used to hold up the wallet
+	// worker's history, and with it every balance of the network.
+	describe('when the store stops answering', () => {
+		const loadHungRealm = async () => {
+			vi.doMock('idb-keyval', async () => ({
+				...(await vi.importActual<typeof IdbKeyval>('idb-keyval')),
+				get: () => new Promise(() => {})
+			}));
+
+			vi.resetModules();
+
+			return await import('$sol/api/idb-sol-transaction-details.api');
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+			vi.doUnmock('idb-keyval');
+		});
+
+		it('should answer a read as a miss once the deadline passes', async () => {
+			const hung = await loadHungRealm();
+
+			const transaction = detailAt({ slot: 100n });
+
+			const reading = hung.getIdbSolTransactionDetail({
+				network: SolanaNetworks.mainnet,
+				signature: transaction
+			});
+
+			await vi.advanceTimersByTimeAsync(SOLANA_DETAILS_IDB_DEADLINE_MILLIS);
+
+			await expect(reading).resolves.toBeUndefined();
+		});
+
+		// Paying the deadline on every read would leave the history crawling instead of stalling, which
+		// is no better for the balances waiting behind it.
+		it('should stand the cache down after a miss rather than wait again', async () => {
+			const hung = await loadHungRealm();
+
+			const transaction = detailAt({ slot: 100n });
+
+			const reading = hung.getIdbSolTransactionDetail({
+				network: SolanaNetworks.mainnet,
+				signature: transaction
+			});
+
+			await vi.advanceTimersByTimeAsync(SOLANA_DETAILS_IDB_DEADLINE_MILLIS);
+			await reading;
+
+			// No timer is advanced here: the second read must answer without waiting at all.
+			await expect(
+				hung.getIdbSolTransactionDetail({
+					network: SolanaNetworks.mainnet,
+					signature: transaction
+				})
+			).resolves.toBeUndefined();
+
+			expect(vi.getTimerCount()).toBe(0);
 		});
 	});
 });

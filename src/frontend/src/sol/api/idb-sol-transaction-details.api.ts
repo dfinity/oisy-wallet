@@ -1,4 +1,8 @@
-import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
+import { withDeadline } from '$lib/utils/timeout.utils';
+import {
+	SOLANA_DETAILS_IDB_DEADLINE_MILLIS,
+	SOLANA_TRANSACTION_DETAILS_CACHE_SIZE
+} from '$sol/constants/sol.constants';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
@@ -32,6 +36,36 @@ interface Idb {
 	// thread) write nothing after sign-out, whether or not they were waiting on a fetch at the time.
 	epoch: Promise<string | undefined>;
 }
+
+// A store that missed its deadline once has stopped answering, and every operation queued behind it
+// waits the same way. Paying the deadline per read would leave a network's history — and so its
+// balances — crawling for the life of the page, so the first miss stands the cache down and later
+// calls answer as a miss immediately.
+let disabled = false;
+
+const withIdbDeadline = async <T>({
+	operation,
+	fallback
+}: {
+	operation: Promise<T>;
+	fallback: T;
+}): Promise<T> => {
+	const timedOut = Symbol('timedOut');
+
+	const result = await withDeadline<T | typeof timedOut>({
+		operation: operation.then((value) => value),
+		fallback: timedOut,
+		milliseconds: SOLANA_DETAILS_IDB_DEADLINE_MILLIS
+	});
+
+	if (result === timedOut) {
+		disabled = true;
+
+		return fallback;
+	}
+
+	return result;
+};
 
 let idb: Idb | undefined;
 
@@ -74,6 +108,11 @@ const openIdb = (): Idb | undefined => {
 		return undefined;
 	}
 
+	// Stood down after a deadline miss: every caller answers as it did before this cache existed.
+	if (disabled) {
+		return undefined;
+	}
+
 	if (isNullish(idb)) {
 		const store = createStore('oisy-sol-transaction-details', 'details');
 
@@ -86,6 +125,12 @@ const openIdb = (): Idb | undefined => {
 // Opened as the module loads rather than on first use, so that a realm takes the epoch of the session
 // it started in: a worker that fetched nothing yet when the user signed out must not adopt the next
 // session's epoch on its first write.
+//
+// The cost is that every realm the app starts opens this database — the main thread plus each
+// wallet, auth and exchange worker, since the worker bundle reaches this module through
+// `solana.api.ts` — and `idb-keyval`'s `createStore` never closes its connection. Realms racing to
+// create the database for the first time can leave an `open` answering with no event at all, which
+// is what `withIdbDeadline` and `disableIdb` below exist to survive.
 openIdb();
 
 // The slot is zero-padded to the 20 digits of a u64, so that the keys of a network sort by slot.
@@ -119,7 +164,10 @@ export const getIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		return await get<SolRpcTransaction>(detailKey({ network, signature, slot }), current.store);
+		return await withIdbDeadline({
+			operation: get<SolRpcTransaction>(detailKey({ network, signature, slot }), current.store),
+			fallback: undefined
+		});
 	} catch (_err: unknown) {
 		return undefined;
 	}
@@ -164,7 +212,7 @@ export const setIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		const epoch = await current.epoch;
+		const epoch = await withIdbDeadline({ operation: current.epoch, fallback: undefined });
 
 		if (isNullish(epoch)) {
 			return;
@@ -177,7 +225,7 @@ export const setIdbSolTransactionDetail = async ({
 		});
 
 		// The epoch is checked in the transaction that writes, so a clear cannot slip in between.
-		await current.store('readwrite', (objectStore) => {
+		const write = current.store('readwrite', (objectStore) => {
 			const request = objectStore.get(EPOCH_KEY);
 
 			return new Promise<void>((resolve, reject) => {
@@ -193,7 +241,12 @@ export const setIdbSolTransactionDetail = async ({
 			});
 		});
 
-		await trimNetwork({ network, store: current.store });
+		await withIdbDeadline({ operation: write, fallback: undefined });
+
+		await withIdbDeadline({
+			operation: trimNetwork({ network, store: current.store }),
+			fallback: undefined
+		});
 	} catch (_err: unknown) {
 		// Nothing to recover: the detail is already loaded, and the next load fetches it again.
 	}
@@ -210,5 +263,5 @@ export const clearIdbSolTransactionDetails = async () => {
 		return;
 	}
 
-	await clear(current.store);
+	await withIdbDeadline({ operation: clear(current.store), fallback: undefined });
 };

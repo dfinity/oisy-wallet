@@ -94,3 +94,10 @@ export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
 // page is what the worker fetches again on every reload, and a few pages below it cover what a newly
 // enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
 export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;
+
+// How long any single IndexedDB operation of the transaction-details cache may take before it is
+// treated as unanswered. IndexedDB can fail by saying nothing at all — an `open` that fires neither
+// `success`, `error` nor `blocked` leaves every operation behind it waiting for the life of the page
+// — and a cache must never hold up the load it exists to speed up. Well above a healthy round trip,
+// well below the point where the wallet looks broken.
+export const SOLANA_DETAILS_IDB_DEADLINE_MILLIS = 5_000;
