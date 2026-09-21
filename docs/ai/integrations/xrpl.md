@@ -277,9 +277,9 @@ failure for a payment that is about to validate — and invite a duplicate send.
 
 | Item            | Value                                                                                           |
 | --------------- | ----------------------------------------------------------------------------------------------- |
-| RPC URL env var | `VITE_XRP_RPC_URL_MAINNET` (`src/frontend/src/env/networks/networks.xrp.env.ts`)                |
+| RPC URL env var | `VITE_XRP_RPC_URL_MAINNET` (`src/frontend/src/env/rest/xrpl.env.ts`)                            |
 | Endpoint        | Selected per network by `xrpHttpRpcUrl` (`src/frontend/src/xrp/providers/xrp-rpc.providers.ts`) |
-| Dev fallback    | `https://xrplcluster.com` (XRP Ledger Foundation public cluster)                                |
+| Fallback        | None — an unset variable leaves the chain unreachable and `xrpHttpRpcUrl` throws                |
 | Deployment      | `VITE_XRP_RPC_URL_MAINNET_STAGING` / `_BETA` secrets, forwarded by `deploy-to-environment.yml`  |
 
 An empty value counts as unconfigured: a `.env` copied from `.env.example`, or a
@@ -301,7 +301,16 @@ mainnet + testnet) and OISY already has a QuickNode account, so it is the
 expected provider; the endpoint hostname is provisioned per account and set via
 the env var.
 
-The public clusters (`xrplcluster.com`, `s1.ripple.com`, `s2.ripple.com`) are
-used only as a **development fallback**. Per
+There is **no fallback endpoint**, on any build. Without the variable XRPL is
+unreachable and `xrpHttpRpcUrl` throws, the same way a build without an Alchemy
+or QuickNode key fails its requests. The public clusters (`xrplcluster.com`,
+`s1.ripple.com`, `s2.ripple.com`) previously stood in on non-user-facing
+builds; that made an unconfigured build look configured, and per
 [xrpl.org](https://xrpl.org/docs/tutorials/public-servers) they are explicitly
 **not for sustained or production use** and may become unavailable at any time.
+
+The variable holds a whole URL, where every other provider credential in this
+repo holds a key that is composed onto a hostname kept in code — QuickNode's
+Solana endpoint being the closest comparison. Splitting XRPL the same way means
+committing the hostname and re-issuing the deployment secrets as bare tokens,
+so it is deliberately left for later.
