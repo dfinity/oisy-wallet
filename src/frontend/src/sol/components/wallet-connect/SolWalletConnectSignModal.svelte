@@ -203,10 +203,12 @@
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity,
-			// The parties are the one thing the decode always returns, and they say which half of the
-			// review this is: a simulated run leaves them complete, while falling back to the
-			// instructions the message states itself marks them partial.
-			simulated: parties?.partial === false
+			// Whether the run described anything, which is not the same as whether it happened. The
+			// preview is omitted when nothing the user owns changed by the measures it takes -
+			// lamports, token balances, and who controls an account - so an instruction whose effect
+			// falls outside those, a stake delegation among them, completes a run and still leaves
+			// nothing describing it. Its presence is the signal; the run's is not.
+			simulated: nonNullish(preview)
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
