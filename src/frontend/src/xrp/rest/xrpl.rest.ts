@@ -4,6 +4,7 @@ import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
+	XrplAccountTxResultSchema,
 	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
@@ -716,7 +717,22 @@ export const loadXrpTransactions = async ({
 		return { transactions: [] };
 	}
 
-	const transactions = (result.transactions as XrpAccountTransactionEntry[] | undefined) ?? [];
+	// Parsed, not cast. An absent `transactions` became a genuine empty history, a non-array reached
+	// `.map` in the scheduler, and nothing checked that the page belongs to the account asked for —
+	// the binding every other reader in this file applies.
+	const parsed = XrplAccountTxResultSchema.safeParse(result);
 
-	return { transactions, marker: result.marker };
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL account_tx response: it does not match the expected shape');
+	}
+
+	const { account, transactions, marker: nextMarker } = parsed.data;
+
+	// Raw comparison, like the `Account` binding in the reads: a classic address is base58 over a
+	// checksummed payload, so two forms differing only in case are not one address.
+	if (account !== address) {
+		throw new Error('Unexpected XRPL account_tx response: it is for a different account');
+	}
+
+	return { transactions: transactions as XrpAccountTransactionEntry[], marker: nextMarker };
 };

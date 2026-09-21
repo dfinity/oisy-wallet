@@ -258,6 +258,26 @@ export const XrplAccountInfoFullResultSchema = z.union([
 	})
 ]);
 
+/**
+ * `account_tx`, success only — the `actNotFound` branch is handled by `expectedErrors` on the
+ * envelope and synthesises an empty page without reaching here.
+ *
+ * Two things are required and nothing else is: the account the result belongs to, and an array of
+ * entries. The entries themselves stay `unknown` on purpose — `mapXrpTransaction` already drops
+ * anything it cannot read, field by field, and duplicating that here would be a second set of
+ * rules to keep in step with the first.
+ *
+ * `account` is required for the reason stated on the balance schemas: nothing else in the result
+ * says whose history this is, and an unbound answer read as this account's would show one wallet's
+ * activity under another's. `transactions` is required because its absence is what silently became
+ * an empty history — the one outcome the `expectedErrors` note on the caller exists to prevent.
+ */
+export const XrplAccountTxResultSchema = z.object({
+	account: z.string(),
+	transactions: z.array(z.unknown()),
+	marker: z.unknown().optional()
+});
+
 export const XrplFeeResultSchema = z.object({
 	drops: z
 		.object({
