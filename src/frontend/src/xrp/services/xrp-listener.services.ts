@@ -34,10 +34,24 @@ export const syncWallet = ({
 		balancesStore.reset(tokenId);
 	}
 
-	// Absent means the history could not be read. Writing anything here — including an empty
-	// array — marks the store initialized, and the UI would report the account as having no
-	// activity on the strength of a request that failed.
+	// Absent means the history could not be read — `loadAndSyncBalance` awaits the request before
+	// posting, so this is never "still loading". An empty array must not be written: it would claim
+	// the account has no history on the strength of a request that failed.
+	//
+	// `null` is not that empty page. It records that the read was attempted and produced nothing to
+	// show, which settles the aggregate Activity gate. Without it an `account_tx` failure held that
+	// gate open for good while the balance kept succeeding — the scheduler folds such a rejection
+	// into `undefined` and posts a normal wallet update, so `syncWalletError` never runs and
+	// nothing is reported at all.
+	//
+	// Same guard as the error path: only a never-loaded entry is written, so rows already held are
+	// untouched, and the per-token view keeps its skeleton because `xrpTransactionsInitialized`
+	// reads `null` as uninitialized.
 	if (isNullish(newTransactions)) {
+		if (isNullish(get(xrpTransactionsStore)?.[tokenId])) {
+			xrpTransactionsStore.nullify(tokenId);
+		}
+
 		return;
 	}
 
@@ -82,6 +96,20 @@ export const syncWalletError = ({
 	//
 	// Ownership changes are `resetWallet`'s job, and it uses `clear` precisely to keep the two apart.
 	balancesStore.reset(tokenId);
+
+	// Keeping the rows is not the same as leaving the entry unwritten. `resetWallet` clears it to
+	// `undefined` on every worker start, and `isTransactionsStoreInitialized` counts anything that
+	// is not `undefined` — so a token whose FIRST load never succeeded holds the aggregate Activity
+	// gate open for good: an otherwise-empty account stays on skeletons, and `levelNewcomers` never
+	// runs, leaving the chains at uneven floors. A provider outage or a rate limit on first load is
+	// enough; no misconfiguration needed.
+	//
+	// Written only in that never-loaded case, which is what separates this from the unconditional
+	// `reset`/`nullify` the other chains do: an entry that already holds rows keeps them, for the
+	// reason above.
+	if (isNullish(get(xrpTransactionsStore)?.[tokenId])) {
+		xrpTransactionsStore.nullify(tokenId);
+	}
 
 	if (hideToast) {
 		consoleWarn(`${errorText}:`, err);
