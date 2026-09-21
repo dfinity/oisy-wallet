@@ -1375,11 +1375,11 @@ describe('sol-instructions.utils', () => {
 			// The parsers end in an exhaustive switch that throws, and the System set is closed, so the
 			// mapper's own fallthrough is unreachable: an instruction added to the program in future
 			// arrives as a throw. It has to become a refusal rather than crash the decode.
-			const instruction = {
+			const instruction: SolInstruction = {
 				programAddress: address(SYSTEM_PROGRAM_ADDRESS),
 				accounts: [],
 				data: Uint8Array.from([99, 0, 0, 0])
-			} as unknown as Parameters<typeof mapSolInstruction>[0];
+			};
 
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: undefined,
