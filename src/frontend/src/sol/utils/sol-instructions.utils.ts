@@ -510,21 +510,15 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// creations above would leave this one funding a stranger's key with a warning. Read as the
 	// others are - the owner alone, the rest left unread - and note it carries no payer of its own
 	// when the new account prefunds itself.
+	// The prefunding variant is refused whatever it opens the account for, which the other two
+	// creations are not. It exists to open an account that already holds lamports, so the field it
+	// states is what this instruction adds rather than what the account ends up with: a target
+	// funded beforehand passes a rent-sized check and still lands under `owner` with the larger
+	// balance. Reading it faithfully would need the account's pre-state, which this mapper is
+	// synchronous and has none of. It also names no payer when the account prefunds itself, so
+	// there would be a cost stated against nobody.
 	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
-		const {
-			data: { lamports, space, programAddress: owner },
-			accounts: { payer }
-		} = instruction;
-
-		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
-			return unfaithfulInstruction();
-		}
-
-		// The new account can prefund itself, and then no payer is named at all.
-		return {
-			amount: lamports,
-			...(nonNullish(payer) && { payer: payer.address })
-		};
+		return unfaithfulInstruction();
 	}
 
 	// Handing an account to a program is the System program's own version of the authority change
@@ -1166,7 +1160,23 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolComputeBudgetInstruction(instruction);
 	}
 
-	const parsedInstruction = parseSolInstruction(instruction);
+	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
+	// know, so a program that gains an instruction the wallet has never seen would throw out of the
+	// decode rather than reach the readings below. Crashing is not the answer a review can show,
+	// and it is the same hazard the Compute Budget parse is already wrapped for: fail closed with a
+	// refusal instead, which is what the mappers return for anything they cannot state.
+	let parsedInstruction: SolInstruction | SolParsedInstruction;
+
+	try {
+		parsedInstruction = parseSolInstruction(instruction);
+	} catch (err: unknown) {
+		consoleWarn(
+			`Could not parse Solana instruction for program ${instruction.programAddress}`,
+			err
+		);
+
+		return unfaithfulInstruction();
+	}
 
 	if (!('instructionType' in parsedInstruction)) {
 		return unreviewedInstruction();
