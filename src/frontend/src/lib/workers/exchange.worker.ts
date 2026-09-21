@@ -395,6 +395,7 @@ const fetchProviderFallbackPrices = async ({
 		!fillBtc &&
 		!fillIcp &&
 		!fillSol &&
+		!fillXrp &&
 		!fillBnb &&
 		!fillPol;
 

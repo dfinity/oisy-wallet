@@ -1641,6 +1641,44 @@ describe('exchange.worker', () => {
 						coingeckoFallbackEnabled.current = false;
 					});
 
+					// XRP was computed into `fillXrp` like every other native and then left out of the
+					// early-return guard, so when it was the ONLY native the backend omitted the function
+					// returned before the fallback ran and XRP stayed unpriced. Any other missing price
+					// masked it, which is why the fallback cases above pass either way — they never reach
+					// the early return.
+					it('should fall back for XRP when it is the only native the backend omitted', async () => {
+						vi.mocked(getExchangeRates).mockResolvedValue(
+							mockMyRates(
+								[{ EvmNative: 1n }, mockExchangeRate],
+								[{ BtcNativeMainnet: null }, mockExchangeRate],
+								[{ IcpNative: null }, mockExchangeRate],
+								[{ SolNativeMainnet: null }, mockExchangeRate],
+								[{ EvmNative: 56n }, mockExchangeRate],
+								[{ EvmNative: 137n }, mockExchangeRate],
+								[{ EvmNative: 42161n }, mockExchangeRate],
+								[{ EvmNative: 8453n }, mockExchangeRate]
+							)
+						);
+
+						const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+							...createEvent(msg),
+							data: {
+								msg,
+								data: {
+									currentCurrency: Currency.USD,
+									erc20Addresses: [],
+									icrcCanisterIds: [],
+									splAddresses: [],
+									erc4626TokensExchangeData: []
+								}
+							}
+						};
+
+						await onExchangeMessage(mockEvent);
+
+						expect(simplePrice).toHaveBeenCalledWith(expect.objectContaining({ ids: 'ripple' }));
+					});
+
 					it('should fill only the tokens the backend left unpriced', async () => {
 						// Backend prices everything except one ERC-20, one ICRC and one SPL token.
 						vi.mocked(getExchangeRates).mockResolvedValue(
