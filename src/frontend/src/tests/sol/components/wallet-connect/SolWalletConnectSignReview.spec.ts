@@ -37,6 +37,49 @@ describe('SolWalletConnectSignReview', () => {
 		exchangeStore.reset();
 	});
 
+	it('should say a message it will not sign cannot be shown', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+	});
+
+	it('should announce the refusal to a screen reader', () => {
+		// It appears only once the decode settles and is the reason Approve never becomes usable,
+		// so it has to reach a reader that is already past it.
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
+	});
+
+	it('should say nothing else about a message it will not sign', () => {
+		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
+		// outside the notice chain: the partial-parties line would tell the user which lists to read
+		// on a request that is refused.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				ambiguous: true,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+	});
+
 	it('should render the unreviewed instructions warning', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
