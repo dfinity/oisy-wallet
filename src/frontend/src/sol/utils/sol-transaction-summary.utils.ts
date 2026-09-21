@@ -358,17 +358,29 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
-	// Closing hands back the account's whole balance, which for a wrapped SOL account is the rent
-	// plus the SOL that was wrapped. Saying "rent" for that understates it by whatever was wrapped.
+	// Closing hands the account's whole balance to the destination it names, which for a wrapped
+	// SOL account is the rent plus the SOL that was wrapped. Saying "rent" for that understates it
+	// by whatever was wrapped - and saying "to your wallet" for a close that names somebody else
+	// states the one thing about it that matters wrongly, so the line says "to" and the address is
+	// rendered beside it.
+	const returnedHome = own ?? isNullish(counterparty);
+
 	const returnedDetail = nonNullish(returned)
-		? replacePlaceholders(i18n.transaction.text.instruction_returned, {
-				$amount: formatToken({
-					value: returned,
-					unitName: SOLANA_DEFAULT_DECIMALS,
-					displayDecimals: SOLANA_DEFAULT_DECIMALS
-				})
-			})
-		: i18n.transaction.text.instruction_rent_returned;
+		? replacePlaceholders(
+				returnedHome
+					? i18n.transaction.text.instruction_returned
+					: i18n.transaction.text.instruction_returned_to,
+				{
+					$amount: formatToken({
+						value: returned,
+						unitName: SOLANA_DEFAULT_DECIMALS,
+						displayDecimals: SOLANA_DEFAULT_DECIMALS
+					})
+				}
+			)
+		: returnedHome
+			? i18n.transaction.text.instruction_rent_returned
+			: i18n.transaction.text.instruction_balance_returned_to;
 
 	if (kind === 'unwrap') {
 		return {

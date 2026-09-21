@@ -2067,6 +2067,8 @@
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
+			"instruction_returned_to": "$amount SOL の送金先",
+			"instruction_balance_returned_to": "残高の送金先",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "ステータス",

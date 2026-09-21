@@ -2067,6 +2067,8 @@
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
+			"instruction_returned_to": "$amount SOL vers",
+			"instruction_balance_returned_to": "solde vers",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Statut",

@@ -13,7 +13,7 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
-import { mockAtaAddress, mockAtaAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockAtaAddress2, mockSolAddress } from '$tests/mocks/sol.mock';
 
 const USER = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 
@@ -337,6 +337,47 @@ describe('sol-transaction-summary.utils', () => {
 			expect(detailOf({ kind: 'unwrap', returned: 2_039_280n })).toBe(
 				'0.00203928 SOL returned to your wallet'
 			);
+		});
+
+		// The balance goes where the close names it. Saying it came back, when it did not, states
+		// the one thing about a close that matters wrongly.
+		it('should not say a close came back when it named somebody else', () => {
+			expect(
+				detailOf({
+					kind: 'closeTokenAccount',
+					returned: 5_002_039_280n,
+					counterparty: mockSolAddress,
+					own: false
+				})
+			).toBe('5.00203928 SOL to');
+		});
+
+		it('should say so of an unwrap that named somebody else too', () => {
+			expect(
+				detailOf({
+					kind: 'unwrap',
+					returned: 2_039_280n,
+					counterparty: mockSolAddress,
+					own: false
+				})
+			).toBe('0.00203928 SOL to');
+		});
+
+		it('should name the destination when the amount is not known either', () => {
+			expect(
+				detailOf({ kind: 'closeTokenAccount', counterparty: mockSolAddress, own: false })
+			).toBe(en.transaction.text.instruction_balance_returned_to);
+		});
+
+		it('should still say it came back when the close named the user', () => {
+			expect(
+				detailOf({
+					kind: 'closeTokenAccount',
+					returned: 2_039_280n,
+					counterparty: mockSolAddress,
+					own: true
+				})
+			).toBe('0.00203928 SOL returned to your wallet');
 		});
 	});
 });

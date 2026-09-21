@@ -354,11 +354,18 @@ const toEffect = ({
 			// going in says zero. What it hands back is the rent it was funded with moments earlier.
 			const returned = fundedInTransaction({ account, flattened }) ?? accountLamports[account];
 
+			// Closing pays the account's whole balance to whoever the instruction names, which need
+			// not be the user: read as a close alone, a hand-over of a funded wrapped SOL account
+			// reads as money coming back. The destination is carried so the line can say where it
+			// went, and marked when it is the user's own.
+			const destination = address({ info, key: 'destination' });
+
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
 				account,
 				...(nonNullish(mint) && { tokenAddress: mint }),
-				...(nonNullish(returned) && { returned })
+				...(nonNullish(returned) && { returned }),
+				...(nonNullish(destination) && { counterparty: destination, own: owned.has(destination) })
 			};
 		}
 

@@ -346,6 +346,35 @@ describe('sol-instruction-summary.utils', () => {
 
 			expect(view.kind).toBe('closeTokenAccount');
 			expect(view.returned).toBe(2_039_280n);
+			expect(view.counterparty).toBe(owner);
+			expect(view.own).toBeTruthy();
+		});
+
+		// The balance goes wherever the close names, and that need not be the user. Left unread, a
+		// hand-over of a funded account reads exactly like money coming back.
+		it('should name a destination that is not the user', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+			const stranger = 'strangerAddress1111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: stranger, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.counterparty).toBe(stranger);
+			expect(view.own).toBeFalsy();
 		});
 
 		it('should count the wrapped SOL in what an unwrap hands back', () => {

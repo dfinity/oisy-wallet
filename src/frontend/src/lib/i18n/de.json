@@ -2067,6 +2067,8 @@
 			"instruction_rent": "",
 			"instruction_rent_returned": "",
 			"instruction_returned": "",
+			"instruction_returned_to": "$amount SOL an",
+			"instruction_balance_returned_to": "Guthaben an",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Status",
