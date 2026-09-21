@@ -198,12 +198,21 @@
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity,
-			// Whether the run described anything, which is not the same as whether it happened. The
-			// preview is omitted when nothing the user owns changed by the measures it takes -
-			// lamports, token balances, and who controls an account - so an instruction whose effect
-			// falls outside those, a stake delegation among them, completes a run and still leaves
-			// nothing describing it. Its presence is the signal; the run's is not.
-			simulated: nonNullish(preview)
+			// Whether the run described the instructions nobody read, which neither the run happening
+			// nor the preview's contents can say. The preview attributes nothing to an instruction,
+			// and it carries the user's lamport delta whether or not that delta is anything but the
+			// fee, so its presence says almost nothing.
+			//
+			// The instruction list does attribute. Built from a run, it marks an entry `unknown`
+			// only when no effect - stated by the message or made inside a program - carried that
+			// instruction's index, so a routed swap's router instruction is covered by the transfers
+			// its own invocations produced, while a stake delegation produces no effect anywhere and
+			// stays unknown. A list with nothing unknown left in it is the description; anything
+			// else leaves an instruction the review cannot account for.
+			simulated:
+				(simulatedInstructions ?? false) &&
+				nonNullish(instructions) &&
+				!instructions.some(({ kind }) => kind === 'unknown')
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
