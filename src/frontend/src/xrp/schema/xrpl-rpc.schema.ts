@@ -313,8 +313,13 @@ const XrpAccountTransactionSchema = z.object({
 	Fee: XrpDropsSchema.optional(),
 	DestinationTag: z.number().int().optional(),
 	hash: z.string().optional(),
-	ledger_index: z.number().int().optional(),
-	date: z.number().int().optional()
+	// Both are XRPL UInt32s, and a bare `int()` admits anything up to `Number.MAX_SAFE_INTEGER`.
+	// `date` becomes a bigint timestamp the UI turns back into a `Date`: out of range that is an
+	// Invalid Date, and `toISOString` and `Intl.DateTimeFormat.format` both throw
+	// `RangeError: Invalid time value` — in a render path, so one row takes the whole list and the
+	// CSV with it rather than just being wrong itself.
+	ledger_index: XrpLedgerCounterSchema.optional(),
+	date: XrpLedgerCounterSchema.optional()
 });
 
 export const XrpAccountTransactionEntrySchema = z.object({
@@ -328,7 +333,7 @@ export const XrpAccountTransactionEntrySchema = z.object({
 		.optional(),
 	validated: z.boolean().optional(),
 	hash: z.string().optional(),
-	ledger_index: z.number().int().optional(),
+	ledger_index: XrpLedgerCounterSchema.optional(),
 	close_time_iso: z.string().optional()
 });
 
