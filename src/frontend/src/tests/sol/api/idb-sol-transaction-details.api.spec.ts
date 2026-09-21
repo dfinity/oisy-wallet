@@ -1,7 +1,5 @@
-import {
-	SOLANA_DETAILS_IDB_DEADLINE_MILLIS,
-	SOLANA_TRANSACTION_DETAILS_CACHE_SIZE
-} from '$sol/constants/sol.constants';
+import { IDB_DEADLINE_MILLIS } from '$lib/constants/app.constants';
+import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
 import { type SolanaNetworkType, SolanaNetworks } from '$sol/types/network';
 import type { SolRpcTransaction } from '$sol/types/sol-transaction';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
@@ -250,7 +248,7 @@ describe('idb-sol-transaction-details.api', () => {
 				signature: transaction
 			});
 
-			await vi.advanceTimersByTimeAsync(SOLANA_DETAILS_IDB_DEADLINE_MILLIS);
+			await vi.advanceTimersByTimeAsync(IDB_DEADLINE_MILLIS);
 
 			await expect(reading).resolves.toBeUndefined();
 		});
@@ -267,7 +265,7 @@ describe('idb-sol-transaction-details.api', () => {
 				signature: transaction
 			});
 
-			await vi.advanceTimersByTimeAsync(SOLANA_DETAILS_IDB_DEADLINE_MILLIS);
+			await vi.advanceTimersByTimeAsync(IDB_DEADLINE_MILLIS);
 			await reading;
 
 			// No timer is advanced here: the second read must answer without waiting at all.

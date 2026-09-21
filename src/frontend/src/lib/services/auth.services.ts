@@ -18,6 +18,7 @@ import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
+import { IDB_DEADLINE_MILLIS } from '$lib/constants/app.constants';
 import { PARAM_DELETE_IDB_CACHE, PARAM_LEVEL, PARAM_MSG } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -210,14 +211,12 @@ export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promi
 // `open` fires no event of any kind — and sign-out would then wait for it for the life of the page,
 // leaving the user on a spinner. Effective logout matters more than an emptied cache, so a clear
 // that misses its deadline is abandoned: the next session starts against a new epoch regardless.
-const CLEAR_IDB_STORE_TIMEOUT_MILLIS = 5_000;
-
 const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	try {
 		await withDeadline({
 			operation: clearIdbStore(),
 			fallback: undefined,
-			milliseconds: CLEAR_IDB_STORE_TIMEOUT_MILLIS
+			milliseconds: IDB_DEADLINE_MILLIS
 		});
 	} catch (err: unknown) {
 		// We silence the error.

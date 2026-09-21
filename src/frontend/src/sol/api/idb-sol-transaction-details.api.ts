@@ -1,8 +1,6 @@
+import { IDB_DEADLINE_MILLIS } from '$lib/constants/app.constants';
 import { withDeadline } from '$lib/utils/timeout.utils';
-import {
-	SOLANA_DETAILS_IDB_DEADLINE_MILLIS,
-	SOLANA_TRANSACTION_DETAILS_CACHE_SIZE
-} from '$sol/constants/sol.constants';
+import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
@@ -55,7 +53,7 @@ const withIdbDeadline = async <T>({
 	const result = await withDeadline<T | typeof timedOut>({
 		operation: operation.then((value) => value),
 		fallback: timedOut,
-		milliseconds: SOLANA_DETAILS_IDB_DEADLINE_MILLIS
+		milliseconds: IDB_DEADLINE_MILLIS
 	});
 
 	if (result === timedOut) {
