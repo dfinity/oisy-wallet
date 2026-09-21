@@ -2076,7 +2076,9 @@ describe('xrpl.rest', () => {
 
 		it('returns the transactions and the pagination marker', async () => {
 			mockFetchResponse({
-				body: { result: { transactions: [entry], marker: { ledger: 42, seq: 1 } } }
+				body: {
+					result: { account: address, transactions: [entry], marker: { ledger: 42, seq: 1 } }
+				}
 			});
 
 			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
@@ -2109,8 +2111,8 @@ describe('xrpl.rest', () => {
 			expect(page.marker).toBeUndefined();
 		});
 
-		it('returns an empty list when the account has no transactions', async () => {
-			mockFetchResponse({ body: { result: {} } });
+		it('returns an empty list for a funded account with no matching transactions', async () => {
+			mockFetchResponse({ body: { result: { account: address, transactions: [] } } });
 
 			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
 
@@ -2118,11 +2120,40 @@ describe('xrpl.rest', () => {
 			expect(page.marker).toBeUndefined();
 		});
 
+		// The same hazard as the error cases above, arriving as a success. A result that never
+		// names its transactions used to be read as a genuine empty history — a wallet with no
+		// activity, never retried — which is what the `expectedErrors` check exists to prevent.
+		it.each([
+			{ name: 'no transactions field', result: { account: address } },
+			{ name: 'transactions that are not an array', result: { account: address, transactions: {} } }
+		])(
+			'throws for a success with $name rather than reporting an empty history',
+			async ({ result }) => {
+				mockFetchResponse({ body: { result } });
+
+				await expect(
+					loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+				).rejects.toThrow('does not match the expected shape');
+			}
+		);
+
+		// Every other reader in this file binds the answer to the question it asked; this one did
+		// not, so a misrouted page would have been shown as this account's activity.
+		it('throws when the page belongs to a different account', async () => {
+			mockFetchResponse({
+				body: { result: { account: `${address}X`, transactions: [] } }
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('it is for a different account');
+		});
+
 		it('sends an account_tx request over the full ledger range, newest first', async () => {
 			const fetchMock = vi.fn().mockResolvedValue({
 				ok: true,
 				status: 200,
-				json: () => Promise.resolve({ result: { transactions: [] } })
+				json: () => Promise.resolve({ result: { account: address, transactions: [] } })
 			});
 			vi.stubGlobal('fetch', fetchMock);
 
@@ -2148,7 +2179,7 @@ describe('xrpl.rest', () => {
 			const fetchMock = vi.fn().mockResolvedValue({
 				ok: true,
 				status: 200,
-				json: () => Promise.resolve({ result: { transactions: [] } })
+				json: () => Promise.resolve({ result: { account: address, transactions: [] } })
 			});
 			vi.stubGlobal('fetch', fetchMock);
 

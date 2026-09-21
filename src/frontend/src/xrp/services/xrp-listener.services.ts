@@ -5,7 +5,7 @@ import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
-import { jsonReviver, nonNullish } from '@dfinity/utils';
+import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -34,6 +34,13 @@ export const syncWallet = ({
 		balancesStore.reset(tokenId);
 	}
 
+	// Absent means the history could not be read. Writing anything here — including an empty
+	// array — marks the store initialized, and the UI would report the account as having no
+	// activity on the strength of a request that failed.
+	if (isNullish(newTransactions)) {
+		return;
+	}
+
 	xrpTransactionsStore.prepend({
 		tokenId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
@@ -47,9 +54,13 @@ export const syncWallet = ({
  * merged into the rows of the address before it — showing, and exporting, another account's
  * history as this one's.
  */
+// Ownership handover — a new address, a fresh worker — as distinct from a failure. `clear` leaves
+// the entry `undefined`, which the activity view reads as "not loaded yet" and keeps its skeleton
+// up for. `reset` writes `null`, which counts as initialized and would announce an empty history
+// for an account nothing has asked about. `syncWalletError` keeps `reset`, which is what it means.
 export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 	balancesStore.reset(tokenId);
-	xrpTransactionsStore.reset(tokenId);
+	xrpTransactionsStore.clear(tokenId);
 };
 
 export const syncWalletError = ({

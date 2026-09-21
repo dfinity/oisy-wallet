@@ -855,39 +855,45 @@ const finalizeRow = ({
 	// Basic-export accounting columns. Credit/Debit/Fee Token Debit are signed; Amount and
 	// Fee in their own columns stay positive for human readability. Approve rows contribute
 	// only the fee to Debit since the allowance itself doesn't move the user's balance.
-	const credit = isIncoming && row.amount !== '' ? row.amount : '';
+	//
+	// These key off the same two facts as the signed values above — whether the asset actually
+	// moved, and whether this wallet paid the fee — rather than off the row's direction. XRP is
+	// why: its self-transfers are a single INCOMING row, so a direction-keyed Credit booked the
+	// returned amount as a gain and a direction-keyed Debit dropped the fee, and the columns
+	// stopped summing to the balance change they are documented to sum to.
+	const credit = isIncoming && !isStandaloneRoundTrip && row.amount !== '' ? row.amount : '';
+
+	// Zero the asset portion for approve rows (allowance doesn't move) and for non-IC
+	// self-transfers (asset returns to the same wallet within this row). ICRC self-transfer OUTs
+	// keep -amount so the IN duplicate's +Credit nets them.
+	const assetPortion = isOutgoing && !(isApprove || isStandaloneRoundTrip) ? row.amount : '0';
+	const feePortion = userPaidFee && mergeColumns ? fee : '';
 
 	let debit = '';
-	if (isOutgoing) {
-		// Zero the asset portion for approve rows (allowance doesn't move) and for
-		// non-IC self-transfers (asset returns to the same wallet within this row). ICRC
-		// self-transfer OUTs keep -amount so the IN duplicate's +Credit nets them.
-		const assetPortion = isApprove || isStandaloneRoundTrip ? '0' : row.amount;
-		const feePortion = mergeColumns ? fee : '';
-		const total = sumDecimals({ a: assetPortion, b: feePortion });
-		if (total !== '' && parseFloat(total) !== 0) {
-			debit = negate(total);
-		}
+	const total = sumDecimals({ a: assetPortion, b: feePortion });
+	if (total !== '' && parseFloat(total) !== 0) {
+		debit = negate(total);
 	}
 
-	const fee_token_debit = isOutgoing && !mergeColumns && fee !== '' ? negate(fee) : '';
+	const fee_token_debit = userPaidFee && !mergeColumns && fee !== '' ? negate(fee) : '';
 
 	// Bigint twins of the accounting columns for the Extended export, which emits raw
 	// integers (no decimal point) — mirrors the Basic-vs-Extended balance split on tokens.
-	const credit_raw = isIncoming && nonNullish(row.amount_raw) ? row.amount_raw : undefined;
+	const credit_raw =
+		isIncoming && !isStandaloneRoundTrip && nonNullish(row.amount_raw) ? row.amount_raw : undefined;
+
+	const assetPortionRaw =
+		isOutgoing && !(isApprove || isStandaloneRoundTrip) ? (row.amount_raw ?? ZERO) : ZERO;
+	const feePortionRaw = userPaidFee && mergeColumns ? (row.fee_raw ?? ZERO) : ZERO;
 
 	let debit_raw: bigint | undefined;
-	if (isOutgoing) {
-		const assetPortionRaw = isApprove || isStandaloneRoundTrip ? ZERO : (row.amount_raw ?? ZERO);
-		const feePortionRaw = mergeColumns ? (row.fee_raw ?? ZERO) : ZERO;
-		const totalRaw = assetPortionRaw + feePortionRaw;
-		if (totalRaw !== ZERO) {
-			debit_raw = -totalRaw;
-		}
+	const totalRaw = assetPortionRaw + feePortionRaw;
+	if (totalRaw !== ZERO) {
+		debit_raw = -totalRaw;
 	}
 
 	const fee_token_debit_raw =
-		isOutgoing && !mergeColumns && nonNullish(row.fee_raw) && row.fee_raw !== ZERO
+		userPaidFee && !mergeColumns && nonNullish(row.fee_raw) && row.fee_raw !== ZERO
 			? -row.fee_raw
 			: undefined;
 

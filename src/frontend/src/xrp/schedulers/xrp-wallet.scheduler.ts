@@ -23,7 +23,8 @@ interface XrpWalletStore {
 
 interface XrpWalletData {
 	balance: CertifiedData<XrpBalance | null>;
-	transactions: XrpCertifiedTransaction[];
+	// `undefined` means the history could not be read this round, as distinct from an empty page.
+	transactions: XrpCertifiedTransaction[] | undefined;
 }
 
 export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> {
@@ -129,12 +130,29 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			xrpNetwork
 		} = data;
 
-		const [balance, transactions] = await Promise.all([
+		// Settled independently, not `Promise.all`. The two come from different endpoints, and only
+		// one of them justifies the reset that a rejection here ultimately triggers: `syncWalletError`
+		// clears the balance AND the history. A stale balance on a funds screen is worse than none,
+		// so a failed `account_info` stays fatal — but an `account_tx` outage used to erase a balance
+		// that had just been read correctly, and discard history the user already had.
+		const [balanceResult, transactionsResult] = await Promise.allSettled([
 			this.loadBalance({ address, xrpNetwork }),
 			this.loadTransactions({ address, xrpNetwork })
 		]);
 
-		this.syncWalletData({ balance, transactions, expectedRef });
+		if (balanceResult.status === 'rejected') {
+			throw balanceResult.reason;
+		}
+
+		// `undefined`, not `[]`: the store keeps what it holds and stays uninitialized, and the next
+		// tick tries again. The scheduler polls, so the in-job retries are not what makes history
+		// arrive. Passing an empty array here claimed the account has no transactions.
+		this.syncWalletData({
+			balance: balanceResult.value,
+			transactions:
+				transactionsResult.status === 'fulfilled' ? transactionsResult.value : undefined,
+			expectedRef
+		});
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestXrp>) => {
@@ -181,7 +199,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		}
 
 		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
-		const newTransactions = transactions.length > 0;
+		const newTransactions = nonNullish(transactions) && transactions.length > 0;
 
 		this.store = {
 			...this.store,
@@ -204,7 +222,11 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
+				// Omitted when the history could not be read, so the listener leaves the store alone
+				// rather than writing an empty page over an unknown one.
+				...(nonNullish(transactions) && {
+					newTransactions: JSON.stringify(transactions, jsonReplacer)
+				})
 			}
 		});
 	};
