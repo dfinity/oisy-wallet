@@ -205,6 +205,78 @@ describe('xrp-transaction.utils', () => {
 			expect(ui?.value).toBe(5_000_000n);
 		});
 
+		// api_version 2 renames the container and moves the timestamp to the entry as an ISO string.
+		// The rest of that shape was already modelled; the time was not, so a v2 row mapped with no
+		// date at all and landed under "no date" with nothing saying why.
+		it('takes the timestamp from close_time_iso on an api_version 2 row', () => {
+			const ui = mapXrpTransaction({
+				transaction: {
+					tx_json: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000'
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true,
+					hash: 'HV2',
+					ledger_index: 90,
+					close_time_iso: '2026-09-21T00:00:00Z'
+				},
+				xrpAddress: wallet
+			});
+
+			expect(ui?.id).toBe('HV2');
+			expect(ui?.blockNumber).toBe(90);
+			expect(ui?.timestamp).toBe(BigInt(Date.parse('2026-09-21T00:00:00Z') / 1000));
+		});
+
+		// Both shapes at once is not a thing a node sends, but if it did, the signed seconds win
+		// over a rendered string.
+		it('prefers tx.date over close_time_iso when both are present', () => {
+			const ui = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						hash: 'HBOTH',
+						date: 1
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true,
+					close_time_iso: '2026-09-21T00:00:00Z'
+				},
+				xrpAddress: wallet
+			});
+
+			expect(ui?.timestamp).toBe(BigInt(1 + XRP_RIPPLE_EPOCH_OFFSET));
+		});
+
+		// The time is the one presentational field here, so an unreadable one costs the date rather
+		// than the payment.
+		it('still maps a row whose close_time_iso cannot be parsed', () => {
+			const ui = mapXrpTransaction({
+				transaction: {
+					tx_json: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000'
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true,
+					hash: 'HBAD',
+					close_time_iso: 'not a date'
+				},
+				xrpAddress: wallet
+			});
+
+			expect(ui?.id).toBe('HBAD');
+			expect(ui?.timestamp).toBeUndefined();
+		});
+
 		// A node adding a field it does not document must not empty a history: unmodelled keys are
 		// stripped, not rejected.
 		it('still maps a row carrying fields the mapper does not model', () => {
@@ -283,7 +355,9 @@ describe('xrp-transaction.utils', () => {
 
 			expect(ui).toEqual({
 				id: 'HSELF',
-				type: 'receive',
+				// A round trip, not income: the amount comes straight back and only the fee leaves.
+				// The export books it the same way, as a standalone round trip.
+				type: 'send',
 				status: 'confirmed',
 				value: 5_000_000n,
 				fee: 10n,

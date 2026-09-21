@@ -328,7 +328,8 @@ export const XrpAccountTransactionEntrySchema = z.object({
 		.optional(),
 	validated: z.boolean().optional(),
 	hash: z.string().optional(),
-	ledger_index: z.number().int().optional()
+	ledger_index: z.number().int().optional(),
+	close_time_iso: z.string().optional()
 });
 
 export const XrplAccountTxErrorSchema = z.object({
