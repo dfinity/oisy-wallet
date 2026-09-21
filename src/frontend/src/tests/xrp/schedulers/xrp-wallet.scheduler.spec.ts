@@ -189,6 +189,32 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// The balance and the history come from different endpoints. Coupled through `Promise.all`, an
+	// `account_tx` outage rejected the pair and the catch posted `syncXrpWalletError` — which clears
+	// the balance store as well, so a balance that had just been read correctly disappeared because
+	// a different endpoint was down.
+	it('should post a balance that loaded even when the transactions request fails', async () => {
+		spyLoadTransactions.mockRejectedValue(new Error('account_tx down'));
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+
+		expect(walletCall).toBeDefined();
+		expect(walletCall?.[0].data.wallet.balance.data).toBe(mockBalance);
+
+		expect(postMessageMock).not.toHaveBeenCalledWith(
+			expect.objectContaining({ msg: 'syncXrpWalletError' })
+		);
+
+		scheduler.stop();
+	});
+
 	// The UI store is cleared whenever this scheduler is stopped — every caller that stops it is
 	// handing ownership over. The cache has to go with it: `setRef` only clears on a CHANGED ref, so
 	// a restart on the same address would diff its first page against a full cache, report nothing
