@@ -84,6 +84,10 @@ export interface XrpAccountTransactionEntry {
 	validated?: boolean;
 	hash?: string;
 	ledger_index?: number;
+	// api_version 2 moves the timestamp here and reports it as an ISO string, where version 1
+	// carries `tx.date` as seconds since the Ripple epoch. Modelled because the rest of the v2
+	// shape already is — without it a v2 response maps to rows with no date at all, silently.
+	close_time_iso?: string;
 }
 
 export interface XrpTransactionsPage {

@@ -74,8 +74,14 @@ export const syncWalletError = ({
 }) => {
 	const errorText = get(i18n).init.error.xrp_wallet_error;
 
+	// The balance only. Since `5c36dba22` the scheduler rethrows for a rejected `account_info` and
+	// absorbs an `account_tx` one, so reaching here means the balance failed — and a stale figure on
+	// a funds screen is worth clearing, while history does not go stale the same way: old rows stay
+	// true. Clearing it here was unrecoverable, too: the scheduler passes no `marker`, so a sync
+	// only ever refetches the newest page and anything older was gone for the session.
+	//
+	// Ownership changes are `resetWallet`'s job, and it uses `clear` precisely to keep the two apart.
 	balancesStore.reset(tokenId);
-	xrpTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
 		consoleWarn(`${errorText}:`, err);

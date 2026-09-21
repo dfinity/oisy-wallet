@@ -266,9 +266,38 @@ export const mapXrpTransaction = ({
 
 	const ledgerIndex = tx.ledger_index ?? entry.ledger_index;
 
+	// A payment to ourselves that delivers XRP is a round trip: the amount comes straight back and
+	// only the fee leaves. Reported as a receive it claimed income the account never gained, while
+	// the export — which books it as a standalone round trip — said the opposite about the same
+	// transaction.
+	//
+	// XRP is the only chain whose self-transfer arrives as a single INCOMING row, and the export's
+	// model is built on non-IC self-transfers being "a single outgoing row". Classifying it as a
+	// send is what makes XRP fit that model rather than be compensated for.
+	//
+	// A self-CONVERSION stays a receive: `crossCurrency` says the delivered XRP was funded by
+	// something else, so it genuinely arrived.
+	// api_version 1 carries `tx.date`, seconds since the Ripple epoch; version 2 carries an ISO
+	// string on the entry. Whichever the node speaks, the row gets a timestamp — a v2 response used
+	// to map without one and land under "no date", with nothing saying why.
+	//
+	// An unparseable ISO string is dropped rather than skipping the row: the time is the one field
+	// here that is presentational, and a payment is worth showing undated.
+	const isoSeconds = nonNullish(entry.close_time_iso)
+		? Math.floor(Date.parse(entry.close_time_iso) / 1000)
+		: undefined;
+
+	const timestamp = nonNullish(tx.date)
+		? BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET)
+		: nonNullish(isoSeconds) && Number.isFinite(isoSeconds)
+			? BigInt(isoSeconds)
+			: undefined;
+
+	const isRoundTrip = isSender && isReceive && !crossCurrency;
+
 	return {
 		id: hash,
-		type: isReceive ? 'receive' : 'send',
+		type: isReceive && !isRoundTrip ? 'receive' : 'send',
 		// Unvalidated entries never get this far.
 		status: 'confirmed',
 		value: BigInt(amount),
@@ -278,7 +307,7 @@ export const mapXrpTransaction = ({
 		...(isSender && nonNullish(tx.Fee) && { fee: BigInt(tx.Fee) }),
 		from: tx.Account,
 		to: tx.Destination,
-		...(nonNullish(tx.date) && { timestamp: BigInt(tx.date + XRP_RIPPLE_EPOCH_OFFSET) }),
+		...(nonNullish(timestamp) && { timestamp }),
 		...(nonNullish(ledgerIndex) && { blockNumber: ledgerIndex }),
 		...(nonNullish(tx.DestinationTag) && { destinationTag: tx.DestinationTag }),
 		// Carried so the export can tell a self-conversion from a self-send: the first is a real
