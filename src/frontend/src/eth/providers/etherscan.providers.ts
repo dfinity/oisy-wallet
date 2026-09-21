@@ -28,6 +28,7 @@ import {
 	Network,
 	type BlockTag
 } from 'ethers/providers';
+import { FetchRequest } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 interface TransactionsParams {
@@ -37,14 +38,115 @@ interface TransactionsParams {
 	sort?: 'asc' | 'desc';
 }
 
+// The single method of `EtherscanProviderLib` this module uses. Declaring it keeps the fallback
+// below honest: anything more the wrapper starts calling has to be implemented there too.
+interface EtherscanFetcher {
+	// Generic rather than `unknown` to match `EtherscanProviderLib.fetch`, whose `any` lets each
+	// call site below declare the shape it expects. The response is unvalidated either way — the
+	// library does not check it against a schema, and neither does the fallback.
+	fetch: <T>({ module, params }: { module: string; params: Record<string, unknown> }) => Promise<T>;
+}
+
+const ETHERSCAN_V2_API_URL = 'https://api.etherscan.io/v2/api';
+
+/**
+ * Etherscan transport for a chain `ethers` does not list.
+ *
+ * `EtherscanProviderLib`'s constructor asserts the chain id against a hardcoded array in
+ * `provider-etherscan.js`, and that array trails new chains — Robinhood Chain (4663) is absent.
+ * The assert is the only chain-specific thing in it: Etherscan v2 serves every chain from one
+ * host selected by a `chainid` query parameter, and ethers' own `getBaseUrl` is documented as
+ * deprecated and unused for v2. `Network.register` does not help, because the assert reads the
+ * literal array rather than the network registry.
+ *
+ * So the URL is built the same way ethers builds it, over the same `FetchRequest` — which is
+ * what keeps the throttle-and-retry behaviour on Etherscan's shared key identical to every other
+ * chain. Only the non-`proxy` response shape is handled, because that is all this module asks
+ * for; `proxy` would need the JSON-RPC envelope checks as well.
+ */
+class EtherscanV2Provider implements EtherscanFetcher {
+	constructor(private readonly chainId: EthereumChainId) {}
+
+	fetch = async <T>({
+		module,
+		params
+	}: {
+		module: string;
+		params: Record<string, unknown>;
+	}): Promise<T> => {
+		const query = Object.entries(params).reduce(
+			(acc, [key, value]) => (nonNullish(value) ? `${acc}&${key}=${value}` : acc),
+			''
+		);
+
+		const request = new FetchRequest(
+			`${ETHERSCAN_V2_API_URL}?chainid=${this.chainId}&module=${module}${query}&apikey=${ETHERSCAN_API_KEY}`
+		);
+		request.setThrottleParams({ slotInterval: 1000 });
+
+		const response = await request.send();
+
+		response.assertOk();
+
+		const { status, message, result } = response.bodyJson;
+
+		// Etherscan reports an empty history as a failure with a distinguishing message; ethers
+		// treats those two as success, and so must we, or a wallet with no activity on the chain
+		// surfaces an error instead of an empty list.
+		if (
+			`${status}` === '0' &&
+			(message === 'No records found' || message === 'No transactions found')
+		) {
+			return result as T;
+		}
+
+		if (`${status}` !== '1' || (typeof message === 'string' && !message.startsWith('OK'))) {
+			throw new Error(`Etherscan error response: ${message ?? ''} ${result ?? ''}`.trim());
+		}
+
+		return result as T;
+	};
+}
+
+/**
+ * `EtherscanProviderLib` when ethers lists the chain, the stand-in above when it does not.
+ *
+ * The choice is made by attempting construction rather than by re-declaring ethers' array of
+ * supported chain ids, which is module-private and grows with each release: a copy here would
+ * drift silently. Attempting it instead means a chain moves back onto the library's own
+ * implementation the moment an ethers upgrade starts listing it, with no edit here. Only the
+ * unsupported-network assert is caught — anything else is a real fault and is rethrown.
+ */
+const etherscanFetcher = ({
+	network,
+	chainId
+}: {
+	network: Network;
+	chainId: EthereumChainId;
+}): EtherscanFetcher => {
+	try {
+		const provider = new EtherscanProviderLib(network, ETHERSCAN_API_KEY);
+
+		// Adapted rather than returned directly, so both branches share one object-shaped
+		// signature; the library's own call stays positional.
+		return { fetch: async ({ module, params }) => await provider.fetch(module, params) };
+	} catch (err: unknown) {
+		if ((err as { code?: string })?.code !== 'INVALID_ARGUMENT') {
+			throw err;
+		}
+
+		return new EtherscanV2Provider(chainId);
+	}
+};
+
 export class EtherscanProvider {
-	private readonly provider: EtherscanProviderLib;
+	private readonly provider: EtherscanFetcher;
 
 	constructor(
 		private readonly network: Network,
 		private readonly chainId: EthereumChainId
 	) {
-		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
+		this.provider = etherscanFetcher({ network: this.network, chainId: this.chainId });
 	}
 
 	// There is no `getHistory` in ethers v6
@@ -65,7 +167,10 @@ export class EtherscanProvider {
 			sort: sort ?? 'asc'
 		};
 
-		const result: EtherscanProviderTransaction[] = await this.provider.fetch('account', params);
+		const result: EtherscanProviderTransaction[] = await this.provider.fetch({
+			module: 'account',
+			params
+		});
 
 		return result.map(
 			({
@@ -112,10 +217,10 @@ export class EtherscanProvider {
 			sort: sort ?? 'asc'
 		};
 
-		const result: EtherscanProviderInternalTransaction[] = await this.provider.fetch(
-			'account',
+		const result: EtherscanProviderInternalTransaction[] = await this.provider.fetch({
+			module: 'account',
 			params
-		);
+		});
 
 		return result.map(
 			({
@@ -168,10 +273,10 @@ export class EtherscanProvider {
 			sort: sort ?? 'desc'
 		};
 
-		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch(
-			'account',
+		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch({
+			module: 'account',
 			params
-		);
+		});
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -224,7 +329,7 @@ export class EtherscanProvider {
 		};
 
 		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
-			await this.provider.fetch('account', params);
+			await this.provider.fetch({ module: 'account', params });
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -278,7 +383,7 @@ export class EtherscanProvider {
 		};
 
 		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
-			await this.provider.fetch('account', params);
+			await this.provider.fetch({ module: 'account', params });
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -332,10 +437,10 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch(
-			'account',
+		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch({
+			module: 'account',
 			params
-		);
+		});
 
 		if (typeof result === 'string') {
 			throw new Error(result);
