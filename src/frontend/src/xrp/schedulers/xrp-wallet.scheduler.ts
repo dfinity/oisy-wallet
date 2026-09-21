@@ -30,6 +30,12 @@ interface XrpWalletData {
 export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> {
 	#ref: PostMessageCommon['ref'] | undefined;
 
+	// Whether a successful history page has reached the UI for the current ref. The first one is
+	// news even when empty: it is what tells the store the history has been read at all, and
+	// without it an account with no transactions — after a tick where `account_tx` failed — never
+	// leaves the loading state, because neither the balance nor the row count has changed.
+	#historyPublished = false;
+
 	private timer = new SchedulerTimer('syncXrpWalletStatus');
 
 	private store: XrpWalletStore = {
@@ -61,6 +67,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 				balance: undefined,
 				transactions: {}
 			};
+			this.#historyPublished = false;
 		}
 
 		this.#ref = newRef;
@@ -215,8 +222,17 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			})
 		};
 
-		if (!newBalance && !newTransactions) {
+		// The first successful page passes even when it changes nothing, because "there is no history"
+		// and "the history has not been read" are different states and only a delivered page tells
+		// them apart.
+		const firstHistory = nonNullish(transactions) && !this.#historyPublished;
+
+		if (!newBalance && !newTransactions && !firstHistory) {
 			return;
+		}
+
+		if (nonNullish(transactions)) {
+			this.#historyPublished = true;
 		}
 
 		this.postMessageWallet({
