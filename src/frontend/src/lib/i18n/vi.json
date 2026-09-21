@@ -1683,7 +1683,7 @@
 			"simulation_control_removed": "Đã xoá",
 			"transfer_sources": "Nguồn",
 			"transfer_party_own": "Tài khoản của bạn",
-			"transfer_parties_partial": "OISY không thể mô phỏng giao dịch này, nên danh sách ở dưới được dựng từ những gì chính thông điệp nêu ra, và có thể không bao gồm hết cả những điều đó. Số tiền do một chương trình khác chuyển thay cho nó không được liệt kê. Chỉ ký nếu bạn tin ứng dụng này.",
+			"transfer_parties_partial": "OISY không thể mô phỏng giao dịch này, nên các nguồn và thao tác được hiển thị chỉ là những gì chính giao dịch chứa. Số tiền do một chương trình khác chuyển thay cho nó không được liệt kê, và thao tác mà OISY không đọc được sẽ được liệt kê mà không nêu nó làm gì. Chỉ ký nếu bạn tin ứng dụng này.",
 			"dapp_prioritization_fee": "Phí ưu tiên do dApp thiết lập, không phải OISY.",
 			"high_prioritization_fee": "Giao dịch này đặt mức phí ưu tiên cao bất thường. Hãy kiểm tra kỹ và chỉ ký nếu bạn tin tưởng ứng dụng này.",
 			"dapp_gas_limit": "Giới hạn gas do ứng dụng thiết lập, không phải OISY. Phí tối đa ở trên là mức cao nhất mà giao dịch này có thể tốn.",

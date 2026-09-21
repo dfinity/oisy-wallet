@@ -1683,7 +1683,7 @@
 			"simulation_control_removed": "Removido",
 			"transfer_sources": "Origens",
 			"transfer_party_own": "Sua conta",
-			"transfer_parties_partial": "A OISY não consegue simular esta transação, por isso a lista abaixo é construída a partir do que a própria mensagem indica, e pode não cobrir nem tudo isso. Os fundos movidos por outro programa em seu nome não são listados. Assine apenas se confiar nesta aplicação.",
+			"transfer_parties_partial": "A OISY não consegue simular esta transação, por isso as origens e operações mostradas são apenas as que ela própria contém. Os fundos movidos por outro programa em seu nome não são listados, e uma operação que a OISY não consegue ler é listada sem o que faz. Assine apenas se confiar nesta aplicação.",
 			"dapp_prioritization_fee": "Taxa de prioridade definida pelo dApp, não pela OISY.",
 			"high_prioritization_fee": "Esta transação define uma taxa de prioridade incomumente alta. Verifique-a com cuidado e assine somente se confiar neste aplicativo.",
 			"dapp_gas_limit": "Limite de gás definido pelo aplicativo, não pela OISY. A taxa máxima acima é o máximo que esta transação pode custar.",

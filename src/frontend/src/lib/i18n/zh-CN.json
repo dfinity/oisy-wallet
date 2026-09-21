@@ -1683,7 +1683,7 @@
 			"simulation_control_removed": "已移除",
 			"transfer_sources": "来源",
 			"transfer_party_own": "您的账户",
-			"transfer_parties_partial": "OISY 无法模拟此交易，因此下面的列表是根据消息本身声明的内容生成的，甚至可能未涵盖其全部。由其他程序代为转移的资金未列出。请仅在您信任该应用时签名。",
+			"transfer_parties_partial": "OISY 无法模拟此交易，因此显示的来源和操作仅为交易本身包含的内容。由其他程序代为转移的资金不会列出，OISY 无法读取的操作会被列出但不说明其作用。请仅在您信任该应用时签名。",
 			"dapp_prioritization_fee": "由 dApp（而非 OISY）设置的优先费。",
 			"high_prioritization_fee": "此交易设置的优先费异常高。请仔细检查，仅在您信任此应用时才签名。",
 			"dapp_gas_limit": "由应用（而非 OISY）设置的 Gas 限额。上方的最高费用是此交易可能花费的最大金额。",
