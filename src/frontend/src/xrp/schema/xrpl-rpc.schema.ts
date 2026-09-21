@@ -334,13 +334,23 @@ export const XrpAccountTransactionEntrySchema = z.object({
 export const XrplAccountTxErrorSchema = z.object({
 	error: z.string(),
 	account: z.string().optional(),
-	request: XrplRequestEchoSchema.optional()
+	request: XrplRequestEchoSchema.optional(),
+	// The two `account_tx` schemas are a discriminated pair, like every other result in this file.
+	// Without this, `{ error: 'actNotFound', transactions: [...] }` parses here — objects strip
+	// unknown keys — and the caller, which branches on `error` before parsing anything, returns an
+	// empty page while the node supplied history in the same payload. Worse than a rejected
+	// response, because an empty page is recorded as settled rather than retried.
+	transactions: z.never().optional()
 });
 
 export const XrplAccountTxResultSchema = z.object({
 	account: z.string(),
 	transactions: z.array(z.unknown()),
-	marker: z.unknown().optional()
+	marker: z.unknown().optional(),
+	// The other half of the pair. Redundant today, since the caller tests `error` first and never
+	// reaches this schema with one — which is exactly the kind of fact that stops being true, and
+	// the reason every other result schema here carries it anyway.
+	error: z.never().optional()
 });
 
 export const XrplFeeResultSchema = z.object({
