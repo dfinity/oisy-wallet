@@ -372,15 +372,23 @@ everything needed (verified §2.1), so the whole effort lives in this repo.
 **Rollout safety — disabled on user-facing environments by a temporary
 override, not a bespoke flag.** XRP uses the **same enablement convention as
 every other chain** — `VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While
-the integration is in progress, `XRP_MAINNET_DISABLED_OVERRIDE` force-disables
+the integration was in progress, `XRP_MAINNET_DISABLED_OVERRIDE` force-disabled
 XRP on prod, beta, and in Vitest regardless of the env var. Real local and
-staging/test_fe builds remain governed by `VITE_XRP_MAINNET_DISABLED`, so they
-default to enabled for testing. On prod, beta, and in Vitest,
-`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays.
-Enabling XRP everywhere is simply **removing the override** (final PR), after
-which it behaves exactly like BTC/ETH/SOL. Enablement stays entirely in code —
-**no CI/deploy env plumbing** — so each PR merges to `main` safely without
+staging/test_fe builds remained governed by `VITE_XRP_MAINNET_DISABLED`, so they
+defaulted to enabled for testing. On prod, beta, and in Vitest,
+`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolved to empty arrays.
+Enabling XRP everywhere was simply **removing the override** (final PR), after
+which it behaves exactly like BTC/ETH/SOL. Enablement stayed entirely in code —
+**no CI/deploy env plumbing** — so each PR merged to `main` safely without
 exposing a half-built chain to users.
+
+**Completed in Phase 10.** The override is gone and `VITE_XRP_MAINNET_DISABLED`
+alone governs XRP, exactly as for every other chain. The "entirely in code"
+property is about enablement only: the RPC **endpoint** has always needed deploy
+plumbing — `VITE_XRP_RPC_URL_MAINNET`, from the
+`VITE_XRP_RPC_URL_MAINNET_STAGING` / `_BETA` secrets forwarded by
+`deploy-to-environment.yml` and from the build for production — which arrived in
+Phase 3 with the RPC client, not with enablement.
 
 **Mainnet first.** The initial PRs are **mainnet-only**; XRPL **testnet** (plus
 a Bithomp testnet explorer + faucet) is a deliberate fast-follow, not part of
