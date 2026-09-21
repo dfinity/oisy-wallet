@@ -115,6 +115,68 @@ describe('xrp-transaction.utils', () => {
 			expect(mapped()).toBeUndefined();
 		});
 
+		// Not just the fields that reach `BigInt`. These reach the store and the UI: an object `hash`
+		// became the row id, and the scheduler keys its cache by it — `[object Object]`. Guarding
+		// field by field kept missing whichever one had not been named yet, which is why the check
+		// is now one parse.
+		it.each([
+			{ name: 'an object hash', tx: { hash: {} } },
+			{ name: 'a numeric hash', tx: { hash: 42 } },
+			{ name: 'an object Account', tx: { Account: {} } },
+			{ name: 'an object Destination', tx: { Destination: {} } },
+			{ name: 'a string DestinationTag', tx: { DestinationTag: '7' } },
+			{ name: 'a fractional DestinationTag', tx: { DestinationTag: 1.5 } },
+			{ name: 'a missing Account', tx: { Account: undefined } }
+		])('skips a row with $name', ({ tx }) => {
+			const mapped = () =>
+				mapXrpTransaction({
+					transaction: {
+						tx: {
+							TransactionType: 'Payment',
+							Account: wallet,
+							Destination: counterparty,
+							Amount: '5000000',
+							Fee: '10',
+							hash: 'HOK',
+							ledger_index: 42,
+							date: 1,
+							...tx
+						},
+						meta: { TransactionResult: 'tesSUCCESS' },
+						validated: true
+					},
+					xrpAddress: wallet
+				});
+
+			expect(mapped).not.toThrow();
+			expect(mapped()).toBeUndefined();
+		});
+
+		// A node adding a field it does not document must not empty a history: unmodelled keys are
+		// stripped, not rejected.
+		it('still maps a row carrying fields the mapper does not model', () => {
+			const ui = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						hash: 'HNEW',
+						ledger_index: 42,
+						date: 1,
+						SomeFutureField: { nested: true }
+					},
+					meta: { TransactionResult: 'tesSUCCESS', AffectedNodes: [] },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(ui?.id).toBe('HNEW');
+			expect(ui?.type).toBe('receive');
+		});
+
 		// These reach `BigInt`, which throws rather than returning nothing, and the throw escapes the
 		// `.map` that builds the page — so one unreadable row used to cost the whole history, on
 		// every tick, since the same page is re-fetched and fails the same way.
