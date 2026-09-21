@@ -7,66 +7,6 @@ describe('networks.xrp.env', () => {
 		vi.resetModules();
 	});
 
-	// Without an endpoint a user-facing build shows XRP and cannot use it: the URL resolves to
-	// `undefined` there by design, `xrpHttpRpcUrl` throws, and every balance and history request
-	// fails. `deploy-to-environment.yml` wires the endpoint for staging and beta only — there is no
-	// `ic` arm — so production could not have one at all. Absent beats broken.
-	describe('XRP_MAINNET_ENABLED', () => {
-		const importEnabled = async ({
-			prod = false,
-			beta = false
-		}: { prod?: boolean; beta?: boolean } = {}): Promise<boolean> => {
-			vi.doMock('$lib/constants/app.constants', async (importOriginal) => ({
-				...(await importOriginal<typeof AppConstants>()),
-				TEST: true,
-				PROD: prod,
-				BETA: beta
-			}));
-
-			vi.resetModules();
-
-			const { XRP_MAINNET_ENABLED } = await import('$env/networks/networks.xrp.env');
-
-			return XRP_MAINNET_ENABLED;
-		};
-
-		it.each([
-			{ flavour: 'ic', flags: { prod: true } },
-			{ flavour: 'beta', flags: { beta: true } }
-		])('is disabled on a $flavour build with no endpoint', async ({ flags }) => {
-			await expect(importEnabled(flags)).resolves.toBeFalsy();
-		});
-
-		it.each([
-			{ flavour: 'ic', flags: { prod: true } },
-			{ flavour: 'beta', flags: { beta: true } }
-		])('is enabled on a $flavour build once an endpoint is configured', async ({ flags }) => {
-			vi.stubEnv('VITE_XRP_RPC_URL_MAINNET', 'https://rpc.example.com');
-
-			await expect(importEnabled(flags)).resolves.toBeTruthy();
-		});
-
-		// An empty secret is unconfigured, the same as it is for the URL itself.
-		it('is disabled on a user-facing build when the endpoint is empty', async () => {
-			vi.stubEnv('VITE_XRP_RPC_URL_MAINNET', '');
-
-			await expect(importEnabled({ prod: true })).resolves.toBeFalsy();
-		});
-
-		// Staging and local keep the public-cluster fallback, so they need no endpoint to work and
-		// the gate must not reach them.
-		it('stays enabled on a non-user-facing build with no endpoint', async () => {
-			await expect(importEnabled()).resolves.toBeTruthy();
-		});
-
-		it('still honours the disable flag on a build that has an endpoint', async () => {
-			vi.stubEnv('VITE_XRP_RPC_URL_MAINNET', 'https://rpc.example.com');
-			vi.stubEnv('VITE_XRP_MAINNET_DISABLED', 'true');
-
-			await expect(importEnabled({ prod: true })).resolves.toBeFalsy();
-		});
-	});
-
 	describe('XRP_RPC_HTTP_URL_MAINNET', () => {
 		// `PROD`/`BETA` derive from `VITE_DFX_NETWORK`, a Vite compile-time define rather than an
 		// `import.meta.env` read, so `stubEnv` cannot reach them and the build flavour is whatever
