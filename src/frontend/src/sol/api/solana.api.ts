@@ -97,9 +97,12 @@ const cachedTransactions = new SvelteMap<
 >();
 
 export const fetchTransactionDetailForSignature = async ({
+	address,
 	signature,
 	network
 }: {
+	// The wallet the detail is kept for: the cache is per wallet, as every other one is per principal.
+	address: SolAddress;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 }): Promise<SolRpcTransaction | null> => {
@@ -123,7 +126,7 @@ export const fetchTransactionDetailForSignature = async ({
 	// worker's newest page again, and every record derived again for another token fetches its
 	// details again. Two realms that ask for the same signature before either has kept it still fetch
 	// it twice: this spares the repeat, not the race.
-	const storedTransaction = await getIdbSolTransactionDetail({ network, signature });
+	const storedTransaction = await getIdbSolTransactionDetail({ address, network, signature });
 
 	if (nonNullish(storedTransaction)) {
 		networkCache.set(signature.signature, storedTransaction);
@@ -154,7 +157,7 @@ export const fetchTransactionDetailForSignature = async ({
 		networkCache.set(signature.signature, transaction);
 
 		// Not awaited: the transaction is already loaded, and keeping it is worth nothing to this call.
-		setIdbSolTransactionDetail({ network, transaction }).catch((err: unknown) =>
+		setIdbSolTransactionDetail({ address, network, transaction }).catch((err: unknown) =>
 			consoleError('Caching a Solana transaction detail failed:', err)
 		);
 	}

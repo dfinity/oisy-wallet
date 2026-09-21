@@ -399,6 +399,7 @@ describe('solana.api', () => {
 			const signature = mockSolSignatureResponse();
 
 			const first = await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
 				signature,
 				network: SolanaNetworks.mainnet
 			});
@@ -416,6 +417,7 @@ describe('solana.api', () => {
 			});
 
 			const second = await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
 				signature,
 				network: SolanaNetworks.mainnet
 			});
@@ -423,7 +425,11 @@ describe('solana.api', () => {
 			expect(second).toBe(first);
 			expect(mockGetTransaction).toHaveBeenCalledOnce();
 
-			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.devnet });
+			await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
+				signature,
+				network: SolanaNetworks.devnet
+			});
 
 			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
 		});
@@ -432,13 +438,18 @@ describe('solana.api', () => {
 			const signature = mockSolSignatureResponse({ confirmationStatus: 'confirmed' });
 
 			const first = await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
 				signature,
 				network: SolanaNetworks.mainnet
 			});
 
 			expect(first?.confirmationStatus).toBe('confirmed');
 
-			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet });
+			await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
+				signature,
+				network: SolanaNetworks.mainnet
+			});
 
 			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
 		});
@@ -449,10 +460,18 @@ describe('solana.api', () => {
 			const signature = mockSolSignatureResponse();
 
 			await expect(
-				fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet })
+				fetchTransactionDetailForSignature({
+					address: mockSolAddress,
+					signature,
+					network: SolanaNetworks.mainnet
+				})
 			).resolves.toBeNull();
 
-			await fetchTransactionDetailForSignature({ signature, network: SolanaNetworks.mainnet });
+			await fetchTransactionDetailForSignature({
+				address: mockSolAddress,
+				signature,
+				network: SolanaNetworks.mainnet
+			});
 
 			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
 		});
@@ -474,12 +493,14 @@ describe('solana.api', () => {
 				vi.mocked(getIdbSolTransactionDetail).mockResolvedValue(stored);
 
 				const transaction = await fetchTransactionDetailForSignature({
+					address: mockSolAddress,
 					signature,
 					network: SolanaNetworks.mainnet
 				});
 
 				expect(transaction).toEqual(stored);
 				expect(getIdbSolTransactionDetail).toHaveBeenCalledExactlyOnceWith({
+					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
 					signature
 				});
@@ -490,11 +511,13 @@ describe('solana.api', () => {
 				const signature = mockSolSignatureResponse();
 
 				await fetchTransactionDetailForSignature({
+					address: mockSolAddress,
 					signature,
 					network: SolanaNetworks.mainnet
 				});
 
 				expect(setIdbSolTransactionDetail).toHaveBeenCalledExactlyOnceWith({
+					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
 					transaction: expect.objectContaining({
 						confirmationStatus: 'finalized',
@@ -507,6 +530,7 @@ describe('solana.api', () => {
 				const signature = mockSolSignatureResponse({ confirmationStatus: 'confirmed' });
 
 				await fetchTransactionDetailForSignature({
+					address: mockSolAddress,
 					signature,
 					network: SolanaNetworks.mainnet
 				});
@@ -522,6 +546,7 @@ describe('solana.api', () => {
 				const signature = mockSolSignatureResponse();
 
 				const transaction = await fetchTransactionDetailForSignature({
+					address: mockSolAddress,
 					signature,
 					network: SolanaNetworks.mainnet
 				});

@@ -1,16 +1,9 @@
 import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.constants';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
-import {
-	clear,
-	createStore,
-	delMany,
-	get,
-	keys,
-	promisifyRequest,
-	type UseStore
-} from 'idb-keyval';
+import { clear, createStore, delMany, get, keys, set, type UseStore } from 'idb-keyval';
 
 /**
  * The details of a finalized Solana transaction, kept per network and signature.
@@ -23,92 +16,67 @@ import {
  * entry is written or not, never half. The slot is part of the key, which lets trimming order the
  * entries by reading their keys alone.
  */
-const EPOCH_KEY = 'epoch';
+let store: UseStore | undefined;
 
-interface Idb {
-	store: UseStore;
-	// The session this realm writes for, read when the realm loads the module. Clearing the store
-	// removes it, so the realms of a session that ended (the network worker as much as the main
-	// thread) write nothing after sign-out, whether or not they were waiting on a fetch at the time.
-	epoch: Promise<string | undefined>;
-}
-
-let idb: Idb | undefined;
-
-// An epoch is created by the first realm of a session that finds none, in the same transaction that
-// reads it, so that two realms starting together agree on one.
-const readEpoch = async (store: UseStore): Promise<string | undefined> => {
-	try {
-		return await store('readwrite', (objectStore) => {
-			const request = objectStore.get(EPOCH_KEY);
-
-			// Chained by hand rather than with promises, as `idb-keyval` does for `update`: a promise
-			// continuation can run after the transaction has closed.
-			return new Promise<string>((resolve, reject) => {
-				request.onsuccess = () => {
-					if (typeof request.result === 'string') {
-						resolve(request.result);
-
-						return;
-					}
-
-					const epoch = crypto.randomUUID();
-
-					objectStore.put(epoch, EPOCH_KEY);
-
-					resolve(epoch);
-				};
-
-				request.onerror = () => reject(request.error);
-			});
-		});
-	} catch (_err: unknown) {
-		// Without an epoch nothing is written, which is where the caller was before this cache existed.
-		return undefined;
-	}
-};
-
-const openIdb = (): Idb | undefined => {
+// Opened on first use, never as the module loads.
+//
+// `idb-keyval`'s `createStore` opens nothing by itself: it calls `indexedDB.open` on first use. So
+// no other `oisy-` database exists before sign-in, and every delete at sign-out succeeds. This
+// module used to open at module scope, and read from it there, so it was the one
+// database that existed, and was held open, on every page load including the landing page. A delete
+// cannot proceed against an open connection, so its delete was blocked, the rejection was swallowed
+// by the `Promise.allSettled` in `deleteIdbAllOisyRelated`, and the pending delete then stalled
+// every later `open()` of it.
+const openIdb = (): UseStore | undefined => {
 	// The dapp is pre-rendered without IndexedDB.
 	if (typeof indexedDB === 'undefined') {
 		return undefined;
 	}
 
-	if (isNullish(idb)) {
-		const store = createStore('oisy-sol-transaction-details', 'details');
+	store ??= createStore('oisy-sol-transaction-details', 'details');
 
-		idb = { store, epoch: readEpoch(store) };
-	}
-
-	return idb;
+	return store;
 };
 
-// Opened as the module loads rather than on first use, so that a realm takes the epoch of the session
-// it started in: a worker that fetched nothing yet when the user signed out must not adopt the next
-// session's epoch on its first write.
-openIdb();
-
-// The slot is zero-padded to the 20 digits of a u64, so that the keys of a network sort by slot.
+// Kept per wallet, as every other cache is kept per principal.
+//
+// A finalized transaction is the same for everyone, so the entries could be shared - but nothing in
+// a shared key says who wrote it, so a leftover entry could not be told apart at sign-out and
+// revealed which transactions the previous user's wallet had looked at. The wallet address scopes it
+// exactly as a principal does, and is what these call sites already hold.
+//
+// The slot is zero-padded to the 20 digits of a u64, so that the keys of one wallet and network sort
+// by slot, which is what lets trimming order the entries by reading keys alone.
 const detailKey = ({
+	address,
 	network,
 	signature,
 	slot
 }: {
+	address: SolAddress;
 	network: SolanaNetworkType;
 	signature: SolSignature['signature'];
 	slot: SolSignature['slot'];
-}): string => `${network}#${slot.toString().padStart(20, '0')}#${signature}`;
+}): string => `${address}#${network}#${slot.toString().padStart(20, '0')}#${signature}`;
 
-const networkPrefix = (network: SolanaNetworkType): string => `${network}#`;
+const walletPrefix = ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): string => `${address}#${network}#`;
 
 /**
  * A cache read must never fail a load: without it the caller asks the RPC, which is what it did
  * before this cache existed.
  */
 export const getIdbSolTransactionDetail = async ({
+	address,
 	network,
 	signature: { signature, slot }
 }: {
+	address: SolAddress;
 	network: SolanaNetworkType;
 	signature: Pick<SolSignature, 'signature' | 'slot'>;
 }): Promise<SolRpcTransaction | undefined> => {
@@ -119,16 +87,25 @@ export const getIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		return await get<SolRpcTransaction>(detailKey({ network, signature, slot }), current.store);
+		return await get<SolRpcTransaction>(detailKey({ address, network, signature, slot }), current);
 	} catch (_err: unknown) {
 		return undefined;
 	}
 };
 
-// Everything below the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots of the network is
-// dropped. The keys alone say which: an entry has no other part that could be left behind.
-const trimNetwork = async ({ network, store }: { network: SolanaNetworkType; store: UseStore }) => {
-	const prefix = networkPrefix(network);
+// Everything below the newest `SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots of the wallet on that
+// network is dropped. The keys alone say which: an entry has no other part that could be left
+// behind.
+const trimWallet = async ({
+	address,
+	network,
+	store
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	store: UseStore;
+}) => {
+	const prefix = walletPrefix({ address, network });
 
 	const networkKeys = (await keys<string>(store)).filter((key) => key.startsWith(prefix)).sort();
 
@@ -151,9 +128,11 @@ const trimNetwork = async ({ network, store }: { network: SolanaNetworkType; sto
  * a full quota) leaves the loaded transaction exactly as it is.
  */
 export const setIdbSolTransactionDetail = async ({
+	address,
 	network,
 	transaction
 }: {
+	address: SolAddress;
 	network: SolanaNetworkType;
 	transaction: SolRpcTransaction;
 }): Promise<void> => {
@@ -164,44 +143,28 @@ export const setIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		const epoch = await current.epoch;
+		await set(
+			detailKey({
+				address,
+				network,
+				signature: transaction.signature,
+				slot: transaction.slot
+			}),
+			transaction,
+			current
+		);
 
-		if (isNullish(epoch)) {
-			return;
-		}
-
-		const key = detailKey({
-			network,
-			signature: transaction.signature,
-			slot: transaction.slot
-		});
-
-		// The epoch is checked in the transaction that writes, so a clear cannot slip in between.
-		await current.store('readwrite', (objectStore) => {
-			const request = objectStore.get(EPOCH_KEY);
-
-			return new Promise<void>((resolve, reject) => {
-				request.onsuccess = () => {
-					if (request.result === epoch) {
-						objectStore.put(transaction, key);
-					}
-
-					resolve(promisifyRequest(objectStore.transaction));
-				};
-
-				request.onerror = () => reject(request.error);
-			});
-		});
-
-		await trimNetwork({ network, store: current.store });
+		await trimWallet({ address, network, store: current });
 	} catch (_err: unknown) {
 		// Nothing to recover: the detail is already loaded, and the next load fetches it again.
 	}
 };
 
 /**
- * Empties the cache, epoch included. This realm keeps the epoch it started with, and so writes
- * nothing more: sign-out reloads the page, and the realms of the next session start a new epoch.
+ * Empties the cache, every wallet in it.
+ *
+ * Sign-out clears it and then deletes the database, and the page that follows deletes it again, as
+ * it does for every other `oisy-` database.
  */
 export const clearIdbSolTransactionDetails = async () => {
 	const current = openIdb();
@@ -210,5 +173,5 @@ export const clearIdbSolTransactionDetails = async () => {
 		return;
 	}
 
-	await clear(current.store);
+	await clear(current);
 };

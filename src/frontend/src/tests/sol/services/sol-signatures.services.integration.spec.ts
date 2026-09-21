@@ -14,6 +14,7 @@ import {
 	fixtureSolAtaAddresses
 } from '$tests/fixtures/solana/addresses.fixture';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import {
@@ -237,6 +238,7 @@ describe('sol-signatures.services integration', () => {
 
 					const transactionDetail: SolRpcTransaction | null =
 						await fetchTransactionDetailForSignature({
+							address: mockSolAddress,
 							signature,
 							network: SolanaNetworks.mainnet
 						});

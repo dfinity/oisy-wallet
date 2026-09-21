@@ -72,6 +72,7 @@ export const fetchSolTransactionsForSignature = async ({
 	ownedTokenAccounts?: SolAddress[];
 }): Promise<SolTransactionUi[]> => {
 	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
+		address,
 		signature,
 		network
 	});
