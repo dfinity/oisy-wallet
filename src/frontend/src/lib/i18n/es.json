@@ -970,6 +970,7 @@
 			"network": "Red",
 			"source_network": "Red de origen",
 			"destination_network": "Red de destino",
+			"xrp_destination_tag": "Etiqueta de destino",
 			"initializing_transaction": "Inicializando transacción",
 			"convert_to_native_icp": "Convertir a ICP nativo",
 			"open_qr_modal": "Iniciar escaneo de código QR para detalles de la transacción",
@@ -992,6 +993,8 @@
 			"enter_eth_address": "Introduce dirección pública (0x), nombre o alias",
 			"enter_recipient_address": "Introduce la dirección, nombre o alias del destinatario",
 			"enter_wallet_address": "Introduce la dirección de la billetera, nombre o alias",
+			"enter_xrp_address": "Introduce la dirección XRP",
+			"xrp_destination_tag": "Introduce la etiqueta de destino (opcional)",
 			"select_network": "Seleccionar red",
 			"search_nfts": "Buscar Coleccionables"
 		},
@@ -1020,7 +1023,9 @@
 			"unknown_cketh": "El token ckETH no se puede recuperar.",
 			"destination_address_invalid": "La dirección de destino es inválida.",
 			"amount_invalid": "La cantidad es inválida.",
+			"xrp_destination_tag_invalid": "La etiqueta de destino debe ser un número entero entre 0 y 4294967295.",
 			"insufficient_funds_verbose_btc": "",
+			"insufficient_funds_for_reserve": "Fondos insuficientes: el importe debe dejar lo suficiente para cubrir la comisión y la reserva de cuenta XRP requerida.",
 			"insufficient_funds_for_gas": "Fondos insuficientes para el gas",
 			"insufficient_funds_for_amount": "Fondos insuficientes para la cantidad",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Fondos de Ethereum insuficientes para cubrir las comisiones",
@@ -1055,6 +1060,9 @@
 			"incompatible_token": "El token es incompatible. Por favor, inténtelo de nuevo con un token compatible.",
 			"no_btc_network_id": "La red actual ($networkId) no es una red Bitcoin.",
 			"no_solana_network_id": "La red actual ($networkId) no es una red Solana.",
+			"no_xrp_network_id": "La red actual ($networkId) no es una red XRP Ledger.",
+			"xrp_confirmation_failed": "No pudimos confirmar si la transacción se envió. Todavía puede completarse, así que no la envíes de nuevo por ahora — tu saldo se actualizará si se completa.",
+			"xrp_transaction_failed": "La red procesó la transacción, pero falló, por lo que no se enviaron tus fondos. La comisión de red se cobró igualmente.",
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",
@@ -1064,7 +1072,13 @@
 			"solana_insufficient_funds": "El saldo de su token no es suficiente para completar esta transacción. Su saldo puede haber cambiado desde la última vez que se mostró.",
 			"solana_insufficient_funds_for_fee": "Su saldo de SOL no es suficiente para cubrir las tarifas de la transacción.",
 			"solana_insufficient_funds_for_rent": "Su saldo de SOL no es suficiente para cubrir el alquiler requerido para la creación de la cuenta.",
-			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible."
+			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible.",
+			"xrp_send_expired": "La transacción no se envió: la red no la incluyó a tiempo. Nada salió de tu billetera y es seguro crear una nueva.",
+			"xrp_amount_exceeds_sendable": "El importe ya no cabe. Tu cuenta debe conservar su reserva de XRP más la comisión de red, y ambas pueden cambiar mientras revisas. No se envió nada: reduce el importe o inténtalo de nuevo cuando se actualicen los datos de tu cuenta.",
+			"xrp_destination_unfunded": "Esta dirección aún no tiene una cuenta de XRP. Crearla requiere un primer pago de al menos $reserve XRP. No se envió nada: aumenta el importe o envía a una dirección que ya esté financiada.",
+			"xrp_destination_tag_required": "Esta dirección requiere una etiqueta de destino. No se envió nada: añade la etiqueta que te dio el servicio al que pagas y vuelve a enviar.",
+			"xrp_destination_is_source": "Esta es tu propia dirección XRP. No se envió nada: elige otro destinatario.",
+			"xrp_account_state_unavailable": "La billetera no pudo leer los datos de tu cuenta, por lo que no se pudo comprobar el importe. No se envió nada: vuelve a intentarlo en un momento."
 		}
 	},
 	"mint": {

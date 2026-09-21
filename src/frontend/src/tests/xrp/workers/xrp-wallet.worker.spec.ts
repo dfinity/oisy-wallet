@@ -1,6 +1,11 @@
-import type { PostMessage, PostMessageDataRequestXrp } from '$lib/types/post-message';
-import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
+import type {
+	PostMessage,
+	PostMessageDataRequestXrp,
+	PostMessageRequest
+} from '$lib/types/post-message';
+import { excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
+import { XrpNetworks } from '$xrp/types/network';
 import { onXrpWalletMessage } from '$xrp/workers/xrp-wallet.worker';
 
 vi.mock(import('$xrp/schedulers/xrp-wallet.scheduler'), async (importOriginal) => {
@@ -27,8 +32,21 @@ describe('xrp-wallet.worker', () => {
 		const mockStop = vi.fn();
 		const mockTrigger = vi.fn();
 
-		const createEvent = (msg: string) =>
-			createMockEvent(msg) as unknown as MessageEvent<PostMessage<PostMessageDataRequestXrp>>;
+		// A real `MessageEvent` carrying a real request payload, rather than a shape-shifted mock.
+		// These tests only assert which scheduler method a message reaches, but the payload still
+		// has to BE a `PostMessageDataRequestXrp` for the signature to mean anything.
+		const createEvent = (
+			msg: PostMessageRequest
+		): MessageEvent<PostMessage<PostMessageDataRequestXrp>> =>
+			new MessageEvent('message', {
+				data: {
+					msg,
+					data: {
+						address: { data: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', certified: false },
+						xrpNetwork: XrpNetworks.mainnet
+					}
+				}
+			});
 
 		beforeEach(() => {
 			vi.clearAllMocks();

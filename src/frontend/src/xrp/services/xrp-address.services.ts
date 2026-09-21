@@ -16,7 +16,13 @@ import type { XrpAddress } from '$xrp/types/address';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { mapEd25519PublicKeyToClassicAddress } from '$xrp/utils/xrp-address.utils';
 
-const getXrpPublicKey = async ({
+/**
+ * The account's Ed25519 public key, derived locally when the frontend can and obtained from the
+ * signer canister otherwise (see `deriveTokenAddress`). Shared with `getXrpSigningPublicKey`: the
+ * address and the transaction's `SigningPubKey` must be the same key, so they must come from the
+ * same derivation.
+ */
+export const getXrpPublicKey = async ({
 	derivationPath,
 	identity,
 	...rest
