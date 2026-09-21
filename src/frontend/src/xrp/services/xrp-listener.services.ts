@@ -83,6 +83,20 @@ export const syncWalletError = ({
 	// Ownership changes are `resetWallet`'s job, and it uses `clear` precisely to keep the two apart.
 	balancesStore.reset(tokenId);
 
+	// Keeping the rows is not the same as leaving the entry unwritten. `resetWallet` clears it to
+	// `undefined` on every worker start, and `isTransactionsStoreInitialized` counts anything that
+	// is not `undefined` — so a token whose FIRST load never succeeded holds the aggregate Activity
+	// gate open for good: an otherwise-empty account stays on skeletons, and `levelNewcomers` never
+	// runs, leaving the chains at uneven floors. A provider outage or a rate limit on first load is
+	// enough; no misconfiguration needed.
+	//
+	// Written only in that never-loaded case, which is what separates this from the unconditional
+	// `reset`/`nullify` the other chains do: an entry that already holds rows keeps them, for the
+	// reason above.
+	if (isNullish(get(xrpTransactionsStore)?.[tokenId])) {
+		xrpTransactionsStore.nullify(tokenId);
+	}
+
 	if (hideToast) {
 		consoleWarn(`${errorText}:`, err);
 		return;
