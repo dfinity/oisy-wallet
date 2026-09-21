@@ -1680,7 +1680,7 @@
 			"simulation_control_removed": "Entfernt",
 			"transfer_sources": "Quellen",
 			"transfer_party_own": "Ihr Konto",
-			"transfer_parties_partial": "OISY kann diese Transaktion nicht simulieren, daher enthalten die obigen Listen nur die Anweisungen, die die Nachricht selbst angibt. Von einem anderen Programm in ihrem Auftrag verschobene Mittel werden nicht aufgeführt. Signieren Sie nur, wenn Sie dieser App vertrauen.",
+			"transfer_parties_partial": "OISY kann diese Transaktion nicht simulieren, daher sind die angezeigten Quellen und Vorgänge nur die, die sie selbst enthält. Gelder, die ein anderes Programm in ihrem Auftrag bewegt, sind nicht aufgeführt, und ein Vorgang, den OISY nicht lesen kann, wird ohne seine Wirkung aufgeführt. Signieren Sie nur, wenn Sie dieser App vertrauen.",
 			"dapp_prioritization_fee": "Prioritätsgebühr von der dApp festgelegt, nicht von OISY.",
 			"high_prioritization_fee": "Diese Transaktion legt eine ungewöhnlich hohe Prioritätsgebühr fest. Prüfen Sie sie sorgfältig und signieren Sie nur, wenn Sie dieser App vertrauen.",
 			"dapp_gas_limit": "Gaslimit von der App festgelegt, nicht von OISY. Die maximale Gebühr oben ist das Höchste, was diese Transaktion kosten kann.",

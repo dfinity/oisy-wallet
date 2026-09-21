@@ -1680,7 +1680,7 @@
 			"simulation_control_removed": "Rimosso",
 			"transfer_sources": "Fonti",
 			"transfer_party_own": "Il tuo account",
-			"transfer_parties_partial": "OISY non riesce a simulare questa transazione, quindi gli elenchi sopra riportati includono solo le istruzioni indicate direttamente dal messaggio. I fondi spostati da un altro programma per suo conto non sono elencati. Firma solo se ti fidi di questa app.",
+			"transfer_parties_partial": "OISY non può simulare questa transazione, quindi le origini e le operazioni mostrate sono solo quelle che contiene essa stessa. I fondi spostati da un altro programma per suo conto non sono elencati, e un'operazione che OISY non riesce a leggere è elencata senza ciò che fa. Firma solo se ti fidi di questa app.",
 			"dapp_prioritization_fee": "Commissione di priorità impostata dalla dApp, non da OISY.",
 			"high_prioritization_fee": "Questa transazione imposta una commissione di priorità insolitamente alta. Controllala attentamente e firma solo se ti fidi di questa app.",
 			"dapp_gas_limit": "Limite di gas impostato dall'app, non da OISY. La commissione massima sopra indicata è il massimo che questa transazione può costare.",
