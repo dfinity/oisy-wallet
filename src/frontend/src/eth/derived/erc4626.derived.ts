@@ -114,7 +114,9 @@ export const erc4626TokensExchangeData: Readable<Erc4626TokensExchangeData[]> = 
 				assetAddress,
 				assetDecimals,
 				network: {
-					providers: { infura },
+					name,
+					chainId,
+					providers: { infura, alchemyJsonRpcUrl },
 					exchange
 				}
 			}) => ({
@@ -123,7 +125,7 @@ export const erc4626TokensExchangeData: Readable<Erc4626TokensExchangeData[]> = 
 				assetAddress,
 				assetDecimals,
 				exchange,
-				infura
+				network: { name, chainId, providers: { infura, alchemyJsonRpcUrl } }
 			})
 		)
 );

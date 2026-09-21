@@ -8,6 +8,9 @@ import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	MEMO_LEGACY_PROGRAM_ADDRESS,
 	MEMO_PROGRAM_ADDRESS,
+	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
+	SOLANA_RENT_EXEMPTION_YEARS,
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR,
 	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
@@ -417,12 +420,34 @@ const parseSolInstruction = (
 	return instruction;
 };
 
+/**
+ * The lamports an account of this size must hold to be rent-exempt, which is what opening one
+ * legitimately costs.
+ */
+const solRentExemptLamports = (space: bigint): bigint =>
+	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space) *
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR *
+	SOLANA_RENT_EXEMPTION_YEARS;
+
+/**
+ * Whether a creation funds the account beyond what its size costs.
+ *
+ * Rent is the price of the account existing, and the review carries it as the cost of the operation
+ * the creation belongs to. Anything above it is a balance sitting in an account somebody else
+ * controls, and the program owning that account decides where it goes - closing an SPL token
+ * account hands its whole balance to a destination the closing instruction names, and a message can
+ * open, initialise and close one in a single request. That is a payment, and the creation states no
+ * destination for the review to show it against.
+ */
+const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
+	lamports > solRentExemptLamports(space);
+
 const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
 		const {
-			data: { lamports, programAddress: owner },
+			data: { lamports, space, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
@@ -442,7 +467,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		// top-level `createAccount` owned by the token program, then initialises it - and the
 		// program that owns such an account is what governs the lamports in it. Those keep the rent
 		// they state, which the review carries as the cost of the operation it belongs to.
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		// System-owned means nothing governs the lamports but the key the account is opened at.
+		// Over-funded means a program governs them and the creation still states no destination: an
+		// SPL token account opened, initialised and closed in one message hands its whole balance to
+		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
 			return unfaithfulInstruction();
 		}
 
@@ -460,13 +489,13 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// is read here: everything else about this instruction stays unread, as it already was.
 	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
 		const {
-			data: { amount, programAddress: owner },
+			data: { amount, space, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
 			return unfaithfulInstruction();
 		}
 
@@ -481,29 +510,22 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// creations above would leave this one funding a stranger's key with a warning. Read as the
 	// others are - the owner alone, the rest left unread - and note it carries no payer of its own
 	// when the new account prefunds itself.
+	// The prefunding variant is refused whatever it opens the account for, which the other two
+	// creations are not. It exists to open an account that already holds lamports, so the field it
+	// states is what this instruction adds rather than what the account ends up with: a target
+	// funded beforehand passes a rent-sized check and still lands under `owner` with the larger
+	// balance. Reading it faithfully would need the account's pre-state, which this mapper is
+	// synchronous and has none of. It also names no payer when the account prefunds itself, so
+	// there would be a cost stated against nobody.
 	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
-		const {
-			data: { lamports, programAddress: owner },
-			accounts: { payer }
-		} = instruction;
-
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
-			return unfaithfulInstruction();
-		}
-
-		// The new account can prefund itself, and then no payer is named at all.
-		return {
-			amount: lamports,
-			...(nonNullish(payer) && { payer: payer.address })
-		};
+		return unfaithfulInstruction();
 	}
 
-	// Handing an account to a program, which is the System program's own version of the authority
-	// change already refused for a token account. The instruction states the new owner and the
-	// account, and the account is its only meta and a required signer - so a request can name the
-	// connected wallet itself, which signs every message it is sent as the fee payer. Afterwards the
-	// named program governs that account, and the summary has no field that says any of it: there is
-	// no amount, no source and no destination, exactly the shape a warning would let ride along
+	// Handing an account to a program is the System program's own version of the authority change
+	// already refused for a token account. A plain `Assign` requires the account to sign;
+	// `AssignWithSeed` instead requires the derivation base to sign. In either form, the authorized
+	// signer can hand the account to the named program, and the summary has no field that says any
+	// of it: there is no amount, source, or destination, so a warning would let the change ride along
 	// behind a transfer the user does see.
 	//
 	// The nonce instructions that name an authority belong here too. Initialising a nonce account
@@ -581,10 +603,18 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
-	// Using a nonce rather than deciding anything about it: advancing one consumes the blockhash a
-	// durable transaction was signed against, and upgrading one migrates a legacy account to the
-	// current layout. Neither moves lamports nor names an authority, so neither has an effect the
-	// summary omits by staying silent about it.
+	// Using a nonce rather than deciding anything about it: advancing one replaces the value a
+	// durable transaction is signed against, and upgrading one migrates a legacy account to the
+	// current layout. Advancing does require the nonce authority to sign, but it designates no new
+	// one and moves no lamports, so neither instruction has an effect the summary omits by staying
+	// silent about it.
+	//
+	// Advancing is also not optional to a caller that needs it: a durable-nonce transaction carries
+	// it as its first instruction, which is what makes the nonce the transaction's lifetime, and
+	// the sign-only path signs the message as given rather than re-dating it. Refusing the opcode
+	// would refuse every such request. A message can still advance a nonce it has no lifetime use
+	// for, invalidating a transaction already signed against the old value, but that moves nothing
+	// and takes nothing: telling the two apart is the instruction's position, not its name.
 	if (
 		instructionType === SystemInstruction.AdvanceNonceAccount ||
 		instructionType === SystemInstruction.UpgradeNonceAccount
@@ -1138,7 +1168,23 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolComputeBudgetInstruction(instruction);
 	}
 
-	const parsedInstruction = parseSolInstruction(instruction);
+	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
+	// know, so a program that gains an instruction the wallet has never seen would throw out of the
+	// decode rather than reach the readings below. Crashing is not the answer a review can show,
+	// and it is the same hazard the Compute Budget parse is already wrapped for: fail closed with a
+	// refusal instead, which is what the mappers return for anything they cannot state.
+	let parsedInstruction: SolInstruction | SolParsedInstruction;
+
+	try {
+		parsedInstruction = parseSolInstruction(instruction);
+	} catch (err: unknown) {
+		consoleWarn(
+			`Could not parse Solana instruction for program ${instruction.programAddress}`,
+			err
+		);
+
+		return unfaithfulInstruction();
+	}
 
 	if (!('instructionType' in parsedInstruction)) {
 		return unreviewedInstruction();

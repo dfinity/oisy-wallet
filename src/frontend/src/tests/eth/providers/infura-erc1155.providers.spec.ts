@@ -48,7 +48,7 @@ describe('infura-erc1155.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new InfuraErc1155Provider(infura);
+			const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 			expect(provider).toBeDefined();
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
@@ -174,7 +174,7 @@ describe('infura-erc1155.providers', () => {
 			});
 
 			it('should return the NFT metadata of the token ID', async () => {
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getNftMetadata(mockParams);
 
@@ -186,7 +186,7 @@ describe('infura-erc1155.providers', () => {
 			it('should handle metadata gracefully if the contract does not support IERC1155MetadataURI', async () => {
 				mockSupportsInterface.mockResolvedValueOnce(false);
 
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getNftMetadata(mockParams);
 
@@ -196,7 +196,7 @@ describe('infura-erc1155.providers', () => {
 			});
 
 			it('should call the uri method of the contract', async () => {
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				await provider.getNftMetadata(mockParams);
 
@@ -228,7 +228,7 @@ describe('infura-erc1155.providers', () => {
 				const errorMessage = 'Error fetching URI';
 				mockUri.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
 
@@ -240,7 +240,7 @@ describe('infura-erc1155.providers', () => {
 					json: () => Promise.resolve(undefined)
 				});
 
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getNftMetadata(mockParams);
 
@@ -253,7 +253,7 @@ describe('infura-erc1155.providers', () => {
 				// Svelte map already has cached value from previous test runs
 				vi.spyOn(SvelteMap.prototype, 'get').mockRestore();
 
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.getNftMetadata(mockParams);
 
@@ -286,7 +286,7 @@ describe('infura-erc1155.providers', () => {
 			});
 
 			it('should return the balance of the token ID for a specific wallet', async () => {
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				const result = await provider.balanceOf(mockParams);
 
@@ -299,7 +299,7 @@ describe('infura-erc1155.providers', () => {
 				const errorMessage = 'Error loading balance';
 				mockBalanceOf.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraErc1155Provider(infura);
+				const provider = new InfuraErc1155Provider(ETHEREUM_NETWORK);
 
 				await expect(provider.balanceOf(mockParams)).rejects.toThrow(errorMessage);
 			});
