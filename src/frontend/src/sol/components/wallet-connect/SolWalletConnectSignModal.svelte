@@ -209,6 +209,13 @@
 			// its own invocations produced, while a stake delegation produces no effect anywhere and
 			// stays unknown. A list with nothing unknown left in it is the description; anything
 			// else leaves an instruction the review cannot account for.
+			//
+			// One shape escapes it. An instruction is marked accounted for as soon as any one of its
+			// invocations produced an effect, so an unread instruction making both a transfer we
+			// model and a call we do not - a stake delegation among them - leaves no unknown entry
+			// and passes here with that call unstated. Closing it needs each inner effect accounted
+			// for by name, which means separating a call that genuinely does nothing from one this
+			// wallet has never modelled, for every program an invocation can reach.
 			simulated:
 				(simulatedInstructions ?? false) &&
 				nonNullish(instructions) &&
