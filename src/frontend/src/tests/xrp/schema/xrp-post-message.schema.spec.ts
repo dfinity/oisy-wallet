@@ -23,10 +23,12 @@ describe('xrp-post-message.schema', () => {
 			expect(() => XrpPostMessageDataResponseWalletSchema.parse({})).toThrow();
 		});
 
-		it('should fail if newTransactions is missing', () => {
-			const invalidData = { wallet: { balance: mockBalance } };
+		// Optional by design: absent means the history could not be read this round, which is a
+		// different claim from an empty page and must not write the store.
+		it('should accept a message that carries no newTransactions', () => {
+			const data = { wallet: { balance: mockBalance } };
 
-			expect(() => XrpPostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
+			expect(() => XrpPostMessageDataResponseWalletSchema.parse(data)).not.toThrow();
 		});
 
 		it('should fail on unknown top-level fields because the base schema is strict', () => {

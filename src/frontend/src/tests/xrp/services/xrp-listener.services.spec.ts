@@ -84,6 +84,10 @@ describe('xrp-listener.services', () => {
 	describe('resetWallet', () => {
 		// Called when the worker observes a new address. `syncWallet` prepends, so without this the
 		// first page synced for the new address merges into the previous address's rows.
+		// `undefined`, not `null`. An ownership handover means nobody has asked about this account
+		// yet, and `isTransactionsStoreInitialized` counts anything other than `undefined` as
+		// initialized — so `null` here would make the activity view drop its skeleton and report an
+		// empty history before the first request had even been sent.
 		it('clears both stores so a later sync starts from nothing', () => {
 			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
 
@@ -91,8 +95,33 @@ describe('xrp-listener.services', () => {
 
 			resetWallet({ tokenId });
 
-			expect(get(xrpTransactionsStore)?.[tokenId]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
+		});
+
+		// A failure is not a handover: `syncWalletError` keeps `reset`, whose `null` says the history
+		// was loaded and then cleared, which is what an error leaves behind.
+		it('keeps a failure distinguishable from a handover', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
+
+			syncWalletError({ tokenId, error: new Error('account_tx down'), hideToast: true });
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toBeNull();
+		});
+
+		// Absent history is not an empty page. Writing anything would mark the store initialized and
+		// report the account as having no activity on the strength of a request that failed.
+		it('leaves the store untouched when a sync carries no history', () => {
+			resetWallet({ tokenId });
+
+			const { wallet } = mockPostMessage({});
+
+			syncWallet({
+				data: { wallet: { balance: wallet.balance } },
+				tokenId
+			});
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 		});
 
 		it('leaves a later sync holding only the new rows', () => {

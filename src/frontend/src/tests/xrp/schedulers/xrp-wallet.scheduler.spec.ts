@@ -208,6 +208,11 @@ describe('xrp-wallet.scheduler', () => {
 		expect(walletCall).toBeDefined();
 		expect(walletCall?.[0].data.wallet.balance.data).toBe(mockBalance);
 
+		// And carries no history at all rather than an empty page: `[]` would be written to the
+		// store, marking it initialized, and the UI would report the account as having no activity
+		// on the strength of a request that failed.
+		expect(walletCall?.[0].data.wallet.newTransactions).toBeUndefined();
+
 		expect(postMessageMock).not.toHaveBeenCalledWith(
 			expect.objectContaining({ msg: 'syncXrpWalletError' })
 		);

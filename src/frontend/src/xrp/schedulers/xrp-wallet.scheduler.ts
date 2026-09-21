@@ -23,7 +23,8 @@ interface XrpWalletStore {
 
 interface XrpWalletData {
 	balance: CertifiedData<XrpBalance | null>;
-	transactions: XrpCertifiedTransaction[];
+	// `undefined` means the history could not be read this round, as distinct from an empty page.
+	transactions: XrpCertifiedTransaction[] | undefined;
 }
 
 export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> {
@@ -143,11 +144,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			throw balanceResult.reason;
 		}
 
-		// No new rows rather than no rows: the store keeps what it holds, and the next tick tries
-		// again. The scheduler polls, so the in-job retries are not what makes history arrive.
+		// `undefined`, not `[]`: the store keeps what it holds and stays uninitialized, and the next
+		// tick tries again. The scheduler polls, so the in-job retries are not what makes history
+		// arrive. Passing an empty array here claimed the account has no transactions.
 		this.syncWalletData({
 			balance: balanceResult.value,
-			transactions: transactionsResult.status === 'fulfilled' ? transactionsResult.value : [],
+			transactions:
+				transactionsResult.status === 'fulfilled' ? transactionsResult.value : undefined,
 			expectedRef
 		});
 	};
@@ -196,7 +199,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		}
 
 		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
-		const newTransactions = transactions.length > 0;
+		const newTransactions = nonNullish(transactions) && transactions.length > 0;
 
 		this.store = {
 			...this.store,
@@ -219,7 +222,11 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
+				// Omitted when the history could not be read, so the listener leaves the store alone
+				// rather than writing an empty page over an unknown one.
+				...(nonNullish(transactions) && {
+					newTransactions: JSON.stringify(transactions, jsonReplacer)
+				})
 			}
 		});
 	};
