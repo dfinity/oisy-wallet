@@ -393,9 +393,11 @@ An XRP payment can carry a **destination tag** — a numeric routing memo that e
 
 The send flow therefore exposes the destination tag as an explicit, optional field rather than hiding it, and a tag of `0` is preserved as a real value rather than treated as "absent". Where a received payment carried a tag, the transaction detail shows it.
 
-### Base reserve
+### Account reserve
 
-The XRP Ledger requires an account to keep a minimum balance on-ledger (the **base reserve**) for the account to continue to exist. The maximum sendable amount therefore subtracts that reserve as well as the fee — the full balance is never sendable, and the balance shown is the full ledger balance rather than the spendable remainder.
+The XRP Ledger requires an account to keep a minimum balance on-ledger for the account to continue to exist. It has two parts: a **base reserve** every account owes, and an **owner reserve** owed once more for every ledger object the account owns — a trust line, an offer, an escrow. An account holding any of those must therefore retain more than the base reserve alone, and both amounts are set by the validators rather than fixed by the protocol.
+
+The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
 ---
 
