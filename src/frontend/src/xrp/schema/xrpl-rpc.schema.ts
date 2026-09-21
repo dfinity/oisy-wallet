@@ -279,6 +279,52 @@ export const XrplAccountInfoFullResultSchema = z.union([
  * read off `unknown` so a malformed identity reaches the comparison instead of being dropped by a
  * type filter before it gets there.
  */
+/**
+ * One `account_tx` row, constrained to exactly the fields `mapXrpTransaction` consumes.
+ *
+ * Defined here with the other RPC shapes but applied in the mapper, not at the RPC boundary: the
+ * mapper is what decides whether a row is readable, and a row it rejects is skipped rather than
+ * failing the page. Three review rounds arrived at this — guards were added field by field and the
+ * next unguarded one was found the same way each time, because a list of `if`s is exhaustive only
+ * by inspection.
+ *
+ * Permissive about what it does not consume: unmodelled fields are stripped, not rejected, so a
+ * node adding one does not empty a history. Strict about what it does, because those values reach
+ * the store — an object `hash` became a key that stringifies to `[object Object]`.
+ *
+ * `Amount`, `SendMax` and `delivered_amount` stay string-or-object on purpose. An issued-currency
+ * amount is a legitimate row, not a malformed one; the mapper decides what to do with it, and
+ * `delivered_amount: "unavailable"` is a string it still has to reject.
+ */
+const XrpAmountFieldSchema = z.union([z.string(), z.record(z.string(), z.unknown())]);
+
+const XrpAccountTransactionSchema = z.object({
+	TransactionType: z.string(),
+	Account: z.string(),
+	Destination: z.string().optional(),
+	Amount: XrpAmountFieldSchema.optional(),
+	SendMax: XrpAmountFieldSchema.optional(),
+	Fee: z.string().regex(/^\d+$/).optional(),
+	DestinationTag: z.number().int().optional(),
+	hash: z.string().optional(),
+	ledger_index: z.number().int().optional(),
+	date: z.number().int().optional()
+});
+
+export const XrpAccountTransactionEntrySchema = z.object({
+	tx: XrpAccountTransactionSchema.optional(),
+	tx_json: XrpAccountTransactionSchema.optional(),
+	meta: z
+		.object({
+			TransactionResult: z.string().optional(),
+			delivered_amount: XrpAmountFieldSchema.optional()
+		})
+		.optional(),
+	validated: z.boolean().optional(),
+	hash: z.string().optional(),
+	ledger_index: z.number().int().optional()
+});
+
 export const XrplAccountTxErrorSchema = z.object({
 	error: z.string(),
 	account: z.string().optional(),

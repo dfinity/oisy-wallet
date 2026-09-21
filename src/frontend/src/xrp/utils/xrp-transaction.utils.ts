@@ -1,12 +1,8 @@
 import { XRP_LEDGER_SEARCH_LOOKBACK, XRP_RIPPLE_EPOCH_OFFSET } from '$xrp/constants/xrp.constants';
+import { XrpAccountTransactionEntrySchema } from '$xrp/schema/xrpl-rpc.schema';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type {
-	XrpAccountTransactionEntry,
-	XrpPayment,
-	XrpSubmitResult,
-	XrpTransactionUi
-} from '$xrp/types/xrp-transaction';
+import type { XrpPayment, XrpSubmitResult, XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { decode } from 'ripple-binary-codec';
 
@@ -196,16 +192,21 @@ export const mapXrpTransaction = ({
 	transaction: unknown;
 	xrpAddress: XrpAddress;
 }): XrpTransactionUi | undefined => {
-	// `unknown`, not the entry type. The schema at the RPC boundary checks the envelope and leaves
-	// rows alone, so what arrives is whatever the node sent — and typing this parameter as a
-	// validated entry promised something no caller could deliver. A `null` row threw on the
-	// destructuring below and took the whole page with it, every tick, since the same page is
-	// re-fetched and fails identically.
-	if (isNullish(transaction) || typeof transaction !== 'object' || Array.isArray(transaction)) {
+	// `unknown`, not the entry type. The RPC schema checks the envelope and leaves rows alone, so
+	// what arrives is whatever the node sent — and typing this parameter as a validated entry
+	// promised something no caller could deliver.
+	//
+	// One parse rather than a list of guards. The guards were added three review rounds running,
+	// each catching the field the last one missed, because nothing made the set complete: a row
+	// with `hash: {}` passed every numeric check and became a store key that stringifies to
+	// `[object Object]`. A rejected row is skipped exactly as before — the page survives it.
+	const parsed = XrpAccountTransactionEntrySchema.safeParse(transaction);
+
+	if (!parsed.success) {
 		return undefined;
 	}
 
-	const entry = transaction as XrpAccountTransactionEntry;
+	const entry = parsed.data;
 
 	const { meta, validated } = entry;
 	const tx = entry.tx ?? entry.tx_json;
@@ -264,26 +265,6 @@ export const mapXrpTransaction = ({
 	}
 
 	const ledgerIndex = tx.ledger_index ?? entry.ledger_index;
-
-	// Same rule as `amount` above, for the same reason: these reach `BigInt`, which throws rather
-	// than returning a value it cannot produce, and the throw escapes the `.map` that builds the
-	// page. One unreadable row would cost the entire history — every tick, since the page is
-	// re-fetched and fails identically. Absence stays fine; only a present, malformed field skips
-	// the row.
-	if (nonNullish(tx.Fee) && (typeof tx.Fee !== 'string' || !/^\d+$/.test(tx.Fee))) {
-		return undefined;
-	}
-
-	if (nonNullish(tx.date) && (typeof tx.date !== 'number' || !Number.isInteger(tx.date))) {
-		return undefined;
-	}
-
-	if (
-		nonNullish(ledgerIndex) &&
-		(typeof ledgerIndex !== 'number' || !Number.isInteger(ledgerIndex))
-	) {
-		return undefined;
-	}
 
 	return {
 		id: hash,
