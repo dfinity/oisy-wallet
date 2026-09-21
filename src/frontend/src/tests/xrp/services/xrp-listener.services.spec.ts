@@ -119,10 +119,38 @@ describe('xrp-listener.services', () => {
 			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 		});
 
-		// Absent history is not an empty page. Writing anything would mark the store initialized and
-		// report the account as having no activity on the strength of a request that failed.
-		it('leaves the store untouched when a sync carries no history', () => {
-			resetWallet({ tokenId });
+		// Absent history is not an empty page — writing `[]` would report the account as having no
+		// activity on the strength of a request that failed. `null` is not that: it records that the
+		// read was attempted and produced nothing to show, which is what settles the aggregate gate.
+		//
+		// The scheduler folds an `account_tx` rejection into `undefined` and posts a normal wallet
+		// update, so `syncWalletError` never runs on this path and, left unwritten, a healthy balance
+		// with a failing history held the gate open for good with nothing reported.
+		it('settles a never-loaded entry when a sync carries no history', () => {
+			const gate = () =>
+				areTransactionsStoresLoaded([
+					{ transactionsStoreData: get(xrpTransactionsStore), tokens: [XRP_TOKEN] }
+				]);
+
+			resetWallet({ tokenId: XRP_TOKEN.id });
+
+			expect(gate()).toBeFalsy();
+
+			const { wallet } = mockPostMessage({});
+
+			syncWallet({
+				data: { wallet: { balance: wallet.balance } },
+				tokenId: XRP_TOKEN.id
+			});
+
+			expect(get(xrpTransactionsStore)?.[XRP_TOKEN.id]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[XRP_TOKEN.id]).not.toEqual([]);
+			expect(gate()).toBeTruthy();
+		});
+
+		// The other half, as on the error path: settling must not cost rows that did load.
+		it('keeps loaded rows when a later sync carries no history', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
 
 			const { wallet } = mockPostMessage({});
 
@@ -131,7 +159,7 @@ describe('xrp-listener.services', () => {
 				tokenId
 			});
 
-			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
 		});
 
 		it('leaves a later sync holding only the new rows', () => {
