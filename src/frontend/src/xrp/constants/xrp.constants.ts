@@ -75,6 +75,10 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // `searched_all: true` at 20, 100, 500, 999 and 1000.
 export const XRP_LEDGER_SEARCH_LOOKBACK = 100;
 
+// Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
+// XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
+export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
+
 // Mainnet ledgers close on a ~4s cadence, so the offset above is a validity window of ~80s.
 const XRP_LEDGER_CLOSE_SECONDS = 4;
 
