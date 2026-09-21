@@ -3,10 +3,11 @@ import { AppWorker } from '$lib/services/_worker.services';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { XrpWalletWorker } from '$xrp/services/worker.xrp-wallet.services';
-import { syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
+import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { XrpNetworks } from '$xrp/types/network';
 
 vi.mock('$xrp/services/xrp-listener.services', () => ({
+	resetWallet: vi.fn(),
 	syncWallet: vi.fn(),
 	syncWalletError: vi.fn()
 }));
@@ -178,6 +179,27 @@ describe('worker.xrp-wallet.services', () => {
 				});
 			});
 
+			// The scheduler drops its own cache on the new ref, so its next sync reports the new
+			// address's first page as new rows — and `syncWallet` prepends. Without a reset those rows
+			// merge with the previous address's, which Activity and the data export then present as
+			// this account's history.
+			//
+			// Earlier tests here leave their workers subscribed to the address store, so several
+			// instances react to one change; what matters is that the reset happens, for this token.
+			it('should reset the token stores on an address change', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				vi.mocked(resetWallet).mockClear();
+
+				xrpAddressMainnetStore.set(otherAddress);
+				await drainQueue();
+
+				expect(resetWallet).toHaveBeenCalledWith({ tokenId: XRP_TOKEN.id });
+
+				worker.destroy();
+			});
+
 			it('should stop the timer when the address is reset', async () => {
 				const worker = await initWorker();
 
@@ -191,6 +213,39 @@ describe('worker.xrp-wallet.services', () => {
 					msg: 'stopXrpWalletTimer',
 					workerId: mockId
 				});
+			});
+
+			// Losing the address used to stop the timer and return, leaving the previous address's rows
+			// in the store for the next address's first page to be prepended onto.
+			it('should reset the token stores when the address is lost', async () => {
+				const worker = await initWorker();
+
+				worker.start();
+				vi.mocked(resetWallet).mockClear();
+
+				xrpAddressMainnetStore.reset();
+				await drainQueue();
+
+				expect(resetWallet).toHaveBeenCalledWith({ tokenId: XRP_TOKEN.id });
+
+				worker.destroy();
+			});
+
+			// A worker constructed while an address is already set seeds `previous` from it and skips
+			// the first emission — it has to, or acting on that synchronous emission would recurse
+			// into `start`. So the reset has to happen when the watcher is installed, or the new
+			// worker silently adopts whatever rows the previous one left in the store.
+			it('should reset the token stores when a fresh worker starts on an existing address', async () => {
+				const worker = await initWorker();
+
+				vi.mocked(resetWallet).mockClear();
+
+				worker.start();
+				await drainQueue();
+
+				expect(resetWallet).toHaveBeenCalledWith({ tokenId: XRP_TOKEN.id });
+
+				worker.destroy();
 			});
 
 			// `destroy` itself posts `stopXrpWalletTimer`, so this asserts the absence of a restart

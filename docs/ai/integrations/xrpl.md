@@ -20,8 +20,9 @@ After enablement, the standard `VITE_XRP_MAINNET_DISABLED` flag will govern it.
 | Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired |
 | Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`    |
 
-A later phase adds `account_tx` (history) — see the
-[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md).
+History comes from `account_tx`, read by `loadXrpTransactions` — see the table below, and the
+[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
+for how the phases fit together.
 
 ## Why not `xrpl.js`
 
@@ -118,7 +119,7 @@ helper rather than your method.
 | `loadXrpValidatedLedgerIndex` | `ledger`         | none                                        |
 | `loadXrpTransactionOutcome`   | `tx`             | `txnNotFound`, and only with `searched_all` |
 | `submitXrpTransaction`        | `submit`         | none                                        |
-| _(a later phase)_             | `account_tx`     | `actNotFound` → empty history               |
+| `loadXrpTransactions`         | `account_tx`     | `actNotFound` → empty history               |
 
 Declaring nothing is the safe default, and `fee` shows why the check cannot be skipped:
 every field of its result is optional, so an error response would otherwise parse with no
