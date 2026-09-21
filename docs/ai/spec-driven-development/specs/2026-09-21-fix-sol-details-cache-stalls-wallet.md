@@ -18,18 +18,30 @@ without intervention.
 `indexedDB.open('oisy-sol-transaction-details')` answered with **no event of any kind** — neither
 `success`, nor `error`, nor `blocked`. Ten other databases on the same origin opened normally.
 
-The store is opened as its module loads (`openIdb()` at the module scope of
-`src/frontend/src/sol/api/idb-sol-transaction-details.api.ts`). `openIdb` calls `idb-keyval`'s
-`createStore`, which opens a connection and **never closes it**, and then `readEpoch`, which
-immediately starts a `readwrite` transaction. The module is reached from `$sol/api/solana.api`,
-which the worker bundle pulls in, so this runs once per realm the app starts: the main thread plus
-every wallet, auth and exchange worker. A dozen realms therefore race to create the same database,
-each holding a connection that is never released and each queuing a `readwrite` transaction on it at
-once. An `open` that loses that race can hang for the life of the page.
+Sign-out does not only empty these stores, it **deletes the databases**:
+`clearIdbStore(deleteIdbAllOisyRelated)` in `$lib/services/auth.services` calls
+`indexedDB.deleteDatabase()` for every `oisy-`prefixed database. But every store here is built with
+`idb-keyval`'s `createStore`, which opens a connection and **never closes it**, and each is opened
+once per realm the app starts — the main thread plus every wallet, auth and exchange worker, since
+the worker bundle reaches them. A delete cannot proceed while a connection is open: it fires
+`blocked`, `deleteDatabase` turns that into a rejection, and the `Promise.allSettled` inside
+`deleteIdbAllOisyRelated` swallows it. Nothing is logged and nothing is deleted.
 
-Being a race, it is intermittent — which is why it appeared to correlate with unrelated deploy
-variables, and why one origin healed by itself. Two deployed bundles, one working and one not, were
-confirmed byte-identical in every `VITE_*` value but their own subdomain, which ruled out the build.
+A pending delete then queues every later `open()` of that database — and `blocked` belongs to the
+delete request, not to the open, which is exactly why the open answers with no event of any kind.
+
+**This is deterministic, not a race.** An earlier reading of this defect blamed a dozen realms
+racing to create the database, which fitted the intermittence but not the reproduction: signing out
+and back in breaks it every time. It also explains why the failure appeared to correlate with an
+unrelated deploy variable — it did not. Two deployed bundles, one working and one not, were confirmed
+identical in every `VITE_*` value but their own subdomain, which ruled out the build.
+
+A related waste sits upstream of it: `openIdb()` runs at module scope, so the details database is
+created on page load, **before anyone signs in**, and its epoch marks a session that does not exist
+yet. Nothing reads or writes the cache until the worker has an address, so the pre-login open buys
+nothing — and it is what puts the database there to be caught by the blocked delete at the next
+sign-out. The neighbouring cache already gets this right: `syncWalletFromIdbCache` returns early
+when identity is nullish.
 
 Two consequences follow, and both were silent:
 
@@ -125,7 +137,14 @@ rather than a 5 s literal in three places.
 
 ## Explicitly not in scope
 
-- **Removing the per-realm eager open**, which is the root cause rather than the symptom. It looks
+- **Closing the connections before deleting, or not deleting at all.** This is the root cause: a
+  delete of a database the app still holds open can only ever be `blocked`. `clear()` already
+  empties the stores a line earlier, so the delete may simply be redundant. Either fix is small and
+  belongs in its own change, because it touches sign-out for every network at once.
+- **Tying the epoch to the session rather than to module load**, which would remove the pre-login
+  database and the per-realm eager open together, and make the epoch mean what its own comment
+  says. This is the better shape of the item below.
+- **Removing the per-realm eager open**, which is the remaining half of the root cause. It looks
   like the obvious fix and it is not safe as a drop-in: the eager open is what gives a realm the
   epoch of the session it _loaded_ in, and `idb-sol-transaction-details.api.spec.ts` pins the
   load-order semantics that follow — a realm loaded before a clear must not keep its writes, while
