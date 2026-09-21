@@ -243,7 +243,14 @@
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
 	{#if ambiguous}
-		<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
+		     the Approve button never becomes usable: without a live region a screen-reader user is
+		     left on a button that will not proceed and never hears why. The same reasoning as the
+		     destination-tag error, and applied here rather than inside `MessageBox`, which every
+		     other notice on this screen also uses. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)

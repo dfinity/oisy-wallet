@@ -67,6 +67,16 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
 	});
 
+	it('should announce the refusal to a screen reader', () => {
+		// It appears only once the decode settles and is the reason Approve never becomes usable,
+		// so it has to reach a reader that is already past it.
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read
