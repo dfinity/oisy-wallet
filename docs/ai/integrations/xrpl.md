@@ -20,8 +20,9 @@ After enablement, the standard `VITE_XRP_MAINNET_DISABLED` flag will govern it.
 | Expiry   | `ledger`         | Latest **validated** ledger index, to decide that a send expired |
 | Signing  | `ledger_current` | Current **open** ledger index, to pick a `LastLedgerSequence`    |
 
-A later phase adds `account_tx` (history) — see the
-[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md).
+History comes from `account_tx`, read by `loadXrpTransactions` — see the table below, and the
+[XRP integration spec](../spec-driven-development/specs/2026-07-24-feat-xrp-ledger-integration.md)
+for how the phases fit together.
 
 ## Why not `xrpl.js`
 
