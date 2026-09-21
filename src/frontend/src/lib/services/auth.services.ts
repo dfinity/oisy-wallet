@@ -38,6 +38,7 @@ import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
+import { withDeadline } from '$lib/utils/timeout.utils';
 import { clearIdbSolTransactionDetails } from '$sol/api/idb-sol-transaction-details.api';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -205,9 +206,19 @@ export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promi
 		clearIdbStorages: false
 	});
 
+// A store can fail by answering nothing at all rather than by rejecting — a wedged IndexedDB
+// `open` fires no event of any kind — and sign-out would then wait for it for the life of the page,
+// leaving the user on a spinner. Effective logout matters more than an emptied cache, so a clear
+// that misses its deadline is abandoned: the next session starts against a new epoch regardless.
+const CLEAR_IDB_STORE_TIMEOUT_MILLIS = 5_000;
+
 const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
 	try {
-		await clearIdbStore();
+		await withDeadline({
+			operation: clearIdbStore(),
+			fallback: undefined,
+			milliseconds: CLEAR_IDB_STORE_TIMEOUT_MILLIS
+		});
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
