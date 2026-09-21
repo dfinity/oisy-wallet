@@ -485,8 +485,9 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// than a key, so nobody signs for it, but System `transferSolWithSeed` moves lamports out of
 	// such an account against a signature from the `base` it was derived from. A System-owned
 	// account opened this way is therefore the same native wallet, spendable by whoever holds that
-	// base, and the review can no more name it than it can name a plain creation's. Only the owner
-	// is read here: everything else about this instruction stays unread, as it already was.
+	// base, and the review can no more name it than it can name a plain creation's. Owned by a
+	// program instead, it states its rent like the plain form and is bounded by it the same way,
+	// since the seed pays out no differently once the account exists.
 	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
 		const {
 			data: { amount, space, programAddress: owner },
@@ -505,11 +506,6 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
-	// The prefunding variant opens an account that may already hold lamports, and states its own
-	// on top. Same owner, same spendable account, a different opcode: a fix that named only the two
-	// creations above would leave this one funding a stranger's key with a warning. Read as the
-	// others are - the owner alone, the rest left unread - and note it carries no payer of its own
-	// when the new account prefunds itself.
 	// The prefunding variant is refused whatever it opens the account for, which the other two
 	// creations are not. It exists to open an account that already holds lamports, so the field it
 	// states is what this instruction adds rather than what the account ends up with: a target
@@ -625,9 +621,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// Every System instruction is now read deliberately, so reaching this point means the program
 	// gained one the wallet has never classified. Unlike a call into a program we do not know, that
 	// is a gap in this table rather than something unknowable: the set is closed, published and
-	// decoded above, and each of its members moves lamports, hands an account to a program, or
-	// names who may spend one. Fail closed on the next one instead of warning and signing, which is
-	// how the seed-derived and prefunding creations sat here reading as harmless.
+	// decoded above, and every member of it has been placed - stated as the transfer it is,
+	// refused because the summary cannot carry it, or ignored because it decides nothing about
+	// value or control. A member nobody placed belongs to none of the three, so fail closed on it
+	// instead of warning and signing, which is how the seed-derived and prefunding creations sat
+	// here reading as harmless.
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
 	return unfaithfulInstruction();
