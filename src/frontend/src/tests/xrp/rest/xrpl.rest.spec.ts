@@ -2124,6 +2124,26 @@ describe('xrpl.rest', () => {
 			expect(page.marker).toBeUndefined();
 		});
 
+		// The echo has to name this request, not just this account. `loadBalance` and
+		// `loadTransactions` run concurrently against the same node for the same address, so those
+		// two in-flight requests differ only in operation — an `account_info` absence would
+		// otherwise be written as this account's history being empty.
+		it('throws for an actNotFound echoing a different operation', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account: address,
+						request: { method: 'account_info', params: [{ account: address }] }
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
+		});
+
 		// Unbound or misrouted: an empty history would be written to the store as a settled fact
 		// about an account nobody confirmed was ours.
 		it.each([

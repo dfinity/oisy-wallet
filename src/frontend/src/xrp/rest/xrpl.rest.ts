@@ -745,7 +745,16 @@ export const loadXrpTransactions = async ({
 		// `account_tx`, and requiring it on an assumption would reject every real absence.
 		const parsedError = XrplAccountTxErrorSchema.safeParse(result);
 
-		if (!parsedError.success || !isXrpEchoedIdentityForAddress({ address, ...parsedError.data })) {
+		// The operation as well as the account. `loadBalance` and `loadTransactions` run concurrently
+		// against the same node for the same address, so those two requests differ only in what they
+		// ask — an `account_info` absence satisfies an account-only binding, and would be written as
+		// this account's history being empty. Checked when present, like the identity: see above.
+		if (
+			!parsedError.success ||
+			(nonNullish(parsedError.data.request) &&
+				parsedError.data.request.operation !== 'account_tx') ||
+			!isXrpEchoedIdentityForAddress({ address, ...parsedError.data })
+		) {
 			throw new Error(
 				`Unexpected XRPL account_tx response: an ${result.error} that does not identify ${address}`
 			);
