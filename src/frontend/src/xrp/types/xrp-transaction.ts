@@ -87,7 +87,10 @@ export interface XrpAccountTransactionEntry {
 }
 
 export interface XrpTransactionsPage {
-	transactions: XrpAccountTransactionEntry[];
+	// `unknown[]`, because that is what it is: the result schema requires an array and says nothing
+	// about the rows. `mapXrpTransaction` decides what is readable, and claiming the entries are
+	// already entries only hid that from the callers.
+	transactions: unknown[];
 	marker?: unknown;
 }
 

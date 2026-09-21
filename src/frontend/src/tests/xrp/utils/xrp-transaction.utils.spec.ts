@@ -99,6 +99,22 @@ describe('xrp-transaction.utils', () => {
 			});
 		});
 
+		// The row itself, not just its fields. `[null]` satisfies the result schema — it requires an
+		// array and says nothing about what is in it — and used to throw on the mapper's first
+		// destructuring, taking the whole page with it.
+		it.each([
+			{ name: 'a null row', transaction: null },
+			{ name: 'an undefined row', transaction: undefined },
+			{ name: 'a string row', transaction: 'nonsense' },
+			{ name: 'a number row', transaction: 42 },
+			{ name: 'an array row', transaction: [] }
+		])('skips $name rather than throwing', ({ transaction }) => {
+			const mapped = () => mapXrpTransaction({ transaction, xrpAddress: wallet });
+
+			expect(mapped).not.toThrow();
+			expect(mapped()).toBeUndefined();
+		});
+
 		// These reach `BigInt`, which throws rather than returning nothing, and the throw escapes the
 		// `.map` that builds the page — so one unreadable row used to cost the whole history, on
 		// every tick, since the same page is re-fetched and fails the same way.
@@ -130,7 +146,7 @@ describe('xrp-transaction.utils', () => {
 			expect(mapped()).toBeUndefined();
 		});
 
-		// XRPL allows paying your own account		// XRPL allows paying your own account — the standard cross-currency conversion. The wallet is
+		// XRPL allows paying your own account — the standard cross-currency conversion. The wallet is
 		// then `Account` and `Destination` at once, so `isReceive` is true while the wallet is still
 		// the signer that paid the fee. Keyed on `!isReceive` the cost was dropped and export
 		// understated what the account paid.
