@@ -6,10 +6,10 @@ import {
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
-import { decode } from '$sol/services/wallet-connect.services';
+import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$sol/services/wallet-connect.services', () => ({
 	decode: vi.fn().mockResolvedValue({
@@ -120,6 +120,63 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	describe('the simulated flag it hands the signing service', () => {
+		// The service tests pass this flag in, so only these cover the derivation itself: a
+		// regression hard-coding it would leave those green and disable the refusal.
+		const approve = async (decoded: Awaited<ReturnType<typeof decode>>) => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(decode).mockResolvedValueOnce(decoded);
+
+			const { getByRole } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const button = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(button).toBeEnabled();
+			});
+
+			await fireEvent.click(button);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledOnce();
+			});
+
+			return vi.mocked(sign).mock.calls[0][0];
+		};
+
+		it('should be true when the run described something', async () => {
+			const args = await approve({
+				amount: 1n,
+				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: true }));
+		});
+
+		it('should be false when a run completed but described nothing', async () => {
+			// A stake delegation is the case: the run succeeds and leaves the parties complete, yet
+			// changes nothing the preview measures, so nothing describes the instruction nobody read.
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
+
+		it('should be false when there was no run at all', async () => {
+			const args = await approve({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
 	});
 
 	it('should keep the message title for a sign-message request', async () => {

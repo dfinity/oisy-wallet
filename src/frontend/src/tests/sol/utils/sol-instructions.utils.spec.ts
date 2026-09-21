@@ -1125,6 +1125,25 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
+		it('should fail closed on a `CreateAccountAllowPrefund` instruction opening an account for a program', () => {
+			// Refused whatever the owner: the field it states is what it adds, not what the account
+			// ends up holding, and the pre-state that would settle the difference is not available here.
+			const instruction = getCreateAccountAllowPrefundInstruction({
+				newAccount: createNoopSigner(address(mockSolAddress2)),
+				payer: createNoopSigner(address(mockSolAddress)),
+				lamports: 2_039_280n,
+				space: 165n,
+				programAddress: address(TOKEN_PROGRAM_ADDRESS)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
 		it('should fail closed on a `CreateAccountAllowPrefund` instruction that states no payer', () => {
 			// The account prefunds itself, so there is no payer meta at all. The refusal must not depend
 			// on reading one.
@@ -1138,23 +1157,6 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
-			});
-
-			expect(console.warn).not.toHaveBeenCalled();
-		});
-
-		it('should state the rent of a `CreateAccountAllowPrefund` instruction that opens an account for a program', () => {
-			const instruction = getCreateAccountAllowPrefundInstruction({
-				newAccount: createNoopSigner(address(mockSolAddress2)),
-				payer: createNoopSigner(address(mockSolAddress)),
-				lamports: 2_039_280n,
-				space: 165n,
-				programAddress: address(TOKEN_PROGRAM_ADDRESS)
-			});
-
-			expect(mapSolInstruction(instruction)).toStrictEqual({
-				amount: 2_039_280n,
-				payer: mockSolAddress
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1239,23 +1241,6 @@ describe('sol-instructions.utils', () => {
 				baseAccount: createNoopSigner(address(mockSolAddress3)),
 				seed: 'vault',
 				amount: 1_000_000_000n,
-				space: 165n,
-				programAddress: address(TOKEN_PROGRAM_ADDRESS)
-			});
-
-			expect(mapSolInstruction(instruction)).toStrictEqual({
-				amount: undefined,
-				ambiguous: true
-			});
-
-			expect(console.warn).not.toHaveBeenCalled();
-		});
-
-		it('should fail closed on a `CreateAccountAllowPrefund` instruction that funds beyond its rent', () => {
-			const instruction = getCreateAccountAllowPrefundInstruction({
-				newAccount: createNoopSigner(address(mockSolAddress2)),
-				payer: createNoopSigner(address(mockSolAddress)),
-				lamports: 1_000_000_000n,
 				space: 165n,
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
@@ -1384,6 +1369,24 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a System instruction the parser does not know', () => {
+			// The parsers end in an exhaustive switch that throws, and the System set is closed, so the
+			// mapper's own fallthrough is unreachable: an instruction added to the program in future
+			// arrives as a throw. It has to become a refusal rather than crash the decode.
+			const instruction: SolInstruction = {
+				programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+				accounts: [],
+				data: Uint8Array.from([99, 0, 0, 0])
+			};
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).toHaveBeenCalledOnce();
 		});
 
 		it('should map a valid Token instruction', () => {
