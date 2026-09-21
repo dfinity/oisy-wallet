@@ -1005,7 +1005,7 @@
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"first_time_destination": "It appears you have never sent tokens to this address before. Verify the address carefully.",
 			"first_time_destination_confirm": "This is the first time I send tokens to this address and I have verified the address carefully.",
-			"fee_expired": "The fee amount calculated for this transaction has expired. Use \u201cBack\u201d to get an updated fee amount.",
+			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
 			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
@@ -1673,6 +1673,7 @@
 			"simulated_review": "The review below is what simulating this transaction against the network's current state predicts. What happens when it actually runs can differ.",
 			"simulated_changes": "Simulated balance changes",
 			"balance_changes": "Balance changes",
+			"balance_changes_none": "This transaction changes nothing in your accounts.",
 			"balance_changes_unknown": "OISY can't determine which assets this transaction moves, or how much. Only sign if you trust this app.",
 			"simulation_control_change": "This transaction would change who controls one or more of your accounts. Approving it can hand over an account itself, not only what is in it.",
 			"simulation_new_owner": "New account owner",

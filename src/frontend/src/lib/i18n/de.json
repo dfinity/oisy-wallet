@@ -1673,6 +1673,7 @@
 			"simulated_review": "Die Überprüfung unten zeigt, was die Simulation dieser Transaktion gegen den aktuellen Netzwerkzustand vorhersagt. Was beim tatsächlichen Ausführen passiert, kann davon abweichen.",
 			"simulated_changes": "Simulierte Guthabenänderungen",
 			"balance_changes": "Guthabenänderungen",
+			"balance_changes_none": "Diese Transaktion ändert nichts an Ihren Konten.",
 			"balance_changes_unknown": "OISY kann nicht feststellen, welche Vermögenswerte diese Transaktion bewegt oder in welcher Höhe. Signieren Sie nur, wenn Sie dieser App vertrauen.",
 			"simulation_control_change": "Diese Transaktion würde ändern, wer eines oder mehrere Ihrer Konten kontrolliert. Ihre Genehmigung kann ein Konto selbst übertragen, nicht nur dessen Inhalt.",
 			"simulation_new_owner": "Neuer Kontoinhaber",

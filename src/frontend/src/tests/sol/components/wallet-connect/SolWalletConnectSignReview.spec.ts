@@ -40,10 +40,39 @@ describe('SolWalletConnectSignReview', () => {
 	describe('balance changes', () => {
 		it('should state that it could not determine them when there is no simulation', () => {
 			// An absent section is indistinguishable from a transaction that moves nothing.
-			const { getByText } = render(SolWalletConnectSignReview, { props });
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
 
 			expect(getByText(en.wallet_connect.text.balance_changes)).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.balance_changes_unknown)).toBeInTheDocument();
+		});
+
+		it('should say nothing at all until the decode settles', () => {
+			// Undefined here means not asked yet, not unanswerable, and the section claiming the
+			// latter would put a red error on every request for as long as the decode takes.
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+		});
+
+		it('should state that nothing changed when a run reported none', () => {
+			// A run that found nothing of the user's is an answer, and a different one from having
+			// no answer at all.
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: false }
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.balance_changes_none)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
 		});
 
 		it('should not say so once a simulation answered', () => {

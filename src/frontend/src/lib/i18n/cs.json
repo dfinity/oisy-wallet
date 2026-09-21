@@ -1673,6 +1673,7 @@
 			"simulated_review": "Kontrola níže je predikcí toho, jak by tato transakce dopadla při simulaci proti aktuálnímu stavu sítě. Skutečný výsledek se může lišit.",
 			"simulated_changes": "Simulované změny zůstatku",
 			"balance_changes": "Změny zůstatků",
+			"balance_changes_none": "Tato transakce ve vašich účtech nic nemění.",
 			"balance_changes_unknown": "OISY nedokáže určit, které prostředky tato transakce přesouvá ani v jaké výši. Podepisujte pouze tehdy, pokud této aplikaci věříte.",
 			"simulation_control_change": "Tato transakce by změnila, kdo ovládá jeden nebo více vašich účtů. Jejím schválením můžete předat samotný účet, nejen to, co obsahuje.",
 			"simulation_new_owner": "Nový vlastník účtu",

@@ -1673,6 +1673,7 @@
 			"simulated_review": "",
 			"simulated_changes": "",
 			"balance_changes": "",
+			"balance_changes_none": "",
 			"balance_changes_unknown": "",
 			"simulation_control_change": "",
 			"simulation_new_owner": "",

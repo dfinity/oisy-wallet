@@ -54,6 +54,9 @@
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
+		// Whether the decode has settled. Until it has, nothing here is an answer yet - the balance
+		// changes in particular would read as unavailable rather than as not asked for.
+		decoded?: boolean;
 		unreviewed?: boolean;
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
@@ -87,6 +90,7 @@
 		prioritizationFeeEstimate,
 		isApproval = false,
 		ambiguous = false,
+		decoded = false,
 		unreviewed = false,
 		preview,
 		instructions,
@@ -340,14 +344,20 @@
 				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
-				{:else}
+				{:else if decoded}
 					<WalletConnectModalValue
 						label={$i18n.wallet_connect.text.balance_changes}
 						ref="balance-changes"
 					>
-						<MessageBox level="error">
-							{$i18n.wallet_connect.text.balance_changes_unknown}
-						</MessageBox>
+						{#if parties?.partial === false}
+							<!-- A run happened and reported nothing of the user's changing. That is an answer,
+							     and a different one from having no answer at all. -->
+							<span>{$i18n.wallet_connect.text.balance_changes_none}</span>
+						{:else}
+							<MessageBox level="error">
+								{$i18n.wallet_connect.text.balance_changes_unknown}
+							</MessageBox>
+						{/if}
 					</WalletConnectModalValue>
 				{/if}
 
