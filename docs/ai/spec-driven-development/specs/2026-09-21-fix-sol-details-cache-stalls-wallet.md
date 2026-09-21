@@ -75,6 +75,40 @@ cache existed, immediately.
 this one — can hold sign-out open. An abandoned clear is harmless: the next session starts against a
 new epoch.
 
+## A second path, found after the first fix
+
+The deadline above covers the details cache. A cleaner reproduction then showed the same failure
+arriving through a **different database**, on the login path rather than the history path:
+
+1. Brand new incognito session.
+2. Landing on the app, `oisy-sol-transaction-details` already exists — the module-scope open runs
+   before anyone signs in.
+3. Sign in: Solana tokens load, and `oisy-sol-transactions` appears.
+4. Sign out and back in: Solana tokens no longer load.
+5. Deleting `oisy-sol-transactions` and reloading fixes it.
+
+`oisy-sol-transactions` is created the same way — `idbTransactionsStore(...)` at the module scope of
+`$lib/api/idb-transactions.api`, once per realm, for four networks at once, through the same
+`createStore` that never closes its connection — so it is exposed to the same creation race. What
+makes it worse than the details cache is where it is read: `SolWalletWorker.init` awaits
+`syncWalletFromCache` for **every enabled token before the worker starts at all**, inside a
+`Promise.allSettled` that catches rejections and cannot see a hang. One wedged read there and the
+network's worker never starts, so no balance is ever requested — which is also why XRP was
+unaffected throughout: `XrpWalletWorker.init` reads no cache.
+
+So the fix needs a fourth item.
+
+**4. Give the shared wallet-cache sync a deadline.**
+
+`syncWalletFromIdbCache` in `$lib/services/listener.services` already documents the intent — "it is
+not critical to sync wallet from cache, so we can skip any issue with availability or errors" — and
+a hang defeats it exactly as it defeated the others. It now runs under the same deadline, which
+covers the Bitcoin, Ethereum/EVM and ICP listeners that share it, not only Solana. A cache that has
+not answered in time is left behind and the chain is read as on a first start.
+
+The three deadlines are now one shared `IDB_DEADLINE_MILLIS` in `$lib/constants/app.constants`,
+rather than a 5 s literal in three places.
+
 ## Acceptance criteria
 
 - A read whose IndexedDB operation never settles resolves as a cache miss within the deadline, and
@@ -85,6 +119,9 @@ new epoch.
 - A rejected operation still rejects, rather than being reported as a miss.
 - Cached details still survive a reload, and a cleared cache still stops a pre-clear realm from
   writing: the epoch guarantee is unchanged.
+- A wallet worker starts even when the transactions or balances cache never answers, so no network's
+  balances depend on a cache being readable. This holds for every listener that shares
+  `syncWalletFromIdbCache`, not only Solana.
 
 ## Explicitly not in scope
 
@@ -96,7 +133,12 @@ new epoch.
   the first use happens after the clear. Fixing it properly means moving the epoch capture to
   something that runs only in the realms that use the cache (for instance the
   `startSolWalletTimer` branch of `sol-wallet.worker.ts`), which changes the module's contract and
-  deserves its own spec. Until then, items 1–3 make the race survivable rather than fatal.
+  deserves its own spec. Until then, items 1–4 make the race survivable rather than fatal.
+- **The same module-scope `createStore` pattern in the other IndexedDB modules.**
+  `$lib/api/idb-transactions.api` opens four databases as it loads and `$lib/api/idb-balances.api`
+  another, in every realm, exactly as the details cache does. Item 4 stops a wedge there from
+  holding up a worker, but the race itself is untouched and the same treatment is worth a pass of
+  its own.
 - **The balances/history coupling in `SolWalletScheduler`.** The `Promise.all` that commits balances
   and history together is what let a cache problem blank every balance of a network, native SOL
   included. Decoupling them changes the scheduler's "at most one message per tick" contract and is a
