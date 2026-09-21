@@ -155,8 +155,8 @@ fn test_update_user_network_settings_saves_settings() {
 
 /// Network settings live in stable memory as `Candid<StoredUserProfile>`, so every new
 /// `NetworkSettingsFor` variant is a change to a persisted type. This pins that a profile
-/// carrying the newest variant survives a canister upgrade instead of being dropped or
-/// trapping on read.
+/// carrying the most recently added variants survives a canister upgrade instead of being
+/// dropped or trapping on read.
 ///
 /// It is a *self*-upgrade and proves only same-version persistence: `setup` and
 /// `upgrade_latest_wasm` both resolve `BACKEND_WASM_PATH`, so the same build encodes and
@@ -183,6 +183,13 @@ fn test_user_network_settings_survive_a_self_upgrade() {
             is_testnet: false,
         },
     );
+    networks.insert(
+        NetworkSettingsFor::RobinhoodMainnet,
+        NetworkSettings {
+            enabled: true,
+            is_testnet: false,
+        },
+    );
 
     let save_response = pic_setup.update::<Result<(), UpdateNetworksSettingsError>>(
         caller,
@@ -197,7 +204,7 @@ fn test_user_network_settings_survive_a_self_upgrade() {
 
     pic_setup
         .upgrade_latest_wasm(None)
-        .expect("upgrade should succeed with XRP network settings stored");
+        .expect("upgrade should succeed with XRP and Robinhood network settings stored");
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
