@@ -6,7 +6,7 @@ This document is the living description of OISY's product behaviors. It is read 
 
 ## What is OISY
 
-OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, BTC, SOL, and XRP without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold ECDSA across ICP replica nodes.
+OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, BTC, SOL, and XRP without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold cryptography across ICP replica nodes.
 
 Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by default. The entire application — frontend and backend — is served from the chain.
 
