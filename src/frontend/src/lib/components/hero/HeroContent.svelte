@@ -38,6 +38,7 @@
 		networkEthereum,
 		networkPolygon,
 		networkSolana,
+		networkXrp,
 		pseudoNetworkChainFusion,
 		networkArbitrum,
 		selectedNetworkNftUnsupported
@@ -180,6 +181,7 @@
 	class:from-polygon-0={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:from-xrp-0={$networkXrp}
 	class:text-primary={isIcpHero}
 	class:text-primary-inverted={!isIcpHero}
 	class:to-arbitrum-100={$networkArbitrum}
@@ -192,6 +194,7 @@
 	class:to-polygon-100={$networkPolygon}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
+	class:to-xrp-100={$networkXrp}
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>

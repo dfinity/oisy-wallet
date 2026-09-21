@@ -102,6 +102,26 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	it('should hold approval on a message it will not sign', async () => {
+		// `sign()` refuses an ambiguous message, so letting the button be pressed would trade a
+		// stated reason for a toast over a closed modal.
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			ambiguous: true,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
 	describe('the simulated flag it hands the signing service', () => {
 		// The service tests pass this flag in, so only these cover the derivation itself: a
 		// regression hard-coding it would leave those green and disable the refusal.
