@@ -272,6 +272,19 @@ export const XrplAccountInfoFullResultSchema = z.union([
  * activity under another's. `transactions` is required because its absence is what silently became
  * an empty history — the one outcome the `expectedErrors` note on the caller exists to prevent.
  */
+/**
+ * `account_tx`, error branch — in practice only `actNotFound`, the one error the caller declares as
+ * expected. Nothing here is required: the identity may arrive as the top-level `account`, as the
+ * echoed request, or not at all, and the caller decides what that means. It is parsed rather than
+ * read off `unknown` so a malformed identity reaches the comparison instead of being dropped by a
+ * type filter before it gets there.
+ */
+export const XrplAccountTxErrorSchema = z.object({
+	error: z.string(),
+	account: z.string().optional(),
+	request: XrplRequestEchoSchema.optional()
+});
+
 export const XrplAccountTxResultSchema = z.object({
 	account: z.string(),
 	transactions: z.array(z.unknown()),
