@@ -3,13 +3,13 @@ import { XrpNetworks } from '$xrp/types/network';
 describe('xrp-rpc.providers', () => {
 	afterEach(() => {
 		vi.resetModules();
-		vi.doUnmock('$env/networks/networks.xrp.env');
+		vi.doUnmock('$env/rest/xrpl.env');
 	});
 
 	describe('xrpHttpRpcUrl', () => {
 		it('returns the configured mainnet RPC endpoint', async () => {
 			vi.resetModules();
-			vi.doMock('$env/networks/networks.xrp.env', () => ({
+			vi.doMock('$env/rest/xrpl.env', () => ({
 				XRP_RPC_HTTP_URL_MAINNET: 'https://rpc.example.com'
 			}));
 
@@ -20,7 +20,7 @@ describe('xrp-rpc.providers', () => {
 
 		it('throws when no mainnet RPC endpoint is configured', async () => {
 			vi.resetModules();
-			vi.doMock('$env/networks/networks.xrp.env', () => ({
+			vi.doMock('$env/rest/xrpl.env', () => ({
 				XRP_RPC_HTTP_URL_MAINNET: undefined
 			}));
 

@@ -12,9 +12,10 @@ import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import { enabledNetworksSymbols, networkXrpMainnetEnabled } from '$lib/derived/networks.derived';
 import { get } from 'svelte/store';
 
-// XRP is force-disabled under TEST, so its entry in the aggregation contributes nothing to the
-// expectation below. The catalog is enabled here while the mainnet flag stays off by default, so
-// the exact-list assertion is untouched and only the XRP block turns it on.
+// This branch drops the force-disable override, so `XRP_MAINNET_ENABLED` now follows the env var
+// and is on under TEST. Pinning the flag through a mock instead of inheriting that default is what
+// keeps both cases assertable: the exact-list expectation below runs with XRP off, and the two
+// blocks at the bottom drive each state explicitly rather than depending on the ambient value.
 const mocks = vi.hoisted(() => ({ xrpMainnetEnabled: false }));
 
 vi.mock('$env/networks/networks.xrp.env', async () => {
