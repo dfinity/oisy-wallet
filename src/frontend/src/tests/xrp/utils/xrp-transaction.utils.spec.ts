@@ -99,7 +99,38 @@ describe('xrp-transaction.utils', () => {
 			});
 		});
 
-		// XRPL allows paying your own account — the standard cross-currency conversion. The wallet is
+		// These reach `BigInt`, which throws rather than returning nothing, and the throw escapes the
+		// `.map` that builds the page — so one unreadable row used to cost the whole history, on
+		// every tick, since the same page is re-fetched and fails the same way.
+		it.each([
+			{ name: 'a non-numeric Fee', tx: { Fee: 'unavailable' } },
+			{ name: 'a Fee that is not a string', tx: { Fee: 12 } },
+			{ name: 'a non-numeric date', tx: { date: 'yesterday' } },
+			{ name: 'a fractional date', tx: { date: 1.5 } },
+			{ name: 'a non-numeric ledger_index', tx: { ledger_index: 'latest' } }
+		])('skips a row with $name rather than throwing', ({ tx }) => {
+			const mapped = () =>
+				mapXrpTransaction({
+					transaction: paymentEntry({
+						tx: {
+							Account: wallet,
+							Destination: counterparty,
+							Amount: '5000000',
+							Fee: '10',
+							hash: 'HBAD',
+							ledger_index: 42,
+							date: 1,
+							...tx
+						} as Partial<XrpAccountTransaction>
+					}),
+					xrpAddress: wallet
+				});
+
+			expect(mapped).not.toThrow();
+			expect(mapped()).toBeUndefined();
+		});
+
+		// XRPL allows paying your own account		// XRPL allows paying your own account — the standard cross-currency conversion. The wallet is
 		// then `Account` and `Destination` at once, so `isReceive` is true while the wallet is still
 		// the signer that paid the fee. Keyed on `!isReceive` the cost was dropped and export
 		// understated what the account paid.
