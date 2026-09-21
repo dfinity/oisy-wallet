@@ -293,10 +293,16 @@ export const XrplAccountInfoFullResultSchema = z.union([
  * the store — an object `hash` became a key that stringifies to `[object Object]`.
  *
  * `Amount`, `SendMax` and `delivered_amount` stay string-or-object on purpose. An issued-currency
- * amount is a legitimate row, not a malformed one; the mapper decides what to do with it, and
- * `delivered_amount: "unavailable"` is a string it still has to reject.
+ * amount is a legitimate row, not a malformed one; the mapper decides what to do with it.
+ *
+ * The string arm is `XrpDropsSchema`, not a bare digit string, for the reason that schema states
+ * about itself: every caller converts what it returns, and both these fields reach `BigInt`. A
+ * plain `/^\d+$/` accepts a million digits from an untrusted response and costs ~40ms to convert
+ * — per row, on a 10s poll, for a payload that is free to send. Bounded, the same row is skipped
+ * in ~1.6ms. `delivered_amount: "unavailable"` is rejected by this arm rather than by the mapper's
+ * own check now, which reaches the same outcome by a shorter path.
  */
-const XrpAmountFieldSchema = z.union([z.string(), z.record(z.string(), z.unknown())]);
+const XrpAmountFieldSchema = z.union([XrpDropsSchema, z.record(z.string(), z.unknown())]);
 
 const XrpAccountTransactionSchema = z.object({
 	TransactionType: z.string(),
@@ -304,7 +310,7 @@ const XrpAccountTransactionSchema = z.object({
 	Destination: z.string().optional(),
 	Amount: XrpAmountFieldSchema.optional(),
 	SendMax: XrpAmountFieldSchema.optional(),
-	Fee: z.string().regex(/^\d+$/).optional(),
+	Fee: XrpDropsSchema.optional(),
 	DestinationTag: z.number().int().optional(),
 	hash: z.string().optional(),
 	ledger_index: z.number().int().optional(),
@@ -328,13 +334,23 @@ export const XrpAccountTransactionEntrySchema = z.object({
 export const XrplAccountTxErrorSchema = z.object({
 	error: z.string(),
 	account: z.string().optional(),
-	request: XrplRequestEchoSchema.optional()
+	request: XrplRequestEchoSchema.optional(),
+	// The two `account_tx` schemas are a discriminated pair, like every other result in this file.
+	// Without this, `{ error: 'actNotFound', transactions: [...] }` parses here — objects strip
+	// unknown keys — and the caller, which branches on `error` before parsing anything, returns an
+	// empty page while the node supplied history in the same payload. Worse than a rejected
+	// response, because an empty page is recorded as settled rather than retried.
+	transactions: z.never().optional()
 });
 
 export const XrplAccountTxResultSchema = z.object({
 	account: z.string(),
 	transactions: z.array(z.unknown()),
-	marker: z.unknown().optional()
+	marker: z.unknown().optional(),
+	// The other half of the pair. Redundant today, since the caller tests `error` first and never
+	// reaches this schema with one — which is exactly the kind of fact that stops being true, and
+	// the reason every other result schema here carries it anyway.
+	error: z.never().optional()
 });
 
 export const XrplFeeResultSchema = z.object({

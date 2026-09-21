@@ -152,6 +152,59 @@ describe('xrp-transaction.utils', () => {
 			expect(mapped()).toBeUndefined();
 		});
 
+		// Unbounded digit strings from an untrusted response reach `BigInt`, which is superlinear:
+		// a million nines cost ~40ms to convert, per row, on a 10s poll. Bounded by `XrpDropsSchema`
+		// the same row is skipped in under two. Nothing legitimate is lost — `XRP_MAX_DROPS` is
+		// above the total supply, so no real payment carries more.
+		it.each([
+			{ name: 'Amount', tx: { Amount: '9'.repeat(1_000) } },
+			{ name: 'Fee', tx: { Fee: '9'.repeat(1_000) } }
+		])('skips a row whose $name exceeds the drops bound', ({ tx }) => {
+			const mapped = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						Fee: '10',
+						hash: 'HBIG',
+						ledger_index: 42,
+						date: 1,
+						...tx
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(mapped).toBeUndefined();
+		});
+
+		// Zero padding is canonicalised before the bound is applied, so a padded-but-small amount
+		// still maps and still converts to the value it names.
+		it('maps a zero-padded amount to its canonical value', () => {
+			const ui = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '0000005000000',
+						hash: 'HPAD',
+						ledger_index: 42,
+						date: 1
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(ui?.value).toBe(5_000_000n);
+		});
+
 		// A node adding a field it does not document must not empty a history: unmodelled keys are
 		// stripped, not rejected.
 		it('still maps a row carrying fields the mapper does not model', () => {

@@ -2124,6 +2124,26 @@ describe('xrpl.rest', () => {
 			expect(page.marker).toBeUndefined();
 		});
 
+		// The two schemas are a discriminated pair. A response carrying both markers is malformed,
+		// and the caller tests `error` first — so without the exclusion it took the error path and
+		// recorded an empty history while the node had supplied one in the same payload. Recorded,
+		// not retried, which is the part that makes it worse than a rejection.
+		it('throws for a response carrying both an error and transactions', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						error: 'actNotFound',
+						account: address,
+						transactions: [{ tx: { TransactionType: 'Payment' } }]
+					}
+				}
+			});
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
+		});
+
 		// The echo has to name this request, not just this account. `loadBalance` and
 		// `loadTransactions` run concurrently against the same node for the same address, so those
 		// two in-flight requests differ only in operation — an `account_info` absence would
