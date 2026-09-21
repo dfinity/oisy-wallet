@@ -485,31 +485,36 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// than a key, so nobody signs for it, but System `transferSolWithSeed` moves lamports out of
 	// such an account against a signature from the `base` it was derived from. A System-owned
 	// account opened this way is therefore the same native wallet, spendable by whoever holds that
-	// base, and the review can no more name it than it can name a plain creation's. Only the owner
-	// is read here: everything else about this instruction stays unread, as it already was.
+	// base, and the review can no more name it than it can name a plain creation's. Owned by a
+	// program instead, it states its rent like the plain form and is bounded by it the same way,
+	// since the seed pays out no differently once the account exists.
 	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
 		const {
-			data: { programAddress: owner }
+			data: { amount, space, programAddress: owner },
+			accounts: {
+				payer: { address: payer }
+			}
 		} = instruction;
 
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
 			return unfaithfulInstruction();
 		}
+
+		return {
+			amount,
+			payer
+		};
 	}
 
-	// The prefunding variant opens an account that may already hold lamports, and states its own
-	// on top. Same owner, same spendable account, a different opcode: a fix that named only the two
-	// creations above would leave this one funding a stranger's key with a warning. Read as the
-	// others are - the owner alone, the rest left unread - and note it carries no payer of its own
-	// when the new account prefunds itself.
+	// The prefunding variant is refused whatever it opens the account for, which the other two
+	// creations are not. It exists to open an account that already holds lamports, so the field it
+	// states is what this instruction adds rather than what the account ends up with: a target
+	// funded beforehand passes a rent-sized check and still lands under `owner` with the larger
+	// balance. Reading it faithfully would need the account's pre-state, which this mapper is
+	// synchronous and has none of. It also names no payer when the account prefunds itself, so
+	// there would be a cost stated against nobody.
 	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
-		const {
-			data: { programAddress: owner }
-		} = instruction;
-
-		if (owner === SYSTEM_PROGRAM_ADDRESS) {
-			return unfaithfulInstruction();
-		}
+		return unfaithfulInstruction();
 	}
 
 	// Handing an account to a program is the System program's own version of the authority change
@@ -518,11 +523,64 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	// signer can hand the account to the named program, and the summary has no field that says any
 	// of it: there is no amount, source, or destination, so a warning would let the change ride along
 	// behind a transfer the user does see.
+	//
+	// The nonce instructions that name an authority belong here too. Initialising a nonce account
+	// sets who may withdraw its balance and authorising one changes that party, so both decide
+	// where the lamports in an account the user paid for may go without stating an amount, a source
+	// or a destination - the token account's authority change again, in the System program's own
+	// vocabulary.
+	//
+	// Sizing an account is refused on the same test rather than on what it costs. It states a
+	// length and nothing else, so there is no amount, source or destination for the summary to
+	// carry, and the account it sizes is its only meta and a required signer, so a message can name
+	// the connected wallet here as well.
 	if (
 		instructionType === SystemInstruction.Assign ||
-		instructionType === SystemInstruction.AssignWithSeed
+		instructionType === SystemInstruction.AssignWithSeed ||
+		instructionType === SystemInstruction.InitializeNonceAccount ||
+		instructionType === SystemInstruction.AuthorizeNonceAccount ||
+		instructionType === SystemInstruction.Allocate ||
+		instructionType === SystemInstruction.AllocateWithSeed
 	) {
 		return unfaithfulInstruction();
+	}
+
+	// A nonce account hands its balance to a recipient it names, against a signature from the
+	// authority that governs it. Amount, source and destination are all stated, so this is a
+	// transfer and reads as one rather than as something the summary cannot carry.
+	if (instructionType === SystemInstruction.WithdrawNonceAccount) {
+		const {
+			data: { withdrawAmount: amount },
+			accounts: {
+				nonceAccount: { address: source },
+				recipientAccount: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	// The seed-derived transfer states its own source, destination and amount exactly as the plain
+	// one does; only the signature authorising it differs, coming from the base the source was
+	// derived from rather than from the source itself.
+	if (instructionType === SystemInstruction.TransferSolWithSeed) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
 	}
 
 	if (instructionType === SystemInstruction.TransferSol) {
@@ -541,9 +599,36 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
+	// Using a nonce rather than deciding anything about it: advancing one replaces the value a
+	// durable transaction is signed against, and upgrading one migrates a legacy account to the
+	// current layout. Advancing does require the nonce authority to sign, but it designates no new
+	// one and moves no lamports, so neither instruction has an effect the summary omits by staying
+	// silent about it.
+	//
+	// Advancing is also not optional to a caller that needs it: a durable-nonce transaction carries
+	// it as its first instruction, which is what makes the nonce the transaction's lifetime, and
+	// the sign-only path signs the message as given rather than re-dating it. Refusing the opcode
+	// would refuse every such request. A message can still advance a nonce it has no lifetime use
+	// for, invalidating a transaction already signed against the old value, but that moves nothing
+	// and takes nothing: telling the two apart is the instruction's position, not its name.
+	if (
+		instructionType === SystemInstruction.AdvanceNonceAccount ||
+		instructionType === SystemInstruction.UpgradeNonceAccount
+	) {
+		return ignoredInstruction();
+	}
+
+	// Every System instruction is now read deliberately, so reaching this point means the program
+	// gained one the wallet has never classified. Unlike a call into a program we do not know, that
+	// is a gap in this table rather than something unknowable: the set is closed, published and
+	// decoded above, and every member of it has been placed - stated as the transfer it is,
+	// refused because the summary cannot carry it, or ignored because it decides nothing about
+	// value or control. A member nobody placed belongs to none of the three, so fail closed on it
+	// instead of warning and signing, which is how the seed-derived and prefunding creations sat
+	// here reading as harmless.
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
-	return unreviewedInstruction();
+	return unfaithfulInstruction();
 };
 
 const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -1081,7 +1166,23 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolComputeBudgetInstruction(instruction);
 	}
 
-	const parsedInstruction = parseSolInstruction(instruction);
+	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
+	// know, so a program that gains an instruction the wallet has never seen would throw out of the
+	// decode rather than reach the readings below. Crashing is not the answer a review can show,
+	// and it is the same hazard the Compute Budget parse is already wrapped for: fail closed with a
+	// refusal instead, which is what the mappers return for anything they cannot state.
+	let parsedInstruction: SolInstruction | SolParsedInstruction;
+
+	try {
+		parsedInstruction = parseSolInstruction(instruction);
+	} catch (err: unknown) {
+		consoleWarn(
+			`Could not parse Solana instruction for program ${instruction.programAddress}`,
+			err
+		);
+
+		return unfaithfulInstruction();
+	}
 
 	if (!('instructionType' in parsedInstruction)) {
 		return unreviewedInstruction();

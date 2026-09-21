@@ -115,14 +115,26 @@ describe('xrp-transaction.utils', () => {
 			expect(mapped()).toBeUndefined();
 		});
 
-		// `date` and `ledger_index` are XRPL UInt32s. A bare integer reaches the UI as a `Date` that
-		// is out of range, and `toISOString` and `Intl.DateTimeFormat.format` both throw
-		// `RangeError: Invalid time value` — in a render path, so one row takes the list and the CSV
-		// with it rather than just being wrong itself.
+		// `date`, `ledger_index` and `DestinationTag` are all XRPL UInt32s, and a bare `int()` admits
+		// negatives as well as anything up to `Number.MAX_SAFE_INTEGER`.
+		//
+		// `date` is the loud one: it reaches the UI as a `Date` that is out of range, and
+		// `toISOString` and `Intl.DateTimeFormat.format` both throw `RangeError: Invalid time value`
+		// — in a render path, so one row takes the list and the CSV with it rather than just being
+		// wrong itself. `DestinationTag` is quiet: nothing converts or formats it, it is rendered
+		// as-is, so an impossible routing tag is shown as though the ledger reported it — and the
+		// send path refuses that same value, `XRP_MAX_DESTINATION_TAG` being this same bound.
 		it.each([
-			{ name: 'date', tx: { date: Number.MAX_SAFE_INTEGER } },
-			{ name: 'ledger_index', tx: { ledger_index: Number.MAX_SAFE_INTEGER } }
-		])('skips a row whose $name exceeds UInt32', ({ tx }) => {
+			{ name: 'an oversized date', tx: { date: Number.MAX_SAFE_INTEGER } },
+			{ name: 'a negative date', tx: { date: -1 } },
+			{ name: 'an oversized ledger_index', tx: { ledger_index: Number.MAX_SAFE_INTEGER } },
+			{ name: 'an oversized DestinationTag', tx: { DestinationTag: Number.MAX_SAFE_INTEGER } },
+			{
+				name: 'a DestinationTag one past the UInt32 ceiling',
+				tx: { DestinationTag: 0xffff_ffff + 1 }
+			},
+			{ name: 'a negative DestinationTag', tx: { DestinationTag: -1 } }
+		])('skips a row with $name, outside the UInt32 range', ({ tx }) => {
 			const mapped = mapXrpTransaction({
 				transaction: {
 					tx: {
@@ -142,6 +154,30 @@ describe('xrp-transaction.utils', () => {
 			});
 
 			expect(mapped).toBeUndefined();
+		});
+
+		// Both ends of the range are real tags, so the bound must not cost them: `0` is a tag rather
+		// than an absent one, and so is the ceiling.
+		it.each([0, 0xffff_ffff])('keeps the boundary DestinationTag %j', (DestinationTag) => {
+			const mapped = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						hash: 'HTAG',
+						ledger_index: 42,
+						date: 1,
+						DestinationTag
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(mapped?.destinationTag).toBe(DestinationTag);
 		});
 
 		// XRPL rejects a Payment without a destination, so a row claiming to be one and omitting it
