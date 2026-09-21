@@ -189,6 +189,25 @@ describe('TipClaim', () => {
 			expect(getByText(get(i18n).tip.text.claim_ready_description)).toBeInTheDocument();
 		});
 
+		it('gives the deadline to the minute, in the app language', async () => {
+			// It was a bare `toLocaleString()`: no locale, so it followed the browser
+			// rather than the language the rest of the page is in, and it printed the
+			// seconds of a deadline weeks away. "21/09/2026, 13:25:35" on the one
+			// screen a stranger reads to decide whether to bother claiming.
+			//
+			// Matched on shape rather than on an exact string: the hour depends on
+			// where this runs, and the shape is what broke.
+			const { getByText } = renderPreview();
+
+			const line = await waitFor(() => getByText(/Claim by/));
+
+			// No numeric date, no seconds.
+			expect(line.textContent).not.toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
+			expect(line.textContent).not.toMatch(/\d\d:\d\d:\d\d/);
+
+			expect(line.textContent).toMatch(/^Claim by \w+ \d{1,2}, \d{4} at \d\d:\d\d$/);
+		});
+
 		it('never prints raw base units when the ledger will not say how to format them', async () => {
 			// 1 ICP is 100_000_000 base units. Printing the integer because the
 			// metadata lookup came back empty is not a degraded label, it is a wrong

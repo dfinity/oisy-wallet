@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import tipIntroImg from '$lib/assets/tip-intro-img.webp';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
+	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -10,7 +12,13 @@
 		TIP_INTRO_GET_STARTED_BUTTON,
 		TIP_INTRO_HISTORY_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { tipsOverview } from '$lib/derived/tips.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		onGetStarted: () => void;
@@ -18,6 +26,54 @@
 	}
 
 	let { onGetStarted, onViewHistory }: Props = $props();
+
+	// Omitted rather than shown as "$0.00" when nothing could be priced: a zero
+	// there would read as "these tips are worth nothing" instead of "we do not
+	// have a rate".
+	const fiat = (value: number): string | undefined =>
+		value > 0
+			? formatCurrency({
+					value,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined;
+
+	let openFiat = $derived(fiat($tipsOverview.openUsd));
+	let claimedFiat = $derived(fiat($tipsOverview.claimedUsd));
+
+	const countLabel = (count: number): string =>
+		replacePlaceholders(
+			count === 1 ? $i18n.tip.text.overview_count_one : $i18n.tip.text.overview_count_other,
+			{ $count: `${count}` }
+		);
+
+	/**
+	 * Three states under each label, where there used to be two.
+	 *
+	 * `fiat` returns nothing both when a group is empty and when its tokens have no
+	 * rate loaded, and the two rendered identically — as a label with a blank under
+	 * it. That is not only untidy: a sender whose open tip is in a newly listed or
+	 * local token saw nothing under "Waiting to be claimed" and could reasonably
+	 * read it as nothing being out there, while their money was reserved.
+	 *
+	 * So an unpriced group falls back to its count, which is the fact we do have,
+	 * and only a genuinely empty one says so. Something is always under the label —
+	 * which also covers the case this was reported for, and the worse one behind it:
+	 * a sender whose only tip failed lights the block through `hasAny` with both of
+	 * these columns empty.
+	 */
+	const figure = ({ priced, count }: { priced: string | undefined; count: number }): string => {
+		if (nonNullish(priced)) {
+			return priced;
+		}
+
+		return count > 0 ? countLabel(count) : $i18n.tip.text.overview_none;
+	};
+
+	let openFigure = $derived(figure({ priced: openFiat, count: $tipsOverview.open }));
+	let claimedFigure = $derived(figure({ priced: claimedFiat, count: $tipsOverview.claimed }));
 </script>
 
 <ContentWithToolbar>
@@ -34,6 +90,98 @@
 	/>
 
 	<h3 class="mb-3">{$i18n.tip.text.intro_heading}</h3>
+
+	<!--
+		Below the heading rather than above the artwork, and on the surface rather
+		than a tinted card: it is part of this screen's content, not a banner bolted
+		on top of it.
+
+		Two columns, because the two figures are peers and reading them side by side
+		is one glance instead of two. Absent entirely unless one of the three groups
+		has something in it — a first-time sender, a still-loading store and a sender
+		whose tips have all lapsed all see the screen unchanged.
+
+		Everything shown comes from the `get_my_tips` the app already made on
+		sign-in, so this costs no extra call.
+	-->
+	{#if $tipsOverview.hasAny}
+		<div class="mb-4 rounded-xl border border-secondary px-4 py-3">
+			<span class="text-xs font-bold tracking-wider text-tertiary uppercase">
+				{$i18n.tip.text.overview_window}
+			</span>
+
+			{#if $tipsOverview.failed > 0}
+				<!--
+					Full width and above the pair: it is the only row with something to do
+					about it, and History now opens with the failed tips at the top. Tinted
+					and iconed rather than set in orange type like the counts below it,
+					because at a glance the shape of the row is what separates "this one
+					wants you" from two figures that are merely information.
+				-->
+				<button
+					class="mt-2 flex w-full items-start gap-2 rounded-lg border border-warning-solid bg-warning-subtle-10 px-3 py-2 text-left"
+					onclick={onViewHistory}
+					type="button"
+				>
+					<span class="shrink-0 text-warning-primary">
+						<IconAlertTriangle size="18" />
+					</span>
+
+					<span class="flex-1">
+						<span class="block text-sm font-bold text-warning-primary">
+							{$i18n.tip.text.overview_failed}
+						</span>
+
+						<span class="block text-xs text-secondary">
+							{$i18n.tip.text.overview_failed_hint}
+						</span>
+					</span>
+
+					<span class="shrink-0 text-sm font-bold text-warning-primary">
+						{$tipsOverview.failed}
+					</span>
+				</button>
+			{/if}
+
+			<!--
+				The sum, not the count. Two large figures competing at the top of the
+				intro read as the subject of the screen, and they are not — what a sender
+				wants from this box is how much is still out there. The tally is one tap
+				away in History, where each tip is a row anyway. A rule between the
+				columns rather than a gap, because the two are peers being compared.
+			-->
+			<div class="mt-3 grid grid-cols-2">
+				<div class="min-w-0 pr-3">
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
+
+					<!--
+						Always rendered, so a label never stands over a blank. Lighter when it
+						is not a sum: a count or "None" is context, and it must not compete
+						with the figure in the other column.
+					-->
+					<span
+						class="block text-sm"
+						class:font-semibold={nonNullish(openFiat)}
+						class:text-tertiary={isNullish(openFiat)}
+					>
+						{openFigure}
+					</span>
+				</div>
+
+				<div class="min-w-0 border-l border-secondary pl-3">
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
+
+					<span
+						class="block text-sm"
+						class:font-semibold={nonNullish(claimedFiat)}
+						class:text-tertiary={isNullish(claimedFiat)}
+					>
+						{claimedFigure}
+					</span>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<p class="mb-4 text-tertiary">{$i18n.tip.text.intro_body}</p>
 
