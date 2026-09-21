@@ -1773,6 +1773,7 @@
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
+			"unreviewed_without_simulation": "OISY không thể đọc một phần của giao dịch này và mạng cũng không trả về bản mô phỏng, nên không có gì mô tả phần đó sẽ làm gì. Vì sự an toàn của bạn, giao dịch đã không được ký.",
 			"sol_transaction_as_message": "Thông báo này là một giao dịch Solana, chỉ có thể được phê duyệt thông qua việc xem xét giao dịch. Vì lý do bảo mật, giao dịch chưa được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."

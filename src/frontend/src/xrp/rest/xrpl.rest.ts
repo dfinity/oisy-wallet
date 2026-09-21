@@ -4,6 +4,8 @@ import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
+	XrplAccountTxErrorSchema,
+	XrplAccountTxResultSchema,
 	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
 	XrplLedgerCurrentResultSchema,
@@ -17,7 +19,8 @@ import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
 	XrpAccountInfo,
 	XrpSubmitResult,
-	XrpTransactionOutcome
+	XrpTransactionOutcome,
+	XrpTransactionsPage
 } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -239,6 +242,26 @@ const isXrpAccountErrorForAddress = ({
 		return false;
 	}
 
+	return isXrpEchoedIdentityForAddress({ address, account, request });
+};
+
+/**
+ * Whether everything an error response says about its subject says this address.
+ *
+ * Split out so `account_tx` can apply the same identity rule: that reader has no ledger dimension
+ * to check — it asks for the full range — and its echo names a different operation, so it cannot
+ * use the `account_info` guard wholesale, but the question "does this absence name us" is the same
+ * one and should not be answered twice in two ways.
+ */
+const isXrpEchoedIdentityForAddress = ({
+	address,
+	account,
+	request
+}: {
+	address: XrpAddress;
+	account?: string;
+	request?: { operation: string; params: Record<string, unknown> };
+}): boolean => {
 	// Everything the response CARRIES, not everything it could parse. Filtering to strings first
 	// discarded a present-but-malformed identity before the comparison saw it, so
 	// `{ account: <requested>, request: { account: 123 } }` passed on the strength of the good half
@@ -673,4 +696,89 @@ export const submitXrpTransaction = async ({
 		// comparison would only be re-deriving what the parse already guarantees.
 		accepted: data.accepted
 	};
+};
+
+/**
+ * Native XRP transaction history via the XRPL `account_tx` method.
+ *
+ * `ledger_index_min` / `ledger_index_max` of `-1` mean "the full available range";
+ * `forward: false` returns newest-first. `marker` is the opaque pagination cursor
+ * returned by a previous page — pass it back to fetch the next (older) page.
+ */
+export const loadXrpTransactions = async ({
+	address,
+	network,
+	limit,
+	marker
+}: {
+	address: XrpAddress;
+	network: XrpNetworkType;
+	limit: number;
+	marker?: unknown;
+}): Promise<XrpTransactionsPage> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'account_tx',
+		params: {
+			account: address,
+			ledger_index_min: -1,
+			ledger_index_max: -1,
+			limit,
+			forward: false,
+			...(nonNullish(marker) && { marker })
+		},
+		// An account that has never been funded has no transactions, which is not a failure. Every
+		// other error is: a rate limit or a server fault read as a genuine empty history would look
+		// like a wallet with no activity and never be retried, so the envelope throws for those.
+		expectedErrors: ['actNotFound']
+	});
+
+	if (nonNullish(result.error)) {
+		// Bound like the success branch below, and for a sharper reason: an unbound absence does not
+		// merely show the wrong rows, it states that this account has no history — a settled-looking
+		// claim built on someone else's answer. `loadXrpBalance` already refuses an `actNotFound`
+		// that names nothing or names another address.
+		//
+		// The echo is checked when present rather than required, unlike the `account_info` guard:
+		// that one could require it because it was verified against the configured endpoint that
+		// `actNotFound` carries `request` on both paths. No such check has been done for
+		// `account_tx`, and requiring it on an assumption would reject every real absence.
+		const parsedError = XrplAccountTxErrorSchema.safeParse(result);
+
+		// The operation as well as the account. `loadBalance` and `loadTransactions` run concurrently
+		// against the same node for the same address, so those two requests differ only in what they
+		// ask — an `account_info` absence satisfies an account-only binding, and would be written as
+		// this account's history being empty. Checked when present, like the identity: see above.
+		if (
+			!parsedError.success ||
+			(nonNullish(parsedError.data.request) &&
+				parsedError.data.request.operation !== 'account_tx') ||
+			!isXrpEchoedIdentityForAddress({ address, ...parsedError.data })
+		) {
+			throw new Error(
+				`Unexpected XRPL account_tx response: an ${result.error} that does not identify ${address}`
+			);
+		}
+
+		return { transactions: [] };
+	}
+
+	// Parsed, not cast. An absent `transactions` became a genuine empty history, a non-array reached
+	// `.map` in the scheduler, and nothing checked that the page belongs to the account asked for —
+	// the binding every other reader in this file applies.
+	const parsed = XrplAccountTxResultSchema.safeParse(result);
+
+	if (!parsed.success) {
+		throw new Error('Unexpected XRPL account_tx response: it does not match the expected shape');
+	}
+
+	const { account, transactions, marker: nextMarker } = parsed.data;
+
+	// Raw comparison, like the `Account` binding in the reads: a classic address is base58 over a
+	// checksummed payload, so two forms differing only in case are not one address.
+	if (account !== address) {
+		throw new Error('Unexpected XRPL account_tx response: it is for a different account');
+	}
+
+	return { transactions, marker: nextMarker };
 };
