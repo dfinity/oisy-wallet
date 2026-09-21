@@ -158,6 +158,21 @@ describe('sol-instruction-summary.utils', () => {
 				}
 			};
 
+			it('should leave nothing unrecognised in the configuration the review runs', () => {
+				// The production path sets `includeUnrecognised`, and the initialisation that follows the
+				// creation is read and deliberately unstated - so its index is uncovered, and without the
+				// plumbing exclusion the list adds a token-program row for an instruction it decoded. That
+				// row would also read as an instruction nothing accounted for, which is what the signing
+				// gate refuses on, so a swap that opens a wrapped SOL account this way would be refused.
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [creation, initialisation],
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						includeUnrecognised: true
+					}).map(({ kind }) => kind)
+				).toStrictEqual(['createTokenAccount']);
+			});
+
 			it('should read it as the token account it becomes, carrying its rent', () => {
 				// Previously the creation produced no effect, so the list called an instruction the wallet
 				// had decoded "unrecognised" and named the System program as the whole of what it knew.
@@ -888,7 +903,9 @@ describe('sol-instruction-summary.utils', () => {
 			});
 
 			// The case the flag exists for: a transaction whose every call sits inside programs the
-			// wallet cannot read listed nothing whatsoever before.
+			// wallet cannot read listed nothing whatsoever before. Its `initializeAccount` is not
+			// among them - that one is read and deliberately left unstated, so it is not listed as
+			// something nothing could read.
 			it('should list a transaction it could read nothing of', () => {
 				expect(kinds(mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.THIRD_PARTY))).toStrictEqual(
 					[]
@@ -901,7 +918,7 @@ describe('sol-instruction-summary.utils', () => {
 							includeUnrecognised: true
 						})
 					)
-				).toStrictEqual(['unknown', 'unknown', 'unknown', 'unknown']);
+				).toStrictEqual(['unknown', 'unknown', 'unknown']);
 			});
 
 			it('should drop them by default, so the activity keeps the list it had', () => {

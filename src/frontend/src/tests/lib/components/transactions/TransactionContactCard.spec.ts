@@ -5,10 +5,17 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi } from '$tests/mocks/contacts.mock';
+import { mockEthAddress3 } from '$tests/mocks/eth.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 vi.spyOn(modalStore, 'openAddressBook').mockImplementation(vi.fn());
+
+// Real addresses on purpose: saving maps through `mapAddressToContactAddressUi`, so a placeholder
+// like `0xTO` silently exercises the unsupported path instead of the supported one.
+const mockEthAddress4Valid = '0xB32979486938AA9694BFC898f35DBED459F44424';
+const mockEthAddressSpender = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
 const mockContacts = (contacts: ContactUi[]) => {
 	vi.spyOn(contactsDerived, 'subscribe').mockImplementation((fn) => {
@@ -19,24 +26,24 @@ const mockContacts = (contacts: ContactUi[]) => {
 
 const [toMockContact] = getMockContactsUi({
 	n: 1,
-	addresses: [{ address: '0xTO', label: 'Alice alias', addressType: 'Eth' }],
+	addresses: [{ address: mockEthAddress3, label: 'Alice alias', addressType: 'Eth' }],
 	name: 'Alice'
 });
 const [fromMockContact] = getMockContactsUi({
 	n: 1,
-	addresses: [{ address: '0xFROM', label: 'Bob alias', addressType: 'Eth' }],
+	addresses: [{ address: mockEthAddress4Valid, label: 'Bob alias', addressType: 'Eth' }],
 	name: 'Bob'
 });
 const [forMockContact] = getMockContactsUi({
 	n: 1,
-	addresses: [{ address: '0xSPENDER', label: 'Charlie alias', addressType: 'Eth' }],
+	addresses: [{ address: mockEthAddressSpender, label: 'Charlie alias', addressType: 'Eth' }],
 	name: 'Charlie'
 });
 
 describe('TransactionContactCard', () => {
-	const toAddress = '0xTO';
-	const fromAddress = '0xFROM';
-	const spenderAddress = '0xSPENDER';
+	const toAddress = mockEthAddress3;
+	const fromAddress = mockEthAddress4Valid;
+	const spenderAddress = mockEthAddressSpender;
 	const toExplorer = 'https://explorer.io/to';
 	const fromExplorer = 'https://explorer.io/from';
 	const spenderExplorer = 'https://explorer.io/spender';
@@ -97,6 +104,18 @@ describe('TransactionContactCard', () => {
 		await fireEvent.click(btn);
 
 		expect(modalStore.openAddressBook).toHaveBeenCalled();
+	});
+
+	// `TokenAccountId` has no XRP variant, so the address book cannot prefill or validate such an
+	// address. Offering the action would walk the user into a form they can never submit.
+	it('hides the save address button for an address no contact can hold', () => {
+		const { queryByRole, getByText } = render(TransactionContactCard, {
+			props: { type: 'send', to: mockXrpAddress }
+		});
+
+		expect(getByText(mockXrpAddress)).toBeTruthy();
+
+		expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
 	});
 
 	it('renders contact name if contact found (to)', () => {

@@ -28,7 +28,8 @@
 		modalBtcTransaction,
 		modalEthTransaction,
 		modalIcTransaction,
-		modalSolTransaction
+		modalSolTransaction,
+		modalXrpTransaction
 	} from '$lib/derived/modal.derived';
 	import {
 		enabledFungibleNetworkTokens,
@@ -51,6 +52,9 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
+	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 
 	// The tokens panel lists the selected network's tokens only, so a selection made on another
 	// network sticks around invisibly and keeps hiding transactions with no row left to untick it.
@@ -95,6 +99,7 @@
 			$ethAddress,
 			$btcStatuses: $btcStatusesStore,
 			$solTransactions: $solTransactionsStore,
+			$xrpTransactions: $xrpTransactionsStore,
 			$icTransactionsStore,
 			$ckBtcMinterInfoStore,
 			$icPendingTransactionsStore,
@@ -159,6 +164,13 @@
 			$modalStore
 		})
 	);
+
+	let { transaction: selectedXrpTransaction, token: selectedXrpToken } = $derived(
+		mapTransactionModalData<XrpTransactionUi>({
+			$modalOpen: $modalXrpTransaction,
+			$modalStore
+		})
+	);
 </script>
 
 <TransactionsFilterToolbar />
@@ -198,4 +210,6 @@
 	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
 {:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
 	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
+{:else if $modalXrpTransaction && nonNullish(selectedXrpTransaction)}
+	<XrpTransactionModal token={selectedXrpToken} transaction={selectedXrpTransaction} />
 {/if}

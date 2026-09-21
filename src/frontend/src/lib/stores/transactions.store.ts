@@ -3,7 +3,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { AnyTransaction } from '$lib/types/transaction-ui';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 type TransactionTypes = AnyTransaction;
 
@@ -42,6 +42,12 @@ export interface TransactionsStore<T extends TransactionTypes> extends Certified
 	update: (params: { tokenId: TokenId; transaction: CertifiedTransaction<T> }) => void;
 	cleanUp: (params: TransactionsStoreIdParams<T>) => void;
 	nullify: (tokenId: TokenId) => void;
+	// Drops the token's entry entirely, leaving it `undefined` rather than the `null` that `reset`
+	// writes. The two are read differently: `isTransactionsStoreInitialized` counts anything that
+	// is not `undefined` as initialized, so clearing for an ownership change — a new address, a
+	// fresh worker — would otherwise tell the UI the account has no activity before anything has
+	// been asked. Added here rather than on `CertifiedStore` so only transaction stores carry it.
+	clear: (tokenId: TokenId) => void;
 }
 
 export const initTransactionsStore = <T extends TransactionTypes>(): TransactionsStore<T> => {
@@ -56,6 +62,19 @@ export const initTransactionsStore = <T extends TransactionTypes>(): Transaction
 		isTransactionUi(transaction) ? transaction.id : transaction.hash;
 
 	return {
+		clear: (tokenId: TokenId) =>
+			update((state) => {
+				if (isNullish(state)) {
+					return state;
+				}
+
+				// `delete` rather than destructuring the key out: `TokenId` is a branded symbol and
+				// cannot be used as a computed index type.
+				const rest = { ...state };
+				delete rest[tokenId];
+
+				return rest;
+			}),
 		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),

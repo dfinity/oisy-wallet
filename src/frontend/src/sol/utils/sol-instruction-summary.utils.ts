@@ -645,6 +645,24 @@ export const mapSolInstructionSummaries = ({
 		return nonNullish(program) ? { ...acc, [index]: program } : acc;
 	}, {});
 
+	// Plumbing the wallet read and chose not to state: initialising an account it just opened,
+	// syncing a wrapped balance, sizing a lookup. `toEffect` returns nothing for these on purpose,
+	// which leaves their index uncovered - and listing an instruction that was decoded as one
+	// nothing could read is untrue, the same objection the compute budget is excluded on.
+	const plumbing = new Set(
+		instructions.reduce<number[]>((acc, instruction, index) => {
+			if (!isParsed(instruction)) {
+				return acc;
+			}
+
+			const {
+				parsed: { type }
+			} = instruction;
+
+			return PLUMBING_TYPES.includes(type) ? [...acc, index] : acc;
+		}, [])
+	);
+
 	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, topLevel, instruction }) => {
 		const effect = toEffect({
 			instruction,
@@ -688,7 +706,7 @@ export const mapSolInstructionSummaries = ({
 					// The review already states what these do, as the priority fee it charges for.
 					// Listing them here as instructions nothing could read would be noise on every
 					// transaction that sets a compute budget, and untrue besides.
-					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+					if (program === COMPUTE_BUDGET_PROGRAM_ADDRESS || plumbing.has(index)) {
 						return acc;
 					}
 
