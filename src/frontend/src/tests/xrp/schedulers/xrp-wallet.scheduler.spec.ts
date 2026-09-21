@@ -7,6 +7,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
 import { XrpNetworks } from '$xrp/types/network';
+import { jsonReplacer, jsonReviver } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/time.utils', () => ({
@@ -28,8 +29,23 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 
 describe('xrp-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadTransactions: MockInstance;
 
 	const mockBalance = 25_000_000n;
+
+	const mockRawTransaction = {
+		tx: {
+			TransactionType: 'Payment',
+			Account: 'rSender',
+			Destination: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+			Amount: '5000000',
+			hash: 'HASH1',
+			ledger_index: 42,
+			date: 1
+		},
+		meta: { TransactionResult: 'tesSUCCESS' },
+		validated: true
+	};
 
 	const startData: PostMessageDataRequestXrp = {
 		address: { data: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', certified: false },
@@ -53,7 +69,8 @@ describe('xrp-wallet.scheduler', () => {
 		ref,
 		data: {
 			wallet: {
-				balance: { certified: false, data: mockBalance }
+				balance: { certified: false, data: mockBalance },
+				newTransactions: JSON.stringify([], jsonReplacer)
 			}
 		}
 	};
@@ -76,6 +93,9 @@ describe('xrp-wallet.scheduler', () => {
 		mockAuthStore();
 
 		spyLoadBalance = vi.spyOn(xrplRest, 'loadXrpBalance').mockResolvedValue(mockBalance);
+		spyLoadTransactions = vi
+			.spyOn(xrplRest, 'loadXrpTransactions')
+			.mockResolvedValue({ transactions: [] });
 
 		const provider = AuthClientProvider.getInstance();
 		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
@@ -142,6 +162,135 @@ describe('xrp-wallet.scheduler', () => {
 		await vi.advanceTimersByTimeAsync(XRP_WALLET_TIMER_INTERVAL_MILLIS);
 
 		expect(spyLoadBalance).toHaveBeenCalledTimes(2);
+
+		scheduler.stop();
+	});
+
+	it('should load transactions and postMessage the mapped new ones', async () => {
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		expect(spyLoadTransactions).toHaveBeenCalledOnce();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+		const transactions = JSON.parse(walletCall?.[0].data.wallet.newTransactions, jsonReviver);
+
+		expect(transactions).toHaveLength(1);
+		expect(transactions[0].data.id).toBe('HASH1');
+		expect(transactions[0].data.type).toBe('receive');
+		expect(transactions[0].data.value).toBe(5_000_000n);
+
+		scheduler.stop();
+	});
+
+	// The balance and the history come from different endpoints. Coupled through `Promise.all`, an
+	// `account_tx` outage rejected the pair and the catch posted `syncXrpWalletError` — which clears
+	// the balance store as well, so a balance that had just been read correctly disappeared because
+	// a different endpoint was down.
+	it('should post a balance that loaded even when the transactions request fails', async () => {
+		spyLoadTransactions.mockRejectedValue(new Error('account_tx down'));
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+
+		expect(walletCall).toBeDefined();
+		expect(walletCall?.[0].data.wallet.balance.data).toBe(mockBalance);
+
+		// And carries no history at all rather than an empty page: `[]` would be written to the
+		// store, marking it initialized, and the UI would report the account as having no activity
+		// on the strength of a request that failed.
+		expect(walletCall?.[0].data.wallet.newTransactions).toBeUndefined();
+
+		expect(postMessageMock).not.toHaveBeenCalledWith(
+			expect.objectContaining({ msg: 'syncXrpWalletError' })
+		);
+
+		scheduler.stop();
+	});
+
+	// After a tick where `account_tx` failed, a later successful EMPTY page changes neither the
+	// balance nor the row count — so the "nothing changed" early return swallowed it and the UI
+	// store stayed uninitialized, leaving Activity on skeletons for an account that simply has no
+	// transactions. The first successful page has to get through on its own account.
+	it('should post the first successful empty page after a failed history tick', async () => {
+		spyLoadTransactions.mockRejectedValueOnce(new Error('account_tx down'));
+		spyLoadTransactions.mockResolvedValue({ transactions: [] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		postMessageMock.mockClear();
+
+		await scheduler.trigger(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+
+		expect(walletCall).toBeDefined();
+		expect(walletCall?.[0].data.wallet.newTransactions).toBe('[]');
+
+		scheduler.stop();
+	});
+
+	// The history request sat inside the retried function, so a balance outage re-issued a
+	// perfectly good `account_tx` on every attempt — eleven calls for one tick, aimed at a provider
+	// that is already failing.
+	it('asks for the history once even while the balance is retried', async () => {
+		spyLoadBalance.mockRejectedValue(new Error('account_info down'));
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		expect(vi.mocked(spyLoadBalance).mock.calls.length).toBeGreaterThan(1);
+		expect(spyLoadTransactions).toHaveBeenCalledOnce();
+
+		scheduler.stop();
+	});
+
+	// The UI store is cleared whenever this scheduler is stopped — every caller that stops it is
+	// handing ownership over. The cache has to go with it: `setRef` only clears on a CHANGED ref, so
+	// a restart on the same address would diff its first page against a full cache, report nothing
+	// new, and leave that cleared store empty. The account's history would just disappear.
+	it('should report its rows again after a stop and a same-address restart', async () => {
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		scheduler.stop();
+		postMessageMock.mockClear();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+		const transactions = JSON.parse(walletCall?.[0].data.wallet.newTransactions, jsonReviver);
+
+		expect(transactions).toHaveLength(1);
+		expect(transactions[0].data.id).toBe('HASH1');
 
 		scheduler.stop();
 	});
