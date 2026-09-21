@@ -1667,6 +1667,7 @@
 			"tab_operations": "Operace",
 			"unreviewed_instructions": "OISY nedokáže dekódovat některé z těchto instrukcí, takže kontrola níže nemusí být úplná.",
 			"unreviewed_instructions_simulated": "Tato transakce obsahuje operace z externího zdroje, které OISY nedokáže dekódovat, proto OISY spustil jejich simulaci. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte simulované změny zůstatku a operace. Mějte na paměti, že skutečný výsledek se může od simulace lišit.",
+			"cannot_be_shown": "Tato transakce obsahuje akce, které nelze všechny přesně zobrazit ke kontrole, takže ji OISY nepodepíše. Odmítněte ji a požádejte aplikaci o jednodušší požadavek.",
 			"simulated_instructions": "Simulované instrukce",
 			"multiple_operations": "Tato transakce obsahuje více operací, které ovlivňují vaši peněženku. Zkontrolujte simulované změny zůstatku a obsažené instrukce a tuto transakci schvalte pouze v případě, že také důvěřujete aplikaci.",
 			"simulated_review": "Kontrola níže je predikcí toho, jak by tato transakce dopadla při simulaci proti aktuálnímu stavu sítě. Skutečný výsledek se může lišit.",
