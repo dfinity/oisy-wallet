@@ -2101,14 +2101,47 @@ describe('xrpl.rest', () => {
 		);
 
 		// An account that was never funded does not exist on-ledger; it has no history rather than
-		// a failed lookup, matching how `loadXrpBalance` treats the same error.
-		it('returns an empty list for an account that does not exist', async () => {
-			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+		// a failed lookup, matching how `loadXrpBalance` treats the same error. Bound to the address,
+		// for the same reason: an absence is a positive claim about an account, so it has to be this
+		// account's. Named either way the node offers it — top level, or through the echo.
+		it.each([
+			{ name: 'a top-level account', result: { error: 'actNotFound', account: 'ADDR' } },
+			{
+				name: 'an echoed request',
+				result: {
+					error: 'actNotFound',
+					request: { method: 'account_tx', params: [{ account: 'ADDR' }] }
+				}
+			}
+		])('returns an empty list for an absence identified by $name', async ({ result }) => {
+			mockFetchResponse({
+				body: { result: JSON.parse(JSON.stringify(result).replaceAll('ADDR', address)) }
+			});
 
 			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
 
 			expect(page.transactions).toEqual([]);
 			expect(page.marker).toBeUndefined();
+		});
+
+		// Unbound or misrouted: an empty history would be written to the store as a settled fact
+		// about an account nobody confirmed was ours.
+		it.each([
+			{ name: 'names nobody', result: { error: 'actNotFound' } },
+			{ name: 'names another account', result: { error: 'actNotFound', account: 'rSomeoneElse' } },
+			{
+				name: 'echoes another account',
+				result: {
+					error: 'actNotFound',
+					request: { method: 'account_tx', params: [{ account: 'rSomeoneElse' }] }
+				}
+			}
+		])('throws for an actNotFound that $name', async ({ result }) => {
+			mockFetchResponse({ body: { result } });
+
+			await expect(
+				loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 })
+			).rejects.toThrow('does not identify');
 		});
 
 		it('returns an empty list for a funded account with no matching transactions', async () => {

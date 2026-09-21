@@ -193,11 +193,22 @@ export const mapXrpTransaction = ({
 	transaction,
 	xrpAddress
 }: {
-	transaction: XrpAccountTransactionEntry;
+	transaction: unknown;
 	xrpAddress: XrpAddress;
 }): XrpTransactionUi | undefined => {
-	const { meta, validated } = transaction;
-	const tx = transaction.tx ?? transaction.tx_json;
+	// `unknown`, not the entry type. The schema at the RPC boundary checks the envelope and leaves
+	// rows alone, so what arrives is whatever the node sent — and typing this parameter as a
+	// validated entry promised something no caller could deliver. A `null` row threw on the
+	// destructuring below and took the whole page with it, every tick, since the same page is
+	// re-fetched and fails identically.
+	if (isNullish(transaction) || typeof transaction !== 'object' || Array.isArray(transaction)) {
+		return undefined;
+	}
+
+	const entry = transaction as XrpAccountTransactionEntry;
+
+	const { meta, validated } = entry;
+	const tx = entry.tx ?? entry.tx_json;
 
 	if (isNullish(tx) || tx.TransactionType !== 'Payment') {
 		return undefined;
@@ -223,7 +234,7 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
-	const hash = tx.hash ?? transaction.hash;
+	const hash = tx.hash ?? entry.hash;
 
 	if (isNullish(hash)) {
 		return undefined;
@@ -252,7 +263,7 @@ export const mapXrpTransaction = ({
 		return undefined;
 	}
 
-	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
+	const ledgerIndex = tx.ledger_index ?? entry.ledger_index;
 
 	// Same rule as `amount` above, for the same reason: these reach `BigInt`, which throws rather
 	// than returning a value it cannot produce, and the throw escapes the `.map` that builds the

@@ -4,6 +4,7 @@ import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
+	XrplAccountTxErrorSchema,
 	XrplAccountTxResultSchema,
 	XrplEnvelopeSchema,
 	XrplFeeResultSchema,
@@ -17,7 +18,6 @@ import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type {
 	XrpAccountInfo,
-	XrpAccountTransactionEntry,
 	XrpSubmitResult,
 	XrpTransactionOutcome,
 	XrpTransactionsPage
@@ -242,6 +242,26 @@ const isXrpAccountErrorForAddress = ({
 		return false;
 	}
 
+	return isXrpEchoedIdentityForAddress({ address, account, request });
+};
+
+/**
+ * Whether everything an error response says about its subject says this address.
+ *
+ * Split out so `account_tx` can apply the same identity rule: that reader has no ledger dimension
+ * to check — it asks for the full range — and its echo names a different operation, so it cannot
+ * use the `account_info` guard wholesale, but the question "does this absence name us" is the same
+ * one and should not be answered twice in two ways.
+ */
+const isXrpEchoedIdentityForAddress = ({
+	address,
+	account,
+	request
+}: {
+	address: XrpAddress;
+	account?: string;
+	request?: { operation: string; params: Record<string, unknown> };
+}): boolean => {
 	// Everything the response CARRIES, not everything it could parse. Filtering to strings first
 	// discarded a present-but-malformed identity before the comparison saw it, so
 	// `{ account: <requested>, request: { account: 123 } }` passed on the strength of the good half
@@ -714,6 +734,23 @@ export const loadXrpTransactions = async ({
 	});
 
 	if (nonNullish(result.error)) {
+		// Bound like the success branch below, and for a sharper reason: an unbound absence does not
+		// merely show the wrong rows, it states that this account has no history — a settled-looking
+		// claim built on someone else's answer. `loadXrpBalance` already refuses an `actNotFound`
+		// that names nothing or names another address.
+		//
+		// The echo is checked when present rather than required, unlike the `account_info` guard:
+		// that one could require it because it was verified against the configured endpoint that
+		// `actNotFound` carries `request` on both paths. No such check has been done for
+		// `account_tx`, and requiring it on an assumption would reject every real absence.
+		const parsedError = XrplAccountTxErrorSchema.safeParse(result);
+
+		if (!parsedError.success || !isXrpEchoedIdentityForAddress({ address, ...parsedError.data })) {
+			throw new Error(
+				`Unexpected XRPL account_tx response: an ${result.error} that does not identify ${address}`
+			);
+		}
+
 		return { transactions: [] };
 	}
 
@@ -734,5 +771,5 @@ export const loadXrpTransactions = async ({
 		throw new Error('Unexpected XRPL account_tx response: it is for a different account');
 	}
 
-	return { transactions: transactions as XrpAccountTransactionEntry[], marker: nextMarker };
+	return { transactions, marker: nextMarker };
 };
