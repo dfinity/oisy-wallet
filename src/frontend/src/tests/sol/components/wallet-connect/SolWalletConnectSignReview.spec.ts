@@ -73,6 +73,26 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.balance_changes_none)).toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+
+			// It is a simulated result like any other, so it is headed as one and carries the caveat
+			// every other simulated result carries - "changes nothing" otherwise reads as a fact
+			// about the transaction rather than a prediction about it.
+			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.balance_changes)).not.toBeInTheDocument();
+		});
+
+		it('should announce an undeterminable balance to a screen reader', () => {
+			// Inserted once the decode settles, like the refusal above it.
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.balance_changes_unknown);
 		});
 
 		it('should not say so once a simulation answered', () => {

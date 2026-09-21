@@ -153,6 +153,11 @@
 		})
 	);
 
+	// Whether a run took place at all, which the preview alone does not say: it is omitted when the
+	// run changed nothing the user owns, and the parties come back whole either way. Shared so the
+	// caveat and the answer below can never disagree about whether anything was simulated.
+	let simulationObtained = $derived(nonNullish(preview) || parties?.partial === false);
+
 	let summaryText = $derived(
 		nonNullish(statedSummary)
 			? formatSolTransactionSummary({
@@ -263,7 +268,7 @@
 		</MessageBox>
 	{:else if nonNullish(preview) && !approveDisabled && isNullish(statedSummary)}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
-	{:else if nonNullish(preview)}
+	{:else if simulationObtained}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
@@ -346,17 +351,24 @@
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
 				{:else if decoded}
 					<WalletConnectModalValue
-						label={$i18n.wallet_connect.text.balance_changes}
+						label={simulationObtained
+							? $i18n.wallet_connect.text.simulated_changes
+							: $i18n.wallet_connect.text.balance_changes}
 						ref="balance-changes"
 					>
-						{#if parties?.partial === false}
+						{#if simulationObtained}
 							<!-- A run happened and reported nothing of the user's changing. That is an answer,
 							     and a different one from having no answer at all. -->
 							<span>{$i18n.wallet_connect.text.balance_changes_none}</span>
 						{:else}
-							<MessageBox level="error">
-								{$i18n.wallet_connect.text.balance_changes_unknown}
-							</MessageBox>
+							<!-- `role="alert"` for the same reason the refusal above carries one: it arrives
+							     once the decode settles, and a reader already past this point would not
+							     otherwise hear that the balance changes could not be determined. -->
+							<div role="alert">
+								<MessageBox level="error">
+									{$i18n.wallet_connect.text.balance_changes_unknown}
+								</MessageBox>
+							</div>
 						{/if}
 					</WalletConnectModalValue>
 				{/if}
