@@ -47,6 +47,12 @@
 		focused?: boolean;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
+		// Opt-in: when this changes, custom validation reruns against the same amount. The effect
+		// below tracks the amount and the token, which is all a self-contained input needs — but a
+		// caller whose verdict depends on values it owns (a fee that moves, a reserve that loads)
+		// has no way to say so, and a stale error survives until the user edits the amount. Pass a
+		// primitive that changes only when those values do; `undefined` keeps the old behaviour.
+		revalidateKey?: unknown;
 		showTokenNetwork?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
@@ -74,6 +80,7 @@
 		focused = $bindable(false),
 		onCustomValidate = () => undefined,
 		onCustomErrorValidate = () => undefined,
+		revalidateKey = undefined,
 		showTokenNetwork = false,
 		onClick,
 		title,
@@ -130,7 +137,7 @@
 	const debounceValidate = debounce(validate, 300);
 
 	$effect(() => {
-		[amount, token];
+		[amount, token, revalidateKey];
 
 		debounceValidate();
 	});
