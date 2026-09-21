@@ -256,23 +256,28 @@
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
-	<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
-	     theft as nothing happening. It is named first among the fund warnings for that reason. -->
-	{#if nonNullish(preview) && preview.controlChanges.length > 0}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
-	{/if}
+	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
+	     message the wallet has already decided it will not sign, and the partial-parties notice is
+	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
+	{#if !ambiguous}
+		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
+		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
+		{#if nonNullish(preview) && preview.controlChanges.length > 0}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
+		{/if}
 
-	<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
-	     something visibly failed: an empty list on a transaction that clearly spends something is
-	     the single most dangerous thing this review can show. -->
-	{#if parties?.partial === true}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
-	{/if}
+		<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+		     something visibly failed: an empty list on a transaction that clearly spends something is
+		     the single most dangerous thing this review can show. -->
+		{#if parties?.partial === true}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
+		{/if}
 
-	{#if dappPrioritizationFee}
-		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
-	{:else if highPrioritizationFee}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{#if dappPrioritizationFee}
+			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+		{:else if highPrioritizationFee}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{/if}
 	{/if}
 
 	<!-- What the message itself says it does, in one line, before the rows that say it in detail.
