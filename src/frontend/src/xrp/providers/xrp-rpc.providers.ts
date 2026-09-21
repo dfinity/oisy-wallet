@@ -1,4 +1,4 @@
-import { XRP_RPC_HTTP_URL_MAINNET } from '$env/networks/networks.xrp.env';
+import { XRP_RPC_HTTP_URL_MAINNET } from '$env/rest/xrpl.env';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { isNullish } from '@dfinity/utils';
 

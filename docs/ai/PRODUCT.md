@@ -6,7 +6,7 @@ This document is the living description of OISY's product behaviors. It is read 
 
 ## What is OISY
 
-OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, and BTC without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold ECDSA across ICP replica nodes.
+OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, BTC, SOL, and XRP without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold cryptography across ICP replica nodes.
 
 Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by default. The entire application — frontend and backend — is served from the chain.
 
@@ -382,6 +382,24 @@ An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**,
 While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
+
+---
+
+## XRP Ledger
+
+OISY supports native XRP: balance, receive, send, and transaction history. The address is an XRPL classic address derived from the same threshold-signing setup as the other chains (Ed25519), so no key ever leaves the network.
+
+### Destination tags
+
+An XRP payment can carry a **destination tag** — a numeric routing memo that exchanges and custodians use to credit the right customer account. Sending to such a recipient **without** the tag, or with the wrong one, is a well-known and typically **unrecoverable** way to lose funds, because the funds arrive at the right address but cannot be attributed.
+
+The send flow therefore exposes the destination tag as an explicit, optional field rather than hiding it, and a tag of `0` is preserved as a real value rather than treated as "absent". Where a received payment carried a tag, the transaction detail shows it.
+
+### Account reserve
+
+The XRP Ledger requires an account to keep a minimum balance on-ledger for the account to continue to exist. It has two parts: a **base reserve** every account owes, and an **owner reserve** owed once more for every ledger object the account owns — a trust line, an offer, an escrow. An account holding any of those must therefore retain more than the base reserve alone, and both amounts are set by the validators rather than fixed by the protocol.
+
+The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
 ---
 
