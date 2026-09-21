@@ -4,13 +4,15 @@ import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.st
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
+import type { XrpCertifiedTransactionsData } from '$xrp/stores/xrp-transactions.store';
 
 export interface TransactionsStoreCheckParams {
 	transactionsStoreData:
 		| BtcCertifiedTransactionsData
 		| EthCertifiedTransactionsData
 		| IcCertifiedTransactionsData
-		| SolCertifiedTransactionsData;
+		| SolCertifiedTransactionsData
+		| XrpCertifiedTransactionsData;
 	tokens: Token[];
 }
 

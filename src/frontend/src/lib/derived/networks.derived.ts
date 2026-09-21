@@ -15,25 +15,34 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
+import { enabledXrpNetworks } from '$xrp/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks, enabledEvmNetworks],
+	[
+		enabledBitcoinNetworks,
+		enabledEthereumNetworks,
+		enabledSolanaNetworks,
+		enabledXrpNetworks,
+		enabledEvmNetworks
+	],
 	([
 		$enabledBitcoinNetworks,
 		$enabledEthereumNetworks,
 		$enabledSolanaNetworks,
+		$enabledXrpNetworks,
 		$enabledEvmNetworks
 	]) => [
 		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
 		ICP_NETWORK,
 		ICP_PSEUDO_TESTNET_NETWORK,
-		...[...$enabledSolanaNetworks, ...$enabledEvmNetworks].sort((a, b) =>
+		...[...$enabledSolanaNetworks, ...$enabledXrpNetworks, ...$enabledEvmNetworks].sort((a, b) =>
 			a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
 		)
 	]
@@ -124,4 +133,8 @@ export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks],
 
 export const networkSolanaLocalEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
+);
+
+export const networkXrpMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
+	$networks.some(({ id }) => id === XRP_MAINNET_NETWORK_ID)
 );
