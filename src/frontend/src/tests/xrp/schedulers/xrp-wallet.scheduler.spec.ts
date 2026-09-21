@@ -220,6 +220,34 @@ describe('xrp-wallet.scheduler', () => {
 		scheduler.stop();
 	});
 
+	// After a tick where `account_tx` failed, a later successful EMPTY page changes neither the
+	// balance nor the row count — so the "nothing changed" early return swallowed it and the UI
+	// store stayed uninitialized, leaving Activity on skeletons for an account that simply has no
+	// transactions. The first successful page has to get through on its own account.
+	it('should post the first successful empty page after a failed history tick', async () => {
+		spyLoadTransactions.mockRejectedValueOnce(new Error('account_tx down'));
+		spyLoadTransactions.mockResolvedValue({ transactions: [] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		postMessageMock.mockClear();
+
+		await scheduler.trigger(startData);
+		await awaitJobExecution();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+
+		expect(walletCall).toBeDefined();
+		expect(walletCall?.[0].data.wallet.newTransactions).toBe('[]');
+
+		scheduler.stop();
+	});
+
 	// The UI store is cleared whenever this scheduler is stopped — every caller that stops it is
 	// handing ownership over. The cache has to go with it: `setRef` only clears on a CHANGED ref, so
 	// a restart on the same address would diff its first page against a full cache, report nothing

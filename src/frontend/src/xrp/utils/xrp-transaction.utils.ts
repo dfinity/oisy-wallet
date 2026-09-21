@@ -254,6 +254,26 @@ export const mapXrpTransaction = ({
 
 	const ledgerIndex = tx.ledger_index ?? transaction.ledger_index;
 
+	// Same rule as `amount` above, for the same reason: these reach `BigInt`, which throws rather
+	// than returning a value it cannot produce, and the throw escapes the `.map` that builds the
+	// page. One unreadable row would cost the entire history — every tick, since the page is
+	// re-fetched and fails identically. Absence stays fine; only a present, malformed field skips
+	// the row.
+	if (nonNullish(tx.Fee) && (typeof tx.Fee !== 'string' || !/^\d+$/.test(tx.Fee))) {
+		return undefined;
+	}
+
+	if (nonNullish(tx.date) && (typeof tx.date !== 'number' || !Number.isInteger(tx.date))) {
+		return undefined;
+	}
+
+	if (
+		nonNullish(ledgerIndex) &&
+		(typeof ledgerIndex !== 'number' || !Number.isInteger(ledgerIndex))
+	) {
+		return undefined;
+	}
+
 	return {
 		id: hash,
 		type: isReceive ? 'receive' : 'send',
