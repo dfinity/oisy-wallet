@@ -24,9 +24,9 @@ import { notEmptyString } from '@dfinity/utils';
  *
  * An empty value counts as unconfigured, not as a configured endpoint. `??` alone would keep
  * `''`, which is not nullish: `xrpHttpRpcUrl` would pass its own check and return an empty URL,
- * and every request would resolve against the app's own origin instead of failing. A var that is
- * declared but unset is the normal case for both of the ways this arrives — a `.env` copied from
- * `.env.example`, and a deployment secret that has not been created yet.
+ * and every request would resolve against the app's own origin instead of failing. A declared but
+ * unset var is a normal way this arrives — a deployment secret created blank or not created at
+ * all, an `env-override` line with nothing after the `=`, a cleared local `.env` entry.
  */
 export const XRP_RPC_HTTP_URL_MAINNET =
 	!TEST && notEmptyString(import.meta.env.VITE_XRP_RPC_URL_MAINNET)

@@ -282,9 +282,10 @@ failure for a payment that is about to validate — and invite a duplicate send.
 | Fallback        | None — an unset variable leaves the chain unreachable and `xrpHttpRpcUrl` throws                |
 | Deployment      | `VITE_XRP_RPC_URL_MAINNET_STAGING` / `_BETA` secrets, forwarded by `deploy-to-environment.yml`  |
 
-An empty value counts as unconfigured: a `.env` copied from `.env.example`, or a
-secret that has not been created, falls back exactly as an absent var does
-rather than building an empty endpoint into the bundle.
+An empty value counts as unconfigured: a secret created blank or not created at
+all, or a cleared local entry, is treated exactly as an absent var rather than
+building an empty endpoint into the bundle. (`.env.example` ships a working
+endpoint, so copying it does not produce this case.)
 
 On `test_*` and `audit` the URL can be supplied per run through the workflow's
 `env-override` dispatch input instead of a secret, which masks it in the logs.

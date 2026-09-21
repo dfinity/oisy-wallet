@@ -42,10 +42,11 @@ describe('xrpl.env', () => {
 			await expect(importUrl()).resolves.toBeUndefined();
 		});
 
-		// A declared-but-unset var is the normal case for both of the ways this arrives: a `.env`
-		// copied from `.env.example`, and a deployment secret nobody has created yet. `??` would keep
-		// the empty string, `xrpHttpRpcUrl` would pass its own check and hand every request an empty
-		// URL, which resolves against the app's own origin instead of failing.
+		// A declared-but-unset var is a normal way this arrives: a deployment secret created blank or
+		// not created at all, an `env-override` line with nothing after the `=`, a cleared local
+		// `.env` entry. `??` would keep the empty string, `xrpHttpRpcUrl` would pass its own check
+		// and hand every request an empty URL, which resolves against the app's own origin instead
+		// of failing.
 		it('treats an empty value as unconfigured rather than as an endpoint', async () => {
 			vi.stubEnv('VITE_XRP_RPC_URL_MAINNET', '');
 
