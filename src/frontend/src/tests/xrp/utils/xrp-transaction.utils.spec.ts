@@ -115,6 +115,59 @@ describe('xrp-transaction.utils', () => {
 			expect(mapped()).toBeUndefined();
 		});
 
+		// `date` and `ledger_index` are XRPL UInt32s. A bare integer reaches the UI as a `Date` that
+		// is out of range, and `toISOString` and `Intl.DateTimeFormat.format` both throw
+		// `RangeError: Invalid time value` — in a render path, so one row takes the list and the CSV
+		// with it rather than just being wrong itself.
+		it.each([
+			{ name: 'date', tx: { date: Number.MAX_SAFE_INTEGER } },
+			{ name: 'ledger_index', tx: { ledger_index: Number.MAX_SAFE_INTEGER } }
+		])('skips a row whose $name exceeds UInt32', ({ tx }) => {
+			const mapped = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: counterparty,
+						Destination: wallet,
+						Amount: '5000000',
+						hash: 'HU32',
+						ledger_index: 42,
+						date: 1,
+						...tx
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(mapped).toBeUndefined();
+		});
+
+		// XRPL rejects a Payment without a destination, so a row claiming to be one and omitting it
+		// is malformed. Left through with our own account as `Account`, it became a confirmed send
+		// with no recipient.
+		it('skips a Payment that names no destination', () => {
+			const mapped = mapXrpTransaction({
+				transaction: {
+					tx: {
+						TransactionType: 'Payment',
+						Account: wallet,
+						Amount: '5000000',
+						Fee: '10',
+						hash: 'HNODEST',
+						ledger_index: 42,
+						date: 1
+					},
+					meta: { TransactionResult: 'tesSUCCESS' },
+					validated: true
+				},
+				xrpAddress: wallet
+			});
+
+			expect(mapped).toBeUndefined();
+		});
+
 		// Not just the fields that reach `BigInt`. These reach the store and the UI: an object `hash`
 		// became the row id, and the scheduler keys its cache by it — `[object Object]`. Guarding
 		// field by field kept missing whichever one had not been named yet, which is why the check

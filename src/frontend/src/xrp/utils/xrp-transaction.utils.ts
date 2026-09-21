@@ -211,7 +211,15 @@ export const mapXrpTransaction = ({
 	const { meta, validated } = entry;
 	const tx = entry.tx ?? entry.tx_json;
 
-	if (isNullish(tx) || tx.TransactionType !== 'Payment') {
+	// `Destination` is mandatory on an XRPL Payment — the ledger rejects one without it — so a row
+	// claiming to be a Payment and omitting it is malformed, not merely unusual. Left through, our
+	// own account as `Account` made it a confirmed send with no recipient, in the list, the modal
+	// and the CSV.
+	//
+	// Checked here rather than made required in the schema: `tx` is shared with the non-Payment
+	// entries `account_tx` returns, and requiring it there would reject those at parse time instead
+	// of letting the type check skip them.
+	if (isNullish(tx) || tx.TransactionType !== 'Payment' || isNullish(tx.Destination)) {
 		return undefined;
 	}
 

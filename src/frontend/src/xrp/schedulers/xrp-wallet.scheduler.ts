@@ -125,41 +125,35 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			.map((data) => ({ data, certified: false }));
 	};
 
-	private loadAndSyncWalletData = async ({
+	// The two come from different endpoints and are treated differently on failure. Only the
+	// balance justifies the reset a rejection here ultimately triggers — `syncWalletError` clears
+	// it, and a stale figure on a funds screen is worse than none — so a failed `account_info`
+	// stays fatal while an `account_tx` outage leaves the history alone.
+	//
+	// The history is fetched ONCE per tick and awaited here, outside the retry in `syncWallet`.
+	// Inside it, a balance failure re-ran a perfectly good `account_tx` on every attempt — eleven
+	// calls for one tick — and that amplification lands exactly when the provider is already
+	// failing, which is when a retry should be doing the opposite.
+	private loadAndSyncBalance = async ({
 		data,
-		expectedRef
+		expectedRef,
+		transactions
 	}: {
 		data: PostMessageDataRequestXrp;
 		expectedRef: string;
+		transactions: Promise<XrpCertifiedTransaction[] | undefined>;
 	}) => {
 		const {
 			address: { data: address },
 			xrpNetwork
 		} = data;
 
-		// Settled independently, not `Promise.all`. The two come from different endpoints, and only
-		// one of them justifies the reset that a rejection here ultimately triggers: `syncWalletError`
-		// clears the balance AND the history. A stale balance on a funds screen is worse than none,
-		// so a failed `account_info` stays fatal — but an `account_tx` outage used to erase a balance
-		// that had just been read correctly, and discard history the user already had.
-		const [balanceResult, transactionsResult] = await Promise.allSettled([
-			this.loadBalance({ address, xrpNetwork }),
-			this.loadTransactions({ address, xrpNetwork })
-		]);
+		const balance = await this.loadBalance({ address, xrpNetwork });
 
-		if (balanceResult.status === 'rejected') {
-			throw balanceResult.reason;
-		}
-
-		// `undefined`, not `[]`: the store keeps what it holds and stays uninitialized, and the next
-		// tick tries again. The scheduler polls, so the in-job retries are not what makes history
-		// arrive. Passing an empty array here claimed the account has no transactions.
-		this.syncWalletData({
-			balance: balanceResult.value,
-			transactions:
-				transactionsResult.status === 'fulfilled' ? transactionsResult.value : undefined,
-			expectedRef
-		});
+		// `undefined`, not `[]`, when the history could not be read: the store keeps what it holds
+		// and stays uninitialized, and the next tick tries again. An empty array claimed the account
+		// has no transactions.
+		this.syncWalletData({ balance, transactions: await transactions, expectedRef });
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestXrp>) => {
@@ -169,9 +163,22 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		// alongside so a result landing after the scheduler was re-keyed can be discarded.
 		const expectedRef = this.refFor(data);
 
+		const {
+			address: { data: address },
+			xrpNetwork
+		} = data;
+
+		// Started once, before the retry loop, and its rejection folded into `undefined` here so a
+		// history outage neither fails the tick nor surfaces as an unhandled rejection when the
+		// balance exhausts its retries.
+		const transactions = this.loadTransactions({ address, xrpNetwork }).then(
+			(loaded) => loaded,
+			() => undefined
+		);
+
 		try {
 			await retryWithDelay({
-				request: async () => await this.loadAndSyncWalletData({ data, expectedRef }),
+				request: async () => await this.loadAndSyncBalance({ data, expectedRef, transactions }),
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
