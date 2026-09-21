@@ -1,5 +1,7 @@
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
+import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
@@ -99,8 +101,9 @@ describe('xrp-listener.services', () => {
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
 		});
 
-		// A failure is not a handover: `syncWalletError` keeps `reset`, whose `null` says the history
-		// was loaded and then cleared, which is what an error leaves behind.
+		// A failure is not a handover. A failure leaves loaded rows in place — `syncWalletError`
+		// writes only the never-loaded case, to settle the aggregate gate — while a handover drops
+		// them to `undefined`, because they belong to the previous account.
 		// A handover clears the history because it belongs to the previous account. A failure does
 		// not: the rows loaded correctly and stay true, and the scheduler passes no marker, so
 		// anything older than the newest page would never be fetched again.
@@ -116,10 +119,38 @@ describe('xrp-listener.services', () => {
 			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 		});
 
-		// Absent history is not an empty page. Writing anything would mark the store initialized and
-		// report the account as having no activity on the strength of a request that failed.
-		it('leaves the store untouched when a sync carries no history', () => {
-			resetWallet({ tokenId });
+		// Absent history is not an empty page — writing `[]` would report the account as having no
+		// activity on the strength of a request that failed. `null` is not that: it records that the
+		// read was attempted and produced nothing to show, which is what settles the aggregate gate.
+		//
+		// The scheduler folds an `account_tx` rejection into `undefined` and posts a normal wallet
+		// update, so `syncWalletError` never runs on this path and, left unwritten, a healthy balance
+		// with a failing history held the gate open for good with nothing reported.
+		it('settles a never-loaded entry when a sync carries no history', () => {
+			const gate = () =>
+				areTransactionsStoresLoaded([
+					{ transactionsStoreData: get(xrpTransactionsStore), tokens: [XRP_TOKEN] }
+				]);
+
+			resetWallet({ tokenId: XRP_TOKEN.id });
+
+			expect(gate()).toBeFalsy();
+
+			const { wallet } = mockPostMessage({});
+
+			syncWallet({
+				data: { wallet: { balance: wallet.balance } },
+				tokenId: XRP_TOKEN.id
+			});
+
+			expect(get(xrpTransactionsStore)?.[XRP_TOKEN.id]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[XRP_TOKEN.id]).not.toEqual([]);
+			expect(gate()).toBeTruthy();
+		});
+
+		// The other half, as on the error path: settling must not cost rows that did load.
+		it('keeps loaded rows when a later sync carries no history', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
 
 			const { wallet } = mockPostMessage({});
 
@@ -128,7 +159,7 @@ describe('xrp-listener.services', () => {
 				tokenId
 			});
 
-			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
 		});
 
 		it('leaves a later sync holding only the new rows', () => {
@@ -162,6 +193,36 @@ describe('xrp-listener.services', () => {
 			syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
+		});
+
+		// `resetWallet` leaves the entry `undefined` on every worker start, and the aggregate Activity
+		// gate counts anything that is not `undefined` as initialized — so a token whose FIRST load
+		// never succeeded held that gate open for good: an otherwise-empty account stayed on
+		// skeletons and `levelNewcomers` never ran. A provider outage on first load is enough.
+		it('settles a never-loaded entry so the aggregate gate can close', () => {
+			const gate = () =>
+				areTransactionsStoresLoaded([
+					{ transactionsStoreData: get(xrpTransactionsStore), tokens: [XRP_TOKEN] }
+				]);
+
+			resetWallet({ tokenId: XRP_TOKEN.id });
+
+			expect(gate()).toBeFalsy();
+
+			syncWalletError({ error: 'test error', tokenId: XRP_TOKEN.id, hideToast: true });
+
+			expect(get(xrpTransactionsStore)?.[XRP_TOKEN.id]).toBeNull();
+			expect(gate()).toBeTruthy();
+		});
+
+		// The other half: settling must not cost rows that did load, which is why this is not the
+		// unconditional `reset`/`nullify` the other chains do.
+		it('leaves a loaded entry alone', () => {
+			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
+
+			syncWalletError({ error: 'test error', tokenId, hideToast: true });
+
 			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
 		});
 
