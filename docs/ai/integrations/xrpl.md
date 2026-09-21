@@ -309,6 +309,20 @@ builds; that made an unconfigured build look configured, and per
 [xrpl.org](https://xrpl.org/docs/tutorials/public-servers) they are explicitly
 **not for sustained or production use** and may become unavailable at any time.
 
+A public cluster is still available where it is appropriate — point the
+variable at one rather than relying on a fallback:
+
+| Where              | How                                                                  |
+| ------------------ | -------------------------------------------------------------------- |
+| Local              | `VITE_XRP_RPC_URL_MAINNET=https://xrplcluster.com` in your `.env`    |
+| Staging            | set the `VITE_XRP_RPC_URL_MAINNET_STAGING` secret to the cluster URL |
+| `test_*` / `audit` | supply it per run through the workflow's `env-override` input        |
+
+Nothing validates the value, so any reachable XRPL JSON-RPC endpoint works.
+Choosing a public cluster this way is a decision that is visible in the
+configuration; a fallback made "nobody configured this" and "we chose the
+public cluster" look identical, which is why there no longer is one.
+
 The variable holds a whole URL, where every other provider credential in this
 repo holds a key that is composed onto a hostname kept in code — QuickNode's
 Solana endpoint being the closest comparison. Splitting XRPL the same way means
