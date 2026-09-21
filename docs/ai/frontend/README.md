@@ -54,7 +54,7 @@ Framework, UI lib, chain SDKs, and dev tooling are discoverable from
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and
   [`vitest.config.ts`](../../../vitest.config.ts)): `$lib`, `$routes`,
-  `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$icp-eth`, `$env`,
+  `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$xrp`, `$icp-eth`, `$env`,
   `$declarations`, `$tests`. Relative imports under `src/frontend/src/`
   are an ESLint error.
 
@@ -65,7 +65,7 @@ src/frontend/src/
 ├── routes/         SvelteKit pages — (app) (public) (sign) groups
 ├── lib/            Cross-cutting components / services / stores / derived /
 │                   utils / constants / i18n / schema / validation / workers
-├── btc/  eth/  evm/  icp/  sol/  icp-eth/   Per-chain mirrors of lib/
+├── btc/  eth/  evm/  icp/  sol/  xrp/  icp-eth/   Per-chain mirrors of lib/
 ├── env/            Networks, tokens and feature-flag definitions
 ├── tests/          Mirrors src/ — every *.spec.ts lives here
 └── hooks.ts, app.html, app.d.ts

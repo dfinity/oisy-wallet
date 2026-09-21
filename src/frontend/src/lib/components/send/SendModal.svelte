@@ -31,7 +31,8 @@
 		btcAddressTestnetNotLoaded,
 		solAddressLocalnetNotLoaded,
 		solAddressDevnetNotLoaded,
-		solAddressMainnetNotLoaded
+		solAddressMainnetNotLoaded,
+		xrpAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { modalSendData } from '$lib/derived/modal.derived';
 	import { routeNft } from '$lib/derived/nav.derived';
@@ -67,7 +68,8 @@
 		isNetworkIdBTCRegtest,
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal
+		isNetworkIdSOLLocal,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import { findNonFungibleToken, getNftSendCloseRedirectUrl } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
@@ -219,7 +221,9 @@
 								? $solAddressDevnetNotLoaded
 								: isNetworkIdSOLLocal(id)
 									? $solAddressLocalnetNotLoaded
-									: false;
+									: isNetworkIdXrp(id)
+										? $xrpAddressMainnetNotLoaded
+										: false;
 
 	const onSendToken = async (token: Token) => {
 		if (isDisabled(token)) {
@@ -323,6 +327,7 @@
 				onClose={close}
 				onNext={modal.next}
 				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onSendForm={() => goToStep(WizardStepsSend.SEND)}
 				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				{selectedContact}
 				bind:amount

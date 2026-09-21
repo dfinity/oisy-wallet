@@ -1,17 +1,24 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { loadCustomTokens } from '$icp/services/icrc.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
 import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
-import { userProfileCreated } from '$lib/stores/user-profile.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
+import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
@@ -20,11 +27,12 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
 // they are stubbed; what is asserted is which token is handed to
 // `autoLoadSingleToken`, since that is the decision this component makes.
 vi.mock('$icp/services/icrc.services', () => ({ loadCustomTokens: vi.fn() }));
+vi.mock('$lib/api/backend.api', () => ({ setCustomToken: vi.fn() }));
 vi.mock('$icp-eth/services/icrc-token.services', () => ({ setCustomToken: vi.fn() }));
 
 vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
-	const { readable } = await import('svelte/store');
+	const { readable, writable } = await import('svelte/store');
 
 	const { mockIcrcCustomToken } = await import('$tests/mocks/icrc-custom-tokens.mock');
 	// `TokenId` is a branded symbol, so a bare `Symbol()` does not satisfy it.
@@ -36,11 +44,15 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 	// is what made `npm run test` fail here before `vitest` could run at all.
 	return {
 		...actual,
+		// Writable, because the handover waits on it: `LoaderTokens` runs inside
+		// `LoaderUserProfile`, so a test needs to hold the list unloaded and then
+		// land it. Defaults to loaded so every other test skips the wait.
+		icrcCustomTokensInitialized: writable(true),
 		icrcTokens: readable([
 			{
 				...mockIcrcCustomToken,
 				id: parseTokenId('ckTest'),
-				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false,
 				symbol: 'ckTEST'
 			}
@@ -50,32 +62,58 @@ vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
 
 describe('TipClaimModal', () => {
 	const pending = { tipId: 'the-tip-id', claimCode: 'the-claim-code' };
-	const ledgerCanisterId = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+	// ckBTC's ledger, not ICP's. The fixture used to be `ryjl3-…`, which *is* the
+	// ICP ledger — so a test named for a ck-asset the claimer has never held was
+	// quietly exercising the one token that is never a custom token at all.
+	const ledgerCanisterId = Principal.fromText('mxzaz-hqaaa-aaaar-qaada-cai');
 	const message = 'thanks for the help';
 
-	const mockDetails = () =>
+	const mockDetailsFor = (ledger: Principal) =>
 		vi.spyOn(tipServices, 'loadTipDetails').mockResolvedValue({
 			amount: 500_000n,
 			expires_at_ns: 1_800_000_000_000_000_000n,
 			message: [message],
-			ledger_canister_id: ledgerCanisterId
+			ledger_canister_id: ledger
 		});
 
-	const mockClaim = () =>
+	const mockClaimFor = (ledger: Principal) =>
 		vi.spyOn(tipServices, 'claimTip').mockResolvedValue({
 			amount: 500_000n,
 			block_index: 7n,
-			ledger_canister_id: ledgerCanisterId
+			ledger_canister_id: ledger
 		});
+
+	const mockDetails = () => mockDetailsFor(ledgerCanisterId);
+
+	const mockClaim = () => mockClaimFor(ledgerCanisterId);
 
 	let warnSpy: MockInstance<typeof consoleUtils.consoleWarn>;
 
+	let tokensInitialized: Writable<boolean>;
+
+	beforeAll(async () => {
+		({ icrcCustomTokensInitialized: tokensInitialized } =
+			(await import('$icp/derived/icrc.derived')) as unknown as {
+				icrcCustomTokensInitialized: Writable<boolean>;
+			});
+	});
+
 	beforeEach(async () => {
 		vi.restoreAllMocks();
+		tokensInitialized.set(true);
+		// `restoreAllMocks` restores spies but leaves a module mock's `vi.fn()`
+		// holding its call history, so these two have to be cleared by hand or a
+		// "was not called" assertion reads the previous test's calls.
+		vi.mocked(setCustomTokenApi).mockReset();
+		vi.mocked(loadCustomTokens).mockReset();
 		modalStore.close();
+		icrcCustomTokensStore.resetAll();
 		mockAuthStore();
 		// Describes one sign-in, so it must not leak between tests.
 		userProfileCreated.set(false);
+		// Loaded by default. The handover waits for the profile before deciding
+		// anything, so without this every test would sit through that wait.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
 
 		// The failure paths log what went wrong on purpose, so the paths that fail
 		// have to expect it rather than leak it into the test output.
@@ -293,6 +331,134 @@ describe('TipClaimModal', () => {
 		expect(remember).toHaveBeenCalledOnce();
 	});
 
+	it('waits for the profile rather than deciding before it lands', async () => {
+		// The race this closes. `TipClaimModal` is mounted by `Modals` inside
+		// `AuthGuard` — beside the loader tree, not beneath it — so nothing orders
+		// the two. A first-time claimer is both the person whose profile is still
+		// being created and the one most likely to tap straight through, so the
+		// welcome was skipped for exactly the person it exists for.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the point where the unguarded handover had already sampled both
+		// stores and closed. Setting the profile any earlier lets it win the race by
+		// luck, which is what made an earlier version of this test pass against the
+		// bug it was written for.
+		await vi.advanceTimersByTimeAsync(600);
+
+		// The profile lands only now — after the reader has already acknowledged.
+		userProfileCreated.set(true);
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		await vi.waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
+
+		vi.useRealTimers();
+	});
+
+	it('waits for the token list too, not just the profile', async () => {
+		// `LoaderTokens` is mounted *inside* `LoaderUserProfile`, so it does not even
+		// start until the profile store is ready. Gating on the profile alone handed
+		// over before the token list had begun loading — and an unloaded list reads
+		// as "never seen this token", which takes the registration path for a row
+		// the backend already has. That is the versionless save `set_custom_token`
+		// answers by trapping.
+		vi.useFakeTimers();
+
+		const autoLoad = vi
+			.spyOn(tokenServices, 'autoLoadSingleToken')
+			.mockResolvedValue({ result: 'loaded' });
+
+		// Profile ready, token list explicitly *not* loaded.
+		userProfileStore.set({ profile: mockUserProfile, certified: true });
+		tokensInitialized.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		await vi.advanceTimersByTimeAsync(600);
+
+		// Nothing decided yet: neither path may run on an unloaded list.
+		expect(autoLoad).not.toHaveBeenCalled();
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+
+		// The list lands, carrying the claimed token as a disabled row.
+		tokensInitialized.set(true);
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockIcrcCustomToken,
+					ledgerCanisterId: ledgerCanisterId.toText(),
+					enabled: false,
+					version: 2n
+				},
+				certified: true
+			}
+		]);
+
+		await vi.advanceTimersByTimeAsync(1_000);
+
+		// Enabled through the existing path, not registered from scratch — which is
+		// the whole point of waiting.
+		await vi.waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
+
+		expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+
+		vi.useRealTimers();
+	});
+
+	it('hands over anyway when the profile never arrives', async () => {
+		// Bounded, not indefinite: the claim is done and the money is theirs, so a
+		// profile that never loads must not trap the reader on a screen whose work
+		// is finished. The cost of giving up is a missed welcome, not a missed
+		// payout.
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+		userProfileCreated.set(false);
+
+		mockDetails();
+		mockClaim();
+
+		const { container } = render(TipClaimModal, { props: { pending } });
+
+		await vi.waitFor(() =>
+			expect(container.querySelector(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)).toBeInTheDocument()
+		);
+
+		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
+
+		// Past the whole retry budget without the profile ever arriving.
+		await vi.advanceTimersByTimeAsync(10_000);
+
+		await vi.waitFor(() => expect(get(modalStore)).toBeNull());
+
+		vi.useRealTimers();
+	});
+
 	it('spares an established user the introduction', async () => {
 		// The case the stored flag alone could not catch: somebody who has used OISY
 		// for months and happens to be claiming their first tip does not need to be
@@ -335,9 +501,161 @@ describe('TipClaimModal', () => {
 			await waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
 
 			expect(autoLoad.mock.calls[0][0].token).toMatchObject({
-				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
 				enabled: false
 			});
+		});
+
+		it('registers a token the claimer has never held', async () => {
+			// The case that used to end in silence. `icrcTokens` is the defaults plus
+			// the claimer's *own* imports, so a token the sender imported is in
+			// neither half: the lookup missed, nothing was enabled, and the claim
+			// finished with the tokens really theirs and nothing on screen.
+			const autoLoad = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
+
+			const stranger = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			mockDetailsFor(stranger);
+			mockClaimFor(stranger);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce());
+
+			// Registered from the ledger id alone, enabled, and the list reloaded so
+			// the metadata is read back off the ledger.
+			const [[{ token }]] = vi.mocked(setCustomTokenApi).mock.calls;
+
+			// The ledger, not just "something enabled". Asserting `enabled` alone
+			// would pass if the wiring sent a different token altogether, which is
+			// precisely the regression worth catching.
+			expect(token).toMatchObject({ enabled: true, version: [] });
+			expect((token.token as { Icrc: { ledger_id: Principal } }).Icrc.ledger_id.toText()).toBe(
+				stranger.toText()
+			);
+			expect(vi.mocked(loadCustomTokens)).toHaveBeenCalled();
+
+			// Not the enable path: there was nothing in the list to enable.
+			expect(autoLoad).not.toHaveBeenCalled();
+		});
+
+		it('carries the existing version for a row the rendered list is hiding', async () => {
+			// `icrcTokens` hides testnet tokens whenever testnets are off, so a row
+			// the claimer really has can be missing from the lookup. A versionless
+			// save for it does not fail politely — `set_custom_token` is a versioned
+			// upsert and **traps** on a mismatch, so the fix has to ask the
+			// unfiltered store and carry the version through.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+
+			const hidden = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			icrcCustomTokensStore.setAll([
+				{
+					data: {
+						...mockIcrcCustomToken,
+						ledgerCanisterId: hidden.toText(),
+						enabled: false,
+						version: 3n
+					},
+					certified: true
+				}
+			]);
+
+			mockDetailsFor(hidden);
+			mockClaimFor(hidden);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce());
+
+			const [[{ token }]] = vi.mocked(setCustomTokenApi).mock.calls;
+
+			// An update, not an insert.
+			expect(token).toMatchObject({ version: [3n] });
+		});
+
+		it('does not start a second handover on a double tap', async () => {
+			// The registration path does not go through `autoLoadSingleToken`, so
+			// there is no global busy overlay in the way of a second tap — and the
+			// second save would meet the first one's freshly written row with no
+			// version, which `set_custom_token` answers by trapping.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+
+			const stranger = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			mockDetailsFor(stranger);
+			mockClaimFor(stranger);
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			const button = getByTestId(TIP_RECEIVED_BUTTON);
+
+			button.click();
+			button.click();
+
+			await waitFor(() => expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalled());
+
+			expect(vi.mocked(setCustomTokenApi)).toHaveBeenCalledOnce();
+		});
+
+		it('leaves ICP alone rather than importing the ICP ledger', async () => {
+			// ICP is always visible and never a custom token. Without this the branch
+			// above reads "not in the list" as "import it" and registers the ICP
+			// ledger as though the claimer had pasted it in by hand.
+			const autoLoad = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
+
+			mockDetailsFor(Principal.fromText(ICP_TOKEN.ledgerCanisterId));
+			mockClaimFor(Principal.fromText(ICP_TOKEN.ledgerCanisterId));
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(get(modalStore)).toBeNull());
+
+			expect(vi.mocked(setCustomTokenApi)).not.toHaveBeenCalled();
+			expect(autoLoad).not.toHaveBeenCalled();
+		});
+
+		it('does not turn a failed registration into a failed claim', async () => {
+			// The money has already moved by the time this runs. A token that did not
+			// get registered is a wallet with one row to add by hand, not a claim
+			// that went wrong.
+			vi.spyOn(tokenServices, 'autoLoadSingleToken').mockResolvedValue({ result: 'loaded' });
+			const toasts = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => Symbol());
+
+			const stranger = Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai');
+
+			mockDetailsFor(stranger);
+			mockClaimFor(stranger);
+			vi.mocked(setCustomTokenApi).mockRejectedValueOnce(new Error('canister unreachable'));
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			// Reported, and the modal still closes onto the wallet.
+			await waitFor(() => expect(toasts).toHaveBeenCalledOnce());
+
+			expect(get(modalStore)).toBeNull();
 		});
 	});
 
