@@ -101,12 +101,19 @@ describe('xrp-listener.services', () => {
 
 		// A failure is not a handover: `syncWalletError` keeps `reset`, whose `null` says the history
 		// was loaded and then cleared, which is what an error leaves behind.
+		// A handover clears the history because it belongs to the previous account. A failure does
+		// not: the rows loaded correctly and stay true, and the scheduler passes no marker, so
+		// anything older than the newest page would never be fetched again.
 		it('keeps a failure distinguishable from a handover', () => {
 			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
 
-			syncWalletError({ tokenId, error: new Error('account_tx down'), hideToast: true });
+			syncWalletError({ tokenId, error: new Error('account_info down'), hideToast: true });
 
-			expect(get(xrpTransactionsStore)?.[tokenId]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
+
+			resetWallet({ tokenId });
+
+			expect(get(xrpTransactionsStore)?.[tokenId]).toBeUndefined();
 		});
 
 		// Absent history is not an empty page. Writing anything would mark the store initialized and
@@ -146,12 +153,16 @@ describe('xrp-listener.services', () => {
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
 		});
 
-		it('resets the transactions store on error', () => {
+		// The balance only. This path means `account_info` failed — the scheduler absorbs an
+		// `account_tx` failure — so history that loaded correctly has no reason to go, and losing
+		// it is unrecoverable: only the newest page is ever refetched.
+		it('resets the balance on error and keeps the history', () => {
 			syncWallet({ data: mockPostMessage({ transactions: [mockTransaction] }), tokenId });
 
 			syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
-			expect(get(xrpTransactionsStore)?.[tokenId]).toBeNull();
+			expect(get(balancesStore)?.[tokenId]).toBeNull();
+			expect(get(xrpTransactionsStore)?.[tokenId]).toHaveLength(1);
 		});
 
 		it('logs a warning when hideToast is true', () => {
