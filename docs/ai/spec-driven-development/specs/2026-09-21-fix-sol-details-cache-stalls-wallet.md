@@ -1,0 +1,120 @@
+This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
+
+# fix: a stalled Solana details cache must not stop the wallet
+
+## What was observed
+
+On staging and on `test_fe_3`, every Solana token — native SOL included — showed a loading skeleton
+instead of a balance, indefinitely. Prices rendered, every other network was fine, the hero total
+was correct for the rest of the wallet, and **nothing at all appeared in the browser console**. On
+the same origin, signing out hung on a spinner that never resolved.
+
+Deleting the `oisy-sol-transaction-details` IndexedDB database on the affected origin restored both
+behaviours immediately, on the same deployed bundle. A second affected origin recovered on its own
+without intervention.
+
+## Why it happened
+
+`indexedDB.open('oisy-sol-transaction-details')` answered with **no event of any kind** — neither
+`success`, nor `error`, nor `blocked`. Ten other databases on the same origin opened normally.
+
+The store is opened as its module loads (`openIdb()` at the module scope of
+`src/frontend/src/sol/api/idb-sol-transaction-details.api.ts`). `openIdb` calls `idb-keyval`'s
+`createStore`, which opens a connection and **never closes it**, and then `readEpoch`, which
+immediately starts a `readwrite` transaction. The module is reached from `$sol/api/solana.api`,
+which the worker bundle pulls in, so this runs once per realm the app starts: the main thread plus
+every wallet, auth and exchange worker. A dozen realms therefore race to create the same database,
+each holding a connection that is never released and each queuing a `readwrite` transaction on it at
+once. An `open` that loses that race can hang for the life of the page.
+
+Being a race, it is intermittent — which is why it appeared to correlate with unrelated deploy
+variables, and why one origin healed by itself. Two deployed bundles, one working and one not, were
+confirmed byte-identical in every `VITE_*` value but their own subdomain, which ruled out the build.
+
+Two consequences follow, and both were silent:
+
+1. **Balances.** `getIdbSolTransactionDetail` is read on the wallet worker's history path
+   (`solana.api.ts` → `fetchTransactionDetailForSignature`). `SolWalletScheduler` loads balances and
+   history in one `Promise.all` and posts only when both have resolved, so a history read that never
+   resolves means balances are never posted and every token of the network stays `undefined`, which
+   `TokenBalanceSkeleton` renders as a skeleton. Nothing rejects, so `retryWithDelay` has nothing to
+   retry and `syncWalletError` never fires — hence the empty console.
+2. **Sign-out.** `clearIdbStoreList` in `$lib/services/auth.services` includes
+   `clearIdbSolTransactionDetails`. Each clear is wrapped in `try`/`catch` precisely so that
+   "effective logout is more important", but a `catch` cannot see an operation that never settles.
+
+The store was introduced by #14073 (`e430dab83`, 2026-09-16) and is not in any release tag, so no
+released build is affected.
+
+## The fix
+
+The shape of the fix follows from the failure mode: the hazard is not an error, it is **silence**.
+No `try`/`catch` anywhere can see it, so the guard has to be a deadline.
+
+**1. Give every cache operation a deadline.**
+
+A new `withDeadline` in `$lib/utils/timeout.utils` resolves with a caller-supplied fallback when an
+operation has not answered within a given time. Every read, write, trim and clear in
+`idb-sol-transaction-details.api.ts` goes through it, so a store that stops answering degrades to
+the answer the caller had before the cache existed — a miss — rather than stalling the load.
+
+A rejection still propagates: a deadline is for an operation that says nothing, and one that fails
+should stay the caller's business.
+
+**2. Stand the cache down after the first miss.**
+
+A store that missed its deadline once has stopped answering, and everything queued behind it waits
+the same way. Paying the deadline per read would leave a network's history — and so its balances —
+crawling rather than stalling, which is no better. The first miss therefore disables the cache for
+the life of the realm: `openIdb` returns nothing, and every later call answers as it did before the
+cache existed, immediately.
+
+**3. Give the sign-out clears a deadline.**
+
+`clearIdbStore` in `$lib/services/auth.services` applies the same deadline, so no cache — not just
+this one — can hold sign-out open. An abandoned clear is harmless: the next session starts against a
+new epoch.
+
+## Acceptance criteria
+
+- A read whose IndexedDB operation never settles resolves as a cache miss within the deadline, and
+  the caller fetches from the RPC as it did before the cache existed.
+- After such a miss, later reads answer immediately rather than waiting again.
+- A write or trim that never settles is abandoned without failing the load that produced it.
+- Sign-out completes within the deadline even when a store never answers.
+- A rejected operation still rejects, rather than being reported as a miss.
+- Cached details still survive a reload, and a cleared cache still stops a pre-clear realm from
+  writing: the epoch guarantee is unchanged.
+
+## Explicitly not in scope
+
+- **Removing the per-realm eager open**, which is the root cause rather than the symptom. It looks
+  like the obvious fix and it is not safe as a drop-in: the eager open is what gives a realm the
+  epoch of the session it _loaded_ in, and `idb-sol-transaction-details.api.spec.ts` pins the
+  load-order semantics that follow — a realm loaded before a clear must not keep its writes, while
+  one loaded after it must. Opening on first use cannot tell those two cases apart, because in both
+  the first use happens after the clear. Fixing it properly means moving the epoch capture to
+  something that runs only in the realms that use the cache (for instance the
+  `startSolWalletTimer` branch of `sol-wallet.worker.ts`), which changes the module's contract and
+  deserves its own spec. Until then, items 1–3 make the race survivable rather than fatal.
+- **The balances/history coupling in `SolWalletScheduler`.** The `Promise.all` that commits balances
+  and history together is what let a cache problem blank every balance of a network, native SOL
+  included. Decoupling them changes the scheduler's "at most one message per tick" contract and is a
+  resilience improvement rather than part of this defect.
+- **`hideToast: true` on `syncSolWalletError`.** It makes a whole network failing invisible, but it
+  did not contribute here — the error path never ran at all.
+
+## Open questions (facts to confirm)
+
+- None. The mechanism was confirmed by probing the affected origin directly: ten databases opened
+  normally and this one returned no event, and deleting it restored both the balances and sign-out
+  on the unchanged bundle.
+
+## Pending decisions (facts are clear — we just need to decide)
+
+- Whether 5 s is the right deadline for both the cache and sign-out. It is well above any healthy
+  IndexedDB round trip and well below the point where the wallet looks broken, but it is a
+  judgement call.
+- Whether to pick up the two follow-ups above now — the epoch-capture move that would remove the
+  race outright, and the scheduler decoupling — or leave them until another regression makes them
+  urgent.
