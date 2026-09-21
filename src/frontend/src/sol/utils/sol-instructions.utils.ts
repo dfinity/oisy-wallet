@@ -1160,7 +1160,23 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolComputeBudgetInstruction(instruction);
 	}
 
-	const parsedInstruction = parseSolInstruction(instruction);
+	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
+	// know, so a program that gains an instruction the wallet has never seen would throw out of the
+	// decode rather than reach the readings below. Crashing is not the answer a review can show,
+	// and it is the same hazard the Compute Budget parse is already wrapped for: fail closed with a
+	// refusal instead, which is what the mappers return for anything they cannot state.
+	let parsedInstruction: SolInstruction | SolParsedInstruction;
+
+	try {
+		parsedInstruction = parseSolInstruction(instruction);
+	} catch (err: unknown) {
+		consoleWarn(
+			`Could not parse Solana instruction for program ${instruction.programAddress}`,
+			err
+		);
+
+		return unfaithfulInstruction();
+	}
 
 	if (!('instructionType' in parsedInstruction)) {
 		return unreviewedInstruction();
