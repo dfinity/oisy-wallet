@@ -12,9 +12,19 @@ import { notEmptyString } from '@dfinity/utils';
 
 // XRP Ledger uses the same enablement convention as every other chain — the
 // `VITE_XRP_MAINNET_DISABLED` env var, which defaults to *enabled*.
-export const XRP_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
-	import.meta.env.VITE_XRP_MAINNET_DISABLED
-);
+//
+// On user-facing builds it additionally requires an endpoint, because without one the chain is
+// visible and wholly non-functional: `XRP_RPC_HTTP_URL_MAINNET` resolves to `undefined` there by
+// design and `xrpHttpRpcUrl` throws, so every balance and history request fails and no send can
+// start. `deploy-to-environment.yml` wires `VITE_XRP_RPC_URL_MAINNET` for staging and beta only —
+// there is no `ic` arm — so production cannot have one until that is added and the secret exists.
+//
+// Absent beats broken, and the gate is self-correcting: the moment an endpoint is wired, XRP
+// appears. It also stops this recurring, since any future environment enabled before it is wired
+// would otherwise ship the same silent breakage.
+export const XRP_MAINNET_ENABLED =
+	parseEnabledMainnetBoolEnvVar(import.meta.env.VITE_XRP_MAINNET_DISABLED) &&
+	(!(PROD || BETA) || notEmptyString(import.meta.env.VITE_XRP_RPC_URL_MAINNET));
 
 /**
  * XRPL JSON-RPC endpoint.
