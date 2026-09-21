@@ -46,12 +46,28 @@ describe('SolWalletConnectSignReview', () => {
 	});
 
 	it('should say nothing else about a message it will not sign', () => {
-		// The caveats below the refusal qualify a review nobody is going to act on.
+		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
+		// outside the notice chain: the partial-parties line would tell the user which lists to read
+		// on a request that is refused.
 		const { queryByText } = render(SolWalletConnectSignReview, {
-			props: { ...props, ambiguous: true, unreviewed: true }
+			props: {
+				...props,
+				ambiguous: true,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
 		});
 
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
 	it('should render the unreviewed instructions warning', () => {
