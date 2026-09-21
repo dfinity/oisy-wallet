@@ -1181,6 +1181,13 @@ describe('export-data.utils', () => {
 			expect(row.direction).toBe('in');
 			expect(row.fee).toBe('0.000012');
 			expect(row.effective_token).toBe('4.999988');
+
+			// The Credit/Debit columns are documented to sum to the actual balance change: the XRP
+			// arrived, and the fee left.
+			expect(row.credit).toBe('5.0');
+			expect(row.credit_raw).toBe(5_000_000n);
+			expect(row.debit).toBe('-0.000012');
+			expect(row.debit_raw).toBe(-12n);
 		});
 
 		// A same-asset round trip really does net to zero on the asset — but the fee still left, and
@@ -1210,6 +1217,13 @@ describe('export-data.utils', () => {
 			expect(row.direction).toBe('in');
 			expect(row.fee).toBe('0.000012');
 			expect(row.effective_token).toBe('-0.000012');
+
+			// Nothing was gained — the asset came back — so Credit is blank rather than the returned
+			// amount, and the only balance change is the fee.
+			expect(row.credit).toBe('');
+			expect(row.credit_raw).toBeUndefined();
+			expect(row.debit).toBe('-0.000012');
+			expect(row.debit_raw).toBe(-12n);
 		});
 
 		it('constructs the Solana explorer URL from the network template when txExplorerUrl is missing', () => {
