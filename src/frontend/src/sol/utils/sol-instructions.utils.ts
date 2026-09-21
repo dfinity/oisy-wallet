@@ -603,10 +603,18 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
-	// Using a nonce rather than deciding anything about it: advancing one consumes the blockhash a
-	// durable transaction was signed against, and upgrading one migrates a legacy account to the
-	// current layout. Neither moves lamports nor names an authority, so neither has an effect the
-	// summary omits by staying silent about it.
+	// Using a nonce rather than deciding anything about it: advancing one replaces the value a
+	// durable transaction is signed against, and upgrading one migrates a legacy account to the
+	// current layout. Advancing does require the nonce authority to sign, but it designates no new
+	// one and moves no lamports, so neither instruction has an effect the summary omits by staying
+	// silent about it.
+	//
+	// Advancing is also not optional to a caller that needs it: a durable-nonce transaction carries
+	// it as its first instruction, which is what makes the nonce the transaction's lifetime, and
+	// the sign-only path signs the message as given rather than re-dating it. Refusing the opcode
+	// would refuse every such request. A message can still advance a nonce it has no lifetime use
+	// for, invalidating a transaction already signed against the old value, but that moves nothing
+	// and takes nothing: telling the two apart is the instruction's position, not its name.
 	if (
 		instructionType === SystemInstruction.AdvanceNonceAccount ||
 		instructionType === SystemInstruction.UpgradeNonceAccount
