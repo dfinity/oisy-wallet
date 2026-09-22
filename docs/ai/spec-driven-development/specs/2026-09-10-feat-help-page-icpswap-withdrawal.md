@@ -38,8 +38,8 @@ live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
 
 **Out of scope (deliberate)**
 
-- Scanning pools where only **one** leg is an active token. ~445 of the 860 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
-- Scanning other fee tiers. All 860 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
+- Scanning pools where only **one** leg is an active token. Roughly half of the 876 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
+- Scanning other fee tiers. All 876 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
 - The **mistransferred balance** (see above): unreachable for an ICRC-2-only flow.
 - Any recovery for non-ICPSwap swap providers (KongSwap, Velora, NEAR Intents, OneSec).
 - Recovery of ICPSwap **liquidity positions**. Only loose balances are covered; the user holds no LP positions through OISY.
@@ -83,7 +83,7 @@ A **Scan my pools** button checks, in one go, every ICPSwap pool that exists bet
 
 The scan is cheap because the pool table comes in a single call, not one lookup per pair:
 
-1. `getAllPools` (`src/frontend/src/lib/api/icp-swap-factory.api.ts`) — one query returning every pool. Measured against the live factory: **860 pools, ~292 KB** of Candid text.
+1. `getAllPools` (`src/frontend/src/lib/api/icp-swap-factory.api.ts`) — one query returning every pool. Measured against the live factory on 2026-09-22: **876 pools, ~298 KB** of Candid text, across 509 distinct token legs.
 2. Filter locally to pools whose **both** legs are in the candidate set (ICP + `enabledIcrcTokens`, the same set the manual selectors offer).
 3. `getUserUnusedBalance` per surviving pool, fanned out in parallel.
 
@@ -93,6 +93,8 @@ Measured cost, live factory data:
 | --------------------------------- | --------------------------- | ------------------- |
 | ICP + 4 ck tokens (5)             | 10 `getPool` + 10 balance   | 1 query + 9 balance |
 | ICP + OISY's 16 default ICRC (17) | 136 `getPool` + 136 balance | 1 query + 9 balance |
+
+That 9 is a ck-heavy wallet, not a ceiling. 65 of the tokens OISY ships appear as a pool leg, and enabling all of them yields 89 candidate pools; enabled custom tokens raise the ceiling to the whole table. Balance queries therefore go out in batches of `ICP_SWAP_SCAN_CONCURRENCY` (10), each batch settling before the next starts, because a throttled query is indistinguishable from a pool that cannot be read — an unbounded fan-out would report phantom unreadable pools and send the user away to retry.
 
 The cost is bounded by the pools that exist between the user's tokens, not by tokens², so it does not degrade as someone enables more tokens. Every call is a query now that the mistransfer probe is gone, so the whole scan is roughly one round trip.
 
