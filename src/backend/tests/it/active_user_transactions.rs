@@ -8,7 +8,7 @@ use shared::types::{
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, NearIntentsData, OisyTradeData,
         OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-        VeloraSwapMode,
+        VeloraSwapMode, XrpData,
     },
     custom_token::ErcTokenId,
     result_types::{
@@ -426,6 +426,64 @@ fn create_oisy_trade_variant_roundtrip() {
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
             assert_eq!(tx.data, data);
             assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_xrp_variant_roundtrip() {
+    // `destination_tag: Some(u32::MAX)` on purpose: it is the widest real tag,
+    // so a narrower encoding anywhere on the wire or in stable memory would
+    // truncate it here rather than in a later flow. The refs are the two values
+    // the resolver polls with, at the lengths they actually have — a 64-hex
+    // transaction id, and a ledger index.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: Some(u32::MAX),
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![
+                    ActiveUserTransactionRef {
+                        key: "tx_hash".to_string(),
+                        value: "AB".repeat(32),
+                    },
+                    ActiveUserTransactionRef {
+                        key: "last_ledger_sequence".to_string(),
+                        value: "97000021".to_string(),
+                    },
+                ],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 2);
         }
         ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }

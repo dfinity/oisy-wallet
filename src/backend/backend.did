@@ -23,6 +23,13 @@ type ActiveUserTransaction = record {
 // `ActiveUserTransaction::external_refs` so we don't need to bump candid for
 // every new provider integration.
 type ActiveUserTransactionData = variant {
+	// Native XRP payment. Unlike every other variant this one does not track a
+	// provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+	// so a second payment from the same address while the first is unresolved
+	// is unsafe whichever sequence it picks. The row is what refuses it, and it
+	// has to outlive the tab to do that. The locally derived transaction id and
+	// the signed `LastLedgerSequence` ride in `external_refs`.
+	Xrp : XrpData;
 	OneSecEvmToIcp : OneSecEvmToIcpData;
 	OneSecIcpToEvm : OneSecIcpToEvmData;
 	// OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
@@ -1547,6 +1554,27 @@ type VeloraData = record {
 // frontend polls for settlement: `Delta` by auction id against Velora's Delta
 // API, `Market` by transaction receipt on the source chain.
 type VeloraSwapMode = variant { Delta; Market };
+// Native XRP payment payload — the values fixed when the transaction was
+// signed. The transaction id and its `LastLedgerSequence` are learned from the
+// signed blob and ride in `external_refs`, so they are not here.
+//
+// `source_address` is the field the guard reads: the invariant is one
+// unresolved payment per *address*, not per user, because a row for a
+// different address says nothing about this one's sequence.
+type XrpData = record {
+	destination_address : text;
+	// Transaction cost in drops.
+	fee : nat;
+	// Native XRP, which also fixes the network the payment was signed for.
+	token : TokenId;
+	// The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+	// tag rather than an absent one, which is why this is an `Option` and not
+	// a sentinel.
+	destination_tag : opt nat32;
+	source_address : text;
+	// Amount in drops.
+	amount : nat
+};
 service : (Arg) -> {
 	// Adds one or more dismissed notifications to the user's profile.
 	//
