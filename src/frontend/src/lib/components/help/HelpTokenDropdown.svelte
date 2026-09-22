@@ -13,11 +13,12 @@
 		tokens: IcToken[];
 		selected?: IcToken;
 		ariaLabel: string;
+		disabled?: boolean;
 		testId: string;
 		onSelect: (token: IcToken) => void;
 	}
 
-	let { tokens, selected, ariaLabel, testId, onSelect }: Props = $props();
+	let { tokens, selected, ariaLabel, disabled = false, testId, onSelect }: Props = $props();
 
 	let dropdown = $state<Dropdown>();
 
@@ -50,7 +51,7 @@
 		asModalOnMobile
 		buttonBorder
 		buttonFullWidth
-		disabled={tokens.length === 0}
+		disabled={disabled || tokens.length === 0}
 		{testId}
 	>
 		{#if nonNullish(selected)}
