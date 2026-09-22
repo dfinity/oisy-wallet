@@ -16,6 +16,7 @@ import {
 	POL_AMOY_TOKEN,
 	POL_MAINNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -190,6 +191,7 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
@@ -281,7 +283,8 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description
 			]);
 		});
 
@@ -313,7 +316,8 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description
 			]);
 		});
 	});
@@ -363,6 +367,7 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,

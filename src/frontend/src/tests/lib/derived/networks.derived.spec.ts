@@ -2,6 +2,7 @@ import { ARBITRUM_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/netw
 import { BASE_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import {
@@ -43,6 +44,7 @@ describe('networks.derived', () => {
 				BASE_NETWORK_SYMBOL,
 				BSC_MAINNET_NETWORK_SYMBOL,
 				POLYGON_MAINNET_NETWORK_SYMBOL,
+				ROBINHOOD_MAINNET_NETWORK_SYMBOL,
 				SOLANA_MAINNET_NETWORK_SYMBOL
 			]);
 		});

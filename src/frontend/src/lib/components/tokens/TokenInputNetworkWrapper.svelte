@@ -8,6 +8,7 @@
 		isNetworkIdBsc,
 		isNetworkIdICP,
 		isNetworkIdPolygon,
+		isNetworkIdRobinhood,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 
@@ -29,6 +30,7 @@
 		class:from-eth-0={isNetworkIdETH(tokenNetworkId)}
 		class:from-icp-0={isNetworkIdICP(tokenNetworkId)}
 		class:from-polygon-0={isNetworkIdPolygon(tokenNetworkId)}
+		class:from-robinhood-0={isNetworkIdRobinhood(tokenNetworkId)}
 		class:from-sol-0={isNetworkIdSolana(tokenNetworkId)}
 		class:to-arbitrum-100={isNetworkIdArbitrum(tokenNetworkId)}
 		class:to-base-100={isNetworkIdBase(tokenNetworkId)}
@@ -36,6 +38,7 @@
 		class:to-eth-100={isNetworkIdETH(tokenNetworkId)}
 		class:to-icp-100={isNetworkIdICP(tokenNetworkId)}
 		class:to-polygon-100={isNetworkIdPolygon(tokenNetworkId)}
+		class:to-robinhood-100={isNetworkIdRobinhood(tokenNetworkId)}
 		class:to-sol-100={isNetworkIdSolana(tokenNetworkId)}
 	>
 		{@render tokenInput?.()}
