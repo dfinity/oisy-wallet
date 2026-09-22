@@ -27,8 +27,9 @@ import { isNullish } from '@dfinity/utils';
  *   `LastLedgerSequence`, resolves it as expired about 80 seconds later. Use this to watch a record
  *   self-clear without spending anything.
  *
- * Both leave the send indeterminate, so both also surface the retry step — the other thing that is
- * hard to reach for real.
+ * Only `lookup_fails` surfaces the retry step. `no_submit` stubs the submit alone, so the lookups
+ * still work, report the hash absent, and past the signed `LastLedgerSequence` resolve the send as
+ * expired — definitive, not indeterminate, so there is nothing to retry.
  *
  * Only active locally, on staging, or on a `test_fe_*` build — never on `ic`. Opt in with:
  *   - URL query param: `?simulate_xrp_send=lookup_fails`
