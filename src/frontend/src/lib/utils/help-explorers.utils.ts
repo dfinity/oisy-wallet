@@ -9,7 +9,8 @@ import {
 	ONESEC_EXPLORER_URL,
 	POLYGON_EXPLORER_URL,
 	SOL_MAINNET_EXPLORER_URL,
-	VELORA_EXPLORER_URL
+	VELORA_EXPLORER_URL,
+	XRP_MAINNET_EXPLORER_URL
 } from '$env/explorers.env';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -19,6 +20,7 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type {
 	HelpExplorerAddresses,
 	HelpExplorerChain,
@@ -105,7 +107,7 @@ export const buildHelpExplorerGroups = ({
 	].filter(({ links }) => links.length > 0);
 
 // Where a whole address is looked up on each mainnet network, and which of the wallet's
-// addresses to look up there. Six entries reuse the network's own explorer host, so the
+// addresses to look up there. Seven entries reuse the network's own explorer host, so the
 // Help page and a transaction link land on the same site; ICP and BTC use the dedicated
 // address explorers (see `ADDRESS_EXPLORER_URLS`).
 //
@@ -150,6 +152,10 @@ const NETWORK_ADDRESS_EXPLORERS: Partial<
 		// non-mainnet clusters - so the account path is substituted, as elsewhere in the app.
 		buildUrl: (address) =>
 			replacePlaceholders(SOL_MAINNET_EXPLORER_URL, { $args: `account/${address}` })
+	},
+	[XRP_MAINNET_NETWORK_ID]: {
+		chain: 'xrp',
+		buildUrl: (address) => `${XRP_MAINNET_EXPLORER_URL}/account/${address}`
 	}
 };
 
@@ -158,6 +164,7 @@ const addressForChain = ({
 	ethAddress,
 	solAddress,
 	btcAddress,
+	xrpAddress,
 	principal
 }: HelpExplorerAddresses & { chain: HelpExplorerChain }): Nullish<string> => {
 	if (chain === 'icp') {
@@ -170,6 +177,10 @@ const addressForChain = ({
 
 	if (chain === 'sol') {
 		return solAddress;
+	}
+
+	if (chain === 'xrp') {
+		return xrpAddress;
 	}
 
 	// Every remaining chain is EVM, where one Ethereum address is read on all of them.

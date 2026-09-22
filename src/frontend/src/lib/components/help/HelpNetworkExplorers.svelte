@@ -7,7 +7,12 @@
 		HELP_NETWORK_EXPLORERS_CARD,
 		HELP_NETWORK_EXPLORERS_LINK
 	} from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		ethAddress,
+		solAddressMainnet,
+		xrpAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { networksMainnets } from '$lib/derived/networks.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
@@ -27,6 +32,7 @@
 			ethAddress: $ethAddress,
 			solAddress: $solAddressMainnet,
 			btcAddress: $btcAddressMainnet,
+			xrpAddress: $xrpAddressMainnet,
 			principal: $icrcAccountIdentifierText
 		})
 	);

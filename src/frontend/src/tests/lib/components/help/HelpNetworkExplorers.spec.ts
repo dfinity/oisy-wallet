@@ -6,6 +6,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import HelpNetworkExplorers from '$lib/components/help/HelpNetworkExplorers.svelte';
 import {
 	HELP_NETWORK_EXPLORERS_CARD,
@@ -15,7 +16,8 @@ import { trackEvent } from '$lib/services/analytics.services';
 import {
 	btcAddressMainnetStore,
 	ethAddressStore,
-	solAddressMainnetStore
+	solAddressMainnetStore,
+	xrpAddressMainnetStore
 } from '$lib/stores/address.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -23,6 +25,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -37,7 +40,8 @@ const mainnets = [
 	BASE_NETWORK,
 	BSC_MAINNET_NETWORK,
 	POLYGON_MAINNET_NETWORK,
-	SOLANA_MAINNET_NETWORK
+	SOLANA_MAINNET_NETWORK,
+	XRP_MAINNET_NETWORK
 ];
 
 // Holders rather than fixed stores, so a single test can narrow the enabled networks or
@@ -71,12 +75,14 @@ describe('HelpNetworkExplorers', () => {
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
+		xrpAddressMainnetStore.set({ data: mockXrpAddress, certified: false });
 	});
 
 	afterEach(() => {
 		ethAddressStore.reset();
 		solAddressMainnetStore.reset();
 		btcAddressMainnetStore.reset();
+		xrpAddressMainnetStore.reset();
 	});
 
 	it('renders the card with its title and description', () => {
@@ -103,6 +109,7 @@ describe('HelpNetworkExplorers', () => {
 		expect(href('bsc')).toBe(`https://bscscan.com/address/${mockEthAddress}`);
 		expect(href('pol')).toBe(`https://polygonscan.com/address/${mockEthAddress}`);
 		expect(href('sol')).toBe(`https://solscan.io/account/${mockSolAddress}`);
+		expect(href('xrp')).toBe(`https://xrpscan.com/account/${mockXrpAddress}`);
 	});
 
 	it('labels each link with the network name and opens it in a new tab', () => {
@@ -144,6 +151,7 @@ describe('HelpNetworkExplorers', () => {
 		ethAddressStore.reset();
 		solAddressMainnetStore.reset();
 		btcAddressMainnetStore.reset();
+		xrpAddressMainnetStore.reset();
 		mockIcpAddress.value = undefined;
 
 		const { queryByTestId } = render(HelpNetworkExplorers);

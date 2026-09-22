@@ -7,9 +7,10 @@ import type { Nullish } from '@dfinity/zod-schemas';
 // vocabulary documented in docs/ai/frontend/analytics.md.
 //
 // The provider card only ever uses the four chains its providers settle against; the
-// network card adds the remaining EVM mainnets, where one Ethereum address is read on
-// several chains.
-export type HelpExplorerChain = 'eth' | 'sol' | 'btc' | 'icp' | 'arb' | 'base' | 'bsc' | 'pol';
+// network card adds XRP and the remaining EVM mainnets, where one Ethereum address is
+// read on several chains.
+export type HelpExplorerChain =
+	'eth' | 'sol' | 'btc' | 'icp' | 'xrp' | 'arb' | 'base' | 'bsc' | 'pol';
 
 export interface HelpExplorerLink {
 	chain: HelpExplorerChain;
@@ -37,5 +38,6 @@ export interface HelpExplorerAddresses {
 	ethAddress?: Nullish<string>;
 	solAddress?: Nullish<string>;
 	btcAddress?: Nullish<string>;
+	xrpAddress?: Nullish<string>;
 	principal?: Nullish<string>;
 }

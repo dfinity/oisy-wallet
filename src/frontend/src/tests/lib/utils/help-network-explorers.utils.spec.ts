@@ -6,17 +6,20 @@ import { BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks/networks
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { buildHelpNetworkExplorerLinks } from '$lib/utils/help-explorers.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 
 describe('buildHelpNetworkExplorerLinks', () => {
 	const addresses = {
 		ethAddress: mockEthAddress,
 		solAddress: mockSolAddress,
 		btcAddress: mockBtcAddress,
+		xrpAddress: mockXrpAddress,
 		principal: mockPrincipalText
 	};
 
@@ -28,7 +31,8 @@ describe('buildHelpNetworkExplorerLinks', () => {
 		BASE_NETWORK,
 		BSC_MAINNET_NETWORK,
 		POLYGON_MAINNET_NETWORK,
-		SOLANA_MAINNET_NETWORK
+		SOLANA_MAINNET_NETWORK,
+		XRP_MAINNET_NETWORK
 	];
 
 	const urlFor = (chain: string) => {
@@ -48,7 +52,8 @@ describe('buildHelpNetworkExplorerLinks', () => {
 			'base',
 			'bsc',
 			'pol',
-			'sol'
+			'sol',
+			'xrp'
 		]);
 	});
 
@@ -68,6 +73,10 @@ describe('buildHelpNetworkExplorerLinks', () => {
 
 	it('substitutes the Solana account into its URL template', () => {
 		expect(urlFor('sol')).toBe(`https://solscan.io/account/${mockSolAddress}`);
+	});
+
+	it('opens the XRP account on the explorer the wallet already links transactions to', () => {
+		expect(urlFor('xrp')).toBe(`https://xrpscan.com/account/${mockXrpAddress}`);
 	});
 
 	it('carries the network through, so the caller can label the link', () => {
@@ -94,7 +103,7 @@ describe('buildHelpNetworkExplorerLinks', () => {
 			ethAddress: ''
 		});
 
-		expect(links.map(({ chain }) => chain)).toEqual(['btc', 'icp', 'sol']);
+		expect(links.map(({ chain }) => chain)).toEqual(['btc', 'icp', 'sol', 'xrp']);
 	});
 
 	it('omits a network that has no address explorer', () => {

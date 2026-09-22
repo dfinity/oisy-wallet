@@ -270,7 +270,7 @@ The first card explains where to get help and links out to the OISY help centre.
 
 OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The block explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo.
 
-The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Six of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
+The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Most of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
 
 - **Internet Computer** uses `icexplorer.io`, not the network's own `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character account identifier — while the address OISY shows a user is their principal. This is a correctness requirement, not a preference.
 - **Bitcoin** uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
