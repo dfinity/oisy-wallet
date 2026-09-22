@@ -820,7 +820,7 @@
 			"scan": "Scan the pools between your active tokens"
 		},
 		"error": {
-			"pool_not_found": "No ICPSwap pool exists for this pair. Check the two tokens and try again.",
+			"pool_not_found": "Could not find a pool for this pair. Check the two tokens, or try again shortly.",
 			"load_failed": "Could not read your balances from this pool.",
 			"withdraw_failed": "The withdrawal failed.",
 			"scan_failed": "Could not fetch the list of ICPSwap pools."

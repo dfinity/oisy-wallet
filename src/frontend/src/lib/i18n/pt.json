@@ -820,7 +820,7 @@
 			"scan": "Verificar os pools entre seus tokens ativos"
 		},
 		"error": {
-			"pool_not_found": "Não existe pool do ICPSwap para este par. Confira os dois tokens e tente novamente.",
+			"pool_not_found": "Não foi possível encontrar um pool para este par. Confira os dois tokens ou tente novamente em instantes.",
 			"load_failed": "Não foi possível ler seus saldos neste pool.",
 			"withdraw_failed": "O saque falhou.",
 			"scan_failed": "Não foi possível obter a lista de pools do ICPSwap."

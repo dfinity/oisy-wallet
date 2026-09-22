@@ -820,7 +820,7 @@
 			"scan": "Kiểm tra các pool giữa những token đang hoạt động của bạn"
 		},
 		"error": {
-			"pool_not_found": "Không có pool ICPSwap nào cho cặp này. Hãy kiểm tra hai token và thử lại.",
+			"pool_not_found": "Không tìm được pool cho cặp này. Hãy kiểm tra hai token hoặc thử lại sau giây lát.",
 			"load_failed": "Không đọc được số dư của bạn trong pool này.",
 			"withdraw_failed": "Rút không thành công.",
 			"scan_failed": "Không tải được danh sách pool của ICPSwap."

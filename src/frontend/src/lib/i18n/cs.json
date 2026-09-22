@@ -820,7 +820,7 @@
 			"scan": "Zkontrolovat pooly mezi vašimi aktivními tokeny"
 		},
 		"error": {
-			"pool_not_found": "Pro tento pár neexistuje žádný pool ICPSwap. Zkontrolujte oba tokeny a zkuste to znovu.",
+			"pool_not_found": "Pro tento pár se nepodařilo najít pool. Zkontrolujte oba tokeny nebo to za chvíli zkuste znovu.",
 			"load_failed": "Vaše zůstatky v tomto poolu se nepodařilo přečíst.",
 			"withdraw_failed": "Výběr se nezdařil.",
 			"scan_failed": "Seznam poolů ICPSwap se nepodařilo načíst."

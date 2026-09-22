@@ -820,7 +820,7 @@
 			"scan": "Sprawdź pule między Twoimi aktywnymi tokenami"
 		},
 		"error": {
-			"pool_not_found": "Dla tej pary nie istnieje pula ICPSwap. Sprawdź oba tokeny i spróbuj ponownie.",
+			"pool_not_found": "Nie udało się znaleźć puli dla tej pary. Sprawdź oba tokeny albo spróbuj ponownie za chwilę.",
 			"load_failed": "Nie udało się odczytać Twoich środków w tej puli.",
 			"withdraw_failed": "Wypłata się nie udała.",
 			"scan_failed": "Nie udało się pobrać listy pul ICPSwap."

@@ -820,7 +820,7 @@
 			"scan": "활성화된 토큰 사이의 풀 확인"
 		},
 		"error": {
-			"pool_not_found": "이 쌍에 해당하는 ICPSwap 풀이 없습니다. 두 토큰을 확인한 뒤 다시 시도하세요.",
+			"pool_not_found": "이 쌍에 해당하는 풀을 찾을 수 없습니다. 두 토큰을 확인하거나 잠시 후 다시 시도하세요.",
 			"load_failed": "이 풀의 잔액을 읽을 수 없습니다.",
 			"withdraw_failed": "출금에 실패했습니다.",
 			"scan_failed": "ICPSwap 풀 목록을 가져올 수 없습니다."

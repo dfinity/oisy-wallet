@@ -40,8 +40,12 @@ export interface IcpSwapScanResult {
 	unreadablePools: number;
 }
 
-// Thrown when the pair has no pool at the fee tier OISY swaps on. The factory rejects an unknown
-// pair with a generic canister error, so the cause is kept for the console rather than shown.
+// Thrown when the pool lookup fails. Despite the name this does not prove the pool is missing: the
+// factory answers an unknown pair with the unit variant `CommonError`, which carries no text and
+// which the API layer has already flattened into a generic `CanisterInternalError`, so a transport
+// failure is indistinguishable from a missing pool here. The message shown to the user covers both
+// readings. Telling them apart would mean a dedicated error type on the shared
+// `mapIcpSwapFactoryError`, which the swap flow also depends on. The cause is kept for the console.
 export class IcpSwapPoolNotFoundError extends Error {
 	constructor(readonly cause?: unknown) {
 		super('No ICPSwap pool found for this token pair');
