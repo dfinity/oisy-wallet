@@ -95,7 +95,7 @@ describe('HelpNetworkExplorers', () => {
 		).toBeInTheDocument();
 	});
 
-	it('opens each network explorer at the user own address', () => {
+	it('opens each network explorer at the user\'s own address', () => {
 		const { getByTestId } = render(HelpNetworkExplorers);
 
 		const href = (chain: string) =>
