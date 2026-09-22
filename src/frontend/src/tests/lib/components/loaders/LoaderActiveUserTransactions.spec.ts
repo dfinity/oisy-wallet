@@ -3,12 +3,15 @@ import {
 	TRACK_COUNT_LIQUIDIUM_ERROR,
 	TRACK_COUNT_LIQUIDIUM_SUCCESS,
 	TRACK_COUNT_SWAP_ERROR,
-	TRACK_COUNT_SWAP_SUCCESS
+	TRACK_COUNT_SWAP_SUCCESS,
+	TRACK_COUNT_XRP_SEND_ERROR,
+	TRACK_COUNT_XRP_SEND_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
+import en from '$lib/i18n/en.json';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
 import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.services';
@@ -19,6 +22,7 @@ import * as oisyTradePoller from '$lib/services/oisy-trade-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
 import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+import * as toasts from '$lib/stores/toasts.store';
 import { SwapProvider } from '$lib/types/swap';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import {
@@ -27,10 +31,12 @@ import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
-	mockVeloraActiveUserTransaction
+	mockVeloraActiveUserTransaction,
+	mockXrpActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as xrpPoller from '$xrp/services/xrp-active-tx.services';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
@@ -97,6 +103,13 @@ const succeededChainFusion = (id: string) =>
 		id,
 		status: { Succeeded: null } as const
 	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const pendingXrp = (id: string) =>
+	({
+		...mockXrpActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockXrpActiveUserTransaction;
 
 const pendingOisyTrade = (id: string) =>
 	({
@@ -349,6 +362,30 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		// XRP is the seventh flow on the same poller host, and the one whose window
+		// is shortest: an XRP record self-clears in about a minute, well inside the
+		// 5-second tick.
+		it('polls XRP rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const xrpSpy = vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue();
+			const tx = pendingXrp('xrp-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -397,6 +434,104 @@ describe('LoaderActiveUserTransactions', () => {
 			vi.spyOn(activeUserTransactionsServices, 'loadActiveUserTransactions').mockResolvedValue();
 			refreshSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet').mockResolvedValue();
 			trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockReturnValue(undefined);
+			vi.spyOn(toasts, 'toastsShow').mockReturnValue(Symbol('toast'));
+			vi.spyOn(toasts, 'toastsError').mockReturnValue(Symbol('toast'));
+		});
+
+		// The XRP send stops at the broadcast, so by the time the ledger decides there may be no
+		// modal left. This hook is the only place the outcome is reported — and it fires once per
+		// row even when the row terminalized while the tab was shut.
+		describe('an XRP send reports its outcome here, because nothing else can', () => {
+			it('toasts success, refreshes the wallet and fires the success event', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				expect(toasts.toastsShow).not.toHaveBeenCalled();
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Succeeded: null } }
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ text: en.send.text.xrp_sent, level: 'success' })
+				);
+				expect(refreshSpy).toHaveBeenCalledOnce();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_SUCCESS })
+				);
+			});
+
+			// The recorded text, not a message derived here: the three failures need different
+			// advice — nothing was sent, the fee was charged, or it may still apply — and only the
+			// resolver knows which one it wrote.
+			it('toasts the recorded failure text and does not refresh', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: {
+						...pendingXrp('xrp-a'),
+						status: { Failed: null },
+						error: ['the network did not include it in time']
+					}
+				});
+				await tick();
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: 'the network did not include it in time' }
+				});
+				expect(refreshSpy).not.toHaveBeenCalled();
+				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_ERROR })
+				);
+			});
+
+			it('falls back to generic copy when the record carries no error text', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Failed: null }, error: [] }
+				});
+				await tick();
+
+				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
+					msg: { text: en.send.error.unexpected }
+				});
+			});
+
+			// Once per row, not once per store update — the same idempotency the six other flows
+			// rely on, which is what makes a row that settled while the tab was shut safe to report.
+			it('reports once even when the row is written again', async () => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({
+					transaction: { ...pendingXrp('xrp-a'), status: { Succeeded: null } }
+				});
+
+				render(LoaderActiveUserTransactions);
+				await tick();
+
+				activeUserTransactionsStore.upsert({
+					transaction: {
+						...pendingXrp('xrp-a'),
+						status: { Succeeded: null },
+						updated_at_ns: 99n
+					}
+				});
+				await tick();
+
+				expect(toasts.toastsShow).toHaveBeenCalledOnce();
+			});
 		});
 
 		it('fires waitAndTriggerWallet and a swap_success event once when a row transitions to Succeeded', async () => {

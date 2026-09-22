@@ -401,6 +401,38 @@ The XRP Ledger requires an account to keep a minimum balance on-ledger for the a
 
 The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
+### One unresolved payment per address
+
+**At most one unresolved XRP payment per XRP address at a time**, held across a page reload and across two OISY sessions signed in as the same user.
+
+Every XRPL transaction carries a `Sequence`, which behaves like an EVM nonce: per-account, strictly increasing, and consumed by inclusion. While a payment is still unresolved, a second one has no safe sequence to take. Reusing the first payment's sequence is refused by the ledger if the first landed, and otherwise replaces it in the node's queue; taking the next sequence leaves a gap, so the second payment cannot be applied until the first is, and it eventually expires — which would tell the user nothing was sent while the original can still go through. Nothing the ledger exposes can prove that nothing is in flight, either: every signal available is positive-only, able to confirm that something is queued but never that nothing is.
+
+So a second send is **refused rather than queued**, and the wallet says an earlier payment is still settling and to wait — about a minute. There is no override, because there is no sequence the second payment could safely use.
+
+The record that holds this is kept server-side per user, so it survives closing the tab and is visible to a second session.
+
+### The send hands off rather than waiting
+
+Sending XRP finishes at the moment the payment is broadcast — it does not hold the user while the ledger decides. The wallet says the payment was submitted, closes, and tracks it from there.
+
+The outcome arrives on its own, once: a confirmation that the payment went through, or a message saying what went wrong. Those messages are deliberately different from each other, because they call for different things — _nothing left your wallet and it is safe to send again_ is not the same as _the payment failed but the network fee was still charged_, and neither is the same as _it may still go through, so do not send it again yet_.
+
+Because the outcome is reported by the record and not by the send window, it reaches the user whether or not that window is still open, whether or not the tab was reloaded, and whether or not they signed out in between. A payment whose session died mid-flight is picked up by the next session that loads.
+
+The payment appears in the notification list while it is settling, showing the amount and the network, and can be dismissed once it has resolved.
+
+A record cannot get stuck. Every XRP payment is signed with an expiry about 20 ledgers ahead, some 60 to 90 seconds, past which it is either provably included or provably dead; one fresh lookup settles which. Once resolved, the next send reads a fresh sequence from the ledger rather than assuming the previous one plus one — an expired payment consumes no sequence, while a successful or a failed-on-ledger one does.
+
+If the wallet cannot establish whether an earlier payment is still settling — the record cannot be read or written — the send is **refused rather than attempted**, and the wallet says to try again. Proceeding would drop the guarantee at exactly the moment a user is most likely to retry, and would leave the payment with nothing to resolve it.
+
+What this deliberately does not do:
+
+- It does **not** queue the second send. Deferring it until the first resolves would hold the same invariant with better manners, and remains a possible improvement.
+- It does **not** resend anything, ever. A payment that resolved as expired is reported, never automatically retried, and the wallet offers no way to resubmit one — the guard is what makes that unnecessary, since a new send is simply refused until the first settles.
+- It does **not** claim a payment arrived at the moment it was sent. The send window reports a submission; only the ledger's answer reports an arrival.
+- It does **not** block sends on other chains, or XRP sends from a different address — a record for one address says nothing about another's sequence.
+- It does **not** cover a payment signed outside OISY from the same account. Nothing in the wallet can.
+
 ---
 
 ## Swap

@@ -10,7 +10,8 @@ import {
 	deriveXrpTransactionHash,
 	isXrpSubmitFinalFailure,
 	isXrpTransactionSuccessful,
-	mapXrpTransaction
+	mapXrpTransaction,
+	xrpLedgerSearchWindow
 } from '$xrp/utils/xrp-transaction.utils';
 import { DEFAULT_DEFINITIONS, encode } from 'ripple-binary-codec';
 
@@ -985,6 +986,24 @@ describe('xrp-transaction.utils', () => {
 		it('refuses a blob that carries no LastLedgerSequence', () => {
 			expect(() => deriveXrpLedgerWindow(blobWith())).toThrow('carries no LastLedgerSequence');
 		});
+
+		// An Active User Transaction row stores `LastLedgerSequence` and nothing
+		// else, and its resolver must search exactly the ledgers the blob's own
+		// window covers — otherwise the node's `searched_all` answer describes a
+		// different range than the one the transaction could be in. One definition,
+		// so the two cannot drift apart.
+		it('gives the same window as the blob-free form', () => {
+			expect(xrpLedgerSearchWindow(1020)).toEqual(deriveXrpLedgerWindow(blobWith(1020)));
+		});
+
+		it.each([5, 1020, 987_654])(
+			'clamps and bounds the blob-free form identically at %i',
+			(lastLedgerSequence) => {
+				expect(xrpLedgerSearchWindow(lastLedgerSequence)).toEqual(
+					deriveXrpLedgerWindow(blobWith(lastLedgerSequence))
+				);
+			}
+		);
 	});
 
 	describe('deriveXrpTransactionHash', () => {

@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_sent": "Seu pagamento XRP foi concluído.",
+			"xrp_submitted": "Pagamento enviado. Normalmente é liquidado em segundos — você pode fechar isto e continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",
@@ -1074,6 +1076,9 @@
 			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
 			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado.",
 			"xrp_send_expired": "A transação não foi enviada: a rede não a incluiu em tempo. Nada saiu da sua carteira e é seguro criar uma nova.",
+			"xrp_send_already_in_flight": "Um pagamento XRP anterior deste endereço ainda não foi liquidado. Nada foi enviado — aguarde a conclusão, o que leva cerca de um minuto, e envie novamente.",
+			"xrp_send_not_guarded": "Não conseguimos verificar se um pagamento XRP anterior ainda está sendo liquidado. Nada foi enviado — tente novamente em um momento.",
+			"xrp_active_transaction_failed": "O XRP Ledger processou o pagamento, mas ele falhou ($result), portanto seus fundos não foram enviados. A taxa de rede foi cobrada.",
 			"xrp_amount_exceeds_sendable": "O valor já não cabe. Sua conta precisa manter a reserva de XRP mais a taxa de rede, e ambas podem mudar enquanto você confere. Nada foi enviado — reduza o valor ou tente novamente quando os dados da conta forem atualizados.",
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
 			"xrp_destination_tag_required": "Este endereço exige uma tag de destino. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",

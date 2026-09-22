@@ -27,8 +27,8 @@ import {
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
-	XrpSendExpiredError,
-	XrpTransactionFailedError
+	XrpSendAlreadyInFlightError,
+	XrpSendNotGuardedError
 } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -106,6 +106,7 @@ describe('XrpSendTokenWizard', () => {
 		mockAuthStore();
 
 		vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+		vi.spyOn(toasts, 'toastsShow').mockImplementation(() => Symbol('toast'));
 
 		vi.spyOn(addressesStore, 'xrpAddressMainnet', 'get').mockImplementation(() =>
 			readable(mockXrpAddress)
@@ -343,11 +344,27 @@ describe('XrpSendTokenWizard', () => {
 		expect(xrpSendServices.sendXrp).not.toHaveBeenCalled();
 	});
 
-	// A validated `tec*` means confirmation WAS received and the payment definitively failed with
-	// the fee claimed — the indeterminate "check your transaction list" advice would be wrong.
-	it('should report a validated failure definitively, not as a missing confirmation', async () => {
+	// The modal stops at the broadcast, so nothing here may claim the payment arrived. The outcome
+	// — success, a validated `tec*`, or expiry — is reported from the record's terminal side
+	// effects, which is the only place that knows what the ledger decided.
+	it('reports the payment as submitted rather than as arrived', async () => {
+		const { container } = await renderSettled();
+
+		await clickSend(container);
+
+		expect(toasts.toastsShow).toHaveBeenCalledWith(
+			expect.objectContaining({ text: en.send.text.xrp_submitted, level: 'info' })
+		);
+		expect(toasts.toastsError).not.toHaveBeenCalled();
+	});
+
+	// Neither refusal is corrected by changing a field: one says wait, the other says try again.
+	// Both fire before any node read and before anything is signed, so nothing left the wallet —
+	// and no override is offered for the in-flight case, because while the first payment is open
+	// there is no sequence a second one could safely take.
+	it('reports an in-flight payment with its own message and steps back', async () => {
 		vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
-			new XrpTransactionFailedError('XRP transaction failed: tecUNFUNDED_PAYMENT')
+			new XrpSendAlreadyInFlightError('XRP send refused: a payment has not resolved yet.')
 		);
 
 		const { container } = await renderSettled();
@@ -355,46 +372,26 @@ describe('XrpSendTokenWizard', () => {
 		await clickSend(container);
 
 		expect(toasts.toastsError).toHaveBeenCalledWith(
-			expect.objectContaining({ msg: { text: en.send.error.xrp_transaction_failed } })
+			expect.objectContaining({ msg: { text: en.send.error.xrp_send_already_in_flight } })
 		);
+		expect(onBack).toHaveBeenCalled();
+		expect(onSendForm).not.toHaveBeenCalled();
+		expect(onSendBack).not.toHaveBeenCalled();
 	});
 
-	it('should still report an indeterminate confirmation as such', async () => {
-		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
-			progress?.(ProgressStepsSendXrp.CONFIRM);
-
-			return await Promise.reject(
-				new Error('XRP transaction confirmation stopped before its ledger expiry was reached.')
-			);
-		});
+	it('reports an unverifiable guard with its own message and steps back', async () => {
+		vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+			new XrpSendNotGuardedError('XRP send refused: could not check for an unresolved payment.')
+		);
 
 		const { container } = await renderSettled();
 
 		await clickSend(container);
 
 		expect(toasts.toastsError).toHaveBeenCalledWith(
-			expect.objectContaining({ msg: { text: en.send.error.xrp_confirmation_failed } })
+			expect.objectContaining({ msg: { text: en.send.error.xrp_send_not_guarded } })
 		);
-	});
-
-	// Expiry is settled: nothing was sent. Showing the indeterminate "we could not confirm" text
-	// would leave the user waiting on an outcome that already happened.
-	it('should report an expired send as definitively not sent', async () => {
-		vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
-			progress?.(ProgressStepsSendXrp.CONFIRM);
-
-			return await Promise.reject(
-				new XrpSendExpiredError('XRP transaction expired: not included by ledger 1020')
-			);
-		});
-
-		const { container } = await renderSettled();
-
-		await clickSend(container);
-
-		expect(toasts.toastsError).toHaveBeenCalledWith(
-			expect.objectContaining({ msg: { text: en.send.error.xrp_send_expired } })
-		);
+		expect(onBack).toHaveBeenCalled();
 	});
 
 	// These three refuse before anything is signed, so nothing left the wallet and the user can fix

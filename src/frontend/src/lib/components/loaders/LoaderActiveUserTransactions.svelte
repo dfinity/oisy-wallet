@@ -5,7 +5,9 @@
 		TRACK_COUNT_LIQUIDIUM_ERROR,
 		TRACK_COUNT_LIQUIDIUM_SUCCESS,
 		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
+		TRACK_COUNT_SWAP_SUCCESS,
+		TRACK_COUNT_XRP_SEND_ERROR,
+		TRACK_COUNT_XRP_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
@@ -21,6 +23,8 @@
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
 	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 	import {
 		buildChainFusionSwapTrackingMetadata,
@@ -48,6 +52,11 @@
 		isVeloraActiveUserTransaction
 	} from '$lib/utils/velora-active-tx.utils';
 	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+	import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
+	import {
+		buildXrpSendTrackingMetadata,
+		isXrpActiveUserTransaction
+	} from '$xrp/utils/xrp-active-tx.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
 	$effect(() => {
@@ -112,6 +121,12 @@
 
 			if (oisyTrade.length > 0) {
 				await pollOisyTradeActiveUserTransactions({ identity, transactions: oisyTrade });
+			}
+
+			const xrp = $activeUserTransactionsPending.filter(isXrpActiveUserTransaction);
+
+			if (xrp.length > 0) {
+				await pollXrpActiveUserTransactions({ identity, transactions: xrp });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -260,6 +275,32 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 					shouldRefreshLiquidium = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isXrpActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_XRP_SEND_SUCCESS : TRACK_COUNT_XRP_SEND_ERROR,
+					metadata: buildXrpSendTrackingMetadata({ tx })
+				});
+
+				// The only place an XRP send's outcome is reported. The modal stops at the submit, so
+				// by the time the ledger decides there may be no modal — and this hook fires exactly
+				// once per row even when the row terminalized while the tab was shut.
+				//
+				// The failure text comes off the record rather than being derived here: the three
+				// outcomes need different advice — nothing was sent, the fee was charged, or the
+				// payment may still apply — and only the resolver knows which one it wrote.
+				if (isSucceeded) {
+					toastsShow({ text: $i18n.send.text.xrp_sent, level: 'success', duration: 4000 });
+
+					shouldRefresh = true;
+				} else {
+					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
 				}
 			}
 		}

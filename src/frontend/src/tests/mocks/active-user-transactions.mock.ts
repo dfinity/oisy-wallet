@@ -8,7 +8,8 @@ import type {
 	NearIntentsData,
 	OisyTradeData,
 	OneSecIcpToEvmData,
-	VeloraData
+	VeloraData,
+	XrpData
 } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
@@ -21,6 +22,7 @@ import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const mockActiveUserTransactionId = '11111111-1111-4111-8111-111111111111';
@@ -167,6 +169,40 @@ export const mockLiquidiumActiveUserTransaction: ActiveUserTransaction = {
 		{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xabc' },
 		{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
 		{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL, value: 'BTC' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockXrpSourceAddress = 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD';
+export const mockXrpDestinationAddress = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe';
+export const mockXrpTxHash = 'AB'.repeat(32);
+export const mockXrpLastLedgerSequence = 1020;
+
+export const mockXrpData: XrpData = {
+	token: { XrpNativeMainnet: null },
+	source_address: mockXrpSourceAddress,
+	destination_address: mockXrpDestinationAddress,
+	destination_tag: [12345],
+	amount: 25_000_000n,
+	fee: 12n
+};
+
+export const mockXrpActiveUserTransaction: ActiveUserTransaction = {
+	id: '77777777-7777-4777-8777-777777777777',
+	status: { Pending: null },
+	data: { Xrp: mockXrpData },
+	progress_step: ['send'],
+	external_refs: [
+		{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash },
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+			value: `${mockXrpLastLedgerSequence}`
+		},
+		{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
+		{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'XRP' },
+		{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'XRP Ledger' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

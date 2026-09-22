@@ -1,17 +1,15 @@
+import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { getActiveUserTransactions } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import type { NullishIdentity } from '$lib/types/identity';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
-import { randomWait } from '$lib/utils/time.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import {
 	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
 	XRP_BASE_RESERVE_DROPS,
-	XRP_CONFIRM_MAX_ATTEMPTS,
-	XRP_CONFIRM_MAX_DURATION_MS,
-	XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD,
-	XRP_CONFIRM_MAX_POLL_MS,
-	XRP_CONFIRM_MIN_POLL_MS,
-	XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE,
 	XRP_LAST_LEDGER_SEQUENCE_OFFSET,
 	XRP_MAX_DESTINATION_TAG,
 	XRP_MAX_FEE_DROPS,
@@ -22,357 +20,146 @@ import {
 	XrpAccountNotFoundError,
 	loadXrpAccountInfo,
 	loadXrpLedgerIndex,
-	loadXrpTransactionOutcome,
-	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
-	XrpSendExpiredError,
-	XrpSendIndeterminateError,
-	XrpTransactionFailedError
+	XrpSendAlreadyInFlightError,
+	XrpSendNotGuardedError
 } from '$xrp/types/xrp-send';
-import type {
-	XrpPendingTransaction,
-	XrpSendResult,
-	XrpSubmitResult,
-	XrpTransactionOutcome
-} from '$xrp/types/xrp-transaction';
+import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import {
+	openXrpActiveUserTransaction,
+	toXrpData,
+	toXrpDisplayRefs,
+	toXrpExternalRefs
+} from '$xrp/utils/xrp-active-tx.utils';
 import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
 	deriveXrpLedgerWindow,
-	deriveXrpTransactionHash,
-	isXrpSubmitFinalFailure,
-	isXrpTransactionSuccessful
+	deriveXrpTransactionHash
 } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 /**
- * Waits for a submitted transaction to be validated, and reports its final result.
+ * Refuses the send if a payment from this address has not resolved yet.
  *
- * A transaction is only definitively failed once the ledger has advanced past the
- * `LastLedgerSequence` it was signed with: until then it can still be included. Giving up
- * earlier would report a failure for a payment that may yet validate, and invite the user
- * to send a duplicate — a real risk for a `terQUEUED` submission, which waits for a later
- * ledger by definition. So this polls to that expiry rather than to a fixed retry budget.
+ * The gate is per **address**, not per user: a record for a different address says nothing about
+ * this one's sequence, and refusing on it would block an unrelated send. There is no override —
+ * the whole point is that no second sequence is safe while the first payment is open.
  */
-const confirmXrpTransaction = async ({
-	hash,
-	network,
-	firstLedgerSequence,
-	lastLedgerSequence
+const assertNoOpenXrpSend = async ({
+	identity,
+	source
 }: {
-	hash: string;
-	network: XrpNetworkType;
-	firstLedgerSequence: number;
-	lastLedgerSequence: number;
-}): Promise<string | undefined> => {
-	// A lookup the node could not answer is not evidence of anything. While attempts remain it is
-	// retried; what must never happen is concluding expiry from it, so the recheck below is
-	// deliberately left to throw.
-	const tryOutcome = async (): Promise<XrpTransactionOutcome | undefined> => {
-		try {
-			return await loadXrpTransactionOutcome({
-				hash,
-				network,
-				firstLedgerSequence,
-				lastLedgerSequence
-			});
-		} catch (_: unknown) {
-			return undefined;
-		}
-	};
-
-	// Same reasoning: this call runs after the blob may already have been accepted, so letting a
-	// transient failure escape would abort the send for a payment that can still validate.
-	// The first validated index this run reads, kept as the reference every later one is measured
-	// against. It has nothing to corroborate it and is accepted as given — a run has to start
-	// somewhere — so this bounds how far the ledger appears to MOVE while the poll watches, not
-	// whether it was in a sane place to begin with. An absurd first read is caught by what already
-	// guards expiry: `tx` must also report `searched_all` absence over the blob's own ledger range,
-	// which is a claim about exactly those 21 ledgers, on a different method.
-	//
-	// Measured from the run and NOT from `lastLedgerSequence`, which is where this went wrong
-	// before: for a retry that value comes out of the stored blob, so it is an expiry already in
-	// the past, and any retry more than `XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD` closes later had every
-	// legitimate index rejected — leaving the retry path with no way to ever establish expiry.
-	let baselineLedgerIndex: number | undefined;
-
-	const tryValidatedLedgerIndex = async (): Promise<number | undefined> => {
-		try {
-			const index = await loadXrpValidatedLedgerIndex({ network });
-
-			if (isNullish(baselineLedgerIndex)) {
-				baselineLedgerIndex = index;
-
-				return index;
-			}
-
-			// Returned as `undefined`, so an implausible jump is handled exactly like a read the node
-			// refused: the poll continues and ends indeterminate, rather than concluding the expiry
-			// that tells a retry to build a new transaction on a new sequence.
-			return index > baselineLedgerIndex + XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD ? undefined : index;
-		} catch (_: unknown) {
-			return undefined;
-		}
-	};
-
-	// Expiry cannot happen until the validated index passes `LastLedgerSequence`, and the index only
-	// moves once per ledger close while this loop polls two to four times as often. Once a read
-	// tells us how many closes are still needed, asking again before roughly that many polls have
-	// passed cannot change the outcome — which is why the previous version spent a ledger call on
-	// every answered poll and almost none of them could decide anything.
-	let nextLedgerReadAttempt = 0;
-
-	// Two limits on the same exit, because the attempt count does not bound one on its own: each
-	// attempt costs an interval plus however long its requests take, so a node answering slowly
-	// stretches the count far past the window it was derived from. Whichever comes first ends the
-	// poll, and for a node that answers at all that is the attempts.
-	const deadline = Date.now() + XRP_CONFIRM_MAX_DURATION_MS;
-
-	for (let attempt = 0; attempt < XRP_CONFIRM_MAX_ATTEMPTS && Date.now() < deadline; attempt++) {
-		const outcome = await tryOutcome();
-
-		if (outcome?.state === 'validated') {
-			return outcome.transactionResult;
-		}
-
-		// The deadline is a wall clock, and the loop condition only reads it BETWEEN iterations. One
-		// entered just under it could still start a validated-ledger read, an expiry recheck and a
-		// poll interval — each request bounded by `XRP_RPC_TIMEOUT_MS` of its own — and overshoot
-		// the documented budget by three timeouts. A definitive answer already in hand is returned
-		// above; past the deadline, no further work is started.
-		if (Date.now() >= deadline) {
-			break;
-		}
-
-		// Expiry is only evaluated on a lookup the node actually answered; an unanswered one
-		// establishes nothing and simply costs an attempt.
-		if (nonNullish(outcome) && attempt >= nextLedgerReadAttempt) {
-			// The VALIDATED index, not the open one: the open ledger has already advanced past a
-			// closed ledger whose transactions are not yet validated, so comparing against it would
-			// declare expiry for a payment that is about to validate.
-			const validatedLedgerIndex = await tryValidatedLedgerIndex();
-
-			// How far the ledger still has to travel, converted to polls. An unanswered read leaves
-			// this unchanged, so the next attempt asks again rather than backing off on no evidence.
-			if (nonNullish(validatedLedgerIndex)) {
-				nextLedgerReadAttempt =
-					attempt +
-					Math.max(lastLedgerSequence - validatedLedgerIndex, 0) *
-						XRP_CONFIRM_POLLS_PER_LEDGER_CLOSE;
-			}
-
-			if (nonNullish(validatedLedgerIndex) && validatedLedgerIndex > lastLedgerSequence) {
-				// Never on a spent budget. The recheck is what keeps a stale lookup from becoming a
-				// false expiry, so skipping it must skip the conclusion too — the loop ends
-				// indeterminate, which hands the blob back, rather than asserting a payment that
-				// may have landed never did.
-				if (Date.now() >= deadline) {
-					break;
-				}
-
-				// The `tx` lookup above and this index come from two separate calls, so the lookup may
-				// have missed a payment that validated in between. Expiry is only final if it survives
-				// a recheck against the newer ledger state — otherwise a succeeded payment would be
-				// reported as failed and the user invited to send a duplicate. This one is not caught:
-				// a node that fails to answer here leaves non-inclusion unestablished, and the error
-				// must surface instead of being turned into a claim that the payment never applied.
-				const recheck = await loadXrpTransactionOutcome({
-					hash,
-					network,
-					firstLedgerSequence,
-					lastLedgerSequence
-				});
-
-				if (recheck.state === 'validated') {
-					return recheck.transactionResult;
-				}
-
-				// A node that hands the transaction back, unvalidated, is not reporting non-inclusion —
-				// it is reporting that the transaction exists. Nothing there supports "it can never
-				// apply", and the two calls above can reach different members of a load-balanced
-				// endpoint, so this is indeterminate: it escapes as a plain error, which the caller
-				// wraps with the signed blob so a retry resubmits THIS transaction on its already
-				// consumed sequence rather than building one with a new sequence.
-				if (recheck.state === 'pending') {
-					throw new Error(
-						`XRP transaction outcome unresolved: ledger ${validatedLedgerIndex} is past ${lastLedgerSequence}, yet the node still reports the transaction as not validated.`
-					);
-				}
-
-				// Past its LastLedgerSequence the transaction can never be applied, so this failure is
-				// final — and, unlike an early timeout, sending again is safe. Its own error type,
-				// because that distinction decides whether a retry may resubmit this transaction or
-				// must build a new one.
-				throw new XrpSendExpiredError(
-					`XRP transaction expired: not included by ledger ${lastLedgerSequence}, so it can no longer be applied.`
-				);
-			}
-		}
-
-		// Nothing follows a wait that outlives the budget it is waiting inside, so it is not taken.
-		if (Date.now() >= deadline) {
-			break;
-		}
-
-		// Explicit rather than `randomWait`'s defaults: `XRP_CONFIRM_MAX_ATTEMPTS` and the ledger-read
-		// skip are both derived from this interval, so the loop has to wait what they assume.
-		await randomWait({ min: XRP_CONFIRM_MIN_POLL_MS, max: XRP_CONFIRM_MAX_POLL_MS });
+	identity: NullishIdentity;
+	source: XrpAddress;
+}): Promise<Identity> => {
+	// Fails closed. Without an identity the record can neither be read nor written, so the
+	// invariant cannot be held — and an unguarded send is the failure this path exists to prevent.
+	if (isNullish(identity)) {
+		throw new XrpSendNotGuardedError(
+			'XRP send refused: the wallet could not check for an unresolved payment without an identity.'
+		);
 	}
 
-	// Which limit ended it is worth saying: one means the ledger never decided, the other that the
-	// node was too slow to let it. Both leave the outcome unknown, and the caller treats them the
-	// same — the signed transaction goes back with the error either way.
-	throw new Error(
-		`XRP transaction confirmation stopped before its ledger expiry was reached: ${
-			Date.now() < deadline
-				? `${XRP_CONFIRM_MAX_ATTEMPTS} attempts made`
-				: `${XRP_CONFIRM_MAX_DURATION_MS}ms elapsed`
-		}.`
-	);
-};
-
-/**
- * Submits a signed transaction and resolves its outcome from the ledger.
- *
- * Shared by a first attempt and by a retry, which is the point: a retry runs exactly these steps
- * over the same stored transaction, so it cannot become a second payment.
- */
-const submitAndConfirmXrpTransaction = async ({
-	network,
-	pending,
-	progress
-}: {
-	network: XrpNetworkType;
-	pending: XrpPendingTransaction;
-	progress?: (step: ProgressStepsSendXrp) => void;
-}): Promise<XrpSendResult> => {
-	const { txBlob } = pending;
-
-	// Before anything is broadcast: the window comes out of the blob, so it cannot describe a
-	// different transaction than the one submitted, and an unbounded blob is refused here rather
-	// than polled to a false expiry.
-	const { firstLedgerSequence, lastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
-
-	// Derived here, from the blob about to be broadcast, so the id polled below cannot be anything
-	// but this transaction's. When it travelled as a field alongside the blob, a retry could submit
-	// one transaction and poll another id.
-	const txHash = await deriveXrpTransactionHash(txBlob);
-
-	progress?.(ProgressStepsSendXrp.SEND);
-
-	let result: XrpSubmitResult | undefined;
+	// `loadActiveUserTransactions` swallows backend errors by design, so a failed load leaves the
+	// store as it was — which would read as "no open record". Asked directly instead: this answer
+	// decides whether a second sequence is signed, so it must come from the backend or not at all.
+	let transactions: ActiveUserTransaction[];
 
 	try {
-		result = await submitXrpTransaction({ txBlob, network });
+		transactions = await getActiveUserTransactions({ identity });
 	} catch (err: unknown) {
-		// The one failure that provably precedes the request: the endpoint comes from a build-time
-		// constant, so nothing was broadcast and nothing can have been. It is rethrown rather than
-		// swallowed — otherwise confirmation spends its whole budget polling the same unreachable
-		// endpoint and reports an indeterminate outcome for a blob that was definitely never sent.
-		//
-		// `retryXrpSend` is why this matters here rather than only in `sendXrp`. That path enters
-		// with a stored blob and makes NO earlier call, so the submit is its first request and this
-		// is the first place the missing endpoint can surface. `sendXrp` fails five reads earlier.
-		if (err instanceof XrpRpcNotConfiguredError) {
-			throw err;
-		}
-
-		// Everything else is ambiguous: a rejected `fetch`, a non-ok status and a malformed body all
-		// follow a request that may already have been processed, so they say nothing about whether
-		// the node applied the blob and fall through to confirmation.
-	}
-
-	// Only a malformed transaction is rejected here. Any other refusal — including a node saying it
-	// did not take the blob — may still end up applied, and reporting it as failed would invite a
-	// retry that pays twice, so it goes to confirmation and is decided by the ledger.
-	if (
-		nonNullish(result) &&
-		isXrpSubmitFinalFailure({ submitResult: result, transactionId: txHash })
-	) {
-		throw new Error(
-			`XRP transaction rejected: ${result.engineResult}${
-				result.engineResultMessage ? ` (${result.engineResultMessage})` : ''
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: the wallet could not check for an unresolved payment. ${
+				err instanceof Error ? err.message : `${err}`
 			}`
 		);
 	}
 
-	// Past this point the blob is on the wire, and a progress observer must not be able to change
-	// what happened to it. The two calls below are the only ones that run after the broadcast —
-	// `INITIALIZATION`, `SIGN` and `SEND` all precede `submitXrpTransaction`, where an observer
-	// throwing aborts with nothing submitted, which is correct and must keep working.
-	//
-	// Unguarded, each rewrote an outcome it had no part in. A throw at `CONFIRM` escaped as a plain
-	// error with no `pending` attached — indistinguishable from a pre-broadcast failure, so a
-	// caller rebuilds on a new sequence and pays twice. A throw at `DONE` was worse: it runs on a
-	// validated `tesSUCCESS`, so it reported a payment that definitively landed as a rejection,
-	// where a resend is unambiguously a duplicate rather than merely possibly one.
-	//
-	// Logged rather than discarded: an observer throwing is a caller bug, and the only thing that
-	// changes here is that it can no longer decide the send.
-	const reportPostBroadcastProgress = (step: ProgressStepsSendXrp) => {
-		try {
-			progress?.(step);
-		} catch (err: unknown) {
-			consoleError(
-				`XRP send progress observer threw at ${step}; the transaction outcome is unaffected.`,
-				err
-			);
-		}
-	};
+	if (nonNullish(openXrpActiveUserTransaction({ transactions, source }))) {
+		throw new XrpSendAlreadyInFlightError(
+			`XRP send refused: a payment from ${source} has not resolved yet.`
+		);
+	}
 
-	reportPostBroadcastProgress(ProgressStepsSendXrp.CONFIRM);
+	return identity;
+};
 
-	let transactionResult: string | undefined;
+/**
+ * Creates the record that holds the invariant.
+ *
+ * Refuses the send if it cannot be created — at the per-user cap, or with the backend unreachable.
+ * Sending anyway would drop the guarantee at exactly the moment a retry is most likely, and would
+ * leave the payment with nothing to resolve it.
+ */
+const openXrpSendRecord = async ({
+	identity,
+	token,
+	source,
+	destination,
+	destinationTag,
+	amount,
+	fee,
+	txHash,
+	lastLedgerSequence
+}: {
+	identity: Identity;
+	token: Token;
+	source: XrpAddress;
+	destination: XrpAddress;
+	destinationTag?: number;
+	amount: XrpBalance;
+	fee: XrpBalance;
+	txHash: string;
+	lastLedgerSequence: number;
+}): Promise<void> => {
+	const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
+
+	if (isNullish(data)) {
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
+		);
+	}
 
 	try {
-		transactionResult = await confirmXrpTransaction({
-			hash: txHash,
-			network,
-			firstLedgerSequence,
-			lastLedgerSequence
+		await createActiveUserTransaction({
+			identity,
+			id: crypto.randomUUID(),
+			data,
+			progressStep: ProgressStepsSendXrp.SEND,
+			externalRefs: toXrpExternalRefs({
+				[XRP_EXTERNAL_REF_KEYS.TX_HASH]: txHash,
+				[XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE]: `${lastLedgerSequence}`,
+				...toXrpDisplayRefs({
+					token,
+					amount: formatToken({ value: amount, unitName: token.decimals })
+				})
+			})
 		});
 	} catch (err: unknown) {
-		// Expiry is the one confirmation failure that is definitive: the validated ledger passed
-		// `LastLedgerSequence` and the hash was still absent on recheck, so this transaction can
-		// never apply and a retry must build a new one. Everything else leaves the outcome unknown,
-		// so the signed transaction is handed back with the error — a retry resubmits it, and the
-		// ledger, not this code, decides whether it was already applied.
-		if (err instanceof XrpSendExpiredError) {
-			throw err;
-		}
-
-		throw new XrpSendIndeterminateError({
-			message: err instanceof Error ? err.message : `${err}`,
-			pending
-		});
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: the unresolved payment could not be recorded. ${
+				err instanceof Error ? err.message : `${err}`
+			}`
+		);
 	}
-
-	// Typed so the caller can tell this apart from an indeterminate confirmation: the ledger
-	// validated the transaction and it failed, claiming the fee. Both are thrown at the CONFIRM
-	// step, so the progress step alone cannot separate "known failure" from "unknown".
-	if (!isXrpTransactionSuccessful(transactionResult)) {
-		throw new XrpTransactionFailedError(`XRP transaction failed: ${transactionResult}`);
-	}
-
-	reportPostBroadcastProgress(ProgressStepsSendXrp.DONE);
-
-	return { txHash, submitResult: result };
 };
 
 /**
  * Sends native XRP: fetches the account sequence, whether the destination exists and the current
- * ledger index, builds and threshold-signs a Payment, submits it, and waits for the transaction to
- * be included in a validated ledger.
+ * ledger index, builds and threshold-signs a Payment, records it, and submits it.
  *
  * `fee` is a parameter rather than an estimate taken here, and that is the point: it is the figure
  * the amount was priced and reviewed against, so re-fetching it at signing time would sign a fee
@@ -385,9 +172,10 @@ const submitAndConfirmXrpTransaction = async ({
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  *
- * A retry of a send whose outcome was never established is {@link retryXrpSend}, not this
- * function: the two share only the network and the progress callback, and nothing here applies to
- * an already-signed transaction.
+ * It stops at the submit and does **not** wait for the transaction to validate. The Active User
+ * Transaction record opened just before the broadcast is what establishes the outcome, and the
+ * global poller drives it — for this send and for one whose session died, on the same code. So
+ * the returned hash says what was broadcast, never that it landed.
  */
 export const sendXrp = async ({
 	identity,
@@ -397,6 +185,7 @@ export const sendXrp = async ({
 	amount,
 	fee,
 	destinationTag,
+	token,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -406,6 +195,7 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	fee: XrpBalance;
 	destinationTag?: number;
+	token: Token;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
@@ -534,6 +324,19 @@ export const sendXrp = async ({
 	if (fee > XRP_MAX_FEE_DROPS) {
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
+
+	// After the guards that need nothing but the arguments, and before the first node read — which
+	// also keeps a self-payment or a zero amount from costing a backend round-trip to be told what
+	// the arguments already say.
+	//
+	// An XRPL `Sequence` is a nonce, so while a payment from this address is unresolved there is no
+	// safe sequence for a second one: reusing it answers `tefPAST_SEQ` or replaces a queued
+	// transaction, and taking the next one signs into a gap that expires — which reports "nothing
+	// was sent" for a payment that can still apply.
+	//
+	// Returns the identity narrowed, because the guard cannot run without one and the record write
+	// below needs it non-nullish.
+	const recordIdentity = await assertNoOpenXrpSend({ identity, source });
 
 	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
@@ -675,38 +478,61 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
 
-	return await submitAndConfirmXrpTransaction({
-		network,
-		pending: { txBlob },
-		progress
+	// Before anything is broadcast: both values come out of the blob, so neither can describe a
+	// different transaction than the one submitted, and an unbounded blob is refused here rather
+	// than recorded against a window nothing signed.
+	const { lastLedgerSequence: signedLastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
+	const txHash = await deriveXrpTransactionHash(txBlob);
+
+	// After signing and before submitting, which is the only correct moment. Later would miss a
+	// submit whose response is lost — precisely the case the record exists for. Earlier would be a
+	// claim about a transaction that does not exist yet.
+	await openXrpSendRecord({
+		identity: recordIdentity,
+		token,
+		source,
+		destination,
+		destinationTag,
+		amount,
+		fee,
+		txHash,
+		lastLedgerSequence: signedLastLedgerSequence
 	});
-};
 
-/**
- * Resubmits a send whose outcome was never established, from the
- * {@link XrpSendIndeterminateError} that reported it.
- *
- * The stored transaction goes back unchanged — nothing is fetched, rebuilt or re-signed — so if the
- * first attempt did land, its sequence is already consumed and the ledger refuses this one
- * (`tefPAST_SEQ`) rather than making a second payment. Building a fresh transaction in that
- * situation takes a NEW sequence, which is precisely what pays twice.
- *
- * Separate from {@link sendXrp} rather than a `pending` field on it, because the two have almost
- * nothing in common: this takes no identity, no addresses, no amount and no fee, and a signature
- * that accepted them would accept a reviewed payment alongside a stored blob and silently act on
- * the blob. The window they are polled over is not a parameter either — it is read out of the blob
- * by `deriveXrpLedgerWindow`.
- */
-export const retryXrpSend = async ({
-	network,
-	pending,
-	progress
-}: {
-	network: XrpNetworkType;
-	pending: XrpPendingTransaction;
-	progress?: (step: ProgressStepsSendXrp) => void;
-}): Promise<XrpSendResult> => {
-	progress?.(ProgressStepsSendXrp.INITIALIZATION);
+	progress?.(ProgressStepsSendXrp.SEND);
 
-	return await submitAndConfirmXrpTransaction({ network, pending, progress });
+	let submitResult: XrpSubmitResult | undefined;
+
+	try {
+		submitResult = await submitXrpTransaction({ txBlob, network });
+	} catch (err: unknown) {
+		// The one failure that provably precedes the request: the endpoint comes from a build-time
+		// constant, so nothing was broadcast and nothing can have been. It is rethrown so the caller
+		// reports a send that definitively did not happen.
+		if (err instanceof XrpRpcNotConfiguredError) {
+			throw err;
+		}
+
+		// Everything else is ambiguous: a rejected `fetch`, a non-ok status and a malformed body all
+		// follow a request that may already have been processed. Swallowed on purpose — the record is
+		// open and the ledger decides, which is exactly what a lost submit response needs.
+		consoleError(
+			'XRP submit did not return a usable response; the record decides the outcome.',
+			err
+		);
+	}
+
+	// Deliberately no confirmation here. The record is the one confirmation path, and the poller
+	// drives it — for this send and for one whose session died, on the same code. Waiting here as
+	// well would mean two writers racing for a status the backend makes immutable, and would hold
+	// the user for the whole validity window in the one case the record already covers.
+	//
+	// So these two steps report the broadcast finishing, NOT the payment landing. Nothing is
+	// reloaded here either: at this point the payment has not validated, so there is nothing new to
+	// read — the balance refresh belongs to the record's terminal side effects, which run when the
+	// ledger has actually decided.
+	progress?.(ProgressStepsSendXrp.RELOAD);
+	progress?.(ProgressStepsSendXrp.DONE);
+
+	return { txHash, submitResult };
 };
