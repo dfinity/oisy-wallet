@@ -5,6 +5,7 @@
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
@@ -30,6 +31,8 @@
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
 	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
+	import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
+	import { isXrpActiveUserTransaction, toXrpExternalRefsMap } from '$xrp/utils/xrp-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -51,8 +54,13 @@
 	// routing and deliberately not surfaced.
 	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
+	// Not a swap and not a provider flow: a native XRP payment, whose row exists
+	// to hold the one-unresolved-payment-per-address invariant. It has one token
+	// and one network, so the swap layout's "A → B" reads wrong for it.
+	const isXrp = $derived(isXrpActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
+	const xrpRefs = $derived(toXrpExternalRefsMap(tx.external_refs));
 
 	const isFailed = $derived('Failed' in tx.status);
 	const isSucceeded = $derived('Succeeded' in tx.status);
@@ -107,15 +115,23 @@
 				]
 					.filter(nonNullish)
 					.join(' ')
-			: [
-					isSwap ? $i18n.swap.text.swap : undefined,
-					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-					'→',
-					refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
-				]
-					.filter(nonNullish)
-					.join(' ')
+			: isXrp
+				? [
+						$i18n.send.text.send,
+						xrpRefs[XRP_EXTERNAL_REF_KEYS.AMOUNT],
+						xrpRefs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL]
+					]
+						.filter(nonNullish)
+						.join(' ')
+				: [
+						isSwap ? $i18n.swap.text.swap : undefined,
+						refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+						refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
+						'→',
+						refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
+					]
+						.filter(nonNullish)
+						.join(' ')
 	);
 
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
@@ -124,11 +140,14 @@
 	);
 
 	// A same-chain swap — always the case for a Velora Market swap — would
-	// otherwise read "Ethereum → Ethereum".
+	// otherwise read "Ethereum → Ethereum". An XRP payment has a single network
+	// and carries it under its own key, since it sets none of the swap refs.
 	const networkText = $derived(
-		sourceNetwork === destinationNetwork
-			? sourceNetwork
-			: `${sourceNetwork} → ${destinationNetwork}`
+		isXrp
+			? (xrpRefs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? '')
+			: sourceNetwork === destinationNetwork
+				? sourceNetwork
+				: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
 	// Time since the last status change, not since creation: a settled swap
@@ -178,6 +197,8 @@
 				<div class={`flex h-10 w-10 items-center justify-center rounded-full ${statusCircleClass}`}>
 					{#if isFailed}
 						<IconAlertTriangle size="20" />
+					{:else if isXrp}
+						<IconSend size="20" />
 					{:else}
 						<IconCkConvert size="20" />
 					{/if}
