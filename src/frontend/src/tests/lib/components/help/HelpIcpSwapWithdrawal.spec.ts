@@ -228,6 +228,37 @@ describe('HelpIcpSwapWithdrawal', () => {
 		);
 	});
 
+	it('does not claim nothing was left behind when pools were unreadable', async () => {
+		// Otherwise the page states a complete result and an incomplete one at the same time.
+		vi.mocked(scanIcpSwapPools).mockResolvedValue({
+			poolsScanned: 5,
+			unreadablePools: 2,
+			pools: []
+		});
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		await waitFor(() => expect(getByTestId(HELP_ICPSWAP_SCAN_SUMMARY)).toBeInTheDocument());
+
+		expect(queryByTestId(HELP_ICPSWAP_EMPTY)).toBeNull();
+	});
+
+	it('still says nothing was found when every pool was readable', async () => {
+		vi.mocked(scanIcpSwapPools).mockResolvedValue({
+			poolsScanned: 5,
+			unreadablePools: 0,
+			pools: []
+		});
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		await waitFor(() => expect(getByTestId(HELP_ICPSWAP_EMPTY)).toBeInTheDocument());
+	});
+
 	it('reports pools it could not read rather than passing a partial scan off as complete', async () => {
 		vi.mocked(scanIcpSwapPools).mockResolvedValue({
 			poolsScanned: 5,

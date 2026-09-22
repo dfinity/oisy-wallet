@@ -384,7 +384,7 @@
 			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR}>
 				{loadError}
 			</p>
-		{:else if showEmpty}
+		{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
 			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
 				{nonNullish(scanSummary)
 					? replacePlaceholders($i18n.help.text.scan_nothing_found, {
