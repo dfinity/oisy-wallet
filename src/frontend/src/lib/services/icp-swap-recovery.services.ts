@@ -4,7 +4,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
+import { ICP_SWAP_POOL_FEE, ICP_SWAP_SCAN_CONCURRENCY } from '$lib/constants/swap.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
@@ -192,13 +192,19 @@ export const loadIcpSwapRecoverableBalances = async ({
 /**
  * Finds every stranded balance across the pools that exist between the user's active tokens.
  *
- * The pool table arrives in a single `getAllPools` query - 860 pools at the time of writing - and
- * is filtered locally, so the cost is one query plus one balance query per pool that actually
+ * The pool table arrives in a single `getAllPools` query - 876 pools when measured on 2026-09-22 -
+ * and is filtered locally, so the cost is one query plus one balance query per pool that actually
  * exists between two active tokens. That is bounded by the pools that exist rather than by the
- * square of the token count: a 17-token wallet reaches 9 pools, not 136 pairs.
+ * square of the token count: a ck-heavy 17-token wallet reaches 9 pools, not 136 pairs.
  *
- * Balance queries are settled independently. A pool that fails is counted, not thrown, so one bad
- * pool cannot cost the user every other result.
+ * It is not, however, a small bound for a token-heavy wallet. 65 of the tokens OISY ships appear
+ * as a pool leg, and enabling all of them yields 89 candidates; custom tokens raise the ceiling to
+ * the full table. Queries therefore go out in batches of ICP_SWAP_SCAN_CONCURRENCY, each settling
+ * before the next starts, because a throttled query is indistinguishable here from a pool that
+ * cannot be read - fanning out everything at once would report phantom unreadable pools.
+ *
+ * Within a batch the queries are settled independently. A pool that fails is counted, not thrown,
+ * so one bad pool cannot cost the user every other result.
  *
  * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
  * Those are reachable through the manual pair lookup above; widening the filter is not viable,
@@ -222,23 +228,31 @@ export const scanIcpSwapPools = async ({
 			tokenByAddress.has(token1.address)
 	);
 
-	const settled = await Promise.allSettled(
-		candidatePools.map(async (pool) => {
-			const { balance0, balance1 } = await getUserUnusedBalance({
-				identity,
-				canisterId: pool.canisterId.toString(),
-				principal: identity.getPrincipal()
-			});
+	const readPool = async (pool: PoolData): Promise<IcpSwapPoolBalances> => {
+		const { balance0, balance1 } = await getUserUnusedBalance({
+			identity,
+			canisterId: pool.canisterId.toString(),
+			principal: identity.getPrincipal()
+		});
 
-			return toPoolBalances({
-				poolCanisterId: pool.canisterId.toString(),
-				poolTokens: [pool.token0, pool.token1],
-				tokenByAddress,
-				balance0,
-				balance1
-			});
-		})
-	);
+		return toPoolBalances({
+			poolCanisterId: pool.canisterId.toString(),
+			poolTokens: [pool.token0, pool.token1],
+			tokenByAddress,
+			balance0,
+			balance1
+		});
+	};
+
+	const settled: PromiseSettledResult<IcpSwapPoolBalances>[] = [];
+
+	for (let i = 0; i < candidatePools.length; i += ICP_SWAP_SCAN_CONCURRENCY) {
+		settled.push(
+			...(await Promise.allSettled(
+				candidatePools.slice(i, i + ICP_SWAP_SCAN_CONCURRENCY).map(readPool)
+			))
+		);
+	}
 
 	return {
 		poolsScanned: candidatePools.length,
