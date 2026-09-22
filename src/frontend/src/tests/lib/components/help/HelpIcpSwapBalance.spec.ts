@@ -15,7 +15,6 @@ const token = {
 
 const unused: IcpSwapRecoverableBalance = {
 	token,
-	poolToken: { address: token.ledgerCanisterId, standard: 'ICRC1' },
 	amount: 150_000_000n
 };
 

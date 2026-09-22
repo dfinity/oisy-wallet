@@ -117,9 +117,7 @@ describe('icp-swap-recovery.services', () => {
 
 			const { balances } = await loadIcpSwapRecoverableBalances(loadParams);
 
-			expect(balances).toStrictEqual([
-				{ token: tokenA, poolToken: pool.token1, amount: tokenA.fee + 1n }
-			]);
+			expect(balances).toStrictEqual([{ token: tokenA, amount: tokenA.fee + 1n }]);
 		});
 
 		it('maps each leg onto the token the user picked', async () => {
@@ -132,8 +130,8 @@ describe('icp-swap-recovery.services', () => {
 
 			// token0 is tokenB and token1 is tokenA - the factory's own order, not the user's.
 			expect(balances).toStrictEqual([
-				{ token: tokenB, poolToken: pool.token0, amount: 500_000n },
-				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
+				{ token: tokenB, amount: 500_000n },
+				{ token: tokenA, amount: 900_000n }
 			]);
 		});
 
@@ -204,7 +202,7 @@ describe('icp-swap-recovery.services', () => {
 					poolCanisterId,
 					poolTokens: [pool.token0, pool.token1],
 					pair: [tokenB.symbol, tokenA.symbol],
-					balances: [{ token: tokenA, poolToken: pool.token1, amount: 900_000n }]
+					balances: [{ token: tokenA, amount: 900_000n }]
 				}
 			]);
 		});
@@ -264,9 +262,7 @@ describe('icp-swap-recovery.services', () => {
 
 			// With the duplicate's 10_000_000n fee the 900_000n balance would have been dropped as
 			// dust; with tokenA's own fee it survives.
-			expect(pools[0].balances).toStrictEqual([
-				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
-			]);
+			expect(pools[0].balances).toStrictEqual([{ token: tokenA, amount: 900_000n }]);
 		});
 
 		it('propagates a failure to fetch the pool table', async () => {
@@ -348,9 +344,7 @@ describe('icp-swap-recovery.services', () => {
 				canisterId: poolCanisterId,
 				principal: mockIdentity.getPrincipal()
 			});
-			expect(refreshed.balances).toStrictEqual([
-				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
-			]);
+			expect(refreshed.balances).toStrictEqual([{ token: tokenA, amount: 900_000n }]);
 		});
 
 		it('surfaces a balance credited after the group was built', async () => {
@@ -366,14 +360,13 @@ describe('icp-swap-recovery.services', () => {
 				tokens: [tokenA, tokenB]
 			});
 
-			expect(balances).toStrictEqual([{ token: tokenB, poolToken: pool.token0, amount: 500_000n }]);
+			expect(balances).toStrictEqual([{ token: tokenB, amount: 500_000n }]);
 		});
 	});
 
 	describe('withdrawIcpSwapBalance', () => {
 		const unused: IcpSwapRecoverableBalance = {
 			token: tokenA,
-			poolToken: pool.token1,
 			amount: 900_000n
 		};
 

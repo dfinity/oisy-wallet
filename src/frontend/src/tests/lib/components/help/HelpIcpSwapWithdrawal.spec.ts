@@ -71,15 +71,17 @@ const usdc = {
 
 const poolCanisterId = 'aaaaa-aa';
 
+// The pool's own view of each leg, which the group retains so a single pool can be re-read.
+const icpLeg = { address: icp.ledgerCanisterId, standard: 'ICRC1' };
+const usdcLeg = { address: usdc.ledgerCanisterId, standard: 'ICRC2' };
+
 const unusedIcp: IcpSwapRecoverableBalance = {
 	token: icp,
-	poolToken: { address: icp.ledgerCanisterId, standard: 'ICRC1' },
 	amount: 150_000_000n
 };
 
 const unusedUsdc: IcpSwapRecoverableBalance = {
 	token: usdc,
-	poolToken: { address: usdc.ledgerCanisterId, standard: 'ICRC2' },
 	amount: 2_000_000n
 };
 
@@ -104,7 +106,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([usdc]));
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -131,13 +133,13 @@ describe('HelpIcpSwapWithdrawal', () => {
 		// supersedes one - so the slower first request must not overwrite the newer one's results.
 		const stale: IcpSwapPoolBalances = {
 			poolCanisterId: 'stale-pool',
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		};
 		const fresh: IcpSwapPoolBalances = {
 			poolCanisterId: 'fresh-pool',
-			poolTokens: [unusedUsdc.poolToken, unusedIcp.poolToken],
+			poolTokens: [usdcLeg, icpLeg],
 			pair: ['ckUSDC', 'ICP'],
 			balances: [unusedUsdc]
 		};
@@ -189,7 +191,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		release({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -213,7 +215,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		release({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -268,13 +270,13 @@ describe('HelpIcpSwapWithdrawal', () => {
 			pools: [
 				{
 					poolCanisterId,
-					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					poolTokens: [icpLeg, usdcLeg],
 					pair: ['ICP', 'ckUSDC'],
 					balances: [unusedIcp]
 				},
 				{
 					poolCanisterId: otherPoolId,
-					poolTokens: [unusedUsdc.poolToken, unusedIcp.poolToken],
+					poolTokens: [usdcLeg, icpLeg],
 					pair: ['ckUSDC', 'ICP'],
 					balances: [unusedUsdc]
 				}
@@ -343,7 +345,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 			pools: [
 				{
 					poolCanisterId,
-					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					poolTokens: [icpLeg, usdcLeg],
 					pair: ['ICP', 'ckUSDC'],
 					balances: [unusedIcp]
 				}
@@ -378,7 +380,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 			pools: [
 				{
 					poolCanisterId,
-					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					poolTokens: [icpLeg, usdcLeg],
 					pair: ['ICP', 'ckUSDC'],
 					balances: [unusedIcp]
 				}
@@ -464,7 +466,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('lists every recoverable balance with its own withdraw button', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
@@ -481,14 +483,14 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('withdraws only the row whose button was pressed, then re-reads that pool', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
 		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedUsdc]
 		});
@@ -524,14 +526,14 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
 		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -566,7 +568,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
@@ -574,7 +576,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(200_000_000n);
 		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -626,7 +628,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 			release({
 				poolCanisterId,
-				poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+				poolTokens: [icpLeg, usdcLeg],
 				pair: ['ICP', 'ckUSDC'],
 				balances: [unusedIcp, unusedUsdc]
 			});
@@ -683,13 +685,13 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('locks discovery while a withdrawal is in flight', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
 		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -721,7 +723,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('surfaces a remainder credited between discovery and withdrawal', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
@@ -729,7 +731,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 		// The pool credited more while the user was looking at it.
 		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [{ ...unusedIcp, amount: 25_000_000n }]
 		});
@@ -751,7 +753,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('does not report a failed withdrawal when only the re-read fails', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
@@ -779,7 +781,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('keeps the row in place when the withdrawal fails', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
@@ -802,7 +804,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('tracks the resolved pool with both symbols and the withdrawable count', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
@@ -844,7 +846,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('tracks a withdrawal from executing through to success, without an amount', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
-			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			poolTokens: [icpLeg, usdcLeg],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
