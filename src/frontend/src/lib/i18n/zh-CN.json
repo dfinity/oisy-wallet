@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"xrp_retry": "重试这笔交易",
+			"xrp_retry_description": "重试会重新发送完全相同的交易，因此不可能重复支付——如果原交易其实已经完成，网络会拒绝这次重试。而新建一笔交易则可能重复支付，这就是钱包在这笔交易结算前不允许你这样做的原因。",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "目标地址",

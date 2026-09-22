@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Invia",
+			"xrp_retry": "Riprova questa transazione",
+			"xrp_retry_description": "Riprovare reinvia esattamente la stessa transazione, quindi non può pagare due volte — se l’originale è andata a buon fine, la rete rifiuta il nuovo tentativo. Creare invece una nuova transazione potrebbe pagare due volte, ed è per questo che il wallet non te lo consente finché questa non è regolata.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destinazione",

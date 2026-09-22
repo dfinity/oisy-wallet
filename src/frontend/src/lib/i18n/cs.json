@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Odeslat",
+			"xrp_retry": "Zkusit transakci znovu",
+			"xrp_retry_description": "Opakování odešle naprosto stejnou transakci, takže nemůže zaplatit dvakrát — pokud původní transakce prošla, síť opakování odmítne. Vytvoření nové transakce by naopak mohlo zaplatit dvakrát, a proto vám to peněženka nedovolí, dokud se tato nevypořádá.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Cíl",

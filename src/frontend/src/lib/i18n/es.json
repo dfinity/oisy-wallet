@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_retry": "Reintentar esta transacción",
+			"xrp_retry_description": "Reintentar reenvía exactamente la misma transacción, así que no puede pagar dos veces — si la original sí se completó, la red rechaza el reintento. Crear una transacción nueva sí podría pagar dos veces, y por eso la cartera no te lo permite hasta que esta se liquide.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",

@@ -685,6 +685,8 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		xrp_retry: string;
+		xrp_retry_description: string;
 		send_token: string;
 		send_unknown_token: string;
 		destination: string;

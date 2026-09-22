@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Envoyer",
+			"xrp_retry": "Réessayer cette transaction",
+			"xrp_retry_description": "Réessayer renvoie exactement la même transaction, elle ne peut donc pas payer deux fois — si l’originale a finalement abouti, le réseau rejette la nouvelle tentative. Créer une transaction différente pourrait, elle, payer deux fois : c’est pourquoi le portefeuille ne l’autorise pas avant que celle-ci soit réglée.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destination",

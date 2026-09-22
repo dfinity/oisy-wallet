@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Senden",
+			"xrp_retry": "Transaktion erneut senden",
+			"xrp_retry_description": "Beim erneuten Senden wird genau dieselbe Transaktion übermittelt, sie kann also nicht doppelt bezahlen — ist die ursprüngliche doch durchgegangen, weist das Netzwerk die Wiederholung ab. Eine neue Transaktion zu erstellen könnte hingegen doppelt bezahlen, weshalb die Wallet das erst zulässt, wenn diese abgeschlossen ist.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Ziel",

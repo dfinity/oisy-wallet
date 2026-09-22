@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"xrp_retry": "Retry this transaction",
+			"xrp_retry_description": "Retrying resends the very same transaction, so it cannot pay twice — if the original did go through, the network rejects the retry. Creating a new transaction instead could pay twice, which is why the wallet will not let you until this one settles.",
 			"send_token": "Send $token",
 			"send_unknown_token": "Send unknown token",
 			"destination": "Destination",

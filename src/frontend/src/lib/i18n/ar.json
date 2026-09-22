@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "إرسال",
+			"xrp_retry": "",
+			"xrp_retry_description": "",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "الوجهة",

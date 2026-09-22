@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"xrp_retry": "Thử lại giao dịch này",
+			"xrp_retry_description": "Thử lại sẽ gửi đúng giao dịch đó, nên không thể trả tiền hai lần — nếu giao dịch ban đầu đã thành công, mạng sẽ từ chối lần thử lại. Ngược lại, tạo một giao dịch mới có thể trả hai lần, nên ví sẽ không cho phép đến khi giao dịch này hoàn tất.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Tới",

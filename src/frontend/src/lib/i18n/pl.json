@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Wyślij",
+			"xrp_retry": "Ponów tę transakcję",
+			"xrp_retry_description": "Ponowienie wysyła dokładnie tę samą transakcję, więc nie może zapłacić dwukrotnie — jeśli pierwotna jednak przeszła, sieć odrzuci ponowienie. Utworzenie nowej transakcji mogłoby natomiast zapłacić dwukrotnie, dlatego portfel nie pozwoli na to, dopóki ta się nie rozliczy.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Miejsce docelowe",

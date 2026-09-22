@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_retry": "Tentar esta transação novamente",
+			"xrp_retry_description": "Tentar novamente reenvia exatamente a mesma transação, portanto não pode pagar duas vezes — se a original foi concluída, a rede rejeita a nova tentativa. Criar uma transação nova, por outro lado, poderia pagar duas vezes, e é por isso que a carteira não permite até que esta seja liquidada.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",
