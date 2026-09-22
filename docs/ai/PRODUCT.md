@@ -415,10 +415,19 @@ A record cannot get stuck. Every XRP payment is signed with an expiry about 20 l
 
 If the wallet cannot establish whether an earlier payment is still settling — the record cannot be read or written — the send is **refused rather than attempted**, and the wallet says to try again. Proceeding would drop the guarantee at exactly the moment a user is most likely to retry.
 
+### Retrying a payment whose outcome is unknown
+
+Occasionally a send finishes without an answer: the ledger never decided in the window, or the network stopped responding. The payment may still go through. The wallet says so, keeps the send open, and offers one action — **retry this transaction**.
+
+That retry resends the _very same_ transaction rather than creating a new one, which is what makes it safe: it carries the sequence the first attempt already used, so if the original did go through, the ledger refuses the retry instead of paying twice. Creating a fresh transaction would take a new sequence and could pay twice, which is exactly what the wallet refuses to let the user do while the first is unresolved.
+
+The offer lasts as long as the send stays open — nothing about it is stored. Closing it is safe and loses nothing important: the record is still open, so the address stays guarded, and the wallet resolves the payment from the ledger within a minute or so either way. The retry only saves the waiting.
+
 What this deliberately does not do:
 
 - It does **not** queue the second send. Deferring it until the first resolves would hold the same invariant with better manners, and remains a possible improvement.
-- It does **not** resend anything on its own. A payment that resolved as expired is reported, never automatically retried.
+- It does **not** resend anything on its own. Every retry is an explicit action, and a payment that resolved as expired is reported rather than retried.
+- It does **not** offer the retry in a later session. The retry needs the exact signed transaction, which is held only while the send is open; afterwards the wallet resolves the payment from the ledger instead.
 - It does **not** block sends on other chains, or XRP sends from a different address — a record for one address says nothing about another's sequence.
 - It does **not** cover a payment signed outside OISY from the same account. Nothing in the wallet can.
 
