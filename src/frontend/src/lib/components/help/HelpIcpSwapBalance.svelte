@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { HELP_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import type { IcpSwapRecoverableBalance } from '$lib/services/icp-swap-recovery.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -33,7 +35,14 @@
 	<span class="flex min-w-0 flex-1 flex-row items-center gap-2">
 		<TokenLogo data={token} logoSize="xs" />
 		<span class="flex min-w-0 flex-col">
-			<span class="truncate">{formattedAmount} {token.symbol}</span>
+			<span class="flex min-w-0 flex-row items-center gap-1">
+				{#if $isPrivacyMode}
+					<IconDots variant="sm" />
+				{:else}
+					<span class="truncate">{formattedAmount}</span>
+				{/if}
+				<span class="truncate">{token.symbol}</span>
+			</span>
 			<span class="truncate text-sm text-tertiary">{$i18n.help.text.balance_unused}</span>
 		</span>
 	</span>
