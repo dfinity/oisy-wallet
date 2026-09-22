@@ -33,6 +33,11 @@ pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 /// is at most 63 characters, so anything longer can never be a valid pool id.
 pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 
+/// Maximum length of an XRPL classic address. It is base58check over a 21-byte
+/// payload, which cannot encode to more than 35 characters, so anything longer
+/// can never be a valid address.
+pub const MAX_XRP_ADDRESS_LEN: usize = 35;
+
 /// Maximum width, in bits, of an `amount`. Every chain OISY supports expresses
 /// base-unit amounts in at most 256 bits, so a wider value is never a real
 /// balance. `Nat` is variable-length on the wire, so without this bound a
@@ -102,6 +107,13 @@ pub enum ActiveUserTransactionData {
     /// later session which token to pull back out of the DEX's custody: the
     /// destination token on a fill, the source token on a kill.
     OisyTrade(OisyTradeData),
+    /// Native XRP payment. Unlike every other variant this one does not track a
+    /// provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+    /// so a second payment from the same address while the first is unresolved
+    /// is unsafe whichever sequence it picks. The row is what refuses it, and it
+    /// has to outlive the tab to do that. The locally derived transaction id and
+    /// the signed `LastLedgerSequence` ride in `external_refs`.
+    Xrp(XrpData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -248,6 +260,29 @@ pub struct OisyTradeData {
     pub amount: Nat,
 }
 
+/// Native XRP payment payload — the values fixed when the transaction was
+/// signed. The transaction id and its `LastLedgerSequence` are learned from the
+/// signed blob and ride in `external_refs`, so they are not here.
+///
+/// `source_address` is the field the guard reads: the invariant is one
+/// unresolved payment per *address*, not per user, because a row for a
+/// different address says nothing about this one's sequence.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct XrpData {
+    /// Native XRP, which also fixes the network the payment was signed for.
+    pub token: TokenId,
+    pub source_address: String,
+    pub destination_address: String,
+    /// The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+    /// tag rather than an absent one, which is why this is an `Option` and not
+    /// a sentinel.
+    pub destination_tag: Option<u32>,
+    /// Amount in drops.
+    pub amount: Nat,
+    /// Transaction cost in drops.
+    pub fee: Nat,
+}
+
 /// In-flight high-level user operation, persisted so the FE can resume polling
 /// across logout / tab close.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -317,7 +352,7 @@ mod tests {
         ChainFusionDirection, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
         OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
     };
     use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
 
@@ -500,6 +535,25 @@ mod tests {
     fn oisy_trade_side_roundtrips() {
         for side in [OisyTradeSide::Buy, OisyTradeSide::Sell] {
             assert_eq!(roundtrip(&side), side);
+        }
+    }
+
+    #[test]
+    fn xrp_variant_roundtrips() {
+        // `destination_tag` is the field that has to survive both ways: `0` is a
+        // real XRPL tag and `None` is its absence, so a round-trip collapsing
+        // one into the other would change the payment. `u32::MAX` is a real tag
+        // too, and it is the value a narrower encoding would truncate.
+        for destination_tag in [None, Some(0), Some(4_294_967_295)] {
+            let original = ActiveUserTransactionData::Xrp(XrpData {
+                token: TokenId::XrpNativeMainnet,
+                source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+                destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+                destination_tag,
+                amount: Nat::from(25_000_000u64),
+                fee: Nat::from(12u64),
+            });
+            assert_eq!(roundtrip(&original), original);
         }
     }
 

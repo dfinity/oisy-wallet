@@ -48,8 +48,17 @@ export interface ActiveUserTransaction {
  */
 export type ActiveUserTransactionData =
 	| {
-			OneSecEvmToIcp: OneSecEvmToIcpData;
+			/**
+			 * Native XRP payment. Unlike every other variant this one does not track a
+			 * provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+			 * so a second payment from the same address while the first is unresolved
+			 * is unsafe whichever sequence it picks. The row is what refuses it, and it
+			 * has to outlive the tab to do that. The locally derived transaction id and
+			 * the signed `LastLedgerSequence` ride in `external_refs`.
+			 */
+			Xrp: XrpData;
 	  }
+	| { OneSecEvmToIcp: OneSecEvmToIcpData }
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
 	| {
 			/**
@@ -2412,6 +2421,37 @@ export interface VeloraData {
  * API, `Market` by transaction receipt on the source chain.
  */
 export type VeloraSwapMode = { Delta: null } | { Market: null };
+/**
+ * Native XRP payment payload — the values fixed when the transaction was
+ * signed. The transaction id and its `LastLedgerSequence` are learned from the
+ * signed blob and ride in `external_refs`, so they are not here.
+ *
+ * `source_address` is the field the guard reads: the invariant is one
+ * unresolved payment per *address*, not per user, because a row for a
+ * different address says nothing about this one's sequence.
+ */
+export interface XrpData {
+	destination_address: string;
+	/**
+	 * Transaction cost in drops.
+	 */
+	fee: bigint;
+	/**
+	 * Native XRP, which also fixes the network the payment was signed for.
+	 */
+	token: TokenId;
+	/**
+	 * The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+	 * tag rather than an absent one, which is why this is an `Option` and not
+	 * a sentinel.
+	 */
+	destination_tag: [] | [number];
+	source_address: string;
+	/**
+	 * Amount in drops.
+	 */
+	amount: bigint;
+}
 export interface _SERVICE {
 	/**
 	 * Adds one or more dismissed notifications to the user's profile.
