@@ -246,6 +246,30 @@ describe('icp-swap-recovery.services', () => {
 			expect(pools[0].poolCanisterId).toBe(poolCanisterId);
 		});
 
+		it('keeps the first token when a ledger id is enabled twice', async () => {
+			// enabledIcrcTokens concatenates enabled defaults with enabled customs without dropping a
+			// custom that duplicates a default. The default entry is authoritative, and its fee and
+			// decimals drive the dust filter and the formatting, so the scan must agree with the
+			// manual lookup rather than picking up the duplicate's values.
+			const duplicate = { ...tokenA, fee: 10_000_000n, decimals: 2, name: 'custom duplicate' };
+
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: ZERO,
+				balance1: 900_000n
+			});
+
+			const { pools } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB, duplicate]
+			});
+
+			// With the duplicate's 10_000_000n fee the 900_000n balance would have been dropped as
+			// dust; with tokenA's own fee it survives.
+			expect(pools[0].balances).toStrictEqual([
+				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
+			]);
+		});
+
 		it('propagates a failure to fetch the pool table', async () => {
 			vi.mocked(getAllPools).mockRejectedValue(new Error('factory unavailable'));
 

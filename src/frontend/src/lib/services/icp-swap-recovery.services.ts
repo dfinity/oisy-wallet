@@ -211,7 +211,7 @@ export const scanIcpSwapPools = async ({
 	identity: Identity;
 	tokens: IcToken[];
 }): Promise<IcpSwapScanResult> => {
-	const tokenByAddress = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+	const tokenByAddress = indexTokensByAddress(tokens);
 
 	const allPools = await getAllPools({ identity });
 
