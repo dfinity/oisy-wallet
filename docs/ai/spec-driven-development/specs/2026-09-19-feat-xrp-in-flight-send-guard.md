@@ -100,8 +100,9 @@ and it already produces every value the record needs:
 - `XrpSendIndeterminateError` already carries the signed blob (`XrpPendingTransaction`) for a
   retry, and `retryXrpSend` resubmits it unchanged.
 
-That last one is listed as an open caveat on PR #13592: the blob is handed back and **nothing
-consumes it**. This spec is what consumes it.
+That last one was listed as an open caveat on PR #13592: the blob is handed back and **nothing
+consumes it**. #13592 has since merged, so it is now a live gap on `main` rather than a pending
+one. This spec is what consumes it.
 
 ## Behaviour
 
@@ -282,5 +283,8 @@ negative guarantees above.
   strictly better UX and holds the same invariant; it is a follow-up, not a v1.
 - **Whether an expired record offers a one-click retry** using the stored blob, or only reports.
   The retry primitive (`retryXrpSend`) already exists and resubmits the blob unchanged.
-- **Ordering against PR #13592.** `sendXrp` is not merged; this spec depends on it. Land after,
-  or fold the gate into the send-modal PR that follows it.
+- ~~**Ordering against PR #13592.** `sendXrp` is not merged; this spec depends on it. Land after,
+  or fold the gate into the send-modal PR that follows it.~~ **Resolved:** #13592 merged, and so
+  did the rest of the XRP stack up to #13597. `sendXrp`, `retryXrpSend`, `deriveXrpLedgerWindow`
+  and `XrpSendIndeterminateError` are all on `main`, and XRP is enabled there, so the
+  implementation is based on `main` with no ordering constraint left.
