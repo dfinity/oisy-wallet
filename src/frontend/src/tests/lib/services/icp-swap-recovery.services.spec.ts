@@ -1,7 +1,7 @@
 import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
+import { ICP_SWAP_POOL_FEE, ICP_SWAP_SCAN_CONCURRENCY } from '$lib/constants/swap.constants';
 import {
 	IcpSwapPoolNotFoundError,
 	loadIcpSwapRecoverableBalances,
@@ -275,6 +275,52 @@ describe('icp-swap-recovery.services', () => {
 			await expect(
 				scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] })
 			).rejects.toThrow('factory unavailable');
+		});
+
+		it('keeps the balance queries within the concurrency limit, and reads every pool', async () => {
+			// One pool per extra token, all paired with tokenA, so every one is a candidate. A
+			// throttled query cannot be told apart from an unreadable pool here, so the fan-out has
+			// to stay bounded no matter how many tokens the user enabled.
+			const poolCount = ICP_SWAP_SCAN_CONCURRENCY * 3 + 1;
+
+			const tokens = Array.from({ length: poolCount }, (_, i) => ({
+				...mockValidIcrcToken,
+				symbol: `TK${i}`,
+				ledgerCanisterId: `ledger-${i}`
+			}));
+
+			vi.mocked(getAllPools).mockResolvedValue(
+				tokens.map((token, i) => ({
+					...pool,
+					key: `pool-${i}`,
+					canisterId: Principal.fromUint8Array(Uint8Array.from([i, 0, 0, 0, 0, 0, 0, 0, 1, 1])),
+					token0: { address: tokenA.ledgerCanisterId, standard: 'ICRC1' },
+					token1: { address: token.ledgerCanisterId, standard: 'ICRC2' }
+				}))
+			);
+
+			let inFlight = 0;
+			let peak = 0;
+
+			vi.mocked(getUserUnusedBalance).mockImplementation(async () => {
+				peak = Math.max(peak, ++inFlight);
+
+				await new Promise((resolve) => setTimeout(resolve, 0));
+
+				inFlight--;
+
+				return { balance0: ZERO, balance1: ZERO };
+			});
+
+			const { poolsScanned, unreadablePools } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, ...tokens]
+			});
+
+			expect(peak).toBe(ICP_SWAP_SCAN_CONCURRENCY);
+			expect(getUserUnusedBalance).toHaveBeenCalledTimes(poolCount);
+			expect(poolsScanned).toBe(poolCount);
+			expect(unreadablePools).toBe(0);
 		});
 	});
 

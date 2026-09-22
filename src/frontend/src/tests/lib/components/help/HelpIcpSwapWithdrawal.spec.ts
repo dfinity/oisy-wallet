@@ -13,6 +13,7 @@ import {
 	HELP_ICPSWAP_TOKEN_B,
 	HELP_ICPSWAP_WITHDRAW_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_HELP_ERROR_TYPES } from '$lib/enums/plausible';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import {
 	IcpSwapPoolNotFoundError,
@@ -41,7 +42,10 @@ vi.mock('$lib/services/icp-swap-recovery.services', async (importOriginal) => {
 	};
 });
 
-vi.mock('$lib/services/help-analytics.services', () => ({
+// Only the tracker is faked: `toHelpErrorType` stays real, so the assertions below see the
+// category the component would actually report.
+vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
 	trackHelp: vi.fn()
 }));
 
@@ -485,6 +489,44 @@ describe('HelpIcpSwapWithdrawal', () => {
 		expect(loadIcpSwapRecoverableBalances).toHaveBeenCalledOnce();
 	});
 
+	it('locks discovery while a withdrawal is in flight', async () => {
+		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		});
+		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
+
+		let settleWithdrawal: (withdrawn: bigint) => void = () => undefined;
+		vi.mocked(withdrawIcpSwapBalance).mockReturnValue(
+			new Promise<bigint>((resolve) => (settleWithdrawal = resolve))
+		);
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(withdrawTestId(unusedIcp)));
+		await waitFor(() => expect(withdrawIcpSwapBalance).toHaveBeenCalledOnce());
+
+		// A scan or a pair change here would clear `groups` under the withdrawal, dropping its
+		// re-read and re-displaying the row it already emptied.
+		expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).toBeDisabled();
+
+		settleWithdrawal(150_000_000n);
+
+		await waitFor(() => expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).not.toBeDisabled());
+	});
+
 	it('surfaces a remainder credited between discovery and withdrawal', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
@@ -599,7 +641,11 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		await waitFor(() =>
 			expect(trackHelp).toHaveBeenCalledWith(
-				expect.objectContaining({ action: 'select_pool', resultStatus: 'error' })
+				expect.objectContaining({
+					action: 'select_pool',
+					resultStatus: 'error',
+					errorType: PLAUSIBLE_EVENT_HELP_ERROR_TYPES.POOL_NOT_FOUND
+				})
 			)
 		);
 	});

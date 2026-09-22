@@ -12,7 +12,8 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
-vi.mock('$lib/services/help-analytics.services', () => ({
+vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
 	trackHelp: vi.fn()
 }));
 
