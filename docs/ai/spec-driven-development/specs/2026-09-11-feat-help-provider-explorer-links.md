@@ -66,7 +66,7 @@ The card reuses the `help` Plausible event defined by the Help page spec, with a
 
 - `event_modifier: 'explorer'`
 - `event_subcontext: 'provider_explorers'`
-- `event_provider` — the provider name (`Velora`, `NEAR Intents`, `1Sec`)
+- `event_provider` — the stable provider id (`velora`, `nearIntents`, `oneSec`)
 - `event_key: 'network'` / `event_value` — the chain the link is for (`eth`, `sol`, `btc`, `icp`)
 
 **The destination URL is deliberately not tracked.** The Support card's `contact` action puts its link in `event_value`, because `OISY_SUPPORT_URL` is a constant. Every URL on this card embeds a wallet address instead, and shipping one to Plausible would breach privacy invariant 3 in `docs/ai/frontend/analytics.md` — no PII, no de-anonymising joins. The provider-and-chain pair carries the entire product signal (which provider users check, and for which chain) with none of the identity.

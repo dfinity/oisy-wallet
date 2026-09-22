@@ -67,39 +67,33 @@
 		{/snippet}
 
 		{#snippet items()}
-			{#if sortedTokens.length === 0}
-				<p class="p-3 text-sm text-tertiary" data-tid={`${testId}-empty`}>
-					{$i18n.help.text.no_tokens}
-				</p>
-			{:else}
-				<List condensed noPadding testId={`${testId}-list`}>
-					{#each sortedTokens as token (token.ledgerCanisterId)}
-						<ListItem>
-							<Button
-								alignLeft
-								colorStyle="tertiary-alt"
-								contentFullWidth
-								fullWidth
-								onclick={() => handleSelect(token)}
-								paddingSmall
-								styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-32"
-								testId={`${testId}-option-${token.ledgerCanisterId}`}
-								transparent
-							>
-								<span class="w-[20px] pt-0.75 text-brand-primary">
-									{#if selected?.ledgerCanisterId === token.ledgerCanisterId}
-										<IconCheck size="20" />
-									{/if}
-								</span>
-								<span class="flex w-full flex-row items-center gap-2">
-									<TokenLogo data={token} logoSize="xs" />
-									<span>{token.symbol}</span>
-								</span>
-							</Button>
-						</ListItem>
-					{/each}
-				</List>
-			{/if}
+			<List condensed noPadding testId={`${testId}-list`}>
+				{#each sortedTokens as token (token.ledgerCanisterId)}
+					<ListItem>
+						<Button
+							alignLeft
+							colorStyle="tertiary-alt"
+							contentFullWidth
+							fullWidth
+							onclick={() => handleSelect(token)}
+							paddingSmall
+							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-32"
+							testId={`${testId}-option-${token.ledgerCanisterId}`}
+							transparent
+						>
+							<span class="w-[20px] pt-0.75 text-brand-primary">
+								{#if selected?.ledgerCanisterId === token.ledgerCanisterId}
+									<IconCheck size="20" />
+								{/if}
+							</span>
+							<span class="flex w-full flex-row items-center gap-2">
+								<TokenLogo data={token} logoSize="xs" />
+								<span>{token.symbol}</span>
+							</span>
+						</Button>
+					</ListItem>
+				{/each}
+			</List>
 		{/snippet}
 	</Dropdown>
 </span>

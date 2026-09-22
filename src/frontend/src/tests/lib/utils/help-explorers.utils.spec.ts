@@ -32,7 +32,7 @@ describe('help-explorers.utils', () => {
 			]);
 		});
 
-		it('links Velora to the user own order list', () => {
+		it("links Velora to the user's own order list", () => {
 			const [velora] = buildHelpExplorerGroups(allAddresses);
 
 			expect(velora.links).toEqual([

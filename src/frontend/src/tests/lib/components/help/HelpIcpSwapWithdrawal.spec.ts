@@ -5,6 +5,7 @@ import {
 	HELP_ICPSWAP_CARD,
 	HELP_ICPSWAP_EMPTY,
 	HELP_ICPSWAP_ERROR,
+	HELP_ICPSWAP_NO_TOKENS,
 	HELP_ICPSWAP_POOL_GROUP,
 	HELP_ICPSWAP_SCAN_BUTTON,
 	HELP_ICPSWAP_SCAN_SUMMARY,
@@ -158,6 +159,48 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		expect(queryByTestId(`${HELP_ICPSWAP_POOL_GROUP}-stale-pool`)).toBeNull();
 		expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument();
+	});
+
+	it('does not spin the scan button for a manual lookup', async () => {
+		// `busy` cannot tell the two entry points apart, so the scan button used to animate while a
+		// pair was being looked up.
+		const { promise: pending, resolve: release } = Promise.withResolvers<IcpSwapPoolBalances>();
+		vi.mocked(loadIcpSwapRecoverableBalances).mockReturnValue(pending);
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+
+		const scanButton = getByTestId(HELP_ICPSWAP_SCAN_BUTTON);
+
+		// Disabled, because the race guard is shared - but not spinning.
+		expect(scanButton).toBeDisabled();
+		expect(scanButton.querySelector('svg')).toBeNull();
+
+		release({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
+	});
+
+	it('explains an empty candidate set where the user can actually see it', async () => {
+		// No enabled ICRC tokens: the candidate set is ICP alone, so picking it on one side leaves
+		// the other with nothing. The dropdown is disabled and cannot open, so the explanation has
+		// to be in the card.
+		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
+		await fireEvent.click(
+			getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${ICP_TOKEN.ledgerCanisterId}`)
+		);
+
+		expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
 	});
 
 	it('does not scan until the button is pressed', () => {

@@ -60,15 +60,16 @@ describe('HelpTokenDropdown', () => {
 		).toHaveLength(1);
 	});
 
-	it('is disabled and says so when no token is available', async () => {
+	it('is disabled when no token is available', async () => {
 		const { getByTestId } = render(HelpTokenDropdown, { props: { ...props, tokens: [] } });
 
 		expect(getByTestId(testId)).toBeDisabled();
 
-		// Force the panel open to prove it explains itself rather than showing a blank list.
+		// The panel cannot open, which is why the explanation lives in the card rather than here.
+		// Forcing it open yields no options to choose.
 		await fireEvent.click(getByTestId(testId));
 
-		expect(document.querySelector(`[data-tid="${testId}-list"]`)).toBeNull();
+		expect(document.querySelectorAll(`[data-tid^="${testId}-option-"]`)).toHaveLength(0);
 	});
 
 	it('lists the tokens sorted case-insensitively by symbol and reports the pick', async () => {

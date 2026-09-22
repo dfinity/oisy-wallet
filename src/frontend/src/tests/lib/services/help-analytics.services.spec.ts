@@ -10,7 +10,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
 
-describe('support-analytics.services', () => {
+describe('help-analytics.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
