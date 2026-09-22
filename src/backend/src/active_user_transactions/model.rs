@@ -7,12 +7,12 @@ use shared::types::{
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
-        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
+        XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
         MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN,
     },
     token_id::TokenId,
 };
@@ -246,6 +246,14 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_valid_amount(&d.amount)?;
             require_oisy_trade_pair(d)?;
         }
+        ActiveUserTransactionData::Xrp(d) => {
+            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.fee)?;
+            require_xrp_token(&d.token)?;
+            require_xrp_address(&d.source_address, "source_address")?;
+            require_xrp_address(&d.destination_address, "destination_address")?;
+            require_distinct_xrp_accounts(d)?;
+        }
     }
     Ok(())
 }
@@ -349,6 +357,70 @@ fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
     Ok(())
 }
 
+/// The row tracks a *native XRP* payment, so a token from any other chain is
+/// unsatisfiable by construction — the FE poller would have no ledger to ask.
+/// `data` is immutable after creation, so such a row could never resolve and
+/// would occupy one of the user's slots forever. Kinds only, deliberately: an
+/// XRPL testnet token would be a new `TokenId` variant and belongs in this list
+/// when it arrives, not a reason to loosen the check now.
+fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> {
+    if matches!(token, TokenId::XrpNativeMainnet) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "token must be a native XRP token".to_string(),
+        ))
+    }
+}
+
+/// A bound and a shape check, not a re-validation: the FE derives
+/// `source_address` from the caller's own key and checks `destination_address`
+/// against a full base58check validator before signing. What matters here is
+/// that a row cannot carry an arbitrary string into permanent stable memory, and
+/// that a value which could never name an XRPL account is refused rather than
+/// stored. Mirrors `require_evm_address` — length, prefix, charset, no checksum.
+fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransactionError> {
+    if addr.is_empty() || addr.len() > MAX_XRP_ADDRESS_LEN {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} invalid length"
+        )));
+    }
+    // Classic addresses carry the 0x00 version byte, which base58check always
+    // renders as a leading `r`.
+    if !addr.starts_with('r') {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must start with r"
+        )));
+    }
+    // XRPL orders the base58 alphabet differently from Bitcoin but uses the same
+    // 58 characters: alphanumerics without `0`, `O`, `I` and `l`.
+    if !addr
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() && !matches!(c, '0' | 'O' | 'I' | 'l'))
+    {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be base58"
+        )));
+    }
+    Ok(())
+}
+
+/// XRPL answers a payment whose destination is its sender `temREDUNDANT`, which
+/// is never applied — so such a row describes a payment that cannot exist, and
+/// the FE refuses it from the arguments alone before signing. Same reasoning as
+/// the pair checks above: immutable data that could never resolve.
+fn require_distinct_xrp_accounts(data: &XrpData) -> Result<(), ActiveUserTransactionError> {
+    // Compared raw, like everywhere else this address travels: a classic address
+    // is base58 over a checksummed payload, so case is significant and two forms
+    // differing in it are not one address.
+    if data.source_address == data.destination_address {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "destination_address must differ from source_address".to_string(),
+        ));
+    }
+    Ok(())
+}
+
 fn validate_transition(
     from: &ActiveUserTransactionStatus,
     to: &ActiveUserTransactionStatus,
@@ -386,7 +458,7 @@ mod tests {
             ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
             CreateActiveUserTransactionRequest, LiquidiumAction, LiquidiumData, NearIntentsData,
             OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
             MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         custom_token::ErcTokenId,
@@ -893,6 +965,158 @@ mod tests {
                 );
             }
         }
+    }
+
+    const XRP_SOURCE: &str = "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi";
+    const XRP_DESTINATION: &str = "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv";
+
+    fn xrp_data(
+        amount: u64,
+        fee: u64,
+        destination_tag: Option<u32>,
+        source_address: &str,
+        destination_address: &str,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: source_address.to_string(),
+            destination_address: destination_address.to_string(),
+            destination_tag,
+            amount: Nat::from(amount),
+            fee: Nat::from(fee),
+        })
+    }
+
+    #[test]
+    fn xrp_create_roundtrip() {
+        // `destination_tag` has to survive create — and the stable-memory read
+        // path — in all three shapes: `0` is a real XRPL tag, `None` is its
+        // absence, and `u32::MAX` is the value a narrower encoding would
+        // truncate. Collapsing any of them changes the payment.
+        for destination_tag in [None, Some(0), Some(u32::MAX)] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION);
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION)
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn xrp_zero_fee_rejected() {
+        // Every XRPL transaction destroys a non-zero transaction cost, so a row
+        // claiming a zero fee describes a payment that could not have been
+        // signed.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 0, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn xrp_non_xrp_token_rejected() {
+        // The resolver polls the XRP Ledger for this row, so a token from any
+        // other chain leaves it with nothing to ask — and `data` is immutable
+        // after creation, so the row could never resolve.
+        for token in [
+            TokenId::EvmNative(1),
+            TokenId::IcpNative,
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = ActiveUserTransactionData::Xrp(XrpData {
+                token,
+                source_address: XRP_SOURCE.to_string(),
+                destination_address: XRP_DESTINATION.to_string(),
+                destination_tag: None,
+                amount: Nat::from(25_000_000u64),
+                fee: Nat::from(12u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "token must be a native XRP token".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_malformed_address_rejected() {
+        // Both fields are checked, and the error names which one — the guard
+        // reads `source_address`, so a row that stored a wrong one would gate
+        // the wrong account.
+        for (source, destination, expected) in [
+            ("", XRP_DESTINATION, "source_address invalid length"),
+            (XRP_SOURCE, "", "destination_address invalid length"),
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMiXXXXX",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (
+                "xBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi",
+                XRP_DESTINATION,
+                "source_address must start with r",
+            ),
+            // `0`, `O`, `I` and `l` are the four characters base58 omits, so an
+            // address carrying one cannot have come from a base58 encoder.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoM0",
+                XRP_DESTINATION,
+                "source_address must be base58",
+            ),
+            (
+                XRP_SOURCE,
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBl",
+                "destination_address must be base58",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, None, source, destination);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_self_payment_rejected() {
+        // XRPL answers `temREDUNDANT` and never applies it, so this row could
+        // never resolve.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_SOURCE);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "destination_address must differ from source_address".to_string()
+            )
+        );
     }
 
     #[test]
