@@ -22,6 +22,10 @@ import type {
 	XrpTransactionOutcome,
 	XrpTransactionsPage
 } from '$xrp/types/xrp-transaction';
+import {
+	shouldSimulateXrpLookupFailure,
+	shouldSimulateXrpSubmitSkipped
+} from '$xrp/utils/xrp-send-simulator.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -550,6 +554,13 @@ export const loadXrpTransactionOutcome = async ({
 	firstLedgerSequence: number;
 	lastLedgerSequence: number;
 }): Promise<XrpTransactionOutcome> => {
+	// DEMO ONLY — see `xrp-send-simulator.utils`. Injected here rather than at the caller so it
+	// travels the real path: the confirmation loop treats it as a node that cannot answer, and the
+	// global poller does the same, which is what leaves the record open.
+	if (shouldSimulateXrpLookupFailure()) {
+		throw new XrplRpcError({ method: 'tx', error: 'simulated: the node did not answer' });
+	}
+
 	// The range is what makes a negative answer meaningful. Per the XRPL reference `txnNotFound`
 	// means "either the transaction does not exist, or it was part of a ledger version that xrpld
 	// does not have available", and so "a txnNotFound on its own is not enough to know the final
@@ -672,6 +683,14 @@ export const submitXrpTransaction = async ({
 	txBlob: string;
 	network: XrpNetworkType;
 }): Promise<XrpSubmitResult> => {
+	// DEMO ONLY — see `xrp-send-simulator.utils`. Thrown as a plain error on purpose: that is the
+	// ambiguous shape `submitAndConfirmXrpTransaction` falls through to confirmation on, which is
+	// how a lost submit response behaves. Nothing is broadcast, so no funds move and no fee is
+	// charged, and the record is already open by the time this runs.
+	if (shouldSimulateXrpSubmitSkipped()) {
+		throw new Error('simulated: the submit response was lost');
+	}
+
 	const result = await xrpJsonRpc({ network, method: 'submit', params: { tx_blob: txBlob } });
 
 	const parsed = XrplSubmitResultSchema.safeParse(result);
