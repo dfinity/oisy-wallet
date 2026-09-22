@@ -254,6 +254,7 @@
 				{application}
 				approveDisabled={!decoded || (ambiguous ?? false)}
 				{data}
+				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
 				{instructions}
