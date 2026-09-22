@@ -27,7 +27,9 @@ import {
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
+	XrpSendAlreadyInFlightError,
 	XrpSendExpiredError,
+	XrpSendNotGuardedError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
@@ -502,6 +504,43 @@ describe('XrpSendTokenWizard', () => {
 			expect(onSendBack).toHaveBeenCalled();
 			expect(onSendForm).not.toHaveBeenCalled();
 			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		// Neither refusal is corrected by changing a field: one says wait, the other says try
+		// again. Both fire before any node read and before anything is signed, so nothing left
+		// the wallet — and neither offers an override, because while the first payment is open
+		// there is no sequence a second one could safely take.
+		it('reports an in-flight payment with its own message and steps back', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+				new XrpSendAlreadyInFlightError('XRP send refused: a payment has not resolved yet.')
+			);
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.xrp_send_already_in_flight } })
+			);
+			expect(onBack).toHaveBeenCalled();
+			expect(onSendForm).not.toHaveBeenCalled();
+			expect(onSendBack).not.toHaveBeenCalled();
+		});
+
+		it('reports an unverifiable guard with its own message and steps back', async () => {
+			vi.spyOn(xrpSendServices, 'sendXrp').mockRejectedValue(
+				new XrpSendNotGuardedError('XRP send refused: could not check for an unresolved payment.')
+			);
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.xrp_send_not_guarded } })
+			);
+			expect(onBack).toHaveBeenCalled();
+			expect(onSendForm).not.toHaveBeenCalled();
 		});
 
 		// Nothing to correct, so the generic branch keeps the ordinary one step back.

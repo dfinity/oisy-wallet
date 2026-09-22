@@ -46,7 +46,9 @@
 		XrpDestinationTagRequiredError,
 		XrpDestinationUnfundedError,
 		XrpSelfDestinationError,
+		XrpSendAlreadyInFlightError,
 		XrpSendExpiredError,
+		XrpSendNotGuardedError,
 		XrpTransactionFailedError
 	} from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
@@ -265,7 +267,8 @@
 				destination,
 				amount: amountDrops,
 				fee: $feeStore,
-				destinationTag: $sendXrpDestinationTag
+				destinationTag: $sendXrpDestinationTag,
+				token: $sendToken
 			});
 
 			trackEvent({
@@ -334,6 +337,35 @@
 
 				onSendForm();
 			};
+
+			// The two refusals no field can fix: a payment from this address has not resolved yet, or
+			// the wallet could not establish whether one has. Both fire before any node read and
+			// before anything is signed, so nothing left the wallet — and neither is corrected by
+			// changing the amount or the recipient, which is why they go back rather than to the form.
+			//
+			// No override is offered for the in-flight case, deliberately: while the first payment is
+			// open there is no sequence a second one could safely take.
+			if (err instanceof XrpSendAlreadyInFlightError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_send_already_in_flight },
+					err
+				});
+
+				onBack();
+
+				return;
+			}
+
+			if (err instanceof XrpSendNotGuardedError) {
+				toastsError({
+					msg: { text: $i18n.send.error.xrp_send_not_guarded },
+					err
+				});
+
+				onBack();
+
+				return;
+			}
 
 			// The one pre-sign refusal the form cannot fix: no amount makes a payment to yourself
 			// deliverable, so it goes back to where the recipient is chosen. `onSendBack` already
