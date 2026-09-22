@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Senden",
+			"xrp_retry": "Transaktion erneut senden",
+			"xrp_retry_description": "Beim erneuten Senden wird genau dieselbe Transaktion übermittelt, sie kann also nicht doppelt bezahlen — ist die ursprüngliche doch durchgegangen, weist das Netzwerk die Wiederholung ab. Eine neue Transaktion zu erstellen könnte hingegen doppelt bezahlen, weshalb die Wallet das erst zulässt, wenn diese abgeschlossen ist.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Ziel",
@@ -1074,6 +1076,9 @@
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
 			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
 			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen.",
+			"xrp_send_already_in_flight": "Eine frühere XRP-Zahlung von dieser Adresse ist noch nicht abgeschlossen. Es wurde nichts gesendet — warten Sie, bis sie fertig ist, das dauert etwa eine Minute, und senden Sie dann erneut.",
+			"xrp_send_not_guarded": "Wir konnten nicht prüfen, ob eine frühere XRP-Zahlung noch abgeschlossen wird. Es wurde nichts gesendet — versuchen Sie es in einem Moment erneut.",
+			"xrp_active_transaction_failed": "Das XRP Ledger hat die Zahlung verarbeitet, sie ist aber fehlgeschlagen ($result) – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"xrp_amount_exceeds_sendable": "Der Betrag passt nicht mehr. Ihr Konto muss seine XRP-Reserve zuzüglich der Netzwerkgebühr behalten, und beides kann sich während der Prüfung ändern. Es wurde nichts gesendet – verringern Sie den Betrag oder versuchen Sie es erneut, sobald die Kontodaten aktualisiert sind.",
 			"xrp_destination_unfunded": "Diese Adresse hat noch kein XRP-Konto. Dessen Erstellung erfordert eine erste Zahlung von mindestens $reserve XRP. Es wurde nichts gesendet – erhöhen Sie den Betrag oder senden Sie an eine bereits finanzierte Adresse.",
 			"xrp_destination_tag_required": "Diese Adresse erfordert ein Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut.",

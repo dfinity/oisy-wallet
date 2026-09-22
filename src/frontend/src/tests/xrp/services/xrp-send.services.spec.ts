@@ -1,6 +1,15 @@
+import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { randomWait } from '$lib/utils/time.utils';
+import {
+	mockLiquidiumActiveUserTransaction,
+	mockXrpActiveUserTransaction,
+	mockXrpData
+} from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	XRP_BASE_RESERVE_DROPS,
@@ -21,13 +30,16 @@ import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
 import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
 import * as xrpSignServices from '$xrp/services/xrp-sign.services';
 import { XrpNetworks } from '$xrp/types/network';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
+	XrpSendAlreadyInFlightError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
+	XrpSendNotGuardedError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
@@ -56,7 +68,19 @@ describe('xrp-send.services', () => {
 		destination,
 		amount: 25_000_000n,
 		fee: 12n,
-		destinationTag: 12345
+		destinationTag: 12345,
+		token: XRP_TOKEN
+	};
+
+	// A retry takes no payment parameters — only the identity and the record it has
+	// to resolve, both of which reach it on the `XrpSendIndeterminateError` that
+	// reported the unresolved send.
+	const recordId = 'record-1';
+
+	const retryParams = {
+		identity: mockIdentity,
+		network: XrpNetworks.mainnet,
+		recordId
 	};
 
 	beforeEach(() => {
@@ -93,6 +117,13 @@ describe('xrp-send.services', () => {
 			state: 'validated',
 			transactionResult: 'tesSUCCESS'
 		});
+
+		// The in-flight guard reads the caller's records before any node call, and the
+		// send opens one between signing and submitting. Nothing open by default, so
+		// only the tests that care set a record.
+		vi.spyOn(backendApi, 'getActiveUserTransactions').mockResolvedValue([]);
+		vi.spyOn(activeUserTransactionsServices, 'createActiveUserTransaction').mockResolvedValue();
+		vi.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction').mockResolvedValue();
 	});
 
 	it('builds the payment from the reviewed fee and fetched sequence/ledger, then signs it', async () => {
@@ -830,7 +861,7 @@ describe('xrp-send.services', () => {
 				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(notConfigured);
 
 				const err = await retryXrpSend({
-					network: XrpNetworks.mainnet,
+					...retryParams,
 					pending: { txBlob: signedBlob }
 				}).catch((e: unknown) => e);
 
@@ -845,7 +876,7 @@ describe('xrp-send.services', () => {
 				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
 
 				await expect(
-					retryXrpSend({ network: XrpNetworks.mainnet, pending: { txBlob: signedBlob } })
+					retryXrpSend({ ...retryParams, pending: { txBlob: signedBlob } })
 				).resolves.toBeDefined();
 
 				expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
@@ -909,7 +940,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
 			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
@@ -927,7 +958,7 @@ describe('xrp-send.services', () => {
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.submitXrpTransaction).toHaveBeenCalledExactlyOnceWith({
 				txBlob: pending.txBlob,
@@ -960,7 +991,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -979,7 +1010,7 @@ describe('xrp-send.services', () => {
 					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).rejects.toThrow(
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
 				'carries no LastLedgerSequence'
 			);
 
@@ -1004,7 +1035,7 @@ describe('xrp-send.services', () => {
 				accepted: false
 			});
 
-			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).resolves.toEqual({
+			await expect(retryXrpSend({ ...retryParams, pending })).resolves.toEqual({
 				txHash: blobHash,
 				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
@@ -1835,5 +1866,350 @@ describe('xrp-send.services', () => {
 		await expect(sendXrp({ ...params, progress })).rejects.toThrow('XRP transaction failed');
 
 		expect(progress.mock.calls.map(([step]) => step)).not.toContain(ProgressStepsSendXrp.DONE);
+	});
+
+	// An XRPL `Sequence` is a nonce, so a second payment from the same address
+	// while the first is unresolved is unsafe whichever sequence it picks. These
+	// are the tests for the record that refuses it.
+	describe('the in-flight guard', () => {
+		const openRecord = mockXrpActiveUserTransaction;
+
+		const withSource = (source_address: string) =>
+			({
+				...openRecord,
+				data: { Xrp: { ...mockXrpData, source_address } }
+			}) as ActiveUserTransaction;
+
+		it('refuses a send while a non-terminal record for the same address is open', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([withSource(source)]);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+		});
+
+		// Before any node read and before anything is signed, so nothing left the
+		// wallet and no RPC budget was spent learning what the record already said.
+		it('refuses before reading the account or signing anything', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([withSource(source)]);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// Per address, not per user: a record for a different address says nothing
+		// about this one's sequence.
+		it('does not refuse on a record for a different address', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				withSource('rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe')
+			]);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+
+		it.each([{ Succeeded: null }, { Failed: null }])(
+			'does not refuse on a terminal record (%o)',
+			async (status) => {
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+					{ ...withSource(source), status }
+				]);
+
+				await expect(sendXrp(params)).resolves.toBeDefined();
+			}
+		);
+
+		it('does not refuse on an open record from another flow', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				mockLiquidiumActiveUserTransaction
+			]);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+
+		// Fails closed. Without an answer the invariant cannot be held, and the
+		// cost of guessing "nothing open" is a duplicate payment.
+		it('refuses when the records cannot be read', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockRejectedValue(new Error('unreachable'));
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendNotGuardedError);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('refuses without an identity, before asking anything', async () => {
+			await expect(sendXrp({ ...params, identity: undefined })).rejects.toThrow(
+				XrpSendNotGuardedError
+			);
+
+			expect(backendApi.getActiveUserTransactions).not.toHaveBeenCalled();
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('the in-flight record', () => {
+		// The only correct moment. Later would miss a submit whose response is
+		// lost — precisely what the record exists for — and earlier would be a
+		// claim about a transaction that does not exist yet.
+		it('is created after signing and before submitting', async () => {
+			const order: string[] = [];
+
+			vi.mocked(xrpSignServices.signXrpTransaction).mockImplementation(() => {
+				order.push('sign');
+				return Promise.resolve(signedBlob);
+			});
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockImplementation(
+				() => {
+					order.push('create');
+					return Promise.resolve();
+				}
+			);
+			vi.mocked(xrplRest.submitXrpTransaction).mockImplementation(() => {
+				order.push('submit');
+				return Promise.resolve({ engineResult: 'tesSUCCESS', accepted: true, txHash: 'TXHASH' });
+			});
+
+			await sendXrp(params);
+
+			expect(order).toEqual(['sign', 'create', 'submit']);
+		});
+
+		it('carries the locally derived hash and the signed ledger window', async () => {
+			const txHash = await deriveXrpTransactionHash(signedBlob);
+
+			await sendXrp(params);
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					data: {
+						Xrp: {
+							token: { XrpNativeMainnet: null },
+							source_address: source,
+							destination_address: destination,
+							destination_tag: [12345],
+							amount: 25_000_000n,
+							fee: 12n
+						}
+					},
+					externalRefs: expect.arrayContaining([
+						{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: txHash },
+						{
+							key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+							value: `${1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET}`
+						}
+					])
+				})
+			);
+		});
+
+		// Refused rather than sent unguarded: at the per-user cap, or with the
+		// backend unreachable, there is no record to hold the invariant.
+		it('refuses the send when the record cannot be created, without submitting', async () => {
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+				new Error('TooManyActiveTransactions')
+			);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendNotGuardedError);
+
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('closes the record as Succeeded on a validated tesSUCCESS', async () => {
+			await sendXrp(params);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ status: { Succeeded: null } })
+			);
+		});
+
+		// Applied, failed, fee claimed, sequence consumed — definitive, so the
+		// address is freed.
+		it('closes the record as Failed on a validated tec result', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecUNFUNDED_PAYMENT'
+			});
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpTransactionFailedError);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ status: { Failed: null } })
+			);
+		});
+
+		// The ledger passed `LastLedgerSequence` without including it, so the
+		// sequence was never consumed and a fresh send is safe.
+		it('closes the record as Failed when the transaction expires', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET + 1
+			);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendExpiredError);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ status: { Failed: null } })
+			);
+		});
+
+		// **The case the whole record exists for.** The payment may still apply, so
+		// leaving the record open is what keeps the next send refused until the
+		// poller can say which way it went.
+		it('leaves the record open when the outcome is indeterminate', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+			vi.mocked(randomWait).mockResolvedValue(undefined);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendIndeterminateError);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		// A malformed transaction the node rejected outright: nothing was applied
+		// and nothing can be, so holding the address would block it on a payment
+		// that cannot exist.
+		it('closes the record as Failed when the submit is rejected outright', async () => {
+			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
+				engineResult: 'temMALFORMED',
+				accepted: false,
+				txHash: await deriveXrpTransactionHash(signedBlob)
+			});
+
+			await expect(sendXrp(params)).rejects.toThrow('XRP transaction rejected');
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ status: { Failed: null } })
+			);
+		});
+
+		// The payment has already happened by the time the close runs, so a failed
+		// write must not turn a settled send into an error. The poller resolves the
+		// record from the ledger instead.
+		it('still resolves the send when the record cannot be closed', async () => {
+			vi.mocked(activeUserTransactionsServices.updateActiveUserTransaction).mockRejectedValue(
+				new Error('unreachable')
+			);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+	});
+
+	// The resolver must never compute the next sequence. Expiry leaves it
+	// unconsumed while success and `tec` consume it, so only the node knows —
+	// and `previous + 1` after an expiry signs into a gap.
+	it('takes the next sequence from the node after an expired record, not previous + 1', async () => {
+		vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+			{
+				...mockXrpActiveUserTransaction,
+				status: { Failed: null },
+				error: ['XRP transaction expired'],
+				data: { Xrp: { ...mockXrpData, source_address: source } }
+			} as ActiveUserTransaction
+		]);
+		// The node still reports 7: the expired transaction consumed nothing.
+		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+			balance: 50_000_000n,
+			sequence: 7,
+			ownerCount: 0,
+			flags: 0
+		});
+
+		await sendXrp(params);
+
+		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
+			expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 7 }) })
+		);
+	});
+
+	// A retry resubmits the same bytes on the sequence the first attempt already used, so it
+	// cannot become a second payment — and it drives the SAME record, rather than opening one.
+	describe('a retry and the record', () => {
+		const pending = { txBlob: signedBlob };
+
+		it('opens no new record and runs no gate', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			// Deliberately ungated: the record for this address is open, so a gate would refuse —
+			// and resubmitting these bytes is the one thing that is safe while it is.
+			expect(backendApi.getActiveUserTransactions).not.toHaveBeenCalled();
+		});
+
+		it('re-reads nothing from the node before submitting', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('closes the record it was given as Succeeded', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ id: recordId, status: { Succeeded: null } })
+			);
+		});
+
+		// `tefPAST_SEQ` is the guarantee working: the original landed, so the ledger refused the
+		// duplicate. It arrives as a validated failure, and the record closes on it.
+		it('closes the record as Failed on a validated failure', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tefPAST_SEQ'
+			});
+
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
+				XrpTransactionFailedError
+			);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ id: recordId, status: { Failed: null } })
+			);
+		});
+
+		it('leaves the record open when the retry is indeterminate too', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+			vi.mocked(randomWait).mockResolvedValue(undefined);
+
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
+				XrpSendIndeterminateError
+			);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		// The blob and the record travel together, so a further retry can be offered off the new
+		// error without the caller keeping either itself.
+		it('hands back the same blob and record for a further retry', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+			vi.mocked(randomWait).mockResolvedValue(undefined);
+
+			const err = await retryXrpSend({ ...retryParams, pending }).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+			expect((err as XrpSendIndeterminateError).pending).toEqual(pending);
+			expect((err as XrpSendIndeterminateError).recordId).toBe(recordId);
+		});
+	});
+
+	// The first attempt hands both back, which is what makes the retry reachable at all — the blob
+	// is not persisted anywhere.
+	it('reports an indeterminate send with the blob and the record to retry against', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+		vi.mocked(randomWait).mockResolvedValue(undefined);
+		vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
+		// The id the send generated for its own record, so a retry resolves that one and not a
+		// record it invented.
+		expect((err as XrpSendIndeterminateError).recordId).toBe(
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id
+		);
 	});
 });

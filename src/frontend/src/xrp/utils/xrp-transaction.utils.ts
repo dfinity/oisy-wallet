@@ -362,15 +362,29 @@ export const deriveXrpLedgerWindow = (
 		);
 	}
 
-	return {
-		// At or below the open index the transaction was signed against, whatever signing offset was
-		// in force when it was signed. Clamped at zero because the subtraction must not produce a
-		// negative `min_ledger` for an index below the lookback, which no real ledger reaches but the
-		// codec's own bounds allow.
-		firstLedgerSequence: Math.max(lastLedgerSequence - XRP_LEDGER_SEARCH_LOOKBACK, 0),
-		lastLedgerSequence
-	};
+	return xrpLedgerSearchWindow(lastLedgerSequence);
 };
+
+/**
+ * The same window as {@link deriveXrpLedgerWindow}, from the signed
+ * `LastLedgerSequence` alone.
+ *
+ * Exported because an Active User Transaction row stores that one number and
+ * nothing else — a resolver reading the row must search exactly the ledgers the
+ * blob's own window covers, or its `searched_all` answer describes a different
+ * range than the one the transaction could be in. One definition, so the two
+ * cannot drift apart.
+ */
+export const xrpLedgerSearchWindow = (
+	lastLedgerSequence: number
+): { firstLedgerSequence: number; lastLedgerSequence: number } => ({
+	// At or below the open index the transaction was signed against, whatever signing offset was
+	// in force when it was signed. Clamped at zero because the subtraction must not produce a
+	// negative `min_ledger` for an index below the lookback, which no real ledger reaches but the
+	// codec's own bounds allow.
+	firstLedgerSequence: Math.max(lastLedgerSequence - XRP_LEDGER_SEARCH_LOOKBACK, 0),
+	lastLedgerSequence
+});
 
 // XRPL's transaction-ID hash prefix, 'TXN\0'.
 const XRP_TRANSACTION_ID_PREFIX = Uint8Array.from([0x54, 0x58, 0x4e, 0x00]);

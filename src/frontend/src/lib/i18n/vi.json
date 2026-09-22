@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"xrp_retry": "Thử lại giao dịch này",
+			"xrp_retry_description": "Thử lại sẽ gửi đúng giao dịch đó, nên không thể trả tiền hai lần — nếu giao dịch ban đầu đã thành công, mạng sẽ từ chối lần thử lại. Ngược lại, tạo một giao dịch mới có thể trả hai lần, nên ví sẽ không cho phép đến khi giao dịch này hoàn tất.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Tới",
@@ -1074,6 +1076,9 @@
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
 			"xrp_send_expired": "Giao dịch chưa được gửi: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và bạn có thể tạo giao dịch mới một cách an toàn.",
+			"xrp_send_already_in_flight": "Một giao dịch XRP trước đó từ địa chỉ này chưa hoàn tất. Chưa có gì được gửi — hãy đợi giao dịch đó xong, mất khoảng một phút, rồi gửi lại.",
+			"xrp_send_not_guarded": "Chúng tôi không thể kiểm tra xem một giao dịch XRP trước đó có còn đang hoàn tất hay không. Chưa có gì được gửi — hãy thử lại sau một lát.",
+			"xrp_active_transaction_failed": "XRP Ledger đã xử lý giao dịch nhưng thất bại ($result), nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"xrp_amount_exceeds_sendable": "Số tiền này không còn vừa nữa. Tài khoản của bạn phải giữ lại khoản dự trữ XRP cùng phí mạng, và cả hai đều có thể thay đổi trong lúc bạn xem lại. Chưa có gì được gửi — hãy giảm số tiền, hoặc thử lại khi thông tin tài khoản được làm mới.",
 			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP. Chưa có gì được gửi — hãy tăng số tiền, hoặc gửi tới một địa chỉ đã được kích hoạt.",
 			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",

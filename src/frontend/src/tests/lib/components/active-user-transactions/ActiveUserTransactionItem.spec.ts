@@ -7,7 +7,8 @@ import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
-	mockVeloraActiveUserTransaction
+	mockVeloraActiveUserTransaction,
+	mockXrpActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
@@ -170,5 +171,79 @@ describe('ActiveUserTransactionItem', () => {
 		);
 
 		expect(onDismiss).toHaveBeenCalledOnce();
+	});
+
+	// Not a swap and not a provider flow: one token, one network, no "A → B". The
+	// shared swap layout would render this row as a bare arrow with an empty
+	// network line, because an XRP record sets none of the swap display refs.
+	describe('XRP rows', () => {
+		it('renders the amount, the symbol and the network, with no provider and no arrow', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: mockXrpActiveUserTransaction,
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
+			expect(container).not.toHaveTextContent('→');
+		});
+
+		// A pending row is the address being held. It offers no dismiss, because
+		// deleting it would release the guard on a payment that may still apply.
+		it('offers no dismiss while the record is still open', () => {
+			render(ActiveUserTransactionItem, {
+				props: {
+					tx: mockXrpActiveUserTransaction,
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(
+				screen.queryByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			).not.toBeInTheDocument();
+		});
+
+		it('offers a dismiss once the record has resolved', async () => {
+			const onDismiss = vi.fn();
+
+			render(ActiveUserTransactionItem, {
+				props: {
+					tx: { ...mockXrpActiveUserTransaction, status: { Succeeded: null } },
+					isUnseen: false,
+					dismissing: false,
+					onDismiss
+				}
+			});
+
+			await fireEvent.click(
+				screen.getByLabelText(en.active_user_transactions.text.dismiss_aria_label)
+			);
+
+			expect(onDismiss).toHaveBeenCalledOnce();
+		});
+
+		it('renders a failed row with the alert icon rather than the send icon', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockXrpActiveUserTransaction,
+						status: { Failed: null },
+						error: ['XRP transaction expired']
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
+			expect(container.querySelector('.text-error-primary')).toBeInTheDocument();
+		});
 	});
 });

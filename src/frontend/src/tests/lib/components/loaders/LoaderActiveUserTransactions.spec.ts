@@ -27,10 +27,12 @@ import {
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
-	mockVeloraActiveUserTransaction
+	mockVeloraActiveUserTransaction,
+	mockXrpActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as xrpPoller from '$xrp/services/xrp-active-tx.services';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get, readable } from 'svelte/store';
@@ -97,6 +99,13 @@ const succeededChainFusion = (id: string) =>
 		id,
 		status: { Succeeded: null } as const
 	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const pendingXrp = (id: string) =>
+	({
+		...mockXrpActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockXrpActiveUserTransaction;
 
 const pendingOisyTrade = (id: string) =>
 	({
@@ -344,6 +353,30 @@ describe('LoaderActiveUserTransactions', () => {
 
 			expect(oneSecSpy).not.toHaveBeenCalled();
 			expect(oisyTradeSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		// XRP is the seventh flow on the same poller host, and the one whose window
+		// is shortest: an XRP record self-clears in about a minute, well inside the
+		// 5-second tick.
+		it('polls XRP rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const xrpSpy = vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue();
+			const tx = pendingXrp('xrp-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transactions: [tx]
 			});

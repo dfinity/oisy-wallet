@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Envoyer",
+			"xrp_retry": "Réessayer cette transaction",
+			"xrp_retry_description": "Réessayer renvoie exactement la même transaction, elle ne peut donc pas payer deux fois — si l’originale a finalement abouti, le réseau rejette la nouvelle tentative. Créer une transaction différente pourrait, elle, payer deux fois : c’est pourquoi le portefeuille ne l’autorise pas avant que celle-ci soit réglée.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destination",
@@ -1074,6 +1076,9 @@
 			"solana_insufficient_funds_for_rent": "Votre solde SOL est insuffisant pour couvrir le loyer requis pour la création du compte.",
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge.",
 			"xrp_send_expired": "La transaction n'a pas été envoyée : le réseau ne l'a pas incluse à temps. Rien n'a quitté votre portefeuille et vous pouvez en créer une nouvelle en toute sécurité.",
+			"xrp_send_already_in_flight": "Un paiement XRP antérieur depuis cette adresse n’est pas encore réglé. Rien n’a été envoyé — attendez qu’il se termine, ce qui prend environ une minute, puis envoyez à nouveau.",
+			"xrp_send_not_guarded": "Nous n’avons pas pu vérifier si un paiement XRP antérieur est encore en cours de règlement. Rien n’a été envoyé — réessayez dans un instant.",
+			"xrp_active_transaction_failed": "Le XRP Ledger a traité le paiement mais celui-ci a échoué ($result) : vos fonds n’ont pas été envoyés. Les frais de réseau ont tout de même été prélevés.",
 			"xrp_amount_exceeds_sendable": "Le montant ne passe plus. Votre compte doit conserver sa réserve XRP ainsi que les frais de réseau, et les deux peuvent changer pendant que vous vérifiez. Rien n’a été envoyé : réduisez le montant ou réessayez une fois les informations de votre compte actualisées.",
 			"xrp_destination_unfunded": "Cette adresse n’a pas encore de compte XRP. Sa création exige un premier paiement d’au moins $reserve XRP. Rien n’a été envoyé : augmentez le montant ou envoyez vers une adresse déjà approvisionnée.",
 			"xrp_destination_tag_required": "Cette adresse exige un tag de destination. Rien n’a été envoyé : ajoutez le tag fourni par le service que vous payez, puis renvoyez.",
