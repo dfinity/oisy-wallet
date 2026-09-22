@@ -1,6 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockXrpActiveUserTransaction,
@@ -114,7 +115,16 @@ describe('xrp-active-tx.services', () => {
 
 			await poll();
 
-			expectStatus({ status: { Failed: null }, error: get(i18n).send.error.xrp_send_expired });
+			// The message names what was being sent, filled from the row's own display snapshot —
+			// by the time the ledger decides there is nothing live left to ask.
+			expectStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).send.error.xrp_send_expired, {
+					$amount: '25',
+					$symbol: 'XRP',
+					$network: 'XRP Ledger'
+				})
+			});
 		});
 
 		it('leaves absence within the window Pending', async () => {
@@ -136,6 +146,67 @@ describe('xrp-active-tx.services', () => {
 			await poll();
 
 			expectNoUpdate();
+		});
+	});
+
+	// The failure text is the only thing the user sees, and it arrives possibly long after the
+	// modal is gone — so it has to say what was being sent, from the row rather than from anything
+	// live.
+	describe('the failure message names the payment', () => {
+		const errorOf = () => {
+			const [{ update }] = applySpy.mock.calls[0] as [{ update: { error: string } }];
+
+			return update.error;
+		};
+
+		it('names the amount, symbol and network on expiry', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				mockXrpLastLedgerSequence + 1
+			);
+
+			await poll();
+
+			expect(errorOf()).toContain('25 XRP');
+			expect(errorOf()).toContain('XRP Ledger');
+		});
+
+		it('names the payment and the result code on a validated failure', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecUNFUNDED_PAYMENT'
+			});
+
+			await poll();
+
+			expect(errorOf()).toContain('25 XRP');
+			expect(errorOf()).toContain('XRP Ledger');
+			expect(errorOf()).toContain('tecUNFUNDED_PAYMENT');
+		});
+
+		// A row whose display snapshot is missing must still produce a readable sentence rather
+		// than "undefined".
+		it('leaves no placeholder behind when the snapshot is missing', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecUNFUNDED_PAYMENT'
+			});
+
+			await poll([
+				{
+					...tx,
+					external_refs: tx.external_refs.filter(({ key }) =>
+						[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+							key as never
+						)
+					)
+				}
+			]);
+
+			expect(errorOf()).not.toContain('$amount');
+			expect(errorOf()).not.toContain('$symbol');
+			expect(errorOf()).not.toContain('$network');
+			expect(errorOf()).not.toContain('undefined');
 		});
 	});
 

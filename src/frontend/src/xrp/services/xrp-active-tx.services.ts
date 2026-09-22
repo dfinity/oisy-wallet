@@ -8,7 +8,9 @@ import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadXrpTransactionOutcome, loadXrpValidatedLedgerIndex } from '$xrp/rest/xrpl.rest';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
+	toXrpExternalRefsMap,
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
@@ -73,6 +75,7 @@ const pollXrpActiveUserTransaction = async ({
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+							...xrpFailureSubject(tx),
 							$result: outcome.transactionResult
 						})
 			});
@@ -119,6 +122,7 @@ const pollXrpActiveUserTransaction = async ({
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+							...xrpFailureSubject(tx),
 							$result: recheck.transactionResult
 						})
 			});
@@ -140,13 +144,30 @@ const pollXrpActiveUserTransaction = async ({
 			identity,
 			tx,
 			candidate: { Failed: null },
-			error: get(i18n).send.error.xrp_send_expired
+			error: replacePlaceholders(get(i18n).send.error.xrp_send_expired, xrpFailureSubject(tx))
 		});
 	} catch (err: unknown) {
 		// Every failure lands here as "leave it Pending": a lookup the node could
 		// not answer is not evidence of anything.
 		consoleError(err);
 	}
+};
+
+/**
+ * The subject of every failure message: what was being sent, and where.
+ *
+ * Taken from the row's own display snapshot rather than from anything live, because by the time
+ * the ledger decides there may be no modal, no fee store and no selected token left to ask — and a
+ * row that resolved while the tab was shut still has to say what it was.
+ */
+const xrpFailureSubject = (tx: ActiveUserTransaction): Record<string, string> => {
+	const refs = toXrpExternalRefsMap(tx.external_refs);
+
+	return {
+		$amount: refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ?? '',
+		$symbol: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? '',
+		$network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? ''
+	};
 };
 
 const applyXrpStatus = async ({
