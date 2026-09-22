@@ -82,8 +82,7 @@ describe('icp-swap-recovery.services', () => {
 		});
 
 		it('throws IcpSwapPoolNotFoundError when the factory returns nothing', async () => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			vi.mocked(getPoolCanister).mockResolvedValue(undefined as any);
+			vi.mocked(getPoolCanister).mockResolvedValue(undefined as never);
 
 			await expect(loadIcpSwapRecoverableBalances(loadParams)).rejects.toThrow(
 				IcpSwapPoolNotFoundError

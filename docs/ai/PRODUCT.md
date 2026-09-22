@@ -278,7 +278,7 @@ Each listed balance has its **own** Withdraw button and withdraws in full. Per-r
 
 Balances at or below the token's ledger fee are **not shown at all** — they cannot be moved, and offering them would only invite a withdrawal that is bound to fail. When a pair resolves to a pool that holds nothing, the card says so explicitly rather than showing an empty space; when the pair has no pool at all, it says that instead.
 
-Only **enabled** ICRC tokens can be picked, and a token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
+ICP and the user's **enabled** ICRC tokens can be picked — ICP always, since it is one leg of most ICPSwap pools but is not an ICRC token and so is absent from the ICRC lists. A token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
 
 The page deliberately does **not**: scan pools where only one leg is active (roughly half of all pools have ICP as a leg, so that would be hundreds of balance queries — manual selection covers them); scan other fee tiers (every live pool sits on the one OISY trades on); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
 

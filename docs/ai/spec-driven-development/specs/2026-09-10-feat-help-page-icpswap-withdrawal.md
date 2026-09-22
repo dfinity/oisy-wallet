@@ -102,7 +102,7 @@ The cost is bounded by the pools that exist between the user's tokens, not by to
 
 **No caching to reuse.** `icpSwapSupportedTokens` already calls `getAllPools` for the swap token list, but it reduces the result to a `Set` of ledger ids and discards the pool canister ids and pairings. The recovery service therefore makes its own `getAllPools` call rather than reshaping shared swap code.
 
-The scan runs only when the button is pressed, never on page load: most Support visits are for the help link, and 292 KB plus a fan-out is not something to spend unasked.
+The scan runs only when the button is pressed, never on page load: most Help visits are for the support link, and 292 KB plus a fan-out is not something to spend unasked.
 
 ### Results from more than one pool
 
@@ -112,7 +112,7 @@ The scan can return balances from several pools, so a result carries the pool it
 
 Below the scan, two token selectors, "Token A" and "Token B", for naming a pair the scan cannot reach.
 
-- **Candidates**: enabled ICRC tokens only — `enabledIcrcTokens` (`src/frontend/src/icp/derived/icrc.derived.ts`). A token that is not enabled cannot be selected; the user must enable it first. This keeps decimals, symbol, logo and ledger fee available from OISY's own metadata, so no ledger lookups are needed.
+- **Candidates**: ICP plus the enabled ICRC tokens — `ICP_TOKEN` prepended to `enabledIcrcTokens` (`src/frontend/src/icp/derived/icrc.derived.ts`). ICP is not an ICRC token and so is absent from those lists, yet it is one leg of most ICPSwap pools, so the swap UI prepends it the same way (`allSwapUniverseTokens`). An ICRC token that is not enabled cannot be selected; the user must enable it first. This keeps decimals, symbol, logo and ledger fee available from OISY's own metadata, so no ledger lookups are needed.
 - Selecting the same token twice is rejected.
 - Reuse the swap flow's token-picking UI where it fits (`SwapTokensList.svelte` / `ModalTokensList.svelte`) rather than inventing a new picker.
 
