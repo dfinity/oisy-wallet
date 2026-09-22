@@ -6,7 +6,7 @@ This document is the living description of OISY's product behaviors. It is read 
 
 ## What is OISY
 
-OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, and BTC without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold ECDSA across ICP replica nodes.
+OISY is a browser-based, network-custodial, multi-chain wallet powered by the Internet Computer's chain fusion technology. It lets users receive, hold, and send native ICP, ICRC-1, ETH, ERC-20, BTC, SOL, and XRP without browser extensions or mobile apps. Keys are never held by a single entity — they are generated and managed using threshold cryptography across ICP replica nodes.
 
 Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by default. The entire application — frontend and backend — is served from the chain.
 
@@ -166,6 +166,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Send
+
+### First-time destination addresses
+
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+
+Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
+
+The send flow says so twice. On the address step, entering such an address raises a warning that it appears to be the first send to it and asks the user to verify the address; the hedge is deliberate, since the claim rests on the history that happens to be loaded. It does not block moving on. On the review step the same box returns, its copy reworded in the first person as the statement the user is agreeing to, with a **confirmation checkbox, and the send button stays disabled until it is ticked** — the same layout as the confirmation for a swap that would lose significant value, kept at warning level rather than error: a first send to a new recipient is routine, and red spent on the routine case stops being read. The confirmation belongs to that address and that visit: going back, changing the destination and returning asks again. It is never remembered — there is no "don't warn me about this address", and the only thing that retires the warning is a real send.
+
+Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
+
+Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+---
+
 ## Activity
 
 ### IC transactions and Index-canister outages
@@ -180,9 +196,19 @@ The same warning appears on the token's own page, above its transaction list —
 
 This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
+### Loading older history
+
+The Activity list and a token's own page both load older transactions as the user scrolls to the end of the list. A page that fails to load (the explorer or RPC errors, the Index canister does not answer) is not taken as the start of the history: what is on screen stays, and the list asks again the next time its end is scrolled into view. It does not retry on its own while the end sits on screen. Only a chain that actually has nothing older stops the list for that token.
+
+On Ethereum and the EVM networks the retries are spaced out per wallet address and token, so an explorer that keeps failing is not asked on every scroll: after a failed page the token waits 5 seconds before asking again, doubling with each failure in a row up to a minute, and the first page served resets the wait. It never gives up for the session. A scroll that arrives during the wait loads nothing for that token, and the next one after it asks again.
+
+For IC tokens a failed page does not count towards the Index-canister outage warning above. That warning is still driven only by the regular 30-second check, so scrolling during an outage neither brings it on sooner nor clears it.
+
 ### Solana history
 
 A Solana transaction is only ever shown as OISY derived it from the chain: what it did to each of the user's balances, a one-line summary, and the instructions it ran. OISY also saves finalized Solana transactions to its backend, per token, but does **not** read them back to show history. The saved copy keeps a single amount and no summary, so a swap saved under the token it bought would read as the amount of the token it sold, and the backend never replaces a transaction it already holds, so a copy saved wrong would stay wrong. A new device or a cleared browser therefore loads its Solana history from the network. Transactions an earlier version cached in the browser without a summary are dropped from that cache when it loads, and fetched again from the network.
+
+The details of the newest Solana transactions are kept in the browser once read from the network, so reloading the app, or enabling a token whose history the wallet already loaded, does not fetch them again. Only transactions the network has finalized are kept, the newest 200 per network, and signing out clears them along with the rest of the session.
 
 OISY keeps the balances and the newest history of each Solana network up to date with one background loader for the whole network, not one per token. On every refresh it reads all the balances of the network in one request, asks the wallet and the token account of each enabled token for their newest transactions, and fetches only the ones it has not seen yet, each of them once however many of the user's tokens it touched. A transaction then appears in the history of every token whose account returned it, so both sides of a swap arrive together. When the user enables or disables a Solana token, or the network's address changes, the loader of that network starts over.
 
@@ -309,6 +335,28 @@ The share funnel — dialog open, link created, and the recipient's open / revea
 
 ---
 
+## Tips
+
+A signed-in user can hand tokens to someone as a **link**. The recipient does not need an OISY account, a wallet, or any prior contact with the sender — opening the link and signing in with any Internet Identity is the whole flow. Reached from an **Issue Tip** item in the user menu.
+
+**Currently limited to local and staging builds.** The create surface is behind a rollout flag; beta and production do not show it. The claim route is deliberately **not** behind that flag, so a link already in someone's hands keeps working even while new tips cannot be made — closing the surface must never strand a reservation.
+
+- **No custody, ever.** A tip is an **ICRC-2 allowance**, not a transfer. The tokens stay in the sender's own account, authorised for this one tip under a spender subaccount derived from its id, and the canister holds nothing. If nobody claims, the authorisation simply lapses and the money was never anywhere else. This is also why only tokens whose ledger has an allowance primitive can be tipped — ICP and the ICRC assets — and never a native BTC, ETH or SOL balance.
+- **The sender pays two fees, the claimer none.** The ledger charges its transfer fee to the _allowance_ and credits the claimer the full amount, so a reservation has to cover the amount plus that fee — and the reservation itself costs a fee to create. Both are quoted in the sender's confirmation before anything is authorised.
+- **The claim code never travels as a URL.** It lives in the link's **fragment**, which browsers do not put on the wire, so it stays out of request paths, referrer headers, web-server logs and anything a crawler fetching the page can see. Two things reach the canister when the tip is created: the code's **SHA-256**, which is what every later check is made against, and an **end-to-end encrypted copy** of the code itself, which only the sender can decrypt and which exists so they can recover their own link later. From then on the plaintext code is sent by whoever holds the link — on the authenticated **review query** as well as the claim update, since comparing it against the stored hash is the only way to check it. So the fragment buys secrecy in transit, in logs and from crawlers; it does not keep the code from the canister once a holder opens the link.
+- **The deadline is the sender's choice** — 24 hours to 7 days. A reservation that would lapse before the tip does is refused rather than shipping a deadline that cannot be honoured.
+- **What an anonymous reader sees** is the amount, the token and the deadline, and nothing else: never the sender, never the claimer, never the message. The sender's message is revealed only to whoever holds the full link, after they have claimed.
+- **The claimer is disclosed to the sender**, and this is stated on the claim screen **before** sign-in — the last moment the recipient can decide whether that is a price they want to pay, and the first moment they can read it without having identified themselves.
+- **One link, one payout.** A tip pays out at most once, so retrying a claim whose response was lost is safe: it either collects or reports the tip already claimed. Unknown, expired, cancelled, already-claimed and wrong-code all answer **identically**, so links cannot be probed to learn which ones exist.
+- **Limits.** A sender may hold a capped number of live tips at once, and creating, claiming and cancelling are each rate-limited per caller. A tip below the ledger's fee cannot be created.
+- **A first-time claimer gets an introduction.** Someone whose OISY account was created by claiming a tip is shown a short welcome afterwards, once — not someone who has used OISY for months and happens to be claiming their first tip.
+
+The link is shown to the sender once, on the share screen, which is the moment to copy it. The wallet keeps an encrypted copy of the claim code so the sender can recover the link later; the surface for that arrives with tips History.
+
+The sender and claimer funnels are tracked via the `tip` Plausible event.
+
+---
+
 ## WalletConnect
 
 OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dApp proposes a session, OISY advertises one namespace per chain family for which the signed-in user has a loaded address, so each connection can span Ethereum, Solana, and Bitcoin at once. Multiple dApp connections can be open simultaneously (see [Multiple simultaneous connections](#multiple-simultaneous-connections)).
@@ -323,25 +371,45 @@ Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OIS
 
 That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
 
+The instruction list reads an account the message opens for the user as the token account it is about to become, with the rent it costs, taking the mint from the initialisation that follows it. An account a program opens inside itself is not listed again: that creation is already described by the program's own instruction. Nor is an instruction the wallet read and chose not to state — initialising an account it just opened, syncing a wrapped balance — listed as one it could not read: those are absent from the list because they say nothing, not because nothing understood them.
+
 Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
+
+The balance-changes section is **always present**, whether or not there is an answer to put in it. An absent section is indistinguishable from a transaction that moves nothing, which is the most dangerous thing the review could imply, so when no simulation was obtained the section says so instead: it is headed **Balance changes** rather than _Simulated balance changes_, and states that OISY cannot determine which assets the transaction moves or how much. A run that succeeded and found nothing of the user's changing is a third case and reads as one: headed _Simulated balance changes_ like any other simulated result, carrying the same caveat that the run predicts rather than decides, and saying that the transaction changes nothing in their accounts — an answer rather than the absence of one. Until the review has finished decoding, the section says nothing at all — nothing has been asked yet, and claiming otherwise would put that error on every request for as long as the decode takes.
 
 The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
 
-Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
+An instruction OISY cannot decode is a warning rather than a refusal, because refusing every undecodable call would block most real dApp interactions — a swap, a mint and a staking flow all carry them. What makes that a warning and not a blindfold is the simulated run, which reports what the message would do to the user's own accounts whether or not any decoder understood it. So when a message carries an instruction OISY could not read **and** no simulated balance change describes it, the request is **refused**: nothing then accounts for the part of the transaction the review could not read, and approving it would be approving an effect nobody stated. What counts as describing it is per-instruction, not per-transaction. A simulated run lists what each instruction did, including the calls a program made inside itself, and marks an instruction unaccounted for when nothing anywhere carried its effects — so a routed swap's unreadable router instruction is accounted for by the transfers its own invocations made, while a stake delegation is not accounted for by anything. A run that leaves an instruction unaccounted for has not described it, however much else it reports: the user's lamports move by the fee on every transaction, so the balance changes alone say almost nothing. The accounting is per instruction rather than per effect, so an instruction is treated as described once any one of its calls is: an unreadable instruction that both moves tokens and does something OISY does not model still signs, with the part it does not model unstated. Accounting for every inner effect by name is a follow-up; until then this refusal covers a run that left an instruction wholly unaccounted for, and the absence of a run. This does not make the simulation required — a message OISY read in full still signs when a provider times out, is unsupported or is too slow.
 
-### Sources and destinations of a Solana transaction
+Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, and says in the balance-changes section that it could not determine them. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
 
-The same review answers "where is this going?" with two lists rather than one address. **Sources** holds the accounts the transaction spends from, and **Destinations** the accounts it pays into. The two rules are asymmetric on purpose: Sources holds the sources of transfers **the user's account is the source of**, while Destinations holds the destinations of transfers the user's account is **either the source or the destination** of. So a counterparty paying into a pool is never listed as a source, and the user appears as a source only when value genuinely leaves one of their accounts. A plain send yields exactly one entry in each list; a swap yields several, because every leg the user is on one side of contributes its destination.
+### Account creations and handovers in a Solana transaction
 
-That asymmetry is what makes a swap describable at all. The leg that pays the user out puts one of the **user's own** accounts among the destinations, which is how the review shows what the user receives and not only what they spend. Such an entry is **marked as the user's own account**, so it does not read as a counterparty. Sources, by contrast, is hidden when it holds nothing but the wallet the review already names, since repeating it says nothing.
+The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there.
 
-Only transfers count. Creating an associated token account, changing an authority, setting a compute budget, or approving a spender contributes to neither list (an approval keeps its own spender row). Accounts are listed by the **wallet that owns them** wherever OISY knows it, because SPL transfers name token accounts and nobody recognises their own associated token account.
+An **account creation** is read by what will own the new account. One opened for a program — the wrapped SOL account a routed swap opens before initialising it, or an associated token account's rent — is governed by that program, and its lamports are the cost of the operation the creation belongs to, so it reads as it always has. One owned by the **System program** is different: no application program decides what may leave it, so it is an address with a balance and a key that can spend it, and the review has no field for that — its single destination belongs to the transfer it displays. Those are refused, in all three forms the System program offers (plain, seed-derived, and prefunding). A creation for a program is refused too when it funds the account **beyond the rent its stated size costs**: rent is what the account existing costs, but anything above it is a balance the owning program decides the fate of, and closing an SPL token account hands its whole balance to a destination the close names — which one message can open, initialise and close. Funded with exactly its rent, a creation reads as the cost of the operation it belongs to, which is what opening one legitimately costs. The plain and seed-derived forms answer that question the same way. The prefunding form is refused whatever it opens the account for: it exists to open an account that already holds lamports, so what it states is what it adds rather than what the account ends up with, and the review has no way to learn the difference. The seed-derived form is included because a derived address has no key of its own, yet lamports can still be moved out of it against a signature from the base it was derived from.
 
-The lists are built from the same simulation as the preview above, which is the only way to see a routed swap: such a swap performs every one of its transfers inside cross-program invocations, which do not exist in the unsigned message at all. When there is no simulation to build them from, OISY falls back to the instructions the message states itself **and says that the lists are partial**. That warning is not optional: without it, a routed swap would show two empty lists for a transaction that moves several amounts, and an empty list reads as an answer rather than as a gap.
+An **account assignment** hands an account to a different program. A plain `assign` names the account as its only account meta and requires that account to sign, so a message can name the connected wallet itself. `assignWithSeed` instead requires the derivation base to sign. In either form, the authorized signer can hand the account to the named program, after which that program, not the System program, governs it. Nothing about that fits an amount, a source or a destination, which is the same reason a token account's authority change is refused, so an assignment is refused too.
 
-Showing several addresses does not make a self-contradicting transaction showable. A transaction whose instructions **disagree** about source, destination, payer, token or action type is still refused outright, exactly as before. Several addresses that agree about what happened is a swap; instructions that disagree about what happened is something OISY cannot state faithfully at all.
+Every other System-program instruction is read deliberately too. Withdrawing from a nonce account and the seed-derived transfer both state an amount, a source and a destination, so they read as the transfers they are. Initialising or re-authorising a nonce account names who may withdraw its balance, and sizing an account states a length and nothing else, so all three are refused on the same test as an assignment. Advancing and upgrading a nonce account are ignored: they use a nonce rather than deciding anything about it. Advancing requires the nonce's authority to sign, but designates no new one and moves no lamports, and a durable-nonce transaction carries it as its first instruction — refusing it would refuse every such request.
 
-The lists currently appear on the WalletConnect sign review. Showing them on an executed transaction in the activity list is a follow-up.
+Because the set is closed and published, an instruction OISY has never classified is a gap in its own table rather than something unknowable — so an unclassified System instruction is refused rather than warned about. An instruction added to the program in future arrives as a decode that cannot be read at all, and is refused on the same terms rather than failing the review outright. That is the opposite of a call into a program OISY does not know, where refusing everything undecodable would block most real dApp interactions and the warning is the honest answer.
+
+The deliberate cost is that a legitimate System-owned creation is refused as well — a durable nonce account is System-owned and carries data. Recognising that specific pattern is a follow-up; until then the review errs toward refusing.
+
+### Where a Solana transaction sends its value
+
+The review names **no recipient of its own**. It once answered "where does this go?" twice — with a Destinations list and with a single destination field the list suppressed — and two competing answers to one question are worse than one, so the question now belongs entirely to the simulated balance changes above. Those describe every account of the user's that moves, rather than picking counterparties out of the instructions, which a routed swap makes impossible anyway: such a swap performs every transfer inside a cross-program invocation that the unsigned message does not contain.
+
+An approval is the exception. Its delegate is not a recipient, so it keeps its own spender row.
+
+What the review does list is **Sources**: the accounts the transaction spends from, holding the sources of transfers the user's account is the source of, so the user appears only when value genuinely leaves one of their accounts. The list is **hidden when it holds nothing but the wallet the review already names**, since repeating that says nothing, and accounts are listed by the **wallet that owns them** wherever OISY knows it, because SPL transfers name token accounts and nobody recognises their own associated token account. Only transfers count: creating an associated token account, changing an authority or setting a compute budget contributes nothing.
+
+The list is built from the same simulation as the preview. When there is no simulation to build it from, OISY falls back to the instructions the message states itself **and says the list is partial**. That warning is not optional: an empty list reads as an answer rather than as a gap.
+
+Listing several sources does not make a self-contradicting transaction showable. A transaction whose instructions **disagree** about source, destination, payer, token or action type is still refused outright. The refusal is **stated on the review itself**, as the only notice — every other one is suppressed, since they all qualify a review that is going to be acted on and the partial-lists warning would tell the user which lists to read on a request that is refused — and approval is held rather than left live: the reason belongs beside the transaction it is about, not in a message that arrives once the review has closed. Rejecting is the way out, as it already is for a review that could not be computed at all. Several addresses that agree about what happened is a swap; instructions that disagree about what happened is something OISY cannot state faithfully at all.
+
+The list currently appears on the WalletConnect sign review. Showing it on an executed transaction in the activity list is a follow-up.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 
@@ -380,6 +448,24 @@ An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**,
 While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
+
+---
+
+## XRP Ledger
+
+OISY supports native XRP: balance, receive, send, and transaction history. The address is an XRPL classic address derived from the same threshold-signing setup as the other chains (Ed25519), so no key ever leaves the network.
+
+### Destination tags
+
+An XRP payment can carry a **destination tag** — a numeric routing memo that exchanges and custodians use to credit the right customer account. Sending to such a recipient **without** the tag, or with the wrong one, is a well-known and typically **unrecoverable** way to lose funds, because the funds arrive at the right address but cannot be attributed.
+
+The send flow therefore exposes the destination tag as an explicit, optional field rather than hiding it, and a tag of `0` is preserved as a real value rather than treated as "absent". Where a received payment carried a tag, the transaction detail shows it.
+
+### Account reserve
+
+The XRP Ledger requires an account to keep a minimum balance on-ledger for the account to continue to exist. It has two parts: a **base reserve** every account owes, and an **owner reserve** owed once more for every ledger object the account owns — a trust line, an offer, an escrow. An account holding any of those must therefore retain more than the base reserve alone, and both amounts are set by the validators rather than fixed by the protocol.
+
+The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
 ---
 

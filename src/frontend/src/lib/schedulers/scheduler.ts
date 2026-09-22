@@ -147,12 +147,27 @@ export class SchedulerTimer {
 
 		this.setStatus('in_progress');
 
+		// `stop` does not cancel a job that is already awaiting, so a stop/start pair can leave the
+		// previous job running alongside the new one. The stop counter identifies the generation this
+		// job belongs to: once it has moved on, this job no longer owns the shared status and must
+		// not report on it — otherwise its completion flips the status to `idle` under the running
+		// job, whose `postMsg` is then discarded, or its failure stops a timer it no longer owns.
+		const generation = this.stops;
+
 		try {
 			await job({ ...rest });
+
+			if (generation !== this.stops) {
+				return;
+			}
 
 			this.setStatus('idle');
 		} catch (err: unknown) {
 			consoleError(err);
+
+			if (generation !== this.stops) {
+				return;
+			}
 
 			// Once the status becomes "error", the job will no longer be called and the status will remain "error"
 			this.setStatus('error');

@@ -3,7 +3,6 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenStandard } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
@@ -15,7 +14,6 @@
 		tokenStandard: TokenStandard;
 		invalidDestination: boolean;
 		knownDestinations?: KnownDestinations;
-		networkContacts?: NetworkContacts;
 		onQRCodeScan?: () => void;
 	}
 
@@ -25,7 +23,6 @@
 		tokenStandard,
 		invalidDestination = $bindable(false),
 		knownDestinations,
-		networkContacts,
 		onQRCodeScan
 	}: Props = $props();
 
@@ -60,7 +57,6 @@
 <SendInputDestination
 	{inputPlaceholder}
 	{knownDestinations}
-	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
 	onQRButtonClick={onQRCodeScan}
 	bind:destination

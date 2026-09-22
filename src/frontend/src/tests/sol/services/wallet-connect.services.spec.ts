@@ -519,7 +519,8 @@ describe('wallet-connect.services', () => {
 			progress: vi.fn(),
 			identity: mockIdentity,
 			request: mockRequest,
-			listener: mockListener
+			listener: mockListener,
+			simulated: true
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -538,7 +539,8 @@ describe('wallet-connect.services', () => {
 				progress: vi.fn(),
 				identity: mockIdentity,
 				request: mockRequest,
-				listener: mockListener
+				listener: mockListener,
+				simulated: true
 			};
 
 			const expected = {
@@ -672,7 +674,8 @@ describe('wallet-connect.services', () => {
 				progress: vi.fn(),
 				identity: mockIdentity,
 				request: mockRequest,
-				listener: mockListener
+				listener: mockListener,
+				simulated: true
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -963,6 +966,60 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
+		describe('with an unreviewed transaction', () => {
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					unreviewed: true
+				});
+			});
+
+			it('should refuse to sign when no simulation described it', async () => {
+				const result = await sign({ ...mockParams, simulated: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unreviewed_without_simulation }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('should sign when a simulation described it', async () => {
+				// The warning exists because the simulated run reports the effect no decoder read. With
+				// one in hand the review is incomplete, not silent, and the user decides.
+				const result = await sign({ ...mockParams, simulated: true });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('with a transaction OISY read in full', () => {
+			it('should sign even when no simulation was obtained', async () => {
+				// The simulation stays best effort for a message the wallet understands: a provider that
+				// times out must not refuse a transaction the review already describes.
+				const result = await sign({ ...mockParams, simulated: false });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('with an ambiguous transaction', () => {
 			beforeEach(() => {
 				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
@@ -1060,7 +1117,8 @@ describe('wallet-connect.services', () => {
 			progress: vi.fn(),
 			identity: mockIdentity,
 			request: mockRequest,
-			listener: mockListener
+			listener: mockListener,
+			simulated: true
 		};
 
 		const mockMessageSignatureBytes = Uint8Array.from([10, 20, 30]);

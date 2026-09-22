@@ -143,6 +143,16 @@ export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 			})
 		: Promise.resolve({});
 
+// XRP's CoinGecko coin id is `ripple`, not `xrp`.
+export const exchangeRateXRPToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'ripple',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
+
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	COINGECKO_PROVIDER_ENABLED
 		? simplePrice({
@@ -308,6 +318,10 @@ const SOL_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { SolNativeMainnet: null },
 	coingeckoKey: 'solana'
 };
+const XRP_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { XrpNativeMainnet: null },
+	coingeckoKey: 'ripple'
+};
 const BNB_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { EvmNative: BSC_MAINNET_NETWORK.chainId },
 	coingeckoKey: 'binancecoin'
@@ -345,6 +359,7 @@ export const fetchExchangeRatesFromBackend = async ({
 	currentBtcPrice: CoingeckoSimplePriceResponse | undefined;
 	currentIcpPrice: CoingeckoSimplePriceResponse | undefined;
 	currentSolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentXrpPrice: CoingeckoSimplePriceResponse | undefined;
 	currentBnbPrice: CoingeckoSimplePriceResponse | undefined;
 	currentPolPrice: CoingeckoSimplePriceResponse | undefined;
 	currentArbitrumEthPrice: CoingeckoSimplePriceResponse | undefined;
@@ -384,6 +399,7 @@ export const fetchExchangeRatesFromBackend = async ({
 		currentBtcPrice: nativePrice({ ...BTC_NATIVE_ENTRY, coingeckoRates }),
 		currentIcpPrice: nativePrice({ ...ICP_NATIVE_ENTRY, coingeckoRates }),
 		currentSolPrice: nativePrice({ ...SOL_NATIVE_ENTRY, coingeckoRates }),
+		currentXrpPrice: nativePrice({ ...XRP_NATIVE_ENTRY, coingeckoRates }),
 		currentBnbPrice: nativePrice({ ...BNB_NATIVE_ENTRY, coingeckoRates }),
 		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
 		currentArbitrumEthPrice: nativePrice({ ...ARBITRUM_ETH_NATIVE_ENTRY, coingeckoRates }),
@@ -402,6 +418,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 				data.currentBtcPrice,
 				data.currentIcpPrice,
 				data.currentSolPrice,
+				data.currentXrpPrice,
 				data.currentBnbPrice,
 				data.currentPolPrice,
 				data.currentArbitrumEthPrice,

@@ -103,13 +103,13 @@
 		"governanceCanisterId": "xomae-vyaaa-aaaaq-aabhq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "BOOM",
-			"symbol": "BOOM",
+			"name": "CHAI",
+			"symbol": "CHAI",
 			"fee": {
 				"__bigint__": "1000000"
 			},
-			"alternativeName": "BOOM DAO",
-			"url": "https://boomdao.xyz/"
+			"alternativeName": "CHAI",
+			"url": "https://yddti-oiaaa-aaaag-ay5sa-cai.icp0.io/"
 		}
 	},
 	{
@@ -636,6 +636,22 @@
 			},
 			"alternativeName": "Delulu DAO",
 			"url": "https://waifu.ic0.ai/"
+		}
+	},
+	{
+		"ledgerCanisterId": "a6urt-aaaaa-aaaaq-aafeq-cai",
+		"rootCanisterId": "bu3tj-cqaaa-aaaaq-aafdq-cai",
+		"indexCanisterId": "aqw43-3qaaa-aaaaq-aaffq-cai",
+		"governanceCanisterId": "azvxh-nyaaa-aaaaq-aafea-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOXA",
+			"symbol": "DOXA",
+			"fee": {
+				"__bigint__": "10000000"
+			},
+			"alternativeName": "DOXA",
+			"url": "https://www.doxadao.org"
 		}
 	}
 ]

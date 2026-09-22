@@ -34,11 +34,13 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
 
 	interface Props {
 		destination: string;
@@ -106,7 +108,6 @@
 			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
-					networkContacts={$ethNetworkContacts}
 					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
@@ -126,7 +127,6 @@
 		<div data-tid={testId}>
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
-				networkContacts={$icNetworkContacts}
 				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
@@ -145,7 +145,6 @@
 		<div data-tid={testId}>
 			<BtcSendDestination
 				knownDestinations={$btcKnownDestinations}
-				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
 				{onQRCodeScan}
 				bind:destination
@@ -164,7 +163,6 @@
 		<div data-tid={testId}>
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
-				networkContacts={$solNetworkContacts}
 				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
@@ -177,6 +175,13 @@
 				bind:activeSendDestinationTab
 				bind:selectedContact
 			/>
+		</div>
+	{:else if isNetworkIdXrp($sendTokenNetworkId)}
+		<!-- XRP address-book contacts require a backend TokenAccountId address type (out of scope for
+		     the frontend-only integration), and transaction history (known destinations) lands in a
+		     later phase — so the destination step is address entry only for now. -->
+		<div data-tid={testId}>
+			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
 		</div>
 	{/if}
 
