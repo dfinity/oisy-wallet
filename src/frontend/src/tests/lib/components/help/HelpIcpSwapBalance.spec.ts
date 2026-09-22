@@ -1,6 +1,7 @@
 import HelpIcpSwapBalance from '$lib/components/help/HelpIcpSwapBalance.svelte';
 import { HELP_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { IcpSwapRecoverableBalance } from '$lib/services/icp-swap-recovery.services';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -21,13 +22,29 @@ const unused: IcpSwapRecoverableBalance = {
 const testId = `${HELP_ICPSWAP_WITHDRAW_BUTTON}-${token.ledgerCanisterId}`;
 
 describe('HelpIcpSwapBalance', () => {
+	beforeEach(() => {
+		setPrivacyMode({ enabled: false });
+	});
+
 	it('renders the formatted amount, the symbol and the unused-balance label', () => {
 		const { getByText } = render(HelpIcpSwapBalance, {
 			props: { balance: unused, onWithdraw: () => undefined }
 		});
 
-		expect(getByText('1.5 ICP')).toBeInTheDocument();
+		expect(getByText('1.5')).toBeInTheDocument();
+		expect(getByText(token.symbol)).toBeInTheDocument();
 		expect(getByText(en.help.text.balance_unused)).toBeInTheDocument();
+	});
+
+	it('masks the amount in privacy mode, but keeps the token identifiable', () => {
+		setPrivacyMode({ enabled: true });
+
+		const { getByText, queryByText } = render(HelpIcpSwapBalance, {
+			props: { balance: unused, onWithdraw: () => undefined }
+		});
+
+		expect(queryByText('1.5')).toBeNull();
+		expect(getByText(token.symbol)).toBeInTheDocument();
 	});
 
 	it('scopes the test id to the pool, so the same token from two pools stays distinct', () => {
