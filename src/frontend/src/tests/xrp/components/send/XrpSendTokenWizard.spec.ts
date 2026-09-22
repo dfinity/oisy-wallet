@@ -29,12 +29,13 @@ import {
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
 	XrpSendExpiredError,
+	XrpSendIndeterminateError,
 	XrpSendNotGuardedError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 // XRP is force-disabled under TEST, so `isNetworkIdXrp` in `send` would reject every attempt and
@@ -616,5 +617,135 @@ describe('XrpSendTokenWizard', () => {
 		await clickSend(rendered.container);
 
 		expect(onNext).not.toHaveBeenCalled();
+	});
+
+	// The outcome is unknown and the payment may still apply. Closing would drop the signed blob —
+	// nothing persists it — leaving the user to wait out the ledger window instead of resubmitting
+	// the one transaction it is safe to resubmit.
+	describe('an indeterminate send offers a retry', () => {
+		const indeterminate = () =>
+			new XrpSendIndeterminateError({
+				message: 'XRP transaction outcome unresolved',
+				pending: { txBlob: 'AB' },
+				recordId: 'record-1'
+			});
+
+		const failIndeterminate = () =>
+			vi.spyOn(xrpSendServices, 'sendXrp').mockImplementation(async ({ progress }) => {
+				progress?.(ProgressStepsSendXrp.CONFIRM);
+
+				return await Promise.reject(indeterminate());
+			});
+
+		it('keeps the modal open and raises no toast', async () => {
+			failIndeterminate();
+
+			const { container } = await renderSettled();
+
+			await clickSend(container);
+
+			expect(onClose).not.toHaveBeenCalled();
+			expect(onBack).not.toHaveBeenCalled();
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+		});
+
+		it('shows the retry on the sending step', async () => {
+			failIndeterminate();
+
+			const { container, rerender } = await renderSettled();
+
+			await clickSend(container);
+
+			await rerender({
+				...props,
+				currentStep: { name: WizardStepsSend.SENDING, title: 'title' }
+			});
+
+			expect(screen.getByTestId('xrp-send-retry-submit')).toBeInTheDocument();
+		});
+
+		it('resubmits the blob and record it was handed, re-reading nothing', async () => {
+			failIndeterminate();
+
+			const retrySpy = vi
+				.spyOn(xrpSendServices, 'retryXrpSend')
+				.mockResolvedValue({ txHash: 'TXHASH', submitResult: undefined });
+
+			const { container, rerender } = await renderSettled();
+
+			await clickSend(container);
+
+			await rerender({
+				...props,
+				currentStep: { name: WizardStepsSend.SENDING, title: 'title' }
+			});
+
+			await fireEvent.click(screen.getByTestId('xrp-send-retry-submit'));
+
+			expect(retrySpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					network: XrpNetworks.mainnet,
+					pending: { txBlob: 'AB' },
+					recordId: 'record-1'
+				})
+			);
+			// A retry must not rebuild: no amount, no fee, no destination reaches it, so it cannot
+			// become a second payment on a fresh sequence.
+			expect(retrySpy.mock.calls[0]?.[0]).not.toHaveProperty('amount');
+			expect(retrySpy.mock.calls[0]?.[0]).not.toHaveProperty('fee');
+			expect(retrySpy.mock.calls[0]?.[0]).not.toHaveProperty('destination');
+		});
+
+		// Still unknown after the retry: the new error carries the blob again, so the offer stands
+		// rather than the user being dropped back with nothing.
+		it('keeps the retry on offer when the retry is indeterminate too', async () => {
+			failIndeterminate();
+
+			vi.spyOn(xrpSendServices, 'retryXrpSend').mockRejectedValue(indeterminate());
+
+			const { container, rerender } = await renderSettled();
+
+			await clickSend(container);
+
+			await rerender({
+				...props,
+				currentStep: { name: WizardStepsSend.SENDING, title: 'title' }
+			});
+
+			await fireEvent.click(screen.getByTestId('xrp-send-retry-submit'));
+
+			expect(screen.getByTestId('xrp-send-retry-submit')).toBeInTheDocument();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.xrp_confirmation_failed } })
+			);
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		// `tefPAST_SEQ` on a retry is the guarantee working: the original landed, so the ledger
+		// refused the duplicate. Settled either way, so the retry stops being offered.
+		it('stops offering the retry once the ledger settles it', async () => {
+			failIndeterminate();
+
+			vi.spyOn(xrpSendServices, 'retryXrpSend').mockRejectedValue(
+				new XrpTransactionFailedError('XRP transaction failed: tefPAST_SEQ')
+			);
+
+			const { container, rerender } = await renderSettled();
+
+			await clickSend(container);
+
+			await rerender({
+				...props,
+				currentStep: { name: WizardStepsSend.SENDING, title: 'title' }
+			});
+
+			await fireEvent.click(screen.getByTestId('xrp-send-retry-submit'));
+
+			expect(screen.queryByTestId('xrp-send-retry-submit')).not.toBeInTheDocument();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.error.xrp_transaction_failed } })
+			);
+		});
 	});
 });

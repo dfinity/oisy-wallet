@@ -30,10 +30,11 @@
 	import { tryParseToken } from '$lib/utils/parse.utils';
 	import XrpFeeContext from '$xrp/components/fee/XrpFeeContext.svelte';
 	import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
+	import XrpSendRetry from '$xrp/components/send/XrpSendRetry.svelte';
 	import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 	import { sendSteps } from '$xrp/constants/steps.constants';
 	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
-	import { sendXrp } from '$xrp/services/xrp-send.services';
+	import { retryXrpSend, sendXrp } from '$xrp/services/xrp-send.services';
 	import {
 		initFeeStore,
 		initReserveStore,
@@ -48,9 +49,11 @@
 		XrpSelfDestinationError,
 		XrpSendAlreadyInFlightError,
 		XrpSendExpiredError,
+		XrpSendIndeterminateError,
 		XrpSendNotGuardedError,
 		XrpTransactionFailedError
 	} from '$xrp/types/xrp-send';
+	import type { XrpPendingTransaction } from '$xrp/types/xrp-transaction';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
 
@@ -123,6 +126,12 @@
 
 	const close = () => onClose();
 	const back = () => onSendBack();
+
+	// Held only while the modal is open, because the signed blob is not persisted
+	// anywhere — resubmitting it is the one safe retry, and once this is gone the
+	// record is still open and the poller resolves it from the ledger instead.
+	let retry = $state<{ pending: XrpPendingTransaction; recordId: string } | undefined>(undefined);
+	let retrying = $state(false);
 
 	const send = async () => {
 		if (isNullish($authIdentity)) {
@@ -311,6 +320,18 @@
 				return;
 			}
 
+			// The outcome is unknown and the payment may still apply, so the modal stays open and
+			// offers the one safe retry: resubmitting the very same signed bytes, on the sequence the
+			// first attempt already used. Closing here would drop the blob — it is not persisted
+			// anywhere — leaving the user to wait out the ledger window instead.
+			if (err instanceof XrpSendIndeterminateError) {
+				retry = { pending: err.pending, recordId: err.recordId };
+
+				return;
+			}
+
+			// Same step, but no blob to resubmit — the error escaped without one, so the only honest
+			// advice is not to send again yet.
 			if (sendProgressStep === ProgressStepsSendXrp.CONFIRM) {
 				toastsError({
 					msg: { text: $i18n.send.error.xrp_confirmation_failed },
@@ -413,6 +434,108 @@
 			onBack();
 		}
 	};
+
+	// Read at report time rather than captured, unlike the send's own: a retry is a fresh user
+	// action, so the figures it reports are the ones standing when it happens.
+	const retryTrackingEventMetadata = (): Record<string, string> => ({
+		...(nonNullish($sendToken)
+			? { token: $sendToken.symbol, network: `${$sendToken.network.id.description}` }
+			: {}),
+		...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+	});
+
+	// Resubmits the stored blob rather than building anything: same sequence, so if the original did
+	// land the ledger refuses this one instead of paying twice. The record stays the same record —
+	// `retryXrpSend` drives it through the same transitions a first attempt does.
+	const runRetry = async () => {
+		if (isNullish($authIdentity) || isNullish(retry)) {
+			return;
+		}
+
+		const network = nonNullish(networkId) ? mapNetworkIdToNetwork(networkId) : undefined;
+
+		if (isNullish(network)) {
+			toastsError({
+				msg: {
+					text: replacePlaceholders($i18n.send.error.no_xrp_network_id, {
+						$networkId: networkId?.description ?? ''
+					})
+				}
+			});
+
+			return;
+		}
+
+		const { pending, recordId } = retry;
+
+		retrying = true;
+
+		try {
+			await retryXrpSend({
+				identity: $authIdentity,
+				progress: (step: ProgressStepsSendXrp) => (sendProgressStep = step),
+				network,
+				pending,
+				recordId
+			});
+
+			trackEvent({
+				name: TRACK_COUNT_XRP_SEND_SUCCESS,
+				metadata: retryTrackingEventMetadata()
+			});
+
+			retry = undefined;
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_XRP_SEND_ERROR,
+				metadata: retryTrackingEventMetadata()
+			});
+
+			// A `tefPAST_SEQ` on a retry is the guarantee working, not a fault: the original landed,
+			// so the ledger refused the duplicate. It surfaces as a validated failure, and the
+			// existing copy already says the funds were not sent by *this* transaction.
+			if (err instanceof XrpTransactionFailedError) {
+				toastsError({ msg: { text: $i18n.send.error.xrp_transaction_failed }, err });
+
+				retry = undefined;
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
+			if (err instanceof XrpSendExpiredError) {
+				toastsError({ msg: { text: $i18n.send.error.xrp_send_expired }, err });
+
+				retry = undefined;
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
+			// Still unknown. The blob is handed back on the new error, so the retry stays on offer
+			// and the record stays open — the user can try again or walk away and let the poller
+			// settle it.
+			if (err instanceof XrpSendIndeterminateError) {
+				retry = { pending: err.pending, recordId: err.recordId };
+
+				toastsError({ msg: { text: $i18n.send.error.xrp_confirmation_failed }, err });
+
+				return;
+			}
+
+			toastsError({ msg: { text: $i18n.send.error.unexpected }, err });
+
+			retry = undefined;
+
+			onBack();
+		} finally {
+			retrying = false;
+		}
+	};
 </script>
 
 <XrpFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} token={$sendToken}>
@@ -427,7 +550,11 @@
 				{selectedContact}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
-			<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+			{#if nonNullish(retry)}
+				<XrpSendRetry onClose={close} onRetry={runRetry} {retrying} />
+			{:else}
+				<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+			{/if}
 		{:else if currentStep?.name === WizardStepsSend.SEND}
 			<XrpSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
 				{#snippet cancel()}
