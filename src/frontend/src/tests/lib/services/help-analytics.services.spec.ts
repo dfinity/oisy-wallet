@@ -1,9 +1,12 @@
+import { CanisterInternalError } from '$lib/canisters/errors';
 import {
+	PLAUSIBLE_EVENT_HELP_ERROR_TYPES,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { buildHelpEvent, trackHelp } from '$lib/services/help-analytics.services';
+import { buildHelpEvent, toHelpErrorType, trackHelp } from '$lib/services/help-analytics.services';
+import { IcpSwapPoolNotFoundError } from '$lib/services/icp-swap-recovery.services';
 import { SwapProvider } from '$lib/types/swap';
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -150,24 +153,30 @@ describe('help-analytics.services', () => {
 			});
 		});
 
-		it('tracks a failed withdrawal with the sanitized error', () => {
+		it('tracks a failed withdrawal with the error category, never the message', () => {
 			trackHelp({
 				action: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: 'ckUSDC',
-				error: 'Internal error: pool unavailable'
+				errorType: toHelpErrorType(
+					new CanisterInternalError('Internal error: 1.5 ICP owed to 2vxsx-fae')
+				)
 			});
 
-			expect(trackEvent).toHaveBeenCalledExactlyOnceWith(
+			const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
+
+			expect(metadata).toEqual(
 				expect.objectContaining({
-					metadata: expect.objectContaining({
-						result_status: 'error',
-						token_symbol: 'ckUSDC',
-						result_error: 'Internal error: pool unavailable'
-					})
+					result_status: 'error',
+					token_symbol: 'ckUSDC',
+					result_error_type: PLAUSIBLE_EVENT_HELP_ERROR_TYPES.CANISTER_ERROR
 				})
 			);
+
+			// No field carries the canister's own text, whatever it happened to contain.
+			expect(JSON.stringify(metadata)).not.toContain('1.5');
+			expect(JSON.stringify(metadata)).not.toContain('2vxsx-fae');
 		});
 
 		it('omits every optional field rather than sending it as undefined', () => {
@@ -181,7 +190,7 @@ describe('help-analytics.services', () => {
 				balancesFound: undefined,
 				poolsScanned: undefined,
 				link: undefined,
-				error: undefined
+				errorType: undefined
 			});
 
 			const [[{ metadata }]] = vi.mocked(trackEvent).mock.calls;
@@ -270,6 +279,37 @@ describe('help-analytics.services', () => {
 
 			expect(Object.keys(metadata ?? {})).not.toContain('event_provider');
 			expect(Object.keys(metadata ?? {})).not.toContain('event_key');
+		});
+	});
+
+	describe('toHelpErrorType', () => {
+		it('reports a missing pool', () => {
+			expect(toHelpErrorType(new IcpSwapPoolNotFoundError())).toBe(
+				PLAUSIBLE_EVENT_HELP_ERROR_TYPES.POOL_NOT_FOUND
+			);
+		});
+
+		it('reports an error variant returned by the factory or the pool', () => {
+			expect(toHelpErrorType(new CanisterInternalError('Internal error: anything'))).toBe(
+				PLAUSIBLE_EVENT_HELP_ERROR_TYPES.CANISTER_ERROR
+			);
+		});
+
+		it('falls back to unknown for transport and unexpected throws', () => {
+			expect(toHelpErrorType(new Error('fetch failed'))).toBe(
+				PLAUSIBLE_EVENT_HELP_ERROR_TYPES.UNKNOWN
+			);
+			expect(toHelpErrorType('a bare string')).toBe(PLAUSIBLE_EVENT_HELP_ERROR_TYPES.UNKNOWN);
+			expect(toHelpErrorType(undefined)).toBe(PLAUSIBLE_EVENT_HELP_ERROR_TYPES.UNKNOWN);
+		});
+
+		it('never returns the message it was given', () => {
+			// The whole point of the category: whatever ICPSwap writes cannot reach the event.
+			const categories: string[] = Object.values(PLAUSIBLE_EVENT_HELP_ERROR_TYPES);
+
+			expect(categories).toContain(
+				toHelpErrorType(new CanisterInternalError('Internal error: 1.5 ICP owed to 2vxsx-fae'))
+			);
 		});
 	});
 });

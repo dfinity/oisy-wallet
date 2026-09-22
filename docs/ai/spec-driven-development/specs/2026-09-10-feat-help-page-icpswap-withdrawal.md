@@ -38,8 +38,8 @@ live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
 
 **Out of scope (deliberate)**
 
-- Scanning pools where only **one** leg is an active token. ~445 of the 860 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
-- Scanning other fee tiers. All 860 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
+- Scanning pools where only **one** leg is an active token. Roughly half of the 876 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
+- Scanning other fee tiers. All 876 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
 - The **mistransferred balance** (see above): unreachable for an ICRC-2-only flow.
 - Any recovery for non-ICPSwap swap providers (KongSwap, Velora, NEAR Intents, OneSec).
 - Recovery of ICPSwap **liquidity positions**. Only loose balances are covered; the user holds no LP positions through OISY.
@@ -83,7 +83,7 @@ A **Scan my pools** button checks, in one go, every ICPSwap pool that exists bet
 
 The scan is cheap because the pool table comes in a single call, not one lookup per pair:
 
-1. `getAllPools` (`src/frontend/src/lib/api/icp-swap-factory.api.ts`) — one query returning every pool. Measured against the live factory: **860 pools, ~292 KB** of Candid text.
+1. `getAllPools` (`src/frontend/src/lib/api/icp-swap-factory.api.ts`) — one query returning every pool. Measured against the live factory on 2026-09-22: **876 pools, ~298 KB** of Candid text, across 509 distinct token legs.
 2. Filter locally to pools whose **both** legs are in the candidate set (ICP + `enabledIcrcTokens`, the same set the manual selectors offer).
 3. `getUserUnusedBalance` per surviving pool, fanned out in parallel.
 
@@ -93,6 +93,8 @@ Measured cost, live factory data:
 | --------------------------------- | --------------------------- | ------------------- |
 | ICP + 4 ck tokens (5)             | 10 `getPool` + 10 balance   | 1 query + 9 balance |
 | ICP + OISY's 16 default ICRC (17) | 136 `getPool` + 136 balance | 1 query + 9 balance |
+
+That 9 is a ck-heavy wallet, not a ceiling. 65 of the tokens OISY ships appear as a pool leg, and enabling all of them yields 89 candidate pools; enabled custom tokens raise the ceiling to the whole table. Balance queries therefore go out in batches of `ICP_SWAP_SCAN_CONCURRENCY` (10), each batch settling before the next starts, because a throttled query is indistinguishable from a pool that cannot be read — an unbounded fan-out would report phantom unreadable pools and send the user away to retry.
 
 The cost is bounded by the pools that exist between the user's tokens, not by tokens², so it does not degrade as someone enables more tokens. Every call is a query now that the mistransfer probe is gone, so the whole scan is roughly one round trip.
 
@@ -164,22 +166,23 @@ New enum members in `src/frontend/src/lib/enums/plausible.ts`:
 - `PLAUSIBLE_EVENT_CONTEXTS.HELP = 'help'`
 - `PLAUSIBLE_EVENT_SUBCONTEXT_HELP { ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal', SUPPORT = 'support' }`
 - `PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE = 'help_page'`
+- `PLAUSIBLE_EVENT_HELP_ERROR_TYPES { POOL_NOT_FOUND = 'pool_not_found', CANISTER_ERROR = 'canister_error', UNKNOWN = 'unknown' }`
 
 A new `src/frontend/src/lib/services/help-analytics.services.ts` exports one typed `trackHelp` function. Every event carries `event_context: help` and `source_location: help_page`.
 
-| `event_modifier` | `event_subcontext`   | Fires when                                                       | `result_status`                            | Other properties                                                                                                                                                     |
-| ---------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open`           | —                    | the Help page is opened                                          | `success`                                  | —                                                                                                                                                                    |
-| `contact`        | `support`            | the external support link in card 1 is clicked                   | `success`                                  | `event_key: link`, `event_value`: destination URL                                                                                                                    |
-| `scan`           | `icpswap_withdrawal` | the scan button completes                                        | `executing` → `success` / `error`          | `event_key: balances_found`, `event_value`: count of withdrawable rows; `source_detail`: number of pools scanned; `result_error` on failure                          |
-| `select_pool`    | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error` on failure |
-| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed                               | `executing` → `success` / `error`          | `token_symbol`, `token_network: icp`, `token_standard`; `result_error` on failure                                                                                    |
+| `event_modifier` | `event_subcontext`   | Fires when                                                       | `result_status`                            | Other properties                                                                                                                                                          |
+| ---------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open`           | —                    | the Help page is opened                                          | `success`                                  | —                                                                                                                                                                         |
+| `contact`        | `support`            | the external support link in card 1 is clicked                   | `success`                                  | `event_key: link`, `event_value`: destination URL                                                                                                                         |
+| `scan`           | `icpswap_withdrawal` | the scan button completes                                        | `executing` → `success` / `error`          | `event_key: balances_found`, `event_value`: count of withdrawable rows; `source_detail`: number of pools scanned; `result_error_type` on failure                          |
+| `select_pool`    | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error_type` on failure |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed                               | `executing` → `success` / `error`          | `token_symbol`, `token_network: icp`, `token_standard`; `result_error_type` on failure                                                                                    |
 
 **Deliberate omission — no amounts.** Withdrawal events carry the token symbol but **not** `token_amount` or `token_usd_value`. Privacy invariant 3 in `analytics.md` forbids "a raw amount that could fingerprint a specific user"; a stuck ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is exactly the de-anonymising join the invariant rules out. The `balances_found` count on `select_pool` gives the same product signal — how often users actually have stuck funds — without the amount.
 
-`result_error` strings are sanitised per invariant 4 (strip IC request IDs) before being attached.
+Failures carry an allow-listed `result_error_type` category, never the message. ICPSwap writes free text into its `InternalError` variant and `mapIcpSwapFactoryError` interpolates it verbatim, so the payload is a third party's and its shape is outside our control; `replaceIcErrorFields` only strips the IC request id, which cannot satisfy invariant 4's "any embedded identifiers". Categorising by error class — `IcpSwapPoolNotFoundError`, `CanisterInternalError`, anything else — bounds the value by construction. The signal survives because `event_modifier` already names the action, and the user still sees the full message in the toast.
 
-Per the `analytics.md` §8 checklist, no new property _keys_ are introduced (every key above already exists in the §4 schema), so that document needs no schema update; `PRODUCT.md` does (below).
+Per the `analytics.md` §8 checklist, `result_error_type` is a new property _key_ relative to the §4 schema — it already existed code-side for the generic `error` event, which that document recorded as drift — so it is added to the §4 Result table in the same PR, together with the third-party clause on invariant 4. Every other key above already exists. `PRODUCT.md` is updated too (below).
 
 ## i18n
 
@@ -192,7 +195,7 @@ The CI `test-coverage` gate enforces whole-project thresholds, so every new comp
 - Each new `.svelte` component gets a component test.
 - The new recovery service is unit-tested with mocked API functions: pool-not-found, zero balances, dust-only balances (hidden), a mixed set, withdrawal success, and withdrawal failure leaving the row in place.
 - The scan is unit-tested against a mocked `getAllPools` table: only pools with both legs active are queried, pools at another fee tier or with an inactive leg are skipped, a pool whose balance query rejects does not discard the others, and the returned rows carry the pool they belong to.
-- `help-analytics.services.spec.ts` follows `analytics.md` §7: assert the exact event name, the full metadata for each action × outcome, that optional fields are **absent** (not `undefined`) when nullish, and that no amount, principal, or unsanitised error reaches the payload.
+- `help-analytics.services.spec.ts` follows `analytics.md` §7: assert the exact event name, the full metadata for each action × outcome, that optional fields are **absent** (not `undefined`) when nullish, and that no amount, principal, or canister-authored error text reaches the payload.
 - `nav.utils` gains cases for `isHelpPath` / `isRouteHelp`.
 - Extend the existing navigation tests so the new item is asserted in both the desktop `more` section and the mobile More sheet, in the right position.
 

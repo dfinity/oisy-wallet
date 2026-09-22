@@ -27,7 +27,7 @@
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
 		PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 	} from '$lib/enums/plausible';
-	import { trackHelp } from '$lib/services/help-analytics.services';
+	import { toHelpErrorType, trackHelp } from '$lib/services/help-analytics.services';
 	import {
 		IcpSwapPoolNotFoundError,
 		loadIcpSwapRecoverableBalances,
@@ -39,7 +39,6 @@
 	} from '$lib/services/icp-swap-recovery.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -67,6 +66,13 @@
 	let activeRequest = $state<'scan' | 'lookup' | undefined>();
 
 	const busy = $derived(nonNullish(activeRequest));
+
+	// A withdrawal is deliberately not folded into `busy`: that one also drives the "checking"
+	// line, the empty message and the unreadable-pool summary, which must keep describing the pool
+	// the user is withdrawing from. Discovery, on the other hand, must not start under a
+	// withdrawal - `startRequest` clears `groups`, which drops the withdrawal's own re-read and
+	// lets a pool read before the withdrawal landed re-display the row it just emptied.
+	const discoveryLocked = $derived(busy || nonNullish(withdrawingKey));
 
 	const startRequest = (kind: 'scan' | 'lookup'): number => {
 		activeRequest = kind;
@@ -147,7 +153,7 @@
 				action: 'scan',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
@@ -196,7 +202,7 @@
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: symbolA,
 				token2: symbolB,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
@@ -309,7 +315,7 @@
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: token.symbol,
 				tokenStandard: token.standard.code,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			withdrawingKey = undefined;
@@ -341,7 +347,7 @@
 
 		<Button
 			ariaLabel={$i18n.help.alt.scan}
-			disabled={busy}
+			disabled={discoveryLocked}
 			loading={activeRequest === 'scan'}
 			onclick={onScan}
 			testId={HELP_ICPSWAP_SCAN_BUTTON}
@@ -365,6 +371,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
+					disabled={discoveryLocked}
 					onSelect={onSelectA}
 					selected={tokenA}
 					testId={HELP_ICPSWAP_TOKEN_A}
@@ -381,6 +388,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
+					disabled={discoveryLocked}
 					onSelect={onSelectB}
 					selected={tokenB}
 					testId={HELP_ICPSWAP_TOKEN_B}
