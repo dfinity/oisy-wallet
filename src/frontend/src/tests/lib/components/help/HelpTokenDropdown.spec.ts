@@ -80,15 +80,45 @@ describe('HelpTokenDropdown', () => {
 		await fireEvent.click(getByTestId(testId));
 
 		const list = getByTestId(`${testId}-list`);
-		const symbols = Array.from(list.querySelectorAll('[data-tid^="token-dropdown-option-"]')).map(
-			(option) => option.textContent?.trim()
+		const labels = Array.from(list.querySelectorAll('[data-tid^="token-dropdown-option-"]')).map(
+			(option) => option.textContent?.replace(/\s+/g, ' ').trim()
 		);
 
 		// localeCompare collates case-insensitively, so ckUSDC sorts before ICP.
-		expect(symbols).toStrictEqual(['ckUSDC', 'ICP']);
+		expect(labels).toStrictEqual([`ckUSDC ${usdc.name}`, `ICP ${icp.name}`]);
 
 		await fireEvent.click(getByTestId(`${testId}-option-${usdc.ledgerCanisterId}`));
 
 		expect(onSelect).toHaveBeenCalledExactlyOnceWith(usdc);
+	});
+
+	it('names the token under its symbol, so the symbol is not the whole label', async () => {
+		const { getByTestId } = render(HelpTokenDropdown, { props });
+
+		await fireEvent.click(getByTestId(testId));
+
+		expect(getByTestId(`${testId}-option-${usdc.ledgerCanisterId}`)).toHaveTextContent(usdc.name);
+	});
+
+	it('falls back to the ledger id when a token impersonates another on symbol and name', async () => {
+		// A custom ledger can claim any symbol and any name. The ledger id is the one field it
+		// cannot copy, so it is what keeps the two options apart.
+		const impostor = { ...usdc, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' };
+
+		const { getByTestId } = render(HelpTokenDropdown, {
+			props: { ...props, tokens: [icp, usdc, impostor] }
+		});
+
+		await fireEvent.click(getByTestId(testId));
+
+		expect(getByTestId(`${testId}-option-${usdc.ledgerCanisterId}`)).toHaveTextContent(
+			'qaa6y-5...afa-cai'
+		);
+		expect(getByTestId(`${testId}-option-${impostor.ledgerCanisterId}`)).toHaveTextContent(
+			'mxzaz-h...ada-cai'
+		);
+
+		// A token with no twin keeps the plain name.
+		expect(getByTestId(`${testId}-option-${icp.ledgerCanisterId}`)).not.toHaveTextContent('...');
 	});
 });

@@ -8,6 +8,8 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		tokens: IcToken[];
@@ -39,9 +41,35 @@
 		)
 	);
 
-	// Two tokens can share a symbol, so the ledger canister id is the stable key and the label is
-	// left as the symbol the user already recognises.
-	const sortedTokens = $derived([...uniqueTokens].sort((a, b) => a.symbol.localeCompare(b.symbol)));
+	const sortedTokens = $derived(
+		[...uniqueTokens].sort((a, b) =>
+			getTokenDisplaySymbol(a).localeCompare(getTokenDisplaySymbol(b))
+		)
+	);
+
+	// A custom ledger is free to claim any symbol, so the symbol alone - which used to be an
+	// option's whole visible and accessible label - cannot identify a ledger. Name the token as
+	// well, as `ModalTokensListItem` does, and fall back to the ledger id where an impersonating
+	// token matches on both, since that is the only field it cannot copy.
+	const options = $derived(
+		sortedTokens.map((token) => {
+			const symbol = getTokenDisplaySymbol(token);
+			const name = getTokenDisplayName(token);
+
+			const ambiguous =
+				sortedTokens.filter(
+					(other) => getTokenDisplaySymbol(other) === symbol && getTokenDisplayName(other) === name
+				).length > 1;
+
+			return {
+				token,
+				symbol,
+				description: ambiguous
+					? `${name} · ${shortenWithMiddleEllipsis({ text: token.ledgerCanisterId })}`
+					: name
+			};
+		})
+	);
 </script>
 
 <span class="help-token-selector min-w-36">
@@ -57,7 +85,7 @@
 		{#if nonNullish(selected)}
 			<span class="flex items-center gap-2">
 				<TokenLogo data={selected} logoSize="xs" />
-				{selected.symbol}
+				{getTokenDisplaySymbol(selected)}
 			</span>
 		{:else}
 			{$i18n.help.text.select_token}
@@ -69,7 +97,7 @@
 
 		{#snippet items()}
 			<List condensed noPadding testId={`${testId}-list`}>
-				{#each sortedTokens as token (token.ledgerCanisterId)}
+				{#each options as { token, symbol, description } (token.ledgerCanisterId)}
 					<ListItem>
 						<Button
 							alignLeft
@@ -87,9 +115,12 @@
 									<IconCheck size="20" />
 								{/if}
 							</span>
-							<span class="flex w-full flex-row items-center gap-2">
+							<span class="flex w-full min-w-0 flex-row items-center gap-2">
 								<TokenLogo data={token} logoSize="xs" />
-								<span>{token.symbol}</span>
+								<span class="flex min-w-0 flex-col">
+									<span class="truncate">{symbol}</span>
+									<span class="truncate text-xs text-tertiary">{description}</span>
+								</span>
 							</span>
 						</Button>
 					</ListItem>
