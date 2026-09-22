@@ -48,6 +48,8 @@
 		isVeloraActiveUserTransaction
 	} from '$lib/utils/velora-active-tx.utils';
 	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
+	import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
+	import { isXrpActiveUserTransaction } from '$xrp/utils/xrp-active-tx.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
 	$effect(() => {
@@ -112,6 +114,12 @@
 
 			if (oisyTrade.length > 0) {
 				await pollOisyTradeActiveUserTransactions({ identity, transactions: oisyTrade });
+			}
+
+			const xrp = $activeUserTransactionsPending.filter(isXrpActiveUserTransaction);
+
+			if (xrp.length > 0) {
+				await pollXrpActiveUserTransactions({ identity, transactions: xrp });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
