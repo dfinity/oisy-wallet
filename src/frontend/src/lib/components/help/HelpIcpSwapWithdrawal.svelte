@@ -45,7 +45,6 @@
 	let tokenA = $state<IcToken | undefined>();
 	let tokenB = $state<IcToken | undefined>();
 
-	let busy = $state(false);
 	let loadError = $state<string | undefined>();
 	// Both entry points produce the same shape: the scan can return several pools, naming a pair
 	// returns one.
@@ -62,8 +61,14 @@
 	// with no terminal event.
 	let requestGeneration = 0;
 
-	const startRequest = (): number => {
-		busy = true;
+	// Which entry point is running, not merely that one is: `busy` alone cannot tell them apart,
+	// so a manual lookup used to spin the scan button as though a scan were under way.
+	let activeRequest = $state<'scan' | 'lookup' | undefined>();
+
+	const busy = $derived(nonNullish(activeRequest));
+
+	const startRequest = (kind: 'scan' | 'lookup'): number => {
+		activeRequest = kind;
 		reset();
 
 		return ++requestGeneration;
@@ -106,7 +111,7 @@
 			return;
 		}
 
-		const generation = startRequest();
+		const generation = startRequest('scan');
 
 		trackHelp({
 			action: 'scan',
@@ -145,7 +150,7 @@
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
-				busy = false;
+				activeRequest = undefined;
 			}
 		}
 	};
@@ -157,7 +162,7 @@
 			return;
 		}
 
-		const generation = startRequest();
+		const generation = startRequest('lookup');
 
 		const [symbolA, symbolB] = [tokenA.symbol, tokenB.symbol];
 
@@ -194,7 +199,7 @@
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
-				busy = false;
+				activeRequest = undefined;
 			}
 		}
 	};
@@ -329,7 +334,7 @@
 		<Button
 			ariaLabel={$i18n.help.alt.scan}
 			disabled={busy}
-			loading={busy && isNullish(groups) && isNullish(loadError)}
+			loading={activeRequest === 'scan'}
 			onclick={onScan}
 			testId={HELP_ICPSWAP_SCAN_BUTTON}
 		>

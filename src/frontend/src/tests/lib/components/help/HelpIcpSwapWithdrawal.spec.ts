@@ -160,6 +160,30 @@ describe('HelpIcpSwapWithdrawal', () => {
 		expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument();
 	});
 
+	it('does not spin the scan button for a manual lookup', async () => {
+		// `busy` cannot tell the two entry points apart, so the scan button used to animate while a
+		// pair was being looked up.
+		const { promise: pending, resolve: release } = Promise.withResolvers<IcpSwapPoolBalances>();
+		vi.mocked(loadIcpSwapRecoverableBalances).mockReturnValue(pending);
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+
+		const scanButton = getByTestId(HELP_ICPSWAP_SCAN_BUTTON);
+
+		// Disabled, because the race guard is shared - but not spinning.
+		expect(scanButton).toBeDisabled();
+		expect(scanButton.querySelector('svg')).toBeNull();
+
+		release({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
+	});
+
 	it('does not scan until the button is pressed', () => {
 		render(HelpIcpSwapWithdrawal);
 
