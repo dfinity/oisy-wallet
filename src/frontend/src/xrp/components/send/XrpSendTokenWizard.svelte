@@ -5,20 +5,17 @@
 	import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import {
-		TRACK_COUNT_XRP_SEND_ERROR,
-		TRACK_COUNT_XRP_SEND_SUCCESS
-	} from '$lib/constants/analytics.constants';
+	import { TRACK_COUNT_XRP_SEND_ERROR } from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { xrpAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+	import type { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
@@ -46,8 +43,8 @@
 		XrpDestinationTagRequiredError,
 		XrpDestinationUnfundedError,
 		XrpSelfDestinationError,
-		XrpSendExpiredError,
-		XrpTransactionFailedError
+		XrpSendAlreadyInFlightError,
+		XrpSendNotGuardedError
 	} from '$xrp/types/xrp-send';
 	import { mapNetworkIdToNetwork } from '$xrp/utils/network.utils';
 	import { isXrpAmountSendable } from '$xrp/utils/xrp-send.utils';
@@ -265,59 +262,28 @@
 				destination,
 				amount: amountDrops,
 				fee: $feeStore,
-				destinationTag: $sendXrpDestinationTag
+				destinationTag: $sendXrpDestinationTag,
+				token: $sendToken
 			});
 
-			trackEvent({
-				name: TRACK_COUNT_XRP_SEND_SUCCESS,
-				metadata: sendTrackingEventMetadata
+			// Submitted, not settled — so nothing here claims the payment arrived. The success and
+			// failure events, and the toast that reports the real outcome, fire from the record's
+			// terminal side effects in `LoaderActiveUserTransactions`, which is the only place that
+			// knows what the ledger decided.
+			toastsShow({
+				text: $i18n.send.text.xrp_submitted,
+				level: 'info',
+				duration: 4000
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			// Only pre-broadcast failures reach here now, so the event is unambiguous: this send did
+			// not happen. A payment that IS on the wire reports from the record instead.
 			trackEvent({
 				name: TRACK_COUNT_XRP_SEND_ERROR,
 				metadata: sendTrackingEventMetadata
 			});
-
-			// Checked before the step, because a validated failure also happens at CONFIRM: the
-			// outcome IS known there, so the indeterminate "we did not receive a confirmation"
-			// advice would be wrong and would hide that the fee was charged.
-			if (err instanceof XrpTransactionFailedError) {
-				toastsError({
-					msg: { text: $i18n.send.error.xrp_transaction_failed },
-					err
-				});
-
-				setTimeout(() => close(), 750);
-
-				return;
-			}
-
-			// Definitive, and the opposite of the message below: the ledger passed the transaction's
-			// LastLedgerSequence without including it, so nothing was sent and a new one is safe.
-			// Reporting that as "we don't know" would leave the user stuck on a settled outcome.
-			if (err instanceof XrpSendExpiredError) {
-				toastsError({
-					msg: { text: $i18n.send.error.xrp_send_expired },
-					err
-				});
-
-				setTimeout(() => close(), 750);
-
-				return;
-			}
-
-			if (sendProgressStep === ProgressStepsSendXrp.CONFIRM) {
-				toastsError({
-					msg: { text: $i18n.send.error.xrp_confirmation_failed },
-					err
-				});
-
-				setTimeout(() => close(), 750);
-
-				return;
-			}
 
 			// Pre-sign refusals, and the reason they are matched before the generic branch: each fires
 			// while progress is still INITIALIZATION, so nothing was signed and nothing left the
@@ -334,6 +300,27 @@
 
 				onSendForm();
 			};
+
+			// The two refusals no field can fix: a payment from this address has not resolved yet, or
+			// the wallet could not establish whether one has. Both fire before any node read and
+			// before anything is signed, so nothing left the wallet — and no override is offered for
+			// the in-flight case, because while the first payment is open there is no sequence a
+			// second one could safely take.
+			if (err instanceof XrpSendAlreadyInFlightError) {
+				toastsError({ msg: { text: $i18n.send.error.xrp_send_already_in_flight }, err });
+
+				onBack();
+
+				return;
+			}
+
+			if (err instanceof XrpSendNotGuardedError) {
+				toastsError({ msg: { text: $i18n.send.error.xrp_send_not_guarded }, err });
+
+				onBack();
+
+				return;
+			}
 
 			// The one pre-sign refusal the form cannot fix: no amount makes a payment to yourself
 			// deliverable, so it goes back to where the recipient is chosen. `onSendBack` already

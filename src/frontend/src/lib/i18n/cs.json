@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Odeslat",
+			"xrp_sent": "Vaše platba XRP prošla.",
+			"xrp_submitted": "Platba odeslána. Obvykle se vypořádá během několika sekund — můžete toto zavřít a pokračovat.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Cíl",
@@ -1073,7 +1075,10 @@
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
 			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
-			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou.",
+			"xrp_send_expired": "Vaše odeslání $amount $symbol na $network nebylo dokončeno: síť ji nezahrnula včas. Nic neopustilo vaši peněženku a je bezpečné odeslat znovu.",
+			"xrp_send_already_in_flight": "Předchozí platba XRP z této adresy ještě nebyla vypořádána. Nic nebylo odesláno — vyčkejte, než se dokončí, což trvá přibližně minutu, a poté odešlete znovu.",
+			"xrp_send_not_guarded": "Nepodařilo se nám zkontrolovat, zda se předchozí platba XRP stále vypořádává. Nic nebylo odesláno — zkuste to za okamžik znovu.",
+			"xrp_active_transaction_failed": "Vaše odeslání $amount $symbol na $network bylo sítí zpracováno, ale selhalo ($result), takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"xrp_amount_exceeds_sendable": "Částka už se nevejde. Váš účet si musí ponechat rezervu XRP a navíc síťový poplatek, a obojí se může během kontroly změnit. Nic nebylo odesláno – snižte částku nebo to zkuste znovu, až se údaje o účtu obnoví.",
 			"xrp_destination_unfunded": "Tato adresa zatím nemá účet XRP. Jeho vytvoření vyžaduje první platbu alespoň $reserve XRP. Nic nebylo odesláno – zvyšte částku nebo odešlete na adresu, která už je financovaná.",
 			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu.",

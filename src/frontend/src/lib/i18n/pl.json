@@ -950,6 +950,8 @@
 	"send": {
 		"text": {
 			"send": "Wyślij",
+			"xrp_sent": "Twoja płatność XRP przeszła.",
+			"xrp_submitted": "Płatność wysłana. Zwykle rozlicza się w ciągu kilku sekund — możesz to zamknąć i kontynuować.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Miejsce docelowe",
@@ -1073,7 +1075,10 @@
 			"solana_insufficient_funds_for_fee": "Twoje saldo SOL jest niewystarczające do pokrycia opłat transakcyjnych.",
 			"solana_insufficient_funds_for_rent": "Twoje saldo SOL jest niewystarczające do pokrycia czynszu wymaganego do utworzenia konta.",
 			"fee_calc_unsupported_standard": "Nie można obliczyć opłaty, ponieważ podany standard tokena nie jest obsługiwany.",
-			"xrp_send_expired": "Transakcja nie została wysłana: sieć nie uwzględniła jej na czas. Nic nie opuściło Twojego portfela i można bezpiecznie utworzyć nową.",
+			"xrp_send_expired": "Twoje wysłanie $amount $symbol w sieci $network nie zostało ukończone: sieć nie uwzględniła go na czas. Nic nie opuściło Twojego portfela i bezpiecznie jest wysłać ponownie.",
+			"xrp_send_already_in_flight": "Wcześniejsza płatność XRP z tego adresu nie została jeszcze rozliczona. Nic nie zostało wysłane — poczekaj na jej zakończenie, co zajmuje około minuty, a następnie wyślij ponownie.",
+			"xrp_send_not_guarded": "Nie mogliśmy sprawdzić, czy wcześniejsza płatność XRP jest jeszcze rozliczana. Nic nie zostało wysłane — spróbuj ponownie za chwilę.",
+			"xrp_active_transaction_failed": "Twoje wysłanie $amount $symbol w sieci $network zostało przetworzone przez sieć, ale nie powiodło się ($result), więc środki nie zostały wysłane. Opłata sieciowa została jednak pobrana.",
 			"xrp_amount_exceeds_sendable": "Ta kwota już się nie mieści. Twoje konto musi zachować rezerwę XRP oraz opłatę sieciową, a obie mogą się zmienić podczas sprawdzania. Nic nie zostało wysłane — zmniejsz kwotę lub spróbuj ponownie, gdy dane konta się odświeżą.",
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
 			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
