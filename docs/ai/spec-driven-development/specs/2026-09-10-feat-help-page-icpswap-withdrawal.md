@@ -60,7 +60,7 @@ Supporting changes, each following the existing Settings entry as the template:
 - `isHelpPath` / `isRouteHelp` in `src/frontend/src/lib/utils/nav.utils.ts`.
 - `'help'` added to `NavigationItemId` in `src/frontend/src/lib/types/navigation.ts`.
 - `NAVIGATION_ITEM_HELP = 'navigation-item-help'` in `src/frontend/src/lib/constants/test-ids.constants.ts`.
-- A descriptor in `NavigationMenuMainItems.svelte` using `IconLifeBuoy`, not gated behind a feature flag. Deliberately not the question-mark `IconHelp` the user menu uses: a question mark frames the page as a problem, a life buoy as help.
+- A descriptor in `NavigationMenuMainItems.svelte` using `IconLifeBuoy`, gated by `HELP_ENABLED = LOCAL || STAGING`. Deliberately not the question-mark `IconHelp` the user menu uses: a question mark frames the page as a problem, a life buoy as help.
 - Route files `src/frontend/src/routes/(app)/help/+page.svelte` and `+page.ts`, mirroring `(app)/settings/`.
 
 The page renders a `PageTitle` plus a `Help` component, exactly as the Settings page renders `Settings`. Cards reuse `SettingsCard` / `SettingsCardItem` so the two pages read as one family.
