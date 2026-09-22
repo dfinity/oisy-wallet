@@ -826,7 +826,8 @@
 			"scan_failed": "Nie udało się pobrać listy pul ICPSwap."
 		},
 		"success": {
-			"withdraw": "Wypłacono $amount $symbol z puli."
+			"withdraw": "Wypłacono $amount $symbol z puli.",
+			"withdraw_hidden": "Wypłacono $symbol z puli."
 		}
 	},
 	"settings": {

@@ -23,6 +23,7 @@
 		HELP_ICPSWAP_TOKEN_B
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
 		PLAUSIBLE_EVENT_SUBCONTEXT_HELP
@@ -285,11 +286,16 @@
 		try {
 			const withdrawn = await withdrawIcpSwapBalance({ identity, poolCanisterId, balance });
 
+			// The row masks the amount under privacy mode, so the toast that confirms the same
+			// withdrawal must not print it either. Worth keeping otherwise: `withdrawn` is what the
+			// pool actually moved, which can exceed the amount captured at discovery.
 			toastsShow({
-				text: replacePlaceholders($i18n.help.success.withdraw, {
-					$amount: formatToken({ value: withdrawn, unitName: token.decimals }),
-					$symbol: token.symbol
-				}),
+				text: $isPrivacyMode
+					? replacePlaceholders($i18n.help.success.withdraw_hidden, { $symbol: token.symbol })
+					: replacePlaceholders($i18n.help.success.withdraw, {
+							$amount: formatToken({ value: withdrawn, unitName: token.decimals }),
+							$symbol: token.symbol
+						}),
 				level: 'success',
 				duration: 4000
 			});

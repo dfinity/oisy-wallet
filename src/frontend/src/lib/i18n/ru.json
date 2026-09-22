@@ -826,7 +826,8 @@
 			"scan_failed": "Не удалось получить список пулов ICPSwap."
 		},
 		"success": {
-			"withdraw": "Выведено $amount $symbol из пула."
+			"withdraw": "Выведено $amount $symbol из пула.",
+			"withdraw_hidden": "Выведено $symbol из пула."
 		}
 	},
 	"settings": {

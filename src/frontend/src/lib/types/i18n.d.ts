@@ -562,7 +562,7 @@ interface I18nHelp {
 		withdraw_failed: string;
 		scan_failed: string;
 	};
-	success: { withdraw: string };
+	success: { withdraw: string; withdraw_hidden: string };
 }
 
 interface I18nSettings {

@@ -826,7 +826,8 @@
 			"scan_failed": "Die Liste der ICPSwap-Pools konnte nicht geladen werden."
 		},
 		"success": {
-			"withdraw": "$amount $symbol aus dem Pool ausgezahlt."
+			"withdraw": "$amount $symbol aus dem Pool ausgezahlt.",
+			"withdraw_hidden": "$symbol aus dem Pool ausgezahlt."
 		}
 	},
 	"settings": {

@@ -826,7 +826,8 @@
 			"scan_failed": "Impossible de récupérer la liste des pools ICPSwap."
 		},
 		"success": {
-			"withdraw": "$amount $symbol retirés du pool."
+			"withdraw": "$amount $symbol retirés du pool.",
+			"withdraw_hidden": "$symbol retiré du pool."
 		}
 	},
 	"settings": {

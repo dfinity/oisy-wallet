@@ -826,7 +826,8 @@
 			"scan_failed": "ICPSwap 풀 목록을 가져올 수 없습니다."
 		},
 		"success": {
-			"withdraw": "풀에서 $amount $symbol 출금을 완료했습니다."
+			"withdraw": "풀에서 $amount $symbol 출금을 완료했습니다.",
+			"withdraw_hidden": "풀에서 $symbol 출금을 완료했습니다."
 		}
 	},
 	"settings": {

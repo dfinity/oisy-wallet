@@ -826,7 +826,8 @@
 			"scan_failed": "Không tải được danh sách pool của ICPSwap."
 		},
 		"success": {
-			"withdraw": "Đã rút $amount $symbol từ pool."
+			"withdraw": "Đã rút $amount $symbol từ pool.",
+			"withdraw_hidden": "Đã rút $symbol từ pool."
 		}
 	},
 	"settings": {

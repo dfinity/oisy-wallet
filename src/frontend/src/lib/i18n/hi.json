@@ -826,7 +826,8 @@
 			"scan_failed": "ICPSwap पूल की सूची प्राप्त नहीं हो सकी।"
 		},
 		"success": {
-			"withdraw": "पूल से $amount $symbol निकाले गए।"
+			"withdraw": "पूल से $amount $symbol निकाले गए।",
+			"withdraw_hidden": "पूल से $symbol निकाले गए।"
 		}
 	},
 	"settings": {

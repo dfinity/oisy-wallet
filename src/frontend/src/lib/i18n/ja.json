@@ -826,7 +826,8 @@
 			"scan_failed": "ICPSwap のプール一覧を取得できませんでした。"
 		},
 		"success": {
-			"withdraw": "プールから $amount $symbol を出金しました。"
+			"withdraw": "プールから $amount $symbol を出金しました。",
+			"withdraw_hidden": "プールから $symbol を出金しました。"
 		}
 	},
 	"settings": {

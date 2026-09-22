@@ -24,6 +24,9 @@ import {
 	type IcpSwapPoolBalances,
 	type IcpSwapRecoverableBalance
 } from '$lib/services/icp-swap-recovery.services';
+import * as toastsStore from '$lib/stores/toasts.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -95,6 +98,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		setPrivacyMode({ enabled: false });
 		mockAuthStore();
 		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([usdc]));
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
@@ -487,6 +491,86 @@ describe('HelpIcpSwapWithdrawal', () => {
 		expect(getByTestId(withdrawTestId(unusedUsdc))).toBeInTheDocument();
 		expect(reloadIcpSwapPoolBalances).toHaveBeenCalledOnce();
 		expect(loadIcpSwapRecoverableBalances).toHaveBeenCalledOnce();
+	});
+
+	it('keeps the withdrawn amount out of the success toast in privacy mode', async () => {
+		const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		});
+		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
+		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
+
+		setPrivacyMode({ enabled: true });
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(withdrawTestId(unusedIcp)));
+
+		await waitFor(() =>
+			expect(spyToastsShow).toHaveBeenCalledWith(
+				expect.objectContaining({
+					text: replacePlaceholders(en.help.success.withdraw_hidden, { $symbol: icp.symbol }),
+					level: 'success'
+				})
+			)
+		);
+
+		// The row hides the figure under privacy mode; the toast confirming the same withdrawal
+		// must not put it back.
+		expect(spyToastsShow).not.toHaveBeenCalledWith(
+			expect.objectContaining({ text: expect.stringContaining('1.5') })
+		);
+	});
+
+	it('confirms the amount the pool actually moved when privacy mode is off', async () => {
+		const spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
+
+		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		});
+		// More than the row showed: a balance credited between discovery and withdrawal.
+		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(200_000_000n);
+		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(withdrawTestId(unusedIcp)));
+
+		await waitFor(() =>
+			expect(spyToastsShow).toHaveBeenCalledWith(
+				expect.objectContaining({
+					text: replacePlaceholders(en.help.success.withdraw, {
+						$amount: '2',
+						$symbol: icp.symbol
+					}),
+					level: 'success'
+				})
+			)
+		);
 	});
 
 	it('locks discovery while a withdrawal is in flight', async () => {

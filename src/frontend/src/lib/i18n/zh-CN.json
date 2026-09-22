@@ -826,7 +826,8 @@
 			"scan_failed": "无法获取 ICPSwap 资金池列表。"
 		},
 		"success": {
-			"withdraw": "已从资金池提取 $amount $symbol。"
+			"withdraw": "已从资金池提取 $amount $symbol。",
+			"withdraw_hidden": "已从资金池提取 $symbol。"
 		}
 	},
 	"settings": {

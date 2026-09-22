@@ -826,7 +826,8 @@
 			"scan_failed": "Seznam poolů ICPSwap se nepodařilo načíst."
 		},
 		"success": {
-			"withdraw": "Vybráno $amount $symbol z poolu."
+			"withdraw": "Vybráno $amount $symbol z poolu.",
+			"withdraw_hidden": "Vybráno $symbol z poolu."
 		}
 	},
 	"settings": {
