@@ -73,7 +73,7 @@ describe('HelpProviderExplorers', () => {
 		expect(getByText(en.help.text.explorers_onesec_description)).toBeInTheDocument();
 	});
 
-	it('carries the user own address into every link', () => {
+	it("carries the user's own address into every link", () => {
 		setAddresses();
 
 		const { getByTestId } = render(HelpProviderExplorers);
