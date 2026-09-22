@@ -350,6 +350,66 @@ describe('sol-instruction-summary.utils', () => {
 			expect(view.own).toBeTruthy();
 		});
 
+		// A close hands its whole balance to the account it names, so a chain carries the first
+		// account's lamports to the last. Counting System funding alone reports the tail of the
+		// chain as though it began there, understating what the final close pays out.
+		it('should carry a chained close through to the last account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const first = 'firstAccount11111111111111111111111111111111';
+			const second = 'secondAccount1111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								lamports: 2_039_280,
+								newAccount: first,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								lamports: 2_039_280,
+								newAccount: second,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: first, destination: second, owner } }
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: second, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, first, second]
+			});
+
+			const [firstClose, secondClose] = views.filter(({ kind }) => kind === 'closeTokenAccount');
+
+			// The first hands over its own rent; the second hands over both, since the first paid
+			// into it before it was closed.
+			expect(firstClose?.returned).toBe(2_039_280n);
+			expect(secondClose?.returned).toBe(4_078_560n);
+		});
+
 		// The balance goes wherever the close names, and that need not be the user. Left unread, a
 		// hand-over of a funded account reads exactly like money coming back.
 		it('should name a destination that is not the user', () => {

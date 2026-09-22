@@ -256,6 +256,7 @@ const toEffect = ({
 		parsed: { type, info }
 	},
 	topLevel,
+	position,
 	owned,
 	accountMints,
 	accountLamports,
@@ -264,6 +265,9 @@ const toEffect = ({
 	instruction: SolParsedRpcInstruction;
 	// Whether the message states this instruction itself, rather than a program having made it.
 	topLevel: boolean;
+	// Where this instruction sits in the flattened order, so a balance can be taken as it stood
+	// here rather than after a later instruction moved it on.
+	position: number;
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
@@ -352,7 +356,9 @@ const toEffect = ({
 
 			// An account the same transaction opened held nothing before it ran, so its balance
 			// going in says zero. What it hands back is the rent it was funded with moments earlier.
-			const returned = fundedInTransaction({ account, flattened }) ?? accountLamports[account];
+			const returned =
+				fundedInTransaction({ account, flattened, accountLamports, until: position }) ??
+				accountLamports[account];
 
 			// Closing pays the account's whole balance to whoever the instruction names, which need
 			// not be the user: read as a close alone, a hand-over of a funded wrapped SOL account
@@ -465,12 +471,19 @@ const toEffect = ({
  */
 const fundedInTransaction = ({
 	account,
-	flattened
+	flattened,
+	accountLamports = {},
+	until
 }: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
+	// What each account held going in, so a chain can start from an account that already existed.
+	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	// Only what arrived before the instruction being described. A close later in the message hands
+	// its balance on afterwards, and is no part of what the one being described paid out.
+	until?: number;
 }): bigint | undefined =>
-	flattened.reduce<bigint | undefined>(
+	flattened.slice(0, until).reduce<bigint | undefined>(
 		(
 			acc,
 			{
@@ -478,8 +491,23 @@ const fundedInTransaction = ({
 					program,
 					parsed: { type, info }
 				}
-			}
+			},
+			index
 		) => {
+			// A close hands its account's whole balance to the account it names, so a chain of them
+			// carries the first account's lamports through to the last. Counting System funding alone
+			// stops at the first link and reports the tail of a chain as though it began there.
+			if (type === 'closeAccount' && address({ info, key: 'destination' }) === account) {
+				const closed = address({ info, key: 'account' });
+
+				const inflow = nonNullish(closed)
+					? (fundedInTransaction({ account: closed, flattened, accountLamports, until: index }) ??
+						accountLamports[closed])
+					: undefined;
+
+				return nonNullish(inflow) ? (acc ?? ZERO) + inflow : acc;
+			}
+
 			if (program !== 'system') {
 				return acc;
 			}
@@ -670,29 +698,33 @@ export const mapSolInstructionSummaries = ({
 		}, [])
 	);
 
-	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, topLevel, instruction }) => {
-		const effect = toEffect({
-			instruction,
-			topLevel,
-			owned,
-			accountMints,
-			accountLamports,
-			flattened
-		});
+	const effects = flattened.reduce<Effect[]>(
+		(acc, { parentIndex, topLevel, instruction }, position) => {
+			const effect = toEffect({
+				instruction,
+				topLevel,
+				position,
+				owned,
+				accountMints,
+				accountLamports,
+				flattened
+			});
 
-		if (isNullish(effect)) {
-			return acc;
-		}
+			if (isNullish(effect)) {
+				return acc;
+			}
 
-		const wrapped = asWrap({ effect, accountMints });
+			const wrapped = asWrap({ effect, accountMints });
 
-		const rent =
-			wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)
-				? rentOf({ account: wrapped.account, flattened })
-				: undefined;
+			const rent =
+				wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)
+					? rentOf({ account: wrapped.account, flattened })
+					: undefined;
 
-		return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
-	}, []);
+			return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
+		},
+		[]
+	);
 
 	// A top-level instruction none of the effects came from is one the wallet could not read: a
 	// program it does not know, or a message whose instructions carry raw bytes rather than the
