@@ -54,6 +54,9 @@
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
+		// Whether the decode has settled. Until it has, nothing here is an answer yet - the balance
+		// changes in particular would read as unavailable rather than as not asked for.
+		decoded?: boolean;
 		unreviewed?: boolean;
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
@@ -87,6 +90,7 @@
 		prioritizationFeeEstimate,
 		isApproval = false,
 		ambiguous = false,
+		decoded = false,
 		unreviewed = false,
 		preview,
 		instructions,
@@ -148,6 +152,11 @@
 			metadata: $splTokenMetadataStore
 		})
 	);
+
+	// Whether a run took place at all, which the preview alone does not say: it is omitted when the
+	// run changed nothing the user owns, and the parties come back whole either way. Shared so the
+	// caveat and the answer below can never disagree about whether anything was simulated.
+	let simulationObtained = $derived(nonNullish(preview) || parties?.partial === false);
 
 	let summaryText = $derived(
 		nonNullish(statedSummary)
@@ -259,7 +268,7 @@
 		</MessageBox>
 	{:else if nonNullish(preview) && !approveDisabled && isNullish(statedSummary)}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
-	{:else if nonNullish(preview)}
+	{:else if simulationObtained}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
@@ -333,8 +342,35 @@
 					<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
 				{/if}
 
+				<!-- What the transaction would do to the user's own accounts, and the one section that must
+				     be here whether or not there is an answer. An absent section is indistinguishable
+				     from a transaction that moves nothing, which is the most dangerous thing this review
+				     could imply; the label says which of the two this is, and the missing answer is
+				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{:else if decoded}
+					<WalletConnectModalValue
+						label={simulationObtained
+							? $i18n.wallet_connect.text.simulated_changes
+							: $i18n.wallet_connect.text.balance_changes}
+						ref="balance-changes"
+					>
+						{#if simulationObtained}
+							<!-- A run happened and reported nothing of the user's changing. That is an answer,
+							     and a different one from having no answer at all. -->
+							<span>{$i18n.wallet_connect.text.balance_changes_none}</span>
+						{:else}
+							<!-- `role="alert"` for the same reason the refusal above carries one: it arrives
+							     once the decode settles, and a reader already past this point would not
+							     otherwise hear that the balance changes could not be determined. -->
+							<div role="alert">
+								<MessageBox level="error">
+									{$i18n.wallet_connect.text.balance_changes_unknown}
+								</MessageBox>
+							</div>
+						{/if}
+					</WalletConnectModalValue>
 				{/if}
 
 				<!-- Where the transaction would run. A program is the closest thing a Solana message has to
