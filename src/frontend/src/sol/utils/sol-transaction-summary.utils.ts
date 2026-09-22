@@ -39,6 +39,19 @@ export const flattenInstructions = (
  * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
  * never this transaction's to charge.
  */
+/**
+ * Whether what a close hands back reaches the user.
+ *
+ * Closing pays the account's whole balance to the destination the instruction names, which the
+ * effect carries and marks. A summary from before that was carried names no destination at all,
+ * and those kept their refund, so the absence of one still counts as the user's own rather than
+ * turning every historical close into a loss.
+ */
+const returnedToOwner = ({
+	own,
+	counterparty
+}: Pick<SolInstructionSummary, 'own' | 'counterparty'>): boolean => own ?? isNullish(counterparty);
+
 export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 	const flattened = flattenInstructions(instructions);
 
@@ -51,9 +64,16 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 	}, {});
 
 	return maxBigInt(
-		flattened.reduce((acc, { kind, account, rent, returned }) => {
+		flattened.reduce((acc, { kind, account, rent, returned, own, counterparty }) => {
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
+			}
+
+			// Only a close that pays the user back reduces what the transaction costs them. One that
+			// names somebody else spends the balance rather than returning it, and crediting it here
+			// would report the smaller number precisely where the larger one is the point.
+			if (!returnedToOwner({ own, counterparty })) {
+				return acc;
 			}
 
 			if (kind === 'unwrap') {
@@ -363,7 +383,7 @@ export const formatSolInstructionSummary = ({
 	// by whatever was wrapped - and saying "to your wallet" for a close that names somebody else
 	// states the one thing about it that matters wrongly, so the line says "to" and the address is
 	// rendered beside it.
-	const returnedHome = own ?? isNullish(counterparty);
+	const returnedHome = returnedToOwner({ own, counterparty });
 
 	const returnedDetail = nonNullish(returned)
 		? replacePlaceholders(

@@ -217,6 +217,35 @@ describe('sol-transaction-summary.utils', () => {
 			expect(solAtaFee([create(), create()])).toBe(RENT * 2n);
 		});
 
+		// Only a close that pays the user back reduces what the transaction cost them. Crediting a
+		// hand-over would report the smaller number exactly where the larger one matters.
+		it('should not credit a close that named somebody else', () => {
+			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: false }])).toBe(
+				RENT
+			);
+		});
+
+		it('should not credit an unwrap that named somebody else', () => {
+			expect(
+				solAtaFee([
+					create(),
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress,
+						own: false
+					}
+				])
+			).toBe(RENT);
+		});
+
+		it('should still credit a close that named the user', () => {
+			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: true }])).toBe(
+				ZERO
+			);
+		});
+
 		// The account is gone by the end of the transaction, so its rent is back in the wallet.
 		// Billing the open alone charges the user for something they no longer have.
 		it('should charge nothing when it closes what it opened', () => {
