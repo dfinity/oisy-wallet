@@ -7,6 +7,7 @@ import {
 	HELP_ICPSWAP_ERROR,
 	HELP_ICPSWAP_NO_TOKENS,
 	HELP_ICPSWAP_POOL_GROUP,
+	HELP_ICPSWAP_RESULTS_SUMMARY,
 	HELP_ICPSWAP_SCAN_BUTTON,
 	HELP_ICPSWAP_SCAN_SUMMARY,
 	HELP_ICPSWAP_TOKEN_A,
@@ -571,6 +572,87 @@ describe('HelpIcpSwapWithdrawal', () => {
 				})
 			)
 		);
+	});
+
+	describe('accessible announcements', () => {
+		// The region has to be in the DOM before its content changes: a polite live region that is
+		// itself inserted is not reliably announced.
+		const liveRegion = (container: HTMLElement): HTMLElement | null =>
+			container.querySelector('[role="status"][aria-live="polite"]');
+
+		it('keeps one polite live region in place before anything is picked', () => {
+			const { container } = render(HelpIcpSwapWithdrawal);
+
+			expect(liveRegion(container)).toBeInTheDocument();
+			expect(liveRegion(container)).toBeEmptyDOMElement();
+		});
+
+		it('announces progress and then the number of balances found', async () => {
+			const { promise: pending, resolve: release } = Promise.withResolvers<IcpSwapPoolBalances>();
+			vi.mocked(loadIcpSwapRecoverableBalances).mockReturnValue(pending);
+
+			const { container, getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await selectPair(getByTestId);
+
+			await waitFor(() =>
+				expect(liveRegion(container)).toHaveTextContent(en.help.text.checking_pool)
+			);
+
+			release({
+				poolCanisterId,
+				poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+				pair: ['ICP', 'ckUSDC'],
+				balances: [unusedIcp, unusedUsdc]
+			});
+
+			await waitFor(() =>
+				expect(getByTestId(HELP_ICPSWAP_RESULTS_SUMMARY)).toHaveTextContent(
+					replacePlaceholders(en.help.text.results_found, { $balances: '2' })
+				)
+			);
+
+			expect(liveRegion(container)).toContainElement(getByTestId(HELP_ICPSWAP_RESULTS_SUMMARY));
+		});
+
+		it('announces an empty result inside the same region', async () => {
+			const { container, getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await selectPair(getByTestId);
+
+			await waitFor(() => expect(getByTestId(HELP_ICPSWAP_EMPTY)).toBeInTheDocument());
+
+			expect(liveRegion(container)).toContainElement(getByTestId(HELP_ICPSWAP_EMPTY));
+		});
+
+		it('raises a failed lookup as an alert rather than a status update', async () => {
+			vi.mocked(loadIcpSwapRecoverableBalances).mockRejectedValue(new Error('transport'));
+
+			const { container, getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await selectPair(getByTestId);
+
+			await waitFor(() => expect(getByTestId(HELP_ICPSWAP_ERROR)).toBeInTheDocument());
+
+			expect(getByTestId(HELP_ICPSWAP_ERROR)).toHaveAttribute('role', 'alert');
+			expect(liveRegion(container)).not.toContainElement(getByTestId(HELP_ICPSWAP_ERROR));
+		});
+
+		it('raises unreadable pools as an alert', async () => {
+			vi.mocked(scanIcpSwapPools).mockResolvedValue({
+				poolsScanned: 4,
+				pools: [],
+				unreadablePools: 2
+			});
+
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+			await waitFor(() => expect(getByTestId(HELP_ICPSWAP_SCAN_SUMMARY)).toBeInTheDocument());
+
+			expect(getByTestId(HELP_ICPSWAP_SCAN_SUMMARY)).toHaveAttribute('role', 'alert');
+		});
 	});
 
 	it('locks discovery while a withdrawal is in flight', async () => {

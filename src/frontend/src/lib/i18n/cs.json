@@ -810,6 +810,7 @@
 			"no_tokens": "Není zapnutý žádný token ICRC. Zapněte nejprve oba tokeny poolu.",
 			"checking_pool": "Kontrolujeme pool…",
 			"nothing_to_withdraw": "V tomto poolu není co vybrat.",
+			"results_found": "Nalezené vybratelné zůstatky: $balances.",
 			"balance_unused": "Nevyužitý zůstatek",
 			"withdraw": "Vybrat"
 		},

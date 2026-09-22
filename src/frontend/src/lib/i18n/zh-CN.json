@@ -810,6 +810,7 @@
 			"no_tokens": "没有启用任何 ICRC 代币。请先启用该资金池的两个代币。",
 			"checking_pool": "正在检查资金池…",
 			"nothing_to_withdraw": "该资金池中没有可提取的余额。",
+			"results_found": "找到可提取余额：$balances 个。",
 			"balance_unused": "未使用余额",
 			"withdraw": "提取"
 		},

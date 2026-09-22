@@ -810,6 +810,7 @@
 			"no_tokens": "Chưa có token ICRC nào được bật. Hãy bật hai token của pool trước.",
 			"checking_pool": "Đang kiểm tra pool…",
 			"nothing_to_withdraw": "Không có gì để rút trong pool này.",
+			"results_found": "Số dư có thể rút đã tìm thấy: $balances.",
 			"balance_unused": "Số dư chưa dùng",
 			"withdraw": "Rút"
 		},

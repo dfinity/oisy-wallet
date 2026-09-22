@@ -810,6 +810,7 @@
 			"no_tokens": "Aucun token ICRC n'est activé. Activez d'abord les deux tokens du pool.",
 			"checking_pool": "Vérification du pool…",
 			"nothing_to_withdraw": "Rien à retirer dans ce pool.",
+			"results_found": "Soldes récupérables trouvés : $balances.",
 			"balance_unused": "Solde non utilisé",
 			"withdraw": "Retirer"
 		},

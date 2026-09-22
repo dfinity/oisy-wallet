@@ -810,6 +810,7 @@
 			"no_tokens": "Es sind keine ICRC-Tokens aktiv. Aktiviere zuerst die beiden Tokens des Pools.",
 			"checking_pool": "Pool wird geprüft…",
 			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
+			"results_found": "Gefundene auszahlbare Guthaben: $balances.",
 			"balance_unused": "Ungenutztes Guthaben",
 			"withdraw": "Auszahlen"
 		},

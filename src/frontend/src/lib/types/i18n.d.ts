@@ -552,6 +552,7 @@ interface I18nHelp {
 		no_tokens: string;
 		checking_pool: string;
 		nothing_to_withdraw: string;
+		results_found: string;
 		balance_unused: string;
 		withdraw: string;
 	};

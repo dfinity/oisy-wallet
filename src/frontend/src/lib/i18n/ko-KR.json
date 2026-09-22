@@ -810,6 +810,7 @@
 			"no_tokens": "활성화된 ICRC 토큰이 없습니다. 먼저 풀의 두 토큰을 활성화하세요.",
 			"checking_pool": "풀을 확인하는 중…",
 			"nothing_to_withdraw": "이 풀에는 출금할 잔액이 없습니다.",
+			"results_found": "출금 가능한 잔액: $balances개.",
 			"balance_unused": "미사용 잔액",
 			"withdraw": "출금"
 		},

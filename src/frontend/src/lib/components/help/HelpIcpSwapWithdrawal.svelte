@@ -17,6 +17,7 @@
 		HELP_ICPSWAP_LOADING,
 		HELP_ICPSWAP_NO_TOKENS,
 		HELP_ICPSWAP_POOL_GROUP,
+		HELP_ICPSWAP_RESULTS_SUMMARY,
 		HELP_ICPSWAP_SCAN_BUTTON,
 		HELP_ICPSWAP_SCAN_SUMMARY,
 		HELP_ICPSWAP_TOKEN_A,
@@ -340,6 +341,10 @@
 
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
 	let hasResults = $derived(visibleGroups.length > 0);
+
+	let withdrawableCount = $derived(
+		visibleGroups.reduce((count, { balances }) => count + balances.length, 0)
+	);
 	let showEmpty = $derived(nonNullish(groups) && !hasResults && !busy);
 </script>
 
@@ -409,21 +414,35 @@
 			</p>
 		{/if}
 
-		{#if busy}
-			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
-				{$i18n.help.text.checking_pool}
-			</p>
-		{:else if nonNullish(loadError)}
-			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR}>
+		<!-- Always in the DOM: a polite live region is announced when its content changes, not when
+		     the region itself is inserted, so the paragraphs have to swap inside it. -->
+		<div aria-live="polite" role="status">
+			{#if busy}
+				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
+					{$i18n.help.text.checking_pool}
+				</p>
+			{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
+				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
+					{nonNullish(scanSummary)
+						? replacePlaceholders($i18n.help.text.scan_nothing_found, {
+								$pools: `${scanSummary.poolsScanned}`
+							})
+						: $i18n.help.text.nothing_to_withdraw}
+				</p>
+			{:else if hasResults}
+				<!-- The visible success state is a list of rows, with no sentence saying the lookup
+				     finished, so the announcement is the one thing here that is screen-reader only. -->
+				<p class="sr-only" data-tid={HELP_ICPSWAP_RESULTS_SUMMARY}>
+					{replacePlaceholders($i18n.help.text.results_found, {
+						$balances: `${withdrawableCount}`
+					})}
+				</p>
+			{/if}
+		</div>
+
+		{#if nonNullish(loadError)}
+			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR} role="alert">
 				{loadError}
-			</p>
-		{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
-			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
-				{nonNullish(scanSummary)
-					? replacePlaceholders($i18n.help.text.scan_nothing_found, {
-							$pools: `${scanSummary.poolsScanned}`
-						})
-					: $i18n.help.text.nothing_to_withdraw}
 			</p>
 		{/if}
 
@@ -452,7 +471,7 @@
 		{/if}
 
 		{#if nonNullish(scanSummary) && scanSummary.unreadablePools > 0 && !busy}
-			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_SCAN_SUMMARY}>
+			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_SCAN_SUMMARY} role="alert">
 				{replacePlaceholders($i18n.help.text.scan_unreadable, {
 					$unreadable: `${scanSummary.unreadablePools}`,
 					$pools: `${scanSummary.poolsScanned}`

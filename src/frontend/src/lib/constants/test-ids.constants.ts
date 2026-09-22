@@ -151,6 +151,7 @@ export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
 export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
 export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
 export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
+export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
 export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
