@@ -97,6 +97,7 @@ describe('support-analytics.services', () => {
 					result_status: 'success',
 					event_subcontext: 'icpswap_withdrawal',
 					token_symbol: 'ICP',
+					token_network: 'icp',
 					token2_symbol: 'ckUSDC',
 					event_key: 'balances_found',
 					event_value: '2'
@@ -142,6 +143,7 @@ describe('support-analytics.services', () => {
 					result_status: 'executing',
 					event_subcontext: 'icpswap_withdrawal',
 					token_symbol: 'ICP',
+					token_network: 'icp',
 					token_standard: 'icrc'
 				}
 			});
