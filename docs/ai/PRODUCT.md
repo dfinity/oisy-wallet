@@ -132,14 +132,14 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 
 The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
 
-| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                |
-| ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                    |
-| `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                    |
-| `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                       | `event_provider`: the provider id; `event_key: network` + the chain                  |
-| `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked              |
-| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`; on success `event_key: balances_found` + the count |
-| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_standard`                                                     |
+| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                 | Extra                                                                                                      |
+| ---------------- | -------------------- | ------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `open`           | —                    | the Help page opens                         | `success`                       | —                                                                                                          |
+| `contact`        | `support`            | the help-centre link is clicked             | `success`                       | `event_key: link`, `event_value`: destination URL                                                          |
+| `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                       | `event_provider`: the provider id; `event_key: network` + the chain                                        |
+| `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error` | `event_key: balances_found` + the count; `source_detail`: pools checked                                    |
+| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)   | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found` + the count |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error` | `token_symbol`, `token_network: icp`, `token_standard`                                                     |
 
 Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
 
@@ -293,7 +293,7 @@ The scan only covers pools where **both** legs are active. A swap into a token t
 
 ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
 
-Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads the pool so the row disappears. Only the pressed row shows a loading state.
+Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads that pool — a single query, not another scan — so the row disappears, or stays showing a remainder if the pool credited more in between. Only the pressed row shows a loading state.
 
 Balances at or below the token's ledger fee are **not shown at all** — they cannot be moved, and offering them would only invite a withdrawal that is bound to fail. When a pair resolves to a pool that holds nothing, the card says so explicitly rather than showing an empty space; when the pair has no pool at all, it says that instead.
 

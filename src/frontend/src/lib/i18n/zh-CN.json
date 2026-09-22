@@ -830,7 +830,7 @@
 			"scan": "检查您已启用代币之间的资金池"
 		},
 		"error": {
-			"pool_not_found": "该交易对没有对应的 ICPSwap 资金池。请检查两个代币后重试。",
+			"pool_not_found": "未能找到该交易对的资金池。请检查两个代币，或稍后重试。",
 			"load_failed": "无法读取您在该资金池中的余额。",
 			"withdraw_failed": "提取失败。",
 			"scan_failed": "无法获取 ICPSwap 资金池列表。"
@@ -1054,7 +1054,6 @@
 			"cketh_certified": "请等待 ckETH 参数被认证。",
 			"pending_bitcoin_transaction": "待处理的比特币交易完成后，你可以发送另一笔交易。",
 			"no_available_utxos": "你没有可用的 UTXO 来执行此交易。",
-			"unknown_destination": "",
 			"first_time_destination": "看起来你从未向该地址转过代币。请仔细核对地址。",
 			"first_time_destination_confirm": "这是我第一次向该地址转账，我已仔细核对地址。",
 			"fee_expired": "",

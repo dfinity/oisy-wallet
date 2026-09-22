@@ -5,6 +5,7 @@ import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import {
 	IcpSwapPoolNotFoundError,
 	loadIcpSwapRecoverableBalances,
+	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
 	type IcpSwapRecoverableBalance
@@ -202,6 +203,7 @@ describe('icp-swap-recovery.services', () => {
 			expect(pools).toStrictEqual([
 				{
 					poolCanisterId,
+					poolTokens: [pool.token0, pool.token1],
 					pair: [tokenB.symbol, tokenA.symbol],
 					balances: [{ token: tokenA, poolToken: pool.token1, amount: 900_000n }]
 				}
@@ -244,12 +246,82 @@ describe('icp-swap-recovery.services', () => {
 			expect(pools[0].poolCanisterId).toBe(poolCanisterId);
 		});
 
+		it('keeps the first token when a ledger id is enabled twice', async () => {
+			// enabledIcrcTokens concatenates enabled defaults with enabled customs without dropping a
+			// custom that duplicates a default. The default entry is authoritative, and its fee and
+			// decimals drive the dust filter and the formatting, so the scan must agree with the
+			// manual lookup rather than picking up the duplicate's values.
+			const duplicate = { ...tokenA, fee: 10_000_000n, decimals: 2, name: 'custom duplicate' };
+
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: ZERO,
+				balance1: 900_000n
+			});
+
+			const { pools } = await scanIcpSwapPools({
+				identity: mockIdentity,
+				tokens: [tokenA, tokenB, duplicate]
+			});
+
+			// With the duplicate's 10_000_000n fee the 900_000n balance would have been dropped as
+			// dust; with tokenA's own fee it survives.
+			expect(pools[0].balances).toStrictEqual([
+				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
+			]);
+		});
+
 		it('propagates a failure to fetch the pool table', async () => {
 			vi.mocked(getAllPools).mockRejectedValue(new Error('factory unavailable'));
 
 			await expect(
 				scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] })
 			).rejects.toThrow('factory unavailable');
+		});
+	});
+
+	describe('reloadIcpSwapPoolBalances', () => {
+		const group = {
+			poolCanisterId,
+			poolTokens: [pool.token0, pool.token1] as [typeof pool.token0, typeof pool.token1],
+			pair: [tokenB.symbol, tokenA.symbol] as [string, string],
+			balances: []
+		};
+
+		it('re-reads one pool without going back to the factory', async () => {
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({ balance0: ZERO, balance1: 900_000n });
+
+			const refreshed = await reloadIcpSwapPoolBalances({
+				identity: mockIdentity,
+				pool: group,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(getAllPools).not.toHaveBeenCalled();
+			expect(getPoolCanister).not.toHaveBeenCalled();
+			expect(getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: poolCanisterId,
+				principal: mockIdentity.getPrincipal()
+			});
+			expect(refreshed.balances).toStrictEqual([
+				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
+			]);
+		});
+
+		it('surfaces a balance credited after the group was built', async () => {
+			// The point of refreshing rather than removing the row locally.
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: 500_000n,
+				balance1: ZERO
+			});
+
+			const { balances } = await reloadIcpSwapPoolBalances({
+				identity: mockIdentity,
+				pool: group,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(balances).toStrictEqual([{ token: tokenB, poolToken: pool.token0, amount: 500_000n }]);
 		});
 	});
 

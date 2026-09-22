@@ -788,7 +788,6 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		unknown_destination: string;
 		first_time_destination: string;
 		first_time_destination_confirm: string;
 		fee_expired: string;

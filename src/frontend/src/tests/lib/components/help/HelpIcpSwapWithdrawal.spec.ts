@@ -16,8 +16,10 @@ import { trackHelp } from '$lib/services/help-analytics.services';
 import {
 	IcpSwapPoolNotFoundError,
 	loadIcpSwapRecoverableBalances,
+	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
+	type IcpSwapPoolBalances,
 	type IcpSwapRecoverableBalance
 } from '$lib/services/icp-swap-recovery.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -32,6 +34,7 @@ vi.mock('$lib/services/icp-swap-recovery.services', async (importOriginal) => {
 	return {
 		...actual,
 		loadIcpSwapRecoverableBalances: vi.fn(),
+		reloadIcpSwapPoolBalances: vi.fn(),
 		scanIcpSwapPools: vi.fn(),
 		withdrawIcpSwapBalance: vi.fn()
 	};
@@ -91,6 +94,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([usdc]));
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
@@ -110,6 +114,50 @@ describe('HelpIcpSwapWithdrawal', () => {
 		// Nothing is looked up until both tokens are chosen.
 		expect(queryByTestId(HELP_ICPSWAP_EMPTY)).toBeNull();
 		expect(loadIcpSwapRecoverableBalances).not.toHaveBeenCalled();
+	});
+
+	it('ignores a superseded lookup that settles after a newer one', async () => {
+		// Neither selector is disabled while a lookup runs, so the slower first request must not
+		// overwrite the newer one's results.
+		const stale: IcpSwapPoolBalances = {
+			poolCanisterId: 'stale-pool',
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		};
+		const fresh: IcpSwapPoolBalances = {
+			poolCanisterId: 'fresh-pool',
+			poolTokens: [unusedUsdc.poolToken, unusedIcp.poolToken],
+			pair: ['ckUSDC', 'ICP'],
+			balances: [unusedUsdc]
+		};
+
+		const { promise: stalePending, resolve: releaseStale } =
+			Promise.withResolvers<IcpSwapPoolBalances>();
+
+		vi.mocked(loadIcpSwapRecoverableBalances)
+			.mockReturnValueOnce(stalePending)
+			.mockResolvedValueOnce(fresh);
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		// First pair: the lookup hangs.
+		await selectPair(getByTestId);
+
+		// Second pair: re-picking token A starts a newer lookup that resolves immediately.
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
+		await fireEvent.click(getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${icp.ledgerCanisterId}`));
+
+		await waitFor(() =>
+			expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument()
+		);
+
+		// Now let the first one finish last.
+		releaseStale(stale);
+		await waitFor(() => expect(loadIcpSwapRecoverableBalances).toHaveBeenCalledTimes(2));
+
+		expect(queryByTestId(`${HELP_ICPSWAP_POOL_GROUP}-stale-pool`)).toBeNull();
+		expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument();
 	});
 
 	it('does not scan until the button is pressed', () => {
@@ -141,8 +189,18 @@ describe('HelpIcpSwapWithdrawal', () => {
 			poolsScanned: 2,
 			unreadablePools: 0,
 			pools: [
-				{ poolCanisterId, pair: ['ICP', 'ckUSDC'], balances: [unusedIcp] },
-				{ poolCanisterId: otherPoolId, pair: ['ckUSDC', 'ICP'], balances: [unusedUsdc] }
+				{
+					poolCanisterId,
+					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					pair: ['ICP', 'ckUSDC'],
+					balances: [unusedIcp]
+				},
+				{
+					poolCanisterId: otherPoolId,
+					poolTokens: [unusedUsdc.poolToken, unusedIcp.poolToken],
+					pair: ['ckUSDC', 'ICP'],
+					balances: [unusedUsdc]
+				}
 			]
 		});
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(2_000_000n);
@@ -170,11 +228,49 @@ describe('HelpIcpSwapWithdrawal', () => {
 		);
 	});
 
+	it('does not claim nothing was left behind when pools were unreadable', async () => {
+		// Otherwise the page states a complete result and an incomplete one at the same time.
+		vi.mocked(scanIcpSwapPools).mockResolvedValue({
+			poolsScanned: 5,
+			unreadablePools: 2,
+			pools: []
+		});
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		await waitFor(() => expect(getByTestId(HELP_ICPSWAP_SCAN_SUMMARY)).toBeInTheDocument());
+
+		expect(queryByTestId(HELP_ICPSWAP_EMPTY)).toBeNull();
+	});
+
+	it('still says nothing was found when every pool was readable', async () => {
+		vi.mocked(scanIcpSwapPools).mockResolvedValue({
+			poolsScanned: 5,
+			unreadablePools: 0,
+			pools: []
+		});
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		await waitFor(() => expect(getByTestId(HELP_ICPSWAP_EMPTY)).toBeInTheDocument());
+	});
+
 	it('reports pools it could not read rather than passing a partial scan off as complete', async () => {
 		vi.mocked(scanIcpSwapPools).mockResolvedValue({
 			poolsScanned: 5,
 			unreadablePools: 2,
-			pools: [{ poolCanisterId, pair: ['ICP', 'ckUSDC'], balances: [unusedIcp] }]
+			pools: [
+				{
+					poolCanisterId,
+					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					pair: ['ICP', 'ckUSDC'],
+					balances: [unusedIcp]
+				}
+			]
 		});
 
 		const { getByTestId } = render(HelpIcpSwapWithdrawal);
@@ -202,7 +298,14 @@ describe('HelpIcpSwapWithdrawal', () => {
 		vi.mocked(scanIcpSwapPools).mockResolvedValue({
 			poolsScanned: 9,
 			unreadablePools: 0,
-			pools: [{ poolCanisterId, pair: ['ICP', 'ckUSDC'], balances: [unusedIcp] }]
+			pools: [
+				{
+					poolCanisterId,
+					poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+					pair: ['ICP', 'ckUSDC'],
+					balances: [unusedIcp]
+				}
+			]
 		});
 
 		const { getByTestId } = render(HelpIcpSwapWithdrawal);
@@ -284,6 +387,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('lists every recoverable balance with its own withdraw button', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
@@ -297,13 +401,20 @@ describe('HelpIcpSwapWithdrawal', () => {
 		expect(getByTestId(withdrawTestId(unusedUsdc))).toBeInTheDocument();
 	});
 
-	it('withdraws only the row whose button was pressed, and drops it without re-querying', async () => {
+	it('withdraws only the row whose button was pressed, then re-reads that pool', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
 		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
+		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedUsdc]
+		});
 
 		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
 
@@ -322,17 +433,77 @@ describe('HelpIcpSwapWithdrawal', () => {
 			})
 		);
 
-		// The row goes away, but nothing is re-queried: re-running a lookup after every withdrawal
-		// would mean a full pool sweep when the rows came from a scan.
+		// The pool is re-read - one query against a known canister id, not another factory sweep -
+		// and the emptied row goes away.
 		await waitFor(() => expect(queryByTestId(withdrawTestId(unusedIcp))).toBeNull());
 
 		expect(getByTestId(withdrawTestId(unusedUsdc))).toBeInTheDocument();
+		expect(reloadIcpSwapPoolBalances).toHaveBeenCalledOnce();
 		expect(loadIcpSwapRecoverableBalances).toHaveBeenCalledOnce();
+	});
+
+	it('surfaces a remainder credited between discovery and withdrawal', async () => {
+		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		});
+		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
+		// The pool credited more while the user was looking at it.
+		vi.mocked(reloadIcpSwapPoolBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [{ ...unusedIcp, amount: 25_000_000n }]
+		});
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(withdrawTestId(unusedIcp)));
+
+		// The row stays, now showing what is left, instead of disappearing with the funds hidden.
+		await waitFor(() => expect(reloadIcpSwapPoolBalances).toHaveBeenCalledOnce());
+
+		expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument();
+		expect(getByTestId(HELP_ICPSWAP_CARD)).toHaveTextContent('0.25');
+	});
+
+	it('does not report a failed withdrawal when only the re-read fails', async () => {
+		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp, unusedUsdc]
+		});
+		vi.mocked(withdrawIcpSwapBalance).mockResolvedValue(150_000_000n);
+		vi.mocked(reloadIcpSwapPoolBalances).mockRejectedValue(new Error('pool unavailable'));
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+		await waitFor(() => expect(getByTestId(withdrawTestId(unusedIcp))).toBeInTheDocument());
+
+		await fireEvent.click(getByTestId(withdrawTestId(unusedIcp)));
+
+		// The withdrawal succeeded, so it is tracked as a success and the row is dropped anyway.
+		await waitFor(() => expect(queryByTestId(withdrawTestId(unusedIcp))).toBeNull());
+
+		expect(trackHelp).toHaveBeenCalledWith(
+			expect.objectContaining({ action: 'withdraw', resultStatus: 'success' })
+		);
+		expect(trackHelp).not.toHaveBeenCalledWith(
+			expect.objectContaining({ action: 'withdraw', resultStatus: 'error' })
+		);
 	});
 
 	it('keeps the row in place when the withdrawal fails', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
@@ -355,6 +526,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('tracks the resolved pool with both symbols and the withdrawable count', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp, unusedUsdc]
 		});
@@ -392,6 +564,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 	it('tracks a withdrawal from executing through to success, without an amount', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
 			pair: ['ICP', 'ckUSDC'],
 			balances: [unusedIcp]
 		});
