@@ -5,6 +5,7 @@ import {
 	HELP_ICPSWAP_CARD,
 	HELP_ICPSWAP_EMPTY,
 	HELP_ICPSWAP_ERROR,
+	HELP_ICPSWAP_NO_TOKENS,
 	HELP_ICPSWAP_POOL_GROUP,
 	HELP_ICPSWAP_SCAN_BUTTON,
 	HELP_ICPSWAP_SCAN_SUMMARY,
@@ -182,6 +183,24 @@ describe('HelpIcpSwapWithdrawal', () => {
 			pair: ['ICP', 'ckUSDC'],
 			balances: []
 		});
+	});
+
+	it('explains an empty candidate set where the user can actually see it', async () => {
+		// No enabled ICRC tokens: the candidate set is ICP alone, so picking it on one side leaves
+		// the other with nothing. The dropdown is disabled and cannot open, so the explanation has
+		// to be in the card.
+		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
+		await fireEvent.click(
+			getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${ICP_TOKEN.ledgerCanisterId}`)
+		);
+
+		expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
 	});
 
 	it('does not scan until the button is pressed', () => {
