@@ -183,7 +183,7 @@ Per the `analytics.md` §8 checklist, no new property _keys_ are introduced (eve
 
 ## i18n
 
-A new `help` root section in `src/frontend/src/lib/i18n/en.json` for the page title and both cards' copy, plus `navigation.alt.help_page` for the nav item's aria-label. The nav item's label reuses a new `navigation.text.help`. Per repo convention only `en.json` is authored; the i18n workflow syncs the other locales' structure and translations follow separately.
+A new `help` root section in `src/frontend/src/lib/i18n/en.json` provides the page title and both cards' copy, plus `navigation.alt.help_page` for the nav item's aria-label and `navigation.text.help` for its label. The 13 additional locales in the `Languages` enum are translated in this PR; `ar.json`, which is not runtime-selectable, receives only the generated empty placeholders.
 
 ## Testing
 
