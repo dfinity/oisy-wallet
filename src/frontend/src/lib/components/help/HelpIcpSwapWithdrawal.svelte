@@ -52,6 +52,23 @@
 	// The row currently being withdrawn, so only its own button spins.
 	let withdrawingKey = $state<string | undefined>();
 
+	// Neither selector is disabled while a lookup runs, so a second lookup - or a lookup racing a
+	// scan - can be in flight before the first settles. Results are therefore claimed by
+	// generation: a request that is no longer the newest drops its UI writes instead of
+	// overwriting fresher ones, and only the newest may clear `busy`. Analytics stay unguarded,
+	// since the call really did complete and dropping it would leave a `scan` `executing` event
+	// with no terminal event.
+	let requestGeneration = 0;
+
+	const startRequest = (): number => {
+		busy = true;
+		reset();
+
+		return ++requestGeneration;
+	};
+
+	const isCurrentRequest = (generation: number): boolean => generation === requestGeneration;
+
 	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
 	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.
 	// The swap UI has the same gap and closes it the same way, by prepending ICP_TOKEN to its
@@ -87,8 +104,7 @@
 			return;
 		}
 
-		busy = true;
-		reset();
+		const generation = startRequest();
 
 		trackHelp({
 			action: 'scan',
@@ -102,8 +118,10 @@
 				tokens: candidateTokens
 			});
 
-			groups = pools;
-			scanSummary = { poolsScanned, unreadablePools };
+			if (isCurrentRequest(generation)) {
+				groups = pools;
+				scanSummary = { poolsScanned, unreadablePools };
+			}
 
 			trackHelp({
 				action: 'scan',
@@ -113,7 +131,9 @@
 				poolsScanned
 			});
 		} catch (err: unknown) {
-			loadError = $i18n.help.error.scan_failed;
+			if (isCurrentRequest(generation)) {
+				loadError = $i18n.help.error.scan_failed;
+			}
 
 			trackHelp({
 				action: 'scan',
@@ -122,7 +142,9 @@
 				error: replaceIcErrorFields(err)
 			});
 		} finally {
-			busy = false;
+			if (isCurrentRequest(generation)) {
+				busy = false;
+			}
 		}
 	};
 
@@ -133,15 +155,16 @@
 			return;
 		}
 
-		busy = true;
-		reset();
+		const generation = startRequest();
 
 		const [symbolA, symbolB] = [tokenA.symbol, tokenB.symbol];
 
 		try {
 			const pool = await loadIcpSwapRecoverableBalances({ identity, tokenA, tokenB });
 
-			groups = [pool];
+			if (isCurrentRequest(generation)) {
+				groups = [pool];
+			}
 
 			trackHelp({
 				action: 'select_pool',
@@ -152,10 +175,12 @@
 				balancesFound: pool.balances.length
 			});
 		} catch (err: unknown) {
-			loadError =
-				err instanceof IcpSwapPoolNotFoundError
-					? $i18n.help.error.pool_not_found
-					: $i18n.help.error.load_failed;
+			if (isCurrentRequest(generation)) {
+				loadError =
+					err instanceof IcpSwapPoolNotFoundError
+						? $i18n.help.error.pool_not_found
+						: $i18n.help.error.load_failed;
+			}
 
 			trackHelp({
 				action: 'select_pool',
@@ -166,7 +191,9 @@
 				error: replaceIcErrorFields(err)
 			});
 		} finally {
-			busy = false;
+			if (isCurrentRequest(generation)) {
+				busy = false;
+			}
 		}
 	};
 

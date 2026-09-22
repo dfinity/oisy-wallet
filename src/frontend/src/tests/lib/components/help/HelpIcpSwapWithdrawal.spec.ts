@@ -18,6 +18,7 @@ import {
 	loadIcpSwapRecoverableBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
+	type IcpSwapPoolBalances,
 	type IcpSwapRecoverableBalance
 } from '$lib/services/icp-swap-recovery.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -110,6 +111,48 @@ describe('HelpIcpSwapWithdrawal', () => {
 		// Nothing is looked up until both tokens are chosen.
 		expect(queryByTestId(HELP_ICPSWAP_EMPTY)).toBeNull();
 		expect(loadIcpSwapRecoverableBalances).not.toHaveBeenCalled();
+	});
+
+	it('ignores a superseded lookup that settles after a newer one', async () => {
+		// Neither selector is disabled while a lookup runs, so the slower first request must not
+		// overwrite the newer one's results.
+		const stale: IcpSwapPoolBalances = {
+			poolCanisterId: 'stale-pool',
+			pair: ['ICP', 'ckUSDC'],
+			balances: [unusedIcp]
+		};
+		const fresh: IcpSwapPoolBalances = {
+			poolCanisterId: 'fresh-pool',
+			pair: ['ckUSDC', 'ICP'],
+			balances: [unusedUsdc]
+		};
+
+		const { promise: stalePending, resolve: releaseStale } =
+			Promise.withResolvers<IcpSwapPoolBalances>();
+
+		vi.mocked(loadIcpSwapRecoverableBalances)
+			.mockReturnValueOnce(stalePending)
+			.mockResolvedValueOnce(fresh);
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		// First pair: the lookup hangs.
+		await selectPair(getByTestId);
+
+		// Second pair: re-picking token A starts a newer lookup that resolves immediately.
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
+		await fireEvent.click(getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${icp.ledgerCanisterId}`));
+
+		await waitFor(() =>
+			expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument()
+		);
+
+		// Now let the first one finish last.
+		releaseStale(stale);
+		await waitFor(() => expect(loadIcpSwapRecoverableBalances).toHaveBeenCalledTimes(2));
+
+		expect(queryByTestId(`${HELP_ICPSWAP_POOL_GROUP}-stale-pool`)).toBeNull();
+		expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument();
 	});
 
 	it('does not scan until the button is pressed', () => {
