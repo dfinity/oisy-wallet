@@ -164,14 +164,17 @@ describe('loadNextBtcTransactionsByOldest', () => {
 		expect(signalEnd).toHaveBeenCalledOnce();
 	});
 
-	it('should not surface a failed page', async () => {
+	it('should hand back a failed page as an error, not as the end', async () => {
 		setStored(1);
 
-		btcAddressData.mockRejectedValue(new Error('Blockchain API response not ok.'));
+		const err = new Error('Blockchain API response not ok.');
+
+		btcAddressData.mockRejectedValue(err);
 
 		const result = await load();
 
-		expect(result).toEqual({ success: false });
+		expect(result).toEqual({ success: false, err });
+		expect(signalEnd).not.toHaveBeenCalled();
 	});
 
 	it('should do nothing without a BTC address', async () => {

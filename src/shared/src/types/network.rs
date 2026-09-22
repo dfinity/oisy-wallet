@@ -33,6 +33,10 @@ pub enum NetworkSettingsFor {
     PolygonAmoy,
     ArbitrumMainnet,
     ArbitrumSepolia,
+    XrpMainnet,
+    RobinhoodMainnet,
+    // Appended last on purpose: the derived `Ord` orders `NetworkSettingsMap` by declaration
+    // order, so inserting earlier would reorder the keys of already-stored settings.
 }
 
 /// A list of logical networks grouped by type.
@@ -85,6 +89,7 @@ pub enum EthereumNetworkId {
     Sepolia = 11_155_111,
     ArbitrumMainnet = 42_161,
     ArbitrumSepolia = 421_614,
+    RobinhoodMainnet = 4_663,
 }
 impl Network for EthereumNetworkId {}
 /// Solana networks, or "clusters".

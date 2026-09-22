@@ -80,6 +80,10 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	// Set when the message bundles instructions that disagree on what it does, or carries one that
+	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
+	// and holds the button rather than letting the user press it and bounce.
+	let ambiguous = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -97,6 +101,7 @@
 	const updateData = async () => {
 		try {
 			({
+				ambiguous,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -197,7 +202,29 @@
 			modalNext: modal.next,
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
-			identity: $authIdentity
+			identity: $authIdentity,
+			// Whether the run described the instructions nobody read, which neither the run happening
+			// nor the preview's contents can say. The preview attributes nothing to an instruction,
+			// and it carries the user's lamport delta whether or not that delta is anything but the
+			// fee, so its presence says almost nothing.
+			//
+			// The instruction list does attribute. Built from a run, it marks an entry `unknown`
+			// only when no effect - stated by the message or made inside a program - carried that
+			// instruction's index, so a routed swap's router instruction is covered by the transfers
+			// its own invocations produced, while a stake delegation produces no effect anywhere and
+			// stays unknown. A list with nothing unknown left in it is the description; anything
+			// else leaves an instruction the review cannot account for.
+			//
+			// One shape escapes it. An instruction is marked accounted for as soon as any one of its
+			// invocations produced an effect, so an unread instruction making both a transfer we
+			// model and a call we do not - a stake delegation among them - leaves no unknown entry
+			// and passes here with that call unstated. Closing it needs each inner effect accounted
+			// for by name, which means separating a call that genuinely does nothing from one this
+			// wallet has never modelled, for every program an invocation can reach.
+			simulated:
+				(simulatedInstructions ?? false) &&
+				nonNullish(instructions) &&
+				!instructions.some(({ kind }) => kind === 'unknown')
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -223,9 +250,11 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
+				ambiguous={ambiguous ?? false}
 				{application}
-				approveDisabled={!decoded}
+				approveDisabled={!decoded || (ambiguous ?? false)}
 				{data}
+				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
 				{instructions}

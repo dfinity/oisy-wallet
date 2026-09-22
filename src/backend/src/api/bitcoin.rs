@@ -27,7 +27,14 @@ use crate::{
     },
 };
 
-const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+/// Confirmation floor a UTXO must clear to be accepted as an input of a pending transaction.
+///
+/// Must stay in sync with `CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS` in
+/// `src/frontend/src/btc/constants/btc.constants.ts`, which is the floor the frontend selects
+/// UTXOs at. A frontend floor below this one selects inputs that
+/// [`btc_add_pending_transaction`] then rejects as `InvalidUtxos` — after the broadcast, so the
+/// spent UTXOs would never get reserved.
+const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 4;
 
 /// Retrieves the current fee percentiles for Bitcoin transactions from the cache
 /// for the specified network. Fee percentiles are measured in millisatoshi per byte
