@@ -64,9 +64,9 @@ export const {
 	ONESEC: ONESEC_EXPLORER_URL
 } = PROVIDER_EXPLORER_URLS;
 
-// Explorers used to look up a whole ADDRESS, where the network's own `explorerUrl`
-// above cannot serve one. Everything else reuses that URL, so these two are the
-// exception rather than a second set.
+// Address explorers used by Help-page whole-address links when the network's own
+// `explorerUrl` cannot serve the wallet's address (ICP) or a different host is
+// intentionally preferred (BTC). Everything else reuses the network URL.
 //
 // ICP: `dashboard.internetcomputer.org` keys its account page by the 64-character
 // account identifier, and the address OISY shows a user is their principal - which
