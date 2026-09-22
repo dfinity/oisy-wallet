@@ -80,6 +80,10 @@ class EtherscanV2Provider implements EtherscanFetcher {
 		module: string;
 		params: Record<string, unknown>;
 	}): Promise<T> => {
+		if (!ETHERSCAN_API_KEY) {
+			throw new Error('Etherscan API key is not configured: set VITE_ETHERSCAN_API_KEY.');
+		}
+
 		const query = Object.entries(params).reduce(
 			(acc, [key, value]) => (nonNullish(value) ? `${acc}&${key}=${value}` : acc),
 			''
@@ -155,7 +159,16 @@ const etherscanFetcher = ({
 		// signature; the library's own call stays positional.
 		return { fetch: async ({ module, params }) => await provider.fetch(module, params) };
 	} catch (err: unknown) {
-		if ((err as { code?: string })?.code !== 'INVALID_ARGUMENT') {
+		const { code, message } = (err ?? {}) as { code?: string; message?: string };
+
+		// `INVALID_ARGUMENT` alone is too broad to divert on: it is ethers' code for *every*
+		// `assertArgument` failure, and `Network.from` runs first in this constructor and raises
+		// the same code — as "unknown network" — for a network it cannot resolve. Since these
+		// networks come from our own env config, that case is a config bug that must surface, not
+		// be absorbed into a fallback that would then build a URL around a nonsense chain id.
+		// Matching the message discriminates the two, and fails safe: if ethers ever rewords it,
+		// this rethrows and the build breaks loudly rather than degrading in silence.
+		if (code !== 'INVALID_ARGUMENT' || !message?.includes('unsupported network')) {
 			throw err;
 		}
 

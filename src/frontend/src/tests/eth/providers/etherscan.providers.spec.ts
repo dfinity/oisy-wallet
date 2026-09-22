@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import * as etherscanEnv from '$env/rest/etherscan.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
 	EtherscanProviderErc1155TokenTransferTransaction,
@@ -23,8 +24,12 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
 
+// Exposed as a getter, not a plain property, so a test can `vi.spyOn(..., 'get')` it — the
+// pattern `exchange.derived.spec` uses for `EXCHANGE_DISABLED`.
 vi.mock('$env/rest/etherscan.env', () => ({
-	ETHERSCAN_API_KEY: 'test-api-key'
+	get ETHERSCAN_API_KEY() {
+		return 'test-api-key';
+	}
 }));
 
 // `ethers/utils` is not mocked globally (unlike `ethers/providers`), so the fallback's real
@@ -121,6 +126,9 @@ describe('etherscan.providers', () => {
 		afterEach(() => {
 			vi.mocked(EtherscanProviderLib).prototype.fetch =
 				originalPrototypeFetch as typeof EtherscanProviderLib.prototype.fetch;
+			// Releases the `ETHERSCAN_API_KEY` getter spy, so a missing key cannot leak into the
+			// tests that follow. `clearAllMocks` in `beforeEach` would not undo a `spyOn`.
+			vi.restoreAllMocks();
 		});
 
 		it('should target the shared v2 endpoint with the chain id as a parameter', async () => {
@@ -238,6 +246,43 @@ describe('etherscan.providers', () => {
 			);
 
 			expect(() => new EtherscanProvider(unlistedNetwork, unlistedChainId)).toThrow('boom');
+		});
+
+		// The case the test above does not reach, and the one that actually matters: ethers uses
+		// `INVALID_ARGUMENT` for every `assertArgument` failure, so a network it cannot resolve
+		// arrives with the same code as the assert we divert on. That is a config bug in our own
+		// env, and absorbing it into the fallback would hide it behind a nonsense chain id.
+		it('should rethrow an INVALID_ARGUMENT that is not about an unsupported network', () => {
+			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
+				class {
+					constructor() {
+						throw Object.assign(
+							new Error('unknown network (argument="network", code=INVALID_ARGUMENT)'),
+							{ code: 'INVALID_ARGUMENT' }
+						);
+					}
+				} as unknown as typeof EtherscanProviderLib
+			);
+
+			expect(() => new EtherscanProvider(unlistedNetwork, unlistedChainId)).toThrow(
+				'unknown network'
+			);
+		});
+
+		it('should fail with a named cause when the API key is not configured', async () => {
+			vi.spyOn(etherscanEnv, 'ETHERSCAN_API_KEY', 'get').mockReturnValue(undefined);
+
+			rejectUnlistedChain();
+
+			const provider = new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			await expect(provider.transactions({ address: mockEthAddress })).rejects.toThrow(
+				'Etherscan API key is not configured: set VITE_ETHERSCAN_API_KEY.'
+			);
+
+			// Nothing is sent: a missing key must not reach Etherscan as `apikey=undefined`, which
+			// would come back as "Invalid API Key" and blame the wrong thing.
+			expect(requestedUrls).toHaveLength(0);
 		});
 
 		it('should not use the fallback for a chain ethers does list', async () => {
