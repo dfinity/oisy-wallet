@@ -13,6 +13,7 @@ import {
 	HELP_ICPSWAP_TOKEN_B,
 	HELP_ICPSWAP_WITHDRAW_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_HELP_ERROR_TYPES } from '$lib/enums/plausible';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import {
 	IcpSwapPoolNotFoundError,
@@ -41,7 +42,10 @@ vi.mock('$lib/services/icp-swap-recovery.services', async (importOriginal) => {
 	};
 });
 
-vi.mock('$lib/services/help-analytics.services', () => ({
+// Only the tracker is faked: `toHelpErrorType` stays real, so the assertions below see the
+// category the component would actually report.
+vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
 	trackHelp: vi.fn()
 }));
 
@@ -637,7 +641,11 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		await waitFor(() =>
 			expect(trackHelp).toHaveBeenCalledWith(
-				expect.objectContaining({ action: 'select_pool', resultStatus: 'error' })
+				expect.objectContaining({
+					action: 'select_pool',
+					resultStatus: 'error',
+					errorType: PLAUSIBLE_EVENT_HELP_ERROR_TYPES.POOL_NOT_FOUND
+				})
 			)
 		);
 	});

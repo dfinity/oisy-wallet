@@ -27,7 +27,7 @@
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
 		PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 	} from '$lib/enums/plausible';
-	import { trackHelp } from '$lib/services/help-analytics.services';
+	import { toHelpErrorType, trackHelp } from '$lib/services/help-analytics.services';
 	import {
 		IcpSwapPoolNotFoundError,
 		loadIcpSwapRecoverableBalances,
@@ -39,7 +39,6 @@
 	} from '$lib/services/icp-swap-recovery.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -154,7 +153,7 @@
 				action: 'scan',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
@@ -203,7 +202,7 @@
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: symbolA,
 				token2: symbolB,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
@@ -316,7 +315,7 @@
 				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL,
 				token: token.symbol,
 				tokenStandard: token.standard.code,
-				error: replaceIcErrorFields(err)
+				errorType: toHelpErrorType(err)
 			});
 		} finally {
 			withdrawingKey = undefined;

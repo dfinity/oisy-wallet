@@ -1,12 +1,15 @@
+import { CanisterInternalError } from '$lib/canisters/errors';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_HELP_ERROR_TYPES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	type PLAUSIBLE_EVENT_RESULT_STATUSES,
 	type PLAUSIBLE_EVENT_SUBCONTEXT_HELP
 } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
+import { IcpSwapPoolNotFoundError } from '$lib/services/icp-swap-recovery.services';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -33,9 +36,23 @@ export interface TrackHelpParams {
 	poolsScanned?: number;
 	// Destination URL of the help link → `event_value`, for the `contact` action.
 	link?: string;
-	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
-	error?: string;
+	// Failure category → `result_error_type`; omitted when the action succeeded. Never the
+	// canister's own message - see `toHelpErrorType`.
+	errorType?: PLAUSIBLE_EVENT_HELP_ERROR_TYPES;
 }
+
+// ICPSwap's `InternalError` carries free text that `mapIcpSwapFactoryError` interpolates verbatim,
+// and `replaceIcErrorFields` only strips the IC request id, so forwarding the message would put a
+// third party's unbounded text into `result_error` - which invariant 4 in
+// docs/ai/frontend/analytics.md forbids. Categorising by error class keeps the category bounded by
+// construction rather than by a scrubber that has to anticipate every payload. The user still sees
+// the full message in the toast.
+export const toHelpErrorType = (err: unknown): PLAUSIBLE_EVENT_HELP_ERROR_TYPES =>
+	err instanceof IcpSwapPoolNotFoundError
+		? PLAUSIBLE_EVENT_HELP_ERROR_TYPES.POOL_NOT_FOUND
+		: err instanceof CanisterInternalError
+			? PLAUSIBLE_EVENT_HELP_ERROR_TYPES.CANISTER_ERROR
+			: PLAUSIBLE_EVENT_HELP_ERROR_TYPES.UNKNOWN;
 
 // One structured event for the Help page: the action rides in
 // `event_modifier`, the card in `event_subcontext` and the outcome in
@@ -57,7 +74,7 @@ export const buildHelpEvent = ({
 	balancesFound,
 	poolsScanned,
 	link,
-	error
+	errorType
 }: TrackHelpParams): TrackEventParams => ({
 	name: PLAUSIBLE_EVENTS.HELP,
 	metadata: {
@@ -78,7 +95,7 @@ export const buildHelpEvent = ({
 			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
 			event_value: link
 		}),
-		...(notEmptyString(error) && { result_error: error })
+		...(nonNullish(errorType) && { result_error_type: errorType })
 	}
 });
 

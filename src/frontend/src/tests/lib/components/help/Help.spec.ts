@@ -5,7 +5,8 @@ import { HELP_ICPSWAP_CARD, HELP_SUPPORT_CARD } from '$lib/constants/test-ids.co
 import { trackHelp } from '$lib/services/help-analytics.services';
 import { render } from '@testing-library/svelte';
 
-vi.mock('$lib/services/help-analytics.services', () => ({
+vi.mock('$lib/services/help-analytics.services', async (importOriginal) => ({
+	...(await importOriginal<Record<string, unknown>>()),
 	trackHelp: vi.fn()
 }));
 

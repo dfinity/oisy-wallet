@@ -49,6 +49,20 @@ export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
 	SIGNING_FAILED = 'signing_failed'
 }
 
+// ICPSwap writes free text into its `InternalError` variant and `mapIcpSwapFactoryError`
+// interpolates it verbatim, so a raw message cannot satisfy invariant 4 in
+// docs/ai/frontend/analytics.md. Help failures are categorised by error class instead; which call
+// failed is already in `event_modifier`.
+export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
+	// The factory has no pool for the pair, or the lookup itself failed - the factory answers an
+	// unknown pair with a text-free `CommonError`, so the two cannot be told apart.
+	POOL_NOT_FOUND = 'pool_not_found',
+	// The factory or the pool returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	BACKEND = 'backend',
 	NFT = 'nft',
