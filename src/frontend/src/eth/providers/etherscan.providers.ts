@@ -20,6 +20,7 @@ import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId } from '$lib/types/nft';
 import type { Transaction } from '$lib/types/transaction';
+import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
@@ -142,8 +143,8 @@ class EtherscanV2Provider implements EtherscanFetcher {
  * The choice is made by attempting construction rather than by re-declaring ethers' array of
  * supported chain ids, which is module-private and grows with each release: a copy here would
  * drift silently. Attempting it instead means a chain moves back onto the library's own
- * implementation the moment an ethers upgrade starts listing it, with no edit here. Only the
- * unsupported-network assert is caught — anything else is a real fault and is rethrown.
+ * implementation the moment an ethers upgrade starts listing it, with no edit here. Only ethers'
+ * argument assert is caught — anything else is a real fault and is rethrown.
  */
 const etherscanFetcher = ({
 	network,
@@ -159,18 +160,26 @@ const etherscanFetcher = ({
 		// signature; the library's own call stays positional.
 		return { fetch: async ({ module, params }) => await provider.fetch(module, params) };
 	} catch (err: unknown) {
-		const { code, message } = (err ?? {}) as { code?: string; message?: string };
+		const { code } = (err ?? {}) as { code?: string };
 
-		// `INVALID_ARGUMENT` alone is too broad to divert on: it is ethers' code for *every*
-		// `assertArgument` failure, and `Network.from` runs first in this constructor and raises
-		// the same code — as "unknown network" — for a network it cannot resolve. Since these
-		// networks come from our own env config, that case is a config bug that must surface, not
-		// be absorbed into a fallback that would then build a URL around a nonsense chain id.
-		// Matching the message discriminates the two, and fails safe: if ethers ever rewords it,
-		// this rethrows and the build breaks loudly rather than degrading in silence.
-		if (code !== 'INVALID_ARGUMENT' || !message?.includes('unsupported network')) {
+		// The chain-id assert is the only `INVALID_ARGUMENT` this constructor can reach: `super()`
+		// is called without a network, so `AbstractProvider` never runs `Network.from`, and the
+		// `Network.from` here returns a clone before any of its own asserts for the `Network`
+		// instance the registry below always passes. So the code alone discriminates, and
+		// narrowing further — on the message — would only add a way to fail: the registry is built
+		// at module scope, so rethrowing after an ethers reword would take the module down at
+		// import. Diverting when we need not costs nothing by comparison; the fallback derives its
+		// URL from our own env chain id either way.
+		if (code !== 'INVALID_ARGUMENT') {
 			throw err;
 		}
+
+		// Expected for a chain ethers does not list, hence a warning and not an error — but it is
+		// also the only signal if that assumption ever stops holding, so it must not be silent.
+		consoleWarn(
+			`ethers rejected chain ${chainId} for its own Etherscan provider; using the Etherscan v2 transport.`,
+			err
+		);
 
 		return new EtherscanV2Provider(chainId);
 	}

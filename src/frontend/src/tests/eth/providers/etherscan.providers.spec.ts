@@ -12,6 +12,7 @@ import type {
 } from '$eth/types/etherscan-transaction';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -23,6 +24,7 @@ import {
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
+import { assertArgument } from 'ethers/utils';
 
 // Exposed as a getter, not a plain property, so a test can `vi.spyOn(..., 'get')` it — the
 // pattern `exchange.derived.spec` uses for `EXCHANGE_DISABLED`.
@@ -96,13 +98,15 @@ describe('etherscan.providers', () => {
 
 		// Classes for the same reason as the `FetchRequest` stub above: these are reached via
 		// `new`, and an arrow would fail as "not a constructor" before ever throwing what we want.
+		//
+		// The error comes from the real `assertArgument`, called exactly as `provider-etherscan.js`
+		// calls it, so its *shape* is ethers' own rather than ours to get wrong. What that cannot
+		// prove is the *trigger* — that ethers genuinely rejects this chain id; see the note above.
 		const rejectUnlistedChain = () => {
 			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
 				class {
 					constructor() {
-						throw Object.assign(new Error('unsupported network'), {
-							code: 'INVALID_ARGUMENT'
-						});
+						assertArgument(false, 'unsupported network', 'network', unlistedNetwork);
 					}
 				} as unknown as typeof EtherscanProviderLib
 			);
@@ -234,9 +238,9 @@ describe('etherscan.providers', () => {
 			);
 		});
 
-		// The library is the default path, and only the unsupported-network assert may divert to
-		// the fallback. Anything else is a real fault and must not be silently swallowed.
-		it('should rethrow a construction error that is not the unsupported-network assert', () => {
+		// The library is the default path, and only an `INVALID_ARGUMENT` may divert to the
+		// fallback. Anything else is a real fault and must not be silently swallowed.
+		it('should rethrow a construction error that is not an argument assert', () => {
 			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
 				class {
 					constructor() {
@@ -248,24 +252,19 @@ describe('etherscan.providers', () => {
 			expect(() => new EtherscanProvider(unlistedNetwork, unlistedChainId)).toThrow('boom');
 		});
 
-		// The case the test above does not reach, and the one that actually matters: ethers uses
-		// `INVALID_ARGUMENT` for every `assertArgument` failure, so a network it cannot resolve
-		// arrives with the same code as the assert we divert on. That is a config bug in our own
-		// env, and absorbing it into the fallback would hide it behind a nonsense chain id.
-		it('should rethrow an INVALID_ARGUMENT that is not about an unsupported network', () => {
-			vi.mocked(EtherscanProviderLib).mockImplementationOnce(
-				class {
-					constructor() {
-						throw Object.assign(
-							new Error('unknown network (argument="network", code=INVALID_ARGUMENT)'),
-							{ code: 'INVALID_ARGUMENT' }
-						);
-					}
-				} as unknown as typeof EtherscanProviderLib
-			);
+		// Diverting is expected here, so it cannot be an error — but it is also the only place the
+		// assumption behind the `INVALID_ARGUMENT` check would show up as wrong, so it must be said
+		// out loud rather than swallowed.
+		it('should warn when it diverts to the fallback', () => {
+			const warnSpy = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
 
-			expect(() => new EtherscanProvider(unlistedNetwork, unlistedChainId)).toThrow(
-				'unknown network'
+			rejectUnlistedChain();
+
+			new EtherscanProvider(unlistedNetwork, unlistedChainId);
+
+			expect(warnSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.stringContaining(`${unlistedChainId}`),
+				expect.objectContaining({ code: 'INVALID_ARGUMENT' })
 			);
 		});
 
