@@ -1,7 +1,18 @@
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionStatus
+} from '$declarations/backend/backend.did';
+import { getActiveUserTransactions } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
+import {
+	createActiveUserTransaction,
+	updateActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
 import type { NullishIdentity } from '$lib/types/identity';
+import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import {
 	XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG,
@@ -26,17 +37,24 @@ import {
 	loadXrpValidatedLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
+import {
+	claimXrpActiveUserTransaction,
+	releaseXrpActiveUserTransaction
+} from '$xrp/services/xrp-active-tx.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import {
 	XrpAmountExceedsSendableError,
 	XrpDestinationTagRequiredError,
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
+	XrpSendAlreadyInFlightError,
 	XrpSendExpiredError,
 	XrpSendIndeterminateError,
+	XrpSendNotGuardedError,
 	XrpTransactionFailedError
 } from '$xrp/types/xrp-send';
 import type {
@@ -45,6 +63,12 @@ import type {
 	XrpSubmitResult,
 	XrpTransactionOutcome
 } from '$xrp/types/xrp-transaction';
+import {
+	openXrpActiveUserTransaction,
+	toXrpData,
+	toXrpDisplayRefs,
+	toXrpExternalRefs
+} from '$xrp/utils/xrp-active-tx.utils';
 import { getXrpMaxAmount, getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import {
 	buildXrpPayment,
@@ -54,6 +78,162 @@ import {
 	isXrpTransactionSuccessful
 } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+
+/**
+ * Refuses the send if a payment from this address has not resolved yet.
+ *
+ * The gate is per **address**, not per user: a record for a different address
+ * says nothing about this one's sequence, and refusing on it would block an
+ * unrelated send. There is no override — the whole point is that no second
+ * sequence is safe while the first payment is open.
+ */
+const assertNoOpenXrpSend = async ({
+	identity,
+	source
+}: {
+	identity: NullishIdentity;
+	source: XrpAddress;
+}): Promise<Identity> => {
+	// Fails closed. Without an identity the record can neither be read nor
+	// written, so the invariant cannot be held — and an unguarded send is the
+	// failure this whole path exists to prevent.
+	if (isNullish(identity)) {
+		throw new XrpSendNotGuardedError(
+			'XRP send refused: the wallet could not check for an unresolved payment without an identity.'
+		);
+	}
+
+	// `loadActiveUserTransactions` swallows backend errors by design, so a failed
+	// load leaves the store as it was — which would read as "no open record".
+	// Asked directly instead: this answer decides whether a second sequence is
+	// signed, so it must come from the backend or not at all.
+	let transactions: ActiveUserTransaction[];
+
+	try {
+		transactions = await getActiveUserTransactions({ identity });
+	} catch (err: unknown) {
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: the wallet could not check for an unresolved payment. ${
+				err instanceof Error ? err.message : `${err}`
+			}`
+		);
+	}
+
+	const open = openXrpActiveUserTransaction({ transactions, source });
+
+	if (nonNullish(open)) {
+		throw new XrpSendAlreadyInFlightError(
+			`XRP send refused: a payment from ${source} has not resolved yet.`
+		);
+	}
+
+	return identity;
+};
+
+/**
+ * Creates the record that holds the invariant, and returns its id.
+ *
+ * Refuses the send if the record cannot be created — at the per-user cap, or
+ * with the backend unreachable. Sending anyway would drop the guarantee at
+ * exactly the moment a retry is most likely.
+ */
+const openXrpSendRecord = async ({
+	identity,
+	token,
+	source,
+	destination,
+	destinationTag,
+	amount,
+	fee,
+	txBlob
+}: {
+	identity: Identity;
+	token: Token;
+	source: XrpAddress;
+	destination: XrpAddress;
+	destinationTag?: number;
+	amount: XrpBalance;
+	fee: XrpBalance;
+	txBlob: string;
+}): Promise<string> => {
+	const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
+
+	if (isNullish(data)) {
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
+		);
+	}
+
+	// Both derived from the blob, so neither can describe a different transaction
+	// than the one about to be submitted.
+	const { lastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
+	const txHash = await deriveXrpTransactionHash(txBlob);
+
+	const id = crypto.randomUUID();
+
+	// Claimed before the create, so a poll tick landing between the create and
+	// the submit cannot resolve a record this send is about to drive.
+	claimXrpActiveUserTransaction(id);
+
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id,
+			data,
+			progressStep: ProgressStepsSendXrp.SEND,
+			externalRefs: toXrpExternalRefs({
+				[XRP_EXTERNAL_REF_KEYS.TX_HASH]: txHash,
+				[XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE]: `${lastLedgerSequence}`,
+				...toXrpDisplayRefs({
+					token,
+					amount: formatToken({ value: amount, unitName: token.decimals })
+				})
+			})
+		});
+	} catch (err: unknown) {
+		releaseXrpActiveUserTransaction(id);
+
+		throw new XrpSendNotGuardedError(
+			`XRP send refused: the unresolved payment could not be recorded. ${
+				err instanceof Error ? err.message : `${err}`
+			}`
+		);
+	}
+
+	return id;
+};
+
+/**
+ * Writes the record's terminal status.
+ *
+ * Best-effort on purpose: the payment has already happened by the time this
+ * runs, so a failed write must not turn a settled send into an error. The record
+ * is then left open, and the poller resolves it from the ledger on its next tick
+ * — which is the same path a session that died mid-send takes.
+ */
+const closeXrpSendRecord = async ({
+	identity,
+	recordId,
+	status,
+	error
+}: {
+	identity: Identity;
+	recordId: string;
+	status: ActiveUserTransactionStatus;
+	error?: string;
+}): Promise<void> => {
+	try {
+		await updateActiveUserTransaction({
+			identity,
+			id: recordId,
+			status,
+			...(nonNullish(error) ? { error } : {})
+		});
+	} catch (err: unknown) {
+		consoleError('Could not close the XRP active-transaction record.', err);
+	}
+};
 
 /**
  * Waits for a submitted transaction to be validated, and reports its final result.
@@ -397,6 +577,7 @@ export const sendXrp = async ({
 	amount,
 	fee,
 	destinationTag,
+	token,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -406,6 +587,7 @@ export const sendXrp = async ({
 	amount: XrpBalance;
 	fee: XrpBalance;
 	destinationTag?: number;
+	token: Token;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
@@ -534,6 +716,21 @@ export const sendXrp = async ({
 	if (fee > XRP_MAX_FEE_DROPS) {
 		throw new Error(`XRP fee ${fee} drops exceeds the maximum of ${XRP_MAX_FEE_DROPS} drops.`);
 	}
+
+	// After the guards that need nothing but the arguments, and before the first
+	// node read — which is what the spec asks for, and also what keeps a
+	// self-payment or a zero amount from costing a backend round-trip to be told
+	// what the arguments already say.
+	//
+	// An XRPL `Sequence` is a nonce, so while a payment from this address is
+	// unresolved there is no safe sequence for a second one: reusing it answers
+	// `tefPAST_SEQ` or replaces a queued transaction, and taking the next one
+	// signs into a gap that expires — which reports "nothing was sent" for a
+	// payment that can still apply.
+	//
+	// Returns the identity narrowed, because the guard cannot run without one and
+	// everything below that writes the record needs it non-nullish.
+	const recordIdentity = await assertNoOpenXrpSend({ identity, source });
 
 	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
@@ -675,11 +872,72 @@ export const sendXrp = async ({
 	progress?.(ProgressStepsSendXrp.SIGN);
 	const txBlob = await signXrpTransaction({ identity, network, transaction });
 
-	return await submitAndConfirmXrpTransaction({
-		network,
-		pending: { txBlob },
-		progress
+	// After signing and before submitting, which is the only correct moment.
+	// Later would miss a submit whose response is lost — precisely the case the
+	// record exists for. Earlier would be a claim about a transaction that does
+	// not exist yet, and both values the resolver polls with are derived from the
+	// signed bytes.
+	const recordId = await openXrpSendRecord({
+		identity: recordIdentity,
+		token,
+		source,
+		destination,
+		destinationTag,
+		amount,
+		fee,
+		txBlob
 	});
+
+	try {
+		const result = await submitAndConfirmXrpTransaction({
+			network,
+			pending: { txBlob },
+			progress
+		});
+
+		await closeXrpSendRecord({
+			identity: recordIdentity,
+			recordId,
+			status: { Succeeded: null }
+		});
+
+		return result;
+	} catch (err: unknown) {
+		// Only a definitive outcome closes the record. An indeterminate
+		// confirmation leaves it open on purpose: the payment may still apply, and
+		// the record staying open is what keeps the next send refused until the
+		// poller can say which way it went.
+		//
+		// `XrpSendExpiredError` is definitive in the other direction — the ledger
+		// passed `LastLedgerSequence` without including it, so the sequence was
+		// never consumed and a fresh send is safe. `XrpTransactionFailedError` is a
+		// validated `tec*`: applied, failed, fee claimed, sequence consumed. Both
+		// free the address.
+		if (err instanceof XrpSendExpiredError || err instanceof XrpTransactionFailedError) {
+			await closeXrpSendRecord({
+				identity: recordIdentity,
+				recordId,
+				status: { Failed: null },
+				error: err.message
+			});
+		} else if (!(err instanceof XrpSendIndeterminateError)) {
+			// Everything else reaching here failed before or at submission without
+			// the blob going anywhere it could still apply from — a rejected
+			// malformed transaction, or an endpoint that provably never received it.
+			// Leaving the record open would block the address on a payment that
+			// cannot exist.
+			await closeXrpSendRecord({
+				identity: recordIdentity,
+				recordId,
+				status: { Failed: null },
+				error: err instanceof Error ? err.message : `${err}`
+			});
+		}
+
+		throw err;
+	} finally {
+		releaseXrpActiveUserTransaction(recordId);
+	}
 };
 
 /**

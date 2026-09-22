@@ -53,13 +53,16 @@ export class XrpSendExpiredError extends Error {}
  * of building a new one — the difference between a retry the ledger refuses on its already-consumed
  * sequence and a second payment.
  *
- * Nothing consumes it yet, so the hazard is NOT closed. `pending` only survives as a field on the
- * rejected promise: nothing in the XRP folder persists it, and the send wizard reports the error
- * and closes, after which it is unreachable. A user who dismisses that and sends again still
- * builds a fresh transaction, which is the second payment this is meant to prevent. Consuming it
- * needs a surface that resolves an unconfirmed send, which belongs with transaction history; the
- * in-repo precedent is BTC, which persists pending send state server-side via
- * `addPendingBtcTransaction` so it survives a reload and reaches other devices.
+ * The second payment is now prevented from the other side: `sendXrp` opens an Active User
+ * Transaction record before submitting and leaves it open on this error, and the record refuses
+ * the next send from the same address until the ledger resolves it. So a user who dismisses this
+ * and sends again is declined rather than building a fresh transaction on a new sequence.
+ *
+ * `pending` itself still only survives as a field on the rejected promise — nothing persists the
+ * blob, because it does not fit an `external_refs` value (256 characters against a signed
+ * Payment's 378) and storing it buys no safety the record does not already provide. It remains
+ * available to an in-session retry through {@link retryXrpSend}, which resubmits these exact bytes
+ * on their already-consumed sequence rather than paying twice.
  */
 export class XrpSendIndeterminateError extends Error {
 	readonly pending: XrpPendingTransaction;
@@ -69,3 +72,27 @@ export class XrpSendIndeterminateError extends Error {
 		this.pending = pending;
 	}
 }
+
+/**
+ * A payment from this address has not resolved yet, so this one is refused.
+ *
+ * An XRPL `Sequence` is a nonce, and while the first payment is open there is no safe sequence for
+ * a second: reusing it answers `tefPAST_SEQ` or replaces a queued transaction, and taking the next
+ * one signs into a gap that expires — which reports "nothing was sent" for a payment that can
+ * still apply. There is deliberately no override; the only correct action is to wait.
+ *
+ * Fires before any node read and before anything is signed, so nothing left the wallet.
+ */
+export class XrpSendAlreadyInFlightError extends Error {}
+
+/**
+ * The send was refused because the invariant could not be held at all — the record could not be
+ * read or written.
+ *
+ * Distinct from {@link XrpSendAlreadyInFlightError}: there is no known open payment, and the
+ * correction is to try again rather than to wait for something to settle. It fails closed on
+ * purpose. Proceeding would drop the one-unresolved-payment-per-address guarantee at exactly the
+ * moment a user is most likely to retry, and the cost of that is a duplicate payment rather than a
+ * refused one.
+ */
+export class XrpSendNotGuardedError extends Error {}
