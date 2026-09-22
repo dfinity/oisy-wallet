@@ -1054,6 +1054,7 @@
 			"cketh_certified": "Por favor, aguarde até que os parâmetros ckETH tenham sido certificados.",
 			"pending_bitcoin_transaction": "Você pode enviar outra transação Bitcoin assim que a pendente for concluída.",
 			"no_available_utxos": "Você não terá UTXOs disponíveis para realizar esta transação.",
+			"unknown_destination": "",
 			"first_time_destination": "Parece que você nunca enviou tokens para este endereço. Verifique o endereço com atenção.",
 			"first_time_destination_confirm": "Esta é a primeira vez que envio tokens para este endereço e verifiquei o endereço com atenção.",
 			"fee_expired": "",
