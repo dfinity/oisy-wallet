@@ -25,11 +25,22 @@ export enum PLAUSIBLE_EVENTS {
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
-	HELP = 'help'
+	HELP = 'help',
+	TIP = 'tip',
+	// An invariant we believed unreachable was reached. Not for flows that can legitimately
+	// fail — those keep their own event and report the outcome via `result_status`.
+	ERROR = 'error'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
-	MAJOR = 'major'
+	// The user cannot continue at all.
+	BLOCKER = 'blocker',
+	// A whole feature is unusable, the rest of the app works.
+	CRITICAL = 'critical',
+	// The user's action visibly failed.
+	MAJOR = 'major',
+	// Invisible to the user; they keep working as normal.
+	MINOR = 'minor'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -53,7 +64,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
-	HELP = 'help'
+	HELP = 'help',
+	TIPS = 'tips'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -72,6 +84,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND {
 	PER_USER = 'per_user',
 	GLOBAL = 'global'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
+	SETTINGS_KEY_UNMAPPED = 'settings_key_unmapped'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
@@ -140,7 +156,9 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
-	HELP_PAGE = 'help_page'
+	HELP_PAGE = 'help_page',
+	TIP_SENDER = 'tip_sender',
+	TIP_CLAIMER = 'tip_claimer'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {

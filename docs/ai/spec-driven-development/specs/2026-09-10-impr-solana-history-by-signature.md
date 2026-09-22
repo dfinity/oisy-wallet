@@ -121,6 +121,18 @@ signatures newer than the newest one the loader holds. When no source has anythi
 tick costs one `getSignaturesForAddress` call per source and nothing else. This replaces
 `exitIfFirstSignatureMatches` (#12772).
 
+When more than a page of new signatures arrives between two ticks, the head check keeps paging
+with the merged pager's cursor until the pager's cut passes the newest slot it holds, so nothing
+between that page and what it holds is left out. The cut, not what a page returns, decides it: a
+page can be empty while a source walks through a crowded slot, and the cut slot itself is held back
+in the cursor until a later page. The pages per tick are bounded; a walk that runs out of them
+keeps its cursor as a catch-up cursor in the worker, and the next ticks resume it, after the fresh
+head page, until it passes what was held when it began. The first tick, holding nothing, still
+loads only the first page: older history is the pagers'. A tick's catch-up cursors are kept only
+once it succeeds, and dropped when the address, network or token list changes. The signatures the
+head check remembers are only those of the newest slot it holds and of the slot each catch-up walk
+ends on, the only ones a later page can return again.
+
 ### 3.6 Scrolling: one pager per network for Activity, one per token for its page
 
 A pager is the merged pagination of 3.3 over a set of sources, so one implementation serves both
@@ -154,6 +166,36 @@ token's balance (Token and Token-2022 accounts parse the same way), and an ATA t
 exist means zero. Today that takes one `getBalance` plus up to three calls per SPL token
 (`isAtaAddress`, `checkIfAccountExists` and `getTokenAccountBalance`, in `loadSplTokenBalance`).
 Balances are still posted per token.
+
+### 3.9 Transaction details survive a reload
+
+`fetchTransactionDetailForSignature` keeps the details of a finalized transaction in IndexedDB,
+per network and signature, and reads them back before asking the RPC. The in-memory map stays in
+front of it, but it is per realm and dies with the tab. Two derivations need a detail again:
+
+- **The worker's first page after a reload.** The worker skips only the signatures in its own set,
+  which starts empty, so every reload fetched its newest page again.
+- **A held record derived again.** A pager skips a signature only when every token it belongs to
+  holds it (3.6), and derives it again otherwise, for example after a token is enabled.
+
+Measured on the recorded mainnet wallet (169 signatures, pages of 10), `getTransaction` calls without
+and with the cache: the worker's first page after a reload, 9 and 0; deriving the newest page again,
+9 and 0; deriving the whole history again after a reload, 169 and 0. The overlap between the worker
+and the Activity list in one session is 0 either way, since the pagers skip what the stores hold.
+
+Only finalized details are kept: a transaction that is not finalized can still be dropped by the
+network. Two realms that ask for the same signature before either has kept it still fetch it twice;
+the cache spares the repeat, not the race.
+
+The cache is one object store, keyed by network, zero-padded slot and signature, so every change is
+a single IndexedDB transaction and nothing can be left half written. Trimming keeps the newest
+`SOLANA_TRANSACTION_DETAILS_CACHE_SIZE` slots per network by reading the keys alone.
+
+It is cleared at sign-out with the other caches. Each realm reads the store's epoch when it loads,
+and a write checks it in the same transaction that writes. Clearing removes the epoch, so no realm of
+the session that ended, the network worker included, writes anything after sign-out; the realms of
+the next session start a new one. Neither reading nor writing may fail a load: a browser that
+refuses to store leaves the caller exactly where it was before the cache existed.
 
 ## 4. Does not do
 
@@ -238,6 +280,15 @@ Implementation, in order:
    last caller.
 6. **PRODUCT.md.** PR 1 adds the "Solana history" entry under Activity; each later PR updates it
    with the behaviour it ships (one loader per network, merged paging, balances).
+7. **Clean-up, #14030.** Merges last, after PR 4 and PR 5, and changes no behaviour. It removes
+   what lost its last caller: `getSolTransactions`, `GetSolTransactionsParams` and the per-token
+   `tokenAddress` / `tokenOwnerAddress` path of `fetchSolTransactionsForSignature`;
+   `loadSplTokenBalance`, `loadSolLamportsBalance`, `loadTokenBalance` and `SolBalance`, replaced
+   by `loadSolNetworkBalances`; and the mocks, specs and `getBalance` / `getTokenAccountBalance`
+   fixtures only they used. `isAtaAddress` and `checkIfAccountExists` stay for the send and fee
+   flows, and `SOLANA_MAX_SKIPPED_SIGNATURE_PAGES` for the pagers. The reconciliation tests of
+   section 7 load each token's history through its pager and `resolveSolSignatures`, and compare it
+   with `loadSolNetworkBalances`.
 
 ## 7. Acceptance criteria
 
@@ -288,6 +339,11 @@ Implementation, in order:
   only finalized ones, and only those that some session of this user happened to load. Treating it
   as a source would reopen the holes 3.3 closes. Re-deriving every restored record instead would
   cost the same RPC calls as not reading and keep more code.
+
+- **D5. The details of a finalized transaction are cached in IndexedDB, 200 per network.** The
+  per-realm map alone left every reload fetching the worker's first page again, and every
+  derivation of a held record for another token fetching its details again (3.9). 200 details are
+  about 2 MB. Cleared at sign-out.
 
 ## 10. Notes for the implementation
 

@@ -52,6 +52,11 @@
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
 		isApproval?: boolean;
+		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
+		ambiguous?: boolean;
+		// Whether the decode has settled. Until it has, nothing here is an answer yet - the balance
+		// changes in particular would read as unavailable rather than as not asked for.
+		decoded?: boolean;
 		unreviewed?: boolean;
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
@@ -84,6 +89,8 @@
 		prioritizationFee,
 		prioritizationFeeEstimate,
 		isApproval = false,
+		ambiguous = false,
+		decoded = false,
 		unreviewed = false,
 		preview,
 		instructions,
@@ -145,6 +152,11 @@
 			metadata: $splTokenMetadataStore
 		})
 	);
+
+	// Whether a run took place at all, which the preview alone does not say: it is omitted when the
+	// run changed nothing the user owns, and the parties come back whole either way. Shared so the
+	// caveat and the answer below can never disagree about whether anything was simulated.
+	let simulationObtained = $derived(nonNullish(preview) || parties?.partial === false);
 
 	let summaryText = $derived(
 		nonNullish(statedSummary)
@@ -228,14 +240,27 @@
 {/snippet}
 
 <ContentWithToolbar>
-	<!-- One notice, whichever fits. A message OISY could not decode is a warning either way, and
+	<!-- One notice, whichever fits, and the refusal comes first: a message the signing flow will not
+	     sign makes every caveat below it moot, since they qualify a review nobody is going to act
+	     on. It is the only notice here that is an error rather than a warning, because it describes
+	     what the wallet has already decided rather than something for the user to weigh.
+	     A message OISY could not decode is a warning either way, and
 	     says the review is simulated only when a simulation was in fact obtained, since one can
 	     fail. A message that decoded but does not reduce to a send, a receive or a swap the run
 	     agrees with is the case the user has to read the detail for, so it says so; it names the
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
-	{#if unreviewed}
+	{#if ambiguous}
+		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
+		     the Approve button never becomes usable: without a live region a screen-reader user is
+		     left on a button that will not proceed and never hears why. The same reasoning as the
+		     destination-tag error, and applied here rather than inside `MessageBox`, which every
+		     other notice on this screen also uses. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+		</div>
+	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
 				? $i18n.wallet_connect.text.unreviewed_instructions_simulated
@@ -243,27 +268,32 @@
 		</MessageBox>
 	{:else if nonNullish(preview) && !approveDisabled && isNullish(statedSummary)}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.multiple_operations}</MessageBox>
-	{:else if nonNullish(preview)}
+	{:else if simulationObtained}
 		<MessageBox level="info">{$i18n.wallet_connect.text.simulated_review}</MessageBox>
 	{/if}
 
-	<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
-	     theft as nothing happening. It is named first among the fund warnings for that reason. -->
-	{#if nonNullish(preview) && preview.controlChanges.length > 0}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
-	{/if}
+	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
+	     message the wallet has already decided it will not sign, and the partial-parties notice is
+	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
+	{#if !ambiguous}
+		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
+		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
+		{#if nonNullish(preview) && preview.controlChanges.length > 0}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
+		{/if}
 
-	<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
-	     something visibly failed: an empty list on a transaction that clearly spends something is
-	     the single most dangerous thing this review can show. -->
-	{#if parties?.partial === true}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
-	{/if}
+		<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+		     something visibly failed: an empty list on a transaction that clearly spends something is
+		     the single most dangerous thing this review can show. -->
+		{#if parties?.partial === true}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
+		{/if}
 
-	{#if dappPrioritizationFee}
-		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
-	{:else if highPrioritizationFee}
-		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{#if dappPrioritizationFee}
+			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+		{:else if highPrioritizationFee}
+			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{/if}
 	{/if}
 
 	<!-- What the message itself says it does, in one line, before the rows that say it in detail.
@@ -312,8 +342,35 @@
 					<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
 				{/if}
 
+				<!-- What the transaction would do to the user's own accounts, and the one section that must
+				     be here whether or not there is an answer. An absent section is indistinguishable
+				     from a transaction that moves nothing, which is the most dangerous thing this review
+				     could imply; the label says which of the two this is, and the missing answer is
+				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
 					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+				{:else if decoded}
+					<WalletConnectModalValue
+						label={simulationObtained
+							? $i18n.wallet_connect.text.simulated_changes
+							: $i18n.wallet_connect.text.balance_changes}
+						ref="balance-changes"
+					>
+						{#if simulationObtained}
+							<!-- A run happened and reported nothing of the user's changing. That is an answer,
+							     and a different one from having no answer at all. -->
+							<span>{$i18n.wallet_connect.text.balance_changes_none}</span>
+						{:else}
+							<!-- `role="alert"` for the same reason the refusal above carries one: it arrives
+							     once the decode settles, and a reader already past this point would not
+							     otherwise hear that the balance changes could not be determined. -->
+							<div role="alert">
+								<MessageBox level="error">
+									{$i18n.wallet_connect.text.balance_changes_unknown}
+								</MessageBox>
+							</div>
+						{/if}
+					</WalletConnectModalValue>
 				{/if}
 
 				<!-- Where the transaction would run. A program is the closest thing a Solana message has to

@@ -47,6 +47,18 @@ export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 // writable accounts can change, which already discards most of a DeFi message's account set;
 // past this many the preview is dropped rather than truncated, because a truncated preview
 // would report "no changes" for accounts it never looked at.
+/**
+ * What the runtime charges to keep an account alive, as the protocol states it: every account pays
+ * for a fixed 128-byte header plus its own data, at a per-byte-year price, for a fixed number of
+ * years up front. An account funded with this much is exempt and never pays again.
+ *
+ * Reproduced here rather than asked of a provider because the review needs it before it renders,
+ * and because the three values are protocol constants rather than chain state.
+ */
+export const SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES = 128n;
+export const SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR = 3_480n;
+export const SOLANA_RENT_EXEMPTION_YEARS = 2n;
+
 export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
 
 // The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
@@ -58,6 +70,11 @@ export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 // over the odds is a legitimate thing to want during congestion.
 export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
 export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
+
+// Every page of the wallet's head check costs a signature lookup per source, and a tick runs
+// every minute. A burst bigger than this many pages is not dropped: the head check resumes it on
+// the next ticks, so the bound only spreads the lookups out.
+export const SOLANA_HEAD_CHECK_MAX_PAGES_PER_TICK = 5;
 
 // A signature lookup on an associated token account answers with transactions that never moved
 // anything of the user's, and a whole page of history can consist of them. Each page costs one
@@ -72,3 +89,8 @@ export const SOLANA_MAX_MULTIPLE_ACCOUNTS = 100;
 // A page of signatures is resolved concurrently, but public RPC endpoints throttle bursts of
 // `getTransaction` calls, so only this many are in flight at once.
 export const SOLANA_TRANSACTION_DETAIL_CONCURRENCY = 5;
+
+// How many transaction details are kept per network in IndexedDB, the newest slots first. The newest
+// page is what the worker fetches again on every reload, and a few pages below it cover what a newly
+// enabled token derives again for most wallets. A detail is around 10 KB, so this is about 2 MB.
+export const SOLANA_TRANSACTION_DETAILS_CACHE_SIZE = 200;

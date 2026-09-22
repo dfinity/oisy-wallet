@@ -172,7 +172,22 @@ pending decision in the first draft.
 | 12  | Create step uses the design's **radio cards**                                                               | The compact dropdown variant is dropped                                                                                        |
 | 13  | Logged-out CTA is **Open or Create** with the Terms-of-Use consent line                                     | Consent is collected before a wallet is created                                                                                |
 | 14  | **No cap on the number of active tips**                                                                     | The sender's balance is the natural limiter; keep a minimum amount and a rate limit                                            |
-| 15  | **Self-claim rejected**                                                                                     | Under an allowance it is a self-transfer that only burns a fee, and cancellation covers the intent                             |
+| 15  | **Self-claim rejected** — _not built, see below_                                                            | Under an allowance it is a self-transfer that only burns a fee, and cancellation covers the intent                             |
+
+### Decision 15 is not implemented
+
+Measured, not assumed: against the local ledger, `get_tip_details` and
+`claim_tip` both succeed for the sender's own tip, and the payout goes through as
+a self-transfer that costs one fee. No guard compares the claimer to the sender.
+
+Leaving it that way is defensible — it is the sender's money either way, and it
+makes a link testable end to end in one browser, which is how the build was
+actually exercised. Closing it needs a `SelfClaim` variant (a breaking candid
+change, harmless while tips have never shipped) rejected before any state moves,
+and a claim screen that says _this is your own tip_ rather than offering a retry
+that can never work. Owner's call, and worth making before tips ship: the sender
+who tries it today burns a fee and gets a History row reading **Claimed by
+<themselves>**.
 
 ## Escrow model — decided: ICRC-2 allowance, no custody
 
@@ -347,9 +362,10 @@ which is the fragile part.
 7. Taps **Open or Create** → Internet Identity. That is the entire account-creation
    step.
 8. Back in the app, **Claim tip** shows the amount and fiat value, **To: Your OISY
-   wallet**, Network, Token, the payout fee, the sender's **message**, a note that
-   the sender will see who claimed, and **Status: Reserved** → **Claim now**. The
-   backend re-checks the allowance and the sender's balance before moving anything.
+   wallet**, Network, Token, the sender's **message**, a note that the sender will
+   see who claimed, and **Status: Reserved** → **Claim now**. No fee line: the
+   claimer pays nothing and receives the full amount. The backend re-checks the
+   allowance before moving anything.
 9. Success: **"135.00 USDC Received!"** with **Status: Completed** and a single
    **Take me to the wallet** CTA. The tokens are in their own wallet.
 
@@ -469,6 +485,11 @@ sender will see who claimed this tip** ([decision 11](#decisions-clarification-r
 The disclosure has to appear **before** the claim, not after — the recipient's
 identity reaching the sender should be a choice, not a surprise.
 
+**This screen no longer ships as drawn.** The review card and its **Claim now**
+footer were replaced after the first build by claiming on sign-in; the disclosure
+moved earlier rather than being dropped. See
+[Claiming without a review step](#claiming-without-a-review-step--changed-after-the-first-build).
+
 **Success** — two variants are drawn. The plain one
 ([claim-success](./2026-08-05-feat-tips-via-link/designs/claim-success-21788-50935.png))
 keeps the review card and swaps the footer for a single **Take me to the wallet**
@@ -526,11 +547,13 @@ the privacy promise.
 5. **History's info banner** reads _"We've hidden these transactions as they
    considered suspicious…"_ [sic] — copy from the spam-token surface, a reused
    component left in the mock. Do not implement.
-6. **Two fees, one story — mostly dissolved.** There is no funding leg any more: the
-   sender pays the `approve` fee, and the payout fee is drawn from the allowance at
-   claim. Two numbers still exist, but they are now "what you pay to reserve" and
-   "what the transfer costs", and the recipient must see the net amount before
-   claiming.
+6. **Two fees — resolved, and both land on the sender.** There is no funding leg
+   any more. The sender pays the `approve` fee to reserve, and the payout fee when
+   the claim moves the tokens; the ledger takes the second from the sender's balance
+   while crediting the claimer the full amount. So the two numbers are "what you pay
+   to reserve" and "what you pay when it is claimed", both quoted to the **sender**
+   at creation. The recipient has no net amount to be shown — what the link says is
+   what they get. Verified against a real ledger in the backend build.
 7. **Two logged-out CTAs — resolved** in favour of **Open or Create** with the
    consent line.
 8. **"Single-use security" — inherent.** A tip is a fixed amount with one allowance;
@@ -680,6 +703,135 @@ no reconciliation sweep, and no refund that can fail. It introduces its own.
 33. **Phishing lookalikes** — a fake "you received a tip" page harvesting II sign-ins
     is the obvious follow-on scam, and this flow trains users to sign in from a link.
 
+## Link recovery and auditability — added after the first build
+
+Two gaps the built flow surfaced, both closed in the stack rather than deferred.
+
+### The sender could not get their link back
+
+The claim code is generated in the browser and only its SHA-256 reaches the
+canister (criterion 16). That is what makes a link unforgeable — and it also
+meant closing the share screen destroyed the only copy. The sender could still
+`cancel_tip` to free the reservation, so no money was ever stuck, but a tip they
+meant to re-send was unrecoverable.
+
+Closed **without weakening criterion 16**: the browser encrypts the claim code
+under a vetKey only that principal can derive and stores the ciphertext. The
+canister holds opaque bytes and can read a claim code exactly as well as before,
+which is to say not at all.
+
+- A second `ic_vetkeys::EncryptedMaps`, mirroring `personal_notes` — see
+  [`src/backend/src/tips/secrets.rs`](../../../../src/backend/src/tips/secrets.rs)
+  and [`tip.vetkeys.ts`](../../../../src/frontend/src/lib/services/tip.vetkeys.ts).
+  `EncryptedMaps` keys every map by its owner, so "only the sender reads their own
+  codes" is the library's guarantee rather than ours — and an integration test
+  pins it, because that is not a property to take on faith.
+- Its **own map name and domain separator** (`tip_secrets` / `oisy_tip_secrets`),
+  so a fault or a key rotation in the notes store cannot reach tips. Its own rate
+  limiters for the same reason. Neither string may ever change for a deployed
+  canister: both are bound into the key derivation, so a change orphans every
+  stored ciphertext.
+- The **tip id is the AES-GCM domain separator**, so ciphertext lifted from one
+  entry cannot decrypt under another.
+- Storage is **best-effort and happens after the tip exists**. It is a
+  convenience; a failure must not read as a failed reservation when the tip is
+  real and the link is on screen.
+- **Cancelling drops the stored code** — the link is worthless then. Claimed and
+  expired tips keep theirs until pruned: the cleanup runs as the caller, and
+  neither of those paths has the sender as caller.
+- **The whole live row opens the tip**, decrypting the code and reopening the
+  share step. It started as a **Link** action beside a **Cancel** one, on the
+  reasoning that nesting interactive elements is invalid markup and ambiguous when
+  one outcome is irreversible. That reasoning held; the conclusion was wrong way
+  round. The row is now the only control, and the irreversible action moved
+  _inside_ what the row opens — where it is one action on a screen that shows what
+  it would destroy, rather than a button next to a list entry.
+- A tip created before this store existed has no ciphertext. That is a fact about
+  the tip, not a failure, and reads as one.
+
+### OISY-side auditability
+
+Encryption is orthogonal to this, and worth stating plainly because it is easy to
+assume otherwise: vetKey-encrypted data is opaque to OISY **by construction**, so
+it contributes nothing to auditability. It does not have to — the interesting
+data was never hidden. Every tip is a `TipRecord` in stable memory with its
+amount, ledger, status and timestamps.
+
+What was missing was a way to read the aggregate, and the endpoint for that
+already existed:
+
+- `tips_count` on `Stats`, off the map's own `len()`, behind the same
+  `caller_is_allowed` guard as every other stat. `personal_note_shares_count` is
+  the precedent.
+- **Aggregate only.** Criterion 19 promises no endpoint enumerates another
+  principal's tips, and this one must not become the way around it: a count, never
+  a row. Note the precedent cuts both ways — `get_account_creation_timestamps`
+  returns per-principal data under the same guard. Tips must not follow it.
+- A per-status or per-ledger breakdown needs either an `O(n)` scan (fine now, an
+  instruction-limit trap later) or counters maintained on each transition. Its own
+  change, deliberately not smuggled into this one.
+- The funnel question — how many people opened a link and converted — is
+  structurally invisible to the canister. That is what the
+  [Analytics](#analytics-plausible) section is for, and it remains unbuilt.
+
+## Claiming without a review step — changed after the first build
+
+The built flow asked the recipient to press **Claim now** on a review card after
+signing in. Two presses, and the second one had nothing left to decide: whoever
+opens a tip link and signs in has already decided. It shipped that way because
+[decision 11](#decisions-clarification-round) put the disclosure — the sender
+learns who claimed — before the claim, and the review card was where it sat.
+
+**What ships now:** the claim fires as soon as there is an identity, and the
+disclosure moved to the screen _before_ sign-in. That is strictly earlier than
+the review card, and it is read by someone who has not yet identified themselves
+to anyone, so signing in **is** the consent. Criterion 8 is revised, not dropped.
+
+### The claim happens in the wallet, not on the link's page
+
+`/tip/<id>` is a standalone page precisely because a tip link arrives at someone
+signed out ([Link shape](#link-shape)). It is the wrong place to _run_ a claim:
+money landing in your wallet should be watched from your wallet, the way a reward
+is. So the route's last act is to hand the tip over and navigate; everything from
+the payout onwards belongs to `TipClaimModal`, which `core/Modals.svelte` renders
+over the wallet.
+
+- Signed in, the route shows **nothing** — it hands over and goes. Signed out it
+  is the welcome screen, and sign-in hands over the same way.
+- The modal owns the whole outcome: **claiming** (a spinner, and
+  **not dismissible** — a modal clicked away mid-payout would leave the result of
+  a money movement unreported), then **received**, or one of three failures.
+  Received gets **`Sprinkles`**, the same welcome a reward gets, because that is
+  what this is.
+- The failures are told apart by which call failed, which the old single-catch
+  could not do: a `get_tip_details` rejection is the **link** (unknown, expired,
+  already claimed, wrong code — one indistinguishable answer by design) and never
+  attempts a payout; `Uncovered` is a reservation the sender no longer covers; a
+  transport failure is neither, and is the only one offering **Try again**.
+- The tip travels **in memory**, as the modal's data — not in the URL the wallet
+  lands on, which would leave the entire authorisation in browser history. A test
+  pins that the code never reaches `goto`.
+- The handover is therefore losable (a reload mid-flight). It costs a claim that
+  did not happen, on a link that still works, because **nothing is consumed until
+  the modal calls `claim_tip`** — which is why the claim runs after the navigation
+  rather than before it.
+- The confirmation is the **fuller success variant** the design already carried
+  (`21763:86266`): amount, Network / Token, **Status: Completed**. It is the one
+  screen that shows the sender's message, which no longer has a review card to
+  live on.
+- The modal is **not behind `TIPS_ENABLED`**, unlike the create surface.
+  Outstanding links stay claimable while the flag is off, so closing the flag must
+  not strand a claim that is already under way.
+- The signed-out welcome screen takes the drawn artwork as an asset
+  (`tip-welcome-img.svg`) with the **token's own mark composited on top** at the
+  two positions the design draws it. Figma draws one frame per token; compositing
+  covers any ICRC-2 ledger, including one added after this ships. Measured against
+  the drawing rather than the frame — the design's crop is tighter than the export,
+  so its frame percentages leave both marks floating clear of the coins. A ledger
+  that publishes no `icrc1:logo` (the plain ICP ledger is one) falls back to its
+  symbol on the larger mark only, because a six-character symbol clips inside the
+  smaller one and a blank badge on a coin reads as a failed image.
+
 ## Security model
 
 - **Two factors authorise a claim:** the opaque `tip_id` the server knows, and the
@@ -722,9 +874,11 @@ behaviour-first voice. It must cover, in the same PR as the behaviour change:
 - Expiry options and the default, and that a lapsed tip cannot be claimed —
   enforced by the backend record and by the reservation itself, which carries the
   same deadline.
-- The two fees — the ledger fee the sender pays to reserve the amount, and the
-  payout fee taken from the tip at claim — and therefore that the recipient
-  receives slightly less than the amount the sender set aside.
+- **Who pays the fees, stated plainly: the sender pays both.** One ledger fee to
+  reserve the amount, a second when the claimer moves it. The claimer receives the
+  **full amount shown** and pays nothing. Measured against a real ledger during the
+  backend build: `icrc2_transfer_from` debits amount + fee from the sender and
+  credits the amount in full, which is why the reservation is sized at amount + fee.
 - **Where the money actually is.** The tokens stay in the sender's account; OISY
   holds a bounded, revocable authorisation and never a balance. The design's
   "non-custodial" phrasing is accurate here and can be used — but the flip side has
@@ -819,23 +973,38 @@ change.
    and network filter, and shows the drawn empty state when the user holds none.
 3. Creating a tip requires an amount and an expiry (**1h / 24h / 7d**, default 24h),
    accepts an optional message of up to **250 characters**, and states that the
-   amount is reserved in the user's own account and lapses on its own.
+   amount is reserved in the user's own account and lapses on its own — quoting
+   **both** fees the sender will pay: one now to reserve, one when it is claimed.
 4. **Generate** issues an `approve` to `{owner: backend, subaccount: H(tip_id)}` for
    the amount plus the payout fee, records the tip, and produces a share screen with
    a scannable QR, the `oisy.com/tip/<id>#c=<code>` link, copy **and** share actions,
    and an absolute expiry.
 5. **No tokens leave the sender's account at creation.** Verifiable in a ledger trace:
    the only transaction is an `approve`.
-6. The reserved amount is **excluded from spendable balance** in the token list, the
-   send flow, the swap flow and both **MAX** controls.
+6. The reserved amount **plus its payout fee** — the whole allowance — is
+   **excluded from spendable balance** in the token list, the send flow, the swap
+   flow and both **MAX** controls. Excluding only the amount would let a user spend
+   down to where their own tip can no longer be claimed.
 7. Opening the link **signed out** shows the branded modal with amount, token and
    expiry — **not** the message, the sender, or the claimer — and performs no
    state-changing call.
 8. After **Open or Create** and Internet Identity, the claim resumes with the
-   fragment intact and shows the review card with the payout fee, the message,
-   **Status: Reserved**, and a disclosure that the sender will see who claimed.
-9. **Claim now** pays out via `icrc2_transfer_from` net of the fee, **including for a
-   principal that has never used OISY before**, with no manual token setup.
+   fragment intact and **pays out without a second press**, from inside the
+   wallet: the recipient lands there and a modal reports the claim as it happens,
+   carrying the amount, the sender's message and **Status: Completed** — and **no
+   fee line**, since the claimer pays none.
+   The disclosure that the sender will see who claimed sits on the screen
+   **before** sign-in, so it is read before any identity exists. Revised after the
+   first build; the review card this replaces is described in
+   [Claiming without a review step](#claiming-without-a-review-step--changed-after-the-first-build).
+9. **Claim now** pays out via `icrc2_transfer_from` for the **full amount shown**,
+   **including for a principal that has never used OISY before**, with no manual
+   token setup. Adjusted during the backend build, and measured against a real
+   ledger: the ledger charges the transfer fee to the **allowance**, not to the
+   transferred amount, so an allowance sized at amount + fee (criterion 4) pays the
+   claimer the whole amount and the sender carries both fees. The earlier "net of
+   the fee" wording described a model where the fee came out of the tip, which the
+   allowance design does not do.
 10. A tip can be claimed **exactly once**; two simultaneous claims produce exactly one
     payout; a tip marked claimed is never left unpaid.
 11. If the sender no longer covers the tip — spent, revoked, or cancelled — the

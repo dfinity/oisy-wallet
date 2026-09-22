@@ -27,6 +27,7 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -58,6 +59,7 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
 		const solPrice = $exchangeStore?.solana;
+		const xrpPrice = $exchangeStore?.ripple;
 		const bnbPrice = $exchangeStore?.binancecoin;
 		const polPrice = $exchangeStore?.['polygon-ecosystem-token'];
 
@@ -73,6 +75,7 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
+			[XRP_TOKEN_ID]: xrpPrice,
 			[BASE_ETH_TOKEN_ID]: ethPrice,
 			[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			[BNB_MAINNET_TOKEN_ID]: bnbPrice,
