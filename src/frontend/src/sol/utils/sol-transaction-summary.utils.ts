@@ -50,23 +50,34 @@ export const flattenInstructions = (
  *
  * A summary naming no destination at all keeps its refund - those are the closes recorded before
  * the destination was read, and turning them into losses would be its own misreport.
+ *
+ * Only closes after this one are followed. The message is the dApp's to arrange, so an unsigned one
+ * can name `A -> B` and then `B -> A`: searching the whole list walks that pair forever, and a
+ * close of the destination that already happened says nothing about where this balance goes. Each
+ * step moving strictly forward is what ends the walk, rather than remembering where it has been.
  */
 const returnedToOwner = ({
 	close: { own, counterparty },
-	closes
+	closes,
+	after
 }: {
 	close: Pick<SolInstructionSummary, 'own' | 'counterparty'>;
 	closes: SolInstructionSummary[];
+	after: number;
 }): boolean => {
 	if (!(own ?? isNullish(counterparty))) {
 		return false;
 	}
 
-	const onward = closes.find(({ account }) => nonNullish(counterparty) && account === counterparty);
+	const onwardAt = closes.findIndex(
+		({ account }, index) => index > after && nonNullish(counterparty) && account === counterparty
+	);
+
+	const onward = closes[onwardAt];
 
 	// The destination is closed again further on, so whether the balance stayed is that close's
 	// question rather than this one's.
-	return isNullish(onward) ? true : returnedToOwner({ close: onward, closes });
+	return isNullish(onward) ? true : returnedToOwner({ close: onward, closes, after: onwardAt });
 };
 
 export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
@@ -83,7 +94,9 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 	const closes = flattened.filter(({ kind }) => kind === 'closeTokenAccount' || kind === 'unwrap');
 
 	return maxBigInt(
-		flattened.reduce((acc, { kind, account, rent, returned, own, counterparty }) => {
+		flattened.reduce((acc, current) => {
+			const { kind, account, rent, returned, own, counterparty } = current;
+
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
 			}
@@ -91,7 +104,13 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 			// Only a close that pays the user back reduces what the transaction costs them. One that
 			// names somebody else spends the balance rather than returning it, and crediting it here
 			// would report the smaller number precisely where the larger one is the point.
-			if (!returnedToOwner({ close: { own, counterparty }, closes })) {
+			if (
+				!returnedToOwner({
+					close: { own, counterparty },
+					closes,
+					after: closes.findIndex((close) => close === current)
+				})
+			) {
 				return acc;
 			}
 

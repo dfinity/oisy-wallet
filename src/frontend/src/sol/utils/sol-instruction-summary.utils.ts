@@ -354,11 +354,15 @@ const toEffect = ({
 
 			const mint = accountMints[account];
 
-			// An account the same transaction opened held nothing before it ran, so its balance
-			// going in says zero. What it hands back is the rent it was funded with moments earlier.
-			const returned =
-				fundedInTransaction({ account, flattened, accountLamports, until: position }) ??
-				accountLamports[account];
+			// What it hands back is everything it holds by the time it closes: whatever it already
+			// held, the rent it was funded with moments earlier, and anything an earlier close in
+			// the same message paid into it.
+			const returned = fundedInTransaction({
+				account,
+				flattened,
+				accountLamports,
+				until: position
+			});
 
 			// Closing pays the account's whole balance to whoever the instruction names, which need
 			// not be the user: read as a close alone, a hand-over of a funded wrapped SOL account
@@ -483,6 +487,9 @@ const fundedInTransaction = ({
 	// its balance on afterwards, and is no part of what the one being described paid out.
 	until?: number;
 }): bigint | undefined =>
+	// Both sources can apply at once: an account can pre-date the message and still be paid into
+	// during it, which is exactly the funded account a hand-over is worth making. Taking one or the
+	// other dropped whichever it did not pick.
 	flattened.slice(0, until).reduce<bigint | undefined>(
 		(
 			acc,
@@ -501,8 +508,7 @@ const fundedInTransaction = ({
 				const closed = address({ info, key: 'account' });
 
 				const inflow = nonNullish(closed)
-					? (fundedInTransaction({ account: closed, flattened, accountLamports, until: index }) ??
-						accountLamports[closed])
+					? fundedInTransaction({ account: closed, flattened, accountLamports, until: index })
 					: undefined;
 
 				return nonNullish(inflow) ? (acc ?? ZERO) + inflow : acc;
@@ -524,7 +530,7 @@ const fundedInTransaction = ({
 
 			return nonNullish(lamports) ? (acc ?? ZERO) + lamports : acc;
 		},
-		undefined
+		accountLamports[account]
 	);
 
 /**

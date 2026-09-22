@@ -281,6 +281,45 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// The message is the dApp's to arrange, so a crafted one can name a cycle. Searching every
+		// close walks it forever and takes the review down while it renders.
+		it('should terminate on a cycle of closes', () => {
+			const second = mockAtaAddress2;
+
+			expect(() =>
+				solAtaFee([
+					{ ...close(), counterparty: second, own: true },
+					{
+						kind: 'closeTokenAccount',
+						account: second,
+						returned: RENT,
+						counterparty: mockAtaAddress,
+						own: true
+					}
+				])
+			).not.toThrow();
+		});
+
+		// A close of the destination that already happened says nothing about where this balance
+		// goes, so it must not be the one consulted.
+		it('should ignore a close of the destination that came earlier', () => {
+			const second = mockAtaAddress2;
+
+			expect(
+				solAtaFee([
+					{
+						kind: 'closeTokenAccount',
+						account: second,
+						returned: RENT,
+						counterparty: mockSolAddress,
+						own: false
+					},
+					create(),
+					{ ...close(), counterparty: second, own: true }
+				])
+			).toBe(ZERO);
+		});
+
 		it('should still credit a close that named the user', () => {
 			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: true }])).toBe(
 				ZERO

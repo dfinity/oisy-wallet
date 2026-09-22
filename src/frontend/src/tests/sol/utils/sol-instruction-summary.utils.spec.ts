@@ -350,6 +350,38 @@ describe('sol-instruction-summary.utils', () => {
 			expect(view.own).toBeTruthy();
 		});
 
+		// Both sources apply at once on an account that pre-dates the message and is paid into during
+		// it. Picking one dropped the other, and on a funded account the one dropped was the bulk.
+		it('should add what the account already held to what arrived', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { destination: wsol, lamports: 1_000_000_000, source: owner }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				accountLamports: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			// 5 SOL it already held plus the 1 SOL the message paid in.
+			expect(close?.returned).toBe(6_000_000_000n);
+		});
+
 		// A close hands its whole balance to the account it names, so a chain carries the first
 		// account's lamports to the last. Counting System funding alone reports the tail of the
 		// chain as though it began there, understating what the final close pays out.
