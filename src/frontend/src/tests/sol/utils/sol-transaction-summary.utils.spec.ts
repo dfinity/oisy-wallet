@@ -240,6 +240,47 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(RENT);
 		});
 
+		// Closing into an account of the user's and then closing that one to a stranger leaves
+		// nothing behind, but each link on its own reads as a close that paid the user: the first
+		// because its destination is theirs, the second because skipping a credit is not a debit.
+		it('should credit neither rent when the chain ends at a stranger', () => {
+			const second = mockAtaAddress2;
+
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'createTokenAccount', account: second, rent: RENT },
+					{ ...close(), counterparty: second, own: true },
+					{
+						kind: 'closeTokenAccount',
+						account: second,
+						returned: RENT * 2n,
+						counterparty: mockSolAddress,
+						own: false
+					}
+				])
+			).toBe(RENT * 2n);
+		});
+
+		it('should credit both rents when the chain ends with the user', () => {
+			const second = mockAtaAddress2;
+
+			expect(
+				solAtaFee([
+					create(),
+					{ kind: 'createTokenAccount', account: second, rent: RENT },
+					{ ...close(), counterparty: second, own: true },
+					{
+						kind: 'closeTokenAccount',
+						account: second,
+						returned: RENT * 2n,
+						counterparty: mockSolAddress,
+						own: true
+					}
+				])
+			).toBe(ZERO);
+		});
+
 		it('should still credit a close that named the user', () => {
 			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: true }])).toBe(
 				ZERO

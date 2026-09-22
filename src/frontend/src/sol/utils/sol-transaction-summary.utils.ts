@@ -40,17 +40,34 @@ export const flattenInstructions = (
  * never this transaction's to charge.
  */
 /**
- * Whether what a close hands back reaches the user.
+ * Whether what a close hands back reaches the user, followed to the end of the chain.
  *
  * Closing pays the account's whole balance to the destination the instruction names, which the
- * effect carries and marks. A summary from before that was carried names no destination at all,
- * and those kept their refund, so the absence of one still counts as the user's own rather than
- * turning every historical close into a loss.
+ * effect carries and marks. Asking only about that destination stops being enough once it can be
+ * closed onward: closing into an account of the user's and then closing that one to a stranger
+ * leaves nothing behind, while each link on its own looks like a close that paid the user. Where
+ * the chain ends is what decides whether the balance stayed.
+ *
+ * A summary naming no destination at all keeps its refund - those are the closes recorded before
+ * the destination was read, and turning them into losses would be its own misreport.
  */
 const returnedToOwner = ({
-	own,
-	counterparty
-}: Pick<SolInstructionSummary, 'own' | 'counterparty'>): boolean => own ?? isNullish(counterparty);
+	close: { own, counterparty },
+	closes
+}: {
+	close: Pick<SolInstructionSummary, 'own' | 'counterparty'>;
+	closes: SolInstructionSummary[];
+}): boolean => {
+	if (!(own ?? isNullish(counterparty))) {
+		return false;
+	}
+
+	const onward = closes.find(({ account }) => nonNullish(counterparty) && account === counterparty);
+
+	// The destination is closed again further on, so whether the balance stayed is that close's
+	// question rather than this one's.
+	return isNullish(onward) ? true : returnedToOwner({ close: onward, closes });
+};
 
 export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 	const flattened = flattenInstructions(instructions);
@@ -63,6 +80,8 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 		return { ...acc, [account]: rent };
 	}, {});
 
+	const closes = flattened.filter(({ kind }) => kind === 'closeTokenAccount' || kind === 'unwrap');
+
 	return maxBigInt(
 		flattened.reduce((acc, { kind, account, rent, returned, own, counterparty }) => {
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
@@ -72,7 +91,7 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 			// Only a close that pays the user back reduces what the transaction costs them. One that
 			// names somebody else spends the balance rather than returning it, and crediting it here
 			// would report the smaller number precisely where the larger one is the point.
-			if (!returnedToOwner({ own, counterparty })) {
+			if (!returnedToOwner({ close: { own, counterparty }, closes })) {
 				return acc;
 			}
 
@@ -383,7 +402,8 @@ export const formatSolInstructionSummary = ({
 	// by whatever was wrapped - and saying "to your wallet" for a close that names somebody else
 	// states the one thing about it that matters wrongly, so the line says "to" and the address is
 	// rendered beside it.
-	const returnedHome = returnedToOwner({ own, counterparty });
+	// The line describes this close alone, so it asks only where this close paid.
+	const returnedHome = own ?? isNullish(counterparty);
 
 	const returnedDetail = nonNullish(returned)
 		? replacePlaceholders(
