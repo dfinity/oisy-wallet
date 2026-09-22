@@ -80,6 +80,10 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	// Set when the message bundles instructions that disagree on what it does, or carries one that
+	// is decoded and still cannot be stated. `sign()` refuses such a message, so the review says so
+	// and holds the button rather than letting the user press it and bounce.
+	let ambiguous = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
@@ -97,6 +101,7 @@
 	const updateData = async () => {
 		try {
 			({
+				ambiguous,
 				destination,
 				tokenAddress,
 				isApproval,
@@ -245,9 +250,11 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSign.REVIEW}
 			<SolWalletConnectSignReview
+				ambiguous={ambiguous ?? false}
 				{application}
-				approveDisabled={!decoded}
+				approveDisabled={!decoded || (ambiguous ?? false)}
 				{data}
+				{decoded}
 				destination={destination ?? ''}
 				feeToken={token}
 				{instructions}

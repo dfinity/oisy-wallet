@@ -1347,10 +1347,14 @@ interface I18nWallet_connect {
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		cannot_be_shown: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
 		simulated_changes: string;
+		balance_changes: string;
+		balance_changes_none: string;
+		balance_changes_unknown: string;
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;
