@@ -15,6 +15,7 @@
 		HELP_ICPSWAP_EMPTY,
 		HELP_ICPSWAP_ERROR,
 		HELP_ICPSWAP_LOADING,
+		HELP_ICPSWAP_NO_TOKENS,
 		HELP_ICPSWAP_POOL_GROUP,
 		HELP_ICPSWAP_SCAN_BUTTON,
 		HELP_ICPSWAP_SCAN_SUMMARY,
@@ -45,7 +46,6 @@
 	let tokenA = $state<IcToken | undefined>();
 	let tokenB = $state<IcToken | undefined>();
 
-	let busy = $state(false);
 	let loadError = $state<string | undefined>();
 	// Both entry points produce the same shape: the scan can return several pools, naming a pair
 	// returns one.
@@ -62,8 +62,14 @@
 	// with no terminal event.
 	let requestGeneration = 0;
 
-	const startRequest = (): number => {
-		busy = true;
+	// Which entry point is running, not merely that one is: `busy` alone cannot tell them apart,
+	// so a manual lookup used to spin the scan button as though a scan were under way.
+	let activeRequest = $state<'scan' | 'lookup' | undefined>();
+
+	const busy = $derived(nonNullish(activeRequest));
+
+	const startRequest = (kind: 'scan' | 'lookup'): number => {
+		activeRequest = kind;
 		reset();
 
 		return ++requestGeneration;
@@ -106,7 +112,7 @@
 			return;
 		}
 
-		const generation = startRequest();
+		const generation = startRequest('scan');
 
 		trackHelp({
 			action: 'scan',
@@ -145,7 +151,7 @@
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
-				busy = false;
+				activeRequest = undefined;
 			}
 		}
 	};
@@ -157,7 +163,7 @@
 			return;
 		}
 
-		const generation = startRequest();
+		const generation = startRequest('lookup');
 
 		const [symbolA, symbolB] = [tokenA.symbol, tokenB.symbol];
 
@@ -194,7 +200,7 @@
 			});
 		} finally {
 			if (isCurrentRequest(generation)) {
-				busy = false;
+				activeRequest = undefined;
 			}
 		}
 	};
@@ -313,6 +319,13 @@
 	// A pool with every row filtered out as dust still comes back as a group, so results are
 	// counted by rows rather than by groups - otherwise an empty pool renders a bare heading and
 	// suppresses the "nothing found" message.
+	// With no enabled ICRC tokens the candidate set is ICP alone, so choosing it on one side leaves
+	// the other with nothing to offer. The explanation belongs in the card rather than inside a
+	// dropdown the user cannot open, and it is a full sentence that would not fit the trigger.
+	let noTokensToPick = $derived(
+		otherTokens(tokenA).length === 0 || otherTokens(tokenB).length === 0
+	);
+
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
 	let hasResults = $derived(visibleGroups.length > 0);
 	let showEmpty = $derived(nonNullish(groups) && !hasResults && !busy);
@@ -329,7 +342,7 @@
 		<Button
 			ariaLabel={$i18n.help.alt.scan}
 			disabled={busy}
-			loading={busy && isNullish(groups) && isNullish(loadError)}
+			loading={activeRequest === 'scan'}
 			onclick={onScan}
 			testId={HELP_ICPSWAP_SCAN_BUTTON}
 		>
@@ -375,6 +388,12 @@
 				/>
 			{/snippet}
 		</SettingsCardItem>
+
+		{#if noTokensToPick}
+			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_NO_TOKENS}>
+				{$i18n.help.text.no_tokens}
+			</p>
+		{/if}
 
 		{#if busy}
 			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>

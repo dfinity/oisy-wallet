@@ -148,6 +148,7 @@ export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
 export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
 export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';
 export const HELP_ICPSWAP_LOADING = 'help-icpswap-loading';
+export const HELP_ICPSWAP_NO_TOKENS = 'help-icpswap-no-tokens';
 export const HELP_ICPSWAP_ERROR = 'help-icpswap-error';
 export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
 export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
