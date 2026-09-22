@@ -236,6 +236,65 @@ const closeXrpSendRecord = async ({
 };
 
 /**
+ * Runs a submit-and-confirm against an open record and writes its outcome.
+ *
+ * Shared by a first attempt and by a retry, and that is the point: both drive
+ * the same record through the same transitions, so a retry cannot leave it in a
+ * state a first attempt could not.
+ *
+ * Only a definitive outcome closes the record. An indeterminate confirmation
+ * deliberately does not — the payment may still apply, and the record staying
+ * open is what keeps the next send refused until the ledger decides.
+ */
+const driveXrpSendRecord = async ({
+	identity,
+	recordId,
+	run
+}: {
+	identity: Identity;
+	recordId: string;
+	run: () => Promise<XrpSendResult>;
+}): Promise<XrpSendResult> => {
+	try {
+		const result = await run();
+
+		await closeXrpSendRecord({ identity, recordId, status: { Succeeded: null } });
+
+		return result;
+	} catch (err: unknown) {
+		// `XrpSendExpiredError` is definitive in the other direction — the ledger
+		// passed `LastLedgerSequence` without including it, so the sequence was
+		// never consumed and a fresh send is safe. `XrpTransactionFailedError` is a
+		// validated `tec*`: applied, failed, fee claimed, sequence consumed. Both
+		// free the address.
+		if (err instanceof XrpSendExpiredError || err instanceof XrpTransactionFailedError) {
+			await closeXrpSendRecord({
+				identity,
+				recordId,
+				status: { Failed: null },
+				error: err.message
+			});
+		} else if (!(err instanceof XrpSendIndeterminateError)) {
+			// Everything else reaching here failed before or at submission without
+			// the blob going anywhere it could still apply from — a rejected
+			// malformed transaction, or an endpoint that provably never received it.
+			// Leaving the record open would block the address on a payment that
+			// cannot exist.
+			await closeXrpSendRecord({
+				identity,
+				recordId,
+				status: { Failed: null },
+				error: err instanceof Error ? err.message : `${err}`
+			});
+		}
+
+		throw err;
+	} finally {
+		releaseXrpActiveUserTransaction(recordId);
+	}
+};
+
+/**
  * Waits for a submitted transaction to be validated, and reports its final result.
  *
  * A transaction is only definitively failed once the ledger has advanced past the
@@ -430,10 +489,12 @@ const confirmXrpTransaction = async ({
 const submitAndConfirmXrpTransaction = async ({
 	network,
 	pending,
+	recordId,
 	progress
 }: {
 	network: XrpNetworkType;
 	pending: XrpPendingTransaction;
+	recordId: string;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	const { txBlob } = pending;
@@ -531,9 +592,13 @@ const submitAndConfirmXrpTransaction = async ({
 			throw err;
 		}
 
+		// Carries the record as well as the blob: a retry has to resubmit these exact
+		// bytes AND resolve the record they belong to, and the record is the only one
+		// the invariant allows for this address.
 		throw new XrpSendIndeterminateError({
 			message: err instanceof Error ? err.message : `${err}`,
-			pending
+			pending,
+			recordId
 		});
 	}
 
@@ -888,56 +953,17 @@ export const sendXrp = async ({
 		txBlob
 	});
 
-	try {
-		const result = await submitAndConfirmXrpTransaction({
-			network,
-			pending: { txBlob },
-			progress
-		});
-
-		await closeXrpSendRecord({
-			identity: recordIdentity,
-			recordId,
-			status: { Succeeded: null }
-		});
-
-		return result;
-	} catch (err: unknown) {
-		// Only a definitive outcome closes the record. An indeterminate
-		// confirmation leaves it open on purpose: the payment may still apply, and
-		// the record staying open is what keeps the next send refused until the
-		// poller can say which way it went.
-		//
-		// `XrpSendExpiredError` is definitive in the other direction — the ledger
-		// passed `LastLedgerSequence` without including it, so the sequence was
-		// never consumed and a fresh send is safe. `XrpTransactionFailedError` is a
-		// validated `tec*`: applied, failed, fee claimed, sequence consumed. Both
-		// free the address.
-		if (err instanceof XrpSendExpiredError || err instanceof XrpTransactionFailedError) {
-			await closeXrpSendRecord({
-				identity: recordIdentity,
+	return await driveXrpSendRecord({
+		identity: recordIdentity,
+		recordId,
+		run: async () =>
+			await submitAndConfirmXrpTransaction({
+				network,
+				pending: { txBlob },
 				recordId,
-				status: { Failed: null },
-				error: err.message
-			});
-		} else if (!(err instanceof XrpSendIndeterminateError)) {
-			// Everything else reaching here failed before or at submission without
-			// the blob going anywhere it could still apply from — a rejected
-			// malformed transaction, or an endpoint that provably never received it.
-			// Leaving the record open would block the address on a payment that
-			// cannot exist.
-			await closeXrpSendRecord({
-				identity: recordIdentity,
-				recordId,
-				status: { Failed: null },
-				error: err instanceof Error ? err.message : `${err}`
-			});
-		}
-
-		throw err;
-	} finally {
-		releaseXrpActiveUserTransaction(recordId);
-	}
+				progress
+			})
+	});
 };
 
 /**
@@ -950,21 +976,40 @@ export const sendXrp = async ({
  * situation takes a NEW sequence, which is precisely what pays twice.
  *
  * Separate from {@link sendXrp} rather than a `pending` field on it, because the two have almost
- * nothing in common: this takes no identity, no addresses, no amount and no fee, and a signature
- * that accepted them would accept a reviewed payment alongside a stored blob and silently act on
- * the blob. The window they are polled over is not a parameter either — it is read out of the blob
- * by `deriveXrpLedgerWindow`.
+ * nothing in common: this takes no addresses, no amount and no fee, and a signature that accepted
+ * them would accept a reviewed payment alongside a stored blob and silently act on the blob. The
+ * window they are polled over is not a parameter either — it is read out of the blob by
+ * `deriveXrpLedgerWindow`.
+ *
+ * It does take the identity and the record, both off the same error, because it drives that record
+ * through the same transitions a first attempt does. There is deliberately **no gate** here: the
+ * record for this address is open, so the gate would refuse — and it should, for a *new* payment.
+ * Resubmitting these exact bytes is the one thing that is safe while it is open, since they carry
+ * the sequence the first attempt already used.
  */
 export const retryXrpSend = async ({
+	identity,
 	network,
 	pending,
+	recordId,
 	progress
 }: {
+	identity: Identity;
 	network: XrpNetworkType;
 	pending: XrpPendingTransaction;
+	recordId: string;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
 
-	return await submitAndConfirmXrpTransaction({ network, pending, progress });
+	// Re-claimed, because `driveXrpSendRecord` released it when the first attempt
+	// ended indeterminate. Without this the poller could resolve the record from a
+	// stale read while the retry is mid-flight.
+	claimXrpActiveUserTransaction(recordId);
+
+	return await driveXrpSendRecord({
+		identity,
+		recordId,
+		run: async () => await submitAndConfirmXrpTransaction({ network, pending, recordId, progress })
+	});
 };

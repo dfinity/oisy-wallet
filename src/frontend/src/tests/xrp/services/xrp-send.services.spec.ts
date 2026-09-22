@@ -72,6 +72,17 @@ describe('xrp-send.services', () => {
 		token: XRP_TOKEN
 	};
 
+	// A retry takes no payment parameters — only the identity and the record it has
+	// to resolve, both of which reach it on the `XrpSendIndeterminateError` that
+	// reported the unresolved send.
+	const recordId = 'record-1';
+
+	const retryParams = {
+		identity: mockIdentity,
+		network: XrpNetworks.mainnet,
+		recordId
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		// `clearAllMocks` keeps implementations, and a test that makes `randomWait` advance fake
@@ -850,7 +861,7 @@ describe('xrp-send.services', () => {
 				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(notConfigured);
 
 				const err = await retryXrpSend({
-					network: XrpNetworks.mainnet,
+					...retryParams,
 					pending: { txBlob: signedBlob }
 				}).catch((e: unknown) => e);
 
@@ -865,7 +876,7 @@ describe('xrp-send.services', () => {
 				vi.spyOn(xrplRest, 'submitXrpTransaction').mockRejectedValue(new Error('network down'));
 
 				await expect(
-					retryXrpSend({ network: XrpNetworks.mainnet, pending: { txBlob: signedBlob } })
+					retryXrpSend({ ...retryParams, pending: { txBlob: signedBlob } })
 				).resolves.toBeDefined();
 
 				expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalled();
@@ -929,7 +940,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
 			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
@@ -947,7 +958,7 @@ describe('xrp-send.services', () => {
 			// The id that blob derives to — the only one a retry may poll.
 			const blobHash = await deriveXrpTransactionHash(pending.txBlob);
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.submitXrpTransaction).toHaveBeenCalledExactlyOnceWith({
 				txBlob: pending.txBlob,
@@ -980,7 +991,7 @@ describe('xrp-send.services', () => {
 					'1200002400000008201B000010E061400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await retryXrpSend({ network: XrpNetworks.mainnet, pending });
+			await retryXrpSend({ ...retryParams, pending });
 
 			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -999,7 +1010,7 @@ describe('xrp-send.services', () => {
 					'120000240000000861400000000098968068400000000000000C7321ED01FA53FA5A7E77798F882ECE20B1ABC00BB358A9E55A202D0D0676BD0CE37A638114D28B177E48D9A8D057E70F7E464B498367281B988314F667B0CA50CC7709A220B0561B85E53A48461FA8'
 			};
 
-			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).rejects.toThrow(
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
 				'carries no LastLedgerSequence'
 			);
 
@@ -1024,7 +1035,7 @@ describe('xrp-send.services', () => {
 				accepted: false
 			});
 
-			await expect(retryXrpSend({ network: XrpNetworks.mainnet, pending })).resolves.toEqual({
+			await expect(retryXrpSend({ ...retryParams, pending })).resolves.toEqual({
 				txHash: blobHash,
 				submitResult: { engineResult: 'tefPAST_SEQ', accepted: false }
 			});
@@ -2109,6 +2120,96 @@ describe('xrp-send.services', () => {
 
 		expect(xrpSignServices.signXrpTransaction).toHaveBeenCalledWith(
 			expect.objectContaining({ transaction: expect.objectContaining({ Sequence: 7 }) })
+		);
+	});
+
+	// A retry resubmits the same bytes on the sequence the first attempt already used, so it
+	// cannot become a second payment — and it drives the SAME record, rather than opening one.
+	describe('a retry and the record', () => {
+		const pending = { txBlob: signedBlob };
+
+		it('opens no new record and runs no gate', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			// Deliberately ungated: the record for this address is open, so a gate would refuse —
+			// and resubmitting these bytes is the one thing that is safe while it is.
+			expect(backendApi.getActiveUserTransactions).not.toHaveBeenCalled();
+		});
+
+		it('re-reads nothing from the node before submitting', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(xrplRest.loadXrpAccountInfo).not.toHaveBeenCalled();
+			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		it('closes the record it was given as Succeeded', async () => {
+			await retryXrpSend({ ...retryParams, pending });
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ id: recordId, status: { Succeeded: null } })
+			);
+		});
+
+		// `tefPAST_SEQ` is the guarantee working: the original landed, so the ledger refused the
+		// duplicate. It arrives as a validated failure, and the record closes on it.
+		it('closes the record as Failed on a validated failure', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tefPAST_SEQ'
+			});
+
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
+				XrpTransactionFailedError
+			);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({ id: recordId, status: { Failed: null } })
+			);
+		});
+
+		it('leaves the record open when the retry is indeterminate too', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+			vi.mocked(randomWait).mockResolvedValue(undefined);
+
+			await expect(retryXrpSend({ ...retryParams, pending })).rejects.toThrow(
+				XrpSendIndeterminateError
+			);
+
+			expect(activeUserTransactionsServices.updateActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		// The blob and the record travel together, so a further retry can be offered off the new
+		// error without the caller keeping either itself.
+		it('hands back the same blob and record for a further retry', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+			vi.mocked(randomWait).mockResolvedValue(undefined);
+
+			const err = await retryXrpSend({ ...retryParams, pending }).catch((e: unknown) => e);
+
+			expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+			expect((err as XrpSendIndeterminateError).pending).toEqual(pending);
+			expect((err as XrpSendIndeterminateError).recordId).toBe(recordId);
+		});
+	});
+
+	// The first attempt hands both back, which is what makes the retry reachable at all — the blob
+	// is not persisted anywhere.
+	it('reports an indeterminate send with the blob and the record to retry against', async () => {
+		vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockRejectedValue(new Error('tooBusy'));
+		vi.mocked(randomWait).mockResolvedValue(undefined);
+		vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+
+		const err = await sendXrp(params).catch((e: unknown) => e);
+
+		expect(err).toBeInstanceOf(XrpSendIndeterminateError);
+		expect((err as XrpSendIndeterminateError).pending).toEqual({ txBlob: signedBlob });
+		// The id the send generated for its own record, so a retry resolves that one and not a
+		// record it invented.
+		expect((err as XrpSendIndeterminateError).recordId).toBe(
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mock.calls[0]?.[0].id
 		);
 	});
 });

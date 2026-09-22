@@ -58,18 +58,31 @@ export class XrpSendExpiredError extends Error {}
  * the next send from the same address until the ledger resolves it. So a user who dismisses this
  * and sends again is declined rather than building a fresh transaction on a new sequence.
  *
- * `pending` itself still only survives as a field on the rejected promise — nothing persists the
- * blob, because it does not fit an `external_refs` value (256 characters against a signed
- * Payment's 378) and storing it buys no safety the record does not already provide. It remains
- * available to an in-session retry through {@link retryXrpSend}, which resubmits these exact bytes
- * on their already-consumed sequence rather than paying twice.
+ * `pending` and `recordId` are what an in-session retry needs, and they travel together for a
+ * reason: `retryXrpSend` resubmits these exact bytes on their already-consumed sequence rather
+ * than paying twice, and it has to resolve the record those bytes belong to. The blob is not
+ * persisted — it does not fit an `external_refs` value (256 characters against a signed Payment's
+ * 378) and storing it buys no safety the record does not already provide — so the retry is
+ * available for as long as this error is held, and no longer. Past that, the record is still open
+ * and the poller resolves it from the ledger.
  */
 export class XrpSendIndeterminateError extends Error {
 	readonly pending: XrpPendingTransaction;
 
-	constructor({ message, pending }: { message: string; pending: XrpPendingTransaction }) {
+	readonly recordId: string;
+
+	constructor({
+		message,
+		pending,
+		recordId
+	}: {
+		message: string;
+		pending: XrpPendingTransaction;
+		recordId: string;
+	}) {
 		super(message);
 		this.pending = pending;
+		this.recordId = recordId;
 	}
 }
 
