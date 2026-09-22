@@ -84,7 +84,7 @@ export const buildHelpEvent = ({
 		source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.HELP_PAGE,
 		result_status: resultStatus,
 		...(nonNullish(subcontext) && { event_subcontext: subcontext }),
-		...(nonNullish(token) && { token_symbol: token }),
+		...(nonNullish(token) && { token_symbol: token, token_network: 'icp' }),
 		...(nonNullish(token2) && { token2_symbol: token2 }),
 		...(notEmptyString(tokenStandard) && { token_standard: tokenStandard }),
 		...(nonNullish(balancesFound) && {

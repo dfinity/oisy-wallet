@@ -833,7 +833,7 @@
 			"scan": "有効なトークン間のプールを確認"
 		},
 		"error": {
-			"pool_not_found": "このペアの ICPSwap プールは存在しません。2 つのトークンをご確認のうえ、もう一度お試しください。",
+			"pool_not_found": "このペアのプールが見つかりませんでした。2 つのトークンをご確認いただくか、しばらくしてからもう一度お試しください。",
 			"load_failed": "このプールの残高を読み取れませんでした。",
 			"withdraw_failed": "出金に失敗しました。",
 			"scan_failed": "ICPSwap のプール一覧を取得できませんでした。"
@@ -1057,7 +1057,6 @@
 			"cketh_certified": "ckETHパラメーターが認証されるまでお待ちください。",
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
-			"unknown_destination": "",
 			"first_time_destination": "このアドレスにトークンを送金したことはないようです。アドレスを慎重に確認してください。",
 			"first_time_destination_confirm": "このアドレスにトークンを送金するのは初めてで、アドレスを慎重に確認しました。",
 			"fee_expired": "",

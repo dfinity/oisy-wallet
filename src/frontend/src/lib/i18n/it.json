@@ -833,7 +833,7 @@
 			"scan": "Controlla i pool tra i tuoi token attivi"
 		},
 		"error": {
-			"pool_not_found": "Non esiste alcun pool ICPSwap per questa coppia. Controlla i due token e riprova.",
+			"pool_not_found": "Non è stato possibile trovare un pool per questa coppia. Controlla i due token oppure riprova tra poco.",
 			"load_failed": "Non è stato possibile leggere i tuoi saldi in questo pool.",
 			"withdraw_failed": "Il prelievo non è riuscito.",
 			"scan_failed": "Non è stato possibile recuperare l’elenco dei pool ICPSwap."
@@ -1057,7 +1057,6 @@
 			"cketh_certified": "Attendere che i parametri ckETH siano stati certificati.",
 			"pending_bitcoin_transaction": "Puoi inviare un'altra transazione Bitcoin una volta completata quella in sospeso.",
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
-			"unknown_destination": "",
 			"first_time_destination": "Sembra che tu non abbia mai inviato token a questo indirizzo. Verifica attentamente l’indirizzo.",
 			"first_time_destination_confirm": "È la prima volta che invio token a questo indirizzo e ho verificato attentamente l’indirizzo.",
 			"fee_expired": "",

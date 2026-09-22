@@ -833,7 +833,7 @@
 			"scan": "활성화된 토큰 사이의 풀 확인"
 		},
 		"error": {
-			"pool_not_found": "이 쌍에 해당하는 ICPSwap 풀이 없습니다. 두 토큰을 확인한 뒤 다시 시도하세요.",
+			"pool_not_found": "이 쌍에 해당하는 풀을 찾을 수 없습니다. 두 토큰을 확인하거나 잠시 후 다시 시도하세요.",
 			"load_failed": "이 풀의 잔액을 읽을 수 없습니다.",
 			"withdraw_failed": "출금에 실패했습니다.",
 			"scan_failed": "ICPSwap 풀 목록을 가져올 수 없습니다."
@@ -1057,7 +1057,6 @@
 			"cketh_certified": "ckETH 파라미터가 인증될 때까지 기다려 주세요.",
 			"pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션이 완료된 후 다른 트랜잭션을 보낼 수 있습니다.",
 			"no_available_utxos": "이 트랜잭션을 수행할 사용 가능한 UTXO가 없습니다.",
-			"unknown_destination": "",
 			"first_time_destination": "이 주소로 토큰을 보낸 적이 없는 것으로 보입니다. 주소를 꼼꼼히 확인하세요.",
 			"first_time_destination_confirm": "이 주소로 토큰을 보내는 것은 처음이며, 주소를 꼼꼼히 확인했습니다.",
 			"fee_expired": "",

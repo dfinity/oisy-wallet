@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -29,6 +30,7 @@
 	import {
 		IcpSwapPoolNotFoundError,
 		loadIcpSwapRecoverableBalances,
+		reloadIcpSwapPoolBalances,
 		scanIcpSwapPools,
 		withdrawIcpSwapBalance,
 		type IcpSwapPoolBalances,
@@ -51,6 +53,23 @@
 	let scanSummary = $state<{ poolsScanned: number; unreadablePools: number } | undefined>();
 	// The row currently being withdrawn, so only its own button spins.
 	let withdrawingKey = $state<string | undefined>();
+
+	// Neither selector is disabled while a lookup runs, so a second lookup - or a lookup racing a
+	// scan - can be in flight before the first settles. Results are therefore claimed by
+	// generation: a request that is no longer the newest drops its UI writes instead of
+	// overwriting fresher ones, and only the newest may clear `busy`. Analytics stay unguarded,
+	// since the call really did complete and dropping it would leave a `scan` `executing` event
+	// with no terminal event.
+	let requestGeneration = 0;
+
+	const startRequest = (): number => {
+		busy = true;
+		reset();
+
+		return ++requestGeneration;
+	};
+
+	const isCurrentRequest = (generation: number): boolean => generation === requestGeneration;
 
 	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
 	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.
@@ -87,8 +106,7 @@
 			return;
 		}
 
-		busy = true;
-		reset();
+		const generation = startRequest();
 
 		trackHelp({
 			action: 'scan',
@@ -102,8 +120,10 @@
 				tokens: candidateTokens
 			});
 
-			groups = pools;
-			scanSummary = { poolsScanned, unreadablePools };
+			if (isCurrentRequest(generation)) {
+				groups = pools;
+				scanSummary = { poolsScanned, unreadablePools };
+			}
 
 			trackHelp({
 				action: 'scan',
@@ -113,7 +133,9 @@
 				poolsScanned
 			});
 		} catch (err: unknown) {
-			loadError = $i18n.help.error.scan_failed;
+			if (isCurrentRequest(generation)) {
+				loadError = $i18n.help.error.scan_failed;
+			}
 
 			trackHelp({
 				action: 'scan',
@@ -122,7 +144,9 @@
 				error: replaceIcErrorFields(err)
 			});
 		} finally {
-			busy = false;
+			if (isCurrentRequest(generation)) {
+				busy = false;
+			}
 		}
 	};
 
@@ -133,15 +157,16 @@
 			return;
 		}
 
-		busy = true;
-		reset();
+		const generation = startRequest();
 
 		const [symbolA, symbolB] = [tokenA.symbol, tokenB.symbol];
 
 		try {
 			const pool = await loadIcpSwapRecoverableBalances({ identity, tokenA, tokenB });
 
-			groups = [pool];
+			if (isCurrentRequest(generation)) {
+				groups = [pool];
+			}
 
 			trackHelp({
 				action: 'select_pool',
@@ -152,10 +177,12 @@
 				balancesFound: pool.balances.length
 			});
 		} catch (err: unknown) {
-			loadError =
-				err instanceof IcpSwapPoolNotFoundError
-					? $i18n.help.error.pool_not_found
-					: $i18n.help.error.load_failed;
+			if (isCurrentRequest(generation)) {
+				loadError =
+					err instanceof IcpSwapPoolNotFoundError
+						? $i18n.help.error.pool_not_found
+						: $i18n.help.error.load_failed;
+			}
 
 			trackHelp({
 				action: 'select_pool',
@@ -166,7 +193,9 @@
 				error: replaceIcErrorFields(err)
 			});
 		} finally {
-			busy = false;
+			if (isCurrentRequest(generation)) {
+				busy = false;
+			}
 		}
 	};
 
@@ -178,6 +207,42 @@
 	const onSelectB = async (token: IcToken) => {
 		tokenB = token;
 		await loadBalances();
+	};
+
+	// Replaces one group with a fresh read of its pool. The withdrawal has already succeeded by the
+	// time this runs, so a failing re-read must not surface as a failed withdrawal: it falls back
+	// to dropping the withdrawn row, which is what the list would have shown anyway.
+	const refreshPool = async ({
+		identity,
+		poolCanisterId,
+		withdrawnToken
+	}: {
+		identity: Identity;
+		poolCanisterId: string;
+		withdrawnToken: IcToken;
+	}) => {
+		const group = groups?.find(({ poolCanisterId: id }) => id === poolCanisterId);
+
+		const dropWithdrawnRow = ({ balances, ...rest }: IcpSwapPoolBalances) => ({
+			...rest,
+			balances: balances.filter(
+				({ token: { ledgerCanisterId } }) => ledgerCanisterId !== withdrawnToken.ledgerCanisterId
+			)
+		});
+
+		const replacement = nonNullish(group)
+			? await reloadIcpSwapPoolBalances({ identity, pool: group, tokens: candidateTokens }).catch(
+					() => dropWithdrawnRow(group)
+				)
+			: undefined;
+
+		if (isNullish(replacement)) {
+			return;
+		}
+
+		groups = groups
+			?.map((g) => (g.poolCanisterId === poolCanisterId ? replacement : g))
+			.filter(({ balances }) => balances.length > 0);
 	};
 
 	const onWithdraw = async ({
@@ -225,20 +290,10 @@
 				tokenStandard: token.standard.code
 			});
 
-			// Drop the withdrawn row locally rather than re-running the whole scan, which would cost
-			// another full pool sweep. A failure deliberately leaves the row in place to retry.
-			groups = groups
-				?.map((group) =>
-					group.poolCanisterId === poolCanisterId
-						? {
-								...group,
-								balances: group.balances.filter(
-									({ token: { ledgerCanisterId } }) => ledgerCanisterId !== token.ledgerCanisterId
-								)
-							}
-						: group
-				)
-				.filter(({ balances }) => balances.length > 0);
+			// Re-read just this pool - one query against a canister id we already hold, not another
+			// factory sweep. Withdrawal moves the amount captured at discovery, so a balance
+			// credited in between would otherwise vanish with the row instead of being offered.
+			await refreshPool({ identity, poolCanisterId, withdrawnToken: token });
 		} catch (err: unknown) {
 			toastsError({ msg: { text: $i18n.help.error.withdraw_failed }, err });
 
@@ -329,7 +384,7 @@
 			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR}>
 				{loadError}
 			</p>
-		{:else if showEmpty}
+		{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
 			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
 				{nonNullish(scanSummary)
 					? replacePlaceholders($i18n.help.text.scan_nothing_found, {

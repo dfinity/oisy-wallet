@@ -833,7 +833,7 @@
 			"scan": "Sprawdź pule między Twoimi aktywnymi tokenami"
 		},
 		"error": {
-			"pool_not_found": "Dla tej pary nie istnieje pula ICPSwap. Sprawdź oba tokeny i spróbuj ponownie.",
+			"pool_not_found": "Nie udało się znaleźć puli dla tej pary. Sprawdź oba tokeny albo spróbuj ponownie za chwilę.",
 			"load_failed": "Nie udało się odczytać Twoich środków w tej puli.",
 			"withdraw_failed": "Wypłata się nie udała.",
 			"scan_failed": "Nie udało się pobrać listy pul ICPSwap."
@@ -1057,7 +1057,6 @@
 			"cketh_certified": "Poczekaj, aż parametry ckETH zostaną certyfikowane.",
 			"pending_bitcoin_transaction": "Możesz wysłać kolejną transakcję Bitcoin po zakończeniu oczekującej.",
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
-			"unknown_destination": "",
 			"first_time_destination": "Wygląda na to, że na ten adres nie wysłano jeszcze żadnych tokenów. Dokładnie sprawdź adres.",
 			"first_time_destination_confirm": "Wysyłam tokeny na ten adres po raz pierwszy, a adres został przeze mnie dokładnie sprawdzony.",
 			"fee_expired": "",

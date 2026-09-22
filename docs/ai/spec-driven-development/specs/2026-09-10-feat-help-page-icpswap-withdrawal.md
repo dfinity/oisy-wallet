@@ -60,7 +60,7 @@ Supporting changes, each following the existing Settings entry as the template:
 - `isHelpPath` / `isRouteHelp` in `src/frontend/src/lib/utils/nav.utils.ts`.
 - `'help'` added to `NavigationItemId` in `src/frontend/src/lib/types/navigation.ts`.
 - `NAVIGATION_ITEM_HELP = 'navigation-item-help'` in `src/frontend/src/lib/constants/test-ids.constants.ts`.
-- A descriptor in `NavigationMenuMainItems.svelte` using `IconLifeBuoy`, not gated behind a feature flag. Deliberately not the question-mark `IconHelp` the user menu uses: a question mark frames the page as a problem, a life buoy as help.
+- A descriptor in `NavigationMenuMainItems.svelte` using `IconLifeBuoy`, gated by `HELP_ENABLED = LOCAL || STAGING`. Deliberately not the question-mark `IconHelp` the user menu uses: a question mark frames the page as a problem, a life buoy as help.
 - Route files `src/frontend/src/routes/(app)/help/+page.svelte` and `+page.ts`, mirroring `(app)/settings/`.
 
 The page renders a `PageTitle` plus a `Help` component, exactly as the Settings page renders `Settings`. Cards reuse `SettingsCard` / `SettingsCardItem` so the two pages read as one family.
@@ -145,8 +145,8 @@ Each visible row gets its own **Withdraw** button. Per-row rather than one butto
 
 Behaviour around the call:
 
-- The row's button shows a loading state and is disabled while its call is in flight; other rows stay usable.
-- On success: a success toast naming the token and amount, and the balances are re-fetched so the row disappears.
+- The row's button shows a loading state while its call is in flight, and every row is disabled until it settles. Withdrawals are deliberately serialised: a successful one replaces that pool's group with a fresh read, so two overlapping withdrawals in one pool would race that replacement, and the second one's amount - captured at discovery - could already be stale, which ICPSwap rejects rather than clamps. The loading state stays on the pressed row alone.
+- On success: a success toast naming the token and amount, and that pool alone is re-read - one `getUserUnusedBalance` query against a canister id already held, never another factory sweep. The row disappears, unless the pool credited more between discovery and withdrawal, in which case it stays showing the remainder. A re-read that fails does not turn a successful withdrawal into a reported failure; the row is simply dropped.
 - On failure: an error toast; the row stays so the user can retry. Errors are mapped through the existing `mapIcpSwapFactoryError` (`src/frontend/src/lib/canisters/icp-swap.errors.ts`), so ICPSwap's own error text reaches the user.
 - The withdrawal credits the user's wallet like any incoming ICRC transfer; no extra balance refresh wiring beyond what the wallet workers already do.
 
@@ -156,7 +156,7 @@ The page's orchestration belongs in a new service (e.g. `src/frontend/src/lib/se
 
 ## Analytics
 
-One structured Plausible event, `support`, covering the whole page — following pattern B in [`docs/ai/frontend/analytics.md`](../../frontend/analytics.md) (a `PLAUSIBLE_EVENTS` member plus a domain service), modelled on `trading-analytics.services.ts`. The action rides in `event_modifier`, the tool in `event_subcontext`, the outcome in `result_status`, so the page is one groupable event rather than a family of `support_*` names.
+One structured Plausible event, `help`, covering the whole page — following pattern B in [`docs/ai/frontend/analytics.md`](../../frontend/analytics.md) (a `PLAUSIBLE_EVENTS` member plus a domain service), modelled on `trading-analytics.services.ts`. The action rides in `event_modifier`, the tool in `event_subcontext`, the outcome in `result_status`, so the page is one groupable event rather than a family of `help_*` names.
 
 New enum members in `src/frontend/src/lib/enums/plausible.ts`:
 
@@ -169,7 +169,7 @@ A new `src/frontend/src/lib/services/help-analytics.services.ts` exports one typ
 
 | `event_modifier` | `event_subcontext`   | Fires when                                                       | `result_status`                            | Other properties                                                                                                                                                     |
 | ---------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open`           | —                    | the Support page is opened                                       | `success`                                  | —                                                                                                                                                                    |
+| `open`           | —                    | the Help page is opened                                          | `success`                                  | —                                                                                                                                                                    |
 | `contact`        | `support`            | the external support link in card 1 is clicked                   | `success`                                  | `event_key: link`, `event_value`: destination URL                                                                                                                    |
 | `scan`           | `icpswap_withdrawal` | the scan button completes                                        | `executing` → `success` / `error`          | `event_key: balances_found`, `event_value`: count of withdrawable rows; `source_detail`: number of pools scanned; `result_error` on failure                          |
 | `select_pool`    | `icpswap_withdrawal` | a complete token pair has been resolved and its balances fetched | `success` (pool found) / `error` (no pool) | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found`, `event_value`: count of withdrawable rows; `result_error` on failure |
@@ -183,7 +183,7 @@ Per the `analytics.md` §8 checklist, no new property _keys_ are introduced (eve
 
 ## i18n
 
-A new `support` root section in `src/frontend/src/lib/i18n/en.json` for the page title and both cards' copy, plus `navigation.alt.help_page` for the nav item's aria-label. The nav item's label reuses a new `navigation.text.help`. Per repo convention only `en.json` is authored; the i18n workflow syncs the other locales' structure and translations follow separately.
+A new `help` root section in `src/frontend/src/lib/i18n/en.json` for the page title and both cards' copy, plus `navigation.alt.help_page` for the nav item's aria-label. The nav item's label reuses a new `navigation.text.help`. Per repo convention only `en.json` is authored; the i18n workflow syncs the other locales' structure and translations follow separately.
 
 ## Testing
 
@@ -192,7 +192,7 @@ The CI `test-coverage` gate enforces whole-project thresholds, so every new comp
 - Each new `.svelte` component gets a component test.
 - The new recovery service is unit-tested with mocked API functions: pool-not-found, zero balances, dust-only balances (hidden), a mixed set, withdrawal success, and withdrawal failure leaving the row in place.
 - The scan is unit-tested against a mocked `getAllPools` table: only pools with both legs active are queried, pools at another fee tier or with an inactive leg are skipped, a pool whose balance query rejects does not discard the others, and the returned rows carry the pool they belong to.
-- `support-analytics.services.spec.ts` follows `analytics.md` §7: assert the exact event name, the full metadata for each action × outcome, that optional fields are **absent** (not `undefined`) when nullish, and that no amount, principal, or unsanitised error reaches the payload.
+- `help-analytics.services.spec.ts` follows `analytics.md` §7: assert the exact event name, the full metadata for each action × outcome, that optional fields are **absent** (not `undefined`) when nullish, and that no amount, principal, or unsanitised error reaches the payload.
 - `nav.utils` gains cases for `isHelpPath` / `isRouteHelp`.
 - Extend the existing navigation tests so the new item is asserted in both the desktop `more` section and the mobile More sheet, in the right position.
 
