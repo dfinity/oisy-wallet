@@ -127,8 +127,8 @@ describe('HelpIcpSwapWithdrawal', () => {
 	});
 
 	it('ignores a superseded lookup that settles after a newer one', async () => {
-		// Neither selector is disabled while a lookup runs, so the slower first request must not
-		// overwrite the newer one's results.
+		// Neither selector is disabled while a lookup runs - changing the pair is how a user
+		// supersedes one - so the slower first request must not overwrite the newer one's results.
 		const stale: IcpSwapPoolBalances = {
 			poolCanisterId: 'stale-pool',
 			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
@@ -154,6 +154,11 @@ describe('HelpIcpSwapWithdrawal', () => {
 		// First pair: the lookup hangs.
 		await selectPair(getByTestId);
 
+		// Load-bearing: without this the rest of the test passes against a disabled selector,
+		// because fireEvent dispatches to one anyway. Superseding a lookup has to be reachable.
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
+
 		// Second pair: re-picking token A starts a newer lookup that resolves immediately.
 		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
 		await fireEvent.click(getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${icp.ledgerCanisterId}`));
@@ -168,6 +173,26 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 		expect(queryByTestId(`${HELP_ICPSWAP_POOL_GROUP}-stale-pool`)).toBeNull();
 		expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-fresh-pool`)).toBeInTheDocument();
+	});
+
+	it('leaves the selectors usable during a lookup while the scan button waits', async () => {
+		const { promise: pending, resolve: release } = Promise.withResolvers<IcpSwapPoolBalances>();
+		vi.mocked(loadIcpSwapRecoverableBalances).mockReturnValue(pending);
+
+		const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await selectPair(getByTestId);
+
+		expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
+
+		release({
+			poolCanisterId,
+			poolTokens: [unusedIcp.poolToken, unusedUsdc.poolToken],
+			pair: ['ICP', 'ckUSDC'],
+			balances: []
+		});
 	});
 
 	it('does not spin the scan button for a manual lookup', async () => {

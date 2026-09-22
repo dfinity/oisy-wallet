@@ -71,10 +71,16 @@
 
 	// A withdrawal is deliberately not folded into `busy`: that one also drives the "checking"
 	// line, the empty message and the unreadable-pool summary, which must keep describing the pool
-	// the user is withdrawing from. Discovery, on the other hand, must not start under a
-	// withdrawal - `startRequest` clears `groups`, which drops the withdrawal's own re-read and
-	// lets a pool read before the withdrawal landed re-display the row it just emptied.
-	const discoveryLocked = $derived(busy || nonNullish(withdrawingKey));
+	// the user is withdrawing from. It does lock both entry points, because `startRequest` clears
+	// `groups`, which would drop the withdrawal's own re-read and let a pool read taken before the
+	// withdrawal landed re-display the row it just emptied.
+	const withdrawing = $derived(nonNullish(withdrawingKey));
+
+	// The selectors deliberately stay live during a lookup: changing the pair is how a user
+	// supersedes one, and the generation guard above is what makes that safe. Only the scan button
+	// waits, since a scan restarts discovery wholesale and queueing one behind a lookup buys
+	// nothing.
+	const scanLocked = $derived(busy || withdrawing);
 
 	const startRequest = (kind: 'scan' | 'lookup'): number => {
 		activeRequest = kind;
@@ -358,7 +364,7 @@
 
 		<Button
 			ariaLabel={$i18n.help.alt.scan}
-			disabled={discoveryLocked}
+			disabled={scanLocked}
 			loading={activeRequest === 'scan'}
 			onclick={onScan}
 			testId={HELP_ICPSWAP_SCAN_BUTTON}
@@ -382,7 +388,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
-					disabled={discoveryLocked}
+					disabled={withdrawing}
 					onSelect={onSelectA}
 					selected={tokenA}
 					testId={HELP_ICPSWAP_TOKEN_A}
@@ -399,7 +405,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
-					disabled={discoveryLocked}
+					disabled={withdrawing}
 					onSelect={onSelectB}
 					selected={tokenB}
 					testId={HELP_ICPSWAP_TOKEN_B}
