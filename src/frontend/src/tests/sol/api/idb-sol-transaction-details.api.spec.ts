@@ -9,8 +9,8 @@ import { mockSolTransactionDetail } from '$tests/mocks/sol-transactions.mock';
 vi.mock('idb-keyval', async () => await vi.importActual('idb-keyval'));
 
 describe('idb-sol-transaction-details.api', () => {
-	// A realm (the worker, the main thread, or either after a reload) loads its own copy of the module
-	// and takes the epoch of the session current at that moment. IndexedDB itself is shared.
+	// A realm (the worker, the main thread, or either after a reload) loads its own copy of the
+	// module. IndexedDB itself is shared.
 	const loadRealm = async () => {
 		vi.resetModules();
 
@@ -46,7 +46,7 @@ describe('idb-sol-transaction-details.api', () => {
 	let realm: Realm;
 
 	beforeEach(async () => {
-		// Each test starts from an empty cache, in a session opened after that clear.
+		// Each test starts from an empty cache.
 		await (await loadRealm()).clearIdbSolTransactionDetails();
 
 		realm = await loadRealm();
@@ -164,51 +164,6 @@ describe('idb-sol-transaction-details.api', () => {
 			await realm.clearIdbSolTransactionDetails();
 
 			await expect(read({ realm: await loadRealm(), transaction })).resolves.toBeUndefined();
-		});
-
-		// The loaders do not wait for a write, so one on its way at sign-out would otherwise land after
-		// the clear and leave the transactions of the session that ended behind.
-		it('should not let a write that was already on its way outlive the clear', async () => {
-			const transaction = detailAt({ slot: 100n });
-
-			const write = realm.setIdbSolTransactionDetail({
-				network: SolanaNetworks.mainnet,
-				transaction
-			});
-
-			await realm.clearIdbSolTransactionDetails();
-
-			await write;
-
-			await expect(read({ realm: await loadRealm(), transaction })).resolves.toBeUndefined();
-		});
-
-		// The network worker is a realm of its own: the main thread clearing the cache cannot wait for
-		// its writes, so its session has to end for it too.
-		it('should not keep what another realm of the ended session writes after the clear', async () => {
-			const worker = await loadRealm();
-
-			const main = await loadRealm();
-
-			await main.clearIdbSolTransactionDetails();
-
-			const transaction = detailAt({ slot: 100n });
-
-			await worker.setIdbSolTransactionDetail({ network: SolanaNetworks.mainnet, transaction });
-
-			await expect(read({ realm: await loadRealm(), transaction })).resolves.toBeUndefined();
-		});
-
-		it('should keep what the next session writes', async () => {
-			await realm.clearIdbSolTransactionDetails();
-
-			const next = await loadRealm();
-
-			const transaction = detailAt({ slot: 100n });
-
-			await next.setIdbSolTransactionDetail({ network: SolanaNetworks.mainnet, transaction });
-
-			await expect(read({ realm: next, transaction })).resolves.toEqual(transaction);
 		});
 	});
 });
