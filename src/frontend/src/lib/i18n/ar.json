@@ -1044,7 +1044,6 @@
 			"cketh_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckETH.",
 			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
-			"unknown_destination": "",
 			"first_time_destination": "",
 			"first_time_destination_confirm": "",
 			"fee_expired": "",

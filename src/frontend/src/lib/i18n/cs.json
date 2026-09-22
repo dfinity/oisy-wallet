@@ -1044,7 +1044,6 @@
 			"cketh_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckETH.",
 			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
-			"unknown_destination": "",
 			"first_time_destination": "Zdá se, že na tuto adresu jste ještě nikdy neposílali tokeny. Adresu pečlivě zkontrolujte.",
 			"first_time_destination_confirm": "Na tuto adresu posílám tokeny poprvé a adresa je pečlivě zkontrolovaná.",
 			"fee_expired": "",

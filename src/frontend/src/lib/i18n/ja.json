@@ -1044,7 +1044,6 @@
 			"cketh_certified": "ckETHパラメーターが認証されるまでお待ちください。",
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
-			"unknown_destination": "",
 			"first_time_destination": "このアドレスにトークンを送金したことはないようです。アドレスを慎重に確認してください。",
 			"first_time_destination_confirm": "このアドレスにトークンを送金するのは初めてで、アドレスを慎重に確認しました。",
 			"fee_expired": "",

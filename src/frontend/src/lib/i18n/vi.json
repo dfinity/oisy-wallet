@@ -1044,7 +1044,6 @@
 			"cketh_certified": "Vui lòng đợi cho đến khi các tham số ckETH được chứng nhận.",
 			"pending_bitcoin_transaction": "Bạn có thể gửi một giao dịch Bitcoin khác sau khi giao dịch đang chờ xử lý hoàn tất.",
 			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
-			"unknown_destination": "",
 			"first_time_destination": "Có vẻ như bạn chưa từng gửi token đến địa chỉ này. Hãy kiểm tra địa chỉ thật cẩn thận.",
 			"first_time_destination_confirm": "Đây là lần đầu tôi gửi token đến địa chỉ này và tôi đã kiểm tra địa chỉ thật cẩn thận.",
 			"fee_expired": "",

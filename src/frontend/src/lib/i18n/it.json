@@ -1044,7 +1044,6 @@
 			"cketh_certified": "Attendere che i parametri ckETH siano stati certificati.",
 			"pending_bitcoin_transaction": "Puoi inviare un'altra transazione Bitcoin una volta completata quella in sospeso.",
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
-			"unknown_destination": "",
 			"first_time_destination": "Sembra che tu non abbia mai inviato token a questo indirizzo. Verifica attentamente l’indirizzo.",
 			"first_time_destination_confirm": "È la prima volta che invio token a questo indirizzo e ho verificato attentamente l’indirizzo.",
 			"fee_expired": "",
