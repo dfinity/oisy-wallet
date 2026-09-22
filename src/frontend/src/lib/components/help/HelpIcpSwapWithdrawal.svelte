@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -29,6 +30,7 @@
 	import {
 		IcpSwapPoolNotFoundError,
 		loadIcpSwapRecoverableBalances,
+		reloadIcpSwapPoolBalances,
 		scanIcpSwapPools,
 		withdrawIcpSwapBalance,
 		type IcpSwapPoolBalances,
@@ -207,6 +209,42 @@
 		await loadBalances();
 	};
 
+	// Replaces one group with a fresh read of its pool. The withdrawal has already succeeded by the
+	// time this runs, so a failing re-read must not surface as a failed withdrawal: it falls back
+	// to dropping the withdrawn row, which is what the list would have shown anyway.
+	const refreshPool = async ({
+		identity,
+		poolCanisterId,
+		withdrawnToken
+	}: {
+		identity: Identity;
+		poolCanisterId: string;
+		withdrawnToken: IcToken;
+	}) => {
+		const group = groups?.find(({ poolCanisterId: id }) => id === poolCanisterId);
+
+		const dropWithdrawnRow = ({ balances, ...rest }: IcpSwapPoolBalances) => ({
+			...rest,
+			balances: balances.filter(
+				({ token: { ledgerCanisterId } }) => ledgerCanisterId !== withdrawnToken.ledgerCanisterId
+			)
+		});
+
+		const replacement = nonNullish(group)
+			? await reloadIcpSwapPoolBalances({ identity, pool: group, tokens: candidateTokens }).catch(
+					() => dropWithdrawnRow(group)
+				)
+			: undefined;
+
+		if (isNullish(replacement)) {
+			return;
+		}
+
+		groups = groups
+			?.map((g) => (g.poolCanisterId === poolCanisterId ? replacement : g))
+			.filter(({ balances }) => balances.length > 0);
+	};
+
 	const onWithdraw = async ({
 		poolCanisterId,
 		balance
@@ -252,20 +290,10 @@
 				tokenStandard: token.standard.code
 			});
 
-			// Drop the withdrawn row locally rather than re-running the whole scan, which would cost
-			// another full pool sweep. A failure deliberately leaves the row in place to retry.
-			groups = groups
-				?.map((group) =>
-					group.poolCanisterId === poolCanisterId
-						? {
-								...group,
-								balances: group.balances.filter(
-									({ token: { ledgerCanisterId } }) => ledgerCanisterId !== token.ledgerCanisterId
-								)
-							}
-						: group
-				)
-				.filter(({ balances }) => balances.length > 0);
+			// Re-read just this pool - one query against a canister id we already hold, not another
+			// factory sweep. Withdrawal moves the amount captured at discovery, so a balance
+			// credited in between would otherwise vanish with the row instead of being offered.
+			await refreshPool({ identity, poolCanisterId, withdrawnToken: token });
 		} catch (err: unknown) {
 			toastsError({ msg: { text: $i18n.help.error.withdraw_failed }, err });
 

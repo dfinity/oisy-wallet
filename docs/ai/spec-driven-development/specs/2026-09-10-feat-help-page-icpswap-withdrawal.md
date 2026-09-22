@@ -146,7 +146,7 @@ Each visible row gets its own **Withdraw** button. Per-row rather than one butto
 Behaviour around the call:
 
 - The row's button shows a loading state and is disabled while its call is in flight; other rows stay usable.
-- On success: a success toast naming the token and amount, and the balances are re-fetched so the row disappears.
+- On success: a success toast naming the token and amount, and that pool alone is re-read - one `getUserUnusedBalance` query against a canister id already held, never another factory sweep. The row disappears, unless the pool credited more between discovery and withdrawal, in which case it stays showing the remainder. A re-read that fails does not turn a successful withdrawal into a reported failure; the row is simply dropped.
 - On failure: an error toast; the row stays so the user can retry. Errors are mapped through the existing `mapIcpSwapFactoryError` (`src/frontend/src/lib/canisters/icp-swap.errors.ts`), so ICPSwap's own error text reaches the user.
 - The withdrawal credits the user's wallet like any incoming ICRC transfer; no extra balance refresh wiring beyond what the wallet workers already do.
 

@@ -5,6 +5,7 @@ import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import {
 	IcpSwapPoolNotFoundError,
 	loadIcpSwapRecoverableBalances,
+	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
 	type IcpSwapRecoverableBalance
@@ -202,6 +203,7 @@ describe('icp-swap-recovery.services', () => {
 			expect(pools).toStrictEqual([
 				{
 					poolCanisterId,
+					poolTokens: [pool.token0, pool.token1],
 					pair: [tokenB.symbol, tokenA.symbol],
 					balances: [{ token: tokenA, poolToken: pool.token1, amount: 900_000n }]
 				}
@@ -250,6 +252,52 @@ describe('icp-swap-recovery.services', () => {
 			await expect(
 				scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] })
 			).rejects.toThrow('factory unavailable');
+		});
+	});
+
+	describe('reloadIcpSwapPoolBalances', () => {
+		const group = {
+			poolCanisterId,
+			poolTokens: [pool.token0, pool.token1] as [typeof pool.token0, typeof pool.token1],
+			pair: [tokenB.symbol, tokenA.symbol] as [string, string],
+			balances: []
+		};
+
+		it('re-reads one pool without going back to the factory', async () => {
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({ balance0: ZERO, balance1: 900_000n });
+
+			const refreshed = await reloadIcpSwapPoolBalances({
+				identity: mockIdentity,
+				pool: group,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(getAllPools).not.toHaveBeenCalled();
+			expect(getPoolCanister).not.toHaveBeenCalled();
+			expect(getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: poolCanisterId,
+				principal: mockIdentity.getPrincipal()
+			});
+			expect(refreshed.balances).toStrictEqual([
+				{ token: tokenA, poolToken: pool.token1, amount: 900_000n }
+			]);
+		});
+
+		it('surfaces a balance credited after the group was built', async () => {
+			// The point of refreshing rather than removing the row locally.
+			vi.mocked(getUserUnusedBalance).mockResolvedValue({
+				balance0: 500_000n,
+				balance1: ZERO
+			});
+
+			const { balances } = await reloadIcpSwapPoolBalances({
+				identity: mockIdentity,
+				pool: group,
+				tokens: [tokenA, tokenB]
+			});
+
+			expect(balances).toStrictEqual([{ token: tokenB, poolToken: pool.token0, amount: 500_000n }]);
 		});
 	});
 

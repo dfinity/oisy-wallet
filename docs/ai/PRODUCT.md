@@ -274,7 +274,7 @@ The scan only covers pools where **both** legs are active. A swap into a token t
 
 ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
 
-Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads the pool so the row disappears. Only the pressed row shows a loading state.
+Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads that pool — a single query, not another scan — so the row disappears, or stays showing a remainder if the pool credited more in between. Only the pressed row shows a loading state.
 
 Balances at or below the token's ledger fee are **not shown at all** — they cannot be moved, and offering them would only invite a withdrawal that is bound to fail. When a pair resolves to a pool that holds nothing, the card says so explicitly rather than showing an empty space; when the pair has no pool at all, it says that instead.
 

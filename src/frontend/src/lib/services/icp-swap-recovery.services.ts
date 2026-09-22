@@ -19,6 +19,10 @@ export interface IcpSwapRecoverableBalance {
 
 export interface IcpSwapPoolBalances {
 	poolCanisterId: string;
+	// The pool's two legs, in the pool's own order. Retained so a single pool can be refreshed
+	// after a withdrawal without going back to the factory - and so the mapping survives even when
+	// dust filtering, or a withdrawal, leaves the group with no rows to derive it from.
+	poolTokens: [ICPSwapToken, ICPSwapToken];
 	// The pool's own pair, in its own order, for labelling a group of rows. Kept separately from
 	// `balances` because dust filtering can leave a group with a single row while the pair is still
 	// what identifies the pool to the user.
@@ -44,6 +48,16 @@ export class IcpSwapPoolNotFoundError extends Error {
 		this.name = 'IcpSwapPoolNotFoundError';
 	}
 }
+
+// `enabledIcrcTokens` can carry the same ledger id twice - an enabled custom token duplicating a
+// default - and the default entry is the one the rest of the app treats as authoritative, so the
+// first occurrence wins. A plain `new Map(...)` would keep the last.
+const indexTokensByAddress = (tokens: IcToken[]): Map<string, IcToken> =>
+	tokens.reduce<Map<string, IcToken>>(
+		(acc, token) =>
+			acc.has(token.ledgerCanisterId) ? acc : acc.set(token.ledgerCanisterId, token),
+		new Map()
+	);
 
 const toPoolToken = (token: IcToken): ICPSwapToken => ({
 	address: token.ledgerCanisterId,
@@ -93,39 +107,41 @@ const isWithdrawable = ({ amount, token: { fee } }: IcpSwapRecoverableBalance): 
 // Maps one pool's two unused balances onto the tokens OISY knows, dropping anything that cannot
 // be moved. Shared by the manual lookup and the scan so both produce identical rows.
 const toPoolBalances = ({
-	pool,
+	poolCanisterId,
+	poolTokens,
 	tokenByAddress,
 	balance0,
 	balance1
 }: {
-	pool: PoolData;
+	poolCanisterId: string;
+	poolTokens: [ICPSwapToken, ICPSwapToken];
 	tokenByAddress: Map<string, IcToken>;
 	balance0: bigint;
 	balance1: bigint;
 }): IcpSwapPoolBalances => {
+	const [token0, token1] = poolTokens;
+
 	const unusedByAddress = new Map<string, bigint>([
-		[pool.token0.address, balance0],
-		[pool.token1.address, balance1]
+		[token0.address, balance0],
+		[token1.address, balance1]
 	]);
 
 	// The pool returns the pair in its own canonical order, so map each leg back onto the token
 	// OISY knows rather than assuming an order.
-	const balances = [pool.token0, pool.token1].reduce<IcpSwapRecoverableBalance[]>(
-		(acc, poolToken) => {
-			const token = tokenByAddress.get(poolToken.address);
+	const balances = [token0, token1].reduce<IcpSwapRecoverableBalance[]>((acc, poolToken) => {
+		const token = tokenByAddress.get(poolToken.address);
 
-			return nonNullish(token)
-				? [...acc, { token, poolToken, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
-				: acc;
-		},
-		[]
-	);
+		return nonNullish(token)
+			? [...acc, { token, poolToken, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
+			: acc;
+	}, []);
 
 	return {
-		poolCanisterId: pool.canisterId.toString(),
+		poolCanisterId,
+		poolTokens,
 		pair: [
-			tokenByAddress.get(pool.token0.address)?.symbol ?? pool.token0.address,
-			tokenByAddress.get(pool.token1.address)?.symbol ?? pool.token1.address
+			tokenByAddress.get(token0.address)?.symbol ?? token0.address,
+			tokenByAddress.get(token1.address)?.symbol ?? token1.address
 		],
 		balances: balances.filter(isWithdrawable)
 	};
@@ -161,11 +177,9 @@ export const loadIcpSwapRecoverableBalances = async ({
 	});
 
 	return toPoolBalances({
-		pool,
-		tokenByAddress: new Map([
-			[tokenA.ledgerCanisterId, tokenA],
-			[tokenB.ledgerCanisterId, tokenB]
-		]),
+		poolCanisterId: pool.canisterId.toString(),
+		poolTokens: [pool.token0, pool.token1],
+		tokenByAddress: indexTokensByAddress([tokenA, tokenB]),
 		balance0,
 		balance1
 	});
@@ -212,7 +226,13 @@ export const scanIcpSwapPools = async ({
 				principal: identity.getPrincipal()
 			});
 
-			return toPoolBalances({ pool, tokenByAddress, balance0, balance1 });
+			return toPoolBalances({
+				poolCanisterId: pool.canisterId.toString(),
+				poolTokens: [pool.token0, pool.token1],
+				tokenByAddress,
+				balance0,
+				balance1
+			});
 		})
 	);
 
@@ -227,6 +247,38 @@ export const scanIcpSwapPools = async ({
 		),
 		unreadablePools: settled.filter(({ status }) => status === 'rejected').length
 	};
+};
+
+/**
+ * Re-reads one pool the user has already seen.
+ *
+ * A single `getUserUnusedBalance` query against the pool canister already on the group - no
+ * factory lookup and no sweep of the other pools. Used after a successful withdrawal so a
+ * remainder credited between discovery and withdrawal becomes visible instead of disappearing
+ * with the row.
+ */
+export const reloadIcpSwapPoolBalances = async ({
+	identity,
+	pool: { poolCanisterId, poolTokens },
+	tokens
+}: {
+	identity: Identity;
+	pool: IcpSwapPoolBalances;
+	tokens: IcToken[];
+}): Promise<IcpSwapPoolBalances> => {
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: poolCanisterId,
+		principal: identity.getPrincipal()
+	});
+
+	return toPoolBalances({
+		poolCanisterId,
+		poolTokens,
+		tokenByAddress: indexTokensByAddress(tokens),
+		balance0,
+		balance1
+	});
 };
 
 /**
