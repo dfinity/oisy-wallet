@@ -1,3 +1,4 @@
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
@@ -12,6 +13,12 @@ describe('swap.constants', () => {
 
 		it('maps Solana mainnet to the sol blockchain code', () => {
 			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[SOLANA_MAINNET_NETWORK_ID]).toBe('sol');
+		});
+
+		// 1Click names the chain `hood`, and the code is a wire value it indexes its own asset
+		// list by — `robinhood` or `rh` would resolve to nothing and silently drop every quote.
+		it('maps Robinhood Chain to the hood blockchain code', () => {
+			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[ROBINHOOD_MAINNET_NETWORK_ID]).toBe('hood');
 		});
 	});
 
