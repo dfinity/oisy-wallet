@@ -447,7 +447,7 @@
 					<span class="text-tertiary">{$i18n.transaction.text.tab_unavailable}</span>
 				{/if}
 			{:else if nonNullish(token)}
-				<SolInstructionsList instructions={instructions ?? []} {netChanges} {token} />
+				<SolInstructionsList instructions={instructions ?? []} {netChanges} {token} {userAddress} />
 			{/if}
 		</Tabs>
 

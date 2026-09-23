@@ -372,12 +372,14 @@ export const formatSolInstructionSummary = ({
 	},
 	i18n,
 	symbolOf,
-	decimalsOf
+	decimalsOf,
+	userAddress
 }: {
 	instruction: SolInstructionSummary;
 	i18n: I18n;
 	symbolOf: (tokenAddress: SplTokenAddress | undefined) => string;
 	decimalsOf: (tokenAddress: SplTokenAddress | undefined) => number;
+	userAddress: OptionSolAddress;
 }): { text: string; detail?: string } => {
 	const amount = (raw: bigint): string =>
 		formatToken({
@@ -421,8 +423,10 @@ export const formatSolInstructionSummary = ({
 	// by whatever was wrapped - and saying "to your wallet" for a close that names somebody else
 	// states the one thing about it that matters wrongly, so the line says "to" and the address is
 	// rendered beside it.
-	// The line describes this close alone, so it asks only where this close paid.
-	const returnedHome = own ?? isNullish(counterparty);
+	// The wallet, and not any account the user owns, on the same test the cost figure applies:
+	// lamports paid into another token account of theirs sit under its rent reserve rather than in
+	// a balance they can spend, so saying they came back would be saying the wrong thing.
+	const returnedHome = isNullish(counterparty) || counterparty === userAddress;
 
 	const returnedDetail = nonNullish(returned)
 		? replacePlaceholders(

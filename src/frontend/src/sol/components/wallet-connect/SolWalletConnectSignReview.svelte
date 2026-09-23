@@ -451,7 +451,12 @@
 					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
 					     which an unchecked transfer does not state and the list would otherwise read
 					     raw. -->
-					<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+					<SolInstructionsList
+						{instructions}
+						netChanges={preview?.tokenDeltas}
+						{token}
+						userAddress={source}
+					/>
 				</WalletConnectModalValue>
 			{/if}
 

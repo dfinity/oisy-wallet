@@ -546,11 +546,12 @@ describe('sol-transaction-summary.utils', () => {
 				instruction,
 				i18n: en,
 				symbolOf: (tokenAddress) => tokenAddress ?? 'SOL',
-				decimalsOf: () => SOLANA_DEFAULT_DECIMALS
+				decimalsOf: () => SOLANA_DEFAULT_DECIMALS,
+				userAddress: mockSolAddress
 			}).detail;
 
-		// Closing hands back the account's whole balance. For a wrapped SOL account that is the
-		// rent plus the SOL that was wrapped, so calling it rent understates it by the wrapping.
+		// Closing hands back the account's whole lamport balance. For a wrapped SOL account that is
+		// the rent plus the SOL that was wrapped, so calling it rent understates it by the wrapping.
 		it('should say what a close hands back when the amount is known', () => {
 			expect(detailOf({ kind: 'closeTokenAccount', returned: 5_002_039_280n })).toBe(
 				'5.00203928 SOL returned to your wallet'
@@ -576,36 +577,42 @@ describe('sol-transaction-summary.utils', () => {
 				detailOf({
 					kind: 'closeTokenAccount',
 					returned: 5_002_039_280n,
-					counterparty: mockSolAddress,
-					own: false
+					counterparty: mockSolAddress2
 				})
 			).toBe('5.00203928 SOL to');
 		});
 
 		it('should say so of an unwrap that named somebody else too', () => {
 			expect(
+				detailOf({ kind: 'unwrap', returned: 2_039_280n, counterparty: mockSolAddress2 })
+			).toBe('0.00203928 SOL to');
+		});
+
+		// An account of the user's own is not the wallet, and the cost figure does not credit one
+		// either: the lamports end up under that account's rent reserve rather than in a balance.
+		it('should not say a close came back when it named another account of the user', () => {
+			expect(
 				detailOf({
-					kind: 'unwrap',
+					kind: 'closeTokenAccount',
 					returned: 2_039_280n,
-					counterparty: mockSolAddress,
-					own: false
+					counterparty: mockAtaAddress2,
+					own: true
 				})
 			).toBe('0.00203928 SOL to');
 		});
 
 		it('should name the destination when the amount is not known either', () => {
-			expect(
-				detailOf({ kind: 'closeTokenAccount', counterparty: mockSolAddress, own: false })
-			).toBe(en.transaction.text.instruction_balance_returned_to);
+			expect(detailOf({ kind: 'closeTokenAccount', counterparty: mockSolAddress2 })).toBe(
+				en.transaction.text.instruction_balance_returned_to
+			);
 		});
 
-		it('should still say it came back when the close named the user', () => {
+		it('should still say it came back when the close named the wallet', () => {
 			expect(
 				detailOf({
 					kind: 'closeTokenAccount',
 					returned: 2_039_280n,
-					counterparty: mockSolAddress,
-					own: true
+					counterparty: mockSolAddress
 				})
 			).toBe('0.00203928 SOL returned to your wallet');
 		});

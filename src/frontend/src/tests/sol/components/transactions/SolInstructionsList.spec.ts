@@ -3,7 +3,7 @@ import SolInstructionsList from '$sol/components/transactions/SolInstructionsLis
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
-import { mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
 
@@ -26,7 +26,8 @@ describe('SolInstructionsList', () => {
 		const { getByTestId } = render(SolInstructionsList, {
 			props: {
 				instructions: [send('first-unnamed'), send('second-unnamed')],
-				token: SOLANA_TOKEN
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
 			}
 		});
 
@@ -41,7 +42,11 @@ describe('SolInstructionsList', () => {
 	// One of a kind needs no number: there is nothing to tell it apart from.
 	it('should leave a lone unnamed mint unnumbered', () => {
 		const { getByTestId } = render(SolInstructionsList, {
-			props: { instructions: [send('only-unnamed')], token: SOLANA_TOKEN }
+			props: {
+				instructions: [send('only-unnamed')],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
 		});
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(
@@ -61,7 +66,11 @@ describe('SolInstructionsList', () => {
 		]);
 
 		const { getByTestId } = render(SolInstructionsList, {
-			props: { instructions: [send(mockSplAddress)], token: SOLANA_TOKEN }
+			props: {
+				instructions: [send(mockSplAddress)],
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
+			}
 		});
 
 		expect(getByTestId('sol-instructions-list')).toHaveTextContent(mockValidSplToken.symbol);
@@ -81,7 +90,8 @@ describe('SolInstructionsList', () => {
 		const { getByTestId } = render(SolInstructionsList, {
 			props: {
 				instructions: [{ ...send(mockSplAddress), decimals: undefined }],
-				token: SOLANA_TOKEN
+				token: SOLANA_TOKEN,
+				userAddress: mockSolAddress
 			}
 		});
 

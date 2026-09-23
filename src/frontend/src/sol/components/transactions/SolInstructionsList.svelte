@@ -7,6 +7,7 @@
 	import type { Token } from '$lib/types/token';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
@@ -23,9 +24,11 @@
 		// The net changes of the same transaction, whose decimals stand in for the ones an
 		// unchecked transfer does not carry.
 		netChanges?: SolNetBalanceChange[];
+		// The user's address on this network, which decides whether a close paid them back.
+		userAddress: OptionSolAddress;
 	}
 
-	let { instructions, token, netChanges }: Props = $props();
+	let { instructions, token, netChanges, userAddress }: Props = $props();
 
 	const splToken = (tokenAddress: string) =>
 		findSplToken({
@@ -69,7 +72,8 @@
 		instruction,
 		i18n: $i18n,
 		symbolOf,
-		decimalsOf
+		decimalsOf,
+		userAddress
 	})}
 
 	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
