@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
+	import type { Action } from 'svelte/action';
 	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
 	import IconList from '$lib/components/icons/IconList.svelte';
@@ -100,6 +101,23 @@
 		]
 	]);
 
+	// Moves the menu to the end of <body>. The footer that holds the trigger is
+	// `md:fixed` with `z-1`, which makes it a stacking context: rendered inside it,
+	// the popover's overlay z-index only competes with the footer's own children,
+	// and against the rest of the page the whole overlay sits at z-1. The header,
+	// the tabs bar and the AI assistant button (`z-2`) drew on top of the backdrop.
+	// At the end of <body> the overlay stacks against the document instead, which
+	// is where the account menu's popover already sits.
+	//
+	// Here rather than in `Popover`: every other popover is anchored somewhere
+	// that is not a low stacking context, and moving all of them would change
+	// where each one sits in the document for no reason of its own.
+	const portal: Action<HTMLDivElement> = (node) => {
+		document.body.appendChild(node);
+
+		return { destroy: () => node.remove() };
+	};
+
 	// `Popover` has no key handling of its own — its backdrop answers Enter and
 	// Space, not Escape — so a menu that is expected to close on Escape does it
 	// here. Scoped to this menu on purpose: teaching every popover in the app the
@@ -135,32 +153,34 @@
 
 <!-- Opens upward: the footer is pinned to the bottom of the viewport, so a panel
      opened the usual way would have nowhere to go. -->
-<Popover anchor={button} placement="above" bind:visible>
-	<div
-		class="flex max-w-80 flex-col gap-1"
-		data-tid={NAVIGATION_MORE_MENU}
-		onclick={close}
-		role="none"
-	>
-		{#each groups as rows, groupIndex (groupIndex)}
-			{#if groupIndex > 0}
-				<Hr />
-			{/if}
+<div use:portal>
+	<Popover anchor={button} placement="above" bind:visible>
+		<div
+			class="flex max-w-80 flex-col gap-1"
+			data-tid={NAVIGATION_MORE_MENU}
+			onclick={close}
+			role="none"
+		>
+			{#each groups as rows, groupIndex (groupIndex)}
+				{#if groupIndex > 0}
+					<Hr />
+				{/if}
 
-			{#each rows as { label, ariaLabel, href, icon: Icon, testId, trackEvent } (testId)}
-				<ExternalLink
-					{ariaLabel}
-					asMenuItem
-					asMenuItemCondensed
-					{href}
-					iconVisible={false}
-					{testId}
-					{trackEvent}
-				>
-					<Icon />
-					{label}
-				</ExternalLink>
+				{#each rows as { label, ariaLabel, href, icon: Icon, testId, trackEvent } (testId)}
+					<ExternalLink
+						{ariaLabel}
+						asMenuItem
+						asMenuItemCondensed
+						{href}
+						iconVisible={false}
+						{testId}
+						{trackEvent}
+					>
+						<Icon />
+						{label}
+					</ExternalLink>
+				{/each}
 			{/each}
-		{/each}
-	</div>
-</Popover>
+		</div>
+	</Popover>
+</div>

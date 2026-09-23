@@ -94,6 +94,30 @@ describe('NavigationMoreMenu', () => {
 		expect(container.ownerDocument.querySelector('.popover .wrapper.above')).not.toBeNull();
 	});
 
+	it('renders the menu at the document root, outside whatever hosts the trigger', async () => {
+		// The footer is `md:fixed` with `z-1`, a stacking context. Rendered inside
+		// it, the overlay's z-index only competed with the footer's own children, so
+		// the header, the tabs bar and the AI assistant button (`z-2`) drew on top
+		// of the backdrop. Moved to the end of <body>, it stacks against the page.
+		const { container, getByTestId } = await open();
+
+		const menu = getByTestId(NAVIGATION_MORE_MENU);
+
+		expect(container.contains(menu)).toBeFalsy();
+		expect(document.body.contains(menu)).toBeTruthy();
+	});
+
+	it('takes the moved menu away with it when it unmounts', async () => {
+		// Otherwise every mount would leave a detached copy at the end of <body>.
+		const { getByTestId, unmount } = await open();
+
+		const menu = getByTestId(NAVIGATION_MORE_MENU);
+
+		unmount();
+
+		expect(document.body.contains(menu)).toBeFalsy();
+	});
+
 	it('closes on Escape', async () => {
 		// `Popover` has no key handling of its own, so this is the menu's.
 		const { getByTestId, queryByTestId } = await open();
