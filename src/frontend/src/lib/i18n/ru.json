@@ -819,6 +819,7 @@
 			"no_tokens": "Ни один токен ICRC не включён. Сначала включите оба токена пула.",
 			"checking_pool": "Проверяем пул…",
 			"nothing_to_withdraw": "В этом пуле нечего выводить.",
+			"results_found": "Найдено доступных для вывода балансов: $balances.",
 			"balance_unused": "Неиспользованный баланс",
 			"withdraw": "Вывести"
 		},
@@ -836,7 +837,8 @@
 			"scan_failed": "Не удалось получить список пулов ICPSwap."
 		},
 		"success": {
-			"withdraw": "Выведено $amount $symbol из пула."
+			"withdraw": "Выведено $amount $symbol из пула.",
+			"withdraw_hidden": "Выведено $symbol из пула."
 		}
 	},
 	"settings": {

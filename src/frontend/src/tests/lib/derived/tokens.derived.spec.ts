@@ -17,6 +17,7 @@ import {
 	POL_AMOY_TOKEN,
 	POL_MAINNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -263,17 +264,18 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
-				{ ...mockIcrcCustomToken, id: result[13].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[13].id },
+				{ ...mockIcrcCustomToken, id: result[14].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken,
-				{ ...mockErc721CustomToken, id: result[16].id },
-				{ ...mockErc1155CustomToken, id: result[17].id },
-				{ ...mockExtCustomToken, id: result[18].id },
-				{ ...mockIcPunksCustomToken, id: result[19].id }
+				{ ...mockErc721CustomToken, id: result[17].id },
+				{ ...mockErc1155CustomToken, id: result[18].id },
+				{ ...mockExtCustomToken, id: result[19].id },
+				{ ...mockIcPunksCustomToken, id: result[20].id }
 			]);
 		});
 
@@ -287,7 +289,8 @@ describe('tokens.derived', () => {
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN
+				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 
@@ -302,7 +305,8 @@ describe('tokens.derived', () => {
 				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN
+				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 
@@ -326,7 +330,8 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				POL_AMOY_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				ARBITRUM_SEPOLIA_ETH_TOKEN
+				ARBITRUM_SEPOLIA_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 
@@ -353,7 +358,8 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				POL_AMOY_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				ARBITRUM_SEPOLIA_ETH_TOKEN
+				ARBITRUM_SEPOLIA_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 	});
@@ -384,11 +390,12 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
-				{ ...mockIcrcCustomToken, id: result[13].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[13].id },
+				{ ...mockIcrcCustomToken, id: result[14].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -502,7 +509,8 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				XRP_TOKEN,
 				BASE_ETH_TOKEN,
-				ARBITRUM_ETH_TOKEN
+				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 

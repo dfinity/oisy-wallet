@@ -10,6 +10,7 @@ import {
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 
@@ -27,10 +28,24 @@ describe('infura.providers', () => {
 	const networks: EthereumNetwork[] = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
 	it('should create the correct map of providers', () => {
+		// The shared setup mock gives `InfuraProvider` and `JsonRpcProvider` one implementation, so
+		// both transports land on this same spy. Every supported network still produces exactly one
+		// call; the arguments are what say which transport it took.
 		expect(InfuraProviderLib).toHaveBeenCalledTimes(networks.length);
 
-		networks.forEach(({ providers: { infura } }, index) => {
-			expect(InfuraProviderLib).toHaveBeenNthCalledWith(index + 1, infura, INFURA_API_KEY);
+		networks.forEach(({ providers: { infura, alchemyJsonRpcUrl } }, index) => {
+			if (nonNullish(infura)) {
+				expect(InfuraProviderLib).toHaveBeenNthCalledWith(index + 1, infura, INFURA_API_KEY);
+
+				return;
+			}
+
+			expect(InfuraProviderLib).toHaveBeenNthCalledWith(
+				index + 1,
+				expect.stringContaining(alchemyJsonRpcUrl),
+				expect.anything(),
+				{ staticNetwork: true }
+			);
 		});
 	});
 

@@ -11,9 +11,6 @@ import type { Identity } from '@icp-sdk/core/agent';
 export interface IcpSwapRecoverableBalance {
 	// The token as OISY knows it - symbol, decimals, logo and the ledger fee.
 	token: IcToken;
-	// The token as the pool knows it. The pool's own standard string is echoed back on withdrawal
-	// rather than re-derived, so the call always matches how the pool registered the token.
-	poolToken: ICPSwapToken;
 	amount: bigint;
 }
 
@@ -136,7 +133,7 @@ const toPoolBalances = ({
 		const token = tokenByAddress.get(poolToken.address);
 
 		return nonNullish(token)
-			? [...acc, { token, poolToken, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
+			? [...acc, { token, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
 			: acc;
 	}, []);
 

@@ -819,6 +819,7 @@
 			"no_tokens": "Es sind keine ICRC-Tokens aktiv. Aktiviere zuerst die beiden Tokens des Pools.",
 			"checking_pool": "Pool wird geprüft…",
 			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
+			"results_found": "Gefundene auszahlbare Guthaben: $balances.",
 			"balance_unused": "Ungenutztes Guthaben",
 			"withdraw": "Auszahlen"
 		},
@@ -836,7 +837,8 @@
 			"scan_failed": "Die Liste der ICPSwap-Pools konnte nicht geladen werden."
 		},
 		"success": {
-			"withdraw": "$amount $symbol aus dem Pool ausgezahlt."
+			"withdraw": "$amount $symbol aus dem Pool ausgezahlt.",
+			"withdraw_hidden": "$symbol aus dem Pool ausgezahlt."
 		}
 	},
 	"settings": {
