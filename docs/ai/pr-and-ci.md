@@ -114,6 +114,10 @@ npm run lint -- --max-warnings 0
 npm run check        # svelte-check, fail-on-warnings
 npm run test         # vitest (single shard locally)
 
+# Build (only if you touched $env/networks, $env/tokens or $eth/providers)
+npm run build        # the eager provider registries are evaluated only here (SSR
+                     # prerender), never under vitest, which mocks ethers/providers
+
 # i18n (only if you edited en.json)
 npm run i18n
 

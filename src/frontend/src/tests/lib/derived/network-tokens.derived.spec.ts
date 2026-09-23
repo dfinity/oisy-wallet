@@ -39,6 +39,7 @@ import {
 	POL_AMOY_TOKEN,
 	POL_MAINNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -112,7 +113,8 @@ describe('network-tokens.derived', () => {
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN
+				ARBITRUM_ETH_TOKEN,
+				ROBINHOOD_ETH_TOKEN
 			]);
 		});
 
@@ -220,6 +222,7 @@ describe('network-tokens.derived', () => {
 					BNB_MAINNET_TOKEN,
 					POL_MAINNET_TOKEN,
 					ARBITRUM_ETH_TOKEN,
+					ROBINHOOD_ETH_TOKEN,
 					mockErc20CustomToken,
 					mockSplCustomToken
 				]);

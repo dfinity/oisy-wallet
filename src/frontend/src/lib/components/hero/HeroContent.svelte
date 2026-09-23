@@ -37,6 +37,7 @@
 		networkBsc,
 		networkEthereum,
 		networkPolygon,
+		networkRobinhood,
 		networkSolana,
 		networkXrp,
 		pseudoNetworkChainFusion,
@@ -145,6 +146,7 @@
 		return $networkBase ||
 			$networkPolygon ||
 			$networkArbitrum ||
+			$networkRobinhood ||
 			isTrumpToken ||
 			isVeurToken ||
 			isUsd1Token
@@ -179,6 +181,7 @@
 	class:from-eth-0={$networkEthereum}
 	class:from-gold-0={isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
+	class:from-robinhood-0={$networkRobinhood}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
 	class:from-xrp-0={$networkXrp}
@@ -192,6 +195,7 @@
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
 	class:to-polygon-100={$networkPolygon}
+	class:to-robinhood-100={$networkRobinhood}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:to-trump-100={isTrumpToken}
 	class:to-xrp-100={$networkXrp}
