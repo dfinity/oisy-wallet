@@ -1,5 +1,6 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { maxBigInt } from '$lib/utils/bigint.utils';
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type {
@@ -393,7 +394,17 @@ const toEffect = ({
 			// account holding none is just being closed, and saying it unwrapped something states
 			// an amount that was never there. An amount nobody read leaves it as an unwrap, which
 			// is the reading that does not understate.
-			const wrapped = accountTokenAmounts[account];
+			//
+			// What it held when it closed, not before the transaction ran: an account this message
+			// opened has no state to read beforehand, and the swaps that open one wrap into it and
+			// unwrap out of it within the same message. Taken as what it hands back less the rent
+			// it was opened with, which is what is left once the account itself is paid for.
+			const openedWith = openedWithRent({ account, flattened, until: position });
+
+			const wrapped =
+				nonNullish(openedWith) && nonNullish(returned)
+					? maxBigInt(returned - openedWith, ZERO)
+					: accountTokenAmounts[account];
 
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
@@ -500,6 +511,40 @@ const toEffect = ({
  * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
  * swap hands back the rent and the wrapped SOL together. No instruction states that total.
  */
+/**
+ * The rent an account was opened with, when this transaction opened it.
+ *
+ * Read from the System `createAccount` that states it, which is the only instruction that says
+ * what an account costs. Absent for an account the message did not open: nothing in it says what
+ * some earlier transaction paid.
+ */
+const openedWithRent = ({
+	account,
+	flattened,
+	until
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+	until?: number;
+}): bigint | undefined =>
+	flattened.slice(0, until).reduce<bigint | undefined>(
+		(
+			acc,
+			{
+				instruction: {
+					program,
+					parsed: { type, info }
+				}
+			}
+		) =>
+			program === 'system' &&
+			type === 'createAccount' &&
+			address({ info, key: 'newAccount' }) === account
+				? amount({ info, key: 'lamports' })
+				: acc,
+		undefined
+	);
+
 const fundedInTransaction = ({
 	account,
 	flattened,

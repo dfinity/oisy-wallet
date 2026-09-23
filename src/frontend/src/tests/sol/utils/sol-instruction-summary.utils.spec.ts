@@ -395,6 +395,90 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.returned).toBe(6_000_000_000n);
 		});
 
+		// An account this message opens has no state to read beforehand, and a swap that opens one
+		// wraps into it and unwraps out of it within the same message. Reading the balance from
+		// before the transaction called every such close an unwrap, including the ones that hand
+		// back nothing but the rent they were opened with.
+		it('should call a close of an account it opened and emptied a close, not an unwrap', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		it('should keep the wrapped amount of an account it opened and wrapped into', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { destination: wsol, lamports: 1_000_000_000, source: owner }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBe(1_000_000_000n);
+		});
+
 		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
 		// Left out, the balance changes carry an inflow no line in the list accounts for.
 		it('should list a close of an account the user does not own that pays their wallet', () => {
