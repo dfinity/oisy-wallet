@@ -146,12 +146,17 @@ export const buildErc20PriceParams = (
 	Object.values(
 		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
 			(acc, { address, coingeckoId }) => {
+				// Deliberately an EVM-only subset of `CoingeckoPlatformIdSchema`, not the whole enum:
+				// `internet-computer` and `solana` are platforms for ICRC / SPL, which are priced
+				// elsewhere. A chain missing here is dropped silently, so a new EVM network must be
+				// added in both places.
 				if (
 					coingeckoId !== 'ethereum' &&
 					coingeckoId !== 'base' &&
 					coingeckoId !== 'binance-smart-chain' &&
 					coingeckoId !== 'polygon-pos' &&
-					coingeckoId !== 'arbitrum-one'
+					coingeckoId !== 'arbitrum-one' &&
+					coingeckoId !== 'robinhood'
 				) {
 					return acc;
 				}
