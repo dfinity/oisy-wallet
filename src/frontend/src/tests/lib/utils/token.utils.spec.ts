@@ -737,6 +737,29 @@ describe('token.utils', () => {
 			expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
 		});
 
+		describe('a ledger listed twice', () => {
+			// mapTokenOisySymbol runs only on the default-token load path, so the default entry can
+			// carry an oisySymbol that a custom duplicate of the same ledger lacks.
+			const defaultEntry = { ...real, symbol: 'RAW', oisySymbol: { oisySymbol: 'GHOSTNODE' } };
+			const customDuplicate = { ...real, symbol: 'RAW' };
+
+			it("keeps the first entry's label rather than the later duplicate's", () => {
+				expect(buildIcTokenLabels([defaultEntry, customDuplicate]).get(real.ledgerCanisterId)).toBe(
+					'GHOSTNODE'
+				);
+			});
+
+			it("does not let the duplicate's symbol invent a collision for another ledger", () => {
+				const unrelated = { ...impostor, symbol: 'RAW' };
+
+				expect(
+					buildIcTokenLabels([defaultEntry, customDuplicate, unrelated]).get(
+						unrelated.ledgerCanisterId
+					)
+				).toBe('RAW');
+			});
+		});
+
 		it('labels by the display symbol, which is what the user actually sees', () => {
 			const renamed = { ...real, oisySymbol: { oisySymbol: 'OSYM' } };
 
