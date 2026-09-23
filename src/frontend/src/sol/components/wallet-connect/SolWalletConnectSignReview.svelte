@@ -264,19 +264,23 @@
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
-	{#if ambiguous}
+	<!-- A close that pays somebody else is asked about first, because the instruction mapper
+	     refuses one the message states and so marks the request ambiguous as well: the two would
+	     both be true of the commonest case, and the general sentence would be shown for the
+	     specific thing that is wrong with it. -->
+	{#if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
 		     destination-tag error, and applied here rather than inside `MessageBox`, which every
 		     other notice on this screen also uses. -->
 		<div role="alert">
-			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
+			<MessageBox level="error">{$i18n.wallet_connect.text.close_pays_others}</MessageBox>
 		</div>
-	{:else if closesPayOthers}
+	{:else if ambiguous}
 		<!-- Same live region, same reason: it is why Approve stays unusable. -->
 		<div role="alert">
-			<MessageBox level="error">{$i18n.wallet_connect.text.close_pays_others}</MessageBox>
+			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">

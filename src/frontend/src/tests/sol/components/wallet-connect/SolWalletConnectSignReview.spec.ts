@@ -142,6 +142,17 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.close_pays_others);
 	});
 
+	// The instruction mapper refuses a close the message states, so both are true of the commonest
+	// case and the general sentence would be shown for the specific thing that is wrong with it.
+	it('should say which refusal it is when a close is both', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+	});
+
 	it('should say nothing else about a close it will not sign', () => {
 		// Same reasoning as the ambiguous case: none of the caveats qualify a review nobody acts on.
 		const { queryByText } = render(SolWalletConnectSignReview, {
