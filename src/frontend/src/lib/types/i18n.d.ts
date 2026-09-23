@@ -563,6 +563,7 @@ interface I18nHelp {
 		no_tokens: string;
 		checking_pool: string;
 		nothing_to_withdraw: string;
+		results_found: string;
 		balance_unused: string;
 		withdraw: string;
 	};
@@ -580,7 +581,7 @@ interface I18nHelp {
 		withdraw_failed: string;
 		scan_failed: string;
 	};
-	success: { withdraw: string };
+	success: { withdraw: string; withdraw_hidden: string };
 }
 
 interface I18nSettings {

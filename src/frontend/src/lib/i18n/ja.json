@@ -821,6 +821,7 @@
 			"no_tokens": "有効な ICRC トークンがありません。先にプールの 2 つのトークンを有効にしてください。",
 			"checking_pool": "プールを確認しています…",
 			"nothing_to_withdraw": "このプールに出金できる残高はありません。",
+			"results_found": "出金可能な残高: $balances 件。",
 			"balance_unused": "未使用の残高",
 			"withdraw": "出金"
 		},
@@ -839,7 +840,8 @@
 			"scan_failed": "ICPSwap のプール一覧を取得できませんでした。"
 		},
 		"success": {
-			"withdraw": "プールから $amount $symbol を出金しました。"
+			"withdraw": "プールから $amount $symbol を出金しました。",
+			"withdraw_hidden": "プールから $symbol を出金しました。"
 		}
 	},
 	"settings": {

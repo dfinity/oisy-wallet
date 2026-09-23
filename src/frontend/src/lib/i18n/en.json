@@ -821,6 +821,7 @@
 			"no_tokens": "No ICRC tokens are enabled. Enable the two tokens of the pool first.",
 			"checking_pool": "Checking the pool…",
 			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
+			"results_found": "Withdrawable balances found: $balances.",
 			"balance_unused": "Unused balance",
 			"withdraw": "Withdraw"
 		},
@@ -839,7 +840,8 @@
 			"scan_failed": "Could not fetch the list of ICPSwap pools."
 		},
 		"success": {
-			"withdraw": "Withdrew $amount $symbol from the pool."
+			"withdraw": "Withdrew $amount $symbol from the pool.",
+			"withdraw_hidden": "Withdrew $symbol from the pool."
 		}
 	},
 	"settings": {

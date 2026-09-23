@@ -821,6 +821,7 @@
 			"no_tokens": "Żaden token ICRC nie jest włączony. Włącz najpierw oba tokeny puli.",
 			"checking_pool": "Sprawdzanie puli…",
 			"nothing_to_withdraw": "W tej puli nie ma nic do wypłaty.",
+			"results_found": "Znalezione środki do wypłaty: $balances.",
 			"balance_unused": "Niewykorzystane środki",
 			"withdraw": "Wypłać"
 		},
@@ -839,7 +840,8 @@
 			"scan_failed": "Nie udało się pobrać listy pul ICPSwap."
 		},
 		"success": {
-			"withdraw": "Wypłacono $amount $symbol z puli."
+			"withdraw": "Wypłacono $amount $symbol z puli.",
+			"withdraw_hidden": "Wypłacono $symbol z puli."
 		}
 	},
 	"settings": {

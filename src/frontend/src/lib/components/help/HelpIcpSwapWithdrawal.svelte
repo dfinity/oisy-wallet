@@ -17,12 +17,14 @@
 		HELP_ICPSWAP_LOADING,
 		HELP_ICPSWAP_NO_TOKENS,
 		HELP_ICPSWAP_POOL_GROUP,
+		HELP_ICPSWAP_RESULTS_SUMMARY,
 		HELP_ICPSWAP_SCAN_BUTTON,
 		HELP_ICPSWAP_SCAN_SUMMARY,
 		HELP_ICPSWAP_TOKEN_A,
 		HELP_ICPSWAP_TOKEN_B
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
 		PLAUSIBLE_EVENT_SUBCONTEXT_HELP
@@ -41,6 +43,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { buildIcTokenLabels } from '$lib/utils/token.utils';
 
 	let tokenA = $state<IcToken | undefined>();
 	let tokenB = $state<IcToken | undefined>();
@@ -69,10 +72,16 @@
 
 	// A withdrawal is deliberately not folded into `busy`: that one also drives the "checking"
 	// line, the empty message and the unreadable-pool summary, which must keep describing the pool
-	// the user is withdrawing from. Discovery, on the other hand, must not start under a
-	// withdrawal - `startRequest` clears `groups`, which drops the withdrawal's own re-read and
-	// lets a pool read before the withdrawal landed re-display the row it just emptied.
-	const discoveryLocked = $derived(busy || nonNullish(withdrawingKey));
+	// the user is withdrawing from. It does lock both entry points, because `startRequest` clears
+	// `groups`, which would drop the withdrawal's own re-read and let a pool read taken before the
+	// withdrawal landed re-display the row it just emptied.
+	const withdrawing = $derived(nonNullish(withdrawingKey));
+
+	// The selectors deliberately stay live during a lookup: changing the pair is how a user
+	// supersedes one, and the generation guard above is what makes that safe. Only the scan button
+	// waits, since a scan restarts discovery wholesale and queueing one behind a lookup buys
+	// nothing.
+	const scanLocked = $derived(busy || withdrawing);
 
 	const startRequest = (kind: 'scan' | 'lookup'): number => {
 		activeRequest = kind;
@@ -89,6 +98,20 @@
 	// universe (see `allSwapUniverseTokens`). The selector sorts by symbol, so this order only
 	// decides which entry wins if a custom token ever duplicates the ICP ledger.
 	const candidateTokens = $derived([ICP_TOKEN as IcToken, ...$enabledIcrcTokens]);
+
+	// Built once over every token the user can encounter here, then used by the selectors, the
+	// pool headings, the rows and the toasts alike. Per-surface labels disagree: a filtered list
+	// can lose an impostor's twin, and the results used to show the bare symbol, so two ledgers
+	// claiming the same symbol rendered as identical groups.
+	const tokenLabels = $derived(buildIcTokenLabels(candidateTokens));
+
+	const labelOf = ({
+		ledgerCanisterId,
+		symbol
+	}: {
+		ledgerCanisterId: string;
+		symbol: string;
+	}): string => tokenLabels.get(ledgerCanisterId) ?? symbol;
 
 	// A pair needs two distinct tokens: the pool is between them, so the same token twice
 	// identifies nothing.
@@ -285,11 +308,18 @@
 		try {
 			const withdrawn = await withdrawIcpSwapBalance({ identity, poolCanisterId, balance });
 
+			// The row masks the amount under privacy mode, so the toast that confirms the same
+			// withdrawal must not print it either. Worth keeping otherwise: `withdrawn` is what the
+			// pool actually moved, which can exceed the amount captured at discovery.
 			toastsShow({
-				text: replacePlaceholders($i18n.help.success.withdraw, {
-					$amount: formatToken({ value: withdrawn, unitName: token.decimals }),
-					$symbol: token.symbol
-				}),
+				text: $isPrivacyMode
+					? replacePlaceholders($i18n.help.success.withdraw_hidden, {
+							$symbol: labelOf(token)
+						})
+					: replacePlaceholders($i18n.help.success.withdraw, {
+							$amount: formatToken({ value: withdrawn, unitName: token.decimals }),
+							$symbol: labelOf(token)
+						}),
 				level: 'success',
 				duration: 4000
 			});
@@ -334,6 +364,10 @@
 
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
 	let hasResults = $derived(visibleGroups.length > 0);
+
+	let withdrawableCount = $derived(
+		visibleGroups.reduce((count, { balances }) => count + balances.length, 0)
+	);
 	let showEmpty = $derived(nonNullish(groups) && !hasResults && !busy);
 </script>
 
@@ -347,7 +381,7 @@
 
 		<Button
 			ariaLabel={$i18n.help.alt.scan}
-			disabled={discoveryLocked}
+			disabled={scanLocked}
 			loading={activeRequest === 'scan'}
 			onclick={onScan}
 			testId={HELP_ICPSWAP_SCAN_BUTTON}
@@ -371,7 +405,8 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
-					disabled={discoveryLocked}
+					disabled={withdrawing}
+					labels={tokenLabels}
 					onSelect={onSelectA}
 					selected={tokenA}
 					testId={HELP_ICPSWAP_TOKEN_A}
@@ -388,7 +423,8 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
-					disabled={discoveryLocked}
+					disabled={withdrawing}
+					labels={tokenLabels}
 					onSelect={onSelectB}
 					selected={tokenB}
 					testId={HELP_ICPSWAP_TOKEN_B}
@@ -403,21 +439,35 @@
 			</p>
 		{/if}
 
-		{#if busy}
-			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
-				{$i18n.help.text.checking_pool}
-			</p>
-		{:else if nonNullish(loadError)}
-			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR}>
+		<!-- Always in the DOM: a polite live region is announced when its content changes, not when
+		     the region itself is inserted, so the paragraphs have to swap inside it. -->
+		<div aria-live="polite" role="status">
+			{#if busy}
+				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
+					{$i18n.help.text.checking_pool}
+				</p>
+			{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
+				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
+					{nonNullish(scanSummary)
+						? replacePlaceholders($i18n.help.text.scan_nothing_found, {
+								$pools: `${scanSummary.poolsScanned}`
+							})
+						: $i18n.help.text.nothing_to_withdraw}
+				</p>
+			{:else if hasResults}
+				<!-- The visible success state is a list of rows, with no sentence saying the lookup
+				     finished, so the announcement is the one thing here that is screen-reader only. -->
+				<p class="sr-only" data-tid={HELP_ICPSWAP_RESULTS_SUMMARY}>
+					{replacePlaceholders($i18n.help.text.results_found, {
+						$balances: `${withdrawableCount}`
+					})}
+				</p>
+			{/if}
+		</div>
+
+		{#if nonNullish(loadError)}
+			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_ERROR} role="alert">
 				{loadError}
-			</p>
-		{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
-			<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
-				{nonNullish(scanSummary)
-					? replacePlaceholders($i18n.help.text.scan_nothing_found, {
-							$pools: `${scanSummary.poolsScanned}`
-						})
-					: $i18n.help.text.nothing_to_withdraw}
 			</p>
 		{/if}
 
@@ -429,13 +479,15 @@
 					<!-- No `uppercase` here: these are token symbols, and casing is part of them
 					     (ckUSDC, not CKUSDC). -->
 					<p class="text-xs font-semibold tracking-wide text-tertiary">
-						{group.pair[0]} / {group.pair[1]}
+						{labelOf({ ledgerCanisterId: group.poolTokens[0].address, symbol: group.pair[0] })} /
+						{labelOf({ ledgerCanisterId: group.poolTokens[1].address, symbol: group.pair[1] })}
 					</p>
 
 					{#each group.balances as balance (rowKey( { poolCanisterId: group.poolCanisterId, balance } ))}
 						<HelpIcpSwapBalance
 							{balance}
 							disabled={nonNullish(withdrawingKey)}
+							label={labelOf(balance.token)}
 							loading={withdrawingKey === rowKey({ poolCanisterId: group.poolCanisterId, balance })}
 							onWithdraw={() => onWithdraw({ poolCanisterId: group.poolCanisterId, balance })}
 							testIdSuffix={group.poolCanisterId}
@@ -446,7 +498,7 @@
 		{/if}
 
 		{#if nonNullish(scanSummary) && scanSummary.unreadablePools > 0 && !busy}
-			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_SCAN_SUMMARY}>
+			<p class="mt-3 text-sm text-error-primary" data-tid={HELP_ICPSWAP_SCAN_SUMMARY} role="alert">
 				{replacePlaceholders($i18n.help.text.scan_unreadable, {
 					$unreadable: `${scanSummary.unreadablePools}`,
 					$pools: `${scanSummary.poolsScanned}`

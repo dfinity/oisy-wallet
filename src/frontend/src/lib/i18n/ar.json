@@ -821,6 +821,7 @@
 			"no_tokens": "",
 			"checking_pool": "",
 			"nothing_to_withdraw": "",
+			"results_found": "",
 			"balance_unused": "",
 			"withdraw": ""
 		},
@@ -839,7 +840,8 @@
 			"scan_failed": ""
 		},
 		"success": {
-			"withdraw": ""
+			"withdraw": "",
+			"withdraw_hidden": ""
 		}
 	},
 	"settings": {

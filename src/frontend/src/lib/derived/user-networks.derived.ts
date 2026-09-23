@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -131,6 +132,9 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('XrpMainnet' in key) {
 				return XRP_MAINNET_NETWORK_ID;
+			}
+			if ('RobinhoodMainnet' in key) {
+				return ROBINHOOD_MAINNET_NETWORK_ID;
 			}
 
 			const unmappedKey = Object.keys(key).join(', ');

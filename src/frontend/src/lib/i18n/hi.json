@@ -821,6 +821,7 @@
 			"no_tokens": "कोई ICRC टोकन सक्षम नहीं है। पहले पूल के दोनों टोकन सक्षम करें।",
 			"checking_pool": "पूल जाँचा जा रहा है…",
 			"nothing_to_withdraw": "इस पूल में निकालने के लिए कुछ नहीं है।",
+			"results_found": "निकाले जा सकने वाले शेष मिले: $balances।",
 			"balance_unused": "अप्रयुक्त बैलेंस",
 			"withdraw": "निकालें"
 		},
@@ -839,7 +840,8 @@
 			"scan_failed": "ICPSwap पूल की सूची प्राप्त नहीं हो सकी।"
 		},
 		"success": {
-			"withdraw": "पूल से $amount $symbol निकाले गए।"
+			"withdraw": "पूल से $amount $symbol निकाले गए।",
+			"withdraw_hidden": "पूल से $symbol निकाले गए।"
 		}
 	},
 	"settings": {

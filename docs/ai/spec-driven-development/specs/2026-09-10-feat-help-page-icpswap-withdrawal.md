@@ -96,7 +96,7 @@ Measured cost, live factory data:
 
 That 9 is a ck-heavy wallet, not a ceiling. 65 of the tokens OISY ships appear as a pool leg, and enabling all of them yields 89 candidate pools; enabled custom tokens raise the ceiling to the whole table. Balance queries therefore go out in batches of `ICP_SWAP_SCAN_CONCURRENCY` (10), each batch settling before the next starts, because a throttled query is indistinguishable from a pool that cannot be read — an unbounded fan-out would report phantom unreadable pools and send the user away to retry.
 
-The cost is bounded by the pools that exist between the user's tokens, not by tokens², so it does not degrade as someone enables more tokens. Every call is a query now that the mistransfer probe is gone, so the whole scan is roughly one round trip.
+The cost is bounded by the pools that exist between the user's tokens, not by tokens². Every call is a query now that the mistransfer probe is gone, but batches settle sequentially: after the factory query, the scan takes `ceil(candidate pools / ICP_SWAP_SCAN_CONCURRENCY)` balance-query rounds.
 
 **A failing pool must not sink the scan.** The balance queries are settled independently: a pool that errors is reported as unreadable and the rest of the results still show. Awaiting a fan-out together is exactly what hid a real balance during development.
 
