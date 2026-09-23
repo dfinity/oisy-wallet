@@ -23,10 +23,10 @@ export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 
 export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
 export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 
-// Solana transaction fee
-// It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
+// Solana base fee, which a message pays once for every signature it requires.
+// It can be hard-coded since it is not changed unless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
-export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
+export const SOLANA_LAMPORTS_PER_SIGNATURE = 5_000n;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 

@@ -21,10 +21,10 @@
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
+		SOLANA_LAMPORTS_PER_SIGNATURE,
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
-		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
-		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER
 	} from '$sol/constants/sol.constants';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -113,7 +113,7 @@
 
 	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
 	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	let costs = $derived(SOLANA_LAMPORTS_PER_SIGNATURE + (prioritizationFee ?? ZERO) + ataFee);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -398,7 +398,7 @@
 						<div data-tid="network-fee">
 							{@render feeValue({
 								kind: $i18n.fee.text.base_kind,
-								feeAmount: SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+								feeAmount: SOLANA_LAMPORTS_PER_SIGNATURE
 							})}
 						</div>
 
