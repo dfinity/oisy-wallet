@@ -68,6 +68,24 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 	};
 };
 
+/**
+ * Whether an idempotent account creation found the account already there and did nothing.
+ *
+ * The run reads every account an instruction writes, and the account a creation names is written,
+ * so a pre-state is what says it already existed. Without a run there are no pre-states and
+ * nothing is read as a no-op, which is right: the creation is then unrefuted.
+ */
+const createdNothing = ({
+	type,
+	account,
+	accountLamports
+}: {
+	type: string;
+	account: SolAddress | undefined;
+	accountLamports: Partial<Record<SolAddress, bigint>>;
+}): boolean =>
+	type === 'createIdempotent' && nonNullish(account) && nonNullish(accountLamports[account]);
+
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
 
 /**
@@ -301,6 +319,15 @@ const toEffect = ({
 		);
 
 		if (isNullish(account) || !concerns) {
+			return undefined;
+		}
+
+		// The idempotent form does nothing when the account is already there, and a line saying an
+		// account was opened for a message that opened none states an operation that did not
+		// happen - along with a rent nobody paid, since the creation it would have been read from
+		// never ran. Counted as plumbing rather than dropped, or the instruction it came from would
+		// be left uncovered and listed as one nothing could read.
+		if (createdNothing({ type, account, accountLamports })) {
 			return undefined;
 		}
 
@@ -815,10 +842,13 @@ export const mapSolInstructionSummaries = ({
 			}
 
 			const {
-				parsed: { type }
+				parsed: { type, info }
 			} = instruction;
 
-			return PLUMBING_TYPES.includes(type) ? [...acc, index] : acc;
+			return PLUMBING_TYPES.includes(type) ||
+				createdNothing({ type, account: address({ info, key: 'account' }), accountLamports })
+				? [...acc, index]
+				: acc;
 		}, [])
 	);
 

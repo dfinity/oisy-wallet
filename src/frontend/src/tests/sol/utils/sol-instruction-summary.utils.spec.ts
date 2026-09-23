@@ -642,6 +642,127 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.returned).toBe(1_488_440n);
 		});
 
+		// The idempotent form does nothing when the account is already there. A line saying an
+		// account was opened, for a message that opened none, states an operation that did not
+		// happen.
+		it('should say nothing for an idempotent creation of an account that already exists', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				includeUnrecognised: true
+			});
+
+			expect(views).toStrictEqual([]);
+		});
+
+		// Dropping the line must not leave the instruction uncovered: listed as one nothing could
+		// read, it would also be the entry that stops the request being signed.
+		it('should not list that creation as unrecognised either', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				includeUnrecognised: true
+			});
+
+			expect(views.map(({ kind }) => kind)).not.toContain('unknown');
+		});
+
+		// Nothing says it was a no-op without a run to say the account was already there.
+		it('should keep an idempotent creation when no run read the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// Only the idempotent form. The plain one fails on an account that exists, so it is never
+		// a no-op.
+		it('should keep a plain creation even when the account has a pre-state', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
 		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
 		// Left out, the balance changes carry an inflow no line in the list accounts for.
 		it('should list a close of an account the user does not own that pays their wallet', () => {
