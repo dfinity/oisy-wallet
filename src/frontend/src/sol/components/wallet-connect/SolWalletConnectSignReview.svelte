@@ -51,6 +51,10 @@
 		feeToken: Token;
 		prioritizationFee?: bigint;
 		prioritizationFeeEstimate?: bigint;
+		// How many signatures the message requires, which the base fee is charged on once each. Every
+		// message carries at least its fee payer's, so that is what the review assumes until the
+		// decode settles.
+		requiredSignatures?: number;
 		isApproval?: boolean;
 		// Whether the message cannot be stated faithfully, which is what the signing flow refuses on.
 		ambiguous?: boolean;
@@ -88,6 +92,7 @@
 		feeToken,
 		prioritizationFee,
 		prioritizationFeeEstimate,
+		requiredSignatures = 1,
 		isApproval = false,
 		ambiguous = false,
 		decoded = false,
@@ -111,9 +116,13 @@
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
+	// Charged for every signature the message requires rather than once per message, so a message a
+	// dApp co-signs pays it twice.
+	let baseFee = $derived(SOLANA_LAMPORTS_PER_SIGNATURE * BigInt(requiredSignatures));
+
 	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
 	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_LAMPORTS_PER_SIGNATURE + (prioritizationFee ?? ZERO) + ataFee);
+	let costs = $derived(baseFee + (prioritizationFee ?? ZERO) + ataFee);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
@@ -390,15 +399,15 @@
 					</WalletConnectModalValue>
 				{/if}
 
-				<!-- One heading, and under it what the transaction actually charges: the base fee every
-		     message pays, what it bids on top, and the rent of any account it opens. Three headings
+				<!-- One heading, and under it what the transaction actually charges: the base fee its
+		     signatures cost, what it bids on top, and the rent of any account it opens. Three headings
 		     read as three unrelated costs. -->
 				<WalletConnectModalValue label={$i18n.fee.text.fee} ref="fee">
 					<div class="flex flex-col gap-1">
 						<div data-tid="network-fee">
 							{@render feeValue({
 								kind: $i18n.fee.text.base_kind,
-								feeAmount: SOLANA_LAMPORTS_PER_SIGNATURE
+								feeAmount: baseFee
 							})}
 						</div>
 

@@ -317,6 +317,14 @@ An instruction OISY cannot decode is a warning rather than a refusal, because re
 
 Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, and says in the balance-changes section that it could not determine them. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
 
+### What a Solana transaction's fee is made of
+
+The review states the fee under one heading, in up to three parts: the **base** fee, the **prioritization** fee the dApp bids on top, and the **rent** of the token accounts the message opens, less what the ones it closes hand back.
+
+The base fee is charged **per signature**, at 5,000 lamports each, not once per transaction. A message the dApp co-signs alongside the user requires two signatures and pays twice, so the review reads the count from the message itself and states the base fee for every signature it requires — all of them charged to the fee payer. The same total is the room the review allows when it compares the simulated SOL change against what the message says it moves, so a co-signed send or swap is still stated in one line instead of being warned about as a transaction with multiple operations. The network also charges for each signature a message has one of its signature-verification programs (Ed25519, Secp256k1, Secp256r1) check; those are not counted yet, which is a follow-up.
+
+OISY's own sends, and the deposit a swap makes, are signed by the user's key alone, so they pay the base fee for a single signature.
+
 ### Account creations and handovers in a Solana transaction
 
 The review reduces a message to a single source, destination and amount, so an instruction whose effect that single figure cannot carry is **refused outright** rather than shown in part. Two families of System-program instruction fall there.
