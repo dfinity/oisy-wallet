@@ -4,7 +4,12 @@ import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
-import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockSolAddress,
+	mockSolAddress2
+} from '$tests/mocks/sol.mock';
 import { getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
@@ -168,6 +173,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: [creation, initialisation],
 						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 						includeUnrecognised: true
 					}).map(({ kind }) => kind)
 				).toStrictEqual(['createTokenAccount']);
@@ -179,7 +185,8 @@ describe('sol-instruction-summary.utils', () => {
 				expect(
 					mapSolInstructionSummaries({
 						instructions: [creation, initialisation],
-						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 					})
 				).toStrictEqual([
 					{
@@ -211,7 +218,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					],
 					innerInstructions: [{ index: 0, instructions: [creation] }],
-					ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+					ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 				});
 
 				expect(summaries.filter(({ kind }) => kind === 'createTokenAccount')).toHaveLength(1);
@@ -233,7 +241,8 @@ describe('sol-instruction-summary.utils', () => {
 				instructions: [
 					{ program: 'spl-token', programId: 'Tokenkeg', parsed: { type: 'transfer', info } }
 				],
-				ownedAddresses: [owner, ata]
+				ownedAddresses: [owner, ata],
+				userAddress: owner
 			});
 
 			// An SPL transfer names token accounts, not wallets. The authority is the only field
@@ -292,7 +301,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('receive');
@@ -315,7 +325,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('send');
@@ -341,6 +352,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				accountLamports: { [ata]: 2_039_280n }
 			});
 
@@ -373,6 +385,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, wsol],
+				userAddress: owner,
 				accountLamports: { [wsol]: 5_000_000_000n }
 			});
 
@@ -380,6 +393,60 @@ describe('sol-instruction-summary.utils', () => {
 
 			// 5 SOL it already held plus the 1 SOL the message paid in.
 			expect(close?.returned).toBe(6_000_000_000n);
+		});
+
+		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
+		// Left out, the balance changes carry an inflow no line in the list accounts for.
+		it('should list a close of an account the user does not own that pays their wallet', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress, owner: mockSolAddress2 }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				accountLamports: { [theirs]: 2_039_280n }
+			});
+
+			expect(views).toStrictEqual([
+				{
+					kind: 'closeTokenAccount',
+					account: theirs,
+					returned: 2_039_280n,
+					ownAccount: false,
+					counterparty: mockSolAddress,
+					own: true
+				}
+			]);
+		});
+
+		it('should leave out a close of an account the user does not own that pays anybody else', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress2, owner: mockSolAddress2 }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress
+			});
+
+			expect(views).toStrictEqual([]);
 		});
 
 		// A close hands its whole balance to the account it names, so a chain carries the first
@@ -431,7 +498,8 @@ describe('sol-instruction-summary.utils', () => {
 						parsed: { type: 'closeAccount', info: { account: second, destination: owner, owner } }
 					}
 				],
-				ownedAddresses: [owner, first, second]
+				ownedAddresses: [owner, first, second],
+				userAddress: owner
 			});
 
 			const [firstClose, secondClose] = views.filter(({ kind }) => kind === 'closeTokenAccount');
@@ -461,6 +529,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				accountLamports: { [ata]: 2_039_280n }
 			});
 
@@ -485,6 +554,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				addressToToken: { [ata]: WSOL_TOKEN.address },
 				// rent plus the wrapped SOL still sitting in the account
 				accountLamports: { [ata]: 2_039_280n + 5_000_000n }
@@ -522,6 +592,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				// The account did not exist before the run, so its balance going in is zero.
 				accountLamports: { [ata]: ZERO }
 			});
@@ -575,6 +646,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				accountLamports: { [ata]: ZERO }
 			});
 
@@ -598,7 +670,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner, ata]
+				ownedAddresses: [owner, ata],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('closeTokenAccount');
@@ -621,7 +694,8 @@ describe('sol-instruction-summary.utils', () => {
 							}
 						}
 					],
-					ownedAddresses: [owner, ata]
+					ownedAddresses: [owner, ata],
+					userAddress: owner
 				});
 
 				expect(view.kind).toBe('setAuthority');
@@ -640,7 +714,8 @@ describe('sol-instruction-summary.utils', () => {
 							}
 						}
 					],
-					ownedAddresses: [owner, ata]
+					ownedAddresses: [owner, ata],
+					userAddress: owner
 				});
 
 				expect(view.kind).toBe('approve');
@@ -676,7 +751,8 @@ describe('sol-instruction-summary.utils', () => {
 						parsed: { type: 'closeAccount', info: { account: opened, owner } }
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			};
 
 			it('should treat it as the user’s own without being told', () => {
@@ -723,6 +799,7 @@ describe('sol-instruction-summary.utils', () => {
 			}: {
 				instructions: unknown[];
 				ownedAddresses: string[];
+				userAddress: string;
 				includeUnrecognised?: boolean;
 			}): SolInstructionSummary[] =>
 				mapSolInstructionSummaries({
@@ -739,7 +816,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 10_000_000n
 						})
 					],
-					ownedAddresses: [me]
+					ownedAddresses: [me],
+					userAddress: me
 				});
 
 				expect(transfer).toStrictEqual({
@@ -762,6 +840,7 @@ describe('sol-instruction-summary.utils', () => {
 								})
 							],
 							ownedAddresses: [me],
+							userAddress: me,
 							includeUnrecognised: true
 						})
 					)
@@ -780,7 +859,8 @@ describe('sol-instruction-summary.utils', () => {
 							decimals: 6
 						})
 					],
-					ownedAddresses: [me]
+					ownedAddresses: [me],
+					userAddress: me
 				});
 
 				expect(transfer?.kind).toBe('send');
@@ -801,7 +881,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 5_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(approval?.kind).toBe('approve');
@@ -822,7 +903,8 @@ describe('sol-instruction-summary.utils', () => {
 							decimals: 6
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(approval?.kind).toBe('approve');
@@ -835,7 +917,8 @@ describe('sol-instruction-summary.utils', () => {
 					instructions: [
 						getRevokeInstruction({ source: toAddress(mockAtaAddress), owner: toAddress(me) })
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(revocation?.kind).toBe('revoke');
@@ -854,7 +937,8 @@ describe('sol-instruction-summary.utils', () => {
 							newAuthority: toAddress(them)
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(handover?.kind).toBe('setAuthority');
@@ -874,7 +958,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 7_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(burn?.kind).toBe('burn');
@@ -892,7 +977,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 9_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(minted?.kind).toBe('mint');
@@ -909,7 +995,8 @@ describe('sol-instruction-summary.utils', () => {
 							owner: toAddress(me)
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(frozen?.kind).toBe('freeze');
@@ -928,7 +1015,8 @@ describe('sol-instruction-summary.utils', () => {
 								data: new Uint8Array([255, 255, 255, 255])
 							}
 						],
-						ownedAddresses: [me]
+						ownedAddresses: [me],
+						userAddress: me
 					})
 				).not.toThrow();
 			});
@@ -939,15 +1027,20 @@ describe('sol-instruction-summary.utils', () => {
 				expect(
 					mapSolInstructionSummaries({
 						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
-						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111']
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111'
 					})
 				).toStrictEqual([]);
 			});
 
 			it('should ignore a transaction with no instructions at all', () => {
-				expect(mapSolInstructionSummaries({ instructions: [], ownedAddresses: [] })).toStrictEqual(
-					[]
-				);
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [],
+						ownedAddresses: [],
+						userAddress: undefined
+					})
+				).toStrictEqual([]);
 			});
 
 			it('should keep a line naming the program when asked to list what it cannot read', () => {
@@ -955,6 +1048,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
 						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111',
 						includeUnrecognised: true
 					})
 				).toStrictEqual([{ kind: 'unknown', program: 'SomeUnknownProgram' }]);
@@ -978,6 +1072,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: message,
 						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111',
 						includeUnrecognised: true
 					})
 				).toStrictEqual([

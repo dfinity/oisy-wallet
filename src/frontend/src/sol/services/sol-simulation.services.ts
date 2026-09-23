@@ -118,6 +118,7 @@ const simulate = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses: [address, ...ownedAddresses],
+		userAddress: address,
 		addressToToken,
 		accountLamports,
 		accountTokenAmounts,
@@ -134,6 +135,7 @@ const simulate = async ({
 			instructions: [...transactionMessage.instructions].map(asSolParsedRpcInstructionOrSelf),
 			innerInstructions: [],
 			ownedAddresses: [address, ...ownedAddresses],
+			userAddress: address,
 			addressToToken
 		}),
 		userAddress: address

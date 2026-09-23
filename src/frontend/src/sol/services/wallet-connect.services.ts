@@ -200,6 +200,7 @@ export const decode = async ({
 					),
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
+					userAddress: address,
 					includeUnrecognised: true
 				}),
 				network: solNetwork

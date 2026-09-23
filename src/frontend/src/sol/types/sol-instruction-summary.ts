@@ -63,6 +63,10 @@ export interface SolInstructionSummary {
 	// a wrapped SOL account that is the SOL wrapped inside it, which separates a close that
 	// unwraps something from one that closes an empty account.
 	wrapped?: bigint;
+	// `false` on a close of an account that is not the user's, which reaches the list only because
+	// it pays their wallet. What arrives is money they did not have rather than money of theirs
+	// coming back, and its rent was never theirs to be charged or credited.
+	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
 	// The program that produced the legs of a route, when one is known by address.

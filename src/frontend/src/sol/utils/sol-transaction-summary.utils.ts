@@ -67,8 +67,12 @@ export const solClosesPayOthers = ({
 	userAddress: OptionSolAddress;
 }): boolean =>
 	flattenInstructions(instructions).some(
-		({ kind, counterparty }) =>
+		({ kind, counterparty, ownAccount }) =>
+			// An account that is not the user's is not theirs to lose. One reaches the list only
+			// because it pays their wallet, so this never fires for it - stated rather than relied
+			// on, since widening what the list carries must not start refusing other people's.
 			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
+			ownAccount !== false &&
 			nonNullish(counterparty) &&
 			counterparty !== userAddress
 	);
@@ -93,8 +97,9 @@ export const solRentPaidToOthers = ({
 	userAddress: OptionSolAddress;
 }): bigint =>
 	flattenInstructions(instructions).reduce(
-		(acc, { kind, counterparty, returned, wrapped }) =>
+		(acc, { kind, counterparty, returned, wrapped, ownAccount }) =>
 			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
+			ownAccount !== false &&
 			nonNullish(counterparty) &&
 			counterparty !== userAddress &&
 			nonNullish(returned)
@@ -121,9 +126,15 @@ export const solAtaFee = ({
 	}, {});
 
 	return maxBigInt(
-		flattened.reduce((acc, { kind, account, rent, returned, counterparty }) => {
+		flattened.reduce((acc, { kind, account, rent, returned, counterparty, ownAccount }) => {
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
+			}
+
+			// An account that was never the user's cost them no rent, so handing them its balance
+			// is not a refund of anything this figure charged.
+			if (ownAccount === false) {
+				return acc;
 			}
 
 			// Only a close that pays the wallet reduces what the transaction cost. One that names
@@ -399,6 +410,7 @@ export const formatSolInstructionSummary = ({
 		rent,
 		returned,
 		wrapped,
+		ownAccount,
 		program
 	},
 	i18n,
@@ -459,10 +471,17 @@ export const formatSolInstructionSummary = ({
 	// a balance they can spend, so saying they came back would be saying the wrong thing.
 	const returnedHome = isNullish(counterparty) || counterparty === userAddress;
 
+	// Returned when the account was the user's: what arrives is theirs coming back. Sent when it
+	// was not, which is the only way such a close reaches the list at all - money they did not
+	// have rather than a refund, and saying it "returned" would claim they had paid it.
+	const arrival = ownAccount === false;
+
 	const returnedDetail = nonNullish(returned)
 		? replacePlaceholders(
 				returnedHome
-					? i18n.transaction.text.instruction_returned
+					? arrival
+						? i18n.transaction.text.instruction_sent
+						: i18n.transaction.text.instruction_returned
 					: i18n.transaction.text.instruction_returned_to,
 				{
 					$amount: formatToken({
@@ -473,7 +492,9 @@ export const formatSolInstructionSummary = ({
 				}
 			)
 		: returnedHome
-			? i18n.transaction.text.instruction_balance_returned
+			? arrival
+				? i18n.transaction.text.instruction_balance_sent
+				: i18n.transaction.text.instruction_balance_returned
 			: i18n.transaction.text.instruction_balance_returned_to;
 
 	// Unwrapping is what a close does with the SOL inside a wrapped SOL account. One holding none

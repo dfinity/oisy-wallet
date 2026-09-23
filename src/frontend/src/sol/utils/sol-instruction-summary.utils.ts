@@ -1,7 +1,7 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { SolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
 	SolInstructionSummaryKind
@@ -258,6 +258,7 @@ const toEffect = ({
 	topLevel,
 	position,
 	owned,
+	userAddress,
 	accountMints,
 	accountLamports,
 	accountTokenAmounts,
@@ -270,6 +271,9 @@ const toEffect = ({
 	// here rather than after a later instruction moved it on.
 	position: number;
 	owned: Set<SolAddress>;
+	// The wallet itself, which is the only account of the user's that a close can pay into as a
+	// balance. Separate from the set above, which is every account of theirs the run named.
+	userAddress: OptionSolAddress;
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Partial<Record<SolAddress, bigint>>;
@@ -351,8 +355,20 @@ const toEffect = ({
 		if (type === 'closeAccount') {
 			const account = address({ info, key: 'account' });
 			const owner = address({ info, key: 'owner' });
+			const destination = address({ info, key: 'destination' });
 
-			if (isNullish(account) || !(owned.has(account) || (nonNullish(owner) && owned.has(owner)))) {
+			const ownAccount = nonNullish(account)
+				? owned.has(account) || (nonNullish(owner) && owned.has(owner))
+				: false;
+
+			// A close of somebody else's account can still pay the user, and the lamports arrive in
+			// their wallet whether or not the account was ever theirs. Left out, the balance changes
+			// carry an inflow that no line in the list accounts for. Only when the wallet itself is
+			// named: lamports paid into an account of theirs that they did not own to begin with is
+			// not an arrival they can spend, and none of it is theirs to be told about.
+			const paysUser = nonNullish(destination) && destination === userAddress;
+
+			if (isNullish(account) || !(ownAccount || paysUser)) {
 				return undefined;
 			}
 
@@ -372,7 +388,6 @@ const toEffect = ({
 			// not be the user: read as a close alone, a hand-over of a funded wrapped SOL account
 			// reads as money coming back. The destination is carried so the line can say where it
 			// went, and marked when it is the user's own.
-			const destination = address({ info, key: 'destination' });
 
 			// Unwrapping is what closing a wrapped SOL account does with the SOL inside it. An
 			// account holding none is just being closed, and saying it unwrapped something states
@@ -386,6 +401,7 @@ const toEffect = ({
 				...(nonNullish(mint) && { tokenAddress: mint }),
 				...(nonNullish(returned) && { returned }),
 				...(nonNullish(wrapped) && { wrapped }),
+				...(!ownAccount && { ownAccount }),
 				...(nonNullish(destination) && { counterparty: destination, own: owned.has(destination) })
 			};
 		}
@@ -662,6 +678,7 @@ export const mapSolInstructionSummaries = ({
 	instructions,
 	innerInstructions = [],
 	ownedAddresses,
+	userAddress,
 	addressToToken = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
@@ -670,6 +687,8 @@ export const mapSolInstructionSummaries = ({
 	instructions: readonly unknown[];
 	innerInstructions?: readonly SolInstructionGroup[];
 	ownedAddresses: SolAddress[];
+	// The wallet itself, which is the only account of the user's a close can pay into as a balance.
+	userAddress: OptionSolAddress;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
@@ -726,6 +745,7 @@ export const mapSolInstructionSummaries = ({
 				topLevel,
 				position,
 				owned,
+				userAddress,
 				accountMints,
 				accountLamports,
 				accountTokenAmounts,

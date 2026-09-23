@@ -380,6 +380,22 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(RENT);
 		});
 
+		// An account that was never the user's cost them no rent, so nothing of theirs leaves with
+		// it.
+		it('should count nothing for a close of an account the user does not own', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress2,
+						ownAccount: false
+					}
+				])
+			).toBe(ZERO);
+		});
+
 		it('should count nothing when the amount was never read', () => {
 			expect(
 				paid([
@@ -592,6 +608,11 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// Handing the user an account that was never theirs refunds nothing this figure charged.
+		it('should not credit a close of an account the user never owned', () => {
+			expect(fee([create(), { ...close(), counterparty: WALLET, ownAccount: false }])).toBe(RENT);
+		});
+
 		it('should charge nothing for a transaction that touches no account', () => {
 			expect(fee([])).toBe(ZERO);
 		});
@@ -747,6 +768,30 @@ describe('sol-transaction-summary.utils', () => {
 			expect(detailOf({ kind: 'closeTokenAccount', counterparty: mockSolAddress2 })).toBe(
 				en.transaction.text.instruction_balance_returned_to
 			);
+		});
+
+		// A close of an account that was never the user's reaches the list only because it pays
+		// their wallet. What arrives is money they did not have, and "returned" would claim they
+		// had paid it.
+		it('should say a close of an account the user does not own was sent, not returned', () => {
+			expect(
+				detailOf({
+					kind: 'closeTokenAccount',
+					returned: 2_039_280n,
+					counterparty: mockSolAddress,
+					ownAccount: false
+				})
+			).toBe('0.00203928 SOL sent to your wallet');
+		});
+
+		it('should say the same with no amount read', () => {
+			expect(
+				detailOf({
+					kind: 'closeTokenAccount',
+					counterparty: mockSolAddress,
+					ownAccount: false
+				})
+			).toBe(en.transaction.text.instruction_balance_sent);
 		});
 
 		it('should still say it came back when the close named the wallet', () => {

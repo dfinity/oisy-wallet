@@ -1744,7 +1744,9 @@ interface I18nTransaction {
 		instruction_unknown_via: string;
 		instruction_rent: string;
 		instruction_balance_returned: string;
+		instruction_balance_sent: string;
 		instruction_returned: string;
+		instruction_sent: string;
 		instruction_returned_to: string;
 		instruction_balance_returned_to: string;
 		instruction_own_account: string;
