@@ -28,6 +28,11 @@ export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 // https://solana.com/docs/core/fees#transaction-fees
 export const SOLANA_LAMPORTS_PER_SIGNATURE = 5_000n;
 
+// How many signatures the messages the wallet builds itself require, for a send or a swap's
+// deposit: the user's key alone pays the fee, authorises the transfer and funds any token account
+// the transfer opens. Their fee is quoted before the message exists, so it is quoted for this many.
+export const SOLANA_SEND_REQUIRED_SIGNATURES = 1;
+
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 
 // When a transaction does not request a compute unit limit, the runtime budgets a fixed
