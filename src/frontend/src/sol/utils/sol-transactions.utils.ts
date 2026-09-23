@@ -71,8 +71,12 @@ const conflicts = ({
 }): boolean => nonNullish(current) && nonNullish(next) && current !== next;
 
 export const mapSolTransactionMessage = ({
-	instructions
-}: TransactionMessage): MappedSolTransaction => {
+	transactionMessage: { instructions },
+	userAddress
+}: {
+	transactionMessage: TransactionMessage;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const instructionsList = Array.from(instructions);
 
 	const mapped = instructionsList.reduce<MappedSolTransaction>(
@@ -88,7 +92,7 @@ export const mapSolTransactionMessage = ({
 				computeUnitPrice,
 				computeUnitLimit,
 				ambiguous: instructionAmbiguous
-			} = mapSolInstruction(instruction);
+			} = mapSolInstruction({ instruction, userAddress });
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the

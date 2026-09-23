@@ -195,7 +195,10 @@ describe('wallet-connect.services', () => {
 				transactionMessage: base64EncodedTransactionMessage,
 				rpc: expect.anything()
 			});
-			expect(mapSolTransactionMessage).toHaveBeenCalledWith(mockParsedTransaction);
+			expect(mapSolTransactionMessage).toHaveBeenCalledWith({
+				transactionMessage: mockParsedTransaction,
+				userAddress: mockSolAddress
+			});
 			expect(result).toEqual({ ...mockMappedTransaction, parties: emptyPartialParties });
 		});
 
@@ -574,7 +577,10 @@ describe('wallet-connect.services', () => {
 					rpc: expect.any(Object)
 				});
 
-				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockParsedTransaction);
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress
+				});
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);
 
@@ -707,7 +713,10 @@ describe('wallet-connect.services', () => {
 					rpc: expect.any(Object)
 				});
 
-				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockParsedTransaction);
+				expect(mapSolTransactionMessage).toHaveBeenCalledExactlyOnceWith({
+					transactionMessage: mockParsedTransaction,
+					userAddress: mockSolAddress
+				});
 
 				expect(decodeTransactionMessage).toHaveBeenCalledExactlyOnceWith(mockTransaction);
 

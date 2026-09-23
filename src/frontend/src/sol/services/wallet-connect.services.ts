@@ -104,7 +104,10 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
+	const mappedTransaction = mapSolTransactionMessage({
+		transactionMessage: parsedTransactionMessage,
+		userAddress: address
+	});
 
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
@@ -488,8 +491,10 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } =
-				mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+				transactionMessage: parsedTransactionMessage,
+				userAddress: address
+			});
 
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary

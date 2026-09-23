@@ -72,7 +72,7 @@ export const toSolTransferLeg = ({
 
 export const mapSolTransferLegs = (instructions: readonly SolInstruction[]): SolTransferLeg[] =>
 	Array.from(instructions).reduce<SolTransferLeg[]>((acc, instruction) => {
-		const leg = toSolTransferLeg(mapSolInstruction(instruction));
+		const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
 
 		return nonNullish(leg) ? [...acc, leg] : acc;
 	}, []);
@@ -128,7 +128,7 @@ export const mapSolSimulatedTransferLegs = async ({
 		async (acc, instruction, index) => {
 			const legs = await acc;
 
-			const leg = toSolTransferLeg(mapSolInstruction(instruction));
+			const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
 
 			const { instructions: inner } =
 				innerInstructions.find(({ index: parentIndex }) => parentIndex === index) ?? {};

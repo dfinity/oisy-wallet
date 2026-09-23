@@ -16,7 +16,7 @@ import {
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
-import type { SolAddress } from '$sol/types/address';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
@@ -631,7 +631,13 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	return unfaithfulInstruction();
 };
 
-const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolTokenInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === TokenInstruction.Transfer) {
@@ -704,6 +710,21 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		};
 	}
 
+	// Closing pays every lamport the account holds to the destination the instruction names, which
+	// need not be its owner. Paid to the user it is the routine end of a swap and states nothing
+	// the summary needs to carry. Paid anywhere else it hands over the rent - and for a wrapped SOL
+	// account everything wrapped in it - with no amount the single-value summary could show, so it
+	// fails closed for the same reason a burn or an authority change does.
+	if (instructionType === TokenInstruction.CloseAccount) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
+	}
+
 	if (
 		instructionType === TokenInstruction.SetAuthority ||
 		instructionType === TokenInstruction.Burn ||
@@ -717,7 +738,13 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 	return unreviewedInstruction();
 };
 
-const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolToken2022Instruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolParsedInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === Token2022Instruction.Transfer) {
@@ -791,6 +818,17 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 	}
 
 	// Token-2022 adds permissioned burns on top of the legacy program's burn variants.
+	// Same reading as the Token program's close: only a payout to the user states nothing.
+	if (instructionType === Token2022Instruction.CloseAccount) {
+		const {
+			accounts: {
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return destination === userAddress ? ignoredInstruction() : unfaithfulInstruction();
+	}
+
 	if (
 		instructionType === Token2022Instruction.SetAuthority ||
 		instructionType === Token2022Instruction.Burn ||
@@ -1157,7 +1195,13 @@ export const asSolParsedRpcInstruction = (
 export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
 	asSolParsedRpcInstruction(instruction) ?? instruction;
 
-export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+export const mapSolInstruction = ({
+	instruction,
+	userAddress
+}: {
+	instruction: SolInstruction;
+	userAddress?: OptionSolAddress;
+}): MappedSolTransaction => {
 	// Compute budget instructions can never move funds, but they do set the prioritisation
 	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
 	// Parsing stays behind its own guard: a malformed or not-yet-supported variant would
@@ -1195,11 +1239,11 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
-		return mapSolTokenInstruction(parsedInstruction);
+		return mapSolTokenInstruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
-		return mapSolToken2022Instruction(parsedInstruction);
+		return mapSolToken2022Instruction({ instruction: parsedInstruction, userAddress });
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
