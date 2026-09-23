@@ -1676,6 +1676,7 @@
 			"balance_changes": "残高の変化",
 			"balance_changes_none": "このトランザクションはあなたのアカウントに何の変更も加えません。",
 			"balance_changes_unknown": "OISY はこのトランザクションがどの資産をどれだけ動かすのか判断できません。このアプリを信頼できる場合にのみ署名してください。",
+			"rent_paid_to_others": "あなたが保有する $amount SOL のアカウント維持費が、あなたのウォレット以外のアドレスに渡ります。",
 			"simulation_control_change": "このトランザクションは、1つ以上のアカウントを誰が管理するかを変更します。承認すると、中身だけでなくアカウント自体が引き渡される可能性があります。",
 			"simulation_new_owner": "新しいアカウント所有者",
 			"simulation_new_spender": "新しく承認された使用者",

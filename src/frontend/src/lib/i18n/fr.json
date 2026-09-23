@@ -1676,6 +1676,7 @@
 			"balance_changes": "Variations de solde",
 			"balance_changes_none": "Cette transaction ne change rien dans vos comptes.",
 			"balance_changes_unknown": "OISY ne peut pas déterminer quels actifs cette transaction déplace, ni pour quel montant. Ne signez que si vous faites confiance à cette application.",
+			"rent_paid_to_others": "$amount SOL de loyer de compte vous appartenant part vers une adresse qui n’est pas votre portefeuille.",
 			"simulation_control_change": "Cette transaction changerait qui contrôle un ou plusieurs de vos comptes. L'approuver peut céder le compte lui-même, pas seulement ce qu'il contient.",
 			"simulation_new_owner": "Nouveau propriétaire du compte",
 			"simulation_new_spender": "Nouveau dépensier approuvé",

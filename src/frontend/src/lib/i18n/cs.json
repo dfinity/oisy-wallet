@@ -1676,6 +1676,7 @@
 			"balance_changes": "Změny zůstatků",
 			"balance_changes_none": "Tato transakce ve vašich účtech nic nemění.",
 			"balance_changes_unknown": "OISY nedokáže určit, které prostředky tato transakce přesouvá ani v jaké výši. Podepisujte pouze tehdy, pokud této aplikaci věříte.",
+			"rent_paid_to_others": "$amount SOL nájemného za účet, které patří vám, jde na adresu, která není vaše peněženka.",
 			"simulation_control_change": "Tato transakce by změnila, kdo ovládá jeden nebo více vašich účtů. Jejím schválením můžete předat samotný účet, nejen to, co obsahuje.",
 			"simulation_new_owner": "Nový vlastník účtu",
 			"simulation_new_spender": "Nový schválený příjemce",

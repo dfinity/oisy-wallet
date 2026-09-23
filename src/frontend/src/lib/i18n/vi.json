@@ -1676,6 +1676,7 @@
 			"balance_changes": "Thay đổi số dư",
 			"balance_changes_none": "Giao dịch này không thay đổi gì trong các tài khoản của bạn.",
 			"balance_changes_unknown": "OISY không thể xác định giao dịch này chuyển những tài sản nào và bao nhiêu. Chỉ ký nếu bạn tin ứng dụng này.",
+			"rent_paid_to_others": "$amount SOL tiền thuê tài khoản thuộc về bạn sẽ chuyển đến một địa chỉ không phải ví của bạn.",
 			"simulation_control_change": "Giao dịch này sẽ thay đổi ai kiểm soát một hoặc nhiều tài khoản của bạn. Việc phê duyệt nó có thể giao lại chính tài khoản đó, chứ không chỉ những gì bên trong.",
 			"simulation_new_owner": "Chủ sở hữu tài khoản mới",
 			"simulation_new_spender": "Người chi tiêu mới được chấp thuận",

@@ -1676,6 +1676,7 @@
 			"balance_changes": "余额变化",
 			"balance_changes_none": "此交易不会更改您账户中的任何内容。",
 			"balance_changes_unknown": "OISY 无法确定此交易转移了哪些资产以及数量。请仅在您信任该应用时签名。",
+			"rent_paid_to_others": "属于您的 $amount SOL 账户租金将转给不属于您钱包的地址。",
 			"simulation_control_change": "此交易将改变您一个或多个账户的控制权归属。批准它可能会交出账户本身，而不仅仅是其中的资产。",
 			"simulation_new_owner": "新账户所有者",
 			"simulation_new_spender": "新批准的支出方",

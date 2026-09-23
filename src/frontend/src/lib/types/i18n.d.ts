@@ -1356,6 +1356,7 @@ interface I18nWallet_connect {
 		balance_changes: string;
 		balance_changes_none: string;
 		balance_changes_unknown: string;
+		rent_paid_to_others: string;
 		simulation_control_change: string;
 		simulation_new_owner: string;
 		simulation_new_spender: string;

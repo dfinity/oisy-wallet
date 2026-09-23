@@ -11,7 +11,8 @@ import {
 	formatSolInstructionSummary,
 	formatSolTransactionSummary,
 	solAtaFee,
-	solClosesPayOthers
+	solClosesPayOthers,
+	solRentPaidToOthers
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
@@ -291,6 +292,100 @@ describe('sol-transaction-summary.utils', () => {
 					userAddress: mockSolAddress
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('solRentPaidToOthers', () => {
+		const RENT = 2_039_280n;
+
+		const paid = (instructions: SolInstructionSummary[]): bigint =>
+			solRentPaidToOthers({ instructions, userAddress: mockSolAddress });
+
+		it('should count nothing when every close pays the wallet', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		it('should count the rent of a close that pays somebody else', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
+		// The wrapped SOL already appears in the same section as the token account's balance going
+		// to zero, so counting it here as well would state it twice.
+		it('should leave the wrapped SOL out of an unwrap that pays somebody else', () => {
+			expect(
+				paid([
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: 10_000_000_000n + RENT,
+						wrapped: 10_000_000_000n,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
+		it('should add up several closes that pay somebody else', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					},
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT * 2n);
+		});
+
+		it('should count a close made inside a routed swap', () => {
+			expect(
+				paid([
+					{
+						kind: 'route',
+						children: [
+							{
+								kind: 'closeTokenAccount',
+								account: mockAtaAddress,
+								returned: RENT,
+								counterparty: mockSolAddress2
+							}
+						]
+					}
+				])
+			).toBe(RENT);
+		});
+
+		it('should count nothing when the amount was never read', () => {
+			expect(
+				paid([
+					{ kind: 'closeTokenAccount', account: mockAtaAddress, counterparty: mockSolAddress2 }
+				])
+			).toBe(ZERO);
 		});
 	});
 

@@ -1676,6 +1676,7 @@
 			"balance_changes": "Guthabenänderungen",
 			"balance_changes_none": "Diese Transaktion ändert nichts an Ihren Konten.",
 			"balance_changes_unknown": "OISY kann nicht feststellen, welche Vermögenswerte diese Transaktion bewegt oder in welcher Höhe. Signieren Sie nur, wenn Sie dieser App vertrauen.",
+			"rent_paid_to_others": "$amount SOL Kontomiete, die dir gehört, geht an eine Adresse, die nicht deine Wallet ist.",
 			"simulation_control_change": "Diese Transaktion würde ändern, wer eines oder mehrere Ihrer Konten kontrolliert. Ihre Genehmigung kann ein Konto selbst übertragen, nicht nur dessen Inhalt.",
 			"simulation_new_owner": "Neuer Kontoinhaber",
 			"simulation_new_spender": "Neu genehmigter Berechtigter",

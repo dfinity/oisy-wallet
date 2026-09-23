@@ -1676,6 +1676,7 @@
 			"balance_changes": "잔액 변화",
 			"balance_changes_none": "이 트랜잭션은 회원님의 계정에서 아무것도 변경하지 않습니다.",
 			"balance_changes_unknown": "OISY는 이 트랜잭션이 어떤 자산을 얼마나 옮기는지 확인할 수 없습니다. 이 앱을 신뢰할 때만 서명하세요.",
+			"rent_paid_to_others": "회원님이 보유한 $amount SOL의 계정 임대료가 회원님의 지갑이 아닌 주소로 갑니다.",
 			"simulation_control_change": "이 트랜잭션은 하나 이상의 계정을 누가 제어하는지를 변경합니다. 승인하면 계정 안의 내용뿐만 아니라 계정 자체가 넘어갈 수 있습니다.",
 			"simulation_new_owner": "새 계정 소유자",
 			"simulation_new_spender": "새로 승인된 사용자",

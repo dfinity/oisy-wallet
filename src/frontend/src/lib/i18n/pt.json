@@ -1676,6 +1676,7 @@
 			"balance_changes": "Alterações de saldo",
 			"balance_changes_none": "Esta transação não altera nada nas suas contas.",
 			"balance_changes_unknown": "A OISY não consegue determinar que ativos esta transação move, nem em que valor. Assine apenas se confiar nesta aplicação.",
+			"rent_paid_to_others": "$amount SOL de aluguel de conta que lhe pertence vai para um endereço que não é a sua carteira.",
 			"simulation_control_change": "Esta transação mudaria quem controla uma ou mais de suas contas. Aprová-la pode entregar a própria conta, não apenas o que ela contém.",
 			"simulation_new_owner": "Novo proprietário da conta",
 			"simulation_new_spender": "Novo autorizado aprovado",

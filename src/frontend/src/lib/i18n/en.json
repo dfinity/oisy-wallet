@@ -1676,6 +1676,7 @@
 			"balance_changes": "Balance changes",
 			"balance_changes_none": "This transaction changes nothing in your accounts.",
 			"balance_changes_unknown": "OISY can't determine which assets this transaction moves, or how much. Only sign if you trust this app.",
+			"rent_paid_to_others": "$amount SOL of account rent you own goes to an address that is not your wallet.",
 			"simulation_control_change": "This transaction would change who controls one or more of your accounts. Approving it can hand over an account itself, not only what is in it.",
 			"simulation_new_owner": "New account owner",
 			"simulation_new_spender": "New approved spender",

@@ -37,7 +37,8 @@
 	import {
 		flattenInstructions,
 		formatSolTransactionSummary,
-		solAtaFee
+		solAtaFee,
+		solRentPaidToOthers
 	} from '$sol/utils/sol-transaction-summary.utils';
 
 	interface Props {
@@ -113,6 +114,13 @@
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
 	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
+
+	// Rent of the user's own accounts that a close hands to somebody else. The balance changes
+	// measure the wallet, and this never touches it, so without saying so the section would
+	// describe a transaction that takes it as taking nothing.
+	let rentToOthers = $derived(
+		solRentPaidToOthers({ instructions: instructions ?? [], userAddress: source })
+	);
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -358,7 +366,7 @@
 				     could imply; the label says which of the two this is, and the missing answer is
 				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
-					<SolWalletConnectSimulationPreview {feeToken} {preview} />
+					<SolWalletConnectSimulationPreview {feeToken} {preview} {rentToOthers} />
 				{:else if decoded}
 					<WalletConnectModalValue
 						label={simulationObtained

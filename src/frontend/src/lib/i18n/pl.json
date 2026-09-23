@@ -1676,6 +1676,7 @@
 			"balance_changes": "Zmiany salda",
 			"balance_changes_none": "Ta transakcja niczego nie zmienia na Twoich kontach.",
 			"balance_changes_unknown": "OISY nie może ustalić, jakie aktywa i w jakiej wysokości przenosi ta transakcja. Podpisz tylko wtedy, gdy ufasz tej aplikacji.",
+			"rent_paid_to_others": "$amount SOL czynszu za konto, który należy do Ciebie, trafia na adres, który nie jest Twoim portfelem.",
 			"simulation_control_change": "Ta transakcja zmieniłaby, kto kontroluje jedno lub więcej Twoich kont. Zatwierdzenie jej może oddać samo konto, a nie tylko jego zawartość.",
 			"simulation_new_owner": "Nowy właściciel konta",
 			"simulation_new_spender": "Nowy zatwierdzony upoważniony",

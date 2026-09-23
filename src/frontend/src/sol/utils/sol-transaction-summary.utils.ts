@@ -73,6 +73,36 @@ export const solClosesPayOthers = ({
 			counterparty !== userAddress
 	);
 
+/**
+ * The account rent that leaves the user when a close pays somewhere other than their wallet.
+ *
+ * The balance changes measure the wallet, so lamports leaving one of the user's token accounts
+ * move nothing they can see: the account is not the wallet, and the wallet's own balance does not
+ * change. The section would describe the transaction as costing nothing while a close hands an
+ * account's rent to somebody else.
+ *
+ * Only the rent, because the rest of what a close hands over is the wrapped SOL, and that already
+ * appears in the same section as the token account's balance going to zero. Stating the whole
+ * lamport balance here would count it twice.
+ */
+export const solRentPaidToOthers = ({
+	instructions,
+	userAddress
+}: {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): bigint =>
+	flattenInstructions(instructions).reduce(
+		(acc, { kind, counterparty, returned, wrapped }) =>
+			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
+			nonNullish(counterparty) &&
+			counterparty !== userAddress &&
+			nonNullish(returned)
+				? acc + maxBigInt(returned - (wrapped ?? ZERO), ZERO)
+				: acc,
+		ZERO
+	);
+
 export const solAtaFee = ({
 	instructions,
 	userAddress

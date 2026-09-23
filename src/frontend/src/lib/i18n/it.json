@@ -1676,6 +1676,7 @@
 			"balance_changes": "Variazioni di saldo",
 			"balance_changes_none": "Questa transazione non cambia nulla nei tuoi conti.",
 			"balance_changes_unknown": "OISY non può determinare quali asset sposta questa transazione, né per quanto. Firma solo se ti fidi di questa app.",
+			"rent_paid_to_others": "$amount SOL di affitto del conto che ti appartiene va a un indirizzo che non è il tuo wallet.",
 			"simulation_control_change": "Questa transazione cambierebbe chi controlla uno o più dei tuoi account. Approvarla può cedere l'account stesso, non solo ciò che contiene.",
 			"simulation_new_owner": "Nuovo proprietario dell'account",
 			"simulation_new_spender": "Nuovo delegato approvato",
