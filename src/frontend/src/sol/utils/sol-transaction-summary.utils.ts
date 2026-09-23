@@ -88,6 +88,12 @@ export const solClosesPayOthers = ({
  * Only the rent, because the rest of what a close hands over is the wrapped SOL, and that already
  * appears in the same section as the token account's balance going to zero. Stating the whole
  * lamport balance here would count it twice.
+ *
+ * And only the last hop of a chain. A close hands on everything its account holds by then, so
+ * closing one account into another and that one onwards carries the first account's lamports
+ * through to the last: adding both counts them once per hop. A close whose destination is closed
+ * again later is that intermediate hop, and the close that follows it states the whole of what
+ * leaves.
  */
 export const solRentPaidToOthers = ({
 	instructions,
@@ -95,18 +101,32 @@ export const solRentPaidToOthers = ({
 }: {
 	instructions: SolInstructionSummary[];
 	userAddress: OptionSolAddress;
-}): bigint =>
-	flattenInstructions(instructions).reduce(
-		(acc, { kind, counterparty, returned, wrapped, ownAccount }) =>
-			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
-			ownAccount !== false &&
-			nonNullish(counterparty) &&
-			counterparty !== userAddress &&
-			nonNullish(returned)
-				? acc + maxBigInt(returned - (wrapped ?? ZERO), ZERO)
-				: acc,
-		ZERO
-	);
+}): bigint => {
+	const flattened = flattenInstructions(instructions);
+
+	return flattened.reduce((acc, current, index) => {
+		const { kind, counterparty, returned, wrapped, ownAccount } = current;
+
+		if (
+			!(kind === 'closeTokenAccount' || kind === 'unwrap') ||
+			ownAccount === false ||
+			isNullish(counterparty) ||
+			counterparty === userAddress ||
+			isNullish(returned)
+		) {
+			return acc;
+		}
+
+		const closedOnward = flattened.some(
+			({ kind: laterKind, account }, laterIndex) =>
+				laterIndex > index &&
+				(laterKind === 'closeTokenAccount' || laterKind === 'unwrap') &&
+				account === counterparty
+		);
+
+		return closedOnward ? acc : acc + maxBigInt(returned - (wrapped ?? ZERO), ZERO);
+	}, ZERO);
+};
 
 export const solAtaFee = ({
 	instructions,

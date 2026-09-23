@@ -396,6 +396,48 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// A close hands on everything its account holds by then, so the last hop of a chain states
+		// the whole of what leaves. Adding each hop counted the first account's rent once per hop.
+		it('should count a chain of closes once', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockAtaAddress2
+					},
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT * 2n,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT * 2n);
+		});
+
+		// Only closes that come after it. A close of the destination that already happened says
+		// nothing about where this balance goes.
+		it('should count a close whose destination was closed earlier', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					},
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockAtaAddress2
+					}
+				])
+			).toBe(RENT * 2n);
+		});
+
 		it('should count nothing when the amount was never read', () => {
 			expect(
 				paid([
