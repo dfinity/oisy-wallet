@@ -4,6 +4,7 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { buildIcTokenLabels } from '$icp/utils/ic-tokens.utils';
 	import HelpIcpSwapBalance from '$lib/components/help/HelpIcpSwapBalance.svelte';
 	import HelpTokenDropdown from '$lib/components/help/HelpTokenDropdown.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
@@ -97,6 +98,20 @@
 	// universe (see `allSwapUniverseTokens`). The selector sorts by symbol, so this order only
 	// decides which entry wins if a custom token ever duplicates the ICP ledger.
 	const candidateTokens = $derived([ICP_TOKEN as IcToken, ...$enabledIcrcTokens]);
+
+	// Built once over every token the user can encounter here, then used by the selectors, the
+	// pool headings, the rows and the toasts alike. Per-surface labels disagree: a filtered list
+	// can lose an impostor's twin, and the results used to show the bare symbol, so two ledgers
+	// claiming the same symbol rendered as identical groups.
+	const tokenLabels = $derived(buildIcTokenLabels(candidateTokens));
+
+	const labelOf = ({
+		ledgerCanisterId,
+		symbol
+	}: {
+		ledgerCanisterId: string;
+		symbol: string;
+	}): string => tokenLabels.get(ledgerCanisterId) ?? symbol;
 
 	// A pair needs two distinct tokens: the pool is between them, so the same token twice
 	// identifies nothing.
@@ -298,10 +313,12 @@
 			// pool actually moved, which can exceed the amount captured at discovery.
 			toastsShow({
 				text: $isPrivacyMode
-					? replacePlaceholders($i18n.help.success.withdraw_hidden, { $symbol: token.symbol })
+					? replacePlaceholders($i18n.help.success.withdraw_hidden, {
+							$symbol: labelOf(token)
+						})
 					: replacePlaceholders($i18n.help.success.withdraw, {
 							$amount: formatToken({ value: withdrawn, unitName: token.decimals }),
-							$symbol: token.symbol
+							$symbol: labelOf(token)
 						}),
 				level: 'success',
 				duration: 4000
@@ -389,6 +406,7 @@
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
 					disabled={withdrawing}
+					labels={tokenLabels}
 					onSelect={onSelectA}
 					selected={tokenA}
 					testId={HELP_ICPSWAP_TOKEN_A}
@@ -406,6 +424,7 @@
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
 					disabled={withdrawing}
+					labels={tokenLabels}
 					onSelect={onSelectB}
 					selected={tokenB}
 					testId={HELP_ICPSWAP_TOKEN_B}
@@ -460,13 +479,15 @@
 					<!-- No `uppercase` here: these are token symbols, and casing is part of them
 					     (ckUSDC, not CKUSDC). -->
 					<p class="text-xs font-semibold tracking-wide text-tertiary">
-						{group.pair[0]} / {group.pair[1]}
+						{labelOf({ ledgerCanisterId: group.poolTokens[0].address, symbol: group.pair[0] })} /
+						{labelOf({ ledgerCanisterId: group.poolTokens[1].address, symbol: group.pair[1] })}
 					</p>
 
 					{#each group.balances as balance (rowKey( { poolCanisterId: group.poolCanisterId, balance } ))}
 						<HelpIcpSwapBalance
 							{balance}
 							disabled={nonNullish(withdrawingKey)}
+							label={labelOf(balance.token)}
 							loading={withdrawingKey === rowKey({ poolCanisterId: group.poolCanisterId, balance })}
 							onWithdraw={() => onWithdraw({ poolCanisterId: group.poolCanisterId, balance })}
 							testIdSuffix={group.poolCanisterId}

@@ -1,6 +1,7 @@
 import HelpIcpSwapBalance from '$lib/components/help/HelpIcpSwapBalance.svelte';
 import { HELP_ICPSWAP_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { IcpSwapRecoverableBalance } from '$lib/services/icp-swap-recovery.services';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -44,6 +45,20 @@ describe('HelpIcpSwapBalance', () => {
 
 		expect(queryByText('1.5')).toBeNull();
 		expect(getByText(token.symbol)).toBeInTheDocument();
+	});
+
+	it("shows the caller's label in place of the bare symbol, including in the button label", () => {
+		const label = 'ICP (ryjl3-t...aba-cai)';
+
+		const { getByTestId, getByText } = render(HelpIcpSwapBalance, {
+			props: { balance: unused, label, onWithdraw: () => undefined }
+		});
+
+		expect(getByText(label)).toBeInTheDocument();
+		expect(getByTestId(testId)).toHaveAttribute(
+			'aria-label',
+			replacePlaceholders(en.help.alt.withdraw, { $symbol: label })
+		);
 	});
 
 	it('scopes the test id to the pool, so the same token from two pools stays distinct', () => {

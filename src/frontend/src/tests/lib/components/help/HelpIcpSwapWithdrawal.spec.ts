@@ -682,6 +682,100 @@ describe('HelpIcpSwapWithdrawal', () => {
 		});
 	});
 
+	describe('ledger labels', () => {
+		// Two ledgers claiming the same symbol and name: the real token and one copying it.
+		const real = {
+			...mockValidIcrcToken,
+			symbol: 'XYZ',
+			name: 'XYZ Token',
+			ledgerCanisterId: 'qaa6y-5yaaa-aaaaa-aaafa-cai'
+		};
+		const impostor = { ...real, ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai' };
+
+		const groupFor = ({ id, token }: { id: string; token: typeof real }): IcpSwapPoolBalances => ({
+			poolCanisterId: id,
+			poolTokens: [icpLeg, { address: token.ledgerCanisterId, standard: 'ICRC1' }],
+			pair: ['ICP', 'XYZ'],
+			balances: [{ token, amount: 500_000_000n }]
+		});
+
+		const groupText = ({
+			getByTestId,
+			id
+		}: {
+			getByTestId: (id: string) => HTMLElement;
+			id: string;
+		}) => getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-${id}`).textContent?.replace(/\s+/g, ' ').trim();
+
+		beforeEach(() => {
+			vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() =>
+				readable([real, impostor])
+			);
+		});
+
+		it('keeps two ledgers that share a symbol apart in the scan results', async () => {
+			vi.mocked(scanIcpSwapPools).mockResolvedValue({
+				poolsScanned: 2,
+				unreadablePools: 0,
+				pools: [
+					groupFor({ id: 'pool-real', token: real }),
+					groupFor({ id: 'pool-fake', token: impostor })
+				]
+			});
+
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+			await waitFor(() =>
+				expect(getByTestId(`${HELP_ICPSWAP_POOL_GROUP}-pool-fake`)).toBeInTheDocument()
+			);
+
+			// Both the heading and the row name the ledger, so neither group can pass for the other.
+			expect(groupText({ getByTestId, id: 'pool-real' })).toContain('XYZ (qaa6y-5...afa-cai)');
+			expect(groupText({ getByTestId, id: 'pool-fake' })).toContain('XYZ (mxzaz-h...ada-cai)');
+			expect(groupText({ getByTestId, id: 'pool-real' })).not.toBe(
+				groupText({ getByTestId, id: 'pool-fake' })
+			);
+		});
+
+		it('names the ledger in the withdraw button, not just the symbol', async () => {
+			vi.mocked(scanIcpSwapPools).mockResolvedValue({
+				poolsScanned: 1,
+				unreadablePools: 0,
+				pools: [groupFor({ id: 'pool-fake', token: impostor })]
+			});
+
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+			await waitFor(() =>
+				expect(
+					getByTestId(`${HELP_ICPSWAP_WITHDRAW_BUTTON}-pool-fake-${impostor.ledgerCanisterId}`)
+				).toHaveAttribute(
+					'aria-label',
+					replacePlaceholders(en.help.alt.withdraw, { $symbol: 'XYZ (mxzaz-h...ada-cai)' })
+				)
+			);
+		});
+
+		it('still names the impostor in the second selector once its twin is picked in the first', async () => {
+			// The second list excludes the first pick, so labels derived from that list alone would
+			// find the impostor unique and show it as a bare XYZ.
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
+			await fireEvent.click(getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${real.ledgerCanisterId}`));
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_B));
+
+			expect(
+				getByTestId(`${HELP_ICPSWAP_TOKEN_B}-option-${impostor.ledgerCanisterId}`)
+			).toHaveTextContent('XYZ (mxzaz-h...ada-cai)');
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toHaveTextContent('XYZ (qaa6y-5...afa-cai)');
+		});
+	});
+
 	it('locks discovery while a withdrawal is in flight', async () => {
 		vi.mocked(loadIcpSwapRecoverableBalances).mockResolvedValue({
 			poolCanisterId,

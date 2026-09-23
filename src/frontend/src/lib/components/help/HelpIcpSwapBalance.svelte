@@ -12,6 +12,9 @@
 
 	interface Props {
 		balance: IcpSwapRecoverableBalance;
+		// The caller's label for the token, unambiguous across the user's token set; the symbol
+		// alone cannot tell an impostor from the ledger it copies.
+		label?: string;
 		disabled?: boolean;
 		loading?: boolean;
 		// The pool the row belongs to. A scan can surface the same token from two pools, so the
@@ -20,9 +23,18 @@
 		onWithdraw: () => void;
 	}
 
-	let { balance, disabled = false, loading = false, testIdSuffix, onWithdraw }: Props = $props();
+	let {
+		balance,
+		label,
+		disabled = false,
+		loading = false,
+		testIdSuffix,
+		onWithdraw
+	}: Props = $props();
 
 	let { token, amount } = $derived(balance);
+
+	let tokenLabel = $derived(label ?? token.symbol);
 
 	let formattedAmount = $derived(formatToken({ value: amount, unitName: token.decimals }));
 
@@ -41,7 +53,7 @@
 				{:else}
 					<span class="truncate">{formattedAmount}</span>
 				{/if}
-				<span class="truncate">{token.symbol}</span>
+				<span class="truncate">{tokenLabel}</span>
 			</span>
 			<span class="truncate text-sm text-tertiary">{$i18n.help.text.balance_unused}</span>
 		</span>
@@ -49,7 +61,7 @@
 
 	<!-- Button is flex-1 by default, which would let the loading state stretch across the row. -->
 	<Button
-		ariaLabel={replacePlaceholders($i18n.help.alt.withdraw, { $symbol: token.symbol })}
+		ariaLabel={replacePlaceholders($i18n.help.alt.withdraw, { $symbol: tokenLabel })}
 		{disabled}
 		link
 		{loading}
