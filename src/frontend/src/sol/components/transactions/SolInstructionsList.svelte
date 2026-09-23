@@ -79,9 +79,18 @@
 	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
 	     handover, the program a route ran through: an address the user has something to check. The
 	     account a creation or a close names is a derived token account nobody recognises, and the
-	     token already identifies it. -->
-	{@const actionAddress =
-		instruction.counterparty ?? instruction.newAuthority ?? instruction.program}
+	     token already identifies it.
+
+	     A close that pays the user their own wallet back is the exception: the line already says
+	     the balance came home, and naming the wallet underneath repeats it. The address is what
+	     the line needs when it went somewhere else. -->
+	{@const closedHome =
+		(instruction.kind === 'closeTokenAccount' || instruction.kind === 'unwrap') &&
+		instruction.counterparty === userAddress}
+
+	{@const actionAddress = closedHome
+		? undefined
+		: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span class="flex flex-wrap items-center gap-x-1">
