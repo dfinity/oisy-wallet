@@ -1,3 +1,4 @@
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { isUserNetworkEnabled, mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
@@ -32,6 +33,19 @@ describe('user-networks.utils', () => {
 
 		it('should handle empty UserNetworks', () => {
 			expect(mapUserNetworks({})).toEqual([]);
+		});
+
+		// The other half of the round trip asserted in `user-networks.derived.spec`. The
+		// "map all networks" case below only asserts that nothing throws or warns, so it would
+		// not catch a Robinhood key mapped to the wrong variant.
+		it('should map the Robinhood Chain network id to its backend key', () => {
+			expect(
+				mapUserNetworks({
+					[ROBINHOOD_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false }
+				})
+			).toEqual([[{ RobinhoodMainnet: null }, { enabled: true, is_testnet: false }]]);
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should be able to map all networks', () => {

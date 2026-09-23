@@ -20,7 +20,8 @@ const EXPLORER_URLS = {
 	POLYGON: 'https://polygonscan.com',
 	POLYGON_AMOY: 'https://amoy.polygonscan.com/',
 	ARBITRUM: 'https://arbiscan.io',
-	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io'
+	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io',
+	ROBINHOOD: 'https://robin.etherscan.io'
 };
 
 export const {
@@ -45,5 +46,6 @@ export const {
 	POLYGON: POLYGON_EXPLORER_URL,
 	POLYGON_AMOY: POLYGON_AMOY_EXPLORER_URL,
 	ARBITRUM: ARBITRUM_EXPLORER_URL,
-	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL
+	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL,
+	ROBINHOOD: ROBINHOOD_EXPLORER_URL
 } = EXPLORER_URLS;
