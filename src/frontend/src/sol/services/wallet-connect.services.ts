@@ -503,6 +503,25 @@ export const sign = ({
 				userAddress: address
 			});
 
+			// The balance is gone the moment this is signed, and the message mapper cannot see a close
+			// made inside another program's call. Refused rather than warned about, on the same test
+			// the mapper applies to the closes it can see: only the user's wallet holds lamports as a
+			// balance, so any other destination is value leaving.
+			//
+			// Asked before the ambiguous refusal below, which the mapper also raises for a close the
+			// message states: both are true of the commonest case, and the general sentence would be
+			// given for the specific thing that is wrong with it. The review's notices are ordered
+			// the same way, and the two have to agree or the toast contradicts the screen it follows.
+			if (closesPayOthers) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
@@ -525,20 +544,6 @@ export const sign = ({
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
 			// the wallet understands still signs.
-			// The balance is gone the moment this is signed, and the message mapper cannot see a close
-			// made inside another program's call. Refused rather than warned about, on the same test
-			// the mapper applies to the closes it can see: only the user's wallet holds lamports as a
-			// balance, so any other destination is value leaving.
-			if (closesPayOthers) {
-				toastsError({
-					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
-				});
-
-				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
-
-				return { success: false };
-			}
-
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }

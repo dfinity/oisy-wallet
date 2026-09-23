@@ -1041,6 +1041,28 @@ describe('wallet-connect.services', () => {
 				});
 			});
 
+			// The mapper raises ambiguous for a close the message states, so both are true of the
+			// commonest case and the general sentence would be given for the specific thing that is
+			// wrong with it. The review's notices are ordered the same way.
+			it('should say which refusal it is when the message states the close itself', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+
+				const result = await sign({ ...mockParams, closesPayOthers: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.close_pays_others }
+				});
+
+				expect(spyToastsError).not.toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+			});
+
 			// The close every routed swap ends in names the user's own wallet, and refusing those
 			// would refuse the swap.
 			it('should sign when every close pays the user', async () => {
