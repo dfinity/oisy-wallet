@@ -443,7 +443,7 @@ export const formatSolInstructionSummary = ({
 				}
 			)
 		: returnedHome
-			? i18n.transaction.text.instruction_rent_returned
+			? i18n.transaction.text.instruction_balance_returned
 			: i18n.transaction.text.instruction_balance_returned_to;
 
 	// Unwrapping is what a close does with the SOL inside a wrapped SOL account. One holding none

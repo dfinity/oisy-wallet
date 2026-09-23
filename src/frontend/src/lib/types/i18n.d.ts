@@ -1742,7 +1742,7 @@ interface I18nTransaction {
 		instruction_unknown: string;
 		instruction_unknown_via: string;
 		instruction_rent: string;
-		instruction_rent_returned: string;
+		instruction_balance_returned: string;
 		instruction_returned: string;
 		instruction_returned_to: string;
 		instruction_balance_returned_to: string;

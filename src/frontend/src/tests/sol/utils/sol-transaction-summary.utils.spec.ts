@@ -603,9 +603,11 @@ describe('sol-transaction-summary.utils', () => {
 			);
 		});
 
-		it('should fall back to naming the rent when the amount is not known', () => {
+		// Saying "rent" understated it: a wrapped SOL account hands over whatever was wrapped too,
+		// and with no amount read there is no telling which kind of account it was.
+		it('should name the SOL balance when the amount is not known', () => {
 			expect(detailOf({ kind: 'closeTokenAccount' })).toBe(
-				en.transaction.text.instruction_rent_returned
+				en.transaction.text.instruction_balance_returned
 			);
 		});
 
