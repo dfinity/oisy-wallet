@@ -5,13 +5,12 @@ import type { NavigationBarSlot, NavigationItemId, NavigationSection } from '$li
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
 	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
-	{ id: 'more', items: ['notes', 'explore', 'rewards', 'x', 'github'] }
+	{ id: 'more', items: ['notes', 'explore', 'rewards'] }
 ];
 
-// Rendered in the page footer's left cluster rather than in the sidebar: these
-// are the utility destinations, and the bottom left is where people reach for
-// them. A named list rather than a hard-coded item so adding one is an edit
-// here and nowhere else — the Help page (#14019) is the next entry.
+// Rendered in the page footer's left cluster rather than in the sidebar, above
+// the More menu (`NavigationMoreMenu`): the utility destinations, where people
+// reach for them. Help is not here — it is the first row of that menu.
 //
 // Desktop only. The footer cluster is `hidden md:flex` off the home page, and
 // mobile keeps Settings in its own More sheet (`MOBILE_NAVIGATION_BAR` below).

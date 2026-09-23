@@ -48,7 +48,11 @@
 				outbound links off the landing page.
 			-->
 			{#if $authSignedIn}
-				<NavigationMenuMainItems layout="footer" testIdPrefix="footer" />
+				<!-- No test-id prefix, unlike the mobile bar: Settings has left the
+				     sidebar, so this is the only desktop element carrying
+				     `navigation-item-settings`, and both e2e page objects reach
+				     Settings by exactly that id. -->
+				<NavigationMenuMainItems layout="footer" />
 			{:else}
 				<div class="flex items-center gap-4">
 					<ExternalLinkIcon

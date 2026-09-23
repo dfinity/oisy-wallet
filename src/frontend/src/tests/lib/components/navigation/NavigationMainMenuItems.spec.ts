@@ -8,14 +8,13 @@ import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
-	NAVIGATION_ITEM_GITHUB,
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_ITEM_TRADE,
-	NAVIGATION_ITEM_X
+	NAVIGATION_MORE_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
@@ -80,10 +79,16 @@ describe('NavigationMainMenuItems', () => {
 			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
 		});
 
-		it('renders Settings in the footer layout', () => {
+		it('stacks Settings above the More menu in the footer layout', () => {
 			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
 
-			expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+			const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
+			const more = getByTestId(NAVIGATION_MORE_MENU_BUTTON);
+
+			// DOM order is visual order in a flex column with no `order` utilities.
+			expect(
+				settings.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
 		});
 
 		it('renders nothing but the footer items in that layout', () => {
@@ -92,34 +97,19 @@ describe('NavigationMainMenuItems', () => {
 			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
 
 			expect(queryByTestId(NAVIGATION_ITEM_TOKENS)).toBeNull();
-			expect(queryByTestId(NAVIGATION_ITEM_X)).toBeNull();
+			expect(queryByTestId(NAVIGATION_ITEM_REWARDS)).toBeNull();
 		});
 
-		it('puts the social links in the sidebar, where the utility items were', () => {
-			const { getByTestId } = render(NavigationMainMenuItems);
+		it('leaves the sidebar More group as notes, explore and rewards', () => {
+			// The social links went into the footer's More menu, not here: the first
+			// version of this change put them in this group, which would have listed
+			// them twice once the menu existed.
+			const { getByTestId, queryByTestId } = render(NavigationMainMenuItems);
 
-			expect(getByTestId(NAVIGATION_ITEM_X)).toBeInTheDocument();
-			expect(getByTestId(NAVIGATION_ITEM_GITHUB)).toBeInTheDocument();
-		});
-
-		it('opens the social links in a new tab, with noopener', () => {
-			// They were `ExternalLinkIcon`s in the footer, which sets both. A plain
-			// `NavigationItem` would have taken the whole app to x.com in the same
-			// tab and handed the opened page a `window.opener` handle.
-			const { getByTestId } = render(NavigationMainMenuItems);
-
-			for (const testId of [NAVIGATION_ITEM_X, NAVIGATION_ITEM_GITHUB]) {
-				const link = getByTestId(testId);
-
-				expect(link.getAttribute('target')).toBe('_blank');
-				expect(link.getAttribute('rel')).toContain('noopener');
-			}
-		});
-
-		it('leaves in-app items routing in the same tab', () => {
-			const { getByTestId } = render(NavigationMainMenuItems);
-
-			expect(getByTestId(NAVIGATION_ITEM_REWARDS).getAttribute('target')).toBeNull();
+			expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
+			expect(queryByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeNull();
 		});
 	});
 

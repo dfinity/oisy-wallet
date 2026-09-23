@@ -119,7 +119,8 @@ interface I18nNavigation {
 		wallet_connect: string;
 		source_code_on_github: string;
 		x: string;
-		github: string;
+		help: string;
+		faq: string;
 		view_on_explorer: string;
 		source_code: string;
 		documentation: string;
@@ -152,6 +153,8 @@ interface I18nNavigation {
 		documentation: string;
 		support: string;
 		open_twitter: string;
+		more: string;
+		faq: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
 		refer_a_friend: string;

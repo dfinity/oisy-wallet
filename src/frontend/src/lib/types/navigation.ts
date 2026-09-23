@@ -11,9 +11,7 @@ export type NavigationItemId =
 	| 'explore'
 	| 'notes'
 	| 'settings'
-	| 'rewards'
-	| 'x'
-	| 'github';
+	| 'rewards';
 
 export type NavigationGroupId = 'portfolio' | 'finance' | 'more';
 
@@ -38,9 +36,6 @@ export interface NavigationItemDescriptor {
 	testId: string;
 	icon: Component;
 	href?: string;
-	// Opens in a new tab rather than routing. The social links are navigation
-	// items that leave the app, and a bare `<a>` would take the SPA with them.
-	external?: boolean;
 	onclick?: () => void;
 	selected: boolean;
 	tag?: string;

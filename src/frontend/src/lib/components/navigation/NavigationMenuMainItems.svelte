@@ -8,9 +8,7 @@
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
-	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
-	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -23,13 +21,13 @@
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
+	import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import {
 		DESKTOP_NAVIGATION_FOOTER_ITEMS,
 		DESKTOP_NAVIGATION_SECTIONS,
 		MOBILE_NAVIGATION_BAR
 	} from '$lib/constants/navigation.constants';
-	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_GROUP_FINANCE,
@@ -39,14 +37,12 @@
 		NAVIGATION_ITEM_BORROW,
 		NAVIGATION_ITEM_EARN,
 		NAVIGATION_ITEM_EXPLORER,
-		NAVIGATION_ITEM_GITHUB,
 		NAVIGATION_ITEM_NFTS,
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS,
-		NAVIGATION_ITEM_TRADE,
-		NAVIGATION_ITEM_X
+		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -58,7 +54,6 @@
 		NavigationItemDescriptor,
 		NavigationItemId
 	} from '$lib/types/navigation';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteBorrow,
@@ -278,24 +273,6 @@
 				href: url(AppPath.Settings),
 				selected: isRouteSettings(page)
 			},
-			x: {
-				label: $i18n.navigation.text.x,
-				ariaLabel: replaceOisyPlaceholders($i18n.navigation.alt.open_twitter),
-				testId: prefixedTestId(NAVIGATION_ITEM_X),
-				icon: IconTwitter,
-				href: OISY_TWITTER_URL,
-				external: true,
-				selected: false
-			},
-			github: {
-				label: $i18n.navigation.text.github,
-				ariaLabel: $i18n.navigation.text.source_code_on_github,
-				testId: prefixedTestId(NAVIGATION_ITEM_GITHUB),
-				icon: IconGixGitHub,
-				href: OISY_REPO_URL,
-				external: true,
-				selected: false
-			},
 			rewards: {
 				label: $i18n.navigation.text.airdrops,
 				ariaLabel: $i18n.navigation.alt.airdrops,
@@ -319,7 +296,6 @@
 		{@const Icon = descriptor.icon}
 		<NavigationItem
 			ariaLabel={descriptor.ariaLabel}
-			external={descriptor.external}
 			href={descriptor.href}
 			onclick={descriptor.onclick}
 			selected={descriptor.selected}
@@ -375,14 +351,17 @@
 {/snippet}
 
 {#if layout === 'footer'}
-	<!-- A row, not a column: this renders in the page footer's left cluster,
-	     beside nothing else once the social links moved into the nav above. The
-	     `nav-item` rows are built for a full-width sidebar, so each is allowed to
-	     size to its own content here rather than stretching. -->
-	<div class="flex items-center gap-1 [&_.nav-item]:flex-none [&_.nav-item]:py-1.5">
+	<!-- The page footer's left cluster: Settings, then the More menu, stacked.
+	     Same condensed rows and 24px icons as the sidebar above it, so the two
+	     read as one navigation rather than a second, smaller one. -->
+	<div
+		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+	>
 		{#each DESKTOP_NAVIGATION_FOOTER_ITEMS as id (id)}
 			{@render navItem(id)}
 		{/each}
+
+		<NavigationMoreMenu />
 	</div>
 {:else if layout === 'desktop'}
 	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}

@@ -8,12 +8,6 @@
 		label?: Snippet;
 		icon?: Snippet;
 		href?: string;
-		/**
-		 * Leaves the app rather than routing: opens in a new tab, with `noopener`
-		 * so the opened page cannot reach back through `window.opener`. Without
-		 * this an external `href` here would take the whole SPA with it.
-		 */
-		external?: boolean;
 		onclick?: () => void;
 		selected?: boolean;
 		ariaLabel: string;
@@ -26,7 +20,6 @@
 		label,
 		icon,
 		href,
-		external = false,
 		onclick,
 		selected = false,
 		ariaLabel,
@@ -62,8 +55,6 @@
 		aria-label={ariaLabel}
 		data-tid={testId}
 		{href}
-		rel={external ? 'external noopener noreferrer' : undefined}
-		target={external ? '_blank' : undefined}
 	>
 		{@render content()}
 	</a>

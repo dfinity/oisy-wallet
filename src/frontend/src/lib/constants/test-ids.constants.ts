@@ -138,8 +138,13 @@ export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
-export const NAVIGATION_ITEM_X = 'navigation-item-x';
-export const NAVIGATION_ITEM_GITHUB = 'navigation-item-github';
+export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
+export const NAVIGATION_MORE_MENU = 'navigation-more-menu';
+export const NAVIGATION_MORE_MENU_HELP = 'navigation-more-menu-help';
+export const NAVIGATION_MORE_MENU_DOCUMENTATION = 'navigation-more-menu-documentation';
+export const NAVIGATION_MORE_MENU_FAQ = 'navigation-more-menu-faq';
+export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-code';
+export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
