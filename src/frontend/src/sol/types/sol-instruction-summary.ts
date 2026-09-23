@@ -59,6 +59,10 @@ export interface SolInstructionSummary {
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.
 	returned?: bigint;
+	// What a closed token account held in tokens before the transaction ran, when it was read. For
+	// a wrapped SOL account that is the SOL wrapped inside it, which separates a close that
+	// unwraps something from one that closes an empty account.
+	wrapped?: bigint;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
 	// The program that produced the legs of a route, when one is known by address.

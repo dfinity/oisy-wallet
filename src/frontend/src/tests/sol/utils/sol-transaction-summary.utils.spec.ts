@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$sol/types/address';
@@ -20,7 +21,8 @@ import {
 	mockAtaAddress2,
 	mockAtaAddress3,
 	mockSolAddress,
-	mockSolAddress2
+	mockSolAddress2,
+	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 
@@ -541,14 +543,57 @@ describe('sol-transaction-summary.utils', () => {
 	});
 
 	describe('formatSolInstructionSummary', () => {
-		const detailOf = (instruction: SolInstructionSummary): string | undefined =>
+		const format = (instruction: SolInstructionSummary): { text: string; detail?: string } =>
 			formatSolInstructionSummary({
 				instruction,
 				i18n: en,
-				symbolOf: (tokenAddress) => tokenAddress ?? 'SOL',
+				symbolOf: (tokenAddress) => (tokenAddress === WSOL_TOKEN.address ? 'WSOL' : 'BONK'),
 				decimalsOf: () => SOLANA_DEFAULT_DECIMALS,
 				userAddress: mockSolAddress
-			}).detail;
+			});
+
+		const detailOf = (instruction: SolInstructionSummary): string | undefined =>
+			format(instruction).detail;
+
+		const textOf = (instruction: SolInstructionSummary): string => format(instruction).text;
+
+		// The opening line names the token, and the closing one did not: "Close token account" left
+		// the user to work out which of their accounts a transaction was closing.
+		it('should name the token a close is closing', () => {
+			expect(textOf({ kind: 'closeTokenAccount', tokenAddress: mockSplAddress })).toBe(
+				'Close token account for BONK'
+			);
+		});
+
+		// `symbolOf` answers an unknown mint with the native symbol, which would name a token
+		// account after SOL.
+		it('should leave the token out of a close when nobody read the mint', () => {
+			expect(textOf({ kind: 'closeTokenAccount' })).toBe(
+				en.transaction.text.instruction_close_account
+			);
+		});
+
+		// "Unwrap SOL" said nothing about the account being closed, and asserted an unwrapping
+		// whether or not there was anything inside to unwrap.
+		it('should say a wrapped SOL account holding something is unwrapped and closed', () => {
+			expect(
+				textOf({ kind: 'unwrap', tokenAddress: WSOL_TOKEN.address, wrapped: 10_000_000_000n })
+			).toBe('Unwrap and close token account for WSOL');
+		});
+
+		it('should say a wrapped SOL account holding nothing is only closed', () => {
+			expect(textOf({ kind: 'unwrap', tokenAddress: WSOL_TOKEN.address, wrapped: ZERO })).toBe(
+				'Close token account for WSOL'
+			);
+		});
+
+		// An amount nobody read leaves it as an unwrap, which is the reading that does not
+		// understate what the close hands over.
+		it('should call it an unwrap when the balance was not read', () => {
+			expect(textOf({ kind: 'unwrap', tokenAddress: WSOL_TOKEN.address })).toBe(
+				'Unwrap and close token account for WSOL'
+			);
+		});
 
 		// Closing hands back the account's whole lamport balance. For a wrapped SOL account that is
 		// the rent plus the SOL that was wrapped, so calling it rent understates it by the wrapping.

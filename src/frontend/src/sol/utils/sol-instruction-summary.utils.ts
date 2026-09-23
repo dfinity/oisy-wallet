@@ -260,6 +260,7 @@ const toEffect = ({
 	owned,
 	accountMints,
 	accountLamports,
+	accountTokenAmounts,
 	flattened
 }: {
 	instruction: SolParsedRpcInstruction;
@@ -272,6 +273,9 @@ const toEffect = ({
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Partial<Record<SolAddress, bigint>>;
+	// What each token account held going in, so a close of an empty wrapped SOL account is not
+	// described as unwrapping something.
+	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
@@ -370,11 +374,18 @@ const toEffect = ({
 			// went, and marked when it is the user's own.
 			const destination = address({ info, key: 'destination' });
 
+			// Unwrapping is what closing a wrapped SOL account does with the SOL inside it. An
+			// account holding none is just being closed, and saying it unwrapped something states
+			// an amount that was never there. An amount nobody read leaves it as an unwrap, which
+			// is the reading that does not understate.
+			const wrapped = accountTokenAmounts[account];
+
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
 				account,
 				...(nonNullish(mint) && { tokenAddress: mint }),
 				...(nonNullish(returned) && { returned }),
+				...(nonNullish(wrapped) && { wrapped }),
 				...(nonNullish(destination) && { counterparty: destination, own: owned.has(destination) })
 			};
 		}
@@ -653,6 +664,7 @@ export const mapSolInstructionSummaries = ({
 	ownedAddresses,
 	addressToToken = {},
 	accountLamports = {},
+	accountTokenAmounts = {},
 	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
@@ -662,6 +674,9 @@ export const mapSolInstructionSummaries = ({
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	// What each token account held before the transaction ran. A wrapped SOL account holding
+	// nothing is closed rather than unwrapped, and the line says so.
+	accountTokenAmounts?: Partial<Record<SolAddress, bigint>>;
 	// Whether to keep a line for each top-level instruction that produced no effect of its own.
 	// Off where the list stands beside the balance changes that vouch for it, on where it is the
 	// only account of the transaction there is.
@@ -713,6 +728,7 @@ export const mapSolInstructionSummaries = ({
 				owned,
 				accountMints,
 				accountLamports,
+				accountTokenAmounts,
 				flattened
 			});
 

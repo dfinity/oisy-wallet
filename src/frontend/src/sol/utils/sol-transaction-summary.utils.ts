@@ -368,6 +368,7 @@ export const formatSolInstructionSummary = ({
 		own,
 		rent,
 		returned,
+		wrapped,
 		program
 	},
 	i18n,
@@ -445,9 +446,17 @@ export const formatSolInstructionSummary = ({
 			? i18n.transaction.text.instruction_rent_returned
 			: i18n.transaction.text.instruction_balance_returned_to;
 
+	// Unwrapping is what a close does with the SOL inside a wrapped SOL account. One holding none
+	// is only being closed, and the label says so; an amount nobody read leaves it as an unwrap,
+	// which is the reading that does not understate.
 	if (kind === 'unwrap') {
 		return {
-			text: i18n.transaction.text.instruction_unwrap,
+			text: replacePlaceholders(
+				wrapped === ZERO
+					? i18n.transaction.text.instruction_close_account_for
+					: i18n.transaction.text.instruction_unwrap,
+				{ $symbol: symbolOf(tokenAddress) }
+			),
 			detail: returnedDetail
 		};
 	}
@@ -465,9 +474,16 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
+	// The mint names the account the line is about, the way the opening line already does. It is
+	// left out when nobody read it: `symbolOf` answers an unknown mint with the native symbol,
+	// which would name a token account after SOL.
 	if (kind === 'closeTokenAccount') {
 		return {
-			text: i18n.transaction.text.instruction_close_account,
+			text: nonNullish(tokenAddress)
+				? replacePlaceholders(i18n.transaction.text.instruction_close_account_for, {
+						$symbol: symbolOf(tokenAddress)
+					})
+				: i18n.transaction.text.instruction_close_account,
 			detail: returnedDetail
 		};
 	}

@@ -2060,6 +2060,7 @@
 			"instruction_unwrap": "",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",

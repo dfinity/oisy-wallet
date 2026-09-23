@@ -15,6 +15,7 @@ import {
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
+	parseTokenAccountState,
 	selectSolSimulationAddresses
 } from '$sol/utils/sol-simulation.utils';
 import {
@@ -90,6 +91,24 @@ const simulate = async ({
 		return acc;
 	}, {});
 
+	// What each token account held going in. A wrapped SOL account holding nothing is closed rather
+	// than unwrapped, and the two read differently: there is no SOL to unwrap out of an empty one.
+	const accountTokenAmounts = addresses.reduce<Record<SolAddress, bigint>>(
+		(acc, account, index) => {
+			const preAccount = preAccounts[index];
+			const amount = nonNullish(preAccount)
+				? parseTokenAccountState(preAccount)?.amount
+				: undefined;
+
+			if (nonNullish(amount)) {
+				acc[account] = amount;
+			}
+
+			return acc;
+		},
+		{}
+	);
+
 	// The kit instructions are not parsed, so they contribute nothing themselves; iterating them is
 	// what attaches each simulated nested call to the instruction that made it.
 	const instructions = mapSolInstructionSummaries({
@@ -101,6 +120,7 @@ const simulate = async ({
 		ownedAddresses: [address, ...ownedAddresses],
 		addressToToken,
 		accountLamports,
+		accountTokenAmounts,
 		// A run whose calls all happen inside a program the wallet cannot read produces no effects
 		// at all, and the review then listed nothing for a transaction that plainly does something.
 		// Saying which programs it hands the instructions to is worth more than an empty list.
