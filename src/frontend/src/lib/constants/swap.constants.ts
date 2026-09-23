@@ -4,6 +4,7 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -50,6 +51,7 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[BASE_NETWORK_ID]: 'base',
 	[BSC_MAINNET_NETWORK_ID]: 'bsc',
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
+	[ROBINHOOD_MAINNET_NETWORK_ID]: 'hood',
 	[SOLANA_MAINNET_NETWORK_ID]: 'sol',
 	[BTC_MAINNET_NETWORK_ID]: 'btc'
 };
@@ -179,6 +181,7 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),
 	[POLYGON_MAINNET_NETWORK_ID]: withIcpIfPaired(POLYGON_MAINNET_NETWORK_ID),
 	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
+	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
 		...NEAR_INTENTS_BTC_NETWORK_IDS

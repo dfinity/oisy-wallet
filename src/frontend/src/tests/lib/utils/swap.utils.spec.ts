@@ -3,8 +3,10 @@ import type {
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -844,6 +846,10 @@ describe('swap utils', () => {
 			expect(resolveNearIntentsBlockchain(SOLANA_MAINNET_NETWORK.id)).toBe('sol');
 		});
 
+		it('should resolve Robinhood Chain to hood', () => {
+			expect(resolveNearIntentsBlockchain(ROBINHOOD_MAINNET_NETWORK.id)).toBe('hood');
+		});
+
 		it('should return undefined for unsupported network', () => {
 			expect(resolveNearIntentsBlockchain(parseNetworkId('UNSUPPORTED'))).toBeUndefined();
 		});
@@ -879,6 +885,31 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toStrictEqual(mockNearIntentsTokens[1]);
+		});
+
+		// Robinhood's native asset and Ethereum's are both `ETH` with no contract address, so the
+		// blockchain code is the only thing separating them. A wrong code in
+		// `NEAR_INTENTS_BLOCKCHAIN_MAP` would not fail loudly — it would resolve to the other
+		// chain's asset and quote a swap from the wrong chain entirely.
+		it('should find the Robinhood native token rather than the identically named Ethereum one', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'hood'
+			});
+
+			expect(result?.assetId).toBe('nep141:hood.omft.near');
+			expect(result?.blockchain).toBe('hood');
+		});
+
+		it('should not match the Robinhood token against another chain', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'arb'
+			});
+
+			expect(result).toBeUndefined();
 		});
 
 		it('should return undefined when no matching token is found', () => {
