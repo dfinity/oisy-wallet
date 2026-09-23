@@ -717,7 +717,7 @@ Once all the new ERC20 tokens are created, they need to be added to the list of 
 
 ### Adapt exchange rate workers
 
-In the first step, the exchange IDs and required fields should have been already be set. Now, the price plumbing needs to be updated to include the new network.
+In the first step, the exchange IDs and required fields should already have been set. Now, the price plumbing needs to be updated to include the new network.
 
 - In `buildErc20PriceParams` (`src/frontend/src/lib/utils/exchange.utils.ts`), add the new CoinGecko platform to the filter for the ERC-20 price parameters. This filter **re-hardcodes** the platform list that `CoingeckoPlatformIdSchema` already encodes, and a platform missing from it is **dropped without error** — the chain looks wired up and never gets ERC-20 prices. Update both places and cover the new platform with a test (see `exchange.utils.spec.ts`). As example, when this document was written, the filter was:
 
