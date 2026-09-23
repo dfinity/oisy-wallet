@@ -126,6 +126,43 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
 	});
 
+	it('should say a close that pays somebody else will not be signed', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+	});
+
+	it('should announce that refusal to a screen reader too', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.close_pays_others);
+	});
+
+	it('should say nothing else about a close it will not sign', () => {
+		// Same reasoning as the ambiguous case: none of the caveats qualify a review nobody acts on.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				closesPayOthers: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+	});
+
 	it('should say nothing else about a message it will not sign', () => {
 		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
 		// outside the notice chain: the partial-parties line would tell the user which lists to read

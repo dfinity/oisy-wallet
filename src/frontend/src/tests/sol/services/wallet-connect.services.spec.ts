@@ -523,7 +523,8 @@ describe('wallet-connect.services', () => {
 			identity: mockIdentity,
 			request: mockRequest,
 			listener: mockListener,
-			simulated: true
+			simulated: true,
+			closesPayOthers: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -543,7 +544,8 @@ describe('wallet-connect.services', () => {
 				identity: mockIdentity,
 				request: mockRequest,
 				listener: mockListener,
-				simulated: true
+				simulated: true,
+				closesPayOthers: false
 			};
 
 			const expected = {
@@ -681,7 +683,8 @@ describe('wallet-connect.services', () => {
 				identity: mockIdentity,
 				request: mockRequest,
 				listener: mockListener,
-				simulated: true
+				simulated: true,
+				closesPayOthers: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1016,6 +1019,40 @@ describe('wallet-connect.services', () => {
 			});
 		});
 
+		describe('with a close that pays somebody else', () => {
+			it('should refuse to sign', async () => {
+				const result = await sign({ ...mockParams, closesPayOthers: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.close_pays_others }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			// The close every routed swap ends in names the user's own wallet, and refusing those
+			// would refuse the swap.
+			it('should sign when every close pays the user', async () => {
+				const result = await sign({ ...mockParams, closesPayOthers: false });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('with a transaction OISY read in full', () => {
 			it('should sign even when no simulation was obtained', async () => {
 				// The simulation stays best effort for a message the wallet understands: a provider that
@@ -1127,7 +1164,8 @@ describe('wallet-connect.services', () => {
 			identity: mockIdentity,
 			request: mockRequest,
 			listener: mockListener,
-			simulated: true
+			simulated: true,
+			closesPayOthers: false
 		};
 
 		const mockMessageSignatureBytes = Uint8Array.from([10, 20, 30]);

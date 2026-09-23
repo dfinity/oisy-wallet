@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { OptionSolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type {
 	SolNetBalanceChange,
@@ -39,6 +40,39 @@ export const flattenInstructions = (
  * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
  * never this transaction's to charge.
  */
+/**
+ * Whether the message closes an account of the user's and pays its balance to an address that is
+ * not their wallet.
+ *
+ * The instruction mapper asks the same question of the message's own instructions, and cannot ask
+ * it of anything else: a program's internal calls exist only in the simulated run, so a close made
+ * inside a routed swap never reaches it. These effects carry both, which makes this the only place
+ * an inner close can be seen at all.
+ *
+ * Measured against the wallet rather than every account the user owns. A close pays lamports, and
+ * the only account of theirs that holds lamports as a balance is the wallet: paying them into
+ * another token account of theirs leaves them under that account's rent reserve rather than spent,
+ * which is not something a review can state as money coming back. It is also what keeps a chain
+ * of closes from arising - each one has to end at the wallet, so none of them can name an account
+ * that is closed again further on.
+ *
+ * A close whose destination was never read is left alone. Those are closes the effects record
+ * without one, and refusing on an address nobody has is refusing on nothing.
+ */
+export const solClosesPayOthers = ({
+	instructions,
+	userAddress
+}: {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): boolean =>
+	flattenInstructions(instructions).some(
+		({ kind, counterparty }) =>
+			(kind === 'closeTokenAccount' || kind === 'unwrap') &&
+			nonNullish(counterparty) &&
+			counterparty !== userAddress
+	);
+
 /**
  * Whether what a close hands back reaches the user, followed to the end of the chain.
  *

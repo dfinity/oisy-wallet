@@ -1,5 +1,6 @@
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { SolAddress } from '$sol/types/address';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
@@ -8,12 +9,19 @@ import {
 	deriveSolTransactionSummary,
 	formatSolInstructionSummary,
 	formatSolTransactionSummary,
-	solAtaFee
+	solAtaFee,
+	solClosesPayOthers
 } from '$sol/utils/sol-transaction-summary.utils';
 import en from '$tests/mocks/i18n.mock';
 import { MOCK_SOL_BALANCES } from '$tests/mocks/sol-balances.mock';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
-import { mockAtaAddress, mockAtaAddress2, mockSolAddress } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockSolAddress,
+	mockSolAddress2
+} from '$tests/mocks/sol.mock';
+import { nonNullish } from '@dfinity/utils';
 
 const USER = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 
@@ -191,6 +199,88 @@ describe('sol-transaction-summary.utils', () => {
 					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
 				}).kind
 			).toBe('other');
+		});
+	});
+
+	describe('solClosesPayOthers', () => {
+		const close = (counterparty?: SolAddress): SolInstructionSummary => ({
+			kind: 'closeTokenAccount',
+			account: mockAtaAddress,
+			...(nonNullish(counterparty) && { counterparty })
+		});
+
+		it('should accept a close that pays the wallet', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [close(mockSolAddress)],
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
+		});
+
+		it('should catch a close that pays anybody else', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [close(mockSolAddress2)],
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		// An account of the user's own still holds lamports under its rent reserve rather than as a
+		// balance, so a close paying into one is not the balance coming back.
+		it('should catch a close that pays another account of the user', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [close(mockAtaAddress)],
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		it('should catch an unwrap that pays somebody else', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [{ ...close(mockSolAddress2), kind: 'unwrap' }],
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		// The reason this lives here rather than with the message: a program's own calls reach the
+		// review only through this list, nested under the instruction that made them.
+		it('should catch a close made inside a routed swap', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [
+						{ kind: 'route', children: [close(mockSolAddress2)] } as SolInstructionSummary
+					],
+					userAddress: mockSolAddress
+				})
+			).toBeTruthy();
+		});
+
+		it('should leave a close whose destination was never read alone', () => {
+			expect(
+				solClosesPayOthers({ instructions: [close()], userAddress: mockSolAddress })
+			).toBeFalsy();
+		});
+
+		// Refusing on an address nobody has would refuse every close in a review the wallet could
+		// not attribute, the routine end of a swap included.
+		it('should catch a close when the wallet address is not known', () => {
+			expect(
+				solClosesPayOthers({ instructions: [close(mockSolAddress)], userAddress: undefined })
+			).toBeTruthy();
+		});
+
+		it('should accept a list with no close in it', () => {
+			expect(
+				solClosesPayOthers({
+					instructions: [{ kind: 'createTokenAccount', account: mockAtaAddress }],
+					userAddress: mockSolAddress
+				})
+			).toBeFalsy();
 		});
 	});
 

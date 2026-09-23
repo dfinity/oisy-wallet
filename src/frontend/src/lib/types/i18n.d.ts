@@ -1348,6 +1348,7 @@ interface I18nWallet_connect {
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
 		cannot_be_shown: string;
+		close_pays_others: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1454,6 +1455,7 @@ interface I18nWallet_connect {
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
+		close_pays_others: string;
 		unreviewed_without_simulation: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;

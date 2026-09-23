@@ -39,6 +39,7 @@
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 	import type { SolTransactionSummary } from '$sol/types/sol-transaction-summary';
+	import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
@@ -89,6 +90,7 @@
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
 	let instructions = $state<SolInstructionSummary[] | undefined>();
+
 	let simulatedInstructions = $state<boolean | undefined>();
 	let messageSummary = $state<SolTransactionSummary | undefined>();
 	let parties = $state<SolTransferParties | undefined>();
@@ -97,6 +99,13 @@
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
 	// which leaves rejecting as the only way out.
 	let decoded = $state(false);
+	// A close pays the account's lamports to whatever address it names, and the message mapper only
+	// sees the message's own instructions: a close made inside a routed swap reaches the review
+	// through this list alone. Refused rather than warned about, since the balance is gone once it
+	// is signed.
+	let closesPayOthers = $derived(
+		solClosesPayOthers({ instructions: instructions ?? [], userAddress: address })
+	);
 
 	const updateData = async () => {
 		try {
@@ -224,7 +233,8 @@
 			simulated:
 				(simulatedInstructions ?? false) &&
 				nonNullish(instructions) &&
-				!instructions.some(({ kind }) => kind === 'unknown')
+				!instructions.some(({ kind }) => kind === 'unknown'),
+			closesPayOthers
 		});
 
 		closeTimeout = setTimeout(() => close(), success ? 750 : 0);
@@ -252,7 +262,8 @@
 			<SolWalletConnectSignReview
 				ambiguous={ambiguous ?? false}
 				{application}
-				approveDisabled={!decoded || (ambiguous ?? false)}
+				approveDisabled={!decoded || (ambiguous ?? false) || closesPayOthers}
+				{closesPayOthers}
 				{data}
 				{decoded}
 				destination={destination ?? ''}

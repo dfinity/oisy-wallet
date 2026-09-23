@@ -90,6 +90,11 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// describe a review they never read. A run that completed and reported nothing is not a
 	// description - an effect outside what the preview measures produces exactly that.
 	simulated: boolean;
+	// Whether a close in the reviewed instruction list pays an account's balance to an address
+	// that is not the user's wallet. Decided from that list rather than from the message, which
+	// cannot see a close a program makes inside its own call, and handed on for the same reason
+	// the simulated flag is.
+	closesPayOthers: boolean;
 };
 
 export const decode = async ({
@@ -449,6 +454,7 @@ export const sign = ({
 	progress,
 	identity,
 	simulated,
+	closesPayOthers,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -518,6 +524,20 @@ export const sign = ({
 			// described. The simulation is best effort by design and stays that way: it is not
 			// required of a message OISY did read, and a provider that times out on a transaction
 			// the wallet understands still signs.
+			// The balance is gone the moment this is signed, and the message mapper cannot see a close
+			// made inside another program's call. Refused rather than warned about, on the same test
+			// the mapper applies to the closes it can see: only the user's wallet holds lamports as a
+			// balance, so any other destination is value leaving.
+			if (closesPayOthers) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }

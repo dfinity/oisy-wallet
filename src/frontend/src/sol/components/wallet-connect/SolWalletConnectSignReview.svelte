@@ -74,6 +74,10 @@
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
+		// Whether a close in that list pays an account's balance to an address that is not the
+		// user's wallet. Read from the list rather than the message, which cannot see a close made
+		// inside another program.
+		closesPayOthers?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -97,6 +101,7 @@
 		simulatedInstructions = false,
 		messageSummary,
 		parties,
+		closesPayOthers = false,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -260,6 +265,11 @@
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
+	{:else if closesPayOthers}
+		<!-- Same live region, same reason: it is why Approve stays unusable. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.close_pays_others}</MessageBox>
+		</div>
 	{:else if unreviewed}
 		<MessageBox level="warning">
 			{nonNullish(preview)
@@ -275,7 +285,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous}
+	{#if !ambiguous && !closesPayOthers}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}
