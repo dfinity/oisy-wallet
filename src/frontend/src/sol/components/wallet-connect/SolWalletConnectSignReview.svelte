@@ -112,7 +112,7 @@
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
-	let ataFee = $derived(solAtaFee(instructions ?? []));
+	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 

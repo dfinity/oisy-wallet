@@ -167,7 +167,8 @@ export const fetchSolTransactionsForSignature = async ({
 
 	const summary = deriveSolTransactionSummary({
 		netChanges,
-		instructions: instructionSummaries
+		instructions: instructionSummaries,
+		userAddress: address
 	});
 
 	const { counterparty } = summary;

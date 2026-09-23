@@ -115,7 +115,8 @@ const simulate = async ({
 			innerInstructions: [],
 			ownedAddresses: [address, ...ownedAddresses],
 			addressToToken
-		})
+		}),
+		userAddress: address
 	});
 
 	return {

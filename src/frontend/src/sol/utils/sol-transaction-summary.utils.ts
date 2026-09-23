@@ -73,48 +73,13 @@ export const solClosesPayOthers = ({
 			counterparty !== userAddress
 	);
 
-/**
- * Whether what a close hands back reaches the user, followed to the end of the chain.
- *
- * Closing pays the account's whole balance to the destination the instruction names, which the
- * effect carries and marks. Asking only about that destination stops being enough once it can be
- * closed onward: closing into an account of the user's and then closing that one to a stranger
- * leaves nothing behind, while each link on its own looks like a close that paid the user. Where
- * the chain ends is what decides whether the balance stayed.
- *
- * A summary naming no destination at all keeps its refund - those are the closes recorded before
- * the destination was read, and turning them into losses would be its own misreport.
- *
- * Only closes after this one are followed. The message is the dApp's to arrange, so an unsigned one
- * can name `A -> B` and then `B -> A`: searching the whole list walks that pair forever, and a
- * close of the destination that already happened says nothing about where this balance goes. Each
- * step moving strictly forward is what ends the walk, rather than remembering where it has been.
- */
-const returnedToOwner = ({
-	close: { own, counterparty },
-	closes,
-	after
+export const solAtaFee = ({
+	instructions,
+	userAddress
 }: {
-	close: Pick<SolInstructionSummary, 'own' | 'counterparty'>;
-	closes: SolInstructionSummary[];
-	after: number;
-}): boolean => {
-	if (!(own ?? isNullish(counterparty))) {
-		return false;
-	}
-
-	const onwardAt = closes.findIndex(
-		({ account }, index) => index > after && nonNullish(counterparty) && account === counterparty
-	);
-
-	const onward = closes[onwardAt];
-
-	// The destination is closed again further on, so whether the balance stayed is that close's
-	// question rather than this one's.
-	return isNullish(onward) ? true : returnedToOwner({ close: onward, closes, after: onwardAt });
-};
-
-export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
+	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
+}): bigint => {
 	const flattened = flattenInstructions(instructions);
 
 	const rentPaidFor = flattened.reduce<Record<string, bigint>>((acc, { kind, account, rent }) => {
@@ -125,26 +90,25 @@ export const solAtaFee = (instructions: SolInstructionSummary[]): bigint => {
 		return { ...acc, [account]: rent };
 	}, {});
 
-	const closes = flattened.filter(({ kind }) => kind === 'closeTokenAccount' || kind === 'unwrap');
-
 	return maxBigInt(
-		flattened.reduce((acc, current) => {
-			const { kind, account, rent, returned, own, counterparty } = current;
-
+		flattened.reduce((acc, { kind, account, rent, returned, counterparty }) => {
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
 			}
 
-			// Only a close that pays the user back reduces what the transaction costs them. One that
-			// names somebody else spends the balance rather than returning it, and crediting it here
-			// would report the smaller number precisely where the larger one is the point.
-			if (
-				!returnedToOwner({
-					close: { own, counterparty },
-					closes,
-					after: closes.findIndex((close) => close === current)
-				})
-			) {
+			// Only a close that pays the wallet reduces what the transaction cost. One that names
+			// anywhere else spends the balance rather than returning it, and crediting it would
+			// report the smaller number precisely where the larger one is the point - an account of
+			// the user's own included, where the lamports end up under its rent reserve rather than
+			// back in a balance they can spend.
+			//
+			// Asking about the wallet is also what makes a chain of closes answer itself. Closing A
+			// into B and B into the wallet credits the second alone, and the amount it carries is
+			// everything that reached B, A's balance included: crediting both would count A twice.
+			//
+			// A close naming no destination keeps its refund. Those are the closes recorded before
+			// the destination was read, and turning them into losses would be its own misreport.
+			if (nonNullish(counterparty) && counterparty !== userAddress) {
 				return acc;
 			}
 
@@ -243,10 +207,12 @@ const counterpartyOf = ({
  */
 export const deriveSolTransactionSummary = ({
 	netChanges,
-	instructions
+	instructions,
+	userAddress
 }: {
 	netChanges: SolNetBalanceChange[];
 	instructions: SolInstructionSummary[];
+	userAddress: OptionSolAddress;
 }): SolTransactionSummary => {
 	const traded = tradedTokens(instructions);
 
@@ -258,7 +224,7 @@ export const deriveSolTransactionSummary = ({
 	// transaction is stated as a fee of its own, beside this line rather than inside it. The
 	// balance changes keep the figure the chain reports: this is what the transaction did, not
 	// what the address holds.
-	const rent = solAtaFee(instructions);
+	const rent = solAtaFee({ instructions, userAddress });
 
 	const considered = netChanges
 		.filter((change) => !isSolNetBalanceChangeSol(change) || traded.has(undefined))

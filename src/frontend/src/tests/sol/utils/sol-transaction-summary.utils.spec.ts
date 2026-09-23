@@ -18,6 +18,7 @@ import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
+	mockAtaAddress3,
 	mockSolAddress,
 	mockSolAddress2
 } from '$tests/mocks/sol.mock';
@@ -44,7 +45,8 @@ describe('sol-transaction-summary.utils', () => {
 				instructions: mapSolInstructionSummaries({
 					...MOCK_SOL_INSTRUCTIONS[fixture],
 					addressToToken: addressToToken(fixture)
-				})
+				}),
+				userAddress: mockSolAddress
 			});
 
 		// The wallet also loses the rent of the account it opens for the recipient, but rent is not
@@ -79,7 +81,8 @@ describe('sol-transaction-summary.utils', () => {
 					{ kind: 'wrap', amount: 1_000_000n },
 					{ kind: 'unwrap', account: wsol, returned: 3_039_280n },
 					{ kind: 'createTokenAccount', account: pump, rent: 2_108_880n }
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('swap');
@@ -105,7 +108,8 @@ describe('sol-transaction-summary.utils', () => {
 					{ kind: 'createTokenAccount', account: wsol, rent: 2_039_280n },
 					{ kind: 'wrap', amount: 1_000_000n },
 					{ kind: 'unwrap', account: wsol, returned: 3_039_280n }
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.spent?.delta).toBe(-1_000_000n);
@@ -144,7 +148,8 @@ describe('sol-transaction-summary.utils', () => {
 				netChanges: [{ tokenAddress: 'mint', decimals: 6, delta: 42_000_000n }],
 				instructions: [
 					{ kind: 'receive', amount: 42_000_000n, tokenAddress: 'mint', counterparty: 'sender' }
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('receive');
@@ -165,7 +170,8 @@ describe('sol-transaction-summary.utils', () => {
 						counterparty: 'my-other-ata',
 						own: true
 					}
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('self');
@@ -184,7 +190,8 @@ describe('sol-transaction-summary.utils', () => {
 						counterparty: 'stranger',
 						own: false
 					}
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('send');
@@ -196,7 +203,8 @@ describe('sol-transaction-summary.utils', () => {
 			expect(
 				deriveSolTransactionSummary({
 					netChanges: [],
-					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }]
+					instructions: [{ kind: 'approve', counterparty: 'spender', account: 'ata' }],
+					userAddress: mockSolAddress
 				}).kind
 			).toBe('other');
 		});
@@ -286,6 +294,11 @@ describe('sol-transaction-summary.utils', () => {
 
 	describe('solAtaFee', () => {
 		const RENT = 2_039_280n;
+		const WALLET = mockSolAddress;
+		const STRANGER = mockSolAddress2;
+
+		const fee = (instructions: SolInstructionSummary[]): bigint =>
+			solAtaFee({ instructions, userAddress: WALLET });
 
 		const create = (rent = RENT): SolInstructionSummary => ({
 			kind: 'createTokenAccount',
@@ -300,172 +313,190 @@ describe('sol-transaction-summary.utils', () => {
 		});
 
 		it('should charge the rent of an account it only opens', () => {
-			expect(solAtaFee([create()])).toBe(RENT);
+			expect(fee([create()])).toBe(RENT);
 		});
 
 		it('should charge the rent of each of several accounts', () => {
-			expect(solAtaFee([create(), create()])).toBe(RENT * 2n);
+			expect(fee([create(), create()])).toBe(RENT * 2n);
 		});
 
-		// Only a close that pays the user back reduces what the transaction cost them. Crediting a
+		// Only a close that pays the wallet reduces what the transaction cost. Crediting a
 		// hand-over would report the smaller number exactly where the larger one matters.
 		it('should not credit a close that named somebody else', () => {
-			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: false }])).toBe(
-				RENT
-			);
+			expect(fee([create(), { ...close(), counterparty: STRANGER }])).toBe(RENT);
 		});
 
 		it('should not credit an unwrap that named somebody else', () => {
 			expect(
-				solAtaFee([
+				fee([
 					create(),
 					{
 						kind: 'unwrap',
 						account: mockAtaAddress,
-						returned: RENT,
-						counterparty: mockSolAddress,
-						own: false
+						returned: 5_000_000_000n,
+						counterparty: STRANGER
 					}
 				])
 			).toBe(RENT);
 		});
 
-		// Closing into an account of the user's and then closing that one to a stranger leaves
-		// nothing behind, but each link on its own reads as a close that paid the user: the first
-		// because its destination is theirs, the second because skipping a credit is not a debit.
-		it('should credit neither rent when the chain ends at a stranger', () => {
-			const second = mockAtaAddress2;
+		// An account of the user's own is not the wallet: lamports paid into it sit under its rent
+		// reserve rather than in a balance they can spend.
+		it('should not credit a close that named another account of the user', () => {
+			expect(fee([create(), { ...close(), counterparty: mockAtaAddress2 }])).toBe(RENT);
+		});
 
+		it('should credit a close that named the wallet', () => {
+			expect(fee([create(), { ...close(), counterparty: WALLET }])).toBe(ZERO);
+		});
+
+		// A close names no destination when the effect was recorded without one. Turning those into
+		// losses would be its own misreport.
+		it('should credit a close that named nobody', () => {
+			expect(fee([create(), close()])).toBe(ZERO);
+		});
+
+		it('should charge both rents when a chain of closes ends at a stranger', () => {
 			expect(
-				solAtaFee([
+				fee([
 					create(),
-					{ kind: 'createTokenAccount', account: second, rent: RENT },
-					{ ...close(), counterparty: second, own: true },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ ...close(), counterparty: mockAtaAddress2 },
 					{
 						kind: 'closeTokenAccount',
-						account: second,
+						account: mockAtaAddress2,
 						returned: RENT * 2n,
-						counterparty: mockSolAddress,
-						own: false
+						counterparty: STRANGER
 					}
 				])
 			).toBe(RENT * 2n);
 		});
 
-		it('should credit both rents when the chain ends with the user', () => {
-			const second = mockAtaAddress2;
-
+		it('should charge nothing when a chain of closes ends at the wallet', () => {
 			expect(
-				solAtaFee([
+				fee([
 					create(),
-					{ kind: 'createTokenAccount', account: second, rent: RENT },
-					{ ...close(), counterparty: second, own: true },
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ ...close(), counterparty: mockAtaAddress2 },
 					{
 						kind: 'closeTokenAccount',
-						account: second,
+						account: mockAtaAddress2,
 						returned: RENT * 2n,
-						counterparty: mockSolAddress,
-						own: true
+						counterparty: WALLET
 					}
 				])
 			).toBe(ZERO);
 		});
 
-		// The message is the dApp's to arrange, so a crafted one can name a cycle. Searching every
-		// close walks it forever and takes the review down while it renders.
-		it('should terminate on a cycle of closes', () => {
-			const second = mockAtaAddress2;
+		// What the last close hands over already includes everything the earlier ones paid into it,
+		// so crediting each link counts the same lamports once per link. Three accounts opened and
+		// two of them chained home leaves exactly one rent standing.
+		it('should credit the lamports of a chain once', () => {
+			const third = mockAtaAddress3;
 
-			expect(() =>
-				solAtaFee([
-					{ ...close(), counterparty: second, own: true },
+			expect(
+				fee([
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ kind: 'createTokenAccount', account: third, rent: RENT },
+					{ ...close(), counterparty: mockAtaAddress2 },
 					{
 						kind: 'closeTokenAccount',
-						account: second,
+						account: mockAtaAddress2,
+						returned: RENT * 2n,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
+		});
+
+		// The message is the dApp's to arrange, so a crafted one can name a cycle of closes. Asking
+		// only about the wallet never follows one, which is what keeps it from being walked at all.
+		it('should not follow a cycle of closes', () => {
+			expect(() =>
+				fee([
+					{ ...close(), counterparty: mockAtaAddress2 },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
 						returned: RENT,
-						counterparty: mockAtaAddress,
-						own: true
+						counterparty: mockAtaAddress
 					}
 				])
 			).not.toThrow();
 		});
 
-		// A close of the destination that already happened says nothing about where this balance
-		// goes, so it must not be the one consulted.
-		it('should ignore a close of the destination that came earlier', () => {
-			const second = mockAtaAddress2;
+		// The account is gone by the end of the transaction, so its rent is back in the wallet.
+		// Billing the open alone charges the user for something they no longer have.
+		it('should charge nothing when it closes what it opened', () => {
+			expect(fee([create(), { ...close(), counterparty: WALLET }])).toBe(ZERO);
+		});
 
+		it('should charge only the difference when it opens more than it closes', () => {
+			expect(fee([create(), create(), { ...close(), counterparty: WALLET }])).toBe(RENT);
+		});
+
+		// Closing more than it opens leaves the user with SOL they did not start with, and a fee
+		// below zero says something a fee cannot say.
+		it('should never go below zero when it closes more than it opens', () => {
 			expect(
-				solAtaFee([
-					{
-						kind: 'closeTokenAccount',
-						account: second,
-						returned: RENT,
-						counterparty: mockSolAddress,
-						own: false
-					},
-					create(),
-					{ ...close(), counterparty: second, own: true }
+				fee([
+					{ ...close(), counterparty: WALLET },
+					{ ...close(), counterparty: WALLET }
 				])
 			).toBe(ZERO);
 		});
 
-		it('should still credit a close that named the user', () => {
-			expect(solAtaFee([create(), { ...close(), counterparty: mockSolAddress, own: true }])).toBe(
-				ZERO
-			);
-		});
-
-		// The account is gone by the end of the transaction, so its rent is back in the wallet.
-		// Billing the open alone charges the user for something they no longer have.
-		it('should charge nothing when it closes what it opened', () => {
-			expect(solAtaFee([create(), close()])).toBe(ZERO);
-		});
-
-		it('should charge only the difference when it opens more than it closes', () => {
-			expect(solAtaFee([create(), create(), close()])).toBe(RENT);
-		});
-
-		// A refund is not a negative fee. It nets to nothing, and the caller shows nothing.
-		it('should never go below zero when it closes more than it opens', () => {
-			expect(solAtaFee([close(), close()])).toBe(ZERO);
-		});
-
-		// A wrap opens an account and the unwrap closes it, so its rent comes back like any other.
-		// What must not come back is the wrapped SOL the close hands over with it.
 		it('should net an unwrap by the rent alone, not by the SOL it unwrapped', () => {
 			expect(
-				solAtaFee([create(), { kind: 'unwrap', account: mockAtaAddress, returned: 5_000_000_000n }])
+				fee([
+					create(),
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: 5_000_000_000n,
+						counterparty: WALLET
+					}
+				])
 			).toBe(ZERO);
 		});
 
 		it('should still charge an account it opens beside a wrap it unwraps', () => {
 			expect(
-				solAtaFee([
+				fee([
 					create(),
 					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
-					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: 5_000_000_000n,
+						counterparty: WALLET
+					}
 				])
 			).toBe(RENT);
 		});
 
-		// Its rent was paid by whatever transaction opened it, so this one has nothing to refund.
-		// Crediting the balance would report a fee of zero for rent this transaction did pay.
 		it('should net nothing for an unwrap of an account it did not open', () => {
 			expect(
-				solAtaFee([
-					create(),
-					{ kind: 'unwrap', account: mockAtaAddress2, returned: 5_000_000_000n }
+				fee([
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: 5_000_000_000n,
+						counterparty: WALLET
+					}
 				])
-			).toBe(RENT);
+			).toBe(ZERO);
 		});
 
 		it('should read the accounts a route opened under it', () => {
-			expect(solAtaFee([{ kind: 'route', children: [create(), close()] }])).toBe(ZERO);
+			expect(
+				fee([{ kind: 'route', children: [create(), { ...close(), counterparty: WALLET }] }])
+			).toBe(ZERO);
 		});
 
 		it('should charge nothing for a transaction that touches no account', () => {
-			expect(solAtaFee([])).toBe(ZERO);
+			expect(fee([])).toBe(ZERO);
 		});
 	});
 
