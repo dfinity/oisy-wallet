@@ -382,6 +382,7 @@ const toEffect = ({
 				account,
 				flattened,
 				accountLamports,
+				accountMints,
 				until: position
 			});
 
@@ -549,12 +550,16 @@ const fundedInTransaction = ({
 	account,
 	flattened,
 	accountLamports = {},
+	accountMints = {},
 	until
 }: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	// Which mint each account holds. A wrapped SOL account's token balance is its lamports, so a
+	// token transfer in or out of one moves lamports; of any other mint, none.
+	accountMints?: Record<SolAddress, SplTokenAddress>;
 	// Only what arrived before the instruction being described. A close later in the message hands
 	// its balance on afterwards, and is no part of what the one being described paid out.
 	until?: number;
@@ -580,10 +585,44 @@ const fundedInTransaction = ({
 				const closed = address({ info, key: 'account' });
 
 				const inflow = nonNullish(closed)
-					? fundedInTransaction({ account: closed, flattened, accountLamports, until: index })
+					? fundedInTransaction({
+							account: closed,
+							flattened,
+							accountLamports,
+							accountMints,
+							until: index
+						})
 					: undefined;
 
 				return nonNullish(inflow) ? (acc ?? ZERO) + inflow : acc;
+			}
+
+			// A wrapped SOL account holds its token balance as lamports, so a token transfer in or
+			// out of one moves them: an account that receives wrapped SOL and still holds it hands
+			// over that much more, and one that passes it on hands over that much less. True of no
+			// other mint, whose balance is a number in the account rather than the lamports under
+			// it.
+			if (
+				TOKEN_PROGRAMS.includes(program ?? '') &&
+				['transfer', 'transferChecked'].includes(type) &&
+				accountMints[account] === WSOL_TOKEN.address
+			) {
+				const moved =
+					type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+
+				if (isNullish(moved)) {
+					return acc;
+				}
+
+				if (address({ info, key: 'destination' }) === account) {
+					return (acc ?? ZERO) + moved;
+				}
+
+				if (address({ info, key: 'source' }) === account) {
+					return maxBigInt((acc ?? ZERO) - moved, ZERO);
+				}
+
+				return acc;
 			}
 
 			if (program !== 'system') {

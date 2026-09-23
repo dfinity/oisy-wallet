@@ -479,6 +479,169 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBe(1_000_000_000n);
 		});
 
+		// A wrapped SOL account holds its token balance as lamports, so a token transfer into one
+		// hands that much more over when it closes. Counting only System funding reported the rent
+		// alone and called the close a return of it.
+		it('should count wrapped SOL transferred into the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(5_001_488_440n);
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		it('should take wrapped SOL sent on out again', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: wsol,
+								destination: 'poo22222222222222222222222222222222222222',
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(1_488_440n);
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		// Any other mint keeps its balance as a number in the account, not as the lamports under
+		// it, so a transfer of one moves none.
+		it('should not count a transfer of any other mint as lamports', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'bonkAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: ata,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: ata,
+								amount: 9_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				addressToToken: { [ata]: 'bonkMint1111111111111111111111111111111111' }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(1_488_440n);
+		});
+
 		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
 		// Left out, the balance changes carry an inflow no line in the list accounts for.
 		it('should list a close of an account the user does not own that pays their wallet', () => {
