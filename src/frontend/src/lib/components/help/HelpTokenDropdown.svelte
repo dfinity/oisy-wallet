@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { buildIcTokenLabels } from '$icp/utils/ic-tokens.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
@@ -9,7 +8,11 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import {
+		buildIcTokenLabels,
+		getTokenDisplayName,
+		getTokenDisplaySymbol
+	} from '$lib/utils/token.utils';
 
 	interface Props {
 		tokens: IcToken[];

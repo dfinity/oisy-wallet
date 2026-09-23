@@ -4,7 +4,6 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { buildIcTokenLabels } from '$icp/utils/ic-tokens.utils';
 	import HelpIcpSwapBalance from '$lib/components/help/HelpIcpSwapBalance.svelte';
 	import HelpTokenDropdown from '$lib/components/help/HelpTokenDropdown.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
@@ -44,6 +43,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { buildIcTokenLabels } from '$lib/utils/token.utils';
 
 	let tokenA = $state<IcToken | undefined>();
 	let tokenB = $state<IcToken | undefined>();
