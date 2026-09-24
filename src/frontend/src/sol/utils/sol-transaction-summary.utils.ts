@@ -22,25 +22,6 @@ export const flattenInstructions = (
 	]);
 
 /**
- * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
- * it closes hand back.
- *
- * A transaction that opens one account and closes another charges only the difference, and one
- * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
- * bills the user for accounts they no longer have.
- *
- * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
- * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
- * a caller shows nothing.
- *
- * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
- * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
- * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
- * account, which the opening instruction states exactly, so the account is what ties the two
- * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
- * never this transaction's to charge.
- */
-/**
  * Whether the message closes an account of the user's and pays its balance to an address that is
  * not their wallet.
  *
@@ -180,6 +161,30 @@ const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: num
 		);
 };
 
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
+ * it closes hand back.
+ *
+ * A transaction that opens one account and closes another charges only the difference, and one
+ * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
+ * bills the user for accounts they no longer have.
+ *
+ * Never negative: a transaction that closes more than it opens ends up with SOL it did not start
+ * with, and calling that a fee below zero says something a fee cannot say. It nets to nothing, and
+ * a caller shows nothing.
+ *
+ * An unwrap nets too, but only by the rent. What it hands back is the account's whole balance, the
+ * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
+ * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
+ * account, which the opening instruction states exactly, so the account is what ties the two
+ * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
+ * never this transaction's to charge.
+ *
+ * Only a close that pays the wallet is credited. One that names anywhere else spends the balance
+ * rather than returning it - an account of the user's own included, where the lamports end up
+ * under its rent reserve rather than in a balance they can spend - and a close of an account that
+ * was never the user's refunds nothing this figure charged.
+ */
 export const solAtaFee = ({
 	instructions,
 	userAddress
