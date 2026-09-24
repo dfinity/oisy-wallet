@@ -22,26 +22,17 @@ describe('Footer', () => {
 			mockAuthSignedIn(true);
 		});
 
-		it('carries Settings under the id both e2e page objects navigate by', () => {
-			// `settings.page.ts` and `homepage.page.ts` reach Settings by exactly
-			// `navigation-item-settings`. The first version of this change rendered
-			// the footer with a `footer-` test-id prefix, which would have left no
-			// element on desktop answering to that id — and e2e was skipped on the
-			// PR, so nothing would have said so.
-			const { getByTestId } = render(Footer);
+		it('holds no navigation any more', () => {
+			// Settings and the More menu moved out of here and into a block pinned to
+			// the bottom of the sidebar. This footer is `position: fixed`, and in a
+			// short window it landed on top of the sidebar's scrolling sections.
+			const { queryByTestId } = render(Footer);
 
-			expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
+			expect(queryByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeNull();
 		});
 
-		it('offers the More menu', () => {
-			const { getByTestId } = render(Footer);
-
-			expect(getByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeInTheDocument();
-		});
-
-		it('no longer shows the social icons, which moved into that menu', () => {
-			// The menu is closed here, so its X and Source code rows are not in the
-			// document either: any link to these URLs would be a leftover icon.
+		it('no longer shows the social icons, which are rows of the More menu', () => {
 			const { container } = render(Footer);
 
 			expect(hrefs(container)).not.toContain(OISY_TWITTER_URL);

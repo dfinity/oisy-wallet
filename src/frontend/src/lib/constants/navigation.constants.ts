@@ -8,13 +8,13 @@ export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'more', items: ['notes', 'explore', 'rewards'] }
 ];
 
-// Rendered in the page footer's left cluster rather than in the sidebar, above
-// the More menu (`NavigationMoreMenu`): the utility destinations, where people
-// reach for them. Help is not here — it is the first row of that menu.
+// Pinned to the bottom of the sidebar, above the More menu (`NavigationMoreMenu`):
+// the utility destinations, where people reach for them. Outside the sidebar's
+// scrolling area, so in a short window the sections above scroll and these stay
+// put. Help is not here — it is the first row of that menu.
 //
-// Desktop only. The footer cluster is `hidden md:flex` off the home page, and
-// mobile keeps Settings in its own More sheet (`MOBILE_NAVIGATION_BAR` below).
-export const DESKTOP_NAVIGATION_FOOTER_ITEMS: NavigationItemId[] = ['settings'];
+// Desktop only; mobile keeps Settings in its More sheet (`MOBILE_NAVIGATION_BAR`).
+export const DESKTOP_NAVIGATION_BOTTOM_ITEMS: NavigationItemId[] = ['settings'];
 
 // Mobile bottom-bar information architecture: five slots, two of which are
 // groups that open bottom sheets (the cradle + sheets render from PR 3 on).

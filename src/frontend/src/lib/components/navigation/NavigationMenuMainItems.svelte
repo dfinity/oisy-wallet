@@ -24,7 +24,7 @@
 	import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import {
-		DESKTOP_NAVIGATION_FOOTER_ITEMS,
+		DESKTOP_NAVIGATION_BOTTOM_ITEMS,
 		DESKTOP_NAVIGATION_SECTIONS,
 		MOBILE_NAVIGATION_BAR
 	} from '$lib/constants/navigation.constants';
@@ -73,7 +73,7 @@
 
 	interface Props {
 		testIdPrefix?: string;
-		layout?: 'desktop' | 'mobile' | 'footer';
+		layout?: 'desktop' | 'mobile' | 'bottom';
 	}
 
 	let { testIdPrefix, layout = 'desktop' }: Props = $props();
@@ -350,14 +350,14 @@
 	{/if}
 {/snippet}
 
-{#if layout === 'footer'}
-	<!-- The page footer's left cluster: Settings, then the More menu, stacked.
-	     Same condensed rows and 24px icons as the sidebar above it, so the two
-	     read as one navigation rather than a second, smaller one. -->
+{#if layout === 'bottom'}
+	<!-- The sidebar's pinned bottom block: Settings, then the More menu, stacked.
+	     Same condensed rows and 24px icons as the sections above, so the two read
+	     as one navigation rather than a second, smaller one. -->
 	<div
 		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
 	>
-		{#each DESKTOP_NAVIGATION_FOOTER_ITEMS as id (id)}
+		{#each DESKTOP_NAVIGATION_BOTTOM_ITEMS as id (id)}
 			{@render navItem(id)}
 		{/each}
 

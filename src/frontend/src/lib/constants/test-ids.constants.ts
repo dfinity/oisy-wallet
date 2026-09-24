@@ -153,6 +153,8 @@ export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
 export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+export const SIDEBAR_NAVIGATION_MENU_SCROLL = 'sidebar-navigation-menu-scroll';
+export const SIDEBAR_NAVIGATION_MENU_BOTTOM = 'sidebar-navigation-menu-bottom';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 

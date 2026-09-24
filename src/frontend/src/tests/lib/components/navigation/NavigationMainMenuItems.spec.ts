@@ -71,16 +71,16 @@ describe('NavigationMainMenuItems', () => {
 
 	describe('the utility items', () => {
 		it('keeps Settings out of the sidebar', () => {
-			// It moved to the footer's left cluster. Asserted rather than merely
-			// dropped from the list above, because a stray descriptor left in a
-			// desktop section would put it in both places at once.
+			// It is pinned to the bottom of the sidebar, in its own block. Asserted
+			// rather than merely dropped from the list above, because a stray entry in
+			// a desktop section would put it in both places at once.
 			const { queryByTestId } = render(NavigationMainMenuItems);
 
 			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
 		});
 
-		it('stacks Settings above the More menu in the footer layout', () => {
-			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
+		it('stacks Settings above the More menu in the bottom layout', () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
 
 			const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
 			const more = getByTestId(NAVIGATION_MORE_MENU_BUTTON);
@@ -91,17 +91,17 @@ describe('NavigationMainMenuItems', () => {
 			).toBeTruthy();
 		});
 
-		it('renders nothing but the footer items in that layout', () => {
-			// The footer cluster is a narrow strip beside the DFINITY credit, so it
-			// takes the named list and not whatever else the descriptors hold.
-			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'footer' } });
+		it('renders nothing but the pinned items in that layout', () => {
+			// The pinned block keeps its height while the sections above scroll, so
+			// it takes the named list and not whatever else the descriptors hold.
+			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
 
 			expect(queryByTestId(NAVIGATION_ITEM_TOKENS)).toBeNull();
 			expect(queryByTestId(NAVIGATION_ITEM_REWARDS)).toBeNull();
 		});
 
 		it('leaves the sidebar More group as notes, explore and rewards', () => {
-			// The social links went into the footer's More menu, not here: the first
+			// The social links went into the pinned More menu, not here: the first
 			// version of this change put them in this group, which would have listed
 			// them twice once the menu existed.
 			const { getByTestId, queryByTestId } = render(NavigationMainMenuItems);
