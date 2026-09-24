@@ -355,11 +355,13 @@
 	// A pool with every row filtered out as dust still comes back as a group, so results are
 	// counted by rows rather than by groups - otherwise an empty pool renders a bare heading and
 	// suppresses the "nothing found" message.
-	// With no enabled ICRC tokens the candidate set is ICP alone, so choosing it on one side leaves
-	// the other with nothing to offer. The explanation belongs in the card rather than inside a
-	// dropdown the user cannot open, and it is a full sentence that would not fit the trigger.
+	// A pool is between two distinct ledgers, so with fewer than two - no enabled ICRC token leaves
+	// ICP alone, and a custom duplicate of a ledger still counts once - no pair can be named at all.
+	// Decided up front from the candidate set: waiting until one side is picked shows two usable
+	// selectors whose only option leads nowhere. The explanation belongs in the card rather than
+	// inside a dropdown, and it is a full sentence that would not fit the trigger.
 	let noTokensToPick = $derived(
-		otherTokens(tokenA).length === 0 || otherTokens(tokenB).length === 0
+		new Set(candidateTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)).size < 2
 	);
 
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
@@ -405,7 +407,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
-					disabled={withdrawing}
+					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectA}
 					selected={tokenA}
@@ -423,7 +425,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
-					disabled={withdrawing}
+					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectB}
 					selected={tokenB}

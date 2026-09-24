@@ -221,22 +221,37 @@ describe('HelpIcpSwapWithdrawal', () => {
 		});
 	});
 
-	it('explains an empty candidate set where the user can actually see it', async () => {
-		// No enabled ICRC tokens: the candidate set is ICP alone, so picking it on one side leaves
-		// the other with nothing. The dropdown is disabled and cannot open, so the explanation has
-		// to be in the card.
-		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
+	describe('a wallet that cannot form a pair', () => {
+		// Without two distinct ledgers no pool can be named, and that is known before anything is
+		// picked. Waiting for a pick would show two usable selectors whose only option leads nowhere.
+		it('explains it on open and disables both selectors', () => {
+			vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
 
-		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
 
-		expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).toBeDisabled();
+		});
 
-		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
-		await fireEvent.click(
-			getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${ICP_TOKEN.ledgerCanisterId}`)
-		);
+		it('does not count a custom duplicate of the ICP ledger as a second ledger', () => {
+			vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() =>
+				readable([{ ...icp, name: 'ICP (custom entry)' }])
+			);
 
-		expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeInTheDocument();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+		});
+
+		it('stays usable, with no explanation, once one ICRC token is enabled', () => {
+			const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+			expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
+		});
 	});
 
 	it('does not scan until the button is pressed', () => {
