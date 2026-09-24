@@ -4,6 +4,7 @@ import en from '$lib/i18n/en.json';
 import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
+	mockCyclesMintActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
@@ -77,6 +78,24 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 3 ICP → ckUSDC`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('OISY Trade');
 		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
+	});
+
+	// Two tokens on one network, like an OISY Trade swap: the swap layout with its own
+	// label and provider.
+	it('renders cycles-mint rows as a mint with the CMC as provider, collapsing the network', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockCyclesMintActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.mint.text.mint} 1.5 ICP → TCYCLES`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Cycles Minting Canister');
+		expect(container).not.toHaveTextContent('Internet Computer → Internet Computer');
+		expect(container).not.toHaveTextContent(en.swap.text.swap);
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {
