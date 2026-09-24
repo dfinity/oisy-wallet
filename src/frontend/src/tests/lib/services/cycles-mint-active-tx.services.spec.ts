@@ -235,6 +235,46 @@ describe('cycles-mint-active-tx.services', () => {
 			expect(deleteSpy).not.toHaveBeenCalled();
 		});
 
+		// A CMC that keeps a mint pending, or cannot be reached, is asked once per grace
+		// period rather than on every tick.
+		it('backs off after a pending answer', async () => {
+			notifyResolves({ status: 'pending' });
+
+			await pollPastGrace([funded]);
+
+			expect(notifySpy).toHaveBeenCalledOnce();
+
+			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+				await poll([funded]);
+			}
+
+			expect(notifySpy).toHaveBeenCalledOnce();
+
+			await poll([funded]);
+
+			expect(notifySpy).toHaveBeenCalledTimes(2);
+		});
+
+		it('backs off after an error, as after a pending answer', async () => {
+			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
+
+			lookupSpy.mockRejectedValue(new Error('index unreachable'));
+
+			await pollPastGrace([unobserved]);
+
+			expect(lookupSpy).toHaveBeenCalledOnce();
+
+			for (let i = 1; i < CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS; i++) {
+				await poll([unobserved]);
+			}
+
+			expect(lookupSpy).toHaveBeenCalledOnce();
+
+			await poll([unobserved]);
+
+			expect(lookupSpy).toHaveBeenCalledTimes(2);
+		});
+
 		it('keeps polling the other rows when one fails', async () => {
 			const consoleErrorSpy = vi
 				.spyOn(consoleUtils, 'consoleError')

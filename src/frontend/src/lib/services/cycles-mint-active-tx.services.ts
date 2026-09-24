@@ -220,8 +220,11 @@ const pollCyclesMintTransaction = async ({
 	const update = toCyclesMintRowUpdate(await notifyCyclesMint({ identity, blockIndex }));
 
 	// `Processing`, a transient CMC error or no answer at all: the ICP is in the CMC's
-	// custody and notifying again can still mint, so the row stays in flight.
+	// custody and notifying again can still mint, so the row stays in flight. It earns the
+	// grace period again before the next notify, so a CMC that keeps answering this way, or
+	// cannot be reached, is asked about once a minute rather than on every tick.
 	if (isNullish(update)) {
+		forgetRow(tx.id);
 		return;
 	}
 
@@ -271,6 +274,9 @@ export const pollCyclesMintActiveUserTransactions = async ({
 			await pollCyclesMintTransaction({ identity, tx });
 		} catch (err: unknown) {
 			consoleError(err);
+
+			// An index or backend that does not answer backs the row off the same way.
+			forgetRow(tx.id);
 		}
 	}
 };
