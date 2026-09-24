@@ -427,6 +427,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, wsol],
 				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
@@ -471,6 +472,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, wsol],
 				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
@@ -579,6 +581,84 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBeUndefined();
 		});
 
+		// A creation may fund a native account with the reserve and the amount to wrap together, and
+		// let its initialisation read the difference as the balance. Seeding from nothing called
+		// that close a plain one and its whole payout rent.
+		it('should hold what a creation funded above the reserve', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440 + 5_000_000_000,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		// Nothing in the message says where the reserve ends and the balance begins: the creation
+		// states one figure and the close hands the same one back.
+		it('should hold an unknown amount when the reserve is not known', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBeUndefined();
+		});
+
 		// A wrapped SOL account holds its token balance as lamports, so a token transfer into one
 		// hands that much more over when it closes. Counting only System funding reported the rent
 		// alone and called the close a return of it.
@@ -622,6 +702,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, wsol],
 				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
@@ -683,6 +764,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, wsol],
 				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
@@ -734,6 +816,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
 				addressToToken: { [ata]: 'bonkMint1111111111111111111111111111111111' }
 			});
 
@@ -1248,6 +1331,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
+				rentExemptMinimum: 2_039_280n,
 				// The account did not exist before the run, so its balance going in is zero.
 				accountLamports: { [ata]: ZERO }
 			});
@@ -1302,6 +1386,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
+				rentExemptMinimum: 2_039_280n,
 				accountLamports: { [ata]: ZERO }
 			});
 

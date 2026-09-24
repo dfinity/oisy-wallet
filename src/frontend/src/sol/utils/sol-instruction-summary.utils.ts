@@ -1,6 +1,7 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type {
@@ -353,6 +354,7 @@ const toEffect = ({
 	addressToOwner,
 	accountLamports,
 	accountTokenAmounts,
+	rentExemptMinimum,
 	flattened
 }: {
 	instruction: SolParsedRpcInstruction;
@@ -377,6 +379,8 @@ const toEffect = ({
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
 	// described as unwrapping something.
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What a token account of the usual size costs to exist, read from the chain.
+	rentExemptMinimum: bigint | undefined;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
@@ -529,6 +533,7 @@ const toEffect = ({
 				native: mint === WSOL_TOKEN.address,
 				flattened,
 				accountTokenAmounts,
+				rentExemptMinimum,
 				until: position
 			});
 
@@ -653,6 +658,7 @@ const heldAtInstruction = ({
 	native,
 	flattened,
 	accountTokenAmounts,
+	rentExemptMinimum,
 	until
 }: {
 	account: SolAddress;
@@ -661,11 +667,24 @@ const heldAtInstruction = ({
 	native: boolean;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	// What the chain charges a token account of the usual size to exist. A creation may fund one
+	// with more than that and let its initialisation read the difference as the balance, so the
+	// two cannot be told apart without knowing where the line falls.
+	rentExemptMinimum: bigint | undefined;
 	until: number;
 }): bigint | undefined => {
-	const opened = nonNullish(openedWithRent({ account, flattened, until }));
+	const opened = openedWithRent({ account, flattened, until });
 
-	const held = accountTokenAmounts[account] ?? (opened ? ZERO : undefined);
+	// An account this message opens starts from whatever its creation funded above the reserve.
+	// Nothing states that split: the creation gives one figure and the close gives the same one
+	// back, so without the reserve the balance is unknown rather than nothing.
+	const openedHolding = nonNullish(opened)
+		? nonNullish(rentExemptMinimum) && opened.space === ATA_SIZE
+			? maxBigInt(opened.lamports - rentExemptMinimum, ZERO)
+			: undefined
+		: undefined;
+
+	const held = accountTokenAmounts[account] ?? openedHolding;
 
 	if (isNullish(held)) {
 		return undefined;
@@ -731,8 +750,8 @@ const openedWithRent = ({
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	until?: number;
-}): bigint | undefined =>
-	flattened.slice(0, until).reduce<bigint | undefined>(
+}): { lamports: bigint; space: bigint | undefined } | undefined =>
+	flattened.slice(0, until).reduce<{ lamports: bigint; space: bigint | undefined } | undefined>(
 		(
 			acc,
 			{
@@ -745,7 +764,11 @@ const openedWithRent = ({
 			program === 'system' &&
 			type === 'createAccount' &&
 			address({ info, key: 'newAccount' }) === account
-				? amount({ info, key: 'lamports' })
+				? (() => {
+						const lamports = amount({ info, key: 'lamports' });
+
+						return nonNullish(lamports) ? { lamports, space: amount({ info, key: 'space' }) } : acc;
+					})()
 				: acc,
 		undefined
 	);
@@ -971,6 +994,7 @@ export const mapSolInstructionSummaries = ({
 	addressToOwner = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
+	rentExemptMinimum,
 	includeUnrecognised = false
 }: {
 	instructions: readonly unknown[];
@@ -988,6 +1012,9 @@ export const mapSolInstructionSummaries = ({
 	// What each token account held before the transaction ran. A wrapped SOL account holding
 	// nothing is closed rather than unwrapped, and the line says so.
 	accountTokenAmounts?: Partial<Record<SolAddress, bigint>>;
+	// What a token account of the usual size costs to exist. Without it, an account this message
+	// opens holds an amount nobody can state rather than nothing.
+	rentExemptMinimum?: bigint;
 	// Whether to keep a line for each top-level instruction that produced no effect of its own.
 	// Off where the list stands beside the balance changes that vouch for it, on where it is the
 	// only account of the transaction there is.
@@ -1046,6 +1073,7 @@ export const mapSolInstructionSummaries = ({
 				addressToOwner,
 				accountLamports,
 				accountTokenAmounts,
+				rentExemptMinimum,
 				flattened
 			});
 

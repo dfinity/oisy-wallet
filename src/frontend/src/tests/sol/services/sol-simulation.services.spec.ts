@@ -1,5 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
+import {
+	getMultipleAccountsInfo,
+	getSolCreateAccountFee,
+	simulateTransactionAccounts
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	TOKEN_PROGRAM_ADDRESS
@@ -21,6 +25,7 @@ import { AccountRole } from '@solana/kit';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
+	getSolCreateAccountFee: vi.fn(),
 	simulateTransactionAccounts: vi.fn()
 }));
 
@@ -111,6 +116,7 @@ describe('sol-simulation.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		vi.mocked(getSolCreateAccountFee).mockResolvedValue(2_039_280n as never);
 		vi.mocked(getMultipleAccountsInfo).mockResolvedValue([]);
 		vi.mocked(simulateTransactionAccounts).mockResolvedValue(simulated({ accounts: [] }));
 	});

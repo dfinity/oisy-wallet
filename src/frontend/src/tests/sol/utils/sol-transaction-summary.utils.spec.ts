@@ -438,6 +438,36 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(RENT * 2n);
 		});
 
+		// A wrapped SOL account hands its rent and whatever was wrapped over together, and only the
+		// first is rent. Calling the payout rent where the balance could not be read would state a
+		// figure the message does not carry.
+		it('should count nothing for an unwrap whose balance could not be read', () => {
+			expect(
+				paid([
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: RENT + 5_000_000_000n,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		// Any other mint holds nothing at its close, so all of what it hands back is rent.
+		it('should count the whole payout of a plain close whose balance was not read', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
 		it('should count nothing when the amount was never read', () => {
 			expect(
 				paid([

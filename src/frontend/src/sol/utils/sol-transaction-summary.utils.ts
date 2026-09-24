@@ -117,6 +117,14 @@ export const solRentPaidToOthers = ({
 			return acc;
 		}
 
+		// A wrapped SOL account hands over its rent and whatever was wrapped in it together, and
+		// only the first of those is rent. Where the balance could not be read, the payout is
+		// passed over rather than stated as rent it may not be. Any other mint holds nothing at
+		// its close, so all of what it hands back is rent.
+		if (kind === 'unwrap' && isNullish(wrapped)) {
+			return acc;
+		}
+
 		const closedOnward = flattened.some(
 			({ kind: laterKind, account }, laterIndex) =>
 				laterIndex > index &&

@@ -1,5 +1,9 @@
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import { getMultipleAccountsInfo, simulateTransactionAccounts } from '$sol/api/solana.api';
+import {
+	getMultipleAccountsInfo,
+	getSolCreateAccountFee,
+	simulateTransactionAccounts
+} from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
 	SOLANA_SIMULATION_TIMEOUT_MILLISECONDS
@@ -44,11 +48,17 @@ const simulate = async ({
 	}
 
 	// The "before" read does not depend on the simulation's outcome, so the two go out together
-	// and the preview costs one round trip rather than two.
-	const [preAccounts, { err, accounts: postAccounts, innerInstructions }] = await Promise.all([
-		getMultipleAccountsInfo({ addresses, network }),
-		simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network })
-	]);
+	// and the preview costs one round trip rather than two. The reserve a token account costs to
+	// exist joins them: a creation may fund one with more than that and let its initialisation
+	// read the difference as the balance, and nothing in the message says where the line falls.
+	// Best effort - without it the balance of an account this message opens is stated as unknown
+	// rather than guessed at.
+	const [preAccounts, { err, accounts: postAccounts, innerInstructions }, rentExemptMinimum] =
+		await Promise.all([
+			getMultipleAccountsInfo({ addresses, network }),
+			simulateTransactionAccounts({ base64EncodedTransactionMessage, addresses, network }),
+			getSolCreateAccountFee(network).catch(() => undefined)
+		]);
 
 	// A run that failed rolled its changes back, so its post-state describes nothing the user
 	// would actually get. Showing those deltas would be worse than showing none.
@@ -123,6 +133,7 @@ const simulate = async ({
 		addressToOwner,
 		accountLamports,
 		accountTokenAmounts,
+		rentExemptMinimum,
 		// A run whose calls all happen inside a program the wallet cannot read produces no effects
 		// at all, and the review then listed nothing for a transaction that plainly does something.
 		// Saying which programs it hands the instructions to is worth more than an empty list.
