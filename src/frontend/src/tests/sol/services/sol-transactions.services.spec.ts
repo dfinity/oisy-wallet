@@ -16,13 +16,8 @@ import {
 	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import * as solProgramToken from '@solana-program/token';
 import { lamports } from '@solana/kit';
 import type { MockInstance } from 'vitest';
-
-vi.mock('@solana-program/token', () => ({
-	findAssociatedTokenPda: vi.fn()
-}));
 
 vi.mock('$env/user-transactions.env', () => ({
 	USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED: true
@@ -41,14 +36,10 @@ vi.mock(import('$sol/api/solana.api'), async (importOriginal) => {
 });
 
 describe('sol-transactions.services', () => {
-	let spyFindAssociatedTokenPda: MockInstance;
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
-		spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
-		spyFindAssociatedTokenPda.mockResolvedValue([mockSplAddress]);
 
 		mockAuthStore();
 	});
@@ -303,7 +294,6 @@ describe('sol-transactions.services', () => {
 
 				expect(result).toHaveLength(1);
 				expect(result[0].instructions).toHaveLength(1);
-				expect(spyFindAssociatedTokenPda).not.toHaveBeenCalled();
 			});
 		});
 

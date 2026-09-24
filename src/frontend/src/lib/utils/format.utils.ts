@@ -85,13 +85,23 @@ export const shortenWithMiddleEllipsis = ({
 		: text;
 };
 
-const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	month: 'short',
 	day: 'numeric',
-	year: 'numeric',
+	year: 'numeric'
+};
+
+const TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour: '2-digit',
 	minute: '2-digit',
 	hour12: false
+};
+
+// Composed from the two halves rather than restated, so a caller that wants only
+// one of them cannot drift from the app's date style.
+const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+	...DATE_FORMAT_OPTIONS,
+	...TIME_FORMAT_OPTIONS
 };
 
 export const formatSecondsToDate = ({
@@ -127,6 +137,40 @@ export const formatNanosecondsToDate = ({
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
+};
+
+/**
+ * A deadline split into its date and its time, for a sentence that joins the two with
+ * a word of its own.
+ *
+ * One `toLocaleString` call cannot give that sentence what it needs: the separator it
+ * puts between the halves belongs to the locale — a comma here, the word "at" there —
+ * so a string that wants to say "at" in its own language has to be handed the halves
+ * and join them itself.
+ *
+ * Day and month order is left to the locale rather than fixed, which is the whole
+ * point of going through `Intl`. Of the fifteen languages here, twelve lead with the
+ * day, three with the year, and English alone with the month.
+ */
+export const formatNanosecondsToDateAndTime = ({
+	nanoseconds,
+	language
+}: {
+	nanoseconds: bigint;
+	language?: Languages;
+}): { date: string; time: string } => {
+	// Not `date`, which is what the field below is called: one of the two would have
+	// been read as the other.
+	const instant = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	const locale = language ?? Languages.ENGLISH;
+
+	return {
+		date: instant.toLocaleDateString(locale, DATE_FORMAT_OPTIONS),
+		// Seconds are not in `TIME_FORMAT_OPTIONS` and are not wanted here either:
+		// this is a deadline days away, so to the second is a precision the reader
+		// has no use for and one more thing to read past.
+		time: instant.toLocaleTimeString(locale, TIME_FORMAT_OPTIONS)
+	};
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {

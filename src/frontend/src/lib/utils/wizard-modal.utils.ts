@@ -13,6 +13,7 @@ import type {
 	WizardStepsScanner,
 	WizardStepsSend,
 	WizardStepsSwap,
+	WizardStepsTip,
 	WizardStepsTradingDeposit,
 	WizardStepsTradingWithdraw
 } from '$lib/enums/wizard-steps';
@@ -36,7 +37,8 @@ type StepName =
 	| WizardStepsLiquidiumSupply
 	| WizardStepsLiquidiumBorrow
 	| WizardStepsLiquidiumWithdraw
-	| WizardStepsLiquidiumRepay;
+	| WizardStepsLiquidiumRepay
+	| WizardStepsTip;
 
 export const goToWizardStep = <T extends StepName>({
 	modal,

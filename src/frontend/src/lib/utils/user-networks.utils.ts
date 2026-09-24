@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -27,6 +28,7 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { consoleWarn } from '$lib/utils/console.utils';
@@ -69,6 +71,10 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { ArbitrumMainnet: null };
 		case ARBITRUM_SEPOLIA_NETWORK_ID:
 			return { ArbitrumSepolia: null };
+		case XRP_MAINNET_NETWORK_ID:
+			return { XrpMainnet: null };
+		case ROBINHOOD_MAINNET_NETWORK_ID:
+			return { RobinhoodMainnet: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			consoleWarn(`Unknown networkId: ${networkId.description}`);
