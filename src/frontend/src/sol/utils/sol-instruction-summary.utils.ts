@@ -758,13 +758,18 @@ const heldAtInstruction = ({
 	);
 
 /**
- * Who holds a token account by the time an instruction reaches it.
+ * Whose a token account is, as of an instruction: the holder it had when its current lifecycle
+ * began.
  *
  * Walked from the holder before the transaction ran, the same way its balances are: initialising
- * an account names its holder, handing over its ownership names a new one, and closing it ends
- * it. Taking the holder the run reported for the whole transaction instead let a message close an
- * account of the user's, open the same address again for somebody else, and have the first close
- * read as that somebody's.
+ * an account names whose it is, and closing it ends it. Taking the holder the run reported for the
+ * whole transaction instead let a message close an account of the user's, open the same address
+ * again for somebody else, and have the first close read as that somebody's.
+ *
+ * A hand-over of ownership is deliberately not followed. It changes who may act on the account,
+ * not whose lamports it holds, and within one message it is the means of taking them: hand the
+ * user's account to a program's own address, close it to a stranger, and the close reads as the
+ * program's. By the same rule an account handed to the user stays whoever's it was.
  */
 const holderAt = ({
 	account,
@@ -797,10 +802,6 @@ const holderAt = ({
 
 			if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
 				return address({ info, key: 'owner' }) ?? acc;
-			}
-
-			if (type === 'setAuthority' && field({ info, key: 'authorityType' }) === 'accountOwner') {
-				return address({ info, key: 'newAuthority' }) ?? acc;
 			}
 
 			return type === 'closeAccount' ? undefined : acc;

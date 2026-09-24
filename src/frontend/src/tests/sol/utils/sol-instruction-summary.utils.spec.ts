@@ -3,6 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
+import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
 import {
 	mockAtaAddress,
@@ -1221,8 +1222,56 @@ describe('sol-instruction-summary.utils', () => {
 			expect(second?.wrapped).toBe(ZERO);
 		});
 
-		// Handing an account's ownership over names a new holder from that instruction on.
-		it('should follow a hand-over of the account to its close', () => {
+		// A hand-over of ownership changes who may act on an account, not whose lamports it holds.
+		// Following it let a message hand the user's account to a program's own address and close
+		// it to a stranger, with the close read as the program's and never refused.
+		it('should keep an account with the user through a hand-over to its close', () => {
+			const x = mockAtaAddress2;
+			const pda = 'programDerived1111111111111111111111111111';
+			const stranger = 'stranger1111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'setAuthority',
+									info: {
+										account: x,
+										authority: mockSolAddress,
+										authorityType: 'accountOwner',
+										newAuthority: pda
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: stranger, owner: pda }
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
+			});
+
+			expect(solClosesPayOthers({ instructions: views, userAddress: mockSolAddress })).toBeTruthy();
+		});
+
+		// By the same rule an account handed to the user stays whoever's it was, so closing it back
+		// to that holder is nothing of the user's.
+		it('should not give the user an account by handing it to them', () => {
 			const x = mockAtaAddress2;
 
 			const views = mapSolInstructionSummaries({
@@ -1255,10 +1304,7 @@ describe('sol-instruction-summary.utils', () => {
 				accountLamports: { [x]: 2_039_280n }
 			});
 
-			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
-
-			expect(close).toBeDefined();
-			expect(close).not.toHaveProperty('ownAccount');
+			expect(views.find(({ kind }) => kind === 'closeTokenAccount')).toBeUndefined();
 		});
 
 		// Absent is not the same as somebody else's: an account no run read says nothing either
