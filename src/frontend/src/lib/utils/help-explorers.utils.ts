@@ -8,6 +8,7 @@ import {
 	NEAR_INTENTS_EXPLORER_URL,
 	ONESEC_EXPLORER_URL,
 	POLYGON_EXPLORER_URL,
+	ROBINHOOD_EXPLORER_URL,
 	SOL_MAINNET_EXPLORER_URL,
 	VELORA_EXPLORER_URL,
 	XRP_MAINNET_EXPLORER_URL
@@ -16,6 +17,7 @@ import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -107,14 +109,17 @@ export const buildHelpExplorerGroups = ({
 	].filter(({ links }) => links.length > 0);
 
 // Where a whole address is looked up on each mainnet network, and which of the wallet's
-// addresses to look up there. Seven entries reuse the network's own explorer host, so the
-// Help page and a transaction link land on the same site; ICP and BTC use the dedicated
-// address explorers (see `ADDRESS_EXPLORER_URLS`).
+// addresses to look up there. Every entry but two reuses the network's own explorer host,
+// so the Help page and a transaction link land on the same site; ICP and BTC use the
+// dedicated address explorers (see `ADDRESS_EXPLORER_URLS`).
 //
 // Keyed by network id rather than derived from `network.explorerUrl`, because the path to
 // an address is not uniform: Solana's URL is a template with the path in the middle, and
-// the ICP dashboard has no page for a principal at all. A mainnet network missing here
-// simply gets no link, which is why the whole thing is `Partial`.
+// the ICP dashboard has no page for a principal at all.
+//
+// A mainnet network missing here simply gets no link, which is why the whole thing is
+// `Partial` - and why every network the wallet gains needs an entry added. Both XRP and
+// Robinhood Chain were caught missing that way after they shipped enabled.
 const NETWORK_ADDRESS_EXPLORERS: Partial<
 	Record<NetworkId, { chain: HelpExplorerChain; buildUrl: (address: string) => string }>
 > = {
@@ -145,6 +150,10 @@ const NETWORK_ADDRESS_EXPLORERS: Partial<
 	[POLYGON_MAINNET_NETWORK_ID]: {
 		chain: 'pol',
 		buildUrl: (address) => `${POLYGON_EXPLORER_URL}/address/${address}`
+	},
+	[ROBINHOOD_MAINNET_NETWORK_ID]: {
+		chain: 'rh',
+		buildUrl: (address) => `${ROBINHOOD_EXPLORER_URL}/address/${address}`
 	},
 	[SOLANA_MAINNET_NETWORK_ID]: {
 		chain: 'sol',

@@ -8,9 +8,10 @@ import type { Nullish } from '@dfinity/zod-schemas';
 //
 // The provider card only ever uses the four chains its providers settle against; the
 // network card adds XRP and the remaining EVM mainnets, where one Ethereum address is
-// read on several chains.
+// read on several chains. Each value is the network's own symbol, lowercased - `rh`,
+// not NEAR Intents' routing code `hood`, which lives in a different namespace.
 export type HelpExplorerChain =
-	'eth' | 'sol' | 'btc' | 'icp' | 'xrp' | 'arb' | 'base' | 'bsc' | 'pol';
+	'eth' | 'sol' | 'btc' | 'icp' | 'xrp' | 'arb' | 'base' | 'bsc' | 'pol' | 'rh';
 
 export interface HelpExplorerLink {
 	chain: HelpExplorerChain;

@@ -2,6 +2,7 @@ import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.ev
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
@@ -31,6 +32,7 @@ describe('buildHelpNetworkExplorerLinks', () => {
 		BASE_NETWORK,
 		BSC_MAINNET_NETWORK,
 		POLYGON_MAINNET_NETWORK,
+		ROBINHOOD_MAINNET_NETWORK,
 		SOLANA_MAINNET_NETWORK,
 		XRP_MAINNET_NETWORK
 	];
@@ -52,6 +54,7 @@ describe('buildHelpNetworkExplorerLinks', () => {
 			'base',
 			'bsc',
 			'pol',
+			'rh',
 			'sol',
 			'xrp'
 		]);
@@ -69,6 +72,7 @@ describe('buildHelpNetworkExplorerLinks', () => {
 		expect(urlFor('base')).toBe(`https://basescan.org/address/${mockEthAddress}`);
 		expect(urlFor('bsc')).toBe(`https://bscscan.com/address/${mockEthAddress}`);
 		expect(urlFor('pol')).toBe(`https://polygonscan.com/address/${mockEthAddress}`);
+		expect(urlFor('rh')).toBe(`https://robin.etherscan.io/address/${mockEthAddress}`);
 	});
 
 	it('substitutes the Solana account into its URL template', () => {

@@ -32,19 +32,20 @@ A user can get there today, but only by copying their address out of Receive, wo
 
 One link per enabled mainnet network, each opening the address page of that chain's explorer:
 
-| Network           | Explorer          | Address                       |
-| ----------------- | ----------------- | ----------------------------- |
-| Internet Computer | `icexplorer.io`   | the user's principal          |
-| Bitcoin           | `mempool.space`   | the wallet's Bitcoin address  |
-| Ethereum          | `etherscan.io`    | the wallet's Ethereum address |
-| Arbitrum          | `arbiscan.io`     | the same Ethereum address     |
-| Base              | `basescan.org`    | the same Ethereum address     |
-| BNB Smart Chain   | `bscscan.com`     | the same Ethereum address     |
-| Polygon           | `polygonscan.com` | the same Ethereum address     |
-| Solana            | `solscan.io`      | the wallet's Solana address   |
-| XRP Ledger        | `xrpscan.com`     | the wallet's XRP address      |
+| Network           | Explorer             | Address                       |
+| ----------------- | -------------------- | ----------------------------- |
+| Internet Computer | `icexplorer.io`      | the user's principal          |
+| Bitcoin           | `mempool.space`      | the wallet's Bitcoin address  |
+| Ethereum          | `etherscan.io`       | the wallet's Ethereum address |
+| Arbitrum          | `arbiscan.io`        | the same Ethereum address     |
+| Base              | `basescan.org`       | the same Ethereum address     |
+| BNB Smart Chain   | `bscscan.com`        | the same Ethereum address     |
+| Polygon           | `polygonscan.com`    | the same Ethereum address     |
+| Robinhood Chain   | `robin.etherscan.io` | the same Ethereum address     |
+| Solana            | `solscan.io`         | the wallet's Solana address   |
+| XRP Ledger        | `xrpscan.com`        | the wallet's XRP address      |
 
-Seven of the nine hosts are the ones already in `$env/explorers.env`, so those links use the same explorer the rest of the wallet links to. **Two deliberately differ from `network.explorerUrl`:**
+Every host but two is the one already in `$env/explorers.env`, so those links use the same explorer the rest of the wallet links to. **Two deliberately differ from `network.explorerUrl`:**
 
 - **Internet Computer.** The network's `explorerUrl` is `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character **account identifier**. The address OISY shows a user is their **principal**, which that page cannot take. `icexplorer.io/address/details/<principal>` can, and shows the ICRC token holdings behind it — so this is a correctness requirement, not a preference.
 - **Bitcoin.** `blockstream.info/address/<address>` would work; `mempool.space` is the explorer named for this card. A preference, and a one-line change if the wallet ever standardises on one.
@@ -54,6 +55,8 @@ Both belong in `$env/explorers.env.ts` next to the rest, named so it is obvious 
 ## Behaviour
 
 **The card follows the user's enabled networks, not a fixed list.** It renders from `networksMainnets`, in that store's order, so disabling a network in Settings removes its link and no third list of networks has to be kept in sync.
+
+**A network the wallet gains still needs an entry**, because the explorer map is keyed by network id. Until it has one, that network is silently absent from the card - the one way this design can quietly break its own rule, and worth checking whenever a chain is added.
 
 **A link appears only when its address is known** — same rule, and the same reasoning, as the provider explorer card: a link is dropped rather than pointing at an explorer with an empty path, and a card with no available link is hidden entirely.
 
@@ -65,7 +68,7 @@ The same `explorer` action as the provider card, under a new `network_explorers`
 
 - `event_modifier: 'explorer'`
 - `event_subcontext: 'network_explorers'`
-- `event_key: 'network'` / `event_value` — the network, in the lowercase `token_network` vocabulary (`icp`, `btc`, `eth`, `arb`, `base`, `bsc`, `pol`, `sol`, `xrp`)
+- `event_key: 'network'` / `event_value` — the network's own symbol, lowercased, following the `token_network` vocabulary (`icp`, `btc`, `eth`, `arb`, `base`, `bsc`, `pol`, `rh`, `sol`, `xrp`). Not NEAR Intents' routing codes, which name some of the same chains differently (`hood` for Robinhood).
 - no `event_provider`: no third party is involved
 
 As on the provider card, the **destination URL is not tracked** — it embeds a wallet address, which privacy invariant 3 in `docs/ai/frontend/analytics.md` forbids.
@@ -75,7 +78,7 @@ As on the provider card, the **destination URL is not tracked** — it embeds a 
 1. `/help/` renders four cards in order: Support, network explorers, provider explorers, ICPSwap Token Withdrawal.
 2. The card shows one link per enabled mainnet network, each labelled with that network's name and logo.
 3. Each link opens that network's explorer at the user's own address for it, per the table above.
-4. The Ethereum address is used for Ethereum, Arbitrum, Base, BNB Smart Chain and Polygon; the principal for the Internet Computer; each chain's own address for Bitcoin, Solana and the XRP Ledger.
+4. The Ethereum address is used for every EVM network; the principal for the Internet Computer; each chain's own address for Bitcoin, Solana and the XRP Ledger.
 5. Disabling a network removes its link; testnet networks never appear.
 6. A link whose address has not loaded is absent, and a card with no available link is absent.
 7. Every link opens in a new tab and is marked as external.
