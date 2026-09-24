@@ -2,6 +2,7 @@
 	import type { Component } from 'svelte';
 	import type { Action } from 'svelte/action';
 	import IconBook from '$lib/components/icons/IconBook.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
 	import IconList from '$lib/components/icons/IconList.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
@@ -178,6 +179,12 @@
 					>
 						<Icon />
 						{label}
+						<!-- Its own trailing icon rather than `ExternalLink`'s: that one sits next
+						     to the label in the link's colour and would read as a second row icon.
+						     Pushed to the edge and muted, it is only a hint that the row leaves OISY. -->
+						<span class="ml-auto flex shrink-0 text-tertiary">
+							<IconExternalLink size="16" />
+						</span>
 					</ExternalLink>
 				{/each}
 			{/each}
