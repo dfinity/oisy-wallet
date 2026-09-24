@@ -960,6 +960,64 @@ describe('sol-instruction-summary.utils', () => {
 			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
 		});
 
+		// The signer of a close is its authority, which is the holder normally and the close
+		// authority when one is set. Taking it for the holder let a third party naming this wallet
+		// as close authority have their account read as the user's.
+		it('should not call an account theirs because the user may close it', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				addressToOwner: { [theirs]: mockSolAddress2 },
+				accountLamports: { [theirs]: 2_039_280n }
+			});
+
+			expect(views).toStrictEqual([
+				{
+					kind: 'closeTokenAccount',
+					account: theirs,
+					returned: 2_039_280n,
+					ownAccount: false,
+					counterparty: mockSolAddress,
+					own: true
+				}
+			]);
+		});
+
+		// Absent is not the same as somebody else's: an account no run read says nothing either
+		// way, and calling it not theirs would drop it out of the refusal.
+		it('should leave ownership unsaid for an account no run read', () => {
+			const account = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress
+			});
+
+			expect(views[0]).not.toHaveProperty('ownAccount');
+		});
+
 		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
 		// Left out, the balance changes carry an inflow no line in the list accounts for.
 		it('should list a close of an account the user does not own that pays their wallet', () => {
@@ -978,6 +1036,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [mockSolAddress],
 				userAddress: mockSolAddress,
+				addressToOwner: { [theirs]: mockSolAddress2 },
 				accountLamports: { [theirs]: 2_039_280n }
 			});
 

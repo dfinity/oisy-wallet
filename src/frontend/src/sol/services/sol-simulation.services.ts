@@ -120,6 +120,7 @@ const simulate = async ({
 		ownedAddresses: [address, ...ownedAddresses],
 		userAddress: address,
 		addressToToken,
+		addressToOwner,
 		accountLamports,
 		accountTokenAmounts,
 		// A run whose calls all happen inside a program the wallet cannot read produces no effects
@@ -136,7 +137,8 @@ const simulate = async ({
 			innerInstructions: [],
 			ownedAddresses: [address, ...ownedAddresses],
 			userAddress: address,
-			addressToToken
+			addressToToken,
+			addressToOwner
 		}),
 		userAddress: address
 	});

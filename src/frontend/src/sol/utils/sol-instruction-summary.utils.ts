@@ -343,6 +343,7 @@ const toEffect = ({
 	owned,
 	userAddress,
 	accountMints,
+	addressToOwner,
 	accountLamports,
 	accountTokenAmounts,
 	flattened
@@ -361,6 +362,9 @@ const toEffect = ({
 	// balance. Separate from the set above, which is every account of theirs the run named.
 	userAddress: OptionSolAddress;
 	accountMints: Record<SolAddress, SplTokenAddress>;
+	// Who holds each token account, as the run read it. Whose an account is, as against who may
+	// act on it: the signer of a close is its authority, which need not be its holder.
+	addressToOwner: Record<SolAddress, SolAddress>;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Partial<Record<SolAddress, bigint>>;
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
@@ -452,9 +456,22 @@ const toEffect = ({
 			const owner = address({ info, key: 'owner' });
 			const destination = address({ info, key: 'destination' });
 
-			const ownAccount = nonNullish(account)
-				? owned.has(account) || (nonNullish(owner) && owned.has(owner))
-				: false;
+			// Whose the account is, not who may close it. The signer of a close is its authority,
+			// which is the holder normally and the close authority when one is set: a third party
+			// naming this wallet as close authority on their own account would otherwise have it
+			// read as the user's, its rent credited against what the transaction costs them and a
+			// close of it elsewhere refused as their loss.
+			//
+			// Three readings, because absent is not the same as somebody else's: an account no run
+			// read says nothing either way, and calling it not theirs would drop it out of the
+			// refusal. Only an account read and held by somebody else is stated as not the user's.
+			const holder = nonNullish(account) ? addressToOwner[account] : undefined;
+
+			const ownAccount = nonNullish(holder)
+				? holder === userAddress
+				: nonNullish(account) && owned.has(account)
+					? true
+					: undefined;
 
 			// A close of somebody else's account can still pay the user, and the lamports arrive in
 			// their wallet whether or not the account was ever theirs. Left out, the balance changes
@@ -463,7 +480,14 @@ const toEffect = ({
 			// not an arrival they can spend, and none of it is theirs to be told about.
 			const paysUser = nonNullish(destination) && destination === userAddress;
 
-			if (isNullish(account) || !(ownAccount || paysUser)) {
+			// The authority stays in the test that decides whether the close is shown at all: it is
+			// the only thing tying a close to the user when no run read the account.
+			const concerns =
+				(ownAccount ?? false) ||
+				(nonNullish(owner) && owned.has(owner) && ownAccount !== false) ||
+				paysUser;
+
+			if (isNullish(account) || !concerns) {
 				return undefined;
 			}
 
@@ -507,7 +531,7 @@ const toEffect = ({
 				...(nonNullish(mint) && { tokenAddress: mint }),
 				...(nonNullish(returned) && { returned }),
 				...(nonNullish(wrapped) && { wrapped }),
-				...(!ownAccount && { ownAccount }),
+				...(ownAccount === false && { ownAccount }),
 				...(nonNullish(destination) && { counterparty: destination, own: owned.has(destination) })
 			};
 		}
@@ -937,6 +961,7 @@ export const mapSolInstructionSummaries = ({
 	ownedAddresses,
 	userAddress,
 	addressToToken = {},
+	addressToOwner = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
 	includeUnrecognised = false
@@ -947,6 +972,9 @@ export const mapSolInstructionSummaries = ({
 	// The wallet itself, which is the only account of the user's a close can pay into as a balance.
 	userAddress: OptionSolAddress;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
+	// Who holds each token account, as the run read it. Absent for an account no run looked at,
+	// which is not the same as one held by somebody else.
+	addressToOwner?: Record<SolAddress, SolAddress>;
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
@@ -1008,6 +1036,7 @@ export const mapSolInstructionSummaries = ({
 				owned,
 				userAddress,
 				accountMints,
+				addressToOwner,
 				accountLamports,
 				accountTokenAmounts,
 				flattened

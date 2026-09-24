@@ -139,6 +139,7 @@ export const fetchSolTransactionsForSignature = async ({
 		ownedAddresses,
 		userAddress: address,
 		addressToToken,
+		addressToOwner,
 		accountLamports
 	});
 
