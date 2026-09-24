@@ -1222,6 +1222,43 @@ describe('sol-instruction-summary.utils', () => {
 			expect(second?.wrapped).toBe(ZERO);
 		});
 
+		// A Token program account is always the same size, so its reserve is the chain's minimum
+		// for that size. A Token-2022 account's size varies with its extensions.
+		it('should carry the reserve of a Token program account and not of a Token-2022 one', () => {
+			const close = ({ programId, program }: { programId: string; program: string }) =>
+				mapSolInstructionSummaries({
+					instructions: [
+						{
+							program,
+							programId,
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: mockAtaAddress2,
+									destination: mockSolAddress,
+									owner: mockSolAddress
+								}
+							}
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress2],
+					userAddress: mockSolAddress,
+					accountLamports: { [mockAtaAddress2]: 2_039_280n },
+					rentExemptMinimum: 2_039_280n
+				})[0];
+
+			expect(
+				close({ programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', program: 'spl-token' })
+					?.reserve
+			).toBe(2_039_280n);
+			expect(
+				close({
+					programId: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+					program: 'spl-token-2022'
+				})
+			).not.toHaveProperty('reserve');
+		});
+
 		// The run's single map of mints is written by the last initialisation. An address reopened
 		// for another mint later in the message would lend its first close that later mint - the
 		// wrong kind, the wrong label, and no split of the wrapped SOL out of the payout.

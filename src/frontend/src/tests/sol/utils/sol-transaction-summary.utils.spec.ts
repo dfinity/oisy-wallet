@@ -306,6 +306,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockSolAddress
@@ -319,6 +320,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockSolAddress2
@@ -334,6 +336,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'unwrap',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: 10_000_000_000n + RENT,
 						wrapped: 10_000_000_000n,
@@ -348,12 +351,14 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockSolAddress2
 					},
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress2,
 						returned: RENT,
 						counterparty: mockSolAddress2
@@ -370,6 +375,7 @@ describe('sol-transaction-summary.utils', () => {
 						children: [
 							{
 								kind: 'closeTokenAccount',
+								reserve: RENT,
 								account: mockAtaAddress,
 								returned: RENT,
 								counterparty: mockSolAddress2
@@ -387,6 +393,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockSolAddress2,
@@ -403,12 +410,14 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockAtaAddress2
 					},
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress2,
 						returned: RENT * 2n,
 						counterparty: mockSolAddress2
@@ -424,12 +433,14 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress2,
 						returned: RENT,
 						counterparty: mockSolAddress2
 					},
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockAtaAddress2
@@ -448,12 +459,14 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT,
 						counterparty: mockAtaAddress2
 					},
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress2,
 						returned: RENT * 2n,
 						counterparty: mockSolAddress2,
@@ -469,6 +482,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress2,
 						returned: RENT,
 						counterparty: mockAtaAddress,
@@ -476,6 +490,7 @@ describe('sol-transaction-summary.utils', () => {
 					},
 					{
 						kind: 'closeTokenAccount',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT * 2n,
 						counterparty: mockSolAddress2
@@ -489,6 +504,7 @@ describe('sol-transaction-summary.utils', () => {
 				paid([
 					{
 						kind: 'unwrap',
+						reserve: RENT,
 						account: mockAtaAddress,
 						returned: RENT + 5_000_000_000n,
 						counterparty: mockSolAddress2
@@ -497,8 +513,40 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
-		// Any other mint holds nothing at its close, so all of what it hands back is rent.
-		it('should count the whole payout of a plain close whose balance was not read', () => {
+		// Any other mint holds nothing at its close, so what it hands back is its rent.
+		it('should count the rent of a plain close whose balance was not read', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						reserve: RENT,
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
+		// Lamports paid into an account on top of its reserve are not rent: from the wallet within
+		// the message they already show as its own outflow, and from anybody else they were never
+		// the user's.
+		it('should count only the reserve of a close whose account was paid into', () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						reserve: RENT,
+						account: mockAtaAddress,
+						returned: RENT + 3_000_000_000n,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
+		// A Token-2022 account's size varies with its extensions, so its reserve is not known.
+		it('should count nothing for a close whose reserve is not known', () => {
 			expect(
 				paid([
 					{
@@ -508,7 +556,7 @@ describe('sol-transaction-summary.utils', () => {
 						counterparty: mockSolAddress2
 					}
 				])
-			).toBe(RENT);
+			).toBe(ZERO);
 		});
 
 		it('should count nothing when the amount was never read', () => {

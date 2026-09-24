@@ -111,7 +111,7 @@ export const solRentPaidToOthers = ({
 	const flattened = flattenInstructions(instructions);
 
 	return flattened.reduce((acc, current, index) => {
-		const { kind, counterparty, returned, wrapped, ownAccount } = current;
+		const { kind, counterparty, returned, wrapped, reserve, ownAccount } = current;
 
 		if (
 			!(kind === 'closeTokenAccount' || kind === 'unwrap') ||
@@ -131,9 +131,19 @@ export const solRentPaidToOthers = ({
 			return acc;
 		}
 
+		// Rent is the reserve and no more. Lamports paid into an account on top of it are not rent:
+		// from the wallet within the message they already show as its own outflow, and from anybody
+		// else they were never the user's. Where the reserve is not known the close is passed over,
+		// rather than stated as rent it may not be.
+		if (isNullish(reserve)) {
+			return acc;
+		}
+
 		const own = maxBigInt(returned - paidIn({ closes: flattened, index }), ZERO);
 
-		return acc + maxBigInt(own - (wrapped ?? ZERO), ZERO);
+		const rent = maxBigInt(own - (wrapped ?? ZERO), ZERO);
+
+		return acc + (rent < reserve ? rent : reserve);
 	}, ZERO);
 };
 

@@ -156,6 +156,7 @@ describe('SolWalletConnectSignReview', () => {
 
 	const closeToStranger: SolInstructionSummary = {
 		kind: 'closeTokenAccount',
+		reserve: 2_039_280n,
 		account: mockAtaAddress,
 		returned: 2_039_280n,
 		counterparty: mockSolAddress2

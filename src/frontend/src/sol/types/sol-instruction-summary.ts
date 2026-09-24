@@ -64,6 +64,11 @@ export interface SolInstructionSummary {
 	// since. For a wrapped SOL account that is the SOL wrapped inside it, which separates a close
 	// that unwraps something from one that closes an empty account.
 	wrapped?: bigint;
+	// The rent-exempt reserve of a closed account, where it is known: the part of what it hands
+	// over that is rent. A Token program account is always the same size, so its reserve is the
+	// chain's minimum for that size; a Token-2022 account's size varies with its extensions and
+	// leaves it unknown. Everything above it and the wrapped SOL is lamports paid in on top.
+	reserve?: bigint;
 	// `false` on a close of an account a run read and found somebody else holding, which reaches
 	// the list only because it pays the user's wallet. What arrives is money they did not have
 	// rather than money of theirs coming back, and its rent was never theirs to be charged or
