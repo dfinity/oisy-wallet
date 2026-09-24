@@ -1505,7 +1505,11 @@
 			"crypto": "Crypto",
 			"stablecoin": "Stablecoins",
 			"stock": "Stocks",
-			"commodity": "Commodities"
+			"commodity": "Commodities",
+			"compute": "Compute"
+		},
+		"category_in_sentence": {
+			"compute": "compute tokens"
 		},
 		"risk": {
 			"low": "Low risk",

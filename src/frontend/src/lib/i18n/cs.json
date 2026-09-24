@@ -1505,7 +1505,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoiny",
 			"stock": "Akcie",
-			"commodity": "Komodity"
+			"commodity": "Komodity",
+			"compute": "Výpočetní výkon"
+		},
+		"category_in_sentence": {
+			"compute": "výpočetní tokeny"
 		},
 		"risk": {
 			"low": "Nízké riziko",

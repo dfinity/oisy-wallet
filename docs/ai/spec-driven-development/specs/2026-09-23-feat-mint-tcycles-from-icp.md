@@ -62,11 +62,12 @@ Verified against `dfinity/ic` (`rs/nns/cmc/src/main.rs`, `lib.rs`) and `dfinity/
 
 1. A new asset type **Compute** is added last: after Commodities in the filter bar and in the Manage tokens dropdown.
 2. TCYCLES moves from Stablecoins to Compute and no longer appears under Stablecoins.
-3. The Compute pill stands out from the other pills while unselected, through a tinted background from the brand colour family. The tint must stay distinct from the hover wash the unselected pills already use, in both light and dark mode. Selected, Compute looks like every other selected pill, so "which filter is on" reads the same everywhere. `PillButton` is shared (the share-note dialog and limit orders use it too), so the accent must not change those.
+3. The Compute pill stands out from the other pills while unselected, through a tinted background from the brand colour family. The tint must stay distinct from the hover wash the unselected pills already use, in both light and dark mode. The tint is on the fill and border only, and the text keeps the regular pill colour: brand-blue text on the tint falls below AA contrast at this size (3.6:1 in light mode, 2.9:1 in dark), while the regular text stays above 10:1 in both. Selected, Compute looks like every other selected pill, so "which filter is on" reads the same everywhere. `PillButton` is shared (the share-note dialog and limit orders use it too), so the accent must not change those.
 4. The empty state stays as it is, including "Choose from 1 supported tokens…", which points a user with TCYCLES disabled towards enabling it. Enabling TCYCLES by default is **out of scope**: a default-enabled token is not written to the user's profile, so it could never be withdrawn again without hiding it from users who hold a balance. That needs its own fix first.
 5. One copy fix: the empty-state title "There are no $asset_type in your wallet" is not a sentence with "compute". Compute's version must read naturally (e.g. "There are no compute tokens in your wallet") in every shipped locale.
 6. "Compute" is translated in the 14 shipped locales (`Languages` enum).
-7. Nothing else changes: "All asset types", the hide-asset-types setting, the filtering rules, and the other categories.
+7. TCYCLES is shown as **ICP Cycles (Trillion)** instead of the ledger's own name, "Trillion Cycles". It is a display name OISY sets by ledger ID, as it sets GHOSTNODE's symbol (`CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID`): the displayed name comes from the ledger's metadata, which `scripts/build.tokens.icrc.ts` also writes over `tokens.icrc.json`, so editing the JSON would not show and would not last.
+8. Nothing else changes: "All asset types", the hide-asset-types setting, the filtering rules, and the other categories.
 
 ## 5. Mint TCYCLES
 

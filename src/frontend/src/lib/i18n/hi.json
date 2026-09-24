@@ -1505,7 +1505,11 @@
 			"crypto": "क्रिप्टो",
 			"stablecoin": "स्टेबलकॉइन",
 			"stock": "शेयर",
-			"commodity": "कमोडिटी"
+			"commodity": "कमोडिटी",
+			"compute": "कंप्यूट"
+		},
+		"category_in_sentence": {
+			"compute": "कंप्यूट टोकन"
 		},
 		"risk": {
 			"low": "कम जोखिम",

@@ -1505,7 +1505,11 @@
 			"crypto": "加密货币",
 			"stablecoin": "稳定币",
 			"stock": "股票",
-			"commodity": "大宗商品"
+			"commodity": "大宗商品",
+			"compute": "算力"
+		},
+		"category_in_sentence": {
+			"compute": "算力代币"
 		},
 		"risk": {
 			"low": "低风险",

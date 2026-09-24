@@ -1505,7 +1505,11 @@
 			"crypto": "暗号資産",
 			"stablecoin": "ステーブルコイン",
 			"stock": "株式",
-			"commodity": "コモディティ"
+			"commodity": "コモディティ",
+			"compute": "コンピュート"
+		},
+		"category_in_sentence": {
+			"compute": "コンピュートトークン"
 		},
 		"risk": {
 			"low": "低リスク",

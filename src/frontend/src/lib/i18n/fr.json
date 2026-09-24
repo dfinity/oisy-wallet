@@ -1505,7 +1505,11 @@
 			"crypto": "Cryptomonnaies",
 			"stablecoin": "Stablecoins",
 			"stock": "Actions",
-			"commodity": "Matières premières"
+			"commodity": "Matières premières",
+			"compute": "Calcul"
+		},
+		"category_in_sentence": {
+			"compute": "tokens de calcul"
 		},
 		"risk": {
 			"low": "Risque faible",

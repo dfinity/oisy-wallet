@@ -1505,7 +1505,11 @@
 			"crypto": "Criptovalute",
 			"stablecoin": "Stablecoin",
 			"stock": "Azioni",
-			"commodity": "Materie prime"
+			"commodity": "Materie prime",
+			"compute": "Calcolo"
+		},
+		"category_in_sentence": {
+			"compute": "token di calcolo"
 		},
 		"risk": {
 			"low": "Rischio basso",

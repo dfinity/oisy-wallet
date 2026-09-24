@@ -1505,7 +1505,11 @@
 			"crypto": "Криптовалюты",
 			"stablecoin": "Стейблкоины",
 			"stock": "Акции",
-			"commodity": "Сырьевые товары"
+			"commodity": "Сырьевые товары",
+			"compute": "Вычисления"
+		},
+		"category_in_sentence": {
+			"compute": "токенов для вычислений"
 		},
 		"risk": {
 			"low": "Низкий риск",

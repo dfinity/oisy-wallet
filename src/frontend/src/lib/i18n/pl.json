@@ -1505,7 +1505,11 @@
 			"crypto": "Kryptowaluty",
 			"stablecoin": "Stablecoiny",
 			"stock": "Akcje",
-			"commodity": "Surowce"
+			"commodity": "Surowce",
+			"compute": "Moc obliczeniowa"
+		},
+		"category_in_sentence": {
+			"compute": "tokenów obliczeniowych"
 		},
 		"risk": {
 			"low": "Niskie ryzyko",

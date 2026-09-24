@@ -1505,7 +1505,11 @@
 			"crypto": "Tiền mã hóa",
 			"stablecoin": "Stablecoin",
 			"stock": "Cổ phiếu",
-			"commodity": "Hàng hóa"
+			"commodity": "Hàng hóa",
+			"compute": "Điện toán"
+		},
+		"category_in_sentence": {
+			"compute": "token điện toán"
 		},
 		"risk": {
 			"low": "Rủi ro thấp",

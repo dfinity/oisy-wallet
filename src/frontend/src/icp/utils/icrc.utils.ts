@@ -3,7 +3,8 @@ import {
 	BITCAT_LEDGER_CANISTER_ID,
 	FORSETISCN_LEDGER_CANISTER_ID,
 	GHOSTNODE_LEDGER_CANISTER_ID,
-	ICONFUCIUS_LEDGER_CANISTER_ID
+	ICONFUCIUS_LEDGER_CANISTER_ID,
+	TCYCLES_LEDGER_CANISTER_ID
 } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type {
@@ -38,6 +39,13 @@ export const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, 
 	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
 	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
 	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
+};
+
+// Names shown instead of a ledger's own, as the symbols above are. Set here rather than in
+// `tokens.icrc.json`: the name OISY displays comes from the ledger's metadata, which
+// `build.tokens.icrc.ts` also writes over the JSON's.
+export const CUSTOM_NAMES_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[TCYCLES_LEDGER_CANISTER_ID]: 'ICP Cycles (Trillion)'
 };
 
 /**
@@ -169,7 +177,13 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 					oisyName: token.twinToken.name
 				}
 			}
-		: {})
+		: nonNullish(CUSTOM_NAMES_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
+			? {
+					oisyName: {
+						oisyName: CUSTOM_NAMES_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
+					}
+				}
+			: {})
 });
 
 export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
