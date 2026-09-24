@@ -4,6 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -151,6 +152,37 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
 		expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+	});
+
+	const closeToStranger: SolInstructionSummary = {
+		kind: 'closeTokenAccount',
+		account: mockAtaAddress,
+		returned: 2_039_280n,
+		counterparty: mockSolAddress2
+	};
+
+	// The section it belongs to has three answers, and the emptiest of them - a run that reported
+	// nothing changing - is exactly the shape a close of an empty account to a stranger takes.
+	it('should state rent a close pays somebody else beside the balance changes', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, instructions: [closeToStranger] }
+		});
+
+		expect(getByTestId('rent-to-others')).toHaveTextContent('0.00203928 SOL');
+	});
+
+	it('should state it even when no preview survived', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, preview: undefined, decoded: true, instructions: [closeToStranger] }
+		});
+
+		expect(getByTestId('rent-to-others')).toHaveTextContent('0.00203928 SOL');
+	});
+
+	it('should say nothing about rent when every close pays the wallet', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+		expect(queryByTestId('rent-to-others')).not.toBeInTheDocument();
 	});
 
 	it('should say nothing else about a close it will not sign', () => {

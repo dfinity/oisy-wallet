@@ -201,24 +201,4 @@ describe('SolWalletConnectSimulationPreview', () => {
 
 		expect(getByTestId('simulated-control-change')).toHaveTextContent(mockSolAddress2);
 	});
-
-	// The deltas measure the wallet, and rent leaving one of the user's token accounts never
-	// touches it: without this the section describes a transaction that takes it as taking nothing.
-	it('should state rent that a close pays somebody else', () => {
-		const { getByTestId } = render(SolWalletConnectSimulationPreview, {
-			...props({ tokenDeltas: [], controlChanges: [] }),
-			rentToOthers: 2_039_280n
-		});
-
-		expect(getByTestId('simulated-rent-to-others')).toHaveTextContent('0.00203928 SOL');
-	});
-
-	it('should say nothing about rent when every close pays the wallet', () => {
-		const { queryByTestId } = render(
-			SolWalletConnectSimulationPreview,
-			props({ tokenDeltas: [], controlChanges: [] })
-		);
-
-		expect(queryByTestId('simulated-rent-to-others')).not.toBeInTheDocument();
-	});
 });

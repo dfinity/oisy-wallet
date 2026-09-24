@@ -16,6 +16,7 @@
 	import type { Token } from '$lib/types/token';
 	import { absBigInt, maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
@@ -370,7 +371,7 @@
 				     could imply; the label says which of the two this is, and the missing answer is
 				     stated rather than left as a gap. -->
 				{#if nonNullish(preview)}
-					<SolWalletConnectSimulationPreview {feeToken} {preview} {rentToOthers} />
+					<SolWalletConnectSimulationPreview {feeToken} {preview} />
 				{:else if decoded}
 					<WalletConnectModalValue
 						label={simulationObtained
@@ -393,6 +394,23 @@
 							</div>
 						{/if}
 					</WalletConnectModalValue>
+				{/if}
+
+				<!-- Rent of the user's own accounts that a close hands to somebody else. It leaves them
+				     without the wallet's balance moving, so none of the three answers above measures it,
+				     and the emptiest of them - a run that reported nothing changing - is exactly the shape
+				     this case takes. Said beside the section rather than inside one of its answers, so it
+				     stands whichever of them was given. -->
+				{#if rentToOthers > ZERO}
+					<span class="text-error-primary" data-tid="rent-to-others">
+						{replacePlaceholders($i18n.wallet_connect.text.rent_paid_to_others, {
+							$amount: formatToken({
+								value: rentToOthers,
+								unitName: feeToken.decimals,
+								displayDecimals: feeToken.decimals
+							})
+						})}
+					</span>
 				{/if}
 
 				<!-- Where the transaction would run. A program is the closest thing a Solana message has to

@@ -7,7 +7,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -21,12 +20,9 @@
 		preview: SolSimulationPreview;
 		// Native token of the network the request targets, which the SOL delta is denominated in.
 		feeToken: Token;
-		// Rent of the user's own token accounts that a close pays somewhere other than their
-		// wallet. It leaves them without moving the wallet's balance, so nothing above measures it.
-		rentToOthers?: bigint;
 	}
 
-	let { preview, feeToken, rentToOthers = ZERO }: Props = $props();
+	let { preview, feeToken }: Props = $props();
 
 	let { solDelta, tokenDeltas, controlChanges } = $derived(preview);
 
@@ -140,21 +136,5 @@
 				{to ?? $i18n.wallet_connect.text.simulation_control_removed}
 			</span>
 		{/each}
-
-		<!-- The deltas above are the wallet's, and this is not: it leaves a token account of the
-		     user's for an address that is not theirs, which moves nothing the wallet can see. Said
-		     as a sentence rather than a figure among them for the same reason - it does not belong
-		     to the column they are measured in. -->
-		{#if rentToOthers > ZERO}
-			<span class="text-error-primary" data-tid="simulated-rent-to-others">
-				{replacePlaceholders($i18n.wallet_connect.text.rent_paid_to_others, {
-					$amount: formatToken({
-						value: rentToOthers,
-						unitName: feeToken.decimals,
-						displayDecimals: feeToken.decimals
-					})
-				})}
-			</span>
-		{/if}
 	</div>
 </WalletConnectModalValue>
