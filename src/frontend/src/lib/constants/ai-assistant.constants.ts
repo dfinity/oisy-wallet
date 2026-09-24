@@ -66,7 +66,7 @@ export const getAiAssistantSystemPrompt = ({
 	- BTC → Btc
 	- ICP → Icrcv2
 	- SOL → Sol
-	- ETH, BASE, BSC, POL, ARB → Eth
+	- ETH, BASE, BSC, POL, ARB, RH → Eth
 	
 	KNOWLEDGE BASE:
 	- if user needs direct assistance or wants to contact support, suggest to visit https://docs.oisy.com/using-oisy-wallet/support or to raise a support ticket (https://docs.oisy.com/using-oisy-wallet/how-tos/raise-a-support-ticket)
