@@ -26,6 +26,7 @@ export enum PLAUSIBLE_EVENTS {
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
 	TIP = 'tip',
+	CYCLES_MINT = 'cycles_mint',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -63,7 +64,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
-	TIPS = 'tips'
+	TIPS = 'tips',
+	COMPUTE = 'compute'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
