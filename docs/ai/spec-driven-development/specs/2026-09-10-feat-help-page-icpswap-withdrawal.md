@@ -19,12 +19,17 @@ Both are already wrapped in OISY's canister and API layers.
 
 ICPSwap tracks a second kind, the **mistransferred balance** — tokens transferred straight to the
 pool canister without a matching `deposit` call, so the pool never credited them to a position.
-This spec originally covered it too. It is **out of scope**, because it cannot arise for an OISY
-user: a mistransfer belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through
-the ICRC-2 approval flow (`depositFrom` against an allowance). ICPSwap enforces the same
-distinction — `getMistransferBalance` answers `InternalError: Use deposit and withdraw instead` for
-a pool's own trading pair, which is the only pair this page ever asks about (verified against the
-live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
+This spec originally covered it too. It is **out of scope**. Current OISY cannot create one:
+ICPSwap is only quoted for ICRC-2 source tokens, which deposit through `depositFrom` against an
+allowance, and `fetchIcpSwap` refuses an ICRC-1 source outright rather than rely on that. An
+ICRC-1 transfer-then-`deposit` path did exist from 2025-05-16 to 2025-08-06, before the quote was
+gated on ICRC-2, wherever ICPSwap's feature flag was on — staging and beta through deployment
+secrets, production not recorded in the repo. Tokens a failed `deposit` left behind on that path
+are not reachable through the mistransfer endpoints either: `getMistransferBalance` answers
+`InternalError: Use deposit and withdraw instead` for a pool's own trading pair, which is the only
+pair this page ever asks about (verified against the live ICP/ckETH pool
+`angxa-baaaa-aaaag-qcvnq-cai`, both legs). Recovering them would mean repeating `deposit`, then
+`withdraw` — a separate change, worth making only if that window reached real users.
 
 ## Scope
 
@@ -40,7 +45,7 @@ live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
 
 - Scanning pools where only **one** leg is an active token. Roughly half of the 876 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
 - Scanning other fee tiers. All 876 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
-- The **mistransferred balance** (see above): unreachable for an ICRC-2-only flow.
+- The **mistransferred balance**, and tokens left uncredited by a failed ICRC-1 `deposit` (see above): current OISY cannot create either.
 - Any recovery for non-ICPSwap swap providers (KongSwap, Velora, NEAR Intents, OneSec).
 - Recovery of ICPSwap **liquidity positions**. Only loose balances are covered; the user holds no LP positions through OISY.
 - Pool selection by pasting a raw pool canister ID.
@@ -236,7 +241,7 @@ Update `docs/ai/PRODUCT.md` in the same PR:
 | Two "Support" destinations (user menu vs. page) | Keep the user menu as it is; both coexist, page card 1 carries the same link.                                                                                                                                                                                                                                                                                       |
 | Withdraw button granularity                     | Per-row, so a partial failure is visible.                                                                                                                                                                                                                                                                                                                           |
 | How to discover stranded pools                  | Scan the pools between the user's active tokens, sourced from one `getAllPools` query. Rejected: mining the transaction store for pool counterparties — its recall depends on how much history happens to be loaded, and OISY's IC transaction store is paginated and index-canister-dependent, so the tool could silently miss the very balance the user came for. |
-| Mistransferred balance                          | Dropped. It only arises from the direct ICRC-1 deposit flow; OISY is ICRC-2-only, and ICPSwap refuses the query for a pool's own pair.                                                                                                                                                                                                                              |
+| Mistransferred balance                          | Dropped. Current OISY cannot create it: ICPSwap is only quoted for ICRC-2 sources, and `fetchIcpSwap` refuses any other. The ICRC-1 path that existed before 2025-08-06 leaves tokens a `deposit` retry recovers, not the mistransfer query, which ICPSwap refuses for a pool's own pair.                                                                           |
 | Analytics                                       | Track, as a single structured `help` event (pattern B), with the type encoded in `event_context` / `event_subcontext` / `event_modifier` / `result_*`.                                                                                                                                                                                                              |
 | Amounts in analytics                            | Omitted, per privacy invariant 3; a `balances_found` count carries the product signal instead.                                                                                                                                                                                                                                                                      |
 
