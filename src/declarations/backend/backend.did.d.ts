@@ -70,6 +70,17 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Minting TCYCLES from ICP through the NNS Cycles Minting Canister: an ICP
+			 * transfer to the CMC's deposit account for the caller, then
+			 * `notify_mint_cycles`. Only the caller's own principal can notify its
+			 * deposit, so the row, opened before the transfer, is what lets a later
+			 * session finish a mint whose tab closed between the two calls. The ICP
+			 * block index, learned once the transfer returns, rides in `external_refs`.
+			 */
+			CyclesMint: CyclesMintData;
+	  }
+	| {
+			/**
 			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
 			 * single variant covers all six directions, discriminated by the
 			 * `direction` field; the minter block indices, the BTC txid and deposit
@@ -776,6 +787,26 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 	allowed_external_content_source_urls: [] | [Array<string>];
+}
+/**
+ * Cycles mint payload: the values fixed when the mint starts. The row opens
+ * before the ICP transfer, so the transfer's creation timestamp is one of them;
+ * only the block index is learned later, in `external_refs`.
+ */
+export interface CyclesMintData {
+	/**
+	 * `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+	 * ledger deduplicate the transfer, and it is what finds the block again
+	 * when the tab died before the transfer returned.
+	 */
+	transfer_created_at_ns: bigint;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units: the ICP sent to the CMC, without the
+	 * ledger fee.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
