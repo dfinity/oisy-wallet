@@ -87,6 +87,7 @@ import {
 	getApproveInstruction as getToken2022ApproveInstruction,
 	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
+	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
 	AuthorityType as Token2022AuthorityType
@@ -1634,6 +1635,38 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The Token-2022 close decides a refusal just as the Token program's does, so it is read the
+		// same way: a payout to the user states nothing, anywhere else is refused.
+		describe('a Token-2022 `CloseAccount` instruction', () => {
+			const closeTo = (destination: string) =>
+				getToken2022CloseAccountInstruction({
+					account: address(mockSolAddress3),
+					destination: address(destination),
+					owner: address(mockSolAddress)
+				});
+
+			it('should state nothing for a close that pays the user back', () => {
+				expect(
+					mapSolInstruction({ instruction: closeTo(mockSolAddress), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should fail closed on a close that pays somebody else', () => {
+				expect(
+					mapSolInstruction({ instruction: closeTo(mockSolAddress2), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a close when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: closeTo(mockSolAddress) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
 		});
 
 		it('should fail closed on a Token-2022 `Burn` instruction', () => {
