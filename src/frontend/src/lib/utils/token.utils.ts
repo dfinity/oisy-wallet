@@ -317,7 +317,10 @@ export const standardLabel = (standard: TokenStandard | undefined): string =>
  * A custom ledger is free to claim any symbol, so a symbol alone cannot identify a ledger. Each
  * token is labelled with its display symbol, and where a *different* ledger in the set shares
  * that symbol, the label is suffixed with the shortened ledger id - the one field an impersonating
- * token cannot copy. A ledger listed twice (a default that is also an enabled custom token) is
+ * token cannot copy. A symbol that spells out another token's suffixed label - `XYZ (qaa6y-...)`
+ * as literal text - is suffixed too, so a label can never be forged from symbol text: an
+ * unsuffixed label then matches no other symbol and no suffixed label, and suffixed labels differ
+ * by ledger id. A ledger listed twice (a default that is also an enabled custom token) is
  * labelled once, from its first entry: the default, which carries the `oisySymbol` a custom
  * duplicate lacks and which the rest of the app treats as authoritative.
  *
@@ -345,15 +348,15 @@ export const buildIcTokenLabels = (tokens: IcToken[]): Map<LedgerCanisterIdText,
 		new Map()
 	);
 
+	const suffixedLabel = (token: IcToken): string =>
+		`${getTokenDisplaySymbol(token)} (${shortenWithMiddleEllipsis({ text: token.ledgerCanisterId })})`;
+
+	const suffixedLabels = new Set(uniqueTokens.map(suffixedLabel));
+
 	return uniqueTokens.reduce<Map<LedgerCanisterIdText, string>>((acc, token) => {
 		const symbol = getTokenDisplaySymbol(token);
-		const ambiguous = (ledgersBySymbol.get(symbol)?.size ?? 0) > 1;
+		const ambiguous = (ledgersBySymbol.get(symbol)?.size ?? 0) > 1 || suffixedLabels.has(symbol);
 
-		return acc.set(
-			token.ledgerCanisterId,
-			ambiguous
-				? `${symbol} (${shortenWithMiddleEllipsis({ text: token.ledgerCanisterId })})`
-				: symbol
-		);
+		return acc.set(token.ledgerCanisterId, ambiguous ? suffixedLabel(token) : symbol);
 	}, new Map());
 };
