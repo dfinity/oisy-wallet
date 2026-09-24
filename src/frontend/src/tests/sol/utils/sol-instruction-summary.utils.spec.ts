@@ -479,6 +479,106 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBe(1_000_000_000n);
 		});
 
+		// An account that pre-dates the message can be emptied before its close just the same.
+		// Reading its balance from before the transaction called that close an unwrap of something
+		// already gone.
+		it('should hold nothing when a pre-existing account was emptied before its close', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: wsol,
+								destination: 'poo11111111111111111111111111111111111111',
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(2_039_280n);
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		it('should add what a pre-existing account received before its close', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 1_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(2_039_280n + 6_000_000_000n);
+			expect(close?.wrapped).toBe(6_000_000_000n);
+		});
+
+		// Nothing to start from: an account that pre-dates the message and whose state no run read.
+		it('should hold an unknown amount when no run read the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBeUndefined();
+		});
+
 		// A wrapped SOL account holds its token balance as lamports, so a token transfer into one
 		// hands that much more over when it closes. Counting only System funding reported the rent
 		// alone and called the close a return of it.

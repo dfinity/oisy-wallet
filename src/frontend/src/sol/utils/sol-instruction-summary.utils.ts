@@ -490,16 +490,16 @@ const toEffect = ({
 			// an amount that was never there. An amount nobody read leaves it as an unwrap, which
 			// is the reading that does not understate.
 			//
-			// What it held when it closed, not before the transaction ran: an account this message
-			// opened has no state to read beforehand, and the swaps that open one wrap into it and
-			// unwrap out of it within the same message. Taken as what it hands back less the rent
-			// it was opened with, which is what is left once the account itself is paid for.
-			const openedWith = openedWithRent({ account, flattened, until: position });
-
-			const wrapped =
-				nonNullish(openedWith) && nonNullish(returned)
-					? maxBigInt(returned - openedWith, ZERO)
-					: accountTokenAmounts[account];
+			// What it held when it closed, not before the transaction ran: the swaps that open one
+			// wrap into it and unwrap out of it within the same message, and one that pre-dates the
+			// message can be emptied before its close just the same.
+			const wrapped = heldAtInstruction({
+				account,
+				native: mint === WSOL_TOKEN.address,
+				flattened,
+				accountTokenAmounts,
+				until: position
+			});
 
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
@@ -606,6 +606,85 @@ const toEffect = ({
  * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
  * swap hands back the rent and the wrapped SOL together. No instruction states that total.
  */
+/**
+ * What a token account holds by the time an instruction reaches it.
+ *
+ * The same walk the lamports take, over the token balance: from what it held before the
+ * transaction, or from nothing when this message opened it, plus every transfer in and out since.
+ * Reading the state from before the transaction instead says a wrapped SOL account emptied on the
+ * way still holds what it started with, and calls its close an unwrap of something already gone.
+ *
+ * Undefined when there is nothing to start from: an account that pre-dates the message and whose
+ * state no run read is one whose balance nobody knows.
+ */
+const heldAtInstruction = ({
+	account,
+	native,
+	flattened,
+	accountTokenAmounts,
+	until
+}: {
+	account: SolAddress;
+	// Whether the account holds wrapped SOL, whose balance is its lamports: a System transfer into
+	// one is the wrapping, and raises the token balance with them. Of any other mint it does not.
+	native: boolean;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
+	until: number;
+}): bigint | undefined => {
+	const opened = nonNullish(openedWithRent({ account, flattened, until }));
+
+	const held = accountTokenAmounts[account] ?? (opened ? ZERO : undefined);
+
+	if (isNullish(held)) {
+		return undefined;
+	}
+
+	return flattened.slice(0, until).reduce<bigint>(
+		(
+			acc,
+			{
+				instruction: {
+					program,
+					parsed: { type, info }
+				}
+			}
+		) => {
+			// Wrapping: a System transfer into a wrapped SOL account raises its token balance with
+			// its lamports, because there the two are the same thing.
+			if (native && program === 'system' && type === 'transfer') {
+				const wrapping = amount({ info, key: 'lamports' });
+
+				return nonNullish(wrapping) && address({ info, key: 'destination' }) === account
+					? acc + wrapping
+					: acc;
+			}
+
+			if (
+				isNullish(program) ||
+				!TOKEN_PROGRAMS.includes(program) ||
+				!['transfer', 'transferChecked'].includes(type)
+			) {
+				return acc;
+			}
+
+			const moved =
+				type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+
+			if (isNullish(moved)) {
+				return acc;
+			}
+
+			if (address({ info, key: 'destination' }) === account) {
+				return acc + moved;
+			}
+
+			return address({ info, key: 'source' }) === account ? maxBigInt(acc - moved, ZERO) : acc;
+		},
+		held
+	);
+};
+
 /**
  * The rent an account was opened with, when this transaction opened it.
  *
