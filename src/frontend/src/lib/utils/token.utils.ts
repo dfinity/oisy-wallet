@@ -317,21 +317,35 @@ export const standardLabel = (standard: TokenStandard | undefined): string =>
  * A custom ledger is free to claim any symbol, so a symbol alone cannot identify a ledger. Each
  * token is labelled with its display symbol, and where a *different* ledger in the set shares
  * that symbol, the label is suffixed with the shortened ledger id - the one field an impersonating
- * token cannot copy. The same ledger listed twice (a default that is also an enabled custom
- * token) is not a collision.
+ * token cannot copy. A ledger listed twice (a default that is also an enabled custom token) is
+ * labelled once, from its first entry: the default, which carries the `oisySymbol` a custom
+ * duplicate lacks and which the rest of the app treats as authoritative.
  *
  * Callers that show a token in several places must build the labels once, over the whole set the
  * user can encounter, and pass them down: computed per surface, a filtered list can lose the twin
  * and label an impostor as though it were unique.
  */
 export const buildIcTokenLabels = (tokens: IcToken[]): Map<LedgerCanisterIdText, string> => {
-	const ledgersBySymbol = tokens.reduce<Map<string, Set<LedgerCanisterIdText>>>((acc, token) => {
-		const symbol = getTokenDisplaySymbol(token);
+	const uniqueTokens = [
+		...tokens
+			.reduce<Map<LedgerCanisterIdText, IcToken>>(
+				(acc, token) =>
+					acc.has(token.ledgerCanisterId) ? acc : acc.set(token.ledgerCanisterId, token),
+				new Map()
+			)
+			.values()
+	];
 
-		return acc.set(symbol, (acc.get(symbol) ?? new Set()).add(token.ledgerCanisterId));
-	}, new Map());
+	const ledgersBySymbol = uniqueTokens.reduce<Map<string, Set<LedgerCanisterIdText>>>(
+		(acc, token) => {
+			const symbol = getTokenDisplaySymbol(token);
 
-	return tokens.reduce<Map<LedgerCanisterIdText, string>>((acc, token) => {
+			return acc.set(symbol, (acc.get(symbol) ?? new Set()).add(token.ledgerCanisterId));
+		},
+		new Map()
+	);
+
+	return uniqueTokens.reduce<Map<LedgerCanisterIdText, string>>((acc, token) => {
 		const symbol = getTokenDisplaySymbol(token);
 		const ambiguous = (ledgersBySymbol.get(symbol)?.size ?? 0) > 1;
 
