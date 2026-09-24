@@ -902,6 +902,37 @@ describe('sol-instruction-summary.utils', () => {
 			expect(views.map(({ kind }) => kind)).toContain('createTokenAccount');
 		});
 
+		// A confirmed transaction's balances carry an entry for every account it names, an account
+		// it creates among them, at nothing. Seeding from the keys alone read those as already
+		// there and dropped the creation that made them, rent and all.
+		it('should keep a creation of an account whose balance going in was nothing', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [owner]: 10_000_000n, [ata]: ZERO }
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
 		// Nothing says it was a no-op without a run to say the account was already there.
 		it('should keep an idempotent creation when no run read the account', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';

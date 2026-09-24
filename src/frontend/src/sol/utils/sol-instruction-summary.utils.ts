@@ -84,7 +84,14 @@ const noOpCreations = ({
 	flattened: { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[];
 	accountLamports: Partial<Record<SolAddress, bigint>>;
 }): { positions: Set<number>; parents: Set<number> } => {
-	const inPlace = new Set<SolAddress>(Object.keys(accountLamports));
+	// Above zero, not merely present. A confirmed transaction's balances carry an entry for every
+	// account it names, an account it creates among them, at nothing: seeding from the keys alone
+	// read those as already there and dropped the creation that made them.
+	const inPlace = new Set<SolAddress>(
+		Object.entries(accountLamports)
+			.filter(([, lamports]) => nonNullish(lamports) && lamports > ZERO)
+			.map(([account]) => account)
+	);
 
 	const positions = new Set<number>();
 	const parents = new Set<number>();
