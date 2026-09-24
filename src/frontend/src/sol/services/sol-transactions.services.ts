@@ -125,6 +125,15 @@ export const fetchSolTransactionsForSignature = async ({
 		{}
 	);
 
+	// Which mint each token account held going in, for the same reason as its holder.
+	const accountMintsBefore = [...(preTokenBalances ?? [])].reduce<
+		Record<SolAddress, SplTokenAddress>
+	>((acc, { accountIndex, mint }) => {
+		const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
+
+		return nonNullish(account) && nonNullish(mint) ? { ...acc, [account]: mint } : acc;
+	}, {});
+
 	// What each token account held going in, from the same array the owners and mints come from.
 	// Only the pre-state: what an account holds at a close is walked forward from here, and the
 	// post-state of an account that was closed is nothing at all.
@@ -166,6 +175,7 @@ export const fetchSolTransactionsForSignature = async ({
 		userAddress: address,
 		addressToToken,
 		accountHolders,
+		accountMintsBefore,
 		accountLamports,
 		accountTokenAmounts
 	});

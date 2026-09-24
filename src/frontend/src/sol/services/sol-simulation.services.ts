@@ -12,6 +12,7 @@ import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSimulationResult } from '$sol/types/sol-simulation';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
@@ -104,16 +105,23 @@ const simulate = async ({
 	// Who held each token account going in. Not the map of owners the run reports, which prefers
 	// the state after the transaction: an address closed and opened again for somebody else within
 	// the one message would read as theirs at a close that happened while it was still the user's.
-	const accountHolders = addresses.reduce<Record<SolAddress, SolAddress>>((acc, account, index) => {
-		const preAccount = preAccounts[index];
-		const holder = nonNullish(preAccount) ? parseTokenAccountState(preAccount)?.owner : undefined;
+	const { accountHolders, accountMintsBefore } = addresses.reduce<{
+		accountHolders: Record<SolAddress, SolAddress>;
+		accountMintsBefore: Record<SolAddress, SplTokenAddress>;
+	}>(
+		(acc, account, index) => {
+			const preAccount = preAccounts[index];
+			const token = nonNullish(preAccount) ? parseTokenAccountState(preAccount) : undefined;
 
-		if (nonNullish(holder)) {
-			acc[account] = holder;
-		}
+			if (nonNullish(token)) {
+				acc.accountHolders[account] = token.owner;
+				acc.accountMintsBefore[account] = token.tokenAddress;
+			}
 
-		return acc;
-	}, {});
+			return acc;
+		},
+		{ accountHolders: {}, accountMintsBefore: {} }
+	);
 
 	// What each token account held going in. A wrapped SOL account holding nothing is closed rather
 	// than unwrapped, and the two read differently: there is no SOL to unwrap out of an empty one.
@@ -145,6 +153,7 @@ const simulate = async ({
 		userAddress: address,
 		addressToToken,
 		accountHolders,
+		accountMintsBefore,
 		accountLamports,
 		accountTokenAmounts,
 		rentExemptMinimum,
@@ -163,7 +172,8 @@ const simulate = async ({
 			ownedAddresses: [address, ...ownedAddresses],
 			userAddress: address,
 			addressToToken,
-			accountHolders
+			accountHolders,
+			accountMintsBefore
 		}),
 		userAddress: address
 	});

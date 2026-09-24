@@ -1222,6 +1222,95 @@ describe('sol-instruction-summary.utils', () => {
 			expect(second?.wrapped).toBe(ZERO);
 		});
 
+		// The run's single map of mints is written by the last initialisation. An address reopened
+		// for another mint later in the message would lend its first close that later mint - the
+		// wrong kind, the wrong label, and no split of the wrapped SOL out of the payout.
+		it('should read the mint a close was opened with, not the one opened after it', () => {
+			const x = mockAtaAddress2;
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: mockSolAddress, owner: mockSolAddress }
+								}
+							},
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: x,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: mockSolAddress,
+										space: 165
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'initializeAccount3',
+									info: { account: x, mint: bonk, owner: mockSolAddress }
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				addressToToken: { [x]: bonk },
+				accountHolders: { [x]: mockSolAddress },
+				accountMintsBefore: { [x]: WSOL_TOKEN.address },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [x]: 5_000_000_000n },
+				rentExemptMinimum: 2_039_280n
+			});
+
+			const [close] = views
+				.flatMap((view) => view.children ?? [view])
+				.filter(({ kind }) => kind === 'unwrap' || kind === 'closeTokenAccount');
+
+			expect(close?.kind).toBe('unwrap');
+			expect(close?.tokenAddress).toBe(WSOL_TOKEN.address);
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		// For an address the message never opens, the account is the same one throughout and the
+		// run's map is the only reading there may be.
+		it("should take the run's mint for an account the message never opens", () => {
+			const x = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: x, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				addressToToken: { [x]: WSOL_TOKEN.address }
+			});
+
+			expect(views[0]?.kind).toBe('unwrap');
+		});
+
 		// A hand-over of ownership changes who may act on an account, not whose lamports it holds.
 		// Following it let a message hand the user's account to a program's own address and close
 		// it to a stranger, with the close read as the program's and never refused.

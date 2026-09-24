@@ -351,7 +351,8 @@ const toEffect = ({
 	owned,
 	userAddress,
 	accountMints,
-	accountHolders,
+	openedAt,
+	mintAt,
 	accountLamports,
 	accountTokenAmounts,
 	rentExemptMinimum,
@@ -371,9 +372,14 @@ const toEffect = ({
 	// balance. Separate from the set above, which is every account of theirs the run named.
 	userAddress: OptionSolAddress;
 	accountMints: Record<SolAddress, SplTokenAddress>;
-	// Who held each token account before the transaction ran. Whose an account is, as against who
-	// may act on it: the signer of a close is its authority, which need not be its holder.
-	accountHolders: Partial<Record<SolAddress, SolAddress>>;
+	// Whose an account is and which mint it holds as of an instruction, walked from the state
+	// before the transaction. Whose it is, as against who may act on it: the signer of a close is
+	// its authority, which need not be its holder.
+	openedAt: (params: { account: SolAddress; position: number }) => {
+		holder?: SolAddress;
+		mint?: SplTokenAddress;
+	};
+	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Partial<Record<SolAddress, bigint>>;
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
@@ -476,9 +482,7 @@ const toEffect = ({
 			// Three readings, because absent is not the same as somebody else's: an account no run
 			// read says nothing either way, and calling it not theirs would drop it out of the
 			// refusal. Only an account read and held by somebody else is stated as not the user's.
-			const holder = nonNullish(account)
-				? holderAt({ account, flattened, accountHolders, until: position })
-				: undefined;
+			const { holder } = nonNullish(account) ? openedAt({ account, position }) : {};
 
 			const ownAccount = nonNullish(holder)
 				? holder === userAddress
@@ -504,7 +508,10 @@ const toEffect = ({
 				return undefined;
 			}
 
-			const mint = accountMints[account];
+			// The mint the account holds as of this close, for the same reason as its holder: an
+			// address reopened for another mint later in the message would otherwise lend this close
+			// that later mint, and with it the wrong label and the wrong split.
+			const mint = mintAt({ account, position });
 
 			// What it hands back is everything it holds by the time it closes: whatever it already
 			// held, the rent it was funded with moments earlier, and anything an earlier close in
@@ -513,7 +520,7 @@ const toEffect = ({
 				account,
 				flattened,
 				accountLamports,
-				accountMints,
+				mintAt,
 				until: position
 			});
 
@@ -758,31 +765,34 @@ const heldAtInstruction = ({
 	);
 
 /**
- * Whose a token account is, as of an instruction: the holder it had when its current lifecycle
- * began.
+ * Whose a token account is and which mint it holds, as of an instruction: what it was opened as,
+ * for its current lifecycle.
  *
- * Walked from the holder before the transaction ran, the same way its balances are: initialising
- * an account names whose it is, and closing it ends it. Taking the holder the run reported for the
- * whole transaction instead let a message close an account of the user's, open the same address
- * again for somebody else, and have the first close read as that somebody's.
+ * Walked from the state before the transaction ran, the same way its balances are: initialising an
+ * account names whose it is and its mint, an associated-account creation does the same, and
+ * closing it ends it. Taking either from the run's report for the whole transaction instead let a
+ * message close an account of the user's, open the same address again for somebody else or for
+ * another mint, and have the first close read as that later account.
  *
  * A hand-over of ownership is deliberately not followed. It changes who may act on the account,
  * not whose lamports it holds, and within one message it is the means of taking them: hand the
  * user's account to a program's own address, close it to a stranger, and the close reads as the
  * program's. By the same rule an account handed to the user stays whoever's it was.
  */
-const holderAt = ({
+const openedAs = ({
 	account,
 	flattened,
 	accountHolders,
+	accountMintsBefore,
 	until
 }: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	accountHolders: Partial<Record<SolAddress, SolAddress>>;
+	accountMintsBefore: Partial<Record<SolAddress, SplTokenAddress>>;
 	until: number;
-}): SolAddress | undefined =>
-	flattened.slice(0, until).reduce<SolAddress | undefined>(
+}): { holder?: SolAddress; mint?: SplTokenAddress } =>
+	flattened.slice(0, until).reduce<{ holder?: SolAddress; mint?: SplTokenAddress }>(
 		(
 			acc,
 			{
@@ -792,37 +802,84 @@ const holderAt = ({
 				}
 			}
 		) => {
+			if (address({ info, key: 'account' }) !== account) {
+				return acc;
+			}
+
+			const names = (holderKey: string): { holder?: SolAddress; mint?: SplTokenAddress } => {
+				const holder = address({ info, key: holderKey }) ?? acc.holder;
+				const mint = address({ info, key: 'mint' }) ?? acc.mint;
+
+				return {
+					...(nonNullish(holder) && { holder }),
+					...(nonNullish(mint) && { mint })
+				};
+			};
+
 			if (
-				isNullish(program) ||
-				!TOKEN_PROGRAMS.includes(program) ||
-				address({ info, key: 'account' }) !== account
+				program === 'spl-associated-token-account' &&
+				['create', 'createIdempotent'].includes(type)
 			) {
+				return names('wallet');
+			}
+
+			if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
 				return acc;
 			}
 
 			if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
-				return address({ info, key: 'owner' }) ?? acc;
+				return names('owner');
 			}
 
-			return type === 'closeAccount' ? undefined : acc;
+			return type === 'closeAccount' ? {} : acc;
 		},
-		accountHolders[account]
+		{
+			...(nonNullish(accountHolders[account]) && { holder: accountHolders[account] }),
+			...(nonNullish(accountMintsBefore[account]) && { mint: accountMintsBefore[account] })
+		}
+	);
+
+/**
+ * Whether the message opens an account at an address anywhere, which makes the run's single map of
+ * mints unreliable for it: that map is written by the last initialisation, which may be of an
+ * account opened after the one being read.
+ */
+const initialisedInMessage = ({
+	account,
+	flattened
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+}): boolean =>
+	flattened.some(
+		({
+			instruction: {
+				program,
+				parsed: { type, info }
+			}
+		}) =>
+			address({ info, key: 'account' }) === account &&
+			((program === 'spl-associated-token-account' &&
+				['create', 'createIdempotent'].includes(type)) ||
+				(nonNullish(program) &&
+					TOKEN_PROGRAMS.includes(program) &&
+					['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)))
 	);
 
 const fundedInTransaction = ({
 	account,
 	flattened,
 	accountLamports = {},
-	accountMints = {},
+	mintAt,
 	until
 }: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
-	// Which mint each account holds. A wrapped SOL account's token balance is its lamports, so a
-	// token transfer in or out of one moves lamports; of any other mint, none.
-	accountMints?: Record<SolAddress, SplTokenAddress>;
+	// Which mint an account holds as of an instruction. A wrapped SOL account's token balance is
+	// its lamports, so a token transfer in or out of one moves lamports; of any other mint, none.
+	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
 	// Only what arrived before the instruction being described. A close later in the message hands
 	// its balance on afterwards, and is no part of what the one being described paid out.
 	until?: number;
@@ -859,7 +916,7 @@ const fundedInTransaction = ({
 							account: closed,
 							flattened,
 							accountLamports,
-							accountMints,
+							mintAt,
 							until: index
 						})
 					: undefined;
@@ -875,7 +932,7 @@ const fundedInTransaction = ({
 			if (
 				TOKEN_PROGRAMS.includes(program ?? '') &&
 				['transfer', 'transferChecked'].includes(type) &&
-				accountMints[account] === WSOL_TOKEN.address
+				mintAt({ account, position: index }) === WSOL_TOKEN.address
 			) {
 				const moved =
 					type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
@@ -1035,6 +1092,7 @@ export const mapSolInstructionSummaries = ({
 	userAddress,
 	addressToToken = {},
 	accountHolders = {},
+	accountMintsBefore = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
 	rentExemptMinimum,
@@ -1050,6 +1108,9 @@ export const mapSolInstructionSummaries = ({
 	// at, which is not the same as one held by somebody else. The holder at any later instruction
 	// is walked from here, never taken from the state after the transaction.
 	accountHolders?: Partial<Record<SolAddress, SolAddress>>;
+	// Which mint each token account held before the transaction ran, for the same reason: the mint
+	// at any later instruction is walked from here, never taken from the state after it.
+	accountMintsBefore?: Partial<Record<SolAddress, SplTokenAddress>>;
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
@@ -1069,6 +1130,21 @@ export const mapSolInstructionSummaries = ({
 	const accountMints = collectAccountMints({ flattened, addressToToken });
 
 	const noOps = noOpCreations({ flattened, accountLamports });
+
+	const openedAt = ({ account, position }: { account: SolAddress; position: number }) =>
+		openedAs({ account, flattened, accountHolders, accountMintsBefore, until: position });
+
+	// The run's single map of mints is right for an address whose account never changes within the
+	// message, and only there: for one the message opens, it holds the last account's mint.
+	const mintAt = ({
+		account,
+		position
+	}: {
+		account: SolAddress;
+		position: number;
+	}): SplTokenAddress | undefined =>
+		openedAt({ account, position }).mint ??
+		(initialisedInMessage({ account, flattened }) ? undefined : accountMints[account]);
 
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
@@ -1114,7 +1190,8 @@ export const mapSolInstructionSummaries = ({
 				owned,
 				userAddress,
 				accountMints,
-				accountHolders,
+				openedAt,
+				mintAt,
 				accountLamports,
 				accountTokenAmounts,
 				rentExemptMinimum,
