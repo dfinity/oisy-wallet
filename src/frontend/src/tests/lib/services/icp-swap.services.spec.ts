@@ -126,9 +126,13 @@ describe('icp-swap.services', () => {
 			// `getUserUnusedBalance` does not see them.
 			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
 
-			await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-				en.swap.error.deposit_error
-			);
+			await expect(
+				fetchIcpSwap({
+					...swapArgs,
+					sourceToken: mockValidIcrcToken as IcTokenToggleable,
+					isSourceTokenIcrc2: false
+				})
+			).rejects.toThrow(en.swap.error.deposit_error);
 
 			expect(sendIcrc).not.toHaveBeenCalled();
 			expect(deposit).not.toHaveBeenCalled();
