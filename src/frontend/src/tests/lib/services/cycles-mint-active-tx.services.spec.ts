@@ -95,7 +95,7 @@ describe('cycles-mint-active-tx.services', () => {
 	let applySpy: ReturnType<typeof vi.spyOn>;
 	let deleteSpy: ReturnType<typeof vi.spyOn>;
 	let notifySpy: ReturnType<typeof vi.spyOn>;
-	let getTransactionsSpy: ReturnType<typeof vi.spyOn>;
+	let lookupSpy: ReturnType<typeof vi.spyOn>;
 	let trackSpy: ReturnType<typeof vi.spyOn>;
 
 	const poll = (transactions: ActiveUserTransaction[]) =>
@@ -126,8 +126,8 @@ describe('cycles-mint-active-tx.services', () => {
 			.spyOn(activeUserTransactionsServices, 'deleteActiveUserTransaction')
 			.mockResolvedValue();
 		notifySpy = vi.spyOn(cyclesMintServices, 'notifyCyclesMint');
-		getTransactionsSpy = vi
-			.spyOn(icpIndexApi, 'getTransactions')
+		lookupSpy = vi
+			.spyOn(icpIndexApi, 'getAccountIdentifierTransactions')
 			.mockResolvedValue(page({ transactions: [] }));
 		trackSpy = vi.spyOn(cyclesMintAnalytics, 'trackCyclesMint').mockImplementation(() => undefined);
 	});
@@ -141,7 +141,7 @@ describe('cycles-mint-active-tx.services', () => {
 			await pollPastGrace([mockOisyTradeActiveUserTransaction]);
 
 			expect(notifySpy).not.toHaveBeenCalled();
-			expect(getTransactionsSpy).not.toHaveBeenCalled();
+			expect(lookupSpy).not.toHaveBeenCalled();
 		});
 
 		// The modal that opened the row is likely still notifying it.
@@ -255,7 +255,7 @@ describe('cycles-mint-active-tx.services', () => {
 
 		describe('a row without a deposit', () => {
 			it('records a deposit it finds, then notifies it', async () => {
-				getTransactionsSpy.mockResolvedValue(
+				lookupSpy.mockResolvedValue(
 					page({
 						transactions: [
 							indexEntry({ id: 42n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
@@ -284,7 +284,7 @@ describe('cycles-mint-active-tx.services', () => {
 			});
 
 			it('closes a found deposit in the same tick when the CMC has answered', async () => {
-				getTransactionsSpy.mockResolvedValue(
+				lookupSpy.mockResolvedValue(
 					page({
 						transactions: [
 							indexEntry({ id: 42n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
@@ -313,14 +313,14 @@ describe('cycles-mint-active-tx.services', () => {
 
 				await pollPastGrace([unobserved]);
 
-				expect(getTransactionsSpy).toHaveBeenCalledOnce();
+				expect(lookupSpy).toHaveBeenCalledOnce();
 				expect(deleteSpy).not.toHaveBeenCalled();
 				expect(notifySpy).not.toHaveBeenCalled();
 
 				// The next look waits for a whole grace period again.
 				await poll([unobserved]);
 
-				expect(getTransactionsSpy).toHaveBeenCalledOnce();
+				expect(lookupSpy).toHaveBeenCalledOnce();
 			});
 
 			it('deletes the row once the transfer can no longer land: nothing moved', async () => {
@@ -356,23 +356,74 @@ describe('cycles-mint-active-tx.services', () => {
 	describe('findCyclesMintDeposit', () => {
 		const find = () => findCyclesMintDeposit({ identity: mockIdentity, data: mockCyclesMintData });
 
-		// Both answers are acted on: a found deposit is notified, and a missing one can get
-		// its row deleted.
-		it('reads the caller’s ICP history, certified', async () => {
+		// Both answers are acted on: a found deposit is notified, and a missing one closes its
+		// row as never sent.
+		it('reads the history of the caller’s CMC deposit account, certified', async () => {
 			await find();
 
-			expect(getTransactionsSpy).toHaveBeenCalledWith(
+			expect(lookupSpy).toHaveBeenCalledWith(
 				expect.objectContaining({
 					identity: mockIdentity,
-					owner: mockPrincipal,
+					accountIdentifier: DEPOSIT_ACCOUNT_IDENTIFIER,
 					indexCanisterId: ICP_INDEX_CANISTER_ID,
 					certified: true
 				})
 			);
 		});
 
+		// That account also sees the burn and the refund of every earlier mint.
+		it('passes over the burns and refunds of earlier mints', async () => {
+			const burn: IcpIndexDid.TransactionWithId = {
+				id: 21n,
+				transaction: {
+					memo: ZERO,
+					icrc1_memo: [],
+					operation: {
+						Burn: {
+							from: DEPOSIT_ACCOUNT_IDENTIFIER,
+							amount: { e8s: mockCyclesMintData.amount },
+							spender: []
+						}
+					},
+					timestamp: [{ timestamp_nanos: CREATED_AT_NS + 21n }],
+					created_at_time: []
+				}
+			};
+
+			const refund: IcpIndexDid.TransactionWithId = {
+				id: 20n,
+				transaction: {
+					memo: ZERO,
+					icrc1_memo: [],
+					operation: {
+						Transfer: {
+							to: 'user-account',
+							fee: { e8s: 10_000n },
+							from: DEPOSIT_ACCOUNT_IDENTIFIER,
+							amount: { e8s: mockCyclesMintData.amount },
+							spender: []
+						}
+					},
+					timestamp: [{ timestamp_nanos: CREATED_AT_NS + 20n }],
+					created_at_time: []
+				}
+			};
+
+			lookupSpy.mockResolvedValueOnce(
+				page({
+					transactions: [
+						burn,
+						refund,
+						indexEntry({ id: 19n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
+					]
+				})
+			);
+
+			await expect(find()).resolves.toBe(19n);
+		});
+
 		it('pages back until it finds the deposit', async () => {
-			getTransactionsSpy
+			lookupSpy
 				.mockResolvedValueOnce(
 					page({
 						transactions: [
@@ -391,14 +442,11 @@ describe('cycles-mint-active-tx.services', () => {
 
 			await expect(find()).resolves.toBe(18n);
 
-			expect(getTransactionsSpy).toHaveBeenNthCalledWith(
-				2,
-				expect.objectContaining({ start: 19n })
-			);
+			expect(lookupSpy).toHaveBeenNthCalledWith(2, expect.objectContaining({ start: 19n }));
 		});
 
 		it('stops at the first entry older than the deposit could be', async () => {
-			getTransactionsSpy.mockResolvedValueOnce(
+			lookupSpy.mockResolvedValueOnce(
 				page({
 					transactions: [
 						indexEntry({ id: 20n, timestampNs: CREATED_AT_NS }),
@@ -412,11 +460,11 @@ describe('cycles-mint-active-tx.services', () => {
 
 			await expect(find()).resolves.toBeUndefined();
 
-			expect(getTransactionsSpy).toHaveBeenCalledOnce();
+			expect(lookupSpy).toHaveBeenCalledOnce();
 		});
 
 		it('keeps paging through entries within the ledger’s permitted drift', async () => {
-			getTransactionsSpy
+			lookupSpy
 				.mockResolvedValueOnce(
 					page({
 						transactions: [
@@ -428,11 +476,11 @@ describe('cycles-mint-active-tx.services', () => {
 
 			await expect(find()).resolves.toBeUndefined();
 
-			expect(getTransactionsSpy).toHaveBeenCalledTimes(2);
+			expect(lookupSpy).toHaveBeenCalledTimes(2);
 		});
 
 		it('stops when the history is exhausted', async () => {
-			getTransactionsSpy.mockResolvedValueOnce(
+			lookupSpy.mockResolvedValueOnce(
 				page({
 					transactions: [indexEntry({ id: 20n, timestampNs: CREATED_AT_NS + 20n })],
 					oldestTxId: 20n
@@ -441,17 +489,17 @@ describe('cycles-mint-active-tx.services', () => {
 
 			await expect(find()).resolves.toBeUndefined();
 
-			expect(getTransactionsSpy).toHaveBeenCalledOnce();
+			expect(lookupSpy).toHaveBeenCalledOnce();
 		});
 
 		it('stops when a page does not move the cursor', async () => {
-			getTransactionsSpy.mockResolvedValue(
+			lookupSpy.mockResolvedValue(
 				page({ transactions: [indexEntry({ id: 20n, timestampNs: CREATED_AT_NS + 20n })] })
 			);
 
 			await expect(find()).resolves.toBeUndefined();
 
-			expect(getTransactionsSpy).toHaveBeenCalledTimes(2);
+			expect(lookupSpy).toHaveBeenCalledTimes(2);
 		});
 	});
 });

@@ -1,6 +1,6 @@
 import type { ActiveUserTransaction, CyclesMintData } from '$declarations/backend/backend.did';
 import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getTransactions } from '$icp/api/icp-index.api';
+import { getAccountIdentifierTransactions } from '$icp/api/icp-index.api';
 import {
 	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
 	CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
@@ -57,12 +57,15 @@ const recordSettleObservation = ({ id, updated_at_ns }: ActiveUserTransaction): 
 };
 
 /**
- * Finds a mint's deposit in the caller's ICP history, for a row whose tab died before the
- * transfer returned. Newest first, stopping at the first entry older than any block the
- * deposit could be in (the transfer timestamp minus the ledger's permitted drift).
+ * Finds a mint's deposit for a row whose tab died before the transfer returned, in the
+ * history of the CMC's deposit account for the caller rather than the caller's own: that
+ * account only ever sees mint deposits, their burns and their refunds, so the deposit is
+ * a page or two away however busy the caller's wallet is. Newest first, stopping at the
+ * first entry older than any block the deposit could be in (the transfer timestamp minus
+ * the ledger's permitted drift).
  *
  * Certified, because both answers are acted on: a deposit that is found is notified, and
- * one that is not can get its row deleted. A single replica answering either would
+ * one that is not closes its row as never sent. A single replica answering either would
  * otherwise be enough to report a funded mint as failed, or to strand one.
  */
 export const findCyclesMintDeposit = async ({
@@ -72,17 +75,16 @@ export const findCyclesMintDeposit = async ({
 	identity: Identity;
 	data: CyclesMintData;
 }): Promise<bigint | undefined> => {
-	const owner = identity.getPrincipal();
-	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(owner);
+	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(identity.getPrincipal());
 	const oldestPossibleNs = data.transfer_created_at_ns - ICP_LEDGER_PERMITTED_DRIFT_NS;
 
 	let start: bigint | undefined;
 	let hasOlderPages = true;
 
 	while (hasOlderPages) {
-		const { transactions, oldest_tx_id } = await getTransactions({
+		const { transactions, oldest_tx_id } = await getAccountIdentifierTransactions({
 			identity,
-			owner,
+			accountIdentifier: depositAccountIdentifier,
 			start,
 			maxResults: CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
 			indexCanisterId: ICP_INDEX_CANISTER_ID,
