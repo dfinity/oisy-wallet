@@ -649,6 +649,35 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		// Closed by the poller when no deposit was ever found: reported once, from the row.
+		it('reports a mint that never sent its ICP with its own error code', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({ id: 'cycles-mint-a', status: { Pending: null } })
+			});
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: cyclesMint({
+					id: 'cycles-mint-a',
+					status: { Failed: null },
+					outcome: 'not_sent'
+				})
+			});
+			await tick();
+
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: PLAUSIBLE_EVENTS.CYCLES_MINT,
+				metadata: expect.objectContaining({
+					result_status: 'error',
+					result_error_code: 'not_sent'
+				})
+			});
+			expect(appliedFlags()).toEqual({ 'cycles-mint-a': true });
+		});
+
 		it('fires a swap_error event without a wallet refresh when a ck row fails', async () => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 			activeUserTransactionsStore.upsert({ transaction: pendingChainFusion('chain-fusion-a') });

@@ -266,8 +266,9 @@
 
 				trackCyclesMint(toCyclesMintTrackingParams({ tx }));
 
-				// Unconditional, as for OISY Trade: a failed mint had its ICP leave the wallet,
-				// and a refund brings most of it back, so the balance changed either way.
+				// Unconditional, as for OISY Trade: a mint that failed after its ICP left the
+				// wallet changed the balance (a refund brings most of it back). One closed as never
+				// sent moved nothing, and refreshing for it is only redundant.
 				shouldRefresh = true;
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&

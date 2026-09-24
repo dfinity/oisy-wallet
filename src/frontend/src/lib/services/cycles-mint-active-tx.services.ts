@@ -1,6 +1,6 @@
 import type { ActiveUserTransaction, CyclesMintData } from '$declarations/backend/backend.did';
 import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getTransactions } from '$icp/api/icp-index.api';
+import { getAccountIdentifierTransactions } from '$icp/api/icp-index.api';
 import {
 	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
 	CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
@@ -9,12 +9,7 @@ import {
 } from '$icp/constants/cmc.constants';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
-import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-import {
-	applyActiveUserTransactionPollUpdate,
-	deleteActiveUserTransaction
-} from '$lib/services/active-user-transactions.services';
-import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -57,12 +52,15 @@ const recordSettleObservation = ({ id, updated_at_ns }: ActiveUserTransaction): 
 };
 
 /**
- * Finds a mint's deposit in the caller's ICP history, for a row whose tab died before the
- * transfer returned. Newest first, stopping at the first entry older than any block the
- * deposit could be in (the transfer timestamp minus the ledger's permitted drift).
+ * Finds a mint's deposit for a row whose tab died before the transfer returned, in the
+ * history of the CMC's deposit account for the caller rather than the caller's own: that
+ * account only ever sees mint deposits, their burns and their refunds, so the deposit is
+ * a page or two away however busy the caller's wallet is. Newest first, stopping at the
+ * first entry older than any block the deposit could be in (the transfer timestamp minus
+ * the ledger's permitted drift).
  *
  * Certified, because both answers are acted on: a deposit that is found is notified, and
- * one that is not can get its row deleted. A single replica answering either would
+ * one that is not closes its row as never sent. A single replica answering either would
  * otherwise be enough to report a funded mint as failed, or to strand one.
  */
 export const findCyclesMintDeposit = async ({
@@ -72,17 +70,16 @@ export const findCyclesMintDeposit = async ({
 	identity: Identity;
 	data: CyclesMintData;
 }): Promise<bigint | undefined> => {
-	const owner = identity.getPrincipal();
-	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(owner);
+	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(identity.getPrincipal());
 	const oldestPossibleNs = data.transfer_created_at_ns - ICP_LEDGER_PERMITTED_DRIFT_NS;
 
 	let start: bigint | undefined;
 	let hasOlderPages = true;
 
 	while (hasOlderPages) {
-		const { transactions, oldest_tx_id } = await getTransactions({
+		const { transactions, oldest_tx_id } = await getAccountIdentifierTransactions({
 			identity,
-			owner,
+			accountIdentifier: depositAccountIdentifier,
 			start,
 			maxResults: CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
 			indexCanisterId: ICP_INDEX_CANISTER_ID,
@@ -162,22 +159,33 @@ const resolveDeposit = async ({
 
 	// Only a `Pending` row: every write that learns a deposit also moves the row to
 	// `Executing`, so an `Executing` row without one is malformed rather than unsent, and is
-	// left alone rather than deleted.
+	// left alone rather than closed.
 	if (canStillLand || !('Pending' in tx.status)) {
 		forgetRow(tx.id);
 		return undefined;
 	}
 
-	// Nothing moved, so the row is deleted rather than failed: a failed mint would have
-	// the user look for ICP that never left the wallet.
-	await deleteActiveUserTransaction({ identity, id: tx.id });
+	// Nothing moved, but the user started this mint and may be watching it in Active
+	// transactions: the row closes as failed, never sent, rather than vanishing. The
+	// modal's own dead ends delete their rows instead, having just shown the failure. The
+	// terminal analytics fire from the row, like every other ending's.
+	const status = advanceStatus({ current: tx.status, candidate: { Failed: null } });
+
 	forgetRow(tx.id);
 
-	trackCyclesMint({
-		step: 'mint',
-		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-		errorCode: 'not_sent'
-	});
+	if (nonNullish(status)) {
+		await applyActiveUserTransactionPollUpdate({
+			identity,
+			tx,
+			update: {
+				status,
+				externalRefs: toCyclesMintExternalRefs({
+					...toCyclesMintExternalRefsMap(tx.external_refs),
+					[CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME]: 'not_sent'
+				})
+			}
+		});
+	}
 
 	return undefined;
 };
@@ -212,8 +220,11 @@ const pollCyclesMintTransaction = async ({
 	const update = toCyclesMintRowUpdate(await notifyCyclesMint({ identity, blockIndex }));
 
 	// `Processing`, a transient CMC error or no answer at all: the ICP is in the CMC's
-	// custody and notifying again can still mint, so the row stays in flight.
+	// custody and notifying again can still mint, so the row stays in flight. It earns the
+	// grace period again before the next notify, so a CMC that keeps answering this way, or
+	// cannot be reached, is asked about once a minute rather than on every tick.
 	if (isNullish(update)) {
+		forgetRow(tx.id);
 		return;
 	}
 
@@ -263,6 +274,9 @@ export const pollCyclesMintActiveUserTransactions = async ({
 			await pollCyclesMintTransaction({ identity, tx });
 		} catch (err: unknown) {
 			consoleError(err);
+
+			// An index or backend that does not answer backs the row off the same way.
+			forgetRow(tx.id);
 		}
 	}
 };

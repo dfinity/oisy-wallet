@@ -118,7 +118,9 @@ export const toCyclesMintRefBlockIndex = (value: string | undefined): bigint | u
 };
 
 export const toCyclesMintOutcome = (value: string | undefined): CyclesMintOutcome | undefined =>
-	value === 'minted' || value === 'refunded' || value === 'failed' ? value : undefined;
+	value === 'minted' || value === 'refunded' || value === 'failed' || value === 'not_sent'
+		? value
+		: undefined;
 
 const isCyclesMintMemo = (memo: Uint8Array | undefined): boolean =>
 	nonNullish(memo) &&
@@ -244,6 +246,6 @@ export const toCyclesMintTrackingParams = ({
 		destinationSymbol: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL],
 		...(isSucceeded
 			? { destinationAmount: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.CREDITED_AMOUNT] }
-			: { errorCode: outcome === 'refunded' ? 'refunded' : 'failed' })
+			: { errorCode: outcome === 'refunded' || outcome === 'not_sent' ? outcome : 'failed' })
 	};
 };
