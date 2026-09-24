@@ -705,6 +705,103 @@ describe('sol-instruction-summary.utils', () => {
 			expect(views.map(({ kind }) => kind)).not.toContain('unknown');
 		});
 
+		// An account this message opens has no pre-state, so asking only about the state before the
+		// transaction called the second creation a real one and charged the same rent twice.
+		it('should say nothing for an idempotent creation of an account this message just opened', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					},
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: ata,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: owner,
+										space: 165
+									}
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// Closing it puts the address back to nothing, so what follows opens it again.
+		it('should keep an idempotent creation that follows a close of the same account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					},
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(views.map(({ kind }) => kind)).toContain('createTokenAccount');
+		});
+
 		// Nothing says it was a no-op without a run to say the account was already there.
 		it('should keep an idempotent creation when no run read the account', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';

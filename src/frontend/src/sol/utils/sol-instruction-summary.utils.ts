@@ -68,6 +68,8 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
 	};
 };
 
+const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
+
 /**
  * Whether an idempotent account creation found the account already there and did nothing.
  *
@@ -75,18 +77,79 @@ const tokenAmount = (info: object): { amount?: bigint; decimals?: number } => {
  * so a pre-state is what says it already existed. Without a run there are no pre-states and
  * nothing is read as a no-op, which is right: the creation is then unrefuted.
  */
-const createdNothing = ({
-	type,
-	account,
+const noOpCreations = ({
+	flattened,
 	accountLamports
 }: {
-	type: string;
-	account: SolAddress | undefined;
+	flattened: { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[];
 	accountLamports: Partial<Record<SolAddress, bigint>>;
-}): boolean =>
-	type === 'createIdempotent' && nonNullish(account) && nonNullish(accountLamports[account]);
+}): { positions: Set<number>; parents: Set<number> } => {
+	const inPlace = new Set<SolAddress>(Object.keys(accountLamports));
 
-const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
+	const positions = new Set<number>();
+	const parents = new Set<number>();
+
+	flattened.forEach(
+		(
+			{
+				parentIndex,
+				topLevel,
+				instruction: {
+					program,
+					parsed: { type, info }
+				}
+			},
+			position
+		) => {
+			if (
+				program === 'spl-associated-token-account' &&
+				['create', 'createIdempotent'].includes(type)
+			) {
+				const account = address({ info, key: 'account' });
+
+				if (isNullish(account)) {
+					return;
+				}
+
+				if (type === 'createIdempotent' && inPlace.has(account)) {
+					positions.add(position);
+
+					// Only a creation the message states itself. Marking the parent of an inner one
+					// would take the program's whole instruction out of the list with it.
+					if (topLevel) {
+						parents.add(parentIndex);
+					}
+				}
+
+				inPlace.add(account);
+
+				return;
+			}
+
+			if (program === 'system' && type === 'createAccount') {
+				const account = address({ info, key: 'newAccount' });
+
+				if (nonNullish(account)) {
+					inPlace.add(account);
+				}
+
+				return;
+			}
+
+			// Closing it puts the address back to nothing, so a creation after one is a creation
+			// again rather than a repeat.
+			if (nonNullish(program) && TOKEN_PROGRAMS.includes(program) && type === 'closeAccount') {
+				const account = address({ info, key: 'account' });
+
+				if (nonNullish(account)) {
+					inPlace.delete(account);
+				}
+			}
+		}
+	);
+
+	return { positions, parents };
+};
 
 /**
  * Instructions that exist only to make another one work. None of them changes what the user holds
@@ -276,6 +339,7 @@ const toEffect = ({
 	},
 	topLevel,
 	position,
+	noOp,
 	owned,
 	userAddress,
 	accountMints,
@@ -289,6 +353,9 @@ const toEffect = ({
 	// Where this instruction sits in the flattened order, so a balance can be taken as it stood
 	// here rather than after a later instruction moved it on.
 	position: number;
+	// Whether this instruction is an idempotent creation of an account that was already there by
+	// the time it ran, and so did nothing.
+	noOp: boolean;
 	owned: Set<SolAddress>;
 	// The wallet itself, which is the only account of the user's that a close can pay into as a
 	// balance. Separate from the set above, which is every account of theirs the run named.
@@ -327,7 +394,7 @@ const toEffect = ({
 		// happen - along with a rent nobody paid, since the creation it would have been read from
 		// never ran. Counted as plumbing rather than dropped, or the instruction it came from would
 		// be left uncovered and listed as one nothing could read.
-		if (createdNothing({ type, account, accountLamports })) {
+		if (noOp) {
 			return undefined;
 		}
 
@@ -816,6 +883,8 @@ export const mapSolInstructionSummaries = ({
 
 	const accountMints = collectAccountMints({ flattened, addressToToken });
 
+	const noOps = noOpCreations({ flattened, accountLamports });
+
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the
@@ -835,22 +904,20 @@ export const mapSolInstructionSummaries = ({
 	// syncing a wrapped balance, sizing a lookup. `toEffect` returns nothing for these on purpose,
 	// which leaves their index uncovered - and listing an instruction that was decoded as one
 	// nothing could read is untrue, the same objection the compute budget is excluded on.
-	const plumbing = new Set(
-		instructions.reduce<number[]>((acc, instruction, index) => {
+	const plumbing = new Set([
+		...noOps.parents,
+		...instructions.reduce<number[]>((acc, instruction, index) => {
 			if (!isParsed(instruction)) {
 				return acc;
 			}
 
 			const {
-				parsed: { type, info }
+				parsed: { type }
 			} = instruction;
 
-			return PLUMBING_TYPES.includes(type) ||
-				createdNothing({ type, account: address({ info, key: 'account' }), accountLamports })
-				? [...acc, index]
-				: acc;
+			return PLUMBING_TYPES.includes(type) ? [...acc, index] : acc;
 		}, [])
-	);
+	]);
 
 	const effects = flattened.reduce<Effect[]>(
 		(acc, { parentIndex, topLevel, instruction }, position) => {
@@ -858,6 +925,7 @@ export const mapSolInstructionSummaries = ({
 				instruction,
 				topLevel,
 				position,
+				noOp: noOps.positions.has(position),
 				owned,
 				userAddress,
 				accountMints,
