@@ -14,16 +14,21 @@ import {
 	HELP_ICPSWAP_TOKEN_B,
 	HELP_ICPSWAP_WITHDRAW_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { PLAUSIBLE_EVENT_HELP_ERROR_TYPES } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_HELP_ERROR_TYPES,
+	PLAUSIBLE_EVENT_RESULT_STATUSES
+} from '$lib/enums/plausible';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import {
 	IcpSwapPoolNotFoundError,
+	IcpSwapScanCancelledError,
 	loadIcpSwapRecoverableBalances,
 	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
 	type IcpSwapPoolBalances,
-	type IcpSwapRecoverableBalance
+	type IcpSwapRecoverableBalance,
+	type IcpSwapScanResult
 } from '$lib/services/icp-swap-recovery.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -252,6 +257,47 @@ describe('HelpIcpSwapWithdrawal', () => {
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
 		});
+	});
+
+	it('tells a superseded scan to stop, and reports it as cancelled', async () => {
+		const { promise: pendingScan, reject: stopScan } = Promise.withResolvers<IcpSwapScanResult>();
+		vi.mocked(scanIcpSwapPools).mockReturnValue(pendingScan);
+
+		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		const [[{ isCancelled }]] = vi.mocked(scanIcpSwapPools).mock.calls;
+
+		expect(isCancelled?.()).toBeFalsy();
+
+		// Load-bearing: the pair change below has to be reachable during a scan, or this passes
+		// against a disabled selector.
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+
+		// A pair lookup supersedes the scan, which should now stop between batches.
+		await selectPair(getByTestId);
+
+		expect(isCancelled?.()).toBeTruthy();
+
+		stopScan(new IcpSwapScanCancelledError());
+
+		await waitFor(() =>
+			expect(trackHelp).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: 'scan',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+				})
+			)
+		);
+
+		expect(trackHelp).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: 'scan',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+			})
+		);
+		expect(queryByTestId(HELP_ICPSWAP_ERROR)).toBeNull();
 	});
 
 	it('does not scan until the button is pressed', () => {

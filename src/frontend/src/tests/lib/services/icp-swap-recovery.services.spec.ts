@@ -4,6 +4,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE, ICP_SWAP_SCAN_CONCURRENCY } from '$lib/constants/swap.constants';
 import {
 	IcpSwapPoolNotFoundError,
+	IcpSwapScanCancelledError,
 	loadIcpSwapRecoverableBalances,
 	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
@@ -271,6 +272,54 @@ describe('icp-swap-recovery.services', () => {
 			await expect(
 				scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, tokenB] })
 			).rejects.toThrow('factory unavailable');
+		});
+
+		describe('cancellation', () => {
+			const poolCount = ICP_SWAP_SCAN_CONCURRENCY * 3 + 1;
+
+			const manyTokens = Array.from({ length: poolCount }, (_, i) => ({
+				...mockValidIcrcToken,
+				symbol: `TK${i}`,
+				ledgerCanisterId: `ledger-${i}`
+			}));
+
+			beforeEach(() => {
+				vi.mocked(getAllPools).mockResolvedValue(
+					manyTokens.map((token, i) => ({
+						...pool,
+						key: `pool-${i}`,
+						canisterId: Principal.fromUint8Array(Uint8Array.from([i, 0, 0, 0, 0, 0, 0, 0, 1, 1])),
+						token0: { address: tokenA.ledgerCanisterId, standard: 'ICRC1' },
+						token1: { address: token.ledgerCanisterId, standard: 'ICRC2' }
+					}))
+				);
+				vi.mocked(getUserUnusedBalance).mockResolvedValue({ balance0: ZERO, balance1: ZERO });
+			});
+
+			it('stops between batches once cancelled, instead of running every round', async () => {
+				// Cancelled as soon as the first batch has gone out.
+				const isCancelled = () =>
+					vi.mocked(getUserUnusedBalance).mock.calls.length >= ICP_SWAP_SCAN_CONCURRENCY;
+
+				await expect(
+					scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, ...manyTokens], isCancelled })
+				).rejects.toThrow(IcpSwapScanCancelledError);
+
+				expect(getUserUnusedBalance).toHaveBeenCalledTimes(ICP_SWAP_SCAN_CONCURRENCY);
+			});
+
+			it('sends no balance query when cancelled while the pool table loads', async () => {
+				await expect(
+					scanIcpSwapPools({
+						identity: mockIdentity,
+						tokens: [tokenA, ...manyTokens],
+						isCancelled: () => true
+					})
+				).rejects.toThrow(IcpSwapScanCancelledError);
+
+				expect(getAllPools).toHaveBeenCalledOnce();
+				expect(getUserUnusedBalance).not.toHaveBeenCalled();
+			});
 		});
 
 		it('keeps the balance queries within the concurrency limit, and reads every pool', async () => {

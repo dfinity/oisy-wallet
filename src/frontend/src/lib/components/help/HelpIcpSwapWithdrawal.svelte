@@ -32,6 +32,7 @@
 	import { toHelpErrorType, trackHelp } from '$lib/services/help-analytics.services';
 	import {
 		IcpSwapPoolNotFoundError,
+		IcpSwapScanCancelledError,
 		loadIcpSwapRecoverableBalances,
 		reloadIcpSwapPoolBalances,
 		scanIcpSwapPools,
@@ -59,9 +60,9 @@
 	// Neither selector is disabled while a lookup runs, so a second lookup - or a lookup racing a
 	// scan - can be in flight before the first settles. Results are therefore claimed by
 	// generation: a request that is no longer the newest drops its UI writes instead of
-	// overwriting fresher ones, and only the newest may clear `busy`. Analytics stay unguarded,
-	// since the call really did complete and dropping it would leave a `scan` `executing` event
-	// with no terminal event.
+	// overwriting fresher ones, and only the newest may clear `busy`. A superseded scan is also told
+	// to stop between batches and reports `cancel`; a superseded lookup is a single query and simply
+	// completes. Analytics stay unguarded otherwise, so every `executing` event gets a terminal one.
 	let requestGeneration = 0;
 
 	// Which entry point is running, not merely that one is: `busy` alone cannot tell them apart,
@@ -152,7 +153,8 @@
 		try {
 			const { pools, poolsScanned, unreadablePools } = await scanIcpSwapPools({
 				identity,
-				tokens: candidateTokens
+				tokens: candidateTokens,
+				isCancelled: () => !isCurrentRequest(generation)
 			});
 
 			if (isCurrentRequest(generation)) {
@@ -168,6 +170,18 @@
 				poolsScanned
 			});
 		} catch (err: unknown) {
+			// Superseded, and stopped between batches: the newer request owns the card, so there is
+			// nothing to show, and the outcome is a cancellation rather than a failure.
+			if (err instanceof IcpSwapScanCancelledError) {
+				trackHelp({
+					action: 'scan',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL,
+					subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL
+				});
+
+				return;
+			}
+
 			if (isCurrentRequest(generation)) {
 				loadError = $i18n.help.error.scan_failed;
 			}
