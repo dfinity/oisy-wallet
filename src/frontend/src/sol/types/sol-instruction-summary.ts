@@ -59,13 +59,15 @@ export interface SolInstructionSummary {
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.
 	returned?: bigint;
-	// What a closed token account held in tokens before the transaction ran, when it was read. For
-	// a wrapped SOL account that is the SOL wrapped inside it, which separates a close that
-	// unwraps something from one that closes an empty account.
+	// What a closed token account held in tokens when it closed, when it was read: what it held
+	// before the message, or nothing when the message opened it, plus every transfer in and out
+	// since. For a wrapped SOL account that is the SOL wrapped inside it, which separates a close
+	// that unwraps something from one that closes an empty account.
 	wrapped?: bigint;
-	// `false` on a close of an account that is not the user's, which reaches the list only because
-	// it pays their wallet. What arrives is money they did not have rather than money of theirs
-	// coming back, and its rent was never theirs to be charged or credited.
+	// `false` on a close of an account a run read and found somebody else holding, which reaches
+	// the list only because it pays the user's wallet. What arrives is money they did not have
+	// rather than money of theirs coming back, and its rent was never theirs to be charged or
+	// credited. Absent where no run read the account, which says nothing either way.
 	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
