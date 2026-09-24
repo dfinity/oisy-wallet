@@ -22,6 +22,7 @@ import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
+	deposit,
 	depositFrom,
 	getPoolMetadata,
 	getUserUnusedBalance,
@@ -672,6 +673,14 @@ export const fetchIcpSwap = async ({
 		slippagePercentage: Number(slippageValue)
 	});
 
+	const transferParams = {
+		identity,
+		token: sourceToken,
+		amount: parsedSwapAmount,
+		to: poolCanisterId,
+		ledgerCanisterId: sourceLedgerCanisterId
+	};
+
 	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
 	// Let's keep it like this for now and adjust it later.
 	if (tryToWithdraw) {
@@ -699,44 +708,46 @@ export const fetchIcpSwap = async ({
 	}
 
 	try {
-		// ICPSwap is only offered for ICRC-2 sources - `fetchSwapAmounts` drops its quote otherwise -
-		// and this refuses the rest rather than relying on that. The ICRC-1 alternative, a transfer
-		// followed by `deposit`, leaves the tokens uncredited in the pool if `deposit` fails: invisible
-		// to `getUserUnusedBalance`, and so to the Help page's recovery, and retrievable only by
-		// repeating `deposit`.
 		if (!isSourceTokenIcrc2) {
-			throw new Error('ICPSwap swaps require an ICRC-2 source token');
-		}
+			await sendIcrc(transferParams);
+			await deposit({
+				identity,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
+				amount: parsedSwapAmount,
+				fee: sourceTokenFee
+			});
+		} else {
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
+			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
 
-		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
-		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
-
-		const isApprovalNeeded = await checkNeedsApproval({
-			identity,
-			ledgerCanisterId: sourceLedgerCanisterId,
-			amount: amountWithFees,
-			spender: pool.canisterId
-		});
-
-		if (isApprovalNeeded) {
-			await approve({
+			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: parsedSwapAmount + sourceTokenFee * 2n,
-				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: { owner: pool.canisterId }
+				amount: amountWithFees,
+				spender: pool.canisterId
+			});
+
+			if (isApprovalNeeded) {
+				await approve({
+					identity,
+					ledgerCanisterId: sourceLedgerCanisterId,
+					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+					amount: parsedSwapAmount + sourceTokenFee * 2n,
+					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+					spender: { owner: pool.canisterId }
+				});
+			}
+
+			await depositFrom({
+				identity,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
+				amount: parsedSwapAmount,
+				fee: sourceTokenFee
 			});
 		}
-
-		await depositFrom({
-			identity,
-			canisterId: poolCanisterId,
-			token: sourceLedgerCanisterId,
-			amount: parsedSwapAmount,
-			fee: sourceTokenFee
-		});
 	} catch (err: unknown) {
 		consoleError(err);
 

@@ -152,13 +152,11 @@ const toPoolBalances = ({
  * Collects what the user can recover from one ICPSwap pool: the balance the pool credited to them
  * and never returned, which is what a failed swap or a failed post-swap withdrawal leaves behind.
  *
- * Tokens that reached the pool canister without being credited - a transfer whose `deposit` failed
- * or never ran - are not read. Current OISY cannot create them: ICPSwap is only quoted for ICRC-2
- * sources, and `fetchIcpSwap` refuses any other before transferring. An ICRC-1 transfer-then-deposit
- * path did exist from 2025-05-16 to 2025-08-06 wherever ICPSwap was enabled. Its leftovers are not
- * reachable through the mistransfer endpoints either - for a pool's own pair `getMistransferBalance`
- * answers `InternalError: Use deposit and withdraw instead` - so recovering them means repeating
- * `deposit`, then `withdraw`.
+ * ICPSwap also tracks a "mistransferred" balance, for tokens sent to the pool canister without a
+ * matching deposit call. That is not covered, and cannot arise here: it only applies to the direct
+ * ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees
+ * - `getMistransferBalance` answers `InternalError: Use deposit and withdraw instead` for a pool's
+ * own trading pair.
  *
  * @throws IcpSwapPoolNotFoundError if the pair has no pool at the supported fee tier.
  */

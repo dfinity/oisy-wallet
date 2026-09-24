@@ -11,10 +11,8 @@ import { swap as sendEvmSwap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
-import {
-	hasSufficientIcrcAllowance,
-	loadCustomTokens as loadCustomIcrcTokens
-} from '$icp/services/icrc.services';
+import { sendIcrc } from '$icp/services/ic-send.services';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -93,7 +91,6 @@ import { get, readable } from 'svelte/store';
 
 vi.mock('$icp/services/icrc.services', async (importOriginal) => ({
 	...(await importOriginal<object>()),
-	hasSufficientIcrcAllowance: vi.fn(),
 	loadCustomTokens: vi.fn()
 }));
 
@@ -2089,7 +2086,7 @@ describe('swap.services', () => {
 			receiveAmount,
 			slippageValue: 3,
 			sourceTokenFee: sourceToken.fee,
-			isSourceTokenIcrc2: true
+			isSourceTokenIcrc2: false
 		};
 
 		beforeEach(() => {
@@ -2100,9 +2097,8 @@ describe('swap.services', () => {
 				token0: { address: sourceToken.ledgerCanisterId, standard: 'ICRC2' },
 				token1: { address: destinationToken.ledgerCanisterId, standard: 'ICRC2' }
 			} as PoolData);
-			// An allowance already covers the amount, so no approve round-trip is needed.
-			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(true);
-			vi.mocked(icpSwapPool.depositFrom).mockResolvedValue(100_000_000n);
+			vi.mocked(sendIcrc).mockResolvedValue(1n);
+			vi.mocked(icpSwapPool.deposit).mockResolvedValue(100_000_000n);
 			vi.mocked(icpSwapPool.withdraw).mockResolvedValue(1n);
 		});
 
