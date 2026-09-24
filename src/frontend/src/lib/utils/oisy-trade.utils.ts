@@ -3,19 +3,23 @@ import type {
 	OrderStatus,
 	PriceLevel,
 	Side,
+	TimeInForce,
 	TradingPair,
 	TradingPairInfo,
 	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
 	OisyTradeOrderDisplayStatus,
 	OisyTradeOrderStatus,
 	OisyTradeOrderView,
+	OisyTradeTimeInForce,
 	OisyTradeWithdrawToken
 } from '$lib/types/oisy-trade';
 import type { BadgeVariant } from '$lib/types/style';
@@ -29,6 +33,7 @@ import {
 } from '$lib/utils/string.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 import { doesTokenMatchFilter } from '$lib/utils/tokens.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
 // The distinct union of every base and quote token symbol across the trading
@@ -339,6 +344,37 @@ export const valueDifferencePercent = ({
 		: ((currentValue - price) / currentValue) * 100;
 };
 
+// A limit price that does NOT cross the book but still gives value up versus
+// the current-value feed — a Sell below it, a Buy above it — by more than
+// `threshold` percent (a negative figure, e.g. -1). Such an order rests, so it
+// carries none of the crossing warnings, yet it sits on the side of the spread
+// the market reaches first: it is the likeliest to fill, and it fills at a price
+// worse than what the feed says the tokens are worth. Crossing prices are
+// excluded — they fill immediately and have their own warning.
+export const restsAgainstValue = ({
+	side,
+	price,
+	currentValue,
+	bid,
+	ask,
+	threshold
+}: {
+	side: LimitOrderSide;
+	price: number;
+	currentValue: number;
+	bid: number | null;
+	ask: number | null;
+	threshold: number;
+}): boolean => {
+	if (!(price > 0) || !(currentValue > 0)) {
+		return false;
+	}
+	if (crossesBook({ side, price, bid, ask })) {
+		return false;
+	}
+	return valueDifferencePercent({ side, price, currentValue }) < threshold;
+};
+
 export type FieldErrorKind = 'balance' | 'lot' | 'min_notional' | 'max_notional';
 
 export interface AmountValidation {
@@ -430,10 +466,7 @@ export const isOrderValid = ({
 	if (!validateAmount({ side, baseAmount, price, freeBalance, pair }).ok) {
 		return false;
 	}
-	if (fillOrKill && !crossesBook({ side, price, bid, ask })) {
-		return false;
-	}
-	return true;
+	return !(fillOrKill && !crossesBook({ side, price, bid, ask }));
 };
 
 // Max for the spend side. Sell: free base floored to lot. Buy: free quote
@@ -677,26 +710,87 @@ export const toCandidSide = (side: LimitOrderSide): Side =>
 const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
 	Object.keys(status)[0] as OisyTradeOrderStatus;
 
+// The candid `TimeInForce` variant flattened to its single discriminant.
+const timeInForceKey = (timeInForce: TimeInForce): OisyTradeTimeInForce =>
+	Object.keys(timeInForce)[0] as OisyTradeTimeInForce;
+
+// Cached per ledger so the synthetic `TokenId` (a symbol) stays stable across
+// derivations — a fresh id would never match balance/exchange lookups keyed by
+// token id and would churn object identity on every re-derive.
+const oisyTradeFallbackTokens = new Map<string, IcToken>();
+
+const toOisyTradeFallbackToken = ({
+	token,
+	ledgerCanisterId
+}: {
+	token: OisyTradeToken;
+	ledgerCanisterId: string;
+}): IcToken => {
+	const cached = oisyTradeFallbackTokens.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const fallback: IcToken = {
+		id: parseTokenId(`OisyTrade:${ledgerCanisterId}`),
+		network: ICP_NETWORK,
+		standard: { code: 'icrc' },
+		category: 'default',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		name: token.metadata.symbol,
+		symbol: token.metadata.symbol,
+		decimals: token.metadata.decimals,
+		ledgerCanisterId,
+		fee: ZERO
+	};
+
+	oisyTradeFallbackTokens.set(ledgerCanisterId, fallback);
+
+	return fallback;
+};
+
 // Resolve a `UserOrder` to OISY tokens (by ledger canister id, like the rest of
-// the Trading tab) and scale amounts to human units. Orders whose base or quote
-// ledger the wallet doesn't know are dropped — nothing to render them with.
+// the Trading tab) and scale amounts to human units. Prefer the user's enabled
+// wallet token so logos/exchange ids stay available, but fall back to the DEX
+// canister's supported-token metadata so active orders remain visible/cancelable
+// even after the user disables one leg in Manage Tokens.
 export const mapOisyTradeOrder = ({
 	order: { id, pair, order },
-	tokens
+	tokens,
+	supportedTokens = []
 }: {
 	order: UserOrder;
 	tokens: IcToken[];
+	supportedTokens?: OisyTradeToken[];
 }): OisyTradeOrderView | undefined => {
 	const byLedger = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+	const supportedByLedger = new Map(
+		supportedTokens.map((token) => [token.id.ledger_id.toText(), token])
+	);
 
-	const base = byLedger.get(pair.base.toText());
-	const quote = byLedger.get(pair.quote.toText());
+	const resolveToken = (ledgerCanisterId: string): IcToken | undefined => {
+		const walletToken = byLedger.get(ledgerCanisterId);
+
+		if (nonNullish(walletToken)) {
+			return walletToken;
+		}
+
+		const supportedToken = supportedByLedger.get(ledgerCanisterId);
+
+		return nonNullish(supportedToken)
+			? toOisyTradeFallbackToken({ token: supportedToken, ledgerCanisterId })
+			: undefined;
+	};
+
+	const base = resolveToken(pair.base.toText());
+	const quote = resolveToken(pair.quote.toText());
 
 	if (isNullish(base) || isNullish(quote)) {
 		return undefined;
 	}
 
-	const { side, price, quantity, filled_quantity, status, created_at } = order;
+	const { side, price, quantity, filled_quantity, status, created_at, time_in_force } = order;
 
 	return {
 		id,
@@ -709,20 +803,24 @@ export const mapOisyTradeOrder = ({
 		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
 		price: Number(price) / 10 ** quote.decimals,
 		status: orderStatusKey(status),
+		timeInForce: timeInForceKey(time_in_force),
 		createdAt: created_at
 	};
 };
 
 // Map a list of `UserOrder`s to view models, dropping any whose tokens can't be
-// resolved (preserving the canister's newest-first order).
+// resolved from either wallet metadata or DEX supported-token metadata (preserving
+// the canister's newest-first order).
 export const mapOisyTradeOrders = ({
 	orders,
-	tokens
+	tokens,
+	supportedTokens = []
 }: {
 	orders: UserOrder[];
 	tokens: IcToken[];
+	supportedTokens?: OisyTradeToken[];
 }): OisyTradeOrderView[] =>
-	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+	orders.map((order) => mapOisyTradeOrder({ order, tokens, supportedTokens })).filter(nonNullish);
 
 // Terminal-order breakdown for the Order-history header, e.g. "2 filled · 1
 // canceled". Only non-zero buckets appear; an all-empty history yields "".

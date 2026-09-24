@@ -29,13 +29,15 @@ export const routeCollection: Readable<OptionString> = derived(
 	]) => collection
 );
 
+// The key mirrors NFT_PARAM (the `collectible` query param), not the internal
+// `Nft` naming — `page.data` is untyped, so a stale key here fails silently.
 export const routeNft: Readable<OptionString> = derived(
 	[page],
 	([
 		{
-			data: { nft }
+			data: { collectible }
 		}
-	]) => nft
+	]) => collectible
 );
 
 export const routeAutopilotVault: Readable<OptionString> = derived(

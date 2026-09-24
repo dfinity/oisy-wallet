@@ -10,6 +10,9 @@
 		externalLink?: string;
 		externalLinkAriaLabel?: string;
 		externalLinkTestId?: string;
+		// Floated by default, which pins the controls to the far edge of a list row. Inline keeps
+		// them beside the address they act on.
+		inline?: boolean;
 	}
 
 	const {
@@ -18,11 +21,12 @@
 		copyAddressTestId,
 		externalLink,
 		externalLinkAriaLabel,
-		externalLinkTestId
+		externalLinkTestId,
+		inline = false
 	}: Props = $props();
 </script>
 
-<span class="float-right flex pl-1.5 align-top">
+<span class="flex pl-1.5 align-top" class:float-right={!inline} class:inline-flex={inline}>
 	{#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
 		<Copy inline testId={copyAddressTestId} text={copyAddressText} value={copyAddress} />
 	{/if}

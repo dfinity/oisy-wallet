@@ -1,6 +1,6 @@
 export enum AppPath {
 	Tokens = '/',
-	Nfts = '/nfts/',
+	Nfts = '/collectibles/',
 	Earning = '/earning/',
 	Trading = '/trading/',
 	Explore = '/explore/',
@@ -27,7 +27,7 @@ export const ROUTE_ID_GROUP_APP = '/(app)';
 export const TOKEN_PARAM = 'token';
 export const NETWORK_PARAM = 'network';
 export const COLLECTION_PARAM = 'collection';
-export const NFT_PARAM = 'nft';
+export const NFT_PARAM = 'collectible';
 export const URI_PARAM = 'uri';
 export const VAULT_PARAM = 'vault';
 

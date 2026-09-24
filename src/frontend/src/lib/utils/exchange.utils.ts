@@ -146,12 +146,17 @@ export const buildErc20PriceParams = (
 	Object.values(
 		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
 			(acc, { address, coingeckoId }) => {
+				// Deliberately an EVM-only subset of `CoingeckoPlatformIdSchema`, not the whole enum:
+				// `internet-computer` and `solana` are platforms for ICRC / SPL, which are priced
+				// elsewhere. A chain missing here is dropped silently, so a new EVM network must be
+				// added in both places.
 				if (
 					coingeckoId !== 'ethereum' &&
 					coingeckoId !== 'base' &&
 					coingeckoId !== 'binance-smart-chain' &&
 					coingeckoId !== 'polygon-pos' &&
-					coingeckoId !== 'arbitrum-one'
+					coingeckoId !== 'arbitrum-one' &&
+					coingeckoId !== 'robinhood'
 				) {
 					return acc;
 				}
@@ -184,6 +189,7 @@ export interface ProviderFallbackPrices {
 	btcPrice?: CoingeckoSimplePriceResponse;
 	icpPrice?: CoingeckoSimplePriceResponse;
 	solPrice?: CoingeckoSimplePriceResponse;
+	xrpPrice?: CoingeckoSimplePriceResponse;
 	bnbPrice?: CoingeckoSimplePriceResponse;
 	polPrice?: CoingeckoSimplePriceResponse;
 	arbitrumEthPrice?: CoingeckoSimplePriceResponse;
@@ -272,6 +278,10 @@ export const mergeExchangePrices = async ({
 		currentSolPrice: mergeNative({
 			providerPrice: providerPrices.solPrice,
 			backendPrice: backendData.currentSolPrice
+		}),
+		currentXrpPrice: mergeNative({
+			providerPrice: providerPrices.xrpPrice,
+			backendPrice: backendData.currentXrpPrice
 		}),
 		currentBnbPrice: mergeNative({
 			providerPrice: providerPrices.bnbPrice,

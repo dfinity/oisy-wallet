@@ -4,7 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
@@ -55,7 +55,7 @@
 		class:bg-success-light={level === 'success'}
 		class:bg-warning-light={level === 'warning'}
 		data-tid={testId}
-		transition:slide={SLIDE_EASING}
+		transition:slide={SLIDE_PARAMS}
 	>
 		{#if nonNullish(icon)}
 			{@render icon()}

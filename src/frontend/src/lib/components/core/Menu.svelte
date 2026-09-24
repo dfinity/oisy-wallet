@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { TIPS_ENABLED } from '$env/tips.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
@@ -13,6 +14,7 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
+	import IconQr from '$lib/components/icons/IconQr.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
@@ -27,10 +29,12 @@
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
@@ -40,6 +44,9 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_TIP_BADGE,
+		NAVIGATION_MENU_TIP_BUTTON,
+		NAVIGATION_MENU_TIP_COUNT,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_SCANNER_BUTTON,
@@ -52,12 +59,13 @@
 	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { tipsOverview } from '$lib/derived/tips.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -118,12 +126,37 @@
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
+	const tipModalId = Symbol();
 	const universalScannerModalId = Symbol();
 	const payDialogModalId = Symbol();
 	const goldModalId = Symbol();
 	const vipModalId = Symbol();
+
+	// `ButtonMenu` renders its own `aria-label`, which replaces the button's
+	// contents as the accessible name — so the count badge inside it is announced
+	// nowhere unless it is said here too.
+	let tipMenuLabel = $derived(
+		$tipsOverview.failed > 0
+			? replacePlaceholders($i18n.navigation.alt.issue_tip_attention, {
+					$count: `${$tipsOverview.failed}`
+				})
+			: $i18n.navigation.alt.issue_tip
+	);
 </script>
 
+<!--
+	The mark is the only thing outside the menu that knows a tip needs attention, so
+	it is what makes the count inside worth opening the menu for. It costs nothing:
+	`tipsOverview` is derived from the tips the app already loaded once at sign-in,
+	with no polling and no extra call.
+
+	`NotificationBlob` rather than a dot of our own: it is the same marker the token
+	and transaction-filter menus already put on a toolbar icon, so a dot up here
+	means one consistent thing instead of one thing per feature. It carries no text,
+	because a bare dot read out on its own says something is wrong without saying
+	what — the count reaches a screen reader through the tip entry's own
+	`aria-label` once the menu is open.
+-->
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="tertiary-alt"
@@ -134,7 +167,13 @@
 	bind:button
 >
 	{#snippet icon()}
-		<IconUser size="24" />
+		<NotificationBlob
+			display={$tipsOverview.failed > 0}
+			position="top-right"
+			testId={NAVIGATION_MENU_TIP_BADGE}
+		>
+			<IconUser size="24" />
+		</NotificationBlob>
 	{/snippet}
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
@@ -243,6 +282,36 @@
 			</ButtonMenu>
 
 			<Hr />
+
+			{#if TIPS_ENABLED}
+				<ButtonMenu
+					ariaLabel={tipMenuLabel}
+					onclick={() => modalStore.openTip(tipModalId)}
+					testId={NAVIGATION_MENU_TIP_BUTTON}
+				>
+					<IconQr size="20" />
+
+					<!--
+						The count, where the dot on the icon only said "something". Inside the
+						menu there is room to say how many.
+
+						It reaches a screen reader through the button's `aria-label`, not from
+						here: `ButtonMenu` sets an explicit label, which replaces everything
+						inside it as the accessible name. So this badge is decoration by
+						construction, and the count has to be in the label or it is announced
+						nowhere.
+					-->
+					<span class="flex flex-1 items-center justify-between gap-2">
+						{$i18n.navigation.text.issue_tip}
+
+						{#if $tipsOverview.failed > 0}
+							<Badge testId={NAVIGATION_MENU_TIP_COUNT} variant="warning" width="w-fit">
+								{$tipsOverview.failed}
+							</Badge>
+						{/if}
+					</span>
+				</ButtonMenu>
+			{/if}
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}

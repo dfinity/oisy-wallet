@@ -3,8 +3,15 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
+	ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS,
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	MEMO_LEGACY_PROGRAM_ADDRESS,
+	MEMO_PROGRAM_ADDRESS,
+	SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES,
+	SOLANA_RENT_EXEMPTION_YEARS,
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -14,24 +21,41 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
 	SolParsedInstruction,
+	SolParsedRpcInstruction,
 	SolRpcInstruction
 } from '$sol/types/sol-instructions';
 import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import { parseSolLookupTableInstruction } from '$sol/utils/sol-instructions-lookup-table.utils';
+import { parseSolMemoInstruction } from '$sol/utils/sol-instructions-memo.utils';
+import { parseSolStakeInstruction } from '$sol/utils/sol-instructions-stake.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { AddressLookupTableInstruction } from '@solana-program/address-lookup-table';
+import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
+import { StakeInstruction } from '@solana-program/stake';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
+import { type Option, unwrapOption } from '@solana/kit';
 
 const ignoredInstruction = (): MappedSolTransaction => ({ amount: undefined });
 const unreviewedInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	unreviewed: true
+});
+// An undecodable program call merely leaves the review incomplete. These ones are decoded and
+// still cannot be stated faithfully, so they fail closed rather than warn: a Compute Budget
+// directive we cannot price makes the fee shown provably wrong, and an authority change or a
+// burn has no amount/source/destination the single-value summary can carry, so a warning would
+// let it ride along invisibly behind a dust transfer the user does see.
+const unfaithfulInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	ambiguous: true
 });
 
 const mapSystemParsedInstruction = ({
@@ -379,25 +403,183 @@ const parseSolInstruction = (
 		return parseSolAtaInstruction(instruction);
 	}
 
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return parseSolLookupTableInstruction(instruction);
+	}
+
+	if (isSolMemoProgram(programAddress)) {
+		return parseSolMemoInstruction(instruction);
+	}
+
+	if (programAddress === STAKE_PROGRAM_ADDRESS) {
+		return parseSolStakeInstruction(instruction);
+	}
+
 	consoleWarn(`Could not parse Solana instruction for program ${programAddress}`);
 
 	return instruction;
 };
+
+/**
+ * The lamports an account of this size must hold to be rent-exempt, which is what opening one
+ * legitimately costs.
+ */
+const solRentExemptLamports = (space: bigint): bigint =>
+	(SOLANA_RENT_ACCOUNT_OVERHEAD_BYTES + space) *
+	SOLANA_RENT_LAMPORTS_PER_BYTE_YEAR *
+	SOLANA_RENT_EXEMPTION_YEARS;
+
+/**
+ * Whether a creation funds the account beyond what its size costs.
+ *
+ * Rent is the price of the account existing, and the review carries it as the cost of the operation
+ * the creation belongs to. Anything above it is a balance sitting in an account somebody else
+ * controls, and the program owning that account decides where it goes - closing an SPL token
+ * account hands its whole balance to a destination the closing instruction names, and a message can
+ * open, initialise and close one in a single request. That is a payment, and the creation states no
+ * destination for the review to show it against.
+ */
+const fundsBeyondRent = ({ lamports, space }: { lamports: bigint; space: bigint }): boolean =>
+	lamports > solRentExemptLamports(space);
 
 const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
 		const {
-			data: { lamports },
+			data: { lamports, space, programAddress: owner },
 			accounts: {
 				payer: { address: payer }
 			}
 		} = instruction;
 
+		// An account the System program owns holds no data and has no program deciding what may
+		// leave it: whoever holds `newAccount`'s key can spend the lamports it is opened with, which
+		// makes this instruction a transfer to that key wearing an account creation's name. The
+		// review cannot say so — the lamports arrive here as an amount with a payer and no
+		// counterparty, and beside a dust transfer they were summed into that transfer's figure
+		// under that transfer's destination, so the funding rode along inside a figure the user read
+		// as something else. Refuse it, for the same reason an authority change is refused rather
+		// than warned about: it is decoded in full and still cannot be stated.
+		//
+		// Only System-owned accounts. Opening an account for a program is how a dApp legitimately
+		// asks for one - a swap routed through Whirlpool creates its wrapped SOL account with a
+		// top-level `createAccount` owned by the token program, then initialises it - and the
+		// program that owns such an account is what governs the lamports in it. Those keep the rent
+		// they state, which the review carries as the cost of the operation it belongs to.
+		// System-owned means nothing governs the lamports but the key the account is opened at.
+		// Over-funded means a program governs them and the creation still states no destination: an
+		// SPL token account opened, initialised and closed in one message hands its whole balance to
+		// whoever the close names. Either way the payment cannot be shown, so neither is signed.
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports, space })) {
+			return unfaithfulInstruction();
+		}
+
 		return {
 			amount: lamports,
 			payer
+		};
+	}
+
+	// The seed variant funds a spendable account by another route: the address is derived rather
+	// than a key, so nobody signs for it, but System `transferSolWithSeed` moves lamports out of
+	// such an account against a signature from the `base` it was derived from. A System-owned
+	// account opened this way is therefore the same native wallet, spendable by whoever holds that
+	// base, and the review can no more name it than it can name a plain creation's. Owned by a
+	// program instead, it states its rent like the plain form and is bounded by it the same way,
+	// since the seed pays out no differently once the account exists.
+	if (instructionType === SystemInstruction.CreateAccountWithSeed) {
+		const {
+			data: { amount, space, programAddress: owner },
+			accounts: {
+				payer: { address: payer }
+			}
+		} = instruction;
+
+		if (owner === SYSTEM_PROGRAM_ADDRESS || fundsBeyondRent({ lamports: amount, space })) {
+			return unfaithfulInstruction();
+		}
+
+		return {
+			amount,
+			payer
+		};
+	}
+
+	// The prefunding variant is refused whatever it opens the account for, which the other two
+	// creations are not. It exists to open an account that already holds lamports, so the field it
+	// states is what this instruction adds rather than what the account ends up with: a target
+	// funded beforehand passes a rent-sized check and still lands under `owner` with the larger
+	// balance. Reading it faithfully would need the account's pre-state, which this mapper is
+	// synchronous and has none of. It also names no payer when the account prefunds itself, so
+	// there would be a cost stated against nobody.
+	if (instructionType === SystemInstruction.CreateAccountAllowPrefund) {
+		return unfaithfulInstruction();
+	}
+
+	// Handing an account to a program is the System program's own version of the authority change
+	// already refused for a token account. A plain `Assign` requires the account to sign;
+	// `AssignWithSeed` instead requires the derivation base to sign. In either form, the authorized
+	// signer can hand the account to the named program, and the summary has no field that says any
+	// of it: there is no amount, source, or destination, so a warning would let the change ride along
+	// behind a transfer the user does see.
+	//
+	// The nonce instructions that name an authority belong here too. Initialising a nonce account
+	// sets who may withdraw its balance and authorising one changes that party, so both decide
+	// where the lamports in an account the user paid for may go without stating an amount, a source
+	// or a destination - the token account's authority change again, in the System program's own
+	// vocabulary.
+	//
+	// Sizing an account is refused on the same test rather than on what it costs. It states a
+	// length and nothing else, so there is no amount, source or destination for the summary to
+	// carry, and the account it sizes is its only meta and a required signer, so a message can name
+	// the connected wallet here as well.
+	if (
+		instructionType === SystemInstruction.Assign ||
+		instructionType === SystemInstruction.AssignWithSeed ||
+		instructionType === SystemInstruction.InitializeNonceAccount ||
+		instructionType === SystemInstruction.AuthorizeNonceAccount ||
+		instructionType === SystemInstruction.Allocate ||
+		instructionType === SystemInstruction.AllocateWithSeed
+	) {
+		return unfaithfulInstruction();
+	}
+
+	// A nonce account hands its balance to a recipient it names, against a signature from the
+	// authority that governs it. Amount, source and destination are all stated, so this is a
+	// transfer and reads as one rather than as something the summary cannot carry.
+	if (instructionType === SystemInstruction.WithdrawNonceAccount) {
+		const {
+			data: { withdrawAmount: amount },
+			accounts: {
+				nonceAccount: { address: source },
+				recipientAccount: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	// The seed-derived transfer states its own source, destination and amount exactly as the plain
+	// one does; only the signature authorising it differs, coming from the base the source was
+	// derived from rather than from the source itself.
+	if (instructionType === SystemInstruction.TransferSolWithSeed) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
 		};
 	}
 
@@ -417,9 +599,36 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
+	// Using a nonce rather than deciding anything about it: advancing one replaces the value a
+	// durable transaction is signed against, and upgrading one migrates a legacy account to the
+	// current layout. Advancing does require the nonce authority to sign, but it designates no new
+	// one and moves no lamports, so neither instruction has an effect the summary omits by staying
+	// silent about it.
+	//
+	// Advancing is also not optional to a caller that needs it: a durable-nonce transaction carries
+	// it as its first instruction, which is what makes the nonce the transaction's lifetime, and
+	// the sign-only path signs the message as given rather than re-dating it. Refusing the opcode
+	// would refuse every such request. A message can still advance a nonce it has no lifetime use
+	// for, invalidating a transaction already signed against the old value, but that moves nothing
+	// and takes nothing: telling the two apart is the instruction's position, not its name.
+	if (
+		instructionType === SystemInstruction.AdvanceNonceAccount ||
+		instructionType === SystemInstruction.UpgradeNonceAccount
+	) {
+		return ignoredInstruction();
+	}
+
+	// Every System instruction is now read deliberately, so reaching this point means the program
+	// gained one the wallet has never classified. Unlike a call into a program we do not know, that
+	// is a gap in this table rather than something unknowable: the set is closed, published and
+	// decoded above, and every member of it has been placed - stated as the transfer it is,
+	// refused because the summary cannot carry it, or ignored because it decides nothing about
+	// value or control. A member nobody placed belongs to none of the three, so fail closed on it
+	// instead of warning and signing, which is how the seed-derived and prefunding creations sat
+	// here reading as harmless.
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
-	return unreviewedInstruction();
+	return unfaithfulInstruction();
 };
 
 const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -493,6 +702,14 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			tokenAddress,
 			isApproval: true
 		};
+	}
+
+	if (
+		instructionType === TokenInstruction.SetAuthority ||
+		instructionType === TokenInstruction.Burn ||
+		instructionType === TokenInstruction.BurnChecked
+	) {
+		return unfaithfulInstruction();
 	}
 
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
@@ -573,10 +790,67 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		};
 	}
 
+	// Token-2022 adds permissioned burns on top of the legacy program's burn variants.
+	if (
+		instructionType === Token2022Instruction.SetAuthority ||
+		instructionType === Token2022Instruction.Burn ||
+		instructionType === Token2022Instruction.BurnChecked ||
+		instructionType === Token2022Instruction.PermissionedBurn ||
+		instructionType === Token2022Instruction.PermissionedBurnChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
 };
+
+const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	try {
+		const parsedInstruction = parseSolComputeBudgetInstruction(instruction);
+
+		const { instructionType } = parsedInstruction;
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitPrice) {
+			const {
+				data: { microLamports }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitPrice: microLamports };
+		}
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitLimit) {
+			const {
+				data: { units }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitLimit: BigInt(units) };
+		}
+
+		// The deprecated `RequestUnits` carries its own flat `additionalFee`, which the review
+		// cannot price the same way.
+		if (instructionType === ComputeBudgetInstruction.RequestUnits) {
+			return unfaithfulInstruction();
+		}
+
+		// Heap frame and loaded-accounts data size requests do not affect the fee.
+		return ignoredInstruction();
+	} catch (err: unknown) {
+		consoleWarn('Could not parse Solana Compute Budget instruction', err);
+
+		return unfaithfulInstruction();
+	}
+};
+
+const isSolMemoProgram = (programAddress: SolAddress): boolean =>
+	programAddress === MEMO_PROGRAM_ADDRESS || programAddress === MEMO_LEGACY_PROGRAM_ADDRESS;
+
+// A memo is written to the transaction log and nowhere else: the program holds no account, so no
+// memo moves value or hands over an authority. That is true of its text too, which is the dApp's
+// own words about its transaction rather than a statement the chain enforces, so the review does
+// not repeat it back to the user as if it were one.
+const mapSolMemoInstruction = (): MappedSolTransaction => ignoredInstruction();
 
 const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
@@ -593,15 +867,322 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 	return unreviewedInstruction();
 };
 
-export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
-	// Compute budget instructions only tune fees and limits and can never move funds,
-	// so they are ignored wholesale before parsing — a malformed or not-yet-supported
-	// variant would make the parser throw and crash the signing guard.
-	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+const mapSolLookupTableInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	// A lookup table is addressing, not value: it lets a message name accounts in fewer bytes and
+	// grants no one anything. Creating and extending one costs rent, which the instruction does not
+	// carry, the runtime works it out from the size; the same is already true of the token accounts
+	// a swap opens along the way.
+	if (
+		instructionType === AddressLookupTableInstruction.CreateLookupTable ||
+		instructionType === AddressLookupTableInstruction.ExtendLookupTable ||
+		instructionType === AddressLookupTableInstruction.FreezeLookupTable ||
+		instructionType === AddressLookupTableInstruction.DeactivateLookupTable
+	) {
 		return ignoredInstruction();
 	}
 
-	const parsedInstruction = parseSolInstruction(instruction);
+	// Closing hands the table's whole balance to a recipient the instruction names, and only the
+	// table's own authority can ask for it, so the balance leaving is the user's. Neither the amount
+	// nor the recipient fits the single-value summary, which is what would let it ride along
+	// unseen behind whatever else the message does.
+	if (instructionType === AddressLookupTableInstruction.CloseLookupTable) {
+		return unfaithfulInstruction();
+	}
+
+	consoleWarn(`Could not map Solana Address Lookup Table instruction of type ${instructionType}`);
+
+	return unreviewedInstruction();
+};
+
+const mapSolStakeInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	// A withdrawal is the one stake instruction the summary can state in full: it names the amount,
+	// the account it leaves and the account it arrives at, exactly as a plain SOL transfer does.
+	if (instructionType === StakeInstruction.Withdraw) {
+		const {
+			data: { args: amount },
+			accounts: {
+				stake: { address: source },
+				recipient: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	// Handing over a stake authority is a transfer of everything the account holds, dressed as
+	// administration. The withdraw authority is the one that can take the stake out, and the
+	// summary has no field that would show it changing hands, so this fails closed rather than
+	// riding along behind whatever else the message does.
+	if (
+		instructionType === StakeInstruction.Authorize ||
+		instructionType === StakeInstruction.AuthorizeChecked ||
+		instructionType === StakeInstruction.AuthorizeWithSeed ||
+		instructionType === StakeInstruction.AuthorizeCheckedWithSeed
+	) {
+		return unfaithfulInstruction();
+	}
+
+	// Reading the runtime's minimum delegation changes nothing at all.
+	if (instructionType === StakeInstruction.GetMinimumDelegation) {
+		return ignoredInstruction();
+	}
+
+	// The rest do something real to the user's stake — delegate it, split it, merge it, move it
+	// between accounts they control, lock it up — and the review has no vocabulary for any of it.
+	// Decoded or not, the honest answer is that this message does more than the summary shows.
+	return unreviewedInstruction();
+};
+
+const isKitInstruction = (instruction: unknown): instruction is SolInstruction =>
+	nonNullish(instruction) &&
+	typeof instruction === 'object' &&
+	'programAddress' in instruction &&
+	'data' in instruction &&
+	'accounts' in instruction;
+
+/**
+ * How one program's decoded instructions are spelled in the RPC's vocabulary.
+ *
+ * The decoders name an instruction by an enum member and its accounts by role, which is almost
+ * exactly what the RPC reports: `TransferChecked` against `transferChecked`, `source` against
+ * `source`. Where the two genuinely disagree, the difference is written down here rather than
+ * handled by a branch per instruction, so a program's whole instruction set is covered at once
+ * and a variant nobody thought about still arrives named.
+ */
+interface ProgramVocabulary {
+	program: string;
+	names: Record<number, string>;
+	types?: Record<string, string>;
+	accounts?: Record<string, string>;
+	fields?: Record<string, string>;
+}
+
+/**
+ * Built per call rather than held in a table, so that merely importing this module does not read
+ * every program's enum. Consumers that mock a program package would otherwise fail to load over a
+ * decoding path they never take.
+ */
+const vocabularyOf = (programId: SolAddress): ProgramVocabulary | undefined => {
+	if (programId === SYSTEM_PROGRAM_ADDRESS) {
+		return {
+			program: 'system',
+			names: SystemInstruction,
+			// The RPC calls a SOL transfer `transfer` and its amount `lamports`, and the effects
+			// below are written against those.
+			types: { transferSol: 'transfer' },
+			fields: { amount: 'lamports' }
+		};
+	}
+
+	// `setAuthority` is the only instruction naming the account it acts on `owned`, and `mintTo`
+	// the only one naming it `token`. The RPC calls both `account`, as everything else does.
+	if (programId === TOKEN_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-token',
+			names: TokenInstruction,
+			accounts: { owned: 'account', token: 'account' }
+		};
+	}
+
+	if (programId === TOKEN_2022_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-token-2022',
+			names: Token2022Instruction,
+			accounts: { owned: 'account', token: 'account' }
+		};
+	}
+
+	if (programId === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		return {
+			program: 'spl-associated-token-account',
+			names: AssociatedTokenInstruction,
+			types: {
+				createAssociatedToken: 'create',
+				createAssociatedTokenIdempotent: 'createIdempotent'
+			},
+			// The RPC names the new account `account`, the wallet it belongs to `wallet` and
+			// whoever funds it `source`. Only the mint is called the same thing by both.
+			accounts: { ata: 'account', owner: 'wallet', payer: 'source' }
+		};
+	}
+
+	// Stake and address lookup table are deliberately absent. No effect is derived from either, so
+	// decoding them changes not one line of what the review shows, and reaching for their packages
+	// here pulls both into the chunk the activity loads: 132KB for an identical screen.
+};
+
+const fieldOf = ({ info, key }: { info: object; key: string }): unknown =>
+	(info as Record<string, unknown>)[key];
+
+const lowerFirst = (value: string): string => `${value.charAt(0).toLowerCase()}${value.slice(1)}`;
+
+const addressOfMeta = (meta: unknown): SolAddress | undefined =>
+	nonNullish(meta) &&
+	typeof meta === 'object' &&
+	'address' in meta &&
+	typeof meta.address === 'string'
+		? meta.address
+		: undefined;
+
+/**
+ * A decoded instruction's accounts and data, flattened the way the RPC reports them.
+ *
+ * The discriminator is dropped, since it says only which instruction this is, and an optional
+ * field that carries nothing is dropped rather than reported as empty: an authority given up is
+ * an authority with no name, not one named nothing.
+ */
+const infoOf = ({
+	accounts,
+	data,
+	vocabulary: { accounts: renames = {}, fields = {} }
+}: {
+	accounts: Record<string, unknown>;
+	data: Record<string, unknown>;
+	vocabulary: ProgramVocabulary;
+}): object => {
+	const named = Object.entries(accounts).reduce<Record<string, unknown>>((acc, [role, meta]) => {
+		const value = addressOfMeta(meta);
+
+		return nonNullish(value) ? { ...acc, [renames[role] ?? role]: value } : acc;
+	}, {});
+
+	return Object.entries(data).reduce<Record<string, unknown>>((acc, [key, raw]) => {
+		if (key === 'discriminator') {
+			return acc;
+		}
+
+		const value = isSolOption(raw) ? unwrapOption(raw) : raw;
+
+		return nonNullish(value) ? { ...acc, [fields[key] ?? key]: value } : acc;
+	}, named);
+};
+
+const isSolOption = (value: unknown): value is Option<SolAddress> =>
+	nonNullish(value) && typeof value === 'object' && '__option' in value;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	nonNullish(value) && typeof value === 'object';
+
+/**
+ * A kit instruction read into the shape the RPC reports.
+ *
+ * An unsigned message carries its instructions as raw bytes, so nothing below recognised them:
+ * every WalletConnect request derived an empty effect list from the message itself, which left the
+ * summary permanently unstated and, once the review started listing what it could not read, put
+ * "unrecognised" against a plain SOL transfer. The wallet already decodes those bytes to name the
+ * parties; this puts the same decoding in front of the effects, so what a message says it does is
+ * read exactly as what a run did.
+ *
+ * Guarded, because the decoders assert on their input: a malformed or not yet supported variant
+ * must leave the instruction unread, never throw into the signing flow.
+ */
+export const asSolParsedRpcInstruction = (
+	instruction: unknown
+): SolParsedRpcInstruction | undefined => {
+	if (!isKitInstruction(instruction)) {
+		return;
+	}
+
+	const programId = instruction.programAddress;
+
+	const vocabulary = vocabularyOf(programId);
+
+	if (isNullish(vocabulary)) {
+		return;
+	}
+
+	try {
+		const decoded = parseSolInstruction(instruction);
+
+		if (!('instructionType' in decoded)) {
+			return;
+		}
+
+		const { instructionType } = decoded;
+
+		const name = vocabulary.names[Number(instructionType)];
+
+		if (isNullish(name)) {
+			return;
+		}
+
+		const spelled = lowerFirst(name);
+		const type = vocabulary.types?.[spelled] ?? spelled;
+
+		const accounts = 'accounts' in decoded && isRecord(decoded.accounts) ? decoded.accounts : {};
+		const data = 'data' in decoded && isRecord(decoded.data) ? decoded.data : {};
+
+		const info = infoOf({ accounts, data, vocabulary });
+
+		return {
+			program: vocabulary.program,
+			programId,
+			parsed: {
+				type,
+				// A checked transfer or approval states the decimals alongside the amount, and the
+				// RPC reports the pair nested. Both spellings are carried so neither reader has to
+				// know which side produced the instruction.
+				info:
+					'decimals' in info && 'amount' in info
+						? {
+								...info,
+								tokenAmount: {
+									amount: String(fieldOf({ info, key: 'amount' })),
+									decimals: fieldOf({ info, key: 'decimals' })
+								}
+							}
+						: info
+			}
+		};
+	} catch (_err: unknown) {
+		// An instruction the decoders cannot read stays unread, which is the same outcome an
+		// unknown program gets and the honest one.
+	}
+};
+
+/**
+ * The same, but total: an instruction the wallet cannot decode keeps its place in the list.
+ *
+ * Dropping it would shift every instruction after it, and both the route programs and the count of
+ * what could not be read are addressed by position.
+ */
+export const asSolParsedRpcInstructionOrSelf = (instruction: unknown): unknown =>
+	asSolParsedRpcInstruction(instruction) ?? instruction;
+
+export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	// Compute budget instructions can never move funds, but they do set the prioritisation
+	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
+	// Parsing stays behind its own guard: a malformed or not-yet-supported variant would
+	// otherwise throw and crash the signing flow.
+	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+		return mapSolComputeBudgetInstruction(instruction);
+	}
+
+	// Every parser here ends in an exhaustive switch that throws on a discriminator it does not
+	// know, so a program that gains an instruction the wallet has never seen would throw out of the
+	// decode rather than reach the readings below. Crashing is not the answer a review can show,
+	// and it is the same hazard the Compute Budget parse is already wrapped for: fail closed with a
+	// refusal instead, which is what the mappers return for anything they cannot state.
+	let parsedInstruction: SolInstruction | SolParsedInstruction;
+
+	try {
+		parsedInstruction = parseSolInstruction(instruction);
+	} catch (err: unknown) {
+		consoleWarn(
+			`Could not parse Solana instruction for program ${instruction.programAddress}`,
+			err
+		);
+
+		return unfaithfulInstruction();
+	}
 
 	if (!('instructionType' in parsedInstruction)) {
 		return unreviewedInstruction();
@@ -623,6 +1204,18 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
 		return mapSolAtaInstruction(parsedInstruction);
+	}
+
+	if (programAddress === ADDRESS_LOOKUP_TABLE_PROGRAM_ADDRESS) {
+		return mapSolLookupTableInstruction(parsedInstruction);
+	}
+
+	if (isSolMemoProgram(programAddress)) {
+		return mapSolMemoInstruction();
+	}
+
+	if (programAddress === STAKE_PROGRAM_ADDRESS) {
+		return mapSolStakeInstruction(parsedInstruction);
 	}
 
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);

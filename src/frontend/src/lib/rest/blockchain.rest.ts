@@ -1,5 +1,6 @@
 import { BLOCKCHAIN_API_URL } from '$env/rest/blockchain.env';
 import type { BitcoinAddressData, BlockchainBtcAddressDataParams } from '$lib/types/blockchain';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Get BTC address data (including transactions).
@@ -9,14 +10,28 @@ import type { BitcoinAddressData, BlockchainBtcAddressDataParams } from '$lib/ty
  *
  */
 export const btcAddressData = ({
-	btcAddress
+	btcAddress,
+	offset,
+	limit
 }: BlockchainBtcAddressDataParams): Promise<BitcoinAddressData> =>
 	fetchBlockchainApi<BitcoinAddressData>({
-		endpointPath: `rawaddr/${btcAddress}`
+		endpointPath: `rawaddr/${btcAddress}`,
+		searchParams: {
+			...(nonNullish(offset) && { offset: `${offset}` }),
+			...(nonNullish(limit) && { limit: `${limit}` })
+		}
 	});
 
-const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
+const fetchBlockchainApi = async <T>({
+	endpointPath,
+	searchParams = {}
+}: {
+	endpointPath: string;
+	searchParams?: Record<string, string>;
+}): Promise<T> => {
 	const url = new URL(`${BLOCKCHAIN_API_URL}/${endpointPath}`);
+
+	Object.entries(searchParams).forEach(([key, value]) => url.searchParams.set(key, value));
 
 	// Some API calls are available with CORS headers if you add a &cors=true parameter to the GET request
 	// https://www.blockchain.com/explorer/api/q

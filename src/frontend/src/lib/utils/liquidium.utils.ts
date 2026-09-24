@@ -16,7 +16,7 @@ import {
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import { findTwinToken } from '$lib/utils/token.utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import {
 	Chain,
@@ -81,6 +81,21 @@ export const liquidiumMarketToken = ({
 	}
 
 	return undefined;
+};
+
+// Display token for a rail the user can actually transact on, for the modal pickers.
+export const liquidiumEnabledRailToken = ({
+	chain,
+	asset,
+	enabledTokens
+}: {
+	chain: string;
+	asset: string;
+	enabledTokens: Token[];
+}): Token | undefined => {
+	const token = liquidiumMarketToken({ chain, asset, tokens: enabledTokens });
+
+	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
 };
 
 // Scaled protocol rate → percentage.

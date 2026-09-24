@@ -71,13 +71,13 @@
 		"governanceCanisterId": "4l7o7-uiaaa-aaaaq-aaa2q-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Mimic Clay",
-			"symbol": "CLAY",
+			"name": "GHOST",
+			"symbol": "GHOST",
 			"fee": {
 				"__bigint__": "100000000"
 			},
-			"alternativeName": "Mimic",
-			"url": "https://github.com/dragginzgame/mimic"
+			"alternativeName": "ICGhost",
+			"url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
 		}
 	},
 	{
@@ -103,13 +103,13 @@
 		"governanceCanisterId": "xomae-vyaaa-aaaaq-aabhq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "BOOM",
-			"symbol": "BOOM",
+			"name": "CHAI",
+			"symbol": "CHAI",
 			"fee": {
 				"__bigint__": "1000000"
 			},
-			"alternativeName": "BOOM DAO",
-			"url": "https://boomdao.xyz/"
+			"alternativeName": "CHAI",
+			"url": "https://yddti-oiaaa-aaaag-ay5sa-cai.icp0.io/"
 		}
 	},
 	{
@@ -220,7 +220,7 @@
 				"__bigint__": "10000"
 			},
 			"alternativeName": "Neutrinite",
-			"url": "https://icpcoins.com"
+			"url": "https://neutrinite.io"
 		}
 	},
 	{
@@ -374,13 +374,13 @@
 		"governanceCanisterId": "lyqgk-ziaaa-aaaaq-aadeq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Swampies",
-			"symbol": "SWAMP",
+			"name": "ICPCC DAO LLC",
+			"symbol": "CONF",
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "Swampies",
-			"url": "https://dragginz.io"
+			"alternativeName": "ICPCC DAO LLC",
+			"url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
 		}
 	},
 	{
@@ -634,8 +634,24 @@
 			"fee": {
 				"__bigint__": "420"
 			},
-			"alternativeName": "Waifu.ai",
+			"alternativeName": "Delulu DAO",
 			"url": "https://waifu.ic0.ai/"
+		}
+	},
+	{
+		"ledgerCanisterId": "a6urt-aaaaa-aaaaq-aafeq-cai",
+		"rootCanisterId": "bu3tj-cqaaa-aaaaq-aafdq-cai",
+		"indexCanisterId": "aqw43-3qaaa-aaaaq-aaffq-cai",
+		"governanceCanisterId": "azvxh-nyaaa-aaaaq-aafea-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOXA",
+			"symbol": "DOXA",
+			"fee": {
+				"__bigint__": "10000000"
+			},
+			"alternativeName": "DOXA",
+			"url": "https://www.doxadao.org"
 		}
 	}
 ]

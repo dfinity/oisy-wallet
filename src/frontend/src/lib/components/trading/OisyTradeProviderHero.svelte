@@ -124,9 +124,13 @@
 						{depositable}
 					{/if}
 				</span>
-				<span class="text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
+				<!-- Breathing room above the action, carried by the hint rather than the
+					 button: the button's `mt-auto` (which keeps the two desktop cards' buttons
+					 level) would override any `mt-*` on it. 8px here plus the column's
+					 `gap-1.5` gives the same 14px on both breakpoints. -->
+				<span class="mb-2 text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
 
-				<Button colorStyle="success" fullWidth onclick={onDeposit} styleClass="mt-4 sm:mt-auto">
+				<Button colorStyle="success" fullWidth onclick={onDeposit} styleClass="sm:mt-auto">
 					{$i18n.trading.page.deposit}
 				</Button>
 			</div>
@@ -142,7 +146,7 @@
 						{deposited}
 					{/if}
 				</span>
-				<span class="text-xs text-tertiary">
+				<span class="mb-2 text-xs text-tertiary">
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />
 					{:else if hasReserved}
@@ -163,7 +167,7 @@
 					disabled={!hasDeposits}
 					fullWidth
 					onclick={onWithdraw}
-					styleClass="mt-4 sm:mt-auto"
+					styleClass="sm:mt-auto"
 				>
 					{$i18n.trading.page.withdraw}
 				</Button>

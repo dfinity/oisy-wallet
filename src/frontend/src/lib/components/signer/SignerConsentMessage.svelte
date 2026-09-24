@@ -19,7 +19,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {
@@ -160,7 +159,8 @@
 {:else if nonNullish(text)}
 	{@const { title, content } = text}
 
-	<form method="POST" onsubmit={preventDefault(onApprove)} in:fade>
+	<!-- The consent message is authored by the relying party. It is rendered outside of any form, and approving is a click on our own button rather than a form submission, so that no markup coming from that text can ever reach the approval handler. -->
+	<div in:fade>
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
@@ -168,18 +168,18 @@
 		<SignerConsentMessageWarning {consentInfo} />
 
 		<div class="msg mb-6 rounded-lg border border-off-white px-8 py-4 break-all">
-			<Markdown text={content} />
+			<Markdown text={content} untrusted />
 		</div>
 
 		<ButtonGroup>
-			<Button colorStyle="error" onclick={onReject}>
+			<Button colorStyle="error" onclick={onReject} type="button">
 				{$i18n.core.text.reject}
 			</Button>
-			<Button colorStyle="success" type="submit">
+			<Button colorStyle="success" onclick={onApprove} type="button">
 				{$i18n.core.text.approve}
 			</Button>
 		</ButtonGroup>
-	</form>
+	</div>
 {/if}
 
 <style lang="scss">

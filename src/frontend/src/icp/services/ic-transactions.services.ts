@@ -27,8 +27,15 @@ import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
-import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	isNullish,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateOnResponse,
+	type QueryAndUpdateRequest
+} from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
+import { get } from 'svelte/store';
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
@@ -55,6 +62,50 @@ const getTransactions = async ({
 	return transactions.flatMap(mapTransactionIcpToSelf);
 };
 
+/**
+ * Requests one page of older history through `queryAndUpdate` and reports whether it failed.
+ *
+ * A failure is not the end of the history, so it never signals the end: that would retire the token
+ * from the lists for as long as they stay mounted. Only a page that produced nothing by the time the
+ * call returns counts as failed. The query usually settles first, so an update call failing after
+ * the query already loaded the page is only tracked. Whether the Index canister is down is for the
+ * wallet's regular check to decide, not for paging.
+ */
+const loadNextPageRequest = async <R>({
+	tokenId,
+	identity,
+	request,
+	onLoad
+}: {
+	tokenId: TokenId;
+	identity: NullishIdentity;
+	request: QueryAndUpdateRequest<R>;
+	onLoad: QueryAndUpdateOnResponse<R>;
+}): Promise<ResultSuccess> => {
+	let loaded = false;
+	let err: unknown;
+
+	await queryAndUpdate<R>({
+		request,
+		onLoad: (params) => {
+			loaded = true;
+
+			onLoad(params);
+		},
+		onQueryError: ({ error }) => {
+			err = error;
+		},
+		onUpdateError: ({ error }) => {
+			err = error;
+
+			trackLoadTransactionsError({ tokenId, error });
+		},
+		identity
+	});
+
+	return loaded || isNullish(err) ? { success: true } : { success: false, err };
+};
+
 const loadNextIcTransactionsRequest = ({
 	token,
 	identity,
@@ -67,8 +118,10 @@ const loadNextIcTransactionsRequest = ({
 	maxResults?: bigint;
 	token: IcToken & IcCanistersStrict;
 	signalEnd: () => void;
-}): Promise<void> =>
-	queryAndUpdate<IcTransaction[]>({
+}): Promise<ResultSuccess> =>
+	loadNextPageRequest<IcTransaction[]>({
+		tokenId: token.id,
+		identity,
 		request: (params) =>
 			getTransactions({
 				token,
@@ -92,13 +145,7 @@ const loadNextIcTransactionsRequest = ({
 					certified
 				}))
 			});
-		},
-		onUpdateError: ({ error }) => {
-			trackLoadTransactionsError({ tokenId: token.id, error });
-
-			signalEnd();
-		},
-		identity
+		}
 	});
 
 interface Icrc7TransactionsPage {
@@ -190,8 +237,10 @@ const loadNextIcrc7TransactionsRequest = ({
 	maxResults?: bigint;
 	token: Icrc7Token;
 	signalEnd: () => void;
-}): Promise<void> =>
-	queryAndUpdate<{ transactions: IcTransactionUi[]; reachedStart: boolean }>({
+}): Promise<ResultSuccess> =>
+	loadNextPageRequest<Icrc7TransactionsPage>({
+		tokenId: token.id,
+		identity,
 		request: ({ certified }) =>
 			loadIcrc7TransactionsPage({
 				token,
@@ -216,13 +265,7 @@ const loadNextIcrc7TransactionsRequest = ({
 			if (reachedStart) {
 				signalEnd();
 			}
-		},
-		onUpdateError: ({ error }) => {
-			trackLoadTransactionsError({ tokenId: token.id, error });
-
-			signalEnd();
-		},
-		identity
+		}
 	});
 
 export const onLoadTransactionsError = ({
@@ -232,9 +275,9 @@ export const onLoadTransactionsError = ({
 	tokenId: TokenId;
 	error: unknown;
 }) => {
-	icTransactionsStore.reset(tokenId);
-
-	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
+	// A sync failure invalidates the balance, not the history: the transactions already loaded —
+	// including those restored from the IndexedDB cache — stay displayed until a later sync updates
+	// them.
 	balancesStore.reset(tokenId);
 
 	trackLoadTransactionsError({ tokenId, error: err });
@@ -287,7 +330,7 @@ export const loadNextIcTransactions = async ({
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
-}): Promise<void> => {
+}): Promise<ResultSuccess> => {
 	const lastIdCleaned = lastId?.replace('-self', '');
 
 	try {
@@ -297,34 +340,33 @@ export const loadNextIcTransactions = async ({
 	} catch {
 		// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
 		// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
-		return;
+		return { success: false };
 	}
 
 	if (isNullish(token)) {
 		// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
-		return;
+		return { success: false };
 	}
 
 	if (isTokenIcrc7(token)) {
-		await loadNextIcrc7TransactionsRequest({
+		return await loadNextIcrc7TransactionsRequest({
 			lastId: lastIdCleaned,
 			token,
 			...rest
 		});
-		return;
 	}
 
 	if (isNotIcToken(token)) {
-		return;
+		return { success: false };
 	}
 
 	if (isNotIcTokenCanistersStrict(token)) {
 		// On one hand, we assume that the parent component does not mount this component if no transactions can be fetched; on the other hand, we want to avoid displaying an error toast that could potentially appear multiple times.
 		// Therefore, we do not particularly display a visual error. In any case, we cannot load transactions without an Index canister.
-		return;
+		return { success: false };
 	}
 
-	await loadNextIcTransactionsRequest({
+	return await loadNextIcTransactionsRequest({
 		start: nonNullish(lastIdCleaned) ? BigInt(lastIdCleaned) : undefined,
 		token,
 		...rest
@@ -333,17 +375,20 @@ export const loadNextIcTransactions = async ({
 
 export const loadNextIcTransactionsByOldest = async ({
 	minTimestamp,
-	transactions,
 	...rest
 }: {
-	minTimestamp: number;
-	transactions: IcTransactionUi[];
+	minTimestamp?: number;
 	owner: Principal;
 	identity: NullishIdentity;
 	maxResults?: bigint;
 	token: Token;
 	signalEnd: () => void;
 }): Promise<ResultSuccess> => {
+	// Read at call time rather than taken as a parameter: callers page in a loop, and each round has
+	// to see what the previous one appended. A list handed in would be a snapshot from before the
+	// first await.
+	const transactions = (get(icTransactionsStore)?.[rest.token.id] ?? []).map(({ data }) => data);
+
 	// If there are no transactions, we let the worker load the first ones
 	if (transactions.length === 0) {
 		return { success: false };
@@ -353,17 +398,24 @@ export const loadNextIcTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
 
+	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
 	if (
+		nonNullish(minTimestamp) &&
 		nonNullish(minIcTimestamp) &&
 		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
 	) {
 		return { success: false };
 	}
 
-	await loadNextIcTransactions({
+	const { err } = await loadNextIcTransactions({
 		...rest,
 		lastId
 	});
+
+	// Passed up rather than read as the end, so the lists keep the token and ask again later.
+	if (nonNullish(err)) {
+		return { success: false, err };
+	}
 
 	return { success: true };
 };

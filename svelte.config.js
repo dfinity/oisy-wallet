@@ -14,6 +14,8 @@ const signerVersions = JSON.parse(readFileSync(signerVersionsFile, 'utf8'));
 
 const signerTarget = process.env.OISY_SIGNER_TARGET;
 
+// The legacy signer is still built from main, so its pin is held equal to the wallet version by
+// the release workflow. The pin only starts to differ once it is frozen at a v4 snapshot.
 const version =
 	(signerTarget === 'legacy_signer' ? signerVersions['legacy_signer_frontend'] : undefined) ??
 	packageVersion;
@@ -48,6 +50,7 @@ const config = {
 			$evm: './src/frontend/src/evm',
 			$icp: './src/frontend/src/icp',
 			$sol: './src/frontend/src/sol',
+			$xrp: './src/frontend/src/xrp',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env',
 			$routes: './src/frontend/src/routes'

@@ -13,4 +13,16 @@ export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 export type IcSendParams = PartialSpecific<IcTransferParams, 'progress'> &
 	Pick<IcToken, 'ledgerCanisterId'>;
 
+/**
+ * The minter block index a ck withdrawal is keyed on, surfaced so callers that need to
+ * follow the withdrawal afterwards can do so. The minters return it already; until now
+ * every layer dropped it on the floor.
+ *
+ * `undefined` for a plain transfer, which has no minter leg.
+ */
+export type IcCkWithdrawalResult =
+	| { type: 'ckBtcToBtc'; blockIndex: bigint }
+	| { type: 'ckEthToEth'; blockIndex: bigint }
+	| { type: 'ckErc20ToErc20'; ckEthBlockIndex: bigint; ckErc20BlockIndex: bigint };
+
 export class IcAmountAssertionError extends Error {}

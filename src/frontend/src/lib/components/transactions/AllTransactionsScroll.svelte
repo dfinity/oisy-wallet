@@ -1,19 +1,40 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
+	import type { ResultSuccess } from '$lib/types/utils';
 
 	interface Props {
 		sortedTransactions: AllTransactionUiWithCmp[];
 		transactionsToDisplay: AllTransactionUiWithCmp[];
+		/**
+		 * Fetches another page from every chain. `success` is whether anything new was loaded, and
+		 * `err` is set when a page failed. Absent while the list has no loader above it.
+		 */
+		onLoadMore?: () => Promise<ResultSuccess>;
+		/** True once no chain has any history left to give. */
+		exhausted?: boolean;
 		children: Snippet;
 	}
 
-	let { sortedTransactions, transactionsToDisplay = $bindable([]), children }: Props = $props();
+	let {
+		sortedTransactions,
+		transactionsToDisplay = $bindable([]),
+		onLoadMore,
+		exhausted = false,
+		children
+	}: Props = $props();
 
 	let pages = $state(1);
+
+	let loading = $state(false);
+
+	// Length the list had when a fetch last loaded nothing. Anything arriving after that (a wallet
+	// worker delivering newer transactions, say) makes it worth asking the chains again.
+	let dryAtLength = $state<number | undefined>(undefined);
 
 	// Reset pagination on filter change so the re-keyed `InfiniteScroll`
 	// below mounts with a fresh observer and `pages = 1`.
@@ -21,17 +42,73 @@
 		[$transactionsFilterStore];
 
 		pages = 1;
+		dryAtLength = undefined;
 	});
 
-	let disableInfiniteScroll = $derived(transactionsToDisplay.length >= sortedTransactions.length);
+	let everythingLoadedIsOnScreen = $derived(
+		transactionsToDisplay.length >= sortedTransactions.length
+	);
 
-	// eslint-disable-next-line require-await -- Component `InfiniteScroll` requires async `onIntersect`
-	const onIntersect = async () => {
-		if (disableInfiniteScroll) {
-			return;
+	let dry = $derived(nonNullish(dryAtLength) && sortedTransactions.length <= dryAtLength);
+
+	let canFetchMore = $derived(nonNullish(onLoadMore) && !exhausted && !dry);
+
+	let disableInfiniteScroll = $derived(everythingLoadedIsOnScreen && !canFetchMore);
+
+	// Resolves whether it made progress, so `InfiniteScroll` checks the end of the list again even when
+	// a filter keeps the displayed list from growing.
+	const onIntersect = async (): Promise<boolean> => {
+		// Still revealing what is already in memory.
+		if (!everythingLoadedIsOnScreen) {
+			pages++;
+
+			return true;
 		}
 
-		pages++;
+		// The user reached the end of the loaded set, so go get more from the chains themselves.
+		// Without this the list stopped at whatever the initial levelling pass had fetched.
+		if (isNullish(onLoadMore) || !canFetchMore || loading) {
+			return false;
+		}
+
+		const lengthBeforeFetch = sortedTransactions.length;
+
+		loading = true;
+
+		let result: ResultSuccess;
+
+		try {
+			result = await onLoadMore();
+		} finally {
+			loading = false;
+		}
+
+		// Whether the fetch achieved anything has to come from the loader, not from this list: it is
+		// filtered, so history that loaded but does not match the current filter leaves its length
+		// untouched. Reading the length here would strand the user on a narrow filter.
+		// A page failed, so the chains may well have more. Going dry would stop asking until unrelated
+		// rows arrived; staying open lets the next intersection try again. What the other chains loaded
+		// is still revealed, but no progress is reported even then: progress re-arms the observer at
+		// once, which would retry the failing chain in a tight loop.
+		if (nonNullish(result.err)) {
+			if (result.success) {
+				pages++;
+			}
+
+			return false;
+		}
+
+		if (result.success) {
+			pages++;
+
+			return true;
+		}
+
+		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
+		// firing against chains that have nothing left.
+		dryAtLength = lengthBeforeFetch;
+
+		return false;
 	};
 
 	$effect(() => {

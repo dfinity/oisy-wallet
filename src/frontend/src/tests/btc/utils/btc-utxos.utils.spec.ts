@@ -2,6 +2,8 @@ import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
 import {
+	calculateFeeSatoshis,
+	calculateMaxSpendableAmount,
 	calculateUtxoSelection,
 	estimateTransactionVSize,
 	extractUtxoOutpoints,
@@ -83,6 +85,43 @@ describe('btc-utxos.utils', () => {
 			const result = extractUtxoOutpoints([]);
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('calculateFeeSatoshis', () => {
+		it('should price the recipient and change outputs at the given rate', () => {
+			// 1 input + 2 outputs = 141 vB, at 4 sat/vByte
+			expect(calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 4000n })).toEqual(
+				564n
+			);
+
+			// 2 inputs + 2 outputs = 209 vB, at 3 sat/vByte
+			expect(calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte: 3000n })).toEqual(
+				627n
+			);
+		});
+
+		it('should round up so the transaction is never priced below the rate', () => {
+			// 141 vB at 1.234 sat/vByte = 173.9 satoshis
+			expect(calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1234n })).toEqual(
+				174n
+			);
+		});
+
+		it('should agree with the fee the selection reports', () => {
+			const feeRateMiliSatoshisPerVByte = 2500n;
+			const { selectedUtxos, feeSatoshis } = calculateUtxoSelection({
+				availableUtxos: [createMockUtxo({ value: 100_000 })],
+				amountSatoshis: 10_000n,
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(feeSatoshis).toEqual(
+				calculateFeeSatoshis({
+					numInputs: selectedUtxos.length,
+					feeRateMiliSatoshisPerVByte
+				})
+			);
 		});
 	});
 
@@ -634,6 +673,83 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('calculateMaxSpendableAmount', () => {
+		const feeRateMiliSatoshisPerVByte = 1_000n;
+
+		it('should spend every available UTXO minus the fee for that many inputs', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				300_000n - calculateFeeSatoshis({ numInputs: 2, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		// Regression: the wallet balance is read at 1 confirmation but a send selects from 6, so
+		// offering the balance quoted a "Max" the selection then rejected for want of funds.
+		it('should exclude UTXOs below the confirmation floor a send selects from', () => {
+			const utxos = [
+				createMockUtxo({ value: 1_000, height: 10 }),
+				createMockUtxo({ value: 40_000, height: 3, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		it('should exclude UTXOs reserved by a pending transaction', () => {
+			const utxos = [
+				createMockUtxo({ value: 100_000 }),
+				createMockUtxo({ value: 200_000, txid: new Uint8Array([5, 6, 7, 8]) })
+			];
+
+			const result = calculateMaxSpendableAmount({
+				utxos,
+				pendingUtxoOutpoints: ['08070605:0'],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(
+				100_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte })
+			);
+		});
+
+		it('should return zero when nothing is available', () => {
+			const result = calculateMaxSpendableAmount({
+				utxos: [createMockUtxo({ value: 100_000, height: 0 })],
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(ZERO);
+		});
+
+		it('should return zero rather than a negative amount when the fee exceeds the funds', () => {
+			const result = calculateMaxSpendableAmount({
+				utxos: [createMockUtxo({ value: 1 })],
+				pendingUtxoOutpoints: [],
+				feeRateMiliSatoshisPerVByte
+			});
+
+			expect(result).toBe(ZERO);
 		});
 	});
 

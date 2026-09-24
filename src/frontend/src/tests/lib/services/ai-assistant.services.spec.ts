@@ -1,6 +1,7 @@
 import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { llmChat } from '$lib/api/llm.api';
+import * as balancesDerived from '$lib/derived/balances.derived';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import * as aiAssistantServices from '$lib/services/ai-assistant.services';
 import { contactsStore } from '$lib/stores/contacts.store';
@@ -8,7 +9,7 @@ import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 vi.mock('$lib/api/llm.api');
 
@@ -34,6 +35,13 @@ describe('ai-assistant.services', () => {
 		function: {
 			name: 'show_balance',
 			arguments: [{ name: 'tokenSymbol', value: 'ICP' }]
+		}
+	};
+	const showTotalBalanceToolCall = {
+		id: 'test',
+		function: {
+			name: 'show_balance',
+			arguments: []
 		}
 	};
 
@@ -182,6 +190,26 @@ describe('ai-assistant.services', () => {
 					mainCard: {
 						token: { ...ICP_TOKEN, balance: undefined, usdBalance: undefined },
 						totalUsdBalance: 0
+					}
+				}
+			});
+		});
+
+		it('reports the unfiltered show_balance total from the same store as the hero', () => {
+			vi.spyOn(balancesDerived, 'enabledMainnetTotalUsdBalance', 'get').mockReturnValue(
+				readable(1234.5)
+			);
+
+			const result = aiAssistantServices.executeTool({
+				toolCall: showTotalBalanceToolCall,
+				requestStartTimestamp: 1000
+			});
+
+			expect(result).toEqual({
+				type: 'show_balance',
+				result: {
+					mainCard: {
+						totalUsdBalance: 1234.5
 					}
 				}
 			});

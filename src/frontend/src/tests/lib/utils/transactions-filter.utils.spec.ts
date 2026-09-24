@@ -1,8 +1,10 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -266,6 +268,26 @@ describe('applyTransactionsFilter', () => {
 			expect(result).toEqual([ethSendTx]);
 		});
 
+		it('matches ETH by the recipient of a token transfer, which the transaction `to` is not', () => {
+			// The fee entry of a token transfer is addressed to the token contract.
+			const erc20FeeTx = {
+				...ethSendTx,
+				transaction: {
+					...ethSendTx.transaction,
+					to: USDC_TOKEN.address,
+					transferRecipient: mockEthAddress2
+				}
+			} as unknown as AllTransactionUiWithCmp;
+
+			const result = applyTransactionsFilter({
+				transactions: [erc20FeeTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['1'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([erc20FeeTx]);
+		});
+
 		it('matches BTC by sender or recipient', () => {
 			const result = applyTransactionsFilter({
 				transactions: allTxs,
@@ -301,6 +323,62 @@ describe('applyTransactionsFilter', () => {
 				transactions: allTxs,
 				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['9999'] },
 				contacts: allContacts
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('XRP transactions', () => {
+		// XRP address-book contacts are not supported yet (they need a backend address
+		// type), so the XRP branch exists to collect the plain from/to addresses — and to
+		// keep the exhaustive `assertNever` from throwing on an XRP transaction.
+		const xrpSendTx = {
+			component: 'xrp',
+			token: XRP_TOKEN,
+			transaction: {
+				id: 'xrp-1',
+				type: 'send',
+				status: 'confirmed',
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress',
+				value: 100n,
+				timestamp: ZERO
+			}
+		} satisfies AllTransactionUiWithCmp;
+
+		const xrpContact: ContactUi = {
+			name: 'Xrp Friend',
+			id: 7n,
+			updateTimestampNs: ZERO,
+			addresses: [{ address: 'rReceiverAddress', addressType: 'Sol' }]
+		};
+
+		it('keeps an XRP transaction when filtering by type', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, types: ['send'] },
+				contacts: []
+			});
+
+			expect(result).toEqual([xrpSendTx]);
+		});
+
+		it('matches an XRP transaction by its recipient address without throwing', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+				contacts: [xrpContact]
+			});
+
+			expect(result).toEqual([xrpSendTx]);
+		});
+
+		it('excludes an XRP transaction whose addresses no contact holds', () => {
+			const result = applyTransactionsFilter({
+				transactions: [xrpSendTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['7'] },
+				contacts: [{ ...xrpContact, addresses: [{ address: 'rOther', addressType: 'Sol' }] }]
 			});
 
 			expect(result).toEqual([]);

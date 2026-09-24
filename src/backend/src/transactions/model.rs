@@ -1,12 +1,14 @@
 use std::collections::HashSet;
 
-use candid::Principal;
+use candid::{Nat, Principal};
 use shared::types::{
     token_id::TokenId,
     user_transaction::{
-        GetUserTransactionsResponse, UserTransaction, UserTransactionError,
-        MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
-        MAX_USER_TRANSACTIONS_PER_TOKEN,
+        GetUserTransactionsResponse, IcrcTransactionType, NetworkTransactionData, UserTransaction,
+        UserTransactionError, MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
+        MAX_USER_TRANSACTIONS_PER_TOKEN, MAX_USER_TRANSACTION_ADDRESS_LEN,
+        MAX_USER_TRANSACTION_AMOUNT_BITS, MAX_USER_TRANSACTION_DATA_LEN,
+        MAX_USER_TRANSACTION_ID_LEN, MAX_USER_TRANSACTION_MEMO_LEN,
     },
 };
 
@@ -65,6 +67,102 @@ pub fn get_transactions(
         total_stored,
         next_start,
     }
+}
+
+/// Cap every free-form field of an incoming transaction.
+///
+/// The stored history is trimmed by count (`MAX_USER_TRANSACTIONS_PER_TOKEN`),
+/// which bounds how many transactions a caller keeps but not how many bytes
+/// each one carries. These caps are what make the size of a stored transaction
+/// provable: they sit far above any real chain value, so only payloads that are
+/// not transaction data are rejected.
+///
+/// # Errors
+/// - If any field of any transaction exceeds its cap. The message names the offending field.
+pub fn validate_transactions(transactions: &[UserTransaction]) -> Result<(), String> {
+    for tx in transactions {
+        validate_transaction(tx)?;
+    }
+    Ok(())
+}
+
+fn validate_transaction(tx: &UserTransaction) -> Result<(), String> {
+    require_len("id", &tx.id, MAX_USER_TRANSACTION_ID_LEN)?;
+    require_len("from", &tx.from, MAX_USER_TRANSACTION_ADDRESS_LEN)?;
+    if let Some(to) = tx.to.as_deref() {
+        require_len("to", to, MAX_USER_TRANSACTION_ADDRESS_LEN)?;
+    }
+    require_amount("value", &tx.value)?;
+
+    match &tx.network_data {
+        NetworkTransactionData::Evm(d) => {
+            for (field, amount) in [
+                ("gas_limit", d.gas_limit.as_ref()),
+                ("gas_price", d.gas_price.as_ref()),
+                ("gas_used", d.gas_used.as_ref()),
+                ("nft_token_id", d.nft_token_id.as_ref()),
+            ] {
+                if let Some(amount) = amount {
+                    require_amount(field, amount)?;
+                }
+            }
+            if let Some(data) = d.data.as_deref() {
+                require_len("data", data, MAX_USER_TRANSACTION_DATA_LEN)?;
+            }
+        }
+        NetworkTransactionData::Icrc(d) => {
+            if let Some(fee) = d.fee.as_ref() {
+                require_amount("fee", fee)?;
+            }
+            if let Some(memo) = d.memo.as_ref() {
+                if memo.len() > MAX_USER_TRANSACTION_MEMO_LEN {
+                    return Err(format!(
+                        "memo exceeds {MAX_USER_TRANSACTION_MEMO_LEN} bytes"
+                    ));
+                }
+            }
+            if let IcrcTransactionType::Approve { spender } = &d.tx_type {
+                require_len("spender", spender, MAX_USER_TRANSACTION_ADDRESS_LEN)?;
+            }
+        }
+        NetworkTransactionData::Btc(d) => {
+            if let Some(fee) = d.fee.as_ref() {
+                require_amount("fee", fee)?;
+            }
+        }
+        NetworkTransactionData::Sol(d) => {
+            if let Some(fee) = d.fee.as_ref() {
+                require_amount("fee", fee)?;
+            }
+            if let Some(from_owner) = d.from_owner.as_deref() {
+                require_len("from_owner", from_owner, MAX_USER_TRANSACTION_ADDRESS_LEN)?;
+            }
+            if let Some(to_owner) = d.to_owner.as_deref() {
+                require_len("to_owner", to_owner, MAX_USER_TRANSACTION_ADDRESS_LEN)?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Every field measured here is an address, a hash or hex calldata, so it is
+/// ASCII in practice. The cap is on bytes regardless, which is what bounds the
+/// stored size.
+fn require_len(field: &str, value: &str, max: usize) -> Result<(), String> {
+    if value.len() > max {
+        return Err(format!("{field} exceeds {max} bytes"));
+    }
+    Ok(())
+}
+
+fn require_amount(field: &str, amount: &Nat) -> Result<(), String> {
+    if amount.0.bits() > MAX_USER_TRANSACTION_AMOUNT_BITS {
+        return Err(format!(
+            "{field} exceeds {MAX_USER_TRANSACTION_AMOUNT_BITS} bits"
+        ));
+    }
+    Ok(())
 }
 
 /// Save finalized transactions for a user and token.
@@ -171,13 +269,16 @@ mod tests {
     use shared::types::{
         token_id::TokenId,
         user_transaction::{
-            EvmTransactionData, NetworkTransactionData, UserTransaction, UserTransactionError,
+            EvmTransactionData, IcrcTransactionData, IcrcTransactionType, NetworkTransactionData,
+            SolTransactionData, UserTransaction, UserTransactionError,
             MAX_GET_USER_TRANSACTIONS_RESULTS, MAX_SAVE_USER_TRANSACTIONS_BATCH,
-            MAX_USER_TRANSACTIONS_PER_TOKEN,
+            MAX_USER_TRANSACTIONS_PER_TOKEN, MAX_USER_TRANSACTION_ADDRESS_LEN,
+            MAX_USER_TRANSACTION_DATA_LEN, MAX_USER_TRANSACTION_ID_LEN,
+            MAX_USER_TRANSACTION_MEMO_LEN,
         },
     };
 
-    use super::{get_transactions, make_key, save_transactions};
+    use super::{get_transactions, make_key, save_transactions, validate_transactions};
     use crate::types::{maps::UserTransactionsMap, storable::Candid};
 
     const PRINCIPAL_TEXT: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
@@ -219,6 +320,120 @@ mod tests {
         let principal = Principal::from_text(PRINCIPAL_TEXT).unwrap();
         let key = make_key(principal, &eth_native_token());
         map.insert(key, Candid(txs));
+    }
+
+    /// 2^256, one bit wider than any real chain amount.
+    const OVER_WIDTH_AMOUNT: &[u8] =
+        b"115792089237316195423570985008687907853269984665640564039457584007913129639936";
+
+    fn icrc_tx(tx_type: IcrcTransactionType, memo: Option<Vec<u8>>) -> UserTransaction {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.network_data = NetworkTransactionData::Icrc(IcrcTransactionData {
+            fee: Some(Nat::from(10u64)),
+            memo,
+            tx_type,
+        });
+        tx
+    }
+
+    #[test]
+    fn test_validate_accepts_realistic_transaction() {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.from = "0x1234567890123456789012345678901234567890".to_string();
+        tx.to = Some("0x0987654321098765432109876543210987654321".to_string());
+        validate_transactions(&[tx]).expect("realistic transaction should be accepted");
+    }
+
+    #[test]
+    fn test_validate_accepts_icrc_and_sol_transactions() {
+        let icrc = icrc_tx(
+            IcrcTransactionType::Approve {
+                spender: "mxzaz-hqaaa-aaaar-qaada-cai".to_string(),
+            },
+            Some(vec![0u8; 32]),
+        );
+        validate_transactions(&[icrc]).expect("icrc transaction should be accepted");
+
+        let mut sol = make_tx("tx-2", 1, 1);
+        sol.network_data = NetworkTransactionData::Sol(SolTransactionData {
+            fee: Some(Nat::from(5_000u64)),
+            from_owner: Some("9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin".to_string()),
+            to_owner: None,
+        });
+        validate_transactions(&[sol]).expect("sol transaction should be accepted");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_id() {
+        let tx = make_tx(&"a".repeat(MAX_USER_TRANSACTION_ID_LEN + 1), 1, 1);
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("id"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_address() {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.from = "a".repeat(MAX_USER_TRANSACTION_ADDRESS_LEN + 1);
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("from"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_evm_data() {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.network_data = NetworkTransactionData::Evm(EvmTransactionData {
+            chain_id: Some(1),
+            nonce: Some(1),
+            gas_limit: None,
+            gas_price: None,
+            gas_used: None,
+            data: Some("0".repeat(MAX_USER_TRANSACTION_DATA_LEN + 1)),
+            nft_token_id: None,
+        });
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("data"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_memo() {
+        let tx = icrc_tx(
+            IcrcTransactionType::Transfer,
+            Some(vec![0u8; MAX_USER_TRANSACTION_MEMO_LEN + 1]),
+        );
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("memo"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_value() {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.value = Nat::parse(OVER_WIDTH_AMOUNT).unwrap();
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("value"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_oversized_gas_price() {
+        let mut tx = make_tx("tx-1", 1, 1);
+        tx.network_data = NetworkTransactionData::Evm(EvmTransactionData {
+            chain_id: Some(1),
+            nonce: Some(1),
+            gas_limit: None,
+            gas_price: Some(Nat::parse(&b"9".repeat(10_000)).unwrap()),
+            gas_used: None,
+            data: None,
+            nft_token_id: None,
+        });
+        let err = validate_transactions(&[tx]).unwrap_err();
+        assert!(err.contains("gas_price"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn test_validate_rejects_one_bad_transaction_in_a_batch() {
+        let good = make_tx("tx-1", 1, 1);
+        let mut bad = make_tx("tx-2", 2, 2);
+        bad.value = Nat::parse(OVER_WIDTH_AMOUNT).unwrap();
+        assert!(validate_transactions(&[good, bad]).is_err());
     }
 
     #[test]

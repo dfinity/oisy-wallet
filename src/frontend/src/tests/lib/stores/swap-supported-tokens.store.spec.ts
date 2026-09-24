@@ -15,7 +15,8 @@ describe('swap-supported-tokens.store', () => {
 			aggregated: {
 				icp: { coverage: 'all' as const, supportedTokenIds: new Set(['canister-1', 'canister-2']) },
 				evm: { coverage: 'some' as const, supportedTokenIds: new Set(['0xabc']) },
-				sol: { coverage: 'none' as const, supportedTokenIds: new Set<string>() }
+				sol: { coverage: 'none' as const, supportedTokenIds: new Set<string>() },
+				btc: { coverage: 'none' as const, supportedTokenIds: new Set<string>() }
 			},
 			providers: []
 		};
@@ -40,7 +41,8 @@ describe('swap-supported-tokens.store', () => {
 			aggregated: {
 				icp: { coverage: 'all', supportedTokenIds: new Set(['a']) },
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			},
 			providers: []
 		});

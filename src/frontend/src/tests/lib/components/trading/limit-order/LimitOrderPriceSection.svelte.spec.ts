@@ -1,6 +1,7 @@
 import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 import type { LimitOrderPairView, LimitOrderSide, PricePreset } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderPriceSection', () => {
@@ -70,6 +71,129 @@ describe('LimitOrderPriceSection', () => {
 		expect(container).toHaveTextContent(en.trading.limit_order.warning_crossing_sell);
 	});
 
+	// A book of 8 / 11 around a current value of 10.5: a sell at 9 rests (above the
+	// bid) yet sits well below what the feed says the token is worth.
+	const wideBook = { bid: 8, ask: 11 };
+
+	it('shows the resting-below-value warning for a sell priced under current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '9' }
+		});
+
+		expect(container).toHaveTextContent(en.trading.limit_order.warning_resting_below_value_sell);
+	});
+
+	it('reads as an immediate sale for a resting sell priced under current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '9' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_crossing.split(' $')[0]
+		);
+	});
+
+	// The label switches on the sign alone, the warning at -1%: a price a hair
+	// under current value has already been met, but is nothing to warn about.
+	it('reads as an immediate sale for a sell a hair under current value, without warning', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '10.45' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_crossing.split(' $')[0]
+		);
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+	});
+
+	it('keeps the resting label for a sell priced above current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '10.55' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_resting.split(' $')[0]
+		);
+	});
+
+	// The severity boundary is inclusive, matching how `ValueDifference` classifies
+	// `errorLevel`: at exactly -5% the figure is red, so the warning must be too.
+	// A buy at 10.5 against a current value of 10 is the one arrangement that lands
+	// exactly on -5 in floating point — the sell side computes -5.000000000000004,
+	// which is past the boundary rather than on it.
+	it('renders the resting warning red at exactly the error threshold', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: {
+				...baseProps,
+				...wideBook,
+				side: 'buy' as LimitOrderSide,
+				currentValue: 10,
+				price: '10.5'
+			}
+		});
+
+		const warning = container.querySelector('p.text-error-primary');
+
+		expect(warning).toHaveTextContent(en.trading.limit_order.warning_resting_above_value_buy);
+	});
+
+	// A fill-or-kill order can never rest, so neither the resting copy nor the
+	// resting label may claim it — including on an empty book side, where
+	// `crossing` and the FOK-blocked branch are both out of the picture.
+	it('claims no resting behaviour for a fill-or-kill sell under current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, bid: null, ask: 11, price: '9', fillOrKill: true }
+		});
+
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_sell_resting.split(' $')[0]
+		);
+	});
+
+	it('shows the resting-above-value warning for a buy priced over current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, side: 'buy' as LimitOrderSide, price: '10.9' }
+		});
+
+		expect(container).toHaveTextContent(en.trading.limit_order.warning_resting_above_value_buy);
+	});
+
+	it('reads as an immediate purchase for a resting buy priced over current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, side: 'buy' as LimitOrderSide, price: '10.9' }
+		});
+
+		expect(container).toHaveTextContent(
+			en.trading.limit_order.price_label_buy_crossing.split(' $')[0]
+		);
+	});
+
+	it('shows no resting warning for a sell priced within the threshold of current value', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, ...wideBook, price: '10.45' }
+		});
+
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+	});
+
+	it('prefers the crossing warning over the resting one when the price crosses', () => {
+		const { container } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, price: '9' }
+		});
+
+		expect(container).toHaveTextContent(en.trading.limit_order.warning_crossing_sell);
+		expect(container).not.toHaveTextContent(
+			en.trading.limit_order.warning_resting_below_value_sell
+		);
+	});
+
 	it('shows the FOK-blocked warning for a fill-or-kill order that cannot cross', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, price: '12', fillOrKill: true }
@@ -113,22 +237,28 @@ describe('LimitOrderPriceSection', () => {
 		expect(parseFloat(props.price)).toBeGreaterThan(0);
 	});
 
-	it('borders the latched preset and no other', () => {
+	// The presets are `PillButton`s, so the latched one is marked by `aria-pressed`
+	// rather than a class of this component's own — assert the semantics, not the
+	// pill's styling.
+	const pressed = (element: HTMLElement): Nullish<string> =>
+		element.closest('button')?.getAttribute('aria-pressed');
+
+	it('marks the latched preset and no other', () => {
 		const { getByText } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, activePreset: 1 as PricePreset | null }
 		});
 
-		expect(getByText(en.trading.limit_order.preset_sell_1)).toHaveClass('border-brand-primary');
-		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
+		expect(pressed(getByText(en.trading.limit_order.preset_sell_1))).toBe('true');
+		expect(pressed(getByText(en.trading.limit_order.preset_market))).toBe('false');
 	});
 
-	it('borders no preset when none is latched', () => {
+	it('marks no preset when none is latched', () => {
 		const { getByText } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, activePreset: null as PricePreset | null }
 		});
 
-		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
-		expect(getByText(en.trading.limit_order.preset_sell_1)).not.toHaveClass('border-brand-primary');
+		expect(pressed(getByText(en.trading.limit_order.preset_market))).toBe('false');
+		expect(pressed(getByText(en.trading.limit_order.preset_sell_1))).toBe('false');
 	});
 
 	it('renders the value difference when price and current value are positive', () => {

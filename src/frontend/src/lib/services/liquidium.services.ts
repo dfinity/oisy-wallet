@@ -74,5 +74,7 @@ export const loadLiquidium = async ({
 		liquidiumStore.set({ markets, portfolio, assetPrices });
 	} catch (err: unknown) {
 		consoleError(err);
+	} finally {
+		liquidiumStore.setLoaded(true);
 	}
 };

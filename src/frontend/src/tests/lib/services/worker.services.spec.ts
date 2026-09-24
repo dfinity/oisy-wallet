@@ -1,5 +1,6 @@
 import { AppWorker } from '$lib/services/_worker.services';
 import type { WorkerData } from '$lib/types/worker';
+import { workerPoolSize } from '$lib/utils/device.utils';
 
 const postMessageSpy = vi.fn();
 const addEventListenerSpy = vi.fn();
@@ -29,10 +30,23 @@ vi.mock('$lib/workers/workers?worker', () => {
 	};
 });
 
+vi.mock(import('$lib/utils/device.utils'), async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...actual,
+		workerPoolSize: vi.fn()
+	};
+});
+
 describe('_worker.services', () => {
 	describe('AppWorker', () => {
 		const listenerSpy = vi.fn();
 		const stopTimerSpy = vi.fn();
+
+		// Pool size 4 keeps the sharding deterministic for the keys used below:
+		// `#hashKey('a') % 4 === 1`, `'b' % 4 === 2`, `'e' % 4 === 1` (collides with `'a'`).
+		const POOL_SIZE = 4;
 
 		class TestWorker extends AppWorker {
 			constructor(worker: WorkerData) {
@@ -54,11 +68,10 @@ describe('_worker.services', () => {
 			return { instance, worker };
 		};
 
-		const createTestWorkerSingleton = async (): Promise<{
-			instance: TestWorker;
-			worker: WorkerData;
-		}> => {
-			const worker = await AppWorker.getInstance({ asSingleton: true });
+		const createTestWorkerPooled = async (
+			poolKey: string
+		): Promise<{ instance: TestWorker; worker: WorkerData }> => {
+			const worker = await AppWorker.getInstance({ pooled: true, poolKey });
 			const instance = new TestWorker(worker);
 			return { instance, worker };
 		};
@@ -73,6 +86,10 @@ describe('_worker.services', () => {
 			vi.stubGlobal('crypto', {
 				randomUUID: vi.fn().mockReturnValueOnce(mockId).mockReturnValueOnce('0000')
 			});
+
+			vi.mocked(workerPoolSize).mockReturnValue(POOL_SIZE);
+
+			AppWorker.resetForTesting();
 		});
 
 		afterEach(() => {
@@ -83,7 +100,7 @@ describe('_worker.services', () => {
 			const worker = await AppWorker.getInstance();
 
 			expect(worker.worker).toBeInstanceOf(Worker);
-			expect(worker.isSingleton).toBeFalsy();
+			expect(worker.poolIndex).toBeUndefined();
 		});
 
 		it('should return different workers by default', async () => {
@@ -91,8 +108,8 @@ describe('_worker.services', () => {
 			const second = await AppWorker.getInstance();
 
 			expect(first.worker).not.toBe(second.worker);
-			expect(first.isSingleton).toBeFalsy();
-			expect(second.isSingleton).toBeFalsy();
+			expect(first.poolIndex).toBeUndefined();
+			expect(second.poolIndex).toBeUndefined();
 		});
 
 		it('should set onmessage listener via setOnMessage', async () => {
@@ -141,24 +158,50 @@ describe('_worker.services', () => {
 			expect(worker.worker.onmessage).toBeNull();
 		});
 
-		describe('as singleton', () => {
-			const params = { asSingleton: true };
-
-			it('should reuse the same worker', async () => {
-				const first = await AppWorker.getInstance(params);
-				const second = await AppWorker.getInstance(params);
+		describe('when pooled', () => {
+			it('should reuse the same worker for the same pool key', async () => {
+				const first = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+				const second = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
 
 				expect(first.worker).toBeInstanceOf(Worker);
 				expect(second.worker).toBeInstanceOf(Worker);
 
 				expect(first.worker).toBe(second.worker);
 
-				expect(first.isSingleton).toBeTruthy();
-				expect(second.isSingleton).toBeTruthy();
+				expect(first.poolIndex).toBe(second.poolIndex);
+				expect(first.poolIndex).toEqual(expect.any(Number));
+			});
+
+			it('should shard keys that hash to different indices onto different workers', async () => {
+				const a = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+				const b = await AppWorker.getInstance({ pooled: true, poolKey: 'b' });
+
+				expect(a.poolIndex).not.toBe(b.poolIndex);
+				expect(a.worker).not.toBe(b.worker);
+			});
+
+			it('should share a worker between keys that hash to the same index', async () => {
+				const a = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+				const e = await AppWorker.getInstance({ pooled: true, poolKey: 'e' });
+
+				expect(a.poolIndex).toBe(e.poolIndex);
+				expect(a.worker).toBe(e.worker);
+			});
+
+			it('should collapse the pool onto a single worker when the pool size is one (iOS)', async () => {
+				vi.mocked(workerPoolSize).mockReturnValue(1);
+				AppWorker.resetForTesting();
+
+				const a = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+				const b = await AppWorker.getInstance({ pooled: true, poolKey: 'b' });
+
+				expect(a.poolIndex).toBe(0);
+				expect(b.poolIndex).toBe(0);
+				expect(a.worker).toBe(b.worker);
 			});
 
 			it("should add a listener to the worker's message event", async () => {
-				const { instance, worker } = await createTestWorkerSingleton();
+				const { instance, worker } = await createTestWorkerPooled('a');
 
 				instance.setListener(listenerSpy);
 
@@ -171,25 +214,28 @@ describe('_worker.services', () => {
 				expect(worker.worker.onmessage).toBeNull();
 			});
 
-			it("should remove the listener from the worker's message event on destroy", async () => {
-				const { instance, worker } = await createTestWorkerSingleton();
+			it('should keep the shared worker alive until the last wrapper is destroyed', async () => {
+				const { instance: first, worker } = await createTestWorkerPooled('a');
+				const { instance: second } = await createTestWorkerPooled('a');
 
-				instance.setListener(listenerSpy);
+				first.setListener(listenerSpy);
+				second.setListener(listenerSpy);
 
-				instance.destroy();
-
-				expect(stopTimerSpy).toHaveBeenCalledExactlyOnceWith();
+				first.destroy();
 
 				expect(worker.worker.removeEventListener).toHaveBeenCalledExactlyOnceWith(
 					'message',
 					listenerSpy
 				);
-
 				expect(worker.worker.terminate).not.toHaveBeenCalled();
+
+				second.destroy();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
 			});
 
 			it('should not remove the listener twice on destroy', async () => {
-				const { instance, worker } = await createTestWorkerSingleton();
+				const { instance, worker } = await createTestWorkerPooled('a');
 
 				instance.setListener(listenerSpy);
 
@@ -201,14 +247,66 @@ describe('_worker.services', () => {
 					'message',
 					listenerSpy
 				);
+			});
+
+			it('should spawn a fresh worker for a pool index after it was fully released', async () => {
+				const { instance: first, worker } = await createTestWorkerPooled('a');
+
+				first.destroy();
+
+				const { worker: next } = await createTestWorkerPooled('a');
+
+				expect(next.worker).not.toBe(worker.worker);
+			});
+
+			it('should keep the shared worker alive when the last wrapper is destroyed while another wrapper is still initializing', async () => {
+				const { instance: first, worker } = await createTestWorkerPooled('a');
+
+				// Not awaited on purpose: the ref-count reservation must happen synchronously on the
+				// getInstance call, before the worker promise resolves.
+				const pending = AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+
+				first.destroy();
+
+				expect(worker.worker.terminate).not.toHaveBeenCalled();
+
+				const workerData = await pending;
+
+				expect(workerData.worker).toBe(worker.worker);
+
+				const second = new TestWorker(workerData);
+
+				second.destroy();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
+			});
+
+			it('should retry the worker creation after a failed one instead of caching the rejection', async () => {
+				class FailingWorker {
+					constructor() {
+						throw new Error('chunk load failed');
+					}
+				}
+
+				vi.stubGlobal('Worker', FailingWorker as unknown as typeof Worker);
+
+				await expect(AppWorker.getInstance({ pooled: true, poolKey: 'a' })).rejects.toThrow(
+					'chunk load failed'
+				);
+
+				vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+
+				const { instance, worker } = await createTestWorkerPooled('a');
+
+				expect(worker.worker).toBeInstanceOf(MockWorker);
+
+				instance.destroy();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
 			});
 		});
 
 		describe('terminateAllWorkers', () => {
-			beforeEach(() => {
-				AppWorker.resetForTesting();
-			});
-
 			it('should terminate every spawned worker', async () => {
 				const { worker: first } = await createTestWorker();
 				const { worker: second } = await createTestWorker();
@@ -219,14 +317,14 @@ describe('_worker.services', () => {
 				expect(second.worker.terminate).toHaveBeenCalledOnce();
 			});
 
-			it('should terminate the singleton worker and reset it', async () => {
-				const { worker } = await createTestWorkerSingleton();
+			it('should terminate pooled workers and reset the pool', async () => {
+				const { worker } = await createTestWorkerPooled('a');
 
 				AppWorker.terminateAllWorkers();
 
 				expect(worker.worker.terminate).toHaveBeenCalledOnce();
 
-				const next = await AppWorker.getInstance({ asSingleton: true });
+				const next = await AppWorker.getInstance({ pooled: true, poolKey: 'a' });
 
 				expect(next.worker).not.toBe(worker.worker);
 			});

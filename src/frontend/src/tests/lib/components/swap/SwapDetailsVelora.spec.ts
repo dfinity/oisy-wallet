@@ -1,17 +1,21 @@
 import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
-import { SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
+import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 import en from '$tests/mocks/i18n.mock';
+import { mockVeloraDeltaPrice, mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SwapDetailsVelora', () => {
 	const baseProvider = {
 		provider: SwapProvider.VELORA,
-		receiveAmount: 1_000_000n,
-		swapDetails: {} as VeloraSwapDetails
+		receiveAmount: 1_000_000n
 	} as const;
 
 	it('displays the swap details for Delta Swap', () => {
-		const provider = { ...baseProvider, type: 'delta' as const };
+		const provider = {
+			...baseProvider,
+			type: VeloraSwapTypes.DELTA,
+			swapDetails: mockVeloraDeltaPrice
+		} as const;
 
 		const { getByText, queryByText } = render(SwapDetailsVelora, {
 			props: { provider }
@@ -31,7 +35,11 @@ describe('SwapDetailsVelora', () => {
 	});
 
 	it('Displays the swap details for Market Swap', () => {
-		const provider = { ...baseProvider, type: 'market' as const };
+		const provider = {
+			...baseProvider,
+			type: VeloraSwapTypes.MARKET,
+			swapDetails: mockVeloraOptimalRate
+		} as const;
 
 		const { getByText, queryByText } = render(SwapDetailsVelora, {
 			props: { provider }

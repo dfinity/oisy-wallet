@@ -19,16 +19,26 @@ export const getUtxosQuery = async ({
 	bitcoinCanisterId,
 	address,
 	network,
-	minConfirmations
-}: BitcoinCanisterParams): Promise<BitcoinDid.get_utxos_response> => {
+	minConfirmations,
+	page
+}: BitcoinCanisterParams & { page?: Uint8Array }): Promise<BitcoinDid.get_utxos_response> => {
 	assertNonNullish(identity);
 
 	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
+	// The filter is a variant: a page reference continues the paginated listing the
+	// previous response's `next_page` points into and cannot be combined with a
+	// confirmations floor, which applies to the listing as a whole.
+	const filter = nonNullish(page)
+		? { page }
+		: nonNullish(minConfirmations)
+			? { minConfirmations }
+			: undefined;
+
 	return getUtxosQuery({
 		address,
 		network,
-		...(nonNullish(minConfirmations) && { filter: { minConfirmations } })
+		...(nonNullish(filter) && { filter })
 	});
 };
 

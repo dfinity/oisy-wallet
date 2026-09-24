@@ -5,14 +5,14 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { liquidiumSupplyMarkets } from '$lib/derived/liquidium.derived';
-	import { tokens } from '$lib/derived/tokens.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { Token } from '$lib/types/token';
-	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
+	import { liquidiumEnabledRailToken } from '$lib/utils/liquidium.utils';
 
 	interface Props {
 		// Omitted on a neutral (token-less) launch — then nothing is excluded.
@@ -25,11 +25,16 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	// Rails whose token the user disabled resolve to `undefined` and drop out below.
 	let entries = $derived(
 		$liquidiumSupplyMarkets
 			.map((market) => ({
 				market,
-				token: liquidiumMarketToken({ chain: market.chain, asset: market.asset, tokens: $tokens })
+				token: liquidiumEnabledRailToken({
+					chain: market.chain,
+					asset: market.asset,
+					enabledTokens: $enabledFungibleTokens
+				})
 			}))
 			.filter(
 				(entry): entry is { market: LiquidiumMarket; token: Token } =>

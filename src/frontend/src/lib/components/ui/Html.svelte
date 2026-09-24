@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { sanitize } from '$lib/utils/html.utils';
+	import { sanitize, sanitizeUntrusted } from '$lib/utils/html.utils';
 
 	interface Props {
 		text?: string;
+		untrusted?: boolean;
 	}
 
-	let { text }: Props = $props();
+	let { text, untrusted = false }: Props = $props();
 
 	// force to rerender after SSR
 	let mounted = $state(false);
@@ -16,5 +17,5 @@
 
 {#if mounted && nonNullish(text)}
 	<!-- eslint-disable svelte/no-at-html-tags -->
-	{@html sanitize(text)}
+	{@html untrusted ? sanitizeUntrusted(text) : sanitize(text)}
 {/if}

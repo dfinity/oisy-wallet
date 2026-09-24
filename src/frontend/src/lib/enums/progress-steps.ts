@@ -82,6 +82,15 @@ export enum ProgressStepsSendSol {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSendXrp {
+	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
+	SEND = 'send',
+	CONFIRM = 'confirm',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',
@@ -180,5 +189,21 @@ export enum ProgressStepsLimitOrder {
 	INITIALIZATION = 'initialization',
 	PLACE = 'place',
 	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+/**
+ * Creating a tip. Three stages, each a real canister call the sender waits on:
+ * the approve that sets the amount aside, the `create_tip` that mints the link,
+ * and the encrypted copy of the claim code that makes the link recoverable.
+ *
+ * The vetKD derivation is deliberately not a step of its own. It starts before
+ * the approve and is awaited inside `SAVE`, so it has no moment of its own to
+ * report — and it is the one part of this that means nothing to a sender.
+ */
+export enum ProgressStepsTip {
+	RESERVE = 'reserve',
+	CREATE = 'create',
+	SAVE = 'save',
 	DONE = 'done'
 }

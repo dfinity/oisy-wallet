@@ -6,7 +6,7 @@
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
-	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
@@ -14,6 +14,7 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
+	import { SwapAmountTooLowError } from '$lib/types/errors';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 
@@ -105,7 +106,8 @@
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
 				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress,
-				userSolAddress: $solAddressMainnet
+				userSolAddress: $solAddressMainnet,
+				userBtcAddress: $btcAddressMainnet
 			});
 
 			if (currentGeneration !== fetchGeneration) {
@@ -126,16 +128,21 @@
 				amountForSwap: parsedAmount,
 				selectedProvider: swapAmounts[0]
 			});
-		} catch (_err: unknown) {
+		} catch (err: unknown) {
 			if (currentGeneration !== fetchGeneration) {
 				return;
 			}
 
-			// if swapAmounts fails, it means no pool is currently available for the provided tokens
+			// Any fetch failure (no pool for the pair, provider or network error) surfaces as
+			// "no offers". A provider that refused the amount as below its minimum names the
+			// reason, which the form surfaces instead of the generic "swap is not offered".
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
-				selectedProvider: undefined
+				selectedProvider: undefined,
+				...(err instanceof SwapAmountTooLowError && {
+					quoteError: { type: 'amount-too-low', minAmount: err.minAmount }
+				})
 			});
 		} finally {
 			if (currentGeneration === fetchGeneration) {

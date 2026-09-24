@@ -2,24 +2,47 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import Actions from '$lib/components/hero/Actions.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	BUY_TOKENS_MODAL_OPEN_BUTTON,
+	NFT_HERO_CHECK_NEW_BUTTON,
+	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
 	SWAP_TOKENS_MODAL_OPEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
+import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { HERO_CONTEXT_KEY, initHeroContext } from '$lib/stores/hero.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
+import { get, readable } from 'svelte/store';
+
+// XRP is force-disabled under TEST, so it is absent from the supported-network catalog
+// that the selected network resolves against. Enable it so the XRP branch of the hero
+// actions can be exercised.
+vi.mock('$env/networks/networks.xrp.env', async () => {
+	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
+
+	return {
+		...actual,
+		XRP_MAINNET_ENABLED: true,
+		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
+		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
+	};
+});
 
 describe('Actions', () => {
 	const swapButtonSelector = `button[data-tid="${SWAP_TOKENS_MODAL_OPEN_BUTTON}"]`;
 	const sendButtonSelector = `button[data-tid="${SEND_TOKENS_MODAL_OPEN_BUTTON}"]`;
 	const buyButtonSelector = `button[data-tid="${BUY_TOKENS_MODAL_OPEN_BUTTON}"]`;
+	const checkNewCollectionsButtonSelector = `button[data-tid="${NFT_HERO_CHECK_NEW_BUTTON}"]`;
+	const receiveButtonSelector = `button[data-tid="${RECEIVE_TOKENS_MODAL_OPEN_BUTTON}"]`;
 
 	const heroContext = new Map<symbol, unknown>([[HERO_CONTEXT_KEY, initHeroContext()]]);
 
@@ -30,6 +53,9 @@ describe('Actions', () => {
 		mockPage.reset();
 
 		vi.spyOn(balancesDerived, 'allBalancesZero', 'get').mockReturnValue(readable(false));
+
+		modalStore.close();
+		xrpAddressMainnetStore.reset();
 	});
 
 	const setTokensPage = () => {
@@ -160,6 +186,103 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(buyButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('receive button visibility', () => {
+		it.each([ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, XRP_TOKEN])(
+			'should show the receive button on the transactions page of the $network.name network',
+			(token) => {
+				setTransactionsPage();
+				mockPage.mockToken(token);
+
+				const { container } = renderActions();
+
+				expect(container.querySelector(receiveButtonSelector)).toBeInTheDocument();
+			}
+		);
+
+		it('should show the receive button when all networks are selected', () => {
+			setTokensPage();
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(receiveButtonSelector)).toBeInTheDocument();
+		});
+
+		// The chain-fusion fallback renders a receive button with the same test id, so
+		// asserting on the button alone would not prove that the XRP branch was taken.
+		it('should open the XRP receive modal on the XRP network', async () => {
+			setTransactionsPage();
+			mockPage.mockToken(XRP_TOKEN);
+
+			xrpAddressMainnetStore.set({ data: mockXrpAddress, certified: true });
+
+			const hero = initHeroContext();
+			// The hero buttons start disabled until the wallet has loaded.
+			hero.inflowActionsDisabled.set(false);
+
+			const { container } = render(Actions, {
+				context: new Map<symbol, unknown>([[HERO_CONTEXT_KEY, hero]])
+			});
+
+			const button = container.querySelector<HTMLButtonElement>(receiveButtonSelector);
+
+			assertNonNullish(button);
+
+			button.click();
+
+			await waitFor(() => {
+				expect(get(modalStore)?.type).toBe('xrp-receive');
+			});
+		});
+	});
+
+	describe('check for new collectibles button visibility', () => {
+		it('should show the button on NFTs page when all networks are selected', () => {
+			setNftsPage();
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).toBeInTheDocument();
+		});
+
+		it('should show the button on NFTs page for the ICP network', () => {
+			setNftsPage();
+			mockPage.mockNetwork(ICP_TOKEN.network.id.description);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).toBeInTheDocument();
+		});
+
+		it.each([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN])(
+			'should hide the button on NFTs page for the $network.name network',
+			(token) => {
+				setNftsPage();
+				mockPage.mockNetwork(token.network.id.description);
+
+				const { container } = renderActions();
+
+				expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
+			}
+		);
+
+		it('should hide the button on tokens page', () => {
+			setTokensPage();
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide the button on transactions page', () => {
+			setTransactionsPage();
+			mockPage.mockToken(ICP_TOKEN);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 });

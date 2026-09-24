@@ -73,7 +73,8 @@ describe('SwapTokensList', () => {
 			aggregated: {
 				icp: { coverage: 'all', supportedTokenIds: new Set() },
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			},
 			providers: [
 				{
@@ -92,7 +93,8 @@ describe('SwapTokensList', () => {
 				receiveSupportedData: {
 					icp: { coverage: 'all', supportedTokenIds: new Set() },
 					evm: { coverage: 'all', supportedTokenIds: new Set() },
-					sol: { coverage: 'all', supportedTokenIds: new Set() }
+					sol: { coverage: 'all', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				}
 			})
 		});

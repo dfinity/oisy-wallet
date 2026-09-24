@@ -9,6 +9,7 @@ import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
 } from '$lib/constants/analytics.constants';
+import { enabledMainnetTotalUsdBalance } from '$lib/derived/balances.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { networks } from '$lib/derived/networks.derived';
 import { enabledMainnetFungibleTokensUi } from '$lib/derived/tokens-ui.derived';
@@ -130,7 +131,8 @@ export const executeTool = ({
 		result = parseShowBalanceToolArguments({
 			filterParams,
 			tokensUi: get(enabledMainnetFungibleTokensUi),
-			networks: get(networks)
+			networks: get(networks),
+			totalUsdBalance: get(enabledMainnetTotalUsdBalance)
 		});
 
 		additionalTrackingMetadata = {

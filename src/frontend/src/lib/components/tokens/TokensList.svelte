@@ -166,7 +166,11 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition-colors duration-300 hover:bg-primary">
-							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
+							<TokenCard
+								data={token}
+								onClick={() => goto(transactionsUrl({ token }))}
+								showNetwork={false}
+							/>
 						</div>
 					{/if}
 				</div>

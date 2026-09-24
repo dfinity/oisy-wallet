@@ -1,10 +1,12 @@
 import * as backendApi from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_SAVE_USER_TRANSACTIONS_BATCH } from '$lib/constants/user-transactions.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { Transaction } from '$lib/types/transaction';
+import { consoleError } from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockEthTransaction,
@@ -18,6 +20,10 @@ import {
 vi.mock('$lib/api/backend.api', () => ({
 	getUserTransactions: vi.fn(),
 	saveUserTransactions: vi.fn()
+}));
+
+vi.mock('$lib/utils/console.utils', () => ({
+	consoleError: vi.fn()
 }));
 
 describe('user-transactions.services', () => {
@@ -124,6 +130,107 @@ describe('user-transactions.services', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('saveFinalizedTransactions batching', () => {
+		const makeTransactions = (count: number): Transaction[] =>
+			Array.from({ length: count }, (_, index) => ({
+				...mockEthTransaction,
+				hash: `0x${index}`
+			}));
+
+		const save = (transactions: Transaction[]) =>
+			saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: mockMapToBackendUserTransaction
+			});
+
+		beforeEach(() => {
+			vi.spyOn(backendApi, 'saveUserTransactions').mockResolvedValue(undefined);
+		});
+
+		it('should send a single call when the batch fits', async () => {
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH));
+
+			expect(result).toEqual({ success: true });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledOnce();
+		});
+
+		// The canister rejects an over-sized batch outright, so one call for a long history saved
+		// nothing at all. A cold start is exactly when the history is long enough to trip that.
+		it('should split a history longer than the cap across calls', async () => {
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 2 + 1));
+
+			expect(result).toEqual({ success: true });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
+		});
+
+		it('should never exceed the cap in any single call', async () => {
+			await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 2 + 7));
+
+			vi.mocked(backendApi.saveUserTransactions).mock.calls.forEach(([{ transactions }]) => {
+				expect(transactions.length).toBeLessThanOrEqual(MAX_SAVE_USER_TRANSACTIONS_BATCH);
+			});
+		});
+
+		it('should persist every transaction across the batches, in order', async () => {
+			const transactions = makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH + 3);
+
+			// The shared mock mapper returns one fixed object for every input, which would let a
+			// dropped or reordered transaction slip through a length-only assertion.
+			await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: ({ hash }: Transaction) => ({ ...mockUserTransaction, id: `${hash}` })
+			});
+
+			const sent = vi
+				.mocked(backendApi.saveUserTransactions)
+				.mock.calls.flatMap(([{ transactions: batch }]) => batch.map(({ id }) => id));
+
+			expect(sent).toEqual(transactions.map(({ hash }) => `${hash}`));
+		});
+
+		it('should report failure rather than throwing when the mapper rejects a transaction', async () => {
+			const result = await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions: makeTransactions(3),
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: () => {
+					throw new Error('Cannot store a transaction without a hash');
+				}
+			});
+
+			expect(result).toEqual({ success: false });
+			expect(backendApi.saveUserTransactions).not.toHaveBeenCalled();
+			expect(consoleError).toHaveBeenCalled();
+		});
+
+		// The canister validates a batch as a unit and refuses all of it on the first transaction that
+		// breaches a field bound, so one unusual transaction must not cost every later batch too.
+		it('should keep saving the later batches when one is rejected', async () => {
+			vi.spyOn(backendApi, 'saveUserTransactions')
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce(new Error('InvalidTransaction'))
+				.mockResolvedValue(undefined);
+
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 3));
+
+			expect(result).toEqual({ success: false });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
+
+			// A save that fails without a trace is what let the over-sized batch go unnoticed.
+			expect(consoleError).toHaveBeenCalledOnce();
 		});
 	});
 

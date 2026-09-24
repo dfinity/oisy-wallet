@@ -8,7 +8,8 @@ import {
 	bitcoinSignedMessageHash,
 	buildBtcAccountAddresses,
 	deriveBtcPublicKey,
-	encodeRecoverableSignature
+	encodeRecoverableSignature,
+	resolvePsbtInputPrevout
 } from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -283,6 +284,9 @@ const safeOutputAddress = ({
  *
  * Parses the base64 PSBT with bitcoinjs-lib and surfaces the inputs, outputs, the total value of the
  * wallet-owned inputs being signed, the fee and the `broadcast` flag, so the user never blind-signs.
+ * Every figure is derived from the previous output the signing path itself reads
+ * (`resolvePsbtInputPrevout`), and the whole decode is flagged `ambiguous` as soon as one input
+ * contradicts itself, since one wrong input value distorts the total and the fee too.
  * Throws if the PSBT is missing or cannot be parsed.
  */
 export const decodePsbt = ({
@@ -301,15 +305,20 @@ export const decodePsbt = ({
 	const network = bitcoinJsNetwork(request.params.chainId);
 	const parsed = Psbt.fromBase64(psbt, { network });
 
-	const inputs: WalletConnectBtcDecodedPsbtInput[] = parsed.data.inputs.map((input) => {
-		const { witnessUtxo } = input;
-		const inputAddress = nonNullish(witnessUtxo)
-			? safeOutputAddress({ script: witnessUtxo.script, network })
+	const prevouts = parsed.data.inputs.map((input, index) =>
+		resolvePsbtInputPrevout({ input, vout: parsed.txInputs[index].index })
+	);
+
+	const ambiguous = prevouts.some(({ ambiguous }) => ambiguous);
+
+	const inputs: WalletConnectBtcDecodedPsbtInput[] = prevouts.map(({ prevout }) => {
+		const inputAddress = nonNullish(prevout)
+			? safeOutputAddress({ script: prevout.script, network })
 			: undefined;
 
 		return {
 			address: inputAddress,
-			value: nonNullish(witnessUtxo) ? BigInt(witnessUtxo.value) : undefined,
+			value: prevout?.value,
 			signedByWallet: nonNullish(address) && inputAddress === address
 		};
 	});
@@ -338,7 +347,8 @@ export const decodePsbt = ({
 		outputs,
 		totalSignedInputs,
 		fee,
-		broadcast: broadcast ?? false
+		broadcast: broadcast ?? false,
+		ambiguous
 	};
 };
 
@@ -431,6 +441,18 @@ export const signPsbt = ({
 
 				const parsed = Psbt.fromBase64(psbt, { network });
 
+				// The review prices the request from `decodePsbt`; refuse whatever it could not display
+				// faithfully, so no signature is ever produced for figures the user did not see.
+				const { ambiguous } = decodePsbt({ request, address });
+
+				if (ambiguous) {
+					toastsError({
+						msg: { text: get(i18n).wallet_connect.error.btc_psbt_input_ambiguous }
+					});
+					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+					return { success: false };
+				}
+
 				const publicKey = Buffer.from(deriveBtcPublicKey({ principal: identity.getPrincipal() }));
 
 				// Expected P2WPKH script for the wallet's own key — used to confirm an input is ours and
@@ -468,12 +490,17 @@ export const signPsbt = ({
 						return { success: false };
 					}
 
+					// Checked against the previous output the sighash is built from, not against the
+					// `witnessUtxo` alone, since the ambiguity guard above already proved the two agree.
+					const { prevout } = resolvePsbtInputPrevout({
+						input,
+						vout: parsed.txInputs[index].index
+					});
+
 					if (
+						isNullish(prevout) ||
 						isNullish(walletWitnessScript) ||
-						Buffer.compare(
-							Buffer.from(input.witnessUtxo.script),
-							Buffer.from(walletWitnessScript)
-						) !== 0
+						Buffer.compare(Buffer.from(prevout.script), Buffer.from(walletWitnessScript)) !== 0
 					) {
 						toastsError({
 							msg: { text: get(i18n).wallet_connect.error.btc_psbt_input_not_owned }

@@ -4,9 +4,11 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import type { Token } from '$lib/types/token';
 import {
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
+	liquidiumEnabledRailToken,
 	liquidiumFreeCollateralUsd,
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
@@ -28,6 +30,8 @@ import {
 	mapLiquidiumReserve,
 	orderLiquidiumRails
 } from '$lib/utils/liquidium.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	RATE_SCALE,
 	type Pool,
@@ -921,6 +925,76 @@ describe('liquidium.utils', () => {
 		it('returns undefined for an unsupported (chain, asset) pair', () => {
 			expect(liquidiumMarketToken({ chain: 'BTC', asset: 'USDC', tokens: [] })).toBeUndefined();
 			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBeUndefined();
+		});
+	});
+
+	describe('liquidiumEnabledRailToken', () => {
+		const ckBtcToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('ckBTC'),
+			symbol: 'ckBTC',
+			network: ICP_TOKEN.network
+		} as Token;
+
+		it('resolves a native rail whose token is enabled', () => {
+			expect(
+				liquidiumEnabledRailToken({
+					chain: 'BTC',
+					asset: 'BTC',
+					enabledTokens: [BTC_MAINNET_TOKEN]
+				})
+			).toBe(BTC_MAINNET_TOKEN);
+		});
+
+		it('resolves a ck rail from the enabled twin', () => {
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'BTC', enabledTokens: [ckBtcToken] })
+			).toBe(ckBtcToken);
+		});
+
+		it('resolves the ICP rail from the enabled list', () => {
+			// In the app ICP is always in that list: it is not toggleable, so `filterEnabledTokens`
+			// always keeps it and the ICP network cannot be switched off.
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'ICP', enabledTokens: [ICP_TOKEN] })
+			).toBe(ICP_TOKEN);
+		});
+
+		it('rejects the rails that `liquidiumMarketToken` resolves statically', () => {
+			// The whole point of the id check: these come back from env config whatever list is passed,
+			// so membership is the only thing that can rule them out. Uniform — ICP included.
+			expect(
+				liquidiumEnabledRailToken({ chain: 'BTC', asset: 'BTC', enabledTokens: [] })
+			).toBeUndefined();
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ETH', asset: 'USDC', enabledTokens: [] })
+			).toBeUndefined();
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ETH', asset: 'USDT', enabledTokens: [] })
+			).toBeUndefined();
+			expect(
+				liquidiumEnabledRailToken({ chain: 'ICP', asset: 'ICP', enabledTokens: [] })
+			).toBeUndefined();
+		});
+
+		it('rejects a ck rail whose twin is not enabled', () => {
+			expect(
+				liquidiumEnabledRailToken({
+					chain: 'ICP',
+					asset: 'BTC',
+					enabledTokens: [BTC_MAINNET_TOKEN]
+				})
+			).toBeUndefined();
+		});
+
+		it('rejects an unsupported (chain, asset) pair', () => {
+			expect(
+				liquidiumEnabledRailToken({
+					chain: 'SOL',
+					asset: 'SOL',
+					enabledTokens: [BTC_MAINNET_TOKEN]
+				})
+			).toBeUndefined();
 		});
 	});
 });

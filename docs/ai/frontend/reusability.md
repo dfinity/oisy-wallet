@@ -5,6 +5,9 @@
 > [meta-update rule](../governance.md#meta-update-rule): every PR that adds
 > a reusable building block adds a row here.
 
+> Building a mockup or wireframe rather than shipping code? The same
+> catalog applies: see [`../visual-artifacts.md`](../visual-artifacts.md).
+
 ## The reuse rule
 
 1. **Search first.** Use `Grep` / `Glob` (or your tool's equivalent) for
@@ -60,6 +63,7 @@
 | `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.                                                                               |
 | `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                                                                                     |
 | `GoToButton`                         | `$lib/components/common/`  | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`. |
+| `FirstTimeDestinationWarning`        | `$lib/components/send/`    | Warning that no send to an address is on record; gates its consumer's action when given an `onConfirm` callback.  |
 | `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.                                                                          |
 | `icons/`                             | `$lib/components/icons/`   | Project's icon set.                                                                                               |
 
@@ -105,16 +109,24 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Common utils
 
-| Util                                                        | Where                             | Purpose                           |
-| ----------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.       |
-| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.        |
-| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper. |
-| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.         |
-| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates.            |
-| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                 |
-| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                 |
-| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                    |
+| Util                                                        | Where                             | Purpose                                                                                                                                                                                                                                          |
+| ----------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.                                                                                                                                                                                                                      |
+| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.                                                                                                                                                                                                                       |
+| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper.                                                                                                                                                                                                                |
+| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                                                                                                                                                                                                        |
+| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates, `findEvmNetworkByChainId`.                                                                                                                                                                                                |
+| `token-id.utils`                                            | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`).                                                                                                                                                                                |
+| `swap-tokens-filter.utils`                                  | `$lib/utils/`                     | The swap provider identifier space. `nativeSwapTokenIdentifier` is the one way to key a contract-less token (native ETH / SOL / BTC) — the category sets have no network dimension, so a bare symbol collides across chains. Never hand-roll it. |
+| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                                                                                                                                                                                                                                |
+| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                                                                                                                                                                                                                                |
+| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                                                                                                                                                                                                                                   |
+
+### Chain-specific utils worth knowing
+
+| Util                         | Where         | Purpose                                                                                                                                                                                                        |
+| ---------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface. |
 
 ### REST + workers
 

@@ -114,6 +114,10 @@ npm run lint -- --max-warnings 0
 npm run check        # svelte-check, fail-on-warnings
 npm run test         # vitest (single shard locally)
 
+# Build (only if you touched $env/networks, $env/tokens or $eth/providers)
+npm run build        # the eager provider registries are evaluated only here (SSR
+                     # prerender), never under vitest, which mocks ethers/providers
+
 # i18n (only if you edited en.json)
 npm run i18n
 
@@ -236,4 +240,7 @@ reviewers — the file does it.
 Releases are tagged via the `tag-release.yml` and `bump-version.yml`
 workflows; the legacy signer has its own `bump-legacy-signer-version.yml`
 and `tag-legacy-signer-release.yml`. Don't bump versions or edit
-`signer-versions.json` manually.
+`signer-versions.json` manually. `bump-version.yml` keeps the legacy
+signer version in lockstep with the wallet, because the legacy signer is
+still rebuilt from `main` on every release. See
+[Versioning](../../SIGNER_DOMAINS.md#versioning).

@@ -3,6 +3,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import { hideTokenCategoryFilterStore, tokenCategoryFilterStore } from '$lib/stores/settings.store';
+import { tokenGroupStore } from '$lib/stores/token-group.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiGroup } from '$lib/types/token-ui-group';
@@ -81,6 +82,7 @@ describe('TokenGroupCard', () => {
 		hideTokenCategoryFilterStore.reset({ key: 'hide-token-category-filter' });
 		tokenCategoryFilterStore.reset({ key: 'token-category-filter' });
 		tokenListStore.set({ filter: '' });
+		tokenGroupStore.reset(groupId);
 	});
 
 	const getTokenCountBadge = (container: HTMLElement): HTMLElement | null =>
@@ -194,6 +196,14 @@ describe('TokenGroupCard', () => {
 		expect(cryptoCardA).toBeInTheDocument();
 		expect(cryptoCardB).toBeInTheDocument();
 		expect(stableCard).not.toBeInTheDocument();
+	});
+
+	it('should show the group name in the collapsed header without listing member networks', () => {
+		const { container } = render(TokenGroupCard, { props: { tokenGroup } });
+
+		expect(container).toHaveTextContent(tokenGroup.groupData.name);
+		expect(container).not.toHaveTextContent(ICP_NETWORK.name);
+		expect(container).not.toHaveTextContent(ETHEREUM_NETWORK.name);
 	});
 
 	it('should render all tokens when expanded without category filter', async () => {

@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -17,7 +17,7 @@
 {#if !hideInfo}
 	<div
 		class="relative mb-12 rounded-lg bg-primary px-6 py-4 text-primary"
-		transition:slide={SLIDE_EASING}
+		transition:slide={SLIDE_PARAMS}
 	>
 		<button
 			class="absolute top-2 right-2 text-tertiary"

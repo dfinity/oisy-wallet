@@ -1,20 +1,33 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import {
+	ETH_OLDER_PAGE_RETRY_BASE_DELAY,
+	ETH_OLDER_PAGE_RETRY_MAX_DELAY
+} from '$eth/constants/eth.constants';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
+	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
-	saveEthFinalizedTransactions
+	requestOlderEtherscanPage,
+	resetEtherscanOlderPageBackOff,
+	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
+	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapUserTransactionToTransaction } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
 import { get } from 'svelte/store';
@@ -85,6 +98,8 @@ describe('eth-user-transactions.services', () => {
 		vi.clearAllMocks();
 
 		ethTransactionsStore.reinitialize();
+
+		resetEtherscanOlderPageBackOff();
 
 		const backendApi = await import('$lib/api/backend.api');
 		mockGetUserTransactions = vi.mocked(backendApi.getUserTransactions);
@@ -189,7 +204,120 @@ describe('eth-user-transactions.services', () => {
 		});
 	});
 
+	describe('capacity tracking', () => {
+		beforeEach(() => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+		});
+
+		it('should not flag a token below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN - 1)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should flag a token at the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
+		it('should clear the flag once the token drops back below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: 10n });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should clear the flag when the backend said nothing about it', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+	});
+
 	describe('loadNextEthUserTransactions', () => {
+		// The read cursor is a position in the stored list, so a trim at the per-token cap shifts every
+		// entry under it and pages start repeating rows we already hold. Asking again would spin.
+		it('should fall through to Etherscan when a cursor page repeats rows we already hold', async () => {
+			const stored = createMockBackendUserTransaction({
+				hash: '0xstored',
+				blockIndex: 50n,
+				timestamp: 500n
+			});
+
+			// Already in the store, so `append` will dedupe the page away.
+			ethTransactionsStore.append({
+				tokenId: mockTokenId,
+				transactions: [{ data: mapUserTransactionToTransaction(stored), certified: false }]
+			});
+
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({ overrides: { transactions: [stored], nextStart: 32n } })
+			);
+
+			mockTransactionsProvider.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 42n,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockTransactionsProvider).toHaveBeenCalledOnce();
+
+			// The cursor is cleared, so the next intersection does not ask the canister again.
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
+		});
+
+		// An empty page is the shape a cursor invalidated by eviction comes back as, and eviction only
+		// happens because the token is at capacity. Dropping `totalStored` there re-enabled the very
+		// saves this branch exists to skip.
+		it('should record the capacity signal even when the cursor page comes back empty', async () => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 5n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [],
+						totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 5n,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
 		// Case 1: Fresh user — backend empty, Etherscan has no older data
 		it('returns hasMore false when backend is empty and Etherscan has nothing older', async () => {
 			const { hasMore } = await loadNextEthUserTransactions({
@@ -410,11 +538,12 @@ describe('eth-user-transactions.services', () => {
 			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 		});
 
-		// Case 8: Etherscan error — returns hasMore false gracefully
-		it('returns hasMore false when Etherscan call fails', async () => {
-			mockTransactionsProvider.mockRejectedValue(new Error('Etherscan rate limit'));
+		// Case 8: Etherscan error. Not the start of the history, so it has to be told apart from one.
+		it('returns the error when Etherscan call fails', async () => {
+			const mockError = new Error('Etherscan rate limit');
+			mockTransactionsProvider.mockRejectedValue(mockError);
 
-			const { hasMore } = await loadNextEthUserTransactions({
+			const result = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
 				transactionTokenId: mockBackendTokenId,
@@ -424,7 +553,29 @@ describe('eth-user-transactions.services', () => {
 				oldestLoadedBlockNumber: 100
 			});
 
-			expect(hasMore).toBeFalsy();
+			expect(result).toEqual({ hasMore: false, err: mockError });
+		});
+
+		it('does not ask Etherscan again while backing off from a failed page', async () => {
+			const mockError = new Error('Etherscan rate limit');
+			mockTransactionsProvider.mockRejectedValue(mockError);
+
+			const params = {
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: undefined,
+				oldestLoadedBlockNumber: 100
+			};
+
+			await loadNextEthUserTransactions(params);
+
+			const result = await loadNextEthUserTransactions(params);
+
+			expect(result).toEqual({ hasMore: false, err: mockError });
+			expect(mockTransactionsProvider).toHaveBeenCalledOnce();
 		});
 
 		// Case 9: Backend returns empty on cursor — falls through to Etherscan
@@ -482,6 +633,206 @@ describe('eth-user-transactions.services', () => {
 
 			// The store's append method deduplicates by hash
 			expect(store?.[mockTokenId]).toHaveLength(2);
+		});
+	});
+
+	describe('requestOlderEtherscanPage', () => {
+		const mockError = new Error('Etherscan down');
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('returns the page and asks every time while Etherscan answers', async () => {
+			const request = vi.fn().mockResolvedValue(['page']);
+
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
+				page: ['page']
+			});
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
+				page: ['page']
+			});
+
+			expect(request).toHaveBeenCalledTimes(2);
+		});
+
+		it('skips the request with the last error until the back-off has passed', async () => {
+			const request = vi.fn().mockRejectedValue(mockError);
+
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
+				err: mockError
+			});
+
+			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY - 1);
+
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
+				err: mockError
+			});
+
+			expect(request).toHaveBeenCalledOnce();
+
+			vi.advanceTimersByTime(1);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+
+			expect(request).toHaveBeenCalledTimes(2);
+		});
+
+		it('doubles the wait with each failure in a row, up to the ceiling', async () => {
+			const request = vi.fn().mockRejectedValue(mockError);
+
+			const waits: number[] = [];
+
+			let wait = ETH_OLDER_PAGE_RETRY_BASE_DELAY;
+
+			// Enough failures to reach the ceiling from the base delay.
+			for (let attempt = 0; attempt < 6; attempt++) {
+				await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+
+				waits.push(wait);
+
+				vi.advanceTimersByTime(wait - 1);
+
+				await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+
+				expect(request).toHaveBeenCalledTimes(attempt + 1);
+
+				vi.advanceTimersByTime(1);
+
+				wait = Math.min(wait * 2, ETH_OLDER_PAGE_RETRY_MAX_DELAY);
+			}
+
+			expect(waits).toEqual([5_000, 10_000, 20_000, 40_000, 60_000, 60_000]);
+		});
+
+		it('clears the back-off once a page is served', async () => {
+			const request = vi
+				.fn()
+				.mockRejectedValueOnce(mockError)
+				.mockRejectedValueOnce(mockError)
+				.mockResolvedValue([]);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY);
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY * 2);
+
+			await expect(
+				requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request })
+			).resolves.toEqual({
+				page: []
+			});
+
+			// Served, so the next failure starts again from the base delay rather than the longer one.
+			request.mockRejectedValueOnce(mockError);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			vi.advanceTimersByTime(ETH_OLDER_PAGE_RETRY_BASE_DELAY);
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+
+			expect(request).toHaveBeenCalledTimes(5);
+		});
+
+		it('backs off per token', async () => {
+			const request = vi.fn().mockRejectedValue(mockError);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({
+				address: mockEthAddress,
+				tokenId: parseTokenId('other-token'),
+				request
+			});
+
+			expect(request).toHaveBeenCalledTimes(2);
+		});
+
+		// The token ids are the same for every wallet, so a back-off kept by token alone would skip the
+		// first request of the next address signed in on this tab.
+		it('backs off per address', async () => {
+			const request = vi.fn().mockRejectedValue(mockError);
+
+			await requestOlderEtherscanPage({ address: mockEthAddress, tokenId: mockTokenId, request });
+			await requestOlderEtherscanPage({ address: mockEthAddress2, tokenId: mockTokenId, request });
+
+			expect(request).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('backend pagination cursor', () => {
+		beforeEach(() => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: undefined });
+		});
+
+		it('should keep and clear the cursor of a token', () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 42n });
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBe(42n);
+
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: undefined });
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
+		});
+
+		it('should advance the cursor to the next page after loading one', async () => {
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [
+							createMockBackendUserTransaction({
+								hash: '0xhash1',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
+						],
+						newestBlockIndex: 500n,
+						oldestBlockIndex: 50n,
+						totalStored: 300n,
+						nextStart: 100n
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 200n,
+				oldestLoadedBlockNumber: 300
+			});
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBe(100n);
+		});
+
+		it('should clear the cursor once the backend has nothing left', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 200n });
+
+			mockGetUserTransactions.mockResolvedValue(makeBackendResponse({}));
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 200n,
+				oldestLoadedBlockNumber: 300
+			});
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
 		});
 	});
 

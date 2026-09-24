@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import SwapBtcWizard from '$btc/components/swap/SwapBtcWizard.svelte';
 	import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 	import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
@@ -9,7 +10,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
-	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 
 	interface Props {
@@ -46,6 +47,8 @@
 	let manualPause = $state(false);
 
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
+
+	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
 
 	const onStopTriggerAmount = () => {
 		manualPause = true;
@@ -88,6 +91,22 @@
 		/>
 	{:else if isNetworkIdSolana($sourceToken.network.id)}
 		<SwapSolWizard
+			{currentStep}
+			{isSwapAmountsLoading}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onShowProviderList}
+			{onShowTokensList}
+			{onStartTriggerAmount}
+			{onStopTriggerAmount}
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			bind:swapProgressStep
+		/>
+	{:else if isBitcoinSource}
+		<SwapBtcWizard
 			{currentStep}
 			{isSwapAmountsLoading}
 			{onBack}

@@ -63,7 +63,7 @@ describe('SendNftsList.spec', () => {
 			onSelectNetwork: vi.fn()
 		});
 
-		const input = getByPlaceholderText('Search NFTs') as HTMLInputElement;
+		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
 		await fireEvent.input(input, { target: { value: '___nope___' } });
 
 		expect(getByText(get(i18n).send.text.no_nfts_found)).toBeInTheDocument();
@@ -243,7 +243,7 @@ describe('SendNftsList.spec', () => {
 			onSelectNetwork: vi.fn()
 		});
 
-		const input = getByPlaceholderText('Search NFTs') as HTMLInputElement;
+		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
 		await fireEvent.input(input, { target: { value: '___nope___' } });
 
 		expect(getByText(get(i18n).send.text.no_nfts_found)).toBeInTheDocument();

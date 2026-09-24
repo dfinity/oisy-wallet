@@ -29,6 +29,7 @@ import {
 } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import type {
 	EthCertifiedTransaction,
 	EthCertifiedTransactionsData
@@ -62,7 +63,9 @@ import {
 } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import { mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
@@ -563,7 +566,9 @@ describe('transactions.utils', () => {
 				expect(result).toHaveLength(2);
 			});
 
-			it('should not deduplicate non-ethereum component transactions', () => {
+			// A swap is deliberately two rows, one per side, each carrying its own token's icon and
+			// balance change; what gets dropped is a token the transaction merely brushed.
+			it('should keep one Solana row per token the transaction moved', () => {
 				const solTx1: SolTransactionUi = {
 					...createMockSolTransactionsUi(1)[0],
 					id: 'same-id'
@@ -578,6 +583,102 @@ describe('transactions.utils', () => {
 					$solTransactions: {
 						[SOLANA_TOKEN_ID]: [{ data: solTx1, certified: false }],
 						[BONK_TOKEN_ID]: [{ data: solTx2, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
+			// A transaction OISY could not reduce still moved what it moved. Keeping a single row,
+			// arbitrarily the first, put an amount belonging to one token under a word that named
+			// none of them.
+			it('should keep a row per token an unreduced Solana transaction moved', () => {
+				const netChanges = [
+					{ delta: -60n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+					{ delta: 5_000n }
+				];
+
+				const [base] = createMockSolTransactionsUi(1);
+
+				const solTx: SolTransactionUi = {
+					...base,
+					id: 'same-id',
+					summary: { kind: 'other' },
+					netChanges
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: solTx, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...solTx }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(2);
+			});
+
+			// Records cached before the redesign carry a per-instruction id, so grouping on the id
+			// would leave their duplicates in place; the signature is what makes them one transaction.
+			it('should deduplicate rows that share a signature but not an id', () => {
+				const [base] = createMockSolTransactionsUi(1);
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: { ...base, id: 'legacy-0-program' }, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: { ...base, id: 'legacy-1-program' }, certified: false }]
+					},
+					$btcTransactions: undefined,
+					$ckEthMinterInfo: {},
+					$ethTransactions: {},
+					$ethAddress: undefined,
+					$btcStatuses: undefined,
+					$ckBtcPendingUtxosStore: undefined,
+					$icPendingTransactionsStore: undefined,
+					$ckBtcMinterInfoStore: undefined,
+					$icTransactionsStore: undefined
+				});
+
+				expect(result).toHaveLength(1);
+			});
+
+			// A swap moved both tokens, so both rows stay: each carries its own icon and balance
+			// change, and a user scanning for one of them finds it on the row that names it.
+			it('should keep both sides of a Solana swap as their own rows', () => {
+				const swap: SolTransactionUi = {
+					...createMockSolTransactionsUi(1)[0],
+					id: 'swap-id',
+					summary: {
+						kind: 'swap',
+						spent: { delta: -100_000n, tokenAddress: BONK_TOKEN.address, decimals: 5 },
+						received: { delta: 1_000_000n }
+					}
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [SOLANA_TOKEN, BONK_TOKEN],
+					$solTransactions: {
+						[SOLANA_TOKEN_ID]: [{ data: swap, certified: false }],
+						[BONK_TOKEN_ID]: [{ data: swap, certified: false }]
 					},
 					$btcTransactions: undefined,
 					$ckEthMinterInfo: {},
@@ -1731,7 +1832,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual(expectedIcKnownDestinations);
 		});
 
-		it('should correctly return an empty array if all txs do not have values', () => {
+		it('should correctly return an empty object if all txs do not have values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1741,7 +1842,7 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs have zero values', () => {
+		it('should correctly return an empty object if all txs have zero values', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ value: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
@@ -1751,11 +1852,54 @@ describe('transactions.utils', () => {
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
 		});
 
-		it('should correctly return an empty array if all txs are receive', () => {
+		it('should correctly return an empty object if all txs are receive', () => {
 			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
 				...rest,
 				token: ICP_TOKEN,
 				type: 'receive' as IcTransactionType
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should ignore transfers that were pulled by a spender', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map((transaction) => ({
+				...transaction,
+				token: ICP_TOKEN,
+				transferSpender: mockPrincipalText
+			}));
+
+			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
+		});
+
+		it('should keep the destinations the user picked when a spender pulled other transfers', () => {
+			const [userInitiated, spenderInitiated] = createMockIcTransactionsUi(2);
+
+			const transactions = [
+				{ ...userInitiated, token: ICP_TOKEN },
+				{
+					...spenderInitiated,
+					token: ICP_TOKEN,
+					to: mockPrincipalText2,
+					transferSpender: mockPrincipalText
+				}
+			];
+
+			expect(getKnownDestinations(transactions)).toEqual({
+				[userInitiated.to as string]: {
+					amounts: [{ value: userInitiated.value, token: ICP_TOKEN }],
+					timestamp: Number(userInitiated.timestamp),
+					address: userInitiated.to
+				}
+			});
+		});
+
+		it('should correctly return an empty object if all txs are approvals', () => {
+			const icTransactionsUi = createMockIcTransactionsUi(7).map(({ type: _, ...rest }) => ({
+				...rest,
+				token: ICP_TOKEN,
+				type: 'approve' as IcTransactionType,
+				approveSpender: mockPrincipalText
 			}));
 
 			expect(getKnownDestinations(icTransactionsUi)).toEqual({});
@@ -1789,6 +1933,14 @@ describe('transactions.utils', () => {
 
 		it('should return the last transaction in the newest-first list', () => {
 			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
+		});
+
+		it('should return the oldest transaction of a list that is not in order', () => {
+			// A store holds a worker's page, the local cache and the pages loaded on demand, and
+			// nothing sorts the result, so the newest can sit at the end.
+			const [newest, ...older] = [...icTransactions].reverse();
+
+			expect(findOldestTransaction([...older, newest])).toStrictEqual(expectedOldestTransaction);
 		});
 
 		it('should return the last transaction in the list if oldest timestamps are tied', () => {
@@ -1828,5 +1980,48 @@ describe('transactions.utils', () => {
 				])
 			).toStrictEqual(expectedTransaction);
 		});
+	});
+});
+
+describe('mapAllTransactionsUi - XRP', () => {
+	const rest = {
+		$btcTransactions: undefined,
+		$ethTransactions: {},
+		$ckEthMinterInfo: {},
+		$ethAddress: undefined,
+		$solTransactions: {},
+		$btcStatuses: undefined,
+		$ckBtcPendingUtxosStore: undefined,
+		$icPendingTransactionsStore: undefined,
+		$ckBtcMinterInfoStore: undefined,
+		$icTransactionsStore: undefined
+	};
+
+	const mockXrpTransaction: XrpTransactionUi = {
+		id: 'HASH1',
+		type: 'receive',
+		status: 'confirmed',
+		value: 5_000_000n,
+		from: 'rSender',
+		to: 'rReceiver',
+		timestamp: 1n
+	};
+
+	it('maps XRP transactions tagged with the xrp component', () => {
+		const result = mapAllTransactionsUi({
+			tokens: [XRP_TOKEN],
+			$xrpTransactions: { [XRP_TOKEN_ID]: [{ data: mockXrpTransaction, certified: false }] },
+			...rest
+		});
+
+		expect(result).toEqual([
+			{ transaction: mockXrpTransaction, token: XRP_TOKEN, component: 'xrp' }
+		]);
+	});
+
+	it('returns an empty array when the XRP transactions store is not initialized', () => {
+		expect(
+			mapAllTransactionsUi({ tokens: [XRP_TOKEN], $xrpTransactions: undefined, ...rest })
+		).toEqual([]);
 	});
 });

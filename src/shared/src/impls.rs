@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
+        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId},
         agreement::{
             Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
@@ -46,6 +47,10 @@ use crate::{
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
 const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
+/// Maximum length of the address string inside a `TokenAccountId`.
+///
+/// Generous headroom: the longest address any supported chain produces is 62 characters.
+const TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH: usize = 128;
 /// Maximum image size in bytes (100 KB)
 pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 
@@ -101,6 +106,19 @@ fn validate_non_negative_float(value: f64, field_name: &str) -> Result<(), Error
         return Err(Error::msg(format!("{field_name} cannot be negative")));
     }
     Ok(())
+}
+
+/// Merges a requested agreement over the currently stored one, discarding the client-supplied
+/// `last_accepted_at_ns`.
+///
+/// That field is server-owned, so the stored value is carried over here and the caller stamps it
+/// with the canister clock on acceptance. Dropping it before the caller's change check also keeps
+/// a forged timestamp from registering as a change on its own.
+fn merge_agreement(current: Option<&UserAgreement>, requested: UserAgreement) -> UserAgreement {
+    UserAgreement {
+        last_accepted_at_ns: current.and_then(|agreement| agreement.last_accepted_at_ns),
+        ..requested
+    }
 }
 
 impl From<&Token> for CustomTokenId {
@@ -413,6 +431,9 @@ impl StoredUserProfile {
 
     /// Returns a copy with the specified user agreements updated.
     ///
+    /// Only fields where `accepted` is `Some(_)` are applied. `last_accepted_at_ns` is server-owned
+    /// and never read from the request; see [`merge_agreement`].
+    ///
     /// # Errors
     ///
     /// Will return Err if there is a version mismatch.
@@ -435,13 +456,18 @@ impl StoredUserProfile {
         let privacy_updated = agreements.privacy_policy.accepted.is_some();
 
         if license_updated {
-            new_agreements.license_agreement = agreements.license_agreement;
+            new_agreements.license_agreement = merge_agreement(
+                Some(&current.license_agreement),
+                agreements.license_agreement,
+            );
         }
         if terms_updated {
-            new_agreements.terms_of_use = agreements.terms_of_use;
+            new_agreements.terms_of_use =
+                merge_agreement(Some(&current.terms_of_use), agreements.terms_of_use);
         }
         if privacy_updated {
-            new_agreements.privacy_policy = agreements.privacy_policy;
+            new_agreements.privacy_policy =
+                merge_agreement(Some(&current.privacy_policy), agreements.privacy_policy);
         }
 
         if current.eq(&new_agreements) {
@@ -472,7 +498,8 @@ impl StoredUserProfile {
     /// Returns a copy with the specified provider agreements updated.
     ///
     /// Only entries where `accepted` is `Some(_)` are applied. Existing provider agreements not
-    /// present in the request are left unchanged.
+    /// present in the request are left unchanged. `last_accepted_at_ns` is server-owned and never
+    /// read from the request; see [`merge_agreement`].
     ///
     /// # Errors
     ///
@@ -499,8 +526,9 @@ impl StoredUserProfile {
         let mut updated_keys = Vec::new();
         for (provider_type, agreement) in provider_agreements {
             if agreement.accepted.is_some() {
-                merged.insert(provider_type.clone(), agreement.clone());
-                updated_keys.push(provider_type.clone());
+                let merged_agreement = merge_agreement(current.get(&provider_type), agreement);
+                merged.insert(provider_type.clone(), merged_agreement);
+                updated_keys.push(provider_type);
             }
         }
 
@@ -856,9 +884,36 @@ impl Validate for Contact {
     }
 }
 
+impl Validate for TokenAccountId {
+    fn validate(&self) -> Result<(), Error> {
+        // Icrcv2 holds a Principal and a [u8; 32], both bounded by their own types.
+        let address = match self {
+            TokenAccountId::Icrcv2(_) => return Ok(()),
+            TokenAccountId::Sol(SolPrincipal(address))
+            | TokenAccountId::Eth(EthAddress::Public(address))
+            | TokenAccountId::Btc(
+                BtcAddress::P2PKH(address)
+                | BtcAddress::P2SH(address)
+                | BtcAddress::P2WPKH(address)
+                | BtcAddress::P2WSH(address)
+                | BtcAddress::P2TR(address),
+            ) => address,
+        };
+
+        validate_string_length(
+            address,
+            TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH,
+            "TokenAccountId.address",
+        )
+    }
+}
+
 impl Validate for ContactAddressData {
     fn validate(&self) -> Result<(), Error> {
-        // Note: We don't need to validate TokenAccountId since it has its own validation
+        // `TokenAccountId` is deliberately not validated here: `ContactAddressData` is wired into
+        // `validate_on_deserialize!`, so a bound applied here would also run against addresses
+        // already in stable memory, and anything failing it would trap on read. The bound lives on
+        // the write path in `UpdateContactRequest::validate` instead.
 
         // Check if the label exists
         if let Some(label) = &self.label {
@@ -922,6 +977,10 @@ impl Validate for UpdateContactRequest {
             "UpdateContactRequest.addresses",
         )?;
 
+        for address in &self.addresses {
+            address.token_account_id.validate()?;
+        }
+
         Ok(())
     }
 }
@@ -954,6 +1013,98 @@ impl Validate for ExchangeRate {
 }
 
 #[cfg(test)]
+mod address_validation_tests {
+    use candid::Principal;
+
+    use super::TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH;
+    use crate::{
+        types::{
+            account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId},
+            contact::{ContactAddressData, UpdateContactRequest},
+        },
+        validate::Validate,
+    };
+
+    fn request_with_address(address: TokenAccountId) -> UpdateContactRequest {
+        UpdateContactRequest {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![ContactAddressData {
+                token_account_id: address,
+                label: None,
+            }],
+            update_timestamp_ns: 0,
+            image: None,
+        }
+    }
+
+    #[test]
+    fn accepts_real_world_addresses() {
+        let addresses = vec![
+            TokenAccountId::Btc(BtcAddress::P2PKH(
+                "1RainRzqJtJxHTngafpCejDLfYq2y4KBc".to_string(),
+            )),
+            TokenAccountId::Btc(BtcAddress::P2TR(
+                "bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k".to_string(),
+            )),
+            TokenAccountId::Eth(EthAddress::Public(
+                "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+            )),
+            TokenAccountId::Sol(SolPrincipal(
+                "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM".to_string(),
+            )),
+            TokenAccountId::Icrcv2(Icrcv2AccountId::WithPrincipal {
+                owner: Principal::anonymous(),
+                subaccount: None,
+            }),
+        ];
+
+        for address in addresses {
+            assert!(
+                address.validate().is_ok(),
+                "expected {address:?} to be accepted"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_an_address_over_the_length_bound() {
+        let address = TokenAccountId::Sol(SolPrincipal(
+            "a".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        ));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn accepts_an_address_exactly_at_the_length_bound() {
+        let address = TokenAccountId::Sol(SolPrincipal(
+            "a".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH),
+        ));
+
+        assert!(address.validate().is_ok());
+    }
+
+    #[test]
+    fn update_request_rejects_an_over_long_address() {
+        let request = request_with_address(TokenAccountId::Btc(BtcAddress::P2PKH(
+            "1".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        )));
+
+        assert!(request.validate().is_err());
+    }
+
+    #[test]
+    fn update_request_accepts_a_normal_address() {
+        let request = request_with_address(TokenAccountId::Eth(EthAddress::Public(
+            "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+        )));
+
+        assert!(request.validate().is_ok());
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
 
@@ -964,6 +1115,9 @@ mod tests {
         },
         user_profile::StoredUserProfile,
     };
+
+    /// A client-supplied `last_accepted_at_ns` that the canister must never persist.
+    const FORGED_TIMESTAMP: u64 = 9_999_999_999_999_999_999;
 
     fn swap_key() -> ProviderAgreementType {
         ProviderAgreementType {
@@ -997,7 +1151,7 @@ mod tests {
         use super::{
             profile_with_provider, swap_key, BTreeMap, ProviderAgreementProvider,
             ProviderAgreementScope, ProviderAgreementType, StoredUserProfile,
-            UpdateAgreementsError, UserAgreement,
+            UpdateAgreementsError, UserAgreement, FORGED_TIMESTAMP,
         };
 
         #[test]
@@ -1059,6 +1213,8 @@ mod tests {
                 swap_key(),
                 UserAgreement {
                     accepted: Some(true),
+                    // A client-supplied timestamp must never survive.
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
                     ..Default::default()
                 },
             )]);
@@ -1080,6 +1236,8 @@ mod tests {
                 swap_key(),
                 UserAgreement {
                     accepted: Some(false),
+                    // A forged timestamp on the rejection path must be discarded, not stored.
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
                     ..Default::default()
                 },
             )]);
@@ -1092,6 +1250,49 @@ mod tests {
 
             assert_eq!(agreement.accepted, Some(false));
             assert_eq!(agreement.last_accepted_at_ns, None);
+        }
+
+        #[test]
+        fn test_rejection_preserves_previously_accepted_timestamp() {
+            let profile = profile_with_provider(&swap_key(), true, Some(1_000));
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
+            let agreement = provider_agreements.get(&swap_key()).unwrap();
+
+            assert_eq!(agreement.accepted, Some(false));
+            assert_eq!(agreement.last_accepted_at_ns, Some(1_000));
+        }
+
+        #[test]
+        fn test_resent_rejection_with_forged_timestamp_is_a_no_op() {
+            let profile = profile_with_provider(&swap_key(), false, None);
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+
+            // Nothing the caller controls changed, so the profile version must not move and no
+            // audit-trail entry may be recorded.
+            assert_eq!(result.version, profile.version);
         }
 
         #[test]
@@ -1168,7 +1369,7 @@ mod tests {
     }
 
     mod with_agreements {
-        use super::StoredUserProfile;
+        use super::{StoredUserProfile, FORGED_TIMESTAMP};
         use crate::types::agreement::{UserAgreement, UserAgreements};
 
         fn profile_with_user_agreements(agreements: UserAgreements) -> StoredUserProfile {
@@ -1259,6 +1460,113 @@ mod tests {
                 agreements.terms_of_use.last_updated_at_ms,
                 Some(1_800_000_000_000)
             );
+        }
+
+        #[test]
+        fn test_acceptance_ignores_client_supplied_timestamp() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(true));
+            assert_eq!(
+                agreements.license_agreement.last_accepted_at_ns,
+                Some(2_000)
+            );
+        }
+
+        #[test]
+        fn test_rejection_ignores_client_supplied_timestamp() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(false));
+            assert_eq!(agreements.license_agreement.last_accepted_at_ns, None);
+        }
+
+        #[test]
+        fn test_rejection_preserves_previously_accepted_timestamp() {
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    ..Default::default()
+                },
+                ..Default::default()
+            });
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(false));
+            assert_eq!(
+                agreements.license_agreement.last_accepted_at_ns,
+                Some(1_000)
+            );
+        }
+
+        #[test]
+        fn test_resent_rejection_with_forged_timestamp_is_a_no_op() {
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    ..Default::default()
+                },
+                ..Default::default()
+            });
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+
+            // Nothing the caller controls changed, so the profile version must not move and no
+            // audit-trail entry may be recorded.
+            assert_eq!(result.version, profile.version);
         }
     }
 }

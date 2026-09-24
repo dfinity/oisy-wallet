@@ -17,11 +17,15 @@ import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'e
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+// `JsonRpcProvider` and `Network` are needed even though this suite only exercises Infura
+// chains: the registry is built eagerly over every supported network, and the ones Infura does
+// not host take the fallback transport. Both share one implementation, as the shared setup mock
+// does — nothing here tells the two apart.
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.getTransactionCount = vi.fn();
 	provider.prototype.sendTransaction = vi.fn();
-	return { InfuraProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, Network: vi.fn() };
 });
 
 vi.mock('$eth/services/eth-transaction.services', () => ({
@@ -106,7 +110,7 @@ describe('swap.services', () => {
 		it('should perform swap successfully', async () => {
 			const result = await swap(mockSwapParams);
 
-			expect(result).toEqual({ hash: mockTransactionHash });
+			expect(result).toEqual({ hash: mockTransactionHash, nonce: mockNonce });
 
 			expect(infuraProviders).toHaveBeenCalled();
 			expect(mockGetTransactionCount).toHaveBeenCalledOnce();

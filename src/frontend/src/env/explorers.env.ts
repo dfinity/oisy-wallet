@@ -12,6 +12,7 @@ const EXPLORER_URLS = {
 	BTC_REGTEST: 'https://blockstream.regtest.trustless.computer/regtest',
 	SOL_MAINNET: 'https://solscan.io/$args',
 	SOL_DEVNET: 'https://solscan.io/$args?cluster=devnet',
+	XRP_MAINNET: 'https://xrpscan.com',
 	BASE: 'https://basescan.org',
 	BASE_SEPOLIA: 'https://sepolia.basescan.org',
 	BSC: 'https://bscscan.com',
@@ -19,7 +20,8 @@ const EXPLORER_URLS = {
 	POLYGON: 'https://polygonscan.com',
 	POLYGON_AMOY: 'https://amoy.polygonscan.com/',
 	ARBITRUM: 'https://arbiscan.io',
-	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io'
+	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io',
+	ROBINHOOD: 'https://robin.etherscan.io'
 };
 
 export const {
@@ -36,6 +38,7 @@ export const {
 	BTC_REGTEST: BTC_REGTEST_EXPLORER_URL,
 	SOL_MAINNET: SOL_MAINNET_EXPLORER_URL,
 	SOL_DEVNET: SOL_DEVNET_EXPLORER_URL,
+	XRP_MAINNET: XRP_MAINNET_EXPLORER_URL,
 	BASE: BASE_EXPLORER_URL,
 	BASE_SEPOLIA: BASE_SEPOLIA_EXPLORER_URL,
 	BSC: BSC_EXPLORER_URL,
@@ -43,5 +46,6 @@ export const {
 	POLYGON: POLYGON_EXPLORER_URL,
 	POLYGON_AMOY: POLYGON_AMOY_EXPLORER_URL,
 	ARBITRUM: ARBITRUM_EXPLORER_URL,
-	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL
+	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL,
+	ROBINHOOD: ROBINHOOD_EXPLORER_URL
 } = EXPLORER_URLS;

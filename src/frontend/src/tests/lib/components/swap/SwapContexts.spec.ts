@@ -1,4 +1,5 @@
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_MAINNET_NETWORKS } from '$env/networks/networks.sol.env';
@@ -138,7 +139,9 @@ describe('SwapContexts', () => {
 				ICP_NETWORK,
 				ETHEREUM_NETWORK,
 				...SUPPORTED_EVM_MAINNET_NETWORKS,
-				...SUPPORTED_SOLANA_MAINNET_NETWORKS
+				...SUPPORTED_SOLANA_MAINNET_NETWORKS,
+				// Bitcoin joins the list as long as a provider reaches it: Chain Fusion or NEAR Intents.
+				BTC_MAINNET_NETWORK
 			]);
 		});
 
@@ -192,7 +195,8 @@ describe('SwapContexts', () => {
 				aggregated: {
 					icp: { coverage: 'all', supportedTokenIds: new Set([icpLedgerId]) },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
@@ -236,7 +240,8 @@ describe('SwapContexts', () => {
 						supportedTokenIds: new Set([mockValidIcToken.ledgerCanisterId, otherIcrcLedger])
 					},
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{

@@ -1,3 +1,4 @@
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
@@ -50,6 +51,25 @@ export const estimateTransactionVSize = ({
 };
 
 /**
+ * Fee in satoshis for a P2WPKH transaction with `numInputs` inputs and the recipient +
+ * change output pair every selection produces.
+ *
+ * Rounds up, so the transaction is never priced below the requested rate. Shared with the
+ * pre-broadcast validation, which must arrive at the same number for the same inputs.
+ */
+export const calculateFeeSatoshis = ({
+	numInputs,
+	feeRateMiliSatoshisPerVByte
+}: {
+	numInputs: number;
+	feeRateMiliSatoshisPerVByte: bigint;
+}): bigint => {
+	const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
+
+	return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
+};
+
+/**
  * Main function to select UTXOs for a transaction with fee consideration.
  *
  * Algorithm (greedy, smallest-sufficient):
@@ -81,10 +101,8 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	const calcFee = (numInputs: number): bigint => {
-		const txVSize = estimateTransactionVSize({ numInputs, numOutputs: 2 });
-		return (BigInt(txVSize) * feeRateMiliSatoshisPerVByte + 999n) / 1000n;
-	};
+	const calcFee = (numInputs: number): bigint =>
+		calculateFeeSatoshis({ numInputs, feeRateMiliSatoshisPerVByte });
 
 	const selectedUtxos: CkBtcMinterDid.Utxo[] = [];
 	let totalInputValue = ZERO;
@@ -195,6 +213,49 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingUtxoOutpoints
 	});
+};
+
+/**
+ * The largest amount a send from `utxos` can actually carry: every available UTXO spent,
+ * minus the fee for a transaction with that many inputs.
+ *
+ * Derived from the set `prepareBtcSend` selects from — not from the wallet balance, which is
+ * read at `BTC_BALANCE_MIN_CONFIRMATIONS` and therefore also counts incoming UTXOs still
+ * under the confirmation floor a send requires. Offering those as "Max" quotes an amount the
+ * selection then refuses for want of funds.
+ *
+ * Spending everything needs every input, so the fee is priced for the full set rather than
+ * for whatever smaller set the greedy selection would pick at a lower amount.
+ */
+export const calculateMaxSpendableAmount = ({
+	utxos,
+	pendingUtxoOutpoints,
+	feeRateMiliSatoshisPerVByte
+}: {
+	utxos: CkBtcMinterDid.Utxo[];
+	pendingUtxoOutpoints: string[];
+	feeRateMiliSatoshisPerVByte: bigint;
+}): bigint => {
+	const availableUtxos = filterAvailableUtxos({
+		utxos,
+		options: {
+			minConfirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+			pendingUtxoOutpoints
+		}
+	});
+
+	if (availableUtxos.length === 0) {
+		return ZERO;
+	}
+
+	const totalValue = availableUtxos.reduce((sum, { value }) => sum + BigInt(value), ZERO);
+
+	const feeSatoshis = calculateFeeSatoshis({
+		numInputs: availableUtxos.length,
+		feeRateMiliSatoshisPerVByte
+	});
+
+	return totalValue > feeSatoshis ? totalValue - feeSatoshis : ZERO;
 };
 
 export const resetUtxosDataStores = (): void => {

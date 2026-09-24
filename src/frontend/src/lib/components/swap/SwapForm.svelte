@@ -31,7 +31,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -41,9 +42,24 @@
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
+		message?: Snippet;
 		errorType?: TokenActionErrorType;
+		/**
+		 * Set by a form that already accounts for the absence of an offer itself — because the
+		 * inputs a quote needs are still loading, or because it is showing the specific reason
+		 * the amount cannot be quoted. Suppresses the generic "swap is not offered", which in
+		 * those cases contradicts the message beside it: a swap *is* offered, just not for this
+		 * amount or not yet.
+		 */
+		notOfferedExplained?: boolean;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
+		/**
+		 * Hard cap (base units) for "Max", for a source token whose spendable amount is lower
+		 * than its balance — BTC, where the balance also counts UTXOs a send cannot select yet.
+		 * Left unset, "Max" is the balance minus the fee as before.
+		 */
+		maxAmount?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -55,9 +71,12 @@
 		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
+		message,
 		errorType = $bindable(),
+		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
+		maxAmount,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -89,8 +108,29 @@
 		nonNullish($swapAmountsStore) &&
 			$swapAmountsStore.swaps.length === 0 &&
 			!isSwapAmountsLoading &&
+			!notOfferedExplained &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
+	);
+
+	// A provider that refused the amount as below its minimum names the reason no offer
+	// exists, so the specific message replaces the generic "swap is not offered".
+	let quoteError = $derived(
+		nonNullish($swapAmountsStore) && $swapAmountsStore.swaps.length === 0
+			? $swapAmountsStore.quoteError
+			: undefined
+	);
+
+	let quoteErrorMinAmount = $derived(
+		quoteError?.type === 'amount-too-low' &&
+			nonNullish(quoteError.minAmount) &&
+			nonNullish($sourceToken)
+			? formatToken({
+					value: quoteError.minAmount,
+					unitName: $sourceToken.decimals,
+					displayDecimals: $sourceToken.decimals
+				})
+			: undefined
 	);
 
 	let isSwitchTokensButtonDisabled = $derived(() => {
@@ -192,6 +232,7 @@
 											balance={$sourceTokenBalance}
 											error={nonNullish(errorType)}
 											{fee}
+											{maxAmount}
 											token={$sourceToken}
 											bind:amountSetToMax
 											bind:amount={swapAmount}
@@ -231,7 +272,18 @@
 							{#if nonNullish($destinationToken)}
 								{#if showSwapNotOfferedError}
 									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
-										>{$i18n.swap.text.swap_is_not_offered}</div
+										>{#if quoteError?.type === 'amount-too-low'}
+											{#if nonNullish(quoteErrorMinAmount) && nonNullish($sourceToken)}
+												{replacePlaceholders($i18n.swap.text.swap_amount_too_low_minimum, {
+													$amount: quoteErrorMinAmount,
+													$symbol: $sourceToken.symbol
+												})}
+											{:else}
+												{$i18n.swap.text.swap_amount_too_low}
+											{/if}
+										{:else}
+											{$i18n.swap.text.swap_is_not_offered}
+										{/if}</div
 									>
 								{:else}
 									<div class="flex gap-3 text-tertiary">
@@ -263,6 +315,8 @@
 				{/snippet}
 			</TokenInputNetworkWrapper>
 		</div>
+
+		{@render message?.()}
 
 		<SwapCrossChainInfo />
 

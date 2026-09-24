@@ -3,8 +3,10 @@ import type {
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -47,7 +49,8 @@ import {
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult,
 	resolveNearIntentsBlockchain,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -60,7 +63,7 @@ import {
 } from '$tests/mocks/near-intents.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
-	mockVeloraBridgeSwapResponse,
+	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaSwapResponse
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
@@ -341,6 +344,40 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('slippagePercentToBasisPoints', () => {
+		it('converts whole and fractional percentages to basis points', () => {
+			expect(slippagePercentToBasisPoints(1)).toBe(100);
+			expect(slippagePercentToBasisPoints('0.5')).toBe(50);
+			expect(slippagePercentToBasisPoints(1.5)).toBe(150);
+		});
+
+		it('floors fractional basis points instead of rounding them up', () => {
+			expect(slippagePercentToBasisPoints(1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('1.0099')).toBe(100);
+		});
+
+		it('floors values finer than the slippage input allows instead of rounding them up', () => {
+			// The invariant must hold even for a value that bypassed the input's decimal limit
+			expect(slippagePercentToBasisPoints('1.0051')).toBe(100);
+			expect(slippagePercentToBasisPoints(0.123456)).toBe(12);
+		});
+
+		it('survives IEEE-754 noise in the percent conversion', () => {
+			// 0.29 * 100 === 28.999999999999996 — a bare floor would drop a whole basis point
+			expect(slippagePercentToBasisPoints('0.29')).toBe(29);
+			expect(slippagePercentToBasisPoints(0.29)).toBe(29);
+		});
+
+		it('takes the absolute value of a negative slippage', () => {
+			expect(slippagePercentToBasisPoints(-1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('-0.29')).toBe(29);
+		});
+
+		it('returns 0 for zero slippage', () => {
+			expect(slippagePercentToBasisPoints(0)).toBe(0);
+		});
+	});
+
 	describe('formatReceiveOutMinimum', () => {
 		it('formats valid number slippage', () => {
 			const result = formatReceiveOutMinimum({
@@ -406,7 +443,7 @@ describe('swap utils', () => {
 	});
 
 	describe('mapVeloraSwapResult', () => {
-		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
+		it('should map a same-chain DeltaPrice result correctly', () => {
 			const mockDeltaSwap: DeltaSwapResponse = {
 				...mockVeloraDeltaSwapResponse
 			};
@@ -414,21 +451,22 @@ describe('swap utils', () => {
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(900n);
+			expect(result.receiveAmount).toBe(900000000n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 
-		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: DeltaSwapResponse = {
-				...mockVeloraBridgeSwapResponse
+		it('should read the destination step of a cross-chain route, not the origin one', () => {
+			const mockCrossChainSwap: DeltaSwapResponse = {
+				...mockVeloraCrossChainSwapResponse
 			};
 
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockCrossChainSwap);
 
-			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
+			// The origin step is denominated in the 18-decimal source token; only the destination
+			// step carries the amount in the 6-decimal destination token.
+			expect(result.receiveAmount).toBe(99976241n);
+			expect(result.swapDetails).toBe(mockCrossChainSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});
@@ -808,6 +846,10 @@ describe('swap utils', () => {
 			expect(resolveNearIntentsBlockchain(SOLANA_MAINNET_NETWORK.id)).toBe('sol');
 		});
 
+		it('should resolve Robinhood Chain to hood', () => {
+			expect(resolveNearIntentsBlockchain(ROBINHOOD_MAINNET_NETWORK.id)).toBe('hood');
+		});
+
 		it('should return undefined for unsupported network', () => {
 			expect(resolveNearIntentsBlockchain(parseNetworkId('UNSUPPORTED'))).toBeUndefined();
 		});
@@ -843,6 +885,31 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toStrictEqual(mockNearIntentsTokens[1]);
+		});
+
+		// Robinhood's native asset and Ethereum's are both `ETH` with no contract address, so the
+		// blockchain code is the only thing separating them. A wrong code in
+		// `NEAR_INTENTS_BLOCKCHAIN_MAP` would not fail loudly — it would resolve to the other
+		// chain's asset and quote a swap from the wrong chain entirely.
+		it('should find the Robinhood native token rather than the identically named Ethereum one', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'hood'
+			});
+
+			expect(result?.assetId).toBe('nep141:hood.omft.near');
+			expect(result?.blockchain).toBe('hood');
+		});
+
+		it('should not match the Robinhood token against another chain', () => {
+			const result = findNearIntentsAsset({
+				tokens: mockNearIntentsTokens,
+				token: ROBINHOOD_ETH_TOKEN,
+				blockchain: 'arb'
+			});
+
+			expect(result).toBeUndefined();
 		});
 
 		it('should return undefined when no matching token is found', () => {
@@ -1042,6 +1109,31 @@ describe('swap utils', () => {
 
 			expect(result.recipient).toBe(recipientAddress);
 			expect(result.refundTo).toBe(mockEthAddress);
+		});
+
+		// Regression: threading a recipient equal to the user's own address is a no-op at
+		// the request level, so pre-existing same-address-space pairs keep their exact
+		// payload now that the fan-out always resolves a recipient.
+		it('should build the same request whether the user address is passed as recipient or omitted', () => {
+			const params = {
+				slippageTolerance: 150,
+				srcAsset,
+				destAsset,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				deadlineMs: 180_000
+			};
+
+			const withoutRecipient = buildNearIntentsQuoteRequest(params);
+			const withRecipient = buildNearIntentsQuoteRequest({
+				...params,
+				recipientAddress: mockEthAddress
+			});
+
+			// The deadline is clock-dependent, so it is pinned before comparing.
+			expect({ ...withRecipient, deadline: withoutRecipient.deadline }).toStrictEqual(
+				withoutRecipient
+			);
 		});
 
 		it('should set deadline as ISO string in the future', () => {

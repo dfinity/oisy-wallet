@@ -4,6 +4,19 @@ export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
+export const NAVIGATION_MENU_TIP_BUTTON = 'navigation-menu-tip-button';
+export const NAVIGATION_MENU_TIP_BADGE = 'navigation-menu-tip-badge';
+export const NAVIGATION_MENU_TIP_COUNT = 'navigation-menu-tip-count';
+export const TIP_INTRO_GET_STARTED_BUTTON = 'tip-intro-get-started-button';
+export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
+export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
+export const TIP_CLAIM_RETRY_BUTTON = 'tip-claim-retry-button';
+export const TIP_RECEIVED_BUTTON = 'tip-received-button';
+export const TIP_WELCOME_MODAL = 'tip-welcome-modal';
+export const TIP_WELCOME_CTA_BUTTON = 'tip-welcome-cta-button';
+export const TIP_HISTORY_CANCEL_BUTTON = 'tip-history-cancel-button';
+export const TIP_HISTORY_ERROR = 'tip-history-error';
+export const TIP_HISTORY_ROW_BUTTON = 'tip-history-row-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
@@ -50,6 +63,9 @@ export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
 export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_GROUP_TOGGLE = 'nft-group-toggle';
+export const NFT_GROUP_TOGGLE_UNGROUPED = 'nft-group-toggle-ungrouped';
+export const NFT_GROUP_TOGGLE_COLLECTIONS = 'nft-group-toggle-collections';
 export const NFT_ACTION_SEND = 'nft-action-send';
 export const NFT_PLACEHOLDER_INVALID = 'nft-placeholder-invalid';
 export const NFT_PLACEHOLDER_FILESIZE = 'nft-placeholder-filesize';
@@ -78,6 +94,7 @@ export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-sectio
 export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
+export const RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION = 'receive-tokens-modal-xrp-mainnet-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 
@@ -96,6 +113,9 @@ export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-not
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+export const SEND_FIRST_TIME_DESTINATION_WARNING = 'send-first-time-destination-warning';
+export const SEND_FIRST_TIME_DESTINATION_CONFIRM = 'send-first-time-destination-confirm';
+export const REVIEW_FORM_FEE_EXPIRED = 'review-form-fee-expired';
 
 export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
@@ -131,6 +151,7 @@ export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const NFT_HERO_COUNT = 'nft-hero-count';
 export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
+export const NFT_HERO_CHECK_NEW_BUTTON = 'nft-hero-check-new-button';
 
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';
@@ -164,6 +185,9 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
+export const XRP_TRANSACTION_SKELETON_PREFIX = 'xrp-txn';
+
+export const TOKEN_INPUT_SELECT_TOKEN_BUTTON = 'token-input-select-token-button';
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
 export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
 export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';
@@ -341,6 +365,12 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SEND_INSUFFICIENT_FEE_INFO = 'send-insufficient-fee-info';
+
+export const ETH_FEE_PRIORITY = 'eth-fee-priority';
+export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
+export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
+export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
 export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar

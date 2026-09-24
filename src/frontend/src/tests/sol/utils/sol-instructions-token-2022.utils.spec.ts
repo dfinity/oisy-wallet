@@ -6,17 +6,22 @@ import {
 	identifyToken2022Instruction,
 	parseAmountToUiAmountInstruction,
 	parseApplyConfidentialPendingBalanceInstruction,
+	parseApplyConfidentialPendingBurnInstruction,
 	parseApproveCheckedInstruction,
 	parseApproveConfidentialTransferAccountInstruction,
 	parseApproveInstruction,
+	parseBatchInstruction,
 	parseBurnCheckedInstruction,
 	parseBurnInstruction,
 	parseCloseAccountInstruction,
+	parseConfidentialBurnInstruction,
 	parseConfidentialDepositInstruction,
+	parseConfidentialMintInstruction,
 	parseConfidentialTransferInstruction,
 	parseConfidentialTransferWithFeeInstruction,
 	parseConfidentialWithdrawInstruction,
 	parseConfigureConfidentialTransferAccountInstruction,
+	parseConfigureConfidentialTransferAccountWithRegistryInstruction,
 	parseCreateNativeMintInstruction,
 	parseDisableConfidentialCreditsInstruction,
 	parseDisableCpiGuardInstruction,
@@ -37,6 +42,7 @@ import {
 	parseInitializeAccount2Instruction,
 	parseInitializeAccount3Instruction,
 	parseInitializeAccountInstruction,
+	parseInitializeConfidentialMintBurnInstruction,
 	parseInitializeConfidentialTransferFeeInstruction,
 	parseInitializeConfidentialTransferMintInstruction,
 	parseInitializeDefaultAccountStateInstruction,
@@ -65,10 +71,12 @@ import {
 	parsePauseInstruction,
 	parsePermissionedBurnCheckedInstruction,
 	parsePermissionedBurnInstruction,
+	parsePermissionedConfidentialBurnInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
 	parseResumeInstruction,
 	parseRevokeInstruction,
+	parseRotateSupplyElgamalPubkeyInstruction,
 	parseSetAuthorityInstruction,
 	parseSetTransferFeeInstruction,
 	parseSyncNativeInstruction,
@@ -78,6 +86,7 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction,
 	parseUnwrapLamportsInstruction,
+	parseUpdateConfidentialMintBurnDecryptableSupplyInstruction,
 	parseUpdateConfidentialTransferMintInstruction,
 	parseUpdateDefaultAccountStateInstruction,
 	parseUpdateGroupMemberPointerInstruction,
@@ -193,6 +202,15 @@ vi.mock(import('@solana-program/token-2022'), async (importOriginal) => {
 		parseInitializePermissionedBurnInstruction: vi.fn(),
 		parsePermissionedBurnInstruction: vi.fn(),
 		parsePermissionedBurnCheckedInstruction: vi.fn(),
+		parseApplyConfidentialPendingBurnInstruction: vi.fn(),
+		parseBatchInstruction: vi.fn(),
+		parseConfidentialBurnInstruction: vi.fn(),
+		parseConfidentialMintInstruction: vi.fn(),
+		parseConfigureConfidentialTransferAccountWithRegistryInstruction: vi.fn(),
+		parseInitializeConfidentialMintBurnInstruction: vi.fn(),
+		parsePermissionedConfidentialBurnInstruction: vi.fn(),
+		parseRotateSupplyElgamalPubkeyInstruction: vi.fn(),
+		parseUpdateConfidentialMintBurnDecryptableSupplyInstruction: vi.fn(),
 		parseWithdrawWithheldTokensFromMintInstruction: vi.fn()
 	};
 });
@@ -1365,6 +1383,124 @@ describe('sol-instructions-token-2022.utils', () => {
 			expect(parsePermissionedBurnCheckedInstruction).toHaveBeenCalledExactlyOnceWith(
 				mockInstruction
 			);
+		});
+
+		it('should parse a ApplyConfidentialPendingBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.ApplyConfidentialPendingBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.ApplyConfidentialPendingBurn
+			});
+
+			expect(parseApplyConfidentialPendingBurnInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a Batch instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(Token2022Instruction.Batch);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.Batch
+			});
+
+			expect(parseBatchInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a ConfidentialBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.ConfidentialBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.ConfidentialBurn
+			});
+
+			expect(parseConfidentialBurnInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a ConfidentialMint instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.ConfidentialMint
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.ConfidentialMint
+			});
+
+			expect(parseConfidentialMintInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a ConfigureConfidentialTransferAccountWithRegistry instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.ConfigureConfidentialTransferAccountWithRegistry
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.ConfigureConfidentialTransferAccountWithRegistry
+			});
+
+			expect(
+				parseConfigureConfidentialTransferAccountWithRegistryInstruction
+			).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+		});
+
+		it('should parse a InitializeConfidentialMintBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.InitializeConfidentialMintBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.InitializeConfidentialMintBurn
+			});
+
+			expect(parseInitializeConfidentialMintBurnInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a PermissionedConfidentialBurn instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.PermissionedConfidentialBurn
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.PermissionedConfidentialBurn
+			});
+
+			expect(parsePermissionedConfidentialBurnInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a RotateSupplyElgamalPubkey instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.RotateSupplyElgamalPubkey
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.RotateSupplyElgamalPubkey
+			});
+
+			expect(parseRotateSupplyElgamalPubkeyInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
+		});
+
+		it('should parse a UpdateConfidentialMintBurnDecryptableSupply instruction', () => {
+			vi.mocked(identifyToken2022Instruction).mockReturnValue(
+				Token2022Instruction.UpdateConfidentialMintBurnDecryptableSupply
+			);
+
+			expect(parseSolToken2022Instruction(mockInstruction)).toStrictEqual({
+				instructionType: Token2022Instruction.UpdateConfidentialMintBurnDecryptableSupply
+			});
+
+			expect(
+				parseUpdateConfidentialMintBurnDecryptableSupplyInstruction
+			).toHaveBeenCalledExactlyOnceWith(mockInstruction);
 		});
 
 		it('should raise an error if it is not a recognised Token-2022 instruction', () => {

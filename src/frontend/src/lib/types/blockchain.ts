@@ -69,4 +69,8 @@ export interface BitcoinAddressData {
 
 export interface BlockchainBtcAddressDataParams {
 	btcAddress: BtcAddress;
+	/** Number of transactions to skip, newest first. Used to page back through the address history. */
+	offset?: number;
+	/** Page size. The API caps it at 100 and defaults to 50. */
+	limit?: number;
 }

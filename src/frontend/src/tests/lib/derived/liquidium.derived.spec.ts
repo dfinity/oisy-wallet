@@ -22,6 +22,7 @@ import {
 	liquidiumMinBorrowApy,
 	liquidiumNetValueUsd,
 	liquidiumPortfolio,
+	liquidiumPortfolioLoading,
 	liquidiumRepayReserves,
 	liquidiumSupplyMarkets,
 	liquidiumTotalBorrowedUsd,
@@ -32,23 +33,35 @@ import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { liquidiumNetInterestUsd } from '$lib/utils/liquidium.utils';
-import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIndexCanisterId, mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
 
 // Seed the ck twins so the `chain: 'ICP'` rails resolve via `findTwinToken` (native/ERC rails
 // resolve statically). Network set to ICP so the rail icon/name is the ICP network's.
 const seedIcpTwins = () => {
-	const twin = (symbol: string): IcrcCustomToken =>
+	// Each twin needs its own ledgerCanisterId: the custom-tokens store identifies ICRC tokens
+	// by ledgerCanisterId, and a single `setAll` batch collapses entries that share one.
+	const twin = ({
+		symbol,
+		ledgerCanisterId
+	}: {
+		symbol: string;
+		ledgerCanisterId: string;
+	}): IcrcCustomToken =>
 		({
 			...mockValidIcCkToken,
 			symbol,
+			ledgerCanisterId,
 			network: ICP_TOKEN.network,
 			enabled: true
 		}) as IcrcCustomToken;
 
 	icrcCustomTokensStore.setAll([
-		{ data: twin('ckBTC'), certified: false },
-		{ data: twin('ckUSDC'), certified: false }
+		{
+			data: twin({ symbol: 'ckBTC', ledgerCanisterId: mockValidIcCkToken.ledgerCanisterId }),
+			certified: false
+		},
+		{ data: twin({ symbol: 'ckUSDC', ledgerCanisterId: mockIndexCanisterId }), certified: false }
 	]);
 };
 
@@ -340,6 +353,37 @@ describe('liquidium derived stores', () => {
 
 		it('is null by default', () => {
 			expect(get(liquidiumPortfolio)).toBeNull();
+		});
+	});
+
+	describe('liquidiumPortfolioLoading', () => {
+		it('is true before the first load settles', () => {
+			expect(get(liquidiumPortfolioLoading)).toBeTruthy();
+		});
+
+		it('is false once the load settles, even with nothing to show', () => {
+			liquidiumStore.setLoaded(true);
+
+			expect(get(liquidiumPortfolioLoading)).toBeFalsy();
+		});
+
+		it('is true again after a reset', () => {
+			liquidiumStore.setLoaded(true);
+			liquidiumStore.reset();
+
+			expect(get(liquidiumPortfolioLoading)).toBeTruthy();
+		});
+
+		it('is false when the lend & borrow provider is off, however unsettled the store', async () => {
+			vi.resetModules();
+			vi.doMock('$env/lend-borrow', () => ({ anyLendBorrowProviderEnabled: false }));
+
+			const { liquidiumPortfolioLoading: gated } = await import('$lib/derived/liquidium.derived');
+
+			expect(get(gated)).toBeFalsy();
+
+			vi.doUnmock('$env/lend-borrow');
+			vi.resetModules();
 		});
 	});
 

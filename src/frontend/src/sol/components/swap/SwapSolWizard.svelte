@@ -12,7 +12,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
+		TRACK_COUNT_SWAP_SUBMITTED
 	} from '$lib/constants/analytics.constants';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -39,6 +39,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
@@ -225,8 +226,11 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// The foreground completes once the user's funds have left their wallet;
+			// success/failure of the background settlement is tracked separately via
+			// the AUT store, so we fire `submitted` here (matching OneSec).
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name: TRACK_COUNT_SWAP_SUBMITTED,
 				metadata: swapTrackingMetadata
 			});
 
@@ -250,9 +254,13 @@
 
 			failedSwapError.set(undefined);
 
+			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
+
 			toastsError({
-				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
-				err
+				msg: { text: quoteRejected ?? mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
+				// The gate aborted before any funds moved, so there is no underlying failure to
+				// attach; the message above already says everything the user needs.
+				...(isNullish(quoteRejected) ? { err } : {})
 			});
 
 			onBack();
@@ -290,7 +298,7 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithTransfer {swapProgressStep} />
+				<SwapProgress sendWithTransfer {swapProgressStep} swapWithActiveTransaction />
 			{/if}
 		{/key}
 	</SolFeeContext>

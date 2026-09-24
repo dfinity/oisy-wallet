@@ -12,7 +12,7 @@
 use std::collections::HashMap;
 
 use candid::Principal;
-use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use shared::types::onramper::{
     OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest,
     SignOnramperWidgetUrlResponse,

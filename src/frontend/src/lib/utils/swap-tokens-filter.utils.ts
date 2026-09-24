@@ -1,3 +1,4 @@
+import { isBitcoinToken } from '$btc/utils/token.utils';
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -36,6 +37,26 @@ interface SwapTokenLookup {
 }
 
 /**
+ * The identifier a token without a contract address is keyed on.
+ *
+ * The symbol alone is not unique: ETH is the native token of Ethereum mainnet, Base and
+ * Arbitrum alike, and the category sets carry no network dimension — so a bare `'eth'`
+ * made an Ethereum-mainnet-only offer (Chain Fusion's ckETH → ETH) look reachable on the
+ * L2s too. The network qualifies it back into a unique key.
+ *
+ * Contract-bearing tokens need no qualifier: their address already pins the network.
+ * Every producer of a native identifier must go through here, or the two spaces drift
+ * apart and the filter silently matches nothing.
+ */
+export const nativeSwapTokenIdentifier = ({
+	networkId,
+	symbol
+}: {
+	networkId: NetworkId;
+	symbol: string;
+}): string => `${String(networkId.description)}:${symbol.toLowerCase()}`;
+
+/**
  * Resolves the provider-group info and the token identifier used for matching
  * against provider supported-token sets.
  *
@@ -71,7 +92,7 @@ export const resolveSwapTokenLookup = ({
 	if (isTokenEthereumNative(token)) {
 		return {
 			info: supportedData?.evm,
-			identifier: token.symbol.toLowerCase(),
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
 			category: 'evm'
 		};
 	}
@@ -79,8 +100,18 @@ export const resolveSwapTokenLookup = ({
 	if (isTokenSolanaNative(token)) {
 		return {
 			info: supportedData?.sol,
-			identifier: token.symbol.toLowerCase(),
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
 			category: 'sol'
+		};
+	}
+
+	// Bitcoin has no contract address, so it is keyed like the other native tokens. No
+	// collision with them: every guard above discriminates on `standard.code`.
+	if (isBitcoinToken(token)) {
+		return {
+			info: supportedData?.btc,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'btc'
 		};
 	}
 };
@@ -171,7 +202,8 @@ export const computeReceiveSupportedTokens = ({
 	const accum: Record<SwapTokenCategory, CategoryAccum> = {
 		icp: { total: 0, withList: 0, ids: new Set() },
 		evm: { total: 0, withList: 0, ids: new Set() },
-		sol: { total: 0, withList: 0, ids: new Set() }
+		sol: { total: 0, withList: 0, ids: new Set() },
+		btc: { total: 0, withList: 0, ids: new Set() }
 	};
 
 	const findProviderSourceTokens = ({
@@ -208,7 +240,8 @@ export const computeReceiveSupportedTokens = ({
 	return {
 		icp: toInfo(accum.icp),
 		evm: toInfo(accum.evm),
-		sol: toInfo(accum.sol)
+		sol: toInfo(accum.sol),
+		btc: toInfo(accum.btc)
 	};
 };
 

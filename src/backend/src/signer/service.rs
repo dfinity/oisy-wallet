@@ -1,14 +1,11 @@
 //! Code for interacting with the chain fusion signer.
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{Nat, Principal};
-use ic_cdk::{
-    api::msg_caller,
-    bitcoin_canister::Network as BitcoinNetwork,
-    call::Call,
-    management_canister::{
-        canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
-        EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
-    },
+use ic_cdk::{api::msg_caller, call::Call};
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
+use ic_cdk_management_canister::{
+    canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
+    EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -57,8 +54,8 @@ const fn per_user_cycles_allowance() -> u64 {
 
 /// Minimum cycles allowance below which a new approve is warranted.
 ///
-/// If the caller already has at least this many cycles, `allow_signing`
-/// skips the `icrc_2_approve` call.  This avoids:
+/// If the caller already has at least this many cycles, the `allow_signing`
+/// endpoint skips the `icrc_2_approve` call.  This avoids:
 /// - Unnecessary inter-canister calls when the user still has plenty of cycles.
 /// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve` *sets* (not
 ///   adds) the value.
@@ -124,7 +121,7 @@ pub async fn has_sufficient_allowance() -> Option<Nat> {
 ///
 /// Callers that want the "check first, approve only if needed" behaviour
 /// should call [`has_sufficient_allowance`] beforehand, or use
-/// [`allow_signing`] which does both.
+/// [`crate::api::signer::allow_signing`], which does both.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
@@ -155,22 +152,6 @@ pub async fn approve_signing() -> Result<(), AllowSigningError> {
         .map_err(AllowSigningError::ApproveError)?;
 
     Ok(())
-}
-
-/// Enables the user to sign transactions.
-///
-/// Checks the current allowance first; if already at or above
-/// [`SUFFICIENT_CYCLES_THRESHOLD`], returns immediately without making an
-/// `icrc_2_approve` call.  Otherwise delegates to [`approve_signing`].
-///
-/// # Errors
-/// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    if has_sufficient_allowance().await.is_some() {
-        return Ok(());
-    }
-
-    approve_signing().await
 }
 
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);

@@ -15,16 +15,21 @@
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
+	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
+	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
 		isLiquidiumActiveUserTransaction,
 		liquidiumActionKey,
 		toLiquidiumExternalRefsMap
 	} from '$lib/utils/liquidium-active-tx.utils';
+	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
+	import { isOisyTradeActiveUserTransaction } from '$lib/utils/oisy-trade-active-tx.utils';
 	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -36,6 +41,15 @@
 	let { tx, isUnseen, dismissing, onDismiss }: Props = $props();
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
+	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
+	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
+	const isChainFusion = $derived(isChainFusionActiveUserTransaction(tx));
+	const isOisyTrade = $derived(isOisyTradeActiveUserTransaction(tx));
+	// Every swap provider is rendered identically — they share the same
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction,
+	// Chain Fusion's conversion direction and OISY Trade's order side are internal
+	// routing and deliberately not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
@@ -65,9 +79,23 @@
 	const providerName = $derived(
 		isLiquidium
 			? lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
-			: isOneSec
-				? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
-				: undefined
+			: isNearIntents
+				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
+				: isOneSec
+					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
+					: isVelora
+						? (swapProvidersDetails[SwapProvider.VELORA]?.name ?? '')
+						: isChainFusion
+							? // Resolves even with `CHAIN_FUSION_SWAP_ENABLED` off: the entry is
+								// unconditional precisely so a row outliving a flag rollback keeps
+								// its provider name.
+								(swapProvidersDetails[SwapProvider.CHAIN_FUSION]?.name ?? '')
+							: isOisyTrade
+								? // Unconditional for the same reason, and it matters more here: the
+									// OISY Trade swap flag is expected to move while the real receive
+									// amount lands, and a row can outlive any of that.
+									(swapProvidersDetails[SwapProvider.OISY_TRADE]?.name ?? '')
+								: undefined
 	);
 
 	const titleText = $derived(
@@ -80,7 +108,7 @@
 					.filter(nonNullish)
 					.join(' ')
 			: [
-					isOneSec ? $i18n.swap.text.swap : undefined,
+					isSwap ? $i18n.swap.text.swap : undefined,
 					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
 					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 					'→',
@@ -95,9 +123,19 @@
 		refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
 	);
 
-	const createdAgo = $derived(
+	// A same-chain swap — always the case for a Velora Market swap — would
+	// otherwise read "Ethereum → Ethereum".
+	const networkText = $derived(
+		sourceNetwork === destinationNetwork
+			? sourceNetwork
+			: `${sourceNetwork} → ${destinationNetwork}`
+	);
+
+	// Time since the last status change, not since creation: a settled swap
+	// should read "1m ago" when it just turned green, however long it ran.
+	const timeAgo = $derived(
 		formatNanosecondsToShortRelativeTime({
-			nanoseconds: tx.created_at_ns,
+			nanoseconds: activeUserTransactionTimestampNs(tx),
 			language: $currentLanguage
 		})
 	);
@@ -159,14 +197,13 @@
 			{#if isLiquidium}
 				{providerName}
 			{:else}
-				{sourceNetwork} → {destinationNetwork}{#if nonNullish(providerName)}<Divider
-					/>{providerName}{/if}
+				{networkText}{#if nonNullish(providerName)}<Divider />{providerName}{/if}
 			{/if}
 		{/snippet}
 
 		{#snippet descriptionEnd()}
 			<div class="ml-2">
-				{createdAgo}
+				{timeAgo}
 			</div>
 		{/snippet}
 	</LogoButton>

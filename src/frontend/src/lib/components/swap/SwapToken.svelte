@@ -13,10 +13,14 @@
 		token?: Token;
 		amount: OptionAmount;
 		exchangeRate?: number;
+		// The fiat line under the amount. Opt out where the row is one leg of a
+		// price the screen already states in full — dropping `exchangeRate` is not
+		// the same thing, as that renders the "unavailable" fallback instead.
+		showExchangeValue?: boolean;
 		title: Snippet;
 	}
 
-	let { token, amount, exchangeRate, title }: Props = $props();
+	let { token, amount, exchangeRate, showExchangeValue = true, title }: Props = $props();
 
 	let formattedAmount = $derived(
 		nonNullish(token) && nonNullish(amount) && notEmptyString(`${amount}`)
@@ -42,9 +46,11 @@
 				{formattedAmount}
 				{getTokenDisplaySymbol(token)}
 			</span>
-			<span class="text-sm text-tertiary">
-				<TokenInputAmountExchange {amount} disabled {exchangeRate} />
-			</span>
+			{#if showExchangeValue}
+				<span class="text-sm text-tertiary">
+					<TokenInputAmountExchange {amount} disabled {exchangeRate} />
+				</span>
+			{/if}
 		</div>
 	</div>
 {/if}

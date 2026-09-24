@@ -19,7 +19,7 @@ EOF
 DFX_NETWORK="${DFX_NETWORK:-local}"
 export LLM_BUILDENV="$DFX_NETWORK"
 
-LLM_RELEASE_URL="https://github.com/dfinity/llm/releases/latest/download/"
+LLM_RELEASE_URL="https://github.com/dfinity/llm/releases/download/v0.3.1"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${LLM_RELEASE_URL}/llm-canister-ollama.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.

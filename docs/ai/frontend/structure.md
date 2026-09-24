@@ -48,6 +48,11 @@ src/frontend/src/
 │   ├── assets/             SVG / images imported by code
 │   ├── actors/             Generic IC actor helpers
 │   ├── ic-pub-key/         Public-key derivation helpers
+│   ├── oisy-trade/         OISY Trade offer calculation — self-contained, speaks
+│   │                       only the oisy_trade declarations; belongs in that
+│   │                       canister and is deleted once it exposes a quote
+│   │                       endpoint (see its README; boundary enforced by
+│   │                       no-restricted-imports)
 │   ├── config/             Runtime config helpers
 │   └── i18n/               en.json (single source of truth) + structurally synced non-en locales
 │
@@ -56,6 +61,7 @@ src/frontend/src/
 ├── evm/                      workers, providers, rest, canisters, api,
 ├── icp/                      validation, assets, …
 ├── sol/                      (each chain mirrors a subset of lib/ subfolders)
+├── xrp/                    XRP Ledger (native XRP)
 ├── icp-eth/                ck-ETH / ck-ERC20 bridge code
 │
 ├── env/                    Environment, networks and tokens
@@ -132,6 +138,7 @@ The local rule `local-rules/no-relative-imports` is **`error`** under
 | `$evm`          | `src/frontend/src/evm`                                               |
 | `$icp`          | `src/frontend/src/icp`                                               |
 | `$sol`          | `src/frontend/src/sol`                                               |
+| `$xrp`          | `src/frontend/src/xrp`                                               |
 | `$icp-eth`      | `src/frontend/src/icp-eth`                                           |
 | `$env`          | `src/frontend/src/env`                                               |
 | `$declarations` | `src/declarations`                                                   |

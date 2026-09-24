@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
+	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
+	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import {
+		LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT,
+		LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
+	} from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -14,6 +21,7 @@
 		type PricePreset,
 		queuePositionDisplay,
 		queuePositionFraction,
+		restsAgainstValue,
 		validatePrice,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
@@ -47,12 +55,51 @@
 		onPriceInput
 	}: Props = $props();
 
+	// The visible title names the field for screen readers: the input has no
+	// `<label>`, and a placeholder is not an accessible name.
+	const uid = $props.id();
+	const labelId = `limit-order-price-label-${uid}`;
+
+	// Drives the shared container's brand focus border, the same way
+	// `TokenInputContent` tracks it for the amount fields.
+	let focused = $state(false);
+
 	const priceNum = $derived(parseFloat(price));
 	const active = $derived(nonNullish(pairView));
 
 	const crossing = $derived(active && crossesBook({ side, price: priceNum, bid, ask }));
 
+	// Priced against the user while still resting: no immediate fill, so none of
+	// the crossing warnings apply, yet the order is the one the market reaches
+	// first and it would fill below (Sell) / above (Buy) current value.
+	// Never for a fill-or-kill order — it cannot rest at all, and with the book
+	// side empty neither `crossing` nor `fokBlocked` is there to claim the copy.
+	const restingAgainstValue = $derived(
+		active &&
+			!fillOrKill &&
+			restsAgainstValue({
+				side,
+				price: priceNum,
+				currentValue,
+				bid,
+				ask,
+				threshold: LIMIT_ORDER_RESTING_VALUE_DIFFERENCE_WARNING_PERCENT
+			})
+	);
+
+	// The label turns on the sign alone, not the warning threshold: "reaches"
+	// describes a price the market has yet to hit, and that stops being true the
+	// moment the price is past current value at all — a full percent earlier than
+	// there is anything worth warning about.
+	const restingPastValue = $derived(
+		active &&
+			!fillOrKill &&
+			restsAgainstValue({ side, price: priceNum, currentValue, bid, ask, threshold: 0 })
+	);
+
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));
+
+	const showValueDifference = $derived(priceNum > 0 && currentValue > 0);
 
 	// The book side we'd cross against (bid when selling, ask when buying). Null
 	// when that side is empty — without it crossing is indeterminate, so we can't
@@ -79,7 +126,12 @@
 				$base: base
 			});
 		}
-		if (crossing) {
+		// The "reaches" / "drops to" wording only holds while the price is still
+		// ahead of the market. Once it is behind — crossing, or resting past
+		// current value — the market has already got there, and a resting order
+		// past current value is what monitoring bots take first, so it reads as
+		// the immediate sale/purchase it effectively is.
+		if (crossing || restingPastValue) {
 			return replacePlaceholders(
 				side === 'sell' ? t.price_label_sell_crossing : t.price_label_buy_crossing,
 				{ $base: base }
@@ -160,16 +212,27 @@
 			if (fillOrKill) {
 				return {
 					text: side === 'sell' ? t.warning_fok_sell : t.warning_fok_buy,
-					danger: valueDiff < -5
+					danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 				};
 			}
 			return {
 				text: side === 'sell' ? t.warning_crossing_sell : t.warning_crossing_buy,
-				danger: valueDiff < -5
+				danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
+			};
+		}
+		if (restingAgainstValue) {
+			return {
+				text:
+					side === 'sell' ? t.warning_resting_below_value_sell : t.warning_resting_above_value_buy,
+				danger: valueDiff <= LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT
 			};
 		}
 		return undefined;
 	});
+
+	const hasFooter = $derived(
+		showValueDifference || nonNullish(queueText) || nonNullish(tickError) || nonNullish(warningText)
+	);
 
 	const presetLabel1 = $derived(
 		side === 'sell'
@@ -191,88 +254,133 @@
 	]);
 </script>
 
-<!-- Border marks the latched preset; it clears on a manual price edit
+<!-- The filled pill marks the latched preset; it clears on a manual price edit
 	 (which nulls `activePreset`) and follows the market while latched. -->
-{#snippet presetButton({ preset, label }: { preset: PricePreset; label: string })}
-	<button
-		class="rounded border px-1 py-0.5 transition-colors"
-		class:border-brand-primary={activePreset === preset}
-		class:border-transparent={activePreset !== preset}
-		class:font-semibold={activePreset === preset}
-		class:text-brand-primary={activePreset !== preset}
-		class:text-primary={activePreset === preset}
-		class:underline={activePreset !== preset}
-		aria-pressed={activePreset === preset}
-		onclick={() => setPreset(preset)}
-		type="button">{label}</button
-	>
+{#snippet presetButton({
+	preset,
+	label,
+	arrow = false
+}: {
+	preset: PricePreset;
+	label: string;
+	arrow?: boolean;
+})}
+	<PillButton onClick={() => setPreset(preset)} selected={activePreset === preset}>
+		<span class="flex items-center gap-1">
+			{label}
+
+			<!-- Which way the offset moves the price: up for a sell, down for a buy.
+				 Rotating `IconArrowDown` is how `LimitOrderSideControl` draws its own
+				 up arrow — there is no `IconArrowUp` in the set. -->
+			{#if arrow}
+				<span class="flex" class:rotate-180={side === 'sell'}>
+					<IconArrowDown size="14" />
+				</span>
+			{/if}
+		</span>
+	</PillButton>
 {/snippet}
 
 <div
-	class="rounded-lg border bg-secondary px-3 py-2.5"
+	class="rounded-lg border bg-secondary px-3 py-3"
 	class:border-disabled={isNullish(warningText)}
 	class:border-error-primary={nonNullish(warningText) && warningText.danger}
 	class:border-warning-primary={nonNullish(warningText) && !warningText.danger}
 >
-	<div class="flex items-center justify-between gap-2">
-		<span class="text-xs text-secondary">{label}</span>
-		<div class="flex items-center gap-1.5 text-xs">
+	<!-- The presets share the title's line: they set the very price the title names,
+		 and lifting them out of the space under the field keeps the box short. Title
+		 plus pills comes to ~483px against the 488px the dialog leaves at its 560px
+		 width, so the row wraps rather than scrolls — the longest labels (fill-or-kill,
+		 or a five-character base symbol) and every phone width drop the pills onto a
+		 line of their own instead of clipping them. -->
+	<div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+		<span id={labelId} class="text-sm font-bold text-primary">{label}</span>
+
+		<div class="flex flex-wrap items-center gap-2">
 			{@render presetButton({ preset: 'book', label: bidAskLabel })}
-			<span class="text-tertiary" aria-hidden="true">|</span>
-			<div class="flex items-center gap-0.5">
-				{#each pricePresets as { preset, label }, i (preset)}
-					{#if i > 0}
-						<span class="text-tertiary" aria-hidden="true">·</span>
-					{/if}
-					{@render presetButton({ preset, label })}
-				{/each}
-			</div>
+
+			<!-- Keeps the book price set apart from the three value-derived presets,
+				 as the `|` did when these were links. -->
+			<span class="h-4 w-px shrink-0 bg-disabled" aria-hidden="true"></span>
+
+			{#each pricePresets as { preset, label } (preset)}
+				{@render presetButton({ preset, label, arrow: preset !== 0 })}
+			{/each}
 		</div>
 	</div>
 
-	<div class="mt-2 flex items-baseline justify-between gap-2">
-		<div class="flex items-baseline gap-1">
-			<input
-				class="w-32 rounded-md border border-secondary bg-primary px-2 py-1 text-xl text-primary outline-none focus:border-brand-primary"
-				class:border-error-primary={nonNullish(tickError)}
-				disabled={!active}
-				oninput={(e) => onPriceInput(e.currentTarget.value)}
-				placeholder={$i18n.trading.limit_order.price_placeholder}
-				type="text"
-				value={price}
-			/>
-			<span class="text-xs text-secondary">{pairView?.quoteSymbol ?? ''}</span>
+	<!-- The shared container, so the field carries the same frame, height and
+		 focus/hover behaviour as the amount inputs — the quote symbol sits where
+		 those put their token selector. The inner input mirrors what
+		 `TokenInputCurrency` renders: borderless, full-height, bold, px-3. -->
+	<TokenInputContainer error={nonNullish(tickError)} {focused} styleClass="h-14 text-xl">
+		<input
+			class="h-full w-full min-w-0 border-none bg-transparent px-3 font-bold text-primary outline-none disabled:cursor-not-allowed disabled:text-tertiary"
+			aria-labelledby={labelId}
+			disabled={!active}
+			onblur={() => (focused = false)}
+			onfocus={() => (focused = true)}
+			oninput={(e) => onPriceInput(e.currentTarget.value)}
+			placeholder={$i18n.trading.limit_order.price_placeholder}
+			type="text"
+			value={price}
+		/>
+
+		<div class="h-3/4 w-[1px] bg-disabled"></div>
+
+		<span class="flex h-full shrink-0 items-center px-3 text-sm font-semibold text-primary">
+			{pairView?.quoteSymbol ?? ''}
+		</span>
+	</TokenInputContainer>
+
+	<!-- Everything the entered price implies, on one row under the field: the messages
+		 read left, the value difference is pinned right. The row always renders and only
+		 its top margin is conditional — gating it behind an `{#if}` would leave the
+		 lines inside needing `|global` to animate at all, and a global outro makes the
+		 wizard hold this step on screen until it finishes, dragging the price box into
+		 the next step on the way to Review. -->
+	<div class="flex items-start justify-between gap-2" class:mt-2={hasFooter}>
+		<div class="flex min-w-0 flex-1 flex-col gap-1">
+			{#if nonNullish(queueText)}
+				<p class="mb-0 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
+			{/if}
+
+			{#if nonNullish(tickError)}
+				<p class="mb-0 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
+			{/if}
+
+			{#if nonNullish(warningText)}
+				<!-- Plain line rather than a tinted chip: its own `px-2.5` indented the
+					 copy past the title and field, and the subtle fill barely reads on the
+					 box's own background. The section border already carries the alert
+					 colour. -->
+				<p
+					class="mb-0 text-xs"
+					class:text-error-primary={warningText.danger}
+					class:text-warning-primary={!warningText.danger}
+					transition:slide={SLIDE_PARAMS}
+				>
+					{warningText.text}
+				</p>
+			{/if}
 		</div>
-		{#if priceNum > 0 && currentValue > 0}
-			<ValueDifference
-				errorLevel={-5}
-				iconPosition="left"
-				muted={!(crossing || fillOrKill)}
-				successNeutral
-				value={valueDiff}
-				warningLevel={0}
-			/>
+
+		{#if showValueDifference}
+			<!-- `ValueDifference` sets no size of its own; without `text-sm` it
+				 inherits the base 16px and ends up the largest text in the box.
+				 Coloured whenever a warning is shown below — crossing, fill-or-kill, or
+				 a resting price against current value — so the figure and the warning
+				 always agree; neutral otherwise. -->
+			<span class="shrink-0 text-sm">
+				<ValueDifference
+					errorLevel={LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT}
+					iconPosition="left"
+					muted={!(crossing || fillOrKill || restingAgainstValue)}
+					successNeutral
+					value={valueDiff}
+					warningLevel={0}
+				/>
+			</span>
 		{/if}
 	</div>
-
-	{#if nonNullish(tickError)}
-		<p class="mt-1 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
-	{/if}
-
-	{#if nonNullish(queueText)}
-		<p class="mt-1.5 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
-	{/if}
-
-	{#if nonNullish(warningText)}
-		<p
-			class="mt-2 rounded-md px-2.5 py-2 text-xs"
-			class:bg-error-subtle={warningText.danger}
-			class:bg-warning-subtle={!warningText.danger}
-			class:text-error-primary={warningText.danger}
-			class:text-warning-primary={!warningText.danger}
-			transition:slide={SLIDE_PARAMS}
-		>
-			{warningText.text}
-		</p>
-	{/if}
 </div>

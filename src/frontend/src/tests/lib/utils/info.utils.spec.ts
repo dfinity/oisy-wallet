@@ -1,4 +1,10 @@
-import { saveHideInfo, shouldHideInfo, type HideInfoKey } from '$lib/utils/info.utils';
+import {
+	hiddenInfoQualifiers,
+	saveHideInfo,
+	saveHideInfoQualifiers,
+	shouldHideInfo,
+	type HideInfoKey
+} from '$lib/utils/info.utils';
 
 describe('info.utils', () => {
 	describe('saveHideInfo', () => {
@@ -80,6 +86,46 @@ describe('info.utils', () => {
 				value: originalSessionStorage,
 				writable: true
 			});
+		});
+	});
+
+	describe('saveHideInfoQualifiers / hiddenInfoQualifiers', () => {
+		const key = 'someKey' as HideInfoKey;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			sessionStorage.clear();
+		});
+
+		it('should return nothing when never saved', () => {
+			expect(hiddenInfoQualifiers(key)).toStrictEqual([]);
+		});
+
+		it('should round-trip the qualifiers', () => {
+			saveHideInfoQualifiers({ key, qualifiers: ['ICP', 'GLDT'] });
+
+			expect(hiddenInfoQualifiers(key)).toStrictEqual(['ICP', 'GLDT']);
+		});
+
+		it('should overwrite rather than append', () => {
+			saveHideInfoQualifiers({ key, qualifiers: ['ICP'] });
+			saveHideInfoQualifiers({ key, qualifiers: ['GLDT'] });
+
+			expect(hiddenInfoQualifiers(key)).toStrictEqual(['GLDT']);
+		});
+
+		it('should tolerate a stored value that is not a list', () => {
+			// The key previously held the boolean flag of the unqualified variant.
+			sessionStorage.setItem(key, 'true');
+
+			expect(hiddenInfoQualifiers(key)).toStrictEqual([]);
+		});
+
+		it('should tolerate a corrupted value', () => {
+			sessionStorage.setItem(key, '{not json');
+
+			expect(hiddenInfoQualifiers(key)).toStrictEqual([]);
 		});
 	});
 });

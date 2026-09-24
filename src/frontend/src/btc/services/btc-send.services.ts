@@ -1,10 +1,9 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { estimateTransactionVSize, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
+import { calculateFeeSatoshis, extractUtxoOutpoints } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse, SignBtcResponse } from '$declarations/signer/signer.did';
 import { getPendingTransactionUtxoOutpoints, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
@@ -13,6 +12,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Amount } from '$lib/types/send';
+import { consoleError } from '$lib/utils/console.utils';
 import { extractIIDelegationChain } from '$lib/utils/delegation.utils';
 import { invalidAmount } from '$lib/utils/input.utils';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -33,6 +33,11 @@ interface CommonBtcServiceParams {
 export type SendBtcParams = CommonBtcServiceParams & {
 	amount: Amount;
 	source: BtcAddress;
+	// Runs the moment the transaction is broadcast, ahead of the pending-transaction
+	// bookkeeping and the wallet refresh: the broadcast is irreversible from there, so
+	// a caller that must record it (e.g. as an active user transaction) cannot wait
+	// behind steps whose failure would swallow the txid.
+	onBroadcast?: (params: { txid: string }) => Promise<void> | void;
 };
 
 export type SignBtcParams = CommonBtcServiceParams & {
@@ -120,7 +125,7 @@ export const validateBtcSend = async ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
 	}
 
-	const { utxos, feeSatoshis } = utxosFee;
+	const { utxos, feeSatoshis, feeRateMiliSatoshisPerVByte } = utxosFee;
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	if (utxos.length === 0) {
@@ -173,21 +178,25 @@ export const validateBtcSend = async ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
 
-	// 4. Validate fee calculation matches expected transaction structure ( recipient + change)
-	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
-		network,
-		identity
-	});
-	const estimatedTxVSize = estimateTransactionVSize({
+	// 4. Validate the fee prices the transaction structure this selection will broadcast
+	// (recipient + change), at the rate it was quoted with.
+	//
+	// The rate comes from the fee itself, never from a fresh sample of the percentiles. The
+	// two are not interchangeable: the median percentile shifts by more than this tolerance
+	// within a minute of ordinary mempool movement, and near the 1 sat/vByte floor a single
+	// slot of drift already exceeds 10%. Checking the quoted fee against a later sample
+	// therefore rejected sends whose fee was correct when it was quoted and still is. A
+	// stale preview is a reason to refresh the preview, not to block a broadcast the user
+	// has approved.
+	const expectedFee = calculateFeeSatoshis({
 		numInputs: utxos.length,
-		numOutputs: 2
+		feeRateMiliSatoshisPerVByte
 	});
-	const expectedMinFee = (BigInt(estimatedTxVSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
-	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
-	const minAcceptableFee = expectedMinFee - feeToleranceRange;
-	const maxAcceptableFee = expectedMinFee + feeToleranceRange;
+	const feeToleranceRange = expectedFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
+	const minAcceptableFee = expectedFee - feeToleranceRange;
+	const maxAcceptableFee = expectedFee + feeToleranceRange;
 
 	if (feeSatoshis < minAcceptableFee || feeSatoshis > maxAcceptableFee) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidFeeCalculation);
@@ -235,9 +244,19 @@ export const sendBtc = async ({
 	source: _source,
 	identity,
 	onProgress,
+	onBroadcast,
 	...rest
 }: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
+
+	// Best-effort by contract: the bookkeeping below protects this flow's own
+	// invariants (the spent UTXOs are recorded as pending), so a failing callback
+	// must not derail it.
+	try {
+		await onBroadcast?.({ txid });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
 	await addPendingBtcTransaction({
 		identity,

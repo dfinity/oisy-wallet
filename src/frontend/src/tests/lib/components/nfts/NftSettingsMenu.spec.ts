@@ -6,18 +6,13 @@ import {
 } from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
-import {
-	nftGroupByCollectionStore,
-	showHiddenStore,
-	showSpamStore
-} from '$lib/stores/settings.store';
+import { showHiddenStore, showSpamStore } from '$lib/stores/settings.store';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('NftsSettingsMenu', () => {
 	const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
-	const nftGroupByCollectionStoreSpy = vi.spyOn(nftGroupByCollectionStore, 'set');
 	const showHiddenStoreSpy = vi.spyOn(showHiddenStore, 'set');
 	const showSpamStoreSpy = vi.spyOn(showSpamStore, 'set');
 
@@ -44,23 +39,9 @@ describe('NftsSettingsMenu', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			const groupingTitle = getByText(get(i18n).nfts.text.grouping);
+			const listSettingsTitle = getByText(get(i18n).tokens.manage.text.list_settings);
 
-			expect(groupingTitle).toBeInTheDocument();
-		});
-	});
-
-	it('should display all grouping options', async () => {
-		const { container, getByText } = render(NftsSettingsMenu);
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			expect(getByText(get(i18n).nfts.text.as_plain_list)).toBeInTheDocument();
-			expect(getByText(get(i18n).nfts.text.by_collection)).toBeInTheDocument();
+			expect(listSettingsTitle).toBeInTheDocument();
 		});
 	});
 
@@ -76,72 +57,6 @@ describe('NftsSettingsMenu', () => {
 			expect(getByText(get(i18n).tokens.manage.text.list_settings)).toBeInTheDocument();
 			expect(getByText(get(i18n).nfts.text.show_hidden)).toBeInTheDocument();
 			expect(getByText(get(i18n).nfts.text.show_spam)).toBeInTheDocument();
-		});
-	});
-
-	it('should set grouping to plain list when clicked', async () => {
-		const { container, getByText } = render(NftsSettingsMenu);
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			const plainListOption = getByText(get(i18n).nfts.text.as_plain_list);
-
-			expect(plainListOption).toBeInTheDocument();
-		});
-
-		const plainListOption = getByText(get(i18n).nfts.text.as_plain_list);
-
-		await fireEvent.click(plainListOption);
-
-		expect(nftGroupByCollectionStoreSpy).toHaveBeenCalledWith({
-			key: 'nft-group-by-collection',
-			value: false
-		});
-
-		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
-			metadata: {
-				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
-				event_value: 'plain_list'
-			}
-		});
-	});
-
-	it('should set grouping to by collection when clicked', async () => {
-		const { container, getByText } = render(NftsSettingsMenu);
-
-		const button = container.querySelector('button');
-		assertNonNullish(button);
-
-		await fireEvent.click(button);
-
-		await waitFor(() => {
-			const byCollectionOption = getByText(get(i18n).nfts.text.by_collection);
-
-			expect(byCollectionOption).toBeInTheDocument();
-		});
-
-		const byCollectionOption = getByText(get(i18n).nfts.text.by_collection);
-
-		await fireEvent.click(byCollectionOption);
-
-		expect(nftGroupByCollectionStoreSpy).toHaveBeenCalledWith({
-			key: 'nft-group-by-collection',
-			value: true
-		});
-
-		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
-			metadata: {
-				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
-				event_value: 'collection'
-			}
 		});
 	});
 

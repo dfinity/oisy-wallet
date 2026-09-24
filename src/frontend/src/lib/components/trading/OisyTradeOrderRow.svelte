@@ -63,13 +63,10 @@
 
 	// Signed legs on the right: the base leaves the account on a sell (−) and
 	// arrives on a buy (+); the quote is the mirror image. U+2212 is the typographic
-	// minus so the two signs align under tabular-nums.
-	let baseAmountSigned = $derived(
-		`${side === 'sell' ? '−' : '+'}${formattedQuantity} ${baseSymbol}`
-	);
-	let quoteAmountSigned = $derived(
-		`${side === 'sell' ? '+' : '−'}${formattedQuoteAmount} ${quoteSymbol}`
-	);
+	// minus so the two signs align under tabular-nums. Symbol-free: `tabular-nums`
+	// must wrap the figure only (see the render below).
+	let baseAmountSigned = $derived(`${side === 'sell' ? '−' : '+'}${formattedQuantity}`);
+	let quoteAmountSigned = $derived(`${side === 'sell' ? '+' : '−'}${formattedQuoteAmount}`);
 
 	let { labelKey, pillVariant } = $derived(orderStatusView(oisyTradeOrderDisplayStatus(order)));
 
@@ -200,11 +197,11 @@
 					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
 				</span>
 				<span class="font-semibold">{baseSymbol}</span>
-				<span class="tabular-nums">{phrase}</span>
+				<span>{phrase}</span>
 			{/if}
 		</div>
 		{#if nonNullish(metaLine)}
-			<div class="mt-0.5 text-xs text-tertiary tabular-nums" transition:slide={SLIDE_PARAMS}>
+			<div class="mt-0.5 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>
 				{metaLine}
 			</div>
 		{/if}
@@ -225,8 +222,14 @@
 		{#if $isPrivacyMode}
 			<IconDots variant="md" />
 		{:else}
-			<span class="text-base font-semibold text-primary tabular-nums">{baseAmountSigned}</span>
-			<span class="text-sm text-tertiary tabular-nums">{quoteAmountSigned}</span>
+			<span class="text-base font-semibold text-primary">
+				<span class="tabular-nums">{baseAmountSigned}</span>
+				{baseSymbol}
+			</span>
+			<span class="text-sm text-tertiary">
+				<span class="tabular-nums">{quoteAmountSigned}</span>
+				{quoteSymbol}
+			</span>
 		{/if}
 	</div>
 </button>

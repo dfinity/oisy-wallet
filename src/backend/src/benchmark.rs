@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
 use candid::{Nat, Principal};
-use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
+use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
 use serde_bytes::ByteBuf;
 use shared::{
     http::HttpRequest,
@@ -118,8 +118,8 @@ fn setup_contact(id: u64) {
 
 fn make_utxo(txid_byte: u8, vout: u32, value: u64) -> Utxo {
     Utxo {
-        outpoint: Outpoint {
-            txid: vec![txid_byte; 32],
+        outpoint: OutPoint {
+            txid: Txid::from([txid_byte; 32]),
             vout,
         },
         value,
