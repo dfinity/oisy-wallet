@@ -113,6 +113,18 @@ export const fetchSolTransactionsForSignature = async ({
 		...ownedTokenAccounts
 	];
 
+	// Who held each token account going in. Not the owners merged from before and after, which the
+	// counterparty lookup wants: an address closed and opened again for somebody else within the
+	// one transaction would read as theirs at a close that happened while it was still the user's.
+	const accountHolders = [...(preTokenBalances ?? [])].reduce<Record<SolAddress, SolAddress>>(
+		(acc, { accountIndex, owner }) => {
+			const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
+
+			return nonNullish(account) && nonNullish(owner) ? { ...acc, [account]: owner } : acc;
+		},
+		{}
+	);
+
 	// What each token account held going in, from the same array the owners and mints come from.
 	// Only the pre-state: what an account holds at a close is walked forward from here, and the
 	// post-state of an account that was closed is nothing at all.
@@ -153,7 +165,7 @@ export const fetchSolTransactionsForSignature = async ({
 		ownedAddresses,
 		userAddress: address,
 		addressToToken,
-		addressToOwner,
+		accountHolders,
 		accountLamports,
 		accountTokenAmounts
 	});

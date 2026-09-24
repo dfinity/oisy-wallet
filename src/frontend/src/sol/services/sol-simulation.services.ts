@@ -101,6 +101,20 @@ const simulate = async ({
 		return acc;
 	}, {});
 
+	// Who held each token account going in. Not the map of owners the run reports, which prefers
+	// the state after the transaction: an address closed and opened again for somebody else within
+	// the one message would read as theirs at a close that happened while it was still the user's.
+	const accountHolders = addresses.reduce<Record<SolAddress, SolAddress>>((acc, account, index) => {
+		const preAccount = preAccounts[index];
+		const holder = nonNullish(preAccount) ? parseTokenAccountState(preAccount)?.owner : undefined;
+
+		if (nonNullish(holder)) {
+			acc[account] = holder;
+		}
+
+		return acc;
+	}, {});
+
 	// What each token account held going in. A wrapped SOL account holding nothing is closed rather
 	// than unwrapped, and the two read differently: there is no SOL to unwrap out of an empty one.
 	const accountTokenAmounts = addresses.reduce<Record<SolAddress, bigint>>(
@@ -130,7 +144,7 @@ const simulate = async ({
 		ownedAddresses: [address, ...ownedAddresses],
 		userAddress: address,
 		addressToToken,
-		addressToOwner,
+		accountHolders,
 		accountLamports,
 		accountTokenAmounts,
 		rentExemptMinimum,
@@ -149,7 +163,7 @@ const simulate = async ({
 			ownedAddresses: [address, ...ownedAddresses],
 			userAddress: address,
 			addressToToken,
-			addressToOwner
+			accountHolders
 		}),
 		userAddress: address
 	});

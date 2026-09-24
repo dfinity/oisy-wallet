@@ -1093,7 +1093,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [mockSolAddress],
 				userAddress: mockSolAddress,
-				addressToOwner: { [theirs]: mockSolAddress2 },
+				accountHolders: { [theirs]: mockSolAddress2 },
 				accountLamports: { [theirs]: 2_039_280n }
 			});
 
@@ -1107,6 +1107,158 @@ describe('sol-instruction-summary.utils', () => {
 					own: true
 				}
 			]);
+		});
+
+		// The holder the run reports for the whole transaction is the one left after it. A message
+		// that closes an account of the user's to a stranger and opens the same address again for
+		// somebody else would have that first close read as the somebody's, and dropped.
+		it('should read the holder at the close, not after the transaction', () => {
+			const x = mockAtaAddress2;
+			const attacker = 'attackerAddress111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: attacker, owner: mockSolAddress }
+								}
+							},
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: x,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: attacker,
+										space: 165
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'initializeAccount3',
+									info: {
+										account: x,
+										mint: 'mint1111111111111111111111111111111111111',
+										owner: attacker
+									}
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close).toBeDefined();
+			expect(close).not.toHaveProperty('ownAccount');
+			expect(close?.counterparty).toBe(attacker);
+		});
+
+		// An address closed and opened again within the one message is two accounts. The second
+		// close hands over what the second account held, not what the first one did.
+		it('should read a reopened account from its reopening, not from before the transaction', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 1_488_440n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const [first, second] = views.filter(({ kind }) => kind === 'unwrap');
+
+			expect(first?.returned).toBe(1_488_440n + 5_000_000_000n);
+			expect(first?.wrapped).toBe(5_000_000_000n);
+			expect(second?.returned).toBe(1_488_440n);
+			expect(second?.wrapped).toBe(ZERO);
+		});
+
+		// Handing an account's ownership over names a new holder from that instruction on.
+		it('should follow a hand-over of the account to its close', () => {
+			const x = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'setAuthority',
+							info: {
+								account: x,
+								authority: mockSolAddress2,
+								authorityType: 'accountOwner',
+								newAuthority: mockSolAddress
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: x, destination: mockSolAddress2, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress2 },
+				accountLamports: { [x]: 2_039_280n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close).toBeDefined();
+			expect(close).not.toHaveProperty('ownAccount');
 		});
 
 		// Absent is not the same as somebody else's: an account no run read says nothing either
@@ -1150,7 +1302,7 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [mockSolAddress],
 				userAddress: mockSolAddress,
-				addressToOwner: { [theirs]: mockSolAddress2 },
+				accountHolders: { [theirs]: mockSolAddress2 },
 				accountLamports: { [theirs]: 2_039_280n }
 			});
 

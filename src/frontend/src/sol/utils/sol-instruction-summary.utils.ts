@@ -351,7 +351,7 @@ const toEffect = ({
 	owned,
 	userAddress,
 	accountMints,
-	addressToOwner,
+	accountHolders,
 	accountLamports,
 	accountTokenAmounts,
 	rentExemptMinimum,
@@ -371,9 +371,9 @@ const toEffect = ({
 	// balance. Separate from the set above, which is every account of theirs the run named.
 	userAddress: OptionSolAddress;
 	accountMints: Record<SolAddress, SplTokenAddress>;
-	// Who holds each token account, as the run read it. Whose an account is, as against who may
-	// act on it: the signer of a close is its authority, which need not be its holder.
-	addressToOwner: Record<SolAddress, SolAddress>;
+	// Who held each token account before the transaction ran. Whose an account is, as against who
+	// may act on it: the signer of a close is its authority, which need not be its holder.
+	accountHolders: Partial<Record<SolAddress, SolAddress>>;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Partial<Record<SolAddress, bigint>>;
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
@@ -476,7 +476,9 @@ const toEffect = ({
 			// Three readings, because absent is not the same as somebody else's: an account no run
 			// read says nothing either way, and calling it not theirs would drop it out of the
 			// refusal. Only an account read and held by somebody else is stated as not the user's.
-			const holder = nonNullish(account) ? addressToOwner[account] : undefined;
+			const holder = nonNullish(account)
+				? holderAt({ account, flattened, accountHolders, until: position })
+				: undefined;
 
 			const ownAccount = nonNullish(holder)
 				? holder === userAddress
@@ -672,25 +674,8 @@ const heldAtInstruction = ({
 	// two cannot be told apart without knowing where the line falls.
 	rentExemptMinimum: bigint | undefined;
 	until: number;
-}): bigint | undefined => {
-	const opened = openedWithRent({ account, flattened, until });
-
-	// An account this message opens starts from whatever its creation funded above the reserve.
-	// Nothing states that split: the creation gives one figure and the close gives the same one
-	// back, so without the reserve the balance is unknown rather than nothing.
-	const openedHolding = nonNullish(opened)
-		? nonNullish(rentExemptMinimum) && opened.space === ATA_SIZE
-			? maxBigInt(opened.lamports - rentExemptMinimum, ZERO)
-			: undefined
-		: undefined;
-
-	const held = accountTokenAmounts[account] ?? openedHolding;
-
-	if (isNullish(held)) {
-		return undefined;
-	}
-
-	return flattened.slice(0, until).reduce<bigint>(
+}): bigint | undefined =>
+	flattened.slice(0, until).reduce<bigint | undefined>(
 		(
 			acc,
 			{
@@ -700,6 +685,44 @@ const heldAtInstruction = ({
 				}
 			}
 		) => {
+			// A close of this account ends it, and an address closed and opened again within the one
+			// message is two accounts. Until something opens it again there is no balance to state.
+			if (
+				nonNullish(program) &&
+				TOKEN_PROGRAMS.includes(program) &&
+				type === 'closeAccount' &&
+				address({ info, key: 'account' }) === account
+			) {
+				return undefined;
+			}
+
+			// Opening it starts it from whatever its creation funded above the reserve - nothing, for
+			// any mint but wrapped SOL. Nothing states that split for wrapped SOL: the creation gives
+			// one figure and the close gives the same one back, so without the reserve the balance is
+			// unknown rather than nothing.
+			if (
+				program === 'system' &&
+				type === 'createAccount' &&
+				address({ info, key: 'newAccount' }) === account
+			) {
+				if (!native) {
+					return ZERO;
+				}
+
+				const lamports = amount({ info, key: 'lamports' });
+
+				return nonNullish(lamports) &&
+					nonNullish(rentExemptMinimum) &&
+					amount({ info, key: 'space' }) === ATA_SIZE
+					? maxBigInt(lamports - rentExemptMinimum, ZERO)
+					: undefined;
+			}
+
+			// An amount nobody knows stays unknown whatever moves after it.
+			if (isNullish(acc)) {
+				return acc;
+			}
+
 			// Wrapping: a System transfer into a wrapped SOL account raises its token balance with
 			// its lamports, because there the two are the same thing.
 			if (native && program === 'system' && type === 'transfer') {
@@ -731,27 +754,30 @@ const heldAtInstruction = ({
 
 			return address({ info, key: 'source' }) === account ? maxBigInt(acc - moved, ZERO) : acc;
 		},
-		held
+		accountTokenAmounts[account]
 	);
-};
 
 /**
- * The rent an account was opened with, when this transaction opened it.
+ * Who holds a token account by the time an instruction reaches it.
  *
- * Read from the System `createAccount` that states it, which is the only instruction that says
- * what an account costs. Absent for an account the message did not open: nothing in it says what
- * some earlier transaction paid.
+ * Walked from the holder before the transaction ran, the same way its balances are: initialising
+ * an account names its holder, handing over its ownership names a new one, and closing it ends
+ * it. Taking the holder the run reported for the whole transaction instead let a message close an
+ * account of the user's, open the same address again for somebody else, and have the first close
+ * read as that somebody's.
  */
-const openedWithRent = ({
+const holderAt = ({
 	account,
 	flattened,
+	accountHolders,
 	until
 }: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
-	until?: number;
-}): { lamports: bigint; space: bigint | undefined } | undefined =>
-	flattened.slice(0, until).reduce<{ lamports: bigint; space: bigint | undefined } | undefined>(
+	accountHolders: Partial<Record<SolAddress, SolAddress>>;
+	until: number;
+}): SolAddress | undefined =>
+	flattened.slice(0, until).reduce<SolAddress | undefined>(
 		(
 			acc,
 			{
@@ -760,17 +786,26 @@ const openedWithRent = ({
 					parsed: { type, info }
 				}
 			}
-		) =>
-			program === 'system' &&
-			type === 'createAccount' &&
-			address({ info, key: 'newAccount' }) === account
-				? (() => {
-						const lamports = amount({ info, key: 'lamports' });
+		) => {
+			if (
+				isNullish(program) ||
+				!TOKEN_PROGRAMS.includes(program) ||
+				address({ info, key: 'account' }) !== account
+			) {
+				return acc;
+			}
 
-						return nonNullish(lamports) ? { lamports, space: amount({ info, key: 'space' }) } : acc;
-					})()
-				: acc,
-		undefined
+			if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
+				return address({ info, key: 'owner' }) ?? acc;
+			}
+
+			if (type === 'setAuthority' && field({ info, key: 'authorityType' }) === 'accountOwner') {
+				return address({ info, key: 'newAuthority' }) ?? acc;
+			}
+
+			return type === 'closeAccount' ? undefined : acc;
+		},
+		accountHolders[account]
 	);
 
 const fundedInTransaction = ({
@@ -805,6 +840,13 @@ const fundedInTransaction = ({
 			},
 			index
 		) => {
+			// A close of this account empties it and ends it. Whatever it held before belongs to an
+			// account that no longer exists, and an address closed and opened again within the one
+			// message is two accounts, the second of which starts from nothing.
+			if (type === 'closeAccount' && address({ info, key: 'account' }) === account) {
+				return ZERO;
+			}
+
 			// A close hands its account's whole balance to the account it names, so a chain of them
 			// carries the first account's lamports through to the last. Counting System funding alone
 			// stops at the first link and reports the tail of a chain as though it began there.
@@ -991,7 +1033,7 @@ export const mapSolInstructionSummaries = ({
 	ownedAddresses,
 	userAddress,
 	addressToToken = {},
-	addressToOwner = {},
+	accountHolders = {},
 	accountLamports = {},
 	accountTokenAmounts = {},
 	rentExemptMinimum,
@@ -1003,9 +1045,10 @@ export const mapSolInstructionSummaries = ({
 	// The wallet itself, which is the only account of the user's a close can pay into as a balance.
 	userAddress: OptionSolAddress;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
-	// Who holds each token account, as the run read it. Absent for an account no run looked at,
-	// which is not the same as one held by somebody else.
-	addressToOwner?: Record<SolAddress, SolAddress>;
+	// Who held each token account before the transaction ran. Absent for an account no run looked
+	// at, which is not the same as one held by somebody else. The holder at any later instruction
+	// is walked from here, never taken from the state after the transaction.
+	accountHolders?: Partial<Record<SolAddress, SolAddress>>;
 	// Lamports per account before the transaction ran, from its balance metadata. A close hands
 	// the destination the whole balance, which no instruction states.
 	accountLamports?: Partial<Record<SolAddress, bigint>>;
@@ -1070,7 +1113,7 @@ export const mapSolInstructionSummaries = ({
 				owned,
 				userAddress,
 				accountMints,
-				addressToOwner,
+				accountHolders,
 				accountLamports,
 				accountTokenAmounts,
 				rentExemptMinimum,
