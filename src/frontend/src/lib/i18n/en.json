@@ -1095,6 +1095,30 @@
 			"burn_review_subtitle": "You burn"
 		}
 	},
+	"cycles_mint": {
+		"text": {
+			"title": "Mint $token",
+			"description": "Minting creates new $destinationToken from $sourceToken at the network's rate, and burns the $sourceToken.",
+			"you_mint_estimate": "You mint (estimate)",
+			"rate": "Rate",
+			"cycles_ledger_fee": "Cycles ledger fee",
+			"minter": "Minted by",
+			"one_way": "Minting cannot be undone: $destinationToken cannot be turned back into $sourceToken.",
+			"sending": "Sending $token to the $minter...",
+			"minting": "Minting $token...",
+			"minted": "Minted $amount $token.",
+			"pending": "Your mint is taking longer than usual. It finishes in the background: follow it under Active transactions."
+		},
+		"error": {
+			"rate_unavailable": "The $token rate could not be loaded. Please try again later.",
+			"amount_too_small": "The amount is too small to mint $token.",
+			"refunded": "The mint was refunded. Your $token came back, minus $refundFee $token. Reason: $reason",
+			"failed": "The mint failed. Reason: $reason",
+			"not_started": "The mint could not be started. Nothing was sent, please try again.",
+			"transfer_failed": "The $token transfer failed. Nothing was sent.",
+			"unconfirmed": "The $token transfer could not be confirmed. If it went through, the mint finishes in the background: follow it under Active transactions."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "Active transactions",

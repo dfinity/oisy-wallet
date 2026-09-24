@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "मिंट करें",
+			"minting": "मिंट हो रहा है...",
+			"mint_review_subtitle": "आप मिंट करते हैं"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token मिंट करें",
+			"description": "मिंट करने से नेटवर्क की दर पर $sourceToken से नए $destinationToken बनते हैं, और $sourceToken बर्न हो जाते हैं।",
+			"you_mint_estimate": "आप मिंट करते हैं (अनुमान)",
+			"rate": "दर",
+			"cycles_ledger_fee": "Cycles Ledger शुल्क",
+			"minter": "मिंट करने वाला",
+			"one_way": "मिंट को वापस नहीं किया जा सकता: $destinationToken को वापस $sourceToken में नहीं बदला जा सकता।",
+			"sending": "$token को $minter पर भेजा जा रहा है...",
+			"minting": "$token मिंट हो रहा है...",
+			"minted": "$amount $token मिंट किए गए।",
+			"pending": "मिंट में सामान्य से अधिक समय लग रहा है। यह बैकग्राउंड में पूरा होगा: इसे सक्रिय लेनदेन में देखें।"
+		},
+		"error": {
+			"rate_unavailable": "$token की दर लोड नहीं हो सकी। कृपया बाद में पुनः प्रयास करें।",
+			"amount_too_small": "$token मिंट करने के लिए राशि बहुत कम है।",
+			"refunded": "मिंट की राशि वापस कर दी गई। आपके $token $refundFee $token घटाकर वापस आ गए। कारण: $reason",
+			"failed": "मिंट विफल रहा। कारण: $reason",
+			"not_started": "मिंट शुरू नहीं हो सका। कुछ भी नहीं भेजा गया, कृपया पुनः प्रयास करें।",
+			"transfer_failed": "$token ट्रांसफ़र विफल रहा। कुछ भी नहीं भेजा गया।",
+			"unconfirmed": "$token ट्रांसफ़र की पुष्टि नहीं हो सकी। अगर यह हो गया है, तो मिंट बैकग्राउंड में पूरा होगा: इसे सक्रिय लेनदेन में देखें।"
 		}
 	},
 	"active_user_transactions": {

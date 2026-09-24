@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Acuñar",
+			"minting": "Acuñando...",
+			"mint_review_subtitle": "Acuñas"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Acuñar $token",
+			"description": "Al acuñar se crean nuevos $destinationToken a partir de $sourceToken al tipo de la red, y los $sourceToken se queman.",
+			"you_mint_estimate": "Acuñas (estimación)",
+			"rate": "Tasa",
+			"cycles_ledger_fee": "Comisión del Cycles Ledger",
+			"minter": "Acuñado por",
+			"one_way": "La acuñación no se puede deshacer: los $destinationToken no se pueden volver a convertir en $sourceToken.",
+			"sending": "Enviando $token al $minter...",
+			"minting": "Acuñando $token...",
+			"minted": "Se acuñaron $amount $token.",
+			"pending": "La acuñación está tardando más de lo habitual. Se completará en segundo plano: puedes seguirla en las transacciones activas."
+		},
+		"error": {
+			"rate_unavailable": "No se pudo cargar la tasa de $token. Inténtalo de nuevo más tarde.",
+			"amount_too_small": "El importe es demasiado pequeño para acuñar $token.",
+			"refunded": "La acuñación fue reembolsada. Tus $token se devolvieron, menos $refundFee $token. Motivo: $reason",
+			"failed": "La acuñación falló. Motivo: $reason",
+			"not_started": "No se pudo iniciar la acuñación. No se envió nada, inténtalo de nuevo.",
+			"transfer_failed": "La transferencia de $token falló. No se envió nada.",
+			"unconfirmed": "No se pudo confirmar la transferencia de $token. Si se realizó, la acuñación se completará en segundo plano: puedes seguirla en las transacciones activas."
 		}
 	},
 	"active_user_transactions": {

@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "铸造",
+			"minting": "正在铸造...",
+			"mint_review_subtitle": "你铸造"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "铸造 $token",
+			"description": "铸造会按网络汇率用 $sourceToken 创建新的 $destinationToken，并销毁这些 $sourceToken。",
+			"you_mint_estimate": "你铸造（预估）",
+			"rate": "汇率",
+			"cycles_ledger_fee": "Cycles Ledger 手续费",
+			"minter": "铸造方",
+			"one_way": "铸造无法撤销：$destinationToken 无法换回 $sourceToken。",
+			"sending": "正在将 $token 发送到 $minter...",
+			"minting": "正在铸造 $token...",
+			"minted": "已铸造 $amount $token。",
+			"pending": "铸造耗时比平常更久。它将在后台完成：可在活跃交易中查看进度。"
+		},
+		"error": {
+			"rate_unavailable": "无法加载 $token 汇率。请稍后再试。",
+			"amount_too_small": "金额太小，无法铸造 $token。",
+			"refunded": "铸造已退款。你的 $token 已退回，扣除了 $refundFee $token。原因：$reason",
+			"failed": "铸造失败。原因：$reason",
+			"not_started": "无法开始铸造。未发送任何内容，请重试。",
+			"transfer_failed": "$token 转账失败。未发送任何内容。",
+			"unconfirmed": "无法确认 $token 转账。如果转账已完成，铸造将在后台完成：可在活跃交易中查看进度。"
 		}
 	},
 	"active_user_transactions": {
