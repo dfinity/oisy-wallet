@@ -89,11 +89,17 @@ export const solClosesPayOthers = ({
  * appears in the same section as the token account's balance going to zero. Stating the whole
  * lamport balance here would count it twice.
  *
- * And only the last hop of a chain. A close hands on everything its account holds by then, so
- * closing one account into another and that one onwards carries the first account's lamports
- * through to the last: adding both counts them once per hop. A close whose destination is closed
- * again later is that intermediate hop, and the close that follows it states the whole of what
- * leaves.
+ * And each account's own lamports once. A close hands on everything its account holds by then,
+ * so closing one account into another carries the first account's lamports into the second's
+ * payout: adding both payouts counts them twice. Each close is counted by what it hands over less
+ * what earlier closes paid into it, which leaves the lamports that were that account's own -
+ * whatever the chain passes through afterwards. Counting only the last hop instead lost the
+ * user's rent whenever that hop was an account of somebody else's, whose close is not theirs to
+ * count.
+ *
+ * One reading this overstates: a chain from one of the user's accounts into another of theirs and
+ * then back to the wallet states the first hop as rent going elsewhere. It does go elsewhere at
+ * that hop, and the request is refused for it.
  */
 export const solRentPaidToOthers = ({
 	instructions,
@@ -125,15 +131,43 @@ export const solRentPaidToOthers = ({
 			return acc;
 		}
 
-		const closedOnward = flattened.some(
-			({ kind: laterKind, account }, laterIndex) =>
-				laterIndex > index &&
-				(laterKind === 'closeTokenAccount' || laterKind === 'unwrap') &&
-				account === counterparty
-		);
+		const own = maxBigInt(returned - paidIn({ closes: flattened, index }), ZERO);
 
-		return closedOnward ? acc : acc + maxBigInt(returned - (wrapped ?? ZERO), ZERO);
+		return acc + maxBigInt(own - (wrapped ?? ZERO), ZERO);
 	}, ZERO);
+};
+
+/**
+ * What earlier closes paid into the account a close is closing, since it last opened.
+ *
+ * One level only: each of those payouts already carries whatever flowed into its own account, so
+ * subtracting them from this one leaves exactly this account's own lamports. A close of the same
+ * account earlier on ended the account it paid into, so what reached it before that is no part of
+ * this one.
+ */
+const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
+	const { account } = closes[index] ?? {};
+
+	if (isNullish(account)) {
+		return ZERO;
+	}
+
+	const isClose = ({ kind }: SolInstructionSummary): boolean =>
+		kind === 'closeTokenAccount' || kind === 'unwrap';
+
+	const reopenedAfter = closes
+		.slice(0, index)
+		.findLastIndex((close) => isClose(close) && close.account === account);
+
+	return closes
+		.slice(reopenedAfter + 1, index)
+		.reduce(
+			(acc, close) =>
+				isClose(close) && close.counterparty === account && nonNullish(close.returned)
+					? acc + close.returned
+					: acc,
+			ZERO
+		);
 };
 
 export const solAtaFee = ({

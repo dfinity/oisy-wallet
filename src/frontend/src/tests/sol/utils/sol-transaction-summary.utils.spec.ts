@@ -441,6 +441,49 @@ describe('sol-transaction-summary.utils', () => {
 		// A wrapped SOL account hands its rent and whatever was wrapped over together, and only the
 		// first is rent. Calling the payout rent where the balance could not be read would state a
 		// figure the message does not carry.
+		// Counting only the last hop lost the user's rent whenever that hop was somebody else's
+		// account, whose close is not theirs to count.
+		it("should count the user's rent that passes through an account of somebody else", () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						counterparty: mockAtaAddress2
+					},
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT * 2n,
+						counterparty: mockSolAddress2,
+						ownAccount: false
+					}
+				])
+			).toBe(RENT);
+		});
+
+		// What somebody else's account paid into one of the user's was never the user's.
+		it("should leave out what a close of somebody else's account paid in", () => {
+			expect(
+				paid([
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						counterparty: mockAtaAddress,
+						ownAccount: false
+					},
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT * 2n,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT);
+		});
+
 		it('should count nothing for an unwrap whose balance could not be read', () => {
 			expect(
 				paid([
