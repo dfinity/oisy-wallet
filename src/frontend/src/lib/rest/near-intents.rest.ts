@@ -54,6 +54,13 @@ const parseUsdMinimum = (message: string): number | undefined => {
 	return !isFinite(parsed) || parsed <= 0 ? undefined : parsed;
 };
 
+/**
+ * Marks an error as 1Click having answered and refused, rather than the request having
+ * failed to complete. The chain-restriction probe reads a refusal as evidence and a
+ * transport failure as no evidence, so it needs to tell the two apart.
+ */
+export const NEAR_INTENTS_QUOTE_ERROR_PREFIX = 'NEAR Intents quote failed:';
+
 // https://docs.near-intents.org/api-reference/oneclick/request-a-swap-quote
 export const fetchNearIntentsQuote = async (
 	request: NearIntentsQuoteRequest
@@ -73,7 +80,7 @@ export const fetchNearIntentsQuote = async (
 			const minAmount = AMOUNT_TOO_LOW_MINIMUM_PATTERN.exec(message)?.[1];
 
 			throw new SwapAmountTooLowError(
-				`NEAR Intents quote failed: ${message}`,
+				`${NEAR_INTENTS_QUOTE_ERROR_PREFIX} ${message}`,
 				nonNullish(minAmount) ? { type: 'token', value: BigInt(minAmount) } : undefined
 			);
 		}
@@ -82,12 +89,12 @@ export const fetchNearIntentsQuote = async (
 			const usdMinimum = parseUsdMinimum(message);
 
 			throw new SwapAmountTooLowError(
-				`NEAR Intents quote failed: ${message}`,
+				`${NEAR_INTENTS_QUOTE_ERROR_PREFIX} ${message}`,
 				nonNullish(usdMinimum) ? { type: 'usd', value: usdMinimum } : undefined
 			);
 		}
 
-		throw new Error(`NEAR Intents quote failed: ${message}`);
+		throw new Error(`${NEAR_INTENTS_QUOTE_ERROR_PREFIX} ${message}`);
 	}
 
 	return response.json();
