@@ -22,6 +22,15 @@ describe('TokenTypeFilterBar', () => {
 		expect(getByText(en.token_tag.category.stablecoin)).toBeInTheDocument();
 		expect(getByText(en.token_tag.category.stock)).toBeInTheDocument();
 		expect(getByText(en.token_tag.category.commodity)).toBeInTheDocument();
+		expect(getByText(en.token_tag.category.compute)).toBeInTheDocument();
+	});
+
+	it('should render Compute as the last pill', () => {
+		const { container } = render(TokenTypeFilterBar);
+
+		const buttons = container.querySelectorAll('button');
+
+		expect(buttons[buttons.length - 1]?.textContent?.trim()).toBe(en.token_tag.category.compute);
 	});
 
 	it('should have "All asset types" selected by default', () => {

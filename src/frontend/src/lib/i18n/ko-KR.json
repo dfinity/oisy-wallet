@@ -1505,7 +1505,11 @@
 			"crypto": "암호화폐",
 			"stablecoin": "스테이블코인",
 			"stock": "주식",
-			"commodity": "원자재"
+			"commodity": "원자재",
+			"compute": "컴퓨팅"
+		},
+		"category_in_sentence": {
+			"compute": "컴퓨팅 토큰"
 		},
 		"risk": {
 			"low": "낮은 위험",

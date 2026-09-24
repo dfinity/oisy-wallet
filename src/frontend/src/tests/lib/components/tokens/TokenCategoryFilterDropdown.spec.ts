@@ -78,6 +78,24 @@ describe('TokenCategoryFilterDropdown', () => {
 			expect(getByText(get(i18n).token_tag.category.stablecoin)).toBeInTheDocument();
 			expect(getByText(get(i18n).token_tag.category.stock)).toBeInTheDocument();
 			expect(getByText(get(i18n).token_tag.category.commodity)).toBeInTheDocument();
+			expect(getByText(get(i18n).token_tag.category.compute)).toBeInTheDocument();
+		});
+	});
+
+	it('should list Compute as the last category option', async () => {
+		const { container } = render(TokenCategoryFilterDropdown);
+
+		const button = container.querySelector('button');
+		assertNonNullish(button);
+
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			const options = container.querySelectorAll('[data-tid="popover-content"] button');
+
+			expect(options[options.length - 1]?.textContent?.trim()).toBe(
+				get(i18n).token_tag.category.compute
+			);
 		});
 	});
 

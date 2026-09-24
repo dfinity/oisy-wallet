@@ -1505,7 +1505,11 @@
 			"crypto": "Criptomoedas",
 			"stablecoin": "Stablecoins",
 			"stock": "Ações",
-			"commodity": "Commodities"
+			"commodity": "Commodities",
+			"compute": "Computação"
+		},
+		"category_in_sentence": {
+			"compute": "tokens de computação"
 		},
 		"risk": {
 			"low": "Risco baixo",
