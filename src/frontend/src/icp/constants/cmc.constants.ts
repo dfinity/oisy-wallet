@@ -52,7 +52,9 @@ export const CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE = 100n;
 // poller's own ticks (see `OISY_TRADE_SWAP_SETTLE_GRACE_OBSERVATIONS` for why not in
 // wall time). It keeps the poller from notifying or looking up while the modal that
 // opened the row is still transferring and notifying. Acting early is harmless for a
-// mint, since a notify is idempotent; the grace only saves duplicate calls.
+// mint, since a notify is idempotent; the grace only saves duplicate calls. A row the CMC
+// keeps pending, or that meets an error, waits it out again before the next attempt, so
+// it is also the interval between retries.
 export const CYCLES_MINT_SETTLE_GRACE_PERIOD_MILLIS = 60_000;
 
 export const CYCLES_MINT_SETTLE_GRACE_OBSERVATIONS = Math.ceil(
