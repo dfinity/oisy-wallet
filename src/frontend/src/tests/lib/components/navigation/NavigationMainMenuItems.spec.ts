@@ -12,6 +12,7 @@ import {
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
+	NAVIGATION_ITEM_TESTING,
 	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_ITEM_TRADE
 } from '$lib/constants/test-ids.constants';
@@ -64,6 +65,35 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
 		// asserted here.
+	});
+
+	// Testing harness - DO NOT MERGE.
+	it('surfaces the harness entry last in More, linking to the Testing page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const testingLink = getByTestId(NAVIGATION_ITEM_TESTING);
+
+		expect(testingLink).toBeInTheDocument();
+		expect(testingLink.getAttribute('href')).toContain(AppPath.Testing);
+
+		// Below Settings: the harness is the last thing in the sidebar.
+		expect(
+			getByTestId(NAVIGATION_ITEM_SETTINGS).compareDocumentPosition(testingLink) &
+				Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+	});
+
+	// Testing harness - DO NOT MERGE.
+	it('surfaces the harness entry in the mobile More sheet', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(queryByTestId(NAVIGATION_ITEM_TESTING)).toBeNull();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_MORE));
+
+		expect(getByTestId(NAVIGATION_ITEM_TESTING)).toBeInTheDocument();
 	});
 
 	it('renders the desktop section headings', () => {

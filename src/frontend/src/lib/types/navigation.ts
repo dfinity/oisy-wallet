@@ -11,7 +11,9 @@ export type NavigationItemId =
 	| 'explore'
 	| 'notes'
 	| 'settings'
-	| 'rewards';
+	| 'rewards'
+	// Testing harness - DO NOT MERGE.
+	| 'testing';
 
 export type NavigationGroupId = 'portfolio' | 'finance' | 'more';
 

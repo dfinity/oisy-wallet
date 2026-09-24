@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SimulatedFailuresRunner from '$icp/components/core/SimulatedFailuresRunner.svelte';
 	import { tokensWithRecoveredIndexCanister } from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 	import { initWalletWorker } from '$icp/utils/wallet.utils';
@@ -19,3 +20,7 @@
 </script>
 
 <WalletWorkers {initWalletWorker} tokens={$enabledIcTokens} />
+
+<!-- Testing harness - DO NOT MERGE. Mounted unconditionally: it only acts on tokens a tester has
+     selected on the Testing page, and does nothing otherwise. -->
+<SimulatedFailuresRunner />
