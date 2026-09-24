@@ -11,7 +11,6 @@ import * as cyclesMintServices from '$icp/services/cycles-mint.services';
 import type { CyclesMintNotifyResult } from '$icp/types/cycles-mint';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import {
 	findCyclesMintDeposit,
@@ -323,31 +322,45 @@ describe('cycles-mint-active-tx.services', () => {
 				expect(lookupSpy).toHaveBeenCalledOnce();
 			});
 
-			it('deletes the row once the transfer can no longer land: nothing moved', async () => {
+			// Nothing moved, but the user started this mint: the row says so rather than
+			// vanishing from Active transactions.
+			it('closes the row as never sent once the transfer can no longer land', async () => {
 				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
 
 				await pollPastGrace([unobserved]);
 
-				expect(deleteSpy).toHaveBeenCalledExactlyOnceWith({
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
-					id: unobserved.id
+					tx: unobserved,
+					update: {
+						status: { Failed: null },
+						externalRefs: toCyclesMintExternalRefs({
+							...displayRefs,
+							[CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME]: 'not_sent'
+						})
+					}
 				});
-				expect(applySpy).not.toHaveBeenCalled();
+				expect(deleteSpy).not.toHaveBeenCalled();
 				expect(notifySpy).not.toHaveBeenCalled();
-				expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
-					step: 'mint',
-					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-					errorCode: 'not_sent'
-				});
+			});
+
+			// The loader reports the row's ending once, as for every other outcome.
+			it('fires no analytics of its own for a row it closes as never sent', async () => {
+				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
+
+				await pollPastGrace([unobserved]);
+
+				expect(trackSpy).not.toHaveBeenCalled();
 			});
 
 			// Every write that learns a deposit also moves the row to `Executing`, so an
 			// `Executing` row without one is malformed, not unsent.
-			it('never deletes an executing row', async () => {
+			it('never closes an executing row', async () => {
 				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
 
 				await pollPastGrace([{ ...unobserved, status: { Executing: null } }]);
 
+				expect(applySpy).not.toHaveBeenCalled();
 				expect(deleteSpy).not.toHaveBeenCalled();
 			});
 		});

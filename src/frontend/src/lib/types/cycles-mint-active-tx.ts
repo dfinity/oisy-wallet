@@ -3,9 +3,9 @@ export const CYCLES_MINT_EXTERNAL_REF_KEYS = {
 	// Written once the transfer returns, or once a later session finds the deposit in
 	// the ICP index after the tab that sent it died.
 	TRANSFER_BLOCK_INDEX: 'cycles_mint_transfer_index',
-	// How the mint ended, written with the terminal status: `minted`, `refunded` or
-	// `failed`. A refund and a final CMC error are both `Failed` rows, and only this
-	// ref tells the two apart.
+	// How the mint ended, written with the terminal status: `minted`, `refunded`, `failed`
+	// or `not_sent`. A refund, a final CMC error and a mint whose ICP never left the wallet
+	// are all `Failed` rows, and only this ref tells them apart.
 	OUTCOME: 'cycles_mint_outcome',
 	// What the cycles ledger credited (the CMC's `minted`, minus the deposit fee), as a
 	// TCYCLES decimal string.
@@ -27,4 +27,4 @@ export const CYCLES_MINT_EXTERNAL_REF_KEYS = {
 export type CyclesMintExternalRefKey =
 	(typeof CYCLES_MINT_EXTERNAL_REF_KEYS)[keyof typeof CYCLES_MINT_EXTERNAL_REF_KEYS];
 
-export type CyclesMintOutcome = 'minted' | 'refunded' | 'failed';
+export type CyclesMintOutcome = 'minted' | 'refunded' | 'failed' | 'not_sent';

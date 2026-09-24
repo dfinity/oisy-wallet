@@ -9,12 +9,7 @@ import {
 } from '$icp/constants/cmc.constants';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
-import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-import {
-	applyActiveUserTransactionPollUpdate,
-	deleteActiveUserTransaction
-} from '$lib/services/active-user-transactions.services';
-import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
+import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
@@ -164,22 +159,33 @@ const resolveDeposit = async ({
 
 	// Only a `Pending` row: every write that learns a deposit also moves the row to
 	// `Executing`, so an `Executing` row without one is malformed rather than unsent, and is
-	// left alone rather than deleted.
+	// left alone rather than closed.
 	if (canStillLand || !('Pending' in tx.status)) {
 		forgetRow(tx.id);
 		return undefined;
 	}
 
-	// Nothing moved, so the row is deleted rather than failed: a failed mint would have
-	// the user look for ICP that never left the wallet.
-	await deleteActiveUserTransaction({ identity, id: tx.id });
+	// Nothing moved, but the user started this mint and may be watching it in Active
+	// transactions: the row closes as failed, never sent, rather than vanishing. The
+	// modal's own dead ends delete their rows instead, having just shown the failure. The
+	// terminal analytics fire from the row, like every other ending's.
+	const status = advanceStatus({ current: tx.status, candidate: { Failed: null } });
+
 	forgetRow(tx.id);
 
-	trackCyclesMint({
-		step: 'mint',
-		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-		errorCode: 'not_sent'
-	});
+	if (nonNullish(status)) {
+		await applyActiveUserTransactionPollUpdate({
+			identity,
+			tx,
+			update: {
+				status,
+				externalRefs: toCyclesMintExternalRefs({
+					...toCyclesMintExternalRefsMap(tx.external_refs),
+					[CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME]: 'not_sent'
+				})
+			}
+		});
+	}
 
 	return undefined;
 };

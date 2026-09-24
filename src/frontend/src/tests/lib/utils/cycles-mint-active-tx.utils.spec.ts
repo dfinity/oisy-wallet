@@ -180,7 +180,7 @@ describe('cycles-mint-active-tx.utils', () => {
 	});
 
 	describe('toCyclesMintOutcome', () => {
-		it.each(['minted', 'refunded', 'failed'])('reads %s', (value) => {
+		it.each(['minted', 'refunded', 'failed', 'not_sent'])('reads %s', (value) => {
 			expect(toCyclesMintOutcome(value)).toBe(value);
 		});
 
@@ -355,6 +355,17 @@ describe('cycles-mint-active-tx.utils', () => {
 					errorCode: 'refunded'
 				})
 			);
+		});
+
+		it('reports a mint that never sent its ICP as its own error code', () => {
+			expect(
+				toCyclesMintTrackingParams({
+					tx: withRefs({
+						tx: { ...mockCyclesMintActiveUserTransaction, status: { Failed: null } },
+						refs: { [CYCLES_MINT_EXTERNAL_REF_KEYS.OUTCOME]: 'not_sent' }
+					})
+				}).errorCode
+			).toBe('not_sent');
 		});
 
 		it('reports any other failure as failed', () => {
