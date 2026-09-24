@@ -242,6 +242,9 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_valid_amount(&d.amount)?;
             require_chain_fusion_pair(d)?;
         }
+        ActiveUserTransactionData::CyclesMint(d) => {
+            require_valid_amount(&d.amount)?;
+        }
         ActiveUserTransactionData::OisyTrade(d) => {
             require_valid_amount(&d.amount)?;
             require_oisy_trade_pair(d)?;
