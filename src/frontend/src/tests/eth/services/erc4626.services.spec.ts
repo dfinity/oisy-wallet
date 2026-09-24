@@ -17,6 +17,7 @@ import {
 	toggleErc4626Token,
 	withdrawErc4626
 } from '$eth/services/erc4626.services';
+import * as nativeBalanceServicesModule from '$eth/services/native-balance.services';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import type { EthAddress } from '$eth/types/address';
@@ -53,9 +54,13 @@ vi.mock('$eth/services/erc20.services', () => ({
 	safeLoadMetadata: vi.fn()
 }));
 
+// `JsonRpcProvider` and `Network` are needed even though this suite only exercises Infura
+// chains: the registry is built eagerly over every supported network, and the ones Infura does
+// not host take the fallback transport. Both share one implementation, as the shared setup mock
+// does — nothing here tells the two apart.
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
-	return { InfuraProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, Network: vi.fn() };
 });
 
 vi.mock('ethers/contract', () => {
@@ -486,6 +491,9 @@ describe('erc4626.services', () => {
 
 			vi.spyOn(infuraProvidersModule, 'infuraProviders').mockReturnValue(mockProvider);
 			vi.spyOn(signerApiModule, 'signTransaction');
+			vi.spyOn(nativeBalanceServicesModule, 'reloadNativeBalanceOnMined').mockResolvedValue(
+				undefined
+			);
 
 			getTransactionCountSpy.mockResolvedValue(mockNonce);
 			sendTransactionSpy.mockResolvedValue({ hash: '0xmockhash' });
@@ -518,6 +526,24 @@ describe('erc4626.services', () => {
 				expect(approveSpy).toHaveBeenCalledOnce();
 				expect(signTransaction).toHaveBeenCalledOnce();
 				expect(sendTransactionSpy).toHaveBeenCalledOnce();
+			});
+
+			it('reloads the native balance the gas was paid from once the deposit is mined', async () => {
+				await depositErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					assetToken: mockAssetToken,
+					amount: mockAmount,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(
+					nativeBalanceServicesModule.reloadNativeBalanceOnMined
+				).toHaveBeenCalledExactlyOnceWith({
+					transaction: { hash: '0xmockhash' },
+					networkId: ETHEREUM_NETWORK.id
+				});
 			});
 
 			it('should call progress callbacks in order', async () => {
@@ -656,6 +682,23 @@ describe('erc4626.services', () => {
 
 		describe('withdrawErc4626', () => {
 			const mockAssets = 500_000n;
+
+			it('reloads the native balance the gas was paid from once the withdrawal is mined', async () => {
+				await withdrawErc4626({
+					identity: mockIdentity,
+					vault: mockVault,
+					assets: mockAssets,
+					from: mockFrom,
+					...mockFeeData
+				});
+
+				expect(
+					nativeBalanceServicesModule.reloadNativeBalanceOnMined
+				).toHaveBeenCalledExactlyOnceWith({
+					transaction: { hash: '0xmockhash' },
+					networkId: ETHEREUM_NETWORK.id
+				});
+			});
 
 			it('should get nonce, sign and send transaction', async () => {
 				await withdrawErc4626({

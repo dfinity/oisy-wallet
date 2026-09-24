@@ -1,3 +1,4 @@
+import { ARBITRUM_SEPOLIA_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
@@ -6,8 +7,10 @@ import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as infuraMod from '$eth/providers/infura.providers';
+import type * as InfuraRestModule from '$eth/rest/infura.rest';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { getEthFeeDataWithProvider } from '$eth/services/fee.services';
 import type { EthFeePerGas, EthFeePriorities } from '$eth/types/fee';
@@ -278,6 +281,80 @@ describe('eth-fee-data.services', () => {
 			expect(result.provider).toHaveProperty('estimateGas');
 		});
 
+		describe('when the Gas API answers with a non-OK response', () => {
+			// The MetaMask Gas API does not cover every chain we support: Arbitrum Sepolia
+			// (chain id 421614) answers 400 "'421614' is not a supported chain id.".
+			// Everything it adds sits on top of the provider's own quote, so losing it has to
+			// degrade the estimate rather than block the send.
+			const { chainId } = ARBITRUM_SEPOLIA_NETWORK;
+
+			beforeEach(async () => {
+				vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 400 })));
+
+				const { InfuraGasRest: ActualInfuraGasRest } =
+					await vi.importActual<typeof InfuraRestModule>('$eth/rest/infura.rest');
+
+				InfuraGasRest.prototype.getSuggestedFeeData = new ActualInfuraGasRest(
+					chainId
+				).getSuggestedFeeData;
+			});
+
+			afterEach(() => {
+				vi.unstubAllGlobals();
+			});
+
+			it('should fall back to the provider fee data instead of throwing', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: ARBITRUM_SEPOLIA_NETWORK.id,
+					chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				// No base fee either, so `estimatedGasFee` falls back to the max fee.
+				expect(result.feeData).toEqual({
+					gasPrice: null,
+					maxFeePerGas: 10n,
+					maxPriorityFeePerGas: 5n,
+					baseFeePerGas: null
+				});
+			});
+
+			it('should offer no priorities to choose between', async () => {
+				const { priorities } = await getEthFeeDataWithProvider({
+					networkId: ARBITRUM_SEPOLIA_NETWORK.id,
+					chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(priorities).toBeUndefined();
+			});
+
+			it('should still apply the BSC fee floor', async () => {
+				vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+					getFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({
+								gasPrice: null,
+								maxFeePerGas: 500_000_000n,
+								maxPriorityFeePerGas: 100_000_000n
+							})
+						)
+				} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+				const result = await getEthFeeDataWithProvider({
+					networkId: BSC_MAINNET_NETWORK.id,
+					chainId: BSC_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxFeePerGas).toBe(BSC_MIN_MAX_FEE_PER_GAS);
+				expect(result.feeData.maxPriorityFeePerGas).toBe(BSC_MIN_MAX_PRIORITY_FEE_PER_GAS);
+			});
+		});
+
 		describe('priority selection', () => {
 			const perPriority = {
 				[EthFeePriority.SLOW]: { maxFeePerGas: 100n, maxPriorityFeePerGas: 1n },
@@ -432,6 +509,21 @@ describe('eth-fee-data.services', () => {
 				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
 				expect(result.feeData.maxFeePerGas).toBe(lowMax);
 			});
+
+			// Robinhood Chain reports a near-zero priority fee, which looks exactly like the BSC case
+			// the floor exists for. It is a Nitro chain with no such minimum, so adding 4663 to
+			// `BSC_CHAIN_IDS` would quote a fee well above what the chain charges.
+			it('should NOT apply the BSC floor on Robinhood Chain', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: ROBINHOOD_MAINNET_NETWORK.id,
+					chainId: ROBINHOOD_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
+				expect(result.feeData.maxFeePerGas).toBe(lowMax);
+			});
 		});
 
 		describe('OP-stack L1 data fee', () => {
@@ -466,7 +558,10 @@ describe('eth-fee-data.services', () => {
 				}
 			);
 
-			it.each([ETHEREUM_NETWORK, BSC_MAINNET_NETWORK])(
+			// Robinhood Chain is in this list, not the one above: Nitro folds the L1 data cost into
+			// the gas units `eth_estimateGas` reports, so quoting it separately would double-count
+			// it. Copying the Base env file when adding the chain is the way that goes wrong.
+			it.each([ETHEREUM_NETWORK, BSC_MAINNET_NETWORK, ROBINHOOD_MAINNET_NETWORK])(
 				'leaves it unquoted on $name, which has no such fee',
 				async ({ id, chainId }) => {
 					const result = await getEthFeeDataWithProvider({

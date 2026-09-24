@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -31,12 +32,19 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
+import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
 import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { assertNever, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+
+// This store is a derived: it recomputes on every `userProfileStore` write (uncertified, then
+// certified, then each settings change). Reporting an unmapped key is a one-off signal, not a
+// per-recompute one, so each distinct key is reported once per session.
+const reportedUnmappedKeys = new Set<string>();
 
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
@@ -60,7 +68,17 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
-		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
+		// Returns `undefined` for a key present in the generated bindings but not mapped here.
+		// That gap is real: `binding-checks` regenerates the declarations in the same PR that
+		// adds a backend variant, so the wire type learns it one release before the network id
+		// it maps to exists. An unmapped key must then degrade to "ignore that setting" rather
+		// than throw, which would take down the whole mapping and with it the user's settings.
+		//
+		// It is NOT wire-level forward compatibility: if a nested variant is missing from
+		// `backend.factory.did.js`, Candid degrades the enclosing optional `UserProfile.settings`
+		// to null, so this function never sees the key and all settings revert to defaults.
+		// This still makes adding a variant a breaking Candid interface change.
+		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId | undefined => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
 			}
@@ -112,14 +130,33 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			if ('ArbitrumSepolia' in key) {
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
+			if ('XrpMainnet' in key) {
+				return XRP_MAINNET_NETWORK_ID;
+			}
+			if ('RobinhoodMainnet' in key) {
+				return ROBINHOOD_MAINNET_NETWORK_ID;
+			}
 
-			assertNever(key, `Unknown network key: ${key}`);
+			const unmappedKey = Object.keys(key).join(', ');
+
+			if (!reportedUnmappedKeys.has(unmappedKey)) {
+				reportedUnmappedKeys.add(unmappedKey);
+
+				trackUnmappedNetworkSettingsKey({ key: unmappedKey });
+			}
+
+			return undefined;
 		};
 
 		return {
 			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-				const networkId: NetworkId = keyToNetworkId(key);
+				const networkId = keyToNetworkId(key);
+
+				if (isNullish(networkId)) {
+					return acc;
+				}
+
 				return { ...acc, [networkId]: { enabled, isTestnet } };
 			}, {}),
 			// We always enable ICP network.

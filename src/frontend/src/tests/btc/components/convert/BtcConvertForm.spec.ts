@@ -8,11 +8,15 @@ import {
 	initUtxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
+import { calculateFeeSatoshis } from '$btc/utils/btc-utxos.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
+import { formatToken } from '$lib/utils/format.utils';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -170,6 +174,44 @@ describe('BtcConvertForm', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
+		});
+	});
+
+	// Regression: the balance counts incoming UTXOs at one confirmation, a send selects at six.
+	// Offering the balance as "Max" quoted an amount the selection then rejected for want of funds.
+	it('should offer a Max the send can honour, not the whole balance', async () => {
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
+		mockBtcPendingSendTransactionsStatusStore();
+		ckBtcMinterInfoStore.set({
+			id: ICP_TOKEN.id,
+			data: { data: mockCkBtcMinterInfo, certified: true }
+		});
+
+		allUtxosStore.setAllUtxos({
+			allUtxos: [
+				{ value: 1_000n, height: 10, outpoint: { txid: new Uint8Array([1]), vout: 0 } },
+				{ value: 40_000n, height: 3, outpoint: { txid: new Uint8Array([2]), vout: 0 } }
+			]
+		});
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: mockBtcAddress,
+			pendingTransactions: []
+		});
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1_000n });
+
+		const expectedMax = formatToken({
+			value: 1_000n - calculateFeeSatoshis({ numInputs: 1, feeRateMiliSatoshisPerVByte: 1_000n }),
+			unitName: BTC_MAINNET_TOKEN.decimals,
+			displayDecimals: BTC_MAINNET_TOKEN.decimals
+		});
+
+		const { getByTestId } = render(BtcConvertForm, {
+			props,
+			context: mockContext({ utxosFeeStore: store, sourceTokenBalance: 41_000n })
+		});
+
+		await waitFor(() => {
+			expect(getByTestId('convert-amount-source-balance')).toHaveTextContent(expectedMax);
 		});
 	});
 });

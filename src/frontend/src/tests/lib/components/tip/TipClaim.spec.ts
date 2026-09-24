@@ -1,0 +1,312 @@
+import TipClaim from '$lib/components/tip/TipClaim.svelte';
+import { ZERO } from '$lib/constants/app.constants';
+import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
+import * as tipServices from '$lib/services/tip.services';
+import { i18n } from '$lib/stores/i18n.store';
+import { modalStore } from '$lib/stores/modal.store';
+import type { PendingTipClaim } from '$lib/types/tip';
+import * as consoleUtils from '$lib/utils/console.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { Principal } from '@icp-sdk/core/principal';
+import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
+
+// Handing the tip to the wallet is now what this page does last, so the
+// navigation is part of its behaviour and has to be observable.
+const goto = vi.fn();
+vi.mock('$app/navigation', () => ({
+	goto: (path: string) => goto(path),
+	// The page warms the wallet route on mount; the test only needs it to exist.
+	preloadData: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
+
+describe('TipClaim', () => {
+	const tipId = 'the-tip-id';
+	const claimCode = 'the-claim-code';
+	const ledgerCanisterId = Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai');
+
+	const setFragment = (hash: string) => {
+		window.location.hash = hash;
+	};
+
+	const pendingClaim = (): PendingTipClaim | undefined => {
+		const modal = get(modalStore);
+		return modal?.type === 'tip-claim' ? (modal.data as PendingTipClaim) : undefined;
+	};
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		goto.mockReset();
+		modalStore.close();
+		setFragment('');
+	});
+
+	describe('a link that cannot be claimed', () => {
+		it('shows the unavailable state without asking the backend anything', async () => {
+			// A fragment-less link is unclaimable by anyone, so there is nothing to
+			// look up — and looking it up anyway would turn a truncated link into a
+			// probe that confirms the tip exists.
+			const previewSpy = vi.spyOn(tipServices, 'loadTipPreview');
+			mockAuthStore(null);
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+			);
+
+			expect(previewSpy).not.toHaveBeenCalled();
+		});
+
+		it('says it is working while the wallet route loads', async () => {
+			// Leaving for the wallet is a cold route fetch, measured at about four
+			// seconds. Without this the button takes the click and sits there, which
+			// is indistinguishable from a broken one.
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue({ NotFound: null });
+			mockAuthStore(null);
+			goto.mockReturnValue(new Promise(() => {}));
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { container, getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+			);
+
+			const button = container.querySelector<HTMLButtonElement>('button');
+			button?.click();
+
+			await waitFor(() => expect(button).toBeDisabled());
+		});
+
+		it('collapses a rejected lookup into the same unavailable state', async () => {
+			// Unknown, expired, cancelled and already-claimed all arrive here as one
+			// error, and all must look identical to whoever opened the link.
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue({ NotFound: null });
+			mockAuthStore(null);
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+			);
+		});
+	});
+
+	// Only the canister saying a link is dead may be reported as dead. Anything
+	// else is this end failing, and "this tip is no longer available" is then a
+	// false statement about someone's money — one they cannot act on, because the
+	// unavailable screen offers no retry.
+	describe('when this end is what failed', () => {
+		it('offers a retry instead of calling a live tip unavailable', async () => {
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue(new Error('boundary node'));
+			mockAuthStore(null);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText, queryByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			expect(queryByText(get(i18n).tip.text.unavailable_title)).not.toBeInTheDocument();
+			expect(getByText(get(i18n).core.text.retry)).toBeInTheDocument();
+		});
+
+		it('reads the preview again when the retry is taken', async () => {
+			setFragment(`#c=${claimCode}`);
+			const previewSpy = vi
+				.spyOn(tipServices, 'loadTipPreview')
+				.mockRejectedValueOnce(new Error('boundary node'))
+				.mockResolvedValueOnce({
+					amount: 1n,
+					ledger_canister_id: ledgerCanisterId,
+					expires_at_ns: ZERO
+				} as Awaited<ReturnType<typeof tipServices.loadTipPreview>>);
+			mockAuthStore(null);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			getByText(get(i18n).core.text.retry).click();
+
+			// A transient failure should cost one tap, not the tip.
+			await waitFor(() => expect(previewSpy).toHaveBeenCalledTimes(2));
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.claim_ready_title_plain)).toBeInTheDocument()
+			);
+		});
+
+		it('does not leave the recipient on a spinner when the wallet will not open', async () => {
+			// `handing-off` renders a bare spinner with no way out, so a rejected
+			// navigation used to strand the recipient until they reloaded the page.
+			setFragment(`#c=${claimCode}`);
+			mockAuthStore();
+			goto.mockRejectedValue(new Error('navigation blew up'));
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unreachable_title)).toBeInTheDocument()
+			);
+
+			expect(getByText(get(i18n).core.text.retry)).toBeInTheDocument();
+		});
+	});
+
+	describe('signed out', () => {
+		const renderPreview = () => {
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockResolvedValue({
+				amount: 500_000n,
+				ledger_canister_id: ledgerCanisterId,
+				expires_at_ns: 1_800_000_000_000_000_000n
+			});
+			mockAuthStore(null);
+
+			return render(TipClaim, { props: { tipId } });
+		};
+
+		it('leads with what there is to claim, not with a sign-in prompt', async () => {
+			// The whole point of the landing page: someone who has never heard of
+			// OISY has to learn what they have been given before being asked to
+			// create anything.
+			const { getByText } = renderPreview();
+
+			await waitFor(() => expect(getByText(/Tip is Ready/)).toBeInTheDocument());
+
+			expect(getByText(get(i18n).tip.text.claim_ready_description)).toBeInTheDocument();
+		});
+
+		it('gives the deadline to the minute, in the app language', async () => {
+			// It was a bare `toLocaleString()`: no locale, so it followed the browser
+			// rather than the language the rest of the page is in, and it printed the
+			// seconds of a deadline weeks away. "21/09/2026, 13:25:35" on the one
+			// screen a stranger reads to decide whether to bother claiming.
+			//
+			// Matched on shape rather than on an exact string: the hour depends on
+			// where this runs, and the shape is what broke.
+			const { getByText } = renderPreview();
+
+			const line = await waitFor(() => getByText(/Claim by/));
+
+			// No numeric date, no seconds.
+			expect(line.textContent).not.toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
+			expect(line.textContent).not.toMatch(/\d\d:\d\d:\d\d/);
+
+			expect(line.textContent).toMatch(/^Claim by \w+ \d{1,2}, \d{4} at \d\d:\d\d$/);
+		});
+
+		it('never prints raw base units when the ledger will not say how to format them', async () => {
+			// 1 ICP is 100_000_000 base units. Printing the integer because the
+			// metadata lookup came back empty is not a degraded label, it is a wrong
+			// number eight orders of magnitude out — on the one line the whole page
+			// exists to deliver.
+			const { getByText, queryByText } = renderPreview();
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.claim_ready_title_plain)).toBeInTheDocument()
+			);
+
+			expect(queryByText(/500000/)).not.toBeInTheDocument();
+		});
+
+		it('discloses that the sender learns who claimed before asking anyone to sign in', async () => {
+			// The claim now follows straight from sign-in, so this line is the last
+			// point at which the recipient can still walk away — and it has to be
+			// readable by someone who has not identified themselves to anyone yet.
+			const { container, getByText } = renderPreview();
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.claimer_disclosure)).toBeInTheDocument()
+			);
+
+			expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).toBeInTheDocument();
+		});
+
+		it('offers sign-in but never the message', async () => {
+			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
+
+			const { container } = renderPreview();
+
+			await waitFor(() =>
+				expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).toBeInTheDocument()
+			);
+
+			// The message belongs to whoever claims: the anonymous preview must not
+			// fetch it, let alone show it.
+			expect(detailsSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('signed in', () => {
+		beforeEach(() => {
+			setFragment(`#c=${claimCode}`);
+			mockAuthStore();
+		});
+
+		it('hands the tip to the wallet instead of claiming here', async () => {
+			// A claim is something that happens to your wallet, so it is watched from
+			// your wallet. This page's last act is to pass the tip over.
+			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
+			const claimSpy = vi.spyOn(tipServices, 'claimTip');
+
+			render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
+			await waitFor(() => expect(goto).toHaveBeenCalledWith('/'));
+
+			expect(detailsSpy).not.toHaveBeenCalled();
+			expect(claimSpy).not.toHaveBeenCalled();
+		});
+
+		it('opens the claim only once the navigation is done', async () => {
+			// The bug this closes: `ModalExitHandler` sits in the root layout and
+			// closes whatever modal is open on *every* navigation, this one included.
+			// A modal opened before `goto` was wiped on the way out, so the wallet
+			// arrived with nothing to show and no claim to make — which is exactly
+			// what "nothing happened" looked like.
+			goto.mockImplementation(() => {
+				modalStore.close();
+			});
+
+			render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
+		});
+
+		it('keeps the claim code out of the URL the wallet lands on', async () => {
+			// The code travels in memory as the modal's data. Putting it in the URL
+			// would leave the whole authorisation in the wallet's history.
+			render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(goto).toHaveBeenCalled());
+
+			expect(goto.mock.calls.flat().join(' ')).not.toContain(claimCode);
+		});
+
+		it('hands nothing over when the link lost its fragment', async () => {
+			setFragment('');
+
+			const { getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+			);
+
+			expect(pendingClaim()).toBeUndefined();
+			expect(goto).not.toHaveBeenCalled();
+		});
+	});
+});

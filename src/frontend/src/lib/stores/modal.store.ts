@@ -12,9 +12,11 @@ import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
+import type { PendingTipClaim } from '$lib/types/tip';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import type { Nullish } from '@dfinity/zod-schemas';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { NavigationTarget } from '@sveltejs/kit';
@@ -29,6 +31,7 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'btc-receive'
 		| 'sol-receive'
+		| 'xrp-receive'
 		| 'receive'
 		| 'send'
 		| 'swap'
@@ -45,6 +48,7 @@ export interface Modal<T> {
 		| 'ic-transaction'
 		| 'btc-transaction'
 		| 'sol-transaction'
+		| 'xrp-transaction'
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
@@ -57,6 +61,9 @@ export interface Modal<T> {
 		| 'about-why-oisy'
 		| 'vip-qr-code'
 		| 'referral-code'
+		| 'tip'
+		| 'tip-welcome'
+		| 'tip-claim'
 		| 'referral-state'
 		| 'address-book'
 		| 'notes'
@@ -111,6 +118,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: (id: symbol) => void;
 	openBtcReceive: (id: symbol) => void;
 	openSolReceive: (id: symbol) => void;
+	openXrpReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
 	openSend: (params: SetWithOptionalDataParams<SendModalData>) => void;
 	openBuy: (id: symbol) => void;
@@ -127,6 +135,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcTransaction: (params: SetWithDataParams<OpenTransactionParams<IcTransactionUi>>) => void;
 	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
 	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
+	openXrpTransaction: (params: SetWithDataParams<OpenTransactionParams<XrpTransactionUi>>) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
@@ -139,6 +148,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
+	openTip: (id: symbol) => void;
+	openTipClaim: (params: SetWithDataParams<PendingTipClaim>) => void;
+	openTipWelcome: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openNotes: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
@@ -185,6 +197,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: setType('cketh-receive'),
 		openBtcReceive: setType('btc-receive'),
 		openSolReceive: setType('sol-receive'),
+		openXrpReceive: setType('xrp-receive'),
 		openReceive: setType('receive'),
 		openSend: <(params: SetWithOptionalDataParams<SendModalData>) => void>setTypeWithData('send'),
 		openBuy: setType('buy'),
@@ -213,6 +226,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolTransaction: <
 			(params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void
 		>setTypeWithData('sol-transaction'),
+		openXrpTransaction: <
+			(params: SetWithDataParams<OpenTransactionParams<XrpTransactionUi>>) => void
+		>setTypeWithData('xrp-transaction'),
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
@@ -241,6 +257,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
+		openTip: setType('tip'),
+		openTipWelcome: setType('tip-welcome'),
+		openTipClaim: <(params: SetWithDataParams<PendingTipClaim>) => void>(
+			setTypeWithData('tip-claim')
+		),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),

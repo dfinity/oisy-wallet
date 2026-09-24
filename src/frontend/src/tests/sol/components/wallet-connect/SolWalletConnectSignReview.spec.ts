@@ -37,6 +37,120 @@ describe('SolWalletConnectSignReview', () => {
 		exchangeStore.reset();
 	});
 
+	describe('balance changes', () => {
+		it('should state that it could not determine them when there is no simulation', () => {
+			// An absent section is indistinguishable from a transaction that moves nothing.
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.balance_changes)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.balance_changes_unknown)).toBeInTheDocument();
+		});
+
+		it('should say nothing at all until the decode settles', () => {
+			// Undefined here means not asked yet, not unanswerable, and the section claiming the
+			// latter would put a red error on every request for as long as the decode takes.
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+		});
+
+		it('should state that nothing changed when a run reported none', () => {
+			// A run that found nothing of the user's is an answer, and a different one from having
+			// no answer at all.
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: false }
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.balance_changes_none)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+
+			// It is a simulated result like any other, so it is headed as one and carries the caveat
+			// every other simulated result carries - "changes nothing" otherwise reads as a fact
+			// about the transaction rather than a prediction about it.
+			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_review)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.balance_changes)).not.toBeInTheDocument();
+		});
+
+		it('should announce an undeterminable balance to a screen reader', () => {
+			// Inserted once the decode settles, like the refusal above it.
+			const { getByRole } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					decoded: true,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.balance_changes_unknown);
+		});
+
+		it('should not say so once a simulation answered', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.balance_changes_unknown)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+		});
+	});
+
+	it('should say a message it will not sign cannot be shown', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+	});
+
+	it('should announce the refusal to a screen reader', () => {
+		// It appears only once the decode settles and is the reason Approve never becomes usable,
+		// so it has to reach a reader that is already past it.
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
+	});
+
+	it('should say nothing else about a message it will not sign', () => {
+		// Every caveat qualifies a review nobody is going to act on, including the ones that sit
+		// outside the notice chain: the partial-parties line would tell the user which lists to read
+		// on a request that is refused.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				ambiguous: true,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
+	});
+
 	it('should render the unreviewed instructions warning', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {

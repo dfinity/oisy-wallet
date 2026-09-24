@@ -15,6 +15,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		ckErc20HelperContractAddress,
@@ -165,10 +166,7 @@
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+			toastEthereumTransactionError({ err, fallbackMsg: $i18n.send.error.unexpected });
 
 			back();
 		}

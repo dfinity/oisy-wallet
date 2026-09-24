@@ -94,6 +94,14 @@ export enum WizardStepsTradingWithdraw {
 	TOKENS_LIST = 'Tokens List'
 }
 
+export enum WizardStepsTip {
+	INTRO = 'Intro',
+	TOKENS_LIST = 'Tokens List',
+	CREATE = 'Create',
+	SHARE = 'Share',
+	HISTORY = 'History'
+}
+
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',

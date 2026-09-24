@@ -1,5 +1,6 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import {
@@ -21,7 +22,7 @@ import {
 	getSetComputeUnitLimitInstruction,
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
-import { getTransferSolInstruction } from '@solana-program/system';
+import { getCreateAccountInstruction, getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
 	getBurnInstruction,
@@ -361,6 +362,65 @@ describe('sol-transactions.utils', () => {
 				prioritizationFee: 1_000_000_001n,
 				computeUnitLimit: 1_400_000n
 			});
+		});
+
+		it('should refuse a System-owned account creation bundled behind a dust transfer', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			// The shape reported as a way to take SOL: the creation funds a key the dApp holds, the
+			// transfer is worth a single lamport and exists to give the summary a destination to show.
+			// Summed, the two read as one 1.000000001 SOL send to the transfer's destination.
+			const instructions = [
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(mockSolAddress)),
+					newAccount: createNoopSigner(address(mockSolAddress3)),
+					lamports: 1_000_000_000n,
+					space: ZERO,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+				}),
+				getTransferSolInstruction({
+					source: createNoopSigner(address(mockSolAddress)),
+					destination: address(mockSolAddress2),
+					amount: 1n
+				})
+			];
+
+			const mapped = mapSolTransactionMessage({
+				...mockSolParsedTransactionMessage,
+				instructions
+			});
+
+			expect(mapped).toStrictEqual({
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				ambiguous: true
+			});
+
+			// The lamports of the creation are not folded into the transfer the review shows.
+			expect(mapped.amount).not.toBe(1_000_000_001n);
+		});
+
+		it('should refuse a System-owned account creation that states nothing else', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			// Without a transfer beside it there is no conflict to notice, so the refusal has to come
+			// from the instruction itself.
+			const instructions = [
+				getCreateAccountInstruction({
+					payer: createNoopSigner(address(mockSolAddress)),
+					newAccount: createNoopSigner(address(mockSolAddress3)),
+					lamports: 1_000_000_000n,
+					space: ZERO,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS)
+				})
+			];
+
+			expect(
+				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions })
+			).toStrictEqual({ amount: undefined, ambiguous: true });
 		});
 
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
