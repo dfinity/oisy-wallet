@@ -170,3 +170,9 @@ export enum WizardStepsLimitOrder {
 	REVIEW = 'Review',
 	PLACING = 'Placing'
 }
+
+export enum WizardStepsCyclesMint {
+	MINT = 'Mint',
+	REVIEW = 'Review',
+	MINTING = 'Minting'
+}

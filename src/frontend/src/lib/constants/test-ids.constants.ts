@@ -263,6 +263,13 @@ export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 
+export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
+export const CYCLES_MINT_FORM = 'cycles-mint-form';
+export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
+export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
+export const CYCLES_MINT_RATE = 'cycles-mint-rate';
+
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
 export const HELP_AUTH_USE_IDENTITY_NUMBER_BUTTON = 'help-auth-user-identity-number-button';

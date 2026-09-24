@@ -1095,6 +1095,30 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"cycles_mint": {
+		"text": {
+			"title": "",
+			"description": "",
+			"you_mint_estimate": "",
+			"rate": "",
+			"cycles_ledger_fee": "",
+			"minter": "",
+			"one_way": "",
+			"sending": "",
+			"minting": "",
+			"minted": "",
+			"pending": ""
+		},
+		"error": {
+			"rate_unavailable": "",
+			"amount_too_small": "",
+			"refunded": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",

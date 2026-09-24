@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Wybij",
+			"minting": "Wybijanie...",
+			"mint_review_subtitle": "Wybijasz"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Wybij $token",
+			"description": "Wybijanie tworzy nowe $destinationToken z $sourceToken po kursie sieci i spala $sourceToken.",
+			"you_mint_estimate": "Wybijasz (szacunkowo)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Opłata Cycles Ledger",
+			"minter": "Wybija",
+			"one_way": "Wybijania nie można cofnąć: $destinationToken nie da się zamienić z powrotem na $sourceToken.",
+			"sending": "Wysyłanie $token do $minter...",
+			"minting": "Wybijanie $token...",
+			"minted": "Wybito $amount $token.",
+			"pending": "Wybijanie trwa dłużej niż zwykle. Zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
+		},
+		"error": {
+			"rate_unavailable": "Nie udało się załadować kursu $token. Spróbuj ponownie później.",
+			"amount_too_small": "Kwota jest za mała, aby wybić $token.",
+			"refunded": "Wybijanie zostało zwrócone. Twoje $token wróciły, pomniejszone o $refundFee $token. Powód: $reason",
+			"failed": "Wybijanie nie powiodło się. Powód: $reason",
+			"not_started": "Nie udało się rozpocząć wybijania. Nic nie zostało wysłane, spróbuj ponownie.",
+			"transfer_failed": "Przelew $token nie powiódł się. Nic nie zostało wysłane.",
+			"unconfirmed": "Nie udało się potwierdzić przelewu $token. Jeśli doszedł do skutku, wybijanie zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
 		}
 	},
 	"active_user_transactions": {

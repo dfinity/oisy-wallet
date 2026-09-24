@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Đúc",
+			"minting": "Đang đúc...",
+			"mint_review_subtitle": "Bạn đúc"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Đúc $token",
+			"description": "Việc đúc tạo ra $destinationToken mới từ $sourceToken theo tỷ giá của mạng và đốt số $sourceToken đó.",
+			"you_mint_estimate": "Bạn đúc (ước tính)",
+			"rate": "Tỷ giá",
+			"cycles_ledger_fee": "Phí Cycles Ledger",
+			"minter": "Đúc bởi",
+			"one_way": "Không thể hoàn tác việc đúc: không thể đổi $destinationToken ngược lại thành $sourceToken.",
+			"sending": "Đang gửi $token đến $minter...",
+			"minting": "Đang đúc $token...",
+			"minted": "Đã đúc $amount $token.",
+			"pending": "Việc đúc đang mất nhiều thời gian hơn bình thường. Nó sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
+		},
+		"error": {
+			"rate_unavailable": "Không thể tải tỷ giá $token. Vui lòng thử lại sau.",
+			"amount_too_small": "Số tiền quá nhỏ để đúc $token.",
+			"refunded": "Việc đúc đã được hoàn tiền. $token của bạn đã được trả lại, trừ $refundFee $token. Lý do: $reason",
+			"failed": "Việc đúc thất bại. Lý do: $reason",
+			"not_started": "Không thể bắt đầu việc đúc. Không có gì được gửi, vui lòng thử lại.",
+			"transfer_failed": "Chuyển $token thất bại. Không có gì được gửi.",
+			"unconfirmed": "Không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc đúc sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
 		}
 	},
 	"active_user_transactions": {

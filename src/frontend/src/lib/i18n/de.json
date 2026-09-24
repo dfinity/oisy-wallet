@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Minten",
+			"minting": "Wird gemintet...",
+			"mint_review_subtitle": "Du mintest"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token minten",
+			"description": "Beim Minten entstehen zum Kurs des Netzwerks neue $destinationToken aus $sourceToken, und die $sourceToken werden verbrannt.",
+			"you_mint_estimate": "Du mintest (geschätzt)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Cycles-Ledger-Gebühr",
+			"minter": "Gemintet von",
+			"one_way": "Minten lässt sich nicht rückgängig machen: $destinationToken können nicht zurück in $sourceToken getauscht werden.",
+			"sending": "$token wird an den $minter gesendet...",
+			"minting": "$token wird gemintet...",
+			"minted": "$amount $token gemintet.",
+			"pending": "Das Minten dauert länger als üblich. Es wird im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
+		},
+		"error": {
+			"rate_unavailable": "Der $token-Kurs konnte nicht geladen werden. Bitte versuche es später erneut.",
+			"amount_too_small": "Der Betrag ist zu klein, um $token zu minten.",
+			"refunded": "Das Minten wurde rückerstattet. Deine $token wurden abzüglich $refundFee $token zurückgezahlt. Grund: $reason",
+			"failed": "Das Minten ist fehlgeschlagen. Grund: $reason",
+			"not_started": "Das Minten konnte nicht gestartet werden. Es wurde nichts gesendet, bitte versuche es erneut.",
+			"transfer_failed": "Die $token-Überweisung ist fehlgeschlagen. Es wurde nichts gesendet.",
+			"unconfirmed": "Die $token-Überweisung konnte nicht bestätigt werden. Falls sie durchgegangen ist, wird das Minten im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
 		}
 	},
 	"active_user_transactions": {

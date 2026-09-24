@@ -131,6 +131,10 @@ export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
 );
+export const modalCyclesMint: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'cycles-mint'
+);
 export const modalConvertBTCToCkBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-btc-ckbtc'

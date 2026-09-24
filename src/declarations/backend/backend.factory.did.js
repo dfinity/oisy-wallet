@@ -289,6 +289,12 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const CyclesMintData = IDL.Record({
+		transfer_created_at_ns: IDL.Nat64,
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const ChainFusionDirection = IDL.Variant({
 		BtcToCkBtc: IDL.Null,
 		CkBtcToBtc: IDL.Null,
@@ -330,6 +336,7 @@ export const idlFactory = ({ IDL }) => {
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		OisyTrade: OisyTradeData,
 		NearIntents: NearIntentsData,
+		CyclesMint: CyclesMintData,
 		ChainFusion: ChainFusionData,
 		Velora: VeloraData,
 		Liquidium: LiquidiumData

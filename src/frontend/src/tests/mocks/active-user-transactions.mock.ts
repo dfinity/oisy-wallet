@@ -4,6 +4,7 @@ import type {
 	ActiveUserTransactionError,
 	ActiveUserTransactionRef,
 	ChainFusionData,
+	CyclesMintData,
 	LiquidiumData,
 	NearIntentsData,
 	OisyTradeData,
@@ -16,6 +17,7 @@ import type {
 	UpdateActiveUserTransactionParams
 } from '$lib/types/api';
 import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
+import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { OISY_TRADE_EXTERNAL_REF_KEYS } from '$lib/types/oisy-trade-swap';
@@ -142,6 +144,32 @@ export const mockOisyTradeActiveUserTransaction: ActiveUserTransaction = {
 		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
 		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'ckUSDC' },
 		{ key: OISY_TRADE_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Internet Computer' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockCyclesMintData: CyclesMintData = {
+	source_token: { Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+	dest_token: { Icrc: Principal.fromText('um5iw-rqaaa-aaaaq-qaaba-cai') },
+	amount: 150_000_000n,
+	transfer_created_at_ns: 1_700_000_000_000_000_000n
+};
+
+export const mockCyclesMintActiveUserTransaction: ActiveUserTransaction = {
+	id: '66666666-6666-4666-8666-666666666666',
+	status: { Executing: null },
+	data: { CyclesMint: mockCyclesMintData },
+	progress_step: [],
+	external_refs: [
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.TRANSFER_BLOCK_INDEX, value: '12' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.AMOUNT, value: '1.5' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '4.5' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ICP' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'TCYCLES' },
+		{ key: CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Internet Computer' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

@@ -1095,6 +1095,30 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"cycles_mint": {
+		"text": {
+			"title": "Minter des $token",
+			"description": "Le mint crée de nouveaux $destinationToken à partir de $sourceToken au taux du réseau, et brûle les $sourceToken.",
+			"you_mint_estimate": "Vous créez (estimation)",
+			"rate": "Taux",
+			"cycles_ledger_fee": "Frais du Cycles Ledger",
+			"minter": "Minté par",
+			"one_way": "Le mint est irréversible : les $destinationToken ne peuvent pas être reconvertis en $sourceToken.",
+			"sending": "Envoi des $token au $minter...",
+			"minting": "Mint des $token en cours...",
+			"minted": "$amount $token mintés.",
+			"pending": "Le mint prend plus de temps que d’habitude. Il se termine en arrière-plan : suivez-le dans les transactions actives."
+		},
+		"error": {
+			"rate_unavailable": "Le taux des $token n’a pas pu être chargé. Veuillez réessayer plus tard.",
+			"amount_too_small": "Le montant est trop faible pour minter des $token.",
+			"refunded": "Le mint a été remboursé. Vos $token vous ont été rendus, moins $refundFee $token. Raison : $reason",
+			"failed": "Le mint a échoué. Raison : $reason",
+			"not_started": "Le mint n’a pas pu démarrer. Rien n’a été envoyé, veuillez réessayer.",
+			"transfer_failed": "Le transfert des $token a échoué. Rien n’a été envoyé.",
+			"unconfirmed": "Le transfert des $token n’a pas pu être confirmé. S’il a abouti, le mint se termine en arrière-plan : suivez-le dans les transactions actives."
+		}
+	},
 	"active_user_transactions": {
 		"text": {
 			"button_label": "",

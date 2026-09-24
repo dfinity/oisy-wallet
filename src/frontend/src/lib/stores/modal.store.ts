@@ -37,6 +37,7 @@ export interface Modal<T> {
 		| 'swap'
 		| 'buy'
 		| 'convert-ckbtc-btc'
+		| 'cycles-mint'
 		| 'convert-btc-ckbtc'
 		| 'convert-to-twin-token-cketh'
 		| 'convert-to-twin-token-eth'
@@ -124,6 +125,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBuy: (id: symbol) => void;
 	openSwap: (id: symbol) => void;
 	openConvertCkBTCToBTC: (id: symbol) => void;
+	openCyclesMint: (id: symbol) => void;
 	openConvertBTCToCkBTC: (id: symbol) => void;
 	openConvertToTwinTokenCkEth: (id: symbol) => void;
 	openConvertToTwinTokenEth: (id: symbol) => void;
@@ -203,6 +205,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openBuy: setType('buy'),
 		openSwap: setType('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
+		openCyclesMint: setType('cycles-mint'),
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
 		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
 		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),

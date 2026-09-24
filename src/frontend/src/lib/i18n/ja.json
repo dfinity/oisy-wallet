@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "ミント",
+			"minting": "ミント中...",
+			"mint_review_subtitle": "ミントする量"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$tokenをミント",
+			"description": "ミントすると、ネットワークのレートで$sourceTokenから新しい$destinationTokenが作られ、$sourceTokenはバーンされます。",
+			"you_mint_estimate": "ミントする量（見積もり）",
+			"rate": "レート",
+			"cycles_ledger_fee": "Cycles Ledger手数料",
+			"minter": "ミント元",
+			"one_way": "ミントは取り消せません。$destinationTokenを$sourceTokenに戻すことはできません。",
+			"sending": "$tokenを$minterに送信中...",
+			"minting": "$tokenをミント中...",
+			"minted": "$amount $tokenをミントしました。",
+			"pending": "ミントに通常より時間がかかっています。バックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
+		},
+		"error": {
+			"rate_unavailable": "$tokenのレートを読み込めませんでした。しばらくしてからもう一度お試しください。",
+			"amount_too_small": "$tokenをミントするには金額が少なすぎます。",
+			"refunded": "ミントは返金されました。$tokenは$refundFee $tokenを差し引いて返却されました。理由: $reason",
+			"failed": "ミントに失敗しました。理由: $reason",
+			"not_started": "ミントを開始できませんでした。何も送信されていません。もう一度お試しください。",
+			"transfer_failed": "$tokenの送金に失敗しました。何も送信されていません。",
+			"unconfirmed": "$tokenの送金を確認できませんでした。送金が完了していれば、ミントはバックグラウンドで完了します。進行状況はアクティブなトランザクションで確認できます。"
 		}
 	},
 	"active_user_transactions": {

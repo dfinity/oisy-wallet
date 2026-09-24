@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Conia",
+			"minting": "Conio in corso...",
+			"mint_review_subtitle": "Tu conii"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Conia $token",
+			"description": "Il conio crea nuovi $destinationToken da $sourceToken al tasso della rete e brucia i $sourceToken.",
+			"you_mint_estimate": "Tu conii (stima)",
+			"rate": "Tasso",
+			"cycles_ledger_fee": "Commissione del Cycles Ledger",
+			"minter": "Coniato da",
+			"one_way": "Il conio non può essere annullato: i $destinationToken non possono essere riconvertiti in $sourceToken.",
+			"sending": "Invio di $token al $minter...",
+			"minting": "Conio di $token in corso...",
+			"minted": "Coniati $amount $token.",
+			"pending": "Il conio sta richiedendo più tempo del solito. Verrà completato in background: puoi seguirlo nelle transazioni attive."
+		},
+		"error": {
+			"rate_unavailable": "Impossibile caricare il tasso di $token. Riprova più tardi.",
+			"amount_too_small": "L’importo è troppo basso per coniare $token.",
+			"refunded": "Il conio è stato rimborsato. I tuoi $token sono stati restituiti, meno $refundFee $token. Motivo: $reason",
+			"failed": "Il conio non è riuscito. Motivo: $reason",
+			"not_started": "Impossibile avviare il conio. Non è stato inviato nulla, riprova.",
+			"transfer_failed": "Il trasferimento di $token non è riuscito. Non è stato inviato nulla.",
+			"unconfirmed": "Impossibile confermare il trasferimento di $token. Se è andato a buon fine, il conio verrà completato in background: puoi seguirlo nelle transazioni attive."
 		}
 	},
 	"active_user_transactions": {

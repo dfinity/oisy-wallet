@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Cunhar",
+			"minting": "Cunhando...",
+			"mint_review_subtitle": "Você cunha"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Cunhar $token",
+			"description": "A cunhagem cria novos $destinationToken a partir de $sourceToken à taxa da rede e queima os $sourceToken.",
+			"you_mint_estimate": "Você cunha (estimativa)",
+			"rate": "Taxa",
+			"cycles_ledger_fee": "Taxa do Cycles Ledger",
+			"minter": "Cunhado por",
+			"one_way": "A cunhagem não pode ser desfeita: os $destinationToken não podem ser convertidos de volta em $sourceToken.",
+			"sending": "Enviando $token para o $minter...",
+			"minting": "Cunhando $token...",
+			"minted": "$amount $token cunhados.",
+			"pending": "A cunhagem está demorando mais do que o normal. Ela será concluída em segundo plano: acompanhe-a nas transações ativas."
+		},
+		"error": {
+			"rate_unavailable": "Não foi possível carregar a taxa de $token. Tente novamente mais tarde.",
+			"amount_too_small": "O valor é pequeno demais para cunhar $token.",
+			"refunded": "A cunhagem foi reembolsada. Seus $token foram devolvidos, menos $refundFee $token. Motivo: $reason",
+			"failed": "A cunhagem falhou. Motivo: $reason",
+			"not_started": "Não foi possível iniciar a cunhagem. Nada foi enviado, tente novamente.",
+			"transfer_failed": "A transferência de $token falhou. Nada foi enviado.",
+			"unconfirmed": "Não foi possível confirmar a transferência de $token. Se ela foi concluída, a cunhagem terminará em segundo plano: acompanhe-a nas transações ativas."
 		}
 	},
 	"active_user_transactions": {

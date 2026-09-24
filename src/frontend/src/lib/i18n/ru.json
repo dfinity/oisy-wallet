@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Выпустить",
+			"minting": "Выпуск...",
+			"mint_review_subtitle": "Вы выпускаете"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Выпустить $token",
+			"description": "При выпуске новые $destinationToken создаются из $sourceToken по курсу сети, а $sourceToken сжигаются.",
+			"you_mint_estimate": "Вы выпускаете (оценка)",
+			"rate": "Курс",
+			"cycles_ledger_fee": "Комиссия Cycles Ledger",
+			"minter": "Выпускает",
+			"one_way": "Выпуск нельзя отменить: $destinationToken невозможно обменять обратно на $sourceToken.",
+			"sending": "Отправка $token в $minter...",
+			"minting": "Выпуск $token...",
+			"minted": "Выпущено $amount $token.",
+			"pending": "Выпуск занимает больше времени, чем обычно. Он завершится в фоновом режиме: следите за ним в активных транзакциях."
+		},
+		"error": {
+			"rate_unavailable": "Не удалось загрузить курс $token. Повторите попытку позже.",
+			"amount_too_small": "Сумма слишком мала для выпуска $token.",
+			"refunded": "Выпуск был возвращён. Ваши $token вернулись за вычетом $refundFee $token. Причина: $reason",
+			"failed": "Выпуск не удался. Причина: $reason",
+			"not_started": "Не удалось начать выпуск. Ничего не было отправлено, повторите попытку.",
+			"transfer_failed": "Перевод $token не удался. Ничего не было отправлено.",
+			"unconfirmed": "Не удалось подтвердить перевод $token. Если он прошёл, выпуск завершится в фоновом режиме: следите за ним в активных транзакциях."
 		}
 	},
 	"active_user_transactions": {

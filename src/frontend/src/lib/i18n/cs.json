@@ -1083,9 +1083,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Razit",
+			"minting": "Ražení...",
+			"mint_review_subtitle": "Razíte"
 		}
 	},
 	"burn": {
@@ -1093,6 +1093,30 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Razit $token",
+			"description": "Ražení vytváří nové $destinationToken z $sourceToken za kurz sítě a $sourceToken spaluje.",
+			"you_mint_estimate": "Razíte (odhad)",
+			"rate": "Kurz",
+			"cycles_ledger_fee": "Poplatek Cycles Ledgeru",
+			"minter": "Razí",
+			"one_way": "Ražení nelze vrátit: $destinationToken nelze převést zpět na $sourceToken.",
+			"sending": "Odesílání $token do $minter...",
+			"minting": "Ražení $token...",
+			"minted": "Vyraženo $amount $token.",
+			"pending": "Ražení trvá déle než obvykle. Dokončí se na pozadí: sledovat ho můžete v aktivních transakcích."
+		},
+		"error": {
+			"rate_unavailable": "Kurz $token se nepodařilo načíst. Zkuste to prosím později.",
+			"amount_too_small": "Částka je příliš malá na ražení $token.",
+			"refunded": "Ražení bylo vráceno. Vaše $token se vrátily, snížené o $refundFee $token. Důvod: $reason",
+			"failed": "Ražení se nezdařilo. Důvod: $reason",
+			"not_started": "Ražení se nepodařilo zahájit. Nic nebylo odesláno, zkuste to prosím znovu.",
+			"transfer_failed": "Převod $token se nezdařil. Nic nebylo odesláno.",
+			"unconfirmed": "Převod $token se nepodařilo potvrdit. Pokud proběhl, ražení se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
 		}
 	},
 	"active_user_transactions": {
