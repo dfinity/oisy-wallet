@@ -2,7 +2,10 @@ import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { maxBigInt } from '$lib/utils/bigint.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
-import { COMPUTE_BUDGET_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type {
 	SolInstructionSummary,
@@ -343,6 +346,7 @@ const transferEffect = ({
 const toEffect = ({
 	instruction: {
 		program,
+		programId,
 		parsed: { type, info }
 	},
 	topLevel,
@@ -510,8 +514,9 @@ const toEffect = ({
 
 			// The part of the payout that is rent. A Token program account is always the same size,
 			// so its reserve is the chain's minimum for that size; a Token-2022 account varies with
-			// its extensions, and its reserve is not stated rather than guessed at.
-			const reserve = program === 'spl-token' ? rentExemptMinimum : undefined;
+			// its extensions, and its reserve is not stated rather than guessed at. Told apart by the
+			// program's address: a parsed response labels both programs `spl-token`.
+			const reserve = programId === TOKEN_PROGRAM_ADDRESS ? rentExemptMinimum : undefined;
 
 			// The mint the account holds as of this close, for the same reason as its holder: an
 			// address reopened for another mint later in the message would otherwise lend this close

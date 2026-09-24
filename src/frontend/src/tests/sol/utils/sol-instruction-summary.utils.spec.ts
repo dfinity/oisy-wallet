@@ -1223,7 +1223,8 @@ describe('sol-instruction-summary.utils', () => {
 		});
 
 		// A Token program account is always the same size, so its reserve is the chain's minimum
-		// for that size. A Token-2022 account's size varies with its extensions.
+		// for that size. A Token-2022 account's size varies with its extensions. The RPC labels
+		// both programs `spl-token`, so only the program's address tells them apart.
 		it('should carry the reserve of a Token program account and not of a Token-2022 one', () => {
 			const close = ({ programId, program }: { programId: string; program: string }) =>
 				mapSolInstructionSummaries({
@@ -1254,7 +1255,7 @@ describe('sol-instruction-summary.utils', () => {
 			expect(
 				close({
 					programId: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
-					program: 'spl-token-2022'
+					program: 'spl-token'
 				})
 			).not.toHaveProperty('reserve');
 		});
