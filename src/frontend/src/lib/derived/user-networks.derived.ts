@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -31,6 +32,7 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import { trackUnmappedNetworkSettingsKey } from '$lib/services/error-analytics.services';
@@ -122,6 +124,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('ArbitrumSepolia' in key) {
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
+			}
+			if ('XrpMainnet' in key) {
+				return XRP_MAINNET_NETWORK_ID;
+			}
+			if ('RobinhoodMainnet' in key) {
+				return ROBINHOOD_MAINNET_NETWORK_ID;
 			}
 
 			// Deduplicated inside the service: this derived recomputes on every profile write.

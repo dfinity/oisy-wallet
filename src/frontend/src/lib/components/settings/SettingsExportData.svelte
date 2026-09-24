@@ -39,6 +39,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 	let exportingTokens = $state(false);
 	let exportingTransactions = $state(false);
@@ -91,6 +92,7 @@
 						$ethAddress,
 						$btcStatuses: $btcStatusesStore,
 						$solTransactions: $solTransactionsStore,
+						$xrpTransactions: $xrpTransactionsStore,
 						$icTransactionsStore,
 						$ckBtcMinterInfoStore,
 						$icPendingTransactionsStore,

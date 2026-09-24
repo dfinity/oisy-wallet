@@ -1318,11 +1318,13 @@ export type NetworkSettingsFor =
 	| { ArbitrumMainnet: null }
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { XrpMainnet: null }
 	| { PolygonMainnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
 	| { PolygonAmoy: null }
 	| { EthereumSepolia: null }
+	| { RobinhoodMainnet: null }
 	| { BitcoinTestnet: null }
 	| { BaseMainnet: null }
 	| { BscMainnet: null }
@@ -2075,6 +2077,12 @@ export type TokenId =
 			 * ICRC token on ICP
 			 */
 			Icrc: Principal;
+	  }
+	| {
+			/**
+			 * Native XRP on mainnet
+			 */
+			XrpNativeMainnet: null;
 	  }
 	| {
 			/**

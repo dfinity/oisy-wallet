@@ -5,6 +5,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -31,6 +32,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -40,19 +42,22 @@ export const nativeTokens: Readable<Token[]> = derivedMemo(
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		enabledEvmTokens,
-		enabledSolanaTokens
+		enabledSolanaTokens,
+		enabledXrpTokens
 	],
 	([
 		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$enabledEvmTokens,
-		$enabledSolanaTokens
+		$enabledSolanaTokens,
+		$enabledXrpTokens
 	]) => [
 		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
+		...$enabledXrpTokens,
 		...$enabledEvmTokens
 	],
 	tokenListEqual
@@ -102,6 +107,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 			BNB_MAINNET_TOKEN,
 			POL_MAINNET_TOKEN,
 			SOLANA_TOKEN,
+			XRP_TOKEN,
 			...$enabledEvmTokens
 		]) {
 			if (!seen.has(token.id)) {

@@ -73,11 +73,13 @@ fn native_token_ids() -> Vec<StoredTokenId> {
         StoredTokenId(TokenId::EvmNative(1)),
         StoredTokenId(TokenId::EvmNative(56)),
         StoredTokenId(TokenId::EvmNative(137)),
+        StoredTokenId(TokenId::EvmNative(4663)),
         StoredTokenId(TokenId::EvmNative(8453)),
         StoredTokenId(TokenId::EvmNative(42161)),
         StoredTokenId(TokenId::IcpNative),
         StoredTokenId(TokenId::SolNativeMainnet),
         StoredTokenId(TokenId::BtcNativeMainnet),
+        StoredTokenId(TokenId::XrpNativeMainnet),
     ]
 }
 
@@ -766,6 +768,30 @@ mod tests {
         assert_eq!(candidates.len(), native_token_ids().len() + 1);
         assert!(candidates.contains(&native));
         assert!(candidates.contains(&custom));
+    }
+
+    /// The test above derives its expected length from `native_token_ids()`, so removing a
+    /// native from that list shrinks both sides and still passes. XRP needs pinning explicitly:
+    /// it is not a custom token, so `native_token_ids` is the only way it can ever reach the
+    /// refresh set, and `custom_tokens_to_mark` deliberately keeps natives out of
+    /// `token_activity` — dropping it would leave XRP with no USD rate at all, silently.
+    #[test]
+    fn refresh_candidates_always_include_native_xrp() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::XrpNativeMainnet)));
+    }
+
+    /// Robinhood Chain needs its own pin for the same reason as XRP, plus one of its own:
+    /// `EvmNative(4663)` groups under the `ethereum` coin id, so dropping it still leaves the
+    /// outcall intact — Ethereum, Base and Arbitrum already request it. What disappears is the
+    /// rate keyed to *this* token id, leaving native ETH on Robinhood with no USD value while
+    /// the same asset is priced on every other chain.
+    #[test]
+    fn refresh_candidates_always_include_native_robinhood() {
+        let candidates = refresh_candidates(vec![], true);
+
+        assert!(candidates.contains(&StoredTokenId(TokenId::EvmNative(4663))));
     }
 
     #[test]

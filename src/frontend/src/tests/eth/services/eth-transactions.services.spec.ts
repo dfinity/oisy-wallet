@@ -1303,6 +1303,45 @@ describe('eth-transactions.services', () => {
 			expect(result).toEqual({ success: true });
 			expect(signalEnd).not.toHaveBeenCalled();
 		});
+
+		// Signalling the end on a failed page retired the token from the Activity list until the page
+		// was left, hiding history the explorer only failed to serve once.
+		it('should pass a failed native page up without signalling the end', async () => {
+			storeTransactions({ token: ETHEREUM_TOKEN, blockNumbers: [300, 100] });
+
+			const mockError = new Error('Etherscan rate limit');
+
+			vi.mocked(loadNextEthUserTransactions).mockResolvedValue({ hasMore: false, err: mockError });
+
+			const result = await loadNextEthTransactionsByOldest({
+				token: ETHEREUM_TOKEN,
+				identity: mockIdentity,
+				signalEnd
+			});
+
+			expect(result).toEqual({ success: false, err: mockError });
+			expect(signalEnd).not.toHaveBeenCalled();
+		});
+
+		it('should pass a failed ERC20 page up without signalling the end', async () => {
+			storeTransactions({ token: USDC_TOKEN, blockNumbers: [300, 100] });
+
+			const mockError = new Error('Etherscan rate limit');
+
+			vi.mocked(loadNextErc20UserTransactions).mockResolvedValue({
+				hasMore: false,
+				err: mockError
+			});
+
+			const result = await loadNextEthTransactionsByOldest({
+				token: USDC_TOKEN,
+				identity: mockIdentity,
+				signalEnd
+			});
+
+			expect(result).toEqual({ success: false, err: mockError });
+			expect(signalEnd).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('reloadEthereumTransactions', () => {
