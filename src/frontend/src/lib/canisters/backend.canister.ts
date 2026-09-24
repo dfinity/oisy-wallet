@@ -19,7 +19,8 @@ import type {
 	TipClaim,
 	TipClaimRequest,
 	TipDetails,
-	TokenId
+	TokenId,
+	UserProfile
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
@@ -89,7 +90,7 @@ import type { Principal } from '@icp-sdk/core/principal';
  * Only the unresolved entries are dropped. The generated decoder would have dropped the whole
  * `settings` record instead, silently resetting every preference the user ever saved.
  */
-const mapTolerantUserProfile = (response: GetUserProfileResponse): GetUserProfileResponse => {
+const mapTolerantUserProfile = <T extends { Ok: UserProfile } | object>(response: T): T => {
 	if (!('Ok' in response)) {
 		return response;
 	}
@@ -109,6 +110,7 @@ const mapTolerantUserProfile = (response: GetUserProfileResponse): GetUserProfil
 	unresolved.forEach((key) => trackUnmappedNetworkSettingsKey({ key }));
 
 	return {
+		...response,
 		Ok: {
 			...response.Ok,
 			settings: [{ ...settings, networks: { ...settings.networks, networks } }]
@@ -200,7 +202,9 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	createUserProfile = async (): Promise<CreateUserProfileResponse> => {
-		const { create_user_profile } = this.caller({ certified: true });
+		// Tolerant like `getUserProfile`: this call is idempotent, so an existing user gets their
+		// stored profile back and it lands in the store the same way a read would.
+		const { create_user_profile } = this.#tolerantCertifiedService;
 
 		const response = await create_user_profile();
 
@@ -208,7 +212,7 @@ export class BackendCanister extends Canister<BackendService> {
 			throw new SignupsClosedError();
 		}
 
-		return response;
+		return mapTolerantUserProfile(response);
 	};
 
 	getUserProfile = async ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
