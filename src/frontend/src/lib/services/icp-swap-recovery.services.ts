@@ -50,6 +50,15 @@ export class IcpSwapPoolNotFoundError extends Error {
 	}
 }
 
+// Thrown when a scan is told to stop between batches. A thrown error rather than a partial result,
+// so a scan that stopped early can never be read as a complete one.
+export class IcpSwapScanCancelledError extends Error {
+	constructor() {
+		super('The ICPSwap pool scan was cancelled');
+		this.name = 'IcpSwapScanCancelledError';
+	}
+}
+
 // `enabledIcrcTokens` can carry the same ledger id twice - an enabled custom token duplicating a
 // default - and the default entry is the one the rest of the app treats as authoritative, so the
 // first occurrence wins. A plain `new Map(...)` would keep the last.
@@ -203,20 +212,32 @@ export const loadIcpSwapRecoverableBalances = async ({
  * Within a batch the queries are settled independently. A pool that fails is counted, not thrown,
  * so one bad pool cannot cost the user every other result.
  *
+ * `isCancelled` is checked once the pool table arrives, before every batch and once more after the
+ * last, so a scan the caller no longer wants - superseded by a newer scan or a pair lookup - stops
+ * issuing queries instead of running every remaining round, and one superseded during its final
+ * round is still reported as cancelled rather than returned.
+ *
  * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
- * Those are reachable through the manual pair lookup above; widening the filter is not viable,
- * since roughly half of all pools have ICP as a leg.
+ * The manual pair lookup offers the same tokens, so it cannot reach those either: the token has to
+ * be enabled first, after which both find the pool. Widening the filter is not viable, since
+ * roughly half of all pools have ICP as a leg.
  */
 export const scanIcpSwapPools = async ({
 	identity,
-	tokens
+	tokens,
+	isCancelled = () => false
 }: {
 	identity: Identity;
 	tokens: IcToken[];
+	isCancelled?: () => boolean;
 }): Promise<IcpSwapScanResult> => {
 	const tokenByAddress = indexTokensByAddress(tokens);
 
 	const allPools = await getAllPools({ identity });
+
+	if (isCancelled()) {
+		throw new IcpSwapScanCancelledError();
+	}
 
 	const candidatePools = allPools.filter(
 		({ fee, token0, token1 }) =>
@@ -244,11 +265,19 @@ export const scanIcpSwapPools = async ({
 	const settled: PromiseSettledResult<IcpSwapPoolBalances>[] = [];
 
 	for (let i = 0; i < candidatePools.length; i += ICP_SWAP_SCAN_CONCURRENCY) {
+		if (isCancelled()) {
+			throw new IcpSwapScanCancelledError();
+		}
+
 		settled.push(
 			...(await Promise.allSettled(
 				candidatePools.slice(i, i + ICP_SWAP_SCAN_CONCURRENCY).map(readPool)
 			))
 		);
+	}
+
+	if (isCancelled()) {
+		throw new IcpSwapScanCancelledError();
 	}
 
 	return {

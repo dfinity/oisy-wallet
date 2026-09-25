@@ -14,16 +14,21 @@ import {
 	HELP_ICPSWAP_TOKEN_B,
 	HELP_ICPSWAP_WITHDRAW_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { PLAUSIBLE_EVENT_HELP_ERROR_TYPES } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_HELP_ERROR_TYPES,
+	PLAUSIBLE_EVENT_RESULT_STATUSES
+} from '$lib/enums/plausible';
 import { trackHelp } from '$lib/services/help-analytics.services';
 import {
 	IcpSwapPoolNotFoundError,
+	IcpSwapScanCancelledError,
 	loadIcpSwapRecoverableBalances,
 	reloadIcpSwapPoolBalances,
 	scanIcpSwapPools,
 	withdrawIcpSwapBalance,
 	type IcpSwapPoolBalances,
-	type IcpSwapRecoverableBalance
+	type IcpSwapRecoverableBalance,
+	type IcpSwapScanResult
 } from '$lib/services/icp-swap-recovery.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -221,22 +226,100 @@ describe('HelpIcpSwapWithdrawal', () => {
 		});
 	});
 
-	it('explains an empty candidate set where the user can actually see it', async () => {
-		// No enabled ICRC tokens: the candidate set is ICP alone, so picking it on one side leaves
-		// the other with nothing. The dropdown is disabled and cannot open, so the explanation has
-		// to be in the card.
-		vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
+	describe('a wallet that cannot form a pair', () => {
+		// Without two distinct ledgers no pool can be named, and that is known before anything is
+		// picked. Waiting for a pick would show two usable selectors whose only option leads nowhere.
+		it('explains it on open and disables both selectors', () => {
+			vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() => readable([]));
+
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).toBeDisabled();
+			// No pool can have both legs among one ledger, so a scan could only report nothing.
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
+		});
+
+		it('does not count a custom duplicate of the ICP ledger as a second ledger', () => {
+			vi.spyOn(icrcDerived, 'enabledIcrcTokens', 'get').mockImplementation(() =>
+				readable([{ ...icp, name: 'ICP (custom entry)' }])
+			);
+
+			const { getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeInTheDocument();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
+		});
+
+		it('stays usable, with no explanation, once one ICRC token is enabled', () => {
+			const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
+
+			expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).not.toBeDisabled();
+		});
+	});
+
+	it('tells a superseded scan to stop, and reports it as cancelled', async () => {
+		const { promise: pendingScan, reject: stopScan } = Promise.withResolvers<IcpSwapScanResult>();
+		vi.mocked(scanIcpSwapPools).mockReturnValue(pendingScan);
 
 		const { getByTestId, queryByTestId } = render(HelpIcpSwapWithdrawal);
 
-		expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
 
-		await fireEvent.click(getByTestId(HELP_ICPSWAP_TOKEN_A));
-		await fireEvent.click(
-			getByTestId(`${HELP_ICPSWAP_TOKEN_A}-option-${ICP_TOKEN.ledgerCanisterId}`)
+		const [[{ isCancelled }]] = vi.mocked(scanIcpSwapPools).mock.calls;
+
+		expect(isCancelled?.()).toBeFalsy();
+
+		// Load-bearing: the pair change below has to be reachable during a scan, or this passes
+		// against a disabled selector.
+		expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
+
+		// A pair lookup supersedes the scan, which should now stop between batches.
+		await selectPair(getByTestId);
+
+		expect(isCancelled?.()).toBeTruthy();
+
+		stopScan(new IcpSwapScanCancelledError());
+
+		await waitFor(() =>
+			expect(trackHelp).toHaveBeenCalledWith(
+				expect.objectContaining({
+					action: 'scan',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+				})
+			)
 		);
 
-		expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
+		expect(trackHelp).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: 'scan',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+			})
+		);
+		expect(queryByTestId(HELP_ICPSWAP_ERROR)).toBeNull();
+	});
+
+	it('stops a scan in flight when the card is left', async () => {
+		// Nothing but a newer request moved the generation on, so a scan outlived its page and kept
+		// sending batches for a result no card would show.
+		vi.mocked(scanIcpSwapPools).mockReturnValue(Promise.withResolvers<IcpSwapScanResult>().promise);
+
+		const { getByTestId, unmount } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		const [[{ isCancelled }]] = vi.mocked(scanIcpSwapPools).mock.calls;
+
+		expect(isCancelled?.()).toBeFalsy();
+
+		unmount();
+
+		expect(isCancelled?.()).toBeTruthy();
 	});
 
 	it('does not scan until the button is pressed', () => {
@@ -612,6 +695,20 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 			expect(liveRegion(container)).toBeInTheDocument();
 			expect(liveRegion(container)).toBeEmptyDOMElement();
+		});
+
+		it('announces a full scan as checking the pools, not one pool', async () => {
+			vi.mocked(scanIcpSwapPools).mockReturnValue(
+				Promise.withResolvers<IcpSwapScanResult>().promise
+			);
+
+			const { container, getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+			await waitFor(() => expect(liveRegion(container)).toHaveTextContent(en.help.text.scanning));
+
+			expect(liveRegion(container)).not.toHaveTextContent(en.help.text.checking_pool);
 		});
 
 		it('announces progress and then the number of balances found', async () => {
