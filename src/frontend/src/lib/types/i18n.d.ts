@@ -125,7 +125,6 @@ interface I18nNavigation {
 		source_code: string;
 		documentation: string;
 		support: string;
-		help: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
