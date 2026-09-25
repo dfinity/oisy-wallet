@@ -544,6 +544,10 @@ const toEffect = ({
 			// an amount that was never there. An amount nobody read leaves it as an unwrap, which
 			// is the reading that does not understate.
 			//
+			// The kind says so too, not only the words: an unwrap is read as SOL the transaction
+			// trades, and an empty account's rent coming back beside a send would make the send read
+			// as a swap.
+			//
 			// What it held when it closed, not before the transaction ran: the swaps that open one
 			// wrap into it and unwrap out of it within the same message, and one that pre-dates the
 			// message can be emptied before its close just the same.
@@ -557,7 +561,7 @@ const toEffect = ({
 			});
 
 			return {
-				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
+				kind: mint === WSOL_TOKEN.address && wrapped !== ZERO ? 'unwrap' : 'closeTokenAccount',
 				account,
 				...(nonNullish(mint) && { tokenAddress: mint }),
 				...(nonNullish(returned) && { returned }),

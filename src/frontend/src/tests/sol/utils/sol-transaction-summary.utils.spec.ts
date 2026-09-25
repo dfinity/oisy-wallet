@@ -211,6 +211,62 @@ describe('sol-transaction-summary.utils', () => {
 				}).kind
 			).toBe('other');
 		});
+
+		// Closing an empty wrapped SOL account hands back its rent and unwraps nothing. Read as an
+		// unwrap it is SOL the transaction trades, and a send beside it reads as a swap.
+		it('should call a send beside the close of an empty wrapped SOL account a send', () => {
+			const wallet = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wso1Account11111111111111111111111111111111';
+			const bonk = 'bonkAccount11111111111111111111111111111111';
+
+			const result = deriveSolTransactionSummary({
+				netChanges: [
+					{ delta: -1_000n, tokenAddress: mockSplAddress, decimals: 5 },
+					{ delta: 2_039_280n }
+				],
+				instructions: mapSolInstructionSummaries({
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'transferChecked',
+								info: {
+									source: bonk,
+									destination: mockAtaAddress2,
+									mint: mockSplAddress,
+									authority: wallet,
+									tokenAmount: { amount: '1000', decimals: 5, uiAmountString: '0.01' }
+								}
+							}
+						},
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: { account: wsol, destination: wallet, owner: wallet }
+							}
+						}
+					],
+					ownedAddresses: [wallet, bonk, wsol],
+					userAddress: wallet,
+					rentExemptMinimum: 2_039_280n,
+					accountLamports: { [wsol]: 2_039_280n },
+					accountTokenAmounts: { [wsol]: ZERO },
+					accountHolders: { [wsol]: wallet },
+					accountMintsBefore: { [wsol]: WSOL_TOKEN.address },
+					addressToToken: {
+						[wsol]: WSOL_TOKEN.address,
+						[bonk]: mockSplAddress,
+						[mockAtaAddress2]: mockSplAddress
+					}
+				}),
+				userAddress: wallet
+			});
+
+			expect(result.kind).toBe('send');
+		});
 	});
 
 	describe('solClosesPayOthers', () => {

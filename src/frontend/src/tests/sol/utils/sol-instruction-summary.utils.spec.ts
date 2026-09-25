@@ -565,7 +565,7 @@ describe('sol-instruction-summary.utils', () => {
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
-			const close = views.find(({ kind }) => kind === 'unwrap');
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close?.wrapped).toBe(ZERO);
 		});
@@ -649,7 +649,7 @@ describe('sol-instruction-summary.utils', () => {
 				accountTokenAmounts: { [wsol]: 5_000_000_000n }
 			});
 
-			const close = views.find(({ kind }) => kind === 'unwrap');
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close?.returned).toBe(2_039_280n);
 			expect(close?.wrapped).toBe(ZERO);
@@ -902,7 +902,7 @@ describe('sol-instruction-summary.utils', () => {
 				addressToToken: { [wsol]: WSOL_TOKEN.address }
 			});
 
-			const close = views.find(({ kind }) => kind === 'unwrap');
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close?.returned).toBe(1_488_440n);
 			expect(close?.wrapped).toBe(ZERO);
@@ -1385,7 +1385,12 @@ describe('sol-instruction-summary.utils', () => {
 				accountTokenAmounts: { [wsol]: 5_000_000_000n }
 			});
 
-			const [first, second] = views.filter(({ kind }) => kind === 'unwrap');
+			const [first, second] = views.filter(
+				({ kind }) => kind === 'unwrap' || kind === 'closeTokenAccount'
+			);
+
+			expect(first?.kind).toBe('unwrap');
+			expect(second?.kind).toBe('closeTokenAccount');
 
 			expect(first?.returned).toBe(1_488_440n + 5_000_000_000n);
 			expect(first?.wrapped).toBe(5_000_000_000n);

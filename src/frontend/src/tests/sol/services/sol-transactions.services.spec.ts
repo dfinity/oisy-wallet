@@ -231,7 +231,7 @@ describe('sol-transactions.services', () => {
 
 			const [record] = await fetchSolTransactionsForSignature(mockParams);
 
-			const close = record.instructions?.find(({ kind }) => kind === 'unwrap');
+			const close = record.instructions?.find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close?.wrapped).toBe(ZERO);
 		});
