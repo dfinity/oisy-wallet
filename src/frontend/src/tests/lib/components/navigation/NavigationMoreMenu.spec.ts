@@ -127,7 +127,10 @@ describe('NavigationMoreMenu', () => {
 			await waitFor(() => expect(goto).toHaveBeenCalledOnce());
 
 			expect(vi.mocked(goto).mock.calls[0][0]).toContain(AppPath.Help);
-			expect(queryByTestId(NAVIGATION_MORE_MENU)).toBeNull();
+
+			// The popover's own fade outlasts the wait before `goto`, so the menu can
+			// still be in the DOM when the route changes.
+			await waitFor(() => expect(queryByTestId(NAVIGATION_MORE_MENU)).toBeNull());
 		});
 
 		it('keeps the documentation support page where the Help page is not enabled', async () => {
