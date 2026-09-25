@@ -997,6 +997,92 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBe(5n);
 		});
 
+		// Whose an account is, is read as of the instruction too. The set of the user's accounts
+		// holds every account they had at any point of the message, so an address closed and opened
+		// for a different holder would lend each holder's transfers to the other.
+		describe('an address closed and opened for a different holder', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const stranger = 'strangerWa11et11111111111111111111111111111';
+			const account = 'reusedAccount11111111111111111111111111111';
+			const pool = 'poo11111111111111111111111111111111111111';
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+
+			const transfer = ({
+				source,
+				destination,
+				authority
+			}: {
+				source: string;
+				destination: string;
+				authority: string;
+			}) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'transfer', info: { source, destination, authority, amount: '100' } }
+			});
+
+			const close = (holder: string) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'closeAccount', info: { account, destination: holder, owner: holder } }
+			});
+
+			const reopenFor = (holder: string) => [
+				{
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'createAccount',
+						info: {
+							newAccount: account,
+							lamports: 2_039_280,
+							owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							source: holder,
+							space: 165
+						}
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: { type: 'initializeAccount3', info: { account, mint: bonk, owner: holder } }
+				}
+			];
+
+			it('should not count a send from it as the user sending before it is opened for them', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transfer({ source: account, destination: pool, authority: stranger }),
+						close(stranger),
+						...reopenFor(owner)
+					],
+					ownedAddresses: [owner],
+					userAddress: owner,
+					accountHolders: { [account]: stranger },
+					accountMintsBefore: { [account]: bonk }
+				});
+
+				expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+			});
+
+			it('should not count a transfer into it as the user receiving once it is opened for somebody else', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						close(owner),
+						...reopenFor(stranger),
+						transfer({ source: pool, destination: account, authority: stranger })
+					],
+					ownedAddresses: [owner, account],
+					userAddress: owner,
+					accountHolders: { [account]: owner },
+					accountMintsBefore: { [account]: bonk },
+					accountLamports: { [account]: 2_039_280n }
+				});
+
+				expect(views.map(({ kind }) => kind)).toStrictEqual(['closeTokenAccount']);
+			});
+		});
+
 		// A transfer into an account is a wrap by the account the address holds at the transfer.
 		// Read from the run's single map, an address opened for two mints judges a transfer into
 		// either by the last one.
