@@ -1,10 +1,17 @@
+import type { Network } from '$lib/types/network';
 import type { SwapProvider } from '$lib/types/swap';
 import type { Nullish } from '@dfinity/zod-schemas';
 
-// The chain a provider explorer link is scoped to. The values double as the
+// The chain a Help page explorer link is scoped to. The values double as the
 // `event_value` of the `network` analytics key, so they follow the `token_network`
 // vocabulary documented in docs/ai/frontend/analytics.md.
-export type HelpExplorerChain = 'eth' | 'sol' | 'btc' | 'icp';
+//
+// The provider card only ever uses the four chains its providers settle against; the
+// network card adds XRP and the remaining EVM mainnets, where one Ethereum address is
+// read on several chains. Each value is the network's own symbol, lowercased - `rh`,
+// not NEAR Intents' routing code `hood`, which lives in a different namespace.
+export type HelpExplorerChain =
+	'eth' | 'sol' | 'btc' | 'icp' | 'xrp' | 'arb' | 'base' | 'bsc' | 'pol' | 'rh';
 
 export interface HelpExplorerLink {
 	chain: HelpExplorerChain;
@@ -18,11 +25,20 @@ export interface HelpExplorerGroup {
 	links: HelpExplorerLink[];
 }
 
+export interface HelpNetworkExplorerLink {
+	network: Network;
+	chain: HelpExplorerChain;
+	// Already carries the user's address on `network`; built by
+	// `buildHelpNetworkExplorerLinks`.
+	url: string;
+}
+
 export interface HelpExplorerAddresses {
 	// One Ethereum address covers every EVM network OISY supports, so a single entry
 	// serves all of them.
 	ethAddress?: Nullish<string>;
 	solAddress?: Nullish<string>;
 	btcAddress?: Nullish<string>;
+	xrpAddress?: Nullish<string>;
 	principal?: Nullish<string>;
 }

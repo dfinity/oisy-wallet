@@ -65,3 +65,19 @@ export const {
 	NEAR_INTENTS: NEAR_INTENTS_EXPLORER_URL,
 	ONESEC: ONESEC_EXPLORER_URL
 } = PROVIDER_EXPLORER_URLS;
+
+// Address explorers used by Help-page whole-address links when the network's own
+// `explorerUrl` cannot serve the wallet's address (ICP) or a different host is
+// intentionally preferred (BTC). Everything else reuses the network URL.
+//
+// ICP: `dashboard.internetcomputer.org` keys its account page by the 64-character
+// account identifier, and the address OISY shows a user is their principal - which
+// only icexplorer resolves. BTC: blockstream would work; mempool.space is the one
+// this wallet points a user at for their own address.
+const ADDRESS_EXPLORER_URLS = {
+	ICP: 'https://www.icexplorer.io',
+	BTC_MAINNET: 'https://mempool.space'
+};
+
+export const { ICP: ICP_ADDRESS_EXPLORER_URL, BTC_MAINNET: BTC_MAINNET_ADDRESS_EXPLORER_URL } =
+	ADDRESS_EXPLORER_URLS;
