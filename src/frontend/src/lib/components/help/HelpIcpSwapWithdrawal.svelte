@@ -78,12 +78,6 @@
 	// withdrawal landed re-display the row it just emptied.
 	const withdrawing = $derived(nonNullish(withdrawingKey));
 
-	// The selectors deliberately stay live during a lookup: changing the pair is how a user
-	// supersedes one, and the generation guard above is what makes that safe. Only the scan button
-	// waits, since a scan restarts discovery wholesale and queueing one behind a lookup buys
-	// nothing.
-	const scanLocked = $derived(busy || withdrawing);
-
 	const startRequest = (kind: 'scan' | 'lookup'): number => {
 		activeRequest = kind;
 		reset();
@@ -377,6 +371,13 @@
 	let noTokensToPick = $derived(
 		new Set(candidateTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)).size < 2
 	);
+
+	// The selectors deliberately stay live during a lookup: changing the pair is how a user
+	// supersedes one, and the generation guard is what makes that safe. Only the scan button waits,
+	// since a scan restarts discovery wholesale and queueing one behind a lookup buys nothing. A
+	// wallet that cannot form a pair locks it too: with fewer than two ledgers no pool has both legs
+	// among them, so a scan could only download the pool table to report nothing.
+	const scanLocked = $derived(busy || withdrawing || noTokensToPick);
 
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
 	let hasResults = $derived(visibleGroups.length > 0);

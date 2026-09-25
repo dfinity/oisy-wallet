@@ -237,6 +237,8 @@ describe('HelpIcpSwapWithdrawal', () => {
 			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toHaveTextContent(en.help.text.no_tokens);
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).toBeDisabled();
+			// No pool can have both legs among one ledger, so a scan could only report nothing.
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
 		});
 
 		it('does not count a custom duplicate of the ICP ledger as a second ledger', () => {
@@ -248,6 +250,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 
 			expect(getByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeInTheDocument();
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).toBeDisabled();
 		});
 
 		it('stays usable, with no explanation, once one ICRC token is enabled', () => {
@@ -256,6 +259,7 @@ describe('HelpIcpSwapWithdrawal', () => {
 			expect(queryByTestId(HELP_ICPSWAP_NO_TOKENS)).toBeNull();
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_A)).not.toBeDisabled();
 			expect(getByTestId(HELP_ICPSWAP_TOKEN_B)).not.toBeDisabled();
+			expect(getByTestId(HELP_ICPSWAP_SCAN_BUTTON)).not.toBeDisabled();
 		});
 	});
 
