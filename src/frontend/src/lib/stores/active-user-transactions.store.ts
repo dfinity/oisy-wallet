@@ -21,17 +21,23 @@ const STORAGE_PREFIX = 'aut:state:';
 
 export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransactionsStoreData> {
 	init: (principal: Principal) => void;
-	set: (params: { transactions: ActiveUserTransaction[] }) => void;
-	upsert: (params: { transaction: ActiveUserTransaction }) => void;
-	remove: (params: { id: string }) => void;
+	set: (params: { principal?: Principal; transactions: ActiveUserTransaction[] }) => void;
+	upsert: (params: { principal?: Principal; transaction: ActiveUserTransaction }) => void;
+	remove: (params: { principal?: Principal; id: string }) => void;
 	markAllSeen: () => void;
 	markTerminalSideEffectsApplied: (params: { ids: string[] }) => void;
 	reset: () => void;
 }
 
+const storageKeyForPrincipal = (principal: Principal): string =>
+	`${STORAGE_PREFIX}${principal.toText()}`;
+
 const initStore = (): ActiveUserTransactionsStore => {
 	const store: Writable<ActiveUserTransactionsStoreData> = writable(undefined);
 	let storageKey: string | undefined;
+
+	const isCurrentPrincipal = (principal: Principal | undefined): boolean =>
+		isNullish(principal) || storageKey === storageKeyForPrincipal(principal);
 
 	const persist = (state: ActiveUserTransactionsLocalState) => {
 		if (isNullish(storageKey)) {
@@ -41,7 +47,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 	};
 
 	const init: ActiveUserTransactionsStore['init'] = (principal) => {
-		const key = `${STORAGE_PREFIX}${principal.toText()}`;
+		const key = storageKeyForPrincipal(principal);
 
 		if (storageKey === key) {
 			return;
@@ -58,9 +64,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
-	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions }) => {
+	const setAll: ActiveUserTransactionsStore['set'] = ({ principal, transactions }) => {
 		store.update((current) => {
-			if (isNullish(current)) {
+			if (isNullish(current) || !isCurrentPrincipal(principal)) {
 				return current;
 			}
 
@@ -98,9 +104,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
-	const upsert: ActiveUserTransactionsStore['upsert'] = ({ transaction }) => {
+	const upsert: ActiveUserTransactionsStore['upsert'] = ({ principal, transaction }) => {
 		store.update((current) => {
-			if (isNullish(current)) {
+			if (isNullish(current) || !isCurrentPrincipal(principal)) {
 				return current;
 			}
 
@@ -117,9 +123,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
-	const remove: ActiveUserTransactionsStore['remove'] = ({ id }) => {
+	const remove: ActiveUserTransactionsStore['remove'] = ({ principal, id }) => {
 		store.update((current) => {
-			if (isNullish(current)) {
+			if (isNullish(current) || !isCurrentPrincipal(principal)) {
 				return current;
 			}
 
