@@ -81,27 +81,6 @@ const simulate = async ({
 		userAddress: address
 	});
 
-	const legs = await mapSolSimulatedTransferLegs({
-		instructions: transactionMessage.instructions,
-		innerInstructions,
-		network,
-		// Handing the mints the simulation already read to the mapper is what keeps it from
-		// looking each one up: an unchecked SPL transfer does not carry its mint, and recovering
-		// it costs a round trip per leg on the review's critical path.
-		addressToToken
-	});
-
-	// The lamports each account holds going in, so a close can say what it hands back.
-	const accountLamports = addresses.reduce<Record<SolAddress, bigint>>((acc, account, index) => {
-		const lamports = preAccounts[index]?.lamports;
-
-		if (nonNullish(lamports)) {
-			acc[account] = lamports;
-		}
-
-		return acc;
-	}, {});
-
 	// Who held each token account going in. Not the map of owners the run reports, which prefers
 	// the state after the transaction: an address closed and opened again for somebody else within
 	// the one message would read as theirs at a close that happened while it was still the user's.
@@ -122,6 +101,30 @@ const simulate = async ({
 		},
 		{ accountHolders: {}, accountMintsBefore: {} }
 	);
+
+	const legs = await mapSolSimulatedTransferLegs({
+		instructions: transactionMessage.instructions,
+		innerInstructions,
+		network,
+		// Handing the mints the simulation already read to the mapper is what keeps it from
+		// looking each one up: an unchecked SPL transfer does not carry its mint, and recovering
+		// it costs a round trip per leg on the review's critical path.
+		addressToToken,
+		// Whose each account was going in, for the same reason the operation list reads it: the
+		// map of owners the run reports is the state after the transaction.
+		accountHolders
+	});
+
+	// The lamports each account holds going in, so a close can say what it hands back.
+	const accountLamports = addresses.reduce<Record<SolAddress, bigint>>((acc, account, index) => {
+		const lamports = preAccounts[index]?.lamports;
+
+		if (nonNullish(lamports)) {
+			acc[account] = lamports;
+		}
+
+		return acc;
+	}, {});
 
 	// What each token account held going in. A wrapped SOL account holding nothing is closed rather
 	// than unwrapped, and the two read differently: there is no SOL to unwrap out of an empty one.

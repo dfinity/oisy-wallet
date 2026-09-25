@@ -17,6 +17,7 @@ import type {
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
 	mockAtaAddress,
+	mockAtaAddress2,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSplAddress
@@ -259,6 +260,64 @@ describe('sol-simulation.services', () => {
 				destinations: [{ address: mockSolAddress2, own: false }],
 				partial: false
 			});
+		});
+
+		// The run reports the state after the transaction, where an address closed and opened for the
+		// user within it is theirs. A transfer made from it before that was somebody else's.
+		it('should read whose an account was at the transfer, not after the transaction', async () => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+				null,
+				tokenAccount({ owner: mockSolAddress2, amount: 1_000n })
+			]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [null, tokenAccount({ owner: mockSolAddress, amount: ZERO })],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{
+									program: 'spl-token',
+									programId: TOKEN_PROGRAM_ADDRESS,
+									parsed: {
+										type: 'transfer',
+										info: {
+											source: mockAtaAddress,
+											destination: mockAtaAddress2,
+											authority: mockSolAddress2,
+											amount: '1000'
+										}
+									}
+								},
+								{
+									program: 'spl-token',
+									programId: TOKEN_PROGRAM_ADDRESS,
+									parsed: {
+										type: 'closeAccount',
+										info: {
+											account: mockAtaAddress,
+											destination: mockSolAddress2,
+											owner: mockSolAddress2
+										}
+									}
+								},
+								{
+									program: 'spl-token',
+									programId: TOKEN_PROGRAM_ADDRESS,
+									parsed: {
+										type: 'initializeAccount3',
+										info: { account: mockAtaAddress, mint: mockSplAddress, owner: mockSolAddress }
+									}
+								}
+							]
+						}
+					] as unknown as SolanaSimulatedInnerInstructions
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([mockAtaAddress])));
+
+			expect(result?.parties).toEqual({ sources: [], destinations: [], partial: false });
 		});
 
 		it('should not mark the lists partial when the simulation supplied them', async () => {
