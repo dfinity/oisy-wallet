@@ -83,19 +83,21 @@ const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
  */
 const noOpCreations = ({
 	flattened,
-	accountLamports
+	accountHolders,
+	accountMintsBefore
 }: {
 	flattened: { parentIndex: number; topLevel: boolean; instruction: SolParsedRpcInstruction }[];
-	accountLamports: Partial<Record<SolAddress, bigint>>;
+	accountHolders: Partial<Record<SolAddress, SolAddress>>;
+	accountMintsBefore: Partial<Record<SolAddress, SplTokenAddress>>;
 }): { positions: Set<number>; parents: Set<number> } => {
-	// Above zero, not merely present. A confirmed transaction's balances carry an entry for every
-	// account it names, an account it creates among them, at nothing: seeding from the keys alone
-	// read those as already there and dropped the creation that made them.
-	const inPlace = new Set<SolAddress>(
-		Object.entries(accountLamports)
-			.filter(([, lamports]) => nonNullish(lamports) && lamports > ZERO)
-			.map(([account]) => account)
-	);
+	// A token account in the state before the message, not lamports at the address. An associated
+	// account's address can hold lamports before anything opens an account there, and the creation
+	// then opens it on top of them rather than doing nothing; nor does a confirmed transaction's
+	// entry of nothing for an account it creates say anything was there.
+	const inPlace = new Set<SolAddress>([
+		...Object.keys(accountHolders),
+		...Object.keys(accountMintsBefore)
+	]);
 
 	const positions = new Set<number>();
 	const parents = new Set<number>();
@@ -1234,7 +1236,7 @@ export const mapSolInstructionSummaries = ({
 
 	const accountMints = collectAccountMints({ flattened, addressToToken });
 
-	const noOps = noOpCreations({ flattened, accountLamports });
+	const noOps = noOpCreations({ flattened, accountHolders, accountMintsBefore });
 
 	const openedAt = ({ account, position }: { account: SolAddress; position: number }) =>
 		openedAs({ account, flattened, accountHolders, accountMintsBefore, until: position });

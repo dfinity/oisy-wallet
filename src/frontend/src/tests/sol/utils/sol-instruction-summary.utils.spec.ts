@@ -1074,6 +1074,8 @@ describe('sol-instruction-summary.utils', () => {
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
 				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' },
 				includeUnrecognised: true
 			});
 
@@ -1105,10 +1107,44 @@ describe('sol-instruction-summary.utils', () => {
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
 				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' },
 				includeUnrecognised: true
 			});
 
 			expect(views.map(({ kind }) => kind)).not.toContain('unknown');
+		});
+
+		// An associated account's address can hold lamports before anything opens an account at it,
+		// and the program then opens one on top of them rather than doing nothing. Lamports alone
+		// do not say the account was there, only a token account in the state before does.
+		it('should keep an idempotent creation over an address that holds lamports but no account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 1_000_000n },
+				includeUnrecognised: true
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
 		});
 
 		// An account this message opens has no pre-state, so asking only about the state before the
@@ -1202,7 +1238,9 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
-				accountLamports: { [ata]: 2_039_280n }
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' }
 			});
 
 			expect(views.map(({ kind }) => kind)).toContain('createTokenAccount');
@@ -1291,7 +1329,9 @@ describe('sol-instruction-summary.utils', () => {
 				],
 				ownedAddresses: [owner, ata],
 				userAddress: owner,
-				accountLamports: { [ata]: 2_039_280n }
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' }
 			});
 
 			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
