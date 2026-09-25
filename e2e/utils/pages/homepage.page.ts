@@ -9,6 +9,7 @@ import {
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
 	MOBILE_NAVIGATION_MENU,
+	MODAL_BACKDROP,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
@@ -264,7 +265,23 @@ abstract class Homepage {
 		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH`, options });
 	}
 
+	private async dismissModalBackdropIfPresent(): Promise<void> {
+		// Post-login RewardGuard can open WelcomeModal on a fresh identity, leaving
+		// a backdrop overlay that intercepts pointer events on the navigation menu
+		// button. The backdrop sits behind the modal wrapper so a normal click on
+		// it is intercepted by the dialog content — press Escape to trigger the
+		// Modal's own close handler.
+		const backdrop = this.#page.getByTestId(MODAL_BACKDROP).filter({ visible: true });
+		if ((await backdrop.count()) === 0) {
+			return;
+		}
+		await this.#page.keyboard.press('Escape');
+		await backdrop.first().waitFor({ state: 'hidden' });
+	}
+
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
+		await this.dismissModalBackdropIfPresent();
+
 		await this.clickByTestId({ testId: NAVIGATION_MENU_BUTTON });
 		await this.waitForNavigationMenu();
 
