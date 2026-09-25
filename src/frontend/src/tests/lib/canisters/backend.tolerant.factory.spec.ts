@@ -4,6 +4,8 @@ import {
 	tolerantIdlFactoryBackend
 } from '$lib/canisters/backend.tolerant.factory';
 import { ZERO } from '$lib/constants/app.constants';
+import { candidFieldHash } from '$lib/utils/candid.utils';
+import { resolveNetworkSettingsKeys } from '$lib/utils/user-networks.utils';
 import { IDL } from '@icp-sdk/core/candid';
 
 const retTypes = (service: IDL.ServiceClass): IDL.Type[] =>
@@ -87,6 +89,21 @@ describe('backend.tolerant.factory', () => {
 			expect(result.Ok.settings).toHaveLength(1);
 
 			expect(result.Ok.settings[0].networks.networks).toHaveLength(2);
+		});
+
+		it('should resolve the known key and report only the unknown one', () => {
+			const [result] = IDL.decode(retTypes(tolerantIdlFactoryBackend({ IDL })), bytes) as [
+				{ Ok: { settings: { networks: { networks: [object, typeof SETTINGS][] } }[] } }
+			];
+
+			const { networks, unresolved } = resolveNetworkSettingsKeys({
+				networks: result.Ok.settings[0].networks.networks,
+				names: networkSettingsForNames()
+			});
+
+			expect(networks).toEqual([[{ SolanaMainnet: null }, SETTINGS]]);
+
+			expect(unresolved).toEqual([`_${candidFieldHash('FutureNetworkMainnet')}_`]);
 		});
 	});
 });
