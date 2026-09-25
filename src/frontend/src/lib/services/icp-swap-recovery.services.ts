@@ -212,9 +212,10 @@ export const loadIcpSwapRecoverableBalances = async ({
  * Within a batch the queries are settled independently. A pool that fails is counted, not thrown,
  * so one bad pool cannot cost the user every other result.
  *
- * `isCancelled` is checked once the pool table arrives and before every batch, so a scan the
- * caller no longer wants - superseded by a newer scan or a pair lookup - stops issuing queries
- * instead of running every remaining round for a result nobody will read.
+ * `isCancelled` is checked once the pool table arrives, before every batch and once more after the
+ * last, so a scan the caller no longer wants - superseded by a newer scan or a pair lookup - stops
+ * issuing queries instead of running every remaining round, and one superseded during its final
+ * round is still reported as cancelled rather than returned.
  *
  * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
  * Those are reachable through the manual pair lookup above; widening the filter is not viable,
@@ -272,6 +273,10 @@ export const scanIcpSwapPools = async ({
 				candidatePools.slice(i, i + ICP_SWAP_SCAN_CONCURRENCY).map(readPool)
 			))
 		);
+	}
+
+	if (isCancelled()) {
+		throw new IcpSwapScanCancelledError();
 	}
 
 	return {

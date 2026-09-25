@@ -308,6 +308,18 @@ describe('icp-swap-recovery.services', () => {
 				expect(getUserUnusedBalance).toHaveBeenCalledTimes(ICP_SWAP_SCAN_CONCURRENCY);
 			});
 
+			it('reports a scan superseded during its final batch as cancelled, not complete', async () => {
+				// Every query, final batch included, has gone out before the cancellation lands, so
+				// there is no next batch to notice it.
+				const isCancelled = () => vi.mocked(getUserUnusedBalance).mock.calls.length >= poolCount;
+
+				await expect(
+					scanIcpSwapPools({ identity: mockIdentity, tokens: [tokenA, ...manyTokens], isCancelled })
+				).rejects.toThrow(IcpSwapScanCancelledError);
+
+				expect(getUserUnusedBalance).toHaveBeenCalledTimes(poolCount);
+			});
+
 			it('sends no balance query when cancelled while the pool table loads', async () => {
 				await expect(
 					scanIcpSwapPools({
