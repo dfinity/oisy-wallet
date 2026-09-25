@@ -760,6 +760,42 @@ describe('token.utils', () => {
 			});
 		});
 
+		describe("a symbol that spells out another token's suffixed label", () => {
+			// A custom ledger can set its symbol to the literal text of the real token's suffixed
+			// label. As a raw string it is unique, so it used to be left as is.
+			const forger = {
+				...mockValidIcToken,
+				symbol: 'XYZ (qaa6y-5...afa-cai)',
+				ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
+			};
+
+			it("cannot end up with the real token's label", () => {
+				const labels = buildIcTokenLabels([real, impostor, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ (qaa6y-5...afa-cai)');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('is flagged even when nothing collides with the real token', () => {
+				// Unsuffixed, the forger would read as the real token disambiguated.
+				const labels = buildIcTokenLabels([real, forger]);
+
+				expect(labels.get(real.ledgerCanisterId)).toBe('XYZ');
+				expect(labels.get(forger.ledgerCanisterId)).toBe(
+					'XYZ (qaa6y-5...afa-cai) (ss2fx-d...coq-cai)'
+				);
+			});
+
+			it('keeps every label distinct', () => {
+				const tokens = [real, impostor, forger];
+				const labels = [...buildIcTokenLabels(tokens).values()];
+
+				expect(new Set(labels).size).toBe(tokens.length);
+			});
+		});
+
 		it('labels by the display symbol, which is what the user actually sees', () => {
 			const renamed = { ...real, oisySymbol: { oisySymbol: 'OSYM' } };
 
