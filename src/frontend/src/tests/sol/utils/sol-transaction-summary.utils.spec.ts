@@ -1005,6 +1005,24 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(ZERO);
 		});
 
+		// Lamports held on top of the reserve come back with the close, but as a balance returning,
+		// not as a refund of what opening an account cost.
+		it('should credit no more than the reserve of an account it closes', () => {
+			expect(
+				fee([
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress3,
+						returned: RENT * 2n,
+						reserve: RENT,
+						counterparty: WALLET
+					}
+				])
+			).toBe(RENT);
+		});
+
 		// Handing the user an account that was never theirs refunds nothing this figure charged.
 		it('should not credit a close of an account the user never owned', () => {
 			expect(fee([create(), { ...close(), counterparty: WALLET, ownAccount: false }])).toBe(RENT);

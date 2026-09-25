@@ -224,7 +224,7 @@ const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: num
  * paid into it.
  */
 const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
-	const { kind, returned, ownAccount } = closes[index] ?? {};
+	const { kind, returned, ownAccount, reserve } = closes[index] ?? {};
 
 	// An account that was never the user's cost them no rent.
 	if (ownAccount === false) {
@@ -237,9 +237,19 @@ const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: nu
 		return openingRent({ closes, index });
 	}
 
-	// A plain token account holds nothing but its rent, so what it hands back beyond what other
-	// closes paid into it is the rent.
-	return nonNullish(returned) ? maxBigInt(returned - paidIn({ closes, index }), ZERO) : ZERO;
+	if (isNullish(returned)) {
+		return ZERO;
+	}
+
+	// What a plain token account hands back beyond what other closes paid into it is its own, and
+	// of that only the reserve is rent. Lamports held on top of it come back with the close, but as
+	// a balance returning rather than as a refund of what opening an account cost, and counted as
+	// rent they cancel the rent of accounts the message still opens. Where the reserve is not known
+	// the whole of it stands: crediting nothing instead would charge the rent of every account a
+	// message opens and closes again, which is the ordinary case, to guard against the rare one.
+	const own = maxBigInt(returned - paidIn({ closes, index }), ZERO);
+
+	return nonNullish(reserve) && own > reserve ? reserve : own;
 };
 
 /**
