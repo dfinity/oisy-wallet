@@ -136,6 +136,7 @@
 			"source_code": "Source code",
 			"documentation": "Documentation",
 			"support": "Support",
+			"help": "Help",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
@@ -163,6 +164,7 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
+			"help_page": "Open the help page",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
@@ -786,6 +788,47 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "Set privacy mode on and off"
+		}
+	},
+	"help": {
+		"text": {
+			"title": "Help",
+			"support_title": "Support",
+			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
+			"support_link": "Visit our support page",
+			"icpswap_title": "ICPSwap Token Withdrawal",
+			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
+			"scan": "Scan my pools",
+			"scanning": "Checking your pools…",
+			"scan_hint": "Checks every pool between two tokens active in your wallet. If you swapped into a token you never enabled, enable it first, then scan again or name the pair below.",
+			"scan_nothing_found": "Nothing left behind in the $pools pools checked.",
+			"scan_unreadable": "$unreadable of the $pools pools could not be read. Try again, or name the pair below.",
+			"or_pick_a_pair": "Or name a pair",
+			"token_first": "First token",
+			"token_second": "Second token",
+			"select_token": "Select",
+			"no_tokens": "Only ICP can be picked. Enable the pool's missing token first, or both tokens if the pool doesn't include ICP.",
+			"checking_pool": "Checking the pool…",
+			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
+			"results_found": "Withdrawable balances found: $balances.",
+			"balance_unused": "Unused balance",
+			"withdraw": "Withdraw"
+		},
+		"alt": {
+			"select_token_first": "Select the first token of the pool",
+			"select_token_second": "Select the second token of the pool",
+			"withdraw": "Withdraw $symbol from the pool",
+			"scan": "Scan the pools between your active tokens"
+		},
+		"error": {
+			"pool_not_found": "Could not find a pool for this pair. Check the two tokens, or try again shortly.",
+			"load_failed": "Could not read your balances from this pool.",
+			"withdraw_failed": "The withdrawal failed.",
+			"scan_failed": "Could not fetch the list of ICPSwap pools."
+		},
+		"success": {
+			"withdraw": "Withdrew $amount $symbol from the pool.",
+			"withdraw_hidden": "Withdrew $symbol from the pool."
 		}
 	},
 	"settings": {
