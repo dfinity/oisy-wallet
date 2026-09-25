@@ -128,42 +128,130 @@ export const solRentPaidToOthers = ({
 	}, ZERO);
 };
 
+const isClose = ({ kind }: SolInstructionSummary): boolean =>
+	kind === 'closeTokenAccount' || kind === 'unwrap';
+
 /**
- * What earlier closes paid into the account a close is closing, since it last opened.
+ * The positions of the earlier closes that paid into the account a close is closing, since it last
+ * opened.
  *
- * One level only: each of those payouts already carries whatever flowed into its own account, so
- * subtracting them from this one leaves exactly this account's own lamports. A close of the same
- * account earlier on ended the account it paid into, so what reached it before that is no part of
- * this one.
+ * A close of the same account earlier on ended the account it paid into, so what reached it before
+ * that is no part of this one.
  */
-const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
+const closesInto = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): number[] => {
 	const { account } = closes[index] ?? {};
 
 	if (isNullish(account)) {
-		return ZERO;
+		return [];
 	}
-
-	const isClose = ({ kind }: SolInstructionSummary): boolean =>
-		kind === 'closeTokenAccount' || kind === 'unwrap';
 
 	const reopenedAfter = closes
 		.slice(0, index)
 		.findLastIndex((close) => isClose(close) && close.account === account);
 
 	return closes
-		.slice(reopenedAfter + 1, index)
-		.reduce(
-			(acc, close) =>
-				isClose(close) && close.counterparty === account && nonNullish(close.returned)
-					? acc + close.returned
+		.slice(0, index)
+		.reduce<number[]>(
+			(acc, close, position) =>
+				position > reopenedAfter && isClose(close) && close.counterparty === account
+					? [...acc, position]
 					: acc,
-			ZERO
+			[]
 		);
 };
 
 /**
- * What the token accounts cost the transaction: the rent of the ones it opens, less what the ones
- * it closes hand back.
+ * What earlier closes paid into the account a close is closing, since it last opened.
+ *
+ * One level only: each of those payouts already carries whatever flowed into its own account, so
+ * subtracting them from this one leaves exactly this account's own lamports.
+ */
+const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint =>
+	closesInto({ closes, index }).reduce(
+		(acc, position) => acc + (closes[position]?.returned ?? ZERO),
+		ZERO
+	);
+
+/**
+ * The rent a close hands back of what its own account cost, leaving aside anything other closes
+ * paid into it.
+ */
+const ownRent = ({
+	closes,
+	index,
+	rentPaidFor
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+	rentPaidFor: Record<string, bigint>;
+}): bigint => {
+	const { kind, account, returned, ownAccount } = closes[index] ?? {};
+
+	// An account that was never the user's cost them no rent.
+	if (ownAccount === false) {
+		return ZERO;
+	}
+
+	// An unwrap's balance is mostly the SOL wrapped in it, so its rent is the rent the same
+	// transaction paid to open it.
+	if (kind === 'unwrap') {
+		return nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO;
+	}
+
+	// A plain token account holds nothing but its rent, so what it hands back beyond what other
+	// closes paid into it is the rent.
+	return nonNullish(returned) ? maxBigInt(returned - paidIn({ closes, index }), ZERO) : ZERO;
+};
+
+/**
+ * The rent a close brings back: its own account's, and what each earlier close into that account
+ * brought with it.
+ *
+ * A close hands on everything its account holds, the payouts of earlier closes into it included,
+ * so the user's rent can come home through an account that was never theirs: close one of theirs
+ * into somebody else's, and that one to the wallet. Reading the last close alone loses the rent
+ * there, since that account's balance is none of theirs, and where the last account is theirs it
+ * reads whatever else reached it as rent - the SOL wrapped in an account closed into it, for one.
+ *
+ * Never more than the close hands over. A wrapped SOL account passes lamports on with every token
+ * transfer out, and what left it that way before its close never reached the wallet through it.
+ *
+ * Only earlier closes are followed, so a message that closes accounts into each other in a cycle
+ * still reads to an end.
+ *
+ * And only the closes the list carries, which leaves one reading short. A close of somebody else's
+ * account is listed only when it pays the wallet, so a chain through two of them in a row loses the
+ * rent at the first, and what such a close pays into an account of the user's is read as that
+ * account's own.
+ */
+const rentBrought = ({
+	closes,
+	index,
+	rentPaidFor
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+	rentPaidFor: Record<string, bigint>;
+}): bigint => {
+	const { returned } = closes[index] ?? {};
+
+	const brought = closesInto({ closes, index }).reduce(
+		(acc, position) => acc + rentBrought({ closes, index: position, rentPaidFor }),
+		ownRent({ closes, index, rentPaidFor })
+	);
+
+	return nonNullish(returned) && returned < brought ? returned : brought;
+};
+
+/**
+ * What the token accounts cost the transaction: the rent of the ones it opens, less the rent the
+ * ones it closes bring back.
  *
  * A transaction that opens one account and closes another charges only the difference, and one
  * that closes as many as it opens charges nothing at all. Reporting the rent of the opens alone
@@ -180,10 +268,12 @@ const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: num
  * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
  * never this transaction's to charge.
  *
- * Only a close that pays the wallet is credited. One that names anywhere else spends the balance
- * rather than returning it - an account of the user's own included, where the lamports end up
- * under its rent reserve rather than in a balance they can spend - and a close of an account that
- * was never the user's refunds nothing this figure charged.
+ * Only a close that pays the wallet is credited, and only with the rent it brings back. One that
+ * names anywhere else spends the balance rather than returning it - an account of the user's own
+ * included, where the lamports end up under its rent reserve rather than in a balance they can
+ * spend. And what a close hands back is not the rent it brings: it can hold more, the SOL wrapped
+ * in an account closed into it, and less, when the rent came home through an account that was
+ * never the user's.
  */
 export const solAtaFee = ({
 	instructions,
@@ -203,14 +293,14 @@ export const solAtaFee = ({
 	}, {});
 
 	return maxBigInt(
-		flattened.reduce((acc, { kind, account, rent, returned, counterparty, ownAccount }) => {
+		flattened.reduce((acc, current, index) => {
+			const { kind, rent, counterparty } = current;
+
 			if (kind === 'createTokenAccount' && nonNullish(rent)) {
 				return acc + rent;
 			}
 
-			// An account that was never the user's cost them no rent, so handing them its balance
-			// is not a refund of anything this figure charged.
-			if (ownAccount === false) {
+			if (!isClose(current)) {
 				return acc;
 			}
 
@@ -220,9 +310,9 @@ export const solAtaFee = ({
 			// the user's own included, where the lamports end up under its rent reserve rather than
 			// back in a balance they can spend.
 			//
-			// Asking about the wallet is also what makes a chain of closes answer itself. Closing A
-			// into B and B into the wallet credits the second alone, and the amount it carries is
-			// everything that reached B, A's balance included: crediting both would count A twice.
+			// Asking about the wallet is also what keeps a chain of closes from counting twice.
+			// Closing A into B and B into the wallet credits the second alone, with the rent it
+			// brings back from A.
 			//
 			// A close naming no destination keeps its refund. Those are the closes recorded before
 			// the destination was read, and turning them into losses would be its own misreport.
@@ -230,12 +320,7 @@ export const solAtaFee = ({
 				return acc;
 			}
 
-			if (kind === 'unwrap') {
-				return acc - (nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO);
-			}
-
-			// A plain token account holds nothing but its rent, so what it hands back is the rent.
-			return kind === 'closeTokenAccount' && nonNullish(returned) ? acc - returned : acc;
+			return acc - rentBrought({ closes: flattened, index, rentPaidFor });
 		}, ZERO),
 		ZERO
 	);

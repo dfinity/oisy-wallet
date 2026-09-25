@@ -686,20 +686,152 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(RENT);
 		});
 
-		// The message is the dApp's to arrange, so a crafted one can name a cycle of closes. Asking
-		// only about the wallet never follows one, which is what keeps it from being walked at all.
-		it('should not follow a cycle of closes', () => {
-			expect(() =>
+		// A close hands on everything its account holds, so the user's rent reaches the wallet
+		// through an account that was never theirs as surely as through one of their own.
+		it('should credit the rent that comes home through an account of somebody else', () => {
+			expect(
 				fee([
+					create(),
+					{ ...close(), counterparty: mockAtaAddress2 },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT * 2n,
+						counterparty: WALLET,
+						ownAccount: false
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		// Both closes of that chain reach the list: the first because the account is the user's,
+		// the second because it pays their wallet.
+		it('should credit the rent that comes home through an account of somebody else as listed', () => {
+			const token = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+
+			const instructions = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: mockAtaAddress,
+								lamports: 2_039_280,
+								owner: token,
+								source: WALLET,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: token,
+						parsed: {
+							type: 'initializeAccount3',
+							info: { account: mockAtaAddress, mint: mockSplAddress, owner: WALLET }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: token,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockAtaAddress, destination: mockAtaAddress2, owner: WALLET }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: token,
+						parsed: {
+							type: 'closeAccount',
+							info: { account: mockAtaAddress2, destination: WALLET, owner: STRANGER }
+						}
+					}
+				],
+				ownedAddresses: [WALLET, mockAtaAddress],
+				userAddress: WALLET,
+				accountHolders: { [mockAtaAddress2]: STRANGER },
+				accountLamports: { [mockAtaAddress2]: RENT },
+				addressToToken: { [mockAtaAddress]: mockSplAddress },
+				rentExemptMinimum: RENT
+			});
+
+			expect(fee(instructions)).toBe(ZERO);
+		});
+
+		// A wrapped SOL account passes lamports on with every token transfer out, so what reached it
+		// from the user may have left before its close.
+		it('should credit no more than a close hands over', () => {
+			expect(
+				fee([
+					create(),
+					{ ...close(), counterparty: mockAtaAddress2 },
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress2,
+						returned: RENT - 1_000n,
+						counterparty: WALLET,
+						ownAccount: false
+					}
+				])
+			).toBe(1_000n);
+		});
+
+		// Closing a wrapped SOL account into another account hands over the wrapped SOL too, and
+		// crediting that as rent cancels the rent of an account the transaction still opened.
+		it('should not credit the SOL wrapped in an account closed into another', () => {
+			expect(
+				fee([
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress3, rent: RENT },
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress2,
+						returned: RENT + 5_000_000_000n,
+						counterparty: mockAtaAddress
+					},
+					{ ...close(RENT * 2n + 5_000_000_000n), counterparty: WALLET }
+				])
+			).toBe(RENT);
+		});
+
+		// An unwrap is credited with the rent that opened its own account, and the rent of an
+		// account closed into it comes home with it all the same.
+		it('should credit the rent of an account closed into a wrapped SOL account', () => {
+			expect(
+				fee([
+					create(),
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{ ...close(), counterparty: mockAtaAddress2 },
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress2,
+						returned: RENT * 2n + 5_000_000_000n,
+						counterparty: WALLET
+					}
+				])
+			).toBe(ZERO);
+		});
+
+		// The message is the dApp's to arrange, so a crafted one can name a cycle of closes. Only
+		// earlier closes are followed, so one still reads to an end.
+		it('should read a cycle of closes to an end', () => {
+			expect(
+				fee([
+					create(),
 					{ ...close(), counterparty: mockAtaAddress2 },
 					{
 						kind: 'closeTokenAccount',
 						account: mockAtaAddress2,
 						returned: RENT,
 						counterparty: mockAtaAddress
-					}
+					},
+					{ ...close(), counterparty: WALLET }
 				])
-			).not.toThrow();
+			).toBe(ZERO);
 		});
 
 		// The account is gone by the end of the transaction, so its rent is back in the wallet.
