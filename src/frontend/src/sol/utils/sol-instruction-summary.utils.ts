@@ -863,8 +863,9 @@ const openedAs = ({
 	);
 
 /**
- * The mint an account the message creates is opened for: the one the initialisation that follows
- * the creation names, before anything closes the account again.
+ * The mint of the account the message opens at an address next, from an instruction on: the one
+ * its initialisation or its associated account creation names, before anything closes an account
+ * there.
  *
  * An address opened for one mint, closed and opened for another is two accounts, and reading the
  * mint from the run's single map lends the first the second's: its line names the wrong token, and
@@ -886,12 +887,14 @@ const mintOpenedWith = ({
 				parsed: { type, info }
 			}
 		}) =>
-			nonNullish(program) &&
-			TOKEN_PROGRAMS.includes(program) &&
 			address({ info, key: 'account' }) === account &&
-			['initializeAccount', 'initializeAccount2', 'initializeAccount3', 'closeAccount'].includes(
-				type
-			)
+			((nonNullish(program) &&
+				TOKEN_PROGRAMS.includes(program) &&
+				['initializeAccount', 'initializeAccount2', 'initializeAccount3', 'closeAccount'].includes(
+					type
+				)) ||
+				(program === 'spl-associated-token-account' &&
+					['create', 'createIdempotent'].includes(type)))
 	);
 
 	if (isNullish(next) || next.instruction.parsed.type === 'closeAccount') {
@@ -1112,19 +1115,24 @@ const rentOf = ({
 /**
  * Wrapping is a System transfer into a wrapped SOL account the user owns. Nothing in the
  * instruction says so, which is why it is recognised by its destination rather than by its name.
+ *
+ * The destination's mint as of the transfer, the account it holds then: an address closed and
+ * opened again for another mint within the message would otherwise read a transfer into either by
+ * the last. Where nothing is open there yet, the account the message opens there next, which is
+ * where SOL sent ahead of its opening ends up.
  */
 const asWrap = ({
 	effect,
-	accountMints
+	mintOf
 }: {
 	effect: Omit<Effect, 'parentIndex'>;
-	accountMints: Record<SolAddress, SplTokenAddress>;
+	mintOf: (account: SolAddress) => SplTokenAddress | undefined;
 }): Omit<Effect, 'parentIndex'> =>
 	effect.kind === 'send' &&
 	isNullish(effect.tokenAddress) &&
 	nonNullish(effect.counterparty) &&
 	(effect.own ?? false) &&
-	accountMints[effect.counterparty] === WSOL_TOKEN.address
+	mintOf(effect.counterparty) === WSOL_TOKEN.address
 		? {
 				kind: 'wrap',
 				...(nonNullish(effect.amount) && { amount: effect.amount }),
@@ -1309,7 +1317,11 @@ export const mapSolInstructionSummaries = ({
 				return acc;
 			}
 
-			const wrapped = asWrap({ effect, accountMints });
+			const wrapped = asWrap({
+				effect,
+				mintOf: (account) =>
+					mintAt({ account, position }) ?? mintOpenedWith({ account, flattened, from: position })
+			});
 
 			const rent =
 				wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)

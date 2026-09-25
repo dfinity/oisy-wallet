@@ -997,6 +997,70 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBe(5n);
 		});
 
+		// A transfer into an account is a wrap by the account the address holds at the transfer.
+		// Read from the run's single map, an address opened for two mints judges a transfer into
+		// either by the last one.
+		describe('a SOL transfer into an address opened for two mints', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const account = 'wso1Account11111111111111111111111111111111';
+
+			const openAs = (mint: string) => ({
+				program: 'spl-associated-token-account',
+				programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+				parsed: { type: 'create', info: { account, mint, source: owner, wallet: owner } }
+			});
+
+			const transfer = {
+				program: 'system',
+				programId: '11111111111111111111111111111111',
+				parsed: {
+					type: 'transfer',
+					info: { source: owner, destination: account, lamports: 1_000_000 }
+				}
+			};
+
+			const close = {
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'closeAccount', info: { account, destination: owner, owner } }
+			};
+
+			const kindOfTransfer = (instructions: unknown[]): string | undefined =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [owner],
+					userAddress: owner
+				}).find(({ kind }) => kind === 'wrap' || kind === 'send')?.kind;
+
+			it('should read it as a wrap while the address holds wrapped SOL', () => {
+				expect(
+					kindOfTransfer([
+						openAs(WSOL_TOKEN.address),
+						transfer,
+						close,
+						openAs('bonkMint1111111111111111111111111111111111')
+					])
+				).toBe('wrap');
+			});
+
+			it('should read it as a send while the address holds any other mint', () => {
+				expect(
+					kindOfTransfer([
+						openAs('bonkMint1111111111111111111111111111111111'),
+						transfer,
+						close,
+						openAs(WSOL_TOKEN.address)
+					])
+				).toBe('send');
+			});
+
+			// SOL sent to the address before anything is open there ends up in the account the
+			// message opens there next.
+			it('should read it by the account opened next when nothing is open yet', () => {
+				expect(kindOfTransfer([transfer, openAs(WSOL_TOKEN.address)])).toBe('wrap');
+			});
+		});
+
 		// Any other mint keeps its balance as a number in the account, not as the lamports under
 		// it, so a transfer of one moves none.
 		it('should not count a transfer of any other mint as lamports', () => {
