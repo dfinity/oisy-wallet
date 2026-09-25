@@ -23,7 +23,17 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
-import { AccountRole, address, createNoopSigner } from '@solana/kit';
+import {
+	AccountRole,
+	address,
+	appendTransactionMessageInstruction,
+	blockhash,
+	createNoopSigner,
+	createTransactionMessage,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash
+} from '@solana/kit';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
@@ -220,19 +230,30 @@ describe('sol-simulation.services', () => {
 			Promise.resolve(simulated({ accounts: accountAt(params) }))
 		);
 
-		const result = await simulateSolTransaction(
-			params({
-				feePayer: { address: mockSolAddress },
-				instructions: [
+		const transactionMessage = pipe(
+			createTransactionMessage({ version: 0 }),
+			(tx) => setTransactionMessageFeePayer(address(mockSolAddress), tx),
+			(tx) =>
+				setTransactionMessageLifetimeUsingBlockhash(
+					{
+						blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+						lastValidBlockHeight: 100n
+					},
+					tx
+				),
+			(tx) =>
+				appendTransactionMessageInstruction(
 					getCreateAssociatedTokenIdempotentInstruction({
 						payer: createNoopSigner(address(mockSolAddress)),
 						ata: address(mockAtaAddress),
 						owner: address(mockSolAddress),
 						mint: address(mockSplAddress)
-					})
-				]
-			} as unknown as CompilableTransactionMessage)
+					}),
+					tx
+				)
 		);
+
+		const result = await simulateSolTransaction(params(transactionMessage));
 
 		expect(result?.instructions).toStrictEqual([]);
 	});
@@ -278,7 +299,7 @@ describe('sol-simulation.services', () => {
 							instructions: [
 								{
 									program: 'spl-token',
-									programId: TOKEN_PROGRAM_ADDRESS,
+									programId: address(TOKEN_PROGRAM_ADDRESS),
 									parsed: {
 										type: 'transfer',
 										info: {
@@ -291,7 +312,7 @@ describe('sol-simulation.services', () => {
 								},
 								{
 									program: 'spl-token',
-									programId: TOKEN_PROGRAM_ADDRESS,
+									programId: address(TOKEN_PROGRAM_ADDRESS),
 									parsed: {
 										type: 'closeAccount',
 										info: {
@@ -303,7 +324,7 @@ describe('sol-simulation.services', () => {
 								},
 								{
 									program: 'spl-token',
-									programId: TOKEN_PROGRAM_ADDRESS,
+									programId: address(TOKEN_PROGRAM_ADDRESS),
 									parsed: {
 										type: 'initializeAccount3',
 										info: { account: mockAtaAddress, mint: mockSplAddress, owner: mockSolAddress }
@@ -311,7 +332,7 @@ describe('sol-simulation.services', () => {
 								}
 							]
 						}
-					] as unknown as SolanaSimulatedInnerInstructions
+					]
 				})
 			);
 

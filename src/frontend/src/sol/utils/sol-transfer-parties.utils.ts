@@ -1,10 +1,6 @@
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type {
-	SolInstruction,
-	SolParsedRpcInstruction,
-	SolRpcInstruction
-} from '$sol/types/sol-instructions';
+import type { SolInstruction, SolRpcInstruction } from '$sol/types/sol-instructions';
 import type {
 	SolanaSimulatedInnerInstruction,
 	SolanaSimulatedInnerInstructions
@@ -82,11 +78,24 @@ type Holders = Partial<Record<SolAddress, SolAddress>>;
 
 const TOKEN_PROGRAMS = ['spl-token', 'spl-token-2022'];
 
-const addressIn = ({ info, key }: { info: object; key: string }): SolAddress | undefined => {
-	const value: unknown = (info as Record<string, unknown>)[key];
+const addressIn = ({
+	info,
+	key
+}: {
+	info: object | undefined;
+	key: string;
+}): SolAddress | undefined => {
+	const value: unknown = nonNullish(info) ? (info as Record<string, unknown>)[key] : undefined;
 
 	return typeof value === 'string' ? value : undefined;
 };
+
+// What the walk reads of a parsed instruction, which the message's own instructions and the run's
+// inner ones both provide, in slightly different shapes.
+interface ParsedStep {
+	program?: string;
+	parsed: { type: string; info?: object };
+}
 
 /**
  * Who holds each token account once an instruction has run, from who held it before. An opening
@@ -98,7 +107,7 @@ const holdersAfter = ({
 	instruction
 }: {
 	holders: Holders;
-	instruction: SolParsedRpcInstruction | undefined;
+	instruction: ParsedStep | undefined;
 }): Holders => {
 	if (isNullish(instruction)) {
 		return holders;
@@ -180,7 +189,7 @@ const mapSolInnerTransferLegs = async ({
 
 			const next = holdersAfter({
 				holders: current,
-				instruction: 'parsed' in instruction ? (instruction as SolParsedRpcInstruction) : undefined
+				instruction: 'parsed' in instruction ? instruction : undefined
 			});
 
 			if (!('parsed' in instruction) || !isSolTransferInstruction(instruction)) {
