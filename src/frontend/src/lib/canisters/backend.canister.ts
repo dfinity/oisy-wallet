@@ -134,8 +134,8 @@ export class BackendCanister extends Canister<BackendService> {
 			certifiedIdlFactory: idlCertifiedFactoryBackend
 		});
 
-		// Read-only companions. `IDL.Unknown` cannot be serialized, so these must never be used for
-		// a call that sends a `NetworkSettingsFor` — only `get_user_profile` reads through them.
+		// Tolerant companions for methods that return a user profile. `IDL.Unknown` cannot be serialized,
+		// so only `get_user_profile` and argument-free `create_user_profile` may use them.
 		const { service: tolerantService, certifiedService: tolerantCertifiedService } =
 			createServices<BackendService>({
 				options: {
