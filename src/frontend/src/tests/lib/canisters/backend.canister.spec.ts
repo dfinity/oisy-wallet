@@ -226,6 +226,43 @@ describe('backend.canister', () => {
 		expect(res).toEqual(response);
 	});
 
+	// `create_user_profile` is idempotent: an existing user gets their stored profile back, and it
+	// goes into the store exactly as a read would. So it needs the same key normalisation — a
+	// hashed key reaching the store unresolved is the settings loss this decode exists to prevent.
+	it('resolves hashed network settings keys returned by create user profile', async () => {
+		service.create_user_profile.mockResolvedValue({
+			Ok: {
+				...mockedUserProfile,
+				settings: [
+					{
+						networks: {
+							// @ts-expect-error A key the generated bindings cannot name — exactly what the
+							// tolerant decode yields before it is resolved
+							networks: [[{ _2986158464_: null }, { enabled: true, is_testnet: false }]],
+							testnets: { show_testnets: false }
+						},
+						notifications: [],
+						dapp: { dapp_carousel: { hidden_dapp_ids: [] } },
+						experimental_features: { experimental_features: [] },
+						transactions: []
+					}
+				]
+			}
+		});
+
+		const { createUserProfile } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = await createUserProfile();
+
+		const [settings] = 'Ok' in res ? res.Ok.settings : [];
+
+		expect(settings?.networks.networks).toEqual([
+			[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+		]);
+	});
+
 	it('should throw SignupsClosedError when backend returns SignupsClosed', async () => {
 		service.create_user_profile.mockResolvedValue({ Err: { SignupsClosed: null } });
 
