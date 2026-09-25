@@ -298,11 +298,14 @@ const expandOwnedAccounts = ({
 const transferEffect = ({
 	info,
 	owned,
-	accountMints
+	mintOf
 }: {
 	info: object;
 	owned: Set<SolAddress>;
-	accountMints: Record<SolAddress, SplTokenAddress>;
+	// Which mint an account holds as of the transfer. An unchecked transfer names no mint, and the
+	// run's single map holds whichever account an address held last: one closed and opened again
+	// for another mint within the message would lend a transfer made before that the later mint.
+	mintOf: (account: SolAddress) => SplTokenAddress | undefined;
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	const source = address({ info, key: 'source' });
 	const destination = address({ info, key: 'destination' });
@@ -314,8 +317,8 @@ const transferEffect = ({
 
 	const tokenAddress =
 		address({ info, key: 'mint' }) ??
-		(nonNullish(source) ? accountMints[source] : undefined) ??
-		(nonNullish(destination) ? accountMints[destination] : undefined);
+		(nonNullish(source) ? mintOf(source) : undefined) ??
+		(nonNullish(destination) ? mintOf(destination) : undefined);
 
 	// The authority is what makes a transfer the user's own: an SPL transfer names token accounts,
 	// and the user's account is the one their wallet signs for, not one whose address they know.
@@ -478,7 +481,11 @@ const toEffect = ({
 
 	if (nonNullish(program) && TOKEN_PROGRAMS.includes(program)) {
 		if (['transfer', 'transferChecked'].includes(type)) {
-			return transferEffect({ info, owned, accountMints });
+			return transferEffect({
+				info,
+				owned,
+				mintOf: (account) => mintAt({ account, position })
+			});
 		}
 
 		if (type === 'closeAccount') {

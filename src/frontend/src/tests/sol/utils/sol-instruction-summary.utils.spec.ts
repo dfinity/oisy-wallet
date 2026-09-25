@@ -1061,6 +1061,67 @@ describe('sol-instruction-summary.utils', () => {
 			});
 		});
 
+		// An unchecked transfer names no mint, so the mint is the one its account holds at the
+		// transfer. Read from the run's single map, a send made before the address is opened again
+		// for another mint is stated in the later mint, with its decimals.
+		it('should read an unchecked transfer by the mint its account holds at the transfer', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const account = 'mineAccount11111111111111111111111111111111';
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: account,
+								destination: 'friendBonkAccount1111111111111111111111111',
+								authority: owner,
+								amount: '100'
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account, destination: owner, owner } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: account,
+								lamports: 2_039_280,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'initializeAccount3', info: { account, mint: usdc, owner } }
+					}
+				],
+				ownedAddresses: [owner, account],
+				userAddress: owner,
+				accountHolders: { [account]: owner },
+				accountMintsBefore: { [account]: bonk },
+				accountLamports: { [account]: 2_039_280n },
+				accountTokenAmounts: { [account]: 100n },
+				addressToToken: { [account]: usdc }
+			});
+
+			expect(views.find(({ kind }) => kind === 'send')?.tokenAddress).toBe(bonk);
+		});
+
 		// Any other mint keeps its balance as a number in the account, not as the lamports under
 		// it, so a transfer of one moves none.
 		it('should not count a transfer of any other mint as lamports', () => {
