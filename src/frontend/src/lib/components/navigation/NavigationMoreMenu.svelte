@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import type { Action } from 'svelte/action';
+	import { goto } from '$app/navigation';
+	import { HELP_ENABLED } from '$env/help.env';
 	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
@@ -8,6 +10,7 @@
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Popover from '$lib/components/ui/Popover.svelte';
@@ -22,6 +25,7 @@
 		OISY_SUPPORT_URL,
 		OISY_TWITTER_URL
 	} from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MORE_MENU,
 		NAVIGATION_MORE_MENU_BUTTON,
@@ -31,14 +35,21 @@
 		NAVIGATION_MORE_MENU_SOURCE_CODE,
 		NAVIGATION_MORE_MENU_X
 	} from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import type { TrackEventParams } from '$lib/types/analytics';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface MoreMenuRow {
 		label: string;
 		ariaLabel: string;
-		href: string;
+		// Exactly one of these. `href` leaves the app in a new tab; `route` stays in
+		// it, in this tab.
+		href?: string;
+		route?: AppPath;
 		icon: Component;
 		testId: string;
 		trackEvent?: TrackEventParams;
@@ -52,15 +63,16 @@
 	// The rows, in the order they appear, split where the divider goes: the places
 	// to get help first, then the links that leave for somewhere else entirely.
 	//
-	// Help points at the support page in the documentation until the in-app Help
-	// page (#14019) lands. That PR's edit is this row's `href`, to `/help/`, and
-	// nothing else — the row, its position and its label are already right.
+	// Help opens the in-app Help page where that page is enabled, and the support
+	// page in the documentation everywhere else. Same row, label and position
+	// either way; only where it goes changes, so production keeps today's link
+	// until the page ships there.
 	const groups = $derived<MoreMenuRow[][]>([
 		[
 			{
 				label: $i18n.navigation.text.help,
 				ariaLabel: replaceOisyPlaceholders($i18n.navigation.alt.support),
-				href: OISY_SUPPORT_URL,
+				...(HELP_ENABLED ? { route: AppPath.Help } : { href: OISY_SUPPORT_URL }),
 				icon: IconHelp,
 				testId: NAVIGATION_MORE_MENU_HELP
 			},
@@ -119,6 +131,22 @@
 		return { destroy: () => node.remove() };
 	};
 
+	// Mirrors the account menu's Settings row: close first, and let the backdrop
+	// finish fading before the route changes, or the blur lingers over the page
+	// that just rendered and reads as a flicker.
+	const goToRoute = async (route: AppPath) => {
+		close();
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+		await goto(
+			networkUrl({
+				path: route,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
+
 	// `Popover` has no key handling of its own — its backdrop answers Enter and
 	// Space, not Escape — so a menu that is expected to close on Escape does it
 	// here. Scoped to this menu on purpose: teaching every popover in the app the
@@ -167,25 +195,32 @@
 					<Hr />
 				{/if}
 
-				{#each rows as { label, ariaLabel, href, icon: Icon, testId, trackEvent } (testId)}
-					<ExternalLink
-						{ariaLabel}
-						asMenuItem
-						asMenuItemCondensed
-						{href}
-						iconVisible={false}
-						{testId}
-						{trackEvent}
-					>
-						<Icon />
-						{label}
-						<!-- Its own trailing icon rather than `ExternalLink`'s: that one sits next
-						     to the label in the link's colour and would read as a second row icon.
-						     Pushed to the edge and muted, it is only a hint that the row leaves OISY. -->
-						<span class="ml-auto flex shrink-0 text-tertiary">
-							<IconExternalLink size="16" />
-						</span>
-					</ExternalLink>
+				{#each rows as { label, ariaLabel, href, route, icon: Icon, testId, trackEvent } (testId)}
+					{#if route}
+						<ButtonMenu {ariaLabel} onclick={() => goToRoute(route)} {testId}>
+							<Icon />
+							{label}
+						</ButtonMenu>
+					{:else if href}
+						<ExternalLink
+							{ariaLabel}
+							asMenuItem
+							asMenuItemCondensed
+							{href}
+							iconVisible={false}
+							{testId}
+							{trackEvent}
+						>
+							<Icon />
+							{label}
+							<!-- Its own trailing icon rather than `ExternalLink`'s: that one sits next
+							     to the label in the link's colour and would read as a second row icon.
+							     Pushed to the edge and muted, it is only a hint that the row leaves OISY. -->
+							<span class="ml-auto flex shrink-0 text-tertiary">
+								<IconExternalLink size="16" />
+							</span>
+						</ExternalLink>
+					{/if}
 				{/each}
 			{/each}
 		</div>

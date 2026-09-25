@@ -186,7 +186,7 @@ export const themeVariables = {
 		'arbitrum-100': '#203147',
 		'xrp-0': '#333333',
 		'xrp-100': '#131215',
-		'robinhood-0': '#02843A',
-		'robinhood-100': '#014421'
+		'robinhood-0': '#0E0E0E',
+		'robinhood-100': '#738428'
 	}
 };

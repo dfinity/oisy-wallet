@@ -139,6 +139,7 @@
 			"source_code": "الرمز المصدري",
 			"documentation": "الوثائق",
 			"support": "الدعم",
+			"help": "",
 			"confirm_navigate": "هل أنت متأكد أنك تريد الانتقال بعيدًا؟",
 			"vip_qr_code": "الرمز الخاص",
 			"binance_qr_code": "رمز باينانس التعريفي",
@@ -166,6 +167,7 @@
 			"menu": "عنوان محفظتك، الإعدادات، تسجيل الخروج والروابط الخارجية",
 			"documentation": "افتح وثائق $oisy_name",
 			"support": "افتح قسم الدعم في وثائق $oisy_name",
+			"help_page": "",
 			"open_twitter": "افتح حساب DFINITY X/Twitter",
 			"more": "",
 			"faq": "",
@@ -791,6 +793,60 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "تشغيل وإيقاف وضع الخصوصية"
+		}
+	},
+	"help": {
+		"text": {
+			"title": "",
+			"support_title": "",
+			"support_description": "",
+			"support_link": "",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "",
+			"icpswap_description": "",
+			"scan": "",
+			"scanning": "",
+			"scan_hint": "",
+			"scan_nothing_found": "",
+			"scan_unreadable": "",
+			"or_pick_a_pair": "",
+			"token_first": "",
+			"token_second": "",
+			"select_token": "",
+			"no_tokens": "",
+			"checking_pool": "",
+			"nothing_to_withdraw": "",
+			"results_found": "",
+			"balance_unused": "",
+			"withdraw": ""
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "",
+			"select_token_second": "",
+			"withdraw": "",
+			"scan": ""
+		},
+		"error": {
+			"pool_not_found": "",
+			"load_failed": "",
+			"withdraw_failed": "",
+			"scan_failed": ""
+		},
+		"success": {
+			"withdraw": "",
+			"withdraw_hidden": ""
 		}
 	},
 	"settings": {

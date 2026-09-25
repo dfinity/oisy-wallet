@@ -1,3 +1,4 @@
+import { goto } from '$app/navigation';
 import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
 import {
 	OISY_DOCS_URL,
@@ -6,6 +7,7 @@ import {
 	OISY_SUPPORT_URL,
 	OISY_TWITTER_URL
 } from '$lib/constants/oisy.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_MORE_MENU,
 	NAVIGATION_MORE_MENU_BUTTON,
@@ -17,6 +19,24 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
+const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
+
+vi.mock('$env/help.env', () => ({
+	get HELP_ENABLED() {
+		return featureFlags.helpEnabled;
+	}
+}));
+
+vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+
+// The rows that leave the app whatever the Help page's flag says.
+const EXTERNAL_ROWS = [
+	NAVIGATION_MORE_MENU_DOCUMENTATION,
+	NAVIGATION_MORE_MENU_FAQ,
+	NAVIGATION_MORE_MENU_SOURCE_CODE,
+	NAVIGATION_MORE_MENU_X
+];
+
 // The rows, in the order they must appear.
 const ROWS = [
 	NAVIGATION_MORE_MENU_HELP,
@@ -27,6 +47,11 @@ const ROWS = [
 ];
 
 describe('NavigationMoreMenu', () => {
+	beforeEach(() => {
+		featureFlags.helpEnabled = true;
+		vi.mocked(goto).mockReset();
+	});
+
 	const open = async () => {
 		const result = render(NavigationMoreMenu);
 
@@ -65,7 +90,6 @@ describe('NavigationMoreMenu', () => {
 	it('points each row where it says it goes', async () => {
 		const { getByTestId } = await open();
 
-		expect(getByTestId(NAVIGATION_MORE_MENU_HELP).getAttribute('href')).toBe(OISY_SUPPORT_URL);
 		expect(getByTestId(NAVIGATION_MORE_MENU_DOCUMENTATION).getAttribute('href')).toBe(
 			OISY_DOCS_URL
 		);
@@ -74,17 +98,51 @@ describe('NavigationMoreMenu', () => {
 		expect(getByTestId(NAVIGATION_MORE_MENU_X).getAttribute('href')).toBe(OISY_TWITTER_URL);
 	});
 
-	it('opens every row in a new tab, with noopener', async () => {
-		// All five leave the app today. A same-tab link would take the whole wallet
-		// with it; without `noopener` the opened page gets a `window.opener` handle.
+	it('opens every outbound row in a new tab, with noopener', async () => {
+		// A same-tab link would take the whole wallet with it; without `noopener` the
+		// opened page gets a `window.opener` handle.
 		const { getByTestId } = await open();
 
-		for (const testId of ROWS) {
+		for (const testId of EXTERNAL_ROWS) {
 			const row = getByTestId(testId);
 
 			expect(row.getAttribute('target')).toBe('_blank');
 			expect(row.getAttribute('rel')).toContain('noopener');
 		}
+	});
+
+	describe('Help', () => {
+		it('opens the in-app Help page where that page is enabled', async () => {
+			// In this tab rather than a new one: it is part of the wallet, not a
+			// place the reader is sent away to.
+			const { getByTestId, queryByTestId } = await open();
+
+			const help = getByTestId(NAVIGATION_MORE_MENU_HELP);
+
+			expect(help.tagName).toBe('BUTTON');
+			expect(help.getAttribute('target')).toBeNull();
+
+			await fireEvent.click(help);
+
+			await waitFor(() => expect(goto).toHaveBeenCalledOnce());
+
+			expect(vi.mocked(goto).mock.calls[0][0]).toContain(AppPath.Help);
+			expect(queryByTestId(NAVIGATION_MORE_MENU)).toBeNull();
+		});
+
+		it('keeps the documentation support page where the Help page is not enabled', async () => {
+			// Production, until the page ships there. Same row, same label, same
+			// place; only where it goes differs.
+			featureFlags.helpEnabled = false;
+
+			const { getByTestId } = await open();
+
+			const help = getByTestId(NAVIGATION_MORE_MENU_HELP);
+
+			expect(help.getAttribute('href')).toBe(OISY_SUPPORT_URL);
+			expect(help.getAttribute('target')).toBe('_blank');
+			expect(help.getAttribute('rel')).toContain('noopener');
+		});
 	});
 
 	it('opens upward, since the footer is pinned to the bottom of the viewport', async () => {

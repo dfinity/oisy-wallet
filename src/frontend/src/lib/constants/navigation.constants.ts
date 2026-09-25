@@ -25,5 +25,5 @@ export const MOBILE_NAVIGATION_BAR: NavigationBarSlot[] = [
 	{ type: 'item', id: 'activity' },
 	{ type: 'group', id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ type: 'item', id: 'notes' },
-	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'settings'] }
+	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'rewards', 'help', 'settings'] }
 ];

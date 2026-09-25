@@ -25,6 +25,7 @@ export enum PLAUSIBLE_EVENTS {
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	HELP = 'help',
 	TIP = 'tip',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
@@ -48,6 +49,20 @@ export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
 	SIGNING_FAILED = 'signing_failed'
 }
 
+// ICPSwap writes free text into its `InternalError` variant and `mapIcpSwapFactoryError`
+// interpolates it verbatim, so a raw message cannot satisfy invariant 4 in
+// docs/ai/frontend/analytics.md. Help failures are categorised by error class instead; which call
+// failed is already in `event_modifier`.
+export enum PLAUSIBLE_EVENT_HELP_ERROR_TYPES {
+	// The factory has no pool for the pair, or the lookup itself failed - the factory answers an
+	// unknown pair with a text-free `CommonError`, so the two cannot be told apart.
+	POOL_NOT_FOUND = 'pool_not_found',
+	// The factory or the pool returned an error variant.
+	CANISTER_ERROR = 'canister_error',
+	// Anything else: transport, agent, or an unexpected throw.
+	UNKNOWN = 'unknown'
+}
+
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	BACKEND = 'backend',
 	NFT = 'nft',
@@ -63,6 +78,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
+	HELP = 'help',
 	TIPS = 'tips'
 }
 
@@ -101,6 +117,13 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 	SHARE = 'share'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
+	SUPPORT = 'support',
+	NETWORK_EXPLORERS = 'network_explorers',
+	PROVIDER_EXPLORERS = 'provider_explorers',
+	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
@@ -149,11 +172,13 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page',
+	HELP_PAGE = 'help_page',
 	TIP_SENDER = 'tip_sender',
 	TIP_CLAIMER = 'tip_claimer'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
+	BALANCES_FOUND = 'balances_found',
 	GROUP = 'group',
 	VISIBILITY = 'visibility',
 	SORT = 'sort',

@@ -8,6 +8,7 @@ import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
+	NAVIGATION_ITEM_HELP,
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
@@ -23,6 +24,14 @@ import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
+
+const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
+
+vi.mock('$env/help.env', () => ({
+	get HELP_ENABLED() {
+		return featureFlags.helpEnabled;
+	}
+}));
 
 const navigationMocks = vi.hoisted(() => ({
 	beforeNavigateCallback: undefined as undefined | (() => void),
@@ -45,6 +54,7 @@ describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		featureFlags.helpEnabled = true;
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
 		bottomSheetOpenStore.set(false);
@@ -171,6 +181,64 @@ describe('NavigationMainMenuItems', () => {
 		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
 
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
+	});
+
+	// Desktop has no Help item in the sidebar: it is a row of the footer's More
+	// menu, tested in `NavigationMoreMenu.spec.ts`. On mobile it lives in the More
+	// sheet, which is what these cover.
+	const openMobileMore = async () => {
+		const result = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile', testIdPrefix: 'mobile' }
+		});
+
+		await fireEvent.click(result.getByTestId(`mobile-${NAVIGATION_GROUP_MORE}`));
+
+		return result;
+	};
+
+	it('keeps Help out of the desktop sidebar', () => {
+		const { queryByTestId } = render(NavigationMainMenuItems);
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+	});
+
+	it('hides Help from the mobile More sheet when the feature flag is off', async () => {
+		featureFlags.helpEnabled = false;
+
+		const { getByTestId, queryByTestId } = await openMobileMore();
+
+		expect(queryByTestId(`mobile-${NAVIGATION_ITEM_HELP}`)).toBeNull();
+		// Its neighbour still renders, so the More sheet itself is intact.
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`)).toBeInTheDocument();
+	});
+
+	it('links Help in the mobile More sheet to the Help page', async () => {
+		const { getByTestId } = await openMobileMore();
+
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`).getAttribute('href')).toContain(
+			AppPath.Help
+		);
+	});
+
+	it('places Help directly before Settings in the mobile More sheet', async () => {
+		const { getByTestId } = await openMobileMore();
+
+		const help = getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`);
+		const settings = getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`);
+
+		expect(help.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it('surfaces Help inside the mobile More sheet', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_MORE));
+
+		expect(getByTestId(NAVIGATION_ITEM_HELP)).toBeInTheDocument();
 	});
 
 	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {
