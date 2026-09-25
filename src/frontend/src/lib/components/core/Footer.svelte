@@ -36,27 +36,27 @@
 			class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
 		>
 			<!--
-				Signed out only. Signed in, these two links are rows of the More menu
-				pinned to the bottom of the sidebar — which is inside `AuthGuard`, so a
-				visitor on the landing page would otherwise have no way to either.
+				Signed in, these two links are also rows of the More menu pinned to the
+				bottom of the sidebar, so from `md` up they would be listed twice. Below
+				`md` there is no sidebar and the mobile More sheet does not carry them,
+				so this is still their only place there. Signed out, the landing page
+				sits outside `AuthGuard` and has no menu at all.
 			-->
-			{#if $authNotSignedIn}
-				<div class="flex items-center gap-4">
-					<ExternalLinkIcon
-						ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
-						href={OISY_TWITTER_URL}
-					>
-						<IconTwitter />
-					</ExternalLinkIcon>
+			<div class="flex items-center gap-4" class:md:hidden={$authSignedIn}>
+				<ExternalLinkIcon
+					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
+					href={OISY_TWITTER_URL}
+				>
+					<IconTwitter />
+				</ExternalLinkIcon>
 
-					<ExternalLinkIcon
-						ariaLabel={$i18n.navigation.text.source_code_on_github}
-						href={OISY_REPO_URL}
-					>
-						<IconGixGitHub />
-					</ExternalLinkIcon>
-				</div>
-			{/if}
+				<ExternalLinkIcon
+					ariaLabel={$i18n.navigation.text.source_code_on_github}
+					href={OISY_REPO_URL}
+				>
+					<IconGixGitHub />
+				</ExternalLinkIcon>
+			</div>
 		</div>
 
 		{#if $aiAssistantConsoleOpen}

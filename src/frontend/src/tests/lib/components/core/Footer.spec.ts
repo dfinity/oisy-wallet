@@ -32,11 +32,18 @@ describe('Footer', () => {
 			expect(queryByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeNull();
 		});
 
-		it('no longer shows the social icons, which are rows of the More menu', () => {
+		it('keeps the social icons below md only, where there is no More menu to hold them', () => {
+			// The More menu lives in the desktop sidebar and the mobile More sheet does
+			// not carry X or GitHub, so dropping these would leave a phone with neither.
 			const { container } = render(Footer);
 
-			expect(hrefs(container)).not.toContain(OISY_TWITTER_URL);
-			expect(hrefs(container)).not.toContain(OISY_REPO_URL);
+			const links = [...container.querySelectorAll('a')].filter((a) =>
+				[OISY_TWITTER_URL, OISY_REPO_URL].includes(a.getAttribute('href') ?? '')
+			);
+
+			expect(links).toHaveLength(2);
+
+			links.forEach((link) => expect(link.parentElement).toHaveClass('md:hidden'));
 		});
 	});
 
@@ -50,6 +57,9 @@ describe('Footer', () => {
 
 			expect(hrefs(container)).toContain(OISY_TWITTER_URL);
 			expect(hrefs(container)).toContain(OISY_REPO_URL);
+			expect(
+				container.querySelector(`a[href="${OISY_TWITTER_URL}"]`)?.parentElement
+			).not.toHaveClass('md:hidden');
 		});
 
 		it('offers no Settings and no More menu to someone who cannot open the app', () => {
