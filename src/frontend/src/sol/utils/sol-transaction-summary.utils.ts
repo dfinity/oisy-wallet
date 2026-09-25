@@ -132,11 +132,29 @@ const isClose = ({ kind }: SolInstructionSummary): boolean =>
 	kind === 'closeTokenAccount' || kind === 'unwrap';
 
 /**
+ * Where the address a close is closing was closed before, or -1: the account this close ends
+ * began after that.
+ *
+ * A close of the same address earlier on ended the account it was, so nothing from before it is
+ * any part of this one - neither what reached it nor what opened it.
+ */
+const closedBefore = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): number => {
+	const { account } = closes[index] ?? {};
+
+	return closes
+		.slice(0, index)
+		.findLastIndex((close) => isClose(close) && close.account === account);
+};
+
+/**
  * The positions of the earlier closes that paid into the account a close is closing, since it last
  * opened.
- *
- * A close of the same account earlier on ended the account it paid into, so what reached it before
- * that is no part of this one.
  */
 const closesInto = ({
 	closes,
@@ -151,19 +169,42 @@ const closesInto = ({
 		return [];
 	}
 
-	const reopenedAfter = closes
-		.slice(0, index)
-		.findLastIndex((close) => isClose(close) && close.account === account);
+	const opened = closedBefore({ closes, index });
 
 	return closes
 		.slice(0, index)
 		.reduce<number[]>(
 			(acc, close, position) =>
-				position > reopenedAfter && isClose(close) && close.counterparty === account
+				position > opened && isClose(close) && close.counterparty === account
 					? [...acc, position]
 					: acc,
 			[]
 		);
+};
+
+/**
+ * The rent the transaction paid to open the account a close is closing: the opening since that
+ * address was last closed, and before the close. An opening after it is another account's, whose
+ * rent this close never held.
+ */
+const openingRent = ({
+	closes,
+	index
+}: {
+	closes: SolInstructionSummary[];
+	index: number;
+}): bigint => {
+	const { account } = closes[index] ?? {};
+
+	if (isNullish(account)) {
+		return ZERO;
+	}
+
+	const opening = closes
+		.slice(closedBefore({ closes, index }) + 1, index)
+		.findLast((summary) => summary.kind === 'createTokenAccount' && summary.account === account);
+
+	return opening?.rent ?? ZERO;
 };
 
 /**
@@ -182,16 +223,8 @@ const paidIn = ({ closes, index }: { closes: SolInstructionSummary[]; index: num
  * The rent a close hands back of what its own account cost, leaving aside anything other closes
  * paid into it.
  */
-const ownRent = ({
-	closes,
-	index,
-	rentPaidFor
-}: {
-	closes: SolInstructionSummary[];
-	index: number;
-	rentPaidFor: Record<string, bigint>;
-}): bigint => {
-	const { kind, account, returned, ownAccount } = closes[index] ?? {};
+const ownRent = ({ closes, index }: { closes: SolInstructionSummary[]; index: number }): bigint => {
+	const { kind, returned, ownAccount } = closes[index] ?? {};
 
 	// An account that was never the user's cost them no rent.
 	if (ownAccount === false) {
@@ -201,7 +234,7 @@ const ownRent = ({
 	// An unwrap's balance is mostly the SOL wrapped in it, so its rent is the rent the same
 	// transaction paid to open it.
 	if (kind === 'unwrap') {
-		return nonNullish(account) ? (rentPaidFor[account] ?? ZERO) : ZERO;
+		return openingRent({ closes, index });
 	}
 
 	// A plain token account holds nothing but its rent, so what it hands back beyond what other
@@ -232,18 +265,16 @@ const ownRent = ({
  */
 const rentBrought = ({
 	closes,
-	index,
-	rentPaidFor
+	index
 }: {
 	closes: SolInstructionSummary[];
 	index: number;
-	rentPaidFor: Record<string, bigint>;
 }): bigint => {
 	const { returned } = closes[index] ?? {};
 
 	const brought = closesInto({ closes, index }).reduce(
-		(acc, position) => acc + rentBrought({ closes, index: position, rentPaidFor }),
-		ownRent({ closes, index, rentPaidFor })
+		(acc, position) => acc + rentBrought({ closes, index: position }),
+		ownRent({ closes, index })
 	);
 
 	return nonNullish(returned) && returned < brought ? returned : brought;
@@ -265,8 +296,9 @@ const rentBrought = ({
  * wrapped SOL included, and subtracting that would cancel rent the user genuinely paid on every
  * swap that wraps. The rent it gets back is the rent the same transaction paid to open that
  * account, which the opening instruction states exactly, so the account is what ties the two
- * together. An unwrap of an account opened by some earlier transaction nets nothing: its rent was
- * never this transaction's to charge.
+ * together - as of the close, since an address opened again after it is another account. An unwrap
+ * of an account opened by some earlier transaction nets nothing: its rent was never this
+ * transaction's to charge.
  *
  * Only a close that pays the wallet is credited, and only with the rent it brings back. One that
  * names anywhere else spends the balance rather than returning it - an account of the user's own
@@ -283,14 +315,6 @@ export const solAtaFee = ({
 	userAddress: OptionSolAddress;
 }): bigint => {
 	const flattened = flattenInstructions(instructions);
-
-	const rentPaidFor = flattened.reduce<Record<string, bigint>>((acc, { kind, account, rent }) => {
-		if (kind !== 'createTokenAccount' || isNullish(account) || isNullish(rent)) {
-			return acc;
-		}
-
-		return { ...acc, [account]: rent };
-	}, {});
 
 	return maxBigInt(
 		flattened.reduce((acc, current, index) => {
@@ -320,7 +344,7 @@ export const solAtaFee = ({
 				return acc;
 			}
 
-			return acc - rentBrought({ closes: flattened, index, rentPaidFor });
+			return acc - rentBrought({ closes: flattened, index });
 		}, ZERO),
 		ZERO
 	);

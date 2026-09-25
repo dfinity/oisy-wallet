@@ -998,19 +998,24 @@ const fundedInTransaction = ({
  * as it has a balance nobody can state, rather than one that includes whatever it was funded to
  * wrap. The associated token account program funds exactly the rent of what it opens, and an
  * account of any other mint has nothing to wrap, so those creations state it as they stand.
+ *
+ * The creation of the account the line opens, which is the first from where the line stands: an
+ * address closed and opened again within the message is two accounts, each funded by its own.
  */
 const rentOf = ({
 	account,
 	flattened,
+	from,
 	native,
 	rentExemptMinimum
 }: {
 	account: SolAddress;
 	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
+	from: number;
 	native: boolean;
 	rentExemptMinimum: bigint | undefined;
 }): bigint | undefined => {
-	const creation = flattened.find(
+	const creation = flattened.slice(from).find(
 		({
 			instruction: {
 				program,
@@ -1253,6 +1258,7 @@ export const mapSolInstructionSummaries = ({
 					? rentOf({
 							account: wrapped.account,
 							flattened,
+							from: position,
 							native: wrapped.tokenAddress === WSOL_TOKEN.address,
 							rentExemptMinimum
 						})

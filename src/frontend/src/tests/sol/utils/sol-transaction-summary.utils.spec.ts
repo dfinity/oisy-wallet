@@ -970,6 +970,22 @@ describe('sol-transaction-summary.utils', () => {
 			).toBe(RENT);
 		});
 
+		// A close ends the account, so an opening of the same address after it is another account,
+		// whose rent that close never held.
+		it('should not credit an unwrap with the rent of an account opened after it', () => {
+			expect(
+				fee([
+					{
+						kind: 'unwrap',
+						account: mockAtaAddress,
+						returned: RENT + 5n,
+						counterparty: WALLET
+					},
+					create()
+				])
+			).toBe(RENT);
+		});
+
 		it('should net nothing for an unwrap of an account it did not open', () => {
 			expect(
 				fee([

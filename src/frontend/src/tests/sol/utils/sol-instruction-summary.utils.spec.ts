@@ -226,6 +226,41 @@ describe('sol-instruction-summary.utils', () => {
 				expect(summaries.filter(({ kind }) => kind === 'createTokenAccount')).toHaveLength(1);
 			});
 
+			// An address closed and opened again is two accounts, each funded by its own creation.
+			it('should read the rent of an account opened again from its own creation', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+
+				const summaries = mapSolInstructionSummaries({
+					instructions: [
+						creation,
+						initialisation,
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									destination: user,
+									owner: user
+								}
+							}
+						},
+						{
+							...creation,
+							parsed: { ...creation.parsed, info: { ...creation.parsed.info, lamports: 3_000_000 } }
+						},
+						initialisation
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(
+					summaries.filter(({ kind }) => kind === 'createTokenAccount').map(({ rent }) => rent)
+				).toStrictEqual([2_039_280n, 3_000_000n]);
+			});
+
 			describe('funded with the SOL it wraps', () => {
 				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 				const reserve = 2_039_280n;
