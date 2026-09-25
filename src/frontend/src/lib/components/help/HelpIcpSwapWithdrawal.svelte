@@ -470,7 +470,7 @@
 		<div aria-live="polite" role="status">
 			{#if busy}
 				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
-					{$i18n.help.text.checking_pool}
+					{activeRequest === 'scan' ? $i18n.help.text.scanning : $i18n.help.text.checking_pool}
 				</p>
 			{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
 				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>

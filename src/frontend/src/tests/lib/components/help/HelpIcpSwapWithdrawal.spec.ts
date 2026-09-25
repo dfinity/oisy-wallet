@@ -697,6 +697,20 @@ describe('HelpIcpSwapWithdrawal', () => {
 			expect(liveRegion(container)).toBeEmptyDOMElement();
 		});
 
+		it('announces a full scan as checking the pools, not one pool', async () => {
+			vi.mocked(scanIcpSwapPools).mockReturnValue(
+				Promise.withResolvers<IcpSwapScanResult>().promise
+			);
+
+			const { container, getByTestId } = render(HelpIcpSwapWithdrawal);
+
+			await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+			await waitFor(() => expect(liveRegion(container)).toHaveTextContent(en.help.text.scanning));
+
+			expect(liveRegion(container)).not.toHaveTextContent(en.help.text.checking_pool);
+		});
+
 		it('announces progress and then the number of balances found', async () => {
 			const { promise: pending, resolve: release } = Promise.withResolvers<IcpSwapPoolBalances>();
 			vi.mocked(loadIcpSwapRecoverableBalances).mockReturnValue(pending);
