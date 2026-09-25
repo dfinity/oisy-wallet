@@ -160,6 +160,13 @@ export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
 export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
 
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
+export const NAVIGATION_MORE_MENU = 'navigation-more-menu';
+export const NAVIGATION_MORE_MENU_HELP = 'navigation-more-menu-help';
+export const NAVIGATION_MORE_MENU_DOCUMENTATION = 'navigation-more-menu-documentation';
+export const NAVIGATION_MORE_MENU_FAQ = 'navigation-more-menu-faq';
+export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-code';
+export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
@@ -168,6 +175,8 @@ export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
 export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+export const SIDEBAR_NAVIGATION_MENU_SCROLL = 'sidebar-navigation-menu-scroll';
+export const SIDEBAR_NAVIGATION_MENU_BOTTOM = 'sidebar-navigation-menu-bottom';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
