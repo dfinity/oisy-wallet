@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import HelpIcpSwapWithdrawal from '$lib/components/help/HelpIcpSwapWithdrawal.svelte';
+	import HelpNetworkExplorers from '$lib/components/help/HelpNetworkExplorers.svelte';
 	import HelpProviderExplorers from '$lib/components/help/HelpProviderExplorers.svelte';
 	import HelpSupport from '$lib/components/help/HelpSupport.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
@@ -20,6 +21,8 @@
      only) div of its type and its own margin never applies - hence the gap on the container. -->
 <div class="flex flex-col gap-5">
 	<HelpSupport />
+
+	<HelpNetworkExplorers />
 
 	<HelpProviderExplorers />
 
