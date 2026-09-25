@@ -38,7 +38,7 @@ live ICP/ckETH pool `angxa-baaaa-aaaag-qcvnq-cai`, both legs).
 
 **Out of scope (deliberate)**
 
-- Scanning pools where only **one** leg is an active token. Roughly half of the 876 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection covers those.
+- Scanning pools where only **one** leg is an active token. Roughly half of the 876 live pools have ICP as a leg, so that would be hundreds of balance queries. Manual selection does not cover them either — it offers the same tokens — so the card asks the user to enable such a token first, after which both paths find the pool.
 - Scanning other fee tiers. All 876 live pools sit at `ICP_SWAP_POOL_FEE` today, and OISY only ever swaps there.
 - The **mistransferred balance** (see above): unreachable for an ICRC-2-only flow.
 - Any recovery for non-ICPSwap swap providers (KongSwap, Velora, NEAR Intents, OneSec).
