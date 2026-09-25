@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
+	import { onDestroy } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -32,6 +33,7 @@
 	import { toHelpErrorType, trackHelp } from '$lib/services/help-analytics.services';
 	import {
 		IcpSwapPoolNotFoundError,
+		IcpSwapScanCancelledError,
 		loadIcpSwapRecoverableBalances,
 		reloadIcpSwapPoolBalances,
 		scanIcpSwapPools,
@@ -59,9 +61,9 @@
 	// Neither selector is disabled while a lookup runs, so a second lookup - or a lookup racing a
 	// scan - can be in flight before the first settles. Results are therefore claimed by
 	// generation: a request that is no longer the newest drops its UI writes instead of
-	// overwriting fresher ones, and only the newest may clear `busy`. Analytics stay unguarded,
-	// since the call really did complete and dropping it would leave a `scan` `executing` event
-	// with no terminal event.
+	// overwriting fresher ones, and only the newest may clear `busy`. A superseded scan is also told
+	// to stop between batches and reports `cancel`; a superseded lookup is a single query and simply
+	// completes. Analytics stay unguarded otherwise, so every `executing` event gets a terminal one.
 	let requestGeneration = 0;
 
 	// Which entry point is running, not merely that one is: `busy` alone cannot tell them apart,
@@ -77,12 +79,6 @@
 	// withdrawal landed re-display the row it just emptied.
 	const withdrawing = $derived(nonNullish(withdrawingKey));
 
-	// The selectors deliberately stay live during a lookup: changing the pair is how a user
-	// supersedes one, and the generation guard above is what makes that safe. Only the scan button
-	// waits, since a scan restarts discovery wholesale and queueing one behind a lookup buys
-	// nothing.
-	const scanLocked = $derived(busy || withdrawing);
-
 	const startRequest = (kind: 'scan' | 'lookup'): number => {
 		activeRequest = kind;
 		reset();
@@ -91,6 +87,14 @@
 	};
 
 	const isCurrentRequest = (generation: number): boolean => generation === requestGeneration;
+
+	// Leaving the page has to invalidate the running request too: nothing else would, so a scan in
+	// flight would keep sending every remaining batch. With the generation moved on, its
+	// `isCancelled` turns true and it stops at the next check, reporting `cancel`; a pending lookup
+	// drops its writes. A withdrawal is left alone - it is an update call the user started.
+	onDestroy(() => {
+		requestGeneration++;
+	});
 
 	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
 	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.
@@ -152,7 +156,8 @@
 		try {
 			const { pools, poolsScanned, unreadablePools } = await scanIcpSwapPools({
 				identity,
-				tokens: candidateTokens
+				tokens: candidateTokens,
+				isCancelled: () => !isCurrentRequest(generation)
 			});
 
 			if (isCurrentRequest(generation)) {
@@ -168,6 +173,18 @@
 				poolsScanned
 			});
 		} catch (err: unknown) {
+			// Superseded, and stopped between batches: the newer request owns the card, so there is
+			// nothing to show, and the outcome is a cancellation rather than a failure.
+			if (err instanceof IcpSwapScanCancelledError) {
+				trackHelp({
+					action: 'scan',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL,
+					subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_HELP.ICPSWAP_WITHDRAWAL
+				});
+
+				return;
+			}
+
 			if (isCurrentRequest(generation)) {
 				loadError = $i18n.help.error.scan_failed;
 			}
@@ -355,12 +372,21 @@
 	// A pool with every row filtered out as dust still comes back as a group, so results are
 	// counted by rows rather than by groups - otherwise an empty pool renders a bare heading and
 	// suppresses the "nothing found" message.
-	// With no enabled ICRC tokens the candidate set is ICP alone, so choosing it on one side leaves
-	// the other with nothing to offer. The explanation belongs in the card rather than inside a
-	// dropdown the user cannot open, and it is a full sentence that would not fit the trigger.
+	// A pool is between two distinct ledgers, so with fewer than two - no enabled ICRC token leaves
+	// ICP alone, and a custom duplicate of a ledger still counts once - no pair can be named at all.
+	// Decided up front from the candidate set: waiting until one side is picked shows two usable
+	// selectors whose only option leads nowhere. The explanation belongs in the card rather than
+	// inside a dropdown, and it is a full sentence that would not fit the trigger.
 	let noTokensToPick = $derived(
-		otherTokens(tokenA).length === 0 || otherTokens(tokenB).length === 0
+		new Set(candidateTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)).size < 2
 	);
+
+	// The selectors deliberately stay live during a lookup: changing the pair is how a user
+	// supersedes one, and the generation guard is what makes that safe. Only the scan button waits,
+	// since a scan restarts discovery wholesale and queueing one behind a lookup buys nothing. A
+	// wallet that cannot form a pair locks it too: with fewer than two ledgers no pool has both legs
+	// among them, so a scan could only download the pool table to report nothing.
+	const scanLocked = $derived(busy || withdrawing || noTokensToPick);
 
 	let visibleGroups = $derived((groups ?? []).filter(({ balances }) => balances.length > 0));
 	let hasResults = $derived(visibleGroups.length > 0);
@@ -405,7 +431,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_first}
-					disabled={withdrawing}
+					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectA}
 					selected={tokenA}
@@ -423,7 +449,7 @@
 			{#snippet value()}
 				<HelpTokenDropdown
 					ariaLabel={$i18n.help.alt.select_token_second}
-					disabled={withdrawing}
+					disabled={withdrawing || noTokensToPick}
 					labels={tokenLabels}
 					onSelect={onSelectB}
 					selected={tokenB}
@@ -444,7 +470,7 @@
 		<div aria-live="polite" role="status">
 			{#if busy}
 				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_LOADING}>
-					{$i18n.help.text.checking_pool}
+					{activeRequest === 'scan' ? $i18n.help.text.scanning : $i18n.help.text.checking_pool}
 				</p>
 			{:else if showEmpty && (isNullish(scanSummary) || scanSummary.unreadablePools === 0)}
 				<p class="mt-3 text-sm text-tertiary" data-tid={HELP_ICPSWAP_EMPTY}>
