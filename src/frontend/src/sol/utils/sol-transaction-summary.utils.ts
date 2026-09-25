@@ -133,10 +133,9 @@ const isClose = ({ kind }: SolInstructionSummary): boolean =>
 
 /**
  * Where the address a close is closing was closed before, or -1: the account this close ends
- * began after that.
+ * began after that, so nothing that opened an account there before it is any part of this one.
  *
- * A close of the same address earlier on ended the account it was, so nothing from before it is
- * any part of this one - neither what reached it nor what opened it.
+ * The close alone, not the opening that follows it: the opening is what this is used to find.
  */
 const closedBefore = ({
 	closes,
@@ -155,6 +154,11 @@ const closedBefore = ({
 /**
  * The positions of the earlier closes that paid into the account a close is closing, since it last
  * opened.
+ *
+ * Since the address was last closed or opened, whichever came later. A close of somebody else's
+ * account is listed only when it pays the wallet, so one of theirs closed elsewhere and then opened
+ * again for the user leaves no close behind to stop at, and what was paid into the first account
+ * would read as paid into the second. Its opening is where the second one starts.
  */
 const closesInto = ({
 	closes,
@@ -169,7 +173,12 @@ const closesInto = ({
 		return [];
 	}
 
-	const opened = closedBefore({ closes, index });
+	const opened = closes
+		.slice(0, index)
+		.findLastIndex(
+			(summary) =>
+				summary.account === account && (isClose(summary) || summary.kind === 'createTokenAccount')
+		);
 
 	return closes
 		.slice(0, index)

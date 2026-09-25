@@ -566,6 +566,32 @@ describe('sol-transaction-summary.utils', () => {
 				])
 			).toBe(ZERO);
 		});
+
+		// Somebody else's account closed elsewhere is not in the list, so the only mark that the B
+		// A paid into is gone is B being opened again. Without it, A's payout reads as paid into the
+		// second B, and the second B's own rent drops out.
+		it('should count the rent of an account opened again at an address once paid into', () => {
+			expect(
+				paid([
+					{ kind: 'createTokenAccount', account: mockAtaAddress, rent: RENT },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress,
+						returned: RENT,
+						reserve: RENT,
+						counterparty: mockAtaAddress2
+					},
+					{ kind: 'createTokenAccount', account: mockAtaAddress2, rent: RENT },
+					{
+						kind: 'closeTokenAccount',
+						account: mockAtaAddress2,
+						returned: RENT,
+						reserve: RENT,
+						counterparty: mockSolAddress2
+					}
+				])
+			).toBe(RENT * 2n);
+		});
 	});
 
 	describe('solAtaFee', () => {
