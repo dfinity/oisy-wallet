@@ -1,24 +1,41 @@
-// TODO: uncomment and replace Jimp with native functions, unless the library bumps its dependency to zod to v4
-export const getQRCodeValueFromDataURL = async ({
-	dataUrl: _
-}: {
-	dataUrl: string;
-	// eslint-disable-next-line arrow-body-style,require-await
-}): Promise<string | undefined> => {
-	return Promise.reject(new Error('Function `getQRCodeValueFromDataURL` not implemented'));
+import type { Page } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 
-	// const qrBuffer = Buffer.from(dataUrl.replace(/^data:image\/[a-z]+;base64,/, ''), 'base64');
-	// const image = await Jimp.read(qrBuffer);
-	//
-	// const imageData = {
-	// 	data: new Uint8ClampedArray(image.bitmap.data),
-	// 	width: image.bitmap.width,
-	// 	height: image.bitmap.height
-	// };
-	//
-	// const decodedQR = jsQR(imageData.data, imageData.width, imageData.height);
-	//
-	// if (nonNullish(decodedQR)) {
-	// 	return decodedQR.data;
-	// }
+declare global {
+	interface Window {
+		jsQR?: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null;
+	}
+}
+
+// Path to the bundled jsQR UMD build. Injected into the page so we can decode
+// the QR straight from the canvas's `ImageData`, avoiding the
+// canvas → PNG → decode round-trip that previously needed a Node-side PNG
+// decoder (Jimp, removed in #9165).
+const JSQR_BUNDLE_PATH = fileURLToPath(
+	new URL('../../node_modules/jsqr/dist/jsQR.js', import.meta.url)
+);
+
+export const getQRCodeValueFromCanvas = async ({
+	page,
+	selector
+}: {
+	page: Page;
+	selector: string;
+}): Promise<string | undefined> => {
+	await page.addScriptTag({ path: JSQR_BUNDLE_PATH });
+
+	return await page.evaluate((sel) => {
+		const canvas = document.querySelector<HTMLCanvasElement>(sel);
+		if (canvas === null) {
+			return undefined;
+		}
+
+		const ctx = canvas.getContext('2d');
+		if (ctx === null || window.jsQR === undefined) {
+			return undefined;
+		}
+
+		const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		return window.jsQR(data, width, height)?.data;
+	}, selector);
 };
