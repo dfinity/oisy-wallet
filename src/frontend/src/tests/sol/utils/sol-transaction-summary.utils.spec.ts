@@ -761,6 +761,92 @@ describe('sol-transaction-summary.utils', () => {
 			expect(fee(instructions)).toBe(ZERO);
 		});
 
+		// A swap can fund the wrapped SOL account it opens with the SOL to wrap along with the rent,
+		// move that SOL out, and close the account to the wallet. Only the rent was charged, and it
+		// comes back.
+		describe('a wrapped SOL account funded with the SOL it wraps', () => {
+			const token = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+
+			const opening = [
+				{
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'createAccount',
+						info: {
+							newAccount: mockAtaAddress,
+							lamports: 1_002_039_280,
+							owner: token,
+							source: WALLET,
+							space: 165
+						}
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: token,
+					parsed: {
+						type: 'initializeAccount3',
+						info: { account: mockAtaAddress, mint: WSOL_TOKEN.address, owner: WALLET }
+					}
+				}
+			];
+
+			const swapAndClose = [
+				{
+					program: 'spl-token',
+					programId: token,
+					parsed: {
+						type: 'transfer',
+						info: {
+							source: mockAtaAddress,
+							destination: mockAtaAddress2,
+							authority: WALLET,
+							amount: '1000000000'
+						}
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: token,
+					parsed: {
+						type: 'closeAccount',
+						info: { account: mockAtaAddress, destination: WALLET, owner: WALLET }
+					}
+				}
+			];
+
+			const feeOf = ({
+				instructions,
+				rentExemptMinimum
+			}: {
+				instructions: readonly unknown[];
+				rentExemptMinimum?: bigint;
+			}): bigint =>
+				fee(
+					mapSolInstructionSummaries({
+						instructions,
+						ownedAddresses: [WALLET],
+						userAddress: WALLET,
+						rentExemptMinimum
+					})
+				);
+
+			it('should charge nothing when it closes to the wallet', () => {
+				expect(
+					feeOf({ instructions: [...opening, ...swapAndClose], rentExemptMinimum: RENT })
+				).toBe(ZERO);
+			});
+
+			it('should charge nothing when it closes to the wallet without the reserve', () => {
+				expect(feeOf({ instructions: [...opening, ...swapAndClose] })).toBe(ZERO);
+			});
+
+			it('should charge the rent alone when it stays open', () => {
+				expect(feeOf({ instructions: opening, rentExemptMinimum: RENT })).toBe(RENT);
+			});
+		});
+
 		// A wrapped SOL account passes lamports on with every token transfer out, so what reached it
 		// from the user may have left before its close.
 		it('should credit no more than a close hands over', () => {

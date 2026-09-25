@@ -225,6 +225,104 @@ describe('sol-instruction-summary.utils', () => {
 
 				expect(summaries.filter(({ kind }) => kind === 'createTokenAccount')).toHaveLength(1);
 			});
+
+			describe('funded with the SOL it wraps', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const reserve = 2_039_280n;
+
+				const instructions = [
+					{
+						...creation,
+						parsed: {
+							...creation.parsed,
+							info: { ...creation.parsed.info, lamports: 1_002_039_280 }
+						}
+					},
+					{
+						...initialisation,
+						parsed: {
+							...initialisation.parsed,
+							info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+						}
+					}
+				];
+
+				const rentOf = (rentExemptMinimum?: bigint): bigint | undefined =>
+					mapSolInstructionSummaries({
+						instructions,
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum
+					}).find(({ kind }) => kind === 'createTokenAccount')?.rent;
+
+				// Initialising it reads everything above the reserve as the wrapped balance, so stating
+				// the whole funding as rent counts the wrapped SOL a second time.
+				it('should state only the reserve as its rent', () => {
+					expect(rentOf(reserve)).toBe(reserve);
+				});
+
+				// Without the reserve the rent and the SOL to wrap cannot be told apart, and the whole
+				// funding would claim the wrapped SOL as rent.
+				it('should leave its rent unstated without the reserve', () => {
+					expect(rentOf()).toBeUndefined();
+				});
+
+				// The associated token account program funds exactly the rent of what it opens, so its
+				// creation states the rent without the reserve, wrapped SOL included.
+				it('should keep the rent of a wrapped SOL account the associated token program opens', () => {
+					const summaries = mapSolInstructionSummaries({
+						instructions: [
+							{
+								program: 'spl-associated-token-account',
+								programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+								parsed: {
+									type: 'create',
+									info: {
+										account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+										mint: WSOL_TOKEN.address,
+										source: user,
+										wallet: user
+									}
+								}
+							}
+						],
+						innerInstructions: [{ index: 0, instructions: [creation] }],
+						ownedAddresses: [user],
+						userAddress: user
+					});
+
+					expect(summaries.find(({ kind }) => kind === 'createTokenAccount')?.rent).toBe(reserve);
+				});
+
+				// The reserve is for the fixed size of a Token program account. An account of any other
+				// size holds no wrapped SOL, so what its creation funds is its rent.
+				it('should keep the funding of an account of another size as its rent', () => {
+					const summaries = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...creation,
+								parsed: {
+									...creation.parsed,
+									info: {
+										...creation.parsed.info,
+										lamports: 2_074_080,
+										owner: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+										space: 170
+									}
+								}
+							},
+							{ ...initialisation, programId: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb' }
+						],
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum: reserve
+					});
+
+					expect(summaries.find(({ kind }) => kind === 'createTokenAccount')?.rent).toBe(
+						2_074_080n
+					);
+				});
+			});
 		});
 
 		describe('a transaction the user is not part of', () => {

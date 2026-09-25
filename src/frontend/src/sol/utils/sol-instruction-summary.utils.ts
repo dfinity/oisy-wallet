@@ -986,34 +986,65 @@ const fundedInTransaction = ({
 
 /**
  * The rent an account creation costs, from the System `createAccount` that funds it.
+ *
+ * The reserve and no more, where that is known. A creation can fund a wrapped SOL account with the
+ * amount to wrap along with its rent, and initialising it reads everything above the reserve as
+ * the wrapped balance: the balance is read with that split, and the rent is the other half of it,
+ * so the two add up to the funding rather than both counting the wrapped SOL. The reserve is known
+ * for one size only, the fixed size of a Token program account, and an account of any other size
+ * holds no wrapped SOL.
+ *
+ * Without the reserve, a wrapped SOL account the message opens itself has a rent nobody can state,
+ * as it has a balance nobody can state, rather than one that includes whatever it was funded to
+ * wrap. The associated token account program funds exactly the rent of what it opens, and an
+ * account of any other mint has nothing to wrap, so those creations state it as they stand.
  */
 const rentOf = ({
 	account,
-	flattened
+	flattened,
+	native,
+	rentExemptMinimum
 }: {
 	account: SolAddress;
-	flattened: { instruction: SolParsedRpcInstruction }[];
-}): bigint | undefined =>
-	flattened.reduce<bigint | undefined>(
-		(
-			acc,
-			{
-				instruction: {
-					program,
-					parsed: { type, info }
-				}
+	flattened: { topLevel: boolean; instruction: SolParsedRpcInstruction }[];
+	native: boolean;
+	rentExemptMinimum: bigint | undefined;
+}): bigint | undefined => {
+	const creation = flattened.find(
+		({
+			instruction: {
+				program,
+				parsed: { type, info }
 			}
-		) => {
-			if (nonNullish(acc) || program !== 'system' || type !== 'createAccount') {
-				return acc;
-			}
-
-			return address({ info, key: 'newAccount' }) === account
-				? amount({ info, key: 'lamports' })
-				: acc;
-		},
-		undefined
+		}) =>
+			program === 'system' &&
+			type === 'createAccount' &&
+			address({ info, key: 'newAccount' }) === account
 	);
+
+	if (isNullish(creation)) {
+		return undefined;
+	}
+
+	const {
+		topLevel,
+		instruction: {
+			parsed: { info }
+		}
+	} = creation;
+
+	const lamports = amount({ info, key: 'lamports' });
+
+	if (isNullish(lamports)) {
+		return undefined;
+	}
+
+	if (nonNullish(rentExemptMinimum) && amount({ info, key: 'space' }) === ATA_SIZE) {
+		return lamports > rentExemptMinimum ? rentExemptMinimum : lamports;
+	}
+
+	return native && topLevel ? undefined : lamports;
+};
 
 /**
  * Wrapping is a System transfer into a wrapped SOL account the user owns. Nothing in the
@@ -1219,7 +1250,12 @@ export const mapSolInstructionSummaries = ({
 
 			const rent =
 				wrapped.kind === 'createTokenAccount' && nonNullish(wrapped.account)
-					? rentOf({ account: wrapped.account, flattened })
+					? rentOf({
+							account: wrapped.account,
+							flattened,
+							native: wrapped.tokenAddress === WSOL_TOKEN.address,
+							rentExemptMinimum
+						})
 					: undefined;
 
 			return [...acc, { ...wrapped, ...(nonNullish(rent) && { rent }), parentIndex }];
