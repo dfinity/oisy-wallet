@@ -393,6 +393,26 @@ describe('wallet-connect.services', () => {
 				expect(result).not.toHaveProperty('simulatedInstructions');
 				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
 			});
+
+			// An empty list is the run's answer that there is nothing to list. Rebuilt from the
+			// message, which cannot see that an account is already there, it listed a creation the
+			// run found did nothing.
+			it('should pass on an empty list from the run rather than read the message', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					instructions: [],
+					parties: mockParties
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(
+					expect.objectContaining({ instructions: [], simulatedInstructions: true })
+				);
+			});
 		});
 
 		describe('transfer parties', () => {

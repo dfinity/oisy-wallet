@@ -180,7 +180,10 @@ const simulate = async ({
 
 	return {
 		...(!isEmptySolSimulationPreview(preview) && { preview }),
-		...(instructions.length > 0 && { instructions }),
+		// Empty included: a run with nothing to list has answered, and leaving the list out made the
+		// review rebuild it from the message, which cannot tell an account that is already there
+		// from one it opens.
+		instructions,
 		...(messageSummary.kind !== 'other' && { messageSummary }),
 		parties: {
 			...deriveSolTransferParties({

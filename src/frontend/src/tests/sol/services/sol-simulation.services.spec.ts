@@ -21,7 +21,8 @@ import {
 	mockSolAddress2,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { AccountRole } from '@solana/kit';
+import { getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
+import { AccountRole, address, createNoopSigner } from '@solana/kit';
 
 vi.mock('$sol/api/solana.api', () => ({
 	getMultipleAccountsInfo: vi.fn(),
@@ -197,6 +198,42 @@ describe('sol-simulation.services', () => {
 		const result = await simulateSolTransaction(params(message([])));
 
 		expect(result?.preview).toBeUndefined();
+	});
+
+	// An idempotent creation of an account that is already there does nothing, so a run of a
+	// message made of nothing else has nothing to list. That is its answer rather than a gap: left
+	// out, the review rebuilt the list from the message alone, which cannot tell that the account
+	// was there and listed the creation as one.
+	it('should keep an empty list for a run with nothing to list', async () => {
+		const accountAt = ({ addresses }: { addresses: SolAddress[] }) =>
+			addresses.map((account) =>
+				account === mockAtaAddress
+					? tokenAccount({ owner: mockSolAddress, amount: ZERO })
+					: systemAccount(1_000_000n)
+			);
+
+		vi.mocked(getMultipleAccountsInfo).mockImplementation((params) =>
+			Promise.resolve(accountAt(params))
+		);
+		vi.mocked(simulateTransactionAccounts).mockImplementation((params) =>
+			Promise.resolve(simulated({ accounts: accountAt(params) }))
+		);
+
+		const result = await simulateSolTransaction(
+			params({
+				feePayer: { address: mockSolAddress },
+				instructions: [
+					getCreateAssociatedTokenIdempotentInstruction({
+						payer: createNoopSigner(address(mockSolAddress)),
+						ata: address(mockAtaAddress),
+						owner: address(mockSolAddress),
+						mint: address(mockSplAddress)
+					})
+				]
+			} as unknown as CompilableTransactionMessage)
+		);
+
+		expect(result?.instructions).toStrictEqual([]);
 	});
 
 	describe('transfer parties', () => {

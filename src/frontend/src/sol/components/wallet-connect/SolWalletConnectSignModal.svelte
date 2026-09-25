@@ -230,9 +230,14 @@
 			// and passes here with that call unstated. Closing it needs each inner effect accounted
 			// for by name, which means separating a call that genuinely does nothing from one this
 			// wallet has never modelled, for every program an invocation can reach.
+			//
+			// And a list with something in it. A run's empty list reaches here now, where before it
+			// was dropped on the way, and whether a run with nothing to list vouches for an instruction
+			// nobody read is its own decision, not one to make by letting an empty list through.
 			simulated:
 				(simulatedInstructions ?? false) &&
 				nonNullish(instructions) &&
+				instructions.length > 0 &&
 				!instructions.some(({ kind }) => kind === 'unknown'),
 			closesPayOthers
 		});

@@ -187,6 +187,19 @@ describe('SolWalletConnectSignModal', () => {
 			expect(args).toEqual(expect.objectContaining({ simulated: false }));
 		});
 
+		// An empty list never reached this flag before. Whether a run with nothing to list vouches
+		// for an instruction nobody read is a decision of its own, not one made by letting it pass.
+		it('should be false when the run listed nothing', async () => {
+			const args = await approve({
+				amount: 1n,
+				simulatedInstructions: true,
+				instructions: [],
+				parties: { sources: [], destinations: [], partial: false }
+			});
+
+			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
+
 		it('should be false when there was no run at all', async () => {
 			const args = await approve({
 				amount: 1n,

@@ -164,9 +164,9 @@ export const decode = async ({
 		mapped.tokenAddress ??
 		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
 
-	// Read whenever either fallback below needs it. A run always reports its parties but only
-	// reports instructions when it produced some, so the two are not missing together, and an
-	// instruction list built without the user's own accounts cannot tell a send from a receive.
+	// Read whenever either fallback below needs it. A run reports its parties and its instructions,
+	// an empty list included, so the two go missing together, and an instruction list built without
+	// the user's own accounts cannot tell a send from a receive.
 	const owned =
 		nonNullish(simulatedParties) && nonNullish(simulatedInstructions)
 			? undefined
@@ -208,7 +208,9 @@ export const decode = async ({
 
 	return {
 		...mapped,
-		...(instructions.length > 0 && {
+		// A run's list is passed on even when it is empty: that is the run saying there is nothing to
+		// list, and the message's own reading would fill it with what the run found was not there.
+		...((instructions.length > 0 || nonNullish(simulatedInstructions)) && {
 			instructions,
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),

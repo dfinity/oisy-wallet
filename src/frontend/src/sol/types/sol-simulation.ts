@@ -50,7 +50,8 @@ export interface SolSimulationPreview {
 export interface SolSimulationResult {
 	preview?: SolSimulationPreview;
 	// What the simulated run does to the user's accounts, instruction by instruction. The message
-	// states almost none of it: a routed swap performs every transfer as a nested call.
+	// states almost none of it: a routed swap performs every transfer as a nested call. Empty when
+	// the run did nothing there is a line for, which is an answer rather than a gap.
 	instructions?: SolInstructionSummary[];
 	// What the message itself says it moves, read from its own top-level instructions rather than
 	// from the run. Whether the run agrees is the caller's to decide, since only the caller knows
