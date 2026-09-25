@@ -8,6 +8,7 @@ import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
+	NAVIGATION_ITEM_HELP,
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
@@ -22,6 +23,14 @@ import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
+
+const featureFlags = vi.hoisted(() => ({ helpEnabled: true }));
+
+vi.mock('$env/help.env', () => ({
+	get HELP_ENABLED() {
+		return featureFlags.helpEnabled;
+	}
+}));
 
 const navigationMocks = vi.hoisted(() => ({
 	beforeNavigateCallback: undefined as undefined | (() => void),
@@ -44,6 +53,7 @@ describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		featureFlags.helpEnabled = true;
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
 		bottomSheetOpenStore.set(false);
@@ -60,6 +70,7 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_HELP)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
@@ -124,6 +135,49 @@ describe('NavigationMainMenuItems', () => {
 		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
 
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
+	});
+
+	it('hides Help when the feature flag is off', () => {
+		featureFlags.helpEnabled = false;
+
+		const { queryByTestId } = render(NavigationMainMenuItems);
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+		// Its neighbour still renders, so the More group itself is intact.
+		expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+	});
+
+	it('surfaces Help in More linking to the Help page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const helpLink = getByTestId(NAVIGATION_ITEM_HELP);
+
+		expect(helpLink.getAttribute('href')).toContain(AppPath.Help);
+	});
+
+	it('places Help directly before Settings in the desktop More section', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const help = getByTestId(NAVIGATION_ITEM_HELP);
+		const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
+
+		const moreItems = Array.from(
+			settings.parentElement?.querySelectorAll('[data-tid^="navigation-item-"]') ?? []
+		);
+
+		expect(moreItems.indexOf(settings) - moreItems.indexOf(help)).toBe(1);
+	});
+
+	it('surfaces Help inside the mobile More sheet', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_MORE));
+
+		expect(getByTestId(NAVIGATION_ITEM_HELP)).toBeInTheDocument();
 	});
 
 	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {
