@@ -436,7 +436,14 @@ const toEffect = ({
 	// produces - counting both would open one account twice.
 	if (program === 'system' && type === 'createAccount' && topLevel) {
 		const account = address({ info, key: 'newAccount' });
-		const tokenAddress = nonNullish(account) ? accountMints[account] : undefined;
+
+		// The mint the initialisation after this creation names. The run's single map holds whichever
+		// account the address held last, and only an address the message never initialises has no
+		// other account for it to be.
+		const tokenAddress = nonNullish(account)
+			? (mintOpenedWith({ account, flattened, from: position }) ??
+				(initialisedInMessage({ account, flattened }) ? undefined : accountMints[account]))
+			: undefined;
 
 		// Only an account of the user's. This list is what a transaction does to what they hold, and
 		// a counterparty opening its own account is the transaction's business, not theirs.
@@ -852,6 +859,45 @@ const openedAs = ({
 			...(nonNullish(accountMintsBefore[account]) && { mint: accountMintsBefore[account] })
 		}
 	);
+
+/**
+ * The mint an account the message creates is opened for: the one the initialisation that follows
+ * the creation names, before anything closes the account again.
+ *
+ * An address opened for one mint, closed and opened for another is two accounts, and reading the
+ * mint from the run's single map lends the first the second's: its line names the wrong token, and
+ * a wrapped SOL account's funding is read as though it had nothing to wrap.
+ */
+const mintOpenedWith = ({
+	account,
+	flattened,
+	from
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+	from: number;
+}): SplTokenAddress | undefined => {
+	const next = flattened.slice(from).find(
+		({
+			instruction: {
+				program,
+				parsed: { type, info }
+			}
+		}) =>
+			nonNullish(program) &&
+			TOKEN_PROGRAMS.includes(program) &&
+			address({ info, key: 'account' }) === account &&
+			['initializeAccount', 'initializeAccount2', 'initializeAccount3', 'closeAccount'].includes(
+				type
+			)
+	);
+
+	if (isNullish(next) || next.instruction.parsed.type === 'closeAccount') {
+		return undefined;
+	}
+
+	return address({ info: next.instruction.parsed.info, key: 'mint' });
+};
 
 /**
  * Whether the message opens an account at an address anywhere, which makes the run's single map of

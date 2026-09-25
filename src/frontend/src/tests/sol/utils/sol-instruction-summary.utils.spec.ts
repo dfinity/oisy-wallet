@@ -261,6 +261,57 @@ describe('sol-instruction-summary.utils', () => {
 				).toStrictEqual([2_039_280n, 3_000_000n]);
 			});
 
+			// Each account at the address is opened for its own mint. Read from the run's single map,
+			// the first takes the second's: its line names the wrong token, and wrapped SOL funding is
+			// read as though there were nothing to wrap in it.
+			it('should read the mint of each account opened at an address from its own opening', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+
+				const summaries = mapSolInstructionSummaries({
+					instructions: [
+						{
+							...creation,
+							parsed: {
+								...creation.parsed,
+								info: { ...creation.parsed.info, lamports: 1_002_039_280 }
+							}
+						},
+						{
+							...initialisation,
+							parsed: {
+								...initialisation.parsed,
+								info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+							}
+						},
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									destination: user,
+									owner: user
+								}
+							}
+						},
+						creation,
+						initialisation
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(
+					summaries
+						.filter(({ kind }) => kind === 'createTokenAccount')
+						.map(({ tokenAddress, rent }) => ({ tokenAddress, rent }))
+				).toStrictEqual([
+					{ tokenAddress: WSOL_TOKEN.address, rent: undefined },
+					{ tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', rent: 2_039_280n }
+				]);
+			});
+
 			describe('funded with the SOL it wraps', () => {
 				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
 				const reserve = 2_039_280n;
