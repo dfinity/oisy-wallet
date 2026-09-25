@@ -800,7 +800,7 @@
 			"icpswap_description": "En un swap en ICPSwap tus tokens pasan por un pool antes de volver a ti. Si ese último paso falló, los tokens siguen siendo tuyos y siguen en el pool. $oisy_name puede buscarlos y devolvértelos.",
 			"scan": "Analizar mis pools",
 			"scanning": "Comprobando tus pools…",
-			"scan_hint": "Comprueba todos los pools entre dos tokens activos en tu wallet. Si hiciste swap hacia un token que nunca activaste, actívalo primero o indica el par abajo.",
+			"scan_hint": "Comprueba todos los pools entre dos tokens activos en tu wallet. Si hiciste swap hacia un token que nunca activaste, actívalo primero y luego vuelve a comprobar o indica el par abajo.",
 			"scan_nothing_found": "No quedó nada en los $pools pools comprobados.",
 			"scan_unreadable": "No se pudieron leer $unreadable de los $pools pools. Inténtalo de nuevo o indica el par abajo.",
 			"or_pick_a_pair": "O indica un par",

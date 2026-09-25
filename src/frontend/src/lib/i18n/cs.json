@@ -800,7 +800,7 @@
 			"icpswap_description": "Při swapu na ICPSwapu projdou vaše tokeny nejprve poolem a teprve pak se vrátí k vám. Pokud tento poslední krok selhal, tokeny jsou stále vaše a stále v poolu. $oisy_name je může najít a poslat vám je zpět.",
 			"scan": "Zkontrolovat moje pooly",
 			"scanning": "Kontrolujeme vaše pooly…",
-			"scan_hint": "Zkontroluje každý pool mezi dvěma tokeny aktivními ve vaší peněžence. Pokud jste směnili na token, který jste nikdy nezapnuli, zapněte ho nejprve nebo zadejte pár níže.",
+			"scan_hint": "Zkontroluje každý pool mezi dvěma tokeny aktivními ve vaší peněžence. Pokud jste směnili na token, který jste nikdy nezapnuli, nejprve ho zapněte a pak skenujte znovu nebo zadejte pár níže.",
 			"scan_nothing_found": "V $pools zkontrolovaných poolech nic nezůstalo.",
 			"scan_unreadable": "$unreadable z $pools poolů se nepodařilo přečíst. Zkuste to znovu nebo zadejte pár níže.",
 			"or_pick_a_pair": "Nebo zadejte pár",

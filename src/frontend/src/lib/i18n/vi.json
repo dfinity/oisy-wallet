@@ -800,7 +800,7 @@
 			"icpswap_description": "Khi swap trên ICPSwap, token của bạn đi vào một pool trước khi được gửi lại cho bạn. Nếu bước cuối đó thất bại, token vẫn là của bạn và vẫn ở trong pool. $oisy_name có thể tìm và gửi lại cho bạn.",
 			"scan": "Kiểm tra pool của tôi",
 			"scanning": "Đang kiểm tra các pool của bạn…",
-			"scan_hint": "Kiểm tra mọi pool giữa hai token đang hoạt động trong ví của bạn. Nếu bạn đã swap sang một token chưa bao giờ bật, hãy bật nó trước hoặc nhập cặp token bên dưới.",
+			"scan_hint": "Kiểm tra mọi pool giữa hai token đang hoạt động trong ví của bạn. Nếu bạn đã swap sang một token chưa bao giờ bật, hãy bật nó trước, rồi kiểm tra lại hoặc nhập cặp token bên dưới.",
 			"scan_nothing_found": "Không còn gì trong $pools pool đã kiểm tra.",
 			"scan_unreadable": "Không đọc được $unreadable trong $pools pool. Hãy thử lại hoặc nhập cặp token bên dưới.",
 			"or_pick_a_pair": "Hoặc nhập một cặp",

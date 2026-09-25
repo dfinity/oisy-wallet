@@ -218,8 +218,9 @@ export const loadIcpSwapRecoverableBalances = async ({
  * round is still reported as cancelled rather than returned.
  *
  * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
- * Those are reachable through the manual pair lookup above; widening the filter is not viable,
- * since roughly half of all pools have ICP as a leg.
+ * The manual pair lookup offers the same tokens, so it cannot reach those either: the token has to
+ * be enabled first, after which both find the pool. Widening the filter is not viable, since
+ * roughly half of all pools have ICP as a leg.
  */
 export const scanIcpSwapPools = async ({
 	identity,

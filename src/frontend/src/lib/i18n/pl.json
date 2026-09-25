@@ -800,7 +800,7 @@
 			"icpswap_description": "Przy swapie na ICPSwap Twoje tokeny trafiają najpierw do puli, a potem wracają do Ciebie. Jeśli ten ostatni krok się nie udał, tokeny nadal są Twoje i nadal są w puli. $oisy_name może ich poszukać i odesłać je do Ciebie.",
 			"scan": "Sprawdź moje pule",
 			"scanning": "Sprawdzanie Twoich pul…",
-			"scan_hint": "Sprawdza każdą pulę między dwoma tokenami aktywnymi w Twoim portfelu. Jeśli zamieniłeś na token, którego nigdy nie włączyłeś, włącz go najpierw albo wskaż parę poniżej.",
+			"scan_hint": "Sprawdza każdą pulę między dwoma tokenami aktywnymi w Twoim portfelu. Jeśli zamieniłeś na token, którego nigdy nie włączyłeś, najpierw go włącz, a potem sprawdź ponownie albo wskaż parę poniżej.",
 			"scan_nothing_found": "W sprawdzonych pulach ($pools) nic nie zostało.",
 			"scan_unreadable": "Nie udało się odczytać $unreadable z $pools pul. Spróbuj ponownie albo wskaż parę poniżej.",
 			"or_pick_a_pair": "Albo wskaż parę",
