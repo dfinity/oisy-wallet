@@ -14,7 +14,8 @@ import {
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
-	NAVIGATION_ITEM_TRADE
+	NAVIGATION_ITEM_TRADE,
+	NAVIGATION_MORE_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
@@ -70,11 +71,56 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
-		expect(getByTestId(NAVIGATION_ITEM_HELP)).toBeInTheDocument();
-		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
 		// asserted here.
+		//
+		// Settings is not here either: it renders in the page footer now, which is
+		// the `footer` layout below.
+	});
+
+	describe('the utility items', () => {
+		it('keeps Settings out of the sidebar', () => {
+			// It is pinned to the bottom of the sidebar, in its own block. Asserted
+			// rather than merely dropped from the list above, because a stray entry in
+			// a desktop section would put it in both places at once.
+			const { queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeNull();
+		});
+
+		it('stacks Settings above the More menu in the bottom layout', () => {
+			const { getByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
+			const more = getByTestId(NAVIGATION_MORE_MENU_BUTTON);
+
+			// DOM order is visual order in a flex column with no `order` utilities.
+			expect(
+				settings.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING
+			).toBeTruthy();
+		});
+
+		it('renders nothing but the pinned items in that layout', () => {
+			// The pinned block keeps its height while the sections above scroll, so
+			// it takes the named list and not whatever else the descriptors hold.
+			const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'bottom' } });
+
+			expect(queryByTestId(NAVIGATION_ITEM_TOKENS)).toBeNull();
+			expect(queryByTestId(NAVIGATION_ITEM_REWARDS)).toBeNull();
+		});
+
+		it('leaves the sidebar More group as notes, explore and rewards', () => {
+			// The social links went into the pinned More menu, not here: the first
+			// version of this change put them in this group, which would have listed
+			// them twice once the menu existed.
+			const { getByTestId, queryByTestId } = render(NavigationMainMenuItems);
+
+			expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
+			expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
+			expect(queryByTestId(NAVIGATION_MORE_MENU_BUTTON)).toBeNull();
+		});
 	});
 
 	it('renders the desktop section headings', () => {
@@ -137,35 +183,50 @@ describe('NavigationMainMenuItems', () => {
 		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
 	});
 
-	it('hides Help when the feature flag is off', () => {
-		featureFlags.helpEnabled = false;
+	// Desktop has no Help item in the sidebar: it is a row of the footer's More
+	// menu, tested in `NavigationMoreMenu.spec.ts`. On mobile it lives in the More
+	// sheet, which is what these cover.
+	const openMobileMore = async () => {
+		const result = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile', testIdPrefix: 'mobile' }
+		});
 
+		await fireEvent.click(result.getByTestId(`mobile-${NAVIGATION_GROUP_MORE}`));
+
+		return result;
+	};
+
+	it('keeps Help out of the desktop sidebar', () => {
 		const { queryByTestId } = render(NavigationMainMenuItems);
 
 		expect(queryByTestId(NAVIGATION_ITEM_HELP)).toBeNull();
-		// Its neighbour still renders, so the More group itself is intact.
-		expect(queryByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 	});
 
-	it('surfaces Help in More linking to the Help page', () => {
-		const { getByTestId } = render(NavigationMainMenuItems);
+	it('hides Help from the mobile More sheet when the feature flag is off', async () => {
+		featureFlags.helpEnabled = false;
 
-		const helpLink = getByTestId(NAVIGATION_ITEM_HELP);
+		const { getByTestId, queryByTestId } = await openMobileMore();
 
-		expect(helpLink.getAttribute('href')).toContain(AppPath.Help);
+		expect(queryByTestId(`mobile-${NAVIGATION_ITEM_HELP}`)).toBeNull();
+		// Its neighbour still renders, so the More sheet itself is intact.
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`)).toBeInTheDocument();
 	});
 
-	it('places Help directly before Settings in the desktop More section', () => {
-		const { getByTestId } = render(NavigationMainMenuItems);
+	it('links Help in the mobile More sheet to the Help page', async () => {
+		const { getByTestId } = await openMobileMore();
 
-		const help = getByTestId(NAVIGATION_ITEM_HELP);
-		const settings = getByTestId(NAVIGATION_ITEM_SETTINGS);
-
-		const moreItems = Array.from(
-			settings.parentElement?.querySelectorAll('[data-tid^="navigation-item-"]') ?? []
+		expect(getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`).getAttribute('href')).toContain(
+			AppPath.Help
 		);
+	});
 
-		expect(moreItems.indexOf(settings) - moreItems.indexOf(help)).toBe(1);
+	it('places Help directly before Settings in the mobile More sheet', async () => {
+		const { getByTestId } = await openMobileMore();
+
+		const help = getByTestId(`mobile-${NAVIGATION_ITEM_HELP}`);
+		const settings = getByTestId(`mobile-${NAVIGATION_ITEM_SETTINGS}`);
+
+		expect(help.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
 	it('surfaces Help inside the mobile More sheet', async () => {

@@ -49,6 +49,31 @@ describe('Popover', () => {
 		expect(container.querySelector('.rtl')).not.toBeNull();
 	});
 
+	it('opens below its anchor unless told otherwise', () => {
+		// Every popover in the app relied on this before `placement` existed, so
+		// the default must stay exactly where it was.
+		const { container } = render(Popover, { props: { visible: true } });
+
+		expect(container.querySelector('.wrapper')).not.toBeNull();
+		expect(container.querySelector('.wrapper.above')).toBeNull();
+	});
+
+	it('opens above its anchor when asked', () => {
+		// For anchors pinned to the bottom of the viewport, such as the footer's
+		// More menu, where a panel opened downward would have nowhere to go.
+		const { container } = render(Popover, { props: { visible: true, placement: 'above' } });
+
+		expect(container.querySelector('.wrapper.above')).not.toBeNull();
+	});
+
+	it('exposes the anchor distance an upward panel is positioned by', () => {
+		const { container } = render(Popover, { props: { visible: true, placement: 'above' } });
+
+		const style = container.querySelector<HTMLElement>('.popover')?.getAttribute('style') ?? '';
+
+		expect(style).toContain('--popover-bottom:');
+	});
+
 	it('should render the content container', () => {
 		const { container } = render(Popover, { props: { visible: true } });
 
