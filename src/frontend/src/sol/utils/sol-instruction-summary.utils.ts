@@ -779,9 +779,10 @@ const heldAtInstruction = ({
  * another mint, and have the first close read as that later account.
  *
  * A hand-over of ownership is deliberately not followed. It changes who may act on the account,
- * not whose lamports it holds, and within one message it is the means of taking them: hand the
- * user's account to a program's own address, close it to a stranger, and the close reads as the
- * program's. By the same rule an account handed to the user stays whoever's it was.
+ * not whose lamports it holds, and following it would make one message enough to take them: hand
+ * the user's account to a program's own address, close it to a stranger, and the close would read
+ * as the program's rather than be refused. By the same rule an account handed to the user stays
+ * whoever's it was.
  */
 const openedAs = ({
 	account,
