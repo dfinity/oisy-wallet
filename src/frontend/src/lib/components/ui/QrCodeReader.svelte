@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import IconQrCodeScanner from '$lib/components/icons/IconQrCodeScanner.svelte';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { nextElementId } from '$lib/utils/html.utils';
 
@@ -19,6 +21,10 @@
 	let scanInterval: NodeJS.Timeout | undefined;
 	let isDestroyed = false;
 	let isProcessingFrame = false;
+
+	// False while the OS permission prompt is up and the camera warms — the
+	// video element is an empty void then, so a placeholder covers it.
+	let streaming = $state(false);
 
 	onMount(async () => {
 		try {
@@ -41,6 +47,8 @@
 				videoElement.srcObject = stream;
 
 				await videoElement.play();
+
+				streaming = true;
 
 				await startScanning();
 			}
@@ -128,6 +136,19 @@
 		muted
 		playsinline
 	></video>
+
+	{#if !streaming}
+		<!-- Camera surface placeholder: conventionally dark regardless of app
+		     theme; icon-only so it needs no copy and survives the mirror flip. -->
+		<div
+			class="absolute inset-0 flex items-center justify-center rounded-lg bg-black"
+			out:fade={{ duration: 250 }}
+		>
+			<span class="animate-pulse text-white/40">
+				<IconQrCodeScanner size="64px" />
+			</span>
+		</div>
+	{/if}
 
 	<div
 		class="[container-type:size] pointer-events-none absolute inset-0 flex h-full items-center justify-center"
