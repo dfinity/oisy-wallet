@@ -759,11 +759,16 @@ const heldAtInstruction = ({
 				return acc;
 			}
 
-			if (address({ info, key: 'destination' }) === account) {
-				return acc + moved;
+			const into = address({ info, key: 'destination' }) === account;
+			const outOf = address({ info, key: 'source' }) === account;
+
+			// Moving nothing for the account unless exactly one end is it: a transfer from it to itself
+			// leaves the balance where it was, and reading the destination alone counts it in.
+			if (into === outOf) {
+				return acc;
 			}
 
-			return address({ info, key: 'source' }) === account ? maxBigInt(acc - moved, ZERO) : acc;
+			return into ? acc + moved : maxBigInt(acc - moved, ZERO);
 		},
 		accountTokenAmounts[account]
 	);
@@ -954,15 +959,16 @@ const fundedInTransaction = ({
 					return acc;
 				}
 
-				if (address({ info, key: 'destination' }) === account) {
-					return (acc ?? ZERO) + moved;
+				const into = address({ info, key: 'destination' }) === account;
+				const outOf = address({ info, key: 'source' }) === account;
+
+				// The same as for the token balance: a transfer from the account to itself moves no
+				// lamports.
+				if (into === outOf) {
+					return acc;
 				}
 
-				if (address({ info, key: 'source' }) === account) {
-					return maxBigInt((acc ?? ZERO) - moved, ZERO);
-				}
-
-				return acc;
+				return into ? (acc ?? ZERO) + moved : maxBigInt((acc ?? ZERO) - moved, ZERO);
 			}
 
 			if (program !== 'system') {

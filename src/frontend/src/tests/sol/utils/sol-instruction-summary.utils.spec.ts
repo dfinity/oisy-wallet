@@ -908,6 +908,44 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.wrapped).toBe(ZERO);
 		});
 
+		// A transfer from an account to itself moves nothing. Read by its destination alone it is an
+		// arrival, and the close states more SOL coming back and more of it wrapped than there is.
+		it('should not count a transfer of wrapped SOL from an account to itself', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wso1Account11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: { source: wsol, destination: wsol, authority: owner, amount: 1_000 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				accountHolders: { [wsol]: owner },
+				accountMintsBefore: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 1_488_445n },
+				accountTokenAmounts: { [wsol]: 5n },
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(1_488_445n);
+			expect(close?.wrapped).toBe(5n);
+		});
+
 		// Any other mint keeps its balance as a number in the account, not as the lamports under
 		// it, so a transfer of one moves none.
 		it('should not count a transfer of any other mint as lamports', () => {
