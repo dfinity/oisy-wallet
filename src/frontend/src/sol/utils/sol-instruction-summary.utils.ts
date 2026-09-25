@@ -656,13 +656,6 @@ const toEffect = ({
 };
 
 /**
- * What an account holds by the time it is closed, when the same transaction put it there.
- *
- * The System `createAccount` that opens it states the rent, and any System `transfer` into it adds
- * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
- * swap hands back the rent and the wrapped SOL together. No instruction states that total.
- */
-/**
  * What a token account holds by the time an instruction reaches it.
  *
  * The same walk the lamports take, over the token balance: from what it held before the
@@ -877,6 +870,14 @@ const initialisedInMessage = ({
 					['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)))
 	);
 
+/**
+ * What an account holds in lamports by the time an instruction reaches it, starting from what it
+ * held going in.
+ *
+ * The System `createAccount` that opens it states the rent, and any System `transfer` into it adds
+ * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
+ * swap hands back the rent and the wrapped SOL together. No instruction states that total.
+ */
 const fundedInTransaction = ({
 	account,
 	flattened,
