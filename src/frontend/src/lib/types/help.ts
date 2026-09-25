@@ -1,0 +1,28 @@
+import type { SwapProvider } from '$lib/types/swap';
+import type { Nullish } from '@dfinity/zod-schemas';
+
+// The chain a provider explorer link is scoped to. The values double as the
+// `event_value` of the `network` analytics key, so they follow the `token_network`
+// vocabulary documented in docs/ai/frontend/analytics.md.
+export type HelpExplorerChain = 'eth' | 'sol' | 'btc' | 'icp';
+
+export interface HelpExplorerLink {
+	chain: HelpExplorerChain;
+	// Already carries the user's address for `chain`; built by `buildHelpExplorerGroups`.
+	url: string;
+}
+
+export interface HelpExplorerGroup {
+	provider: SwapProvider;
+	// Never empty: a provider whose addresses are all still loading is dropped entirely.
+	links: HelpExplorerLink[];
+}
+
+export interface HelpExplorerAddresses {
+	// One Ethereum address covers every EVM network OISY supports, so a single entry
+	// serves all of them.
+	ethAddress?: Nullish<string>;
+	solAddress?: Nullish<string>;
+	btcAddress?: Nullish<string>;
+	principal?: Nullish<string>;
+}
