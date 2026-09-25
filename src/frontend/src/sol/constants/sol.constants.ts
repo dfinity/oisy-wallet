@@ -23,10 +23,15 @@ export const ANCHOR_IDL_ACCOUNT_DISCRIMINATOR = [24, 70, 98, 191, 58, 144, 123, 
 export const ANCHOR_IDL_ACCOUNT_LENGTH_OFFSET = 40;
 export const ANCHOR_IDL_ACCOUNT_HEADER_LENGTH = 44;
 
-// Solana transaction fee
-// It can be hard-coded since it is not changed unsless under community proposal, with time in advance.
+// Solana base fee, which a message pays once for every signature it requires.
+// It can be hard-coded since it is not changed unless under community proposal, with time in advance.
 // https://solana.com/docs/core/fees#transaction-fees
-export const SOLANA_TRANSACTION_FEE_IN_LAMPORTS = 5_000n;
+export const SOLANA_LAMPORTS_PER_SIGNATURE = 5_000n;
+
+// How many signatures the messages the wallet builds itself require, for a send or a swap's
+// deposit: the user's key alone pays the fee, authorises the transfer and funds any token account
+// the transfer opens. Their fee is quoted before the message exists, so it is quoted for this many.
+export const SOLANA_SEND_REQUIRED_SIGNATURES = 1;
 
 export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 

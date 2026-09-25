@@ -95,7 +95,11 @@ describe('SolWalletConnectSignModal', () => {
 
 		expect(approve).toBeDisabled();
 
-		resolveDecode({ amount: 1n, parties: { sources: [], destinations: [], partial: true } });
+		resolveDecode({
+			amount: 1n,
+			requiredSignatures: 1,
+			parties: { sources: [], destinations: [], partial: true }
+		});
 
 		await waitFor(() => {
 			expect(approve).toBeEnabled();
@@ -108,6 +112,7 @@ describe('SolWalletConnectSignModal', () => {
 		vi.mocked(decode).mockResolvedValueOnce({
 			amount: 1n,
 			ambiguous: true,
+			requiredSignatures: 1,
 			parties: { sources: [], destinations: [], partial: true }
 		});
 
@@ -120,6 +125,22 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should charge the base fee for every signature the decode counted', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			requiredSignatures: 2,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		const { getByTestId } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+		});
 	});
 
 	describe('the simulated flag it hands the signing service', () => {
@@ -154,6 +175,7 @@ describe('SolWalletConnectSignModal', () => {
 			// invocations make carry its index, so the run leaves nothing unknown.
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [{ kind: 'route' }, { kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: false }
@@ -167,6 +189,7 @@ describe('SolWalletConnectSignModal', () => {
 			// fee so the preview is not empty, and nothing anywhere describes the delegation.
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: true,
 				instructions: [{ kind: 'unknown' }],
 				preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] },
@@ -179,6 +202,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when the list came from the message rather than a run', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				simulatedInstructions: false,
 				instructions: [{ kind: 'send', amount: 1n }],
 				parties: { sources: [], destinations: [], partial: true }
@@ -190,6 +214,7 @@ describe('SolWalletConnectSignModal', () => {
 		it('should be false when there was no run at all', async () => {
 			const args = await approve({
 				amount: 1n,
+				requiredSignatures: 1,
 				parties: { sources: [], destinations: [], partial: true }
 			});
 

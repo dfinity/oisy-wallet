@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import type { SolAddress } from '$sol/types/address';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	SolRpcTransaction,
@@ -13,8 +14,10 @@ import {
 	address,
 	appendTransactionMessageInstruction,
 	blockhash,
+	compileTransaction,
 	compileTransactionMessage,
 	createTransactionMessage,
+	getBase64EncodedWireTransaction,
 	getCompiledTransactionMessageEncoder,
 	lamports,
 	pipe,
@@ -1092,15 +1095,18 @@ export const mockSolSignedTransaction: SolSignedTransaction = {
 	} as SignaturesMap
 } as unknown as SolSignedTransaction;
 
-/**
- * A genuine compiled transaction message, i.e. the exact byte string a `solana_signTransaction`
- * signature is taken over. Specs use it to submit a transaction through paths that are not the
- * transaction flow.
- */
-export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' | 0): Uint8Array => {
+// A plain SOL transfer whose sender pays the fee. The transfer names each co-signer as a read-only
+// signer, so the message requires that signature too.
+const createMockSolTransferMessage = ({
+	version,
+	coSigners = []
+}: {
+	version: 'legacy' | 0;
+	coSigners?: SolAddress[];
+}) => {
 	const feePayer = address(mockSolAddress);
 
-	const transactionMessage = pipe(
+	return pipe(
 		createTransactionMessage({ version }),
 		(tx) => setTransactionMessageFeePayer(feePayer, tx),
 		(tx) =>
@@ -1117,18 +1123,40 @@ export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' |
 					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
 					accounts: [
 						{ address: feePayer, role: AccountRole.WRITABLE_SIGNER },
-						{ address: address(mockSolAddress2), role: AccountRole.WRITABLE }
+						{ address: address(mockSolAddress2), role: AccountRole.WRITABLE },
+						...coSigners.map((coSigner) => ({
+							address: address(coSigner),
+							role: AccountRole.READONLY_SIGNER
+						}))
 					],
 					data: Uint8Array.from([2, 0, 0, 0, 0, 202, 154, 59, 0, 0, 0, 0])
 				},
 				tx
 			)
 	);
-
-	return Uint8Array.from(
-		getCompiledTransactionMessageEncoder().encode(compileTransactionMessage(transactionMessage))
-	);
 };
+
+/**
+ * A genuine compiled transaction message, i.e. the exact byte string a `solana_signTransaction`
+ * signature is taken over. Specs use it to submit a transaction through paths that are not the
+ * transaction flow.
+ */
+export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' | 0): Uint8Array =>
+	Uint8Array.from(
+		getCompiledTransactionMessageEncoder().encode(
+			compileTransactionMessage(createMockSolTransferMessage({ version }))
+		)
+	);
+
+/**
+ * A genuine wire transaction, base64-encoded the way a dApp hands one over WalletConnect: the
+ * transfer above, carrying an empty signature slot for each signature its message requires.
+ */
+export const createMockSolBase64Transaction = (params: {
+	version: 'legacy' | 0;
+	coSigners?: SolAddress[];
+}): string =>
+	getBase64EncodedWireTransaction(compileTransaction(createMockSolTransferMessage(params)));
 
 export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {
 	feePayer: {

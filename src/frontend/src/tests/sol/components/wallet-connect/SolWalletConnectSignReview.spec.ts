@@ -204,6 +204,15 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
+	// A message the dApp co-signs requires two signatures, and each one is charged.
+	it('should charge the base fee for every signature the message requires', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, requiredSignatures: 2 }
+		});
+
+		expect(getByTestId('network-fee')).toHaveTextContent('0.00001 SOL');
+	});
+
 	it('should render the prioritization fee at the full precision of the token', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
@@ -437,6 +446,33 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		// Every signature pays the base fee out of the SOL balance the run reports, so a send the
+		// dApp co-signs takes two of them beyond what it moves.
+		it('should allow for every signature the message requires', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					requiredSignatures: 2,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
+		it('should not allow for a signature the message does not require', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					preview: { solDelta: -1_010_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(queryByTestId('message-summary')).not.toBeInTheDocument();
 		});
 
 		// A sentence the user would check the figures against, over a transaction that does

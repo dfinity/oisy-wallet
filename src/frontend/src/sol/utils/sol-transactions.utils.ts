@@ -37,6 +37,24 @@ export const parseSolBase64TransactionMessage = async ({
 };
 
 /**
+ * How many signatures a base64-encoded transaction requires, which is what its base fee is charged
+ * on.
+ *
+ * It is read from the header of the compiled message rather than counted in the decompiled one.
+ * Decompiling keeps only the fee payer and the accounts the instructions name, so a signer that no
+ * instruction names drops out of it, though its signature is still required and still charged.
+ */
+export const countSolRequiredSignatures = (transactionMessage: string): number => {
+	const { messageBytes } = decodeTransactionMessage(transactionMessage);
+
+	const {
+		header: { numSignerAccounts }
+	} = getCompiledTransactionMessageDecoder().decode(messageBytes);
+
+	return numSignerAccounts;
+};
+
+/**
  * Whether these bytes decode as a compiled Solana transaction message.
  *
  * Decoder acceptance is the definition, deliberately, and it is wider than "the network would
