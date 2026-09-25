@@ -807,7 +807,7 @@
 			"token_first": "Primer token",
 			"token_second": "Segundo token",
 			"select_token": "Seleccionar",
-			"no_tokens": "No hay tokens ICRC activos. Activa primero los dos tokens del pool.",
+			"no_tokens": "Solo se puede elegir ICP. Activa primero el token que le falta al pool, o ambos si el pool no incluye ICP.",
 			"checking_pool": "Comprobando el pool…",
 			"nothing_to_withdraw": "No hay nada que retirar en este pool.",
 			"results_found": "Saldos retirables encontrados: $balances.",

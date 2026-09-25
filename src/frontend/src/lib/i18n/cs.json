@@ -807,7 +807,7 @@
 			"token_first": "První token",
 			"token_second": "Druhý token",
 			"select_token": "Vybrat",
-			"no_tokens": "Není zapnutý žádný token ICRC. Zapněte nejprve oba tokeny poolu.",
+			"no_tokens": "Lze vybrat jen ICP. Nejprve zapněte chybějící token poolu, nebo oba tokeny, pokud pool neobsahuje ICP.",
 			"checking_pool": "Kontrolujeme pool…",
 			"nothing_to_withdraw": "V tomto poolu není co vybrat.",
 			"results_found": "Nalezené vybratelné zůstatky: $balances.",

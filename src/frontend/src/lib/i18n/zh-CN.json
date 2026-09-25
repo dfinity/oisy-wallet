@@ -807,7 +807,7 @@
 			"token_first": "第一个代币",
 			"token_second": "第二个代币",
 			"select_token": "选择",
-			"no_tokens": "没有启用任何 ICRC 代币。请先启用该资金池的两个代币。",
+			"no_tokens": "只能选择 ICP。请先启用该资金池缺少的代币；如果资金池不包含 ICP，请启用两个代币。",
 			"checking_pool": "正在检查资金池…",
 			"nothing_to_withdraw": "该资金池中没有可提取的余额。",
 			"results_found": "找到可提取余额：$balances 个。",

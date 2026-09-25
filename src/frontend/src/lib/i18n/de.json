@@ -807,7 +807,7 @@
 			"token_first": "Erstes Token",
 			"token_second": "Zweites Token",
 			"select_token": "Auswählen",
-			"no_tokens": "Es sind keine ICRC-Tokens aktiv. Aktiviere zuerst die beiden Tokens des Pools.",
+			"no_tokens": "Nur ICP ist auswählbar. Aktiviere zuerst das fehlende Token des Pools – oder beide, wenn der Pool kein ICP enthält.",
 			"checking_pool": "Pool wird geprüft…",
 			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
 			"results_found": "Gefundene auszahlbare Guthaben: $balances.",

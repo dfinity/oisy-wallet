@@ -807,7 +807,7 @@
 			"token_first": "1 つ目のトークン",
 			"token_second": "2 つ目のトークン",
 			"select_token": "選択",
-			"no_tokens": "有効な ICRC トークンがありません。先にプールの 2 つのトークンを有効にしてください。",
+			"no_tokens": "選択できるのは ICP のみです。先にプールの不足しているトークンを有効にしてください。プールに ICP が含まれない場合は、両方のトークンを有効にしてください。",
 			"checking_pool": "プールを確認しています…",
 			"nothing_to_withdraw": "このプールに出金できる残高はありません。",
 			"results_found": "出金可能な残高: $balances 件。",

@@ -807,7 +807,7 @@
 			"token_first": "First token",
 			"token_second": "Second token",
 			"select_token": "Select",
-			"no_tokens": "No ICRC tokens are enabled. Enable the two tokens of the pool first.",
+			"no_tokens": "Only ICP can be picked. Enable the pool's missing token first, or both tokens if the pool doesn't include ICP.",
 			"checking_pool": "Checking the pool…",
 			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
 			"results_found": "Withdrawable balances found: $balances.",

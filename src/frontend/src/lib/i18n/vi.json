@@ -807,7 +807,7 @@
 			"token_first": "Token thứ nhất",
 			"token_second": "Token thứ hai",
 			"select_token": "Chọn",
-			"no_tokens": "Chưa có token ICRC nào được bật. Hãy bật hai token của pool trước.",
+			"no_tokens": "Chỉ có thể chọn ICP. Hãy bật token còn thiếu của pool trước, hoặc cả hai token nếu pool không có ICP.",
 			"checking_pool": "Đang kiểm tra pool…",
 			"nothing_to_withdraw": "Không có gì để rút trong pool này.",
 			"results_found": "Số dư có thể rút đã tìm thấy: $balances.",

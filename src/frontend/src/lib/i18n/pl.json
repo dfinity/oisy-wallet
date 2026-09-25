@@ -807,7 +807,7 @@
 			"token_first": "Pierwszy token",
 			"token_second": "Drugi token",
 			"select_token": "Wybierz",
-			"no_tokens": "Żaden token ICRC nie jest włączony. Włącz najpierw oba tokeny puli.",
+			"no_tokens": "Można wybrać tylko ICP. Najpierw włącz brakujący token puli albo oba tokeny, jeśli pula nie zawiera ICP.",
 			"checking_pool": "Sprawdzanie puli…",
 			"nothing_to_withdraw": "W tej puli nie ma nic do wypłaty.",
 			"results_found": "Znalezione środki do wypłaty: $balances.",
