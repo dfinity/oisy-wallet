@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
+	import { onDestroy } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -86,6 +87,14 @@
 	};
 
 	const isCurrentRequest = (generation: number): boolean => generation === requestGeneration;
+
+	// Leaving the page has to invalidate the running request too: nothing else would, so a scan in
+	// flight would keep sending every remaining batch. With the generation moved on, its
+	// `isCancelled` turns true and it stops at the next check, reporting `cancel`; a pending lookup
+	// drops its writes. A withdrawal is left alone - it is an update call the user started.
+	onDestroy(() => {
+		requestGeneration++;
+	});
 
 	// ICP is not an ICRC token - it has its own `icp` standard and lives outside the ICRC stores -
 	// so `enabledIcrcTokens` does not contain it, even though it is one side of most ICPSwap pools.

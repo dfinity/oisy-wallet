@@ -304,6 +304,24 @@ describe('HelpIcpSwapWithdrawal', () => {
 		expect(queryByTestId(HELP_ICPSWAP_ERROR)).toBeNull();
 	});
 
+	it('stops a scan in flight when the card is left', async () => {
+		// Nothing but a newer request moved the generation on, so a scan outlived its page and kept
+		// sending batches for a result no card would show.
+		vi.mocked(scanIcpSwapPools).mockReturnValue(Promise.withResolvers<IcpSwapScanResult>().promise);
+
+		const { getByTestId, unmount } = render(HelpIcpSwapWithdrawal);
+
+		await fireEvent.click(getByTestId(HELP_ICPSWAP_SCAN_BUTTON));
+
+		const [[{ isCancelled }]] = vi.mocked(scanIcpSwapPools).mock.calls;
+
+		expect(isCancelled?.()).toBeFalsy();
+
+		unmount();
+
+		expect(isCancelled?.()).toBeTruthy();
+	});
+
 	it('does not scan until the button is pressed', () => {
 		render(HelpIcpSwapWithdrawal);
 
