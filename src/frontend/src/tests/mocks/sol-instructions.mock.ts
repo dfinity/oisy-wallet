@@ -97,6 +97,7 @@ export const MOCK_SOL_INSTRUCTIONS = {
 				]
 			}
 		],
+		userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 		ownedAddresses: [
 			'4Zao69PUPwc16Qf3ddV32hKNU8ATed8a5encUtN7d5Sp',
 			'5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
@@ -328,6 +329,7 @@ export const MOCK_SOL_INSTRUCTIONS = {
 				]
 			}
 		],
+		userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 		ownedAddresses: [
 			'4ZqAVpgtTgPn6nX2FSVYBWhqYLaNpNweTiJqw6S5kHBE',
 			'5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
@@ -459,6 +461,7 @@ export const MOCK_SOL_INSTRUCTIONS = {
 				]
 			}
 		],
+		userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 		ownedAddresses: [
 			'5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 			'6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',
@@ -538,6 +541,7 @@ export const MOCK_SOL_INSTRUCTIONS = {
 				]
 			}
 		],
+		userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 		ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
 	},
 	JUPITER_SWAP: {
@@ -703,6 +707,7 @@ export const MOCK_SOL_INSTRUCTIONS = {
 				]
 			}
 		],
+		userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 		ownedAddresses: [
 			'5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 			'6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU',

@@ -178,6 +178,41 @@ describe('sol-transfer-parties.utils', () => {
 			});
 		});
 
+		// Whose an account is, is read at the transfer. The accounts named as the user's are every
+		// account they held at any point of the message, so an address closed and opened for a
+		// different holder would otherwise lend each holder's transfers to the other.
+		it('should not list an account that somebody else held at the transfer', () => {
+			const parties = deriveSolTransferParties({
+				legs: [
+					{
+						...leg({ source: mockAtaAddress, destination: mockAtaAddress3 }),
+						sourceHolder: mockSolAddress2
+					}
+				],
+				ownedAddresses: [mockSolAddress, mockAtaAddress]
+			});
+
+			expect(parties).toEqual({ sources: [], destinations: [] });
+		});
+
+		it('should list an account the user held at the transfer, with that holder', () => {
+			const parties = deriveSolTransferParties({
+				legs: [
+					{
+						...leg({ source: mockAtaAddress, destination: mockAtaAddress3 }),
+						sourceHolder: mockSolAddress
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				addressToOwner: { [mockAtaAddress]: mockSolAddress2 }
+			});
+
+			expect(parties).toEqual({
+				sources: [{ address: mockAtaAddress, owner: mockSolAddress, own: true }],
+				destinations: [{ address: mockAtaAddress3, own: false }]
+			});
+		});
+
 		it('should match on a token account the user owns, not only on their wallet', () => {
 			const parties = deriveSolTransferParties({
 				legs: [leg({ source: mockAtaAddress, destination: mockAtaAddress3 })],

@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
@@ -190,6 +191,49 @@ describe('sol-transactions.services', () => {
 			expect(record.netChanges).toStrictEqual([{ delta: -1_000_000n }]);
 			expect(record.instructions).toHaveLength(1);
 			expect(record.instructions?.[0].kind).toBe('send');
+		});
+
+		// The lamports were threaded through this path and the token balances were not, so every
+		// close in the activity list held an unknown amount and read as an unwrap of it.
+		it('should read what a closed account held from the pre-token balances', async () => {
+			spyFetchTransactionDetailForSignature.mockResolvedValueOnce(
+				detailWith({
+					instructions: [
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: mockAtaAddress,
+									destination: mockSolAddress,
+									owner: mockSolAddress
+								}
+							}
+						}
+					],
+					accountKeys: [
+						{ pubkey: mockSolAddress, signer: true, writable: true, source: 'transaction' },
+						{ pubkey: mockAtaAddress, signer: false, writable: true, source: 'transaction' }
+					],
+					preBalances: [10_000_000n, 2_039_280n],
+					postBalances: [12_034_280n, ZERO],
+					preTokenBalances: [
+						{
+							accountIndex: 1,
+							mint: WSOL_TOKEN.address,
+							owner: mockSolAddress,
+							uiTokenAmount: { amount: '0', decimals: 9 }
+						}
+					]
+				})
+			);
+
+			const [record] = await fetchSolTransactionsForSignature(mockParams);
+
+			const close = record.instructions?.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.wrapped).toBe(ZERO);
 		});
 
 		it('should return nothing for a transaction the user has no part in', async () => {

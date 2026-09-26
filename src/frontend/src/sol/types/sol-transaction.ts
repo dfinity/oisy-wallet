@@ -146,6 +146,12 @@ export interface SolTransferLeg {
 	destination: SolAddress;
 	amount: bigint;
 	tokenAddress?: SplTokenAddress;
+	// Whose each end was at the transfer, where the state before the transaction or an opening
+	// earlier in it says. An address can hold more than one account within one message, closed and
+	// opened again for somebody else, and whose it is at the end says nothing about whose it was
+	// when an earlier transfer used it.
+	sourceHolder?: SolAddress;
+	destinationHolder?: SolAddress;
 }
 
 export interface SolTransferParty {

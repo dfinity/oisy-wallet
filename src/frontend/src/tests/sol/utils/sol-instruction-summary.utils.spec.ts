@@ -3,8 +3,14 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
+import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 import { MOCK_SOL_INSTRUCTIONS } from '$tests/mocks/sol-instructions.mock';
-import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockAtaAddress2,
+	mockSolAddress,
+	mockSolAddress2
+} from '$tests/mocks/sol.mock';
 import { getTransferSolInstruction } from '@solana-program/system';
 import {
 	AuthorityType,
@@ -168,6 +174,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: [creation, initialisation],
 						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 						includeUnrecognised: true
 					}).map(({ kind }) => kind)
 				).toStrictEqual(['createTokenAccount']);
@@ -179,7 +186,8 @@ describe('sol-instruction-summary.utils', () => {
 				expect(
 					mapSolInstructionSummaries({
 						instructions: [creation, initialisation],
-						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+						ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+						userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 					})
 				).toStrictEqual([
 					{
@@ -211,10 +219,195 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					],
 					innerInstructions: [{ index: 0, instructions: [creation] }],
-					ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q']
+					ownedAddresses: ['5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'],
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 				});
 
 				expect(summaries.filter(({ kind }) => kind === 'createTokenAccount')).toHaveLength(1);
+			});
+
+			// An address closed and opened again is two accounts, each funded by its own creation.
+			it('should read the rent of an account opened again from its own creation', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+
+				const summaries = mapSolInstructionSummaries({
+					instructions: [
+						creation,
+						initialisation,
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									destination: user,
+									owner: user
+								}
+							}
+						},
+						{
+							...creation,
+							parsed: { ...creation.parsed, info: { ...creation.parsed.info, lamports: 3_000_000 } }
+						},
+						initialisation
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(
+					summaries.filter(({ kind }) => kind === 'createTokenAccount').map(({ rent }) => rent)
+				).toStrictEqual([2_039_280n, 3_000_000n]);
+			});
+
+			// Each account at the address is opened for its own mint. Read from the run's single map,
+			// the first takes the second's: its line names the wrong token, and wrapped SOL funding is
+			// read as though there were nothing to wrap in it.
+			it('should read the mint of each account opened at an address from its own opening', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+
+				const summaries = mapSolInstructionSummaries({
+					instructions: [
+						{
+							...creation,
+							parsed: {
+								...creation.parsed,
+								info: { ...creation.parsed.info, lamports: 1_002_039_280 }
+							}
+						},
+						{
+							...initialisation,
+							parsed: {
+								...initialisation.parsed,
+								info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+							}
+						},
+						{
+							program: 'spl-token',
+							programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+									destination: user,
+									owner: user
+								}
+							}
+						},
+						creation,
+						initialisation
+					],
+					ownedAddresses: [user],
+					userAddress: user
+				});
+
+				expect(
+					summaries
+						.filter(({ kind }) => kind === 'createTokenAccount')
+						.map(({ tokenAddress, rent }) => ({ tokenAddress, rent }))
+				).toStrictEqual([
+					{ tokenAddress: WSOL_TOKEN.address, rent: undefined },
+					{ tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', rent: 2_039_280n }
+				]);
+			});
+
+			describe('funded with the SOL it wraps', () => {
+				const user = '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q';
+				const reserve = 2_039_280n;
+
+				const instructions = [
+					{
+						...creation,
+						parsed: {
+							...creation.parsed,
+							info: { ...creation.parsed.info, lamports: 1_002_039_280 }
+						}
+					},
+					{
+						...initialisation,
+						parsed: {
+							...initialisation.parsed,
+							info: { ...initialisation.parsed.info, mint: WSOL_TOKEN.address }
+						}
+					}
+				];
+
+				const rentOf = (rentExemptMinimum?: bigint): bigint | undefined =>
+					mapSolInstructionSummaries({
+						instructions,
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum
+					}).find(({ kind }) => kind === 'createTokenAccount')?.rent;
+
+				// Initialising it reads everything above the reserve as the wrapped balance, so stating
+				// the whole funding as rent counts the wrapped SOL a second time.
+				it('should state only the reserve as its rent', () => {
+					expect(rentOf(reserve)).toBe(reserve);
+				});
+
+				// Without the reserve the rent and the SOL to wrap cannot be told apart, and the whole
+				// funding would claim the wrapped SOL as rent.
+				it('should leave its rent unstated without the reserve', () => {
+					expect(rentOf()).toBeUndefined();
+				});
+
+				// The associated token account program funds exactly the rent of what it opens, so its
+				// creation states the rent without the reserve, wrapped SOL included.
+				it('should keep the rent of a wrapped SOL account the associated token program opens', () => {
+					const summaries = mapSolInstructionSummaries({
+						instructions: [
+							{
+								program: 'spl-associated-token-account',
+								programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+								parsed: {
+									type: 'create',
+									info: {
+										account: 'DgdHwEGCLtmQxxh1NbUzDVjbj2mYMY8RoxF83BRHPmSe',
+										mint: WSOL_TOKEN.address,
+										source: user,
+										wallet: user
+									}
+								}
+							}
+						],
+						innerInstructions: [{ index: 0, instructions: [creation] }],
+						ownedAddresses: [user],
+						userAddress: user
+					});
+
+					expect(summaries.find(({ kind }) => kind === 'createTokenAccount')?.rent).toBe(reserve);
+				});
+
+				// The reserve is for the fixed size of a Token program account. An account of any other
+				// size holds no wrapped SOL, so what its creation funds is its rent.
+				it('should keep the funding of an account of another size as its rent', () => {
+					const summaries = mapSolInstructionSummaries({
+						instructions: [
+							{
+								...creation,
+								parsed: {
+									...creation.parsed,
+									info: {
+										...creation.parsed.info,
+										lamports: 2_074_080,
+										owner: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+										space: 170
+									}
+								}
+							},
+							{ ...initialisation, programId: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb' }
+						],
+						ownedAddresses: [user],
+						userAddress: user,
+						rentExemptMinimum: reserve
+					});
+
+					expect(summaries.find(({ kind }) => kind === 'createTokenAccount')?.rent).toBe(
+						2_074_080n
+					);
+				});
 			});
 		});
 
@@ -233,7 +426,8 @@ describe('sol-instruction-summary.utils', () => {
 				instructions: [
 					{ program: 'spl-token', programId: 'Tokenkeg', parsed: { type: 'transfer', info } }
 				],
-				ownedAddresses: [owner, ata]
+				ownedAddresses: [owner, ata],
+				userAddress: owner
 			});
 
 			// An SPL transfer names token accounts, not wallets. The authority is the only field
@@ -292,7 +486,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('receive');
@@ -315,7 +510,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('send');
@@ -341,11 +537,1546 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				accountLamports: { [ata]: 2_039_280n }
 			});
 
 			expect(view.kind).toBe('closeTokenAccount');
 			expect(view.returned).toBe(2_039_280n);
+			expect(view.counterparty).toBe(owner);
+			expect(view.own).toBeTruthy();
+		});
+
+		// Both sources apply at once on an account that pre-dates the message and is paid into during
+		// it. Picking one dropped the other, and on a funded account the one dropped was the bulk.
+		it('should add what the account already held to what arrived', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { destination: wsol, lamports: 1_000_000_000, source: owner }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				accountLamports: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			// 5 SOL it already held plus the 1 SOL the message paid in.
+			expect(close?.returned).toBe(6_000_000_000n);
+		});
+
+		// An account this message opens has no state to read beforehand, and a swap that opens one
+		// wraps into it and unwraps out of it within the same message. Reading the balance from
+		// before the transaction called every such close an unwrap, including the ones that hand
+		// back nothing but the rent they were opened with.
+		it('should call a close of an account it opened and emptied a close, not an unwrap', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		it('should keep the wrapped amount of an account it opened and wrapped into', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'transfer',
+							info: { destination: wsol, lamports: 1_000_000_000, source: owner }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBe(1_000_000_000n);
+		});
+
+		// An account that pre-dates the message can be emptied before its close just the same.
+		// Reading its balance from before the transaction called that close an unwrap of something
+		// already gone.
+		it('should hold nothing when a pre-existing account was emptied before its close', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: wsol,
+								destination: 'poo11111111111111111111111111111111111111',
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(2_039_280n);
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		it('should add what a pre-existing account received before its close', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 1_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(2_039_280n + 6_000_000_000n);
+			expect(close?.wrapped).toBe(6_000_000_000n);
+		});
+
+		// Nothing to start from: an account that pre-dates the message and whose state no run read.
+		it('should hold an unknown amount when no run read the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBeUndefined();
+		});
+
+		// A creation may fund a native account with the reserve and the amount to wrap together, and
+		// let its initialisation read the difference as the balance. Seeding from nothing called
+		// that close a plain one and its whole payout rent.
+		it('should hold what a creation funded above the reserve', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440 + 5_000_000_000,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		// Nothing in the message says where the reserve ends and the balance begins: the creation
+		// states one figure and the close hands the same one back.
+		it('should hold an unknown amount when the reserve is not known', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.wrapped).toBeUndefined();
+		});
+
+		// A wrapped SOL account holds its token balance as lamports, so a token transfer into one
+		// hands that much more over when it closes. Counting only System funding reported the rent
+		// alone and called the close a return of it.
+		it('should count wrapped SOL transferred into the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(5_001_488_440n);
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		it('should take wrapped SOL sent on out again', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: wsol,
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: wsol,
+								destination: 'poo22222222222222222222222222222222222222',
+								amount: 5_000_000_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(1_488_440n);
+			expect(close?.wrapped).toBe(ZERO);
+		});
+
+		// A transfer from an account to itself moves nothing. Read by its destination alone it is an
+		// arrival, and the close states more SOL coming back and more of it wrapped than there is.
+		it('should not count a transfer of wrapped SOL from an account to itself', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wso1Account11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: { source: wsol, destination: wsol, authority: owner, amount: 1_000 }
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				accountHolders: { [wsol]: owner },
+				accountMintsBefore: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 1_488_445n },
+				accountTokenAmounts: { [wsol]: 5n },
+				addressToToken: { [wsol]: WSOL_TOKEN.address }
+			});
+
+			const close = views.find(({ kind }) => kind === 'unwrap');
+
+			expect(close?.returned).toBe(1_488_445n);
+			expect(close?.wrapped).toBe(5n);
+		});
+
+		// Whose an account is, is read as of the instruction too. The set of the user's accounts
+		// holds every account they had at any point of the message, so an address closed and opened
+		// for a different holder would lend each holder's transfers to the other.
+		describe('an address closed and opened for a different holder', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const stranger = 'strangerWa11et11111111111111111111111111111';
+			const account = 'reusedAccount11111111111111111111111111111';
+			const pool = 'poo11111111111111111111111111111111111111';
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+
+			const transfer = ({
+				source,
+				destination,
+				authority
+			}: {
+				source: string;
+				destination: string;
+				authority: string;
+			}) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'transfer', info: { source, destination, authority, amount: '100' } }
+			});
+
+			const close = (holder: string) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'closeAccount', info: { account, destination: holder, owner: holder } }
+			});
+
+			const reopenFor = (holder: string) => [
+				{
+					program: 'system',
+					programId: '11111111111111111111111111111111',
+					parsed: {
+						type: 'createAccount',
+						info: {
+							newAccount: account,
+							lamports: 2_039_280,
+							owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+							source: holder,
+							space: 165
+						}
+					}
+				},
+				{
+					program: 'spl-token',
+					programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+					parsed: { type: 'initializeAccount3', info: { account, mint: bonk, owner: holder } }
+				}
+			];
+
+			it('should not count a send from it as the user sending before it is opened for them', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						transfer({ source: account, destination: pool, authority: stranger }),
+						close(stranger),
+						...reopenFor(owner)
+					],
+					ownedAddresses: [owner],
+					userAddress: owner,
+					accountHolders: { [account]: stranger },
+					accountMintsBefore: { [account]: bonk }
+				});
+
+				expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+			});
+
+			it('should not count a transfer into it as the user receiving once it is opened for somebody else', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						close(owner),
+						...reopenFor(stranger),
+						transfer({ source: pool, destination: account, authority: stranger })
+					],
+					ownedAddresses: [owner, account],
+					userAddress: owner,
+					accountHolders: { [account]: owner },
+					accountMintsBefore: { [account]: bonk },
+					accountLamports: { [account]: 2_039_280n }
+				});
+
+				expect(views.map(({ kind }) => kind)).toStrictEqual(['closeTokenAccount']);
+			});
+		});
+
+		// A transfer into an account is a wrap by the account the address holds at the transfer.
+		// Read from the run's single map, an address opened for two mints judges a transfer into
+		// either by the last one.
+		describe('a SOL transfer into an address opened for two mints', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const account = 'wso1Account11111111111111111111111111111111';
+
+			const openAs = (mint: string) => ({
+				program: 'spl-associated-token-account',
+				programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+				parsed: { type: 'create', info: { account, mint, source: owner, wallet: owner } }
+			});
+
+			const transfer = {
+				program: 'system',
+				programId: '11111111111111111111111111111111',
+				parsed: {
+					type: 'transfer',
+					info: { source: owner, destination: account, lamports: 1_000_000 }
+				}
+			};
+
+			const close = {
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'closeAccount', info: { account, destination: owner, owner } }
+			};
+
+			const kindOfTransfer = (instructions: unknown[]): string | undefined =>
+				mapSolInstructionSummaries({
+					instructions,
+					ownedAddresses: [owner],
+					userAddress: owner
+				}).find(({ kind }) => kind === 'wrap' || kind === 'send')?.kind;
+
+			it('should read it as a wrap while the address holds wrapped SOL', () => {
+				expect(
+					kindOfTransfer([
+						openAs(WSOL_TOKEN.address),
+						transfer,
+						close,
+						openAs('bonkMint1111111111111111111111111111111111')
+					])
+				).toBe('wrap');
+			});
+
+			it('should read it as a send while the address holds any other mint', () => {
+				expect(
+					kindOfTransfer([
+						openAs('bonkMint1111111111111111111111111111111111'),
+						transfer,
+						close,
+						openAs(WSOL_TOKEN.address)
+					])
+				).toBe('send');
+			});
+
+			// SOL sent to the address before anything is open there ends up in the account the
+			// message opens there next.
+			it('should read it by the account opened next when nothing is open yet', () => {
+				expect(kindOfTransfer([transfer, openAs(WSOL_TOKEN.address)])).toBe('wrap');
+			});
+		});
+
+		// An unchecked transfer names no mint, so the mint is the one its account holds at the
+		// transfer. Read from the run's single map, a send made before the address is opened again
+		// for another mint is stated in the later mint, with its decimals.
+		it('should read an unchecked transfer by the mint its account holds at the transfer', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const account = 'mineAccount11111111111111111111111111111111';
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+			const usdc = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: account,
+								destination: 'friendBonkAccount1111111111111111111111111',
+								authority: owner,
+								amount: '100'
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account, destination: owner, owner } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: account,
+								lamports: 2_039_280,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'initializeAccount3', info: { account, mint: usdc, owner } }
+					}
+				],
+				ownedAddresses: [owner, account],
+				userAddress: owner,
+				accountHolders: { [account]: owner },
+				accountMintsBefore: { [account]: bonk },
+				accountLamports: { [account]: 2_039_280n },
+				accountTokenAmounts: { [account]: 100n },
+				addressToToken: { [account]: usdc }
+			});
+
+			expect(views.find(({ kind }) => kind === 'send')?.tokenAddress).toBe(bonk);
+		});
+
+		// Any other mint keeps its balance as a number in the account, not as the lamports under
+		// it, so a transfer of one moves none.
+		it('should not count a transfer of any other mint as lamports', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'bonkAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: ata,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'transfer',
+							info: {
+								source: 'poo11111111111111111111111111111111111111',
+								destination: ata,
+								amount: 9_000
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [ata]: 'bonkMint1111111111111111111111111111111111' }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close?.returned).toBe(1_488_440n);
+		});
+
+		// The idempotent form does nothing when the account is already there. A line saying an
+		// account was opened, for a message that opened none, states an operation that did not
+		// happen.
+		it('should say nothing for an idempotent creation of an account that already exists', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' },
+				includeUnrecognised: true
+			});
+
+			expect(views).toStrictEqual([]);
+		});
+
+		// Dropping the line must not leave the instruction uncovered: listed as one nothing could
+		// read, it would also be the entry that stops the request being signed.
+		it('should not list that creation as unrecognised either', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' },
+				includeUnrecognised: true
+			});
+
+			expect(views.map(({ kind }) => kind)).not.toContain('unknown');
+		});
+
+		// An associated account's address can hold lamports before anything opens an account at it,
+		// and the program then opens one on top of them rather than doing nothing. Lamports alone
+		// do not say the account was there, only a token account in the state before does.
+		it('should keep an idempotent creation over an address that holds lamports but no account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 1_000_000n },
+				includeUnrecognised: true
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// An account this message opens has no pre-state, so asking only about the state before the
+		// transaction called the second creation a real one and charged the same rent twice.
+		it('should say nothing for an idempotent creation of an account this message just opened', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					},
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: ata,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: owner,
+										space: 165
+									}
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// Closing it puts the address back to nothing, so what follows opens it again.
+		it('should keep an idempotent creation that follows a close of the same account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: ata, destination: owner, owner } }
+					},
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' }
+			});
+
+			expect(views.map(({ kind }) => kind)).toContain('createTokenAccount');
+		});
+
+		// A confirmed transaction's balances carry an entry for every account it names, an account
+		// it creates among them, at nothing. Seeding from the keys alone read those as already
+		// there and dropped the creation that made them, rent and all.
+		it('should keep a creation of an account whose balance going in was nothing', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [owner]: 10_000_000n, [ata]: ZERO }
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// Nothing says it was a no-op without a run to say the account was already there.
+		it('should keep an idempotent creation when no run read the account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'createIdempotent',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// Only the idempotent form. The plain one fails on an account that exists, so it is never
+		// a no-op.
+		it('should keep a plain creation even when the account has a pre-state', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAccount111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-associated-token-account',
+						programId: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+						parsed: {
+							type: 'create',
+							info: {
+								account: ata,
+								wallet: owner,
+								source: owner,
+								mint: 'bonkMint1111111111111111111111111111111111'
+							}
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n },
+				accountHolders: { [ata]: owner },
+				accountMintsBefore: { [ata]: 'bonkMint1111111111111111111111111111111111' }
+			});
+
+			expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
+		});
+
+		// The signer of a close is its authority, which is the holder normally and the close
+		// authority when one is set. Taking it for the holder let a third party naming this wallet
+		// as close authority have their account read as the user's.
+		it('should not call an account theirs because the user may close it', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				accountHolders: { [theirs]: mockSolAddress2 },
+				accountLamports: { [theirs]: 2_039_280n }
+			});
+
+			expect(views).toStrictEqual([
+				{
+					kind: 'closeTokenAccount',
+					account: theirs,
+					returned: 2_039_280n,
+					ownAccount: false,
+					counterparty: mockSolAddress,
+					own: true
+				}
+			]);
+		});
+
+		// The holder the run reports for the whole transaction is the one left after it. A message
+		// that closes an account of the user's to a stranger and opens the same address again for
+		// somebody else would have that first close read as the somebody's, and dropped.
+		it('should read the holder at the close, not after the transaction', () => {
+			const x = mockAtaAddress2;
+			const attacker = 'attackerAddress111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: attacker, owner: mockSolAddress }
+								}
+							},
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: x,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: attacker,
+										space: 165
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'initializeAccount3',
+									info: {
+										account: x,
+										mint: 'mint1111111111111111111111111111111111111',
+										owner: attacker
+									}
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
+			});
+
+			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+
+			expect(close).toBeDefined();
+			expect(close).not.toHaveProperty('ownAccount');
+			expect(close?.counterparty).toBe(attacker);
+		});
+
+		// An address closed and opened again within the one message is two accounts. The second
+		// close hands over what the second account held, not what the first one did.
+		it('should read a reopened account from its reopening, not from before the transaction', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const wsol = 'wsolAccount11111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								newAccount: wsol,
+								lamports: 1_488_440,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: wsol, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, wsol],
+				userAddress: owner,
+				rentExemptMinimum: 1_488_440n,
+				addressToToken: { [wsol]: WSOL_TOKEN.address },
+				accountLamports: { [wsol]: 1_488_440n + 5_000_000_000n },
+				accountTokenAmounts: { [wsol]: 5_000_000_000n }
+			});
+
+			const [first, second] = views.filter(
+				({ kind }) => kind === 'unwrap' || kind === 'closeTokenAccount'
+			);
+
+			expect(first?.kind).toBe('unwrap');
+			expect(second?.kind).toBe('closeTokenAccount');
+
+			expect(first?.returned).toBe(1_488_440n + 5_000_000_000n);
+			expect(first?.wrapped).toBe(5_000_000_000n);
+			expect(second?.returned).toBe(1_488_440n);
+			expect(second?.wrapped).toBe(ZERO);
+		});
+
+		// A Token program account is always the same size, so its reserve is the chain's minimum
+		// for that size. A Token-2022 account's size varies with its extensions. The RPC labels
+		// both programs `spl-token`, so only the program's address tells them apart.
+		it('should carry the reserve of a Token program account and not of a Token-2022 one', () => {
+			const close = ({ programId, program }: { programId: string; program: string }) =>
+				mapSolInstructionSummaries({
+					instructions: [
+						{
+							program,
+							programId,
+							parsed: {
+								type: 'closeAccount',
+								info: {
+									account: mockAtaAddress2,
+									destination: mockSolAddress,
+									owner: mockSolAddress
+								}
+							}
+						}
+					],
+					ownedAddresses: [mockSolAddress, mockAtaAddress2],
+					userAddress: mockSolAddress,
+					accountLamports: { [mockAtaAddress2]: 2_039_280n },
+					rentExemptMinimum: 2_039_280n
+				})[0];
+
+			expect(
+				close({ programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', program: 'spl-token' })
+					?.reserve
+			).toBe(2_039_280n);
+			expect(
+				close({
+					programId: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+					program: 'spl-token'
+				})
+			).not.toHaveProperty('reserve');
+		});
+
+		// The run's single map of mints is written by the last initialisation. An address reopened
+		// for another mint later in the message would lend its first close that later mint - the
+		// wrong kind, the wrong label, and no split of the wrapped SOL out of the payout.
+		it('should read the mint a close was opened with, not the one opened after it', () => {
+			const x = mockAtaAddress2;
+			const bonk = 'bonkMint1111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: mockSolAddress, owner: mockSolAddress }
+								}
+							},
+							{
+								program: 'system',
+								programId: '11111111111111111111111111111111',
+								parsed: {
+									type: 'createAccount',
+									info: {
+										newAccount: x,
+										lamports: 2_039_280,
+										owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+										source: mockSolAddress,
+										space: 165
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'initializeAccount3',
+									info: { account: x, mint: bonk, owner: mockSolAddress }
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				addressToToken: { [x]: bonk },
+				accountHolders: { [x]: mockSolAddress },
+				accountMintsBefore: { [x]: WSOL_TOKEN.address },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n + 5_000_000_000n },
+				accountTokenAmounts: { [x]: 5_000_000_000n },
+				rentExemptMinimum: 2_039_280n
+			});
+
+			const [close] = views
+				.flatMap((view) => view.children ?? [view])
+				.filter(({ kind }) => kind === 'unwrap' || kind === 'closeTokenAccount');
+
+			expect(close?.kind).toBe('unwrap');
+			expect(close?.tokenAddress).toBe(WSOL_TOKEN.address);
+			expect(close?.wrapped).toBe(5_000_000_000n);
+		});
+
+		// For an address the message never opens, the account is the same one throughout and the
+		// run's map is the only reading there may be.
+		it("should take the run's mint for an account the message never opens", () => {
+			const x = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: x, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				addressToToken: { [x]: WSOL_TOKEN.address }
+			});
+
+			expect(views[0]?.kind).toBe('unwrap');
+		});
+
+		// A hand-over of ownership changes who may act on an account, not whose lamports it holds.
+		// Following it let a message hand the user's account to a program's own address and close
+		// it to a stranger, with the close read as the program's and never refused.
+		it('should keep an account with the user through a hand-over to its close', () => {
+			const x = mockAtaAddress2;
+			const pda = 'programDerived1111111111111111111111111111';
+			const stranger = 'stranger1111111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [{ programId: 'evi1Program11111111111111111111111111111111' }],
+				innerInstructions: [
+					{
+						index: 0,
+						instructions: [
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'setAuthority',
+									info: {
+										account: x,
+										authority: mockSolAddress,
+										authorityType: 'accountOwner',
+										newAuthority: pda
+									}
+								}
+							},
+							{
+								program: 'spl-token',
+								programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								parsed: {
+									type: 'closeAccount',
+									info: { account: x, destination: stranger, owner: pda }
+								}
+							}
+						]
+					}
+				],
+				ownedAddresses: [mockSolAddress, x],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress },
+				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
+			});
+
+			expect(solClosesPayOthers({ instructions: views, userAddress: mockSolAddress })).toBeTruthy();
+		});
+
+		// By the same rule an account handed to the user stays whoever's it was, so closing it back
+		// to that holder is nothing of the user's.
+		it('should not give the user an account by handing it to them', () => {
+			const x = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'setAuthority',
+							info: {
+								account: x,
+								authority: mockSolAddress2,
+								authorityType: 'accountOwner',
+								newAuthority: mockSolAddress
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: x, destination: mockSolAddress2, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				accountHolders: { [x]: mockSolAddress2 },
+				accountLamports: { [x]: 2_039_280n }
+			});
+
+			expect(views.find(({ kind }) => kind === 'closeTokenAccount')).toBeUndefined();
+		});
+
+		// Absent is not the same as somebody else's: an account no run read says nothing either
+		// way, and calling it not theirs would drop it out of the refusal.
+		it('should leave ownership unsaid for an account no run read', () => {
+			const account = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account, destination: mockSolAddress, owner: mockSolAddress }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress
+			});
+
+			expect(views[0]).not.toHaveProperty('ownAccount');
+		});
+
+		// The lamports arrive in the user's wallet whether or not the account was ever theirs.
+		// Left out, the balance changes carry an inflow no line in the list accounts for.
+		it('should list a close of an account the user does not own that pays their wallet', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress, owner: mockSolAddress2 }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress,
+				accountHolders: { [theirs]: mockSolAddress2 },
+				accountLamports: { [theirs]: 2_039_280n }
+			});
+
+			expect(views).toStrictEqual([
+				{
+					kind: 'closeTokenAccount',
+					account: theirs,
+					returned: 2_039_280n,
+					ownAccount: false,
+					counterparty: mockSolAddress,
+					own: true
+				}
+			]);
+		});
+
+		it('should leave out a close of an account the user does not own that pays anybody else', () => {
+			const theirs = mockAtaAddress2;
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: theirs, destination: mockSolAddress2, owner: mockSolAddress2 }
+						}
+					}
+				],
+				ownedAddresses: [mockSolAddress],
+				userAddress: mockSolAddress
+			});
+
+			expect(views).toStrictEqual([]);
+		});
+
+		// A close hands its whole balance to the account it names, so a chain carries the first
+		// account's lamports to the last. Counting System funding alone reports the tail of the
+		// chain as though it began there, understating what the final close pays out.
+		it('should carry a chained close through to the last account', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const first = 'firstAccount11111111111111111111111111111111';
+			const second = 'secondAccount1111111111111111111111111111111';
+
+			const views = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								lamports: 2_039_280,
+								newAccount: first,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'system',
+						programId: '11111111111111111111111111111111',
+						parsed: {
+							type: 'createAccount',
+							info: {
+								lamports: 2_039_280,
+								newAccount: second,
+								owner: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+								source: owner,
+								space: 165
+							}
+						}
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: first, destination: second, owner } }
+					},
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: { type: 'closeAccount', info: { account: second, destination: owner, owner } }
+					}
+				],
+				ownedAddresses: [owner, first, second],
+				userAddress: owner
+			});
+
+			const [firstClose, secondClose] = views.filter(({ kind }) => kind === 'closeTokenAccount');
+
+			// The first hands over its own rent; the second hands over both, since the first paid
+			// into it before it was closed.
+			expect(firstClose?.returned).toBe(2_039_280n);
+			expect(secondClose?.returned).toBe(4_078_560n);
+		});
+
+		// The balance goes wherever the close names, and that need not be the user. Left unread, a
+		// hand-over of a funded account reads exactly like money coming back.
+		it('should name a destination that is not the user', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+			const stranger = 'strangerAddress1111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: stranger, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.counterparty).toBe(stranger);
+			expect(view.own).toBeFalsy();
 		});
 
 		it('should count the wrapped SOL in what an unwrap hands back', () => {
@@ -364,6 +2095,7 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
 				addressToToken: { [ata]: WSOL_TOKEN.address },
 				// rent plus the wrapped SOL still sitting in the account
 				accountLamports: { [ata]: 2_039_280n + 5_000_000n }
@@ -401,6 +2133,8 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				rentExemptMinimum: 2_039_280n,
 				// The account did not exist before the run, so its balance going in is zero.
 				accountLamports: { [ata]: ZERO }
 			});
@@ -454,6 +2188,8 @@ describe('sol-instruction-summary.utils', () => {
 					}
 				],
 				ownedAddresses: [owner, ata],
+				userAddress: owner,
+				rentExemptMinimum: 2_039_280n,
 				accountLamports: { [ata]: ZERO }
 			});
 
@@ -477,7 +2213,8 @@ describe('sol-instruction-summary.utils', () => {
 						}
 					}
 				],
-				ownedAddresses: [owner, ata]
+				ownedAddresses: [owner, ata],
+				userAddress: owner
 			});
 
 			expect(view.kind).toBe('closeTokenAccount');
@@ -500,7 +2237,8 @@ describe('sol-instruction-summary.utils', () => {
 							}
 						}
 					],
-					ownedAddresses: [owner, ata]
+					ownedAddresses: [owner, ata],
+					userAddress: owner
 				});
 
 				expect(view.kind).toBe('setAuthority');
@@ -519,7 +2257,8 @@ describe('sol-instruction-summary.utils', () => {
 							}
 						}
 					],
-					ownedAddresses: [owner, ata]
+					ownedAddresses: [owner, ata],
+					userAddress: owner
 				});
 
 				expect(view.kind).toBe('approve');
@@ -555,7 +2294,8 @@ describe('sol-instruction-summary.utils', () => {
 						parsed: { type: 'closeAccount', info: { account: opened, owner } }
 					}
 				],
-				ownedAddresses: [owner]
+				ownedAddresses: [owner],
+				userAddress: owner
 			};
 
 			it('should treat it as the user’s own without being told', () => {
@@ -602,6 +2342,7 @@ describe('sol-instruction-summary.utils', () => {
 			}: {
 				instructions: unknown[];
 				ownedAddresses: string[];
+				userAddress: string;
 				includeUnrecognised?: boolean;
 			}): SolInstructionSummary[] =>
 				mapSolInstructionSummaries({
@@ -618,7 +2359,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 10_000_000n
 						})
 					],
-					ownedAddresses: [me]
+					ownedAddresses: [me],
+					userAddress: me
 				});
 
 				expect(transfer).toStrictEqual({
@@ -641,6 +2383,7 @@ describe('sol-instruction-summary.utils', () => {
 								})
 							],
 							ownedAddresses: [me],
+							userAddress: me,
 							includeUnrecognised: true
 						})
 					)
@@ -659,7 +2402,8 @@ describe('sol-instruction-summary.utils', () => {
 							decimals: 6
 						})
 					],
-					ownedAddresses: [me]
+					ownedAddresses: [me],
+					userAddress: me
 				});
 
 				expect(transfer?.kind).toBe('send');
@@ -680,7 +2424,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 5_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(approval?.kind).toBe('approve');
@@ -701,7 +2446,8 @@ describe('sol-instruction-summary.utils', () => {
 							decimals: 6
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(approval?.kind).toBe('approve');
@@ -714,7 +2460,8 @@ describe('sol-instruction-summary.utils', () => {
 					instructions: [
 						getRevokeInstruction({ source: toAddress(mockAtaAddress), owner: toAddress(me) })
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(revocation?.kind).toBe('revoke');
@@ -733,7 +2480,8 @@ describe('sol-instruction-summary.utils', () => {
 							newAuthority: toAddress(them)
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(handover?.kind).toBe('setAuthority');
@@ -753,7 +2501,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 7_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(burn?.kind).toBe('burn');
@@ -771,7 +2520,8 @@ describe('sol-instruction-summary.utils', () => {
 							amount: 9_000_000n
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(minted?.kind).toBe('mint');
@@ -788,7 +2538,8 @@ describe('sol-instruction-summary.utils', () => {
 							owner: toAddress(me)
 						})
 					],
-					ownedAddresses: [me, mockAtaAddress]
+					ownedAddresses: [me, mockAtaAddress],
+					userAddress: me
 				});
 
 				expect(frozen?.kind).toBe('freeze');
@@ -807,7 +2558,8 @@ describe('sol-instruction-summary.utils', () => {
 								data: new Uint8Array([255, 255, 255, 255])
 							}
 						],
-						ownedAddresses: [me]
+						ownedAddresses: [me],
+						userAddress: me
 					})
 				).not.toThrow();
 			});
@@ -818,15 +2570,20 @@ describe('sol-instruction-summary.utils', () => {
 				expect(
 					mapSolInstructionSummaries({
 						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
-						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111']
+						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111'
 					})
 				).toStrictEqual([]);
 			});
 
 			it('should ignore a transaction with no instructions at all', () => {
-				expect(mapSolInstructionSummaries({ instructions: [], ownedAddresses: [] })).toStrictEqual(
-					[]
-				);
+				expect(
+					mapSolInstructionSummaries({
+						instructions: [],
+						ownedAddresses: [],
+						userAddress: undefined
+					})
+				).toStrictEqual([]);
 			});
 
 			it('should keep a line naming the program when asked to list what it cannot read', () => {
@@ -834,6 +2591,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: [{ programId: 'SomeUnknownProgram', accounts: [], data: 'AQID' }],
 						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111',
 						includeUnrecognised: true
 					})
 				).toStrictEqual([{ kind: 'unknown', program: 'SomeUnknownProgram' }]);
@@ -857,6 +2615,7 @@ describe('sol-instruction-summary.utils', () => {
 					mapSolInstructionSummaries({
 						instructions: message,
 						ownedAddresses: ['ownerWa11etAddress1111111111111111111111111'],
+						userAddress: 'ownerWa11etAddress1111111111111111111111111',
 						includeUnrecognised: true
 					})
 				).toStrictEqual([

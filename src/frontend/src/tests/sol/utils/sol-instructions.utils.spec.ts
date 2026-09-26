@@ -87,6 +87,7 @@ import {
 	getApproveInstruction as getToken2022ApproveInstruction,
 	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
 	getBurnInstruction as getToken2022BurnInstruction,
+	getCloseAccountInstruction as getToken2022CloseAccountInstruction,
 	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
 	AuthorityType as Token2022AuthorityType
@@ -946,11 +947,11 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction1 })).toStrictEqual({
 				amount: undefined,
 				computeUnitLimit: 152_343n
 			});
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction2 })).toStrictEqual({
 				amount: undefined,
 				computeUnitPrice: 1_563_686n
 			});
@@ -965,7 +966,7 @@ describe('sol-instructions.utils', () => {
 				accountDataSizeLimit: 64_000
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
@@ -973,7 +974,7 @@ describe('sol-instructions.utils', () => {
 		it('should fail closed on the deprecated RequestUnits instruction, which it cannot price', () => {
 			const instruction = getRequestUnitsInstruction({ units: 200_000, additionalFee: 1_000_000 });
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -986,7 +987,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(COMPUTE_BUDGET_PROGRAM_ADDRESS)
 			};
 
-			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: malformedInstruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1004,12 +1005,12 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction1 })).toStrictEqual({
 				amount: 5100n,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction2 })).toStrictEqual({
 				amount: 2039280n,
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
@@ -1033,7 +1034,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1053,7 +1054,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 2_039_280n,
 				payer: mockSolAddress
 			});
@@ -1076,7 +1077,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1098,7 +1099,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 2_039_280n,
 				payer: mockSolAddress
 			});
@@ -1117,7 +1118,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1136,7 +1137,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1154,7 +1155,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1171,7 +1172,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1188,7 +1189,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1208,7 +1209,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1225,7 +1226,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1245,7 +1246,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1261,7 +1262,7 @@ describe('sol-instructions.utils', () => {
 				withdrawAmount: 5_000n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 5_000n,
 				source: mockSolAddress2,
 				destination: mockSolAddress3
@@ -1280,7 +1281,7 @@ describe('sol-instructions.utils', () => {
 				fromOwner: address(SYSTEM_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 7_000n,
 				source: mockSolAddress2,
 				destination: mockSolAddress3
@@ -1295,7 +1296,7 @@ describe('sol-instructions.utils', () => {
 				nonceAuthority: address(mockSolAddress3)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1310,7 +1311,7 @@ describe('sol-instructions.utils', () => {
 				newNonceAuthority: address(mockSolAddress3)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1324,7 +1325,7 @@ describe('sol-instructions.utils', () => {
 				space: 165n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1342,7 +1343,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(TOKEN_PROGRAM_ADDRESS)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1356,7 +1357,7 @@ describe('sol-instructions.utils', () => {
 				nonceAuthority: createNoopSigner(address(mockSolAddress))
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
@@ -1366,7 +1367,7 @@ describe('sol-instructions.utils', () => {
 				nonceAccount: address(mockSolAddress2)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
@@ -1381,7 +1382,7 @@ describe('sol-instructions.utils', () => {
 				data: Uint8Array.from([99, 0, 0, 0])
 			};
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1399,28 +1400,70 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
-				amount: undefined,
-				unreviewed: true
-			});
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction1 })).toStrictEqual({
 				amount: undefined,
 				unreviewed: true
 			});
 
-			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
+			expect(parseSolTokenInstruction).toHaveBeenCalledOnce();
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
-			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
 
-			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenCalledOnce();
 			expect(console.warn).toHaveBeenNthCalledWith(
 				1,
 				`Could not map Solana Token instruction of type ${TokenInstruction.InitializeAccount}`
 			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`Could not map Solana Token instruction of type ${TokenInstruction.CloseAccount}`
+		});
+
+		it('should ignore a close that pays the user back', () => {
+			// The swap this message performs closes the wrapped SOL account it opened and names the
+			// signer as the destination, which is the shape every routed swap ends in. Nothing leaves
+			// the user, so there is nothing for the summary to state.
+			const [_, closeInstruction] = mockInstructions.filter(
+				({ programAddress }) => programAddress === TOKEN_PROGRAM_ADDRESS
 			);
+
+			assertNonNullish(closeInstruction, 'Close instruction not found');
+
+			expect(
+				mapSolInstruction({
+					instruction: closeInstruction,
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+				})
+			).toStrictEqual({ amount: undefined });
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a close that pays somebody else', () => {
+			// Closing hands the account's whole lamport balance to the destination the instruction
+			// names - the rent, and for a wrapped SOL account everything wrapped in it. A destination
+			// that is not the user's is value leaving with no amount the summary could carry.
+			const [_, closeInstruction] = mockInstructions.filter(
+				({ programAddress }) => programAddress === TOKEN_PROGRAM_ADDRESS
+			);
+
+			assertNonNullish(closeInstruction, 'Close instruction not found');
+
+			expect(
+				mapSolInstruction({ instruction: closeInstruction, userAddress: mockSolAddress })
+			).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+		});
+
+		it('should fail closed on a close when the user is not known', () => {
+			const [_, closeInstruction] = mockInstructions.filter(
+				({ programAddress }) => programAddress === TOKEN_PROGRAM_ADDRESS
+			);
+
+			assertNonNullish(closeInstruction, 'Close instruction not found');
+
+			expect(mapSolInstruction({ instruction: closeInstruction })).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 		});
 
 		it('should forward the delegate as destination and flag an `Approve` instruction as an approval', () => {
@@ -1431,7 +1474,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1449,7 +1492,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1467,7 +1510,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1486,7 +1529,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1502,7 +1545,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1520,7 +1563,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -1537,7 +1580,7 @@ describe('sol-instructions.utils', () => {
 				newAuthority: address(mockSolAddress2)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1553,7 +1596,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1570,7 +1613,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1586,12 +1629,44 @@ describe('sol-instructions.utils', () => {
 				newAuthority: address(mockSolAddress2)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		// The Token-2022 close decides a refusal just as the Token program's does, so it is read the
+		// same way: a payout to the user states nothing, anywhere else is refused.
+		describe('a Token-2022 `CloseAccount` instruction', () => {
+			const closeTo = (destination: string) =>
+				getToken2022CloseAccountInstruction({
+					account: address(mockSolAddress3),
+					destination: address(destination),
+					owner: address(mockSolAddress)
+				});
+
+			it('should state nothing for a close that pays the user back', () => {
+				expect(
+					mapSolInstruction({ instruction: closeTo(mockSolAddress), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined });
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
+
+			it('should fail closed on a close that pays somebody else', () => {
+				expect(
+					mapSolInstruction({ instruction: closeTo(mockSolAddress2), userAddress: mockSolAddress })
+				).toStrictEqual({ amount: undefined, ambiguous: true });
+			});
+
+			it('should fail closed on a close when the user is not known', () => {
+				expect(mapSolInstruction({ instruction: closeTo(mockSolAddress) })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+			});
 		});
 
 		it('should fail closed on a Token-2022 `Burn` instruction', () => {
@@ -1602,7 +1677,7 @@ describe('sol-instructions.utils', () => {
 				amount: 100n
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1619,7 +1694,7 @@ describe('sol-instructions.utils', () => {
 				decimals: 6
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({
+			expect(mapSolInstruction({ instruction })).toStrictEqual({
 				amount: undefined,
 				ambiguous: true
 			});
@@ -1635,7 +1710,7 @@ describe('sol-instructions.utils', () => {
 				mint: address(JUP_TOKEN.address)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1649,7 +1724,7 @@ describe('sol-instructions.utils', () => {
 				mint: address(JUP_TOKEN.address)
 			});
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1658,7 +1733,7 @@ describe('sol-instructions.utils', () => {
 		it('should ignore a Memo instruction', () => {
 			const instruction = getAddMemoInstruction({ memo: 'Deposit 42' });
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1670,7 +1745,7 @@ describe('sol-instructions.utils', () => {
 				{ programAddress: address(MEMO_LEGACY_PROGRAM_ADDRESS) }
 			);
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(parseSolMemoInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 			expect(console.warn).not.toHaveBeenCalled();
@@ -1683,7 +1758,7 @@ describe('sol-instructions.utils', () => {
 				programAddress: address(MEMO_PROGRAM_ADDRESS)
 			};
 
-			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction({ instruction })).toStrictEqual({ amount: undefined });
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
@@ -1703,7 +1778,9 @@ describe('sol-instructions.utils', () => {
 					recentSlot: 123n
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
+					amount: undefined
+				});
 
 				expect(parseSolLookupTableInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
 				expect(console.warn).not.toHaveBeenCalled();
@@ -1717,7 +1794,9 @@ describe('sol-instructions.utils', () => {
 					addresses: [address(mockSolAddress)]
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
+					amount: undefined
+				});
 
 				expect(console.warn).not.toHaveBeenCalled();
 			});
@@ -1728,7 +1807,9 @@ describe('sol-instructions.utils', () => {
 					authority: mockAuthority
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
+					amount: undefined
+				});
 
 				expect(console.warn).not.toHaveBeenCalled();
 			});
@@ -1739,7 +1820,9 @@ describe('sol-instructions.utils', () => {
 					authority: mockAuthority
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
+					amount: undefined
+				});
 
 				expect(console.warn).not.toHaveBeenCalled();
 			});
@@ -1753,7 +1836,7 @@ describe('sol-instructions.utils', () => {
 					recipient: address(mockSolAddress)
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
 					amount: undefined,
 					ambiguous: true
 				});
@@ -1773,7 +1856,7 @@ describe('sol-instructions.utils', () => {
 					args: 5_000_000n
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
 					amount: 5_000_000n,
 					source: mockSolAddress2,
 					destination: mockSolAddress
@@ -1795,7 +1878,7 @@ describe('sol-instructions.utils', () => {
 						arg1: stakeAuthorize
 					});
 
-					expect(mapSolInstruction(instruction)).toStrictEqual({
+					expect(mapSolInstruction({ instruction })).toStrictEqual({
 						amount: undefined,
 						ambiguous: true
 					});
@@ -1807,7 +1890,9 @@ describe('sol-instructions.utils', () => {
 			it('should ignore a GetMinimumDelegation instruction', () => {
 				const instruction = getGetMinimumDelegationInstruction();
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
+					amount: undefined
+				});
 
 				expect(console.warn).not.toHaveBeenCalled();
 			});
@@ -1822,7 +1907,7 @@ describe('sol-instructions.utils', () => {
 					stakeAuthority: mockStakeAuthority
 				});
 
-				expect(mapSolInstruction(instruction)).toStrictEqual({
+				expect(mapSolInstruction({ instruction })).toStrictEqual({
 					amount: undefined,
 					unreviewed: true
 				});
@@ -1850,7 +1935,7 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction2).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+			expect(mapSolInstruction({ instruction: mockInstruction1 })).toStrictEqual({
 				amount: undefined,
 				unreviewed: true
 			});

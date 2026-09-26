@@ -4,6 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -124,6 +125,86 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown);
+	});
+
+	it('should say a close that pays somebody else will not be signed', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+	});
+
+	it('should announce that refusal to a screen reader too', () => {
+		const { getByRole } = render(SolWalletConnectSignReview, {
+			props: { ...props, closesPayOthers: true }
+		});
+
+		expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.close_pays_others);
+	});
+
+	// The instruction mapper refuses a close the message states, so both are true of the commonest
+	// case and the general sentence would be shown for the specific thing that is wrong with it.
+	it('should say which refusal it is when a close is both', () => {
+		const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, ambiguous: true, closesPayOthers: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.close_pays_others)).toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+	});
+
+	const closeToStranger: SolInstructionSummary = {
+		kind: 'closeTokenAccount',
+		reserve: 2_039_280n,
+		account: mockAtaAddress,
+		returned: 2_039_280n,
+		counterparty: mockSolAddress2
+	};
+
+	// The section it belongs to has three answers, and the emptiest of them - a run that reported
+	// nothing changing - is exactly the shape a close of an empty account to a stranger takes.
+	it('should state rent a close pays somebody else beside the balance changes', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, instructions: [closeToStranger] }
+		});
+
+		expect(getByTestId('rent-to-others')).toHaveTextContent('0.00203928 SOL');
+	});
+
+	it('should state it even when no preview survived', () => {
+		const { getByTestId } = render(SolWalletConnectSignReview, {
+			props: { ...props, preview: undefined, decoded: true, instructions: [closeToStranger] }
+		});
+
+		expect(getByTestId('rent-to-others')).toHaveTextContent('0.00203928 SOL');
+	});
+
+	it('should say nothing about rent when every close pays the wallet', () => {
+		const { queryByTestId } = render(SolWalletConnectSignReview, { props });
+
+		expect(queryByTestId('rent-to-others')).not.toBeInTheDocument();
+	});
+
+	it('should say nothing else about a close it will not sign', () => {
+		// Same reasoning as the ambiguous case: none of the caveats qualify a review nobody acts on.
+		const { queryByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				closesPayOthers: true,
+				parties: { sources: [], destinations: [], partial: true },
+				preview: {
+					solDelta: -5_000n,
+					tokenDeltas: [],
+					controlChanges: [
+						{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }
+					]
+				}
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
 	it('should say nothing else about a message it will not sign', () => {

@@ -90,6 +90,11 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// describe a review they never read. A run that completed and reported nothing is not a
 	// description - an effect outside what the preview measures produces exactly that.
 	simulated: boolean;
+	// Whether a close in the reviewed instruction list pays an account's balance to an address
+	// that is not the user's wallet. Decided from that list rather than from the message, which
+	// cannot see a close a program makes inside its own call, and handed on for the same reason
+	// the simulated flag is.
+	closesPayOthers: boolean;
 };
 
 export const decode = async ({
@@ -104,7 +109,10 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
+	const mappedTransaction = mapSolTransactionMessage({
+		transactionMessage: parsedTransactionMessage,
+		userAddress: address
+	});
 
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
 	// simulation are fetched here, where the request is already being decoded before the modal
@@ -156,9 +164,9 @@ export const decode = async ({
 		mapped.tokenAddress ??
 		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
 
-	// Read whenever either fallback below needs it. A run always reports its parties but only
-	// reports instructions when it produced some, so the two are not missing together, and an
-	// instruction list built without the user's own accounts cannot tell a send from a receive.
+	// Read whenever either fallback below needs it. A run reports its parties and its instructions,
+	// an empty list included, so the two go missing together, and an instruction list built without
+	// the user's own accounts cannot tell a send from a receive.
 	const owned =
 		nonNullish(simulatedParties) && nonNullish(simulatedInstructions)
 			? undefined
@@ -192,6 +200,7 @@ export const decode = async ({
 					),
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
+					userAddress: address,
 					includeUnrecognised: true
 				}),
 				network: solNetwork
@@ -199,7 +208,9 @@ export const decode = async ({
 
 	return {
 		...mapped,
-		...(instructions.length > 0 && {
+		// A run's list is passed on even when it is empty: that is the run saying there is nothing to
+		// list, and the message's own reading would fill it with what the run found was not there.
+		...((instructions.length > 0 || nonNullish(simulatedInstructions)) && {
 			instructions,
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),
@@ -446,6 +457,7 @@ export const sign = ({
 	progress,
 	identity,
 	simulated,
+	closesPayOthers,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -488,8 +500,29 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination, ambiguous, unreviewed } =
-				mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous, unreviewed } = mapSolTransactionMessage({
+				transactionMessage: parsedTransactionMessage,
+				userAddress: address
+			});
+
+			// The balance is gone the moment this is signed, and the message mapper cannot see a close
+			// made inside another program's call. Refused rather than warned about, on the same test
+			// the mapper applies to the closes it can see: only the user's wallet holds lamports as a
+			// balance, so any other destination is value leaving.
+			//
+			// Asked before the ambiguous refusal below, which the mapper also raises for a close the
+			// message states: both are true of the commonest case, and the general sentence would be
+			// given for the specific thing that is wrong with it. The review's notices are ordered
+			// the same way, and the two have to agree or the toast contradicts the screen it follows.
+			if (closesPayOthers) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.close_pays_others }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary

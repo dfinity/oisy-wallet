@@ -4,7 +4,7 @@ import {
 	deriveSolMessageSummary,
 	solMessageMatchesSimulation
 } from '$sol/utils/sol-message-summary.utils';
-import { mockAtaAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 
 describe('sol-message-summary.utils', () => {
@@ -35,7 +35,8 @@ describe('sol-message-summary.utils', () => {
 	describe('deriveSolMessageSummary', () => {
 		it('should read a plain SOL transfer as a send of that amount', () => {
 			const result = deriveSolMessageSummary({
-				instructions: [leg({ kind: 'send', amount: 1_000_000n })]
+				instructions: [leg({ kind: 'send', amount: 1_000_000n })],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('send');
@@ -48,7 +49,8 @@ describe('sol-message-summary.utils', () => {
 				instructions: [
 					leg({ kind: 'send', amount: 1_000_000n, tokenAddress: MINT }),
 					leg({ kind: 'receive', amount: 2_000_000n, tokenAddress: OTHER_MINT })
-				]
+				],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).toBe('swap');
@@ -60,7 +62,8 @@ describe('sol-message-summary.utils', () => {
 		// the user never took.
 		it('should not call a transfer between the user own accounts a send', () => {
 			const result = deriveSolMessageSummary({
-				instructions: [{ ...leg({ kind: 'send', amount: 1_000_000n }), own: true }]
+				instructions: [{ ...leg({ kind: 'send', amount: 1_000_000n }), own: true }],
+				userAddress: mockSolAddress
 			});
 
 			expect(result.kind).not.toBe('send');
@@ -72,7 +75,8 @@ describe('sol-message-summary.utils', () => {
 				deriveSolMessageSummary({
 					instructions: [
 						{ kind: 'approve', counterparty: mockSolAddress2, account: mockAtaAddress }
-					]
+					],
+					userAddress: mockSolAddress
 				}).kind
 			).toBe('other');
 		});
@@ -80,7 +84,8 @@ describe('sol-message-summary.utils', () => {
 
 	describe('solMessageMatchesSimulation', () => {
 		const summary = deriveSolMessageSummary({
-			instructions: [leg({ kind: 'send', amount: 1_000_000n, tokenAddress: MINT })]
+			instructions: [leg({ kind: 'send', amount: 1_000_000n, tokenAddress: MINT })],
+			userAddress: mockSolAddress
 		});
 
 		it('should agree when the run moves exactly what the message states', () => {
@@ -178,7 +183,8 @@ describe('sol-message-summary.utils', () => {
 			expect(
 				solMessageMatchesSimulation({
 					summary: deriveSolMessageSummary({
-						instructions: [leg({ kind: 'send', amount: 1_000_000n })]
+						instructions: [leg({ kind: 'send', amount: 1_000_000n })],
+						userAddress: mockSolAddress
 					}),
 					preview: preview({ solDelta: -1_005_000n }),
 					costs: 5_000n
@@ -190,7 +196,8 @@ describe('sol-message-summary.utils', () => {
 			expect(
 				solMessageMatchesSimulation({
 					summary: deriveSolMessageSummary({
-						instructions: [leg({ kind: 'send', amount: 1_000_000n })]
+						instructions: [leg({ kind: 'send', amount: 1_000_000n })],
+						userAddress: mockSolAddress
 					}),
 					preview: preview({ solDelta: -1_050_000n }),
 					costs: 5_000n
