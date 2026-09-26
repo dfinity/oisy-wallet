@@ -41,11 +41,6 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-// This store is a derived: it recomputes on every `userProfileStore` write (uncertified, then
-// certified, then each settings change). Reporting an unmapped key is a one-off signal, not a
-// per-recompute one, so each distinct key is reported once per session.
-const reportedUnmappedKeys = new Set<string>();
-
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
 	([$userSettingsNetworks, $testnetsEnabled]) => {
@@ -137,13 +132,8 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return ROBINHOOD_MAINNET_NETWORK_ID;
 			}
 
-			const unmappedKey = Object.keys(key).join(', ');
-
-			if (!reportedUnmappedKeys.has(unmappedKey)) {
-				reportedUnmappedKeys.add(unmappedKey);
-
-				trackUnmappedNetworkSettingsKey({ key: unmappedKey });
-			}
+			// Deduplicated inside the service: this derived recomputes on every profile write.
+			trackUnmappedNetworkSettingsKey({ key: Object.keys(key).join(', ') });
 
 			return undefined;
 		};
