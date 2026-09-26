@@ -1,17 +1,20 @@
 import type {
 	AccountSnapshot_Any,
+	AnyNetwork,
 	Transaction_Any,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { ETH_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.eth.env';
 import { ICP_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.icp.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.testnet.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -53,6 +56,9 @@ import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock'
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
+import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -553,6 +559,103 @@ describe('user-snapshot.services', () => {
 					accounts: expectedAccounts
 				},
 				identity: mockIdentity
+			});
+		});
+
+		describe('XRP', () => {
+			// Required for the type interpreter
+			assertNonNullish(XRP_MAINNET_NETWORK_ID.description);
+			assertNonNullish(XRP_TOKEN_ID.description);
+
+			const mockXrpAmount = 25_000_000n;
+
+			const mockXrpTransactions: XrpTransactionUi[] = Array.from({ length: 7 }, (_, i) => ({
+				id: `HASH${i}`,
+				type: i % 2 === 0 ? 'send' : 'receive',
+				status: 'confirmed',
+				value: BigInt(i + 1) * 1_000_000n,
+				from: i % 2 === 0 ? mockXrpAddress : mockXrpAddress2,
+				to: i % 2 === 0 ? mockXrpAddress2 : mockXrpAddress,
+				timestamp: BigInt(now + i) * NANO_SECONDS_IN_MILLISECOND
+			}));
+
+			const network: AnyNetwork = {
+				testnet_for: toNullable(),
+				network_id: XRP_MAINNET_NETWORK_ID.description
+			};
+
+			const xrpAccount: { Any: AccountSnapshot_Any } = {
+				Any: {
+					decimals: XRP_TOKEN.decimals,
+					approx_usd_per_token: 2,
+					amount: mockXrpAmount,
+					timestamp: nowNanoseconds,
+					network,
+					account: mockXrpAddress,
+					token_address: { token_symbol: XRP_TOKEN_ID.description, wraps: toNullable() },
+					last_transactions: mockXrpTransactions
+						.slice(0, 5)
+						.map(({ type, value, timestamp }: XrpTransactionUi): Transaction_Any => ({
+							transaction_type: type === 'send' ? { Send: null } : { Receive: null },
+							timestamp: BigInt(
+								normalizeTimestampToSeconds(timestamp ?? ZERO) * Number(NANO_SECONDS_IN_SECOND)
+							),
+							amount: value ?? ZERO,
+							network,
+							// The counterparty is the other side, for sends (`to`) and receives (`from`) alike.
+							counterparty: mockXrpAddress2
+						}))
+				}
+			};
+
+			beforeEach(() => {
+				vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementation(() => readable([XRP_TOKEN]));
+
+				vi.spyOn(addressStore, 'xrpAddressMainnet', 'get').mockImplementation(() =>
+					readable(mockXrpAddress)
+				);
+
+				vi.spyOn(exchangeDerived, 'exchanges', 'get').mockImplementation(() =>
+					readable({ [XRP_TOKEN.id]: { usd: 2 } })
+				);
+
+				balancesStore.reset(XRP_TOKEN.id);
+				xrpTransactionsStore.reset(XRP_TOKEN.id);
+
+				balancesStore.set({
+					id: XRP_TOKEN.id,
+					data: { data: mockXrpAmount, certified }
+				});
+
+				xrpTransactionsStore.prepend({
+					tokenId: XRP_TOKEN.id,
+					transactions: mockXrpTransactions.map((transaction) => ({
+						data: transaction,
+						certified
+					}))
+				});
+			});
+
+			it('should include XRP with the XRP address and the last transactions', async () => {
+				await registerUserSnapshot();
+
+				expect(registerAirdropRecipient).toHaveBeenCalledWith({
+					userSnapshot: {
+						accounts: [xrpAccount],
+						timestamp: toNullable(nowNanoseconds)
+					},
+					identity: mockIdentity
+				});
+			});
+
+			it('should skip XRP if the XRP address is not loaded', async () => {
+				vi.spyOn(addressStore, 'xrpAddressMainnet', 'get').mockImplementation(() =>
+					readable(undefined)
+				);
+
+				await registerUserSnapshot();
+
+				expect(registerAirdropRecipient).not.toHaveBeenCalled();
 			});
 		});
 	});
