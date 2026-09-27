@@ -36,6 +36,11 @@ export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 
 export const ICP_SWAP_POOL_FEE = 3000n;
 
+// In-flight balance queries during a Help pool scan. The candidate count is the pools whose both
+// legs the user has enabled: 89 with only the tokens OISY ships, and up to the whole factory table
+// (876 pools, measured 2026-09-22) with custom ones.
+export const ICP_SWAP_SCAN_CONCURRENCY = 10;
+
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;

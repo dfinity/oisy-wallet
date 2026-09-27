@@ -1,0 +1,348 @@
+import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
+import type { Token as ICPSwapToken } from '$declarations/icp_swap_pool/icp_swap_pool.did';
+import type { IcToken } from '$icp/types/ic-token';
+import { getAllPools, getPoolCanister } from '$lib/api/icp-swap-factory.api';
+import { getUserUnusedBalance, withdraw } from '$lib/api/icp-swap-pool.api';
+import { ZERO } from '$lib/constants/app.constants';
+import { ICP_SWAP_POOL_FEE, ICP_SWAP_SCAN_CONCURRENCY } from '$lib/constants/swap.constants';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+
+export interface IcpSwapRecoverableBalance {
+	// The token as OISY knows it - symbol, decimals, logo and the ledger fee.
+	token: IcToken;
+	amount: bigint;
+}
+
+export interface IcpSwapPoolBalances {
+	poolCanisterId: string;
+	// The pool's two legs, in the pool's own order. Retained so a single pool can be refreshed
+	// after a withdrawal without going back to the factory - and so the mapping survives even when
+	// dust filtering, or a withdrawal, leaves the group with no rows to derive it from.
+	poolTokens: [ICPSwapToken, ICPSwapToken];
+	// The pool's own pair, in its own order, for labelling a group of rows. Kept separately from
+	// `balances` because dust filtering can leave a group with a single row while the pair is still
+	// what identifies the pool to the user.
+	pair: [string, string];
+	balances: IcpSwapRecoverableBalance[];
+}
+
+export interface IcpSwapScanResult {
+	// Pools looked at - i.e. those with both legs among the user's active tokens.
+	poolsScanned: number;
+	// Only the pools that turned out to hold something withdrawable.
+	pools: IcpSwapPoolBalances[];
+	// Pools whose balance query failed. Reported rather than swallowed, so a partial scan never
+	// passes for an exhaustive one.
+	unreadablePools: number;
+}
+
+// Thrown when the pool lookup fails. Despite the name this does not prove the pool is missing: the
+// factory answers an unknown pair with the unit variant `CommonError`, which carries no text and
+// which the API layer has already flattened into a generic `CanisterInternalError`, so a transport
+// failure is indistinguishable from a missing pool here. The message shown to the user covers both
+// readings. Telling them apart would mean a dedicated error type on the shared
+// `mapIcpSwapFactoryError`, which the swap flow also depends on. The cause is kept for the console.
+export class IcpSwapPoolNotFoundError extends Error {
+	constructor(readonly cause?: unknown) {
+		super('No ICPSwap pool found for this token pair');
+		this.name = 'IcpSwapPoolNotFoundError';
+	}
+}
+
+// Thrown when a scan is told to stop between batches. A thrown error rather than a partial result,
+// so a scan that stopped early can never be read as a complete one.
+export class IcpSwapScanCancelledError extends Error {
+	constructor() {
+		super('The ICPSwap pool scan was cancelled');
+		this.name = 'IcpSwapScanCancelledError';
+	}
+}
+
+// `enabledIcrcTokens` can carry the same ledger id twice - an enabled custom token duplicating a
+// default - and the default entry is the one the rest of the app treats as authoritative, so the
+// first occurrence wins. A plain `new Map(...)` would keep the last.
+const indexTokensByAddress = (tokens: IcToken[]): Map<string, IcToken> =>
+	tokens.reduce<Map<string, IcToken>>(
+		(acc, token) =>
+			acc.has(token.ledgerCanisterId) ? acc : acc.set(token.ledgerCanisterId, token),
+		new Map()
+	);
+
+const toPoolToken = (token: IcToken): ICPSwapToken => ({
+	address: token.ledgerCanisterId,
+	standard: token.standard.code
+});
+
+// Resolves the pool exactly the way a swap does: the same factory lookup at the same fee tier.
+// Since OISY only ever swaps on ICP_SWAP_POOL_FEE, only that tier can hold funds stranded by OISY.
+// The factory canonicalises the pair, so the order the two tokens are passed in does not matter.
+const findPool = async ({
+	identity,
+	tokenA,
+	tokenB
+}: {
+	identity: Identity;
+	tokenA: IcToken;
+	tokenB: IcToken;
+}): Promise<PoolData> => {
+	try {
+		const pool = await getPoolCanister({
+			identity,
+			token0: toPoolToken(tokenA),
+			token1: toPoolToken(tokenB),
+			fee: ICP_SWAP_POOL_FEE
+		});
+
+		if (isNullish(pool)) {
+			throw new IcpSwapPoolNotFoundError();
+		}
+
+		return pool;
+	} catch (err: unknown) {
+		if (err instanceof IcpSwapPoolNotFoundError) {
+			throw err;
+		}
+
+		throw new IcpSwapPoolNotFoundError(err);
+	}
+};
+
+// A balance at or below the token's ledger fee cannot be moved: withdrawing it would cost more
+// than it is worth. Such rows are dropped rather than shown, so the page never offers a
+// withdrawal that is bound to fail.
+const isWithdrawable = ({ amount, token: { fee } }: IcpSwapRecoverableBalance): boolean =>
+	amount > fee;
+
+// Maps one pool's two unused balances onto the tokens OISY knows, dropping anything that cannot
+// be moved. Shared by the manual lookup and the scan so both produce identical rows.
+const toPoolBalances = ({
+	poolCanisterId,
+	poolTokens,
+	tokenByAddress,
+	balance0,
+	balance1
+}: {
+	poolCanisterId: string;
+	poolTokens: [ICPSwapToken, ICPSwapToken];
+	tokenByAddress: Map<string, IcToken>;
+	balance0: bigint;
+	balance1: bigint;
+}): IcpSwapPoolBalances => {
+	const [token0, token1] = poolTokens;
+
+	const unusedByAddress = new Map<string, bigint>([
+		[token0.address, balance0],
+		[token1.address, balance1]
+	]);
+
+	// The pool returns the pair in its own canonical order, so map each leg back onto the token
+	// OISY knows rather than assuming an order.
+	const balances = [token0, token1].reduce<IcpSwapRecoverableBalance[]>((acc, poolToken) => {
+		const token = tokenByAddress.get(poolToken.address);
+
+		return nonNullish(token)
+			? [...acc, { token, amount: unusedByAddress.get(poolToken.address) ?? ZERO }]
+			: acc;
+	}, []);
+
+	return {
+		poolCanisterId,
+		poolTokens,
+		pair: [
+			tokenByAddress.get(token0.address)?.symbol ?? token0.address,
+			tokenByAddress.get(token1.address)?.symbol ?? token1.address
+		],
+		balances: balances.filter(isWithdrawable)
+	};
+};
+
+/**
+ * Collects what the user can recover from one ICPSwap pool: the balance the pool credited to them
+ * and never returned, which is what a failed swap or a failed post-swap withdrawal leaves behind.
+ *
+ * ICPSwap also tracks a "mistransferred" balance, for tokens sent to the pool canister without a
+ * matching deposit call. That is not covered, and cannot arise here: it only applies to the direct
+ * ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees
+ * - `getMistransferBalance` answers `InternalError: Use deposit and withdraw instead` for a pool's
+ * own trading pair.
+ *
+ * @throws IcpSwapPoolNotFoundError if the pair has no pool at the supported fee tier.
+ */
+export const loadIcpSwapRecoverableBalances = async ({
+	identity,
+	tokenA,
+	tokenB
+}: {
+	identity: Identity;
+	tokenA: IcToken;
+	tokenB: IcToken;
+}): Promise<IcpSwapPoolBalances> => {
+	const pool = await findPool({ identity, tokenA, tokenB });
+
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: pool.canisterId.toString(),
+		principal: identity.getPrincipal()
+	});
+
+	return toPoolBalances({
+		poolCanisterId: pool.canisterId.toString(),
+		poolTokens: [pool.token0, pool.token1],
+		tokenByAddress: indexTokensByAddress([tokenA, tokenB]),
+		balance0,
+		balance1
+	});
+};
+
+/**
+ * Finds every stranded balance across the pools that exist between the user's active tokens.
+ *
+ * The pool table arrives in a single `getAllPools` query - 876 pools when measured on 2026-09-22 -
+ * and is filtered locally, so the cost is one query plus one balance query per pool that actually
+ * exists between two active tokens. That is bounded by the pools that exist rather than by the
+ * square of the token count: a ck-heavy 17-token wallet reaches 9 pools, not 136 pairs.
+ *
+ * It is not, however, a small bound for a token-heavy wallet. 65 of the tokens OISY ships appear
+ * as a pool leg, and enabling all of them yields 89 candidates; custom tokens raise the ceiling to
+ * the full table. Queries therefore go out in batches of ICP_SWAP_SCAN_CONCURRENCY, each settling
+ * before the next starts, because a throttled query is indistinguishable here from a pool that
+ * cannot be read - fanning out everything at once would report phantom unreadable pools.
+ *
+ * Within a batch the queries are settled independently. A pool that fails is counted, not thrown,
+ * so one bad pool cannot cost the user every other result.
+ *
+ * `isCancelled` is checked once the pool table arrives, before every batch and once more after the
+ * last, so a scan the caller no longer wants - superseded by a newer scan or a pair lookup - stops
+ * issuing queries instead of running every remaining round, and one superseded during its final
+ * round is still reported as cancelled rather than returned.
+ *
+ * Blind to pools with only one active leg - the token swapped *into* may never have been enabled.
+ * The manual pair lookup offers the same tokens, so it cannot reach those either: the token has to
+ * be enabled first, after which both find the pool. Widening the filter is not viable, since
+ * roughly half of all pools have ICP as a leg.
+ */
+export const scanIcpSwapPools = async ({
+	identity,
+	tokens,
+	isCancelled = () => false
+}: {
+	identity: Identity;
+	tokens: IcToken[];
+	isCancelled?: () => boolean;
+}): Promise<IcpSwapScanResult> => {
+	const tokenByAddress = indexTokensByAddress(tokens);
+
+	const allPools = await getAllPools({ identity });
+
+	if (isCancelled()) {
+		throw new IcpSwapScanCancelledError();
+	}
+
+	const candidatePools = allPools.filter(
+		({ fee, token0, token1 }) =>
+			fee === ICP_SWAP_POOL_FEE &&
+			tokenByAddress.has(token0.address) &&
+			tokenByAddress.has(token1.address)
+	);
+
+	const readPool = async (pool: PoolData): Promise<IcpSwapPoolBalances> => {
+		const { balance0, balance1 } = await getUserUnusedBalance({
+			identity,
+			canisterId: pool.canisterId.toString(),
+			principal: identity.getPrincipal()
+		});
+
+		return toPoolBalances({
+			poolCanisterId: pool.canisterId.toString(),
+			poolTokens: [pool.token0, pool.token1],
+			tokenByAddress,
+			balance0,
+			balance1
+		});
+	};
+
+	const settled: PromiseSettledResult<IcpSwapPoolBalances>[] = [];
+
+	for (let i = 0; i < candidatePools.length; i += ICP_SWAP_SCAN_CONCURRENCY) {
+		if (isCancelled()) {
+			throw new IcpSwapScanCancelledError();
+		}
+
+		settled.push(
+			...(await Promise.allSettled(
+				candidatePools.slice(i, i + ICP_SWAP_SCAN_CONCURRENCY).map(readPool)
+			))
+		);
+	}
+
+	if (isCancelled()) {
+		throw new IcpSwapScanCancelledError();
+	}
+
+	return {
+		poolsScanned: candidatePools.length,
+		pools: settled.reduce<IcpSwapPoolBalances[]>(
+			(acc, result) =>
+				result.status === 'fulfilled' && result.value.balances.length > 0
+					? [...acc, result.value]
+					: acc,
+			[]
+		),
+		unreadablePools: settled.filter(({ status }) => status === 'rejected').length
+	};
+};
+
+/**
+ * Re-reads one pool the user has already seen.
+ *
+ * A single `getUserUnusedBalance` query against the pool canister already on the group - no
+ * factory lookup and no sweep of the other pools. Used after a successful withdrawal so a
+ * remainder credited between discovery and withdrawal becomes visible instead of disappearing
+ * with the row.
+ */
+export const reloadIcpSwapPoolBalances = async ({
+	identity,
+	pool: { poolCanisterId, poolTokens },
+	tokens
+}: {
+	identity: Identity;
+	pool: IcpSwapPoolBalances;
+	tokens: IcToken[];
+}): Promise<IcpSwapPoolBalances> => {
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: poolCanisterId,
+		principal: identity.getPrincipal()
+	});
+
+	return toPoolBalances({
+		poolCanisterId,
+		poolTokens,
+		tokenByAddress: indexTokensByAddress(tokens),
+		balance0,
+		balance1
+	});
+};
+
+/**
+ * Withdraws one recoverable balance in full.
+ *
+ * @returns the amount credited back to the user's wallet.
+ */
+export const withdrawIcpSwapBalance = async ({
+	identity,
+	poolCanisterId: canisterId,
+	balance: { token, amount }
+}: {
+	identity: Identity;
+	poolCanisterId: string;
+	balance: IcpSwapRecoverableBalance;
+}): Promise<bigint> =>
+	await withdraw({
+		identity,
+		canisterId,
+		token: token.ledgerCanisterId,
+		amount,
+		fee: token.fee
+	});
