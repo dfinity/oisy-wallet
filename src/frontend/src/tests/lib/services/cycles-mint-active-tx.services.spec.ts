@@ -1,6 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import * as icpIndexApi from '$icp/api/icp-index.api';
+import * as icpLedgerApi from '$icp/api/icp-ledger.api';
 import {
 	CMC_MINT_CYCLES_MEMO,
 	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
@@ -15,6 +16,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import {
 	findCyclesMintDeposit,
+	hasIcpIndexSyncedPast,
 	pollCyclesMintActiveUserTransactions,
 	resetCyclesMintSettleObservations
 } from '$lib/services/cycles-mint-active-tx.services';
@@ -44,12 +46,17 @@ delete displayRefs[CYCLES_MINT_EXTERNAL_REF_KEYS.TRANSFER_BLOCK_INDEX];
 
 const funded: ActiveUserTransaction = mockCyclesMintActiveUserTransaction;
 
-// The tab died during the transfer: the row never learned a block.
+// The tab died during the transfer: the row never learned a block. The backend stamped the
+// row a moment after the tab stamped the transfer.
 const unobserved: ActiveUserTransaction = {
 	...mockCyclesMintActiveUserTransaction,
 	status: { Pending: null },
-	external_refs: toCyclesMintExternalRefs(displayRefs)
+	external_refs: toCyclesMintExternalRefs(displayRefs),
+	created_at_ns: CREATED_AT_NS + 1_000_000_000n
 };
+
+// The last moment the row's transfer could land, in IC time.
+const LANDING_DEADLINE_NS = unobserved.created_at_ns + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS;
 
 const indexEntry = ({
 	id,
@@ -99,6 +106,8 @@ describe('cycles-mint-active-tx.services', () => {
 	let deleteSpy: ReturnType<typeof vi.spyOn>;
 	let notifySpy: ReturnType<typeof vi.spyOn>;
 	let lookupSpy: ReturnType<typeof vi.spyOn>;
+	let syncedSpy: ReturnType<typeof vi.spyOn>;
+	let blockTimeSpy: ReturnType<typeof vi.spyOn>;
 	let trackSpy: ReturnType<typeof vi.spyOn>;
 
 	const poll = (transactions: ActiveUserTransaction[]) =>
@@ -132,6 +141,11 @@ describe('cycles-mint-active-tx.services', () => {
 		lookupSpy = vi
 			.spyOn(icpIndexApi, 'getAccountIdentifierTransactions')
 			.mockResolvedValue(page({ transactions: [] }));
+		// An index that is up to date, but not yet past the landing deadline, by default.
+		syncedSpy = vi.spyOn(icpIndexApi, 'getIcpIndexNumBlocksSynced').mockResolvedValue(1_000n);
+		blockTimeSpy = vi
+			.spyOn(icpLedgerApi, 'getIcpLedgerBlockTimestamp')
+			.mockResolvedValue(LANDING_DEADLINE_NS);
 		trackSpy = vi.spyOn(cyclesMintAnalytics, 'trackCyclesMint').mockImplementation(() => undefined);
 	});
 
@@ -350,13 +364,15 @@ describe('cycles-mint-active-tx.services', () => {
 				);
 			});
 
-			// Until the transfer can no longer land, "not found" only means "not yet".
-			it('leaves a row alone while its transfer can still land, and backs off', async () => {
-				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) - 1);
+			const indexSyncedPastLanding = () => blockTimeSpy.mockResolvedValue(LANDING_DEADLINE_NS + 1n);
 
+			// Until the index has synced past the last moment the transfer could land, "not
+			// found" only means "not yet".
+			it('leaves a row alone until the index has synced past its landing, and backs off', async () => {
 				await pollPastGrace([unobserved]);
 
 				expect(lookupSpy).toHaveBeenCalledOnce();
+				expect(applySpy).not.toHaveBeenCalled();
 				expect(deleteSpy).not.toHaveBeenCalled();
 				expect(notifySpy).not.toHaveBeenCalled();
 
@@ -366,10 +382,21 @@ describe('cycles-mint-active-tx.services', () => {
 				expect(lookupSpy).toHaveBeenCalledOnce();
 			});
 
+			// The finding this guards against: a lagging index hides a deposit that landed, and a
+			// wall-clock deadline alone would then close a funded mint as never sent.
+			it('never closes a row on the poller’s clock alone', async () => {
+				vi.setSystemTime(toMillis(LANDING_DEADLINE_NS) + 24 * 60 * 60 * 1_000);
+
+				await pollPastGrace([unobserved]);
+
+				expect(applySpy).not.toHaveBeenCalled();
+				expect(deleteSpy).not.toHaveBeenCalled();
+			});
+
 			// Nothing moved, but the user started this mint: the row says so rather than
 			// vanishing from Active transactions.
-			it('closes the row as never sent once the transfer can no longer land', async () => {
-				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
+			it('closes the row as never sent once the index has synced past its landing', async () => {
+				indexSyncedPastLanding();
 
 				await pollPastGrace([unobserved]);
 
@@ -388,9 +415,47 @@ describe('cycles-mint-active-tx.services', () => {
 				expect(notifySpy).not.toHaveBeenCalled();
 			});
 
+			// Asked after the lookup, the index could take the deposit in between.
+			it('asks how far the index has synced before looking the deposit up', async () => {
+				indexSyncedPastLanding();
+
+				await pollPastGrace([unobserved]);
+
+				expect(syncedSpy.mock.invocationCallOrder[0]).toBeLessThan(
+					lookupSpy.mock.invocationCallOrder[0]
+				);
+				expect(blockTimeSpy.mock.invocationCallOrder[0]).toBeLessThan(
+					lookupSpy.mock.invocationCallOrder[0]
+				);
+			});
+
+			it('records a deposit the index has taken by then, rather than closing the row', async () => {
+				indexSyncedPastLanding();
+				lookupSpy.mockResolvedValue(
+					page({
+						transactions: [
+							indexEntry({ id: 42n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
+						]
+					})
+				);
+				notifyResolves({ status: 'pending' });
+
+				await pollPastGrace([unobserved]);
+
+				expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						update: expect.objectContaining({ status: { Executing: null } })
+					})
+				);
+				expect(notifySpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					blockIndex: 42n
+				});
+			});
+
 			// The loader reports the row's ending once, as for every other outcome.
 			it('fires no analytics of its own for a row it closes as never sent', async () => {
-				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
+				indexSyncedPastLanding();
 
 				await pollPastGrace([unobserved]);
 
@@ -400,13 +465,63 @@ describe('cycles-mint-active-tx.services', () => {
 			// Every write that learns a deposit also moves the row to `Executing`, so an
 			// `Executing` row without one is malformed, not unsent.
 			it('never closes an executing row', async () => {
-				vi.setSystemTime(toMillis(CREATED_AT_NS + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS) + 1);
+				indexSyncedPastLanding();
 
 				await pollPastGrace([{ ...unobserved, status: { Executing: null } }]);
 
 				expect(applySpy).not.toHaveBeenCalled();
 				expect(deleteSpy).not.toHaveBeenCalled();
+				expect(syncedSpy).not.toHaveBeenCalled();
 			});
+		});
+	});
+
+	describe('hasIcpIndexSyncedPast', () => {
+		const hasSyncedPast = () =>
+			hasIcpIndexSyncedPast({ identity: mockIdentity, timestampNs: LANDING_DEADLINE_NS });
+
+		// A "yes" lets a row close as never sent.
+		it('reads the index’s height and its last block’s time, certified', async () => {
+			await hasSyncedPast();
+
+			expect(syncedSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				indexCanisterId: ICP_INDEX_CANISTER_ID,
+				certified: true
+			});
+			expect(blockTimeSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+				index: 999n,
+				certified: true
+			});
+		});
+
+		it('is true once the last synced block is later than the time', async () => {
+			blockTimeSpy.mockResolvedValue(LANDING_DEADLINE_NS + 1n);
+
+			await expect(hasSyncedPast()).resolves.toBeTruthy();
+		});
+
+		it('is false while the last synced block is not later than the time', async () => {
+			blockTimeSpy.mockResolvedValue(LANDING_DEADLINE_NS);
+
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+		});
+
+		// The index is then far behind the ledger anyway.
+		it('is false when the ledger has archived the last synced block', async () => {
+			blockTimeSpy.mockResolvedValue(undefined);
+
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+		});
+
+		it('is false for an index that has synced nothing, without asking the ledger', async () => {
+			syncedSpy.mockResolvedValue(ZERO);
+
+			await expect(hasSyncedPast()).resolves.toBeFalsy();
+
+			expect(blockTimeSpy).not.toHaveBeenCalled();
 		});
 	});
 

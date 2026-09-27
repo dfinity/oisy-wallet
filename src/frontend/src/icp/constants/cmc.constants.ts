@@ -34,11 +34,12 @@ export const CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS = 2_000;
 // moves.
 export const CYCLES_MINT_TRANSFER_START_WINDOW_NS = 60_000_000_000n;
 
-// When a deposit that no tab saw land can no longer land: the start window, plus the
-// 5-minute ingress expiry of the transfer call and the IC's 1-minute clock drift. The
-// rest is margin for the poller's clock disagreeing with the clock that stamped the
-// transfer, since that is the one comparison here that uses two devices' clocks. A row
-// still without a deposit after this is deleted: nothing moved.
+// How long after its row opened on the backend a deposit that no tab saw land can still
+// land: the start window, plus the 5-minute ingress expiry of the transfer call and the
+// IC's 1-minute clock drift, with the rest as margin. Counted in IC time, from the row's
+// `created_at_ns`, and compared with the time of the last block the ICP index has synced.
+// A row still without a deposit once the index is past it closes as never sent: nothing
+// moved.
 export const CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS = 15n * 60n * 1_000_000_000n;
 
 // The ICP ledger accepts a `created_at_time` up to this far in its own future, so the
