@@ -217,11 +217,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -229,26 +229,26 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_chain_fusion_pair(d)?;
         }
         ActiveUserTransactionData::OisyTrade(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_oisy_trade_pair(d)?;
         }
         ActiveUserTransactionData::Xrp(d) => {
-            require_valid_amount(&d.amount)?;
-            require_valid_amount(&d.fee)?;
+            require_valid_amount(&d.amount, "amount")?;
+            require_valid_amount(&d.fee, "fee")?;
             require_xrp_token(&d.token)?;
             require_xrp_address(&d.source_address, "source_address")?;
             require_xrp_address(&d.destination_address, "destination_address")?;
@@ -262,16 +262,20 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
 /// integer any supported chain uses. The upper bound is what makes the encoded
 /// size of a record provable: `Nat` is variable-length, so an unbounded amount
 /// would let a single record carry megabytes into permanent stable memory.
-fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+///
+/// `field` is named rather than assumed because a payload can carry more than
+/// one such value — an XRP row validates its transaction cost here too, and
+/// reporting that as an `amount` problem sends the reader to the wrong field.
+fn require_valid_amount(amount: &Nat, field: &str) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount must be greater than zero".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be greater than zero"
+        )));
     }
     if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount is too large".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} is too large"
+        )));
     }
     Ok(())
 }
@@ -1023,11 +1027,53 @@ mod tests {
         // Every XRPL transaction destroys a non-zero transaction cost, so a row
         // claiming a zero fee describes a payment that could not have been
         // signed.
+        //
+        // The exact message is asserted, not just the variant: the fee is the
+        // second `Nat` this payload validates, and a shared validator that named
+        // the wrong field would send the reader to the amount instead.
         let (mut map, _mm) = setup();
         let mut req = create_req("xrp-1");
         req.data = xrp_data(25_000_000, 0, None, XRP_SOURCE, XRP_DESTINATION);
         let err = create(&mut map, principal(), req, 1).unwrap_err();
-        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_oversized_fee_rejected() {
+        // The other end of the same bound, and the other message that has to name
+        // the fee rather than the amount.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::parse(MAX_WIDTH_AMOUNT).unwrap() + Nat::from(1u32),
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee is too large".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_zero_amount_names_the_amount() {
+        // The counterpart to the two above: making the validator field-aware must
+        // not make an amount problem report as a fee one.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
     }
 
     #[test]
