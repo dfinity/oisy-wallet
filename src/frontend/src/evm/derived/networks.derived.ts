@@ -3,21 +3,30 @@ import { enabledArbitrumNetworks } from '$evm/arbitrum/derived/networks.derived'
 import { enabledBaseNetworks } from '$evm/base/derived/networks.derived';
 import { enabledBscNetworks } from '$evm/bsc/derived/networks.derived';
 import { enabledPolygonNetworks } from '$evm/polygon/derived/networks.derived';
+import { enabledRobinhoodNetworks } from '$evm/robinhood/derived/networks.derived';
 import type { NetworkId } from '$lib/types/network';
 import { derived, type Readable } from 'svelte/store';
 
 export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
-	[enabledBaseNetworks, enabledBscNetworks, enabledPolygonNetworks, enabledArbitrumNetworks],
+	[
+		enabledBaseNetworks,
+		enabledBscNetworks,
+		enabledPolygonNetworks,
+		enabledArbitrumNetworks,
+		enabledRobinhoodNetworks
+	],
 	([
 		$enabledBaseNetworks,
 		$enabledBscNetworks,
 		$enabledPolygonNetworks,
-		$enabledArbitrumNetworks
+		$enabledArbitrumNetworks,
+		$enabledRobinhoodNetworks
 	]) => [
 		...$enabledBaseNetworks,
 		...$enabledBscNetworks,
 		...$enabledPolygonNetworks,
-		...$enabledArbitrumNetworks
+		...$enabledArbitrumNetworks,
+		...$enabledRobinhoodNetworks
 	]
 );
 

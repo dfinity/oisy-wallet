@@ -371,6 +371,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ActiveUserTransactionError = IDL.Variant({
 		InvalidId: IDL.Null,
+		AlreadyInFlight: IDL.Null,
 		NotFound: IDL.Null,
 		TooManyActiveTransactions: IDL.Null,
 		InvalidData: IDL.Text,

@@ -495,6 +495,59 @@ fn create_xrp_variant_roundtrip() {
     assert_eq!(listed[0].data, data);
 }
 
+// The invariant the XRP guard exists for, through the real endpoint: the
+// frontend's own check cannot be atomic with the create, so this is what
+// actually holds it.
+#[test]
+fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let xrp = |destination: &str| {
+        ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+            destination_address: destination.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::from(12u64),
+        })
+    };
+
+    let create = |id: &str, data: ActiveUserTransactionData| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data,
+                external_refs: vec![],
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    match create(TX_ID, xrp("rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv")) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // A different id and a different destination, so neither is what refuses it.
+    match create(
+        "22222222-2222-4222-8222-222222222222",
+        xrp("rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi"),
+    ) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    // And the first row is the only one stored.
+    assert_eq!(list_active(&pic, user).len(), 1);
+}
+
 #[test]
 fn duplicate_create_returns_already_exists() {
     let pic = setup();

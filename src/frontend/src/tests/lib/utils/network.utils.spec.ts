@@ -1,4 +1,7 @@
-import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	SUPPORTED_ARBITRUM_NETWORK_IDS
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	SUPPORTED_BASE_NETWORK_IDS
@@ -12,6 +15,7 @@ import {
 	SUPPORTED_EVM_NETWORK_IDS
 } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -66,6 +70,7 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdPolygon,
+	isNetworkIdRobinhood,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLMainnet,
@@ -268,6 +273,24 @@ describe('network utils', () => {
 			expect(isNetworkIdArbitrum(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdArbitrum(BASE_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('should return false for the Robinhood Chain network ID', () => {
+			expect(isNetworkIdArbitrum(ROBINHOOD_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdRobinhood', () => {
+		it('should return true for the Robinhood Chain network ID', () => {
+			expect(isNetworkIdRobinhood(ROBINHOOD_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-Robinhood network IDs', () => {
+			expect(isNetworkIdRobinhood(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdRobinhood(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdRobinhood(ARBITRUM_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 

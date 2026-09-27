@@ -8,6 +8,7 @@ import {
 	SUPPORTED_EVM_NETWORKS
 } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { SUPPORTED_ROBINHOOD_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -90,6 +91,9 @@ export const isNetworkIdPolygon: IsNetworkIdUtil = (id) =>
 
 export const isNetworkIdArbitrum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ARBITRUM_NETWORK_IDS.includes(id);
+
+export const isNetworkIdRobinhood: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_ROBINHOOD_NETWORK_IDS.includes(id);
 
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BITCOIN_NETWORK_IDS.includes(id);
