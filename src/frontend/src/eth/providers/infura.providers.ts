@@ -37,6 +37,13 @@ import type {
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
+// What a call that both providers failed leaves to decide it by.
+interface FallbackFailure {
+	infuraErr: unknown;
+	fallbackErr: unknown;
+	fallbackProvider: JsonRpcProvider;
+}
+
 export class InfuraProvider {
 	private readonly provider: JsonRpcProvider;
 	// Asked only after `provider` fails a call a send depends on. `undefined` where there is no
@@ -90,81 +97,109 @@ export class InfuraProvider {
 		return gasPriceOracle.getL1FeeUpperBound(unsignedTxSize);
 	};
 
+	// The rule every call a send depends on follows: Infura first, and when it fails the call or gives
+	// no answer within `milliseconds`, the same call to the fallback. Only for calls that are safe to
+	// repeat, since the one Infura was given carries on. `recover` decides what the fallback failing
+	// as well amounts to; without it, Infura's error stands.
+	private callWithFallback = async <T>({
+		operation,
+		milliseconds,
+		call,
+		recover
+	}: {
+		operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS;
+		milliseconds: number;
+		call: (provider: JsonRpcProvider) => Promise<T>;
+		recover?: (params: FallbackFailure) => Promise<T>;
+	}): Promise<T> => {
+		const { fallbackProvider } = this;
+
+		if (isNullish(fallbackProvider) || !ALCHEMY_EVM_FALLBACK_ENABLED) {
+			return await call(this.provider);
+		}
+
+		try {
+			return await withTimeout({ promise: call(this.provider), milliseconds });
+		} catch (infuraErr: unknown) {
+			const track = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
+				trackProviderFallback({
+					operation,
+					trigger: infuraErr instanceof TimeoutError ? 'timeout' : 'error',
+					network: this.networkLabel,
+					resultStatus
+				});
+
+			try {
+				const result = await this.askFallback({
+					call,
+					recover,
+					milliseconds,
+					fallbackProvider,
+					infuraErr
+				});
+
+				track(PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS);
+
+				return result;
+			} catch (err: unknown) {
+				track(PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR);
+
+				throw err;
+			}
+		}
+	};
+
+	private askFallback = async <T>({
+		call,
+		recover,
+		milliseconds,
+		fallbackProvider,
+		infuraErr
+	}: Pick<FallbackFailure, 'fallbackProvider' | 'infuraErr'> & {
+		call: (provider: JsonRpcProvider) => Promise<T>;
+		recover?: (params: FallbackFailure) => Promise<T>;
+		milliseconds: number;
+	}): Promise<T> => {
+		try {
+			return await withTimeout({ promise: call(fallbackProvider), milliseconds });
+		} catch (fallbackErr: unknown) {
+			if (isNullish(recover)) {
+				throw infuraErr;
+			}
+
+			return await recover({ infuraErr, fallbackErr, fallbackProvider });
+		}
+	};
+
 	// Who submits a signed transaction changes nothing about it: its bytes fix its hash and its nonce,
 	// so the network mines at most one copy however many providers it is handed to. That is what
 	// makes it safe to hand the same bytes to the fallback when Infura does not accept them, or does
 	// not answer in time.
-	sendTransaction = async (signedTransaction: string): Promise<TransactionResponse> => {
-		const { fallbackProvider } = this;
+	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
+		this.callWithFallback({
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
+			milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
+			call: (provider) => provider.broadcastTransaction(signedTransaction),
+			recover: async ({ infuraErr, fallbackErr, fallbackProvider }) => {
+				// Neither error proves the transaction went nowhere. Infura can pass a transaction on and
+				// still fail the request, and a node answers a transaction it already holds with an error
+				// of its own. Only the network knows, so it is asked before the send is reported as failed.
+				const submitted = await this.findSubmittedTransaction({
+					signedTransaction,
+					fallbackProvider
+				});
 
-		if (isNullish(fallbackProvider) || !ALCHEMY_EVM_FALLBACK_ENABLED) {
-			return await this.provider.broadcastTransaction(signedTransaction);
-		}
+				if (nonNullish(submitted)) {
+					return submitted;
+				}
 
-		try {
-			return await withTimeout({
-				promise: this.provider.broadcastTransaction(signedTransaction),
-				milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS
-			});
-		} catch (err: unknown) {
-			return await this.submitThroughFallback({
-				signedTransaction,
-				fallbackProvider,
-				infuraErr: err
-			});
-		}
-	};
-
-	private submitThroughFallback = async ({
-		signedTransaction,
-		fallbackProvider,
-		infuraErr
-	}: {
-		signedTransaction: string;
-		fallbackProvider: JsonRpcProvider;
-		infuraErr: unknown;
-	}): Promise<TransactionResponse> => {
-		const track = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
-			trackProviderFallback({
-				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
-				trigger: infuraErr instanceof TimeoutError ? 'timeout' : 'error',
-				network: this.networkLabel,
-				resultStatus
-			});
-
-		try {
-			const transaction = await withTimeout({
-				promise: fallbackProvider.broadcastTransaction(signedTransaction),
-				milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS
-			});
-
-			track(PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS);
-
-			return transaction;
-		} catch (fallbackErr: unknown) {
-			// Neither error proves the transaction went nowhere. Infura can pass a transaction on and
-			// still fail the request, and a node answers a transaction it already holds with an error of
-			// its own. Only the network knows, so it is asked before the send is reported as failed.
-			const submitted = await this.findSubmittedTransaction({
-				signedTransaction,
-				fallbackProvider
-			});
-
-			if (nonNullish(submitted)) {
-				track(PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS);
-
-				return submitted;
+				// A refusal states something about the transaction; a provider failing the request does
+				// not. So the user is told whichever reason there is, Infura's when both give one.
+				throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
+					? fallbackErr
+					: infuraErr;
 			}
-
-			track(PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR);
-
-			// A refusal states something about the transaction; a provider failing the request does not.
-			// So the user is told whichever reason there is, Infura's when both give one.
-			throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
-				? fallbackErr
-				: infuraErr;
-		}
-	};
+		});
 
 	// A transaction's hash is the hash of its signed bytes, so it is known before any node answers.
 	private findSubmittedTransaction = async ({
