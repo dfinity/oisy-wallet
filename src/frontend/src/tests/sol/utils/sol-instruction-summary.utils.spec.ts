@@ -580,6 +580,45 @@ describe('sol-instruction-summary.utils', () => {
 			expect(close?.returned).toBe(6_000_000_000n);
 		});
 
+		// A close hands its whole balance to the account it names, so reading what one hands back
+		// walks the closes that paid into it, and those walk the closes that paid into them. A message
+		// is the dApp's to arrange, so it can close two accounts into each other over and over - A
+		// into B, then B into A - which reaches the same account at the same point along many paths.
+		// Walking each of them re-does the same work, doubling with every added close, so a message
+		// of a few dozen would hang the review before it could be rejected. Each point is walked once,
+		// so the whole message is read in one pass regardless of how the closes are arranged.
+		it('should read a message that closes two accounts into each other many times over', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const a = 'aAccount11111111111111111111111111111111111';
+			const b = 'bAccount11111111111111111111111111111111111';
+
+			const closes = Array.from({ length: 120 }, (_, index) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: {
+					type: 'closeAccount',
+					info:
+						index % 2 === 0
+							? { account: a, destination: b, owner }
+							: { account: b, destination: a, owner }
+				}
+			}));
+
+			const start = performance.now();
+
+			const views = mapSolInstructionSummaries({
+				instructions: closes,
+				ownedAddresses: [owner, a, b],
+				userAddress: owner,
+				accountLamports: { [a]: 2_039_280n, [b]: 2_039_280n }
+			});
+
+			// Every close is read, and the read is near-instant. The budget is generous on purpose:
+			// it is here to fail if the walk ever grows with the arrangement again, not to measure it.
+			expect(views.filter(({ kind }) => kind === 'closeTokenAccount')).toHaveLength(120);
+			expect(performance.now() - start).toBeLessThan(2_000);
+		});
+
 		// An account this message opens has no state to read beforehand, and a swap that opens one
 		// wraps into it and unwraps out of it within the same message. Reading the balance from
 		// before the transaction called every such close an unwrap, including the ones that hand

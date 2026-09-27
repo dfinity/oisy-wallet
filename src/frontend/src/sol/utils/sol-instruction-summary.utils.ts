@@ -971,13 +971,7 @@ const initialisedInMessage = ({
  * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
  * swap hands back the rent and the wrapped SOL together. No instruction states that total.
  */
-const fundedInTransaction = ({
-	account,
-	flattened,
-	accountLamports = {},
-	mintAt,
-	until
-}: {
+const fundedInTransaction = (params: {
 	account: SolAddress;
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
@@ -989,10 +983,44 @@ const fundedInTransaction = ({
 	// its balance on afterwards, and is no part of what the one being described paid out.
 	until?: number;
 }): bigint | undefined =>
+	// A close hands its account's whole balance to the account it names, so the walk below recurses
+	// from each close into the account it closed. A message that closes accounts into each other and
+	// back - close A into B, then B into A, over and over - would otherwise walk the same account at
+	// the same point once for every path that reaches it, which doubles with every added close and
+	// hangs the review on a message that never runs. The result at each (account, point) is the same
+	// however the walk arrives there, so it is computed once and reused, which is what keeps a
+	// crafted message from turning the review into an exponential re-walk. The cache lives for this
+	// one call, so the function stays pure.
+	fundedInTransactionWalk({ ...params, funded: new Map() });
+
+const fundedInTransactionWalk = ({
+	account,
+	flattened,
+	accountLamports = {},
+	mintAt,
+	until,
+	funded
+}: {
+	account: SolAddress;
+	flattened: { instruction: SolParsedRpcInstruction }[];
+	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
+	until?: number;
+	// Every (account, point) already walked in this call, mapped to what it hands over. `undefined`
+	// is a real answer - an account whose balance nobody knows - so membership is asked with `has`,
+	// never by the value being nullish.
+	funded: Map<string, bigint | undefined>;
+}): bigint | undefined => {
+	const key = `${account}:${until ?? 'all'}`;
+
+	if (funded.has(key)) {
+		return funded.get(key);
+	}
+
 	// Both sources can apply at once: an account can pre-date the message and still be paid into
 	// during it, which is exactly the funded account a hand-over is worth making. Taking one or the
 	// other dropped whichever it did not pick.
-	flattened.slice(0, until).reduce<bigint | undefined>(
+	const result = flattened.slice(0, until).reduce<bigint | undefined>(
 		(
 			acc,
 			{
@@ -1017,12 +1045,13 @@ const fundedInTransaction = ({
 				const closed = address({ info, key: 'account' });
 
 				const inflow = nonNullish(closed)
-					? fundedInTransaction({
+					? fundedInTransactionWalk({
 							account: closed,
 							flattened,
 							accountLamports,
 							mintAt,
-							until: index
+							until: index,
+							funded
 						})
 					: undefined;
 
@@ -1076,6 +1105,11 @@ const fundedInTransaction = ({
 		},
 		accountLamports[account]
 	);
+
+	funded.set(key, result);
+
+	return result;
+};
 
 /**
  * The rent an account creation costs, from the System `createAccount` that funds it.
