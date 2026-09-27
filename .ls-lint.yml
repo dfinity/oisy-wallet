@@ -20,3 +20,4 @@ ignore:
   - src/frontend/src/lib/ic-pub-key
   - src/frontend/src/routes
   - src/frontend/src/tests/fixtures
+  - src/ai-frontend/src/routes
