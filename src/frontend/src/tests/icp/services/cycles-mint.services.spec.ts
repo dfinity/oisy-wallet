@@ -383,13 +383,16 @@ describe('cycles-mint.services', () => {
 			);
 		});
 
-		// What bounds when the transfer can still land, so when the poller may delete the row.
-		it('abandons a mint whose tab was suspended before sending', async () => {
+		const suspendBeforeSending = () =>
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				vi.setSystemTime(NOW_MS + Number(CYCLES_MINT_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
 
 				return Promise.resolve();
 			});
+
+		// What bounds when the transfer can still land, so when the poller may close the row.
+		it('abandons a mint whose tab was suspended before sending', async () => {
+			suspendBeforeSending();
 
 			await expect(errorKind()).resolves.toBe('timed_out');
 
@@ -398,6 +401,22 @@ describe('cycles-mint.services', () => {
 				identity: mockIdentity,
 				id: 'mint-1'
 			});
+			expect(trackCyclesMint).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'timed_out' })
+			);
+		});
+
+		// The row survives and reports the ending itself, as never sent, once the poller closes
+		// it: reporting it here too would count the mint twice.
+		it('leaves the ending of an abandoned mint to a row it could not delete', async () => {
+			suspendBeforeSending();
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('timed_out');
+
+			expect(trackCyclesMint).not.toHaveBeenCalledWith(
+				expect.objectContaining({ errorCode: 'timed_out' })
+			);
 		});
 
 		it('deletes the row when the ledger refuses the transfer: nothing moved', async () => {
@@ -411,6 +430,17 @@ describe('cycles-mint.services', () => {
 			});
 			expect(notifyMintCycles).not.toHaveBeenCalled();
 			expect(trackCyclesMint).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
+		});
+
+		it('leaves the ending of a refused transfer to a row it could not delete', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new InsufficientFundsError(ZERO));
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('transfer_failed');
+
+			expect(trackCyclesMint).not.toHaveBeenCalledWith(
 				expect.objectContaining({ errorCode: 'transfer_failed' })
 			);
 		});
