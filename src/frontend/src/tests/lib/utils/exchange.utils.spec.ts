@@ -504,6 +504,23 @@ describe('exchange.utils', () => {
 			]);
 		});
 
+		// The gate in `buildErc20PriceParams` re-hardcodes the platform list that
+		// `CoingeckoPlatformIdSchema` already encodes, and a platform missing from it is dropped
+		// with no error — so a new EVM chain looks wired up and silently has no ERC-20 prices.
+		// Robinhood Chain is pinned here because adding the schema entry alone is not enough.
+		it('keeps addresses on Robinhood Chain', () => {
+			const result = buildErc20PriceParams([
+				{ address: '0x789', coingeckoId: 'robinhood', chainId: 4663n }
+			]);
+
+			expect(result).toEqual([
+				{
+					coingeckoPlatformId: 'robinhood',
+					contractAddresses: [{ address: '0x789', coingeckoId: 'robinhood' }]
+				}
+			]);
+		});
+
 		it('drops addresses with an unsupported coingecko platform id', () => {
 			const result = buildErc20PriceParams([
 				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
