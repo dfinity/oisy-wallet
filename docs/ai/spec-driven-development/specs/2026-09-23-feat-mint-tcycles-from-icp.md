@@ -90,7 +90,7 @@ Built from OISY's existing wizard pieces (the Convert flow's form, fees and revi
 - **Fees**: the ICP network fee (0.0001 ICP, on top of the amount) and the cycles-ledger fee (0.0001 TCYCLES, taken from what is received). There is no other conversion fee.
 - **One-way notice**: minting cannot be reversed, and TCYCLES cannot be turned back into ICP.
 - The user enters ICP only. Entering a TCYCLES target instead (the NNS dapp's two-way input) is not offered.
-- The form cannot continue when the rate is missing, the amount is zero, the amount plus fee exceeds the balance (which covers a zero balance), or the estimate would not clear the deposit fee with a margin for a rate change before the mint runs. Such an amount is refunded minus 0.0003 ICP, and can be lost entirely (§3.7).
+- The form cannot continue when the rate is missing, the amount is zero, the amount plus fee exceeds the balance (which covers a zero balance), or the amount is below the lower bound. The bound has two parts, and the amount must meet both: it is **above 0.0003 ICP**, because a refund returns the ICP minus 0.0003 ICP and returns nothing at or below that (§3.7); and what it mints at the current rate (ICP × rate, before the deposit fee) is **at least twice the 0.0001 TCYCLES deposit fee**, so the mint still clears the fee if the rate halves before it runs. At the late-September 2026 rate of about 2.29 TCYCLES per ICP the first part binds; the second only once the rate falls below about 0.67 TCYCLES per ICP.
 
 ### 5.3 Review
 
@@ -156,11 +156,11 @@ One structured event family, following the domain-service pattern in `docs/ai/fr
 - **AC5** With the flag on, the TCYCLES page shows an always-enabled Mint button (pickaxe, "Mint") as its fourth hero button, after Receive, Send and Swap, and no other token page does. With the flag off, it is absent.
 - **AC6** With 0 ICP, the form shows 0 ICP available and cannot continue.
 - **AC7** The form shows the ICP balance, Max (balance − 0.0001 ICP), the estimate (ICP × rate − 0.0001 TCYCLES) as the user types, the rate, both fees and the one-way notice.
-- **AC8** The form cannot continue without a rate, with a zero amount, with an amount above the balance minus the fee, or with an amount whose estimate does not clear the deposit fee.
+- **AC8** The form cannot continue without a rate, with a zero amount, with an amount above the balance minus the fee, with an amount of 0.0003 ICP or less, or with an amount that mints less than twice the 0.0001 TCYCLES deposit fee at the current rate.
 - **AC9** Review shows what is paid and received with fiat values, the rate, the fees and the CMC as minter; it re-quotes when it opens and keeps the amount on Back.
 - **AC10** Minting moves exactly the entered ICP (plus the fee) to the CMC deposit account of the user's principal with the `MINT` memo; the CMC credits the user's default TCYCLES account; the success state shows the credited amount.
 - **AC11** After the transfer, `Processing` or a failed notify call never shows the mint as failed.
-- **AC12** A refund is shown as failed, stating that the ICP came back minus 0.0003 ICP.
+- **AC12** A refund is shown as failed, stating that the ICP came back minus 0.0003 ICP, which the lower bound (AC8) makes true of every refund.
 - **AC13** A mint whose modal was closed, or whose tab was refreshed or closed, or whose user logged out between the transfer and the notify, completes (or shows as refunded) in the next session without user action. No recovery path ever sends ICP.
 - **AC14** If the AUT row cannot be created, no ICP moves.
 - **AC15** A mint in flight, minted or failed shows in the Active transactions list as "Mint X ICP → TCYCLES" with the Cycles Minting Canister as provider.
