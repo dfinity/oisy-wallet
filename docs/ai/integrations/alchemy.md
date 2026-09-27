@@ -66,6 +66,9 @@ in time, never alongside it.
   If Alchemy fails too, `eth_getTransactionByHash` (10 s,
   `INFURA_READ_TIMEOUT_MILLISECONDS`) settles whether the network has the
   transaction anyway before the send is reported as failed.
+- **Fee data** — the calls behind ethers' `getFeeData` (`eth_getBlockByNumber`,
+  `eth_maxPriorityFeePerGas`, `eth_gasPrice`), when Infura did not answer within
+  10 s. Gas estimation is not handed over.
 
 A network Infura does not host (Robinhood Chain) is already read over this URL and
 has no fallback. `ALCHEMY_EVM_FALLBACK_ENABLED`
