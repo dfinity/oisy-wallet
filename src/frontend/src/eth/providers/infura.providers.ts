@@ -64,7 +64,14 @@ export class InfuraProvider {
 
 	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
-	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
+	// Every review waits on this sample, and ethers computes it the same way whichever provider
+	// answers, so Alchemy's is as good a fee as Infura's would have been.
+	getFeeData = (): Promise<FeeData> =>
+		this.callWithFallback({
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.FEE,
+			milliseconds: INFURA_READ_TIMEOUT_MILLISECONDS,
+			call: (provider) => provider.getFeeData()
+		});
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
