@@ -286,5 +286,22 @@
 		},
 		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg",
 		"metadataOnly": true
+	},
+	"DUSD": {
+		"ledgerCanisterId": "irorr-5aaaa-aaaak-qddsq-cai",
+		"mintingAccount": "iyn2n-liaaa-aaaak-qddta-cai",
+		"tags": [
+			{
+				"type": "category",
+				"value": "stablecoin"
+			}
+		],
+		"decimals": 6,
+		"name": "Doxa USD",
+		"symbol": "DUSD",
+		"fee": {
+			"__bigint__": "70000"
+		},
+		"icon": "/icons/icrc/irorr-5aaaa-aaaak-qddsq-cai.svg"
 	}
 }
