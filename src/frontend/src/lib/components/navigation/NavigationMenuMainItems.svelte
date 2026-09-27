@@ -5,6 +5,7 @@
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { HELP_ENABLED } from '$env/help.env';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
@@ -17,12 +18,15 @@
 	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
+	import IconLifeBuoy from '$lib/components/icons/lucide/IconLifeBuoy.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
+	import NavigationMoreMenu from '$lib/components/navigation/NavigationMoreMenu.svelte';
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import {
+		DESKTOP_NAVIGATION_BOTTOM_ITEMS,
 		DESKTOP_NAVIGATION_SECTIONS,
 		MOBILE_NAVIGATION_BAR
 	} from '$lib/constants/navigation.constants';
@@ -39,6 +43,7 @@
 		NAVIGATION_ITEM_NOTES,
 		NAVIGATION_ITEM_REWARDS,
 		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_HELP,
 		NAVIGATION_ITEM_TOKENS,
 		NAVIGATION_ITEM_TRADE
 	} from '$lib/constants/test-ids.constants';
@@ -62,6 +67,7 @@
 		isRouteNfts,
 		isRouteRewards,
 		isRouteSettings,
+		isRouteHelp,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
 		isRouteTrading,
@@ -71,7 +77,7 @@
 
 	interface Props {
 		testIdPrefix?: string;
-		layout?: 'desktop' | 'mobile';
+		layout?: 'desktop' | 'mobile' | 'bottom';
 	}
 
 	let { testIdPrefix, layout = 'desktop' }: Props = $props();
@@ -263,6 +269,20 @@
 						}
 					}
 				: {}),
+			// Gated on HELP_ENABLED: with the flag off the entry is simply absent, which is all
+			// the gating the page needs - it has nothing worth hiding behind a route guard.
+			...(HELP_ENABLED
+				? {
+						help: {
+							label: $i18n.navigation.text.help,
+							ariaLabel: $i18n.navigation.alt.help_page,
+							testId: prefixedTestId(NAVIGATION_ITEM_HELP),
+							icon: IconLifeBuoy,
+							href: url(AppPath.Help),
+							selected: isRouteHelp(page)
+						}
+					}
+				: {}),
 			settings: {
 				label: $i18n.navigation.text.settings,
 				ariaLabel: $i18n.navigation.alt.settings,
@@ -348,7 +368,20 @@
 	{/if}
 {/snippet}
 
-{#if layout === 'desktop'}
+{#if layout === 'bottom'}
+	<!-- The sidebar's pinned bottom block: Settings, then the More menu, stacked.
+	     Same condensed rows and 24px icons as the sections above, so the two read
+	     as one navigation rather than a second, smaller one. -->
+	<div
+		class="flex flex-col gap-0.5 [&_.nav-item]:items-center [&_.nav-item]:py-2 [&_.nav-item_svg]:h-6 [&_.nav-item_svg]:w-6"
+	>
+		{#each DESKTOP_NAVIGATION_BOTTOM_ITEMS as id (id)}
+			{@render navItem(id)}
+		{/each}
+
+		<NavigationMoreMenu />
+	</div>
+{:else if layout === 'desktop'}
 	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}
 		{@const items = section.items.filter((id) => nonNullish(descriptors[id]))}
 		{#if items.length > 0}

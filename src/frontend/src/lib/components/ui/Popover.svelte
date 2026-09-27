@@ -8,7 +8,7 @@
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { PopoverDirection } from '$lib/types/popover';
+	import type { PopoverDirection, PopoverPlacement } from '$lib/types/popover';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { computePopoverPlacement } from '$lib/utils/popover.utils';
 
@@ -16,6 +16,7 @@
 		anchor?: HTMLElement;
 		visible?: boolean;
 		direction?: PopoverDirection;
+		placement?: PopoverPlacement;
 		closeButton?: boolean;
 		invisibleBackdrop?: boolean;
 		testId?: string;
@@ -26,6 +27,7 @@
 		anchor,
 		visible = $bindable(false),
 		direction = 'ltr',
+		placement = 'below',
 		closeButton = false,
 		invisibleBackdrop = false,
 		testId = 'popover-component',
@@ -39,6 +41,9 @@
 	const DEFAULT_VIEWPORT_PADDING = 8;
 
 	let popoverTop = $state(0);
+	// Distance from the viewport's bottom edge to the anchor's top edge: where an
+	// `above` panel's own bottom edge sits.
+	let popoverBottom = $state(0);
 	let popoverLeft = $state(0);
 	let popoverRight = $state(0);
 	let panelWidth = $state(0);
@@ -65,6 +70,7 @@
 
 		if (isNullish(anchor)) {
 			popoverTop = 0;
+			popoverBottom = 0;
 			popoverLeft = 0;
 			popoverRight = 0;
 			effectiveDirection = direction;
@@ -72,7 +78,7 @@
 			return;
 		}
 
-		const { bottom, left, right } = anchor.getBoundingClientRect();
+		const { top, bottom, left, right } = anchor.getBoundingClientRect();
 
 		const viewportWidth = document.documentElement.clientWidth;
 
@@ -86,6 +92,7 @@
 		});
 
 		popoverTop = bottom;
+		popoverBottom = document.documentElement.clientHeight - top;
 		popoverLeft = placement.left;
 		popoverRight = placement.right;
 		effectiveDirection = placement.direction;
@@ -93,7 +100,7 @@
 
 	$effect(() => {
 		// Recompute the placement whenever the anchor, visibility or preferred direction changes.
-		[anchor, visible, direction];
+		[anchor, visible, direction, placement];
 		initPosition();
 	});
 
@@ -150,7 +157,7 @@
 
 {#if visible}
 	<div
-		style="--popover-top: {popoverTop}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
+		style="--popover-top: {popoverTop}px; --popover-bottom: {popoverBottom}px; --popover-left: {popoverLeft}px; --popover-right: {popoverRight}px"
 		class="popover"
 		aria-orientation="vertical"
 		data-tid={testId}
@@ -161,6 +168,7 @@
 		<Backdrop invisible={invisibleBackdrop} onClose={close} />
 		<div
 			class="wrapper"
+			class:above={placement === 'above'}
 			class:placed={placementResolved}
 			class:rtl={effectiveDirection === 'rtl'}
 			class:with-border={invisibleBackdrop}
@@ -243,6 +251,14 @@
 		&.rtl {
 			left: auto;
 			right: var(--popover-right);
+		}
+
+		// Anchored by its bottom edge to the anchor's top, and capped by the room
+		// above it rather than below — the mirror of the default placement.
+		&.above {
+			top: auto;
+			bottom: calc(var(--popover-bottom) + var(--padding));
+			max-height: calc(var(--full-vh, 100vh) - var(--popover-bottom) - calc(6 * var(--padding)));
 		}
 
 		// After the initial measurement, clamp the panel to the available room on
