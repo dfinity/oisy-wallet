@@ -1127,6 +1127,8 @@
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_transaction_not_sent": "Die Transaktion wurde nicht gesendet: Wir konnten das Netzwerk nicht erreichen, um sie vorzubereiten. Sie können es bedenkenlos erneut versuchen.",
+			"ethereum_transaction_unconfirmed": "Wir konnten nicht bestätigen, ob die Transaktion das Netzwerk erreicht hat. Sie kann noch durchgehen, prüfen Sie daher Ihre Aktivität, bevor Sie sie erneut senden.",
 			"solana_transaction_expired": "Ihre Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, höchstwahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichend war. Wir haben sie auf den aktuell empfohlenen Betrag aktualisiert. Bitte versuchen Sie es erneut.",
 			"solana_confirmation_failed": "Wir haben keine Bestätigung für die soeben erstellte Transaktion erhalten. Bitte warten Sie einige Sekunden und prüfen Sie dann in der Transaktionsliste Ihres Tokens, ob Ihre Transaktion korrekt erstellt wurde.",
 			"solana_insufficient_funds": "Ihr Token-Guthaben reicht nicht aus, um diese Transaktion abzuschließen. Ihr Guthaben kann sich seit der letzten Anzeige geändert haben.",
