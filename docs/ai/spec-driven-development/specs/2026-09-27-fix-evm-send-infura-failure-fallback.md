@@ -85,6 +85,8 @@ learn how often Infura fails.
   provider sees it, pending transactions included.
 - If both fail, the send stops before anything is signed, as today.
 - A custom nonce the user entered is used as it is, and nothing is read.
+- The confirmed count (the `latest` read that tells whether a Velora swap was replaced) is no send's
+  nonce, and stays with Infura alone.
 
 ### 3. Saying what happened (PR 3)
 
