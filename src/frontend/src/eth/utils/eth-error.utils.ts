@@ -72,6 +72,29 @@ const isInsufficientBalanceError = (err: unknown): boolean =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
 	);
 
+// Ethers' own verdicts for a node that judged a transaction and turned it down.
+const ETHERS_REFUSAL_CODES: string[] = [
+	ETHERS_INSUFFICIENT_FUNDS_CODE,
+	'NONCE_EXPIRED',
+	'REPLACEMENT_UNDERPRICED'
+];
+
+/**
+ * Whether a failed submission is the node refusing the transaction, rather than the provider
+ * failing to serve the request.
+ *
+ * A refusal is an answer about the transaction, and it holds whichever node gives it: a submission
+ * is answered with -32000 and the reason once the node has judged it. A bare internal error, a rate
+ * limit or a timeout says only that one provider did not serve the call, which makes it the least
+ * useful thing to report when another provider has stated a reason.
+ */
+export const isEthereumNodeRefusal = (err: unknown): boolean =>
+	collectErrorRecords({ err }).some(
+		({ code }) =>
+			code === JSON_RPC_SERVER_ERROR_CODE ||
+			(typeof code === 'string' && ETHERS_REFUSAL_CODES.includes(code))
+	);
+
 /**
  * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
  *
