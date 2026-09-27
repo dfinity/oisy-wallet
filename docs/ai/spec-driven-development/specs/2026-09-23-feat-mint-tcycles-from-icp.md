@@ -55,7 +55,7 @@ Verified against `dfinity/ic` (`rs/nns/cmc/src/main.rs`, `lib.rs`) and `dfinity/
 5. **Rate.** The CMC refreshes its ICP/XDR rate every 5 minutes, and converts at the rate current when the notify runs, not when the user saw the quote.
 6. **Idempotent.** Notifying the same block again returns the stored result; a concurrent call answers `Processing`. `Refunded`, `InvalidTransaction` and `TransactionTooOld` do not change on retry.
 7. **Refund.** If the deposit into the cycles ledger fails (the amount does not cover the 0.0001 TCYCLES fee, or the CMC's network-wide mint limit, 150,000 TCYCLES per hour by default, is reached), the CMC returns the ICP **minus 0.0003 ICP**. At 0.0003 ICP or less, nothing comes back.
-8. **Nothing expires quickly.** A deposit nobody notifies stays in the CMC's custody. It remains notifiable for a long but finite time: the CMC keeps its most recent 1,000,000 notification records.
+8. **Nothing expires quickly.** A deposit nobody notifies stays in the CMC's custody. It remains notifiable for a long but finite time: the CMC keeps its most recent 1,000,000 notification records. Once those have moved past its block, `notify_mint_cycles` answers `TransactionTooOld`, and the deposit can be neither minted nor refunded: its ICP stays in the CMC's custody for good.
 9. **One way.** Cycles cannot be turned back into ICP.
 
 ## 4. Compute asset type
@@ -104,7 +104,7 @@ Every OISY flow that moves funds has a review step (Send, Convert, Swap, Stake, 
 - Success shows what was **actually credited** (the CMC's `minted` minus the 0.0001 TCYCLES deposit fee) and refreshes the TCYCLES and ICP balances.
 - Once the ICP has left the wallet, a mint is never reported as failed because a notify call failed or answered `Processing`: those are retried. If the mint is still pending when the user closes the modal, it carries on in the background and shows in the header's Active transactions list (§6).
 - A refund is reported as failed, saying that the ICP was returned minus 0.0003 ICP and giving the CMC's reason.
-- If the ICP transfer itself fails, nothing has moved: it is an ordinary error, and the user can try again.
+- If the ICP ledger refuses the transfer, nothing has moved: it is an ordinary error, and the user can try again. A transfer call that ends without the ledger's answer (no reply, a reject, a timeout) may still have landed, so it is never reported as that error: the mint is handed to the background, where the deposit lookup (§6.4) finishes it or, once the transfer can no longer land, closes it as never sent.
 
 ### 5.5 Afterwards
 
@@ -115,7 +115,9 @@ Every OISY flow that moves funds has a review step (Send, Convert, Swap, Stake, 
 
 Between the transfer and the notify, the ICP sits in the CMC's custody, and only the user's own principal can finish the mint (§3.3). A closed tab, a backgrounded phone or a logout in that window would otherwise strand it with nothing tracking it. The mint is therefore an **active user transaction** (AUT), like the Chain Fusion conversions (PRODUCT.md → Swap → Cross-session settlement). The guarantee:
 
-> Once ICP has left the wallet, the mint is driven to **minted** or **refunded** without the user doing anything, across modal close, refresh, tab close and logout. Recovery never sends ICP; it only finishes a deposit that already exists.
+> Once ICP has left the wallet, the mint is driven to **minted** or **refunded** without the user doing anything, across modal close, refresh, tab close and logout, as long as the user's next session comes while the CMC still accepts the notify (§3.8). Recovery never sends ICP; it only finishes a deposit that already exists.
+>
+> A deposit the CMC no longer accepts, answering `TransactionTooOld`, closes its row as failed, like any other final CMC answer; its ICP stays in the CMC's custody for good.
 
 1. **The row opens before the ICP transfer** (the OISY Trade precedent) and is updated with the block index once the transfer returns. If the row cannot be created (e.g. the per-user AUT cap of 100 is reached), the mint does not start and nothing moves (fail-closed).
 2. A row whose transfer failed is closed as failed.
@@ -139,7 +141,7 @@ So the SDK bump is its own project, and none is planned (2026-09-23). This featu
 
 ## 8. Analytics
 
-One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES), amounts and USD values, as `deposit_withdraw` does. It never carries a principal. The terminal event fires once, from the AUT (§6.5). Choosing the Compute filter is covered by the filter's existing tracking.
+One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES), amounts and USD values, as `deposit_withdraw` does. It never carries a principal. The terminal event fires from the AUT (§6.5), once per browser profile that sees the mint end: the loader records that it fired in local storage, and the backend has no claim to make it once overall, so another browser or device, or a second tab already open, reports the same ending again, as for every other flow the loader tracks. Choosing the Compute filter is covered by the filter's existing tracking.
 
 ## 9. Acceptance criteria
 
@@ -160,11 +162,11 @@ One structured event family, following the domain-service pattern in `docs/ai/fr
 - **AC10** Minting moves exactly the entered ICP (plus the fee) to the CMC deposit account of the user's principal with the `MINT` memo; the CMC credits the user's default TCYCLES account; the success state shows the credited amount.
 - **AC11** After the transfer, `Processing` or a failed notify call never shows the mint as failed.
 - **AC12** A refund is shown as failed, stating that the ICP came back minus 0.0003 ICP, which the lower bound (AC8) makes true of every refund.
-- **AC13** A mint whose modal was closed, or whose tab was refreshed or closed, or whose user logged out between the transfer and the notify, completes (or shows as refunded) in the next session without user action. No recovery path ever sends ICP.
+- **AC13** A mint whose modal was closed, or whose tab was refreshed or closed, or whose user logged out between the transfer and the notify, completes (or shows as refunded) in the next session without user action, as long as that session comes while the CMC still accepts the notify; one the CMC answers `TransactionTooOld` for shows as failed. No recovery path ever sends ICP.
 - **AC14** If the AUT row cannot be created, no ICP moves.
 - **AC15** A mint in flight, minted or failed shows in the Active transactions list as "Mint X ICP → TCYCLES" with the Cycles Minting Canister as provider.
 - **AC16** The CMC deposit account never appears among the recently used ICP destinations and never suppresses the first-time destination warning.
-- **AC17** The mint analytics fire as specified, once per mint, and never carry a principal.
+- **AC17** The mint analytics fire as specified, the terminal event once per browser profile that sees the mint end, and never carry a principal.
 - **AC18** PRODUCT.md documents the Compute asset type and minting, including the non-goals.
 
 ## 10. Non-goals
