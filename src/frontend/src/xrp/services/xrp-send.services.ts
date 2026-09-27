@@ -37,6 +37,7 @@ import {
 } from '$xrp/types/xrp-send';
 import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
+	isXrpAlreadyInFlightError,
 	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
@@ -149,6 +150,15 @@ const openXrpSendRecord = async ({
 			})
 		});
 	} catch (err: unknown) {
+		// The backend refusing a second open payment is the same refusal the gate makes, so it reads
+		// the same way to the user. This is the case the gate cannot catch on its own: its read is
+		// not atomic with this create, and a second tab can pass it in the window between.
+		if (isXrpAlreadyInFlightError(err)) {
+			throw new XrpSendAlreadyInFlightError(
+				`XRP send refused: a payment from ${source} has not resolved yet.`
+			);
+		}
+
 		throw new XrpSendNotGuardedError(
 			`XRP send refused: the unresolved payment could not be recorded. ${
 				err instanceof Error ? err.message : `${err}`
