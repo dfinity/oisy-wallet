@@ -69,6 +69,8 @@ DFX_NETWORK=ic ./scripts/build.icpunks.sh
 DFX_NETWORK=ic ./scripts/build.icrc7.sh
 # .. creates candid for icrc3
 DFX_NETWORK=ic ./scripts/build.icrc3.sh
+# .. downloads candid for the icp_index and icp_ledger, at the release the local replica runs
+./scripts/download.icp.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
