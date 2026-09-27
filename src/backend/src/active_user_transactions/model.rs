@@ -17,7 +17,10 @@ use shared::types::{
     token_id::TokenId,
 };
 
-use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal};
+use crate::{
+    signer::{CYCLES_LEDGER, ICP_LEDGER},
+    types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal},
+};
 
 /// Create a new active transaction. Checks are ordered so callers always see
 /// the most informative error: `InvalidId` → `AlreadyExists` (idempotent
@@ -317,19 +320,25 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
 }
 
 /// A mint spends ICP, in either of its spellings, and deposits into the cycles
-/// ledger, an ICRC ledger. `data` is immutable after creation, so a row naming
-/// any other kind of token could never settle and would occupy one of the
-/// user's slots forever — reject it up front. Kinds only, deliberately, as for
-/// the other variants: no ledger id is pinned here.
+/// ledger. Unlike the other variants, which check kinds only so that testnets
+/// and new pairs need no change here, a mint has exactly one pair, and both
+/// ledgers have the same id on every network (`icp_ledger` and `cycles_ledger`
+/// in `dfx.json`), so both legs are pinned. `data` is immutable after creation,
+/// so a row naming any other token would describe a mint that cannot exist.
 fn require_cycles_mint_pair(data: &CyclesMintData) -> Result<(), ActiveUserTransactionError> {
-    let is_ic = |t: &TokenId| matches!(t, TokenId::Icrc(_) | TokenId::IcpNative);
-    let is_icrc = |t: &TokenId| matches!(t, TokenId::Icrc(_));
+    let is_icp = |t: &TokenId| match t {
+        TokenId::IcpNative => true,
+        TokenId::Icrc(ledger) => *ledger == *ICP_LEDGER,
+        _ => false,
+    };
+    let is_cycles_ledger =
+        |t: &TokenId| matches!(t, TokenId::Icrc(ledger) if *ledger == *CYCLES_LEDGER);
 
-    if is_ic(&data.source_token) && is_icrc(&data.dest_token) {
+    if is_icp(&data.source_token) && is_cycles_ledger(&data.dest_token) {
         Ok(())
     } else {
         Err(ActiveUserTransactionError::InvalidData(
-            "cycles-mint tokens must be an Internet Computer source and an ICRC destination"
+            "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
                 .to_string(),
         ))
     }
@@ -873,10 +882,10 @@ mod tests {
 
     #[test]
     fn cycles_mint_wrong_token_kinds_rejected() {
-        // A mint spends an Internet Computer token and deposits into an ICRC
-        // ledger, so any other kind on either side could never settle — and
-        // `data` is immutable after creation. `IcpNative` is a valid source but
-        // never a destination: the CMC deposits into the cycles ledger.
+        // A mint spends ICP and deposits into the cycles ledger, so any other
+        // kind on either side could never settle — and `data` is immutable after
+        // creation. `IcpNative` is a valid source but never a destination: the
+        // CMC deposits into the cycles ledger.
         let non_ic = [
             TokenId::EvmNative(1),
             TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
@@ -899,14 +908,34 @@ mod tests {
             let mut req = create_req("mint-1");
             req.data = cycles_mint_data(100_000_000, source_token, dest_token);
             let err = create(&mut map, principal(), req, 1).unwrap_err();
-            assert_eq!(
-                err,
-                ActiveUserTransactionError::InvalidData(
-                    "cycles-mint tokens must be an Internet Computer source and an ICRC destination"
-                        .to_string()
-                )
-            );
+            assert_eq!(err, cycles_mint_pair_error());
         }
+    }
+
+    #[test]
+    fn cycles_mint_other_ledgers_rejected() {
+        // Right kinds, wrong ledgers: only ICP into the cycles ledger is a mint.
+        let pairs = [
+            (icrc(CKBTC_LEDGER), icrc(CYCLES_LEDGER)),
+            (icrc(ICP_LEDGER), icrc(CKUSDC_LEDGER)),
+            (icrc(CKBTC_LEDGER), icrc(CKUSDC_LEDGER)),
+            (TokenId::IcpNative, icrc(ICP_LEDGER)),
+        ];
+
+        for (source_token, dest_token) in pairs {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("mint-1");
+            req.data = cycles_mint_data(100_000_000, source_token, dest_token);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(err, cycles_mint_pair_error());
+        }
+    }
+
+    fn cycles_mint_pair_error() -> ActiveUserTransactionError {
+        ActiveUserTransactionError::InvalidData(
+            "cycles-mint tokens must be ICP as the source and the cycles ledger as the destination"
+                .to_string(),
+        )
     }
 
     fn oisy_trade_data(
