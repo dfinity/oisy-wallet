@@ -152,6 +152,11 @@ export interface SolTransferLeg {
 	// when an earlier transfer used it.
 	sourceHolder?: SolAddress;
 	destinationHolder?: SolAddress;
+	// Whether no account was open at that end at the transfer: closed earlier in the message, or
+	// opened there only later. Such an address is nobody's, which is not the same as nobody having
+	// read whose it was.
+	sourceNoAccount?: boolean;
+	destinationNoAccount?: boolean;
 }
 
 export interface SolTransferParty {

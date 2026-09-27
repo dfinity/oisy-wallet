@@ -6,6 +6,7 @@ import {
 } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
@@ -339,6 +340,89 @@ describe('sol-simulation.services', () => {
 			const result = await simulateSolTransaction(params(message([mockAtaAddress])));
 
 			expect(result?.parties).toEqual({ sources: [], destinations: [], partial: false });
+		});
+
+		// A close ends the account, and until something opens the address again nothing of the
+		// user's is there: SOL leaving it is not theirs, whoever held the account before.
+		it('should not list an address the user closed as a source of what leaves it', async () => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([
+				null,
+				tokenAccount({ owner: mockSolAddress, amount: ZERO })
+			]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [null, null],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{
+									program: 'spl-token',
+									programId: address(TOKEN_PROGRAM_ADDRESS),
+									parsed: {
+										type: 'closeAccount',
+										info: {
+											account: mockAtaAddress,
+											destination: mockSolAddress,
+											owner: mockSolAddress
+										}
+									}
+								},
+								{
+									program: 'system',
+									programId: address(SYSTEM_PROGRAM_ADDRESS),
+									parsed: {
+										type: 'transfer',
+										info: { source: mockAtaAddress, destination: mockSolAddress2, lamports: 1_000 }
+									}
+								}
+							]
+						}
+					]
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([mockAtaAddress])));
+
+			expect(result?.parties.sources).toEqual([]);
+		});
+
+		// Nothing is open at an address the message opens only later, so nothing of the user's can
+		// leave it before then, even when the account opened there is theirs.
+		it('should not list an address as a source of what leaves it before its opening', async () => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([null, null]);
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [null, tokenAccount({ owner: mockSolAddress, amount: ZERO })],
+					innerInstructions: [
+						{
+							index: 0,
+							instructions: [
+								{
+									program: 'system',
+									programId: address(SYSTEM_PROGRAM_ADDRESS),
+									parsed: {
+										type: 'transfer',
+										info: { source: mockAtaAddress, destination: mockSolAddress2, lamports: 1_000 }
+									}
+								},
+								{
+									program: 'spl-token',
+									programId: address(TOKEN_PROGRAM_ADDRESS),
+									parsed: {
+										type: 'initializeAccount3',
+										info: { account: mockAtaAddress, mint: mockSplAddress, owner: mockSolAddress }
+									}
+								}
+							]
+						}
+					]
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([mockAtaAddress])));
+
+			expect(result?.parties.sources).toEqual([]);
 		});
 
 		it('should not mark the lists partial when the simulation supplied them', async () => {

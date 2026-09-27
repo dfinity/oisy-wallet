@@ -97,20 +97,16 @@ interface ParsedStep {
 	parsed: { type: string; info?: object };
 }
 
-/**
- * Who holds each token account once an instruction has run, from who held it before. An opening
- * names the holder, and a close ends the account: the address is nobody's until something opens
- * it again.
- */
-const holdersAfter = ({
-	holders,
-	instruction
-}: {
-	holders: Holders;
-	instruction: ParsedStep | undefined;
-}): Holders => {
+// What an instruction does to the life of a token account. An opening names the holder of the
+// account it opens, and a close ends it. An associated account's opening is marked, because its
+// address can only ever hold that wallet's account: before the opening as much as after it.
+type LifecycleEvent = { account: SolAddress } & (
+	{ kind: 'open'; holder?: SolAddress; associated: boolean } | { kind: 'close' }
+);
+
+const lifecycleEventOf = (instruction: ParsedStep | undefined): LifecycleEvent | undefined => {
 	if (isNullish(instruction)) {
-		return holders;
+		return undefined;
 	}
 
 	const {
@@ -121,48 +117,84 @@ const holdersAfter = ({
 	const account = addressIn({ info, key: 'account' });
 
 	if (isNullish(account)) {
-		return holders;
+		return undefined;
 	}
 
 	if (program === 'spl-associated-token-account' && ['create', 'createIdempotent'].includes(type)) {
-		const wallet = addressIn({ info, key: 'wallet' });
+		const holder = addressIn({ info, key: 'wallet' });
 
-		return nonNullish(wallet) ? { ...holders, [account]: wallet } : holders;
+		return { account, kind: 'open', associated: true, ...(nonNullish(holder) && { holder }) };
 	}
 
 	if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
-		return holders;
+		return undefined;
 	}
 
 	if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
-		const owner = addressIn({ info, key: 'owner' });
+		const holder = addressIn({ info, key: 'owner' });
 
-		return nonNullish(owner) ? { ...holders, [account]: owner } : holders;
+		return { account, kind: 'open', associated: false, ...(nonNullish(holder) && { holder }) };
 	}
 
-	if (type === 'closeAccount') {
-		const { [account]: _closed, ...open } = holders;
-
-		return open;
-	}
-
-	return holders;
+	return type === 'closeAccount' ? { account, kind: 'close' } : undefined;
 };
 
-const withHolders = ({
-	leg,
-	holders
+/**
+ * Whose one end of a leg was at the transfer, from the holders before the transaction and the
+ * openings and closes up to that point.
+ *
+ * An address with no account open is nobody's, which is not the same as nobody having read whose
+ * it was: the message closed what was there, or opens the first account there only later. Nothing
+ * of the user's can leave it, and what arrives lands in the account opened there next.
+ */
+const endOf = ({
+	account,
+	at,
+	arriving,
+	events,
+	accountHolders
 }: {
-	leg: SolTransferLeg;
-	holders: Holders;
-}): SolTransferLeg => {
-	const { [leg.source]: sourceHolder, [leg.destination]: destinationHolder } = holders;
+	account: SolAddress;
+	// How many lifecycle events came before the transfer.
+	at: number;
+	arriving: boolean;
+	events: LifecycleEvent[];
+	accountHolders: Holders;
+}): { holder?: SolAddress; noAccount?: boolean } => {
+	const last = events.slice(0, at).findLast((event) => event.account === account);
 
-	return {
-		...leg,
-		...(nonNullish(sourceHolder) && { sourceHolder }),
-		...(nonNullish(destinationHolder) && { destinationHolder })
-	};
+	if (last?.kind === 'open') {
+		return nonNullish(last.holder) ? { holder: last.holder } : {};
+	}
+
+	const before = accountHolders[account];
+
+	if (isNullish(last) && nonNullish(before)) {
+		return { holder: before };
+	}
+
+	const next = events.slice(at).find((event) => event.account === account);
+	const upcoming = next?.kind === 'open' ? next : undefined;
+
+	if ((upcoming?.associated ?? false) && nonNullish(upcoming?.holder)) {
+		return { holder: upcoming.holder };
+	}
+
+	const noAccount = last?.kind === 'close' || (isNullish(last) && nonNullish(upcoming));
+
+	if (!noAccount) {
+		return {};
+	}
+
+	if (!arriving) {
+		return { noAccount: true };
+	}
+
+	if (nonNullish(upcoming?.holder)) {
+		return { holder: upcoming.holder };
+	}
+
+	return nonNullish(upcoming) ? {} : { noAccount: true };
 };
 
 export const mapSolTransferLegs = (instructions: readonly SolInstruction[]): SolTransferLeg[] =>
@@ -172,28 +204,33 @@ export const mapSolTransferLegs = (instructions: readonly SolInstruction[]): Sol
 		return nonNullish(leg) ? [...acc, leg] : acc;
 	}, []);
 
+interface PlacedLeg {
+	leg: SolTransferLeg;
+	// How many lifecycle events came before it.
+	at: number;
+}
+
 const mapSolInnerTransferLegs = async ({
 	instructions,
 	network,
 	addressToToken,
-	holders
+	from
 }: {
 	instructions: readonly SolanaSimulatedInnerInstruction[];
 	network: SolanaNetworkType;
 	addressToToken: Record<SolAddress, SplTokenAddress>;
-	holders: Holders;
-}): Promise<{ legs: SolTransferLeg[]; holders: Holders }> =>
-	await instructions.reduce<Promise<{ legs: SolTransferLeg[]; holders: Holders }>>(
+	// How many lifecycle events came before the first of these instructions.
+	from: number;
+}): Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }> =>
+	await instructions.reduce<Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }>>(
 		async (acc, instruction) => {
-			const { legs, holders: current } = await acc;
+			const { legs, events } = await acc;
 
-			const next = holdersAfter({
-				holders: current,
-				instruction: 'parsed' in instruction ? instruction : undefined
-			});
+			const event = lifecycleEventOf('parsed' in instruction ? instruction : undefined);
+			const after = nonNullish(event) ? [...events, event] : events;
 
 			if (!('parsed' in instruction) || !isSolTransferInstruction(instruction)) {
-				return { legs, holders: next };
+				return { legs, events: after };
 			}
 
 			const mapped = await mapSolParsedInstruction({
@@ -205,12 +242,12 @@ const mapSolInnerTransferLegs = async ({
 
 			return {
 				legs: nonNullish(mapped)
-					? [...legs, withHolders({ leg: toSolParsedTransferLeg(mapped), holders: current })]
+					? [...legs, { leg: toSolParsedTransferLeg(mapped), at: from + events.length }]
 					: legs,
-				holders: next
+				events: after
 			};
 		},
-		Promise.resolve({ legs: [], holders })
+		Promise.resolve({ legs: [], events: [] })
 	);
 
 /**
@@ -223,8 +260,8 @@ const mapSolInnerTransferLegs = async ({
  * read in the order the transaction runs. The simulation groups them by the index of the
  * instruction that made them, exactly as `getTransaction` does, so no splice arithmetic is needed.
  *
- * Each leg carries whose its two ends were at that point, walked in the same order from the
- * holders before the transaction: an opening names a holder and a close ends it.
+ * Each leg carries whose its two ends were at that point, read from the holders before the
+ * transaction and the openings and closes the message makes in the same order.
  */
 export const mapSolSimulatedTransferLegs = async ({
 	instructions,
@@ -240,36 +277,52 @@ export const mapSolSimulatedTransferLegs = async ({
 	// Who held each token account going in, as the run's state before the transaction reports it.
 	accountHolders?: Holders;
 }): Promise<SolTransferLeg[]> => {
-	const { legs } = await Array.from(instructions).reduce<
-		Promise<{ legs: SolTransferLeg[]; holders: Holders }>
+	const { legs, events } = await Array.from(instructions).reduce<
+		Promise<{ legs: PlacedLeg[]; events: LifecycleEvent[] }>
 	>(
 		async (acc, instruction, index) => {
-			const { legs, holders } = await acc;
+			const { legs, events } = await acc;
 
 			const leg = toSolTransferLeg(mapSolInstruction({ instruction }));
 
 			const { instructions: inner } =
 				innerInstructions.find(({ index: parentIndex }) => parentIndex === index) ?? {};
 
-			const { legs: innerLegs, holders: within } = await mapSolInnerTransferLegs({
+			const within = await mapSolInnerTransferLegs({
 				instructions: inner ?? [],
 				network,
 				addressToToken,
-				holders
+				from: events.length
 			});
 
+			const event = lifecycleEventOf(asSolParsedRpcInstruction(instruction));
+
 			return {
-				legs: [...legs, ...(nonNullish(leg) ? [withHolders({ leg, holders })] : []), ...innerLegs],
-				holders: holdersAfter({
-					holders: within,
-					instruction: asSolParsedRpcInstruction(instruction)
-				})
+				legs: [...legs, ...(nonNullish(leg) ? [{ leg, at: events.length }] : []), ...within.legs],
+				events: [...events, ...within.events, ...(nonNullish(event) ? [event] : [])]
 			};
 		},
-		Promise.resolve({ legs: [], holders: accountHolders })
+		Promise.resolve({ legs: [], events: [] })
 	);
 
-	return legs;
+	return legs.map(({ leg, at }) => {
+		const source = endOf({ account: leg.source, at, arriving: false, events, accountHolders });
+		const destination = endOf({
+			account: leg.destination,
+			at,
+			arriving: true,
+			events,
+			accountHolders
+		});
+
+		return {
+			...leg,
+			...(nonNullish(source.holder) && { sourceHolder: source.holder }),
+			...((source.noAccount ?? false) && { sourceNoAccount: true }),
+			...(nonNullish(destination.holder) && { destinationHolder: destination.holder }),
+			...((destination.noAccount ?? false) && { destinationNoAccount: true })
+		};
+	});
 };
 
 /**
@@ -283,9 +336,10 @@ export const mapSolSimulatedTransferLegs = async ({
  * the order the transaction does rather than in an order this function invented.
  *
  * Whose an account is, is read at each transfer: the holder the leg carries for that end where it
- * carries one, and the accounts named as the user's otherwise. Those are every account the user
- * held at any point of the message, so read alone they would lend an address closed and opened for
- * a different holder to whichever holder it never was at that transfer.
+ * carries one, nobody where the leg says no account was open there, and the accounts named as the
+ * user's otherwise. Those are every account the user held at any point of the message, so read
+ * alone they would lend an address closed and opened for a different holder to whichever holder it
+ * never was at that transfer.
  */
 export const deriveSolTransferParties = ({
 	legs,
@@ -301,23 +355,36 @@ export const deriveSolTransferParties = ({
 	interface Party {
 		address: SolAddress;
 		holder?: SolAddress;
+		noAccount?: boolean;
 	}
 
-	const isUsers = ({ address, holder }: Party): boolean =>
-		nonNullish(holder) ? owned.has(holder) : owned.has(address);
+	const isUsers = ({ address, holder, noAccount }: Party): boolean =>
+		nonNullish(holder) ? owned.has(holder) : (noAccount ?? false) ? false : owned.has(address);
 
 	const add = ({ parties, party }: { parties: Party[]; party: Party }): Party[] =>
 		parties.some(({ address }) => address === party.address) ? parties : [...parties, party];
 
 	const { sources, destinations } = legs.reduce<{ sources: Party[]; destinations: Party[] }>(
-		({ sources, destinations }, { source, destination, sourceHolder, destinationHolder }) => {
+		(
+			{ sources, destinations },
+			{
+				source,
+				destination,
+				sourceHolder,
+				sourceNoAccount,
+				destinationHolder,
+				destinationNoAccount
+			}
+		) => {
 			const from: Party = {
 				address: source,
-				...(nonNullish(sourceHolder) && { holder: sourceHolder })
+				...(nonNullish(sourceHolder) && { holder: sourceHolder }),
+				...((sourceNoAccount ?? false) && { noAccount: true })
 			};
 			const to: Party = {
 				address: destination,
-				...(nonNullish(destinationHolder) && { holder: destinationHolder })
+				...(nonNullish(destinationHolder) && { holder: destinationHolder }),
+				...((destinationNoAccount ?? false) && { noAccount: true })
 			};
 
 			const spends = isUsers(from);
@@ -331,10 +398,13 @@ export const deriveSolTransferParties = ({
 		{ sources: [], destinations: [] }
 	);
 
-	const toParty = ({ address, holder }: Party): SolTransferParty => {
-		const owner = holder ?? addressToOwner?.[address];
+	// An address with no account open at the transfer has no owner to show either: the run's map
+	// names whoever held it at the end of the transaction.
+	const toParty = (party: Party): SolTransferParty => {
+		const { address, holder, noAccount } = party;
+		const owner = holder ?? ((noAccount ?? false) ? undefined : addressToOwner?.[address]);
 
-		return { address, ...(nonNullish(owner) && { owner }), own: isUsers({ address, holder }) };
+		return { address, ...(nonNullish(owner) && { owner }), own: isUsers(party) };
 	};
 
 	return { sources: sources.map(toParty), destinations: destinations.map(toParty) };
