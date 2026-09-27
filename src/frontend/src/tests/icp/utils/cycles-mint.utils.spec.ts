@@ -82,22 +82,22 @@ describe('cycles-mint.utils', () => {
 	describe('isCyclesMintAmountTooSmall', () => {
 		// A refund returns the amount minus 0.0003 ICP: nothing at all at or below it.
 		it('is true at or below 0.0003 ICP, however much that mints', () => {
-			expect(isCyclesMintAmountTooSmall({ amount: 30_000n, xdrPermyriadPerIcp: 45_000n })).toBeTruthy(
-				
-			);
-			expect(isCyclesMintAmountTooSmall({ amount: 30_001n, xdrPermyriadPerIcp: 45_000n })).toBeFalsy(
-				
-			);
+			expect(
+				isCyclesMintAmountTooSmall({ amount: 30_000n, xdrPermyriadPerIcp: 45_000n })
+			).toBeTruthy();
+			expect(
+				isCyclesMintAmountTooSmall({ amount: 30_001n, xdrPermyriadPerIcp: 45_000n })
+			).toBeFalsy();
 		});
 
 		// At 0.5 TCYCLES per ICP, 0.0004 ICP mints exactly twice the 0.0001 TCYCLES fee.
 		it('is true while the amount mints less than twice the deposit fee at the rate', () => {
-			expect(isCyclesMintAmountTooSmall({ amount: 39_999n, xdrPermyriadPerIcp: 5_000n })).toBeTruthy(
-				
-			);
-			expect(isCyclesMintAmountTooSmall({ amount: 40_000n, xdrPermyriadPerIcp: 5_000n })).toBeFalsy(
-				
-			);
+			expect(
+				isCyclesMintAmountTooSmall({ amount: 39_999n, xdrPermyriadPerIcp: 5_000n })
+			).toBeTruthy();
+			expect(
+				isCyclesMintAmountTooSmall({ amount: 40_000n, xdrPermyriadPerIcp: 5_000n })
+			).toBeFalsy();
 		});
 
 		it('checks only the 0.0003 ICP floor without a rate', () => {
