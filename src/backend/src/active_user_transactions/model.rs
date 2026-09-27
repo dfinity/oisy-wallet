@@ -12,7 +12,7 @@ use shared::types::{
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
     },
     token_id::TokenId,
 };
@@ -384,7 +384,10 @@ fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> 
 /// that a value which could never name an XRPL account is refused rather than
 /// stored. Mirrors `require_evm_address` — length, prefix, charset, no checksum.
 fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransactionError> {
-    if addr.is_empty() || addr.len() > MAX_XRP_ADDRESS_LEN {
+    // Both ends, and the lower one matters as much: a string like `"r"` clears
+    // the prefix and charset checks below while being far too short for
+    // base58check to have produced it.
+    if addr.len() < MIN_XRP_ADDRESS_LEN || addr.len() > MAX_XRP_ADDRESS_LEN {
         return Err(ActiveUserTransactionError::InvalidData(format!(
             "{field} invalid length"
         )));
@@ -1115,6 +1118,18 @@ mod tests {
         for (source, destination, expected) in [
             ("", XRP_DESTINATION, "source_address invalid length"),
             (XRP_SOURCE, "", "destination_address invalid length"),
+            // Clears the prefix and charset checks but is far too short for
+            // base58check to have produced it — the lower bound is the only
+            // thing that refuses it.
+            ("r", XRP_DESTINATION, "source_address invalid length"),
+            // One character below the bound, still valid base58 with the right
+            // prefix, so the length is the only thing that can refuse it.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrG",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (XRP_SOURCE, "r", "destination_address invalid length"),
             (
                 "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMiXXXXX",
                 XRP_DESTINATION,
