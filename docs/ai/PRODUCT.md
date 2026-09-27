@@ -189,6 +189,12 @@ Because the set of used destinations is read from the history OISY has loaded, a
 
 Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
 
+### When an Ethereum send fails
+
+When an Ethereum or EVM send fails, what OISY says depends on how far the transaction got. If the network could not be reached to read the transaction's nonce, the transaction was never signed, so the message says it was not sent and that trying again is safe. If a node refused the transaction with a reason, such as a balance that cannot cover it, the message states that reason. If every provider failed the submission without an answer, OISY cannot know whether the network received the transaction, and the message says exactly that: it may still go through, so the user should check their activity before sending it again. It never says such a transaction was not sent, because a new attempt is signed with the next nonce, and if the first one did get through, both would execute and the user would pay twice.
+
+The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests, which before showed a generic WalletConnect error followed by the provider's raw answer; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
+
 ---
 
 ## Activity

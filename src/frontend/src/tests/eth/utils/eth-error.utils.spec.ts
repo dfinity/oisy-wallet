@@ -1,3 +1,4 @@
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	isEthereumNodeRefusal,
 	mapEthereumErrorMsg,
@@ -88,6 +89,26 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg(err)).toBeUndefined();
 		});
 
+		it('says the transaction was not sent when its nonce could not be read', () => {
+			expect(mapEthereumErrorMsg(new EthNonceReadError(new Error('Internal error')))).toBe(
+				en.send.error.ethereum_transaction_not_sent
+			);
+		});
+
+		it('says the outcome is unknown when every provider failed the submission', () => {
+			expect(
+				mapEthereumErrorMsg(new EthSubmissionUnconfirmedError(new Error('Internal error')))
+			).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
+		it('still recognises either when a caller wraps it again', () => {
+			const err = new Error('sending the transaction failed', {
+				cause: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			});
+
+			expect(mapEthereumErrorMsg(err)).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
 		it('leaves an error it cannot explain to the caller', () => {
 			expect(mapEthereumErrorMsg(new Error('nonce too low'))).toBeUndefined();
 
@@ -158,6 +179,19 @@ describe('eth-error.utils', () => {
 			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.send.error.ethereum_insufficient_funds },
 				err: gasRequiredExceedsAllowance
+			});
+
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+		});
+
+		it('shows an unknown outcome on its own, without the provider text', () => {
+			const err = new EthSubmissionUnconfirmedError(new Error('Internal error'));
+
+			toastEthereumTransactionError({ err, fallbackMsg: en.send.error.unexpected });
+
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
 			});
 
 			expect(toasts.toastsError).not.toHaveBeenCalled();

@@ -9,6 +9,7 @@ import { ethersFallbackProvider, ethersProvider } from '$eth/providers/ethers.pr
 import type { EthAddress } from '$eth/types/address';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { isEthereumNodeRefusal } from '$eth/utils/eth-error.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
@@ -175,31 +176,40 @@ export class InfuraProvider {
 	// so the network mines at most one copy however many providers it is handed to. That is what
 	// makes it safe to hand the same bytes to the fallback when Infura does not accept them, or does
 	// not answer in time.
-	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
-		this.callWithFallback({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
-			milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
-			call: (provider) => provider.broadcastTransaction(signedTransaction),
-			recover: async ({ infuraErr, fallbackErr, fallbackProvider }) => {
-				// Neither error proves the transaction went nowhere. Infura can pass a transaction on and
-				// still fail the request, and a node answers a transaction it already holds with an error
-				// of its own. Only the network knows, so it is asked before the send is reported as failed.
-				const submitted = await this.findSubmittedTransaction({
-					signedTransaction,
-					fallbackProvider
-				});
+	sendTransaction = async (signedTransaction: string): Promise<TransactionResponse> => {
+		try {
+			return await this.callWithFallback({
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
+				milliseconds: INFURA_SUBMISSION_TIMEOUT_MILLISECONDS,
+				call: (provider) => provider.broadcastTransaction(signedTransaction),
+				recover: async ({ infuraErr, fallbackErr, fallbackProvider }) => {
+					// Neither error proves the transaction went nowhere. Infura can pass a transaction on
+					// and still fail the request, and a node answers a transaction it already holds with an
+					// error of its own. Only the network knows, so it is asked before the send is reported
+					// as failed.
+					const submitted = await this.findSubmittedTransaction({
+						signedTransaction,
+						fallbackProvider
+					});
 
-				if (nonNullish(submitted)) {
-					return submitted;
+					if (nonNullish(submitted)) {
+						return submitted;
+					}
+
+					// A refusal states something about the transaction; a provider failing the request
+					// does not. So the user is told whichever reason there is, Infura's when both give one.
+					throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
+						? fallbackErr
+						: infuraErr;
 				}
-
-				// A refusal states something about the transaction; a provider failing the request does
-				// not. So the user is told whichever reason there is, Infura's when both give one.
-				throw !isEthereumNodeRefusal(infuraErr) && isEthereumNodeRefusal(fallbackErr)
-					? fallbackErr
-					: infuraErr;
-			}
-		});
+			});
+		} catch (err: unknown) {
+			// A refusal is the network's answer: the transaction was not accepted. Anything else leaves
+			// open whether it reached the network, which the send must say rather than claim either
+			// way, since a retry is signed with the next nonce and both could execute.
+			throw isEthereumNodeRefusal(err) ? err : new EthSubmissionUnconfirmedError(err);
+		}
+	};
 
 	// A transaction's hash is the hash of its signed bytes, so it is known before any node answers.
 	private findSubmittedTransaction = async ({

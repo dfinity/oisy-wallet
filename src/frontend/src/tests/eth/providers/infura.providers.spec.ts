@@ -8,6 +8,7 @@ import {
 } from '$eth/constants/eth.constants';
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
 	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
@@ -369,7 +370,7 @@ describe('infura.providers', () => {
 			);
 		});
 
-		it('should fail with Infura error when the network does not know the transaction', async () => {
+		it('should report the outcome as unknown when the network does not know the transaction', async () => {
 			const { provider } = buildProvider();
 
 			mockBroadcastTransaction
@@ -377,8 +378,14 @@ describe('infura.providers', () => {
 				.mockRejectedValueOnce(new Error('Alchemy failed too'));
 			mockGetTransaction.mockResolvedValueOnce(null);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
 
+			// A retry would be signed with the next nonce, so the send must not claim it went nowhere.
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
+			expect(outcome).toHaveProperty('message', internalError.message);
 			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith({
 				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.SUBMISSION,
 				trigger: 'error',
@@ -417,7 +424,12 @@ describe('infura.providers', () => {
 				.mockRejectedValueOnce(new Error('Alchemy failed too'));
 			mockGetTransaction.mockRejectedValueOnce(new Error('lookup failed'));
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
+
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+			expect(outcome).toHaveProperty('cause', internalError);
 
 			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR })
@@ -443,7 +455,8 @@ describe('infura.providers', () => {
 
 			await vi.advanceTimersByTimeAsync(INFURA_READ_TIMEOUT_MILLISECONDS);
 
-			await expect(outcome).resolves.toBe(internalError);
+			await expect(outcome).resolves.toBeInstanceOf(EthSubmissionUnconfirmedError);
+			await expect(outcome).resolves.toHaveProperty('cause', internalError);
 		});
 
 		describe('when the fallback is switched off', () => {
@@ -451,16 +464,29 @@ describe('infura.providers', () => {
 				mockFallbackEnabled.value = false;
 			});
 
-			it('should submit through Infura alone and report its error', async () => {
+			it('should submit through Infura alone and report its outcome as unknown', async () => {
 				const { provider } = buildProvider();
 
 				mockBroadcastTransaction.mockRejectedValueOnce(internalError);
 
-				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+				const outcome = await provider
+					.sendTransaction(signedTransaction)
+					.catch((err: unknown) => err);
+
+				expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
+				expect(outcome).toHaveProperty('cause', internalError);
 
 				expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
 				expect(mockGetTransaction).not.toHaveBeenCalled();
 				expect(trackProviderFallback).not.toHaveBeenCalled();
+			});
+
+			it('should report a refusal from Infura as it is', async () => {
+				const { provider } = buildProvider();
+
+				mockBroadcastTransaction.mockRejectedValueOnce(refusal);
+
+				await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(refusal);
 			});
 
 			it('should not cut Infura short either', async () => {
@@ -490,8 +516,11 @@ describe('infura.providers', () => {
 
 			mockBroadcastTransaction.mockRejectedValueOnce(internalError);
 
-			await expect(provider.sendTransaction(signedTransaction)).rejects.toBe(internalError);
+			const outcome = await provider
+				.sendTransaction(signedTransaction)
+				.catch((err: unknown) => err);
 
+			expect(outcome).toBeInstanceOf(EthSubmissionUnconfirmedError);
 			expect(mockBroadcastTransaction).toHaveBeenCalledOnce();
 			expect(trackProviderFallback).not.toHaveBeenCalled();
 		});

@@ -92,24 +92,27 @@ learn how often Infura fails.
 
 What OISY may claim depends on how far the send got:
 
-- **It failed before the signed transaction was handed to a provider**: reading the nonce or the
-  fee, estimating gas, signing. Nothing was sent, and the message says so, because retrying is safe.
+- **Its nonce could not be read**, so the transaction was never signed. The message says the
+  transaction was not sent and that trying again is safe. The claim is about this transaction only:
+  a swap may already have sent its approval before it reads the nonce for the swap itself. Reads of
+  the fee and gas fail before a review can be approved and keep their own message, and a signing
+  failure keeps its current one, since in a flow with an approval the approval may already be out.
 - **The network refused it with a reason.** The message states the reason, as the send flow already
   does for a transaction the balance cannot pay for.
 - **OISY could not find out whether the network received it**, because every provider failed without
   an answer. The message says so and asks the user to check their activity before trying again. It
-  never says that nothing was sent: a retry is signed with the next nonce, so if the first
-  transaction did get through, both execute and the user pays twice.
+  never says the transaction was not sent: a retry is signed with the next nonce, so if the first
+  one did get through, both execute and the user pays twice.
 
 WalletConnect Ethereum sends are explained the same way as the send flow, instead of through the
 generic WalletConnect message. The dApp still receives a rejection, as today.
 
-Proposed English copy:
+English copy, in the register of the neighbouring send errors:
 
-- Nothing was sent: _"OISY could not reach the network to prepare this transaction. Nothing was
-  sent. You can try again."_
-- Outcome unknown: _"OISY could not confirm that the network received this transaction. Wait a
-  minute and check your activity before trying again, so that it is not sent twice."_
+- Not sent: _"The transaction was not sent: we could not reach the network to prepare it. It is safe
+  to try again."_
+- Outcome unknown: _"We could not confirm whether the transaction reached the network. It may still
+  go through, so check your activity before you send it again."_
 
 New copy is translated into every shipped locale (the `Languages` enum; `ar.json` is not shipped).
 
@@ -182,10 +185,11 @@ PR 3:
 
 - A failed WalletConnect Ethereum send shows the message the send flow would show, not the generic
   WalletConnect message with the RPC dump.
-- A failure before submission says that nothing was sent, in every flow that uses the mapping.
+- A send whose nonce could not be read says the transaction was not sent, in every flow that uses
+  the mapping.
 - A submission whose outcome is unknown says that OISY could not confirm it and asks the user to
-  check their activity first. No path says that nothing was sent once the transaction was handed to
-  a provider.
+  check their activity first. No path says the transaction was not sent once it was handed to a
+  provider.
 - A WalletConnect transaction the balance cannot pay for shows the existing insufficient-funds
   message.
 - An error with no mapping keeps its current generic message.
