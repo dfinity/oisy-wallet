@@ -23,7 +23,11 @@ import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { keccak256 } from 'ethers/crypto';
-import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'ethers/providers';
+import {
+	type FeeData,
+	InfuraProvider as InfuraProviderLib,
+	type TransactionResponse
+} from 'ethers/providers';
 
 const { mockFallbackEnabled } = vi.hoisted(() => ({ mockFallbackEnabled: { value: true } }));
 
@@ -418,6 +422,146 @@ describe('infura.providers', () => {
 				expect.anything()
 			);
 			expect(mockGetL1FeeUpperBound).toHaveBeenCalledExactlyOnceWith(128n);
+		});
+	});
+
+	describe('getFeeData', () => {
+		const mockProvider = vi.mocked(InfuraProviderLib);
+		const mockGetFeeData = vi.fn();
+
+		const infuraFeeData = { maxFeePerGas: 2_000n, maxPriorityFeePerGas: 1n } as FeeData;
+		const alchemyFeeData = { maxFeePerGas: 3_000n, maxPriorityFeePerGas: 1n } as FeeData;
+
+		// Infura failing the request itself, as ethers hands it over.
+		const feeReadError = Object.assign(new Error('could not coalesce error'), {
+			code: 'UNKNOWN_ERROR',
+			error: { code: -32603, message: 'Internal error' }
+		});
+
+		// Both providers share one mock implementation, and a provider builds Infura first, then its
+		// fallback, so the order of construction is what tells the two apart, by identity.
+		const buildFeeProvider = (network: EthereumNetwork = ETHEREUM_NETWORK) => {
+			const provider = new InfuraProvider(network);
+
+			const [infura, alchemy] = mockProvider.mock.instances;
+
+			return { provider, infura, alchemy };
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			// Queued answers a failed test left unconsumed must not leak into the next one.
+			mockGetFeeData.mockReset();
+
+			mockFallbackEnabled.value = true;
+
+			mockProvider.prototype.getFeeData = mockGetFeeData;
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('should read the fee from Infura alone when it answers', async () => {
+			const { provider, infura } = buildFeeProvider();
+
+			mockGetFeeData.mockResolvedValueOnce(infuraFeeData);
+
+			await expect(provider.getFeeData()).resolves.toBe(infuraFeeData);
+
+			expect(mockGetFeeData).toHaveBeenCalledOnce();
+			expect(mockGetFeeData.mock.contexts[0]).toBe(infura);
+			expect(trackProviderFallback).not.toHaveBeenCalled();
+		});
+
+		it('should read the fee from Alchemy when Infura fails', async () => {
+			const { provider, infura, alchemy } = buildFeeProvider();
+
+			mockGetFeeData.mockRejectedValueOnce(feeReadError).mockResolvedValueOnce(alchemyFeeData);
+
+			await expect(provider.getFeeData()).resolves.toBe(alchemyFeeData);
+
+			expect(infura).not.toBe(alchemy);
+			expect(mockGetFeeData.mock.contexts[0]).toBe(infura);
+			expect(mockGetFeeData.mock.contexts[1]).toBe(alchemy);
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith({
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.FEE,
+				trigger: 'error',
+				network: 'mainnet',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+		});
+
+		it('should ask Alchemy when Infura does not answer within the read time limit', async () => {
+			vi.useFakeTimers();
+
+			const { provider, alchemy } = buildFeeProvider();
+
+			mockGetFeeData
+				.mockReturnValueOnce(new Promise(() => {}))
+				.mockResolvedValueOnce(alchemyFeeData);
+
+			const result = provider.getFeeData();
+
+			await vi.advanceTimersByTimeAsync(INFURA_READ_TIMEOUT_MILLISECONDS - 1);
+
+			expect(mockGetFeeData).toHaveBeenCalledOnce();
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			await expect(result).resolves.toBe(alchemyFeeData);
+
+			expect(mockGetFeeData.mock.contexts[1]).toBe(alchemy);
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.FEE,
+					trigger: 'timeout',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				})
+			);
+		});
+
+		it('should fail with the Infura error when Alchemy fails too', async () => {
+			// The fee context then retries with backoff and shows its toast, as before.
+			const { provider } = buildFeeProvider();
+
+			mockGetFeeData
+				.mockRejectedValueOnce(feeReadError)
+				.mockRejectedValueOnce(new Error('Alchemy failed too'));
+
+			await expect(provider.getFeeData()).rejects.toBe(feeReadError);
+
+			expect(trackProviderFallback).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.FEE,
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+				})
+			);
+		});
+
+		it('should read from Infura alone when the fallback is switched off', async () => {
+			mockFallbackEnabled.value = false;
+
+			const { provider } = buildFeeProvider();
+
+			mockGetFeeData.mockRejectedValueOnce(feeReadError);
+
+			await expect(provider.getFeeData()).rejects.toBe(feeReadError);
+
+			expect(mockGetFeeData).toHaveBeenCalledOnce();
+			expect(trackProviderFallback).not.toHaveBeenCalled();
+		});
+
+		it('should read once on a network with no second provider', async () => {
+			const { provider } = buildFeeProvider(ROBINHOOD_MAINNET_NETWORK);
+
+			mockGetFeeData.mockRejectedValueOnce(feeReadError);
+
+			await expect(provider.getFeeData()).rejects.toBe(feeReadError);
+
+			expect(mockGetFeeData).toHaveBeenCalledOnce();
+			expect(trackProviderFallback).not.toHaveBeenCalled();
 		});
 	});
 
