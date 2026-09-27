@@ -104,7 +104,7 @@ Every OISY flow that moves funds has a review step (Send, Convert, Swap, Stake, 
 - Success shows what was **actually credited** (the CMC's `minted` minus the 0.0001 TCYCLES deposit fee) and refreshes the TCYCLES and ICP balances.
 - Once the ICP has left the wallet, a mint is never reported as failed because a notify call failed or answered `Processing`: those are retried. If the mint is still pending when the user closes the modal, it carries on in the background and shows in the header's Active transactions list (§6).
 - A refund is reported as failed, saying that the ICP was returned minus 0.0003 ICP and giving the CMC's reason.
-- If the ICP transfer itself fails, nothing has moved: it is an ordinary error, and the user can try again.
+- If the ICP ledger refuses the transfer, nothing has moved: it is an ordinary error, and the user can try again. A transfer call that ends without the ledger's answer (no reply, a reject, a timeout) may still have landed, so it is never reported as that error: the mint is handed to the background, where the deposit lookup (§6.4) finishes it or, once the transfer can no longer land, closes it as never sent.
 
 ### 5.5 Afterwards
 
