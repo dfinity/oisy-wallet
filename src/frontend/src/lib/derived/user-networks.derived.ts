@@ -15,6 +15,7 @@ import {
 	POLYGON_AMOY_NETWORK_ID,
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -39,11 +40,6 @@ import type { NetworkId } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-
-// This store is a derived: it recomputes on every `userProfileStore` write (uncertified, then
-// certified, then each settings change). Reporting an unmapped key is a one-off signal, not a
-// per-recompute one, so each distinct key is reported once per session.
-const reportedUnmappedKeys = new Set<string>();
 
 export const userNetworks: Readable<UserNetworks> = derived(
 	[userSettingsNetworks, testnetsEnabled],
@@ -132,14 +128,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			if ('XrpMainnet' in key) {
 				return XRP_MAINNET_NETWORK_ID;
 			}
-
-			const unmappedKey = Object.keys(key).join(', ');
-
-			if (!reportedUnmappedKeys.has(unmappedKey)) {
-				reportedUnmappedKeys.add(unmappedKey);
-
-				trackUnmappedNetworkSettingsKey({ key: unmappedKey });
+			if ('RobinhoodMainnet' in key) {
+				return ROBINHOOD_MAINNET_NETWORK_ID;
 			}
+
+			// Deduplicated inside the service: this derived recomputes on every profile write.
+			trackUnmappedNetworkSettingsKey({ key: Object.keys(key).join(', ') });
 
 			return undefined;
 		};

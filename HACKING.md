@@ -433,11 +433,10 @@ Before starting the integration, ensure the following:
 
 - You have the **Chain ID** for both **mainnet** and any **testnet(s)**.
 - The network is supported by key infrastructure providers:
-  - [Alchemy](https://www.alchemy.com/)
-  - [Infura](https://www.infura.io/)
-  - [Etherscan](https://docs.etherscan.io/etherscan-v2)
-- The network is already integrated in the [`ethers.js`](https://github.com/ethers-io/ethers.js) library.  
-  If not, submit a request to the library maintainers or implement a custom extension as needed.
+  - [Alchemy](https://www.alchemy.com/) — required, and the chain must be **enabled on OISY's Alchemy app** (a dashboard action; an `eth_chainId` call tells you).
+  - [Etherscan v2](https://docs.etherscan.io/etherscan-v2) — required; check `api.etherscan.io/v2/chainlist`. Transaction history has no fallback.
+  - [Infura](https://www.infura.io/) — preferred, not required. If Infura does not host the chain, omit `providers.infura` and the network is read over `alchemyJsonRpcUrl` instead (see `ethersProvider` in `$eth/providers/`).
+- The network does not need to be registered in [`ethers.js`](https://github.com/ethers-io/ethers.js): `etherscan.providers.ts` falls back to a stand-in when ethers' `EtherscanProvider` rejects the chain id. Copy `networks.evm.arbitrum.env.ts` for a Nitro/Orbit chain and `networks.evm.base.env.ts` for an OP-stack chain — the two differ in how the L1 data fee is quoted (`OP_STACK_CHAIN_IDS` in `$eth/services/fee.services.ts`).
 
 ### Create network object(s)
 
@@ -445,47 +444,55 @@ Location: `src/frontend/src/env/networks/networks-evm/`
 
 #### Steps
 
-- Create a new file: `networks.<network>.env.ts`
-- Copy contents from an existing EVM network file (e.g., `networks.bsc.env.ts`)
+- Create a new file: `networks.evm.<network>.env.ts`
+- Copy contents from an existing EVM network file (e.g., `networks.evm.arbitrum.env.ts`)
 - Update the following fields:
-  - `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`)
+  - `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`). It becomes the network's route slug.
   - `NAME` – name of the network
   - `CHAIN ID` - chainId of the network
-  - `ICONS` – for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+  - `ICON` – a single SVG in `src/frontend/src/lib/assets/networks/<network>-mainnet.svg` (one icon for all themes).
   - `EXPLORER URL` – to have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+  - `SUPPORTS NFT` – whether the NFT surface is shown for the network.
   - `PROVIDERS`:
-    - `infura`
+    - `infura` – optional; omit it when Infura does not host the chain
     - `alchemy`
-    - `alchemyJsonRpcUrl`
-  - `EXCHANGE` (Coingecko ID) - Update the `CoingeckoPlatformId` type if needed
-  - `BUY` (Onramper ID) - Update the `OnramperNetworkId` type if needed
+    - `alchemyJsonRpcUrl` / `alchemyWsUrl`
+    - `viemChain` – from `viem/chains`
+  - `EXCHANGE` (Coingecko ID) - Update `CoingeckoPlatformIdSchema` in `src/frontend/src/lib/schema/coingecko.schema.ts` if needed
+  - `BUY` (Onramper ID) - Update `OnramperNetworkIdSchema` in `src/frontend/src/lib/schema/onramper.schema.ts` if needed
+  - `PAY` (OpenCryptoPay name) - optional; omit it if OpenCryptoPay does not support the chain
 
 - Add testnet object(s): if there are testnets, create a similar object for each one.
 
 Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
-For example, this is the mainnet object of `networks.bsc.env.ts`:
+For example, this is the mainnet object of `networks.evm.arbitrum.env.ts`:
 
 ```typescript
-export const BSC_MAINNET_NETWORK_SYMBOL = 'BSC';
+export const ARBITRUM_MAINNET_NETWORK_SYMBOL = 'ARB';
 
-export const BSC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BSC_MAINNET_NETWORK_SYMBOL);
+export const ARBITRUM_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(
+	ARBITRUM_MAINNET_NETWORK_SYMBOL
+);
 
-export const BSC_MAINNET_NETWORK: EthereumNetwork = {
-	id: BSC_MAINNET_NETWORK_ID,
+export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
+	id: ARBITRUM_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'BNB Smart Chain',
-	chainId: 56n,
-	iconLight: bscMainnetIconLight,
-	iconDark: bscMainnetIconDark,
-	explorerUrl: BSC_EXPLORER_URL,
+	name: 'Arbitrum',
+	chainId: 42161n,
+	icon: arbitrumMainnetIcon,
+	explorerUrl: ARBITRUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
-		infura: 'bnb',
-		alchemy: 'bnb',
-		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
+		infura: 'arbitrum',
+		alchemy: 'arbitrum',
+		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2',
+		alchemyWsUrl: 'wss://arb-mainnet.g.alchemy.com/v2',
+		viemChain: arbitrum
 	},
-	exchange: { coingeckoId: 'binance-smart-chain' },
-	buy: { onramperId: 'bsc' }
+	exchange: { coingeckoId: 'arbitrum-one' },
+	buy: { onramperId: 'arbitrum' },
+	pay: { openCryptoPay: 'Arbitrum' }
 };
 ```
 
@@ -526,8 +533,11 @@ Location: `src/frontend/src/env/tokens/tokens-evm/`
   - **Symbol** – short token symbol (e.g., `'POL'`, `'ARB'`)
   - **Network** – reference the network object created in the previous step
   - **Name** – display name of the token
-  - **Icon** – SVG format, placed in `src/frontend/src/evm/<network>/assets` folder.
+  - **Icon** – SVG format, placed in `src/frontend/src/evm/<network>/assets` folder. A chain whose gas token is ETH reuses `$icp-eth/assets/eth.svg` and `groupData: ETH_TOKEN_GROUP` instead (see `tokens-arbitrum/tokens.eth.env.ts`).
   - **Buy** – Onramper ID if applicable (e.g., `'pol_polygon'`)
+
+> [!NOTE]
+> `parseTokenId('ETH')` yields a distinct `TokenId` per file even though the symbol string is the same, so every ETH-gas chain still needs its own entry in the exchange-rate map (see "Adapt exchange rate workers").
 
 - If the network includes testnet tokens, repeat the process for each testnet.
 
@@ -535,14 +545,23 @@ Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is ac
 
 ### Add network variant(s) to the Backend
 
-In file `src/shared/src/types/network.ts`, add the network(s) variant to the `NetworkSettingsFor` enum, similar to the existing ones.
+In file `src/shared/src/types/network.rs`, add the network(s) variant to the `NetworkSettingsFor` enum. **Append it last**: the derived `Ord` orders the stored `NetworkSettingsMap`, so inserting in the middle reorders existing state.
 
 Furthermore, in the same file, add the chain ID(s) to the `EthereumNetworkId` enum, similar to the existing ones.
 
-This process will generate new bindings. Once generated, the mapping of user networks must be updated manually:
+The backend price maps are keyed by chain id and need the new chain too:
 
-1. Derived store `userNetworks` needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
-2. Sub-function `networkIdToKey` of util `mapUserNetworks` needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
+- `src/backend/src/exchange/providers/coingecko/platform.rs` — `coingecko_platform` (chain id → CoinGecko platform) and `coingecko_native_coin` (chain id → native coin id; an ETH-gas chain joins the `ethereum` arm).
+- `src/backend/src/exchange/mod.rs` — `native_token_ids()` gets an `EvmNative(<chain id>)` entry. Pin it with a test that names the id; a length-derived assertion stays green when the entry is missing.
+
+Then run `npm run generate` to regenerate the bindings — never hand-edit `src/declarations/**`. This is a **breaking** interface change (`feat(backend)!:` with a `BREAKING CHANGE:` line): a client built against the old interface degrades the whole optional `UserProfile.settings` to `null` and silently falls back to default networks, so the regenerated declarations must reach users with or before the canister upgrade. See `docs/ai/backend/workflows/breaking-interface.md`.
+
+The mapping of user networks must then be updated manually, in the **frontend** PR (both arms need the network id constant, which does not exist until the network object does):
+
+1. Derived store `userNetworks` (`src/frontend/src/lib/derived/user-networks.derived.ts`) needs to map the new variant(s) to the respective network ID(s), similar to the existing ones.
+2. Sub-function `networkIdToKey` of util `mapUserNetworks` (`src/frontend/src/lib/utils/user-networks.utils.ts`) needs to map the new network ID(s) to the respective network variant(s), similar to the existing ones.
+
+Cover the round trip both ways in tests; a chain that is force-disabled under `TEST` is absent from the shared "all networks" fixtures, so it needs its own case.
 
 ### Include network(s) and token(s) in EVM List
 
@@ -698,16 +717,18 @@ Once all the new ERC20 tokens are created, they need to be added to the list of 
 
 ### Adapt exchange rate workers
 
-In the first step, the exchange IDs and required fields should have been already be set. Now, the worker needs to be updated to include the new network.
+In the first step, the exchange IDs and required fields should already have been set. Now, the price plumbing needs to be updated to include the new network.
 
-- In service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`, add the new network in the filter for the ERC-20 price parameters. As example, when this document was written, the filter was:
+- In `buildErc20PriceParams` (`src/frontend/src/lib/utils/exchange.utils.ts`), add the new CoinGecko platform to the filter for the ERC-20 price parameters. This filter **re-hardcodes** the platform list that `CoingeckoPlatformIdSchema` already encodes, and a platform missing from it is **dropped without error** — the chain looks wired up and never gets ERC-20 prices. Update both places and cover the new platform with a test (see `exchange.utils.spec.ts`). As example, when this document was written, the filter was:
 
 ```typescript
 if (
 	coingeckoId !== 'ethereum' &&
 	coingeckoId !== 'base' &&
 	coingeckoId !== 'binance-smart-chain' &&
-	coingeckoId !== 'polygon-pos'
+	coingeckoId !== 'polygon-pos' &&
+	coingeckoId !== 'arbitrum-one' &&
+	coingeckoId !== 'robinhood'
 ) {
 	return acc;
 }
@@ -727,20 +748,28 @@ export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 - Use the function created above in the worker to fetch the price of the new token(s) in service `syncExchange` of the exchange worker in file `src/frontend/src/lib/workers/exchange.worker.ts`. Adapt the types if necessary.
 - Map the new token ID(s) to the correct price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
 - Set the price for the native token(s) that are a fork of ETH token:
-  - Just map the new token ID(s) to the ETH price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones.
+  - Just map the new token ID(s) to the ETH price in the `exchanges` derived store in file `src/frontend/src/lib/derived/exchange.derived.ts`, similar to the existing ones. This map is not gated by the `SUPPORTED_*` lists, so `exchange.derived.spec.ts` needs the new entry even while the chain is force-disabled under `TEST`.
 
 ### Add providers' URLs to Content Security Policy (CSP)
 
-The script that builds the CSP is `scripts/build.csp.mjs`.
-It must be updated to include the new network providers' URLs (and any other required URL), similar to the existing ones.
+No longer required for provider URLs: `connect-src` in `scripts/build.csp.mjs` is a `'self' https: wss:` wildcard. Only a new **framed** origin (`frame-src`) needs an entry.
 
-### Optional
+### Swap surface
 
-- Define a custom Hero color palette for the new network in `src/frontend/src/lib/components/hero/HeroContent.svelte`, similar to the existing ones.
+Swap eligibility is derived from the aggregate EVM lists (`SUPPORTED_EVM_MAINNET_NETWORK_IDS` in `src/frontend/src/lib/constants/swap.constants.ts`, `enabledEvmNetworks` in `cross-chain-networks.derived.ts`), and Velora is registered without a per-chain token list. A new EVM chain therefore gets a Swap button and shows up as a swap destination **by default**. If no swap provider serves the chain, exclude it explicitly before enabling it, or every quote fails at runtime.
+
+### Cosmetics (in practice required by review)
+
+- Add the `<network>-0` / `<network>-100` gradient pair in `src/frontend/src/lib/styles/tailwind/theme-variables.ts`. The hero renders **white** text over it, so both stops must clear WCAG AA against white — a bright brand colour cannot go in as-is.
+- Wire the gradient in `src/frontend/src/lib/components/hero/HeroContent.svelte` and `src/frontend/src/lib/components/tokens/TokenInputNetworkWrapper.svelte`, similar to the existing ones.
+- User-facing copy that enumerates supported chains (`src/frontend/src/lib/constants/ai-assistant.constants.ts`, `loader.retrieving_public_keys` in `en.json`) belongs in the PR that **enables** the chain, not before. Non-`en` locales are left to the `auto-update-i18n` workflow.
 - If provided, please add any additional information that might be useful for the new network. For example, a specific faucet to the list in this same document.
 
-> [!NOTE]
-> Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
+### Tests and build
+
+- Adapt the existing tests and create new ones where needed. **Vitest only** — `e2e/` is maintenance-only (see `AGENTS.md`).
+- Run `npm run build` in addition to the usual gates. The provider registries in `$eth/providers/` are built eagerly at module import over the supported-network lists, and only the build (SSR prerender) evaluates them: `vitest.setup.ts` replaces `ethers/providers` with a mock for the whole suite, so a chain ethers or Infura rejects passes every test and fails at app load. The `TEST` override above hides this class of bug too, since it keeps the chain out of every registry the suite builds.
+- A list-based guard such as `isNetworkId<Network>` returns `false` for every input while the chain is force-disabled under `TEST`, so its negative assertions pass vacuously; mock the env file to enable the chain in that spec, and drop the mock once the override goes.
 
 ## Build Frontend Locally with Docker
 

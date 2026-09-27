@@ -10,7 +10,8 @@ export const OnramperNetworkIdSchema = z.enum([
 	'base',
 	'bsc',
 	'polygon',
-	'arbitrum'
+	'arbitrum',
+	'robinhood'
 ]);
 
 // The list of cryptocurrencies that are supported by Onramper can be found here:
