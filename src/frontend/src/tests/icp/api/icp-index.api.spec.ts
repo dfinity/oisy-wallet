@@ -1,9 +1,15 @@
 import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getAccountIdentifierTransactions, getTransactions } from '$icp/api/icp-index.api';
+import {
+	getAccountIdentifierTransactions,
+	getIcpIndexNumBlocksSynced,
+	getTransactions
+} from '$icp/api/icp-index.api';
+import { IcpIndexStatusCanister } from '$icp/canisters/icp-index-status.canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('icp-index.api', () => {
@@ -88,6 +94,55 @@ describe('icp-index.api', () => {
 					accountIdentifier: getAccountIdentifier(mockPrincipal).toHex()
 				})
 			);
+		});
+	});
+
+	describe('getIcpIndexNumBlocksSynced', () => {
+		const statusCanisterMock = mock<IcpIndexStatusCanister>();
+
+		beforeEach(() => {
+			vi.spyOn(IcpIndexStatusCanister, 'create').mockResolvedValue(statusCanisterMock);
+			statusCanisterMock.numBlocksSynced.mockResolvedValue(123n);
+		});
+
+		it('reads how far the index has synced, certified by default', async () => {
+			await expect(
+				getIcpIndexNumBlocksSynced({
+					identity: mockIdentity,
+					indexCanisterId: ICP_INDEX_CANISTER_ID
+				})
+			).resolves.toBe(123n);
+
+			expect(IcpIndexStatusCanister.create).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				canisterId: Principal.fromText(ICP_INDEX_CANISTER_ID)
+			});
+			expect(statusCanisterMock.numBlocksSynced).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('passes a query', async () => {
+			await getIcpIndexNumBlocksSynced({
+				identity: mockIdentity,
+				indexCanisterId: ICP_INDEX_CANISTER_ID,
+				certified: false
+			});
+
+			expect(statusCanisterMock.numBlocksSynced).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws without an identity, before calling the index', async () => {
+			await expect(
+				getIcpIndexNumBlocksSynced({
+					identity: undefined,
+					indexCanisterId: ICP_INDEX_CANISTER_ID
+				})
+			).rejects.toThrow();
+
+			expect(statusCanisterMock.numBlocksSynced).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import { IcpIndexStatusCanister } from '$icp/canisters/icp-index-status.canister';
 import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
@@ -52,4 +53,23 @@ export const getAccountIdentifierTransactions = async ({
 		maxResults,
 		accountIdentifier
 	});
+};
+
+// How far the index has synced: every ledger block below this height is in its histories.
+export const getIcpIndexNumBlocksSynced = async ({
+	identity,
+	indexCanisterId,
+	certified = true
+}: QueryParams & {
+	identity: NullishIdentity;
+	indexCanisterId: IndexCanisterIdText;
+}): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	const { numBlocksSynced } = await IcpIndexStatusCanister.create({
+		identity,
+		canisterId: Principal.fromText(indexCanisterId)
+	});
+
+	return await numBlocksSynced({ certified });
 };

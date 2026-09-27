@@ -1,3 +1,4 @@
+import { IcpLedgerBlocksCanister } from '$icp/canisters/icp-ledger-blocks.canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -80,6 +81,27 @@ export const icrc1Transfer = async ({
 		createdAt: createdAt ?? nowInBigIntNanoSeconds(),
 		...(nonNullish(memo) && { icrc1Memo: memo })
 	});
+};
+
+// When a block was appended, if the ledger still holds it rather than an archive.
+export const getIcpLedgerBlockTimestamp = async ({
+	identity,
+	ledgerCanisterId,
+	index,
+	certified = true
+}: QueryParams & {
+	identity: NullishIdentity;
+	ledgerCanisterId: CanisterIdText;
+	index: bigint;
+}): Promise<bigint | undefined> => {
+	assertNonNullish(identity);
+
+	const { blockTimestamp } = await IcpLedgerBlocksCanister.create({
+		identity,
+		canisterId: Principal.fromText(ledgerCanisterId)
+	});
+
+	return await blockTimestamp({ index, certified });
 };
 
 const ledgerCanister = async ({
