@@ -10,6 +10,7 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdPolygon,
+	isNetworkIdRobinhood,
 	isNetworkIdSolana,
 	isNetworkIdXrp,
 	isPseudoNetworkIdIcpTestnet
@@ -64,6 +65,10 @@ export const networkPolygon: Readable<boolean> = derived([networkId], ([$network
 
 export const networkArbitrum: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdArbitrum($networkId)
+);
+
+export const networkRobinhood: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdRobinhood($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

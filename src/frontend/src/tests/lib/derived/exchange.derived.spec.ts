@@ -17,6 +17,7 @@ import {
 	POL_AMOY_TOKEN_ID,
 	POL_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN_ID } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import {
@@ -195,7 +196,8 @@ describe('exchange.derived', () => {
 			[POL_MAINNET_TOKEN_ID]: undefined,
 			[POL_AMOY_TOKEN_ID]: undefined,
 			[ARBITRUM_ETH_TOKEN_ID]: undefined,
-			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined,
+			[ROBINHOOD_ETH_TOKEN_ID]: undefined
 		};
 
 		const expectedNullishExchangesIcrc = IC_BUILTIN_TOKENS.sort((a, b) =>
@@ -229,7 +231,8 @@ describe('exchange.derived', () => {
 			[POL_MAINNET_TOKEN_ID]: polPrice,
 			[POL_AMOY_TOKEN_ID]: polPrice,
 			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
-			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+			[ROBINHOOD_ETH_TOKEN_ID]: ethPrice
 		};
 
 		beforeEach(() => {
@@ -308,7 +311,8 @@ describe('exchange.derived', () => {
 				[BASE_ETH_TOKEN_ID]: ethPrice,
 				[BASE_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 				[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
-				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice
+				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+				[ROBINHOOD_ETH_TOKEN_ID]: ethPrice
 			});
 		});
 
@@ -348,7 +352,8 @@ describe('exchange.derived', () => {
 				[BASE_ETH_TOKEN_ID]: newEthPrice,
 				[BASE_SEPOLIA_ETH_TOKEN_ID]: newEthPrice,
 				[ARBITRUM_ETH_TOKEN_ID]: newEthPrice,
-				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: newEthPrice
+				[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: newEthPrice,
+				[ROBINHOOD_ETH_TOKEN_ID]: newEthPrice
 			});
 		});
 

@@ -1,3 +1,4 @@
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
@@ -12,6 +13,12 @@ describe('swap.constants', () => {
 
 		it('maps Solana mainnet to the sol blockchain code', () => {
 			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[SOLANA_MAINNET_NETWORK_ID]).toBe('sol');
+		});
+
+		// 1Click names the chain `hood`, and the code is a wire value it indexes its own asset
+		// list by — `robinhood` or `rh` would resolve to nothing and silently drop every quote.
+		it('maps Robinhood Chain to the hood blockchain code', () => {
+			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[ROBINHOOD_MAINNET_NETWORK_ID]).toBe('hood');
 		});
 	});
 
@@ -39,14 +46,16 @@ describe('swap.constants', () => {
 				{ ICP_NETWORK_ID },
 				{ BASE_NETWORK_ID },
 				{ BTC_MAINNET_NETWORK_ID },
-				{ SOLANA_MAINNET_NETWORK_ID }
+				{ SOLANA_MAINNET_NETWORK_ID },
+				{ ROBINHOOD_MAINNET_NETWORK_ID: ROBINHOOD_ID }
 			] = await Promise.all([
 				import('$lib/constants/swap.constants'),
 				import('$env/networks/networks.eth.env'),
 				import('$env/networks/networks.icp.env'),
 				import('$env/networks/networks-evm/networks.evm.base.env'),
 				import('$env/networks/networks.btc.env'),
-				import('$env/networks/networks.sol.env')
+				import('$env/networks/networks.sol.env'),
+				import('$env/networks/networks-evm/networks.evm.robinhood.env')
 			]);
 
 			return {
@@ -59,7 +68,8 @@ describe('swap.constants', () => {
 				ETHEREUM_NETWORK_ID,
 				BASE_NETWORK_ID,
 				BTC_MAINNET_NETWORK_ID,
-				SOLANA_MAINNET_NETWORK_ID
+				SOLANA_MAINNET_NETWORK_ID,
+				ROBINHOOD_ID
 			};
 		};
 
@@ -191,6 +201,58 @@ describe('swap.constants', () => {
 			expect(icpReaches(ETHEREUM_NETWORK_ID)).toBeFalsy();
 			expect(reachesIcp(ETHEREUM_NETWORK_ID)).toBeFalsy();
 			expect(icpReaches(BASE_NETWORK_ID)).toBeFalsy();
+		});
+
+		// Robinhood reaches the other chains through the generic EVM spread, so only the reverse
+		// lookup can be missing — and it fails silently, because `SwapForm` reads
+		// `SUPPORTED_CROSS_SWAP_NETWORKS[destination]?.includes(source)` and an absent key
+		// disables the switch button rather than erroring.
+		describe('Robinhood Chain', () => {
+			it('pairs with the other EVM chains in both directions', async () => {
+				const { reaches, ETHEREUM_NETWORK_ID, BASE_NETWORK_ID, ROBINHOOD_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true
+				});
+
+				expect(reaches({ from: ETHEREUM_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
+				expect(reaches({ from: ROBINHOOD_ID, to: ETHEREUM_NETWORK_ID })).toBeTruthy();
+
+				expect(reaches({ from: BASE_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
+				expect(reaches({ from: ROBINHOOD_ID, to: BASE_NETWORK_ID })).toBeTruthy();
+			});
+
+			it('pairs with Solana in both directions', async () => {
+				const { reaches, SOLANA_MAINNET_NETWORK_ID, ROBINHOOD_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true
+				});
+
+				expect(reaches({ from: ROBINHOOD_ID, to: SOLANA_MAINNET_NETWORK_ID })).toBeTruthy();
+				expect(reaches({ from: SOLANA_MAINNET_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
+			});
+
+			it('pairs with Bitcoin in both directions when the NEAR Intents BTC flag is on', async () => {
+				const { reaches, BTC_MAINNET_NETWORK_ID, ROBINHOOD_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true,
+					nearIntentsBtc: true
+				});
+
+				expect(reaches({ from: ROBINHOOD_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+				expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ROBINHOOD_ID })).toBeTruthy();
+			});
+
+			// OneSec and Chain Fusion both stop at Ethereum, Base and Arbitrum, and a live 1Click
+			// quote from Robinhood to ICP is rejected outright.
+			it('never pairs with ICP, even with both ICP providers on', async () => {
+				const { icpReaches, reachesIcp, ROBINHOOD_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true
+				});
+
+				expect(icpReaches(ROBINHOOD_ID)).toBeFalsy();
+				expect(reachesIcp(ROBINHOOD_ID)).toBeFalsy();
+			});
 		});
 
 		it('lists Ethereum once when both providers claim it', async () => {

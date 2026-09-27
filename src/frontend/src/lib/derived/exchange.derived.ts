@@ -15,6 +15,7 @@ import {
 	POL_AMOY_TOKEN_ID,
 	POL_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN_ID } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
@@ -84,6 +85,7 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 			[POL_AMOY_TOKEN_ID]: polPrice,
 			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
 			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
+			[ROBINHOOD_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const tokens = [
 					...[...$erc20Tokens, ...$erc4626Tokens].filter(

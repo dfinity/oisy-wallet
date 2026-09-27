@@ -2,15 +2,7 @@ import { SOLANA_TRANSACTION_DETAILS_CACHE_SIZE } from '$sol/constants/sol.consta
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
-import {
-	clear,
-	createStore,
-	delMany,
-	get,
-	keys,
-	promisifyRequest,
-	type UseStore
-} from 'idb-keyval';
+import { clear, createStore, delMany, get, keys, set, type UseStore } from 'idb-keyval';
 
 /**
  * The details of a finalized Solana transaction, kept per network and signature.
@@ -23,70 +15,32 @@ import {
  * entry is written or not, never half. The slot is part of the key, which lets trimming order the
  * entries by reading their keys alone.
  */
-const EPOCH_KEY = 'epoch';
+let store: UseStore | undefined;
 
-interface Idb {
-	store: UseStore;
-	// The session this realm writes for, read when the realm loads the module. Clearing the store
-	// removes it, so the realms of a session that ended (the network worker as much as the main
-	// thread) write nothing after sign-out, whether or not they were waiting on a fetch at the time.
-	epoch: Promise<string | undefined>;
-}
-
-let idb: Idb | undefined;
-
-// An epoch is created by the first realm of a session that finds none, in the same transaction that
-// reads it, so that two realms starting together agree on one.
-const readEpoch = async (store: UseStore): Promise<string | undefined> => {
-	try {
-		return await store('readwrite', (objectStore) => {
-			const request = objectStore.get(EPOCH_KEY);
-
-			// Chained by hand rather than with promises, as `idb-keyval` does for `update`: a promise
-			// continuation can run after the transaction has closed.
-			return new Promise<string>((resolve, reject) => {
-				request.onsuccess = () => {
-					if (typeof request.result === 'string') {
-						resolve(request.result);
-
-						return;
-					}
-
-					const epoch = crypto.randomUUID();
-
-					objectStore.put(epoch, EPOCH_KEY);
-
-					resolve(epoch);
-				};
-
-				request.onerror = () => reject(request.error);
-			});
-		});
-	} catch (_err: unknown) {
-		// Without an epoch nothing is written, which is where the caller was before this cache existed.
-		return undefined;
-	}
-};
-
-const openIdb = (): Idb | undefined => {
+// Opened on first use, never as the module loads.
+//
+// This module is reached from `solana.api.ts`, which the worker bundle pulls in, so a module-scope
+// open ran in every realm the app starts, on every page load — including the landing page, where
+// there is no session and nothing to cache. `idb-keyval` opens lazily and closes nothing, so this
+// was the only `oisy-` database that existed, and was held open, before sign-in.
+//
+// That is what broke sign-out. `signOut` deletes every `oisy-` database and, after the reload,
+// `displayAndCleanLogoutMsg` deletes them again; a delete cannot proceed against an open
+// connection. Every other store had none, because nothing had used it yet, so every other delete
+// succeeded. This one was already open on the fresh page, so its delete was blocked, the rejection
+// was swallowed by the `Promise.allSettled` in `deleteIdbAllOisyRelated`, and the pending delete
+// then stalled every later `open()` of it — which is what left the details of an ended session
+// behind, stopped the wallet reading them, and hung the next sign-out.
+const openIdb = (): UseStore | undefined => {
 	// The dapp is pre-rendered without IndexedDB.
 	if (typeof indexedDB === 'undefined') {
 		return undefined;
 	}
 
-	if (isNullish(idb)) {
-		const store = createStore('oisy-sol-transaction-details', 'details');
+	store ??= createStore('oisy-sol-transaction-details', 'details');
 
-		idb = { store, epoch: readEpoch(store) };
-	}
-
-	return idb;
+	return store;
 };
-
-// Opened as the module loads rather than on first use, so that a realm takes the epoch of the session
-// it started in: a worker that fetched nothing yet when the user signed out must not adopt the next
-// session's epoch on its first write.
-openIdb();
 
 // The slot is zero-padded to the 20 digits of a u64, so that the keys of a network sort by slot.
 const detailKey = ({
@@ -119,7 +73,7 @@ export const getIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		return await get<SolRpcTransaction>(detailKey({ network, signature, slot }), current.store);
+		return await get<SolRpcTransaction>(detailKey({ network, signature, slot }), current);
 	} catch (_err: unknown) {
 		return undefined;
 	}
@@ -164,44 +118,28 @@ export const setIdbSolTransactionDetail = async ({
 	}
 
 	try {
-		const epoch = await current.epoch;
+		await set(
+			detailKey({
+				network,
+				signature: transaction.signature,
+				slot: transaction.slot
+			}),
+			transaction,
+			current
+		);
 
-		if (isNullish(epoch)) {
-			return;
-		}
-
-		const key = detailKey({
-			network,
-			signature: transaction.signature,
-			slot: transaction.slot
-		});
-
-		// The epoch is checked in the transaction that writes, so a clear cannot slip in between.
-		await current.store('readwrite', (objectStore) => {
-			const request = objectStore.get(EPOCH_KEY);
-
-			return new Promise<void>((resolve, reject) => {
-				request.onsuccess = () => {
-					if (request.result === epoch) {
-						objectStore.put(transaction, key);
-					}
-
-					resolve(promisifyRequest(objectStore.transaction));
-				};
-
-				request.onerror = () => reject(request.error);
-			});
-		});
-
-		await trimNetwork({ network, store: current.store });
+		await trimNetwork({ network, store: current });
 	} catch (_err: unknown) {
 		// Nothing to recover: the detail is already loaded, and the next load fetches it again.
 	}
 };
 
 /**
- * Empties the cache, epoch included. This realm keeps the epoch it started with, and so writes
- * nothing more: sign-out reloads the page, and the realms of the next session start a new epoch.
+ * Empties the cache.
+ *
+ * A realm still running when this is called can write once more before the page reloads. Sign-out
+ * deletes the database outright, and deletes it again on the page that follows, so anything left in
+ * that window does not reach the next session.
  */
 export const clearIdbSolTransactionDetails = async () => {
 	const current = openIdb();
@@ -210,5 +148,5 @@ export const clearIdbSolTransactionDetails = async () => {
 		return;
 	}
 
-	await clear(current.store);
+	await clear(current);
 };

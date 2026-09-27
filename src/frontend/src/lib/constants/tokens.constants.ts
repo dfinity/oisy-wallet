@@ -2,6 +2,7 @@ import { SUPPORTED_ARBITRUM_TOKENS } from '$env/tokens/tokens-evm/tokens-arbitru
 import { SUPPORTED_BASE_TOKENS } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { SUPPORTED_BSC_TOKENS } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { SUPPORTED_POLYGON_TOKENS } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { SUPPORTED_ROBINHOOD_TOKENS } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
@@ -22,3 +23,5 @@ export const [DEFAULT_BASE_TOKEN] = SUPPORTED_BASE_TOKENS;
 export const [DEFAULT_POLYGON_TOKEN] = SUPPORTED_POLYGON_TOKENS;
 
 export const [DEFAULT_ARBITRUM_TOKEN] = SUPPORTED_ARBITRUM_TOKENS;
+
+export const [DEFAULT_ROBINHOOD_TOKEN] = SUPPORTED_ROBINHOOD_TOKENS;
