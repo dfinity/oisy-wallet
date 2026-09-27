@@ -9,6 +9,7 @@ import {
 } from '$icp/constants/cmc.constants';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -71,6 +72,7 @@ export const findCyclesMintDeposit = async ({
 	data: CyclesMintData;
 }): Promise<bigint | undefined> => {
 	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(identity.getPrincipal());
+	const ownAccountIdentifier = getAccountIdentifier(identity.getPrincipal()).toHex();
 	const oldestPossibleNs = data.transfer_created_at_ns - ICP_LEDGER_PERMITTED_DRIFT_NS;
 
 	let start: bigint | undefined;
@@ -91,7 +93,7 @@ export const findCyclesMintDeposit = async ({
 		}
 
 		const deposit = transactions.find(({ transaction }) =>
-			isCyclesMintDeposit({ transaction, depositAccountIdentifier, data })
+			isCyclesMintDeposit({ transaction, depositAccountIdentifier, ownAccountIdentifier, data })
 		);
 
 		if (nonNullish(deposit)) {

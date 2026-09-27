@@ -128,27 +128,32 @@ const isCyclesMintMemo = (memo: Uint8Array | undefined): boolean =>
 	memo.every((byte, index) => byte === CMC_MINT_CYCLES_MEMO[index]);
 
 /**
- * Whether an ICP history entry is this row's deposit: a transfer of the row's amount to
- * the CMC deposit account, with the `MINT` memo and the row's own `created_at_time`. The
- * timestamp is what makes it this row's deposit rather than another mint of the same
- * amount.
+ * Whether an ICP history entry is this row's deposit: a transfer of the row's amount from
+ * the caller's own account to the CMC deposit account, with the `MINT` memo and the row's
+ * own `created_at_time`. Short of the fixed fee, these are the fields the ledger
+ * deduplicates a transfer on. The timestamp is what makes it this row's deposit rather
+ * than another mint of the same amount, and the sender what keeps a transfer someone else
+ * makes to that account from passing for it.
  */
 export const isCyclesMintDeposit = ({
 	transaction: { operation, icrc1_memo, created_at_time },
 	depositAccountIdentifier,
+	ownAccountIdentifier,
 	data: { amount, transfer_created_at_ns }
 }: {
 	transaction: IcpIndexDid.Transaction;
 	depositAccountIdentifier: string;
+	ownAccountIdentifier: string;
 	data: CyclesMintData;
 }): boolean => {
 	if (!('Transfer' in operation)) {
 		return false;
 	}
 
-	const { to, amount: transferred } = operation.Transfer;
+	const { from, to, amount: transferred } = operation.Transfer;
 
 	return (
+		from.toLowerCase() === ownAccountIdentifier.toLowerCase() &&
 		to.toLowerCase() === depositAccountIdentifier.toLowerCase() &&
 		transferred.e8s === amount &&
 		fromNullable(created_at_time)?.timestamp_nanos === transfer_created_at_ns &&

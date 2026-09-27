@@ -10,6 +10,7 @@ import {
 import * as cyclesMintServices from '$icp/services/cycles-mint.services';
 import type { CyclesMintNotifyResult } from '$icp/types/cycles-mint';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import {
@@ -35,6 +36,7 @@ import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 const CREATED_AT_NS = mockCyclesMintData.transfer_created_at_ns;
 
 const DEPOSIT_ACCOUNT_IDENTIFIER = getCyclesMintDepositAccountIdentifier(mockPrincipal);
+const OWN_ACCOUNT_IDENTIFIER = getAccountIdentifier(mockPrincipal).toHex();
 
 const displayRefs = toCyclesMintExternalRefsMap(mockCyclesMintActiveUserTransaction.external_refs);
 
@@ -52,11 +54,13 @@ const unobserved: ActiveUserTransaction = {
 const indexEntry = ({
 	id,
 	timestampNs,
-	isDeposit = false
+	isDeposit = false,
+	from = OWN_ACCOUNT_IDENTIFIER
 }: {
 	id: bigint;
 	timestampNs: bigint;
 	isDeposit?: boolean;
+	from?: string;
 }): IcpIndexDid.TransactionWithId => ({
 	id,
 	transaction: {
@@ -66,7 +70,7 @@ const indexEntry = ({
 			Transfer: {
 				to: isDeposit ? DEPOSIT_ACCOUNT_IDENTIFIER : 'another-account',
 				fee: { e8s: 10_000n },
-				from: 'user-account',
+				from,
 				amount: { e8s: mockCyclesMintData.amount },
 				spender: []
 			}
@@ -467,6 +471,25 @@ describe('cycles-mint-active-tx.services', () => {
 					transactions: [
 						burn,
 						refund,
+						indexEntry({ id: 19n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
+					]
+				})
+			);
+
+			await expect(find()).resolves.toBe(19n);
+		});
+
+		// Anyone can send to that account, with the row's details too.
+		it('passes over the same transfer from someone else', async () => {
+			lookupSpy.mockResolvedValueOnce(
+				page({
+					transactions: [
+						indexEntry({
+							id: 20n,
+							timestampNs: CREATED_AT_NS + 2n,
+							isDeposit: true,
+							from: 'another-account'
+						}),
 						indexEntry({ id: 19n, timestampNs: CREATED_AT_NS + 1n, isDeposit: true })
 					]
 				})

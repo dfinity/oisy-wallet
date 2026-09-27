@@ -35,13 +35,14 @@ const TCYCLES_TOKEN = {
 };
 
 const DEPOSIT_ACCOUNT_IDENTIFIER = 'a1b2c3';
+const OWN_ACCOUNT_IDENTIFIER = 'd4e5f6';
 
 const deposit = ({
 	overrides = {},
 	transfer = {}
 }: {
 	overrides?: Partial<IcpIndexDid.Transaction>;
-	transfer?: Partial<{ to: string; e8s: bigint }>;
+	transfer?: Partial<{ from: string; to: string; e8s: bigint }>;
 } = {}): IcpIndexDid.Transaction => ({
 	memo: ZERO,
 	icrc1_memo: [CMC_MINT_CYCLES_MEMO],
@@ -49,7 +50,7 @@ const deposit = ({
 		Transfer: {
 			to: transfer.to ?? DEPOSIT_ACCOUNT_IDENTIFIER,
 			fee: { e8s: 10_000n },
-			from: 'f00',
+			from: transfer.from ?? OWN_ACCOUNT_IDENTIFIER,
 			amount: { e8s: transfer.e8s ?? mockCyclesMintData.amount },
 			spender: []
 		}
@@ -261,6 +262,7 @@ describe('cycles-mint-active-tx.utils', () => {
 	describe('isCyclesMintDeposit', () => {
 		const params = {
 			depositAccountIdentifier: DEPOSIT_ACCOUNT_IDENTIFIER,
+			ownAccountIdentifier: OWN_ACCOUNT_IDENTIFIER,
 			data: mockCyclesMintData
 		};
 
@@ -268,17 +270,24 @@ describe('cycles-mint-active-tx.utils', () => {
 			expect(isCyclesMintDeposit({ ...params, transaction: deposit() })).toBeTruthy();
 		});
 
-		it('compares the account in any letter case', () => {
+		it('compares the accounts in any letter case', () => {
 			expect(
 				isCyclesMintDeposit({
 					...params,
-					transaction: deposit({ transfer: { to: DEPOSIT_ACCOUNT_IDENTIFIER.toUpperCase() } })
+					transaction: deposit({
+						transfer: {
+							from: OWN_ACCOUNT_IDENTIFIER.toUpperCase(),
+							to: DEPOSIT_ACCOUNT_IDENTIFIER.toUpperCase()
+						}
+					})
 				})
 			).toBeTruthy();
 		});
 
 		it.each([
-			{ label: 'another account', transaction: deposit({ transfer: { to: 'ffff' } }) },
+			{ label: 'another recipient', transaction: deposit({ transfer: { to: 'ffff' } }) },
+			// Anyone can send to the deposit account, with the same details.
+			{ label: 'another sender', transaction: deposit({ transfer: { from: 'ffff' } }) },
 			{ label: 'another amount', transaction: deposit({ transfer: { e8s: 1n } }) },
 			{
 				label: 'another mint of the same amount',
