@@ -11,6 +11,7 @@ import type { GetFeeData } from '$eth/types/infura';
 import type { EthersProviderNetwork } from '$eth/types/network';
 import { EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { isEthereumNodeRefusal } from '$eth/utils/eth-error.utils';
+import { simulateInfuraFailureIfEnabled } from '$eth/utils/infura-failure-simulator.utils';
 import {
 	OP_STACK_GAS_PRICE_ORACLE_ABI,
 	OP_STACK_GAS_PRICE_ORACLE_ADDRESS
@@ -112,7 +113,7 @@ export class InfuraProvider {
 	private callWithFallback = async <T>({
 		operation,
 		milliseconds,
-		call,
+		call: realCall,
 		recover
 	}: {
 		operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS;
@@ -121,6 +122,15 @@ export class InfuraProvider {
 		recover?: (params: FallbackFailure) => Promise<T>;
 	}): Promise<T> => {
 		const { fallbackProvider } = this;
+
+		// DEMO ONLY: every attempt passes through the failure switch; see
+		// `infura-failure-simulator.utils.ts`.
+		const call = (provider: JsonRpcProvider): Promise<T> =>
+			simulateInfuraFailureIfEnabled({
+				operation,
+				provider: provider === this.provider ? 'infura' : 'alchemy',
+				call: () => realCall(provider)
+			});
 
 		if (isNullish(fallbackProvider) || !ALCHEMY_EVM_FALLBACK_ENABLED) {
 			return await call(this.provider);
