@@ -29,7 +29,9 @@ export const ICP_MINTING_ACCOUNT = getIcrcAccount(
 );
 
 // The NNS Cycles Minting Canister. Minting always targets the mainnet one: it
-// deposits into the mainnet cycles ledger, which TCYCLES is on every build.
+// deposits into the mainnet cycles ledger, which TCYCLES is on every build. A local
+// replica has no CMC (`dfx.json` marks `cmc` remote there), so every CMC call from a
+// local build fails: its Mint form cannot load the rate and stops before any transfer.
 export const CMC_CANISTER_ID: CanisterIdText = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
 
 /**
