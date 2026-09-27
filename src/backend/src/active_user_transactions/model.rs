@@ -21,7 +21,10 @@ use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, 
 
 /// Create a new active transaction. Checks are ordered so callers always see
 /// the most informative error: `InvalidId` → `AlreadyExists` (idempotent
-/// retries land here even at the cap) → `InvalidData` → `TooManyActiveTransactions`.
+/// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
+/// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
+/// names the specific reason this create is refused and tells the caller what to
+/// wait for, where the cap only says the store is full.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -38,6 +41,18 @@ pub fn create(
     validate_data(&request.data)?;
     validate_progress_step(request.progress_step.as_deref())?;
     validate_external_refs(&request.external_refs)?;
+
+    // An XRPL `Sequence` is a nonce, so at most one unresolved payment may exist
+    // per source address. The frontend refuses early too, but that check cannot
+    // be atomic with this create — between the two it reads the account, derives
+    // a signing key and takes a threshold signature, and a second tab can pass
+    // its own check inside that window. This call is the only place that sees the
+    // check and the write at once, so this is what actually holds the invariant.
+    if let ActiveUserTransactionData::Xrp(d) = &request.data {
+        if has_open_xrp_send(map, principal, &d.source_address) {
+            return Err(ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
 
     if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
         return Err(ActiveUserTransactionError::TooManyActiveTransactions);
@@ -125,6 +140,28 @@ pub fn list(
         scan_principal(map, principal).map(|(_, c)| c.0).collect();
 
     GetActiveUserTransactionsResponse { transactions }
+}
+
+/// Whether a non-terminal XRP payment already exists for this source address.
+///
+/// Per **address**, not per user: a record for a different address says nothing
+/// about this one's sequence, and refusing on it would block an unrelated send.
+/// Compared raw, like everywhere else this address travels — a classic address is
+/// base58 over a checksummed payload, so case is significant.
+fn has_open_xrp_send(
+    map: &ActiveUserTransactionsMap,
+    principal: Principal,
+    source_address: &str,
+) -> bool {
+    scan_principal(map, principal).any(|(_, Candid(tx))| {
+        matches!(
+            tx.status,
+            ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
+        ) && matches!(
+            tx.data,
+            ActiveUserTransactionData::Xrp(ref d) if d.source_address == source_address
+        )
+    })
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -976,6 +1013,8 @@ mod tests {
 
     const XRP_SOURCE: &str = "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi";
     const XRP_DESTINATION: &str = "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv";
+    const XRP_OTHER_SOURCE: &str = "rETD6N4kWuW9tDE6ewyzZsXw2uqzDAPQwg";
+    const XRP_OTHER_DESTINATION: &str = "rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi";
 
     fn xrp_data(
         amount: u64,
@@ -1162,6 +1201,133 @@ mod tests {
                 ActiveUserTransactionError::InvalidData(expected.to_string())
             );
         }
+    }
+
+    // The invariant the whole XRP guard exists for, enforced here because the
+    // frontend's own check cannot be atomic with this create.
+    #[test]
+    fn xrp_second_open_send_from_the_same_address_rejected() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        // A different id and a different destination: neither is what refuses it.
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, Some(7), XRP_SOURCE, XRP_OTHER_DESTINATION);
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_rejected_while_the_first_is_executing() {
+        // `Executing` is non-terminal too, and a row that has advanced past
+        // `Pending` is exactly one whose sequence is still in play.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+        update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Executing),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("advance");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_allowed_once_the_first_is_terminal() {
+        // Bounded by design: the record self-clears within the signed validity
+        // window, and the address is free again the moment it does.
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+
+            let mut first = create_req("xrp-1");
+            first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            create(&mut map, principal(), first, 1).expect("first send");
+            update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "xrp-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .expect("resolve");
+
+            let mut second = create_req("xrp-2");
+            second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+
+            create(&mut map, principal(), second, 3).expect("second send");
+        }
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_address() {
+        // Per address, not per user: a record for a different address says
+        // nothing about this one's sequence.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+
+        create(&mut map, principal(), second, 2).expect("other address");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_user() {
+        // The scan is principal-scoped, so one user's open payment cannot refuse
+        // another's — even from the same address, which two users cannot share
+        // anyway.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-1");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+
+        create(&mut map, other_principal(), second, 2).expect("other user");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_flow() {
+        // Only XRP carries this constraint; the six swap flows are unaffected.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        create(&mut map, principal(), create_req("swap-1"), 2).expect("another flow");
     }
 
     #[test]

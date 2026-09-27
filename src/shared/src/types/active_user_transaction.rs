@@ -341,6 +341,10 @@ pub enum ActiveUserTransactionError {
     InvalidId,
     InvalidData(String),
     IllegalStatusTransition,
+    /// A non-terminal record already tracks the same subject, and the flow only
+    /// allows one at a time. Distinct from `AlreadyExists`, which is about the
+    /// record's own id: this one is about what the record is *for*.
+    AlreadyInFlight,
 }
 
 #[cfg(test)]
