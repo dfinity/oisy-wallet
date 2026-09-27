@@ -15,11 +15,23 @@ import { trackEvent } from '$lib/services/analytics.services';
  * Every helper here must set `result_error_severity`, so the volume can be read by impact.
  */
 
+const reportedNetworkSettingsKeys = new Set<string>();
+
 /**
  * A `NetworkSettingsFor` key the backend persisted that this frontend has no `NetworkId` for.
  * The setting is ignored and every other network still maps, so the user notices nothing.
+ *
+ * Reported once per key per session. The callers run repeatedly — the profile is decoded on every
+ * load and the settings store is a derived that recomputes on every write — but the signal is
+ * that the key exists, not how many times we looked at it.
  */
 export const trackUnmappedNetworkSettingsKey = ({ key }: { key: string }) => {
+	if (reportedNetworkSettingsKeys.has(key)) {
+		return;
+	}
+
+	reportedNetworkSettingsKeys.add(key);
+
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.ERROR,
 		metadata: {
