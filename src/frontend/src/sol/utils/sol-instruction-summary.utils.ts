@@ -301,8 +301,9 @@ const transferEffect = ({
 	mintOf
 }: {
 	info: object;
-	// Whether an account is the user's as of the transfer, for the same reason as its mint.
-	isOwned: (account: SolAddress) => boolean;
+	// Whether an account is the user's as of the transfer, for the same reason as its mint, and
+	// whether what arrives at it lands with them.
+	isOwned: (params: { account: SolAddress; arriving?: boolean }) => boolean;
 	// Which mint an account holds as of the transfer. An unchecked transfer names no mint, and the
 	// run's single map holds whichever account an address held last: one closed and opened again
 	// for another mint within the message would lend a transfer made before that the later mint.
@@ -324,8 +325,9 @@ const transferEffect = ({
 	// The authority is what makes a transfer the user's own: an SPL transfer names token accounts,
 	// and the user's account is the one their wallet signs for, not one whose address they know.
 	const outgoing =
-		(nonNullish(authority) && isOwned(authority)) || (nonNullish(source) && isOwned(source));
-	const incoming = nonNullish(destination) && isOwned(destination);
+		(nonNullish(authority) && isOwned({ account: authority })) ||
+		(nonNullish(source) && isOwned({ account: source }));
+	const incoming = nonNullish(destination) && isOwned({ account: destination, arriving: true });
 
 	if (!outgoing && !incoming) {
 		return undefined;
@@ -339,7 +341,10 @@ const transferEffect = ({
 		...(nonNullish(value) && { amount: value }),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
 		...(nonNullish(decimals) && { decimals }),
-		...(nonNullish(counterparty) && { counterparty, own: isOwned(counterparty) })
+		...(nonNullish(counterparty) && {
+			counterparty,
+			own: isOwned({ account: counterparty, arriving: outgoing })
+		})
 	};
 };
 
@@ -377,8 +382,9 @@ const toEffect = ({
 	// Whether this instruction is an idempotent creation of an account that was already there by
 	// the time it ran, and so did nothing.
 	noOp: boolean;
-	// Whether an account is the user's as of an instruction.
-	ownedAt: (params: { account: SolAddress; position: number }) => boolean;
+	// Whether an account is the user's as of an instruction, and whether what arrives at it lands
+	// with them.
+	ownedAt: (params: { account: SolAddress; position: number; arriving?: boolean }) => boolean;
 	// The wallet itself, which is the only account of the user's that a close can pay into as a
 	// balance. Separate from the accounts above, which are every account of theirs the run named.
 	userAddress: OptionSolAddress;
@@ -404,7 +410,8 @@ const toEffect = ({
 		return undefined;
 	}
 
-	const isOwned = (account: SolAddress): boolean => ownedAt({ account, position });
+	const isOwned = ({ account, arriving }: { account: SolAddress; arriving?: boolean }): boolean =>
+		ownedAt({ account, position, arriving });
 
 	if (program === 'spl-associated-token-account' && ['create', 'createIdempotent'].includes(type)) {
 		const account = address({ info, key: 'account' });
@@ -416,7 +423,7 @@ const toEffect = ({
 		const mint = address({ info, key: 'mint' });
 
 		const concerns = [account, wallet, source].some(
-			(candidate) => nonNullish(candidate) && isOwned(candidate)
+			(candidate) => nonNullish(candidate) && isOwned({ account: candidate })
 		);
 
 		if (isNullish(account) || !concerns) {
@@ -460,8 +467,8 @@ const toEffect = ({
 		// a counterparty opening its own account is the transaction's business, not theirs. Whose it
 		// is, the initialisation that follows says, for the same reason as its mint.
 		const theirs = nonNullish(opening.holder)
-			? isOwned(opening.holder)
-			: nonNullish(account) && isOwned(account);
+			? isOwned({ account: opening.holder })
+			: nonNullish(account) && isOwned({ account });
 
 		return nonNullish(account) && nonNullish(tokenAddress) && theirs
 			? { kind: 'createTokenAccount', account, tokenAddress }
@@ -472,8 +479,8 @@ const toEffect = ({
 		const source = address({ info, key: 'source' });
 		const destination = address({ info, key: 'destination' });
 
-		const outgoing = nonNullish(source) && isOwned(source);
-		const incoming = nonNullish(destination) && isOwned(destination);
+		const outgoing = nonNullish(source) && isOwned({ account: source });
+		const incoming = nonNullish(destination) && isOwned({ account: destination, arriving: true });
 
 		if (!outgoing && !incoming) {
 			return undefined;
@@ -486,7 +493,10 @@ const toEffect = ({
 			...(nonNullish(amount({ info, key: 'lamports' })) && {
 				amount: amount({ info, key: 'lamports' })
 			}),
-			...(nonNullish(counterparty) && { counterparty, own: isOwned(counterparty) })
+			...(nonNullish(counterparty) && {
+				counterparty,
+				own: isOwned({ account: counterparty, arriving: outgoing })
+			})
 		};
 	}
 
@@ -517,7 +527,7 @@ const toEffect = ({
 
 			const ownAccount = nonNullish(holder)
 				? holder === userAddress
-				: nonNullish(account) && isOwned(account)
+				: nonNullish(account) && isOwned({ account })
 					? true
 					: undefined;
 
@@ -532,7 +542,7 @@ const toEffect = ({
 			// the only thing tying a close to the user when no run read the account.
 			const concerns =
 				(ownAccount ?? false) ||
-				(nonNullish(owner) && isOwned(owner) && ownAccount !== false) ||
+				(nonNullish(owner) && isOwned({ account: owner }) && ownAccount !== false) ||
 				paysUser;
 
 			if (isNullish(account) || !concerns) {
@@ -595,7 +605,10 @@ const toEffect = ({
 				...(nonNullish(wrapped) && { wrapped }),
 				...(nonNullish(reserve) && { reserve }),
 				...(ownAccount === false && { ownAccount }),
-				...(nonNullish(destination) && { counterparty: destination, own: isOwned(destination) })
+				...(nonNullish(destination) && {
+					counterparty: destination,
+					own: isOwned({ account: destination, arriving: true })
+				})
 			};
 		}
 
@@ -603,7 +616,10 @@ const toEffect = ({
 			const source = address({ info, key: 'source' });
 			const owner = address({ info, key: 'owner' });
 
-			if (isNullish(source) || !(isOwned(source) || (nonNullish(owner) && isOwned(owner)))) {
+			if (
+				isNullish(source) ||
+				!(isOwned({ account: source }) || (nonNullish(owner) && isOwned({ account: owner })))
+			) {
 				return undefined;
 			}
 
@@ -617,7 +633,10 @@ const toEffect = ({
 				...(nonNullish(checked ?? amount({ info, key: 'amount' })) && {
 					amount: checked ?? amount({ info, key: 'amount' })
 				}),
-				...(nonNullish(delegate) && { counterparty: delegate, own: isOwned(delegate) }),
+				...(nonNullish(delegate) && {
+					counterparty: delegate,
+					own: isOwned({ account: delegate })
+				}),
 				...(nonNullish(approved) && { tokenAddress: approved })
 			};
 		}
@@ -631,7 +650,7 @@ const toEffect = ({
 
 			if (
 				isNullish(account) ||
-				!(isOwned(account) || (nonNullish(authority) && isOwned(authority)))
+				!(isOwned({ account }) || (nonNullish(authority) && isOwned({ account: authority })))
 			) {
 				return undefined;
 			}
@@ -654,7 +673,7 @@ const toEffect = ({
 		if (['freezeAccount', 'thawAccount'].includes(type)) {
 			const account = address({ info, key: 'account' });
 
-			if (isNullish(account) || !isOwned(account)) {
+			if (isNullish(account) || !isOwned({ account })) {
 				return undefined;
 			}
 
@@ -670,7 +689,7 @@ const toEffect = ({
 		if (type === 'setAuthority') {
 			const account = address({ info, key: 'account' });
 
-			if (isNullish(account) || !isOwned(account)) {
+			if (isNullish(account) || !isOwned({ account })) {
 				return undefined;
 			}
 
@@ -833,53 +852,57 @@ const openedAs = ({
 	accountHolders: Partial<Record<SolAddress, SolAddress>>;
 	accountMintsBefore: Partial<Record<SolAddress, SplTokenAddress>>;
 	until: number;
-}): { holder?: SolAddress; mint?: SplTokenAddress } =>
-	flattened.slice(0, until).reduce<{ holder?: SolAddress; mint?: SplTokenAddress }>(
-		(
-			acc,
-			{
-				instruction: {
-					program,
-					parsed: { type, info }
+}): { holder?: SolAddress; mint?: SplTokenAddress; closed?: boolean } =>
+	flattened
+		.slice(0, until)
+		.reduce<{ holder?: SolAddress; mint?: SplTokenAddress; closed?: boolean }>(
+			(
+				acc,
+				{
+					instruction: {
+						program,
+						parsed: { type, info }
+					}
 				}
-			}
-		) => {
-			if (address({ info, key: 'account' }) !== account) {
-				return acc;
-			}
+			) => {
+				if (address({ info, key: 'account' }) !== account) {
+					return acc;
+				}
 
-			const names = (holderKey: string): { holder?: SolAddress; mint?: SplTokenAddress } => {
-				const holder = address({ info, key: holderKey }) ?? acc.holder;
-				const mint = address({ info, key: 'mint' }) ?? acc.mint;
+				const names = (holderKey: string): { holder?: SolAddress; mint?: SplTokenAddress } => {
+					const holder = address({ info, key: holderKey }) ?? acc.holder;
+					const mint = address({ info, key: 'mint' }) ?? acc.mint;
 
-				return {
-					...(nonNullish(holder) && { holder }),
-					...(nonNullish(mint) && { mint })
+					return {
+						...(nonNullish(holder) && { holder }),
+						...(nonNullish(mint) && { mint })
+					};
 				};
-			};
 
-			if (
-				program === 'spl-associated-token-account' &&
-				['create', 'createIdempotent'].includes(type)
-			) {
-				return names('wallet');
+				if (
+					program === 'spl-associated-token-account' &&
+					['create', 'createIdempotent'].includes(type)
+				) {
+					return names('wallet');
+				}
+
+				if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
+					return acc;
+				}
+
+				if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
+					return names('owner');
+				}
+
+				// A close ends the account, which is not the same as nobody having read whose it was:
+				// until something opens the address again, it holds no account at all.
+				return type === 'closeAccount' ? { closed: true } : acc;
+			},
+			{
+				...(nonNullish(accountHolders[account]) && { holder: accountHolders[account] }),
+				...(nonNullish(accountMintsBefore[account]) && { mint: accountMintsBefore[account] })
 			}
-
-			if (isNullish(program) || !TOKEN_PROGRAMS.includes(program)) {
-				return acc;
-			}
-
-			if (['initializeAccount', 'initializeAccount2', 'initializeAccount3'].includes(type)) {
-				return names('owner');
-			}
-
-			return type === 'closeAccount' ? {} : acc;
-		},
-		{
-			...(nonNullish(accountHolders[account]) && { holder: accountHolders[account] }),
-			...(nonNullish(accountMintsBefore[account]) && { mint: accountMintsBefore[account] })
-		}
-	);
+		);
 
 /**
  * The account the message opens at an address next, from an instruction on: the mint and the
@@ -1323,9 +1346,17 @@ export const mapSolInstructionSummaries = ({
 	}: {
 		account: SolAddress;
 		position: number;
-	}): SplTokenAddress | undefined =>
-		openedAt({ account, position }).mint ??
-		(initialisedInMessage({ account, flattened }) ? undefined : accountMints[account]);
+	}): SplTokenAddress | undefined => {
+		const { mint, closed } = openedAt({ account, position });
+
+		// A closed address holds no account and so no mint, until something opens it again.
+		return (
+			mint ??
+			((closed ?? false) || initialisedInMessage({ account, flattened })
+				? undefined
+				: accountMints[account])
+		);
+	};
 
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
@@ -1333,10 +1364,32 @@ export const mapSolInstructionSummaries = ({
 	// that is known, and the accounts named as the user's otherwise. Those are every account the
 	// user held at any point of the message, so read alone they lend an address that was somebody
 	// else's before it was opened for the user, or after the user's was closed, to the user.
-	const ownedAt = ({ account, position }: { account: SolAddress; position: number }): boolean => {
-		const { holder } = openedAt({ account, position });
+	//
+	// An address with no account open is neither: the message closed what was there, or opens the
+	// first account there only later. Nothing of the user's can leave it, and what arrives lands in
+	// the account opened there next, so it is whoever that one is opened for.
+	const ownedAt = ({
+		account,
+		position,
+		arriving = false
+	}: {
+		account: SolAddress;
+		position: number;
+		arriving?: boolean;
+	}): boolean => {
+		const { holder, closed } = openedAt({ account, position });
 
-		return nonNullish(holder) ? owned.has(holder) : owned.has(account);
+		if (nonNullish(holder)) {
+			return owned.has(holder);
+		}
+
+		const { holder: next } = openedNext({ account, flattened, from: position });
+
+		if ((closed ?? false) || nonNullish(next)) {
+			return arriving && nonNullish(next) && owned.has(next);
+		}
+
+		return owned.has(account);
 	};
 
 	// Read from the top-level instructions themselves: a router's own instruction is precisely the

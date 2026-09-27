@@ -1104,6 +1104,59 @@ describe('sol-instruction-summary.utils', () => {
 				expect(views.map(({ kind }) => kind)).toStrictEqual(['createTokenAccount']);
 			});
 
+			const sol = ({ source, destination }: { source: string; destination: string }) => ({
+				program: 'system',
+				programId: '11111111111111111111111111111111',
+				parsed: { type: 'transfer', info: { source, destination, lamports: 1_000 } }
+			});
+
+			const initialiseFor = (holder: string) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed: { type: 'initializeAccount3', info: { account, mint: bonk, owner: holder } }
+			});
+
+			// A closed address holds no account, which is not the same as nobody having read whose it
+			// was. What arrives there lands in the account opened there next.
+			it('should not count SOL sent to it after the close as sent to the user', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [
+						close(owner),
+						sol({ source: owner, destination: account }),
+						initialiseFor(stranger)
+					],
+					ownedAddresses: [owner, account],
+					userAddress: owner,
+					accountHolders: { [account]: owner },
+					accountMintsBefore: { [account]: bonk },
+					accountLamports: { [account]: 2_039_280n }
+				});
+
+				expect(views.find(({ kind }) => kind === 'send')?.own).toBeFalsy();
+			});
+
+			it('should count SOL sent to a fresh address ahead of its opening for the user as theirs', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [sol({ source: owner, destination: account }), initialiseFor(owner)],
+					ownedAddresses: [owner],
+					userAddress: owner
+				});
+
+				expect(views.find(({ kind }) => kind === 'send')?.own).toBeTruthy();
+			});
+
+			// Nothing of the user's is at an address before an account is opened there, so nothing of
+			// theirs can leave it.
+			it('should not count SOL sent out of a fresh address before its opening as the user sending', () => {
+				const views = mapSolInstructionSummaries({
+					instructions: [sol({ source: account, destination: stranger }), initialiseFor(owner)],
+					ownedAddresses: [owner],
+					userAddress: owner
+				});
+
+				expect(views).toStrictEqual([]);
+			});
+
 			it('should not count a transfer into it as the user receiving once it is opened for somebody else', () => {
 				const views = mapSolInstructionSummaries({
 					instructions: [
