@@ -7,6 +7,7 @@ import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import * as infuraMod from '$eth/providers/infura.providers';
 import type * as InfuraRestModule from '$eth/rest/infura.rest';
@@ -508,6 +509,21 @@ describe('eth-fee-data.services', () => {
 				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
 				expect(result.feeData.maxFeePerGas).toBe(lowMax);
 			});
+
+			// Robinhood Chain reports a near-zero priority fee, which looks exactly like the BSC case
+			// the floor exists for. It is a Nitro chain with no such minimum, so adding 4663 to
+			// `BSC_CHAIN_IDS` would quote a fee well above what the chain charges.
+			it('should NOT apply the BSC floor on Robinhood Chain', async () => {
+				const result = await getEthFeeDataWithProvider({
+					networkId: ROBINHOOD_MAINNET_NETWORK.id,
+					chainId: ROBINHOOD_MAINNET_NETWORK.chainId,
+					from: fromAddr,
+					to: toAddr
+				});
+
+				expect(result.feeData.maxPriorityFeePerGas).toBe(lowTip);
+				expect(result.feeData.maxFeePerGas).toBe(lowMax);
+			});
 		});
 
 		describe('OP-stack L1 data fee', () => {
@@ -542,7 +558,10 @@ describe('eth-fee-data.services', () => {
 				}
 			);
 
-			it.each([ETHEREUM_NETWORK, BSC_MAINNET_NETWORK])(
+			// Robinhood Chain is in this list, not the one above: Nitro folds the L1 data cost into
+			// the gas units `eth_estimateGas` reports, so quoting it separately would double-count
+			// it. Copying the Base env file when adding the chain is the way that goes wrong.
+			it.each([ETHEREUM_NETWORK, BSC_MAINNET_NETWORK, ROBINHOOD_MAINNET_NETWORK])(
 				'leaves it unquoted on $name, which has no such fee',
 				async ({ id, chainId }) => {
 					const result = await getEthFeeDataWithProvider({

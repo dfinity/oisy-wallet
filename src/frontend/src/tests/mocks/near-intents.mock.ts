@@ -68,6 +68,15 @@ export const mockNearIntentsTokens: NearIntentsToken[] = [
 		price: 65000.0,
 		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
 		contractAddress: null
+	},
+	{
+		assetId: 'nep141:hood.omft.near',
+		decimals: 18,
+		blockchain: 'hood',
+		symbol: 'ETH',
+		price: 1947.28,
+		priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+		contractAddress: null
 	}
 ];
 

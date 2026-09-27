@@ -203,6 +203,7 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `result_error`                       | Our own error text              | `NFT sending failed`                       | sanitised string (§6)              |
 | `result_error_severity`              | Severity band                   | `blocker` / `critical` / `major` / `minor` | `PLAUSIBLE_EVENT_ERROR_SEVERITIES` |
 | `result_error_code`                  | Error code                      | `407`                                      | string                             |
+| `result_error_type`                  | Allow-listed failure category   | `pool_not_found` / `rate_limited`          | a per-feature `*_ERROR_TYPES` enum |
 | `result_error_text`                  | Full raw error text we received | `Error parsing …`                          | sanitised string (§6)              |
 
 > Legacy: `result_error_toast_level` / `result_error_toast_key` are
@@ -232,8 +233,7 @@ quote/second token is `token2_*` (see `trackLimitOrder`).
 
 > **Code vs. schema naming.** A few code enums use adjacent names for the same
 > idea — e.g. `result_error_message` in code maps to this doc's
-> `result_error_text`, and `result_error_type` is a code-side classifier not in
-> the tables above. When adding events, prefer the **schema** names above and
+> `result_error_text`. When adding events, prefer the **schema** names above and
 > reconcile any drift (code wins on current-state conflicts per the AGENTS.md
 > hierarchy, but the two should be made to agree).
 
@@ -316,7 +316,10 @@ These are not guidelines. A PR that violates them does not merge.
    is not — prefer bucketed or omit.
 4. **Sanitise errors.** Strip IC request IDs and any embedded identifiers from
    error strings before they become `result_error*`. Omit the field when empty
-   (`notEmptyString`).
+   (`notEmptyString`). Where the text comes from a third party — another
+   project's canister, an external API — a scrubber cannot be written against
+   payloads we do not control: emit an allow-listed `result_error_type` category
+   instead and leave the message to the toast and the console.
 5. **English, locale-independent labels.** Human-readable labels resolve against
    the bundled `en.json` (see `resolveEnglishLabel` / `replaceOisyPlaceholders`),
    never the user's locale, so dashboards stay consistent and no locale leaks.
