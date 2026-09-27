@@ -65,7 +65,7 @@ learn how often Infura fails.
   Alchemy. The same bytes carry the same hash and the same nonce, so the transaction can execute at
   most once: resubmitting it can never produce a second transfer.
 - An answer from Alchemy that it already holds the transaction means Infura did pass it on. That is
-  a successful submission.
+  a successful submission, recognised by the lookup below rather than by the wording of the answer.
 - Before reporting a submission as failed, OISY looks its hash up on Alchemy. If the network knows
   it, the submission succeeded.
 - When a provider refuses the transaction with a reason, that reason is what the user is told, not
@@ -219,8 +219,9 @@ PR 4:
 - Alchemy answers `eth_sendRawTransaction`, `eth_getTransactionCount` with the `pending` tag, and
   the calls behind the ethers fee data (`eth_getBlockByNumber`, `eth_maxPriorityFeePerGas`,
   `eth_gasPrice`) on every supported EVM network, testnets included. To verify in PR 1, per network.
-- Alchemy's exact answer when it already holds a transaction. PR 1 uses it only as a shortcut; the
-  hash lookup is the backstop.
+- Alchemy's exact answer when it already holds a transaction. _Resolved:_ not needed. PR 1 reads no
+  error text: any failed resubmission is followed by the hash lookup, which settles the case the
+  same way on every network.
 - How often Infura fails these calls in production. Nobody knows today; the analytics event will
   answer it.
 
