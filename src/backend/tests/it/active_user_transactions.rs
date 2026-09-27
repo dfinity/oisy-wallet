@@ -521,7 +521,7 @@ fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
             "create_active_user_transaction",
             CreateActiveUserTransactionRequest {
                 data,
-                external_refs: vec![],
+                external_refs: xrp_refs(),
                 ..create_req(id)
             },
         )
@@ -546,6 +546,85 @@ fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
 
     // And the first row is the only one stored.
     assert_eq!(list_active(&pic, user).len(), 1);
+}
+
+/// The two refs an XRP row is polled with, at the shapes they really have.
+fn xrp_refs() -> Vec<ActiveUserTransactionRef> {
+    vec![
+        ActiveUserTransactionRef {
+            key: "tx_hash".to_string(),
+            value: "AB".repeat(32),
+        },
+        ActiveUserTransactionRef {
+            key: "last_ledger_sequence".to_string(),
+            value: "97000021".to_string(),
+        },
+    ]
+}
+
+// Through the real endpoint, because this is the state that cannot be recovered
+// from: a `Pending` XRP row with no usable poll keys is never resolved, refuses
+// every later send from its address, and the frontend offers no way to dismiss a
+// row that is not terminal. The create has to be what refuses it.
+#[test]
+fn xrp_create_without_poll_keys_is_rejected() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: None,
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    let create = |external_refs: Vec<ActiveUserTransactionRef>| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs,
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    let without = |key: &str| -> Vec<ActiveUserTransactionRef> {
+        xrp_refs().into_iter().filter(|r| r.key != key).collect()
+    };
+
+    for (refs, expected) in [
+        (vec![], "tx_hash is required"),
+        (without("tx_hash"), "tx_hash is required"),
+        (
+            without("last_ledger_sequence"),
+            "last_ledger_sequence is required",
+        ),
+    ] {
+        match create(refs) {
+            ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+            ActiveUserTransactionResult::Err(err) => assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            ),
+        }
+        assert!(
+            list_active(&pic, user).is_empty(),
+            "a rejected create must not leave a row behind"
+        );
+    }
+
+    // And the same create with both refs present is accepted, so it is the refs
+    // and nothing else about this payload that was refused.
+    match create(xrp_refs()) {
+        ActiveUserTransactionResult::Ok(tx) => assert_eq!(tx.external_refs, xrp_refs()),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
 }
 
 #[test]
