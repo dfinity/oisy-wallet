@@ -2005,6 +2005,19 @@ describe('xrp-send.services', () => {
 			);
 		});
 
+		// The window the gate cannot cover: its read is not atomic with the create, so a second
+		// tab can pass it. The backend refuses instead, and that refusal has to reach the user as
+		// the in-flight one rather than as "could not be recorded".
+		it('reports the backend refusing a second open payment as already in flight', async () => {
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue({
+				AlreadyInFlight: null
+			});
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
 		// Refused rather than sent unguarded: at the per-user cap, or with the
 		// backend unreachable, there is no record to hold the invariant.
 		it('refuses the send when the record cannot be created, without submitting', async () => {
