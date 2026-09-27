@@ -64,6 +64,17 @@ describe('active-user-transactions.store', () => {
 		expect(Object.keys(get(activeUserTransactionsStore)?.data ?? {}).sort()).toEqual(['a', 'b']);
 	});
 
+	it('drops set writes scoped to a previous principal', () => {
+		activeUserTransactionsStore.init(mockPrincipal);
+		activeUserTransactionsStore.init(mockPrincipal2);
+		activeUserTransactionsStore.set({
+			principal: mockPrincipal,
+			transactions: [pending({ id: 'a', updatedAtNs: 1n })]
+		});
+
+		expect(get(activeUserTransactionsStore)?.data).toEqual({});
+	});
+
 	it('upsert adds a new row and updates an existing one', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 		activeUserTransactionsStore.upsert({
@@ -158,6 +169,17 @@ describe('active-user-transactions.store', () => {
 		expect(get(activeUserTransactionsStore)?.data.a?.updated_at_ns).toBe(5n);
 	});
 
+	it('drops upserts scoped to a previous principal', () => {
+		activeUserTransactionsStore.init(mockPrincipal);
+		activeUserTransactionsStore.init(mockPrincipal2);
+		activeUserTransactionsStore.upsert({
+			principal: mockPrincipal,
+			transaction: pending({ id: 'a', updatedAtNs: 1n })
+		});
+
+		expect(get(activeUserTransactionsStore)?.data).toEqual({});
+	});
+
 	it('upsert applies writes with an equal updated_at_ns (idempotent)', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 
@@ -166,6 +188,17 @@ describe('active-user-transactions.store', () => {
 		activeUserTransactionsStore.upsert({ transaction: tx });
 
 		expect(get(activeUserTransactionsStore)?.data.a?.updated_at_ns).toBe(5n);
+	});
+
+	it('drops removes scoped to a previous principal', () => {
+		activeUserTransactionsStore.init(mockPrincipal2);
+		activeUserTransactionsStore.upsert({
+			transaction: pending({ id: 'b', updatedAtNs: 1n })
+		});
+
+		activeUserTransactionsStore.remove({ principal: mockPrincipal, id: 'b' });
+
+		expect(get(activeUserTransactionsStore)?.data.b).toBeDefined();
 	});
 
 	describe('writes after reset', () => {
