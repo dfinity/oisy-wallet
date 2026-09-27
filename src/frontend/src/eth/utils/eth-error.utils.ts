@@ -1,3 +1,4 @@
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { nonNullish } from '@dfinity/utils';
@@ -95,8 +96,23 @@ export const isEthereumNodeRefusal = (err: unknown): boolean =>
 			(typeof code === 'string' && ETHERS_REFUSAL_CODES.includes(code))
 	);
 
+// Whether the error, or one it wraps, is of the given kind: a caller may wrap a send's error again.
+const isErrorOfKind = ({
+	err,
+	kind
+}: {
+	err: unknown;
+	kind: typeof EthNonceReadError | typeof EthSubmissionUnconfirmedError;
+}): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
+
 /**
- * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
+ * Maps an error raised by an Ethereum or EVM send to a user-friendly message.
+ *
+ * What a message may claim depends on how far the transaction got. One whose nonce could not be read
+ * was never signed, so it was not sent and retrying it is safe. One whose submission every provider
+ * failed without a word may have reached the network all the same, and a retry would be signed with
+ * the next nonce, so the message sends the user to their activity first and never says it was not
+ * sent.
  *
  * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
  * the error is not one we can explain, allowing callers to fall through to their own generic
@@ -106,6 +122,14 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }
 	} = get(i18n);
+
+	if (isErrorOfKind({ err, kind: EthNonceReadError })) {
+		return error.ethereum_transaction_not_sent;
+	}
+
+	if (isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError })) {
+		return error.ethereum_transaction_unconfirmed;
+	}
 
 	if (isInsufficientBalanceError(err)) {
 		return error.ethereum_insufficient_funds;

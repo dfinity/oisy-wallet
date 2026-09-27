@@ -2,6 +2,7 @@ import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
+import { toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
 import {
 	getSendParamsGas,
 	getSignParamsMessageHex,
@@ -185,7 +186,15 @@ export const send = ({
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
-				throw err;
+				// Explained the way the send flow explains it, rather than through the generic message
+				// `execute` gives any error it has to catch: whether the transaction may have reached the
+				// network decides whether sending it again is safe.
+				toastEthereumTransactionError({
+					err,
+					fallbackMsg: get(i18n).wallet_connect.error.unexpected_processing_request
+				});
+
+				return { success: false, err };
 			}
 		},
 		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
