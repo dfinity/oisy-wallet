@@ -3,8 +3,10 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import CyclesMintDetails from '$icp/components/cycles-mint/CyclesMintDetails.svelte';
-	import { CYCLES_MINT_MIN_ESTIMATE, CYCLES_MINT_REFUND_FEES } from '$icp/constants/cmc.constants';
-	import { estimateCyclesMintCredited } from '$icp/utils/cycles-mint.utils';
+	import {
+		estimateCyclesMintCredited,
+		isCyclesMintAmountTooSmall
+	} from '$icp/utils/cycles-mint.utils';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 	import IconMoveDown from '$lib/components/icons/lucide/IconMoveDown.svelte';
@@ -81,15 +83,11 @@
 			: undefined
 	);
 
-	// Two bounds, both of which the amount must meet. At or below the CMC's refund fees, a
-	// refund would return nothing, however much the amount mints. And below twice the
-	// deposit fee, a drop in the rate before the mint runs could leave nothing to credit,
-	// which the CMC refunds.
+	// Review applies the same bound again, to the quote it shows.
 	let tooSmall = $derived(
 		nonNullish(amount) &&
 			amount > ZERO &&
-			(amount <= CYCLES_MINT_REFUND_FEES ||
-				(nonNullish(xdrPermyriadPerIcp) && amount * xdrPermyriadPerIcp < CYCLES_MINT_MIN_ESTIMATE))
+			isCyclesMintAmountTooSmall({ amount, xdrPermyriadPerIcp })
 	);
 
 	let invalid = $derived(

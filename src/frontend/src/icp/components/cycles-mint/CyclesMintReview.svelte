@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import CyclesMintDetails from '$icp/components/cycles-mint/CyclesMintDetails.svelte';
-	import { estimateCyclesMintCredited } from '$icp/utils/cycles-mint.utils';
+	import {
+		estimateCyclesMintCredited,
+		isCyclesMintAmountTooSmall
+	} from '$icp/utils/cycles-mint.utils';
 	import IconCircleArrowDown from '$lib/components/icons/lucide/IconCircleArrowDown.svelte';
 	import SwapToken from '$lib/components/swap/SwapToken.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -34,17 +38,27 @@
 	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
+	let amount = $derived(
+		nonNullish(sendAmount) && !invalidAmount(sendAmount)
+			? parseToken({ value: `${sendAmount}`, unitName: $sourceToken.decimals })
+			: undefined
+	);
+
 	let estimateAmount = $derived(
-		nonNullish(sendAmount) && !invalidAmount(sendAmount) && nonNullish(xdrPermyriadPerIcp)
+		nonNullish(amount) && nonNullish(xdrPermyriadPerIcp)
 			? formatToken({
-					value: estimateCyclesMintCredited({
-						amount: parseToken({ value: `${sendAmount}`, unitName: $sourceToken.decimals }),
-						xdrPermyriadPerIcp
-					}),
+					value: estimateCyclesMintCredited({ amount, xdrPermyriadPerIcp }),
 					unitName: $destinationToken.decimals,
 					displayDecimals: $destinationToken.decimals
 				})
 			: undefined
+	);
+
+	// The form's lower bound, against the quote shown here: the modal re-quotes when Review
+	// opens and every minute after, and a rate that has fallen since the form can put the
+	// amount below it.
+	let tooSmall = $derived(
+		nonNullish(amount) && isCyclesMintAmountTooSmall({ amount, xdrPermyriadPerIcp })
 	);
 </script>
 
@@ -71,6 +85,16 @@
 
 	<CyclesMintDetails showMinter {xdrPermyriadPerIcp} />
 
+	{#if tooSmall}
+		<div class="mt-4" in:fade>
+			<MessageBox level="error">
+				{replacePlaceholders($i18n.cycles_mint.error.amount_too_small, {
+					$token: $destinationToken.symbol
+				})}
+			</MessageBox>
+		</div>
+	{/if}
+
 	<div class="mt-4">
 		<MessageBox level="info">
 			{replacePlaceholders($i18n.cycles_mint.text.one_way, {
@@ -85,7 +109,7 @@
 			<ButtonBack onclick={onBack} />
 
 			<Button
-				disabled={invalidAmount(sendAmount) || isNullish(xdrPermyriadPerIcp)}
+				disabled={invalidAmount(sendAmount) || isNullish(xdrPermyriadPerIcp) || tooSmall}
 				onclick={onMint}
 				testId={CYCLES_MINT_REVIEW_MINT_BUTTON}
 			>

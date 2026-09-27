@@ -7,6 +7,8 @@ import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('CyclesMintReview', () => {
+	const tooSmall = 'The amount is too small to mint TCYCLES.';
+
 	const context = () =>
 		new Map([
 			[
@@ -15,7 +17,9 @@ describe('CyclesMintReview', () => {
 			]
 		]);
 
-	const props = (overrides: Partial<{ xdrPermyriadPerIcp: bigint | undefined }> = {}) => ({
+	const props = (
+		overrides: Partial<{ sendAmount: string; xdrPermyriadPerIcp: bigint | undefined }> = {}
+	) => ({
 		sendAmount: '1.5',
 		xdrPermyriadPerIcp: mockXdrPermyriadPerIcp as bigint | undefined,
 		onBack: vi.fn(),
@@ -62,5 +66,34 @@ describe('CyclesMintReview', () => {
 		});
 
 		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
+	});
+
+	// The modal re-quotes when Review opens and every minute after. At 0.5 TCYCLES per ICP,
+	// 0.00035 ICP mints less than twice the deposit fee, which the form would have rejected.
+	it('stops the mint, and says why, once a new quote puts the amount below the bound', async () => {
+		const testProps = props({ sendAmount: '0.00035' });
+
+		const { container, getByTestId, rerender } = render(CyclesMintReview, {
+			props: testProps,
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		expect(container).not.toHaveTextContent(tooSmall);
+
+		await rerender({ ...testProps, xdrPermyriadPerIcp: 5_000n });
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
+		expect(container).toHaveTextContent(tooSmall);
+	});
+
+	it('mints at a quote that keeps the amount above the bound', () => {
+		const { container, getByTestId } = render(CyclesMintReview, {
+			props: props({ sendAmount: '0.0004', xdrPermyriadPerIcp: 5_000n }),
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		expect(container).not.toHaveTextContent(tooSmall);
 	});
 });
