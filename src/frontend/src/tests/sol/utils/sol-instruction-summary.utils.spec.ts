@@ -619,6 +619,48 @@ describe('sol-instruction-summary.utils', () => {
 			expect(performance.now() - start).toBeLessThan(2_000);
 		});
 
+		// What each close hands back depends on every instruction before it, a transfer of wrapped
+		// SOL among them. Reading that afresh for every close grew with the cube of the message, so
+		// the payouts are read in one forward pass: five hundred instructions stay near-instant.
+		it('should read what every close hands back in one pass over the message', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const a = 'aAccount11111111111111111111111111111111111';
+			const b = 'bAccount11111111111111111111111111111111111';
+
+			const instructions = Array.from({ length: 510 }, (_, index) => ({
+				program: 'spl-token',
+				programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+				parsed:
+					index % 3 === 2
+						? {
+								type: 'transfer',
+								info: { source: a, destination: b, authority: owner, amount: '1' }
+							}
+						: {
+								type: 'closeAccount',
+								info:
+									index % 2 === 0
+										? { account: a, destination: b, owner }
+										: { account: b, destination: a, owner }
+							}
+			}));
+
+			const start = performance.now();
+
+			const views = mapSolInstructionSummaries({
+				instructions,
+				ownedAddresses: [owner, a, b],
+				userAddress: owner,
+				accountLamports: { [a]: 2_039_280n, [b]: 2_039_280n },
+				addressToToken: { [a]: WSOL_TOKEN.address, [b]: WSOL_TOKEN.address }
+			});
+
+			expect(
+				views.filter(({ kind }) => kind === 'unwrap' || kind === 'closeTokenAccount')
+			).toHaveLength(340);
+			expect(performance.now() - start).toBeLessThan(1_000);
+		});
+
 		// An account this message opens has no state to read beforehand, and a swap that opens one
 		// wraps into it and unwraps out of it within the same message. Reading the balance from
 		// before the transaction called every such close an unwrap, including the ones that hand

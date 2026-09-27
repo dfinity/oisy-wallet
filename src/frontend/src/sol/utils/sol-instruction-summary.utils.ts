@@ -368,7 +368,7 @@ const toEffect = ({
 	accountMints,
 	openedAt,
 	mintAt,
-	accountLamports,
+	returnedAt,
 	accountTokenAmounts,
 	rentExemptMinimum,
 	flattened
@@ -397,8 +397,8 @@ const toEffect = ({
 		mint?: SplTokenAddress;
 	};
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
-	// What each account held going in, so a close can say what it hands back.
-	accountLamports: Partial<Record<SolAddress, bigint>>;
+	// What the close at a position hands back, every lamport its account holds by then.
+	returnedAt: (position: number) => bigint | undefined;
 	// What each token account held going in, so a close of an empty wrapped SOL account is not
 	// described as unwrapping something.
 	accountTokenAmounts: Partial<Record<SolAddress, bigint>>;
@@ -563,13 +563,7 @@ const toEffect = ({
 			// What it hands back is everything it holds by the time it closes: whatever it already
 			// held, the rent it was funded with moments earlier, and anything an earlier close in
 			// the same message paid into it.
-			const returned = fundedInTransaction({
-				account,
-				flattened,
-				accountLamports,
-				mintAt,
-				until: position
-			});
+			const returned = returnedAt(position);
 
 			// Closing pays the account's whole balance to whoever the instruction names, which need
 			// not be the user: read as a close alone, a hand-over of a funded wrapped SOL account
@@ -987,151 +981,130 @@ const initialisedInMessage = ({
 	);
 
 /**
- * What an account holds in lamports by the time an instruction reaches it, starting from what it
- * held going in.
+ * What each close in the message hands back: every lamport its account holds by then, read in one
+ * pass over the message.
  *
- * The System `createAccount` that opens it states the rent, and any System `transfer` into it adds
- * to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the end of a
- * swap hands back the rent and the wrapped SOL together. No instruction states that total.
+ * An account's lamports start from what it held going in and move with every instruction that
+ * reaches it. The System `createAccount` that opens it states the rent, and a System `transfer`
+ * into it adds to that: wrapping SOL is exactly such a transfer, so a wrapped account closed at the
+ * end of a swap hands back the rent and the wrapped SOL together, a total no instruction states.
+ * A token transfer of wrapped SOL moves lamports too, since for that mint the token balance is the
+ * lamports, and a close hands everything its account holds to the account it names and leaves it
+ * with nothing.
+ *
+ * Walked forward once, keeping each account's lamports as they stand. Read backwards from each
+ * close through the closes that fed it, a message closing accounts into each other over and over
+ * re-read the instructions before every close for every close it reached, which grows with the cube
+ * of the message.
+ *
+ * Keyed by the position of the close. An account nobody read and nothing funded hands back an
+ * amount nobody knows.
  */
-const fundedInTransaction = (params: {
-	account: SolAddress;
+const closePayouts = ({
+	flattened,
+	accountLamports,
+	mintAt
+}: {
 	flattened: { instruction: SolParsedRpcInstruction }[];
 	// What each account held going in, so a chain can start from an account that already existed.
-	accountLamports?: Partial<Record<SolAddress, bigint>>;
+	accountLamports: Partial<Record<SolAddress, bigint>>;
 	// Which mint an account holds as of an instruction. A wrapped SOL account's token balance is
 	// its lamports, so a token transfer in or out of one moves lamports; of any other mint, none.
 	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
-	// Only what arrived before the instruction being described. A close later in the message hands
-	// its balance on afterwards, and is no part of what the one being described paid out.
-	until?: number;
-}): bigint | undefined =>
-	// A close hands its account's whole balance to the account it names, so the walk below recurses
-	// from each close into the account it closed. A message that closes accounts into each other and
-	// back - close A into B, then B into A, over and over - would otherwise walk the same account at
-	// the same point once for every path that reaches it, which doubles with every added close and
-	// hangs the review on a message that never runs. The result at each (account, point) is the same
-	// however the walk arrives there, so it is computed once and reused, which is what keeps a
-	// crafted message from turning the review into an exponential re-walk. The cache lives for this
-	// one call, so the function stays pure.
-	fundedInTransactionWalk({ ...params, funded: new Map() });
+}): Map<number, bigint | undefined> => {
+	// What each account holds as the walk stands. Absent means untouched so far, and an untouched
+	// account holds what it held going in, which may be unknown.
+	const lamports = new Map<SolAddress, bigint | undefined>();
 
-const fundedInTransactionWalk = ({
-	account,
-	flattened,
-	accountLamports = {},
-	mintAt,
-	until,
-	funded
-}: {
-	account: SolAddress;
-	flattened: { instruction: SolParsedRpcInstruction }[];
-	accountLamports?: Partial<Record<SolAddress, bigint>>;
-	mintAt: (params: { account: SolAddress; position: number }) => SplTokenAddress | undefined;
-	until?: number;
-	// Every (account, point) already walked in this call, mapped to what it hands over. `undefined`
-	// is a real answer - an account whose balance nobody knows - so membership is asked with `has`,
-	// never by the value being nullish.
-	funded: Map<string, bigint | undefined>;
-}): bigint | undefined => {
-	const key = `${account}:${until ?? 'all'}`;
+	const held = (account: SolAddress): bigint | undefined =>
+		lamports.has(account) ? lamports.get(account) : accountLamports[account];
 
-	if (funded.has(key)) {
-		return funded.get(key);
-	}
+	const add = ({ account, value }: { account: SolAddress; value: bigint }) =>
+		lamports.set(account, (held(account) ?? ZERO) + value);
 
-	// Both sources can apply at once: an account can pre-date the message and still be paid into
-	// during it, which is exactly the funded account a hand-over is worth making. Taking one or the
-	// other dropped whichever it did not pick.
-	const result = flattened.slice(0, until).reduce<bigint | undefined>(
+	const payouts = new Map<number, bigint | undefined>();
+
+	flattened.forEach(
 		(
-			acc,
 			{
 				instruction: {
 					program,
 					parsed: { type, info }
 				}
 			},
-			index
+			position
 		) => {
-			// A close of this account empties it and ends it. Whatever it held before belongs to an
-			// account that no longer exists, and an address closed and opened again within the one
-			// message is two accounts, the second of which starts from nothing.
-			if (type === 'closeAccount' && address({ info, key: 'account' }) === account) {
-				return ZERO;
+			if (type === 'closeAccount') {
+				const account = address({ info, key: 'account' });
+				const destination = address({ info, key: 'destination' });
+
+				if (isNullish(account)) {
+					return;
+				}
+
+				// Everything it holds goes, and an address closed and opened again is a second account
+				// that starts from nothing.
+				const payout = held(account);
+
+				payouts.set(position, payout);
+				lamports.set(account, ZERO);
+
+				if (nonNullish(destination) && destination !== account && nonNullish(payout)) {
+					add({ account: destination, value: payout });
+				}
+
+				return;
 			}
 
-			// A close hands its account's whole balance to the account it names, so a chain of them
-			// carries the first account's lamports through to the last. Counting System funding alone
-			// stops at the first link and reports the tail of a chain as though it began there.
-			if (type === 'closeAccount' && address({ info, key: 'destination' }) === account) {
-				const closed = address({ info, key: 'account' });
-
-				const inflow = nonNullish(closed)
-					? fundedInTransactionWalk({
-							account: closed,
-							flattened,
-							accountLamports,
-							mintAt,
-							until: index,
-							funded
-						})
-					: undefined;
-
-				return nonNullish(inflow) ? (acc ?? ZERO) + inflow : acc;
-			}
-
-			// A wrapped SOL account holds its token balance as lamports, so a token transfer in or
-			// out of one moves them: an account that receives wrapped SOL and still holds it hands
-			// over that much more, and one that passes it on hands over that much less. True of no
-			// other mint, whose balance is a number in the account rather than the lamports under
-			// it.
 			if (
-				TOKEN_PROGRAMS.includes(program ?? '') &&
-				['transfer', 'transferChecked'].includes(type) &&
-				mintAt({ account, position: index }) === WSOL_TOKEN.address
+				nonNullish(program) &&
+				TOKEN_PROGRAMS.includes(program) &&
+				['transfer', 'transferChecked'].includes(type)
 			) {
 				const moved =
 					type === 'transferChecked' ? tokenAmount(info).amount : amount({ info, key: 'amount' });
+				const source = address({ info, key: 'source' });
+				const destination = address({ info, key: 'destination' });
 
-				if (isNullish(moved)) {
-					return acc;
+				// A transfer from an account to itself moves nothing.
+				if (isNullish(moved) || source === destination) {
+					return;
 				}
 
-				const into = address({ info, key: 'destination' }) === account;
-				const outOf = address({ info, key: 'source' }) === account;
-
-				// The same as for the token balance: a transfer from the account to itself moves no
-				// lamports.
-				if (into === outOf) {
-					return acc;
+				if (
+					nonNullish(destination) &&
+					mintAt({ account: destination, position }) === WSOL_TOKEN.address
+				) {
+					add({ account: destination, value: moved });
 				}
 
-				return into ? (acc ?? ZERO) + moved : maxBigInt((acc ?? ZERO) - moved, ZERO);
+				if (nonNullish(source) && mintAt({ account: source, position }) === WSOL_TOKEN.address) {
+					lamports.set(source, maxBigInt((held(source) ?? ZERO) - moved, ZERO));
+				}
+
+				return;
 			}
 
 			if (program !== 'system') {
-				return acc;
+				return;
 			}
 
-			const funds =
-				(type === 'createAccount' && address({ info, key: 'newAccount' }) === account) ||
-				(type === 'transfer' && address({ info, key: 'destination' }) === account);
+			const funded =
+				type === 'createAccount'
+					? address({ info, key: 'newAccount' })
+					: type === 'transfer'
+						? address({ info, key: 'destination' })
+						: undefined;
 
-			if (!funds) {
-				return acc;
+			const value = amount({ info, key: 'lamports' });
+
+			if (nonNullish(funded) && nonNullish(value)) {
+				add({ account: funded, value });
 			}
-
-			const lamports = amount({ info, key: 'lamports' });
-
-			return nonNullish(lamports) ? (acc ?? ZERO) + lamports : acc;
-		},
-		accountLamports[account]
+		}
 	);
 
-	funded.set(key, result);
-
-	return result;
+	return payouts;
 };
 
 /**
@@ -1358,6 +1331,8 @@ export const mapSolInstructionSummaries = ({
 		);
 	};
 
+	const payouts = closePayouts({ flattened, accountLamports, mintAt });
+
 	const owned = expandOwnedAccounts({ flattened, ownedAddresses });
 
 	// Whose an account is as of an instruction: the holder its current lifecycle began with, where
@@ -1436,7 +1411,7 @@ export const mapSolInstructionSummaries = ({
 				accountMints,
 				openedAt,
 				mintAt,
-				accountLamports,
+				returnedAt: (at) => payouts.get(at),
 				accountTokenAmounts,
 				rentExemptMinimum,
 				flattened
