@@ -224,13 +224,23 @@ export class InfuraProvider {
 	getTransactionReceipt = (hash: string): Promise<TransactionReceipt | null> =>
 		this.provider.getTransactionReceipt(hash);
 
+	// The pending count is the nonce a send signs with, so it falls back when Infura fails it. The
+	// latest count is a confirmed-history read — the one that tells whether a Velora swap was replaced
+	// — which no send waits on, and it stays with Infura alone.
 	getTransactionCount = ({
 		address,
 		tag
 	}: {
 		address: EthAddress;
 		tag: 'pending' | 'latest';
-	}): Promise<number> => this.provider.getTransactionCount(address, tag);
+	}): Promise<number> =>
+		tag === 'pending'
+			? this.callWithFallback({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS.NONCE,
+					milliseconds: INFURA_READ_TIMEOUT_MILLISECONDS,
+					call: (provider) => provider.getTransactionCount(address, tag)
+				})
+			: this.provider.getTransactionCount(address, tag);
 
 	getTransactionCountLatest = (address: EthAddress): Promise<number> =>
 		this.getTransactionCount({ address, tag: 'latest' });
