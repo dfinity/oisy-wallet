@@ -139,7 +139,7 @@ So the SDK bump is its own project, and none is planned (2026-09-23). This featu
 
 ## 8. Analytics
 
-One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES), amounts and USD values, as `deposit_withdraw` does. It never carries a principal. The terminal event fires once, from the AUT (§6.5). Choosing the Compute filter is covered by the filter's existing tracking.
+One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES), amounts and USD values, as `deposit_withdraw` does. It never carries a principal. The terminal event fires from the AUT (§6.5), once per browser profile that sees the mint end: the loader records that it fired in local storage, and the backend has no claim to make it once overall, so another browser or device, or a second tab already open, reports the same ending again, as for every other flow the loader tracks. Choosing the Compute filter is covered by the filter's existing tracking.
 
 ## 9. Acceptance criteria
 
@@ -164,7 +164,7 @@ One structured event family, following the domain-service pattern in `docs/ai/fr
 - **AC14** If the AUT row cannot be created, no ICP moves.
 - **AC15** A mint in flight, minted or failed shows in the Active transactions list as "Mint X ICP → TCYCLES" with the Cycles Minting Canister as provider.
 - **AC16** The CMC deposit account never appears among the recently used ICP destinations and never suppresses the first-time destination warning.
-- **AC17** The mint analytics fire as specified, once per mint, and never carry a principal.
+- **AC17** The mint analytics fire as specified, the terminal event once per browser profile that sees the mint end, and never carry a principal.
 - **AC18** PRODUCT.md documents the Compute asset type and minting, including the non-goals.
 
 ## 10. Non-goals
