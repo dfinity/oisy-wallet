@@ -132,6 +132,9 @@
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "Zdrojový kód na GitHubu",
+			"x": "",
+			"help": "Nápověda",
+			"faq": "",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
 			"documentation": "Dokumentace",
@@ -163,7 +166,10 @@
 			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
 			"documentation": "Otevřít dokumentaci $oisy_name",
 			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
+			"help_page": "Otevřít stránku nápovědy",
 			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "Vygenerovat pozvánku",
 			"binance_qr_code": "Vygenerovat odkaz na Binance Clubhouse",
 			"refer_a_friend": "Vygenerovat pozvánku pro přítele",
@@ -786,6 +792,60 @@
 		},
 		"alt": {
 			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
+		}
+	},
+	"help": {
+		"text": {
+			"title": "Nápověda",
+			"support_title": "Podpora",
+			"support_description": "Odpovědi a další informace najdete na stránce podpory v dokumentaci $oisy_name. Pokud si nebudete vědět rady, obraťte se na tým.",
+			"support_link": "Přejít na naši stránku podpory",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "Výběr tokenů z ICPSwapu",
+			"icpswap_description": "Při swapu na ICPSwapu projdou vaše tokeny nejprve poolem a teprve pak se vrátí k vám. Pokud tento poslední krok selhal, tokeny jsou stále vaše a stále v poolu. $oisy_name je může najít a poslat vám je zpět.",
+			"scan": "Zkontrolovat moje pooly",
+			"scanning": "Kontrolujeme vaše pooly…",
+			"scan_hint": "Zkontroluje každý pool mezi dvěma tokeny aktivními ve vaší peněžence. Pokud jste směnili na token, který jste nikdy nezapnuli, nejprve ho zapněte a pak skenujte znovu nebo zadejte pár níže.",
+			"scan_nothing_found": "V $pools zkontrolovaných poolech nic nezůstalo.",
+			"scan_unreadable": "$unreadable z $pools poolů se nepodařilo přečíst. Zkuste to znovu nebo zadejte pár níže.",
+			"or_pick_a_pair": "Nebo zadejte pár",
+			"token_first": "První token",
+			"token_second": "Druhý token",
+			"select_token": "Vybrat",
+			"no_tokens": "Lze vybrat jen ICP. Nejprve zapněte chybějící token poolu, nebo oba tokeny, pokud pool neobsahuje ICP.",
+			"checking_pool": "Kontrolujeme pool…",
+			"nothing_to_withdraw": "V tomto poolu není co vybrat.",
+			"results_found": "Nalezené vybratelné zůstatky: $balances.",
+			"balance_unused": "Nevyužitý zůstatek",
+			"withdraw": "Vybrat"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "Vyberte první token poolu",
+			"select_token_second": "Vyberte druhý token poolu",
+			"withdraw": "Vybrat $symbol z poolu",
+			"scan": "Zkontrolovat pooly mezi vašimi aktivními tokeny"
+		},
+		"error": {
+			"pool_not_found": "Pro tento pár se nepodařilo najít pool. Zkontrolujte oba tokeny nebo to za chvíli zkuste znovu.",
+			"load_failed": "Vaše zůstatky v tomto poolu se nepodařilo přečíst.",
+			"withdraw_failed": "Výběr se nezdařil.",
+			"scan_failed": "Seznam poolů ICPSwap se nepodařilo načíst."
+		},
+		"success": {
+			"withdraw": "Vybráno $amount $symbol z poolu.",
+			"withdraw_hidden": "Vybráno $symbol z poolu."
 		}
 	},
 	"settings": {

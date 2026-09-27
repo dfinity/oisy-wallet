@@ -12,7 +12,7 @@ use shared::types::{
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
     },
     token_id::TokenId,
 };
@@ -21,7 +21,10 @@ use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, 
 
 /// Create a new active transaction. Checks are ordered so callers always see
 /// the most informative error: `InvalidId` → `AlreadyExists` (idempotent
-/// retries land here even at the cap) → `InvalidData` → `TooManyActiveTransactions`.
+/// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
+/// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
+/// names the specific reason this create is refused and tells the caller what to
+/// wait for, where the cap only says the store is full.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -38,6 +41,18 @@ pub fn create(
     validate_data(&request.data)?;
     validate_progress_step(request.progress_step.as_deref())?;
     validate_external_refs(&request.external_refs)?;
+
+    // An XRPL `Sequence` is a nonce, so at most one unresolved payment may exist
+    // per source address. The frontend refuses early too, but that check cannot
+    // be atomic with this create — between the two it reads the account, derives
+    // a signing key and takes a threshold signature, and a second tab can pass
+    // its own check inside that window. This call is the only place that sees the
+    // check and the write at once, so this is what actually holds the invariant.
+    if let ActiveUserTransactionData::Xrp(d) = &request.data {
+        if has_open_xrp_send(map, principal, &d.source_address) {
+            return Err(ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
 
     if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
         return Err(ActiveUserTransactionError::TooManyActiveTransactions);
@@ -125,6 +140,28 @@ pub fn list(
         scan_principal(map, principal).map(|(_, c)| c.0).collect();
 
     GetActiveUserTransactionsResponse { transactions }
+}
+
+/// Whether a non-terminal XRP payment already exists for this source address.
+///
+/// Per **address**, not per user: a record for a different address says nothing
+/// about this one's sequence, and refusing on it would block an unrelated send.
+/// Compared raw, like everywhere else this address travels — a classic address is
+/// base58 over a checksummed payload, so case is significant.
+fn has_open_xrp_send(
+    map: &ActiveUserTransactionsMap,
+    principal: Principal,
+    source_address: &str,
+) -> bool {
+    scan_principal(map, principal).any(|(_, Candid(tx))| {
+        matches!(
+            tx.status,
+            ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
+        ) && matches!(
+            tx.data,
+            ActiveUserTransactionData::Xrp(ref d) if d.source_address == source_address
+        )
+    })
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -217,11 +254,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -229,26 +266,26 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_chain_fusion_pair(d)?;
         }
         ActiveUserTransactionData::OisyTrade(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_oisy_trade_pair(d)?;
         }
         ActiveUserTransactionData::Xrp(d) => {
-            require_valid_amount(&d.amount)?;
-            require_valid_amount(&d.fee)?;
+            require_valid_amount(&d.amount, "amount")?;
+            require_valid_amount(&d.fee, "fee")?;
             require_xrp_token(&d.token)?;
             require_xrp_address(&d.source_address, "source_address")?;
             require_xrp_address(&d.destination_address, "destination_address")?;
@@ -262,16 +299,20 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
 /// integer any supported chain uses. The upper bound is what makes the encoded
 /// size of a record provable: `Nat` is variable-length, so an unbounded amount
 /// would let a single record carry megabytes into permanent stable memory.
-fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+///
+/// `field` is named rather than assumed because a payload can carry more than
+/// one such value — an XRP row validates its transaction cost here too, and
+/// reporting that as an `amount` problem sends the reader to the wrong field.
+fn require_valid_amount(amount: &Nat, field: &str) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount must be greater than zero".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be greater than zero"
+        )));
     }
     if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount is too large".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} is too large"
+        )));
     }
     Ok(())
 }
@@ -380,7 +421,10 @@ fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> 
 /// that a value which could never name an XRPL account is refused rather than
 /// stored. Mirrors `require_evm_address` — length, prefix, charset, no checksum.
 fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransactionError> {
-    if addr.is_empty() || addr.len() > MAX_XRP_ADDRESS_LEN {
+    // Both ends, and the lower one matters as much: a string like `"r"` clears
+    // the prefix and charset checks below while being far too short for
+    // base58check to have produced it.
+    if addr.len() < MIN_XRP_ADDRESS_LEN || addr.len() > MAX_XRP_ADDRESS_LEN {
         return Err(ActiveUserTransactionError::InvalidData(format!(
             "{field} invalid length"
         )));
@@ -969,6 +1013,8 @@ mod tests {
 
     const XRP_SOURCE: &str = "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi";
     const XRP_DESTINATION: &str = "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv";
+    const XRP_OTHER_SOURCE: &str = "rETD6N4kWuW9tDE6ewyzZsXw2uqzDAPQwg";
+    const XRP_OTHER_DESTINATION: &str = "rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi";
 
     fn xrp_data(
         amount: u64,
@@ -1023,11 +1069,53 @@ mod tests {
         // Every XRPL transaction destroys a non-zero transaction cost, so a row
         // claiming a zero fee describes a payment that could not have been
         // signed.
+        //
+        // The exact message is asserted, not just the variant: the fee is the
+        // second `Nat` this payload validates, and a shared validator that named
+        // the wrong field would send the reader to the amount instead.
         let (mut map, _mm) = setup();
         let mut req = create_req("xrp-1");
         req.data = xrp_data(25_000_000, 0, None, XRP_SOURCE, XRP_DESTINATION);
         let err = create(&mut map, principal(), req, 1).unwrap_err();
-        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_oversized_fee_rejected() {
+        // The other end of the same bound, and the other message that has to name
+        // the fee rather than the amount.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::parse(MAX_WIDTH_AMOUNT).unwrap() + Nat::from(1u32),
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee is too large".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_zero_amount_names_the_amount() {
+        // The counterpart to the two above: making the validator field-aware must
+        // not make an amount problem report as a fee one.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
     }
 
     #[test]
@@ -1069,6 +1157,18 @@ mod tests {
         for (source, destination, expected) in [
             ("", XRP_DESTINATION, "source_address invalid length"),
             (XRP_SOURCE, "", "destination_address invalid length"),
+            // Clears the prefix and charset checks but is far too short for
+            // base58check to have produced it — the lower bound is the only
+            // thing that refuses it.
+            ("r", XRP_DESTINATION, "source_address invalid length"),
+            // One character below the bound, still valid base58 with the right
+            // prefix, so the length is the only thing that can refuse it.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrG",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (XRP_SOURCE, "r", "destination_address invalid length"),
             (
                 "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMiXXXXX",
                 XRP_DESTINATION,
@@ -1101,6 +1201,133 @@ mod tests {
                 ActiveUserTransactionError::InvalidData(expected.to_string())
             );
         }
+    }
+
+    // The invariant the whole XRP guard exists for, enforced here because the
+    // frontend's own check cannot be atomic with this create.
+    #[test]
+    fn xrp_second_open_send_from_the_same_address_rejected() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        // A different id and a different destination: neither is what refuses it.
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, Some(7), XRP_SOURCE, XRP_OTHER_DESTINATION);
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_rejected_while_the_first_is_executing() {
+        // `Executing` is non-terminal too, and a row that has advanced past
+        // `Pending` is exactly one whose sequence is still in play.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+        update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Executing),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("advance");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_allowed_once_the_first_is_terminal() {
+        // Bounded by design: the record self-clears within the signed validity
+        // window, and the address is free again the moment it does.
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+
+            let mut first = create_req("xrp-1");
+            first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            create(&mut map, principal(), first, 1).expect("first send");
+            update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "xrp-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .expect("resolve");
+
+            let mut second = create_req("xrp-2");
+            second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+
+            create(&mut map, principal(), second, 3).expect("second send");
+        }
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_address() {
+        // Per address, not per user: a record for a different address says
+        // nothing about this one's sequence.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+
+        create(&mut map, principal(), second, 2).expect("other address");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_user() {
+        // The scan is principal-scoped, so one user's open payment cannot refuse
+        // another's — even from the same address, which two users cannot share
+        // anyway.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-1");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+
+        create(&mut map, other_principal(), second, 2).expect("other user");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_flow() {
+        // Only XRP carries this constraint; the six swap flows are unaffected.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        create(&mut map, principal(), create_req("swap-1"), 2).expect("another flow");
     }
 
     #[test]
