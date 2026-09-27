@@ -20,6 +20,12 @@ export const CYCLES_LEDGER_DEPOSIT_FEE = 100_000_000n;
 // refunded minus 0.0003 ICP, which for amounts this small means nothing comes back.
 export const CYCLES_MINT_MIN_ESTIMATE = 2n * CYCLES_LEDGER_DEPOSIT_FEE;
 
+// What the CMC keeps of a mint deposit it refunds, in ICP e8s: the ledger fee of the refund
+// transfer, plus twice that again, which it burns (`MINT_CYCLES_REFUND_FEE` in
+// `rs/nns/cmc`). A refund of this much or less returns nothing, so the form only lets
+// through amounts above it, whatever the rate.
+export const CYCLES_MINT_REFUND_FEES = 30_000n;
+
 // How often the form re-reads the ICP/XDR rate. The CMC refreshes it every 5 minutes.
 export const CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS = 60_000;
 
