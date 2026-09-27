@@ -292,7 +292,7 @@ export const mintCycles = async ({
 
 		// No answer, so the transfer may have landed. The row stays `Pending` without a
 		// deposit, which the poller resolves from the ICP history: it finishes the mint, or
-		// deletes the row once the transfer can no longer land.
+		// closes the row as never sent once the ICP index has synced past its landing.
 		throw new CyclesMintError('unconfirmed');
 	}
 

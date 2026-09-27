@@ -415,7 +415,8 @@ describe('cycles-mint.services', () => {
 			);
 		});
 
-		// The transfer may have landed: the poller looks it up and finishes or deletes the row.
+		// The transfer may have landed: the poller looks it up, then finishes the mint or closes
+		// the row as never sent.
 		it('keeps the row when the transfer gets no answer', async () => {
 			vi.mocked(icrc1Transfer).mockRejectedValue(new Error('Network error'));
 
