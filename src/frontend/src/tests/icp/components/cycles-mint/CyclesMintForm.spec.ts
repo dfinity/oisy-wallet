@@ -136,15 +136,48 @@ describe('CyclesMintForm', () => {
 		);
 	});
 
-	// Such an amount is refunded minus fees larger than itself.
-	it('cannot continue when the estimate would not clear the deposit fee with a margin', () => {
+	// A refund returns the amount minus 0.0003 ICP, so nothing at all, whatever it mints.
+	it.each(['0.0003', '0.0001'])(
+		'cannot continue with %s ICP, which mints enough but a refund returns nothing of',
+		(sendAmount) => {
+			const { container, getByTestId } = render(CyclesMintForm, {
+				props: props({ sendAmount }),
+				context: context()
+			});
+
+			expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).toBeDisabled();
+			expect(container).toHaveTextContent('The amount is too small to mint TCYCLES.');
+		}
+	);
+
+	it('continues just above 0.0003 ICP', () => {
+		const { getByTestId } = render(CyclesMintForm, {
+			props: props({ sendAmount: '0.00030001' }),
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).toBeEnabled();
+	});
+
+	// Above 0.0003 ICP, but at 0.5 TCYCLES per ICP it mints less than twice the deposit fee:
+	// if the rate halved before the mint runs, nothing would clear the fee.
+	it('cannot continue when it would mint less than twice the deposit fee', () => {
 		const { container, getByTestId } = render(CyclesMintForm, {
-			props: props({ sendAmount: '0.000001' }),
+			props: props({ sendAmount: '0.00035', xdrPermyriadPerIcp: 5_000n }),
 			context: context()
 		});
 
 		expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).toBeDisabled();
 		expect(container).toHaveTextContent('The amount is too small to mint TCYCLES.');
+	});
+
+	it('continues once it mints twice the deposit fee', () => {
+		const { getByTestId } = render(CyclesMintForm, {
+			props: props({ sendAmount: '0.0004', xdrPermyriadPerIcp: 5_000n }),
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).toBeEnabled();
 	});
 
 	it('cannot continue when the amount and the fee exceed the balance', async () => {

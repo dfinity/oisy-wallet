@@ -18,7 +18,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 - **Portfolio** — Assets, NFTs, Activity.
 - **Finance** — Trade, Earn, Borrow.
-- **More** — Notes, Explore, Rewards, Settings.
+- **More** — Notes, Explore, Rewards, Help, Settings.
 
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
@@ -26,8 +26,9 @@ On **desktop** every section is laid out at once under a non-interactive heading
 - **Finance destinations.** **Earn** (`/earn/`) is a standalone destination, distinct from the Earning tab inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag and — since each has a single provider today — route **directly to that provider's page**, skipping the intermediate category page: Trade to the **OISY TRADE** provider page (`/providers/oisy-trade/`), Borrow to the Liquidium provider page (`/providers/liquidium/`). The Assets **Trading** tab (`/trading/`) remains a distinct surface. Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
+- **Help** (`/help/`) — behind `HELP_ENABLED` (`src/frontend/src/env/help.env.ts`, on for local and staging builds, off in production), which gates the navigation entry only; the route itself is unguarded — sits in the More group directly before Settings, under a life-buoy icon. The user menu keeps its own link straight out to the external help centre; the two do not compete, because the navigation entry is Help and the menu entry is Support.
 
-On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
+On **mobile** the bottom bar has five slots: **Assets · Activity · Finance · Notes · More**. **Finance** is a raised center **cradle** (layers icon) and **More** is the right-hand entry; each opens a **bottom sheet** of its children (Finance: Trade / Earn / Borrow; More: NFTs / Explore / Rewards / Help / Settings) under the group name. The bar **stays visible while a sheet is open** so the opened entry can show its state: a **grey** "pressed" fill when the sheet is open over another page (the current page keeps its blue), and a **blue** treatment when the entry owns the current page — with the active child marked inside the sheet. Tapping the open entry again, the backdrop, or any destination closes the sheet. (These open-state signals are mobile-only; desktop shows every group at once with no "menu-open" state.)
 
 The desktop sidebar's logo header and social-links footer remain a follow-up.
 
@@ -127,6 +128,26 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 | `deposit`        | funds are deposited | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_price`, `token_usd_value`; `result_error` on failure |
 | `withdraw`       | funds are withdrawn | `executing` → `success`/`error` | same                                                                                            |
 
+### Help tracking
+
+The [Help](#help) page emits one structured `help` event under `event_context: help` and `source_location: help_page`, following the domain-service pattern (the action in `event_modifier`, the card in `event_subcontext`, the outcome in `result_status`).
+
+| `event_modifier` | `event_subcontext`   | Fires when                                  | `result_status`                                       | Extra                                                                                                      |
+| ---------------- | -------------------- | ------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `open`           | —                    | the Help page opens                         | `success`                                             | —                                                                                                          |
+| `contact`        | `support`            | the help-centre link is clicked             | `success`                                             | `event_key: link`, `event_value`: destination URL                                                          |
+| `explorer`       | `network_explorers`  | a block explorer link is clicked            | `success`                                             | `event_key: network` + the network; no `event_provider`                                                    |
+| `explorer`       | `provider_explorers` | a provider explorer link is clicked         | `success`                                             | `event_provider`: the provider id; `event_key: network` + the chain                                        |
+| `scan`           | `icpswap_withdrawal` | the scan completes                          | `executing` → `success`/`error`/`cancel` (superseded) | `event_key: balances_found` + the count; `source_detail`: pools checked                                    |
+| `select_pool`    | `icpswap_withdrawal` | a token pair resolves and its balances load | `success` / `error` (no pool)                         | `token_symbol` / `token2_symbol`, `token_network: icp`; on success `event_key: balances_found` + the count |
+| `withdraw`       | `icpswap_withdrawal` | a row's Withdraw button is pressed          | `executing` → `success`/`error`                       | `token_symbol`, `token_network: icp`, `token_standard`                                                     |
+
+Failures carry an allow-listed `result_error_type` — `pool_not_found`, `canister_error` or `unknown` — and never ICPSwap's own message, which is free text the pool canister authors and we cannot bound; the user still sees it in the toast.
+
+Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A stranded ICPSwap balance is a rare event with a distinctive amount that is also visible on-chain, which is the de-anonymising join forbidden by invariant 3 in [`analytics.md`](frontend/analytics.md); the `balances_found` count on `select_pool` carries the same product signal without it.
+
+The same invariant keeps the destination URL out of both `explorer` subcontexts, unlike `contact`: every explorer URL on those two cards embeds a wallet address. The provider and the network carry the whole product signal — which explorer users reach for, and for which chain — with none of the identity.
+
 ### Cycles mint tracking
 
 [Minting TCYCLES](#mint-tcycles) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_*` is the ICP paid and `token2_*` the TCYCLES received.
@@ -136,7 +157,7 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 | `open`           | the Mint modal opens       | none                            | none                                                                                                                                                                             |
 | `mint`           | a mint starts and finishes | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_value`, `token2_symbol`, `token2_amount` (the estimate while executing, what was credited on success); `result_error_code` on failure |
 
-`result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there; every other ending, `not_sent` included, fires once from the mint's active user transaction, whichever session closes it. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
+`result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted; a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
 
 ---
 
@@ -247,6 +268,65 @@ The user-menu popover (the `IconUser` button) carries a **Language** selector fo
 The user menu also carries the **theme/appearance** selector when signed in (unchanged).
 
 The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.
+
+---
+
+## Help
+
+A dedicated page (`/help/`) for resolving problems without filing a ticket. The test for what belongs here is whether it lets a user settle something themselves that would otherwise become a support request. It is laid out like Settings — a stack of cards — so the two read as one family.
+
+Data export is deliberately **not** here: it is a utility, not help. It stays on the Settings page until a second utility exists to justify a Utilities page of its own.
+
+### Support
+
+The first card explains where to get help and links out to the OISY help centre. It is the same destination as the user menu's Support link, kept at the top of the page as the fallback for anything the page below cannot resolve.
+
+### Block explorers
+
+OISY's transaction history is an index built from third-party providers, so it can lag behind the chain: a received transfer missing, a balance minutes stale, a send confirmed on-chain but not yet listed. The block explorer is the ground truth, and this card opens it at the user's own address — one link per **enabled mainnet network**, labelled with that network's name and logo.
+
+The card renders from the user's enabled mainnet networks rather than a fixed list, so switching a network off in Settings removes its link, and a network the wallet gains is one map entry away from having one. Testnets never appear: the card is about real funds, and a user running testnets already knows where the explorer is. Most of the links use the same explorer host as the rest of the wallet. Two differ on purpose:
+
+- **Internet Computer** uses `icexplorer.io`, not the network's own `dashboard.internetcomputer.org`, whose account page is keyed by the 64-character account identifier — while the address OISY shows a user is their principal. This is a correctness requirement, not a preference.
+- **Bitcoin** uses `mempool.space`, where the network's own explorer is `blockstream.info`. A preference.
+
+As on the provider card below, a link whose address has not loaded is left out, and a card with no available link is hidden.
+
+### Provider transaction status
+
+Swaps and bridge transfers are settled by third parties, and a cross-chain transfer can sit in a provider-internal state for minutes: a deposit seen but not yet credited, one leg filled while the destination leg waits, a refund in flight. OISY shows "pending" for that whole window; the provider's own explorer already says exactly where the transfer is.
+
+This card links straight into those explorers, each pre-filtered to the user's own address — one link per address a provider can settle against:
+
+- **Velora** — the user's order list, on their Ethereum address.
+- **NEAR Intents** — three links, for their Ethereum, Solana and Bitcoin addresses.
+- **1Sec** — two links, for their principal and their Ethereum address.
+
+One Ethereum address serves every EVM network OISY supports, so the EVM link is offered once per provider rather than per chain. The links point at the providers' production explorers only, and a link whose address has not loaded yet is left out entirely rather than opening an explorer with an empty query; a provider with no available link, and a card with no available provider, disappear the same way.
+
+The links are deliberately **not** gated behind the providers' swap feature flags. Those flags decide whether a _new_ transfer may be started, while this card answers a question about a transfer already made — and a past transfer outlives a flag rollback. It matters most for 1Sec, whose integration is being wound down to its unwrapping direction: the users with the strongest reason to check a 1Sec transfer are the ones holding a bridged position the wallet no longer routes into.
+
+The card links out; it does not read provider state, and it cannot say whether a given transfer is stuck. ICPSwap and KongSwap are not listed — ICP-side activity is already visible in the wallet's own history, and the card below recovers the one ICPSwap failure mode that strands funds.
+
+### ICPSwap Token Withdrawal
+
+OISY swaps ICRC tokens through ICPSwap, which deposits the tokens into a pool canister, swaps them, then withdraws them back. When that final withdrawal fails — the pool canister unavailable, a slow subnet, the browser closed mid-flow — the tokens stay credited to the user inside the pool. The swap flow already retries twice, but once the user leaves the swap wizard OISY previously offered no way back to the funds.
+
+This card recovers them, two ways.
+
+**Scan my pools** checks, in one press, every ICPSwap pool that exists between two tokens active in the user's wallet — the path for someone who does not remember which pair they were swapping. The pool table arrives in a single query and is filtered locally, so the cost is one query plus one balance query per pool that actually exists between two active tokens: a wallet with 17 active ck-tokens reaches 9 pools, not 136 pairs, and enabling every shipped token that has a pool reaches 89. Balance queries go out in bounded batches, so a token-heavy wallet cannot fan out hundreds of simultaneous calls and have the throttled ones look like pools that could not be read. Pools are read independently, so one that fails is reported as unreadable rather than discarding the rest — a partial scan never passes for a complete one. The scan runs only when pressed, never on page load.
+
+The scan only covers pools where **both** legs are active. A swap into a token the user never enabled leaves a pool the scan cannot see, so the card asks the user to enable that token first and then scan again. The second way is to pick the two tokens themselves: it draws on the same enabled tokens, so it reaches the same pools, but as one targeted query rather than the whole pool table. Either way OISY resolves the pool exactly as a swap does, at the single fee tier OISY trades on, and lists the **unused balance** for each leg — the balance the pool credited to the user and never returned. Results are grouped per pool under the pair that identifies it.
+
+ICPSwap also tracks a second, **mistransferred** balance, for tokens transferred to a pool canister without a matching deposit call. That is deliberately **not** covered, because it cannot arise: it belongs to the direct ICRC-1 deposit flow, and OISY swaps exclusively through the ICRC-2 approval flow. ICPSwap agrees — it answers a mistransfer query for a pool's own trading pair with "use deposit and withdraw instead".
+
+Each listed balance has its **own** Withdraw button and withdraws in full. Per-row rather than one button for the pool, so that a partial failure stays visible: a failed withdrawal shows the error from ICPSwap and leaves its row in place to retry, while a successful one re-reads that pool — a single query, not another scan — so the row disappears, or stays showing a remainder if the pool credited more in between. Only the pressed row shows a loading state.
+
+Balances at or below the token's ledger fee are **not shown at all** — they cannot be moved, and offering them would only invite a withdrawal that is bound to fail. When a pair resolves to a pool that holds nothing, the card says so explicitly rather than showing an empty space; when the pair has no pool at all, it says that instead.
+
+ICP and the user's **enabled** ICRC tokens can be picked — ICP always, since it is one leg of most ICPSwap pools but is not an ICRC token and so is absent from the ICRC lists. A token chosen on one side is removed from the other side's options. The order the two tokens are picked in does not matter.
+
+The page deliberately does **not**: scan pools where only one leg is active (roughly half of all pools have ICP as a leg, so that would be hundreds of balance queries — the token has to be enabled first, for manual selection too); scan other fee tiers (every live pool sits on the one OISY trades on); recover funds from any other swap provider; or touch ICPSwap liquidity positions, which OISY does not create. Linking to this page from the swap-failure toast itself, with the pair pre-selected, is a planned follow-up.
 
 ---
 
@@ -420,7 +500,7 @@ The maximum sendable amount subtracts the whole reserve as well as the fee, so t
 
 The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap, in every environment; `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`) is kept as a kill switch that hides it. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, the form offers a Max of 0 and cannot continue.
 
-**Form.** The user enters ICP and sees the TCYCLES it mints as an estimate: ICP × the CMC's rate, minus the cycles ledger's 0.0001 TCYCLES deposit fee. It is an estimate because the CMC converts at its rate when the mint runs, not when the user looked. The rate ("1 ICP ≈ N TCYCLES") is read from the CMC, refreshed every minute and read again when Review opens, and the amount waits for it. The fees are the ICP network fee, on top of the amount, and the cycles ledger fee, out of what is received. The form cannot continue without a rate, with no amount, with an amount that with its fee exceeds the balance, or with an estimate below twice the deposit fee: a rate drop before the mint runs could leave nothing to credit, and a refund of so small an amount returns nothing after the CMC's fees. A notice says that minting cannot be undone.
+**Form.** The user enters ICP and sees the TCYCLES it mints as an estimate: ICP × the CMC's rate, minus the cycles ledger's 0.0001 TCYCLES deposit fee. It is an estimate because the CMC converts at its rate when the mint runs, not when the user looked. The rate ("1 ICP ≈ N TCYCLES") is read from the CMC, refreshed every minute and read again when Review opens, and the amount waits for it. The fees are the ICP network fee, on top of the amount, and the cycles ledger fee, out of what is received. The form cannot continue without a rate, with no amount, with an amount that with its fee exceeds the balance, or with an amount below the lower bound, which has two parts. The amount must be above 0.0003 ICP, since a refund returns the ICP minus 0.0003 ICP and so returns nothing at or below that, and it must mint at least twice the deposit fee at the current rate, since a rate drop before the mint runs could otherwise leave nothing to credit. A notice says that minting cannot be undone.
 
 **Review** shows what is paid and minted with their fiat values, the rate, both fees and the CMC as the minter, and repeats the notice.
 
@@ -428,8 +508,8 @@ The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send a
 
 **Settlement.** A mint is two calls, an ICP transfer to the CMC and a notify that only the user's own principal can make, so a tab closed in between would strand the ICP. Every mint is therefore an [active user transaction](#cross-session-settlement), opened **before** the transfer and carrying the transfer's creation timestamp; a mint whose row cannot be opened does not start. The Active transactions list shows it as "Mint X ICP → TCYCLES" on the ICP network, with the Cycles Minting Canister as provider. The global poller finishes what the modal did not:
 
-- A row with a deposit is notified until the CMC answers minted, refunded or a final error. Notifying the same deposit twice is harmless (the CMC answers the second call from the first one's result), so the modal and the poller need no coordination beyond the poller waiting a minute of silence on a row first. While the CMC keeps answering that it is still processing, or cannot be reached, the poller asks again about once a minute rather than on every poll.
-- A row without a deposit (its tab died during the transfer) is looked up in the certified ICP history of the user's CMC deposit account, by the transfer's creation timestamp, amount and `MINT` memo. That account only holds mint deposits and their burns and refunds, so the search stays short however busy the wallet is. A deposit found is recorded and notified. Once the transfer can no longer land, a row still without one closes as failed, never sent: nothing moved, and the entry confirms that the mint the user started did not happen instead of vanishing from the list. The modal only sends a transfer within a minute of its timestamp and the call expires minutes after that, so the poller waits 15 minutes from the timestamp, leaving room for clocks that disagree.
+- A row with a deposit is notified until the CMC answers minted, refunded or a final error. Notifying the same deposit twice is harmless (the CMC answers the second call from the first one's result), so the modal and the poller need no coordination beyond the poller waiting a minute of silence on a row first. While the CMC keeps answering that it is still processing, or cannot be reached, the poller asks again about once a minute rather than on every poll. A deposit left un-notified until the CMC's most recent 1,000,000 notifications have moved past it gets `TransactionTooOld`, a final answer: the row closes as failed, and the ICP stays in the CMC's custody for good, since only the user's own principal could notify it and the CMC no longer will.
+- A row without a deposit (its tab died during the transfer, or the transfer call got no answer) is looked up in the certified ICP history of the user's CMC deposit account, by the transfer's sender, creation timestamp, amount and `MINT` memo. That account only holds mint deposits and their burns and refunds, so the search stays short however busy the wallet is. A deposit found is recorded and notified. Once the transfer can no longer land, a row still without one closes as failed, never sent: nothing moved, and the entry confirms that the mint the user started did not happen instead of vanishing from the list. The modal only sends a transfer within a minute of its timestamp and the call expires minutes after that, so that moment is 15 minutes after the row opened on the backend. The poller only acts on it once the ICP index has synced a block the ledger dates later, so a lagging index keeps the row in flight, and no device clock decides it.
 
 Recovery never sends ICP; it only finishes a deposit that exists.
 

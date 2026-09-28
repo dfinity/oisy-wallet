@@ -219,13 +219,19 @@ export const mintCycles = async ({
 	}
 
 	// Best-effort, for a row whose mint never sent anything: a delete that fails leaves the
-	// row `Pending` without a deposit, which the poller deletes once the transfer can no
-	// longer land.
-	const deleteRow = async () => {
+	// row `Pending` without a deposit, which the poller closes as never sent once the ICP
+	// index has synced past its landing, and which then reports the mint's ending itself.
+	// Whether the row is gone is returned, so that the modal only reports an ending the row
+	// will not.
+	const deleteRow = async (): Promise<boolean> => {
 		try {
 			await deleteActiveUserTransaction({ identity, id: mintId });
+
+			return true;
 		} catch (err: unknown) {
 			consoleError(err);
+
+			return false;
 		}
 	};
 
@@ -263,9 +269,7 @@ export const mintCycles = async ({
 	// What bounds when this transfer can still land, and so when the poller may conclude
 	// it never will: a transfer is only ever sent within this window of its timestamp.
 	if (nowInBigIntNanoSeconds() - transferCreatedAtNs > CYCLES_MINT_TRANSFER_START_WINDOW_NS) {
-		await deleteRow();
-
-		throw fail('timed_out');
+		throw (await deleteRow()) ? fail('timed_out') : new CyclesMintError('timed_out');
 	}
 
 	trackCyclesMint({ ...analytics, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING });
@@ -285,14 +289,12 @@ export const mintCycles = async ({
 
 		// The ledger answered and refused: nothing moved.
 		if (err instanceof IcrcError) {
-			await deleteRow();
-
-			throw fail('transfer_failed');
+			throw (await deleteRow()) ? fail('transfer_failed') : new CyclesMintError('transfer_failed');
 		}
 
 		// No answer, so the transfer may have landed. The row stays `Pending` without a
 		// deposit, which the poller resolves from the ICP history: it finishes the mint, or
-		// deletes the row once the transfer can no longer land.
+		// closes the row as never sent once the ICP index has synced past its landing.
 		throw new CyclesMintError('unconfirmed');
 	}
 

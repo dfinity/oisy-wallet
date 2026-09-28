@@ -3,8 +3,10 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import CyclesMintDetails from '$icp/components/cycles-mint/CyclesMintDetails.svelte';
-	import { CYCLES_MINT_MIN_ESTIMATE } from '$icp/constants/cmc.constants';
-	import { estimateCyclesMintCredited } from '$icp/utils/cycles-mint.utils';
+	import {
+		estimateCyclesMintCredited,
+		isCyclesMintAmountTooSmall
+	} from '$icp/utils/cycles-mint.utils';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 	import IconMoveDown from '$lib/components/icons/lucide/IconMoveDown.svelte';
@@ -81,13 +83,11 @@
 			: undefined
 	);
 
-	// Below twice the deposit fee, a drop in the rate before the mint runs could leave
-	// nothing to credit, and the CMC would refund it minus fees larger than the amount.
+	// Review applies the same bound again, to the quote it shows.
 	let tooSmall = $derived(
 		nonNullish(amount) &&
 			amount > ZERO &&
-			nonNullish(xdrPermyriadPerIcp) &&
-			amount * xdrPermyriadPerIcp < CYCLES_MINT_MIN_ESTIMATE
+			isCyclesMintAmountTooSmall({ amount, xdrPermyriadPerIcp })
 	);
 
 	let invalid = $derived(
