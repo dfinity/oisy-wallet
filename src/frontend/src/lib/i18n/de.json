@@ -2612,6 +2612,8 @@
 			"transaction_fee": "Transaktionsgebühr",
 			"insufficient_funds_for_fee": "Guthaben reicht nicht aus, um Betrag und Gebühren zu decken.",
 			"supply_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Bereitstellen ist deaktiviert, bis sie geladen sind.",
+			"minimum_supply": "",
+			"supply_below_minimum": "",
 			"borrow_review": "Kreditaufnahme prüfen",
 			"borrow_review_subtitle": "Du leihst",
 			"borrowing": "Kreditaufnahme läuft",

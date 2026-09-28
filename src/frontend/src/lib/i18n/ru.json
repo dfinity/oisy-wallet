@@ -2612,6 +2612,8 @@
 			"transaction_fee": "Комиссия за транзакцию",
 			"insufficient_funds_for_fee": "Недостаточно средств для покрытия суммы и комиссий.",
 			"supply_prices_unavailable": "Цены временно недоступны. Предоставление отключено, пока они не загрузятся.",
+			"minimum_supply": "",
+			"supply_below_minimum": "",
 			"borrow_review": "Проверить займ",
 			"borrow_review_subtitle": "Ты занимаешь",
 			"borrowing": "Оформление займа",
