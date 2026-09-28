@@ -383,6 +383,31 @@ describe('cycles-mint.services', () => {
 			);
 		});
 
+		// A create can fail after the backend committed the row, if only its answer was lost.
+		it('deletes the row it may have opened after all when the create fails', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('not_trackable');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				id: 'mint-1'
+			});
+		});
+
+		// Such a row would report its own ending, as never sent, once the poller closes it.
+		it('leaves the ending of a mint that could not start to a row it could not delete', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('not_trackable');
+
+			expect(icrc1Transfer).not.toHaveBeenCalled();
+			expect(trackCyclesMint).not.toHaveBeenCalledWith(
+				expect.objectContaining({ errorCode: 'not_trackable' })
+			);
+		});
+
 		const suspendBeforeSending = () =>
 			vi.mocked(createActiveUserTransaction).mockImplementation(() => {
 				vi.setSystemTime(NOW_MS + Number(CYCLES_MINT_TRANSFER_START_WINDOW_NS / 1_000_000n) + 1);
