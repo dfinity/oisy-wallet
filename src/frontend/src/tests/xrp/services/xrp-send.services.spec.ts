@@ -177,11 +177,73 @@ describe('xrp-send.services', () => {
 		expect(progress.mock.calls.map(([step]) => step)).not.toContain(ProgressStepsSendXrp.CONFIRM);
 	});
 
-	// Past the broadcast a progress observer must not be able to change what happened to the blob.
-	// Unguarded, a throw at CONFIRM escaped as a plain error with no `pending` attached — which a
-	// caller cannot tell from a pre-broadcast failure, so it rebuilds on a new sequence and pays
-	// twice — and a throw at DONE reported a validated `tesSUCCESS` as a rejection, where a resend
-	// is unambiguously a duplicate.
+	// Past the broadcast a progress observer must not be able to change what the caller is told.
+	// Unguarded, a throw at RELOAD or DONE reached the wizard's catch — which relies on only
+	// pre-broadcast failures getting there — and reported a submitted payment as a failed send.
+	describe('a progress observer that throws', () => {
+		const throwingAt = (step: ProgressStepsSendXrp) =>
+			vi.fn((reported: ProgressStepsSendXrp) => {
+				if (reported === step) {
+					throw new Error(`observer failed at ${reported}`);
+				}
+			});
+
+		it.each([ProgressStepsSendXrp.RELOAD, ProgressStepsSendXrp.DONE])(
+			'cannot change the outcome when it throws at %s',
+			async (step) => {
+				const progress = throwingAt(step);
+
+				await expect(sendXrp({ ...params, progress })).resolves.toBeDefined();
+
+				expect(xrplRest.submitXrpTransaction).toHaveBeenCalledOnce();
+				// Logged, not discarded: the throw is a caller bug, and it should stay visible.
+				expect(console.error).toHaveBeenCalledExactlyOnceWith(
+					`XRP send progress observer threw at ${step}; the transaction outcome is unaffected.`,
+					new Error(`observer failed at ${step}`)
+				);
+			}
+		);
+
+		// Both post-broadcast steps are still reported, so one observer failing does not silence
+		// the other.
+		it('still reports DONE when the observer threw at RELOAD', async () => {
+			const progress = throwingAt(ProgressStepsSendXrp.RELOAD);
+
+			await sendXrp({ ...params, progress });
+
+			expect(progress.mock.calls.map(([reported]) => reported)).toContain(
+				ProgressStepsSendXrp.DONE
+			);
+		});
+
+		// The other half of the contract. Before the record there is nothing to resolve and nothing on
+		// the wire, so an observer throwing must still abort — wrapping those calls would swallow a
+		// real caller failure at the one moment it is free to fail.
+		it.each([
+			ProgressStepsSendXrp.INITIALIZATION,
+			ProgressStepsSendXrp.SIGN,
+			ProgressStepsSendXrp.SEND
+		])('still aborts the send when it throws at %s', async (step) => {
+			const progress = throwingAt(step);
+
+			await expect(sendXrp({ ...params, progress })).rejects.toThrow('observer failed');
+
+			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// `SEND` is the step a refactor would most plausibly move to the wrong side of the record: the
+		// row is created in that step, so reporting it after the create reads naturally. A throw there
+		// would leave the row open for a payment nothing broadcasts, refusing every send from this
+		// address until it expires.
+		it('opens no record when it throws at SEND', async () => {
+			const progress = throwingAt(ProgressStepsSendXrp.SEND);
+
+			await expect(sendXrp({ ...params, progress })).rejects.toThrow('observer failed');
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("the sender's own reserve", () => {
 		// XRPL applies a payment that would leave the account below its reserve as
 		// `tecUNFUNDED_PAYMENT`: fee destroyed, sequence burned, nothing delivered. The balance and
