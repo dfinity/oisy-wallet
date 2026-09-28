@@ -159,7 +159,7 @@ describe('xrp-send.services', () => {
 		expect(second.txHash).toBe(first.txHash);
 	});
 
-	// No `CONFIRM`: the send stops at the broadcast, so the last two steps report that finishing
+	// No confirmation step: the send stops at the broadcast, so the last two steps report that finishing
 	// rather than the payment landing. Waiting for the ledger here would hold the user for the whole
 	// validity window over something the record already tracks.
 	it('reports progress through the send steps, without confirming', async () => {
@@ -174,7 +174,6 @@ describe('xrp-send.services', () => {
 			ProgressStepsSendXrp.RELOAD,
 			ProgressStepsSendXrp.DONE
 		]);
-		expect(progress.mock.calls.map(([step]) => step)).not.toContain(ProgressStepsSendXrp.CONFIRM);
 	});
 
 	// Past the broadcast a progress observer must not be able to change what the caller is told.
