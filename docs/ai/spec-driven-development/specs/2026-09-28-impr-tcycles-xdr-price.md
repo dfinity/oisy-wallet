@@ -4,7 +4,7 @@
 
 - **Type:** `impr`
 - **Area:** Frontend (price providers, price worker, analytics); backend (exchange-rate providers) in a later follow-up
-- **Status:** Ready for the frontend PR. All questions and decisions resolved (§10).
+- **Status:** Ready for implementation, in this spec's own PR (§7). All questions and decisions resolved (§10).
 
 ---
 
@@ -40,7 +40,7 @@ The IMF defines the XDR as a fixed basket of five currencies, and CoinGecko, the
 - **CoinGecko's own XDR is stale.** `vs_currencies=xdr` works on the public and the Pro API (§10, Q1), but in 10 days of hourly history to 2026-09-28 CoinGecko's XDR/USD changed once, on 2026-09-21 at 15:00 UTC, from 1.36928 to 1.36441, while its EUR/USD changed 145 times in the same 239 hours. On 2026-09-28 it was 0.32% above the IMF's latest rate.
 - **The CMC mints at `CXDR`,** which the exchange rate canister computes from the 2016 amounts (`src/xrc/src/forex.rs` in `dfinity/exchange-rate-canister`): 0.28% above the IMF basket on 2026-09-28, hence the 1.3635 in §1.
 - **The swap guard:** `calculateValueDifference` (`src/frontend/src/lib/utils/swap.utils.ts`) with `SWAP_VALUE_DIFFERENCE_WARNING_VALUE = -1` and `SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5` (`src/frontend/src/lib/constants/swap.constants.ts`). A token without a price makes the review ask for its own confirmation (`value_difference_missing_price_confirmation`).
-- **Analytics:** `docs/ai/frontend/analytics.md` (event families, metadata keys, privacy invariants).
+- **Analytics:** `docs/ai/frontend/analytics.md` (event families, metadata keys, privacy invariants). The only severity key today is `result_error_severity`, which rates errors alone (`blocker`, `critical`, `major`, `minor`).
 - **The token:** TCYCLES in `src/frontend/src/env/tokens/tokens.icrc.json`.
 
 ## 3. Behaviour
@@ -50,19 +50,20 @@ The IMF defines the XDR as a fixed basket of five currencies, and CoinGecko, the
 3. **TCYCLES is never priced from a market.** Neither ICPSwap nor KongSwap is asked for TCYCLES, in any mode, fill or fallback. A CoinGecko listing, should one appear, does not override the peg either: it would track the same pools.
 4. **No usable basket, no TCYCLES price.** If a refresh lacks any of the five BTC prices (the request failed, or a value is missing, non-finite or not positive), or the basket has expired (§3.5), TCYCLES has no price for that refresh: it shows "$ value is not available", and the swap review asks for the missing-price confirmation. No other token is affected (§10, D2).
 5. **The basket expires after a grace period.** The 2022 amounts are valid through 2027-07-31. During the grace period, from 2027-08-01 to 2027-09-30 (UTC), TCYCLES is still priced with them: the new basket is worth the same on its first day and drifts away slowly, so two months cost about 0.01%, and the new amounts have time to ship. From 2027-10-01 00:00 UTC, TCYCLES has no price until the amounts are updated (§10, D4).
-6. **An analytics event counts down to the switch.** From 2027-07-25 00:00 UTC, one week before the switch, every price refresh that includes TCYCLES fires one Plausible event with its phase and the whole days left in it, rounded up:
+6. **An analytics event counts down to the switch.** From 2027-07-25 00:00 UTC, one week before the switch, every price refresh that includes TCYCLES fires one Plausible event, with the phase in `event_key`, the whole days left in it, rounded up, in `event_value`, and the phase's level in `event_severity` (§3.7):
 
-   | Phase     | When                     | Level   | Meaning                                                                      | Days left until |
-   | --------- | ------------------------ | ------- | ---------------------------------------------------------------------------- | --------------- |
-   | `valid`   | 2027-07-25 to 2027-07-31 | info    | Prices are valid; the end date is coming.                                    | 2027-08-01      |
-   | `grace`   | 2027-08-01 to 2027-09-30 | warning | The IMF's new basket applies; OISY's price now drifts from the official XDR. | 2027-10-01      |
-   | `expired` | from 2027-10-01          | error   | TCYCLES has no price.                                                        | (always 0)      |
+   | Phase           | When                     | `event_severity` | Meaning                                                                      | Days left until |
+   | --------------- | ------------------------ | ---------------- | ---------------------------------------------------------------------------- | --------------- |
+   | `expiring_soon` | 2027-07-25 to 2027-07-31 | `warn`           | The basket will expire soon; prices are still exact.                         | 2027-08-01      |
+   | `grace`         | 2027-08-01 to 2027-09-30 | `warn`           | The IMF's new basket applies; OISY's price now drifts from the official XDR. | 2027-10-01      |
+   | `expired`       | from 2027-10-01          | `error`          | TCYCLES has no price.                                                        | (always 0)      |
 
-   The level follows from the phase, so the event does not repeat it in a field of its own. The event carries no amount, no USD value and nothing about the user. At one refresh every 5 minutes, that is up to 12 events an hour per open wallet with TCYCLES enabled (§10, D5).
+   The event carries no amount, no USD value and nothing about the user. At one refresh every 5 minutes, that is up to 12 events an hour per open wallet with TCYCLES enabled (§10, D5).
 
-7. **The backend follows later.** This change prices TCYCLES on the frontend: on the provider path, which staging, beta and production use, and by keeping it out of the ICPSwap/Kong cascade in backend mode's frontend fill. The backend itself keeps pricing TCYCLES through ICPSwap until the backend follow-up (§7), so a build running in backend mode, which no deployed environment does today (§2), keeps the ICPSwap price until then: the backend's price wins every collision (§10, D3).
-8. **No new frontend request.** The five BTC prices come from the BTC request that every refresh already sends, with `eur,cny,jpy,gbp` added to its currencies. The backend follow-up sends at most one extra CoinGecko request per refresh, and only when TCYCLES is among the tokens it prices.
-9. **Everything else follows the price:** the balance, the portfolio total, the display-currency conversion, the swap value difference, the Mint flow's USD figures and the USD values in analytics. None of them changes.
+7. **`event_severity` is a new, general metadata key,** so that any event can be filtered by severity. Its scale, from low to high, is `info`, `warn`, `error`, `blocker`: OpenTelemetry's level names, with `blocker` as in `result_error_severity` (the user cannot continue at all) in place of `fatal`. `result_error_severity` stays as it is. Only the countdown event sets `event_severity` for now (§10, D6).
+8. **The backend follows later.** This change prices TCYCLES on the frontend: on the provider path, which staging, beta and production use, and by keeping it out of the ICPSwap/Kong cascade in backend mode's frontend fill. The backend itself keeps pricing TCYCLES through ICPSwap until the backend follow-up (§7), so a build running in backend mode, which no deployed environment does today (§2), keeps the ICPSwap price until then: the backend's price wins every collision (§10, D3).
+9. **No new frontend request.** The five BTC prices come from the BTC request that every refresh already sends, with `eur,cny,jpy,gbp` added to its currencies. The backend follow-up sends at most one extra CoinGecko request per refresh, and only when TCYCLES is among the tokens it prices.
+10. **Everything else follows the price:** the balance, the portfolio total, the display-currency conversion, the swap value difference, the Mint flow's USD figures and the USD values in analytics. None of them changes.
 
 What users will notice, by design:
 
@@ -92,15 +93,16 @@ What users will notice, by design:
 - **AC4** A CoinGecko `token_price` result for `um5iw…`, if one ever appears, does not replace the basket price.
 - **AC5** A refresh that lacks any of the five BTC prices leaves TCYCLES unpriced ("$ value is not available") and every other price unchanged.
 - **AC6** TCYCLES is priced with the 2022 amounts until 2027-09-30 23:59:59 UTC and has no price from 2027-10-01 00:00 UTC.
-- **AC7** From 2027-07-25 00:00 UTC, every refresh that includes TCYCLES fires exactly one countdown event, with its phase and days: `valid` 7 at 2027-07-25 00:00, `valid` 1 at 2027-07-31 23:00, `grace` 61 at 2027-08-01 00:00, `grace` 1 at 2027-09-30 23:00, `expired` 0 at 2027-10-01 00:00. No event fires before 2027-07-25, or for a refresh without TCYCLES.
+- **AC7** From 2027-07-25 00:00 UTC, every refresh that includes TCYCLES fires exactly one countdown event, with its phase, days and severity: `expiring_soon` 7 `warn` at 2027-07-25 00:00, `expiring_soon` 1 `warn` at 2027-07-31 23:00, `grace` 61 `warn` at 2027-08-01 00:00, `grace` 1 `warn` at 2027-09-30 23:00, `expired` 0 `error` at 2027-10-01 00:00. No event fires before 2027-07-25, or for a refresh without TCYCLES.
 - **AC8** The provider path sends the same requests as before; only the BTC request's `vs_currencies` changes.
 - **AC9** Every other token keeps its sources, their order and their filters.
 - **AC10** Unit tests cover the price and 24h change derivation, each missing or invalid BTC price, the expiry and event boundaries of AC6 and AC7 on a mocked clock, the event's full metadata per phase, the absence of any ICPSwap or Kong request for TCYCLES on either frontend path, and the basket price's precedence over a CoinGecko listing.
-- **AC11** `docs/ai/PRODUCT.md` → _Exchange-rate sourcing_ states the TCYCLES rule, including that the frontend never prices TCYCLES from a market, the basket's end date and grace period, the countdown event, and that backend mode still shows the backend's price for TCYCLES until the backend follow-up.
+- **AC11** `docs/ai/frontend/analytics.md` §4 documents `event_severity` and its scale, next to `result_error_severity`, and the severity values come from a `plausible.ts` enum, not literals.
+- **AC12** `docs/ai/PRODUCT.md` → _Exchange-rate sourcing_ states the TCYCLES rule, including that the frontend never prices TCYCLES from a market, the basket's end date and grace period, the countdown event, and that backend mode still shows the backend's price for TCYCLES until the backend follow-up.
 
 **Backend follow-up**
 
-- **AC12** In backend mode, the backend returns TCYCLES with the price and 24h change of AC1 and AC2 from its own CoinGecko response, under the same expiry as AC6, never asks ICPSwap for it, leaves it unpriced without a usable basket, and does not let a CoinGecko listing replace the basket price. `docs/ai/PRODUCT.md` drops the backend-mode exception.
+- **AC13** In backend mode, the backend returns TCYCLES with the price and 24h change of AC1 and AC2 from its own CoinGecko response, under the same expiry as AC6, never asks ICPSwap for it, leaves it unpriced without a usable basket, and does not let a CoinGecko listing replace the basket price. `docs/ai/PRODUCT.md` drops the backend-mode exception.
 
 ## 6. Non-goals
 
@@ -108,16 +110,17 @@ What users will notice, by design:
 - Loading the basket amounts at runtime: the IMF fixes the next ones only on the last business day before they apply, so the 2027 update is a code change, and the countdown event (§3.6) is its reminder.
 - The exchange rate canister's outdated `CXDR` amounts, which are outside OISY.
 - XDR as a display currency.
+- Adding `event_severity` to existing events.
 - A market cap for TCYCLES (it has none today either).
 - Any change to the ICPSwap/Kong fallback or its liquidity filter for other tokens.
 
-## 7. Implementation plan (atomic PRs)
+## 7. Implementation plan
 
-1. `feat(frontend): price TCYCLES at its XDR peg`: `eur,cny,jpy,gbp` added to the provider path's BTC request; TCYCLES priced from the basket with its 24h change, end date and grace period, and kept out of the ICPSwap/Kong cascade, on the provider path and in the backend-mode fill; the countdown event, added as `docs/ai/frontend/analytics.md` describes; tests; PRODUCT.md (AC1 to AC11). This is the PR that changes staging, beta and production.
-2. Later, as its own follow-up: `feat(backend): price TCYCLES at its XDR peg`: TCYCLES taken out of the CoinGecko token request and the ICPSwap supplemental, and priced from the basket with one `simple/price?ids=bitcoin&vs_currencies=usd,eur,cny,jpy,gbp&include_24hr_change=true` request, sent only when TCYCLES is requested; Rust unit tests; PRODUCT.md (AC12).
+1. This PR (#14153), which carries this spec and the frontend implementation together, renamed `feat(frontend): price TCYCLES at its XDR peg` once the code is in: `eur,cny,jpy,gbp` added to the provider path's BTC request; TCYCLES priced from the basket with its 24h change, end date and grace period, and kept out of the ICPSwap/Kong cascade, on the provider path and in the backend-mode fill; the countdown event and the `event_severity` key, added as `docs/ai/frontend/analytics.md` describes, with that doc updated; tests; PRODUCT.md (AC1 to AC12). This is the PR that changes staging, beta and production.
+2. Later, as its own follow-up: `feat(backend): price TCYCLES at its XDR peg`: TCYCLES taken out of the CoinGecko token request and the ICPSwap supplemental, and priced from the basket with one `simple/price?ids=bitcoin&vs_currencies=usd,eur,cny,jpy,gbp&include_24hr_change=true` request, sent only when TCYCLES is requested; Rust unit tests; PRODUCT.md (AC13).
 3. In the last days of July 2027, once the IMF publishes the new amounts: a PR that sets them and their end date.
 
-PR 1 ships alone (§10, D3) and changes every deployed environment, since none of them uses backend prices (§2). Until the backend follow-up lands, a build running in backend mode keeps showing the ICPSwap price for TCYCLES, since the backend wins every collision.
+This PR ships alone (§10, D3, D7) and changes every deployed environment, since none of them uses backend prices (§2). Until the backend follow-up lands, a build running in backend mode keeps showing the ICPSwap price for TCYCLES, since the backend wins every collision.
 
 ## 8. Open questions (facts to confirm)
 
@@ -131,8 +134,10 @@ None.
 
 - **D1 Source (revised 2026-09-28):** the IMF basket, valued with CoinGecko's live EUR, CNY, JPY and GBP rates. It replaces CoinGecko's own XDR, which was chosen first the same day and dropped once its history showed it stale (§2). 1 XDR is the official value of 1 TCYCLES; the alternatives are in §4.
 - **D2 No usable rate (§3.4), was P1:** TCYCLES has no price for that refresh, with no fallback to ICPSwap or any other source (2026-09-28). A missing price is honest and makes the swap review ask for confirmation, while the pool price is what this spec removes: in one day it ranged from 94% below the peg to 64% above it.
-- **D3 Backend (§3.7, §7), was P2:** later. The frontend PR ships alone, and the backend follows as its own PR (2026-09-28). No deployed environment uses backend prices (staging's `exchange_rate_enabled` is off, and beta and production never read it), so the frontend PR alone changes all of them.
+- **D3 Backend (§3.8, §7), was P2:** later. The frontend PR ships alone, and the backend follows as its own PR (2026-09-28). No deployed environment uses backend prices (staging's `exchange_rate_enabled` is off, and beta and production never read it), so the frontend PR alone changes all of them.
 - **D4 End date (§3.5):** the 2022 amounts carry their end date and a grace period to 2027-09-30, after which TCYCLES has no price rather than a price from an outdated basket (2026-09-28).
-- **D5 Countdown event (§3.6):** from one week before the switch, on every price refresh, with the days left in the current phase: `valid` (info), `grace` (warning), `expired` (error), which keeps it firing once TCYCLES has lost its price (2026-09-28).
+- **D5 Countdown event (§3.6):** from one week before the switch, on every price refresh, with the days left in the current phase: `expiring_soon` (warn), `grace` (warn), then `expired` (error), which keeps it firing once TCYCLES has lost its price (2026-09-28).
+- **D6 Severity (§3.7):** a new `event_severity` key, so that any event can be filtered by severity, on the scale `info`, `warn`, `error`, `blocker` (2026-09-28). The common standards all name the level above warning "error" and put worse levels above it (OpenTelemetry: TRACE, DEBUG, INFO, WARN, ERROR, FATAL; syslog, RFC 5424: … Warning, Error, Critical …); OISY's `blocker` takes the place of `fatal`.
+- **D7 One PR:** the spec ships in the feature's PR: #14153 gains the frontend implementation, `analytics.md` and `PRODUCT.md`. The backend follow-up and the 2027 amounts stay separate, later PRs (2026-09-28).
 - **Q1 Pro API:** CoinGecko's Pro API (`pro-api.coingecko.com`, used by the frontend's provider path and by the backend) returns `xdr` from `simple/price` like the public API; checked with the production key on 2026-09-28 at 11:18 UTC (BTC at 83,026 USD and 60,851 XDR: 1.3644). Since D1's revision the basket needs only EUR, CNY, JPY and GBP, which the display-currency switcher already requests.
 - **Q2 CoinGecko's XDR update rhythm:** one change in 10 days of hourly history (§2), which led to D1's revision.
