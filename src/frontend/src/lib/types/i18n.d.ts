@@ -901,6 +901,7 @@ interface I18nCycles_mint {
 		rate_unavailable: string;
 		amount_too_small: string;
 		refunded: string;
+		refunded_nothing: string;
 		failed: string;
 		not_started: string;
 		transfer_failed: string;

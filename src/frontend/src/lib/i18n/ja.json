@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "$tokenのレートを読み込めませんでした。しばらくしてからもう一度お試しください。",
 			"amount_too_small": "$tokenをミントするには金額が少なすぎます。",
 			"refunded": "ミントは返金されました。$tokenは$refundFee $tokenを差し引いて返却されました。理由: $reason",
+			"refunded_nothing": "ミントは返金されましたが、手数料で全額が差し引かれたため、$tokenは返却されませんでした。理由: $reason",
 			"failed": "ミントに失敗しました。理由: $reason",
 			"not_started": "ミントを開始できませんでした。何も送信されていません。もう一度お試しください。",
 			"transfer_failed": "$tokenの送金に失敗しました。何も送信されていません。",

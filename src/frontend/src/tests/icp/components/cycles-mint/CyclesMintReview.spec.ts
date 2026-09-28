@@ -109,7 +109,7 @@ describe('CyclesMintReview', () => {
 
 	it('mints at a quote that keeps the amount above the bound', () => {
 		const { container, getByTestId } = render(CyclesMintReview, {
-			props: props({ sendAmount: '0.0004', xdrPermyriadPerIcp: 5_000n }),
+			props: props({ sendAmount: '0.00040001', xdrPermyriadPerIcp: 5_000n }),
 			context: context()
 		});
 

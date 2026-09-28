@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Nie udało się załadować kursu $token. Spróbuj ponownie później.",
 			"amount_too_small": "Kwota jest za mała, aby wybić $token.",
 			"refunded": "Wybijanie zostało zwrócone. Twoje $token wróciły, pomniejszone o $refundFee $token. Powód: $reason",
+			"refunded_nothing": "Wybijanie zostało zwrócone, ale opłaty pochłonęły całą kwotę: żadne $token nie wróciły. Powód: $reason",
 			"failed": "Wybijanie nie powiodło się. Powód: $reason",
 			"not_started": "Nie udało się rozpocząć wybijania. Nic nie zostało wysłane, spróbuj ponownie.",
 			"transfer_failed": "Przelew $token nie powiódł się. Nic nie zostało wysłane.",

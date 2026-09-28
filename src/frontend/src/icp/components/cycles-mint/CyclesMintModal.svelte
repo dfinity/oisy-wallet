@@ -138,11 +138,18 @@
 			msg: {
 				text:
 					result.status === 'refunded'
-						? replacePlaceholders($i18n.cycles_mint.error.refunded, {
-								$token: sourceToken.symbol,
-								$refundFee: REFUND_FEE,
-								$reason: result.reason
-							})
+						? replacePlaceholders(
+								// Without a refund block, the CMC's fees took the whole amount and it sent
+								// nothing back, which the form's floor rules out at today's fees.
+								nonNullish(result.refundBlockIndex)
+									? $i18n.cycles_mint.error.refunded
+									: $i18n.cycles_mint.error.refunded_nothing,
+								{
+									$token: sourceToken.symbol,
+									$refundFee: REFUND_FEE,
+									$reason: result.reason
+								}
+							)
 						: replacePlaceholders($i18n.cycles_mint.error.failed, { $reason: result.reason })
 			}
 		});

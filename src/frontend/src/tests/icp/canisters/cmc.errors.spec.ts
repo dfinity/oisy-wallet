@@ -49,7 +49,8 @@ describe('cmc.errors', () => {
 			expect(err.message).toBe('Wrong memo');
 		});
 
-		it.each([1n, 2n, 3n])('should treat the transient Other code %s as retryable', (code) => {
+		// 99 stands for a code the CMC adds later: a mint whose ICP it holds must not close on it.
+		it.each([1n, 2n, 3n, 99n])('should treat the Other code %s as retryable', (code) => {
 			const err = mapCmcNotifyError({ Other: { error_code: code, error_message: 'transient' } });
 
 			expect(err).toBeInstanceOf(CmcNotifyOtherError);
@@ -57,7 +58,7 @@ describe('cmc.errors', () => {
 			expect((err as CmcNotifyOtherError).errorCode).toBe(code);
 		});
 
-		it.each([4n, 5n, 6n, 99n])('should treat the Other code %s as final', (code) => {
+		it.each([4n, 5n, 6n])('should treat the Other code %s as final', (code) => {
 			const err = mapCmcNotifyError({ Other: { error_code: code, error_message: 'final' } });
 
 			expect(err).toBeInstanceOf(CmcNotifyOtherError);

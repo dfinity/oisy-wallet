@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Impossibile caricare il tasso di $token. Riprova più tardi.",
 			"amount_too_small": "L’importo è troppo basso per coniare $token.",
 			"refunded": "Il conio è stato rimborsato. I tuoi $token sono stati restituiti, meno $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "Il conio è stato rimborsato, ma le commissioni hanno assorbito l'intero importo: non è stato restituito alcun $token. Motivo: $reason",
 			"failed": "Il conio non è riuscito. Motivo: $reason",
 			"not_started": "Impossibile avviare il conio. Non è stato inviato nulla, riprova.",
 			"transfer_failed": "Il trasferimento di $token non è riuscito. Non è stato inviato nulla.",

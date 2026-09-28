@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Le taux des $token n’a pas pu être chargé. Veuillez réessayer plus tard.",
 			"amount_too_small": "Le montant est trop faible pour minter des $token.",
 			"refunded": "Le mint a été remboursé. Vos $token vous ont été rendus, moins $refundFee $token. Raison : $reason",
+			"refunded_nothing": "Le mint a été remboursé, mais les frais ont absorbé tout le montant : aucun $token ne vous a été rendu. Raison : $reason",
 			"failed": "Le mint a échoué. Raison : $reason",
 			"not_started": "Le mint n’a pas pu démarrer. Rien n’a été envoyé, veuillez réessayer.",
 			"transfer_failed": "Le transfert des $token a échoué. Rien n’a été envoyé.",
