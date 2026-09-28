@@ -144,6 +144,12 @@ export const toCustomToken = ({
 	};
 };
 
+// `parseTokenId` mints a new `Symbol` on every call, even for the same string. Custom tokens are
+// re-derived from scratch on every reload of the custom-token list (login, post-swap, etc.), so
+// without interning, a custom token's `TokenId` would lose referential equality across reloads
+// and desync any store (e.g. `ethTransactionsStore`) keyed by it.
+const customTokenIdCache = new Map<string, TokenId>();
+
 export const parseCustomTokenId = ({
 	identifier,
 	chainId
@@ -155,4 +161,16 @@ export const parseCustomTokenId = ({
 	| {
 			identifier: SplTokenAddress | TokenMetadata['symbol'];
 			chainId: SolanaChainId['chainId'];
-	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);
+	  }): TokenId => {
+	const key = `custom-token#${identifier}#${chainId}`;
+
+	const cachedId = customTokenIdCache.get(key);
+	if (nonNullish(cachedId)) {
+		return cachedId;
+	}
+
+	const tokenId = parseTokenId(key);
+	customTokenIdCache.set(key, tokenId);
+
+	return tokenId;
+};

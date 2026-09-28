@@ -1,5 +1,5 @@
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { parseCustomTokenId, toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
 import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
@@ -308,6 +308,33 @@ describe('custom-token.utils', () => {
 					symbol: 'mock-symbol'
 				})
 			).toThrow('Unsupported network key: UnsupportedNetwork');
+		});
+	});
+
+	describe('parseCustomTokenId', () => {
+		it('should return the same TokenId (referentially equal) for repeated calls with the same identifier and chainId', () => {
+			const params = { identifier: '0xTokenAddress', chainId: 1n };
+
+			const id1 = parseCustomTokenId(params);
+			const id2 = parseCustomTokenId(params);
+			const id3 = parseCustomTokenId({ ...params });
+
+			expect(id1).toBe(id2);
+			expect(id1).toBe(id3);
+		});
+
+		it('should return different TokenIds for different identifiers on the same chain', () => {
+			const idA = parseCustomTokenId({ identifier: '0xTokenAddressA', chainId: 1n });
+			const idB = parseCustomTokenId({ identifier: '0xTokenAddressB', chainId: 1n });
+
+			expect(idA).not.toBe(idB);
+		});
+
+		it('should return different TokenIds for the same identifier on different chains', () => {
+			const idMainnet = parseCustomTokenId({ identifier: '0xTokenAddress', chainId: 1n });
+			const idOtherChain = parseCustomTokenId({ identifier: '0xTokenAddress', chainId: 4663n });
+
+			expect(idMainnet).not.toBe(idOtherChain);
 		});
 	});
 });
