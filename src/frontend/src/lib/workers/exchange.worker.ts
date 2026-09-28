@@ -1,4 +1,5 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
@@ -39,10 +40,17 @@ import {
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
 	mergeExchangePrices,
-	type ProviderFallbackPrices
+	type ProviderFallbackPrices,
+	xdrBasketStatus,
+	xdrUsdPrice
 } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
+
+// TCYCLES is priced at its XDR peg from BTC's prices (`xdrUsdPrice`), so it is never sent to the
+// CoinGecko token request or to the ICPSwap/Kong cascade, where a thin pool would price it.
+const isTcycles = (ledgerCanisterId: LedgerCanisterIdText): boolean =>
+	ledgerCanisterId === IC_CYCLES_LEDGER_CANISTER_ID;
 
 export const onExchangeMessage = async ({
 	data
@@ -259,7 +267,7 @@ const syncExchangeFromProviders = async ({
 		exchangeRateETHToUsd(),
 		exchangeRateBTCToUsd(),
 		exchangeRateICPToUsd(),
-		exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcycles(id))),
 		exchangeRateSOLToUsd(),
 		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
@@ -312,6 +320,15 @@ const syncExchangeFromProviders = async ({
 		erc4626TokensExchangeData
 	});
 
+	// Only a refresh that includes TCYCLES reports on the basket that prices it, and once the
+	// basket has expired TCYCLES has no price rather than a wrong one.
+	const tcyclesRequested = icrcLedgerCanisterIds.some(isTcycles);
+	const currentXdrBasketStatus = tcyclesRequested ? xdrBasketStatus(Date.now()) : undefined;
+	const tcyclesPrice =
+		tcyclesRequested && currentXdrBasketStatus?.phase !== 'expired'
+			? xdrUsdPrice(currentBtcPrice?.bitcoin)
+			: undefined;
+
 	return {
 		currentExchangeRate: {
 			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
@@ -322,7 +339,10 @@ const syncExchangeFromProviders = async ({
 		currentBtcPrice,
 		currentErc20Prices,
 		currentIcpPrice,
-		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentIcrcPrices: {
+			...currentIcrcPrices,
+			...(nonNullish(tcyclesPrice) && { [IC_CYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
+		},
 		currentSolPrice,
 		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
@@ -330,7 +350,8 @@ const syncExchangeFromProviders = async ({
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice: currentEthPrice,
-		currentBaseEthPrice: currentEthPrice
+		currentBaseEthPrice: currentEthPrice,
+		...(nonNullish(currentXdrBasketStatus) && { currentXdrBasketStatus })
 	};
 };
 
@@ -351,7 +372,7 @@ const fetchProviderFallbackPrices = async ({
 		coingeckoResponse: backendData.currentErc20Prices
 	});
 	const missingIcrc = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: params.icrcLedgerCanisterIds,
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter((id) => !isTcycles(id)),
 		coingeckoResponse: backendData.currentIcrcPrices
 	});
 	const missingSpl = findMissingSplTokenAddresses({

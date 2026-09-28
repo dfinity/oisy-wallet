@@ -10,6 +10,7 @@ import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { getExchangeRates } from '$lib/api/backend.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { XDR_BASKET_CURRENCIES } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
@@ -116,11 +117,13 @@ export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 			})
 		: Promise.resolve({});
 
+// BTC's price in the XDR basket's currencies also prices TCYCLES (see `xdrUsdPrice`), so that it
+// costs no request of its own.
 export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	COINGECKO_PROVIDER_ENABLED
 		? simplePrice({
 				ids: 'bitcoin',
-				vs_currencies: Currency.USD,
+				vs_currencies: XDR_BASKET_CURRENCIES,
 				include_24hr_change: true
 			})
 		: Promise.resolve({});

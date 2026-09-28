@@ -1,4 +1,5 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -11,6 +12,7 @@ import { fetchBatchIcpSwapPrices } from '$lib/rest/icpswap.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import type {
 	CoingeckoSimpleErc4626TokenPriceResponse,
+	CoingeckoSimplePrice,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceParams,
@@ -185,7 +187,7 @@ describe('exchange.worker', () => {
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(2, {
 					ids: 'bitcoin',
-					vs_currencies: Currency.USD,
+					vs_currencies: [Currency.USD, Currency.EUR, Currency.CNY, Currency.JPY, Currency.GBP],
 					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(3, {
@@ -929,7 +931,10 @@ describe('exchange.worker', () => {
 										[id]: {
 											usd: 1,
 											usd_24h_change: 3,
-											...(vs_currencies.includes(',') ? { jpy: 3, jpy_24h_change: 5 } : {})
+											// Only the `usd,jpy` currency-rate request, not BTC's list of XDR basket currencies.
+											...(typeof vs_currencies === 'string' && vs_currencies.includes(',')
+												? { jpy: 3, jpy_24h_change: 5 }
+												: {})
 										}
 									}),
 									{}
@@ -978,6 +983,145 @@ describe('exchange.worker', () => {
 							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
 						}
 					});
+				});
+			});
+
+			describe('TCYCLES', () => {
+				// BTC on 2026-09-25 at 11:00 UTC, from CoinGecko's hourly history: one XDR is 1.36029 USD.
+				const btcPrice = {
+					usd: 84705.76,
+					eur: 74319.22,
+					cny: 568494.22,
+					jpy: 13369872.07,
+					gbp: 63957.51
+				};
+
+				const mockBtcPrice = (bitcoin: CoingeckoSimplePrice) =>
+					vi
+						.mocked(simplePrice)
+						.mockImplementation(({ ids }: CoingeckoSimplePriceParams) =>
+							Promise.resolve(ids === 'bitcoin' ? { bitcoin } : { [String(ids)]: { usd: 1 } })
+						);
+
+				const tcyclesEvent = (icrcCanisterIds: LedgerCanisterIdText[]) => ({
+					...event,
+					data: {
+						...event.data,
+						msg,
+						data: {
+							currentCurrency: Currency.USD,
+							erc20Addresses: [],
+							icrcCanisterIds,
+							splAddresses: [],
+							erc4626TokensExchangeData: []
+						}
+					}
+				});
+
+				const postedData = () => postMessageMock.mock.calls[0][0].data;
+
+				beforeEach(() => {
+					mockBtcPrice(btcPrice);
+				});
+
+				it('should price TCYCLES from the XDR basket without asking any ICRC provider', async () => {
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(simpleTokenPrice).not.toHaveBeenCalled();
+					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
+					expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
+
+					const tcyclesPrice = postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID];
+
+					expect(tcyclesPrice).toEqual({ usd: expect.any(Number), usd_market_cap: 0 });
+					expect(tcyclesPrice.usd).toBeCloseTo(1.36029, 5);
+				});
+
+				it('should keep TCYCLES out of the CoinGecko token request and the ICPSwap/Kong cascade', async () => {
+					vi.mocked(simpleTokenPrice).mockResolvedValue({});
+					vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue([]);
+					vi.mocked(fetchBatchKongSwapPrices).mockResolvedValue([]);
+
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID, 'icrc1']));
+
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+						id: 'internet-computer',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['icrc1'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+					expect(fetchBatchIcpSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
+					expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
+
+					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+						1.36029,
+						5
+					);
+				});
+
+				it('should leave TCYCLES unpriced when BTC has no price in one of the basket currencies', async () => {
+					const { jpy: _, ...btcPriceWithoutJpy } = btcPrice;
+
+					mockBtcPrice(btcPriceWithoutJpy);
+
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(postedData().currentIcrcPrices).toEqual({});
+					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
+					expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
+				});
+
+				it('should not post a basket status before the countdown', async () => {
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(postedData()).not.toHaveProperty('currentXdrBasketStatus');
+				});
+
+				it('should post the basket status and keep the price in the week before the end date', async () => {
+					vi.setSystemTime(new Date('2027-07-25T00:00:00.000Z'));
+
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(postedData().currentXdrBasketStatus).toEqual({
+						phase: 'expiring_soon',
+						daysLeft: 7
+					});
+					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+						1.36029,
+						5
+					);
+				});
+
+				it('should keep the price through the grace period', async () => {
+					vi.setSystemTime(new Date('2027-09-30T23:00:00.000Z'));
+
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(postedData().currentXdrBasketStatus).toEqual({ phase: 'grace', daysLeft: 1 });
+					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+						1.36029,
+						5
+					);
+				});
+
+				it('should stop pricing TCYCLES once the basket has expired', async () => {
+					vi.setSystemTime(new Date('2027-10-01T00:00:00.000Z'));
+
+					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+
+					expect(postedData().currentXdrBasketStatus).toEqual({ phase: 'expired', daysLeft: 0 });
+					expect(postedData().currentIcrcPrices).toEqual({});
+					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
+					expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
+				});
+
+				it('should not post a basket status for a refresh without TCYCLES', async () => {
+					vi.setSystemTime(new Date('2027-08-01T00:00:00.000Z'));
+
+					await onExchangeMessage(tcyclesEvent(['icrc1']));
+
+					expect(postedData()).not.toHaveProperty('currentXdrBasketStatus');
 				});
 			});
 		});
@@ -1630,6 +1774,36 @@ describe('exchange.worker', () => {
 						usd_24h_change: 2.5
 					});
 					expect(postedData.currentIcrcPrices.icrc2).toBeUndefined();
+				});
+
+				it('should keep TCYCLES out of the ICPSwap/Kong fill', async () => {
+					vi.mocked(getExchangeRates).mockResolvedValue(mockMyRates(...allNativesBackendRates()));
+
+					vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue([]);
+					vi.mocked(fetchBatchKongSwapPrices).mockResolvedValue([]);
+
+					const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+						...createEvent(msg),
+						data: {
+							msg,
+							data: {
+								currentCurrency: Currency.USD,
+								erc20Addresses: [],
+								icrcCanisterIds: [IC_CYCLES_LEDGER_CANISTER_ID, 'icrc1'],
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(fetchBatchIcpSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
+					expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
+
+					const postedData = postMessageMock.mock.calls[0][0].data;
+
+					expect(postedData.currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID]).toBeUndefined();
 				});
 
 				describe('when the CoinGecko fallback provider is enabled', () => {
