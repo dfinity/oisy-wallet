@@ -1590,7 +1590,11 @@
 			"crypto": "",
 			"stablecoin": "",
 			"stock": "",
-			"commodity": ""
+			"commodity": "",
+			"compute": ""
+		},
+		"category_in_sentence": {
+			"compute": ""
 		},
 		"risk": {
 			"low": "",
