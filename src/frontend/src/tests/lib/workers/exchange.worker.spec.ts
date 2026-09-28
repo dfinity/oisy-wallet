@@ -788,12 +788,46 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					// Native tokens + BTCUSD/BTCXXX
-					expect(simplePrice).toHaveBeenCalledTimes(7 + 1);
+					// Native tokens only: BTC's request also carries the display currency.
+					expect(simplePrice).toHaveBeenCalledTimes(7);
 
-					expect(simplePrice).toHaveBeenNthCalledWith(1, {
+					expect(simplePrice).toHaveBeenNthCalledWith(2, {
 						ids: 'bitcoin',
-						vs_currencies: `${Currency.USD},${Currency.JPY}`,
+						vs_currencies: [Currency.USD, Currency.EUR, Currency.CNY, Currency.JPY, Currency.GBP],
+						include_24hr_change: true
+					});
+				});
+
+				it('should add a display currency outside the XDR basket to BTC’s request', async () => {
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							msg,
+							data: {
+								currentCurrency: Currency.CHF,
+								erc20Addresses: [],
+								icrcCanisterIds: [],
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(simplePrice).toHaveBeenCalledTimes(7);
+
+					expect(simplePrice).toHaveBeenNthCalledWith(2, {
+						ids: 'bitcoin',
+						vs_currencies: [
+							Currency.USD,
+							Currency.EUR,
+							Currency.CNY,
+							Currency.JPY,
+							Currency.GBP,
+							Currency.CHF
+						],
 						include_24hr_change: true
 					});
 				});
@@ -931,8 +965,8 @@ describe('exchange.worker', () => {
 										[id]: {
 											usd: 1,
 											usd_24h_change: 3,
-											// Only the `usd,jpy` currency-rate request, not BTC's list of XDR basket currencies.
-											...(typeof vs_currencies === 'string' && vs_currencies.includes(',')
+											// Only BTC's request carries the display currency.
+											...(String(vs_currencies).split(',').includes(Currency.JPY)
 												? { jpy: 3, jpy_24h_change: 5 }
 												: {})
 										}
@@ -962,7 +996,9 @@ describe('exchange.worker', () => {
 								currency: Currency.JPY
 							},
 							currentBnbPrice: { binancecoin: { usd: 1, usd_24h_change: 3 } },
-							currentBtcPrice: { bitcoin: { usd: 1, usd_24h_change: 3 } },
+							currentBtcPrice: {
+								bitcoin: { usd: 1, usd_24h_change: 3, jpy: 3, jpy_24h_change: 5 }
+							},
 							currentErc20Prices: {
 								'0x123': { usd: 1 },
 								'0x456': { usd: 1 },

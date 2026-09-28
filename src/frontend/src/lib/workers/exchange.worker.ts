@@ -36,6 +36,7 @@ import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import {
 	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
@@ -259,9 +260,8 @@ const syncExchangeFromProviders = async ({
 	);
 
 	const results = await Promise.allSettled([
-		exchangeRateUsdToCurrency(currentCurrency),
 		exchangeRateETHToUsd(),
-		exchangeRateBTCToUsd(),
+		exchangeRateBTCToUsd(currentCurrency),
 		exchangeRateICPToUsd(),
 		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcyclesLedgerCanisterId(id))),
 		exchangeRateSOLToUsd(),
@@ -278,7 +278,6 @@ const syncExchangeFromProviders = async ({
 	});
 
 	const [
-		currentExchangeRateResult,
 		currentEthPriceResult,
 		currentBtcPriceResult,
 		currentIcpPriceResult,
@@ -290,12 +289,15 @@ const syncExchangeFromProviders = async ({
 		currentPolPriceResult
 	] = results;
 
-	const currentExchangeRate =
-		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 	const currentEthPrice =
 		currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
 	const currentBtcPrice =
 		currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
+	// The display currency's rate comes from the same BTC request as BTC's own price.
+	const currentExchangeRate = currencyExchangeRateFromBtc({
+		btcPrice: currentBtcPrice?.bitcoin,
+		currency: currentCurrency
+	});
 	const currentIcpPrice =
 		currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
 	const currentIcrcPrices =
