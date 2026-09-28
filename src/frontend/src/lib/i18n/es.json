@@ -1565,7 +1565,11 @@
 			"crypto": "Criptomonedas",
 			"stablecoin": "Stablecoins",
 			"stock": "Acciones",
-			"commodity": "Materias primas"
+			"commodity": "Materias primas",
+			"compute": "Cómputo"
+		},
+		"category_in_sentence": {
+			"compute": "tokens de cómputo"
 		},
 		"risk": {
 			"low": "Riesgo bajo",
