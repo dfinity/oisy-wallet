@@ -12,6 +12,8 @@ import {
 } from '$icp/canisters/cmc.errors';
 import {
 	CMC_MINT_CYCLES_MEMO,
+	CYCLES_MINT_DELETE_ATTEMPTS,
+	CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS,
 	CYCLES_MINT_NOTIFY_ATTEMPTS,
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
@@ -203,7 +205,6 @@ describe('cycles-mint.services', () => {
 			sourceToken: ICP_TOKEN,
 			destinationToken: TCYCLES_TOKEN,
 			amount: 150_000_000n,
-			estimatedCredited: 4_499_900_000_000n,
 			usdSourceValue: '4.5',
 			progress
 		};
@@ -324,10 +325,7 @@ describe('cycles-mint.services', () => {
 				step: 'mint',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 				sourceSymbol: 'ICP',
-				sourceAmount: '1.5',
-				sourceUsdValue: '4.5',
-				destinationSymbol: 'TCYCLES',
-				destinationAmount: '4.4999'
+				destinationSymbol: 'TCYCLES'
 			});
 			expect(JSON.stringify(vi.mocked(trackCyclesMint).mock.calls)).not.toContain(
 				mockPrincipal.toText()
@@ -482,6 +480,33 @@ describe('cycles-mint.services', () => {
 			expect(trackCyclesMint).not.toHaveBeenCalledWith(
 				expect.objectContaining({ errorCode: 'transfer_failed' })
 			);
+		});
+
+		// The delete succeeds for a row that is not there, so a later success settles an earlier
+		// delete whose answer was lost: the row is gone either way, and only the modal can report.
+		it('tries the delete again, and reports the ending once one succeeds', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new InsufficientFundsError(ZERO));
+			vi.mocked(deleteActiveUserTransaction)
+				.mockRejectedValueOnce(new Error('Network error'))
+				.mockResolvedValue();
+
+			await expect(errorKind()).resolves.toBe('transfer_failed');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(2);
+			expect(waitForMilliseconds).toHaveBeenCalledWith(CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS);
+			expect(trackCyclesMint).toHaveBeenLastCalledWith(
+				expect.objectContaining({ errorCode: 'transfer_failed' })
+			);
+		});
+
+		it('gives the delete up after its last attempt', async () => {
+			vi.mocked(icrc1Transfer).mockRejectedValue(new InsufficientFundsError(ZERO));
+			vi.mocked(deleteActiveUserTransaction).mockRejectedValue(new Error('Network error'));
+
+			await expect(errorKind()).resolves.toBe('transfer_failed');
+
+			expect(deleteActiveUserTransaction).toHaveBeenCalledTimes(CYCLES_MINT_DELETE_ATTEMPTS);
+			expect(waitForMilliseconds).toHaveBeenCalledTimes(CYCLES_MINT_DELETE_ATTEMPTS - 1);
 		});
 
 		// The transfer may have landed: the poller looks it up, then finishes the mint or closes

@@ -229,7 +229,8 @@ export const toCyclesMintRowUpdate = (
 /**
  * The terminal analytics of a mint row, read entirely off the row so they survive a
  * refresh or a later session. Never the row's `error`: that is the CMC's own reason
- * text, which can name the caller's account.
+ * text, which can name the caller's account. Nor its amounts, for the reason
+ * `TrackCyclesMintParams` gives.
  */
 export const toCyclesMintTrackingParams = ({
 	tx
@@ -246,11 +247,9 @@ export const toCyclesMintTrackingParams = ({
 			? PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 			: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 		sourceSymbol: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-		sourceAmount: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.AMOUNT],
-		sourceUsdValue: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE],
 		destinationSymbol: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL],
-		...(isSucceeded
-			? { destinationAmount: refs[CYCLES_MINT_EXTERNAL_REF_KEYS.CREDITED_AMOUNT] }
-			: { errorCode: outcome === 'refunded' || outcome === 'not_sent' ? outcome : 'failed' })
+		...(!isSucceeded && {
+			errorCode: outcome === 'refunded' || outcome === 'not_sent' ? outcome : 'failed'
+		})
 	};
 };

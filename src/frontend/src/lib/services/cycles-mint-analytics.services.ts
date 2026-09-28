@@ -26,18 +26,18 @@ export type CyclesMintStep = 'open' | 'mint';
 export type CyclesMintErrorCode =
 	'refunded' | 'failed' | 'transfer_failed' | 'not_trackable' | 'timed_out' | 'not_sent';
 
+// No amounts and no USD value, on purpose: every mint is a transfer to one of the CMC's
+// deposit accounts with the `MINT` memo, so an exact amount and the event's time would
+// pick out the one block on the public ICP ledger, and with it the sender's account
+// (`docs/ai/frontend/analytics.md` §6).
 export interface TrackCyclesMintParams {
 	step: CyclesMintStep;
 	// Omitted for `open`, which cannot fail.
 	resultStatus?: PLAUSIBLE_EVENT_RESULT_STATUSES;
-	// ICP paid → `token_symbol` / `token_amount` / `token_usd_value`.
+	// ICP paid → `token_symbol`.
 	sourceSymbol?: string;
-	sourceAmount?: string;
-	sourceUsdValue?: string;
-	// TCYCLES received → `token2_symbol` / `token2_amount`: the estimate while executing,
-	// what was credited on success.
+	// TCYCLES received → `token2_symbol`.
 	destinationSymbol?: string;
-	destinationAmount?: string;
 	errorCode?: CyclesMintErrorCode;
 }
 
@@ -45,10 +45,7 @@ export const trackCyclesMint = ({
 	step,
 	resultStatus,
 	sourceSymbol,
-	sourceAmount,
-	sourceUsdValue,
 	destinationSymbol,
-	destinationAmount,
 	errorCode
 }: TrackCyclesMintParams) => {
 	trackEvent({
@@ -59,10 +56,7 @@ export const trackCyclesMint = ({
 			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS,
 			...(nonNullish(resultStatus) && { result_status: resultStatus }),
 			...(notEmptyString(sourceSymbol) && { token_symbol: sourceSymbol }),
-			...(notEmptyString(sourceAmount) && { token_amount: sourceAmount }),
-			...(notEmptyString(sourceUsdValue) && { token_usd_value: sourceUsdValue }),
 			...(notEmptyString(destinationSymbol) && { token2_symbol: destinationSymbol }),
-			...(notEmptyString(destinationAmount) && { token2_amount: destinationAmount }),
 			...(nonNullish(errorCode) && { result_error_code: errorCode })
 		}
 	});

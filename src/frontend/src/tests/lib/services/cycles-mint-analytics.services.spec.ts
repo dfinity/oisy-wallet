@@ -38,15 +38,14 @@ describe('trackCyclesMint', () => {
 		});
 	});
 
-	it('maps both tokens onto the token and token2 fields', () => {
+	// Symbols only: an exact amount and the event's time would pick out the deposit on the
+	// public ICP ledger.
+	it('maps both tokens onto the token and token2 fields, without amounts', () => {
 		trackCyclesMint({
 			step: 'mint',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 			sourceSymbol: 'ICP',
-			sourceAmount: '1.5',
-			sourceUsdValue: '4.5',
-			destinationSymbol: 'TCYCLES',
-			destinationAmount: '4.4999'
+			destinationSymbol: 'TCYCLES'
 		});
 
 		expect(track).toHaveBeenCalledExactlyOnceWith({
@@ -57,10 +56,7 @@ describe('trackCyclesMint', () => {
 				source_location: 'token_details',
 				result_status: 'success',
 				token_symbol: 'ICP',
-				token_amount: '1.5',
-				token_usd_value: '4.5',
-				token2_symbol: 'TCYCLES',
-				token2_amount: '4.4999'
+				token2_symbol: 'TCYCLES'
 			}
 		});
 	});
@@ -79,7 +75,7 @@ describe('trackCyclesMint', () => {
 	});
 
 	it('omits the fields it was not given', () => {
-		trackCyclesMint({ step: 'mint', sourceSymbol: '', destinationAmount: '' });
+		trackCyclesMint({ step: 'mint', sourceSymbol: '', destinationSymbol: '' });
 
 		const [[{ metadata }]] = track.mock.calls;
 

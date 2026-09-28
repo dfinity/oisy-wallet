@@ -34,6 +34,12 @@ export const CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS = 60_000;
 export const CYCLES_MINT_NOTIFY_ATTEMPTS = 5;
 export const CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS = 2_000;
 
+// How often a mint that ends before any ICP moves tries to delete its row. The backend's
+// delete succeeds for a row that is not there, so a later success also settles an earlier
+// delete whose answer was lost.
+export const CYCLES_MINT_DELETE_ATTEMPTS = 3;
+export const CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS = 1_000;
+
 // How long after the row's transfer timestamp the foreground may still send the ICP. The
 // row is opened first and carries the timestamp, so a tab suspended between the two would
 // otherwise send it arbitrarily late; past this, the mint is abandoned before anything
