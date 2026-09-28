@@ -102,6 +102,13 @@ pub enum ActiveUserTransactionData {
     /// later session which token to pull back out of the DEX's custody: the
     /// destination token on a fill, the source token on a kill.
     OisyTrade(OisyTradeData),
+    /// Minting TCYCLES from ICP through the NNS Cycles Minting Canister: an ICP
+    /// transfer to the CMC's deposit account for the caller, then
+    /// `notify_mint_cycles`. Only the caller's own principal can notify its
+    /// deposit, so the row, opened before the transfer, is what lets a later
+    /// session finish a mint whose tab closed between the two calls. The ICP
+    /// block index, learned once the transfer returns, rides in `external_refs`.
+    CyclesMint(CyclesMintData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -220,6 +227,22 @@ pub struct ChainFusionData {
     pub amount: Nat,
 }
 
+/// Cycles mint payload: the values fixed when the mint starts. The row opens
+/// before the ICP transfer, so the transfer's creation timestamp is one of them;
+/// only the block index is learned later, in `external_refs`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct CyclesMintData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units: the ICP sent to the CMC, without the
+    /// ledger fee.
+    pub amount: Nat,
+    /// `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+    /// ledger deduplicate the transfer, and it is what finds the block again
+    /// when the tab died before the transfer returned.
+    pub transfer_created_at_ns: Timestamp,
+}
+
 /// Which side of the pair a swap-placed order takes. Equivalently, which leg of
 /// the pair the source token is: `Sell` spends the base token, `Buy` spends the
 /// quote token.
@@ -314,7 +337,7 @@ mod tests {
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
         OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
         UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
@@ -470,6 +493,25 @@ mod tests {
     fn chain_fusion_direction_roundtrips() {
         for direction in ChainFusionDirection::ALL {
             assert_eq!(roundtrip(&direction), direction);
+        }
+    }
+
+    const ICP_LEDGER: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    const CYCLES_LEDGER: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+
+    #[test]
+    fn cycles_mint_variant_roundtrips() {
+        // The wallet sends ICP as `Icrc` of its ledger, while `IcpNative`
+        // exists for the exchange-rate path, so both spellings of the source
+        // must survive.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let original = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+                source_token,
+                dest_token: icrc(CYCLES_LEDGER),
+                amount: Nat::from(100_000_000u64),
+                transfer_created_at_ns: 1_790_000_000_000_000_000,
+            });
+            assert_eq!(roundtrip(&original), original);
         }
     }
 

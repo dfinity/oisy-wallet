@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 use candid::Principal;
 
 const MAINNET_CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+const MAINNET_ICP_LEDGER_CANISTER_ID: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const MAINNET_SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
 
 // This gets canister IDs:
@@ -14,6 +15,10 @@ const MAINNET_SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
 pub static CYCLES_LEDGER: LazyLock<Principal> = LazyLock::new(|| {
     Principal::from_text(option_env!("CANISTER_ID_CYCLES_LEDGER").unwrap_or(MAINNET_CYCLES_LEDGER_CANISTER_ID))
         .unwrap_or_else(|e| unreachable!("The cycles_ledger canister ID from DFX and mainnet are valid and should have been parsed.  Is this being compiled in some strange way? {e}"))
+});
+pub static ICP_LEDGER: LazyLock<Principal> = LazyLock::new(|| {
+    Principal::from_text(option_env!("CANISTER_ID_ICP_LEDGER").unwrap_or(MAINNET_ICP_LEDGER_CANISTER_ID))
+        .unwrap_or_else(|e| unreachable!("The icp_ledger canister ID from DFX and mainnet are valid and should have been parsed.  Is this being compiled in some strange way? {e}"))
 });
 pub static SIGNER: LazyLock<Principal> = LazyLock::new(|| {
     Principal::from_text(option_env!("CANISTER_ID_SIGNER").unwrap_or(MAINNET_SIGNER_CANISTER_ID))

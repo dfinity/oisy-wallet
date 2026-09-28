@@ -1565,7 +1565,11 @@
 			"crypto": "Tiền mã hóa",
 			"stablecoin": "Stablecoin",
 			"stock": "Cổ phiếu",
-			"commodity": "Hàng hóa"
+			"commodity": "Hàng hóa",
+			"compute": "Điện toán"
+		},
+		"category_in_sentence": {
+			"compute": "token điện toán"
 		},
 		"risk": {
 			"low": "Rủi ro thấp",
@@ -2612,6 +2616,8 @@
 			"transaction_fee": "Phí giao dịch",
 			"insufficient_funds_for_fee": "Số dư không đủ để trang trải số tiền và phí.",
 			"supply_prices_unavailable": "Giá tạm thời không khả dụng. Việc cung cấp bị vô hiệu hóa cho đến khi giá được tải.",
+			"minimum_supply": "Mức cung cấp tối thiểu",
+			"supply_below_minimum": "Số lượng dưới mức cung cấp tối thiểu.",
 			"borrow_review": "Xem lại khoản vay",
 			"borrow_review_subtitle": "Bạn vay",
 			"borrowing": "Đang xử lý khoản vay",
