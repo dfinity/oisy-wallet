@@ -2637,6 +2637,8 @@
 			"transaction_fee": "Opłata transakcyjna",
 			"insufficient_funds_for_fee": "Saldo jest niewystarczające, aby pokryć kwotę i opłaty.",
 			"supply_prices_unavailable": "Ceny są tymczasowo niedostępne. Dostarczanie jest wyłączone do czasu ich wczytania.",
+			"minimum_supply": "Minimalne dostarczenie",
+			"supply_below_minimum": "Kwota jest niższa od minimalnego dostarczenia.",
 			"borrow_review": "Sprawdź pożyczkę",
 			"borrow_review_subtitle": "Pożyczasz",
 			"borrowing": "Trwa zaciąganie pożyczki",
