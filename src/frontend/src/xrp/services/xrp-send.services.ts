@@ -494,6 +494,13 @@ export const sendXrp = async ({
 	const { lastLedgerSequence: signedLastLedgerSequence } = deriveXrpLedgerWindow(txBlob);
 	const txHash = await deriveXrpTransactionHash(txBlob);
 
+	// Before the record, not after it — the row is created in this step, but reporting it after the
+	// create would put an observer throw past the point where the row decides the send. The payment
+	// would never be broadcast, yet the open row would refuse every send from this address for a
+	// whole validity window and then resolve as an expiry. Here a throw still aborts with nothing
+	// recorded and nothing sent, which is correct and must keep working.
+	progress?.(ProgressStepsSendXrp.SEND);
+
 	// After signing and before submitting, which is the only correct moment. Later would miss a
 	// submit whose response is lost — precisely the case the record exists for. Earlier would be a
 	// claim about a transaction that does not exist yet.
@@ -508,8 +515,6 @@ export const sendXrp = async ({
 		txHash,
 		lastLedgerSequence: signedLastLedgerSequence
 	});
-
-	progress?.(ProgressStepsSendXrp.SEND);
 
 	let submitResult: XrpSubmitResult | undefined;
 
@@ -532,6 +537,24 @@ export const sendXrp = async ({
 		);
 	}
 
+	// Past this point the blob may be on the wire and the record is open, so a progress observer must
+	// not be able to change what the caller is told. Unguarded, a throw at `RELOAD` or `DONE` reaches
+	// the wizard's catch — which relies on only pre-broadcast failures getting there — and reports a
+	// submitted payment as a failed send.
+	//
+	// Logged rather than discarded: an observer throwing is a caller bug, and the only thing that
+	// changes here is that it can no longer decide the send.
+	const reportPostBroadcastProgress = (step: ProgressStepsSendXrp) => {
+		try {
+			progress?.(step);
+		} catch (err: unknown) {
+			consoleError(
+				`XRP send progress observer threw at ${step}; the transaction outcome is unaffected.`,
+				err
+			);
+		}
+	};
+
 	// Deliberately no confirmation here. The record is the one confirmation path, and the poller
 	// drives it — for this send and for one whose session died, on the same code. Waiting here as
 	// well would mean two writers racing for a status the backend makes immutable, and would hold
@@ -541,8 +564,8 @@ export const sendXrp = async ({
 	// reloaded here either: at this point the payment has not validated, so there is nothing new to
 	// read — the balance refresh belongs to the record's terminal side effects, which run when the
 	// ledger has actually decided.
-	progress?.(ProgressStepsSendXrp.RELOAD);
-	progress?.(ProgressStepsSendXrp.DONE);
+	reportPostBroadcastProgress(ProgressStepsSendXrp.RELOAD);
+	reportPostBroadcastProgress(ProgressStepsSendXrp.DONE);
 
 	return { txHash, submitResult };
 };

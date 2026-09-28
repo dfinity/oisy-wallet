@@ -127,8 +127,7 @@ describe('XrpSendTokenWizard', () => {
 			submitResult: {
 				engineResult: 'tesSUCCESS',
 				engineResultMessage: 'The transaction was applied.',
-				txHash: 'HASH',
-				accepted: true
+				txHash: 'HASH'
 			}
 		});
 	});

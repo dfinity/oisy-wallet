@@ -379,7 +379,7 @@ describe('xrpl-rpc.schema', () => {
 		);
 
 		// None of these can be in a validated ledger, so a record claiming one is malformed — and
-		// the caller would otherwise turn it into a definitive `XrpTransactionFailedError`.
+		// the resolver would otherwise close the payment as a definitive failure.
 		it.each([
 			'tefPAST_SEQ',
 			'telINSUF_FEE_P',
@@ -477,7 +477,7 @@ describe('xrpl-rpc.schema', () => {
 			{
 				name: 'XrplSubmitResultSchema',
 				schema: XrplSubmitResultSchema,
-				result: { engine_result: 'tesSUCCESS', accepted: true }
+				result: { engine_result: 'tesSUCCESS' }
 			},
 			{
 				name: 'XrplAccountInfoFullResultSchema',
