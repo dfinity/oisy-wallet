@@ -11,10 +11,13 @@
 	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { SIGNER_TARGET } from '$lib/constants/app.constants';
+	import { MOBILE_APP_SIGNER_ENABLED } from '$lib/constants/mobile-flags.constants';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
+	import { isNativePlatform } from '$lib/utils/device.utils';
+	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
@@ -44,7 +47,17 @@
 	// Technically, from a specification standpoint, we don't have a way to fully prevent this.
 	const fadeParams: FadeParams = { delay: 150, duration: 250 };
 
+	// The signer flow assumes a dapp-opened browser popup (`window.opener`,
+	// ICRC-29 postMessage) — impossible inside the Capacitor shell. Redirect
+	// to the wallet root instead of rendering a dead flow.
+	const signerAvailable = !isNativePlatform() || MOBILE_APP_SIGNER_ENABLED;
+
 	onMount(() => {
+		if (!signerAvailable) {
+			void gotoReplaceRoot();
+			return;
+		}
+
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.SIGNER_PAGE_VISIT,
 			metadata: {
@@ -54,28 +67,30 @@
 	});
 </script>
 
-<article
-	class="mb-2 flex min-h-96 flex-col rounded-lg border border-brand-subtle-20 bg-surface px-5 py-6"
->
-	{#if $authNotSignedIn}
-		<SignerSignIn />
-	{:else}
-		<LoaderUserProfile>
-			<SignerAccounts>
-				{#if $idle}
-					<div in:fade={fadeParams}>
-						<SignerIdle />
-					</div>
-				{:else}
-					<SignerPermissions />
+{#if signerAvailable}
+	<article
+		class="mb-2 flex min-h-96 flex-col rounded-lg border border-brand-subtle-20 bg-surface px-5 py-6"
+	>
+		{#if $authNotSignedIn}
+			<SignerSignIn />
+		{:else}
+			<LoaderUserProfile>
+				<SignerAccounts>
+					{#if $idle}
+						<div in:fade={fadeParams}>
+							<SignerIdle />
+						</div>
+					{:else}
+						<SignerPermissions />
 
-					<SignerConsentMessage />
+						<SignerConsentMessage />
 
-					<SignerCallCanister />
-				{/if}
-			</SignerAccounts>
+						<SignerCallCanister />
+					{/if}
+				</SignerAccounts>
 
-			<AgreementsGuard />
-		</LoaderUserProfile>
-	{/if}
-</article>
+				<AgreementsGuard />
+			</LoaderUserProfile>
+		{/if}
+	</article>
+{/if}

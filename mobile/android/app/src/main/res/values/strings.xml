@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">OISY Wallet</string>
+    <string name="title_activity_main">OISY Wallet</string>
+    <string name="package_name">com.oisy.wallet</string>
+    <string name="custom_url_scheme">com.oisy.wallet</string>
+</resources>

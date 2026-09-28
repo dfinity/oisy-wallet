@@ -4,6 +4,18 @@
 		"ignore": false
 	},
 	{
+		"match": ".well-known/apple-app-site-association",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	},
+	{
+		"match": ".well-known/ii-auth-callbacks",
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	},
+	{
 		"match": "**/*",
 		"headers": {
 			"X-Frame-Options": "DENY",
