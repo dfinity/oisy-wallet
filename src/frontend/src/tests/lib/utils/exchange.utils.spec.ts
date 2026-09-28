@@ -1,3 +1,4 @@
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import { Currency } from '$lib/enums/currency';
 import type {
@@ -17,6 +18,7 @@ import {
 	findMissingSplTokenAddresses,
 	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices,
+	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
 	type ProviderFallbackPrices,
 	xdrBasketStatus,
@@ -813,6 +815,16 @@ describe('exchange.utils', () => {
 			expect(
 				xdrUsdPrice({ ...btcPrice, [currency]: value } as CoingeckoSimplePrice)
 			).toBeUndefined();
+		});
+	});
+
+	describe('isTcyclesLedgerCanisterId', () => {
+		it('recognises the TCYCLES ledger', () => {
+			expect(isTcyclesLedgerCanisterId(IC_CYCLES_LEDGER_CANISTER_ID)).toBeTruthy();
+		});
+
+		it('does not take another ledger for it', () => {
+			expect(isTcyclesLedgerCanisterId(MOCK_CANISTER_ID_1)).toBeFalsy();
 		});
 	});
 

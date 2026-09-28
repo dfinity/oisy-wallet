@@ -39,6 +39,7 @@ import {
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
+	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
 	type ProviderFallbackPrices,
 	xdrBasketStatus,
@@ -46,11 +47,6 @@ import {
 } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-
-// TCYCLES is priced at its XDR peg from BTC's prices (`xdrUsdPrice`), so it is never sent to the
-// CoinGecko token request or to the ICPSwap/Kong cascade, where a thin pool would price it.
-const isTcycles = (ledgerCanisterId: LedgerCanisterIdText): boolean =>
-	ledgerCanisterId === IC_CYCLES_LEDGER_CANISTER_ID;
 
 export const onExchangeMessage = async ({
 	data
@@ -267,7 +263,7 @@ const syncExchangeFromProviders = async ({
 		exchangeRateETHToUsd(),
 		exchangeRateBTCToUsd(),
 		exchangeRateICPToUsd(),
-		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcycles(id))),
+		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcyclesLedgerCanisterId(id))),
 		exchangeRateSOLToUsd(),
 		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
@@ -320,14 +316,15 @@ const syncExchangeFromProviders = async ({
 		erc4626TokensExchangeData
 	});
 
-	// Only a refresh that includes TCYCLES reports on the basket that prices it, and once the
-	// basket has expired TCYCLES has no price rather than a wrong one.
-	const tcyclesRequested = icrcLedgerCanisterIds.some(isTcycles);
-	const currentXdrBasketStatus = tcyclesRequested ? xdrBasketStatus(Date.now()) : undefined;
+	// TCYCLES costs no request of its own, so it is priced whether or not it is enabled: the swap
+	// flow lists disabled tokens too. Once the basket has expired, it has no price rather than a
+	// wrong one. Only a refresh that includes TCYCLES reports on the basket's countdown.
+	const xdrBasket = xdrBasketStatus(Date.now());
 	const tcyclesPrice =
-		tcyclesRequested && currentXdrBasketStatus?.phase !== 'expired'
-			? xdrUsdPrice(currentBtcPrice?.bitcoin)
-			: undefined;
+		xdrBasket?.phase !== 'expired' ? xdrUsdPrice(currentBtcPrice?.bitcoin) : undefined;
+	const currentXdrBasketStatus = icrcLedgerCanisterIds.some(isTcyclesLedgerCanisterId)
+		? xdrBasket
+		: undefined;
 
 	return {
 		currentExchangeRate: {
@@ -372,7 +369,9 @@ const fetchProviderFallbackPrices = async ({
 		coingeckoResponse: backendData.currentErc20Prices
 	});
 	const missingIcrc = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter((id) => !isTcycles(id)),
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter(
+			(id) => !isTcyclesLedgerCanisterId(id)
+		),
 		coingeckoResponse: backendData.currentIcrcPrices
 	});
 	const missingSpl = findMissingSplTokenAddresses({

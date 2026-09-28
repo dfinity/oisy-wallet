@@ -1116,12 +1116,16 @@ describe('exchange.worker', () => {
 					expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
 				});
 
-				it('should not post a basket status for a refresh without TCYCLES', async () => {
+				it('should price TCYCLES without posting a basket status when it is not enabled', async () => {
 					vi.setSystemTime(new Date('2027-08-01T00:00:00.000Z'));
 
 					await onExchangeMessage(tcyclesEvent(['icrc1']));
 
 					expect(postedData()).not.toHaveProperty('currentXdrBasketStatus');
+					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+						1.36029,
+						5
+					);
 				});
 			});
 		});
