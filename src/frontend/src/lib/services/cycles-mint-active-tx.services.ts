@@ -1,6 +1,10 @@
 import type { ActiveUserTransaction, CyclesMintData } from '$declarations/backend/backend.did';
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
-import { getAccountIdentifierTransactions } from '$icp/api/icp-index.api';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
+import {
+	getAccountIdentifierTransactions,
+	getIcpIndexNumBlocksSynced
+} from '$icp/api/icp-index.api';
+import { getIcpLedgerBlockTimestamp } from '$icp/api/icp-ledger.api';
 import {
 	CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS,
 	CYCLES_MINT_DEPOSIT_LOOKUP_PAGE_SIZE,
@@ -9,6 +13,8 @@ import {
 } from '$icp/constants/cmc.constants';
 import { notifyCyclesMint } from '$icp/services/cycles-mint.services';
 import { getCyclesMintDepositAccountIdentifier } from '$icp/utils/cycles-mint.utils';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { CYCLES_MINT_EXTERNAL_REF_KEYS } from '$lib/types/cycles-mint-active-tx';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -20,7 +26,7 @@ import {
 	toCyclesMintRefBlockIndex,
 	toCyclesMintRowUpdate
 } from '$lib/utils/cycles-mint-active-tx.utils';
-import { fromNullable, isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
@@ -60,8 +66,9 @@ const recordSettleObservation = ({ id, updated_at_ns }: ActiveUserTransaction): 
  * the ledger's permitted drift).
  *
  * Certified, because both answers are acted on: a deposit that is found is notified, and
- * one that is not closes its row as never sent. A single replica answering either would
- * otherwise be enough to report a funded mint as failed, or to strand one.
+ * one that is not, once the index has synced past it, closes its row as never sent. A
+ * single replica answering either would otherwise be enough to report a funded mint as
+ * failed, or to strand one.
  */
 export const findCyclesMintDeposit = async ({
 	identity,
@@ -71,6 +78,7 @@ export const findCyclesMintDeposit = async ({
 	data: CyclesMintData;
 }): Promise<bigint | undefined> => {
 	const depositAccountIdentifier = getCyclesMintDepositAccountIdentifier(identity.getPrincipal());
+	const ownAccountIdentifier = getAccountIdentifier(identity.getPrincipal()).toHex();
 	const oldestPossibleNs = data.transfer_created_at_ns - ICP_LEDGER_PERMITTED_DRIFT_NS;
 
 	let start: bigint | undefined;
@@ -91,7 +99,7 @@ export const findCyclesMintDeposit = async ({
 		}
 
 		const deposit = transactions.find(({ transaction }) =>
-			isCyclesMintDeposit({ transaction, depositAccountIdentifier, data })
+			isCyclesMintDeposit({ transaction, depositAccountIdentifier, ownAccountIdentifier, data })
 		);
 
 		if (nonNullish(deposit)) {
@@ -119,6 +127,42 @@ export const findCyclesMintDeposit = async ({
 };
 
 /**
+ * Whether the ICP index already holds every block up to `timestampNs`. The ledger appends
+ * blocks in time order and the index takes them in the same order, so it does once the
+ * last block it has taken is later. The index keeps its blocks only encoded, so that
+ * block's time is read from the ledger. A block the ledger has already archived reads as
+ * "not yet": the index is then far behind anyway, and the row only waits longer.
+ *
+ * Certified, like the lookup: a "yes" lets a row close as never sent.
+ */
+export const hasIcpIndexSyncedPast = async ({
+	identity,
+	timestampNs
+}: {
+	identity: Identity;
+	timestampNs: bigint;
+}): Promise<boolean> => {
+	const numBlocksSynced = await getIcpIndexNumBlocksSynced({
+		identity,
+		indexCanisterId: ICP_INDEX_CANISTER_ID,
+		certified: true
+	});
+
+	if (numBlocksSynced === ZERO) {
+		return false;
+	}
+
+	const lastSyncedAtNs = await getIcpLedgerBlockTimestamp({
+		identity,
+		ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+		index: numBlocksSynced - 1n,
+		certified: true
+	});
+
+	return nonNullish(lastSyncedAtNs) && lastSyncedAtNs > timestampNs;
+};
+
+/**
  * A row without a deposit: its tab died between opening the row and learning the
  * transfer's block. The transfer either landed or it did not, and the ICP history says
  * which. Recovery never sends: a deposit that is not there is never made up for.
@@ -134,6 +178,21 @@ const resolveDeposit = async ({
 	tx: ActiveUserTransaction;
 	data: CyclesMintData;
 }): Promise<bigint | undefined> => {
+	// Whether "not found" is final, asked before the lookup rather than after: an index that
+	// has synced past the last moment the transfer could land already holds the deposit if
+	// there is one, so the lookup that follows settles it. Asked after, the index could take
+	// the deposit in between, and the lookup would still have missed it. Both times are the
+	// IC's, the row's creation on the backend and the ledger's block, so no device clock
+	// decides it. Only a `Pending` row can close: every write that learns a deposit also
+	// moves the row to `Executing`, so an `Executing` row without one is malformed rather
+	// than unsent, and is left alone.
+	const notFoundIsFinal =
+		'Pending' in tx.status &&
+		(await hasIcpIndexSyncedPast({
+			identity,
+			timestampNs: tx.created_at_ns + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS
+		}));
+
 	const blockIndex = await findCyclesMintDeposit({ identity, data });
 
 	if (nonNullish(blockIndex)) {
@@ -152,15 +211,9 @@ const resolveDeposit = async ({
 		return blockIndex;
 	}
 
-	// Until the transfer can no longer land, "not found" only means "not yet". The row
-	// earns the whole grace period again before the next look.
-	const canStillLand =
-		nowInBigIntNanoSeconds() < data.transfer_created_at_ns + CYCLES_MINT_DEPOSIT_LANDING_WINDOW_NS;
-
-	// Only a `Pending` row: every write that learns a deposit also moves the row to
-	// `Executing`, so an `Executing` row without one is malformed rather than unsent, and is
-	// left alone rather than closed.
-	if (canStillLand || !('Pending' in tx.status)) {
+	// Until then, "not found" only means "not yet", however late the poller's own clock
+	// says it is. The row earns the whole grace period again before the next look.
+	if (!notFoundIsFinal) {
 		forgetRow(tx.id);
 		return undefined;
 	}

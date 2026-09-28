@@ -1,5 +1,6 @@
 import { CMC_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { CYCLES_MINT_MIN_ESTIMATE, CYCLES_MINT_REFUND_FEES } from '$icp/constants/cmc.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type { OptionToken } from '$lib/types/token';
@@ -46,3 +47,20 @@ export const estimateCyclesMintCredited = ({
 	amount: bigint;
 	xdrPermyriadPerIcp: bigint;
 }): bigint => toCyclesMintCredited(amount * xdrPermyriadPerIcp);
+
+/**
+ * Whether an amount of ICP e8s is below the Mint lower bound (spec §5.2), which has two
+ * parts. A refund returns the amount minus the CMC's refund fees, so nothing at or below
+ * them, whatever the rate. And below twice the deposit fee at the rate, a drop in the rate
+ * before the mint runs could leave nothing to credit. Without a rate, only the first part
+ * can be checked.
+ */
+export const isCyclesMintAmountTooSmall = ({
+	amount,
+	xdrPermyriadPerIcp
+}: {
+	amount: bigint;
+	xdrPermyriadPerIcp?: bigint;
+}): boolean =>
+	amount <= CYCLES_MINT_REFUND_FEES ||
+	(nonNullish(xdrPermyriadPerIcp) && amount * xdrPermyriadPerIcp < CYCLES_MINT_MIN_ESTIMATE);
