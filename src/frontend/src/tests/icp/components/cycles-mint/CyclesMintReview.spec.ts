@@ -18,7 +18,11 @@ describe('CyclesMintReview', () => {
 		]);
 
 	const props = (
-		overrides: Partial<{ sendAmount: string; xdrPermyriadPerIcp: bigint | undefined }> = {}
+		overrides: Partial<{
+			sendAmount: string;
+			xdrPermyriadPerIcp: bigint | undefined;
+			requoting: boolean;
+		}> = {}
 	) => ({
 		sendAmount: '1.5',
 		xdrPermyriadPerIcp: mockXdrPermyriadPerIcp as bigint | undefined,
@@ -57,6 +61,22 @@ describe('CyclesMintReview', () => {
 		await fireEvent.click(getByText(en.core.text.back));
 
 		expect(testProps.onBack).toHaveBeenCalledOnce();
+	});
+
+	// Review checks the bound against the quote it opened with.
+	it('cannot mint until its re-quote has come back', async () => {
+		const testProps = props({ requoting: true });
+
+		const { getByTestId, rerender } = render(CyclesMintReview, {
+			props: testProps,
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
+
+		await rerender({ ...testProps, requoting: false });
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
 	});
 
 	it('cannot mint without a rate', () => {
