@@ -343,10 +343,7 @@ describe('cycles-mint-active-tx.utils', () => {
 				step: 'mint',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				sourceSymbol: 'ICP',
-				sourceAmount: '1.5',
-				sourceUsdValue: '4.5',
-				destinationSymbol: 'TCYCLES',
-				destinationAmount: '4.4999'
+				destinationSymbol: 'TCYCLES'
 			});
 		});
 

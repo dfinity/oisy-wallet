@@ -203,7 +203,6 @@ describe('cycles-mint.services', () => {
 			sourceToken: ICP_TOKEN,
 			destinationToken: TCYCLES_TOKEN,
 			amount: 150_000_000n,
-			estimatedCredited: 4_499_900_000_000n,
 			usdSourceValue: '4.5',
 			progress
 		};
@@ -324,10 +323,7 @@ describe('cycles-mint.services', () => {
 				step: 'mint',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 				sourceSymbol: 'ICP',
-				sourceAmount: '1.5',
-				sourceUsdValue: '4.5',
-				destinationSymbol: 'TCYCLES',
-				destinationAmount: '4.4999'
+				destinationSymbol: 'TCYCLES'
 			});
 			expect(JSON.stringify(vi.mocked(trackCyclesMint).mock.calls)).not.toContain(
 				mockPrincipal.toText()

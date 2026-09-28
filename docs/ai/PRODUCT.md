@@ -150,12 +150,12 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 
 ### Cycles mint tracking
 
-[Minting TCYCLES](#mint-tcycles-local-and-staging) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_*` is the ICP paid and `token2_*` the TCYCLES received.
+[Minting TCYCLES](#mint-tcycles-local-and-staging) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_symbol` is the ICP paid and `token2_symbol` the TCYCLES received. It carries no amounts and no USD value: every mint is a transfer to one of the CMC's deposit accounts with the `MINT` memo, so an exact amount and the event's time would pick out the one block on the public ICP ledger, and with it the sender's account.
 
-| `event_modifier` | Fires when                 | `result_status`                 | Properties                                                                                                                                                                       |
-| ---------------- | -------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `open`           | the Mint modal opens       | none                            | none                                                                                                                                                                             |
-| `mint`           | a mint starts and finishes | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_value`, `token2_symbol`, `token2_amount` (the estimate while executing, what was credited on success); `result_error_code` on failure |
+| `event_modifier` | Fires when                 | `result_status`                 | Properties                                                      |
+| ---------------- | -------------------------- | ------------------------------- | --------------------------------------------------------------- |
+| `open`           | the Mint modal opens       | none                            | none                                                            |
+| `mint`           | a mint starts and finishes | `executing` → `success`/`error` | `token_symbol`, `token2_symbol`; `result_error_code` on failure |
 
 `result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted; a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
 
