@@ -131,8 +131,8 @@ const xrpJsonRpc = async ({
 	// `error_code` and `error_message` — and was previously ignored, so a FAILED response could
 	// still deliver a plausible-looking result: the method schemas strip `status` as an unknown key,
 	// and `{ status: 'error', ledger_current_index: <bogus> }` came back as an index. That is the
-	// one payload the confirmation loop cannot defend against by arithmetic, because the first
-	// validated index a run reads has nothing to corroborate it.
+	// one payload no check downstream can defend against by arithmetic, because a single index read
+	// has nothing to corroborate it.
 	//
 	// Only these two values exist. Gated on presence, so a node that omits the field is still fine.
 	if ('status' in result && status !== 'success' && status !== 'error') {
@@ -578,8 +578,8 @@ export const loadXrpTransactionOutcome = async ({
 	//
 	// A `txnNotFound` WITHOUT `searched_all` matches no variant and so lands here too, which is
 	// right: it may mean the node simply lacks the ledger our payment is in — a resynced or
-	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion declares
-	// a settled payment expired, inviting the duplicate send that `XrpSendExpiredError` calls safe.
+	// history-gapped member of a load-balanced endpoint — and reading that as non-inclusion closes a
+	// settled payment's record as expired, inviting the duplicate send the expiry message calls safe.
 	const parsed = XrplTxResultSchema.safeParse(result);
 
 	if (!parsed.success) {
@@ -600,8 +600,8 @@ export const loadXrpTransactionOutcome = async ({
 	// And therefore the one that must be bound to the question. The validated and pending branches
 	// carry a `hash` to compare; absence carries none, so the echoed request is the only identity
 	// available — and without it a stale or misrouted `txnNotFound`, for another hash or another
-	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that is
-	// `XrpSendExpiredError`, which tells the caller a fresh payment is safe to build.
+	// range, is read as THIS payment's non-inclusion. Past `LastLedgerSequence` that closes the
+	// record as expired, which tells the user a fresh payment is safe to build.
 	//
 	// The range is compared too, not just the hash: absence only means anything over the ledgers
 	// that were actually searched, so an answer about a different window says nothing about this

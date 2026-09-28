@@ -107,9 +107,8 @@ const pollXrpActiveUserTransaction = async ({
 		// this, a succeeded payment is recorded as failed and the user is invited to
 		// send a duplicate.
 		//
-		// `confirmXrpTransaction` makes the same recheck for the same reason. It
-		// matters at least as much here: a terminal status is immutable on the
-		// backend, so this write cannot be walked back.
+		// A terminal status is immutable on the backend, so an expiry written in
+		// error cannot be walked back.
 		const recheck = await lookup();
 
 		if (recheck.state === 'validated') {

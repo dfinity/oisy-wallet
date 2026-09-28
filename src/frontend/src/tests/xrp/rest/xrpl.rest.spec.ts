@@ -114,8 +114,8 @@ describe('xrpl.rest', () => {
 		];
 
 		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
-		// settles, and the confirmation loop bounds ATTEMPTS rather than time — so one hung request
-		// suspends the whole send and `sendXrp` never rejects with the blob a retry needs.
+		// settles, so one hung request suspends the send it belongs to — or, in the resolver, every
+		// later tick of the active-transaction poller, which skips its ticks while one is in flight.
 		//
 		// The signal is substituted rather than waited out: vitest's fake timers do not drive
 		// `AbortSignal.timeout`, and the real one would make this an eight-second test. Aborting a
@@ -1663,8 +1663,8 @@ describe('xrpl.rest', () => {
 		);
 
 		// Before the three variants were mutually exclusive, every field of the pending branch was
-		// optional — so an empty or junk `result` parsed as "pending", and at the expiry recheck
-		// pending is what produces `XrpSendExpiredError` and tells the caller a resend is safe.
+		// optional — so an empty or junk `result` parsed as "pending" instead of failing as the
+		// malformed response it is.
 		it.each([{}, { anything: 1 }, { validated: false }, { hash: 'H' }])(
 			'refuses to read the shapeless result %j as pending',
 			async (result) => {
@@ -1708,8 +1708,8 @@ describe('xrpl.rest', () => {
 
 		// A `tx` result reports the transaction at the TOP LEVEL of `result`, so a payload claiming
 		// absence while carrying transaction fields used to parse as absence — which past
-		// `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the caller is told is
-		// safe. Forbidding the fields one by one only covered the ones that were named; the branch
+		// `LastLedgerSequence` closes the record as expired and tells the user a resend is safe.
+		// Forbidding the fields one by one only covered the ones that were named; the branch
 		// is strict now, so any of these leaves the outcome indeterminate.
 		it.each([
 			{ name: 'a transaction type', extra: { TransactionType: 'Payment' } },
@@ -1767,7 +1767,7 @@ describe('xrpl.rest', () => {
 		});
 
 		// Absence is the one variant with no `hash` to be bound by, and the one that ends the send:
-		// past `LastLedgerSequence` it becomes `XrpSendExpiredError` and tells the caller a fresh
+		// past `LastLedgerSequence` it closes the record as expired and tells the user a fresh
 		// payment is safe. The echoed request is the only identity it carries.
 		describe('binding an absence to the question asked', () => {
 			const ask = () =>

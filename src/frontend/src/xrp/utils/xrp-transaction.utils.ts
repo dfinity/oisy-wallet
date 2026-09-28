@@ -105,7 +105,7 @@ const XRP_SUCCESS_TRANSACTION_RESULT = 'tesSUCCESS';
  * and that this node took it contradicts itself — and a response that contradicts itself is not
  * evidence of anything, least of all on the ONE path here that declares a definitive failure after
  * the blob has been broadcast. So it is treated as ambiguous: the send falls through to the
- * confirmation poll, which costs a validity window on a transaction that will never land, and
+ * record's poll, which costs a validity window on a transaction that will never land, and
  * avoids reporting someone else's rejection as this payment's.
  */
 export const isXrpSubmitFinalFailure = ({
@@ -327,10 +327,10 @@ export const mapXrpTransaction = ({
 /**
  * The inclusive ledger range a signed transaction can be included in, read out of the blob.
  *
- * Not carried as fields, for the same reason the transaction id is not (see
- * {@link XrpPendingTransaction}): the blob is what the ledger acts on, so anything travelling
- * beside it is a second claim that can disagree — and a stored lower bound that disagreed would
- * search the wrong ledgers, which is precisely the failure this window exists to avoid.
+ * Read out of the blob, like the transaction id: the blob is what the ledger acts on, so anything
+ * travelling beside it is a second claim that can disagree — and a stored lower bound that
+ * disagreed would search the wrong ledgers, which is precisely the failure this window exists to
+ * avoid.
  *
  * The two ends are therefore established differently, because only one of them is signed.
  * `LastLedgerSequence` comes out of the blob and is exact. The lower bound cannot: nothing in the

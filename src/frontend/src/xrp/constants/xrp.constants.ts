@@ -62,8 +62,8 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // from the signing offset meant a *reduced* offset moved the bound for transactions signed under
 // the old one: `min_ledger` above the index they were actually signed against, the node reporting
 // `searched_all` over a range that excludes ledgers the payment could be in, and absence concluded
-// from a search that never looked where it was. Past `LastLedgerSequence` that is
-// `XrpSendExpiredError` — a definitive "it never landed" that invites a duplicate payment.
+// from a search that never looked where it was. Past `LastLedgerSequence` that closes the record
+// as expired — a definitive "it never landed" that invites a duplicate payment.
 //
 // A lower bound that is too LOW is not the mirror of one that is too high, which is why a fixed
 // conservative value is a fix rather than a trade: it is a superset of the true window, so it can
@@ -83,13 +83,14 @@ export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
 const XRP_LEDGER_CLOSE_SECONDS = 4;
 
 // Deadline on every XRPL request, because `fetch` has none of its own: a connection that stalls
-// instead of rejecting never settles, and the confirmation loop bounds ATTEMPTS rather than time —
-// so one hung request suspends the whole send indefinitely, and `sendXrp` never rejects with the
-// signed blob a retry needs.
+// instead of rejecting never settles. In a send that suspends the send indefinitely; in the
+// resolver it is worse, because the active-transaction poller skips its ticks while one is in
+// flight, so one hung lookup stops every flow's records from resolving, not only XRP's.
 //
 // Two ledger closes rather than a figure picked for feel: a request that outlives that cannot tell
 // the poll anything the next one will not, since the ledger itself has moved on. Aborting makes a
-// stall a rejected fetch, which the loop already treats as one consumed attempt.
+// stall a rejected fetch, which the resolver already treats as an unanswered lookup: the record
+// stays `Pending` and the next tick asks again.
 export const XRP_RPC_TIMEOUT_MS = XRP_LEDGER_CLOSE_SECONDS * 2 * 1000;
 
 // The confirmation poll's interval, passed to `randomWait` rather than left to its defaults: the
