@@ -510,41 +510,20 @@ export const XrplTxResultSchema = z.union([
 	})
 ]);
 
-// `engine_result` is the only field the send still reads, and it is read with `startsWith` outside
-// the try that wraps the submit — so a non-string would throw there, after the blob was broadcast,
-// and turn an ambiguous submit into a reported failure. Validating it here keeps that failure
-// inside the caught call, where it correctly means "go and confirm". The rest is optional because
-// none of it decides anything: the hash is derived locally and `accepted` no longer gates.
+// Nothing here decides a send's outcome: the send hands every submit answer to the record, which
+// polls the locally derived hash. `engine_result` stays required because it is what makes this a
+// submit answer at all — a response without one fails the parse, and `sendXrp` treats that exactly
+// as a lost response. The rest is cosmetic, so a malformed value is dropped rather than failing the
+// parse over a field nothing consults.
 export const XrplSubmitResultSchema = z.object({
 	engine_result: z.string(),
 	error: z.never().optional(),
-	// Strict only where the decision reads. These two are cosmetic — the message is interpolated
-	// into an error and the hash is derived locally — so a malformed one must not fail the parse:
-	// that would throw, and the send would poll for a minute over a field it never consults.
 	engine_result_message: z.string().optional().catch(undefined),
-	// `accepted` is not one of them any more. It decides, alongside `engine_result`, whether a
-	// `tem*` is a definitive rejection: only a node that did NOT claim to take the blob makes that
-	// claim credible. Left as `z.unknown().optional()` and normalised with `=== true`, every
-	// malformed value — `'true'`, `1`, `null`, or the field missing — collapsed to `false` and
-	// turned a contradictory response into a reported rejection AFTER the blob was broadcast,
-	// which is the outcome that check exists to avoid.
-	//
-	// Required, so a malformed one fails the parse instead. `submitXrpTransaction` then throws,
-	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
-	// where the hash decides. That is the direction this path has to fail in.
-	accepted: z.boolean(),
-	// The hash the node echoes back. Optional on purpose — the id is derived locally precisely so a
-	// lost or partial submit response stays survivable, and requiring it would turn a node that
-	// omits `tx_json` into a poll on every send. But SHAPED, because it is no longer only
-	// cosmetic: the rejection branch compares it with the locally derived id before treating a
-	// `tem*` as definitive, and a malformed value must not be able to satisfy that comparison.
+	// The hash the node echoes back. Optional because the id is derived locally precisely so a lost
+	// or partial submit response stays survivable.
 	tx_json: z
 		.object({
-			hash: z
-				.string()
-				.regex(/^[0-9a-fA-F]{64}$/)
-				.optional()
-				.catch(undefined)
+			hash: z.string().optional().catch(undefined)
 		})
 		.optional()
 		.catch(undefined)

@@ -89,7 +89,6 @@ describe('xrp-send.services', () => {
 		vi.spyOn(xrpSignServices, 'signXrpTransaction').mockResolvedValue(signedBlob);
 		vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 			engineResult: 'tesSUCCESS',
-			accepted: true,
 			txHash: 'TXHASH'
 		});
 		// The in-flight guard reads the caller's records before any node call, and the send opens
@@ -133,7 +132,7 @@ describe('xrp-send.services', () => {
 		});
 	});
 
-	it('submits the signed blob and returns the accepted result', async () => {
+	it('submits the signed blob and returns the submit result', async () => {
 		const result = await sendXrp(params);
 
 		expect(xrplRest.submitXrpTransaction).toHaveBeenCalledWith({
@@ -1042,7 +1041,7 @@ describe('xrp-send.services', () => {
 			);
 			vi.mocked(xrplRest.submitXrpTransaction).mockImplementation(() => {
 				order.push('submit');
-				return Promise.resolve({ engineResult: 'tesSUCCESS', accepted: true, txHash: 'TXHASH' });
+				return Promise.resolve({ engineResult: 'tesSUCCESS', txHash: 'TXHASH' });
 			});
 
 			await sendXrp(params);
@@ -1132,7 +1131,6 @@ describe('xrp-send.services', () => {
 		it('returns the locally derived hash rather than the one the node echoed', async () => {
 			vi.spyOn(xrplRest, 'submitXrpTransaction').mockResolvedValue({
 				engineResult: 'tesSUCCESS',
-				accepted: true,
 				txHash: 'NOTTHEHASHWEDERIVED'
 			});
 

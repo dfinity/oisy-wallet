@@ -659,10 +659,9 @@ export const loadXrpTransactionOutcome = async ({
 /**
  * Broadcasts a signed transaction blob via the XRPL `submit` method.
  *
- * `accepted` reports whether THIS node took the transaction and `engine_result` is its
- * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither is proof of
- * anything final: an applied `tec*` is accepted yet failed, and a refusal may still be reapplied
- * later. So no submit result decides the outcome — every one is settled by the record's poll of the
+ * `engine_result` is this node's provisional result (e.g. `tesSUCCESS`, `terQUEUED`,
+ * `tecUNFUNDED_PAYMENT`), and not proof of anything final: an applied `tec*` failed yet consumed
+ * the sequence, and a refusal may still be reapplied later. So no submit result decides the outcome — every one is settled by the record's poll of the
  * tx hash (see {@link loadXrpTransactionOutcome}). Even a malformed `tem*`, which no ledger will
  * ever apply, is left to it: the transaction never lands, and the record resolves as expired once
  * its window has passed.
@@ -687,14 +686,7 @@ export const submitXrpTransaction = async ({
 	return {
 		engineResult: data.engine_result,
 		engineResultMessage: data.engine_result_message,
-		txHash: data.tx_json?.hash,
-		// It says this node took the transaction (applied/queued/broadcast/kept), which is neither
-		// necessary nor sufficient for the send to have happened — so `accepted: false` never
-		// creates a failure.
-		//
-		// Passed through rather than compared to `true`: the schema requires a boolean, so the
-		// comparison would only be re-deriving what the parse already guarantees.
-		accepted: data.accepted
+		txHash: data.tx_json?.hash
 	};
 };
 

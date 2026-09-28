@@ -20,7 +20,6 @@ export interface XrpSubmitResult {
 	engineResult: string;
 	engineResultMessage?: string;
 	txHash?: string;
-	accepted: boolean;
 }
 
 export interface XrpAccountInfo {

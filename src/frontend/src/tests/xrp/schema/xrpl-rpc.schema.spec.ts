@@ -477,7 +477,7 @@ describe('xrpl-rpc.schema', () => {
 			{
 				name: 'XrplSubmitResultSchema',
 				schema: XrplSubmitResultSchema,
-				result: { engine_result: 'tesSUCCESS', accepted: true }
+				result: { engine_result: 'tesSUCCESS' }
 			},
 			{
 				name: 'XrplAccountInfoFullResultSchema',

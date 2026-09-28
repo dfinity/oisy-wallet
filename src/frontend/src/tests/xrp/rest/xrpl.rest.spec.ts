@@ -609,7 +609,7 @@ describe('xrpl.rest', () => {
 	describe('submitXrpTransaction', () => {
 		const txBlob = '1200002280000000';
 
-		it('returns an accepted result for a tesSUCCESS engine result', async () => {
+		it('returns the engine result, message and echoed hash', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
@@ -626,57 +626,8 @@ describe('xrpl.rest', () => {
 			expect(result).toEqual({
 				engineResult: 'tesSUCCESS',
 				engineResultMessage: 'The transaction was applied.',
-				txHash: 'A'.repeat(64),
-				accepted: true
+				txHash: 'A'.repeat(64)
 			});
-		});
-
-		// `ter` is a retry class: a queued one was taken by the node, a non-queued one was not.
-		it('marks a queued ter response (terQUEUED) as accepted', async () => {
-			mockFetchResponse({
-				body: { result: { engine_result: 'terQUEUED', accepted: true, queued: true } }
-			});
-
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeTruthy();
-			expect(result.engineResult).toBe('terQUEUED');
-		});
-
-		it('marks a non-queued ter response (terPRE_SEQ) as not accepted', async () => {
-			mockFetchResponse({
-				body: { result: { engine_result: 'terPRE_SEQ', accepted: false } }
-			});
-
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeFalsy();
-			expect(result.engineResult).toBe('terPRE_SEQ');
-		});
-
-		// `accepted` decides, alongside `engine_result`, whether a `tem*` is a definitive rejection,
-		// so a malformed one must not collapse to `false` — that read a contradictory response as a
-		// rejection reported AFTER the blob was broadcast. It now fails the parse, which the send
-		// treats exactly as a lost response and answers by confirming the hash.
-		it.each(['false', 'true', 1, 0, {}, null])(
-			'refuses a non-boolean accepted value of %j',
-			async (accepted) => {
-				mockFetchResponse({
-					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
-				});
-
-				await expect(
-					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
-				).rejects.toThrow('Unexpected XRPL submit response');
-			}
-		);
-
-		it('refuses a response without an accepted flag', async () => {
-			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
-
-			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'Unexpected XRPL submit response'
-			);
 		});
 
 		it('throws on a non-ok HTTP response', async () => {
@@ -699,10 +650,8 @@ describe('xrpl.rest', () => {
 			);
 		});
 
-		// `engine_result` is read with `startsWith` outside the try that wraps this call, so a
-		// non-string would throw there — after the blob was broadcast — and turn an ambiguous submit
-		// into a reported failure. It must fail here instead, where the caller treats it as
-		// "go and confirm".
+		// `engine_result` is what makes the answer a submit result, so a response without a string
+		// one fails the parse — which the send treats exactly as a lost response.
 		it.each([7, true, {}, ['tesSUCCESS'], null])(
 			'throws for the non-string engine_result %j',
 			async (engine_result) => {
@@ -714,29 +663,27 @@ describe('xrpl.rest', () => {
 			}
 		);
 
-		// Cosmetic fields must not cost the send a minute of polling: the message only reaches an
-		// error string and the hash is derived locally.
-		it('tolerates malformed engine_result_message and tx_json', async () => {
-			mockFetchResponse({
-				body: {
-					result: {
-						engine_result: 'tesSUCCESS',
-						accepted: true,
-						engine_result_message: 7,
-						tx_json: 'nope'
-					}
-				}
-			});
+		// Nothing reads these — the outcome is the record's, polled by the locally derived hash — so
+		// a missing or malformed one must not fail the parse.
+		it.each([
+			{ name: 'tx_json', tx_json: 'nope' },
+			{ name: 'tx_json.hash', tx_json: { hash: 7 } }
+		])(
+			'tolerates a missing accepted flag, a malformed message and a malformed $name',
+			async ({ tx_json }) => {
+				mockFetchResponse({
+					body: { result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json } }
+				});
 
-			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).resolves.toEqual(
-				{
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).resolves.toEqual({
 					engineResult: 'tesSUCCESS',
 					engineResultMessage: undefined,
-					txHash: undefined,
-					accepted: true
-				}
-			);
-		});
+					txHash: undefined
+				});
+			}
+		);
 
 		it('throws when the response has no engine_result', async () => {
 			mockFetchResponse({ body: { result: { error: 'invalidTransaction' } } });
