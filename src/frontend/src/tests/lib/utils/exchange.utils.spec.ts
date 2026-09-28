@@ -1,4 +1,4 @@
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import { Currency } from '$lib/enums/currency';
 import type {
@@ -879,7 +879,7 @@ describe('exchange.utils', () => {
 
 	describe('isTcyclesLedgerCanisterId', () => {
 		it('recognises the TCYCLES ledger', () => {
-			expect(isTcyclesLedgerCanisterId(IC_CYCLES_LEDGER_CANISTER_ID)).toBeTruthy();
+			expect(isTcyclesLedgerCanisterId(TCYCLES_LEDGER_CANISTER_ID)).toBeTruthy();
 		});
 
 		it('does not take another ledger for it', () => {

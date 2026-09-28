@@ -1,4 +1,4 @@
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
@@ -105,7 +105,7 @@ const mapMetricsToCoingeckoPrice = ({
 // TCYCLES is priced at its XDR peg (`xdrUsdPrice`), so no request for a market price may include it:
 // a thin pool would price it.
 export const isTcyclesLedgerCanisterId = (ledgerCanisterId: LedgerCanisterIdText): boolean =>
-	ledgerCanisterId === IC_CYCLES_LEDGER_CANISTER_ID;
+	ledgerCanisterId === TCYCLES_LEDGER_CANISTER_ID;
 
 const isFiniteNumber = (value: number | undefined): value is number =>
 	nonNullish(value) && Number.isFinite(value);

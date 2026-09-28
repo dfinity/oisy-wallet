@@ -1,6 +1,6 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { SNS_BUILTIN_TOKENS } from '$env/tokens/tokens.sns.env';
 import {
@@ -594,7 +594,7 @@ describe('icrc.services', () => {
 					{
 						...mockIcrcCustomToken,
 						id: parseTokenId('TCYCLES'),
-						ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID
+						ledgerCanisterId: TCYCLES_LEDGER_CANISTER_ID
 					}
 				]
 			});
@@ -602,7 +602,7 @@ describe('icrc.services', () => {
 			expect(exchangeServices.exchangeRateICRCToUsd).toHaveBeenCalledExactlyOnceWith(
 				withoutTcycles
 			);
-			expect(withoutTcycles).not.toContain(IC_CYCLES_LEDGER_CANISTER_ID);
+			expect(withoutTcycles).not.toContain(TCYCLES_LEDGER_CANISTER_ID);
 		});
 	});
 
