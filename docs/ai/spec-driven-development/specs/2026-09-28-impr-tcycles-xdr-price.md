@@ -3,8 +3,8 @@
 # Spec: price TCYCLES at its XDR peg
 
 - **Type:** `impr`
-- **Area:** Frontend (price providers, price worker); backend (exchange-rate providers)
-- **Status:** Draft. Two open questions (§8) and one pending decision (§9).
+- **Area:** Frontend (price providers, price worker); backend (exchange-rate providers) in a later follow-up
+- **Status:** Ready for the frontend PR. Two facts to confirm while building it (§8); all decisions resolved (§10).
 
 ---
 
@@ -43,8 +43,8 @@ CoinGecko, the provider OISY already uses, quotes XDR as a fiat currency ("IMF S
 2. **Its 24h change is XDR's own** against USD, derived from BTC's two 24h changes the way the display-currency multiplier is: usually a fraction of a percent, and zero while CoinGecko's XDR rate has not moved.
 3. **TCYCLES is never priced from a market.** Neither ICPSwap nor KongSwap is asked for TCYCLES, in any mode, fill or fallback. A CoinGecko listing, should one appear, does not override the peg either: it would track the same pools.
 4. **No XDR rate, no TCYCLES price.** If a refresh has no usable XDR rate (the request failed, or the value is missing, non-finite or not positive), TCYCLES has no price for that refresh: it shows "$ value is not available", and the swap review asks for the missing-price confirmation. No other token is affected (§10, D2).
-5. **Same price in every mode.** The frontend provider path (beta, production) and backend mode with its frontend fill (local, staging) give TCYCLES the same price from the same source (§9, P2).
-6. **No new frontend request.** On the provider path, the XDR rate comes from the BTC request that every refresh already sends, with `xdr` added to its currencies. The backend sends at most one extra CoinGecko request per refresh, and only when TCYCLES is among the tokens it prices.
+5. **The backend follows later.** This change prices TCYCLES on the frontend: on the provider path (beta, production), and by keeping it out of the ICPSwap/Kong cascade in backend mode's frontend fill (local, staging). The backend itself keeps pricing TCYCLES through ICPSwap until the backend follow-up (§7), and in backend mode its price wins every collision (§10, D3).
+6. **No new frontend request.** On the provider path, the XDR rate comes from the BTC request that every refresh already sends, with `xdr` added to its currencies. The backend follow-up sends at most one extra CoinGecko request per refresh, and only when TCYCLES is among the tokens it prices.
 7. **Everything else follows the price:** the balance, the portfolio total, the display-currency conversion, the swap value difference, the Mint flow's USD figures and the USD values in analytics. None of them changes.
 
 What users will notice, by design:
@@ -64,15 +64,20 @@ What users will notice, by design:
 
 ## 5. Acceptance criteria
 
+**Frontend PR**
+
 - **AC1** On beta and production builds, TCYCLES's USD price equals `bitcoin.usd / bitcoin.xdr` of the refresh's BTC response, and its 24h change equals `((1 + usd_24h_change / 100) / (1 + xdr_24h_change / 100) - 1) * 100` of that response.
-- **AC2** In backend mode, the backend returns TCYCLES with the price and 24h change of AC1, computed from its own CoinGecko response.
-- **AC3** No path asks ICPSwap or KongSwap for TCYCLES: not the provider path, not the backend's supplementals, not the backend-mode fill, and not when the XDR rate is missing.
-- **AC4** A CoinGecko `token_price` result for `um5iw…`, if one ever appears, does not replace the XDR price, in either layer.
-- **AC5** A refresh without a usable XDR rate leaves TCYCLES unpriced ("$ value is not available") and every other price unchanged.
-- **AC6** The provider path sends the same requests as before; only the BTC request's `vs_currencies` changes.
-- **AC7** Every other token keeps its sources, their order and their filters.
-- **AC8** Unit tests cover the price and 24h change derivation, each invalid-XDR case, the absence of any ICPSwap or Kong request for TCYCLES in every path, and the XDR price's precedence over a CoinGecko listing.
-- **AC9** `docs/ai/PRODUCT.md` → _Exchange-rate sourcing_ states the TCYCLES rule, including that TCYCLES is never priced from a market.
+- **AC2** The frontend never asks ICPSwap or KongSwap for TCYCLES: not on the provider path, not in the backend-mode fill, and not when the XDR rate is missing.
+- **AC3** A CoinGecko `token_price` result for `um5iw…`, if one ever appears, does not replace the XDR price.
+- **AC4** A refresh without a usable XDR rate leaves TCYCLES unpriced ("$ value is not available") and every other price unchanged.
+- **AC5** The provider path sends the same requests as before; only the BTC request's `vs_currencies` changes.
+- **AC6** Every other token keeps its sources, their order and their filters.
+- **AC7** Unit tests cover the price and 24h change derivation, each invalid-XDR case, the absence of any ICPSwap or Kong request for TCYCLES on either frontend path, and the XDR price's precedence over a CoinGecko listing.
+- **AC8** `docs/ai/PRODUCT.md` → _Exchange-rate sourcing_ states the TCYCLES rule, including that the frontend never prices TCYCLES from a market, and that backend mode still shows the backend's price for it until the backend follow-up.
+
+**Backend follow-up**
+
+- **AC9** In backend mode, the backend returns TCYCLES with the price and 24h change of AC1 from its own CoinGecko response, never asks ICPSwap for it, leaves it unpriced without a usable XDR rate, and does not let a CoinGecko listing replace the XDR price. `docs/ai/PRODUCT.md` drops the backend-mode exception.
 
 ## 6. Non-goals
 
@@ -83,10 +88,10 @@ What users will notice, by design:
 
 ## 7. Implementation plan (atomic PRs)
 
-1. `feat(frontend): price TCYCLES at its XDR peg`: `xdr` added to the provider path's BTC request, TCYCLES priced from it and kept out of the ICPSwap/Kong cascade, on the provider path and in the backend-mode fill; tests; PRODUCT.md. This is the PR that changes beta and production.
-2. `feat(backend): price TCYCLES at its XDR peg`: TCYCLES taken out of the CoinGecko token request and the ICPSwap supplemental, and priced from one `simple/price?ids=bitcoin&vs_currencies=usd,xdr` request, sent only when TCYCLES is requested; Rust unit tests; PRODUCT.md.
+1. `feat(frontend): price TCYCLES at its XDR peg`: `xdr` added to the provider path's BTC request, TCYCLES priced from it and kept out of the ICPSwap/Kong cascade, on the provider path and in the backend-mode fill; tests; PRODUCT.md (AC1 to AC8). This is the PR that changes beta and production.
+2. Later, as its own follow-up: `feat(backend): price TCYCLES at its XDR peg`: TCYCLES taken out of the CoinGecko token request and the ICPSwap supplemental, and priced from one `simple/price?ids=bitcoin&vs_currencies=usd,xdr` request, sent only when TCYCLES is requested; Rust unit tests; PRODUCT.md (AC9).
 
-The two are independent. Until PR 2 lands, backend mode keeps showing the ICPSwap price for TCYCLES, since the backend wins every collision.
+PR 1 ships alone (§10, D3). Until the backend follow-up lands, backend mode on local and staging keeps showing the ICPSwap price for TCYCLES, since the backend wins every collision.
 
 ## 8. Open questions (facts to confirm)
 
@@ -95,9 +100,10 @@ The two are independent. Until PR 2 lands, backend mode keeps showing the ICPSwa
 
 ## 9. Pending decisions (facts are clear)
 
-- **P2 Backend (§3.5, §7):** (a) both PRs, or (b) PR 1 only for now. Recommended: (a). Backend mode runs only on local and staging, so production is fixed either way, but with (b) staging keeps showing the pool price.
+None.
 
 ## 10. Resolved
 
 - **D1 Source:** CoinGecko's XDR rate (2026-09-28). 1 XDR is the official value of 1 TCYCLES; the alternatives are in §4.
 - **D2 No usable XDR rate (§3.4), was P1:** TCYCLES has no price for that refresh, with no fallback to ICPSwap or any other source (2026-09-28). A missing price is honest and makes the swap review ask for confirmation, while the pool price is what this spec removes: in one day it ranged from 94% below the peg to 64% above it.
+- **D3 Backend (§3.5, §7), was P2:** later. The frontend PR ships alone, and the backend follows as its own PR (2026-09-28). Backend mode runs only on local and staging, so the frontend PR alone fixes production; staging keeps the pool price for TCYCLES until the backend PR.
