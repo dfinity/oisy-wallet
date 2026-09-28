@@ -1,15 +1,24 @@
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
+import {
+	XDR_BASKET,
+	XDR_BASKET_COUNTDOWN_START_MS,
+	XDR_BASKET_EXPIRY_MS,
+	XDR_BASKET_GRACE_END_MS,
+	XDR_BASKET_NON_USD_CURRENCIES
+} from '$lib/constants/exchange.constants';
+import { Currency } from '$lib/enums/currency';
 import type { OptionBalance } from '$lib/types/balance';
 import type {
 	CoingeckoPlatformId,
+	CoingeckoSimplePrice,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
-import type { ExchangesData } from '$lib/types/exchange';
+import type { ExchangesData, XdrBasketStatus } from '$lib/types/exchange';
 import type { IcpSwapToken } from '$lib/types/icpswap';
 import type { KongSwapToken, KongSwapTokenMetrics } from '$lib/types/kongswap';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
@@ -91,6 +100,82 @@ const mapMetricsToCoingeckoPrice = ({
 	usd_24h_change: Number(price_change_24h),
 	last_updated_at: new Date(updated_at).getTime()
 });
+
+const isFiniteNumber = (value: number | undefined): value is number =>
+	nonNullish(value) && Number.isFinite(value);
+
+const isUsableRate = (value: number | undefined): value is number =>
+	isFiniteNumber(value) && value > 0;
+
+/**
+ * The USD price of one XDR, and so of one TCYCLES: the IMF basket valued at BTC's price in each of
+ * its currencies, the same BTC cross as `exchangeRateUsdToCurrency`. The 24h change values the
+ * basket at the rates of 24 hours earlier, derived from BTC's 24h changes, and is left out when one
+ * of them is missing. Without all five prices there is no price, since a partial basket is wrong.
+ */
+export const xdrUsdPrice = (
+	btcPrice: CoingeckoSimplePrice | undefined
+): CoingeckoSimpleTokenPrice | undefined => {
+	const btcUsd = btcPrice?.usd;
+
+	if (isNullish(btcPrice) || !isUsableRate(btcUsd)) {
+		return;
+	}
+
+	const { usd_24h_change: btcUsdChange } = btcPrice;
+
+	let usd = XDR_BASKET[Currency.USD];
+	let usd24hAgo: number | undefined = XDR_BASKET[Currency.USD];
+
+	for (const currency of XDR_BASKET_NON_USD_CURRENCIES) {
+		const btcInCurrency = btcPrice[currency];
+
+		if (!isUsableRate(btcInCurrency)) {
+			return;
+		}
+
+		const valueInUsd = XDR_BASKET[currency] * (btcUsd / btcInCurrency);
+
+		usd += valueInUsd;
+
+		// The currency's USD rate 24 hours ago follows from how BTC moved against both.
+		const btcCurrencyChange = btcPrice[`${currency}_24h_change`];
+
+		usd24hAgo =
+			nonNullish(usd24hAgo) && isFiniteNumber(btcUsdChange) && isFiniteNumber(btcCurrencyChange)
+				? usd24hAgo + (valueInUsd * (1 + btcCurrencyChange / 100)) / (1 + btcUsdChange / 100)
+				: undefined;
+	}
+
+	return {
+		usd,
+		usd_market_cap: 0,
+		...(nonNullish(usd24hAgo) && { usd_24h_change: (usd / usd24hAgo - 1) * 100 })
+	};
+};
+
+const daysUntil = ({ endMs, nowMs }: { endMs: number; nowMs: number }): number =>
+	Math.ceil((endMs - nowMs) / MILLISECONDS_IN_DAY);
+
+/**
+ * Where the XDR basket stands on its way to expiry, for the countdown event. `undefined` while the
+ * basket is valid and its end date is more than a week away.
+ */
+export const xdrBasketStatus = (nowMs: number): XdrBasketStatus | undefined => {
+	if (nowMs < XDR_BASKET_COUNTDOWN_START_MS) {
+		return;
+	}
+
+	if (nowMs < XDR_BASKET_EXPIRY_MS) {
+		return { phase: 'expiring_soon', daysLeft: daysUntil({ endMs: XDR_BASKET_EXPIRY_MS, nowMs }) };
+	}
+
+	if (nowMs < XDR_BASKET_GRACE_END_MS) {
+		return { phase: 'grace', daysLeft: daysUntil({ endMs: XDR_BASKET_GRACE_END_MS, nowMs }) };
+	}
+
+	return { phase: 'expired', daysLeft: 0 };
+};
 
 export const findMissingLedgerCanisterIds = ({
 	allLedgerCanisterIds,
