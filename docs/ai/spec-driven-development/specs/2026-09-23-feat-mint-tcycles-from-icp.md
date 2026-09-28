@@ -141,7 +141,7 @@ So the SDK bump is its own project, and none is planned (2026-09-23). This featu
 
 ## 8. Analytics
 
-One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES), amounts and USD values, as `deposit_withdraw` does. It never carries a principal. The terminal event fires from the AUT (§6.5), under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The loader records a fired event in local storage, which a tab reads only when it starts, and the backend has no claim that could make the event once overall. Choosing the Compute filter is covered by the filter's existing tracking.
+One structured event family, following the domain-service pattern in `docs/ai/frontend/analytics.md`: the mint funnel (modal opened; mint executing, then success or error, with a refund as an error with its own value), carrying the token symbols (ICP, TCYCLES) but no amounts or USD values: an exact amount and the event's time would pick out the one deposit to the CMC on the public ICP ledger, and with it the sender's account (`docs/ai/frontend/analytics.md` §6). It never carries a principal. The terminal event fires from the AUT (§6.5), under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The loader records a fired event in local storage, which a tab reads only when it starts, and the backend has no claim that could make the event once overall. Choosing the Compute filter is covered by the filter's existing tracking.
 
 ## 9. Acceptance criteria
 
@@ -166,7 +166,7 @@ One structured event family, following the domain-service pattern in `docs/ai/fr
 - **AC14** If the AUT row cannot be created, no ICP moves.
 - **AC15** A mint in flight, minted or failed shows in the Active transactions list as "Mint X ICP → TCYCLES" with the Cycles Minting Canister as provider.
 - **AC16** The CMC deposit account never appears among the recently used ICP destinations and never suppresses the first-time destination warning.
-- **AC17** The mint analytics fire as specified and never carry a principal; the terminal event follows the loader's rule (§8): once in every tab open when the mint ends, and never in a tab or session started after one of them has recorded it.
+- **AC17** The mint analytics fire as specified and never carry a principal, an amount or a USD value; the terminal event follows the loader's rule (§8): once in every tab open when the mint ends, and never in a tab or session started after one of them has recorded it.
 - **AC18** PRODUCT.md documents the Compute asset type and minting, including the non-goals.
 
 ## 10. Non-goals
