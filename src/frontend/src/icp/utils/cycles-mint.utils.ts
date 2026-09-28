@@ -49,6 +49,17 @@ export const estimateCyclesMintCredited = ({
 }): bigint => toCyclesMintCredited(amount * xdrPermyriadPerIcp);
 
 /**
+ * A random number of nanoseconds below one millisecond. A transfer timestamp taken from
+ * `Date.now()` alone has none, so two mints of the same amount started in the same
+ * millisecond would send the same transfer, which the ledger keeps only once.
+ */
+export const randomSubMillisecondNs = (): bigint => {
+	const [value] = crypto.getRandomValues(new Uint32Array(1));
+
+	return BigInt(value % 1_000_000);
+};
+
+/**
  * Whether an amount of ICP e8s is below the Mint lower bound (spec §5.2), which has two
  * parts. A refund returns the amount minus the CMC's refund fees, so nothing at or below
  * them, whatever the rate. And below twice the deposit fee at the rate, a drop in the rate

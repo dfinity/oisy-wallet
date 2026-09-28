@@ -7,6 +7,7 @@ import {
 	getCyclesMintDepositAccountIdentifier,
 	isCyclesMintAmountTooSmall,
 	isTokenCyclesLedger,
+	randomSubMillisecondNs,
 	toCyclesPerIcp
 } from '$icp/utils/cycles-mint.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -76,6 +77,28 @@ describe('cycles-mint.utils', () => {
 		it('is zero when the deposit fee takes it all', () => {
 			expect(estimateCyclesMintCredited({ amount: 1n, xdrPermyriadPerIcp: 45_000n })).toBe(ZERO);
 			expect(estimateCyclesMintCredited({ amount: ZERO, xdrPermyriadPerIcp: 45_000n })).toBe(ZERO);
+		});
+	});
+
+	describe('randomSubMillisecondNs', () => {
+		it('takes the nanoseconds below one millisecond from a random draw', () => {
+			const randomSpy = vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {
+				(array as Uint32Array)[0] = 4_294_967_295;
+
+				return array;
+			});
+
+			expect(randomSubMillisecondNs()).toBe(967_295n);
+
+			randomSpy.mockRestore();
+		});
+
+		it('stays below one millisecond', () => {
+			for (let i = 0; i < 100; i++) {
+				const ns = randomSubMillisecondNs();
+
+				expect(ns >= ZERO && ns < 1_000_000n).toBeTruthy();
+			}
 		});
 	});
 

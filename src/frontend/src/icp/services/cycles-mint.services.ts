@@ -11,7 +11,7 @@ import {
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccount } from '$icp/utils/cycles-mint.utils';
+import { getCyclesMintDepositAccount, randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsCyclesMint } from '$lib/enums/progress-steps';
 import {
@@ -189,8 +189,10 @@ export const mintCycles = async ({
 	};
 
 	// Fixed for the whole mint: stored in the row, it lets the ledger deduplicate a resent
-	// transfer and lets a later session find the deposit again.
-	const transferCreatedAtNs = nowInBigIntNanoSeconds();
+	// transfer and lets a later session find the deposit again. Its sub-millisecond digits
+	// are random, so that another mint started in the same millisecond sends another
+	// transfer rather than the same one.
+	const transferCreatedAtNs = nowInBigIntNanoSeconds() + randomSubMillisecondNs();
 
 	const data = toCyclesMintData({ sourceToken, destinationToken, amount, transferCreatedAtNs });
 

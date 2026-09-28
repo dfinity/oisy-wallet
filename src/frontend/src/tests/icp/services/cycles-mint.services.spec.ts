@@ -39,6 +39,7 @@ import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { InsufficientFundsError, TxDuplicateError } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icp-ledger.api', () => ({
 	icrc1Transfer: vi.fn()
@@ -181,6 +182,12 @@ describe('cycles-mint.services', () => {
 		const NOW_MS = 1_790_000_000_000;
 		const NOW_NS = BigInt(NOW_MS) * 1_000_000n;
 
+		// The transfer timestamp's random sub-millisecond digits.
+		const SUB_MS_NS = 123_456n;
+		const STAMP_NS = NOW_NS + SUB_MS_NS;
+
+		let randomSpy: MockInstance;
+
 		const TCYCLES_TOKEN = {
 			...mockValidIcrcToken,
 			symbol: 'TCYCLES',
@@ -220,6 +227,12 @@ describe('cycles-mint.services', () => {
 			vi.useFakeTimers();
 			vi.setSystemTime(NOW_MS);
 
+			randomSpy = vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {
+				(array as Uint32Array)[0] = Number(SUB_MS_NS);
+
+				return array;
+			});
+
 			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
 
 			vi.mocked(createActiveUserTransaction).mockResolvedValue();
@@ -232,6 +245,7 @@ describe('cycles-mint.services', () => {
 
 		afterEach(() => {
 			vi.useRealTimers();
+			randomSpy.mockRestore();
 		});
 
 		const errorKind = async (): Promise<string | undefined> => {
@@ -253,13 +267,13 @@ describe('cycles-mint.services', () => {
 						source_token: { Icrc: Principal.fromText(ICP_TOKEN.ledgerCanisterId) },
 						dest_token: { Icrc: Principal.fromText(TCYCLES_TOKEN.ledgerCanisterId) },
 						amount: 150_000_000n,
-						transfer_created_at_ns: NOW_NS
+						transfer_created_at_ns: STAMP_NS
 					}
 				},
 				externalRefs: toCyclesMintExternalRefs(displayRefs)
 			});
 			expect(icrc1Transfer).toHaveBeenCalledWith(
-				expect.objectContaining({ amount: 150_000_000n, createdAt: NOW_NS })
+				expect.objectContaining({ amount: 150_000_000n, createdAt: STAMP_NS })
 			);
 			expect(vi.mocked(createActiveUserTransaction).mock.invocationCallOrder[0]).toBeLessThan(
 				vi.mocked(icrc1Transfer).mock.invocationCallOrder[0]
