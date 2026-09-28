@@ -114,42 +114,90 @@ const isUsableRate = (value: number | undefined): value is number =>
 	isFiniteNumber(value) && value > 0;
 
 /**
- * The USD price of one XDR, and so of one TCYCLES: the IMF basket valued at BTC's price in each of
- * its currencies, the same BTC cross as `exchangeRateUsdToCurrency`. The 24h change values the
- * basket at the rates of 24 hours earlier, derived from BTC's 24h changes, and is left out when one
- * of them is missing. Without all five prices there is no price, since a partial basket is wrong.
+ * The USD value of one unit of `currency`, from BTC's price in USD and in that currency: there is
+ * no IC source for currency rates yet, so a very liquid asset serves as the cross. Its 24h change
+ * multiplier follows from BTC's two 24h changes, and is left out when one of them is missing.
+ * Both the display currency's rate and the XDR basket are built from it.
+ */
+export const btcCrossExchangeRate = ({
+	btcPrice,
+	currency
+}: {
+	btcPrice: CoingeckoSimplePrice | undefined;
+	currency: Exclude<Currency, Currency.USD>;
+}): { rate: number; fx24hChangeMultiplier?: number } | undefined => {
+	const btcUsd = btcPrice?.usd;
+	const btcInCurrency = btcPrice?.[currency];
+
+	if (!isUsableRate(btcUsd) || !isUsableRate(btcInCurrency)) {
+		return;
+	}
+
+	const btcUsdChange = btcPrice?.usd_24h_change;
+	const btcCurrencyChange = btcPrice?.[`${currency}_24h_change`];
+
+	return {
+		rate: btcUsd / btcInCurrency,
+		...(isFiniteNumber(btcUsdChange) &&
+			isFiniteNumber(btcCurrencyChange) && {
+				fx24hChangeMultiplier: (1 + btcUsdChange / 100) / (1 + btcCurrencyChange / 100)
+			})
+	};
+};
+
+/**
+ * The display currency's rate: 1 for USD, otherwise the BTC cross, which the display only takes
+ * with its 24h change.
+ */
+export const currencyExchangeRateFromBtc = ({
+	btcPrice,
+	currency
+}: {
+	btcPrice: CoingeckoSimplePrice | undefined;
+	currency: Currency;
+}): { rate: number; fx24hChangeMultiplier: number } | undefined => {
+	if (currency === Currency.USD) {
+		return { rate: 1, fx24hChangeMultiplier: 1 };
+	}
+
+	const exchangeRate = btcCrossExchangeRate({ btcPrice, currency });
+	const fx24hChangeMultiplier = exchangeRate?.fx24hChangeMultiplier;
+
+	if (isNullish(exchangeRate) || isNullish(fx24hChangeMultiplier)) {
+		return;
+	}
+
+	return { rate: exchangeRate.rate, fx24hChangeMultiplier };
+};
+
+/**
+ * The USD price of one XDR, and so of one TCYCLES: the IMF basket valued at the BTC cross rate of
+ * each of its currencies. The 24h change values the basket at the rates of 24 hours earlier, and is
+ * left out when one of them is missing. Without all five prices there is no price, since a partial
+ * basket is wrong.
  */
 export const xdrUsdPrice = (
 	btcPrice: CoingeckoSimplePrice | undefined
 ): CoingeckoSimpleTokenPrice | undefined => {
-	const btcUsd = btcPrice?.usd;
-
-	if (isNullish(btcPrice) || !isUsableRate(btcUsd)) {
-		return;
-	}
-
-	const { usd_24h_change: btcUsdChange } = btcPrice;
-
 	let usd = XDR_BASKET[Currency.USD];
 	let usd24hAgo: number | undefined = XDR_BASKET[Currency.USD];
 
 	for (const currency of XDR_BASKET_NON_USD_CURRENCIES) {
-		const btcInCurrency = btcPrice[currency];
+		const exchangeRate = btcCrossExchangeRate({ btcPrice, currency });
 
-		if (!isUsableRate(btcInCurrency)) {
+		if (isNullish(exchangeRate)) {
 			return;
 		}
 
-		const valueInUsd = XDR_BASKET[currency] * (btcUsd / btcInCurrency);
+		const { rate, fx24hChangeMultiplier } = exchangeRate;
+
+		const valueInUsd = XDR_BASKET[currency] * rate;
 
 		usd += valueInUsd;
 
-		// The currency's USD rate 24 hours ago follows from how BTC moved against both.
-		const btcCurrencyChange = btcPrice[`${currency}_24h_change`];
-
 		usd24hAgo =
-			nonNullish(usd24hAgo) && isFiniteNumber(btcUsdChange) && isFiniteNumber(btcCurrencyChange)
-				? usd24hAgo + (valueInUsd * (1 + btcCurrencyChange / 100)) / (1 + btcUsdChange / 100)
+			nonNullish(usd24hAgo) && nonNullish(fx24hChangeMultiplier)
+				? usd24hAgo + valueInUsd / fx24hChangeMultiplier
 				: undefined;
 	}
 

@@ -11,7 +11,9 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import {
+	btcCrossExchangeRate,
 	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
 	exchangesDataEqual,
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
@@ -710,6 +712,63 @@ describe('exchange.utils', () => {
 			}
 
 			expect(erc4626Spy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('btcCrossExchangeRate', () => {
+		it('gives the USD value of one unit, with its 24h change multiplier', () => {
+			expect(
+				btcCrossExchangeRate({
+					btcPrice: { usd: 100_000, eur: 80_000, usd_24h_change: 2, eur_24h_change: 1 },
+					currency: Currency.EUR
+				})
+			).toEqual({ rate: 1.25, fx24hChangeMultiplier: 1.02 / 1.01 });
+		});
+
+		it('leaves out the multiplier when a 24h change is missing', () => {
+			expect(
+				btcCrossExchangeRate({
+					btcPrice: { usd: 100_000, eur: 80_000, usd_24h_change: 2 },
+					currency: Currency.EUR
+				})
+			).toEqual({ rate: 1.25 });
+		});
+
+		it.each([
+			{ btcPrice: undefined },
+			{ btcPrice: { usd: 100_000 } },
+			{ btcPrice: { usd: 0, eur: 80_000 } },
+			{ btcPrice: { usd: 100_000, eur: NaN } },
+			{ btcPrice: { usd: Infinity, eur: 80_000 } }
+		])('returns undefined for $btcPrice', ({ btcPrice }) => {
+			expect(btcCrossExchangeRate({ btcPrice, currency: Currency.EUR })).toBeUndefined();
+		});
+	});
+
+	describe('currencyExchangeRateFromBtc', () => {
+		it('is 1 for USD, without any price', () => {
+			expect(currencyExchangeRateFromBtc({ btcPrice: undefined, currency: Currency.USD })).toEqual({
+				rate: 1,
+				fx24hChangeMultiplier: 1
+			});
+		});
+
+		it('is the BTC cross for another currency', () => {
+			expect(
+				currencyExchangeRateFromBtc({
+					btcPrice: { usd: 100_000, jpy: 15_000_000, usd_24h_change: 3, jpy_24h_change: 5 },
+					currency: Currency.JPY
+				})
+			).toEqual({ rate: 100_000 / 15_000_000, fx24hChangeMultiplier: 1.03 / 1.05 });
+		});
+
+		it('returns undefined without the 24h changes, which the display needs', () => {
+			expect(
+				currencyExchangeRateFromBtc({
+					btcPrice: { usd: 100_000, jpy: 15_000_000 },
+					currency: Currency.JPY
+				})
+			).toBeUndefined();
 		});
 	});
 
