@@ -576,7 +576,7 @@ describe('user-snapshot.services', () => {
 				value: BigInt(i + 1) * 1_000_000n,
 				from: i % 2 === 0 ? mockXrpAddress : mockXrpAddress2,
 				to: i % 2 === 0 ? mockXrpAddress2 : mockXrpAddress,
-				timestamp: BigInt(now + i) * NANO_SECONDS_IN_MILLISECOND
+				timestamp: BigInt(now - i) * NANO_SECONDS_IN_MILLISECOND
 			}));
 
 			const network: AnyNetwork = {
