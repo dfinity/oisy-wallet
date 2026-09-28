@@ -1174,6 +1174,7 @@
 			"rate_unavailable": "The $token rate could not be loaded. Please try again later.",
 			"amount_too_small": "The amount is too small to mint $token.",
 			"refunded": "The mint was refunded. Your $token came back, minus $refundFee $token. Reason: $reason",
+			"refunded_nothing": "The mint was refunded, but its fees took the whole amount: no $token came back. Reason: $reason",
 			"failed": "The mint failed. Reason: $reason",
 			"not_started": "The mint could not be started. Nothing was sent, please try again.",
 			"transfer_failed": "The $token transfer failed. Nothing was sent.",

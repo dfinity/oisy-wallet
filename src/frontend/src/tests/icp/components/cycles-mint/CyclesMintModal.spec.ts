@@ -174,7 +174,11 @@ describe('CyclesMintModal', () => {
 	});
 
 	it('reports a refund with what came back and the CMC’s reason', async () => {
-		mintSpy.mockResolvedValue({ status: 'refunded', reason: 'Mint limit reached' });
+		mintSpy.mockResolvedValue({
+			status: 'refunded',
+			reason: 'Mint limit reached',
+			refundBlockIndex: 99n
+		});
 
 		await mint();
 
@@ -182,6 +186,21 @@ describe('CyclesMintModal', () => {
 			expect(toastsErrorSpy).toHaveBeenCalledWith({
 				msg: {
 					text: 'The mint was refunded. Your ICP came back, minus 0.0003 ICP. Reason: Mint limit reached'
+				}
+			});
+		});
+	});
+
+	// Without a refund block, the CMC's fees took the whole amount.
+	it('says that nothing came back from a refund without a block', async () => {
+		mintSpy.mockResolvedValue({ status: 'refunded', reason: 'Mint limit reached' });
+
+		await mint();
+
+		await waitFor(() => {
+			expect(toastsErrorSpy).toHaveBeenCalledWith({
+				msg: {
+					text: 'The mint was refunded, but its fees took the whole amount: no ICP came back. Reason: Mint limit reached'
 				}
 			});
 		});

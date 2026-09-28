@@ -171,9 +171,19 @@ describe('CyclesMintForm', () => {
 		expect(container).toHaveTextContent('The amount is too small to mint TCYCLES.');
 	});
 
-	it('continues once it mints twice the deposit fee', () => {
+	// Exactly twice is not enough: a halved rate would mint only the fee.
+	it('cannot continue when it mints exactly twice the deposit fee', () => {
 		const { getByTestId } = render(CyclesMintForm, {
 			props: props({ sendAmount: '0.0004', xdrPermyriadPerIcp: 5_000n }),
+			context: context()
+		});
+
+		expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).toBeDisabled();
+	});
+
+	it('continues once it mints more than twice the deposit fee', () => {
+		const { getByTestId } = render(CyclesMintForm, {
+			props: props({ sendAmount: '0.00040001', xdrPermyriadPerIcp: 5_000n }),
 			context: context()
 		});
 

@@ -15,9 +15,9 @@ export const CMC_MINT_CYCLES_MEMO = new Uint8Array([0x4d, 0x49, 0x4e, 0x54, 0, 0
 export const CYCLES_LEDGER_DECIMALS = 12;
 export const CYCLES_LEDGER_DEPOSIT_FEE = 100_000_000n;
 
-// The smallest estimate the form lets through: twice the deposit fee, so the mint still
-// clears the fee if the rate halves before the notify runs. An estimate below the fee is
-// refunded minus 0.0003 ICP, which for amounts this small means nothing comes back.
+// The estimate the form's lower bound sits on: an amount must mint more than this, twice
+// the deposit fee, so that the mint still leaves a positive credit if the rate halves
+// before the notify runs. At exactly twice, a halved rate mints only the fee.
 export const CYCLES_MINT_MIN_ESTIMATE = 2n * CYCLES_LEDGER_DEPOSIT_FEE;
 
 // What the CMC keeps of a mint deposit it refunds, in ICP e8s: the ledger fee of the refund

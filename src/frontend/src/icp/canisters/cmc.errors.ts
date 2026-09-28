@@ -48,10 +48,13 @@ export class CmcNotifyInvalidTransactionError extends CmcNotifyError {
 	}
 }
 
-// The CMC's own error codes. An internal error (e.g. no conversion rate yet), a
-// ledger it could not reach and a refund it could not send all clear the
-// block's status, so a later notify runs the mint again.
-const RETRYABLE_OTHER_ERROR_CODES: bigint[] = [1n, 2n, 3n];
+// The CMC's own error codes that a retry cannot change: a bad subnet selection,
+// an unauthorised caller and a deposit memo that is too long depend only on the
+// call, which a retry repeats. The CMC clears a block's status after every error
+// except `Refunded`, so any other code is retried: an internal error (e.g. no
+// conversion rate yet), a ledger it could not reach, a refund it could not send,
+// and a code added later, which must not close a mint whose ICP it still holds.
+const FINAL_OTHER_ERROR_CODES: bigint[] = [4n, 5n, 6n];
 
 export class CmcNotifyOtherError extends CmcNotifyError {
 	constructor(
@@ -60,7 +63,7 @@ export class CmcNotifyOtherError extends CmcNotifyError {
 	) {
 		super({
 			message: errorMessage,
-			retryable: RETRYABLE_OTHER_ERROR_CODES.includes(errorCode)
+			retryable: !FINAL_OTHER_ERROR_CODES.includes(errorCode)
 		});
 	}
 }

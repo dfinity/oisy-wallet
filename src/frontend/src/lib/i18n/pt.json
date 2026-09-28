@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Não foi possível carregar a taxa de $token. Tente novamente mais tarde.",
 			"amount_too_small": "O valor é pequeno demais para cunhar $token.",
 			"refunded": "A cunhagem foi reembolsada. Seus $token foram devolvidos, menos $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "A cunhagem foi reembolsada, mas as taxas consumiram todo o valor: nenhum $token foi devolvido. Motivo: $reason",
 			"failed": "A cunhagem falhou. Motivo: $reason",
 			"not_started": "Não foi possível iniciar a cunhagem. Nada foi enviado, tente novamente.",
 			"transfer_failed": "A transferência de $token falhou. Nada foi enviado.",

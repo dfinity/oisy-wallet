@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Không thể tải tỷ giá $token. Vui lòng thử lại sau.",
 			"amount_too_small": "Số tiền quá nhỏ để đúc $token.",
 			"refunded": "Việc đúc đã được hoàn tiền. $token của bạn đã được trả lại, trừ $refundFee $token. Lý do: $reason",
+			"refunded_nothing": "Việc đúc đã được hoàn tiền, nhưng phí đã lấy hết toàn bộ số tiền: không có $token nào được trả lại. Lý do: $reason",
 			"failed": "Việc đúc thất bại. Lý do: $reason",
 			"not_started": "Không thể bắt đầu việc đúc. Không có gì được gửi, vui lòng thử lại.",
 			"transfer_failed": "Chuyển $token thất bại. Không có gì được gửi.",

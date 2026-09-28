@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "Kurz $token se nepodařilo načíst. Zkuste to prosím později.",
 			"amount_too_small": "Částka je příliš malá na ražení $token.",
 			"refunded": "Ražení bylo vráceno. Vaše $token se vrátily, snížené o $refundFee $token. Důvod: $reason",
+			"refunded_nothing": "Ražení bylo vráceno, ale poplatky pohltily celou částku: žádné $token se nevrátily. Důvod: $reason",
 			"failed": "Ražení se nezdařilo. Důvod: $reason",
 			"not_started": "Ražení se nepodařilo zahájit. Nic nebylo odesláno, zkuste to prosím znovu.",
 			"transfer_failed": "Převod $token se nezdařil. Nic nebylo odesláno.",

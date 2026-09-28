@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "No se pudo cargar la tasa de $token. Inténtalo de nuevo más tarde.",
 			"amount_too_small": "El importe es demasiado pequeño para acuñar $token.",
 			"refunded": "La acuñación fue reembolsada. Tus $token se devolvieron, menos $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "La acuñación fue reembolsada, pero las comisiones se llevaron todo el importe: no se devolvió ningún $token. Motivo: $reason",
 			"failed": "La acuñación falló. Motivo: $reason",
 			"not_started": "No se pudo iniciar la acuñación. No se envió nada, inténtalo de nuevo.",
 			"transfer_failed": "La transferencia de $token falló. No se envió nada.",

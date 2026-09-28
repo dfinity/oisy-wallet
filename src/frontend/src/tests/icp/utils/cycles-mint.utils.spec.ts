@@ -113,13 +113,14 @@ describe('cycles-mint.utils', () => {
 			).toBeFalsy();
 		});
 
-		// At 0.5 TCYCLES per ICP, 0.0004 ICP mints exactly twice the 0.0001 TCYCLES fee.
-		it('is true while the amount mints less than twice the deposit fee at the rate', () => {
-			expect(
-				isCyclesMintAmountTooSmall({ amount: 39_999n, xdrPermyriadPerIcp: 5_000n })
-			).toBeTruthy();
+		// At 0.5 TCYCLES per ICP, 0.0004 ICP mints exactly twice the 0.0001 TCYCLES fee: a
+		// halved rate would then mint only the fee, leaving nothing to credit.
+		it('is true while the amount mints twice the deposit fee or less at the rate', () => {
 			expect(
 				isCyclesMintAmountTooSmall({ amount: 40_000n, xdrPermyriadPerIcp: 5_000n })
+			).toBeTruthy();
+			expect(
+				isCyclesMintAmountTooSmall({ amount: 40_001n, xdrPermyriadPerIcp: 5_000n })
 			).toBeFalsy();
 		});
 

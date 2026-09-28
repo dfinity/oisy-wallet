@@ -62,9 +62,9 @@ export const randomSubMillisecondNs = (): bigint => {
 /**
  * Whether an amount of ICP e8s is below the Mint lower bound (spec §5.2), which has two
  * parts. A refund returns the amount minus the CMC's refund fees, so nothing at or below
- * them, whatever the rate. And below twice the deposit fee at the rate, a drop in the rate
- * before the mint runs could leave nothing to credit. Without a rate, only the first part
- * can be checked.
+ * them, whatever the rate. And at twice the deposit fee or less at the rate, a halving of
+ * the rate before the mint runs could leave nothing to credit. Without a rate, only the
+ * first part can be checked.
  */
 export const isCyclesMintAmountTooSmall = ({
 	amount,
@@ -74,4 +74,4 @@ export const isCyclesMintAmountTooSmall = ({
 	xdrPermyriadPerIcp?: bigint;
 }): boolean =>
 	amount <= CYCLES_MINT_REFUND_FEES ||
-	(nonNullish(xdrPermyriadPerIcp) && amount * xdrPermyriadPerIcp < CYCLES_MINT_MIN_ESTIMATE);
+	(nonNullish(xdrPermyriadPerIcp) && amount * xdrPermyriadPerIcp <= CYCLES_MINT_MIN_ESTIMATE);
