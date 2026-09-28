@@ -1565,7 +1565,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoins",
 			"stock": "Aktien",
-			"commodity": "Rohstoffe"
+			"commodity": "Rohstoffe",
+			"compute": "Rechenleistung"
+		},
+		"category_in_sentence": {
+			"compute": "Token für Rechenleistung"
 		},
 		"risk": {
 			"low": "Geringes Risiko",
