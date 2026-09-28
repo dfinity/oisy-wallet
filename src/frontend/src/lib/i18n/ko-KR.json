@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "$token 환율을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
 			"amount_too_small": "$token을 민트하기에는 금액이 너무 적습니다.",
 			"refunded": "민트가 환불되었습니다. $token이 $refundFee $token을 제외하고 반환되었습니다. 사유: $reason",
+			"refunded_nothing": "민트가 환불되었지만 수수료로 전액이 차감되어 $token이 반환되지 않았습니다. 사유: $reason",
 			"failed": "민트에 실패했습니다. 사유: $reason",
 			"not_started": "민트를 시작하지 못했습니다. 아무것도 전송되지 않았으니 다시 시도해 주세요.",
 			"transfer_failed": "$token 전송에 실패했습니다. 아무것도 전송되지 않았습니다.",

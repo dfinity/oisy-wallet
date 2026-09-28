@@ -1173,6 +1173,7 @@
 			"rate_unavailable": "",
 			"amount_too_small": "",
 			"refunded": "",
+			"refunded_nothing": "",
 			"failed": "",
 			"not_started": "",
 			"transfer_failed": "",
