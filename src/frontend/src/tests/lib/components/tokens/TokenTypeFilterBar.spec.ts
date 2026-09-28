@@ -22,6 +22,40 @@ describe('TokenTypeFilterBar', () => {
 		expect(getByText(en.token_tag.category.stablecoin)).toBeInTheDocument();
 		expect(getByText(en.token_tag.category.stock)).toBeInTheDocument();
 		expect(getByText(en.token_tag.category.commodity)).toBeInTheDocument();
+		expect(getByText(en.token_tag.category.compute)).toBeInTheDocument();
+	});
+
+	it('should render Compute as the last pill', () => {
+		const { container } = render(TokenTypeFilterBar);
+
+		const buttons = container.querySelectorAll('button');
+
+		expect(buttons[buttons.length - 1]?.textContent?.trim()).toBe(en.token_tag.category.compute);
+	});
+
+	it('should accent the Compute pill and no other', () => {
+		const { container, getByText } = render(TokenTypeFilterBar);
+
+		const accented = [...container.querySelectorAll('button')].filter((button) =>
+			button.classList.contains('bg-brand-subtle-20')
+		);
+
+		expect(accented).toEqual([getByText(en.token_tag.category.compute)]);
+	});
+
+	it('should render a selected Compute pill like any other selected pill', () => {
+		tokenCategoryFilterStore.set({
+			key: 'token-category-filter',
+			value: { value: TokenCategoryTagValue.COMPUTE }
+		});
+
+		const { getByText } = render(TokenTypeFilterBar);
+
+		const computeButton = getByText(en.token_tag.category.compute);
+
+		expect(computeButton.classList.contains('bg-brand-primary')).toBeTruthy();
+		expect(computeButton.classList.contains('text-primary-inverted')).toBeTruthy();
+		expect(computeButton.classList.contains('bg-brand-subtle-20')).toBeFalsy();
 	});
 
 	it('should have "All asset types" selected by default', () => {
