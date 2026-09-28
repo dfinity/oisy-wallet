@@ -501,7 +501,7 @@ Because the outcome is reported by the record and not by the send window, it rea
 
 The payment appears in the notification list while it is settling, showing the amount and the network, and can be dismissed once it has resolved.
 
-A record cannot get stuck. Every XRP payment is signed with an expiry about 20 ledgers ahead, some 60 to 90 seconds, past which it is either provably included or provably dead; one fresh lookup settles which. Once resolved, the next send reads a fresh sequence from the ledger rather than assuming the previous one plus one — an expired payment consumes no sequence, while a successful or a failed-on-ledger one does.
+A record resolves once the network can answer for it. Every XRP payment is signed with an expiry about 20 ledgers ahead, some 60 to 90 seconds, past which it is either provably included or provably dead; one fresh lookup settles which. If that lookup cannot be made, or its answer cannot be trusted, the record deliberately stays pending and keeps refusing another send from that address, rather than guessing that a new one is safe. Once resolved, the next send reads a fresh sequence from the ledger rather than assuming the previous one plus one — an expired payment consumes no sequence, while a successful or a failed-on-ledger one does.
 
 If the wallet cannot establish whether an earlier payment is still settling — the record cannot be read or written — the send is **refused rather than attempted**, and the wallet says to try again. Proceeding would drop the guarantee at exactly the moment a user is most likely to retry, and would leave the payment with nothing to resolve it.
 
