@@ -14,6 +14,7 @@ import { XrpNetworks } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
 	isXrpActiveUserTransaction,
+	isXrpAlreadyInFlightError,
 	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
@@ -260,6 +261,27 @@ describe('xrp-active-tx.utils', () => {
 					source: mockXrpSourceAddress
 				})
 			).toBeUndefined();
+		});
+	});
+
+	describe('isXrpAlreadyInFlightError', () => {
+		it('recognises the backend refusal', () => {
+			expect(isXrpAlreadyInFlightError({ AlreadyInFlight: null })).toBeTruthy();
+		});
+
+		// Everything else the create can fail with has to keep reading as "could not be
+		// recorded" — telling the user to wait for a payment that does not exist would
+		// be worse than the generic message.
+		it.each([
+			[{ TooManyActiveTransactions: null }],
+			[{ AlreadyExists: null }],
+			[{ InvalidData: 'token must be a native XRP token' }],
+			[new Error('network down')],
+			[undefined],
+			[null],
+			['AlreadyInFlight']
+		])('does not recognise %o', (err) => {
+			expect(isXrpAlreadyInFlightError(err)).toBeFalsy();
 		});
 	});
 });

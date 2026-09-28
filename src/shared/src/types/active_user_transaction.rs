@@ -33,9 +33,21 @@ pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 /// is at most 63 characters, so anything longer can never be a valid pool id.
 pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 
-/// Maximum length of an XRPL classic address. It is base58check over a 21-byte
-/// payload, which cannot encode to more than 35 characters, so anything longer
-/// can never be a valid address.
+/// The two `external_refs` an XRP row is polled with. Both are derived from the
+/// signed blob before the record is created, so both are known to the caller and
+/// can be required: a row missing either cannot be resolved, and — since an open
+/// row refuses every later send from its address — could never be escaped.
+pub const XRP_REF_TX_HASH: &str = "tx_hash";
+pub const XRP_REF_LAST_LEDGER_SEQUENCE: &str = "last_ledger_sequence";
+
+/// Length of an XRPL transaction id in hex.
+pub const XRP_TX_HASH_LEN: usize = 64;
+
+/// Length bounds of an XRPL classic address. It is base58check over a 21-byte
+/// payload — the `0x00` version byte plus the 20-byte `AccountID` — with a
+/// 4-byte checksum appended, so 25 bytes are encoded and the result is 25 to 35
+/// characters. Anything outside that can never have come from an encoder.
+pub const MIN_XRP_ADDRESS_LEN: usize = 25;
 pub const MAX_XRP_ADDRESS_LEN: usize = 35;
 
 /// Maximum width, in bits, of an `amount`. Every chain OISY supports expresses
@@ -339,6 +351,10 @@ pub enum ActiveUserTransactionError {
     InvalidId,
     InvalidData(String),
     IllegalStatusTransition,
+    /// A non-terminal record already tracks the same subject, and the flow only
+    /// allows one at a time. Distinct from `AlreadyExists`, which is about the
+    /// record's own id: this one is about what the record is *for*.
+    AlreadyInFlight,
 }
 
 #[cfg(test)]

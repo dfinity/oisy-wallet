@@ -29,10 +29,14 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { get } from 'svelte/store';
 
+// `JsonRpcProvider` and `Network` are needed even though this suite only exercises Infura
+// chains: the registry is built eagerly over every supported network, and the ones Infura does
+// not host take the fallback transport. Both share one implementation, as the shared setup mock
+// does — nothing here tells the two apart.
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 	provider.prototype.getBalance = vi.fn();
-	return { InfuraProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, Network: vi.fn() };
 });
 
 vi.mock('ethers/contract', () => {

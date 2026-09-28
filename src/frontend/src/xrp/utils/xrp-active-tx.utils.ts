@@ -192,3 +192,16 @@ export const buildXrpSendTrackingMetadata = ({
 		...(nonNullish(tx.error[0]) ? { error: tx.error[0] } : {})
 	};
 };
+
+/**
+ * Whether a failed record create was the backend refusing a second open payment.
+ *
+ * The backend holds the same invariant the send's own gate checks, and it is the one that *can*
+ * hold it: the gate's read cannot be atomic with the create, so a second tab can pass the gate in
+ * the window between the two. Its refusal is therefore the same refusal, and has to reach the user
+ * as such rather than as "the payment could not be recorded".
+ *
+ * The canister throws the raw candid `Err` variant, so this matches on its shape.
+ */
+export const isXrpAlreadyInFlightError = (err: unknown): boolean =>
+	nonNullish(err) && typeof err === 'object' && 'AlreadyInFlight' in err;
