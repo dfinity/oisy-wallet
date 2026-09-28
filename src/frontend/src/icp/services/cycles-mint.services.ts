@@ -11,7 +11,7 @@ import {
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
 } from '$icp/constants/cmc.constants';
 import { CyclesMintError, type CyclesMintNotifyResult } from '$icp/types/cycles-mint';
-import { getCyclesMintDepositAccount } from '$icp/utils/cycles-mint.utils';
+import { getCyclesMintDepositAccount, randomSubMillisecondNs } from '$icp/utils/cycles-mint.utils';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsCyclesMint } from '$lib/enums/progress-steps';
 import {
@@ -189,8 +189,10 @@ export const mintCycles = async ({
 	};
 
 	// Fixed for the whole mint: stored in the row, it lets the ledger deduplicate a resent
-	// transfer and lets a later session find the deposit again.
-	const transferCreatedAtNs = nowInBigIntNanoSeconds();
+	// transfer and lets a later session find the deposit again. Its sub-millisecond digits
+	// are random, so that another mint started in the same millisecond sends another
+	// transfer rather than the same one.
+	const transferCreatedAtNs = nowInBigIntNanoSeconds() + randomSubMillisecondNs();
 
 	const data = toCyclesMintData({ sourceToken, destinationToken, amount, transferCreatedAtNs });
 
@@ -205,24 +207,12 @@ export const mintCycles = async ({
 		usdSourceValue
 	});
 
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: mintId,
-			data,
-			externalRefs: toCyclesMintExternalRefs(refs)
-		});
-	} catch (err: unknown) {
-		consoleError(err);
-
-		throw fail('not_trackable');
-	}
-
 	// Best-effort, for a row whose mint never sent anything: a delete that fails leaves the
 	// row `Pending` without a deposit, which the poller closes as never sent once the ICP
 	// index has synced past its landing, and which then reports the mint's ending itself.
 	// Whether the row is gone is returned, so that the modal only reports an ending the row
-	// will not.
+	// will not. The backend's delete succeeds for a row that is not there, so this also
+	// settles a create whose answer was lost.
 	const deleteRow = async (): Promise<boolean> => {
 		try {
 			await deleteActiveUserTransaction({ identity, id: mintId });
@@ -234,6 +224,20 @@ export const mintCycles = async ({
 			return false;
 		}
 	};
+
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id: mintId,
+			data,
+			externalRefs: toCyclesMintExternalRefs(refs)
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+
+		// The backend may have committed the row all the same, if only its answer was lost.
+		throw (await deleteRow()) ? fail('not_trackable') : new CyclesMintError('not_trackable');
+	}
 
 	// Learned refs ride with the status they belong to, and a failed write is swallowed:
 	// the ICP has already moved, and the poller re-derives everything from the deposit. As
