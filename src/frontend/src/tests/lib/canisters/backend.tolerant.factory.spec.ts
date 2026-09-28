@@ -91,6 +91,21 @@ describe('backend.tolerant.factory', () => {
 			expect(result.Ok.settings[0].networks.networks).toHaveLength(2);
 		});
 
+		// Vite/Rollup materialise `import * as IDL` as a frozen object tagged `Module`, unlike the
+		// live namespace vitest passes.
+		it('should keep the settings with the IDL namespace as the production bundle ships it', () => {
+			const bundledIdl: typeof IDL = Object.freeze(
+				Object.defineProperty({ ...IDL }, Symbol.toStringTag, { value: 'Module' })
+			);
+
+			const [result] = IDL.decode(
+				retTypes(tolerantIdlFactoryBackend({ IDL: bundledIdl })),
+				bytes
+			) as [{ Ok: { settings: { networks: { networks: unknown[] } }[] } }];
+
+			expect(result.Ok.settings[0].networks.networks).toHaveLength(2);
+		});
+
 		it('should resolve the known key and report only the unknown one', () => {
 			const [result] = IDL.decode(retTypes(tolerantIdlFactoryBackend({ IDL })), bytes) as [
 				{ Ok: { settings: { networks: { networks: [object, typeof SETTINGS][] } }[] } }
