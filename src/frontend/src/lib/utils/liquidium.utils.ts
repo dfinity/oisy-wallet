@@ -54,6 +54,8 @@ export const liquidiumMarketToken = ({
 				return ICP_TOKEN;
 			case 'BTC':
 				return findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens });
+			case 'ETH':
+				return findTwinToken({ tokenToPair: ETHEREUM_TOKEN, tokens });
 			case 'USDC':
 				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
 			case 'USDT':
@@ -106,7 +108,8 @@ const scaledUsdToNumber = ({ value, decimals }: { value: bigint; decimals: bigin
 	Number(value) / 10 ** Number(decimals);
 
 // Buffer-remaining health %: (1 − LTV / liquidationThreshold) × 100, clamped. From the
-// bps fields, not the raw `healthFactor` (whose scale is unreliable across positions).
+// bps fields, not the raw `healthFactor`, which is `null` without debt and measures distance
+// to liquidation as a ratio rather than the remaining buffer this percentage shows.
 export const liquidiumHealthFactorPercent = ({
 	currentLtvBps,
 	weightedLiquidationThresholdBps
