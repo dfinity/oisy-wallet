@@ -1565,7 +1565,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoiny",
 			"stock": "Akcie",
-			"commodity": "Komodity"
+			"commodity": "Komodity",
+			"compute": "Výpočetní výkon"
+		},
+		"category_in_sentence": {
+			"compute": "výpočetní tokeny"
 		},
 		"risk": {
 			"low": "Nízké riziko",
@@ -2620,6 +2624,8 @@
 			"transaction_fee": "Transakční poplatek",
 			"insufficient_funds_for_fee": "Zůstatek nestačí na pokrytí částky a poplatků.",
 			"supply_prices_unavailable": "Ceny jsou dočasně nedostupné. Poskytování je deaktivováno, dokud se nenačtou.",
+			"minimum_supply": "Minimální poskytnutí",
+			"supply_below_minimum": "Částka je nižší než minimální poskytnutí.",
 			"borrow_review": "Zkontrolovat půjčku",
 			"borrow_review_subtitle": "Půjčuješ si",
 			"borrowing": "Probíhá půjčka",

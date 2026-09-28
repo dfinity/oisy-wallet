@@ -1565,7 +1565,11 @@
 			"crypto": "암호화폐",
 			"stablecoin": "스테이블코인",
 			"stock": "주식",
-			"commodity": "원자재"
+			"commodity": "원자재",
+			"compute": "컴퓨팅"
+		},
+		"category_in_sentence": {
+			"compute": "컴퓨팅 토큰"
 		},
 		"risk": {
 			"low": "낮은 위험",
@@ -2620,6 +2624,8 @@
 			"transaction_fee": "트랜잭션 수수료",
 			"insufficient_funds_for_fee": "금액과 수수료를 충당하기에 잔액이 부족합니다.",
 			"supply_prices_unavailable": "가격 정보를 일시적으로 사용할 수 없습니다. 로드될 때까지 공급이 비활성화됩니다.",
+			"minimum_supply": "최소 공급액",
+			"supply_below_minimum": "입력 금액이 최소 공급액 미만입니다.",
 			"borrow_review": "대출 검토",
 			"borrow_review_subtitle": "대출 금액",
 			"borrowing": "대출 진행 중",

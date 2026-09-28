@@ -1565,7 +1565,11 @@
 			"crypto": "加密货币",
 			"stablecoin": "稳定币",
 			"stock": "股票",
-			"commodity": "大宗商品"
+			"commodity": "大宗商品",
+			"compute": "算力"
+		},
+		"category_in_sentence": {
+			"compute": "算力代币"
 		},
 		"risk": {
 			"low": "低风险",
@@ -2620,6 +2624,8 @@
 			"transaction_fee": "交易费用",
 			"insufficient_funds_for_fee": "余额不足以支付金额和费用。",
 			"supply_prices_unavailable": "价格暂时不可用。加载完成前，提供功能已禁用。",
+			"minimum_supply": "最低提供额",
+			"supply_below_minimum": "金额低于最低提供额。",
 			"borrow_review": "查看借款详情",
 			"borrow_review_subtitle": "您借入",
 			"borrowing": "借款处理中",

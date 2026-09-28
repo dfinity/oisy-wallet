@@ -1565,7 +1565,11 @@
 			"crypto": "Criptovalute",
 			"stablecoin": "Stablecoin",
 			"stock": "Azioni",
-			"commodity": "Materie prime"
+			"commodity": "Materie prime",
+			"compute": "Calcolo"
+		},
+		"category_in_sentence": {
+			"compute": "token di calcolo"
 		},
 		"risk": {
 			"low": "Rischio basso",
@@ -2620,6 +2624,8 @@
 			"transaction_fee": "Commissione di transazione",
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire l'importo e le commissioni.",
 			"supply_prices_unavailable": "I prezzi non sono temporaneamente disponibili. La fornitura è disabilitata finché non vengono caricati.",
+			"minimum_supply": "Fornitura minima",
+			"supply_below_minimum": "L'importo è inferiore alla fornitura minima.",
 			"borrow_review": "Rivedi prestito",
 			"borrow_review_subtitle": "Prendi in prestito",
 			"borrowing": "Richiesta prestito in corso",
