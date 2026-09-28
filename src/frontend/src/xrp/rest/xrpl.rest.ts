@@ -662,8 +662,10 @@ export const loadXrpTransactionOutcome = async ({
  * `accepted` reports whether THIS node took the transaction and `engine_result` is its
  * provisional result (e.g. `tesSUCCESS`, `terQUEUED`, `tecUNFUNDED_PAYMENT`). Neither is proof of
  * anything final: an applied `tec*` is accepted yet failed, and a refusal may still be reapplied
- * later. Only a malformed `tem*` result is conclusive (see `isXrpSubmitFinalFailure`); every other
- * outcome is settled by polling the tx hash (see {@link loadXrpTransactionOutcome}).
+ * later. So no submit result decides the outcome — every one is settled by the record's poll of the
+ * tx hash (see {@link loadXrpTransactionOutcome}). Even a malformed `tem*`, which no ledger will
+ * ever apply, is left to it: the transaction never lands, and the record resolves as expired once
+ * its window has passed.
  */
 export const submitXrpTransaction = async ({
 	txBlob,
@@ -688,9 +690,7 @@ export const submitXrpTransaction = async ({
 		txHash: data.tx_json?.hash,
 		// It says this node took the transaction (applied/queued/broadcast/kept), which is neither
 		// necessary nor sufficient for the send to have happened — so `accepted: false` never
-		// creates a failure. It does decide one thing: a `tem*` is only a definitive rejection when
-		// the node did NOT also claim to have taken the blob, because nothing can be both malformed
-		// and accepted. See `isXrpSubmitFinalFailure`.
+		// creates a failure.
 		//
 		// Passed through rather than compared to `true`: the schema requires a boolean, so the
 		// comparison would only be re-deriving what the parse already guarantees.
