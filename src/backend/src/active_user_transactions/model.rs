@@ -880,6 +880,22 @@ mod tests {
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }
 
+    /// The width bound the other variants share, checked on this arm too.
+    #[test]
+    fn cycles_mint_oversized_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("mint-1");
+        req.data = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+            source_token: icrc(ICP_LEDGER),
+            dest_token: icrc(CYCLES_LEDGER),
+            amount: Nat::parse(OVER_WIDTH_AMOUNT).unwrap(),
+            transfer_created_at_ns: 1_790_000_000_000_000_000,
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(list(&map, principal()).transactions.len(), 0);
+    }
+
     #[test]
     fn cycles_mint_wrong_token_kinds_rejected() {
         // A mint spends ICP and deposits into the cycles ledger, so any other
