@@ -4,7 +4,7 @@
 
 - **Type:** `impr`
 - **Area:** Frontend (price providers, price worker); backend (exchange-rate providers)
-- **Status:** Draft. Two open questions (§8) and two pending decisions (§9).
+- **Status:** Draft. Two open questions (§8) and one pending decision (§9).
 
 ---
 
@@ -42,7 +42,7 @@ CoinGecko, the provider OISY already uses, quotes XDR as a fiat currency ("IMF S
 1. **TCYCLES is priced at 1 XDR.** Its USD price is CoinGecko's XDR rate, BTC in USD ÷ BTC in XDR, taken from one response. TCYCLES is recognised by its ledger canister ID `um5iw-rqaaa-aaaaq-qaaba-cai`, never by its symbol.
 2. **Its 24h change is XDR's own** against USD, derived from BTC's two 24h changes the way the display-currency multiplier is: usually a fraction of a percent, and zero while CoinGecko's XDR rate has not moved.
 3. **TCYCLES is never priced from a market.** Neither ICPSwap nor KongSwap is asked for TCYCLES, in any mode, fill or fallback. A CoinGecko listing, should one appear, does not override the peg either: it would track the same pools.
-4. **No XDR rate, no TCYCLES price.** If a refresh has no usable XDR rate (the request failed, or the value is missing, non-finite or not positive), TCYCLES has no price for that refresh: it shows "$ value is not available", and the swap review asks for the missing-price confirmation. No other token is affected (§9, P1).
+4. **No XDR rate, no TCYCLES price.** If a refresh has no usable XDR rate (the request failed, or the value is missing, non-finite or not positive), TCYCLES has no price for that refresh: it shows "$ value is not available", and the swap review asks for the missing-price confirmation. No other token is affected (§10, D2).
 5. **Same price in every mode.** The frontend provider path (beta, production) and backend mode with its frontend fill (local, staging) give TCYCLES the same price from the same source (§9, P2).
 6. **No new frontend request.** On the provider path, the XDR rate comes from the BTC request that every refresh already sends, with `xdr` added to its currencies. The backend sends at most one extra CoinGecko request per refresh, and only when TCYCLES is among the tokens it prices.
 7. **Everything else follows the price:** the balance, the portfolio total, the display-currency conversion, the swap value difference, the Mint flow's USD figures and the USD values in analytics. None of them changes.
@@ -95,9 +95,9 @@ The two are independent. Until PR 2 lands, backend mode keeps showing the ICPSwa
 
 ## 9. Pending decisions (facts are clear)
 
-- **P1 No usable XDR rate (§3.4):** (a) TCYCLES stays unpriced for that refresh, or (b) it falls back to ICPSwap. Recommended: (a). A missing price is honest and makes the swap review ask for confirmation; the pool price is what this spec removes, and in one day it ranged from 94% below the peg to 64% above it.
 - **P2 Backend (§3.5, §7):** (a) both PRs, or (b) PR 1 only for now. Recommended: (a). Backend mode runs only on local and staging, so production is fixed either way, but with (b) staging keeps showing the pool price.
 
 ## 10. Resolved
 
 - **D1 Source:** CoinGecko's XDR rate (2026-09-28). 1 XDR is the official value of 1 TCYCLES; the alternatives are in §4.
+- **D2 No usable XDR rate (§3.4), was P1:** TCYCLES has no price for that refresh, with no fallback to ICPSwap or any other source (2026-09-28). A missing price is honest and makes the swap review ask for confirmation, while the pool price is what this spec removes: in one day it ranged from 94% below the peg to 64% above it.
