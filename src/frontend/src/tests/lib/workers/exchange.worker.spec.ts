@@ -1,5 +1,5 @@
 import type { TokenId } from '$declarations/backend/backend.did';
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -1061,13 +1061,13 @@ describe('exchange.worker', () => {
 				});
 
 				it('should price TCYCLES from the XDR basket without asking any ICRC provider', async () => {
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(simpleTokenPrice).not.toHaveBeenCalled();
 					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
 					expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
 
-					const tcyclesPrice = postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID];
+					const tcyclesPrice = postedData().currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID];
 
 					expect(tcyclesPrice).toEqual({ usd: expect.any(Number), usd_market_cap: 0 });
 					expect(tcyclesPrice.usd).toBeCloseTo(1.36029, 5);
@@ -1078,7 +1078,7 @@ describe('exchange.worker', () => {
 					vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue([]);
 					vi.mocked(fetchBatchKongSwapPrices).mockResolvedValue([]);
 
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID, 'icrc1']));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID, 'icrc1']));
 
 					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
 						id: 'internet-computer',
@@ -1090,7 +1090,7 @@ describe('exchange.worker', () => {
 					expect(fetchBatchIcpSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
 					expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith(['icrc1']);
 
-					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+					expect(postedData().currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
 						1.36029,
 						5
 					);
@@ -1101,7 +1101,7 @@ describe('exchange.worker', () => {
 
 					mockBtcPrice(btcPriceWithoutJpy);
 
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(postedData().currentIcrcPrices).toEqual({});
 					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
@@ -1109,7 +1109,7 @@ describe('exchange.worker', () => {
 				});
 
 				it('should not post a basket status before the countdown', async () => {
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(postedData()).not.toHaveProperty('currentXdrBasketStatus');
 				});
@@ -1117,13 +1117,13 @@ describe('exchange.worker', () => {
 				it('should post the basket status and keep the price in the week before the end date', async () => {
 					vi.setSystemTime(new Date('2027-07-25T00:00:00.000Z'));
 
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(postedData().currentXdrBasketStatus).toEqual({
 						phase: 'expiring_soon',
 						daysLeft: 7
 					});
-					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+					expect(postedData().currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
 						1.36029,
 						5
 					);
@@ -1132,10 +1132,10 @@ describe('exchange.worker', () => {
 				it('should keep the price through the grace period', async () => {
 					vi.setSystemTime(new Date('2027-09-30T23:00:00.000Z'));
 
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(postedData().currentXdrBasketStatus).toEqual({ phase: 'grace', daysLeft: 1 });
-					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+					expect(postedData().currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
 						1.36029,
 						5
 					);
@@ -1144,7 +1144,7 @@ describe('exchange.worker', () => {
 				it('should stop pricing TCYCLES once the basket has expired', async () => {
 					vi.setSystemTime(new Date('2027-10-01T00:00:00.000Z'));
 
-					await onExchangeMessage(tcyclesEvent([IC_CYCLES_LEDGER_CANISTER_ID]));
+					await onExchangeMessage(tcyclesEvent([TCYCLES_LEDGER_CANISTER_ID]));
 
 					expect(postedData().currentXdrBasketStatus).toEqual({ phase: 'expired', daysLeft: 0 });
 					expect(postedData().currentIcrcPrices).toEqual({});
@@ -1158,7 +1158,7 @@ describe('exchange.worker', () => {
 					await onExchangeMessage(tcyclesEvent(['icrc1']));
 
 					expect(postedData()).not.toHaveProperty('currentXdrBasketStatus');
-					expect(postedData().currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
+					expect(postedData().currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID].usd).toBeCloseTo(
 						1.36029,
 						5
 					);
@@ -1829,7 +1829,7 @@ describe('exchange.worker', () => {
 							data: {
 								currentCurrency: Currency.USD,
 								erc20Addresses: [],
-								icrcCanisterIds: [IC_CYCLES_LEDGER_CANISTER_ID, 'icrc1'],
+								icrcCanisterIds: [TCYCLES_LEDGER_CANISTER_ID, 'icrc1'],
 								splAddresses: [],
 								erc4626TokensExchangeData: []
 							}
@@ -1843,7 +1843,7 @@ describe('exchange.worker', () => {
 
 					const postedData = postMessageMock.mock.calls[0][0].data;
 
-					expect(postedData.currentIcrcPrices[IC_CYCLES_LEDGER_CANISTER_ID]).toBeUndefined();
+					expect(postedData.currentIcrcPrices[TCYCLES_LEDGER_CANISTER_ID]).toBeUndefined();
 				});
 
 				describe('when the CoinGecko fallback provider is enabled', () => {

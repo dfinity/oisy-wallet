@@ -1,6 +1,6 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
@@ -340,7 +340,7 @@ const syncExchangeFromProviders = async ({
 		currentIcpPrice,
 		currentIcrcPrices: {
 			...currentIcrcPrices,
-			...(nonNullish(tcyclesPrice) && { [IC_CYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
+			...(nonNullish(tcyclesPrice) && { [TCYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
 		},
 		currentSolPrice,
 		currentXrpPrice,
