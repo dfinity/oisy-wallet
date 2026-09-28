@@ -29,11 +29,13 @@
 	interface Props {
 		sendAmount: OptionAmount;
 		xdrPermyriadPerIcp?: bigint;
+		// The re-quote Review opened with is still on its way: Mint waits for it.
+		requoting?: boolean;
 		onBack: () => void;
 		onMint: () => void;
 	}
 
-	let { sendAmount, xdrPermyriadPerIcp, onBack, onMint }: Props = $props();
+	let { sendAmount, xdrPermyriadPerIcp, requoting = false, onBack, onMint }: Props = $props();
 
 	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -109,7 +111,10 @@
 			<ButtonBack onclick={onBack} />
 
 			<Button
-				disabled={invalidAmount(sendAmount) || isNullish(xdrPermyriadPerIcp) || tooSmall}
+				disabled={requoting ||
+					invalidAmount(sendAmount) ||
+					isNullish(xdrPermyriadPerIcp) ||
+					tooSmall}
 				onclick={onMint}
 				testId={CYCLES_MINT_REVIEW_MINT_BUTTON}
 			>

@@ -59,6 +59,11 @@ describe('CyclesMintModal', () => {
 	const mint = async () => {
 		const result = await toReview();
 
+		// Mint waits for the re-quote Review opened with.
+		await waitFor(() => {
+			expect(result.getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		});
+
 		await fireEvent.click(result.getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON));
 
 		return result;
@@ -111,6 +116,39 @@ describe('CyclesMintModal', () => {
 
 		expect(getByTestId(CYCLES_MINT_REVIEW)).toHaveTextContent('1.5 ICP');
 		expect(rateSpy).toHaveBeenCalledTimes(2);
+	});
+
+	// So that Review checks the bound against the latest rate, not the form's.
+	it('keeps Mint disabled until the re-quote Review opened with has come back', async () => {
+		let settle: (rate: bigint) => void = () => undefined;
+
+		rateSpy
+			.mockResolvedValueOnce(mockXdrPermyriadPerIcp)
+			.mockImplementationOnce(() => new Promise<bigint>((resolve) => (settle = resolve)));
+
+		const { getByTestId } = await toReview();
+
+		expect(getByTestId(CYCLES_MINT_REVIEW)).toBeInTheDocument();
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
+
+		settle(mockXdrPermyriadPerIcp);
+
+		await waitFor(() => {
+			expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		});
+	});
+
+	// The last good rate stays in use, as for every other failed read of it.
+	it('lets Mint go ahead on the last good rate when the re-quote fails', async () => {
+		rateSpy
+			.mockResolvedValueOnce(mockXdrPermyriadPerIcp)
+			.mockRejectedValueOnce(new Error('CMC unreachable'));
+
+		const { getByTestId } = await toReview();
+
+		await waitFor(() => {
+			expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		});
 	});
 
 	it('mints the entered ICP and shows what was credited', async () => {
