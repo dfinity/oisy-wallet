@@ -2612,6 +2612,8 @@
 			"transaction_fee": "Comisión de transacción",
 			"insufficient_funds_for_fee": "Saldo insuficiente para cubrir el importe y las comisiones.",
 			"supply_prices_unavailable": "Los precios no están disponibles temporalmente. El suministro está deshabilitado hasta que se carguen.",
+			"minimum_supply": "Suministro mínimo",
+			"supply_below_minimum": "La cantidad es inferior al suministro mínimo.",
 			"borrow_review": "Revisar préstamo",
 			"borrow_review_subtitle": "Pides prestado",
 			"borrowing": "Solicitando préstamo",

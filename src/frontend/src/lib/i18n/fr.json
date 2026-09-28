@@ -2612,6 +2612,8 @@
 			"transaction_fee": "Frais de transaction",
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir le montant et les frais.",
 			"supply_prices_unavailable": "Les prix sont temporairement indisponibles. La fourniture est désactivée jusqu'à leur chargement.",
+			"minimum_supply": "Fourniture minimale",
+			"supply_below_minimum": "Le montant est inférieur à la fourniture minimale.",
 			"borrow_review": "Vérifier l'emprunt",
 			"borrow_review_subtitle": "Vous empruntez",
 			"borrowing": "Emprunt en cours",

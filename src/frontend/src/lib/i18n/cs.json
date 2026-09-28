@@ -2612,6 +2612,8 @@
 			"transaction_fee": "Transakční poplatek",
 			"insufficient_funds_for_fee": "Zůstatek nestačí na pokrytí částky a poplatků.",
 			"supply_prices_unavailable": "Ceny jsou dočasně nedostupné. Poskytování je deaktivováno, dokud se nenačtou.",
+			"minimum_supply": "Minimální poskytnutí",
+			"supply_below_minimum": "Částka je nižší než minimální poskytnutí.",
 			"borrow_review": "Zkontrolovat půjčku",
 			"borrow_review_subtitle": "Půjčuješ si",
 			"borrowing": "Probíhá půjčka",
