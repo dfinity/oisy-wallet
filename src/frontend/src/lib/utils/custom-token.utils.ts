@@ -24,7 +24,7 @@ import type {
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import type { TokenId, TokenMetadata } from '$lib/types/token';
+import type { TokenId, TokenStandardCode } from '$lib/types/token';
 import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
@@ -144,32 +144,34 @@ export const toCustomToken = ({
 	};
 };
 
-// `parseTokenId` mints a new `Symbol` on every call, even for the same string. Custom tokens are
-// re-derived from scratch on every reload of the custom-token list (login, post-swap, etc.), so
-// without interning, a custom token's `TokenId` would lose referential equality across reloads
-// and desync any store (e.g. `ethTransactionsStore`) keyed by it.
+// Interned: `parseTokenId` mints a new Symbol per call, which would churn ids on every reload.
 const customTokenIdCache = new Map<string, TokenId>();
 
 export const parseCustomTokenId = ({
 	identifier,
-	chainId
+	chainId,
+	standard
 }:
 	| {
-			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			identifier: ContractAddress['address'];
 			chainId: EthereumChainId;
+			standard: TokenStandardCode;
 	  }
 	| {
-			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			identifier: SplTokenAddress;
 			chainId: SolanaChainId['chainId'];
+			standard: TokenStandardCode;
 	  }): TokenId => {
-	const key = `custom-token#${identifier}#${chainId}`;
+	// The standard splits entries sharing an address, e.g. an ERC-721 and an ERC-1155 collection.
+	const key = `custom-token#${standard}#${identifier}#${chainId}`;
 
 	const cachedId = customTokenIdCache.get(key);
 	if (nonNullish(cachedId)) {
 		return cachedId;
 	}
 
-	const tokenId = parseTokenId(key);
+	// The description omits the standard: it feeds the persisted Activity token-filter key.
+	const tokenId = parseTokenId(`custom-token#${identifier}#${chainId}`);
 	customTokenIdCache.set(key, tokenId);
 
 	return tokenId;
