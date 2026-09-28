@@ -8,10 +8,12 @@ describe('coingecko.rest', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
-		vi.mocked(fetch).mockResolvedValue({
-			ok: true,
-			json: () => Promise.resolve({ bitcoin: { usd: 1 } })
-		} as unknown as Response);
+		vi.mocked(fetch).mockResolvedValue(
+			new Response(JSON.stringify({ bitcoin: { usd: 1 } }), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			})
+		);
 	});
 
 	describe('simplePrice', () => {
