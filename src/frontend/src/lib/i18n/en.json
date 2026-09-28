@@ -2638,6 +2638,8 @@
 			"transaction_fee": "Transaction fee",
 			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the fees.",
 			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
+			"minimum_supply": "Minimum supply",
+			"supply_below_minimum": "Amount is below the minimum supply.",
 			"borrow_review": "Review borrow",
 			"borrow_review_subtitle": "You borrow",
 			"borrowing": "Borrowing",

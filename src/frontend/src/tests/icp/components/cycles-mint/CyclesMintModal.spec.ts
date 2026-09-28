@@ -167,8 +167,7 @@ describe('CyclesMintModal', () => {
 				identity: mockIdentity,
 				sourceToken: ICP_TOKEN,
 				destinationToken: mockTcyclesToken,
-				amount: 150_000_000n,
-				estimatedCredited: 6_749_900_000_000n
+				amount: 150_000_000n
 			})
 		);
 	});

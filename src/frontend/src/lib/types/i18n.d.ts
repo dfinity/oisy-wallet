@@ -2175,6 +2175,8 @@ interface I18nLiquidium {
 		transaction_fee: string;
 		insufficient_funds_for_fee: string;
 		supply_prices_unavailable: string;
+		minimum_supply: string;
+		supply_below_minimum: string;
 		borrow_review: string;
 		borrow_review_subtitle: string;
 		borrowing: string;

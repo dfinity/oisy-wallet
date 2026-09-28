@@ -5,7 +5,8 @@ import { icrc1Transfer } from '$icp/api/icp-ledger.api';
 import { CmcNotifyError, CmcNotifyRefundedError } from '$icp/canisters/cmc.errors';
 import {
 	CMC_MINT_CYCLES_MEMO,
-	CYCLES_LEDGER_DECIMALS,
+	CYCLES_MINT_DELETE_ATTEMPTS,
+	CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS,
 	CYCLES_MINT_NOTIFY_ATTEMPTS,
 	CYCLES_MINT_NOTIFY_RETRY_DELAY_MILLIS,
 	CYCLES_MINT_TRANSFER_START_WINDOW_NS
@@ -141,7 +142,6 @@ export const mintCycles = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	estimatedCredited,
 	usdSourceValue,
 	progress
 }: {
@@ -152,8 +152,6 @@ export const mintCycles = async ({
 	destinationToken: Token;
 	// ICP e8s, without the ledger fee.
 	amount: bigint;
-	// The estimate the user reviewed, for the analytics only.
-	estimatedCredited?: bigint;
 	usdSourceValue?: string;
 	progress: (step: ProgressStepsCyclesMint) => void;
 }): Promise<CyclesMintResult> => {
@@ -166,16 +164,7 @@ export const mintCycles = async ({
 	const analytics: Omit<TrackCyclesMintParams, 'resultStatus'> = {
 		step: 'mint',
 		sourceSymbol: sourceToken.symbol,
-		sourceAmount,
-		sourceUsdValue: usdSourceValue,
-		destinationSymbol: destinationToken.symbol,
-		...(nonNullish(estimatedCredited) && {
-			destinationAmount: formatToken({
-				value: estimatedCredited,
-				unitName: CYCLES_LEDGER_DECIMALS,
-				displayDecimals: CYCLES_LEDGER_DECIMALS
-			})
-		})
+		destinationSymbol: destinationToken.symbol
 	};
 
 	const fail = (errorCode: CyclesMintErrorCode & CyclesMintError['kind']): CyclesMintError => {
@@ -212,17 +201,24 @@ export const mintCycles = async ({
 	// index has synced past its landing, and which then reports the mint's ending itself.
 	// Whether the row is gone is returned, so that the modal only reports an ending the row
 	// will not. The backend's delete succeeds for a row that is not there, so this also
-	// settles a create whose answer was lost.
+	// settles a create whose answer was lost, and a later attempt settles an earlier delete
+	// whose answer was: the first success means the row is gone, whichever call removed it.
 	const deleteRow = async (): Promise<boolean> => {
-		try {
-			await deleteActiveUserTransaction({ identity, id: mintId });
+		for (let attempt = 1; attempt <= CYCLES_MINT_DELETE_ATTEMPTS; attempt++) {
+			try {
+				await deleteActiveUserTransaction({ identity, id: mintId });
 
-			return true;
-		} catch (err: unknown) {
-			consoleError(err);
+				return true;
+			} catch (err: unknown) {
+				consoleError(err);
+			}
 
-			return false;
+			if (attempt < CYCLES_MINT_DELETE_ATTEMPTS) {
+				await waitForMilliseconds(CYCLES_MINT_DELETE_RETRY_DELAY_MILLIS);
+			}
 		}
+
+		return false;
 	};
 
 	try {

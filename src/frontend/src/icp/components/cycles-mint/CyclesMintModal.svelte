@@ -10,7 +10,6 @@
 	import { mintCycles, type CyclesMintResult } from '$icp/services/cycles-mint.services';
 	import { CyclesMintError } from '$icp/types/cycles-mint';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { estimateCyclesMintCredited } from '$icp/utils/cycles-mint.utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -195,9 +194,6 @@
 				sourceToken,
 				destinationToken,
 				amount,
-				estimatedCredited: nonNullish(xdrPermyriadPerIcp)
-					? estimateCyclesMintCredited({ amount, xdrPermyriadPerIcp })
-					: undefined,
 				usdSourceValue: nonNullish(usdPrice) ? `${usdPrice * Number(sendAmount)}` : undefined,
 				progress: (step) => (progressStep = step)
 			});

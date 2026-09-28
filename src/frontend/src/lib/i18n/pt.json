@@ -2637,6 +2637,8 @@
 			"transaction_fee": "Taxa de transação",
 			"insufficient_funds_for_fee": "Saldo insuficiente para cobrir o montante e as taxas.",
 			"supply_prices_unavailable": "Os preços estão temporariamente indisponíveis. O fornecimento está desativado até serem carregados.",
+			"minimum_supply": "Fornecimento mínimo",
+			"supply_below_minimum": "O valor está abaixo do fornecimento mínimo.",
 			"borrow_review": "Rever empréstimo",
 			"borrow_review_subtitle": "Pedes emprestado",
 			"borrowing": "A pedir empréstimo",

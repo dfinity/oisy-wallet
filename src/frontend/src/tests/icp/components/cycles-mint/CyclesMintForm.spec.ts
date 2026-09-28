@@ -79,6 +79,15 @@ describe('CyclesMintForm', () => {
 		expect(container).toHaveTextContent('Max: 2.4999 ICP');
 	});
 
+	// 0.00005 ICP does not cover the 0.0001 ICP fee: Max stops at zero rather than going negative.
+	it('offers 0 ICP as Max for a balance below the network fee', () => {
+		balancesStore.set({ id: ICP_TOKEN.id, data: { data: 5_000n, certified: true } });
+
+		const { container } = render(CyclesMintForm, { props: props(), context: context() });
+
+		expect(container).toHaveTextContent('Max: 0 ICP');
+	});
+
 	it('continues to Review with a valid amount', async () => {
 		const testProps = props();
 

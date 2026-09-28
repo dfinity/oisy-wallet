@@ -86,6 +86,46 @@ describe('LiquidiumSupplyForm', () => {
 		expect(container).not.toHaveTextContent(en.liquidium.text.insufficient_funds_for_fee);
 	});
 
+	it('shows the minimum supply for the asset', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.minimum_supply);
+		expect(container).toHaveTextContent('0.000051 BTC');
+	});
+
+	it('hides the minimum supply row for an asset without a protocol minimum', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, market: { ...market, asset: 'UNLISTED' } },
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.minimum_supply);
+	});
+
+	it('rejects an amount below the protocol deposit minimum before the rail validator', () => {
+		const railValidate = vi.fn(() => new Error(en.liquidium.text.insufficient_funds_for_fee));
+
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, amount: 0.00005, onCustomErrorValidate: railValidate },
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.supply_below_minimum);
+		expect(container).not.toHaveTextContent(en.liquidium.text.insufficient_funds_for_fee);
+	});
+
+	it('accepts an amount at the protocol deposit minimum', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, amount: 0.000051 },
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.supply_below_minimum);
+	});
+
 	it('surfaces a retry message when the provider-fee estimate is unavailable', () => {
 		const { container } = render(LiquidiumSupplyForm, {
 			props: { ...baseProps, inflowFeeUnavailable: true },
