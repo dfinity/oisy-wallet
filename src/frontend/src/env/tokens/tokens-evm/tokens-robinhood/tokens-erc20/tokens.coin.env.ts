@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import coinx from '$sol/assets/coinx.svg';
 
 export const COIN_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const COIN_TOKEN: RequiredEvmErc20Token = {
 	name: 'Coinbase • Robinhood Token',
 	symbol: COIN_SYMBOL,
 	decimals: COIN_DECIMALS,
-	icon: coinx,
+	icon: robinhoodstock,
 	address: '0x6330D8C3178a418788dF01a47479c0ce7CCF450b'
 };

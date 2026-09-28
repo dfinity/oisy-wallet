@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import spyx from '$sol/assets/spyx.svg';
 
 export const SPY_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const SPY_TOKEN: RequiredEvmErc20Token = {
 	name: 'SPDR S&P 500 ETF Trust • Robinhood Token',
 	symbol: SPY_SYMBOL,
 	decimals: SPY_DECIMALS,
-	icon: spyx,
+	icon: robinhoodstock,
 	address: '0x117cc2133c37B721F49dE2A7a74833232B3B4C0C'
 };

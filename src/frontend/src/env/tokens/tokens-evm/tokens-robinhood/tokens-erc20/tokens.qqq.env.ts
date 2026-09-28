@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import qqqx from '$sol/assets/qqqx.svg';
 
 export const QQQ_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const QQQ_TOKEN: RequiredEvmErc20Token = {
 	name: 'Invesco QQQ • Robinhood Token',
 	symbol: QQQ_SYMBOL,
 	decimals: QQQ_DECIMALS,
-	icon: qqqx,
+	icon: robinhoodstock,
 	address: '0xD5f3879160bc7c32ebb4dC785F8a4F505888de68'
 };

@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import llyx from '$sol/assets/llyx.svg';
 
 export const LLY_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const LLY_TOKEN: RequiredEvmErc20Token = {
 	name: 'Eli Lilly • Robinhood Token',
 	symbol: LLY_SYMBOL,
 	decimals: LLY_DECIMALS,
-	icon: llyx,
+	icon: robinhoodstock,
 	address: '0x8005d266423c7ea827372c9c864491e5786600ea'
 };

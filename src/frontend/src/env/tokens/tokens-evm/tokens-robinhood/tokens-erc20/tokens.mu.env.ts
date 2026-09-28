@@ -1,5 +1,5 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
-import muon from '$eth/assets/muon.png';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
@@ -20,6 +20,6 @@ export const MU_TOKEN: RequiredEvmErc20Token = {
 	name: 'Micron Technology • Robinhood Token',
 	symbol: MU_SYMBOL,
 	decimals: MU_DECIMALS,
-	icon: muon,
+	icon: robinhoodstock,
 	address: '0xfF080c8ce2E5feadaCa0Da81314Ae59D232d4afD'
 };

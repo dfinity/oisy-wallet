@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import vtix from '$sol/assets/vtix.svg';
 
 export const VTI_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const VTI_TOKEN: RequiredEvmErc20Token = {
 	name: 'Vanguard Morningstar Total Stock Market ETF • Robinhood Token',
 	symbol: VTI_SYMBOL,
 	decimals: VTI_DECIMALS,
-	icon: vtix,
+	icon: robinhoodstock,
 	address: '0x0594134DF3f171a354D9C85eBD65b7A6148F6D09'
 };

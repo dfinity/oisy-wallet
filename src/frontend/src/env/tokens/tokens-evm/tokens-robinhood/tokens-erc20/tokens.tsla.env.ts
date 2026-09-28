@@ -1,9 +1,9 @@
 import { ROBINHOOD_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.robinhood.env';
+import robinhoodstock from '$eth/assets/robinhoodstock.webp';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import tslax from '$sol/assets/tslax.svg';
 
 export const TSLA_DECIMALS = 18;
 
@@ -20,6 +20,6 @@ export const TSLA_TOKEN: RequiredEvmErc20Token = {
 	name: 'Tesla • Robinhood Token',
 	symbol: TSLA_SYMBOL,
 	decimals: TSLA_DECIMALS,
-	icon: tslax,
+	icon: robinhoodstock,
 	address: '0x322F0929c4625eD5bAd873c95208D54E1c003b2d'
 };
