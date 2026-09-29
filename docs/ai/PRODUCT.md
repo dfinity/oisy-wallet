@@ -489,6 +489,12 @@ The XRP Ledger requires an account to keep a minimum balance on-ledger for the a
 
 The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
 
+### Contacts
+
+A contact can hold XRP Ledger addresses like any other network's. Only **classic** addresses (starting with `r`) are accepted. **X-addresses** are rejected, because they bundle a destination tag into the address and a contact stores no tag. Picking a contact therefore never fills in a tag: sending to an exchange still needs the tag entered by hand, and an address that demands one is still refused without it.
+
+The send flow's **Contacts** tab offers every contact with an XRP address. The **Recently Used** tab stays empty for XRP, because it is not yet built from the XRP transaction history.
+
 ---
 
 ## Swap
