@@ -2639,7 +2639,7 @@
 			"funds_delivered_to": "Gelder werden gesendet an",
 			"your_oisy_address": "Deine $oisy_short-Adresse",
 			"borrow_risk_info": "Eine Kreditaufnahme senkt deinen Gesundheitsfaktor. Fällt er zu weit, kann deine Sicherheit liquidiert werden.",
-			"borrow_activation_fee_info": "",
+			"borrow_activation_fee_info": "Liquidium berechnet zusätzlich zum geliehenen Betrag eine Aktivierungsgebühr von $fee %.",
 			"borrow_at_risk_warning": "Diese Kreditaufnahme senkt deinen Gesundheitsfaktor spürbar.",
 			"borrow_exceeds_power": "Der Betrag übersteigt deinen Kreditrahmen.",
 			"borrow_below_minimum": "Der Betrag liegt unter dem Mindestkreditbetrag.",

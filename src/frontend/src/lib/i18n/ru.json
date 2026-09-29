@@ -2639,7 +2639,7 @@
 			"funds_delivered_to": "Средства будут отправлены на",
 			"your_oisy_address": "Твой адрес $oisy_short",
 			"borrow_risk_info": "Заём снижает твой коэффициент здоровья. Если он упадёт слишком низко, твой залог может быть ликвидирован.",
-			"borrow_activation_fee_info": "",
+			"borrow_activation_fee_info": "Liquidium добавляет к сумме займа комиссию за активацию в размере $fee%.",
 			"borrow_at_risk_warning": "Этот заём заметно снижает твой коэффициент здоровья.",
 			"borrow_exceeds_power": "Сумма превышает твой кредитный лимит.",
 			"borrow_below_minimum": "Сумма ниже минимального займа.",

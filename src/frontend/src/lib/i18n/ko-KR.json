@@ -2639,7 +2639,7 @@
 			"funds_delivered_to": "자금 전송 주소",
 			"your_oisy_address": "회원님의 $oisy_short 주소",
 			"borrow_risk_info": "대출을 받으면 건강 지수가 낮아집니다. 너무 낮아지면 담보가 청산될 수 있습니다.",
-			"borrow_activation_fee_info": "",
+			"borrow_activation_fee_info": "Liquidium은 대출 금액에 $fee%의 활성화 수수료를 추가로 부과합니다.",
 			"borrow_at_risk_warning": "이 대출로 건강 지수가 눈에 띄게 낮아집니다.",
 			"borrow_exceeds_power": "금액이 대출 가능 한도를 초과합니다.",
 			"borrow_below_minimum": "금액이 최소 대출 금액보다 적습니다.",
