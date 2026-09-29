@@ -19,6 +19,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
@@ -179,8 +180,9 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- XRP address-book contacts require a backend TokenAccountId address type, so there is no
-		     Contacts tab: the recently used addresses are listed without the tabs around them. -->
+		<!-- XRP address-book contacts require a backend TokenAccountId address type, so Recently Used
+		     is the only tab. It is pinned rather than bound to `activeSendDestinationTab`, which still
+		     holds `contacts` when the user opened that tab on another network in the same modal. -->
 		<div data-tid={testId}>
 			<XrpSendDestination
 				knownDestinations={$xrpKnownDestinations}
@@ -189,11 +191,16 @@
 				bind:invalidDestination
 			/>
 			<div class="my-6">
-				<KnownDestinations
-					knownDestinations={$xrpKnownDestinations}
-					onNext={next}
-					bind:destination
-				/>
+				<Tabs
+					activeTab="recentlyUsed"
+					tabs={[{ label: $i18n.send.text.recently_used_tab, id: 'recentlyUsed' }]}
+				>
+					<KnownDestinations
+						knownDestinations={$xrpKnownDestinations}
+						onNext={next}
+						bind:destination
+					/>
+				</Tabs>
 			</div>
 		</div>
 	{/if}

@@ -153,8 +153,8 @@ describe('SendDestinationWizardStep', () => {
 		).toBeInTheDocument();
 	});
 
-	// XRP contacts need a backend address type, so the step lists the recently used addresses
-	// without the tabs, whose Contacts tab could only ever show its empty state.
+	// XRP contacts need a backend address type, so Recently Used is the only tab: a Contacts tab
+	// could only ever show its empty state.
 	describe('XRP', () => {
 		const createXrpSend = (to: string): XrpCertifiedTransaction => ({
 			data: {
@@ -184,14 +184,30 @@ describe('SendDestinationWizardStep', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render the destination tabs', () => {
-			const { queryByText } = render(SendDestinationWizardStep, {
+		it('should show the Recently Used tab without a Contacts tab', () => {
+			const { getByText, queryByText } = render(SendDestinationWizardStep, {
 				props,
 				context: mockContext(XRP_TOKEN)
 			});
 
-			expect(queryByText(en.send.text.recently_used_tab)).toBeNull();
+			expect(getByText(en.send.text.recently_used_tab)).toBeInTheDocument();
 			expect(queryByText(en.send.text.contacts_tab)).toBeNull();
+		});
+
+		// The modal keeps one tab state for every network, so it still says `contacts` when the user
+		// opened that tab on another network before picking XRP.
+		it('should list the recently used addresses when the modal last had the Contacts tab open', () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [createXrpSend(mockXrpAddress2)]
+			});
+
+			const { getByText } = render(SendDestinationWizardStep, {
+				props: { ...props, destination: '', activeSendDestinationTab: 'contacts' as const },
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(getByText(shortenWithMiddleEllipsis({ text: mockXrpAddress2 }))).toBeInTheDocument();
 		});
 
 		// Navigation comes from the step's toolbar, not from the tabs.
