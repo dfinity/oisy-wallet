@@ -18,6 +18,7 @@ import {
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
+	findMissingXrpTrustLineKeys,
 	formatIcpSwapToCoingeckoPrices,
 	formatKongSwapToCoingeckoPrices,
 	isTcyclesLedgerCanisterId,
@@ -464,6 +465,21 @@ describe('exchange.utils', () => {
 		});
 	});
 
+	describe('findMissingXrpTrustLineKeys', () => {
+		it('returns the keys absent from the response, compared as sent', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				'USD.rIssuer': { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = findMissingXrpTrustLineKeys({
+				allXrpTrustLineKeys: ['USD.rIssuer', 'EUR.rIssuer', 'usd.rissuer'],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual(['EUR.rIssuer', 'usd.rissuer']);
+		});
+	});
+
 	describe('findMissingSplTokenAddresses', () => {
 		it('returns addresses absent from the response', () => {
 			const response: CoingeckoSimpleTokenPriceResponse = {
@@ -611,7 +627,8 @@ describe('exchange.utils', () => {
 			const providerPrices: ProviderFallbackPrices = {
 				erc20Prices: { '0xprovider': tokenPrice(1) },
 				icrcPrices: { icrc1: tokenPrice(2) },
-				splPrices: { spl1: tokenPrice(3) }
+				splPrices: { spl1: tokenPrice(3) },
+				xrpTrustLinePrices: { 'USD.rIssuer': tokenPrice(4) }
 			};
 
 			const merged = await mergeExchangePrices({
@@ -623,6 +640,7 @@ describe('exchange.utils', () => {
 			expect(merged.currentErc20Prices).toEqual({ '0xprovider': tokenPrice(1) });
 			expect(merged.currentIcrcPrices).toEqual({ icrc1: tokenPrice(2) });
 			expect(merged.currentSplPrices).toEqual({ spl1: tokenPrice(3) });
+			expect(merged.currentXrpTrustLinePrices).toEqual({ 'USD.rIssuer': tokenPrice(4) });
 		});
 
 		it('fills missing native prices but keeps backend native prices on collisions', async () => {

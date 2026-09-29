@@ -74,6 +74,9 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>()),
+	// `<currency>.<issuer>` of each held XRP Ledger trust-line token, the form CoinGecko keys them in.
+	// Optional so a timer started without trust-line tokens needs no change.
+	xrpTrustLineKeys: z.array(z.string()).optional(),
 	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>()),
 	// Effective backend `exchange_rate_enabled` flag, resolved at runtime via the backend
 	// `exchange_rate_enabled` query. Optional for backwards compatibility — when absent,
@@ -192,6 +195,7 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentXrpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
+	currentXrpTrustLinePrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
