@@ -213,7 +213,7 @@ impl TokenId<EthereumSepolia> for EthAddress {}
 ///
 /// # Reference
 /// - <https://xrpl.org/docs/references/protocol/data-types/base58-encodings>
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub struct XrpAddress(pub String);
 impl AccountId<XrpMainnet> for XrpAddress {}
 
