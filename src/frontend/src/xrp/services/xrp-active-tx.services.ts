@@ -2,6 +2,7 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
+import { ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
@@ -186,12 +187,22 @@ const applyXrpStatus = async ({
 		return;
 	}
 
+	// Past the backend's limit the whole update is rejected, status included, and
+	// `applyActiveUserTransactionPollUpdate` only logs that — so the row would stay open, be re-polled
+	// into the same rejection on every tick, and refuse every send from its address for good. The
+	// verdict matters more than its wording, so such a row closes without text and the loader falls
+	// back to generic copy. No real payment gets here: it takes a fabricated result code, or a display
+	// snapshot another client wrote.
+	const fits =
+		nonNullish(error) &&
+		new TextEncoder().encode(error).length <= ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES;
+
 	await applyActiveUserTransactionPollUpdate({
 		identity,
 		tx,
 		update: {
 			status,
-			...(nonNullish(error) ? { error } : {})
+			...(fits ? { error } : {})
 		}
 	});
 };
