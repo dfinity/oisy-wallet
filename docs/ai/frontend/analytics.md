@@ -179,9 +179,18 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `event_modifier`                  | "Direction" for two-way events                         | `enable` / `disable`, `deposit` / `withdraw`, `create` / `cancel` | `PLAUSIBLE_EVENT_FILTER_MODIFIERS` or feature-local union |
 | `event_key` (`event_key2`, …)     | Event-specific key                                     | `episode`, `type`                                                 | `PLAUSIBLE_EVENT_EVENTS_KEYS` / free string               |
 | `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`                                                 | free string                                               |
+| `event_severity`                  | How serious the event is, from low to high             | `info` / `warn` / `error` / `blocker`                             | `PLAUSIBLE_EVENT_SEVERITIES`                              |
 | `side`                            | Order side (trade events)                              | `buy` / `sell`                                                    | feature-local union                                       |
 | `order_type`                      | Order time-in-force (trade events)                     | `FOK` / `GTC`                                                     | feature-local union                                       |
 | `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | string (full-precision decimal string)                    |
+
+> **Two severities.** `event_severity` can rate any event, so that dashboards can
+> filter every event by it. Its scale is OpenTelemetry's level names with
+> `blocker` in place of `fatal`: `info` < `warn` < `error` < `blocker`.
+> `result_error_severity` (the Result group below) stays the impact band of an
+> `error` result, with its own values. The first event to set `event_severity` is
+> `xdr_basket_expiry`, the countdown to the end of the XDR basket that prices
+> TCYCLES.
 
 ### Source — where it came from
 

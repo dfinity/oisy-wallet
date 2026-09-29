@@ -117,12 +117,22 @@
 
 	// Review re-quotes at the CMC's current rate, and Mint waits for that quote, so that
 	// Review checks the bound against it. Review still opens at once: waiting here would
-	// leave the form's button live, and a second click would skip past Review.
-	let pendingRequotes = $state(0);
+	// leave the form's button live, and a second click would skip past Review. Only the
+	// latest Review's quote counts: one that Back left behind must not hold Mint back.
+	let requotes = 0;
+	let requoting = $state(false);
 
 	const review = () => {
-		pendingRequotes++;
-		loadRate().finally(() => pendingRequotes--);
+		const requote = ++requotes;
+
+		requoting = true;
+
+		loadRate().finally(() => {
+			if (requote === requotes) {
+				requoting = false;
+			}
+		});
+
 		modal?.next();
 	};
 
@@ -259,7 +269,7 @@
 				<CyclesMintReview
 					onBack={() => modal?.back()}
 					onMint={mint}
-					requoting={pendingRequotes > 0}
+					{requoting}
 					{sendAmount}
 					{xdrPermyriadPerIcp}
 				/>

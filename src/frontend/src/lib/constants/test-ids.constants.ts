@@ -202,6 +202,9 @@ export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
+export const TOKEN_MENU_XRP = 'token-menu-xrp';
+export const TOKEN_MENU_XRP_BUTTON = 'token-menu-xrp-button';
+export const TOKEN_MENU_XRP_EXPLORER_LINK = 'xrp-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
@@ -298,6 +301,7 @@ export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
 export const CYCLES_MINT_FORM = 'cycles-mint-form';
 export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
 export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
 export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
 export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 

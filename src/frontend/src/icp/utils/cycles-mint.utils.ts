@@ -54,9 +54,16 @@ export const estimateCyclesMintCredited = ({
  * millisecond would send the same transfer, which the ledger keeps only once.
  */
 export const randomSubMillisecondNs = (): bigint => {
-	const [value] = crypto.getRandomValues(new Uint32Array(1));
+	const bound = 1_000_000;
+	const maxUint32PlusOne = 0x1_0000_0000;
+	const limit = maxUint32PlusOne - (maxUint32PlusOne % bound);
 
-	return BigInt(value % 1_000_000);
+	let value: number;
+	do {
+		[value] = crypto.getRandomValues(new Uint32Array(1));
+	} while (value >= limit);
+
+	return BigInt(value % bound);
 };
 
 /**

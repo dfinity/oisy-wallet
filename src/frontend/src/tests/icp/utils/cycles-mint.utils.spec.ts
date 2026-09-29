@@ -81,14 +81,28 @@ describe('cycles-mint.utils', () => {
 	});
 
 	describe('randomSubMillisecondNs', () => {
-		it('takes the nanoseconds below one millisecond from a random draw', () => {
-			const randomSpy = vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {
-				(array as Uint32Array)[0] = 4_294_967_295;
+		const mockDraws = (...draws: number[]) =>
+			vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {
+				(array as Uint32Array)[0] = draws.shift() ?? 0;
 
 				return array;
 			});
 
-			expect(randomSubMillisecondNs()).toBe(967_295n);
+		it('takes the nanoseconds below one millisecond from a random draw', () => {
+			const randomSpy = mockDraws(4_293_999_999);
+
+			expect(randomSubMillisecondNs()).toBe(999_999n);
+
+			randomSpy.mockRestore();
+		});
+
+		// A modulo would fold the top 967,296 draws onto the bottom of the range, making
+		// those values more likely than the rest.
+		it('draws again rather than folding a draw from the top of the range', () => {
+			const randomSpy = mockDraws(4_294_967_295, 1_234_567);
+
+			expect(randomSubMillisecondNs()).toBe(234_567n);
+			expect(randomSpy).toHaveBeenCalledTimes(2);
 
 			randomSpy.mockRestore();
 		});

@@ -15,6 +15,9 @@ export interface LiquidiumMarket {
 	// Maximum loan-to-value ratio (0–1) for this collateral; drives the borrowing-power
 	// potential. Optional so existing market fixtures need not set it.
 	maxLtv?: number;
+	// Borrow activation fee (percent) the protocol adds to the opening debt; 0 when the pool
+	// charges none. Optional so existing market fixtures need not set it.
+	activationFeePercent?: number;
 	frozen: boolean;
 	// Not frozen and under supply cap; else renders as "Coming soon".
 	available: boolean;

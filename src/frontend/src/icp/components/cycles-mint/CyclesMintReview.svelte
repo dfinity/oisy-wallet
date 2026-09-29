@@ -16,6 +16,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import {
 		CYCLES_MINT_REVIEW,
+		CYCLES_MINT_REVIEW_BACK_BUTTON,
 		CYCLES_MINT_REVIEW_MINT_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
@@ -108,7 +109,7 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={onBack} />
+			<ButtonBack onclick={onBack} testId={CYCLES_MINT_REVIEW_BACK_BUTTON} />
 
 			<Button
 				disabled={requoting ||
