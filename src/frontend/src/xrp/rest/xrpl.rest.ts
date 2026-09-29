@@ -4,6 +4,8 @@ import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import {
 	XrplAccountInfoFullResultSchema,
 	XrplAccountInfoResultSchema,
+	XrplAccountLinesErrorSchema,
+	XrplAccountLinesResultSchema,
 	XrplAccountTxErrorSchema,
 	XrplAccountTxResultSchema,
 	XrplEnvelopeSchema,
@@ -22,6 +24,7 @@ import type {
 	XrpTransactionOutcome,
 	XrpTransactionsPage
 } from '$xrp/types/xrp-transaction';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -341,6 +344,140 @@ export const loadXrpBalance = async ({
 	}
 
 	return BigInt(data.account_data.Balance);
+};
+
+// The node's own ceiling for one page; most accounts need a single one.
+const XRP_ACCOUNT_LINES_PAGE_LIMIT = 400;
+
+// A bound on the pages one read follows, so a node that keeps answering with a marker cannot keep
+// the scheduler's tick alive. Far above any account the wallet creates: every line is one the user
+// added and one that holds 0.2 XRP of reserve.
+const XRP_ACCOUNT_LINES_MAX_PAGES = 10;
+
+/**
+ * The account's trust lines via the XRPL `account_lines` method, every page, all from one
+ * validated ledger.
+ *
+ * The first page is read at `validated` and every later page is pinned to the ledger index it
+ * reported, so a marker is never followed into a different ledger and the list describes a single
+ * state of the account. A never-funded account owns no lines, which is not a failure: `actNotFound`
+ * is an empty list, bound to the address like the other absences in this file.
+ */
+export const loadXrpAccountLines = async ({
+	address,
+	network
+}: {
+	address: XrpAddress;
+	network: XrpNetworkType;
+}): Promise<XrpTrustLine[]> => {
+	const lines: XrpTrustLine[] = [];
+
+	let ledgerIndex: number | undefined;
+	let marker: unknown;
+
+	for (let page = 0; page < XRP_ACCOUNT_LINES_MAX_PAGES; page++) {
+		const result = await xrpJsonRpc({
+			network,
+			method: 'account_lines',
+			params: {
+				account: address,
+				ledger_index: ledgerIndex ?? 'validated',
+				limit: XRP_ACCOUNT_LINES_PAGE_LIMIT,
+				...(nonNullish(marker) && { marker })
+			},
+			expectedErrors: ['actNotFound']
+		});
+
+		if (nonNullish(result.error)) {
+			const parsedError = XrplAccountLinesErrorSchema.safeParse(result);
+
+			// Only the first page can meet an absence honestly: a later one was asked of the ledger
+			// the first page came from, where the account existed. The absence is bound as the
+			// `account_tx` one is — operation and ledger checked when the node echoes the request, the
+			// account required — because `loadXrpBalance` reads the same address concurrently and an
+			// `account_info` absence must not be written as "this account holds no tokens".
+			if (
+				page > 0 ||
+				!parsedError.success ||
+				parsedError.data.validated === false ||
+				(nonNullish(parsedError.data.request) &&
+					(parsedError.data.request.operation !== 'account_lines' ||
+						parsedError.data.request.params.ledger_index !== 'validated')) ||
+				!isXrpEchoedIdentityForAddress({ address, ...parsedError.data })
+			) {
+				throw new Error(
+					`Unexpected XRPL account_lines response: an ${result.error} that does not identify ${address}`
+				);
+			}
+
+			return [];
+		}
+
+		const parsed = XrplAccountLinesResultSchema.safeParse(result);
+
+		if (!parsed.success) {
+			throw new Error(
+				'Unexpected XRPL account_lines response: it does not match the expected shape'
+			);
+		}
+
+		const { account, lines: pageLines, ledger_index, validated, marker: nextMarker } = parsed.data;
+
+		if (!validated) {
+			throw new Error('Unexpected XRPL account_lines response: an open-ledger snapshot');
+		}
+
+		// Raw comparison: a classic address is base58 over a checksummed payload, so case matters.
+		if (account !== address) {
+			throw new Error(
+				`Unexpected XRPL account_lines response: answered for ${account}, asked for ${address}`
+			);
+		}
+
+		if (nonNullish(ledgerIndex) && ledger_index !== ledgerIndex) {
+			throw new Error(
+				`Unexpected XRPL account_lines response: a page from ledger ${ledger_index} continuing ledger ${ledgerIndex}`
+			);
+		}
+
+		ledgerIndex = ledger_index;
+
+		lines.push(
+			...pageLines.map(
+				({
+					account: issuer,
+					balance,
+					currency,
+					limit,
+					limit_peer,
+					no_ripple,
+					peer_authorized,
+					freeze_peer,
+					deep_freeze_peer
+				}) => ({
+					currency,
+					issuer,
+					balance,
+					limit,
+					limitPeer: limit_peer,
+					noRipple: no_ripple ?? false,
+					peerAuthorized: peer_authorized ?? false,
+					freezePeer: freeze_peer ?? false,
+					deepFreezePeer: deep_freeze_peer ?? false
+				})
+			)
+		);
+
+		if (isNullish(nextMarker)) {
+			return lines;
+		}
+
+		marker = nextMarker;
+	}
+
+	throw new Error(
+		`Unexpected XRPL account_lines response: more than ${XRP_ACCOUNT_LINES_MAX_PAGES} pages`
+	);
 };
 
 /**

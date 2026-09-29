@@ -4,6 +4,7 @@ import {
 	XrpAccountNotFoundError,
 	XrplRpcError,
 	loadXrpAccountInfo,
+	loadXrpAccountLines,
 	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
@@ -2055,6 +2056,249 @@ describe('xrpl.rest', () => {
 					lastLedgerSequence: 1020
 				})
 			).rejects.toThrow('neither a validated result, a pending transaction');
+		});
+	});
+
+	describe('loadXrpAccountLines', () => {
+		const issuer = 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+		const currency = '524C555344000000000000000000000000000000';
+
+		// A holder-side line as a Clio node writes it: the flags are omitted when false.
+		const rawLine = (overrides: Record<string, unknown> = {}) => ({
+			account: issuer,
+			balance: '0.00204230364',
+			currency,
+			limit: '1000000000',
+			limit_peer: '0',
+			quality_in: 0,
+			quality_out: 0,
+			...overrides
+		});
+
+		const page = ({
+			lines = [rawLine()],
+			ledgerIndex = 107309110,
+			marker,
+			account = address,
+			validated = true
+		}: {
+			lines?: unknown[];
+			ledgerIndex?: number;
+			marker?: unknown;
+			account?: string;
+			validated?: boolean;
+		} = {}) => ({
+			result: {
+				account,
+				lines,
+				ledger_index: ledgerIndex,
+				validated,
+				limit: 400,
+				status: 'success',
+				...(marker !== undefined && { marker })
+			}
+		});
+
+		const mockFetchPages = (bodies: unknown[]) => {
+			const fetchMock = vi.fn();
+
+			for (const body of bodies) {
+				fetchMock.mockResolvedValueOnce({
+					ok: true,
+					status: 200,
+					json: () => Promise.resolve(body)
+				});
+			}
+
+			vi.stubGlobal('fetch', fetchMock);
+
+			return fetchMock;
+		};
+
+		const requestParams = ({
+			fetchMock,
+			call
+		}: {
+			fetchMock: ReturnType<typeof vi.fn>;
+			call: number;
+		}) => JSON.parse(fetchMock.mock.calls[call][1].body).params[0];
+
+		it('maps the lines of a single page, with omitted flags as false', async () => {
+			mockFetchPages([
+				page({
+					lines: [
+						rawLine(),
+						rawLine({
+							currency: 'USD',
+							balance: '5800000000000000e13',
+							peer_authorized: true,
+							freeze_peer: true,
+							deep_freeze_peer: true,
+							no_ripple: true
+						})
+					]
+				})
+			]);
+
+			await expect(loadXrpAccountLines({ address, network })).resolves.toEqual([
+				{
+					currency,
+					issuer,
+					balance: '0.00204230364',
+					limit: '1000000000',
+					limitPeer: '0',
+					noRipple: false,
+					peerAuthorized: false,
+					freezePeer: false,
+					deepFreezePeer: false
+				},
+				{
+					currency: 'USD',
+					issuer,
+					balance: '5800000000000000e13',
+					limit: '1000000000',
+					limitPeer: '0',
+					noRipple: true,
+					peerAuthorized: true,
+					freezePeer: true,
+					deepFreezePeer: true
+				}
+			]);
+		});
+
+		it("follows the marker, pinning every later page to the first page's ledger", async () => {
+			const fetchMock = mockFetchPages([
+				page({ marker: 'NEXT', ledgerIndex: 100 }),
+				page({ lines: [rawLine({ currency: 'USD' })], ledgerIndex: 100 })
+			]);
+
+			const lines = await loadXrpAccountLines({ address, network });
+
+			expect(lines.map(({ currency: code }) => code)).toEqual([currency, 'USD']);
+			expect(requestParams({ fetchMock, call: 0 })).toEqual({
+				account: address,
+				ledger_index: 'validated',
+				limit: 400
+			});
+			expect(requestParams({ fetchMock, call: 1 })).toEqual({
+				account: address,
+				ledger_index: 100,
+				limit: 400,
+				marker: 'NEXT'
+			});
+		});
+
+		it('throws when a later page comes from another ledger', async () => {
+			mockFetchPages([page({ marker: 'NEXT', ledgerIndex: 100 }), page({ ledgerIndex: 101 })]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				'a page from ledger 101 continuing ledger 100'
+			);
+		});
+
+		it('throws after the page bound instead of following markers forever', async () => {
+			mockFetchPages(Array.from({ length: 10 }, () => page({ marker: 'NEXT', ledgerIndex: 100 })));
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow('more than 10 pages');
+		});
+
+		it('returns no lines for a never-funded account whose absence names it', async () => {
+			mockFetchPages([
+				{
+					result: {
+						error: 'actNotFound',
+						status: 'error',
+						request: {
+							method: 'account_lines',
+							params: [{ account: address, ledger_index: 'validated', limit: 400 }]
+						}
+					}
+				}
+			]);
+
+			await expect(loadXrpAccountLines({ address, network })).resolves.toEqual([]);
+		});
+
+		it.each([
+			{
+				name: 'another account',
+				request: {
+					method: 'account_lines',
+					params: [{ account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe', ledger_index: 'validated' }]
+				}
+			},
+			{
+				name: 'another operation',
+				request: {
+					method: 'account_info',
+					params: [{ account: address, ledger_index: 'validated' }]
+				}
+			},
+			{
+				name: 'the open ledger',
+				request: {
+					method: 'account_lines',
+					params: [{ account: address, ledger_index: 'current' }]
+				}
+			},
+			{ name: 'nobody', request: undefined }
+		])('throws for an absence that names $name', async ({ request }) => {
+			mockFetchPages([
+				{ result: { error: 'actNotFound', status: 'error', ...(request && { request }) } }
+			]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				`an actNotFound that does not identify ${address}`
+			);
+		});
+
+		it('throws for an absence on a later page, where the account existed', async () => {
+			mockFetchPages([
+				page({ marker: 'NEXT' }),
+				{ result: { error: 'actNotFound', status: 'error', account: address } }
+			]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				'an actNotFound that does not identify'
+			);
+		});
+
+		it('throws for an answer about another account', async () => {
+			mockFetchPages([page({ account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe' })]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				`asked for ${address}`
+			);
+		});
+
+		it('throws for an open-ledger snapshot', async () => {
+			mockFetchPages([page({ validated: false })]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				'an open-ledger snapshot'
+			);
+		});
+
+		it.each([
+			{ name: 'a balance that is not a decimal', line: rawLine({ balance: '0x10' }) },
+			{ name: 'a lowercase hex code', line: rawLine({ currency: currency.toLowerCase() }) },
+			{ name: 'a code of the wrong length', line: rawLine({ currency: 'USDC' }) },
+			{ name: 'a four-digit exponent', line: rawLine({ balance: '1e1000' }) },
+			{ name: 'a missing limit', line: rawLine({ limit: undefined }) }
+		])('throws for $name', async ({ line }) => {
+			mockFetchPages([page({ lines: [line] })]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				'it does not match the expected shape'
+			);
+		});
+
+		it('throws for an XRPL error other than an absence', async () => {
+			mockFetchPages([{ result: { error: 'slowDown', status: 'error' } }]);
+
+			await expect(loadXrpAccountLines({ address, network })).rejects.toThrow(
+				'Unexpected XRPL account_lines response: slowDown'
+			);
 		});
 	});
 
