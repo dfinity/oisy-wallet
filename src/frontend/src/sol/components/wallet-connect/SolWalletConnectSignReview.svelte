@@ -74,6 +74,10 @@
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
+		// Whether a close in that list pays an account's balance to an address that is not the
+		// user's wallet. Read from the list rather than the message, which cannot see a close made
+		// inside another program.
+		closesPayOthers?: boolean;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -97,6 +101,7 @@
 		simulatedInstructions = false,
 		messageSummary,
 		parties,
+		closesPayOthers = false,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -107,7 +112,7 @@
 	// What the token accounts cost this message: the rent of the ones it opens, less what the ones
 	// it closes hand back. Charged like a fee and part of neither the base nor the bid, so it is
 	// stated as its own line rather than folded into either.
-	let ataFee = $derived(solAtaFee(instructions ?? []));
+	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress: source }));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -251,12 +256,21 @@
 	     simulated changes, so it waits for a run to exist and for the decode to settle, and the
 	     absence of a run has a warning of its own. A message that does reduce still shows
 	     simulated figures, which is a caveat and no more. -->
-	{#if ambiguous}
+	<!-- A close that pays somebody else is asked about first, because the instruction mapper
+	     refuses one the message states and so marks the request ambiguous as well: the two would
+	     both be true of the commonest case, and the general sentence would be shown for the
+	     specific thing that is wrong with it. -->
+	{#if closesPayOthers}
 		<!-- `role="alert"` because this arrives only once the decode settles, and it is the reason
 		     the Approve button never becomes usable: without a live region a screen-reader user is
 		     left on a button that will not proceed and never hears why. The same reasoning as the
 		     destination-tag error, and applied here rather than inside `MessageBox`, which every
 		     other notice on this screen also uses. -->
+		<div role="alert">
+			<MessageBox level="error">{$i18n.wallet_connect.text.close_pays_others}</MessageBox>
+		</div>
+	{:else if ambiguous}
+		<!-- Same live region, same reason: it is why Approve stays unusable. -->
 		<div role="alert">
 			<MessageBox level="error">{$i18n.wallet_connect.text.cannot_be_shown}</MessageBox>
 		</div>
@@ -275,7 +289,7 @@
 	<!-- Everything below qualifies a review that is going to be acted on. None of it applies to a
 	     message the wallet has already decided it will not sign, and the partial-parties notice is
 	     actively wrong there: it tells the user which lists to read on a request that is refused. -->
-	{#if !ambiguous}
+	{#if !ambiguous && !closesPayOthers}
 		<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
 		     theft as nothing happening. It is named first among the fund warnings for that reason. -->
 		{#if nonNullish(preview) && preview.controlChanges.length > 0}
@@ -441,7 +455,12 @@
 					<!-- The simulated deltas carry the decimals of a mint the wallet does not list,
 					     which an unchecked transfer does not state and the list would otherwise read
 					     raw. -->
-					<SolInstructionsList {instructions} netChanges={preview?.tokenDeltas} {token} />
+					<SolInstructionsList
+						{instructions}
+						netChanges={preview?.tokenDeltas}
+						{token}
+						userAddress={source}
+					/>
 				</WalletConnectModalValue>
 			{/if}
 
