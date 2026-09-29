@@ -1078,6 +1078,25 @@ describe('xrp-send.services', () => {
 			);
 		});
 
+		// Once the modal closes, this snapshot is what the row, the failure text and the analytics
+		// event show — so it has to be the amount that was sent, not `formatToken`'s four-decimal
+		// display rounding of it. Trailing zeros are still dropped.
+		it.each([
+			{ drops: 1_234_567n, shown: '1.234567' },
+			{ drops: 1_230_000n, shown: '1.23' },
+			{ drops: 25_000_000n, shown: '25' }
+		])('snapshots $drops drops as $shown', async ({ drops, shown }) => {
+			await sendXrp({ ...params, amount: drops });
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: shown }
+					])
+				})
+			);
+		});
+
 		// The window the gate cannot cover: its read is not atomic with the create, so a second
 		// tab can pass it. The backend refuses instead, and that refusal has to reach the user as
 		// the in-flight one rather than as "could not be recorded".

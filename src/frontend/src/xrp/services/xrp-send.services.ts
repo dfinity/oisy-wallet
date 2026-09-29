@@ -145,7 +145,11 @@ const openXrpSendRecord = async ({
 				[XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE]: `${lastLedgerSequence}`,
 				...toXrpDisplayRefs({
 					token,
-					amount: formatToken({ value: amount, unitName: token.decimals })
+					amount: formatToken({
+						value: amount,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})
 				})
 			})
 		});
