@@ -2639,6 +2639,7 @@
 			"funds_delivered_to": "資金の送付先",
 			"your_oisy_address": "あなたの$oisy_shortアドレス",
 			"borrow_risk_info": "借入するとヘルスファクターが下がります。下がりすぎると担保が清算される可能性があります。",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "この借入によりヘルスファクターが大きく下がります。",
 			"borrow_exceeds_power": "金額が借入可能額を超えています。",
 			"borrow_below_minimum": "金額が最低借入額を下回っています。",

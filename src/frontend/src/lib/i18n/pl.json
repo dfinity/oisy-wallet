@@ -2639,6 +2639,7 @@
 			"funds_delivered_to": "Środki wysłane do",
 			"your_oisy_address": "Twój adres $oisy_short",
 			"borrow_risk_info": "Pożyczanie obniża twój wskaźnik zdrowia. Jeśli spadnie zbyt nisko, twoje zabezpieczenie może zostać zlikwidowane.",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "Ta pożyczka wyraźnie obniża twój wskaźnik zdrowia.",
 			"borrow_exceeds_power": "Kwota przekracza twoją zdolność pożyczkową.",
 			"borrow_below_minimum": "Kwota jest niższa niż minimalna pożyczka.",

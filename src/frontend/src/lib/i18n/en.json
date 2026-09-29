@@ -2640,6 +2640,7 @@
 			"funds_delivered_to": "Funds delivered to",
 			"your_oisy_address": "Your $oisy_short address",
 			"borrow_risk_info": "Borrowing reduces your health factor. If it falls too far your collateral can be liquidated.",
+			"borrow_activation_fee_info": "Liquidium adds an activation fee of $fee% to the borrowed amount.",
 			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
 			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
 			"borrow_below_minimum": "Amount is below the minimum borrow.",
