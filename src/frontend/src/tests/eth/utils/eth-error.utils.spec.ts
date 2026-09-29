@@ -1,5 +1,10 @@
-import { mapEthereumErrorMsg, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import {
+	isEthereumNodeRefusal,
+	mapEthereumErrorMsg,
+	toastEthereumTransactionError
+} from '$eth/utils/eth-error.utils';
 import * as toasts from '$lib/stores/toasts.store';
+import { TimeoutError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 
 describe('eth-error.utils', () => {
@@ -89,6 +94,50 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg('boom')).toBeUndefined();
 
 			expect(mapEthereumErrorMsg(undefined)).toBeUndefined();
+		});
+	});
+
+	describe('isEthereumNodeRefusal', () => {
+		it('recognises the node refusing a submission with a reason', () => {
+			expect(isEthereumNodeRefusal(gasRequiredExceedsAllowance)).toBeTruthy();
+		});
+
+		it.each(['INSUFFICIENT_FUNDS', 'NONCE_EXPIRED', 'REPLACEMENT_UNDERPRICED'])(
+			'recognises ethers own verdict %s',
+			(code) => {
+				expect(isEthereumNodeRefusal(Object.assign(new Error(code), { code }))).toBeTruthy();
+			}
+		);
+
+		it('follows the cause chain', () => {
+			const err = new Error('sending the transaction failed', {
+				cause: gasRequiredExceedsAllowance
+			});
+
+			expect(isEthereumNodeRefusal(err)).toBeTruthy();
+		});
+
+		it('does not count a provider failing the request as a refusal', () => {
+			// A provider's own internal error, as ethers hands it over: nothing in it is about the
+			// transaction, so another node may well accept the same bytes.
+			const internalError = Object.assign(
+				new Error(
+					'could not coalesce error (error={ "code": -32603, "message": "Internal error" }, payload={ "id": 91, "jsonrpc": "2.0", "method": "eth_sendRawTransaction" }, code=UNKNOWN_ERROR, version=6.17.0)'
+				),
+				{ code: 'UNKNOWN_ERROR', error: { code: -32603, message: 'Internal error' } }
+			);
+
+			expect(isEthereumNodeRefusal(internalError)).toBeFalsy();
+		});
+
+		it('does not count a call that ran out of time as a refusal', () => {
+			expect(isEthereumNodeRefusal(new TimeoutError())).toBeFalsy();
+		});
+
+		it('does not count anything that is not an error record', () => {
+			expect(isEthereumNodeRefusal('nonce too low')).toBeFalsy();
+
+			expect(isEthereumNodeRefusal(undefined)).toBeFalsy();
 		});
 	});
 
