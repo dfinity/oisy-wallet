@@ -1,6 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as cmcApi from '$icp/api/cmc.api';
 import CyclesMintModal from '$icp/components/cycles-mint/CyclesMintModal.svelte';
+import { CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS } from '$icp/constants/cmc.constants';
 import * as cyclesMintServices from '$icp/services/cycles-mint.services';
 import { CyclesMintError } from '$icp/types/cycles-mint';
 import {
@@ -19,6 +20,7 @@ import { mockTcyclesToken, mockXdrPermyriadPerIcp } from '$tests/mocks/cycles-mi
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -32,12 +34,14 @@ describe('CyclesMintModal', () => {
 	const renderModal = () =>
 		render(CyclesMintModal, { props: { destinationToken: mockTcyclesToken } });
 
-	const toReview = async () => {
+	const toReview = async (onForm?: () => Promise<unknown>) => {
 		const result = renderModal();
 
 		await waitFor(() => {
 			expect(result.getByTestId(CYCLES_MINT_RATE)).toBeInTheDocument();
 		});
+
+		await onForm?.();
 
 		const input = result.container.querySelector<HTMLInputElement>(
 			`input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`
@@ -148,6 +152,47 @@ describe('CyclesMintModal', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		});
+	});
+
+	describe('with the minute’s refresh still on its way when Review opens', () => {
+		beforeEach(() => {
+			// Real time still passes, for `waitFor`; the refresh is fired by hand.
+			vi.useFakeTimers({ shouldAdvanceTime: true });
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		// The refresh was sent before the re-quote, so the rate it brings is the older one.
+		it('keeps the re-quoted rate when the refresh comes back after it', async () => {
+			let settleRefresh: (rate: bigint) => void = () => undefined;
+
+			rateSpy
+				.mockResolvedValueOnce(mockXdrPermyriadPerIcp)
+				.mockImplementationOnce(() => new Promise<bigint>((resolve) => (settleRefresh = resolve)))
+				.mockResolvedValueOnce(50_000n);
+
+			const { getByTestId } = await toReview(() =>
+				vi.advanceTimersByTimeAsync(CYCLES_MINT_RATE_REFRESH_INTERVAL_MILLIS)
+			);
+
+			await waitFor(() => {
+				expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+			});
+
+			expect(rateSpy).toHaveBeenCalledTimes(3);
+			expect(getByTestId(CYCLES_MINT_RATE)).toHaveTextContent('1 ICP ≈ 5 TCYCLES');
+
+			settleRefresh(mockXdrPermyriadPerIcp);
+
+			// The modal awaited the refresh first, so it has handled the answer by the time this
+			// await returns.
+			await rateSpy.mock.results[1].value;
+			await tick();
+
+			expect(getByTestId(CYCLES_MINT_RATE)).toHaveTextContent('1 ICP ≈ 5 TCYCLES');
 		});
 	});
 
