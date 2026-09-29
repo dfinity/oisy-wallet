@@ -130,11 +130,11 @@ Solana had the balance problem and solved it: since #14028 one worker per networ
 
 **Form.** The issuer is a classic address; X-addresses are refused, as the XRP contacts draft (#14159) refuses them. The currency code is accepted in three spellings:
 
-| Input                                      | Meaning                                                      |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| exactly 3 characters                       | a standard code; `XRP` is refused                            |
-| 40 hex characters                          | a nonstandard code, as given; a leading `00` byte is refused |
-| 4 to 20 printable ASCII characters (RLUSD) | encoded as the zero-padded 40-hex code, as RLUSD's code is   |
+| Input                                      | Meaning                                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| exactly 3 characters                       | a standard code; `XRP` is refused                                                             |
+| 40 hex characters                          | a nonstandard code, stored uppercase as the ledger reports it; a leading `00` byte is refused |
+| 4 to 20 printable ASCII characters (RLUSD) | encoded as the zero-padded 40-hex code, as RLUSD's code is                                    |
 
 A symbol already in the list is not a refusal, unlike in the SPL review: two issuers' "RLUSD" is the expected case on XRPL. Only the same currency and issuer is — "already added".
 
@@ -259,9 +259,9 @@ A `TrustSet` consumes the account's `Sequence` exactly as a payment does, so the
 
 ### 7.1 Backend
 
-- A trust-line variant in `Token`, `CustomTokenId` and `TokenId`, each carrying the currency code and the issuer, validated on write (a classic address that decodes; a currency code under the rules of §2.1). Indicative names: `Token::XrpTrustLineMainnet(XrpTrustLineToken { issuer, currency })`, `CustomTokenId::XrpTrustLineMainnet(currency, issuer)`, `TokenId::XrpTrustLineMainnet(currency, issuer)`.
+- A trust-line variant in `Token`, `CustomTokenId` and `TokenId`, each carrying the currency code and the issuer: `Token::XrpTrustLineMainnet(XrpTrustLineToken { currency, issuer })`, `CustomTokenId::XrpTrustLineMainnet(currency, issuer)` and `TokenId::XrpTrustLineMainnet(currency, issuer)`. `XrpCurrencyCode` holds the rules of §2.1, with hex kept uppercase so that a token has one spelling; the issuer is #14159's `XrpAddress`, parsed in full (base58check, version byte, checksum). Both are checked when a custom token is written and when it is decoded.
 - `is_priceable_token_id` and the backend-mode CoinGecko mapping (`src/backend/src/exchange/providers/coingecko/platform.rs`) gain the `xrp` platform.
-- The in-flight guard: `require_xrp_token` accepts the new `TokenId`; `XrpData.amount` is documented as drops for XRP and as the token's fixed-point units (§7.3) for a token; adding and removing a token get their own `ActiveUserTransactionData` variant with no amount and no destination; the one-unresolved-per-address check counts both variants.
+- The in-flight guard: `require_xrp_token` accepts the new `TokenId`; `XrpData.amount` is documented as drops for XRP and as the token's fixed-point units (§7.3) for a token; adding and removing a token get their own variant, `XrpTrustSet(XrpTrustSetData { token, source_address, change, fee })` with `change` one of `Add` and `Remove`, which has no amount and no destination and refuses a trust line to the account's own address; the one-unresolved-per-address check counts both variants.
 - `Token`, `TokenId` and the new `ActiveUserTransactionData` variant are breaking Candid changes, so the PR is `feat(backend,frontend)!:` with a `BREAKING CHANGE:` note (`docs/ai/backend/workflows/breaking-interface.md`). It carries the frontend arms `npm run check` then requires — `parsePrincipal` and `tokenIdKey` — and no UI. After it merges, the staging backend needs a forced deploy, as #14109 did.
 - The backend wasm does not build locally: the `.did` is hand-written in field-hash order and CI's `binding-checks` regenerates the declarations.
 
