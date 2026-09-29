@@ -905,7 +905,19 @@ impl Validate for TokenAccountId {
             address,
             TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH,
             "TokenAccountId.address",
-        )
+        )?;
+
+        // XRP is the only variant whose format is checked. The check shipped with the variant, so
+        // no stored contact can hold a malformed XRP address; adding one for an older variant could
+        // make `update_contact` reject a contact that already holds a malformed address. The length
+        // bound runs first because base58 decoding is quadratic in the input length.
+        if let TokenAccountId::Xrp(XrpAddress(address)) = self {
+            address.parse::<XrpAddress>().map_err(|_| {
+                Error::msg("TokenAccountId.address is not a valid XRP Ledger classic address")
+            })?;
+        }
+
+        Ok(())
     }
 }
 
@@ -1090,9 +1102,50 @@ mod address_validation_tests {
     }
 
     #[test]
+    fn rejects_an_xrp_x_address() {
+        let address = TokenAccountId::Xrp(XrpAddress(
+            "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
+        ));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_a_malformed_xrp_address() {
+        let address = TokenAccountId::Xrp(XrpAddress("not an xrp address".to_string()));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_an_over_long_xrp_address_on_the_length_bound() {
+        let address = TokenAccountId::Xrp(XrpAddress(
+            "r".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        ));
+
+        let error = address
+            .validate()
+            .expect_err("an over-long address is rejected");
+
+        assert!(
+            error.to_string().contains("too long"),
+            "expected the length bound to reject it before parsing, got: {error}"
+        );
+    }
+
+    #[test]
     fn update_request_rejects_an_over_long_address() {
         let request = request_with_address(TokenAccountId::Btc(BtcAddress::P2PKH(
             "1".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        )));
+
+        assert!(request.validate().is_err());
+    }
+
+    #[test]
+    fn update_request_rejects_an_xrp_x_address() {
+        let request = request_with_address(TokenAccountId::Xrp(XrpAddress(
+            "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
         )));
 
         assert!(request.validate().is_err());

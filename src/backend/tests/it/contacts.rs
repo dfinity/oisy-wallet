@@ -1087,6 +1087,43 @@ fn test_update_contact_stores_an_xrp_address() {
 }
 
 #[test]
+fn test_update_contact_rejects_an_xrp_x_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "XRP Contact".to_string()).unwrap();
+
+    // An X-address bundles a destination tag, which a contact does not store. Validation runs
+    // during candid deserialization, so the call is rejected outright rather than returning a typed
+    // ContactError.
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        UpdateContactRequest {
+            id: contact.id,
+            name: contact.name.clone(),
+            addresses: vec![ContactAddressData {
+                token_account_id: TokenAccountId::Xrp(XrpAddress(
+                    "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc".to_string(),
+                )),
+                label: None,
+            }],
+            update_timestamp_ns: contact.update_timestamp_ns,
+            image: None,
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "an XRP X-address should be rejected"
+    );
+
+    // The rejected write left the stored contact untouched.
+    let after =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
+    assert!(after.addresses.is_empty());
+}
+
+#[test]
 fn test_images_survive_in_get_contacts() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
