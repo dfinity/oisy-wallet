@@ -1469,7 +1469,8 @@
 				"info": "Identyfikatory kanistrów rejestru i indeksu są zwykle dostępne na stronie internetowej projektu.",
 				"info_ext": "",
 				"info_index": "Identyfikator kanistra indeksu jest opcjonalny, ale bez niego $oisy_short nie może wyświetlić historii transakcji.",
-				"custom_tokens_not_supported": "Wybrana sieć nie obsługuje niestandardowych tokenów."
+				"custom_tokens_not_supported": "Wybrana sieć nie obsługuje niestandardowych tokenów.",
+				"custom_tokens_not_supported_yet": "OISY nie obsługuje jeszcze niestandardowych tokenów w tej sieci."
 			},
 			"error": {
 				"loading_metadata": "Podany adres nie jest prawidłowym tokenem w wybranej sieci.",
