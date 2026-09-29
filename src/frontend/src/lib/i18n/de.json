@@ -1472,7 +1472,8 @@
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
 				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
-				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
+				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token.",
+				"custom_tokens_not_supported_yet": "OISY unterstützt in diesem Netzwerk noch keine benutzerdefinierten Token."
 			},
 			"error": {
 				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",

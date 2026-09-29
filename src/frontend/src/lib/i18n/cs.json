@@ -1472,7 +1472,8 @@
 				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
 				"info_ext": "ID kanistru je obvykle dostupné na webových stránkách projektu.",
 				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
-				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
+				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny.",
+				"custom_tokens_not_supported_yet": "OISY zatím v této síti nepodporuje vlastní tokeny."
 			},
 			"error": {
 				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",

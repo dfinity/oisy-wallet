@@ -1472,7 +1472,8 @@
 				"info": "Los ID de los canisters de Ledger e Índice suelen estar disponibles en el sitio web del proyecto.",
 				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
-				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados."
+				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados.",
+				"custom_tokens_not_supported_yet": "OISY aún no admite tokens personalizados en esta red."
 			},
 			"error": {
 				"loading_metadata": "La dirección especificada no es un token válido en la red seleccionada.",

@@ -1473,7 +1473,8 @@
 				"info": "Ledger and Index canister IDs are usually available on the project’s website.",
 				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
-				"custom_tokens_not_supported": "The selected network does not support custom tokens."
+				"custom_tokens_not_supported": "The selected network does not support custom tokens.",
+				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
