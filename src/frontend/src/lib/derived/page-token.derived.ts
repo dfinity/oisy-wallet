@@ -14,6 +14,7 @@ import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
+import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -27,11 +28,26 @@ export const pageToken: Readable<OptionToken> = derived(
 		nativeTokens,
 		enabledErcFungibleTokens,
 		enabledIcrcTokens,
-		enabledSplTokens
+		enabledSplTokens,
+		xrpTrustLineTokens
 	],
-	([$routeToken, $routeNetwork, $nativeTokens, $ercFungibleTokens, $icrcTokens, $splTokens]) =>
+	([
+		$routeToken,
+		$routeNetwork,
+		$nativeTokens,
+		$ercFungibleTokens,
+		$icrcTokens,
+		$splTokens,
+		$xrpTrustLineTokens
+	]) =>
 		nonNullish($routeToken)
-			? [...$nativeTokens, ...$ercFungibleTokens, ...$icrcTokens, ...$splTokens].find(
+			? [
+					...$nativeTokens,
+					...$ercFungibleTokens,
+					...$icrcTokens,
+					...$splTokens,
+					...$xrpTrustLineTokens
+				].find(
 					(token) =>
 						getPageTokenIdentifier(token) === $routeToken &&
 						token.network.id.description === $routeNetwork

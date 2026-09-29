@@ -1,13 +1,18 @@
+import { RLUSD_TOKEN_ID } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import { resetWallet, syncWallet, syncWalletError } from '$xrp/services/xrp-listener.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
 import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -230,6 +235,79 @@ describe('xrp-listener.services', () => {
 			syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
 			expect(console.warn).toHaveBeenCalled();
+		});
+	});
+
+	describe('trust lines', () => {
+		const nativeTokenId = XRP_TOKEN.id;
+
+		const withLines = (trustLines?: XrpTrustLine[]): XrpPostMessageDataResponseWallet => ({
+			wallet: {
+				balance: { certified: false, data: mockBalance },
+				...(trustLines !== undefined && { trustLines })
+			}
+		});
+
+		const balanceOf = (id: TokenId) => get(balancesStore)?.[id];
+
+		const heldBalance = { data: 125n * 10n ** 17n, certified: false };
+
+		// Real timers: `batchSet` flushes on the next frame, and a frame an earlier test scheduled
+		// under real timers cannot be advanced by fake ones — writes would queue behind it unseen.
+		beforeEach(() => {
+			vi.useRealTimers();
+			resetWallet({ tokenId: nativeTokenId });
+			balancesStore.reset(RLUSD_TOKEN_ID);
+		});
+
+		it('writes the lines and the balance of each held token', async () => {
+			syncWallet({ data: withLines([mockXrpTrustLine]), tokenId: nativeTokenId });
+
+			expect(get(xrpTrustLinesStore)[nativeTokenId]).toEqual([mockXrpTrustLine]);
+
+			await vi.waitFor(() => expect(balanceOf(RLUSD_TOKEN_ID)).toEqual(heldBalance));
+		});
+
+		// A negative balance is the side that is owed — an issuer's position. The wallet holds none.
+		it('shows a negative line balance as zero', async () => {
+			syncWallet({
+				data: withLines([{ ...mockXrpTrustLine, balance: '-3' }]),
+				tokenId: nativeTokenId
+			});
+
+			await vi.waitFor(() =>
+				expect(balanceOf(RLUSD_TOKEN_ID)).toEqual({ data: ZERO, certified: false })
+			);
+		});
+
+		it('resets the balance of a token whose line is gone', async () => {
+			syncWallet({ data: withLines([mockXrpTrustLine]), tokenId: nativeTokenId });
+			await vi.waitFor(() => expect(balanceOf(RLUSD_TOKEN_ID)).toEqual(heldBalance));
+
+			syncWallet({ data: withLines([]), tokenId: nativeTokenId });
+
+			expect(get(xrpTrustLinesStore)[nativeTokenId]).toEqual([]);
+			expect(balanceOf(RLUSD_TOKEN_ID)).toBeNull();
+		});
+
+		it('keeps the lines it holds when a sync carries none', async () => {
+			syncWallet({ data: withLines([mockXrpTrustLine]), tokenId: nativeTokenId });
+			await vi.waitFor(() => expect(balanceOf(RLUSD_TOKEN_ID)).toEqual(heldBalance));
+
+			syncWallet({ data: withLines(), tokenId: nativeTokenId });
+
+			expect(get(xrpTrustLinesStore)[nativeTokenId]).toEqual([mockXrpTrustLine]);
+			expect(balanceOf(RLUSD_TOKEN_ID)).toEqual(heldBalance);
+		});
+
+		it('drops the lines and their balances on a handover', async () => {
+			syncWallet({ data: withLines([mockXrpTrustLine]), tokenId: nativeTokenId });
+			await vi.waitFor(() => expect(balanceOf(RLUSD_TOKEN_ID)).toEqual(heldBalance));
+
+			resetWallet({ tokenId: nativeTokenId });
+
+			expect(get(xrpTrustLinesStore)[nativeTokenId]).toBeUndefined();
+			expect(balanceOf(RLUSD_TOKEN_ID)).toBeNull();
 		});
 	});
 });
