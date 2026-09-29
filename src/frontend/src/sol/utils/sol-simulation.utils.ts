@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { SOLANA_KNOWN_PROGRAM_ADDRESSES } from '$sol/constants/sol-known-programs.constants';
 import type { SolAddress } from '$sol/types/address';
-import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
+import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type {
 	SolSimulationControlChange,
 	SolSimulationPreview,
@@ -278,3 +279,24 @@ export const isEmptySolSimulationPreview = ({
 	controlChanges
 }: SolSimulationPreview): boolean =>
 	isNullish(solDelta) && tokenDeltas.length === 0 && controlChanges.length === 0;
+
+/**
+ * The programs a simulated run calls from inside another program's instruction that are not among
+ * the known ones, each named once, in the order the run first reaches them.
+ *
+ * Only the nested calls. The message's own instructions are the review's to list, and one it
+ * cannot read is already listed as such; a nested call exists only in the run.
+ */
+export const findSolUnreadPrograms = (
+	innerInstructions: SolanaSimulatedInnerInstructions
+): SolAddress[] => {
+	const known = new Set<SolAddress>(SOLANA_KNOWN_PROGRAM_ADDRESSES);
+
+	return [
+		...new Set(
+			[...innerInstructions].flatMap(({ instructions }) =>
+				[...instructions].map(({ programId }) => programId)
+			)
+		)
+	].filter((program) => !known.has(program));
+};

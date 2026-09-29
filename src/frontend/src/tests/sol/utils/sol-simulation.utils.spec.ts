@@ -1,9 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	STAKE_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
-import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
+import type { SolanaParsedAccountInfo, SolanaSimulatedInnerInstructions } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
+	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
@@ -14,6 +19,7 @@ import {
 	mockAtaAddress2,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { AccountRole } from '@solana/kit';
@@ -322,6 +328,63 @@ describe('sol-simulation.utils', () => {
 			// A wallet has no owner of its own, so it contributes to neither map.
 			expect(addressToOwner).toEqual({ [mockAtaAddress2]: mockSolAddress2 });
 			expect(addressToToken).toEqual({ [mockAtaAddress2]: mockSplAddress });
+		});
+	});
+
+	describe('findSolUnreadPrograms', () => {
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+
+		// The RPC parses the calls of the programs it knows and hands the rest over as raw data;
+		// both name their program the same way.
+		const parsed = (programId: SolAddress) => ({
+			program: 'spl-token',
+			programId,
+			parsed: { type: 'transfer', info: {} },
+			stackHeight: 2
+		});
+		const raw = (programId: SolAddress) => ({ programId, accounts: [], data: '', stackHeight: 2 });
+
+		const run = (groups: { index: number; instructions: unknown[] }[]) =>
+			groups as unknown as SolanaSimulatedInnerInstructions;
+
+		it('should find nothing in a run whose nested calls all reach known programs', () => {
+			expect(
+				findSolUnreadPrograms(
+					run([
+						{
+							index: 2,
+							instructions: [
+								parsed(TOKEN_PROGRAM_ADDRESS),
+								raw(JUPITER),
+								parsed(SYSTEM_PROGRAM_ADDRESS)
+							]
+						}
+					])
+				)
+			).toEqual([]);
+		});
+
+		it('should find nothing in a run without nested calls', () => {
+			expect(findSolUnreadPrograms(run([]))).toEqual([]);
+		});
+
+		it('should name each other program once, in the order the run first reaches it', () => {
+			expect(
+				findSolUnreadPrograms(
+					run([
+						{
+							index: 0,
+							instructions: [
+								parsed(TOKEN_PROGRAM_ADDRESS),
+								raw(mockSolAddress3),
+								parsed(STAKE_PROGRAM_ADDRESS),
+								raw(mockSolAddress3)
+							]
+						},
+						{ index: 1, instructions: [raw(mockSolAddress2), parsed(STAKE_PROGRAM_ADDRESS)] }
+					])
+				)
+			).toEqual([mockSolAddress3, STAKE_PROGRAM_ADDRESS, mockSolAddress2]);
 		});
 	});
 });
