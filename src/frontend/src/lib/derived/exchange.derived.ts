@@ -40,6 +40,8 @@ import type { ExchangesData } from '$lib/types/exchange';
 import { derivedMemo } from '$lib/utils/derived-memo.utils';
 import { exchangesDataEqual } from '$lib/utils/exchange.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
+import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -54,8 +56,22 @@ export const exchangeNotInitialized: Readable<boolean> = derived(
 );
 
 export const exchanges: Readable<ExchangesData> = derivedMemo(
-	[exchangeStore, enabledErc20Tokens, erc4626Tokens, allIcrcTokens, enabledSplTokens],
-	([$exchangeStore, $erc20Tokens, $erc4626Tokens, $icrcTokens, $splTokens]) => {
+	[
+		exchangeStore,
+		enabledErc20Tokens,
+		erc4626Tokens,
+		allIcrcTokens,
+		enabledSplTokens,
+		xrpTrustLineTokens
+	],
+	([
+		$exchangeStore,
+		$erc20Tokens,
+		$erc4626Tokens,
+		$icrcTokens,
+		$splTokens,
+		$xrpTrustLineTokens
+	]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
@@ -91,7 +107,10 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 					...[...$erc20Tokens, ...$erc4626Tokens].filter(
 						({ address }) => address.toLowerCase() === key.toLowerCase()
 					),
-					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase())
+					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase()),
+					...$xrpTrustLineTokens.filter(
+						(token) => xrpTrustLineIdentifier(token).toLowerCase() === key.toLowerCase()
+					)
 				];
 
 				return {
