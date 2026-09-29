@@ -412,6 +412,7 @@ export const idlFactory = ({ IDL }) => {
 		Btc: BtcAddress,
 		Eth: EthAddress,
 		Sol: IDL.Text,
+		Xrp: IDL.Text,
 		Icrcv2: Icrcv2AccountId
 	});
 	const ContactAddressData = IDL.Record({

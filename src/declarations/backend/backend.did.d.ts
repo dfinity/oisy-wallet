@@ -2076,7 +2076,11 @@ export type Token =
 	| { Erc4626: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
-	{ Btc: BtcAddress } | { Eth: EthAddress } | { Sol: string } | { Icrcv2: Icrcv2AccountId };
+	| { Btc: BtcAddress }
+	| { Eth: EthAddress }
+	| { Sol: string }
+	| { Xrp: string }
+	| { Icrcv2: Icrcv2AccountId };
 /**
  * A unified token identifier covering both native and custom tokens for the main supported chains.
  * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
