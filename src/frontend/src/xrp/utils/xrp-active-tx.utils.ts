@@ -12,7 +12,7 @@ import type { XrpAddress } from '$xrp/types/address';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS, type XrpExternalRefKey } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const isXrpActiveUserTransaction = (tx: ActiveUserTransaction): boolean => 'Xrp' in tx.data;
 
@@ -205,16 +205,24 @@ export const xrpActiveUserTransactionDisplay = (
 
 	const refs = toXrpExternalRefsMap(tx.external_refs);
 
+	// Blank counts as absent: the backend bounds a ref value's length but not its content, so another
+	// client can store an empty or whitespace-only one, which `??` alone would take as present.
+	const snapshot = (key: XrpExternalRefKey): string | undefined => {
+		const value = refs[key]?.trim();
+
+		return notEmptyString(value) ? value : undefined;
+	};
+
 	return {
 		amount:
-			refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ??
+			snapshot(XRP_EXTERNAL_REF_KEYS.AMOUNT) ??
 			formatToken({
 				value: tx.data.Xrp.amount,
 				unitName: XRP_TOKEN.decimals,
 				displayDecimals: XRP_TOKEN.decimals
 			}),
-		symbol: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? XRP_TOKEN.symbol,
-		network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? XRP_TOKEN.network.name
+		symbol: snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ?? XRP_TOKEN.symbol,
+		network: snapshot(XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL) ?? XRP_TOKEN.network.name
 	};
 };
 

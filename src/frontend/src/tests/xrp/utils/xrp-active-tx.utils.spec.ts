@@ -338,6 +338,34 @@ describe('xrp-active-tx.utils', () => {
 			).toEqual({ amount: '1.234567', symbol: XRP_TOKEN.symbol, network: 'Snapshot Ledger' });
 		});
 
+		// The backend bounds a ref value's length, not its content, so another client can store a
+		// blank one. `??` alone would take it as present and render "Send" over a blank network line.
+		it.each(['', '   ', '\t\n'])('treats a blank snapshot value (%j) as absent', (blank) => {
+			expect(
+				xrpActiveUserTransactionDisplay(
+					rowKeepingRefs({
+						keep: POLL_KEYS,
+						extra: [
+							{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: blank },
+							{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: blank },
+							{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: blank }
+						]
+					})
+				)
+			).toEqual({ amount: '1.234567', symbol: XRP_TOKEN.symbol, network: XRP_TOKEN.network.name });
+		});
+
+		it('trims a snapshot value it keeps', () => {
+			expect(
+				xrpActiveUserTransactionDisplay(
+					rowKeepingRefs({
+						keep: POLL_KEYS,
+						extra: [{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: '  Snapshot Ledger ' }]
+					})
+				)?.network
+			).toBe('Snapshot Ledger');
+		});
+
 		it('is undefined for a row that is not an XRP payment', () => {
 			expect(xrpActiveUserTransactionDisplay(mockLiquidiumActiveUserTransaction)).toBeUndefined();
 		});
