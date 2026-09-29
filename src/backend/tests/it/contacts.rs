@@ -4,7 +4,7 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
-    account::{EthAddress, TokenAccountId},
+    account::{EthAddress, TokenAccountId, XrpAddress},
     contact::{
         Contact, ContactAddressData, ContactError, ContactImage, CreateContactRequest,
         ImageMimeType, UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
@@ -1055,6 +1055,35 @@ fn test_update_contact_rejects_an_over_long_address() {
         call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
     assert_eq!(after.addresses, vec![valid_address]);
     assert_eq!(after.name, contact.name);
+}
+
+#[test]
+fn test_update_contact_stores_an_xrp_address() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let contact = call_create_contact(&pic_setup, caller, "XRP Contact".to_string()).unwrap();
+
+    let xrp_address = ContactAddressData {
+        token_account_id: TokenAccountId::Xrp(XrpAddress(
+            "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh".to_string(),
+        )),
+        label: Some("main".to_string()),
+    };
+    let updated = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            addresses: vec![xrp_address.clone()],
+            ..contact.clone()
+        },
+    )
+    .expect("that an XRP address is accepted");
+    assert_eq!(updated.addresses, vec![xrp_address.clone()]);
+
+    let stored =
+        call_get_contact(&pic_setup, caller, contact.id).expect("that the contact is retrievable");
+    assert_eq!(stored.addresses, vec![xrp_address]);
 }
 
 #[test]

@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId},
+        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId, XrpAddress},
         agreement::{
             Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
@@ -890,6 +890,7 @@ impl Validate for TokenAccountId {
         let address = match self {
             TokenAccountId::Icrcv2(_) => return Ok(()),
             TokenAccountId::Sol(SolPrincipal(address))
+            | TokenAccountId::Xrp(XrpAddress(address))
             | TokenAccountId::Eth(EthAddress::Public(address))
             | TokenAccountId::Btc(
                 BtcAddress::P2PKH(address)
@@ -1019,7 +1020,9 @@ mod address_validation_tests {
     use super::TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH;
     use crate::{
         types::{
-            account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId},
+            account::{
+                BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId, XrpAddress,
+            },
             contact::{ContactAddressData, UpdateContactRequest},
         },
         validate::Validate,
@@ -1053,6 +1056,7 @@ mod address_validation_tests {
             TokenAccountId::Sol(SolPrincipal(
                 "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM".to_string(),
             )),
+            TokenAccountId::Xrp(XrpAddress("rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh".to_string())),
             TokenAccountId::Icrcv2(Icrcv2AccountId::WithPrincipal {
                 owner: Principal::anonymous(),
                 subaccount: None,
