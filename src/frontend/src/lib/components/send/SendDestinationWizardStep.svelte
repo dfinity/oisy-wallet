@@ -12,6 +12,7 @@
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
+	import KnownDestinations from '$lib/components/send/KnownDestinations.svelte';
 	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -41,6 +42,7 @@
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -177,11 +179,22 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- XRP address-book contacts require a backend TokenAccountId address type (out of scope for
-		     the frontend-only integration), and transaction history (known destinations) lands in a
-		     later phase — so the destination step is address entry only for now. -->
+		<!-- XRP address-book contacts require a backend TokenAccountId address type, so there is no
+		     Contacts tab: the recently used addresses are listed without the tabs around them. -->
 		<div data-tid={testId}>
-			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
+			<XrpSendDestination
+				knownDestinations={$xrpKnownDestinations}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
+			<div class="my-6">
+				<KnownDestinations
+					knownDestinations={$xrpKnownDestinations}
+					onNext={next}
+					bind:destination
+				/>
+			</div>
 		</div>
 	{/if}
 

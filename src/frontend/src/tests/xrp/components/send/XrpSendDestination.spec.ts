@@ -14,9 +14,9 @@ describe('XrpSendDestination', () => {
 		return found as HTMLInputElement;
 	};
 
-	// Nothing resolves a name on this branch — no contacts, and the wizard step renders this
-	// without `knownDestinations` — so prompting for one walks the user into an invalid-address
-	// error. The shared `enter_recipient_address` is correct again once either source is wired.
+	// Nothing resolves a name on this branch — no contacts, and the recently used list matches
+	// addresses only — so prompting for one walks the user into an invalid-address error. The
+	// shared `enter_recipient_address` is correct again once XRP contacts exist.
 	it('asks for an address only, not a name or alias', () => {
 		const { container } = render(XrpSendDestination, {
 			props: { destination: '', invalidDestination: false }
