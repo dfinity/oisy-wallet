@@ -626,7 +626,8 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
-			closesPayOthers: false
+			closesPayOthers: false,
+			unreadProgramsAcknowledged: true
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -647,7 +648,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				unreadProgramsAcknowledged: true
 			};
 
 			const expected = {
@@ -786,7 +788,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				unreadProgramsAcknowledged: true
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1169,6 +1172,38 @@ describe('wallet-connect.services', () => {
 			// would refuse the swap.
 			it('should sign when every close pays the user', async () => {
 				const result = await sign({ ...mockParams, closesPayOthers: false });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('with a program the run calls that OISY does not know', () => {
+			it('should refuse to sign when the review did not confirm it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unread_programs_unconfirmed }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('should sign once the review confirmed it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: true });
 
 				expect(result).toEqual(expect.objectContaining({ success: true }));
 

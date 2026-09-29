@@ -96,6 +96,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
 	// the simulated flag is.
 	closesPayOthers: boolean;
+	// Whether the user confirmed on the review that OISY cannot say what the programs the run calls
+	// it does not know do. True when the run calls none. Asked there and handed on for the same
+	// reason as the two flags above.
+	unreadProgramsAcknowledged: boolean;
 };
 
 export const decode = async ({
@@ -477,6 +481,7 @@ export const sign = ({
 	identity,
 	simulated,
 	closesPayOthers,
+	unreadProgramsAcknowledged,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -568,6 +573,20 @@ export const sign = ({
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// A program the run calls from inside another one can act on what the user holds in an
+			// application, which neither the balance changes nor the operations show. The review holds
+			// the button until the user confirms they understand that; this is the same condition,
+			// asked where the signature is made.
+			if (!unreadProgramsAcknowledged) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unread_programs_unconfirmed }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });

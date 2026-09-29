@@ -1439,6 +1439,9 @@ interface I18nWallet_connect {
 		tab_operations: string;
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
+		unread_programs_one: string;
+		unread_programs_other: string;
+		unread_programs_acknowledge: string;
 		cannot_be_shown: string;
 		close_pays_others: string;
 		simulated_instructions: string;
@@ -1549,6 +1552,7 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		close_pays_others: string;
 		unreviewed_without_simulation: string;
+		unread_programs_unconfirmed: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
