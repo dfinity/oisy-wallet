@@ -2642,6 +2642,7 @@
 			"funds_delivered_to": "Fondi inviati a",
 			"your_oisy_address": "Il tuo indirizzo $oisy_short",
 			"borrow_risk_info": "Prendere in prestito riduce il tuo fattore di salute. Se scende troppo, la tua garanzia può essere liquidata.",
+			"borrow_activation_fee_info": "Liquidium applica una commissione di attivazione del $fee% in aggiunta all'importo preso in prestito.",
 			"borrow_at_risk_warning": "Questo prestito riduce notevolmente il tuo fattore di salute.",
 			"borrow_exceeds_power": "L'importo supera la tua capacità di prestito.",
 			"borrow_below_minimum": "L'importo è inferiore al prestito minimo.",
