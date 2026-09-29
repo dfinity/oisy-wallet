@@ -12,6 +12,7 @@ import {
 } from '$lib/api/idb-tokens.api';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { createMockErc20CustomTokens } from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc4626CustomTokens } from '$tests/mocks/erc4626-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -180,7 +181,7 @@ describe('idb-tokens.api', () => {
 			expect(idbKeyval.set).not.toHaveBeenCalled();
 		});
 
-		it('should return early with non-Erc20 token', async () => {
+		it('should return early with a token that is neither Erc20 nor Erc4626', async () => {
 			await deleteIdbEthToken({
 				identity: mockIdentity,
 				token: icMockTokens[0]
@@ -244,6 +245,76 @@ describe('idb-tokens.api', () => {
 			const userTokenToDelete = toCustomToken({
 				...tokenToDelete.data,
 				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should delete provided ERC4626 token', async () => {
+			const [tokenToDelete, ...rest] = createMockErc4626CustomTokens({
+				n: 3,
+				networkEnv: 'mainnet'
+			});
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc4626', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc4626',
+				chainId: tokenToDelete.data.network.chainId
+			});
+			const otherUserTokens = [
+				...createMockErc20CustomTokens({ n: 1, networkEnv: 'mainnet' }).map(({ data }) =>
+					toCustomToken({ ...data, networkKey: 'Erc20', chainId: data.network.chainId })
+				),
+				...icMockTokens
+			];
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([
+				userTokenToDelete,
+				...restUserTokens,
+				...otherUserTokens
+			]);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				[...restUserTokens, ...otherUserTokens],
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided ERC4626 token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = createMockErc4626CustomTokens({
+				n: 3,
+				networkEnv: 'mainnet'
+			});
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc4626', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc4626',
 				chainId: tokenToDelete.data.network.chainId
 			});
 
