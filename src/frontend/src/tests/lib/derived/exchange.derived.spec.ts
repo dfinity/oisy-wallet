@@ -20,6 +20,7 @@ import {
 import { ROBINHOOD_ETH_TOKEN_ID } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
@@ -34,7 +35,8 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -59,6 +61,8 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
+import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -380,6 +384,21 @@ describe('exchange.derived', () => {
 				[mockSplDefaultToken.id]: mockSplTokenPrice1,
 				[mockSplCustomToken.id]: mockSplTokenPrice2
 			});
+		});
+
+		// Keyed `<currency>.<issuer>`, matched without regard to case like the other token keys.
+		it('should return values for XRP Ledger trust-line tokens', () => {
+			const tokenPrice = { usd: 1, usd_market_cap: 0 };
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
+			xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [mockXrpTrustLine] });
+
+			exchangeStore.set([
+				{ [`${RLUSD_TOKEN.currency}.${RLUSD_TOKEN.issuer}`.toLowerCase()]: tokenPrice }
+			]);
+
+			expect(get(exchanges)[RLUSD_TOKEN.id]).toStrictEqual(tokenPrice);
+
+			xrpTrustLinesStore.clear(XRP_TOKEN.id);
 		});
 
 		it('should return values for ERC20 and SPL tokens', () => {

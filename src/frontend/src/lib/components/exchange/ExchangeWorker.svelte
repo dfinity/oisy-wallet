@@ -10,6 +10,7 @@
 	import { loadBackendExchangeEnabled } from '$lib/services/backend-exchange-enabled.services';
 	import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
+	import { xrpTrustLineTokenKeys } from '$xrp/derived/xrp-trust-line-tokens.derived';
 
 	let worker = $state<ExchangeWorker | undefined>();
 	let backendExchangeEnabled = $state<boolean>(BACKEND_EXCHANGE_ENABLED);
@@ -40,6 +41,7 @@
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
 			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
 			splAddresses: $enabledSplTokenAddresses,
+			xrpTrustLineKeys: $xrpTrustLineTokenKeys,
 			erc4626TokensExchangeData: $erc4626TokensExchangeData,
 			backendExchangeEnabled
 		});
@@ -61,7 +63,8 @@
 			[
 				$enabledMergedErc20TokensAddresses,
 				$enabledIcrcLedgerCanisterIdsNoCk,
-				$enabledSplTokenAddresses
+				$enabledSplTokenAddresses,
+				$xrpTrustLineTokenKeys
 			];
 		}
 
