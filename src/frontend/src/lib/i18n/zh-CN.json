@@ -2369,7 +2369,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "比特币",
 			"Eth": "以太坊",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "新地址",

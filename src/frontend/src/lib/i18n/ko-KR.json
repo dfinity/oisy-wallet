@@ -2369,7 +2369,8 @@
 			"Icrcv2": "인터넷 컴퓨터",
 			"Btc": "비트코인",
 			"Eth": "이더리움",
-			"Sol": "솔라나"
+			"Sol": "솔라나",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "새 주소",
