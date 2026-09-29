@@ -1570,7 +1570,11 @@
 			"crypto": "暗号資産",
 			"stablecoin": "ステーブルコイン",
 			"stock": "株式",
-			"commodity": "コモディティ"
+			"commodity": "コモディティ",
+			"compute": "コンピュート"
+		},
+		"category_in_sentence": {
+			"compute": "コンピュートトークン"
 		},
 		"risk": {
 			"low": "低リスク",
@@ -2617,6 +2621,8 @@
 			"transaction_fee": "トランザクション手数料",
 			"insufficient_funds_for_fee": "金額と手数料を賄うには残高が不足しています。",
 			"supply_prices_unavailable": "価格は一時的に利用できません。読み込まれるまで供給は無効になっています。",
+			"minimum_supply": "最小供給額",
+			"supply_below_minimum": "金額が最小供給額を下回っています。",
 			"borrow_review": "借入内容を確認",
 			"borrow_review_subtitle": "借り入れる",
 			"borrowing": "借入手続き中",

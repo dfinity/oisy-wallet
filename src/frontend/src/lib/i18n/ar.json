@@ -1570,7 +1570,11 @@
 			"crypto": "",
 			"stablecoin": "",
 			"stock": "",
-			"commodity": ""
+			"commodity": "",
+			"compute": ""
+		},
+		"category_in_sentence": {
+			"compute": ""
 		},
 		"risk": {
 			"low": "",
@@ -2617,6 +2621,8 @@
 			"transaction_fee": "",
 			"insufficient_funds_for_fee": "",
 			"supply_prices_unavailable": "",
+			"minimum_supply": "",
+			"supply_below_minimum": "",
 			"borrow_review": "",
 			"borrow_review_subtitle": "",
 			"borrowing": "",

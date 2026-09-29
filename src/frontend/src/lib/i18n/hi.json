@@ -1570,7 +1570,11 @@
 			"crypto": "क्रिप्टो",
 			"stablecoin": "स्टेबलकॉइन",
 			"stock": "शेयर",
-			"commodity": "कमोडिटी"
+			"commodity": "कमोडिटी",
+			"compute": "कंप्यूट"
+		},
+		"category_in_sentence": {
+			"compute": "कंप्यूट टोकन"
 		},
 		"risk": {
 			"low": "कम जोखिम",
@@ -2617,6 +2621,8 @@
 			"transaction_fee": "लेन-देन शुल्क",
 			"insufficient_funds_for_fee": "राशि और शुल्क को कवर करने के लिए बैलेंस अपर्याप्त है।",
 			"supply_prices_unavailable": "कीमतें अस्थायी रूप से अनुपलब्ध हैं। लोड होने तक जमा करना अक्षम है।",
+			"minimum_supply": "न्यूनतम जमा",
+			"supply_below_minimum": "राशि न्यूनतम जमा राशि से कम है।",
 			"borrow_review": "उधार की समीक्षा करें",
 			"borrow_review_subtitle": "आप उधार ले रहे हैं",
 			"borrowing": "उधार लिया जा रहा है",
