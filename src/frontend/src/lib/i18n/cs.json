@@ -1123,8 +1123,6 @@
 			"no_btc_network_id": "Aktuální síť ($networkId) není sítí Bitcoin.",
 			"no_solana_network_id": "Aktuální síť ($networkId) není sítí Solana.",
 			"no_xrp_network_id": "Aktuální síť ($networkId) není sítí XRP Ledger.",
-			"xrp_confirmation_failed": "Nepodařilo se nám potvrdit, zda byla transakce odeslána. Stále může projít, proto ji zatím neposílejte znovu — pokud projde, váš zůstatek se aktualizuje.",
-			"xrp_transaction_failed": "Transakce byla sítí zpracována, ale selhala, takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později.",
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",
