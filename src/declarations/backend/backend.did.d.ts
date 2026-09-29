@@ -49,12 +49,13 @@ export interface ActiveUserTransaction {
 export type ActiveUserTransactionData =
 	| {
 			/**
-			 * Native XRP payment. Unlike every other variant this one does not track a
-			 * provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
-			 * so a second payment from the same address while the first is unresolved
-			 * is unsafe whichever sequence it picks. The row is what refuses it, and it
-			 * has to outlive the tab to do that. The locally derived transaction id and
-			 * the signed `LastLedgerSequence` ride in `external_refs`.
+			 * XRP Ledger payment, of native XRP or of a trust-line token. Unlike every
+			 * other variant this one does not track a provider — it exists to hold an
+			 * invariant: an XRPL `Sequence` is a nonce, so a second payment from the
+			 * same address while the first is unresolved is unsafe whichever sequence
+			 * it picks. The row is what refuses it, and it has to outlive the tab to do
+			 * that. The locally derived transaction id and the signed
+			 * `LastLedgerSequence` ride in `external_refs`.
 			 */
 			Xrp: XrpData;
 	  }
@@ -97,6 +98,16 @@ export type ActiveUserTransactionData =
 			 * `external_refs`.
 			 */
 			ChainFusion: ChainFusionData;
+	  }
+	| {
+			/**
+			 * XRP Ledger `TrustSet` that adds or removes a trust-line token. It consumes
+			 * the account's `Sequence` exactly as a payment does, so it is held to the
+			 * same one-unresolved-transaction-per-address invariant as `Xrp`, and its
+			 * transaction id and `LastLedgerSequence` ride in `external_refs` the same
+			 * way.
+			 */
+			XrpTrustSet: XrpTrustSetData;
 	  }
 	| {
 			/**
@@ -2085,6 +2096,7 @@ export type Token =
 	| { ExtV2: ExtV2Token }
 	| { Icrc: IcrcToken }
 	| { Icrc7: ExtV2Token }
+	| { XrpTrustLineMainnet: XrpTrustLineToken }
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
@@ -2147,6 +2159,12 @@ export type TokenId =
 			 * ICRC-7 NFT collection on the Internet Computer
 			 */
 			Icrc7: Principal;
+	  }
+	| {
+			/**
+			 * Trust-line token on the XRP Ledger mainnet, identified by currency code and issuer
+			 */
+			XrpTrustLineMainnet: [string, string];
 	  }
 	| {
 			/**
@@ -2465,7 +2483,7 @@ export interface VeloraData {
  */
 export type VeloraSwapMode = { Delta: null } | { Market: null };
 /**
- * Native XRP payment payload — the values fixed when the transaction was
+ * XRP Ledger payment payload — the values fixed when the transaction was
  * signed. The transaction id and its `LastLedgerSequence` are learned from the
  * signed blob and ride in `external_refs`, so they are not here.
  *
@@ -2480,7 +2498,8 @@ export interface XrpData {
 	 */
 	fee: bigint;
 	/**
-	 * Native XRP, which also fixes the network the payment was signed for.
+	 * Native XRP or a trust-line token, which also fixes the network the
+	 * payment was signed for.
 	 */
 	token: TokenId;
 	/**
@@ -2491,9 +2510,53 @@ export interface XrpData {
 	destination_tag: [] | [number];
 	source_address: string;
 	/**
-	 * Amount in drops.
+	 * Amount in drops for native XRP; for a trust-line token, in units of
+	 * 10^-18 of the token.
 	 */
 	amount: bigint;
+}
+/**
+ * What an XRP Ledger `TrustSet` does to the account's trust line.
+ */
+export type XrpTrustLineChange =
+	| {
+			/**
+			 * Creates the line, so the account can hold and receive the token.
+			 */
+			Add: null;
+	  }
+	| {
+			/**
+			 * Sets the line's limit to zero, so the ledger deletes it and releases its
+			 * reserve.
+			 */
+			Remove: null;
+	  };
+/**
+ * A token held through a trust line on the XRP Ledger: a currency code and the account that
+ * issues it. The code alone does not identify a token, since any account can issue under any
+ * code.
+ */
+export interface XrpTrustLineToken {
+	issuer: string;
+	currency: string;
+}
+/**
+ * XRP Ledger `TrustSet` payload — the values fixed when the transaction was
+ * signed. As for `XrpData`, the transaction id and its `LastLedgerSequence`
+ * ride in `external_refs`, and `source_address` is the field the guard reads.
+ */
+export interface XrpTrustSetData {
+	/**
+	 * Transaction cost in drops.
+	 */
+	fee: bigint;
+	/**
+	 * The trust-line token the line is for, which also fixes the network.
+	 */
+	token: TokenId;
+	source_address: string;
+	change: XrpTrustLineChange;
 }
 export interface _SERVICE {
 	/**

@@ -253,6 +253,7 @@ export const idlFactory = ({ IDL }) => {
 		XrpNativeMainnet: IDL.Null,
 		EvmNative: IDL.Nat64,
 		Icrc7: IDL.Principal,
+		XrpTrustLineMainnet: IDL.Tuple(IDL.Text, IDL.Text),
 		BtcNativeMainnet: IDL.Null,
 		Erc721: IDL.Tuple(IDL.Text, IDL.Nat64),
 		SolNativeMainnet: IDL.Null,
@@ -317,6 +318,16 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const XrpTrustLineChange = IDL.Variant({
+		Add: IDL.Null,
+		Remove: IDL.Null
+	});
+	const XrpTrustSetData = IDL.Record({
+		fee: IDL.Nat,
+		token: TokenId,
+		source_address: IDL.Text,
+		change: XrpTrustLineChange
+	});
 	const VeloraSwapMode = IDL.Variant({
 		Delta: IDL.Null,
 		Market: IDL.Null
@@ -347,6 +358,7 @@ export const idlFactory = ({ IDL }) => {
 		NearIntents: NearIntentsData,
 		CyclesMint: CyclesMintData,
 		ChainFusion: ChainFusionData,
+		XrpTrustSet: XrpTrustSetData,
 		Velora: VeloraData,
 		Liquidium: LiquidiumData
 	});
@@ -842,6 +854,10 @@ export const idlFactory = ({ IDL }) => {
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)
 	});
+	const XrpTrustLineToken = IDL.Record({
+		issuer: IDL.Text,
+		currency: IDL.Text
+	});
 	const SplToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
 		token_address: IDL.Text,
@@ -852,6 +868,7 @@ export const idlFactory = ({ IDL }) => {
 		ExtV2: ExtV2Token,
 		Icrc: IcrcToken,
 		Icrc7: ExtV2Token,
+		XrpTrustLineMainnet: XrpTrustLineToken,
 		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken,
