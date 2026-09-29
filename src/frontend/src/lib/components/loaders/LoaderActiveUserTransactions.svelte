@@ -255,9 +255,9 @@
 					metadata: buildOisyTradeSwapTrackingMetadata({ tx })
 				});
 
-				// Unconditional, unlike every other provider's: a failed OISY Trade swap is a
-				// killed fill-or-kill order whose *source* token has just been withdrawn back
-				// to the wallet. Elsewhere a failure means nothing moved and there is nothing
+				// Unconditional, as for XRP below: a failed OISY Trade swap is a killed
+				// fill-or-kill order whose *source* token has just been withdrawn back to the
+				// wallet. For most providers a failure means nothing moved and there is nothing
 				// to refresh; here the balance changed either way.
 				shouldRefresh = true;
 			} else if (
@@ -297,11 +297,13 @@
 				// payment may still apply — and only the resolver knows which one it wrote.
 				if (isSucceeded) {
 					toastsShow({ text: $i18n.send.text.xrp_sent, level: 'success', duration: 4000 });
-
-					shouldRefresh = true;
 				} else {
 					toastsError({ msg: { text: tx.error[0] ?? $i18n.send.error.unexpected } });
 				}
+
+				// Unconditional: a validated failure claimed the fee, so the balance moved, and an
+				// expiry costs only a refresh that finds nothing new.
+				shouldRefresh = true;
 			}
 		}
 

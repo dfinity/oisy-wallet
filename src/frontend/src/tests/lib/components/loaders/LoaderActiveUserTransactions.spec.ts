@@ -468,7 +468,7 @@ describe('LoaderActiveUserTransactions', () => {
 			// The recorded text, not a message derived here: the three failures need different
 			// advice — nothing was sent, the fee was charged, or it may still apply — and only the
 			// resolver knows which one it wrote.
-			it('toasts the recorded failure text and does not refresh', async () => {
+			it('toasts the recorded failure text and refreshes the wallet', async () => {
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
 
@@ -487,7 +487,8 @@ describe('LoaderActiveUserTransactions', () => {
 				expect(toasts.toastsError).toHaveBeenCalledExactlyOnceWith({
 					msg: { text: 'the network did not include it in time' }
 				});
-				expect(refreshSpy).not.toHaveBeenCalled();
+				// Refreshed on failure too: a validated one claimed the fee, which the balance must show.
+				expect(refreshSpy).toHaveBeenCalledOnce();
 				expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
 					expect.objectContaining({ name: TRACK_COUNT_XRP_SEND_ERROR })
 				);
