@@ -150,7 +150,7 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 
 ### Cycles mint tracking
 
-[Minting TCYCLES](#mint-tcycles-local-and-staging) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_symbol` is the ICP paid and `token2_symbol` the TCYCLES received. It carries no amounts and no USD value: every mint is a transfer to one of the CMC's deposit accounts with the `MINT` memo, so an exact amount and the event's time would pick out the one block on the public ICP ledger, and with it the sender's account.
+[Minting TCYCLES](#mint-tcycles) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_symbol` is the ICP paid and `token2_symbol` the TCYCLES received. It carries no amounts and no USD value: every mint is a transfer to one of the CMC's deposit accounts with the `MINT` memo, so an exact amount and the event's time would pick out the one block on the public ICP ledger, and with it the sender's account.
 
 | `event_modifier` | Fires when                 | `result_status`                 | Properties                                                      |
 | ---------------- | -------------------------- | ------------------------------- | --------------------------------------------------------------- |
@@ -540,9 +540,9 @@ What this deliberately does not do:
 
 ---
 
-## Mint TCYCLES (local and staging)
+## Mint TCYCLES
 
-Behind `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`, on for local and staging builds, off in production), the TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, or less than the 0.0001 ICP fee, the form offers a Max of 0 and cannot continue.
+The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap, in every environment; `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`) is kept as a kill switch that hides it. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, or less than the 0.0001 ICP fee, the form offers a Max of 0 and cannot continue.
 
 **Form.** The user enters ICP and sees the TCYCLES it mints as an estimate: ICP × the CMC's rate, minus the cycles ledger's 0.0001 TCYCLES deposit fee. It is an estimate because the CMC converts at its rate when the mint runs, not when the user looked. The rate ("1 ICP ≈ N TCYCLES") is read from the CMC, refreshed every minute and read again when Review opens, and the amount waits for it. The fees are the ICP network fee, on top of the amount, and the cycles ledger fee, out of what is received. The form cannot continue without a rate, with no amount, with an amount that with its fee exceeds the balance, or with an amount below the lower bound, which has two parts. The amount must be above 0.0003 ICP, since a refund returns the ICP minus 0.0003 ICP and so returns nothing at or below that, and it must mint more than twice the deposit fee at the current rate, so that a halving of the rate before the mint runs still leaves a positive credit. A notice says that minting cannot be undone.
 
