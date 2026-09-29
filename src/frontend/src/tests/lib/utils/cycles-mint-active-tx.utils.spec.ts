@@ -257,6 +257,22 @@ describe('cycles-mint-active-tx.utils', () => {
 			expect(new TextEncoder().encode(update?.error).length).toBeLessThanOrEqual(512);
 			expect(update?.error).toBe('é'.repeat(256));
 		});
+
+		// 509 bytes of ASCII leave room for 3 more, and the emoji takes 4.
+		it('drops a character that does not fit whole, rather than half of it', () => {
+			const update = toCyclesMintRowUpdate({
+				status: 'failed',
+				reason: `${'a'.repeat(509)}\u{1F600}`
+			});
+
+			expect(update?.error).toBe('a'.repeat(509));
+		});
+
+		it('cuts a reason many times the limit to its first 512 bytes', () => {
+			const update = toCyclesMintRowUpdate({ status: 'failed', reason: 'x'.repeat(50_000) });
+
+			expect(update?.error).toBe('x'.repeat(512));
+		});
 	});
 
 	describe('isCyclesMintDeposit', () => {
