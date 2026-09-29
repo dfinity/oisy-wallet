@@ -202,6 +202,9 @@ export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
+export const TOKEN_MENU_XRP = 'token-menu-xrp';
+export const TOKEN_MENU_XRP_BUTTON = 'token-menu-xrp-button';
+export const TOKEN_MENU_XRP_EXPLORER_LINK = 'xrp-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
