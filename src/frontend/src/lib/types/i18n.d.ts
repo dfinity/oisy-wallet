@@ -1260,7 +1260,14 @@ interface I18nTokens {
 
 interface I18nToken_tag {
 	type: { category: string; risk: string };
-	category: { crypto: string; stablecoin: string; stock: string; commodity: string };
+	category: {
+		crypto: string;
+		stablecoin: string;
+		stock: string;
+		commodity: string;
+		compute: string;
+	};
+	category_in_sentence: { compute: string };
 	risk: { low: string; medium: string; high: string };
 }
 
@@ -2154,6 +2161,8 @@ interface I18nLiquidium {
 		transaction_fee: string;
 		insufficient_funds_for_fee: string;
 		supply_prices_unavailable: string;
+		minimum_supply: string;
+		supply_below_minimum: string;
 		borrow_review: string;
 		borrow_review_subtitle: string;
 		borrowing: string;

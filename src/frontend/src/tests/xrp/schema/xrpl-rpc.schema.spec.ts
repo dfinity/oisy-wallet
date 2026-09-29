@@ -61,13 +61,23 @@ describe('xrpl-rpc.schema', () => {
 		// The length answers before the value does. `BigInt` is superlinear in the digit count and
 		// this parses untrusted provider JSON on the main thread, so an oversized field must be
 		// rejected without being converted first.
+		//
+		// Asserted on the conversion, not on the clock: a time bound measures the machine as much as
+		// the schema, and a loaded full-suite run overran 10ms with the length check in place.
 		it('rejects a very long value without converting it', () => {
-			const started = performance.now();
+			const toBigInt = vi.spyOn(globalThis, 'BigInt');
+
+			// A spy the schema never reaches would pass the silence below too, so it is first seen
+			// converting a value within the bound.
+			expect(XrpDropsSchema.safeParse('25000000').success).toBeTruthy();
+			expect(toBigInt).toHaveBeenCalledWith('25000000');
+
+			toBigInt.mockClear();
 
 			expect(XrpDropsSchema.safeParse('9'.repeat(1_000_000)).success).toBeFalsy();
+			expect(toBigInt).not.toHaveBeenCalled();
 
-			// Converting a million digits costs tens of milliseconds; the length check is immediate.
-			expect(performance.now() - started).toBeLessThan(10);
+			toBigInt.mockRestore();
 		});
 
 		it.each(['100000000000000001', '999999999999999999999999999999'])(
