@@ -7,6 +7,7 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId, XrpAddress},
+        active_user_transaction::MAX_XRP_ADDRESS_LEN,
         agreement::{
             Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
@@ -16,7 +17,8 @@ use crate::{
         },
         custom_token::{
             CustomToken, CustomTokenId, Dip721Token, ErcToken, ErcTokenId, ExtV2Token,
-            IcPunksToken, Icrc7Token, IcrcToken, SplToken, SplTokenId, Token,
+            IcPunksToken, Icrc7Token, IcrcToken, SplToken, SplTokenId, Token, XrpCurrencyCode,
+            XrpTrustLineToken,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         exchange::{ExchangeData, ExchangeRate},
@@ -155,6 +157,9 @@ impl From<&Token> for CustomTokenId {
             Token::Dip721(token) => CustomTokenId::Dip721(token.canister_id),
             Token::IcPunks(token) => CustomTokenId::IcPunks(token.canister_id),
             Token::Icrc7(token) => CustomTokenId::Icrc7(token.canister_id),
+            Token::XrpTrustLineMainnet(XrpTrustLineToken { currency, issuer }) => {
+                CustomTokenId::XrpTrustLineMainnet(currency.clone(), issuer.clone())
+            }
         }
     }
 }
@@ -721,6 +726,10 @@ impl Validate for CustomTokenId {
                 token_address.validate()
             }
             CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
+            CustomTokenId::XrpTrustLineMainnet(currency, issuer) => {
+                currency.validate()?;
+                validate_xrp_issuer(issuer)
+            }
         }
     }
 }
@@ -744,6 +753,7 @@ impl Validate for Token {
             Token::Dip721(token) => token.validate(),
             Token::IcPunks(token) => token.validate(),
             Token::Icrc7(token) => token.validate(),
+            Token::XrpTrustLineMainnet(token) => token.validate(),
         }
     }
 }
@@ -768,6 +778,79 @@ impl Validate for ErcToken {
     fn validate(&self) -> Result<(), Error> {
         self.token_address.validate()
     }
+}
+
+impl XrpCurrencyCode {
+    pub const NONSTANDARD_LENGTH: usize = 40;
+    pub const STANDARD_LENGTH: usize = 3;
+    /// The symbols a standard code may use besides ASCII letters and digits.
+    const STANDARD_SYMBOLS: &'static str = "?!@#$%^&*<>(){}[]|";
+}
+
+impl Validate for XrpCurrencyCode {
+    /// Verifies that an XRP Ledger currency code is in one of its two formats.
+    ///
+    /// # References
+    /// - <https://xrpl.org/docs/references/protocol/data-types/currency-formats>
+    fn validate(&self) -> Result<(), Error> {
+        let code = self.as_str();
+        // `len` counts bytes, so a single multi-byte character can be 3 long; the character check
+        // below is what refuses it.
+        match code.len() {
+            Self::STANDARD_LENGTH => {
+                if !code
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || Self::STANDARD_SYMBOLS.contains(c))
+                {
+                    return Err(Error::msg(
+                        "Invalid XRP Ledger currency code: unsupported character",
+                    ));
+                }
+                if code == "XRP" {
+                    return Err(Error::msg(
+                        "Invalid XRP Ledger currency code: XRP is the native asset",
+                    ));
+                }
+                Ok(())
+            }
+            Self::NONSTANDARD_LENGTH => {
+                if !code.chars().all(|c| matches!(c, '0'..='9' | 'A'..='F')) {
+                    return Err(Error::msg(
+                        "Invalid XRP Ledger currency code: not uppercase hex",
+                    ));
+                }
+                if code.starts_with("00") {
+                    return Err(Error::msg(
+                        "Invalid XRP Ledger currency code: starts with a zero byte",
+                    ));
+                }
+                Ok(())
+            }
+            _ => Err(Error::msg(
+                "Invalid XRP Ledger currency code: neither 3 nor 40 characters long",
+            )),
+        }
+    }
+}
+
+impl Validate for XrpTrustLineToken {
+    fn validate(&self) -> Result<(), Error> {
+        self.currency.validate()?;
+        validate_xrp_issuer(&self.issuer)
+    }
+}
+
+/// Parses the issuer in full — base58check in the XRP Ledger alphabet, version byte and checksum —
+/// after a length bound, because base58 decoding is quadratic in the input length.
+fn validate_xrp_issuer(issuer: &XrpAddress) -> Result<(), Error> {
+    let XrpAddress(address) = issuer;
+    if address.len() > MAX_XRP_ADDRESS_LEN {
+        return Err(Error::msg("XRP Ledger issuer address is too long"));
+    }
+    address
+        .parse::<XrpAddress>()
+        .map(|_| ())
+        .map_err(|_| Error::msg("XRP Ledger issuer is not a valid classic address"))
 }
 
 impl Validate for IcrcToken {
@@ -1645,6 +1728,8 @@ validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
+validate_on_deserialize!(XrpCurrencyCode);
+validate_on_deserialize!(XrpTrustLineToken);
 validate_on_deserialize!(UserToken);
 validate_on_deserialize!(ExchangeData);
 validate_on_deserialize!(ExchangeRate);

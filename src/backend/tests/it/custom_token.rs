@@ -3,9 +3,10 @@ use std::{sync::LazyLock, time::Duration};
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
+    account::XrpAddress,
     custom_token::{
         ChainId, CustomToken, Dip721Token, ErcToken, ErcTokenId, ExtV2Token, IcPunksToken,
-        Icrc7Token, IcrcToken, SplToken, SplTokenId, Token,
+        Icrc7Token, IcrcToken, SplToken, SplTokenId, Token, XrpCurrencyCode, XrpTrustLineToken,
     },
     Stats, TokenVersion,
 };
@@ -160,6 +161,17 @@ static ICRC7_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     allow_external_content_source: None,
     allowed_external_content_source_urls: None,
 });
+static XRP_TRUST_LINE_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::XrpTrustLineMainnet(XrpTrustLineToken {
+        currency: XrpCurrencyCode("524C555344000000000000000000000000000000".to_string()),
+        issuer: XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De".to_string()),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -173,6 +185,7 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         DIP721_TOKEN.clone(),
         ICPUNKS_TOKEN.clone(),
         ICRC7_TOKEN.clone(),
+        XRP_TRUST_LINE_TOKEN.clone(),
     ]
 });
 
@@ -358,6 +371,32 @@ fn test_remove_custom_icpunks_token() {
 #[test]
 fn test_remove_custom_icrc7_token() {
     test_remove_custom_token(&ICRC7_TOKEN);
+}
+
+#[test]
+fn test_remove_custom_xrp_trust_line_token() {
+    test_remove_custom_token(&XRP_TRUST_LINE_TOKEN);
+}
+
+#[test]
+fn test_set_custom_token_rejects_an_invalid_xrp_trust_line_token() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    let token = CustomToken {
+        token: Token::XrpTrustLineMainnet(XrpTrustLineToken {
+            currency: XrpCurrencyCode("XRP".to_string()),
+            issuer: XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De".to_string()),
+        }),
+        ..XRP_TRUST_LINE_TOKEN.clone()
+    };
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token);
+
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains("XRP is the native asset"));
 }
 
 #[test]
