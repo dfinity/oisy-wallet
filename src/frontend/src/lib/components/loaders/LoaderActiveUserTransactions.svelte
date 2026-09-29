@@ -16,6 +16,8 @@
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
+	import { pollCyclesMintActiveUserTransactions } from '$lib/services/cycles-mint-active-tx.services';
+	import { trackCyclesMint } from '$lib/services/cycles-mint-analytics.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
@@ -31,6 +33,10 @@
 		isChainFusionActiveUserTransaction
 	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { consoleError } from '$lib/utils/console.utils';
+	import {
+		isCyclesMintActiveUserTransaction,
+		toCyclesMintTrackingParams
+	} from '$lib/utils/cycles-mint-active-tx.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
@@ -121,6 +127,12 @@
 
 			if (oisyTrade.length > 0) {
 				await pollOisyTradeActiveUserTransactions({ identity, transactions: oisyTrade });
+			}
+
+			const cyclesMint = $activeUserTransactionsPending.filter(isCyclesMintActiveUserTransaction);
+
+			if (cyclesMint.length > 0) {
+				await pollCyclesMintActiveUserTransactions({ identity, transactions: cyclesMint });
 			}
 
 			const xrp = $activeUserTransactionsPending.filter(isXrpActiveUserTransaction);
@@ -259,6 +271,19 @@
 				// fill-or-kill order whose *source* token has just been withdrawn back to the
 				// wallet. For most providers a failure means nothing moved and there is nothing
 				// to refresh; here the balance changed either way.
+				shouldRefresh = true;
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isCyclesMintActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackCyclesMint(toCyclesMintTrackingParams({ tx }));
+
+				// Unconditional, as for OISY Trade: a mint that failed after its ICP left the
+				// wallet changed the balance (a refund brings most of it back). One closed as never
+				// sent moved nothing, and refreshing for it is only redundant.
 				shouldRefresh = true;
 			} else if (
 				isTerminalActiveUserTransaction(tx) &&

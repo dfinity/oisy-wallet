@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+	import { CMC_NAME } from '$icp/constants/cmc.constants';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
+	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
@@ -18,6 +20,7 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
 	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import { isCyclesMintActiveUserTransaction } from '$lib/utils/cycles-mint-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
 		isLiquidiumActiveUserTransaction,
@@ -60,6 +63,10 @@
 	// to hold the one-unresolved-payment-per-address invariant. It has one token
 	// and one network, so the swap layout's "A → B" reads wrong for it.
 	const isXrp = $derived(isXrpActiveUserTransaction(tx));
+
+	// A mint writes the swap providers' display refs and keeps their layout: two tokens on
+	// one network. Only its label, provider and icon differ.
+	const isCyclesMint = $derived(isCyclesMintActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
 	const xrpDisplay = $derived(xrpActiveUserTransactionDisplay(tx));
@@ -105,7 +112,9 @@
 									// OISY Trade swap flag is expected to move while the real receive
 									// amount lands, and a row can outlive any of that.
 									(swapProvidersDetails[SwapProvider.OISY_TRADE]?.name ?? '')
-								: undefined
+								: isCyclesMint
+									? CMC_NAME
+									: undefined
 	);
 
 	const titleText = $derived(
@@ -122,7 +131,7 @@
 						.filter(nonNullish)
 						.join(' ')
 				: [
-						isSwap ? $i18n.swap.text.swap : undefined,
+						isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
 						refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
 						refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 						'→',
@@ -197,6 +206,8 @@
 						<IconAlertTriangle size="20" />
 					{:else if isXrp}
 						<IconSend size="20" />
+					{:else if isCyclesMint}
+						<IconPickaxe size="20" />
 					{:else}
 						<IconCkConvert size="20" />
 					{/if}
