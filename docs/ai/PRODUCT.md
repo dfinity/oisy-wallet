@@ -505,7 +505,7 @@ The record that holds this is kept server-side per user, so it survives closing 
 
 Sending XRP finishes at the moment the payment is broadcast — it does not hold the user while the ledger decides. The wallet says the payment was submitted, closes, and tracks it from there.
 
-The outcome arrives on its own, once: a confirmation that the payment went through, or a message saying what went wrong. Those messages are deliberately different from each other, because they call for different things — _nothing left your wallet and it is safe to send again_ is not the same as _the payment failed but the network fee was still charged_, and neither is the same as _it may still go through, so do not send it again yet_.
+The outcome arrives on its own, once: a confirmation that the payment went through, or a message saying what went wrong. Those messages are deliberately different from each other, because they call for different things — _nothing left your wallet and it is safe to send again_ is not the same as _the payment failed but the network fee was still charged_.
 
 Because the outcome is reported by the record and not by the send window, it reaches the user whether or not that window is still open, whether or not the tab was reloaded, and whether or not they signed out in between. A payment whose session died mid-flight is picked up by the next session that loads.
 

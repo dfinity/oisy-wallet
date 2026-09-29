@@ -292,9 +292,9 @@
 				// by the time the ledger decides there may be no modal — and this hook fires exactly
 				// once per row even when the row terminalized while the tab was shut.
 				//
-				// The failure text comes off the record rather than being derived here: the three
-				// outcomes need different advice — nothing was sent, the fee was charged, or the
-				// payment may still apply — and only the resolver knows which one it wrote.
+				// The failure text comes off the record rather than being derived here: the two
+				// failures need different advice — nothing was sent, or the fee was charged — and
+				// only the resolver knows which one it wrote.
 				if (isSucceeded) {
 					toastsShow({ text: $i18n.send.text.xrp_sent, level: 'success', duration: 4000 });
 				} else {

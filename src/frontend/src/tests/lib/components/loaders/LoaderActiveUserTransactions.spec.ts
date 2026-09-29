@@ -465,9 +465,9 @@ describe('LoaderActiveUserTransactions', () => {
 				);
 			});
 
-			// The recorded text, not a message derived here: the three failures need different
-			// advice — nothing was sent, the fee was charged, or it may still apply — and only the
-			// resolver knows which one it wrote.
+			// The recorded text, not a message derived here: the two failures need different
+			// advice — nothing was sent, or the fee was charged — and only the resolver knows which
+			// one it wrote.
 			it('toasts the recorded failure text and refreshes the wallet', async () => {
 				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 				activeUserTransactionsStore.upsert({ transaction: pendingXrp('xrp-a') });
