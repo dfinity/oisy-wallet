@@ -2,8 +2,10 @@ import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
+import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { randomWait } from '$lib/utils/time.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
@@ -35,6 +37,7 @@ import {
 import type { XrpAccountInfo } from '$xrp/types/xrp-transaction';
 import { deriveXrpTransactionHash } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 vi.mock('$lib/utils/time.utils', () => ({
 	randomWait: vi.fn()
@@ -971,6 +974,43 @@ describe('xrp-send.services', () => {
 			expect(xrplRest.loadXrpLedgerIndex).not.toHaveBeenCalled();
 			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
 			expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// The store loads only when the identity changes, and the poller polls only what is in it. A
+		// record another tab opened — and may since have closed — would otherwise be refused on here
+		// forever and never resolved, so the refusal hands it to the poller.
+		describe('the record it refuses on', () => {
+			beforeEach(() => {
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			});
+
+			afterEach(() => {
+				activeUserTransactionsStore.reset();
+			});
+
+			it('is handed to the poller', async () => {
+				const open = withSource(source);
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([open]);
+
+				await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+				expect(get(activeUserTransactionsPending)).toEqual([open]);
+			});
+
+			it('does not replace a newer local copy', async () => {
+				const open = withSource(source);
+				const newer: ActiveUserTransaction = {
+					...open,
+					status: { Succeeded: null },
+					updated_at_ns: open.updated_at_ns + 1n
+				};
+				activeUserTransactionsStore.upsert({ transaction: newer });
+				vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([open]);
+
+				await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+				expect(get(activeUserTransactionsStore)?.data[open.id]).toEqual(newer);
+			});
 		});
 
 		// Per address, not per user: a record for a different address says nothing about this one's
