@@ -8,8 +8,10 @@ import {
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
-	mockXrpActiveUserTransaction
+	mockXrpActiveUserTransaction,
+	mockXrpData
 } from '$tests/mocks/active-user-transactions.mock';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
 describe('ActiveUserTransactionItem', () => {
@@ -190,6 +192,31 @@ describe('ActiveUserTransactionItem', () => {
 			expect(screen.getByText(`${en.send.text.send} 25 XRP`)).toBeInTheDocument();
 			expect(container).toHaveTextContent('XRP Ledger');
 			expect(container).not.toHaveTextContent('→');
+		});
+
+		// The backend requires only the two poll refs, so a row written by another
+		// client can lack the display snapshot. It still has to say what it sent:
+		// the amount from its own drops, and the only token its data can name.
+		it('names the payment from its own data when the display snapshot is missing', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockXrpActiveUserTransaction,
+						data: { Xrp: { ...mockXrpData, amount: 1_234_567n } },
+						external_refs: mockXrpActiveUserTransaction.external_refs.filter(({ key }) =>
+							[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+								key as never
+							)
+						)
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(screen.getByText(`${en.send.text.send} 1.234567 XRP`)).toBeInTheDocument();
+			expect(container).toHaveTextContent('XRP Ledger');
 		});
 
 		// A pending row is the address being held. It offers no dismiss, because

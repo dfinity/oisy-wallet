@@ -31,8 +31,10 @@
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
 	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
-	import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
-	import { isXrpActiveUserTransaction, toXrpExternalRefsMap } from '$xrp/utils/xrp-active-tx.utils';
+	import {
+		isXrpActiveUserTransaction,
+		xrpActiveUserTransactionDisplay
+	} from '$xrp/utils/xrp-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -60,7 +62,7 @@
 	const isXrp = $derived(isXrpActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
-	const xrpRefs = $derived(toXrpExternalRefsMap(tx.external_refs));
+	const xrpDisplay = $derived(xrpActiveUserTransactionDisplay(tx));
 
 	const isFailed = $derived('Failed' in tx.status);
 	const isSucceeded = $derived('Succeeded' in tx.status);
@@ -116,11 +118,7 @@
 					.filter(nonNullish)
 					.join(' ')
 			: isXrp
-				? [
-						$i18n.send.text.send,
-						xrpRefs[XRP_EXTERNAL_REF_KEYS.AMOUNT],
-						xrpRefs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL]
-					]
+				? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
 						.filter(nonNullish)
 						.join(' ')
 				: [
@@ -144,7 +142,7 @@
 	// and carries it under its own key, since it sets none of the swap refs.
 	const networkText = $derived(
 		isXrp
-			? (xrpRefs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? '')
+			? (xrpDisplay?.network ?? '')
 			: sourceNetwork === destinationNetwork
 				? sourceNetwork
 				: `${sourceNetwork} → ${destinationNetwork}`
