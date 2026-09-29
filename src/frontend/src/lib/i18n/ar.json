@@ -2639,6 +2639,7 @@
 			"funds_delivered_to": "",
 			"your_oisy_address": "",
 			"borrow_risk_info": "",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",

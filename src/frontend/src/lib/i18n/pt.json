@@ -2639,6 +2639,7 @@
 			"funds_delivered_to": "Fundos enviados para",
 			"your_oisy_address": "O teu endereço $oisy_short",
 			"borrow_risk_info": "Pedir emprestado reduz o teu fator de saúde. Se cair demasiado, a tua garantia pode ser liquidada.",
+			"borrow_activation_fee_info": "A Liquidium acrescenta uma taxa de ativação de $fee% ao montante emprestado.",
 			"borrow_at_risk_warning": "Este empréstimo reduz notavelmente o teu fator de saúde.",
 			"borrow_exceeds_power": "O montante excede a tua capacidade de empréstimo.",
 			"borrow_below_minimum": "O montante está abaixo do empréstimo mínimo.",
