@@ -7,12 +7,13 @@ use shared::types::{
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
         GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
-        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
+        XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
         MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
+        XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
     },
     token_id::TokenId,
 };
@@ -24,7 +25,10 @@ use crate::{
 
 /// Create a new active transaction. Checks are ordered so callers always see
 /// the most informative error: `InvalidId` → `AlreadyExists` (idempotent
-/// retries land here even at the cap) → `InvalidData` → `TooManyActiveTransactions`.
+/// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
+/// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
+/// names the specific reason this create is refused and tells the caller what to
+/// wait for, where the cap only says the store is full.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -41,6 +45,25 @@ pub fn create(
     validate_data(&request.data)?;
     validate_progress_step(request.progress_step.as_deref())?;
     validate_external_refs(&request.external_refs)?;
+
+    // Required here and not only in `validate_data`, which cannot see the refs:
+    // both values are derived from the signed blob before this call, so a row
+    // arriving without them describes a payment nothing could ever poll.
+    if matches!(request.data, ActiveUserTransactionData::Xrp(_)) {
+        require_xrp_refs(&request.external_refs)?;
+    }
+
+    // An XRPL `Sequence` is a nonce, so at most one unresolved payment may exist
+    // per source address. The frontend refuses early too, but that check cannot
+    // be atomic with this create — between the two it reads the account, derives
+    // a signing key and takes a threshold signature, and a second tab can pass
+    // its own check inside that window. This call is the only place that sees the
+    // check and the write at once, so this is what actually holds the invariant.
+    if let ActiveUserTransactionData::Xrp(d) = &request.data {
+        if has_open_xrp_send(map, principal, &d.source_address) {
+            return Err(ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
 
     if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
         return Err(ActiveUserTransactionError::TooManyActiveTransactions);
@@ -82,6 +105,14 @@ pub fn update(
     }
     if let Some(refs) = request.external_refs.as_ref() {
         validate_external_refs(refs)?;
+
+        // `external_refs` is replaced wholesale, so without this an update could
+        // strip the poll keys off a row that is already refusing sends — the same
+        // unresolvable state `create` now rejects, reached one call later. Held
+        // for terminal rows too: the invariant is the record's, not a phase's.
+        if matches!(current.data, ActiveUserTransactionData::Xrp(_)) {
+            require_xrp_refs(refs)?;
+        }
     }
     if let Some(err) = request.error.as_deref() {
         validate_error(err)?;
@@ -128,6 +159,28 @@ pub fn list(
         scan_principal(map, principal).map(|(_, c)| c.0).collect();
 
     GetActiveUserTransactionsResponse { transactions }
+}
+
+/// Whether a non-terminal XRP payment already exists for this source address.
+///
+/// Per **address**, not per user: a record for a different address says nothing
+/// about this one's sequence, and refusing on it would block an unrelated send.
+/// Compared raw, like everywhere else this address travels — a classic address is
+/// base58 over a checksummed payload, so case is significant.
+fn has_open_xrp_send(
+    map: &ActiveUserTransactionsMap,
+    principal: Principal,
+    source_address: &str,
+) -> bool {
+    scan_principal(map, principal).any(|(_, Candid(tx))| {
+        matches!(
+            tx.status,
+            ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
+        ) && matches!(
+            tx.data,
+            ActiveUserTransactionData::Xrp(ref d) if d.source_address == source_address
+        )
+    })
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -220,11 +273,11 @@ fn validate_external_refs(
 fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTransactionError> {
     match data {
         ActiveUserTransactionData::OneSecIcpToEvm(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_evm_address(&d.recipient_evm_address)?;
         }
         ActiveUserTransactionData::OneSecEvmToIcp(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             if d.recipient_principal == Principal::anonymous() {
                 return Err(ActiveUserTransactionError::InvalidData(
                     "recipient_principal must not be anonymous".to_string(),
@@ -232,26 +285,34 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             }
         }
         ActiveUserTransactionData::Liquidium(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_pool_id(&d.pool_id)?;
         }
         ActiveUserTransactionData::NearIntents(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::Velora(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
         }
         ActiveUserTransactionData::ChainFusion(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_chain_fusion_pair(d)?;
         }
         ActiveUserTransactionData::CyclesMint(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_cycles_mint_pair(d)?;
         }
         ActiveUserTransactionData::OisyTrade(d) => {
-            require_valid_amount(&d.amount)?;
+            require_valid_amount(&d.amount, "amount")?;
             require_oisy_trade_pair(d)?;
+        }
+        ActiveUserTransactionData::Xrp(d) => {
+            require_valid_amount(&d.amount, "amount")?;
+            require_valid_amount(&d.fee, "fee")?;
+            require_xrp_token(&d.token)?;
+            require_xrp_address(&d.source_address, "source_address")?;
+            require_xrp_address(&d.destination_address, "destination_address")?;
+            require_distinct_xrp_accounts(d)?;
         }
     }
     Ok(())
@@ -261,16 +322,20 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
 /// integer any supported chain uses. The upper bound is what makes the encoded
 /// size of a record provable: `Nat` is variable-length, so an unbounded amount
 /// would let a single record carry megabytes into permanent stable memory.
-fn require_valid_amount(amount: &Nat) -> Result<(), ActiveUserTransactionError> {
+///
+/// `field` is named rather than assumed because a payload can carry more than
+/// one such value — an XRP row validates its transaction cost here too, and
+/// reporting that as an `amount` problem sends the reader to the wrong field.
+fn require_valid_amount(amount: &Nat, field: &str) -> Result<(), ActiveUserTransactionError> {
     if amount.0 == 0u32.into() {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount must be greater than zero".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be greater than zero"
+        )));
     }
     if amount.0.bits() > MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS {
-        return Err(ActiveUserTransactionError::InvalidData(
-            "amount is too large".to_string(),
-        ));
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} is too large"
+        )));
     }
     Ok(())
 }
@@ -381,6 +446,124 @@ fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
     Ok(())
 }
 
+/// The row tracks a *native XRP* payment, so a token from any other chain is
+/// unsatisfiable by construction — the FE poller would have no ledger to ask.
+/// `data` is immutable after creation, so such a row could never resolve and
+/// would occupy one of the user's slots forever. Kinds only, deliberately: an
+/// XRPL testnet token would be a new `TokenId` variant and belongs in this list
+/// when it arrives, not a reason to loosen the check now.
+fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> {
+    if matches!(token, TokenId::XrpNativeMainnet) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "token must be a native XRP token".to_string(),
+        ))
+    }
+}
+
+/// A bound and a shape check, not a re-validation: the FE derives
+/// `source_address` from the caller's own key and checks `destination_address`
+/// against a full base58check validator before signing. What matters here is
+/// that a row cannot carry an arbitrary string into permanent stable memory, and
+/// that a value which could never name an XRPL account is refused rather than
+/// stored. Mirrors `require_evm_address` — length, prefix, charset, no checksum.
+fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransactionError> {
+    // Both ends, and the lower one matters as much: a string like `"r"` clears
+    // the prefix and charset checks below while being far too short for
+    // base58check to have produced it.
+    if addr.len() < MIN_XRP_ADDRESS_LEN || addr.len() > MAX_XRP_ADDRESS_LEN {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} invalid length"
+        )));
+    }
+    // Classic addresses carry the 0x00 version byte, which base58check always
+    // renders as a leading `r`.
+    if !addr.starts_with('r') {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must start with r"
+        )));
+    }
+    // XRPL orders the base58 alphabet differently from Bitcoin but uses the same
+    // 58 characters: alphanumerics without `0`, `O`, `I` and `l`.
+    if !addr
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() && !matches!(c, '0' | 'O' | 'I' | 'l'))
+    {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{field} must be base58"
+        )));
+    }
+    Ok(())
+}
+
+/// XRPL answers a payment whose destination is its sender `temREDUNDANT`, which
+/// is never applied — so such a row describes a payment that cannot exist, and
+/// the FE refuses it from the arguments alone before signing. Same reasoning as
+/// the pair checks above: immutable data that could never resolve.
+fn require_distinct_xrp_accounts(data: &XrpData) -> Result<(), ActiveUserTransactionError> {
+    // Compared raw, like everywhere else this address travels: a classic address
+    // is base58 over a checksummed payload, so case is significant and two forms
+    // differing in it are not one address.
+    if data.source_address == data.destination_address {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "destination_address must differ from source_address".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+/// The two refs an XRP row is polled with, required because a row without them
+/// can never resolve.
+///
+/// The resolver refuses to guess: given no usable poll keys it returns without
+/// touching the node, which is correct — a row that cannot name what to poll must
+/// not be closed on an assumption. But an open row also refuses every later send
+/// from its address, and the frontend offers no way to dismiss one that is not
+/// terminal, so such a row would deny that address permanently.
+///
+/// Bounded tighter than the resolver parses: a ledger index is a `UInt32`, so a
+/// value accepted here is always one the resolver can use.
+fn require_xrp_refs(refs: &[ActiveUserTransactionRef]) -> Result<(), ActiveUserTransactionError> {
+    let value = |key: &str| {
+        refs.iter()
+            .find(|ActiveUserTransactionRef { key: k, .. }| k == key)
+            .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    };
+
+    let Some(tx_hash) = value(XRP_REF_TX_HASH) else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_TX_HASH} is required"
+        )));
+    };
+
+    if tx_hash.len() != XRP_TX_HASH_LEN || !tx_hash.chars().all(|c| c.is_ascii_hexdigit()) {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_TX_HASH} must be {XRP_TX_HASH_LEN} hex characters"
+        )));
+    }
+
+    let Some(last_ledger_sequence) = value(XRP_REF_LAST_LEDGER_SEQUENCE) else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LAST_LEDGER_SEQUENCE} is required"
+        )));
+    };
+
+    // Digits only, then a `u32` parse: the resolver rejects anything `Number()`
+    // would coerce, and a ledger index the transaction was signed against is
+    // always a positive `UInt32`.
+    if !last_ledger_sequence.chars().all(|c| c.is_ascii_digit())
+        || last_ledger_sequence.parse::<u32>().is_ok_and(|n| n == 0)
+        || last_ledger_sequence.parse::<u32>().is_err()
+    {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LAST_LEDGER_SEQUENCE} must be a positive UInt32"
+        )));
+    }
+
+    Ok(())
+}
+
 fn validate_transition(
     from: &ActiveUserTransactionStatus,
     to: &ActiveUserTransactionStatus,
@@ -414,12 +597,14 @@ mod tests {
     use pretty_assertions::assert_eq;
     use shared::types::{
         active_user_transaction::{
-            ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-            ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
-            CreateActiveUserTransactionRequest, CyclesMintData, LiquidiumAction, LiquidiumData,
-            NearIntentsData, OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
-            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+            ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
+            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+            VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_TX_HASH,
+            XRP_TX_HASH_LEN,
         },
         custom_token::ErcTokenId,
         token_id::TokenId,
@@ -1045,6 +1230,559 @@ mod tests {
                 );
             }
         }
+    }
+
+    const XRP_SOURCE: &str = "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi";
+    const XRP_DESTINATION: &str = "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv";
+    const XRP_OTHER_SOURCE: &str = "rETD6N4kWuW9tDE6ewyzZsXw2uqzDAPQwg";
+    const XRP_OTHER_DESTINATION: &str = "rJkHLRqmFWoMGPsBdP8ZPMK8PR7GtbxTWi";
+
+    fn xrp_data(
+        amount: u64,
+        fee: u64,
+        destination_tag: Option<u32>,
+        source_address: &str,
+        destination_address: &str,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: source_address.to_string(),
+            destination_address: destination_address.to_string(),
+            destination_tag,
+            amount: Nat::from(amount),
+            fee: Nat::from(fee),
+        })
+    }
+
+    const XRP_TX_HASH: &str = "8F2C4D1A9B3E5760A1C8D4F2B6E093751A4C8D2F6B0E93751A4C8D2F6B0E9375";
+    const XRP_LAST_LEDGER_SEQUENCE: &str = "96312004";
+
+    /// The refs every XRP row must carry. Tests not about the refs use this, so
+    /// they still exercise the check they are named for.
+    fn xrp_refs() -> Vec<ActiveUserTransactionRef> {
+        vec![
+            ActiveUserTransactionRef {
+                key: XRP_REF_TX_HASH.to_string(),
+                value: XRP_TX_HASH.to_string(),
+            },
+            ActiveUserTransactionRef {
+                key: XRP_REF_LAST_LEDGER_SEQUENCE.to_string(),
+                value: XRP_LAST_LEDGER_SEQUENCE.to_string(),
+            },
+        ]
+    }
+
+    fn xrp_refs_without(key: &str) -> Vec<ActiveUserTransactionRef> {
+        xrp_refs().into_iter().filter(|r| r.key != key).collect()
+    }
+
+    fn xrp_refs_with(key: &str, value: &str) -> Vec<ActiveUserTransactionRef> {
+        let mut refs = xrp_refs_without(key);
+        refs.push(ActiveUserTransactionRef {
+            key: key.to_string(),
+            value: value.to_string(),
+        });
+        refs
+    }
+
+    #[test]
+    fn xrp_create_roundtrip() {
+        // `destination_tag` has to survive create — and the stable-memory read
+        // path — in all three shapes: `0` is a real XRPL tag, `None` is its
+        // absence, and `u32::MAX` is the value a narrower encoding would
+        // truncate. Collapsing any of them changes the payment.
+        for destination_tag in [None, Some(0), Some(u32::MAX)] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION);
+            req.external_refs = xrp_refs();
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                xrp_data(25_000_000, 12, destination_tag, XRP_SOURCE, XRP_DESTINATION)
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn xrp_zero_fee_rejected() {
+        // Every XRPL transaction destroys a non-zero transaction cost, so a row
+        // claiming a zero fee describes a payment that could not have been
+        // signed.
+        //
+        // The exact message is asserted, not just the variant: the fee is the
+        // second `Nat` this payload validates, and a shared validator that named
+        // the wrong field would send the reader to the amount instead.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 0, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_oversized_fee_rejected() {
+        // The other end of the same bound, and the other message that has to name
+        // the fee rather than the amount.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpNativeMainnet,
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000u64),
+            fee: Nat::parse(MAX_WIDTH_AMOUNT).unwrap() + Nat::from(1u32),
+        });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("fee is too large".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_zero_amount_names_the_amount() {
+        // The counterpart to the two above: making the validator field-aware must
+        // not make an amount problem report as a fee one.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(0, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("amount must be greater than zero".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_non_xrp_token_rejected() {
+        // The resolver polls the XRP Ledger for this row, so a token from any
+        // other chain leaves it with nothing to ask — and `data` is immutable
+        // after creation, so the row could never resolve.
+        for token in [
+            TokenId::EvmNative(1),
+            TokenId::IcpNative,
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = ActiveUserTransactionData::Xrp(XrpData {
+                token,
+                source_address: XRP_SOURCE.to_string(),
+                destination_address: XRP_DESTINATION.to_string(),
+                destination_tag: None,
+                amount: Nat::from(25_000_000u64),
+                fee: Nat::from(12u64),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "token must be a native XRP token".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_malformed_address_rejected() {
+        // Both fields are checked, and the error names which one — the guard
+        // reads `source_address`, so a row that stored a wrong one would gate
+        // the wrong account.
+        for (source, destination, expected) in [
+            ("", XRP_DESTINATION, "source_address invalid length"),
+            (XRP_SOURCE, "", "destination_address invalid length"),
+            // Clears the prefix and charset checks but is far too short for
+            // base58check to have produced it — the lower bound is the only
+            // thing that refuses it.
+            ("r", XRP_DESTINATION, "source_address invalid length"),
+            // One character below the bound, still valid base58 with the right
+            // prefix, so the length is the only thing that can refuse it.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrG",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (XRP_SOURCE, "r", "destination_address invalid length"),
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMiXXXXX",
+                XRP_DESTINATION,
+                "source_address invalid length",
+            ),
+            (
+                "xBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi",
+                XRP_DESTINATION,
+                "source_address must start with r",
+            ),
+            // `0`, `O`, `I` and `l` are the four characters base58 omits, so an
+            // address carrying one cannot have come from a base58 encoder.
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoM0",
+                XRP_DESTINATION,
+                "source_address must be base58",
+            ),
+            (
+                XRP_SOURCE,
+                "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBl",
+                "destination_address must be base58",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_data(25_000_000, 12, None, source, destination);
+            req.external_refs = xrp_refs();
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+        }
+    }
+
+    // The invariant the whole XRP guard exists for, enforced here because the
+    // frontend's own check cannot be atomic with this create.
+    #[test]
+    fn xrp_second_open_send_from_the_same_address_rejected() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        // A different id and a different destination: neither is what refuses it.
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, Some(7), XRP_SOURCE, XRP_OTHER_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_rejected_while_the_first_is_executing() {
+        // `Executing` is non-terminal too, and a row that has advanced past
+        // `Pending` is exactly one whose sequence is still in play.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+        update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Executing),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("advance");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_second_send_allowed_once_the_first_is_terminal() {
+        // Bounded by design: the record self-clears within the signed validity
+        // window, and the address is free again the moment it does.
+        for status in [
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+
+            let mut first = create_req("xrp-1");
+            first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            first.external_refs = xrp_refs();
+            create(&mut map, principal(), first, 1).expect("first send");
+            update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "xrp-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .expect("resolve");
+
+            let mut second = create_req("xrp-2");
+            second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            second.external_refs = xrp_refs();
+
+            create(&mut map, principal(), second, 3).expect("second send");
+        }
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_address() {
+        // Per address, not per user: a record for a different address says
+        // nothing about this one's sequence.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+
+        create(&mut map, principal(), second, 2).expect("other address");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_user() {
+        // The scan is principal-scoped, so one user's open payment cannot refuse
+        // another's — even from the same address, which two users cannot share
+        // anyway.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        let mut second = create_req("xrp-1");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+
+        create(&mut map, other_principal(), second, 2).expect("other user");
+    }
+
+    #[test]
+    fn xrp_open_send_does_not_block_another_flow() {
+        // Only XRP carries this constraint; the six swap flows are unaffected.
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("first send");
+
+        create(&mut map, principal(), create_req("swap-1"), 2).expect("another flow");
+    }
+
+    #[test]
+    fn xrp_self_payment_rejected() {
+        // XRPL answers `temREDUNDANT` and never applies it, so this row could
+        // never resolve.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_SOURCE);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "destination_address must differ from source_address".to_string()
+            )
+        );
+    }
+
+    /// Helper for the ref tests: an otherwise-valid XRP create carrying `refs`.
+    fn xrp_create_with_refs(
+        map: &mut ActiveUserTransactionsMap,
+        refs: Vec<ActiveUserTransactionRef>,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        let mut req = create_req("xrp-1");
+        req.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        req.external_refs = refs;
+        create(map, principal(), req, 1)
+    }
+
+    #[test]
+    fn xrp_create_without_poll_keys_rejected() {
+        // Both are derived from the signed blob before this call, so a row
+        // without them describes a payment nothing can poll — and an unpollable
+        // row is worse than a rejected create, because it is `Pending`, it
+        // refuses every later send from its address, and nothing clears it.
+        for (missing, expected) in [
+            (XRP_REF_TX_HASH, "tx_hash is required"),
+            (
+                XRP_REF_LAST_LEDGER_SEQUENCE,
+                "last_ledger_sequence is required",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let err = xrp_create_with_refs(&mut map, xrp_refs_without(missing)).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+            assert!(
+                list(&map, principal()).transactions.is_empty(),
+                "a rejected create must not leave a row behind"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_with_malformed_tx_hash_rejected() {
+        // Length and alphabet, because a hash that is not one cannot be looked
+        // up: the poll would 404 forever rather than resolve.
+        let too_short = &XRP_TX_HASH[..63];
+        let too_long = format!("{XRP_TX_HASH}0");
+        let non_hex = format!("{}Z", &XRP_TX_HASH[..63]);
+        assert_eq!(too_short.len(), XRP_TX_HASH_LEN - 1);
+        assert_eq!(too_long.len(), XRP_TX_HASH_LEN + 1);
+        assert_eq!(non_hex.len(), XRP_TX_HASH_LEN);
+
+        for value in ["", too_short, too_long.as_str(), non_hex.as_str()] {
+            let (mut map, _mm) = setup();
+            let err =
+                xrp_create_with_refs(&mut map, xrp_refs_with(XRP_REF_TX_HASH, value)).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "tx_hash must be 64 hex characters".to_string()
+                ),
+                "accepted {value:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_with_unusable_last_ledger_sequence_rejected() {
+        // Mirrors what the resolver refuses to parse. `Number(" 12")`,
+        // `Number("0x1f")` and `Number("1e5")` all produce a number, and each
+        // would decide expiry against a ledger range the payment was never
+        // signed against — so digits only, then a `UInt32` that is not zero.
+        let over_u32 = (u64::from(u32::MAX) + 1).to_string();
+
+        for value in [
+            "",
+            " 12",
+            "12 ",
+            "0x1f",
+            "1e5",
+            "+7",
+            "-7",
+            "7.0",
+            "0",
+            over_u32.as_str(),
+        ] {
+            let (mut map, _mm) = setup();
+            let err =
+                xrp_create_with_refs(&mut map, xrp_refs_with(XRP_REF_LAST_LEDGER_SEQUENCE, value))
+                    .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "last_ledger_sequence must be a positive UInt32".to_string()
+                ),
+                "accepted {value:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_create_accepts_display_refs_alongside_the_poll_keys() {
+        // The requirement is "these two are present", not "only these two" —
+        // the row also snapshots what it needs to render itself later.
+        let (mut map, _mm) = setup();
+        let mut refs = xrp_refs();
+        for (key, value) in [
+            ("amount", "25"),
+            ("token_symbol", "XRP"),
+            ("network_symbol", "XRP"),
+        ] {
+            refs.push(ActiveUserTransactionRef {
+                key: key.to_string(),
+                value: value.to_string(),
+            });
+        }
+
+        let tx = xrp_create_with_refs(&mut map, refs.clone()).expect("create");
+        assert_eq!(tx.external_refs, refs);
+    }
+
+    #[test]
+    fn xrp_update_cannot_strip_the_poll_keys() {
+        // `external_refs` is replaced wholesale, so without this check an update
+        // reaches the same unresolvable state `create` rejects — on a row that
+        // is already refusing sends from its address.
+        let (mut map, _mm) = setup();
+        xrp_create_with_refs(&mut map, xrp_refs()).expect("create");
+
+        let err = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: None,
+                progress_step: None,
+                external_refs: Some(xrp_refs_without(XRP_REF_TX_HASH)),
+                error: None,
+            },
+            2,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("tx_hash is required".to_string())
+        );
+
+        // The stored row is untouched, and the update the resolver actually
+        // sends — status only — still goes through.
+        let tx = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: Some(ActiveUserTransactionStatus::Succeeded),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            3,
+        )
+        .expect("status-only update");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Succeeded);
+        assert_eq!(tx.external_refs, xrp_refs());
+    }
+
+    #[test]
+    fn poll_keys_are_required_of_xrp_rows_only() {
+        // Guards against the check leaking into flows that have no such refs;
+        // every other variant still creates with none.
+        let (mut map, _mm) = setup();
+        create(&mut map, principal(), create_req("other-1"), 1).expect("non-xrp create");
     }
 
     #[test]

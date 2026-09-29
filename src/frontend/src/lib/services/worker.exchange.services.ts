@@ -1,5 +1,6 @@
 import { AppWorker } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
+import { trackXdrBasketExpiry } from '$lib/services/xdr-basket-analytics.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
@@ -8,6 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import type { WorkerData } from '$lib/types/worker';
 import { consoleError } from '$lib/utils/console.utils';
+import { nonNullish } from '@dfinity/utils';
 
 export class ExchangeWorker extends AppWorker {
 	private constructor(worker: WorkerData) {
@@ -22,9 +24,17 @@ export class ExchangeWorker extends AppWorker {
 				const { msg, data } = dataMsg;
 
 				switch (msg) {
-					case 'syncExchange':
-						syncExchange(data as PostMessageDataResponseExchange | undefined);
+					case 'syncExchange': {
+						const exchangeData = data as PostMessageDataResponseExchange | undefined;
+
+						syncExchange(exchangeData);
+
+						// Tracked here rather than in the worker: analytics only runs on the main thread.
+						if (nonNullish(exchangeData?.currentXdrBasketStatus)) {
+							trackXdrBasketExpiry(exchangeData.currentXdrBasketStatus);
+						}
 						return;
+					}
 					case 'syncExchangeError':
 						consoleError(
 							'An error occurred while attempting to retrieve the USD exchange rates.',

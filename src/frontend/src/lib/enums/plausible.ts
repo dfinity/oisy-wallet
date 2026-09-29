@@ -27,10 +27,22 @@ export enum PLAUSIBLE_EVENTS {
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
 	HELP = 'help',
 	TIP = 'tip',
+	// The countdown to the end of the XDR basket that prices TCYCLES.
+	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
+}
+
+// How serious any event is, from low to high, in `event_severity`: OpenTelemetry's level names,
+// with `blocker` (as in `PLAUSIBLE_EVENT_ERROR_SEVERITIES`) in place of `fatal`. Unlike
+// `result_error_severity`, which rates only errors, it can be set on every event.
+export enum PLAUSIBLE_EVENT_SEVERITIES {
+	INFO = 'info',
+	WARN = 'warn',
+	ERROR = 'error',
+	BLOCKER = 'blocker'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
