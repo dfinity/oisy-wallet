@@ -2,7 +2,12 @@ import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertNonNullish, nowInBigIntNanoSeconds, type QueryParams } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	nonNullish,
+	nowInBigIntNanoSeconds,
+	type QueryParams
+} from '@dfinity/utils';
 import {
 	AccountIdentifier,
 	IcpLedgerCanister,
@@ -55,12 +60,14 @@ export const icrc1Transfer = async ({
 	to,
 	amount,
 	createdAt,
+	memo,
 	ledgerCanisterId
 }: {
 	identity: NullishIdentity;
 	to: IcrcAccount;
 	amount: bigint;
 	createdAt?: bigint;
+	memo?: Uint8Array;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity);
@@ -70,7 +77,8 @@ export const icrc1Transfer = async ({
 	return icrc1Transfer({
 		to: toCandidAccount(to),
 		amount,
-		createdAt: createdAt ?? nowInBigIntNanoSeconds()
+		createdAt: createdAt ?? nowInBigIntNanoSeconds(),
+		...(nonNullish(memo) && { icrc1Memo: memo })
 	});
 };
 
