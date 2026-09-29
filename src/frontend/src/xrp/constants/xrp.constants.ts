@@ -151,3 +151,10 @@ export const XRP_CONFIRM_MAX_DURATION_MS =
 // `tx` must independently report `searched_all` absence across the blob's own ledger range.
 export const XRP_CONFIRM_MAX_LEDGER_LOOKAHEAD =
 	XRP_CONFIRM_MAX_DURATION_MS / 1000 / XRP_LEDGER_CLOSE_SECONDS + XRP_LAST_LEDGER_SEQUENCE_OFFSET;
+
+// The fixed scale a trust-line token's amounts are held in, in the wallet's integer base units. The
+// ledger writes these amounts as decimals with 15 significant digits at any exponent, so no scale is
+// exact for all of them; 18 is exact for every amount of at least 0.001. Where an exact figure
+// matters — sending the whole balance, removing a line only at zero — the reader uses the ledger's
+// own decimal string rather than this value.
+export const XRP_TRUST_LINE_TOKEN_DECIMALS = 18;

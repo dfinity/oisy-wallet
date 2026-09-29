@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -47,6 +48,11 @@ describe('identifier.utils', () => {
 
 		it('should return the address for SPL tokens', () => {
 			expect(getTokenIdentifier(mockValidSplToken)).toBe(mockValidSplToken.address);
+		});
+
+		// The currency code alone is not unique: any account can issue a token called RLUSD.
+		it('should return the currency and the issuer for XRP Ledger trust-line tokens', () => {
+			expect(getTokenIdentifier(RLUSD_TOKEN)).toBe(`${RLUSD_TOKEN.currency}.${RLUSD_TOKEN.issuer}`);
 		});
 
 		it('should return the ledgerCanisterId for IC tokens', () => {
