@@ -3,7 +3,10 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
-import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+import {
+	xrpTrustLineTokenKeys,
+	xrpTrustLineTokens
+} from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import { get } from 'svelte/store';
 
@@ -44,6 +47,18 @@ describe('xrp-trust-line-tokens.derived', () => {
 			expect(tokens.map(({ symbol }) => symbol)).toEqual(['RLUSD', 'USD']);
 			expect(tokens[0]).toEqual({ ...RLUSD_TOKEN, enabled: true });
 			expect(tokens.every(({ enabled }) => enabled)).toBeTruthy();
+		});
+
+		it('prices each held token under its currency and issuer', () => {
+			xrpTrustLinesStore.set({
+				tokenId: XRP_TOKEN.id,
+				lines: [mockXrpTrustLine, { ...mockXrpTrustLine, currency: 'USD' }]
+			});
+
+			expect(get(xrpTrustLineTokenKeys)).toEqual([
+				`${RLUSD_TOKEN.currency}.${RLUSD_TOKEN.issuer}`,
+				`USD.${RLUSD_TOKEN.issuer}`
+			]);
 		});
 
 		it('drops a token once its line is gone', () => {
