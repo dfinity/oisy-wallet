@@ -123,6 +123,19 @@ describe('icp-ledger.api', () => {
 			});
 		});
 
+		it('passes a memo through as the icrc1 memo', async () => {
+			const memo = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
+
+			await icrc1Transfer({ ...params, memo });
+
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				createdAt,
+				icrc1Memo: memo
+			});
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
