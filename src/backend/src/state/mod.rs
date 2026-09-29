@@ -36,6 +36,8 @@ use crate::{
     },
 };
 
+// DO NOT MERGE: one-off repair for `test_be_1`, see the module docs.
+pub(crate) mod be1_repair;
 pub(crate) mod memory;
 
 pub(crate) struct State {

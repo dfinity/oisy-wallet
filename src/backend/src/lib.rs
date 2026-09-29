@@ -104,6 +104,9 @@ pub fn init(arg: Arg) {
 ///   new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
+    // DO NOT MERGE: one-off repair for `test_be_1`, before anything opens `STATE`.
+    state::be1_repair::reset_clashing_memories_on_test_be_1();
+
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
