@@ -184,29 +184,51 @@ describe('xrp-active-tx.services', () => {
 			expect(errorOf()).toContain('tecUNFUNDED_PAYMENT');
 		});
 
-		// A row whose display snapshot is missing must still produce a readable sentence rather
-		// than "undefined".
-		it('leaves no placeholder behind when the snapshot is missing', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				state: 'validated',
-				transactionResult: 'tecUNFUNDED_PAYMENT'
+		// The backend requires only the two poll refs, so a row written by another client can lack
+		// its display snapshot. The sentence must still be the specific one — not merely free of
+		// placeholders, which "Your send of   on  was …" is too — built from what the backend does
+		// guarantee: the amount in drops, at full precision, and a token that can only be native XRP.
+		describe('without a display snapshot', () => {
+			const withoutSnapshot: ActiveUserTransaction = {
+				...tx,
+				data: { Xrp: { ...mockXrpData, amount: 1_234_567n } },
+				external_refs: tx.external_refs.filter(({ key }) =>
+					[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+						key as never
+					)
+				)
+			};
+
+			const subject = { $amount: '1.234567', $symbol: 'XRP', $network: 'XRP Ledger' };
+
+			it('still names the payment on a validated failure', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+					state: 'validated',
+					transactionResult: 'tecUNFUNDED_PAYMENT'
+				});
+
+				await poll([withoutSnapshot]);
+
+				expect(errorOf()).toContain('1.234567 XRP on XRP Ledger');
+				expect(errorOf()).toBe(
+					replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+						...subject,
+						$result: 'tecUNFUNDED_PAYMENT'
+					})
+				);
 			});
 
-			await poll([
-				{
-					...tx,
-					external_refs: tx.external_refs.filter(({ key }) =>
-						[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
-							key as never
-						)
-					)
-				}
-			]);
+			it('still names the payment on expiry', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+				vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+					mockXrpLastLedgerSequence + 1
+				);
 
-			expect(errorOf()).not.toContain('$amount');
-			expect(errorOf()).not.toContain('$symbol');
-			expect(errorOf()).not.toContain('$network');
-			expect(errorOf()).not.toContain('undefined');
+				await poll([withoutSnapshot]);
+
+				expect(errorOf()).toContain('1.234567 XRP on XRP Ledger');
+				expect(errorOf()).toBe(replacePlaceholders(get(i18n).send.error.xrp_send_expired, subject));
+			});
 		});
 	});
 

@@ -2,10 +2,12 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadXrpTransactionOutcome, loadXrpValidatedLedgerIndex } from '$xrp/rest/xrpl.rest';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
@@ -155,17 +157,30 @@ const pollXrpActiveUserTransaction = async ({
 /**
  * The subject of every failure message: what was being sent, and where.
  *
- * Taken from the row's own display snapshot rather than from anything live, because by the time
- * the ledger decides there may be no modal, no fee store and no selected token left to ask — and a
- * row that resolved while the tab was shut still has to say what it was.
+ * Taken from the row itself rather than from anything live, because by the time the ledger decides
+ * there may be no modal, no fee store and no selected token left to ask — and a row that resolved
+ * while the tab was shut still has to say what it was.
+ *
+ * The display snapshot first, and for any field it lacks, what the backend guarantees every XRP row
+ * carries: the amount in drops, and an `XrpNativeMainnet` token, which can only be `XRP_TOKEN`. The
+ * backend does not require the snapshot, so a row written by another client may lack it, and empty
+ * strings in its place would read "Your send of   on  was …".
  */
 const xrpFailureSubject = (tx: ActiveUserTransaction): Record<string, string> => {
 	const refs = toXrpExternalRefsMap(tx.external_refs);
 
 	return {
-		$amount: refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ?? '',
-		$symbol: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? '',
-		$network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? ''
+		$amount:
+			refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ??
+			('Xrp' in tx.data
+				? formatToken({
+						value: tx.data.Xrp.amount,
+						unitName: XRP_TOKEN.decimals,
+						displayDecimals: XRP_TOKEN.decimals
+					})
+				: ''),
+		$symbol: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? XRP_TOKEN.symbol,
+		$network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? XRP_TOKEN.network.name
 	};
 };
 
