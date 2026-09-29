@@ -1494,7 +1494,8 @@
 				"info": "ID canister ledger và index thường có sẵn trên trang web của dự án.",
 				"info_ext": "",
 				"info_index": "ID canister index là tùy chọn, nhưng nếu không có nó, $oisy_short không thể hiển thị lịch sử giao dịch.",
-				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
+				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh.",
+				"custom_tokens_not_supported_yet": "OISY hiện chưa hỗ trợ token tùy chỉnh trên mạng này."
 			},
 			"error": {
 				"loading_metadata": "Địa chỉ được chỉ định không phải là một token hợp lệ trong mạng đã chọn.",
@@ -2663,6 +2664,7 @@
 			"funds_delivered_to": "Tiền được gửi đến",
 			"your_oisy_address": "Địa chỉ $oisy_short của bạn",
 			"borrow_risk_info": "Vay tiền làm giảm hệ số sức khỏe của bạn. Nếu giảm quá thấp, tài sản thế chấp của bạn có thể bị thanh lý.",
+			"borrow_activation_fee_info": "Liquidium cộng thêm phí kích hoạt $fee% vào số tiền vay.",
 			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
 			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
 			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",

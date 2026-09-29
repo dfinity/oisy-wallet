@@ -1495,7 +1495,8 @@
 				"info": "Ledger and Index canister IDs are usually available on the project’s website.",
 				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
-				"custom_tokens_not_supported": "The selected network does not support custom tokens."
+				"custom_tokens_not_supported": "The selected network does not support custom tokens.",
+				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -2664,6 +2665,7 @@
 			"funds_delivered_to": "Funds delivered to",
 			"your_oisy_address": "Your $oisy_short address",
 			"borrow_risk_info": "Borrowing reduces your health factor. If it falls too far your collateral can be liquidated.",
+			"borrow_activation_fee_info": "Liquidium adds an activation fee of $fee% on top of the borrowed amount.",
 			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
 			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
 			"borrow_below_minimum": "Amount is below the minimum borrow.",

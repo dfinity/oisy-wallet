@@ -102,6 +102,7 @@ describe('liquidium.utils', () => {
 				supplyApy: expect.closeTo(5),
 				borrowApy: expect.closeTo(9),
 				maxLtv: expect.closeTo(0),
+				activationFeePercent: 0,
 				frozen: false,
 				available: true
 			});
@@ -110,6 +111,13 @@ describe('liquidium.utils', () => {
 		it('maps maxLtv from basis points to a 0–1 ratio', () => {
 			// maxLtv is basis points: 7000 / 10_000 = 0.7.
 			expect(mapLiquidiumMarket(buildPool({ maxLtv: 7000n })).maxLtv).toBeCloseTo(0.7);
+		});
+
+		it('maps activationFee from basis points to a percentage', () => {
+			// activationFee is basis points: 50 / 100 = 0.5%.
+			expect(
+				mapLiquidiumMarket(buildPool({ activationFee: 50n })).activationFeePercent
+			).toBeCloseTo(0.5);
 		});
 
 		it('is unavailable when frozen', () => {
