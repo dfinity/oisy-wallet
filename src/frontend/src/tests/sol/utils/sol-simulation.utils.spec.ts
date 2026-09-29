@@ -386,5 +386,20 @@ describe('sol-simulation.utils', () => {
 				)
 			).toEqual([mockSolAddress3, STAKE_PROGRAM_ADDRESS, mockSolAddress2]);
 		});
+
+		// A call that only points into the account list could reach anything, and an empty list
+		// would say it reaches a known program.
+		it('should find nothing to rely on when a nested call does not name its program', () => {
+			expect(
+				findSolUnreadPrograms(
+					run([
+						{
+							index: 0,
+							instructions: [raw(JUPITER), { programIdIndex: 7, accounts: [], data: '' }]
+						}
+					])
+				)
+			).toBeUndefined();
+		});
 	});
 });

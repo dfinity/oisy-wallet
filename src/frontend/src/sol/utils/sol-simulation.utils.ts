@@ -286,17 +286,25 @@ export const isEmptySolSimulationPreview = ({
  *
  * Only the nested calls. The message's own instructions are the review's to list, and one it
  * cannot read is already listed as such; a nested call exists only in the run.
+ *
+ * Nothing at all when a nested call does not name its program. The RPC names it for every call a
+ * simulation reports, parsed or not, but the type also admits one that only points into the
+ * account list, and an empty list for a run containing it would say it calls only known programs.
  */
 export const findSolUnreadPrograms = (
 	innerInstructions: SolanaSimulatedInnerInstructions
-): SolAddress[] => {
+): SolAddress[] | undefined => {
+	const calls = [...innerInstructions].flatMap(({ instructions }) => [...instructions]);
+
+	const programs = calls
+		.map((instruction) => ('programId' in instruction ? instruction.programId : undefined))
+		.filter(nonNullish);
+
+	if (programs.length < calls.length) {
+		return undefined;
+	}
+
 	const known = new Set<SolAddress>(SOLANA_KNOWN_PROGRAM_ADDRESSES);
 
-	return [
-		...new Set(
-			[...innerInstructions].flatMap(({ instructions }) =>
-				[...instructions].map(({ programId }) => programId)
-			)
-		)
-	].filter((program) => !known.has(program));
+	return [...new Set(programs)].filter((program) => !known.has(program));
 };

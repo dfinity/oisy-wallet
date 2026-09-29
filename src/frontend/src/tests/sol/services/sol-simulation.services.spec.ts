@@ -500,5 +500,20 @@ describe('sol-simulation.services', () => {
 
 			expect(result?.unreadPrograms).toEqual([]);
 		});
+
+		it('should yield nothing when a nested call does not name its program', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: [
+						{ index: 0, instructions: [{ programIdIndex: 3, accounts: [], data: '' }] }
+					] as unknown as SolanaSimulatedInnerInstructions
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).toBeUndefined();
+		});
 	});
 });

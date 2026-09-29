@@ -68,6 +68,14 @@ const simulate = async ({
 		return undefined;
 	}
 
+	// A run with a nested call that names no program cannot be said to call only known ones, and
+	// the review would read the empty list as exactly that.
+	const unreadPrograms = findSolUnreadPrograms(innerInstructions);
+
+	if (isNullish(unreadPrograms)) {
+		return undefined;
+	}
+
 	const preview = mapSolSimulationPreview({
 		addresses,
 		preAccounts,
@@ -197,7 +205,7 @@ const simulate = async ({
 			}),
 			partial: false
 		},
-		unreadPrograms: findSolUnreadPrograms(innerInstructions)
+		unreadPrograms
 	};
 };
 
