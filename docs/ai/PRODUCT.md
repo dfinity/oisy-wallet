@@ -181,7 +181,7 @@ TCYCLES is not enabled by default, so for most users Compute opens on the empty 
 
 ### First-time destination addresses
 
-A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts. For XRP it reaches back only as far as the most recent page of the account's history (see [Recently used addresses](#recently-used-addresses)).
 
 Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
 
@@ -476,6 +476,12 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 ## XRP Ledger
 
 OISY supports native XRP: balance, receive, send, and transaction history. The address is an XRPL classic address derived from the same threshold-signing setup as the other chains (Ed25519), so no key ever leaves the network.
+
+### Recently used addresses
+
+The address step lists the addresses the user has sent XRP to, as on the other chains, but without a Contacts tab beside it: address-book contacts cannot hold an XRP address yet. The list is built from the loaded history, which on XRP is only the most recent page of the account's ledger history (currently ten entries). An older send therefore drops out of it, and its address is treated as first-time again (see [First-time destination addresses](#first-time-destination-addresses)).
+
+Picking an address fills in the address only, never a destination tag. An exchange gives all its customers one address and tells them apart by the tag, so the tag of an earlier send to that address may belong to someone else.
 
 ### Destination tags
 
