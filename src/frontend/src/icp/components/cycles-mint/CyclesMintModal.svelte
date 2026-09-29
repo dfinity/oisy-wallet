@@ -64,14 +64,29 @@
 		}
 	]);
 
+	// Reads can come back out of order: the minute's refresh may still be on its way when
+	// Review re-quotes. A rate only replaces the one in use if its read started later, so an
+	// earlier read that comes back late cannot put back an older rate.
+	let rateReads = 0;
+	let rateInUseRead = 0;
+
 	// A query: the rate only feeds the estimate, and the CMC converts at its own rate when
 	// the notify runs anyway.
 	const loadRate = async () => {
+		const read = ++rateReads;
+
 		try {
-			xdrPermyriadPerIcp = await getIcpXdrConversionRate({
+			const rate = await getIcpXdrConversionRate({
 				identity: $authIdentity,
 				certified: false
 			});
+
+			if (read < rateInUseRead) {
+				return;
+			}
+
+			rateInUseRead = read;
+			xdrPermyriadPerIcp = rate;
 			rateUnavailable = false;
 		} catch (err: unknown) {
 			consoleError(err);
