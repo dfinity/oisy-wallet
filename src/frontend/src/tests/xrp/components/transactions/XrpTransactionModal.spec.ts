@@ -1,5 +1,8 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { getMockContactsUi } from '$tests/mocks/contacts.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
 import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { render } from '@testing-library/svelte';
@@ -65,5 +68,35 @@ describe('XrpTransactionModal', () => {
 		});
 
 		expect(container.textContent).not.toContain('12345');
+	});
+
+	describe('counterparty contact', () => {
+		beforeEach(() => {
+			contactsStore.set(
+				getMockContactsUi({
+					n: 1,
+					name: 'Alice',
+					addresses: [{ addressType: 'Xrp', address: mockXrpAddress }]
+				})
+			);
+		});
+
+		afterEach(() => {
+			contactsStore.reset();
+		});
+
+		it.each([
+			{ type: 'send', counterparty: { to: mockXrpAddress } },
+			{ type: 'receive', counterparty: { from: mockXrpAddress } }
+		] as const)('shows the contact name for a $type', ({ type, counterparty }) => {
+			const { getByText, queryByRole } = render(XrpTransactionModal, {
+				props: { transaction: { ...transaction, type, ...counterparty }, token: XRP_TOKEN }
+			});
+
+			expect(getByText(/Alice/)).toBeInTheDocument();
+
+			// A known contact is not offered for saving again.
+			expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
+		});
 	});
 });

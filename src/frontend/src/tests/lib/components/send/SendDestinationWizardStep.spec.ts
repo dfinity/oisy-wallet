@@ -18,7 +18,11 @@ import type { Token } from '$lib/types/token';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import SendDestinationWizardStepTestHost from '$tests/lib/components/send/SendDestinationWizardStepTestHost.svelte';
-import { getMockContacts, mockBackendContactAddressEth } from '$tests/mocks/contacts.mock';
+import {
+	getMockContacts,
+	mockBackendContactAddressEth,
+	mockBackendContactAddressXrp
+} from '$tests/mocks/contacts.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
@@ -145,9 +149,39 @@ describe('SendDestinationWizardStep', () => {
 		).toBeInTheDocument();
 	});
 
-	// The XRP destination step is address entry only: contacts need a backend address type and
-	// known destinations need history, so the tabs could only ever show empty states.
 	describe('XRP', () => {
+		const xrpContact = mapToFrontendContact({
+			...getMockContacts({
+				n: 1,
+				names: ['XRP Contact'],
+				addresses: [[mockBackendContactAddressXrp]]
+			})[0],
+			// Distinct from the ETH contacts above, so removing it leaves them in the store
+			id: BigInt(99)
+		});
+
+		const renderHost = (selectedContact: Writable<ContactUi>) =>
+			render(SendDestinationWizardStepTestHost, {
+				props: {
+					selectedContact,
+					destination: '',
+					activeSendDestinationTab: 'recentlyUsed',
+					onBack: vi.fn(),
+					onNext: vi.fn(),
+					onClose: vi.fn(),
+					onQRCodeScan: vi.fn()
+				},
+				context: mockContext(XRP_TOKEN)
+			});
+
+		beforeEach(() => {
+			contactsStore.addContact(xrpContact);
+		});
+
+		afterEach(() => {
+			contactsStore.removeContact(xrpContact.id);
+		});
+
 		it('should display the XRP send destination components', () => {
 			const { getByTestId } = render(SendDestinationWizardStep, {
 				props,
@@ -159,14 +193,35 @@ describe('SendDestinationWizardStep', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render the destination tabs', () => {
-			const { queryByText } = render(SendDestinationWizardStep, {
+		it('should render the destination tabs', () => {
+			const { getByText } = render(SendDestinationWizardStep, {
 				props,
 				context: mockContext(XRP_TOKEN)
 			});
 
-			expect(queryByText(en.send.text.recently_used_tab)).toBeNull();
-			expect(queryByText(en.send.text.contacts_tab)).toBeNull();
+			expect(getByText(en.send.text.recently_used_tab)).toBeInTheDocument();
+			expect(getByText(en.send.text.contacts_tab)).toBeInTheDocument();
+		});
+
+		it('should set selectedContact when an XRP contact is selected', async () => {
+			const selectedContact: Writable<ContactUi> = writable();
+			const { getByText, getByTestId } = renderHost(selectedContact);
+
+			await fireEvent.click(getByText(get(i18n).send.text.contacts_tab));
+
+			await fireEvent.click(getByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${xrpContact.name}`));
+
+			expect(get(selectedContact)).toEqual(xrpContact);
+		});
+
+		it('should not offer contacts without an XRP address', async () => {
+			const { getByText, queryByTestId } = renderHost(writable());
+
+			await fireEvent.click(getByText(get(i18n).send.text.contacts_tab));
+
+			expect(
+				queryByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${mockContacts[0].name}`)
+			).not.toBeInTheDocument();
 		});
 
 		// Navigation comes from the step's toolbar, not from the tabs.

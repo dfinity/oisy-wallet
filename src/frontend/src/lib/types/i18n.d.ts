@@ -786,7 +786,6 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
-		enter_xrp_address: string;
 		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
@@ -2022,7 +2021,7 @@ interface I18nContact {
 }
 
 interface I18nAddress {
-	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string; Xrp: string };
 	form: {
 		new_address: string;
 		address_placeholder: string;
