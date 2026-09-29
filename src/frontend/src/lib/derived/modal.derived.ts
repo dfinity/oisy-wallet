@@ -251,6 +251,15 @@ export const modalSolTokenData: Readable<NavigationTarget | undefined> = derived
 	($modalStore) =>
 		$modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
+export const modalXrpToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-token'
+);
+export const modalXrpTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'xrp-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
