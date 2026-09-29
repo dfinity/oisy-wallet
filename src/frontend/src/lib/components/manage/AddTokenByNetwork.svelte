@@ -19,7 +19,8 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
@@ -54,6 +55,8 @@
 	let isEvmNetwork = $derived(isNetworkIdEvm(network?.id));
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
+
+	let isXrpNetwork = $derived(isNetworkIdXrp(network?.id));
 
 	let {
 		ledgerCanisterId,
@@ -153,8 +156,12 @@
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
-		{:else if nonNullish($selectedNetwork)}
-			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
+		{:else if nonNullish(network)}
+			<span class="mb-6"
+				>{isXrpNetwork
+					? $i18n.tokens.import.text.custom_tokens_not_supported_yet
+					: $i18n.tokens.import.text.custom_tokens_not_supported}</span
+			>
 		{/if}
 
 		{#snippet toolbar()}
