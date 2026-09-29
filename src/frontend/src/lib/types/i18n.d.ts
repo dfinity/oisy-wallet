@@ -1183,6 +1183,7 @@ interface I18nTokens {
 			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
+			custom_tokens_not_supported_yet: string;
 		};
 		error: {
 			loading_metadata: string;
