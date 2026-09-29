@@ -6,9 +6,9 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, NearIntentsData, OisyTradeData,
-        OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-        VeloraSwapMode,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
+        OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        VeloraData, VeloraSwapMode,
     },
     custom_token::ErcTokenId,
     result_types::{
@@ -378,6 +378,49 @@ fn create_chain_fusion_variant_roundtrip() {
             assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
             assert_eq!(tx.data, data);
             assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_cycles_mint_variant_roundtrip() {
+    // The row is opened before the ICP transfer, so it carries no block index
+    // yet: that arrives by update once the transfer returns.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+        source_token: TokenId::Icrc(Principal::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap()),
+        dest_token: TokenId::Icrc(Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap()),
+        amount: Nat::from(100_000_000u64),
+        transfer_created_at_ns: 1_790_000_000_000_000_000,
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert!(tx.external_refs.is_empty());
         }
         ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
