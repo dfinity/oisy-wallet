@@ -12,6 +12,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -24,6 +25,7 @@ import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
+import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -48,6 +50,7 @@ import {
 	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
@@ -344,7 +347,11 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					parties: mockParties,
+					unreadPrograms: []
+				});
 				expect(result).not.toHaveProperty('preview');
 			});
 		});
@@ -399,7 +406,11 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).not.toHaveProperty('simulatedInstructions');
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					parties: mockParties,
+					unreadPrograms: []
+				});
 			});
 
 			// An empty list is the run's answer that there is nothing to list. Rebuilt from the
@@ -456,6 +467,68 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).toEqual(expect.objectContaining({ parties: emptyPartialParties }));
+			});
+
+			describe('unread programs', () => {
+				const parties: SolTransferParties = { sources: [], destinations: [], partial: false };
+
+				// Named from the store so nothing is read from the chain: the stake program publishes
+				// no interface, the other one does.
+				beforeEach(() => {
+					solProgramNameStore.set({
+						network: 'mainnet',
+						names: { [STAKE_PROGRAM_ADDRESS]: '', [mockSolAddress3]: 'lending_app' }
+					});
+				});
+
+				afterEach(() => {
+					solProgramNameStore.reset();
+				});
+
+				it('should pass on the programs the run calls that it does not know, with their names', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: [STAKE_PROGRAM_ADDRESS, mockSolAddress3]
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([
+						{ address: STAKE_PROGRAM_ADDRESS },
+						{ address: mockSolAddress3, name: 'lending_app' }
+					]);
+				});
+
+				it('should pass on none when the run calls only programs it knows', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: []
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([]);
+				});
+
+				it('should leave them out without a run to name them from', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue(undefined);
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result).not.toHaveProperty('unreadPrograms');
+				});
 			});
 		});
 

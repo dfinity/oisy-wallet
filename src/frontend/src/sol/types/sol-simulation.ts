@@ -41,6 +41,16 @@ export interface SolSimulationPreview {
 }
 
 /**
+ * A program the simulated run calls from inside another program's instruction and that OISY does
+ * not know, with the name it publishes for itself when it publishes one. The name is the program's
+ * own claim, attested by nobody: a label for the address, never a statement about what it does.
+ */
+export interface SolUnreadProgram {
+	address: SolAddress;
+	name?: string;
+}
+
+/**
  * Everything one simulated run yields for the review.
  *
  * The preview is absent when the run changes nothing the user owns; the parties are always

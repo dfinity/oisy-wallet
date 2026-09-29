@@ -37,6 +37,7 @@ import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.serv
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolUnreadProgram } from '$sol/types/sol-simulation';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
@@ -134,14 +135,23 @@ export const decode = async ({
 		preview,
 		instructions: simulatedInstructions,
 		messageSummary,
-		parties: simulatedParties
+		parties: simulatedParties,
+		unreadPrograms
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
 	// the review is synchronous and a name that landed after the modal opened would arrive too late
 	// to read.
-	const [namedInstructions] = await Promise.all([
+	const [namedInstructions, namedUnreadPrograms] = await Promise.all([
 		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
+		// Each is an instruction nothing here reads, which is what the loader names.
+		loadSolProgramNames({
+			instructions: (unreadPrograms ?? []).map((program) => ({
+				kind: 'unknown' as const,
+				program
+			})),
+			network: solNetwork
+		}),
 		loadSplTokenMetadata({
 			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
 			network: solNetwork
@@ -215,6 +225,15 @@ export const decode = async ({
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
+		// Only from a run: without one there are no nested calls to name, and the review already says
+		// that the lists are then partial.
+		...(nonNullish(unreadPrograms) && {
+			unreadPrograms: unreadPrograms.map((address, index): SolUnreadProgram => {
+				const name = namedUnreadPrograms[index]?.programName;
+
+				return { address, ...(nonNullish(name) && { name }) };
+			})
+		}),
 		parties
 	};
 };
