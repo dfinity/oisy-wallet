@@ -4,7 +4,7 @@
 
 - **Type:** `feat`
 - **Area:** Backend (custom-token, token-id and active-user-transaction variants); frontend (`$xrp` balances, adding and removing a token, send, history, prices, Manage tokens); provider configuration (the QuickNode method whitelist)
-- **Status:** Draft. Pending decisions in §9.
+- **Status:** Draft. All decisions resolved (§10); two open questions (§8).
 
 ---
 
@@ -166,7 +166,7 @@ The issuer's self-declared `Domain` is never shown: any account can set any doma
 - **What the ledger holds is shown.** A trust line on the ledger without a backend entry — the backend write failed after the `TrustSet` validated, say — is saved to the backend list, enabled, the way `LoaderCollections` saves the NFTs it finds. A trust line never disappears from view without the user choosing to hide it.
 - A backend entry without a trust line — a removal whose backend write failed — is treated as not added.
 - The balance is the line's balance as the ledger reports it.
-- **Hiding** — the token menu's Hide, or switching the token off in Manage tokens — saves it as disabled. Its trust line and its reserve stay.
+- **Hiding** — the token menu's Hide, or switching the token off in Manage tokens — saves it as disabled. Its trust line and its reserve stay (D3).
 - A frozen, deep-frozen or not-yet-approved line says so on the token.
 - **USD value:** RLUSD by its CoinGecko id; an imported token by `simple/token_price/xrp` under the `<hex code>.<issuer>` key, plus `<code>.<issuer>` for a 3-character code; otherwise no value, as for any unpriced token.
 
@@ -189,6 +189,7 @@ The same XRP address, no destination tag needed. The receive screen says which i
   - the user's line is deep-frozen;
   - the issuer blocks transfers between holders and the recipient is not the issuer;
   - the recipient requires a destination tag and none is given (the existing XRP rule).
+- **XRP payments get the DepositAuth refusal too** (D6). Today they are signed and fail on the ledger (§3.1). OISY asks the ledger (`deposit_authorized`) only when the recipient's account has DepositAuth set, so a payment to any other account makes no extra call.
 - When the recipient's or the issuer's state cannot be read, the send is refused, not signed unchecked — the same fail-closed answer as the XRP send's existing `xrp_account_state_unavailable` message. How the form shows loading and failure while it waits is open draft #14101's subject and applies to the token form unchanged.
 - Destination tags and the first-time destination check work as they do for XRP, and a token send counts as a send to that address. XRP contacts and recently used addresses (open drafts #14159 and #14160) apply the same way once they land.
 - The row under the header bell button "Active transactions" reads "Send 25 RLUSD".
@@ -198,7 +199,7 @@ The same XRP address, no destination tag needed. The receive screen says which i
 - Token payments, sent and received, appear on the token's page and in Activity. XRP's page keeps showing native XRP only.
 - The amount is what moved on the user's trust line, read from the transaction metadata (§2.6) — never the amount the payment asked for.
 - A token's page shows that token's payments even when the account's newest transactions concern other assets: history keeps loading until the page is filled or the history ends.
-- Not listed: the `TrustSet` that added or removed a token, and an issuer's clawback or freeze. The balance reflects them (§9).
+- Not listed: the `TrustSet` that added or removed a token, and an issuer's clawback or freeze. The balance reflects them (D5).
 
 ### 4.7 Removing a token
 
@@ -242,6 +243,8 @@ A `TrustSet` consumes the account's `Sequence` exactly as a payment does, so the
 17. Removing a token at zero balance deletes the line and raises the spendable XRP by 0.2 XRP; removal is not offered at a non-zero balance.
 18. No screen shows an issuer's `Domain`.
 19. RLUSD shows a USD value; an imported token that CoinGecko does not list shows none.
+20. An XRP payment to an account with DepositAuth that has not preauthorized the sender is refused before signing; a payment to an account without DepositAuth makes no `deposit_authorized` call.
+21. With the flag off, nothing of this spec is reachable or runs: no RLUSD entry, no XRP import form, no `account_lines` or `deposit_authorized` call, and XRP payments behave as on `main`.
 
 ## 6. Non-goals
 
@@ -273,43 +276,46 @@ A `TrustSet` consumes the account's `Sequence` exactly as a payment does, so the
 - **Amounts.** A fixed scale of 18 decimals: exact for every ledger amount of at least 0.001, and within the 256-bit bound of `XrpData.amount` for up to 10^59 tokens. Removal and max read the ledger's balance string, never the scaled value, so dust below the scale cannot block a removal or survive a max send.
 - **Balances.** One XRP wallet worker per address, in the shape of Solana's #14028: it reads `account_info` and `account_lines` together and routes XRP and each line's balance to its token id. Trust-line tokens never get a worker of their own. Lines without a backend entry are saved (§4.3).
 - **Adding and removing.** An XRP branch in `AddTokenByNetwork.svelte` with the form of §4.2, replacing the "not yet" message; a review component; and one service that builds, signs, submits and confirms a `TrustSet` through the same guard, signer and confirmation loop as `sendXrp` (`signXrpTransaction` takes any transaction rather than only `XrpPayment`). The RLUSD switch in Manage tokens opens that review. An XRP branch in `TokenMenu.svelte`'s hide routing. `XrpTokenModal` passes `isDeletable`, and `TokenModal`'s delete gains an XRP branch that sends the `TrustSet` before touching the backend entry and its IndexedDB copy.
-- **Send.** `XrpSendTokenWizard` branches on the token: amount and max in the token, fee and reserve in XRP. `sendXrp` gains token amounts and `SendMax`. `toBackendTokenId` gains a trust-line branch **before** #14121's XRP-mainnet network match. The checks of §4.5 run on `account_lines` for the recipient (`peer` = issuer), `account_info` for the recipient and the issuer, and `deposit_authorized`.
+- **Send.** `XrpSendTokenWizard` branches on the token: amount and max in the token, fee and reserve in XRP. `sendXrp` gains token amounts and `SendMax`. `toBackendTokenId` gains a trust-line branch **before** #14121's XRP-mainnet network match. The checks of §4.5 run on `account_lines` for the recipient (`peer` = issuer), `account_info` for the recipient and the issuer, and `deposit_authorized` — for XRP payments too, and only when the recipient's account has DepositAuth set.
 - **History.** `mapXrpTransaction` gains a token branch reading the metadata; the rows land in `xrpTransactionsStore` under the token's id (the store is keyed by `TokenId` already); `pageToken` searches XRP tokens; the loader fetches further `account_tx` pages until a token's page is filled or history ends.
 - **The guard's rows.** The display snapshot carries the token; the fallback formats by the row's `TokenId` instead of `XRP_TOKEN`; the messages speak of the XRP account's earlier transaction rather than of an XRP payment; adding and removing render as "Add RLUSD" and "Remove RLUSD".
 - **Prices.** `xrp` joins `CoingeckoPlatformIdSchema`; imported tokens are priced through a dedicated call in the shape of SPL's, with the keys of §4.3; RLUSD by the coin id `ripple-usd`, the way native XRP is priced by `ripple`.
-- **Rollout.** An in-code override, in the same shape as the `XRP_MAINNET_DISABLED_OVERRIDE` the XRP stack used, keeps the two entry points — the RLUSD entry and the XRP import form — off on production and beta until the last phase. With neither reachable, no account can hold a trust line there.
+- **Rollout.** A feature flag, `XRP_TRUST_LINE_TOKENS_ENABLED = LOCAL || STAGING`, in its own env file like `src/frontend/src/env/cycles-mint.env.ts`. With it off, nothing of this spec runs: no RLUSD entry, no XRP import form, no `account_lines` or `deposit_authorized` call, and XRP payments behave as on `main`. Each PR of §7.4 merges with the flag off on production and beta and is tested on staging; the last PR sets it to `true as boolean`, as #14136 did for `CYCLES_MINT_ENABLED`.
 - **Analytics.** A token send emits the existing `xrp_send_success` / `xrp_send_error` (`src/frontend/src/lib/constants/analytics.constants.ts:57`), whose `token` metadata already carries the symbol; adding and removing a token get their own success and error events, documented in `docs/ai/frontend/analytics.md`.
 - **`PRODUCT.md`.** The XRP Ledger section gains a Tokens part in the same PR as each behaviour change, including the negative guarantees of §4.9.
 - **i18n.** Every new string in the locales of the `Languages` enum.
 
-### 7.4 Phases
+### 7.4 PRs
 
-| Phase | PR                                                  | Scope                                                                                                                                    |
-| ----- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | this spec + `feat(backend,frontend)!:` variants     | §7.1, and the frontend arms the new variants force; no UI                                                                                |
-| 2     | `feat(frontend)`: trust-line balances               | token model, RLUSD entry (behind the override), `account_lines`, one worker per address, balances, lines without a backend entry, prices |
-| 3     | `feat(frontend)`: add a trust-line token            | import form, review, `TrustSet` through the guard, the RLUSD switch opening the review, hiding                                           |
-| 4     | `feat(frontend)`: send a trust-line token           | token payments, `SendMax`, `deposit_authorized`, the checks of §4.5, max                                                                 |
-| 5     | `feat(frontend)`: trust-line token history          | metadata mapping, per-token history, pagination                                                                                          |
-| 6     | `feat(frontend)`: remove a trust-line token, enable | removal, reserve release, override removed, `PRODUCT.md` complete                                                                        |
+Every PR after the first merges behind the flag of §7.3 and is tested on staging; only the last one turns the feature on.
 
-Each phase ships its tests (the coverage gate ratchets). End-to-end testing on staging becomes possible with phase 3, since before it no account can hold a trust line. The guard's changes in phases 3 and 4 need #14121 on `main`.
+| #   | PR                                                  | Scope                                                                                                                        |
+| --- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 1   | this spec + `feat(backend,frontend)!:` variants     | §7.1, and the frontend arms the new variants force; no UI, so nothing to put behind the flag                                 |
+| 2   | `feat(frontend)`: trust-line balances               | the flag, token model, RLUSD entry, `account_lines`, one worker per address, balances, lines without a backend entry, prices |
+| 3   | `feat(frontend)`: add a trust-line token            | import form, review, `TrustSet` through the guard, the RLUSD switch opening the review, hiding                               |
+| 4   | `feat(frontend)`: send a trust-line token           | token payments, `SendMax`, the checks of §4.5, max, and the DepositAuth check for token and XRP payments                     |
+| 5   | `feat(frontend)`: trust-line token history          | metadata mapping, per-token history, pagination                                                                              |
+| 6   | `feat(frontend)`: remove a trust-line token, enable | removal, reserve release, the flag set to `true as boolean`, `PRODUCT.md` complete                                           |
+
+Each PR ships its tests (the coverage gate ratchets). End-to-end testing on staging becomes possible with PR 3, since before it no account can hold a trust line. The guard's changes in PRs 3 and 4 need #14121 on `main`.
 
 ## 8. Open questions (facts to confirm)
 
 - **Does the QuickNode Clio endpoint answer `account_lines` (with `peer`) and `deposit_authorized` once whitelisted?** Public Clio does (checked 2026-09-29). The whitelist edit comes first.
 - **Where does the RLUSD icon come from, and under what licence?**
 
-## 9. Pending decisions
+## 9. Pending decisions (facts are clear)
 
-- **Listed tokens: RLUSD only?** _Recommended: yes._ Every further entry is a curation decision OISY then maintains.
-- **What does switching a token off in Manage tokens do?** _Recommended: it hides the token_ (§4.3); the trust line and its reserve stay, and removal (§4.7) is its own action, offered only at zero balance. The alternative, removing on switch-off, cannot work at a non-zero balance and turns a display switch into a transaction.
-- **Are tokens with a restrictive issuer importable** — one that requires approval, or blocks transfers between holders? _Recommended: yes, with the restriction stated at review and on the token._ Refusing them would also refuse tokens that work as their issuer intends.
-- **Do `TrustSet`, clawback and freeze transactions appear in history?** _Recommended: not in this spec._ The balance reflects them; showing them needs its own row types.
-- **Does the DepositAuth check (§4.5) also cover XRP payments?** _Recommended: yes._ It sits in the same `sendXrp` path, and today an XRP payment to such an account is signed and applies as a failure that keeps its fee (§3.1). The alternative keeps XRP payments as they are and checks only token payments.
-- **One PR or the phases of §7.4?** _Recommended: the phases._ The XRP integration shipped in ten phased PRs, and its spec estimated tokens at roughly double that scope.
+None.
 
 ## 10. Resolved
 
-- **Trust-line tokens only**, RLUSD listed plus import by issuer and currency, MPTs later (decided 2026-09-29).
-- **The guard extension rides in phase 1**, now that #14109 has merged: the new `TokenId` variant is a breaking change anyway, so extending the guard adds no second breaking PR.
+- **D1 Scope:** trust-line tokens only: RLUSD listed, plus import of any trust-line token by issuer and currency. MPTs get a later spec (2026-09-29).
+- **D2 Listed tokens:** RLUSD only (2026-09-29). Every further entry is a curation decision OISY then maintains.
+- **D3 Switching a token off hides it (§4.3):** the trust line and its 0.2 XRP reserve stay, and the token can still arrive, as a hidden token can on any other network. Removal (§4.7) is its own action, the token modal's Delete token, offered only at zero balance (2026-09-29). Removing on switch-off would fail at any non-zero balance and turn a display switch into a transaction.
+- **D4 Restrictive issuers (§4.2):** a token whose issuer requires approval, or blocks transfers between holders, can be imported, with the restriction stated at review and on the token (2026-09-29).
+- **D5 History (§4.6):** `TrustSet`, clawback and freeze transactions are not listed in this spec; the balance reflects them (2026-09-29).
+- **D6 DepositAuth for XRP payments (§4.5):** the check covers XRP payments too, behind the same flag (2026-09-29). It sits in the same `sendXrp` path, and today such a payment is signed and fails on the ledger, keeping its fee (§3.1).
+- **D7 Rollout (§7.3, §7.4):** a feature flag, on locally and on staging, gates everything while the PRs land and are tested on staging; the last PR turns it on in every environment, as #14136 did for `CYCLES_MINT_ENABLED` (2026-09-29).
+- **D8 The guard extension rides in PR 1:** now that #14109 has merged, the new `TokenId` variant is a breaking change anyway, so extending the guard adds no second breaking PR (2026-09-29).
