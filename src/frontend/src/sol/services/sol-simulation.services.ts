@@ -17,6 +17,7 @@ import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.u
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
 import { deriveSolMessageSummary } from '$sol/utils/sol-message-summary.utils';
 import {
+	findSolUnreadPrograms,
 	isEmptySolSimulationPreview,
 	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
@@ -195,7 +196,8 @@ const simulate = async ({
 				addressToOwner
 			}),
 			partial: false
-		}
+		},
+		unreadPrograms: findSolUnreadPrograms(innerInstructions)
 	};
 };
 

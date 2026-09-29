@@ -313,7 +313,8 @@ describe('wallet-connect.services', () => {
 			it('should attach the preview to the decoded review', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					preview: mockPreview,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -332,7 +333,10 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should decode without a preview when the simulation yields none', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -365,7 +369,8 @@ describe('wallet-connect.services', () => {
 			it('should call the list simulated when the run produced one', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: simulated,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -382,7 +387,10 @@ describe('wallet-connect.services', () => {
 			// A run reports its parties whether or not it produced any instruction summaries, so
 			// this is the state where only the list falls back.
 			it('should read the message when the run produced no list', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -400,7 +408,8 @@ describe('wallet-connect.services', () => {
 			it('should pass on an empty list from the run rather than read the message', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: [],
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -426,7 +435,7 @@ describe('wallet-connect.services', () => {
 					partial: false
 				};
 
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties, unreadPrograms: [] });
 
 				const result = await decode({
 					base64EncodedTransactionMessage,

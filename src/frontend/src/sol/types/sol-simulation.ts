@@ -58,4 +58,8 @@ export interface SolSimulationResult {
 	// what the transaction costs, which the simulated balance carries and the message never states.
 	messageSummary?: SolTransactionSummary;
 	parties: SolTransferParties;
+	// The programs the run calls from inside another program's instruction that are not among the
+	// known ones. Such a call can act on what the user holds in an application, which neither the
+	// preview nor the instructions describe. Empty when every nested call reaches a known program.
+	unreadPrograms: SolAddress[];
 }
