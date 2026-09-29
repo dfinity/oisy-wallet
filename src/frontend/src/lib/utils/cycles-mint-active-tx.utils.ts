@@ -171,15 +171,11 @@ export const toCyclesMintCredited = (minted: bigint): bigint =>
 const MAX_ROW_ERROR_BYTES = 512;
 
 const toCyclesMintRowError = (reason: string): string => {
-	const encoder = new TextEncoder();
+	// `encodeInto` stops at the last whole code point that fits, and `read` counts the UTF-16
+	// units it took: one pass that ends at the limit, whatever the reason's length.
+	const { read } = new TextEncoder().encodeInto(reason, new Uint8Array(MAX_ROW_ERROR_BYTES));
 
-	let error = reason;
-
-	while (encoder.encode(error).length > MAX_ROW_ERROR_BYTES) {
-		error = error.slice(0, -1);
-	}
-
-	return error;
+	return reason.slice(0, read);
 };
 
 /**
