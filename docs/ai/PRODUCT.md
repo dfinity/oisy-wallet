@@ -148,6 +148,17 @@ Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A strand
 
 The same invariant keeps the destination URL out of both `explorer` subcontexts, unlike `contact`: every explorer URL on those two cards embeds a wallet address. The provider and the network carry the whole product signal — which explorer users reach for, and for which chain — with none of the identity.
 
+### Cycles mint tracking
+
+[Minting TCYCLES](#mint-tcycles-local-and-staging) emits one structured event, **`cycles_mint`**, under `event_context: compute` and `source_location: token_details`. `token_symbol` is the ICP paid and `token2_symbol` the TCYCLES received. It carries no amounts and no USD value: every mint is a transfer to one of the CMC's deposit accounts with the `MINT` memo, so an exact amount and the event's time would pick out the one block on the public ICP ledger, and with it the sender's account.
+
+| `event_modifier` | Fires when                 | `result_status`                 | Properties                                                      |
+| ---------------- | -------------------------- | ------------------------------- | --------------------------------------------------------------- |
+| `open`           | the Mint modal opens       | none                            | none                                                            |
+| `mint`           | a mint starts and finishes | `executing` → `success`/`error` | `token_symbol`, `token2_symbol`; `result_error_code` on failure |
+
+`result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted (the modal tries the delete up to three times, since a delete also succeeds for a row an earlier, unanswered one already removed); a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
+
 ---
 
 ## Tokens
@@ -494,6 +505,27 @@ The send flow therefore exposes the destination tag as an explicit, optional fie
 The XRP Ledger requires an account to keep a minimum balance on-ledger for the account to continue to exist. It has two parts: a **base reserve** every account owes, and an **owner reserve** owed once more for every ledger object the account owns — a trust line, an offer, an escrow. An account holding any of those must therefore retain more than the base reserve alone, and both amounts are set by the validators rather than fixed by the protocol.
 
 The maximum sendable amount subtracts the whole reserve as well as the fee, so the full balance is never sendable and an account with several trust lines keeps noticeably more than a bare one. The balance shown is the full ledger balance rather than the spendable remainder.
+
+---
+
+## Mint TCYCLES (local and staging)
+
+Behind `CYCLES_MINT_ENABLED` (`src/frontend/src/env/cycles-mint.env.ts`, on for local and staging builds, off in production), the TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send and Swap. It turns ICP into TCYCLES through the NNS **Cycles Minting Canister** (CMC), at the network's rate, into the user's own TCYCLES balance. Only the mainnet cycles ledger's token (`um5iw-rqaaa-aaaaq-qaaba-cai`) has it. The button is always enabled: it does not follow the page's outflow state, which tracks the TCYCLES balance, so a user without any TCYCLES yet can still mint. With no ICP, or less than the 0.0001 ICP fee, the form offers a Max of 0 and cannot continue.
+
+**Form.** The user enters ICP and sees the TCYCLES it mints as an estimate: ICP × the CMC's rate, minus the cycles ledger's 0.0001 TCYCLES deposit fee. It is an estimate because the CMC converts at its rate when the mint runs, not when the user looked. The rate ("1 ICP ≈ N TCYCLES") is read from the CMC, refreshed every minute and read again when Review opens, and the amount waits for it. The fees are the ICP network fee, on top of the amount, and the cycles ledger fee, out of what is received. The form cannot continue without a rate, with no amount, with an amount that with its fee exceeds the balance, or with an amount below the lower bound, which has two parts. The amount must be above 0.0003 ICP, since a refund returns the ICP minus 0.0003 ICP and so returns nothing at or below that, and it must mint more than twice the deposit fee at the current rate, so that a halving of the rate before the mint runs still leaves a positive credit. A notice says that minting cannot be undone.
+
+**Review** shows what is paid and minted with their fiat values, the rate, both fees and the CMC as the minter, and repeats the notice.
+
+**Outcome.** A minted mint closes the modal with a confirmation of the amount actually credited. A refund is reported as an error, with the CMC's reason quoted: the ICP came back, minus 0.0003 ICP, or, for a refund without a refund block, the fees took the whole amount and nothing came back, which the minimum amount rules out at today's CMC fees. Once the ICP has left the wallet, a CMC that has not answered yet never makes the mint a failure: the modal closes and the mint finishes in the background. A transfer the ICP ledger refused moved nothing and returns the user to Review.
+
+**Settlement.** A mint is two calls, an ICP transfer to the CMC and a notify that only the user's own principal can make, so a tab closed in between would strand the ICP. Every mint is therefore an [active user transaction](#cross-session-settlement), opened **before** the transfer and carrying the transfer's creation timestamp; a mint whose row cannot be opened does not start. The Active transactions list shows it as "Mint X ICP → TCYCLES" on the ICP network, with the Cycles Minting Canister as provider. The global poller finishes what the modal did not:
+
+- A row with a deposit is notified until the CMC answers minted, refunded or a final error. Notifying the same deposit twice is harmless (the CMC answers the second call from the first one's result), so the modal and the poller need no coordination beyond the poller waiting a minute of silence on a row first. While the CMC keeps answering that it is still processing, or cannot be reached, the poller asks again about once a minute rather than on every poll. A deposit left un-notified until the CMC's most recent 1,000,000 notifications have moved past it gets `TransactionTooOld`, a final answer: the row closes as failed, with the CMC's reason. That answer cannot tell whether an earlier notify, whose answer no session saw, already minted it, in which case the TCYCLES activity shows the mint; if none did, the ICP stays in the CMC's custody for good, since only the user's own principal could notify it and the CMC no longer will.
+- A row without a deposit (its tab died during the transfer, or the transfer call got no answer) is looked up in the certified ICP history of the user's CMC deposit account, by the transfer's sender, creation timestamp, amount and `MINT` memo. That account only holds mint deposits and their burns and refunds, so the search stays short however busy the wallet is. A deposit found is recorded and notified. Once the transfer can no longer land, a row still without one closes as failed, never sent: nothing moved, and the entry confirms that the mint the user started did not happen instead of vanishing from the list. The modal only sends a transfer within a minute of its timestamp and the call expires minutes after that, so that moment is 15 minutes after the row opened on the backend. The poller only acts on it once the ICP index has synced a block the ledger dates later, so a lagging index keeps the row in flight, and no device clock decides it.
+
+Recovery never sends ICP; it only finishes a deposit that exists.
+
+What this deliberately does not do: TCYCLES → ICP (the CMC cannot), topping up or sending cycles to a canister, minting into a subaccount or for another principal, a Mint entry on the ICP page, labelling the ICP deposit as a mint in Activity, and enabling TCYCLES by default.
 
 ---
 

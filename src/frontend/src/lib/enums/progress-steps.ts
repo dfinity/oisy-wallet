@@ -207,3 +207,11 @@ export enum ProgressStepsTip {
 	SAVE = 'save',
 	DONE = 'done'
 }
+
+// Minting TCYCLES: the ICP transfer to the CMC, then the notify that mints.
+export enum ProgressStepsCyclesMint {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	MINT = 'mint',
+	DONE = 'done'
+}

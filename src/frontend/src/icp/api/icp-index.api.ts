@@ -1,3 +1,4 @@
+import { IcpIndexStatusCanister } from '$icp/canisters/icp-index-status.canister';
 import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
@@ -7,20 +8,36 @@ import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { Principal } from '@icp-sdk/core/principal';
 
+interface GetTransactionsParams extends QueryParams {
+	identity: NullishIdentity;
+	start?: bigint;
+	maxResults?: bigint;
+	indexCanisterId: IndexCanisterIdText;
+}
+
 export const getTransactions = async ({
 	owner,
+	...rest
+}: GetTransactionsParams & {
+	owner: Principal;
+}): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> =>
+	await getAccountIdentifierTransactions({
+		...rest,
+		accountIdentifier: getAccountIdentifier(owner).toHex()
+	});
+
+// The history of any account identifier, including accounts the caller does not own, such
+// as the CMC's deposit account for the caller.
+export const getAccountIdentifierTransactions = async ({
+	accountIdentifier,
 	identity,
 	start,
 	maxResults = WALLET_PAGINATION,
 	indexCanisterId,
 	certified = true
-}: {
-	owner: Principal;
-	identity: NullishIdentity;
-	start?: bigint;
-	maxResults?: bigint;
-	indexCanisterId: IndexCanisterIdText;
-} & QueryParams): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> => {
+}: GetTransactionsParams & {
+	accountIdentifier: string;
+}): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> => {
 	assertNonNullish(identity);
 
 	const agent = await getAgent({ identity });
@@ -34,6 +51,25 @@ export const getTransactions = async ({
 		certified,
 		start,
 		maxResults,
-		accountIdentifier: getAccountIdentifier(owner).toHex()
+		accountIdentifier
 	});
+};
+
+// How far the index has synced: every ledger block below this height is in its histories.
+export const getIcpIndexNumBlocksSynced = async ({
+	identity,
+	indexCanisterId,
+	certified = true
+}: QueryParams & {
+	identity: NullishIdentity;
+	indexCanisterId: IndexCanisterIdText;
+}): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	const { numBlocksSynced } = await IcpIndexStatusCanister.create({
+		identity,
+		canisterId: Principal.fromText(indexCanisterId)
+	});
+
+	return await numBlocksSynced({ certified });
 };
