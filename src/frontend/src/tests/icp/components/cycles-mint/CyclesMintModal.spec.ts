@@ -8,6 +8,7 @@ import {
 	CYCLES_MINT_FORM_REVIEW_BUTTON,
 	CYCLES_MINT_RATE,
 	CYCLES_MINT_REVIEW,
+	CYCLES_MINT_REVIEW_BACK_BUTTON,
 	CYCLES_MINT_REVIEW_MINT_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
@@ -136,6 +137,35 @@ describe('CyclesMintModal', () => {
 		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
 
 		settle(mockXdrPermyriadPerIcp);
+
+		await waitFor(() => {
+			expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();
+		});
+	});
+
+	// Back stays open while a re-quote is out, and the Review it leaves is no longer the one
+	// whose bound Mint checks.
+	it('does not wait for the re-quote of a Review left through Back', async () => {
+		let settleSecond: (rate: bigint) => void = () => undefined;
+
+		rateSpy
+			.mockResolvedValueOnce(mockXdrPermyriadPerIcp)
+			.mockImplementationOnce(() => new Promise<bigint>(() => undefined))
+			.mockImplementationOnce(() => new Promise<bigint>((resolve) => (settleSecond = resolve)));
+
+		const { getByTestId } = await toReview();
+
+		await fireEvent.click(getByTestId(CYCLES_MINT_REVIEW_BACK_BUTTON));
+
+		await waitFor(() => {
+			expect(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON)).not.toBeDisabled();
+		});
+
+		await fireEvent.click(getByTestId(CYCLES_MINT_FORM_REVIEW_BUTTON));
+
+		expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeDisabled();
+
+		settleSecond(mockXdrPermyriadPerIcp);
 
 		await waitFor(() => {
 			expect(getByTestId(CYCLES_MINT_REVIEW_MINT_BUTTON)).toBeEnabled();

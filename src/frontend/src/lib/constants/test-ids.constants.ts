@@ -301,6 +301,7 @@ export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
 export const CYCLES_MINT_FORM = 'cycles-mint-form';
 export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
 export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
 export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
 export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 
