@@ -268,6 +268,8 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 	// pool.maxLtv is basis points (the SDK uses it directly as `maxAllowedLtvBps`), not the
 	// rate scale — convert to a 0–1 ratio.
 	maxLtv: Number(pool.maxLtv) / 10_000,
+	// Also basis points: the SDK adds `amount × activationFee / 10_000` to the opening debt.
+	activationFeePercent: Number(pool.activationFee) / 100,
 	frozen: pool.frozen,
 	available: !pool.frozen && isUnderSupplyCap(pool)
 });

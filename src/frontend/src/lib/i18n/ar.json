@@ -1468,7 +1468,8 @@
 				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
 				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
-				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
+				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة.",
+				"custom_tokens_not_supported_yet": ""
 			},
 			"error": {
 				"loading_metadata": "العنوان المحدد ليس توكنًا صالحًا في الشبكة المحددة.",
@@ -2638,6 +2639,7 @@
 			"funds_delivered_to": "",
 			"your_oisy_address": "",
 			"borrow_risk_info": "",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",

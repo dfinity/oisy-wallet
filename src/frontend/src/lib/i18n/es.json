@@ -1468,7 +1468,8 @@
 				"info": "Los ID de los canisters de Ledger e Índice suelen estar disponibles en el sitio web del proyecto.",
 				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
-				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados."
+				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados.",
+				"custom_tokens_not_supported_yet": "OISY aún no admite tokens personalizados en esta red."
 			},
 			"error": {
 				"loading_metadata": "La dirección especificada no es un token válido en la red seleccionada.",
@@ -2638,6 +2639,7 @@
 			"funds_delivered_to": "Fondos enviados a",
 			"your_oisy_address": "Tu dirección de $oisy_short",
 			"borrow_risk_info": "Pedir prestado reduce tu factor de salud. Si cae demasiado, tu garantía puede ser liquidada.",
+			"borrow_activation_fee_info": "Liquidium añade una comisión de activación del $fee% sobre el importe prestado.",
 			"borrow_at_risk_warning": "Este préstamo reduce notablemente tu factor de salud.",
 			"borrow_exceeds_power": "El importe supera tu capacidad de préstamo.",
 			"borrow_below_minimum": "El importe está por debajo del préstamo mínimo.",

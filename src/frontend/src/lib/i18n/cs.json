@@ -1468,7 +1468,8 @@
 				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
 				"info_ext": "ID kanistru je obvykle dostupné na webových stránkách projektu.",
 				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
-				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
+				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny.",
+				"custom_tokens_not_supported_yet": "OISY zatím v této síti nepodporuje vlastní tokeny."
 			},
 			"error": {
 				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",
@@ -2638,6 +2639,7 @@
 			"funds_delivered_to": "Prostředky budou odeslány na",
 			"your_oisy_address": "Tvá adresa $oisy_short",
 			"borrow_risk_info": "Půjčka snižuje tvůj faktor zdraví. Pokud klesne příliš nízko, tvé zajištění může být zlikvidováno.",
+			"borrow_activation_fee_info": "Liquidium k vypůjčené částce připočítává aktivační poplatek ve výši $fee %.",
 			"borrow_at_risk_warning": "Tato půjčka citelně sníží tvůj faktor zdraví.",
 			"borrow_exceeds_power": "Částka přesahuje tvůj úvěrový rámec.",
 			"borrow_below_minimum": "Částka je nižší než minimální výše půjčky.",

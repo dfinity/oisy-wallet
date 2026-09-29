@@ -1182,6 +1182,7 @@ interface I18nTokens {
 			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
+			custom_tokens_not_supported_yet: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -2177,6 +2178,7 @@ interface I18nLiquidium {
 		funds_delivered_to: string;
 		your_oisy_address: string;
 		borrow_risk_info: string;
+		borrow_activation_fee_info: string;
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;

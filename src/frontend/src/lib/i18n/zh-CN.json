@@ -1468,7 +1468,8 @@
 				"info": "Ledger 和 Index canister ID 通常可在项目官网上找到。",
 				"info_ext": "Canister ID 通常可在项目官网上找到。",
 				"info_index": "Index canister ID 是可选的，但如果缺少，$oisy_short 将无法显示交易历史。",
-				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
+				"custom_tokens_not_supported": "所选网络不支持自定义代币。",
+				"custom_tokens_not_supported_yet": "OISY 目前尚不支持此网络上的自定义代币。"
 			},
 			"error": {
 				"loading_metadata": "指定的地址在所选网络中不是有效的代币。",
@@ -2638,6 +2639,7 @@
 			"funds_delivered_to": "资金发送至",
 			"your_oisy_address": "您的 $oisy_short 地址",
 			"borrow_risk_info": "借款会降低您的健康系数。如果降得太低，您的抵押品可能会被清算。",
+			"borrow_activation_fee_info": "Liquidium 会在借款金额之上额外收取 $fee% 的激活费。",
 			"borrow_at_risk_warning": "此笔借款会明显降低您的健康系数。",
 			"borrow_exceeds_power": "金额超过您的可借额度。",
 			"borrow_below_minimum": "金额低于最低借款额。",
