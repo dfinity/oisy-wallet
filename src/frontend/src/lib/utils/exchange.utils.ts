@@ -259,6 +259,21 @@ export const findMissingErc20ContractAddresses = ({
 };
 
 /**
+ * XRP Ledger trust-line token keys (`<currency>.<issuer>`) requested by the caller that are absent
+ * from a CoinGecko-shaped price response. Compared as given: the key is the one the request sent.
+ */
+export const findMissingXrpTrustLineKeys = ({
+	allXrpTrustLineKeys,
+	coingeckoResponse
+}: {
+	allXrpTrustLineKeys: string[];
+	coingeckoResponse: CoingeckoSimpleTokenPriceResponse;
+}): string[] => {
+	const found = new Set(Object.keys(coingeckoResponse));
+	return allXrpTrustLineKeys.filter((key) => !found.has(key));
+};
+
+/**
  * SPL token addresses requested by the caller that are absent from a
  * CoinGecko-shaped price response.
  */
@@ -324,6 +339,7 @@ export interface ProviderFallbackPrices {
 	erc20Prices?: CoingeckoSimpleTokenPriceResponse;
 	icrcPrices?: CoingeckoSimpleTokenPriceResponse;
 	splPrices?: CoingeckoSimpleTokenPriceResponse;
+	xrpTrustLinePrices?: CoingeckoSimpleTokenPriceResponse;
 	ethPrice?: CoingeckoSimplePriceResponse;
 	btcPrice?: CoingeckoSimplePriceResponse;
 	icpPrice?: CoingeckoSimplePriceResponse;
@@ -400,6 +416,10 @@ export const mergeExchangePrices = async ({
 		currentSplPrices: mergeMaps({
 			providerMap: providerPrices.splPrices,
 			backendMap: backendData.currentSplPrices ?? {}
+		}),
+		currentXrpTrustLinePrices: mergeMaps({
+			providerMap: providerPrices.xrpTrustLinePrices,
+			backendMap: backendData.currentXrpTrustLinePrices ?? {}
 		}),
 		currentErc4626Prices,
 		currentEthPrice: mergeNative({
