@@ -1,7 +1,8 @@
 import { SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 
 describe('exchange.constants', () => {
-	const nonProdEnvs = ['local', 'test_fe_1', 'audit', 'e2e', 'staging', 'beta'];
+	const fastProviderEnvs = ['ic', 'beta'];
+	const slowProviderEnvs = ['local', 'test_fe_1', 'audit', 'e2e', 'staging'];
 
 	beforeEach(() => {
 		vi.unstubAllGlobals();
@@ -9,7 +10,7 @@ describe('exchange.constants', () => {
 	});
 
 	describe('getSyncExchangeTimerInterval', () => {
-		it.each(['ic', ...nonProdEnvs])(
+		it.each([...fastProviderEnvs, ...slowProviderEnvs])(
 			'should sync every minute from the backend on %s',
 			async (mode) => {
 				vi.stubGlobal('VITE_DFX_NETWORK', mode);
@@ -19,18 +20,24 @@ describe('exchange.constants', () => {
 			}
 		);
 
-		it('should sync every 5 minutes from the providers in production', async () => {
-			vi.stubGlobal('VITE_DFX_NETWORK', 'ic');
-			const { getSyncExchangeTimerInterval } = await import('$lib/constants/exchange.constants');
+		it.each(fastProviderEnvs)(
+			'should sync every 5 minutes from the providers on %s',
+			async (mode) => {
+				vi.stubGlobal('VITE_DFX_NETWORK', mode);
+				const { getSyncExchangeTimerInterval } = await import('$lib/constants/exchange.constants');
 
-			expect(getSyncExchangeTimerInterval(false)).toBe(SECONDS_IN_MINUTE * 1000 * 5);
-		});
+				expect(getSyncExchangeTimerInterval(false)).toBe(SECONDS_IN_MINUTE * 1000 * 5);
+			}
+		);
 
-		it.each(nonProdEnvs)('should sync every 30 minutes from the providers on %s', async (mode) => {
-			vi.stubGlobal('VITE_DFX_NETWORK', mode);
-			const { getSyncExchangeTimerInterval } = await import('$lib/constants/exchange.constants');
+		it.each(slowProviderEnvs)(
+			'should sync every 30 minutes from the providers on %s',
+			async (mode) => {
+				vi.stubGlobal('VITE_DFX_NETWORK', mode);
+				const { getSyncExchangeTimerInterval } = await import('$lib/constants/exchange.constants');
 
-			expect(getSyncExchangeTimerInterval(false)).toBe(SECONDS_IN_MINUTE * 1000 * 30);
-		});
+				expect(getSyncExchangeTimerInterval(false)).toBe(SECONDS_IN_MINUTE * 1000 * 30);
+			}
+		);
 	});
 });

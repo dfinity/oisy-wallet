@@ -1,5 +1,5 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
-import { PROD, SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
+import { BETA, PROD, SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 
 /**
  * CoinGecko's public API offers cached values updated every 60 seconds (or every 30 seconds for Pro API users).
@@ -12,13 +12,13 @@ import { PROD, SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
  * because the backend already caches exchange rates at a controlled interval.
  * This allows the frontend to simply retrieve cached data without increasing load on external APIs.
  *
- * Outside production, the frontend provider path syncs every 30 minutes instead of 5 to save CoinGecko
- * monthly quota: non-production deployments do not need fresh prices.
+ * Outside production and beta, the frontend provider path syncs every 30 minutes instead of 5 to save CoinGecko
+ * monthly quota: the other deployments do not need fresh prices.
  */
 export const getSyncExchangeTimerInterval = (backendEnabled: boolean): number =>
 	backendEnabled
 		? SECONDS_IN_MINUTE * 1000 // 1 minute
-		: PROD
+		: PROD || BETA
 			? SECONDS_IN_MINUTE * 1000 * 5 // 5 minutes
 			: SECONDS_IN_MINUTE * 1000 * 30; // 30 minutes
 
