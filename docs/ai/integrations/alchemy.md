@@ -2,21 +2,23 @@
 
 OISY uses [Alchemy](https://www.alchemy.com/) as a multi-chain data provider. A
 single API key, `VITE_ALCHEMY_API_KEY` (`src/frontend/src/env/rest/alchemy.env.ts`),
-authenticates every chain. Alchemy is reached three different ways — there is
+authenticates every chain. Alchemy is reached four different ways — there is
 _no_ `alchemy-sdk` dependency:
 
 - **viem `PublicClient`** for EVM JSON-RPC,
+- **ethers.js `JsonRpcProvider`** for the EVM calls it answers in Infura's place,
 - **direct HTTP `fetch`** for the NFT API v3, and
 - **plain RPC URLs** for Solana.
 
 ## What we use it for
 
-| Area                    | Chains                                       | Transport                  | Purpose                                                 |
-| ----------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------- |
-| NFT API v3              | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | HTTP `fetch`               | NFT ownership, metadata, contracts, spam classification |
-| JSON-RPC                | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | viem `PublicClient` (HTTP) | Transaction lookup, receipt polling                     |
-| WebSocket subscriptions | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | WebSocket                  | Real-time mined / pending transaction notifications     |
-| JSON-RPC                | Solana (mainnet + devnet)                    | HTTP only                  | General-purpose Solana RPC (balances, accounts, txs, …) |
+| Area                    | Chains                                       | Transport                          | Purpose                                                 |
+| ----------------------- | -------------------------------------------- | ---------------------------------- | ------------------------------------------------------- |
+| NFT API v3              | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | HTTP `fetch`                       | NFT ownership, metadata, contracts, spam classification |
+| JSON-RPC                | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | viem `PublicClient` (HTTP)         | Transaction lookup, receipt polling                     |
+| WebSocket subscriptions | EVM (Ethereum, Arbitrum, Base, Polygon, BSC) | WebSocket                          | Real-time mined / pending transaction notifications     |
+| JSON-RPC fallback       | EVM (every network Infura hosts)             | ethers.js `JsonRpcProvider` (HTTP) | Asked when Infura fails a call an EVM send depends on   |
+| JSON-RPC                | Solana (mainnet + devnet)                    | HTTP only                          | General-purpose Solana RPC (balances, accounts, txs, …) |
 
 ## EVM — NFT API v3
 
@@ -46,6 +48,33 @@ subscriptions use the Alchemy WebSocket endpoint.
 - `alchemy_minedTransactions` (WS) — newly mined transactions, optionally filtered
   by recipient address.
 - `alchemy_pendingTransactions` (WS) — mempool notifications filtered by recipient.
+
+## EVM — fallback for Infura
+
+When [Infura](./infura.md) fails a call an EVM send depends on, `InfuraProvider`
+(`src/frontend/src/eth/providers/infura.providers.ts`) asks the same question over
+the network's Alchemy JSON-RPC URL, through the ethers.js `JsonRpcProvider` that
+`ethersFallbackProvider` (`src/frontend/src/eth/providers/ethers.providers.ts`)
+builds. Alchemy is asked only after Infura answers with an error or gives no answer
+in time, never alongside it.
+
+- **Nonce** — `eth_getTransactionCount` with the `pending` tag, when Infura did not
+  answer it within 10 s (`INFURA_READ_TIMEOUT_MILLISECONDS`). The `latest` count,
+  which no send signs with, is not handed over.
+- **Submission** — `eth_sendRawTransaction` with the same signed bytes, when
+  Infura did not accept them within 30 s (`INFURA_SUBMISSION_TIMEOUT_MILLISECONDS`).
+  If Alchemy fails too, `eth_getTransactionByHash` (10 s,
+  `INFURA_READ_TIMEOUT_MILLISECONDS`) settles whether the network has the
+  transaction anyway before the send is reported as failed.
+- **Fee data** — the calls behind ethers' `getFeeData` (`eth_getBlockByNumber`,
+  `eth_maxPriorityFeePerGas`, `eth_gasPrice`), when Infura did not answer within
+  10 s. Gas estimation is not handed over.
+
+A network Infura does not host (Robinhood Chain) is already read over this URL and
+has no fallback. `ALCHEMY_EVM_FALLBACK_ENABLED`
+(`src/frontend/src/env/rest/alchemy.env.ts`) switches the fallback off in code.
+Each use is tracked as a `provider_fallback` event — see
+[`PRODUCT.md`](../PRODUCT.md#provider-fallback-tracking).
 
 ## Solana — HTTP RPC only
 

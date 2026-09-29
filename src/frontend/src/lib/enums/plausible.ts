@@ -27,6 +27,7 @@ export enum PLAUSIBLE_EVENTS {
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
 	HELP = 'help',
 	TIP = 'tip',
+	PROVIDER_FALLBACK = 'provider_fallback',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
@@ -79,7 +80,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
 	HELP = 'help',
-	TIPS = 'tips'
+	TIPS = 'tips',
+	PROVIDERS = 'providers'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -124,6 +126,13 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_HELP {
 	NETWORK_EXPLORERS = 'network_explorers',
 	PROVIDER_EXPLORERS = 'provider_explorers',
 	ICPSWAP_WITHDRAWAL = 'icpswap_withdrawal'
+}
+
+// The call an EVM send asked a second provider for, after the first failed it.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_PROVIDERS {
+	SUBMISSION = 'submission',
+	NONCE = 'nonce',
+	FEE = 'fee'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {

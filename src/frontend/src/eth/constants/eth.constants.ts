@@ -16,6 +16,13 @@ export const ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR = 200_000n;
 export const ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER = 3n;
 export const ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER = 10n;
 
+// How long OISY waits for Infura before it asks Alchemy the same question instead (see
+// `InfuraProvider`). Left to ethers, a call that never answers is given five minutes, all of which
+// the send spends on its progress step. Both are safe to cut short: a read changes nothing, and a
+// signed transaction handed to a second provider is the same transaction, mined at most once.
+export const INFURA_READ_TIMEOUT_MILLISECONDS = 10_000;
+export const INFURA_SUBMISSION_TIMEOUT_MILLISECONDS = 30_000;
+
 // Exponential-backoff retry schedule for transaction-fee fetches that fail (e.g. a transient
 // network loss while OISY is backgrounded on mobile). See `EthFeeContext`.
 export const ETH_FEE_RETRY_BASE_DELAY = 2_000;

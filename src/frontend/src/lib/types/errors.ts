@@ -35,6 +35,10 @@ export class InvalidMetadataImageUrl extends NftError {}
 
 export class AuthClientNotInitializedError extends Error {}
 
+// A call that did not settle within the time it was given. It says nothing about the outcome: the
+// call itself carries on, and may still succeed or fail after this was raised.
+export class TimeoutError extends Error {}
+
 /**
  * A swap quote provider refused the requested amount as below its minimum.
  *

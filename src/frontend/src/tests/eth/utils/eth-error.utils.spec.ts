@@ -1,5 +1,11 @@
-import { mapEthereumErrorMsg, toastEthereumTransactionError } from '$eth/utils/eth-error.utils';
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
+import {
+	isEthereumNodeRefusal,
+	mapEthereumErrorMsg,
+	toastEthereumTransactionError
+} from '$eth/utils/eth-error.utils';
 import * as toasts from '$lib/stores/toasts.store';
+import { TimeoutError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 
 describe('eth-error.utils', () => {
@@ -83,12 +89,76 @@ describe('eth-error.utils', () => {
 			expect(mapEthereumErrorMsg(err)).toBeUndefined();
 		});
 
+		it('says the transaction was not sent when its nonce could not be read', () => {
+			expect(mapEthereumErrorMsg(new EthNonceReadError(new Error('Internal error')))).toBe(
+				en.send.error.ethereum_transaction_not_sent
+			);
+		});
+
+		it('says the outcome is unknown when every provider failed the submission', () => {
+			expect(
+				mapEthereumErrorMsg(new EthSubmissionUnconfirmedError(new Error('Internal error')))
+			).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
+		it('still recognises either when a caller wraps it again', () => {
+			const err = new Error('sending the transaction failed', {
+				cause: new EthSubmissionUnconfirmedError(new Error('Internal error'))
+			});
+
+			expect(mapEthereumErrorMsg(err)).toBe(en.send.error.ethereum_transaction_unconfirmed);
+		});
+
 		it('leaves an error it cannot explain to the caller', () => {
 			expect(mapEthereumErrorMsg(new Error('nonce too low'))).toBeUndefined();
 
 			expect(mapEthereumErrorMsg('boom')).toBeUndefined();
 
 			expect(mapEthereumErrorMsg(undefined)).toBeUndefined();
+		});
+	});
+
+	describe('isEthereumNodeRefusal', () => {
+		it('recognises the node refusing a submission with a reason', () => {
+			expect(isEthereumNodeRefusal(gasRequiredExceedsAllowance)).toBeTruthy();
+		});
+
+		it.each(['INSUFFICIENT_FUNDS', 'NONCE_EXPIRED', 'REPLACEMENT_UNDERPRICED'])(
+			'recognises ethers own verdict %s',
+			(code) => {
+				expect(isEthereumNodeRefusal(Object.assign(new Error(code), { code }))).toBeTruthy();
+			}
+		);
+
+		it('follows the cause chain', () => {
+			const err = new Error('sending the transaction failed', {
+				cause: gasRequiredExceedsAllowance
+			});
+
+			expect(isEthereumNodeRefusal(err)).toBeTruthy();
+		});
+
+		it('does not count a provider failing the request as a refusal', () => {
+			// A provider's own internal error, as ethers hands it over: nothing in it is about the
+			// transaction, so another node may well accept the same bytes.
+			const internalError = Object.assign(
+				new Error(
+					'could not coalesce error (error={ "code": -32603, "message": "Internal error" }, payload={ "id": 91, "jsonrpc": "2.0", "method": "eth_sendRawTransaction" }, code=UNKNOWN_ERROR, version=6.17.0)'
+				),
+				{ code: 'UNKNOWN_ERROR', error: { code: -32603, message: 'Internal error' } }
+			);
+
+			expect(isEthereumNodeRefusal(internalError)).toBeFalsy();
+		});
+
+		it('does not count a call that ran out of time as a refusal', () => {
+			expect(isEthereumNodeRefusal(new TimeoutError())).toBeFalsy();
+		});
+
+		it('does not count anything that is not an error record', () => {
+			expect(isEthereumNodeRefusal('nonce too low')).toBeFalsy();
+
+			expect(isEthereumNodeRefusal(undefined)).toBeFalsy();
 		});
 	});
 
@@ -109,6 +179,19 @@ describe('eth-error.utils', () => {
 			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.send.error.ethereum_insufficient_funds },
 				err: gasRequiredExceedsAllowance
+			});
+
+			expect(toasts.toastsError).not.toHaveBeenCalled();
+		});
+
+		it('shows an unknown outcome on its own, without the provider text', () => {
+			const err = new EthSubmissionUnconfirmedError(new Error('Internal error'));
+
+			toastEthereumTransactionError({ err, fallbackMsg: en.send.error.unexpected });
+
+			expect(toasts.toastsErrorNoTrace).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.send.error.ethereum_transaction_unconfirmed },
+				err
 			});
 
 			expect(toasts.toastsError).not.toHaveBeenCalled();

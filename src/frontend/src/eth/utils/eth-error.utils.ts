@@ -1,3 +1,4 @@
+import { EthNonceReadError, EthSubmissionUnconfirmedError } from '$eth/types/send';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { nonNullish } from '@dfinity/utils';
@@ -72,8 +73,46 @@ const isInsufficientBalanceError = (err: unknown): boolean =>
 			record.code === ETHERS_INSUFFICIENT_FUNDS_CODE || isNodeInsufficientBalanceAnswer(record)
 	);
 
+// Ethers' own verdicts for a node that judged a transaction and turned it down.
+const ETHERS_REFUSAL_CODES: string[] = [
+	ETHERS_INSUFFICIENT_FUNDS_CODE,
+	'NONCE_EXPIRED',
+	'REPLACEMENT_UNDERPRICED'
+];
+
 /**
- * Maps an error raised while broadcasting an Ethereum or EVM transaction to a user-friendly message.
+ * Whether a failed submission is the node refusing the transaction, rather than the provider
+ * failing to serve the request.
+ *
+ * A refusal is an answer about the transaction, and it holds whichever node gives it: a submission
+ * is answered with -32000 and the reason once the node has judged it. A bare internal error, a rate
+ * limit or a timeout says only that one provider did not serve the call, which makes it the least
+ * useful thing to report when another provider has stated a reason.
+ */
+export const isEthereumNodeRefusal = (err: unknown): boolean =>
+	collectErrorRecords({ err }).some(
+		({ code }) =>
+			code === JSON_RPC_SERVER_ERROR_CODE ||
+			(typeof code === 'string' && ETHERS_REFUSAL_CODES.includes(code))
+	);
+
+// Whether the error, or one it wraps, is of the given kind: a caller may wrap a send's error again.
+const isErrorOfKind = ({
+	err,
+	kind
+}: {
+	err: unknown;
+	kind: typeof EthNonceReadError | typeof EthSubmissionUnconfirmedError;
+}): boolean => collectErrorRecords({ err }).some((record) => record instanceof kind);
+
+/**
+ * Maps an error raised by an Ethereum or EVM send to a user-friendly message.
+ *
+ * What a message may claim depends on how far the transaction got. One whose nonce could not be read
+ * was never signed, so it was not sent and retrying it is safe. One whose submission every provider
+ * failed without a word may have reached the network all the same, and a retry would be signed with
+ * the next nonce, so the message sends the user to their activity first and never says it was not
+ * sent.
  *
  * Resolves i18n strings imperatively so callers don't need to pass them. Returns `undefined` when
  * the error is not one we can explain, allowing callers to fall through to their own generic
@@ -83,6 +122,14 @@ export const mapEthereumErrorMsg = (err: unknown): string | undefined => {
 	const {
 		send: { error }
 	} = get(i18n);
+
+	if (isErrorOfKind({ err, kind: EthNonceReadError })) {
+		return error.ethereum_transaction_not_sent;
+	}
+
+	if (isErrorOfKind({ err, kind: EthSubmissionUnconfirmedError })) {
+		return error.ethereum_transaction_unconfirmed;
+	}
 
 	if (isInsufficientBalanceError(err)) {
 		return error.ethereum_insufficient_funds;

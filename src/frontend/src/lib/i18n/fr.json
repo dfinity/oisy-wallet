@@ -1127,6 +1127,8 @@
 			"unexpected_utxos_fee": "Une erreur s'est produite lors du calcul des frais de transaction.",
 			"unable_to_retrieve_amount": "n/d (impossible à récupérer)",
 			"ethereum_insufficient_funds": "",
+			"ethereum_transaction_not_sent": "La transaction n'a pas été envoyée : nous n'avons pas pu joindre le réseau pour la préparer. Vous pouvez réessayer en toute sécurité.",
+			"ethereum_transaction_unconfirmed": "Nous n'avons pas pu confirmer si la transaction a atteint le réseau. Elle peut encore aboutir, vérifiez donc votre activité avant de la renvoyer.",
 			"solana_transaction_expired": "Votre transaction n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au montant recommandé le plus récent, veuillez donc réessayer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez attendre quelques secondes, puis vérifier la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
 			"solana_insufficient_funds": "Le solde de votre token est insuffisant pour effectuer cette transaction. Votre solde a peut-être changé depuis son dernier affichage.",

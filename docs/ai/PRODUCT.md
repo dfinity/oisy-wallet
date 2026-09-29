@@ -148,6 +148,12 @@ Withdrawal events carry **no** `token_amount` and no `token_usd_value`. A strand
 
 The same invariant keeps the destination URL out of both `explorer` subcontexts, unlike `contact`: every explorer URL on those two cards embeds a wallet address. The provider and the network carry the whole product signal — which explorer users reach for, and for which chain — with none of the identity.
 
+### Provider fallback tracking
+
+Every call an EVM send hands to Alchemy after Infura failed it emits one structured `provider_fallback` event under `event_context: providers`. `event_subcontext` names the call that was handed over (`submission`, `nonce` or `fee`), `event_trigger` says why (`error` when Infura answered with one, `timeout` when it did not answer in time), `event_key: network` and `event_value` name the network, and `result_status` is `success` when Alchemy delivered and `error` when it did not either. A submission Alchemy failed that the network turns out to know counts as a `success`.
+
+The event carries no address, no transaction hash and no amount: each would tie it to one wallet, which invariant 3 in [`analytics.md`](frontend/analytics.md) forbids, and the question it answers — how often a provider fails a send, on which call and network — needs none of them.
+
 ---
 
 ## Tokens
@@ -190,6 +196,12 @@ The send flow says so twice. On the address step, entering such an address raise
 Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
 
 Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+### When an Ethereum send fails
+
+When an Ethereum or EVM send fails, what OISY says depends on how far the transaction got. If the network could not be reached to read the transaction's nonce, the transaction was never signed, so the message says it was not sent and that trying again is safe. If a node refused the transaction with a reason, such as a balance that cannot cover it, the message states that reason. If every provider failed the submission without an answer, OISY cannot know whether the network received the transaction, and the message says exactly that: it may still go through, so the user should check their activity before sending it again. It never says such a transaction was not sent, because a new attempt is signed with the next nonce, and if the first one did get through, both would execute and the user would pay twice.
+
+The send, convert, swap and AI assistant flows show these messages, and so do WalletConnect transaction requests, which before showed a generic WalletConnect error followed by the provider's raw answer; the dApp still receives a rejection. A failure OISY cannot explain keeps its flow's generic message.
 
 ---
 
@@ -453,13 +465,27 @@ Requests are still handled **one at a time**: while a request from one dApp is u
 
 When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
 
+When Infura, OISY's primary EVM provider, fails that fee read, or gives no answer within 10 seconds, OISY reads the fee from Alchemy instead, computed the same way, so a failing provider no longer leaves a send or a WalletConnect request without a fee. If both fail, the retries carry on as before. Gas estimation stays with Infura.
+
 A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
 The fee a send quotes is what the transaction is **expected to cost**, not the most it could cost. Ethereum charges the network's own base fee plus whatever tip the sender adds, and refunds the difference between that and the ceiling the sender authorised; it also refunds gas the transaction did not use. Quoting the ceiling would overstate the price, often close to double for a token transfer, because the ceiling deliberately carries headroom for a base-fee rise and because token transfers pad their gas limit. The ceiling still decides whether a send is **affordable**: the balance checks and the "max" amount button hold the user to the worst case, so a send can never start out payable and end up short. When the network does not report a base fee, the quote falls back to the ceiling, since overstating the cost is safer than showing none. The send flow and WalletConnect transaction requests quote an expected cost; swap, convert and stake still quote the maximum. This is currently limited to local and staging builds: beta and production still quote the maximum everywhere, unchanged.
 
+### Transaction nonce
+
+Every Ethereum or EVM transaction carries a nonce, the account's next sequence number, and the network runs an account's transactions strictly in that order. OISY reads it right before signing, as the pending count: the next number after every transaction the provider knows of, pending ones included. When Infura fails that read, or gives no answer within 10 seconds, OISY reads the same count from Alchemy instead, so a failing provider no longer stops a send before it is signed. If both fail, the send stops before anything is signed, and nothing has left the wallet. The confirmed count, which a Velora swap reads to tell whether its transaction was replaced, is no send's nonce and stays with Infura alone.
+
 ### Transaction priority
 
 An Ethereum or EVM send lets the user pick how fast it should confirm: **slow**, **standard** or **fast**. This is currently limited to local and staging builds; beta and production keep the previous single-speed form. Standard is the default and the recommendation, and the choice lasts for that one send rather than being remembered. Each option is priced against the same transaction, so the amounts differ only by the tip the sender is willing to add, which is the part of the fee they actually control. That difference is quoted in gwei, a billionth of the native token, because in the token's own units a whole fee is a few millionths and the three options separate only in the eighth decimal; the fiat value beside each one is the same amount in money. The fee row itself stays in the token, since it quotes a single amount with nothing beside it to compare. Picking a different speed re-prices from the sample already in hand rather than asking the network again, so the quoted fee updates immediately. Whatever is chosen is what gets signed. On a small screen the options open in a sheet; on a large one they expand in place. Where the network reports no choice, the row does not appear and the send behaves as it did before. The same choice is offered when a connected dApp asks the wallet to sign a transaction, on every request type it can ask for, since the speed is a property of the transaction rather than of what the transaction does. There the options are priced against the gas limit the dApp asked for, which is the limit that gets signed, so they agree with the fee quoted beneath them. Swaps, conversions and staking still use the standard speed.
+
+### Submitting a transaction
+
+A signed Ethereum or EVM transaction is handed to Infura, OISY's primary EVM provider, for the network. When Infura does not accept it — it answers with an error, or gives no answer within 30 seconds — OISY hands **the same signed transaction** to Alchemy instead. That is safe by construction: the signed bytes fix the transaction's nonce and hash, so the network mines at most one copy however many providers see it, and a resubmission can never become a second payment. Alchemy is asked only after Infura fails, so a healthy Infura is the only provider a send talks to.
+
+An error from a provider does not prove the transaction went nowhere: Infura can pass it on and still fail the request, and a node answers a transaction it already holds with an error of its own. So before a submission is reported as failed, OISY asks Alchemy whether the network knows the transaction, and if it does, the send succeeded. When a provider refuses the transaction with a reason — a balance that cannot cover it, a nonce already used — that refusal is the error the send reports, rather than the other provider's failure to serve the request.
+
+This covers every submission OISY makes itself: send, convert, swap, approvals, ERC-4626 deposits and withdrawals, NFT transfers and WalletConnect, whose dApp receives the hash of that one transaction whichever provider accepted it. Open Crypto Pay is the exception: it hands the signed transaction to the payment provider, which submits it itself. A network Infura does not host, such as Robinhood Chain, is already read over Alchemy and has no second provider to ask. The fallback can be switched off in code, which returns every submission to Infura alone, with no time limit of OISY's own.
 
 ---
 
