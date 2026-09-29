@@ -3,14 +3,15 @@ use std::time::Duration;
 use candid::{Nat, Principal};
 use pretty_assertions::assert_eq;
 use shared::types::{
+    account::XrpAddress,
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData, NearIntentsData,
         OisyTradeData, OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
-        VeloraData, VeloraSwapMode, XrpData,
+        VeloraData, VeloraSwapMode, XrpData, XrpTrustLineChange, XrpTrustSetData,
     },
-    custom_token::ErcTokenId,
+    custom_token::{ErcTokenId, XrpCurrencyCode},
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
         GetActiveUserTransactionsResult,
@@ -589,6 +590,63 @@ fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
 
     // And the first row is the only one stored.
     assert_eq!(list_active(&pic, user).len(), 1);
+}
+
+// A `TrustSet` takes the account's `Sequence` like a payment, so an open one refuses the next
+// payment from its address through the real endpoint, and the new variant survives the round
+// trip through Candid and stable memory.
+#[test]
+fn open_xrp_trust_set_refuses_a_payment_from_the_same_address() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let trust_set = ActiveUserTransactionData::XrpTrustSet(XrpTrustSetData {
+        token: TokenId::XrpTrustLineMainnet(
+            XrpCurrencyCode("524C555344000000000000000000000000000000".to_string()),
+            XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De".to_string()),
+        ),
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        change: XrpTrustLineChange::Add,
+        fee: Nat::from(12u64),
+    });
+    let payment = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: None,
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    let create = |id: &str, data: ActiveUserTransactionData| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data,
+                external_refs: xrp_refs(),
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    match create(TX_ID, trust_set.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => assert_eq!(tx.data, trust_set),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    match create("22222222-2222-4222-8222-222222222222", payment) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, trust_set);
 }
 
 /// The two refs an XRP row is polled with, at the shapes they really have.
