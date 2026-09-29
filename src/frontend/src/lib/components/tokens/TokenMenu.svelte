@@ -11,7 +11,8 @@
 		networkEthereum,
 		networkEvm,
 		networkICP,
-		networkSolana
+		networkSolana,
+		networkXrp
 	} from '$lib/derived/network.derived';
 	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -60,7 +61,9 @@
 					? modalStore.openBtcToken
 					: $networkSolana
 						? modalStore.openSolToken
-						: () => {};
+						: $networkXrp
+							? modalStore.openXrpToken
+							: () => {};
 		fn({
 			id: openModalId,
 			data: fromRoute

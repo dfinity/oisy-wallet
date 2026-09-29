@@ -1,5 +1,5 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
-import { MILLISECONDS_IN_DAY, SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
+import { BETA, MILLISECONDS_IN_DAY, PROD, SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { Currency } from '$lib/enums/currency';
 import type { XdrBasketCurrency } from '$lib/types/exchange';
 
@@ -13,11 +13,16 @@ import type { XdrBasketCurrency } from '$lib/types/exchange';
  * When the backend exchange refresh is enabled, the frontend can safely fetch more frequently
  * because the backend already caches exchange rates at a controlled interval.
  * This allows the frontend to simply retrieve cached data without increasing load on external APIs.
+ *
+ * Outside production and beta, the frontend provider path syncs every 30 minutes instead of 5 to save CoinGecko
+ * monthly quota: the other deployments do not need fresh prices.
  */
 export const getSyncExchangeTimerInterval = (backendEnabled: boolean): number =>
 	backendEnabled
 		? SECONDS_IN_MINUTE * 1000 // 1 minute
-		: SECONDS_IN_MINUTE * 1000 * 5; // 5 minutes
+		: PROD || BETA
+			? SECONDS_IN_MINUTE * 1000 * 5 // 5 minutes
+			: SECONDS_IN_MINUTE * 1000 * 30; // 30 minutes
 
 /**
  * @deprecated Prefer `getSyncExchangeTimerInterval(runtimeFlag)`. Kept as a build-time default
