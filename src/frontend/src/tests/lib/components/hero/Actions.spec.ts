@@ -1,4 +1,5 @@
 import * as cyclesMintEnv from '$env/cycles-mint.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -348,6 +349,31 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(cyclesMintButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	// The XRP send flow moves native XRP only; offered for a trust-line token it would send XRP.
+	describe('send on an XRP Ledger trust-line token page', () => {
+		const setTokenPage = (token: typeof RLUSD_TOKEN | typeof XRP_TOKEN) => {
+			setTransactionsPage();
+			mockPage.mockToken(token);
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(token));
+		};
+
+		it('should hide Send on a trust-line token page', () => {
+			setTokenPage(RLUSD_TOKEN);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should keep Send on the XRP page', () => {
+			setTokenPage(XRP_TOKEN);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
 		});
 	});
 });
