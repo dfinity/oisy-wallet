@@ -4,7 +4,7 @@ import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 import type { Network } from '$lib/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render } from '@testing-library/svelte';
+import { render, screen } from '@testing-library/svelte';
 
 describe('AddTokenByNetwork', () => {
 	const renderComponent = (network?: Network) =>
@@ -43,7 +43,9 @@ describe('AddTokenByNetwork', () => {
 		const { container } = renderComponent(XRP_MAINNET_NETWORK);
 
 		expect(container).toHaveTextContent(en.tokens.manage.text.network);
-		expect(container).toHaveTextContent(en.tokens.import.text.custom_tokens_not_supported_yet);
+		expect(screen.getByRole('status')).toHaveTextContent(
+			en.tokens.import.text.custom_tokens_not_supported_yet
+		);
 	});
 
 	it('should show no unsupported-network text when no network is picked', () => {
@@ -52,5 +54,11 @@ describe('AddTokenByNetwork', () => {
 		expect(container).toHaveTextContent(en.tokens.manage.placeholder.select_network);
 		expect(container).not.toHaveTextContent(en.tokens.import.text.custom_tokens_not_supported);
 		expect(container).not.toHaveTextContent(en.tokens.import.text.custom_tokens_not_supported_yet);
+	});
+
+	it('should mount the status region before a network is picked', () => {
+		renderComponent();
+
+		expect(screen.getByRole('status')).toBeEmptyDOMElement();
 	});
 });
