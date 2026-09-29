@@ -57,6 +57,7 @@ export interface Modal<T> {
 		| 'btc-token'
 		| 'ic-token'
 		| 'sol-token'
+		| 'xrp-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
@@ -144,6 +145,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openXrpToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openReceiveBitcoin: (id: symbol) => void;
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
@@ -252,6 +254,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openSolToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('sol-token')
+		),
+		openXrpToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('xrp-token')
 		),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
