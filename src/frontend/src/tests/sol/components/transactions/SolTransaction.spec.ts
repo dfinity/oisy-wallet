@@ -249,7 +249,11 @@ describe('SolTransaction', () => {
 			{ kind: 'unwrap', account: mockAtaAddress, returned: 502_039_280n }
 		];
 
-		const summary = deriveSolTransactionSummary({ netChanges, instructions });
+		const summary = deriveSolTransactionSummary({
+			netChanges,
+			instructions,
+			userAddress: mockSolAddress
+		});
 
 		// Shaped as the service shapes a swap: typed by its outgoing half, valued by the SOL spent.
 		const derived: SolTransactionUi = {
