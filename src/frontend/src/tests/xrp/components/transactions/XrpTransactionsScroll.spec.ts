@@ -40,6 +40,8 @@ describe('XrpTransactionsScroll', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		vi.mocked(loadOlderXrpTransactions).mockResolvedValue({ success: false });
+
 		mockAuthStore();
 
 		token.set(XRP_TOKEN);
@@ -82,25 +84,21 @@ describe('XrpTransactionsScroll', () => {
 		expect(loadOlderXrpTransactions).toHaveBeenCalledOnce();
 	});
 
-	// Rows the micro-transaction filter hides do not move the end of the list, so only the reported
-	// progress asks for the next page.
-	it('should ask for the next page when the pager added rows', async () => {
-		vi.mocked(loadOlderXrpTransactions).mockImplementationOnce(() => {
-			xrpTransactionsStore.append({
-				tokenId: XRP_TOKEN.id,
-				transactions: [{ data: { ...mockTransaction, id: 'HASH2' }, certified: false }]
-			});
-
-			return Promise.resolve({ success: true });
-		});
+	// Neither rows the micro-transaction filter hides nor a round of pages that held no row move the
+	// end of the list, so only the pager's result asks for the next round.
+	it('should ask again after a round the pager got through, with or without a row', async () => {
+		vi.mocked(loadOlderXrpTransactions).mockResolvedValueOnce({ success: true });
 
 		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
 
 		await waitFor(() => expect(loadOlderXrpTransactions).toHaveBeenCalledTimes(2));
 	});
 
-	it('should not ask again when the pager added nothing', async () => {
-		vi.mocked(loadOlderXrpTransactions).mockResolvedValue({ success: true });
+	it('should not ask again at once after a failed page', async () => {
+		vi.mocked(loadOlderXrpTransactions).mockResolvedValue({
+			success: false,
+			err: new Error('account_tx down')
+		});
 
 		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
 

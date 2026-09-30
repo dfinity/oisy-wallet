@@ -5,7 +5,6 @@
 	import type { Token } from '$lib/types/token';
 	import { xrpTransactionsInitialized } from '$xrp/derived/xrp-transactions.derived';
 	import { loadOlderXrpTransactions } from '$xrp/services/xrp-history-pager.services';
-	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 	interface Props {
 		token: Token;
@@ -16,11 +15,10 @@
 
 	let disableInfiniteScroll = $state(false);
 
-	const loadedCount = (): number => ($xrpTransactionsStore?.[token.id] ?? []).length;
-
-	// Resolves whether the pager added rows, because the list's height does not show the ones the
-	// micro-transaction filter hides: a page of hidden dust left the end on screen, and nothing asked
-	// for the next page.
+	// Resolves whether the pager moved on, because the list's height shows neither rows the
+	// micro-transaction filter hides nor a round of pages that held no row at all: either left the end
+	// on screen, and nothing asked again. A failed page resolves `false` so it is not retried at once,
+	// and the end disables the scroll.
 	const onIntersect = async (): Promise<boolean> => {
 		// Only a gate, not a cursor: the pager keeps its own. Until the worker delivered its first
 		// page, paging would race it for the same newest rows. Initialized rather than non-empty: that
@@ -29,15 +27,13 @@
 			return false;
 		}
 
-		const loadedBefore = loadedCount();
-
-		await loadOlderXrpTransactions({
+		const { success } = await loadOlderXrpTransactions({
 			identity: $authIdentity,
 			token,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 
-		return loadedCount() > loadedBefore;
+		return success;
 	};
 </script>
 
