@@ -143,7 +143,11 @@ describe('computeLiquidiumBorrowPreview', () => {
 	});
 
 	it('reflects the current LTV / health for a zero borrow', () => {
-		const preview = computeLiquidiumBorrowPreview({ portfolio: portfolio(), newBorrowUsd: 0 });
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 0,
+			openingDebtFactor: 1
+		});
 
 		expect(preview.resultingLtvPercent).toBe(0);
 		expect(preview.projectedHealthPercent).toBe(100);
@@ -154,7 +158,8 @@ describe('computeLiquidiumBorrowPreview', () => {
 	it('includes existing debt in the resulting LTV', () => {
 		const preview = computeLiquidiumBorrowPreview({
 			portfolio: portfolio({ totalBorrowedUsd: 10_000, availableBorrowsUsd: 70_000 }),
-			newBorrowUsd: 30_000
+			newBorrowUsd: 30_000,
+			openingDebtFactor: 1
 		});
 
 		// (10k existing + 30k new) / 100k collateral.
@@ -163,7 +168,11 @@ describe('computeLiquidiumBorrowPreview', () => {
 
 	it('derives the health level from the projected health', () => {
 		// marginal = 76k / (100k × 0.8) = 95% → projected 5% → critical.
-		const preview = computeLiquidiumBorrowPreview({ portfolio: portfolio(), newBorrowUsd: 76_000 });
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 76_000,
+			openingDebtFactor: 1
+		});
 
 		expect(preview.projectedHealthPercent).toBeCloseTo(5, 5);
 		expect(preview.healthLevel).toBe('critical');
@@ -171,14 +180,45 @@ describe('computeLiquidiumBorrowPreview', () => {
 	});
 
 	it('is invalid when the borrow exceeds the borrowing power', () => {
-		const preview = computeLiquidiumBorrowPreview({ portfolio: portfolio(), newBorrowUsd: 90_000 });
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 90_000,
+			openingDebtFactor: 1
+		});
 
 		expect(preview.valid).toBeFalsy();
 	});
 
 	it('stays valid for a borrow exactly at the cap (rounding tolerance)', () => {
-		const preview = computeLiquidiumBorrowPreview({ portfolio: portfolio(), newBorrowUsd: 80_000 });
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 80_000,
+			openingDebtFactor: 1
+		});
 
 		expect(preview.valid).toBeTruthy();
+	});
+
+	it('counts the activation fee as new debt', () => {
+		// $40k principal at a 0.5% fee books $40.2k of debt.
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 40_000,
+			openingDebtFactor: 1.005
+		});
+
+		expect(preview.resultingLtvPercent).toBeCloseTo(40.2, 5);
+		// marginal = 40.2k / (100k × 0.8) = 50.25% → projected 49.75%.
+		expect(preview.projectedHealthPercent).toBeCloseTo(49.75, 5);
+	});
+
+	it('is invalid when principal fits the cap but principal plus fee does not', () => {
+		const preview = computeLiquidiumBorrowPreview({
+			portfolio: portfolio(),
+			newBorrowUsd: 79_900,
+			openingDebtFactor: 1.005
+		});
+
+		expect(preview.valid).toBeFalsy();
 	});
 });

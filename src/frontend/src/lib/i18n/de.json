@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Senden",
+			"xrp_sent": "Ihre XRP-Zahlung ist durchgegangen.",
+			"xrp_submitted": "Zahlung übermittelt. Sie wird meist innerhalb von Sekunden abgeschlossen — Sie können dies schließen und weitermachen.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Ziel",
@@ -1120,8 +1122,6 @@
 			"no_btc_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
 			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
 			"no_xrp_network_id": "Das aktuelle Netzwerk ($networkId) ist kein XRP Ledger-Netzwerk.",
-			"xrp_confirmation_failed": "Wir konnten nicht bestätigen, ob die Transaktion gesendet wurde. Sie kann noch durchgehen, senden Sie sie daher noch nicht erneut — Ihr Guthaben wird aktualisiert, falls sie durchgeht.",
-			"xrp_transaction_failed": "Die Transaktion wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
@@ -1132,7 +1132,10 @@
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
 			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
-			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen.",
+			"xrp_send_expired": "Ihre Sendung von $amount $symbol auf $network wurde nicht abgeschlossen: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und ein erneutes Senden ist sicher.",
+			"xrp_send_already_in_flight": "Eine frühere XRP-Zahlung von dieser Adresse ist noch nicht abgeschlossen. Es wurde nichts gesendet — warten Sie, bis sie fertig ist, das dauert etwa eine Minute, und senden Sie dann erneut.",
+			"xrp_send_not_guarded": "Wir konnten nicht prüfen, ob eine frühere XRP-Zahlung noch abgeschlossen wird. Es wurde nichts gesendet — versuchen Sie es in einem Moment erneut.",
+			"xrp_active_transaction_failed": "Ihre Sendung von $amount $symbol auf $network wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen ($result) – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"xrp_amount_exceeds_sendable": "Der Betrag passt nicht mehr. Ihr Konto muss seine XRP-Reserve zuzüglich der Netzwerkgebühr behalten, und beides kann sich während der Prüfung ändern. Es wurde nichts gesendet – verringern Sie den Betrag oder versuchen Sie es erneut, sobald die Kontodaten aktualisiert sind.",
 			"xrp_destination_unfunded": "Diese Adresse hat noch kein XRP-Konto. Dessen Erstellung erfordert eine erste Zahlung von mindestens $reserve XRP. Es wurde nichts gesendet – erhöhen Sie den Betrag oder senden Sie an eine bereits finanzierte Adresse.",
 			"xrp_destination_tag_required": "Diese Adresse erfordert ein Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut.",
@@ -1142,9 +1145,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Minten",
+			"minting": "Wird gemintet...",
+			"mint_review_subtitle": "Du mintest"
 		}
 	},
 	"burn": {
@@ -1152,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token minten",
+			"description": "Beim Minten entstehen zum Kurs des Netzwerks neue $destinationToken aus $sourceToken, und die $sourceToken werden verbrannt.",
+			"you_mint_estimate": "Du mintest (geschätzt)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Cycles-Ledger-Gebühr",
+			"minter": "Gemintet von",
+			"one_way": "Minten lässt sich nicht rückgängig machen: $destinationToken können nicht zurück in $sourceToken getauscht werden.",
+			"sending": "$token wird an den $minter gesendet...",
+			"minting": "$token wird gemintet...",
+			"minted": "$amount $token gemintet.",
+			"pending": "Das Minten dauert länger als üblich. Es wird im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
+		},
+		"error": {
+			"rate_unavailable": "Der $token-Kurs konnte nicht geladen werden. Bitte versuche es später erneut.",
+			"amount_too_small": "Der Betrag ist zu klein, um $token zu minten.",
+			"refunded": "Das Minten wurde rückerstattet. Deine $token wurden abzüglich $refundFee $token zurückgezahlt. Grund: $reason",
+			"refunded_nothing": "Das Minten wurde rückerstattet, aber die Gebühren haben den ganzen Betrag aufgebraucht: Es wurden keine $token zurückgezahlt. Grund: $reason",
+			"failed": "Das Minten ist fehlgeschlagen. Grund: $reason",
+			"not_started": "Das Minten konnte nicht gestartet werden. Es wurde nichts gesendet, bitte versuche es erneut.",
+			"transfer_failed": "Die $token-Überweisung ist fehlgeschlagen. Es wurde nichts gesendet.",
+			"unconfirmed": "Die $token-Überweisung konnte nicht bestätigt werden. Falls sie durchgegangen ist, wird das Minten im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
 		}
 	},
 	"active_user_transactions": {
@@ -1468,7 +1496,8 @@
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
 				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
-				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
+				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token.",
+				"custom_tokens_not_supported_yet": "OISY unterstützt in diesem Netzwerk noch keine benutzerdefinierten Token."
 			},
 			"error": {
 				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
@@ -2638,6 +2667,7 @@
 			"funds_delivered_to": "Gelder werden gesendet an",
 			"your_oisy_address": "Deine $oisy_short-Adresse",
 			"borrow_risk_info": "Eine Kreditaufnahme senkt deinen Gesundheitsfaktor. Fällt er zu weit, kann deine Sicherheit liquidiert werden.",
+			"borrow_activation_fee_info": "Liquidium berechnet zusätzlich zum geliehenen Betrag eine Aktivierungsgebühr von $fee %.",
 			"borrow_at_risk_warning": "Diese Kreditaufnahme senkt deinen Gesundheitsfaktor spürbar.",
 			"borrow_exceeds_power": "Der Betrag übersteigt deinen Kreditrahmen.",
 			"borrow_below_minimum": "Der Betrag liegt unter dem Mindestkreditbetrag.",

@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_sent": "Seu pagamento XRP foi concluído.",
+			"xrp_submitted": "Pagamento enviado. Normalmente é liquidado em segundos — você pode fechar isto e continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",
@@ -1120,8 +1122,6 @@
 			"no_btc_network_id": "A rede atual ($networkId) não é uma rede Bitcoin.",
 			"no_solana_network_id": "A rede atual ($networkId) não é uma rede Solana.",
 			"no_xrp_network_id": "A rede atual ($networkId) não é uma rede XRP Ledger.",
-			"xrp_confirmation_failed": "Não conseguimos confirmar se a transação foi enviada. Ela ainda pode ser concluída, portanto não a envie novamente por agora — seu saldo será atualizado se ela for concluída.",
-			"xrp_transaction_failed": "A transação foi processada pela rede, mas falhou, portanto seus fundos não foram enviados. A taxa de rede foi cobrada.",
 			"no_pending_bitcoin_transaction": "Ocorreu um erro ao carregar as transações Bitcoin pendentes. Por favor, tente novamente mais tarde.",
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
@@ -1132,7 +1132,10 @@
 			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
 			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
 			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado.",
-			"xrp_send_expired": "A transação não foi enviada: a rede não a incluiu em tempo. Nada saiu da sua carteira e é seguro criar uma nova.",
+			"xrp_send_expired": "Seu envio de $amount $symbol em $network não foi concluído: a rede não o incluiu em tempo. Nada saiu da sua carteira e é seguro enviar novamente.",
+			"xrp_send_already_in_flight": "Um pagamento XRP anterior deste endereço ainda não foi liquidado. Nada foi enviado — aguarde a conclusão, o que leva cerca de um minuto, e envie novamente.",
+			"xrp_send_not_guarded": "Não conseguimos verificar se um pagamento XRP anterior ainda está sendo liquidado. Nada foi enviado — tente novamente em um momento.",
+			"xrp_active_transaction_failed": "Seu envio de $amount $symbol em $network foi processado pela rede, mas falhou ($result), portanto seus fundos não foram enviados. A taxa de rede foi cobrada.",
 			"xrp_amount_exceeds_sendable": "O valor já não cabe. Sua conta precisa manter a reserva de XRP mais a taxa de rede, e ambas podem mudar enquanto você confere. Nada foi enviado — reduza o valor ou tente novamente quando os dados da conta forem atualizados.",
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
 			"xrp_destination_tag_required": "Este endereço exige uma tag de destino. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
@@ -1142,9 +1145,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Cunhar",
+			"minting": "Cunhando...",
+			"mint_review_subtitle": "Você cunha"
 		}
 	},
 	"burn": {
@@ -1152,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Cunhar $token",
+			"description": "A cunhagem cria novos $destinationToken a partir de $sourceToken à taxa da rede e queima os $sourceToken.",
+			"you_mint_estimate": "Você cunha (estimativa)",
+			"rate": "Taxa",
+			"cycles_ledger_fee": "Taxa do Cycles Ledger",
+			"minter": "Cunhado por",
+			"one_way": "A cunhagem não pode ser desfeita: os $destinationToken não podem ser convertidos de volta em $sourceToken.",
+			"sending": "Enviando $token para o $minter...",
+			"minting": "Cunhando $token...",
+			"minted": "$amount $token cunhados.",
+			"pending": "A cunhagem está demorando mais do que o normal. Ela será concluída em segundo plano: acompanhe-a nas transações ativas."
+		},
+		"error": {
+			"rate_unavailable": "Não foi possível carregar a taxa de $token. Tente novamente mais tarde.",
+			"amount_too_small": "O valor é pequeno demais para cunhar $token.",
+			"refunded": "A cunhagem foi reembolsada. Seus $token foram devolvidos, menos $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "A cunhagem foi reembolsada, mas as taxas consumiram todo o valor: nenhum $token foi devolvido. Motivo: $reason",
+			"failed": "A cunhagem falhou. Motivo: $reason",
+			"not_started": "Não foi possível iniciar a cunhagem. Nada foi enviado, tente novamente.",
+			"transfer_failed": "A transferência de $token falhou. Nada foi enviado.",
+			"unconfirmed": "Não foi possível confirmar a transferência de $token. Se ela foi concluída, a cunhagem terminará em segundo plano: acompanhe-a nas transações ativas."
 		}
 	},
 	"active_user_transactions": {
@@ -1468,7 +1496,8 @@
 				"info": "Os IDs dos canisters Ledger e Index geralmente estão disponíveis no site do projeto.",
 				"info_ext": "",
 				"info_index": "O ID do canister Index é opcional, mas sem ele, $oisy_short não pode exibir o histórico de transações.",
-				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
+				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados.",
+				"custom_tokens_not_supported_yet": "A OISY ainda não suporta tokens personalizados nesta rede."
 			},
 			"error": {
 				"loading_metadata": "O endereço fornecido não corresponde a um token válido na rede selecionada.",
@@ -2638,6 +2667,7 @@
 			"funds_delivered_to": "Fundos enviados para",
 			"your_oisy_address": "O teu endereço $oisy_short",
 			"borrow_risk_info": "Pedir emprestado reduz o teu fator de saúde. Se cair demasiado, a tua garantia pode ser liquidada.",
+			"borrow_activation_fee_info": "A Liquidium acrescenta uma taxa de ativação de $fee% ao montante emprestado.",
 			"borrow_at_risk_warning": "Este empréstimo reduz notavelmente o teu fator de saúde.",
 			"borrow_exceeds_power": "O montante excede a tua capacidade de empréstimo.",
 			"borrow_below_minimum": "O montante está abaixo do empréstimo mínimo.",

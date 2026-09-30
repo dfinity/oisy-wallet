@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Gửi",
+			"xrp_sent": "Giao dịch XRP của bạn đã thành công.",
+			"xrp_submitted": "Đã gửi giao dịch. Thường hoàn tất trong vài giây — bạn có thể đóng và tiếp tục.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Tới",
@@ -1120,8 +1122,6 @@
 			"no_btc_network_id": "Mạng hiện tại ($networkId) không phải là mạng Bitcoin.",
 			"no_solana_network_id": "Mạng hiện tại ($networkId) không phải là mạng Solana.",
 			"no_xrp_network_id": "Mạng hiện tại ($networkId) không phải là mạng XRP Ledger.",
-			"xrp_confirmation_failed": "Chúng tôi không thể xác nhận giao dịch đã được gửi hay chưa. Giao dịch vẫn có thể thành công, nên đừng gửi lại lúc này — số dư của bạn sẽ được cập nhật nếu thành công.",
-			"xrp_transaction_failed": "Giao dịch đã được mạng xử lý nhưng thất bại, nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"no_pending_bitcoin_transaction": "Đã xảy ra lỗi khi tải các giao dịch Bitcoin đang chờ xử lý. Vui lòng thử lại sau.",
 			"unexpected_utxos_fee": "Đã xảy ra lỗi khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "n/a (không thể lấy được)",
@@ -1132,7 +1132,10 @@
 			"solana_insufficient_funds_for_fee": "Số dư SOL của bạn không đủ để trang trải phí giao dịch.",
 			"solana_insufficient_funds_for_rent": "Số dư SOL của bạn không đủ để trang trải khoản thuê cần thiết cho việc tạo tài khoản.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ.",
-			"xrp_send_expired": "Giao dịch chưa được gửi: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và bạn có thể tạo giao dịch mới một cách an toàn.",
+			"xrp_send_expired": "Việc gửi $amount $symbol trên $network chưa hoàn tất: mạng không đưa nó vào kịp thời. Không có gì rời khỏi ví của bạn, và gửi lại là an toàn.",
+			"xrp_send_already_in_flight": "Một giao dịch XRP trước đó từ địa chỉ này chưa hoàn tất. Chưa có gì được gửi — hãy đợi giao dịch đó xong, mất khoảng một phút, rồi gửi lại.",
+			"xrp_send_not_guarded": "Chúng tôi không thể kiểm tra xem một giao dịch XRP trước đó có còn đang hoàn tất hay không. Chưa có gì được gửi — hãy thử lại sau một lát.",
+			"xrp_active_transaction_failed": "Việc gửi $amount $symbol trên $network đã được mạng xử lý nhưng thất bại ($result), nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"xrp_amount_exceeds_sendable": "Số tiền này không còn vừa nữa. Tài khoản của bạn phải giữ lại khoản dự trữ XRP cùng phí mạng, và cả hai đều có thể thay đổi trong lúc bạn xem lại. Chưa có gì được gửi — hãy giảm số tiền, hoặc thử lại khi thông tin tài khoản được làm mới.",
 			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP. Chưa có gì được gửi — hãy tăng số tiền, hoặc gửi tới một địa chỉ đã được kích hoạt.",
 			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",
@@ -1142,9 +1145,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Đúc",
+			"minting": "Đang đúc...",
+			"mint_review_subtitle": "Bạn đúc"
 		}
 	},
 	"burn": {
@@ -1152,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Đúc $token",
+			"description": "Việc đúc tạo ra $destinationToken mới từ $sourceToken theo tỷ giá của mạng và đốt số $sourceToken đó.",
+			"you_mint_estimate": "Bạn đúc (ước tính)",
+			"rate": "Tỷ giá",
+			"cycles_ledger_fee": "Phí Cycles Ledger",
+			"minter": "Đúc bởi",
+			"one_way": "Không thể hoàn tác việc đúc: không thể đổi $destinationToken ngược lại thành $sourceToken.",
+			"sending": "Đang gửi $token đến $minter...",
+			"minting": "Đang đúc $token...",
+			"minted": "Đã đúc $amount $token.",
+			"pending": "Việc đúc đang mất nhiều thời gian hơn bình thường. Nó sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
+		},
+		"error": {
+			"rate_unavailable": "Không thể tải tỷ giá $token. Vui lòng thử lại sau.",
+			"amount_too_small": "Số tiền quá nhỏ để đúc $token.",
+			"refunded": "Việc đúc đã được hoàn tiền. $token của bạn đã được trả lại, trừ $refundFee $token. Lý do: $reason",
+			"refunded_nothing": "Việc đúc đã được hoàn tiền, nhưng phí đã lấy hết toàn bộ số tiền: không có $token nào được trả lại. Lý do: $reason",
+			"failed": "Việc đúc thất bại. Lý do: $reason",
+			"not_started": "Không thể bắt đầu việc đúc. Không có gì được gửi, vui lòng thử lại.",
+			"transfer_failed": "Chuyển $token thất bại. Không có gì được gửi.",
+			"unconfirmed": "Không thể xác nhận việc chuyển $token. Nếu đã chuyển thành công, việc đúc sẽ hoàn tất trong nền: theo dõi trong các giao dịch đang hoạt động."
 		}
 	},
 	"active_user_transactions": {
@@ -1468,7 +1496,8 @@
 				"info": "ID canister ledger và index thường có sẵn trên trang web của dự án.",
 				"info_ext": "",
 				"info_index": "ID canister index là tùy chọn, nhưng nếu không có nó, $oisy_short không thể hiển thị lịch sử giao dịch.",
-				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
+				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh.",
+				"custom_tokens_not_supported_yet": "OISY hiện chưa hỗ trợ token tùy chỉnh trên mạng này."
 			},
 			"error": {
 				"loading_metadata": "Địa chỉ được chỉ định không phải là một token hợp lệ trong mạng đã chọn.",
@@ -2638,6 +2667,7 @@
 			"funds_delivered_to": "Tiền được gửi đến",
 			"your_oisy_address": "Địa chỉ $oisy_short của bạn",
 			"borrow_risk_info": "Vay tiền làm giảm hệ số sức khỏe của bạn. Nếu giảm quá thấp, tài sản thế chấp của bạn có thể bị thanh lý.",
+			"borrow_activation_fee_info": "Liquidium cộng thêm phí kích hoạt $fee% vào số tiền vay.",
 			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
 			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
 			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",

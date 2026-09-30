@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_sent": "Tu pago de XRP se completó.",
+			"xrp_submitted": "Pago enviado. Normalmente se liquida en segundos — puedes cerrar esto y continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",
@@ -1120,8 +1122,6 @@
 			"no_btc_network_id": "La red actual ($networkId) no es una red Bitcoin.",
 			"no_solana_network_id": "La red actual ($networkId) no es una red Solana.",
 			"no_xrp_network_id": "La red actual ($networkId) no es una red XRP Ledger.",
-			"xrp_confirmation_failed": "No pudimos confirmar si la transacción se envió. Todavía puede completarse, así que no la envíes de nuevo por ahora — tu saldo se actualizará si se completa.",
-			"xrp_transaction_failed": "La red procesó la transacción, pero falló, por lo que no se enviaron tus fondos. La comisión de red se cobró igualmente.",
 			"no_pending_bitcoin_transaction": "Se produjo un error al cargar las transacciones de Bitcoin pendientes. Por favor, inténtelo de nuevo más tarde.",
 			"unexpected_utxos_fee": "Algo salió mal al calcular la tarifa de la transacción.",
 			"unable_to_retrieve_amount": "n/d (no se puede recuperar)",
@@ -1132,7 +1132,10 @@
 			"solana_insufficient_funds_for_fee": "Su saldo de SOL no es suficiente para cubrir las tarifas de la transacción.",
 			"solana_insufficient_funds_for_rent": "Su saldo de SOL no es suficiente para cubrir el alquiler requerido para la creación de la cuenta.",
 			"fee_calc_unsupported_standard": "No se pudo calcular la tarifa porque el estándar de token proporcionado no es compatible.",
-			"xrp_send_expired": "La transacción no se envió: la red no la incluyó a tiempo. Nada salió de tu billetera y es seguro crear una nueva.",
+			"xrp_send_expired": "Tu envío de $amount $symbol en $network no se completó: la red no lo incluyó a tiempo. Nada salió de tu cartera y es seguro enviarlo de nuevo.",
+			"xrp_send_already_in_flight": "Un pago de XRP anterior desde esta dirección aún no se ha liquidado. No se envió nada — espera a que termine, lo que tarda alrededor de un minuto, y envíalo de nuevo.",
+			"xrp_send_not_guarded": "No pudimos comprobar si un pago de XRP anterior sigue liquidándose. No se envió nada — inténtalo de nuevo en un momento.",
+			"xrp_active_transaction_failed": "Tu envío de $amount $symbol en $network fue procesado por la red, pero falló ($result), por lo que no se enviaron tus fondos. La comisión de red se cobró igualmente.",
 			"xrp_amount_exceeds_sendable": "El importe ya no cabe. Tu cuenta debe conservar su reserva de XRP más la comisión de red, y ambas pueden cambiar mientras revisas. No se envió nada: reduce el importe o inténtalo de nuevo cuando se actualicen los datos de tu cuenta.",
 			"xrp_destination_unfunded": "Esta dirección aún no tiene una cuenta de XRP. Crearla requiere un primer pago de al menos $reserve XRP. No se envió nada: aumenta el importe o envía a una dirección que ya esté financiada.",
 			"xrp_destination_tag_required": "Esta dirección requiere una etiqueta de destino. No se envió nada: añade la etiqueta que te dio el servicio al que pagas y vuelve a enviar.",
@@ -1142,9 +1145,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Acuñar",
+			"minting": "Acuñando...",
+			"mint_review_subtitle": "Acuñas"
 		}
 	},
 	"burn": {
@@ -1152,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Acuñar $token",
+			"description": "Al acuñar se crean nuevos $destinationToken a partir de $sourceToken al tipo de la red, y los $sourceToken se queman.",
+			"you_mint_estimate": "Acuñas (estimación)",
+			"rate": "Tasa",
+			"cycles_ledger_fee": "Comisión del Cycles Ledger",
+			"minter": "Acuñado por",
+			"one_way": "La acuñación no se puede deshacer: los $destinationToken no se pueden volver a convertir en $sourceToken.",
+			"sending": "Enviando $token al $minter...",
+			"minting": "Acuñando $token...",
+			"minted": "Se acuñaron $amount $token.",
+			"pending": "La acuñación está tardando más de lo habitual. Se completará en segundo plano: puedes seguirla en las transacciones activas."
+		},
+		"error": {
+			"rate_unavailable": "No se pudo cargar la tasa de $token. Inténtalo de nuevo más tarde.",
+			"amount_too_small": "El importe es demasiado pequeño para acuñar $token.",
+			"refunded": "La acuñación fue reembolsada. Tus $token se devolvieron, menos $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "La acuñación fue reembolsada, pero las comisiones se llevaron todo el importe: no se devolvió ningún $token. Motivo: $reason",
+			"failed": "La acuñación falló. Motivo: $reason",
+			"not_started": "No se pudo iniciar la acuñación. No se envió nada, inténtalo de nuevo.",
+			"transfer_failed": "La transferencia de $token falló. No se envió nada.",
+			"unconfirmed": "No se pudo confirmar la transferencia de $token. Si se realizó, la acuñación se completará en segundo plano: puedes seguirla en las transacciones activas."
 		}
 	},
 	"active_user_transactions": {
@@ -1468,7 +1496,8 @@
 				"info": "Los ID de los canisters de Ledger e Índice suelen estar disponibles en el sitio web del proyecto.",
 				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
-				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados."
+				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados.",
+				"custom_tokens_not_supported_yet": "OISY aún no admite tokens personalizados en esta red."
 			},
 			"error": {
 				"loading_metadata": "La dirección especificada no es un token válido en la red seleccionada.",
@@ -2638,6 +2667,7 @@
 			"funds_delivered_to": "Fondos enviados a",
 			"your_oisy_address": "Tu dirección de $oisy_short",
 			"borrow_risk_info": "Pedir prestado reduce tu factor de salud. Si cae demasiado, tu garantía puede ser liquidada.",
+			"borrow_activation_fee_info": "Liquidium añade una comisión de activación del $fee% sobre el importe prestado.",
 			"borrow_at_risk_warning": "Este préstamo reduce notablemente tu factor de salud.",
 			"borrow_exceeds_power": "El importe supera tu capacidad de préstamo.",
 			"borrow_below_minimum": "El importe está por debajo del préstamo mínimo.",

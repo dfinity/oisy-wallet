@@ -1011,6 +1011,8 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"xrp_sent": "Your XRP payment went through.",
+			"xrp_submitted": "Payment submitted. It usually settles within seconds — you can close this and carry on.",
 			"send_token": "Send $token",
 			"send_unknown_token": "Send unknown token",
 			"destination": "Destination",
@@ -1121,8 +1123,6 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_xrp_network_id": "Current network ($networkId) is not an XRP Ledger network.",
-			"xrp_confirmation_failed": "We could not confirm whether the transaction was sent. It may still go through, so do not send it again yet — your balance will update if it does.",
-			"xrp_transaction_failed": "The transaction was processed by the network but failed, so your funds were not sent. The network fee was still charged.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
@@ -1133,7 +1133,10 @@
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
-			"xrp_send_expired": "The transaction was not sent: the network did not include it in time. Nothing left your wallet, and it is safe to create a new one.",
+			"xrp_send_expired": "Your send of $amount $symbol on $network was not completed: the network did not include it in time. Nothing left your wallet, and it is safe to send again.",
+			"xrp_send_already_in_flight": "An earlier XRP payment from this address has not settled yet. Nothing was sent — wait for it to finish, which takes about a minute, then send again.",
+			"xrp_send_not_guarded": "The wallet could not check whether an earlier XRP payment is still settling. Nothing was sent — try again in a moment.",
+			"xrp_active_transaction_failed": "Your send of $amount $symbol on $network was processed by the network but failed ($result), so your funds were not sent. The network fee was still charged.",
 			"xrp_amount_exceeds_sendable": "The amount no longer fits. Your account must keep its XRP reserve plus the network fee, and both can change while you review. Nothing was sent — lower the amount, or try again once your account details refresh.",
 			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
 			"xrp_destination_tag_required": "This address requires a destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
@@ -1153,6 +1156,31 @@
 			"burn": "Burn",
 			"burning": "Burning...",
 			"burn_review_subtitle": "You burn"
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Mint $token",
+			"description": "Minting creates new $destinationToken from $sourceToken at the network's rate, and burns the $sourceToken.",
+			"you_mint_estimate": "You mint (estimate)",
+			"rate": "Rate",
+			"cycles_ledger_fee": "Cycles ledger fee",
+			"minter": "Minted by",
+			"one_way": "Minting cannot be undone: $destinationToken cannot be turned back into $sourceToken.",
+			"sending": "Sending $token to the $minter...",
+			"minting": "Minting $token...",
+			"minted": "Minted $amount $token.",
+			"pending": "Your mint is taking longer than usual. It finishes in the background: follow it under Active transactions."
+		},
+		"error": {
+			"rate_unavailable": "The $token rate could not be loaded. Please try again later.",
+			"amount_too_small": "The amount is too small to mint $token.",
+			"refunded": "The mint was refunded. Your $token came back, minus $refundFee $token. Reason: $reason",
+			"refunded_nothing": "The mint was refunded, but its fees took the whole amount: no $token came back. Reason: $reason",
+			"failed": "The mint failed. Reason: $reason",
+			"not_started": "The mint could not be started. Nothing was sent, please try again.",
+			"transfer_failed": "The $token transfer failed. Nothing was sent.",
+			"unconfirmed": "The $token transfer could not be confirmed. If it went through, the mint finishes in the background: follow it under Active transactions."
 		}
 	},
 	"active_user_transactions": {
@@ -1469,7 +1497,8 @@
 				"info": "Ledger and Index canister IDs are usually available on the project’s website.",
 				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
-				"custom_tokens_not_supported": "The selected network does not support custom tokens."
+				"custom_tokens_not_supported": "The selected network does not support custom tokens.",
+				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -2639,6 +2668,7 @@
 			"funds_delivered_to": "Funds delivered to",
 			"your_oisy_address": "Your $oisy_short address",
 			"borrow_risk_info": "Borrowing reduces your health factor. If it falls too far your collateral can be liquidated.",
+			"borrow_activation_fee_info": "Liquidium adds an activation fee of $fee% on top of the borrowed amount.",
 			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
 			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
 			"borrow_below_minimum": "Amount is below the minimum borrow.",
