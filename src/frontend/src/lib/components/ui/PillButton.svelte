@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	interface Props {
 		selected?: boolean;
@@ -44,6 +45,12 @@
 		return () => observer.disconnect();
 	});
 
+	// An arc removed mid-run, e.g. by selecting the pill, never reports its end; without this the
+	// pill would stay marked as running and ignore every later pointer entry.
+	const clearRunningOnRemove: Attachment = () => () => {
+		running = false;
+	};
+
 	const replayLaps = ({ pointerType }: PointerEvent) => {
 		if (pointerType === 'touch' || running) {
 			return;
@@ -82,6 +89,7 @@
 		{#key laps}
 			<span
 				class="pill-lap"
+				{@attach clearRunningOnRemove}
 				aria-hidden="true"
 				onanimationend={() => (running = false)}
 				onanimationstart={() => (running = true)}

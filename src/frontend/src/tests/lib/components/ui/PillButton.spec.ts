@@ -182,6 +182,34 @@ describe('PillButton', () => {
 		expect(button.querySelector('.pill-lap')).not.toBe(runningLap);
 	});
 
+	it('should replay the border laps after the pill is selected mid-run and deselected', async () => {
+		const { container, rerender } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const runningLap = button.querySelector('.pill-lap');
+
+		assertNonNullish(runningLap);
+
+		await fireEvent.animationStart(runningLap);
+
+		await rerender({ selected: true });
+
+		expect(button.querySelector('.pill-lap')).toBeNull();
+
+		await rerender({ selected: false });
+
+		const lapAfterDeselect = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).not.toBe(lapAfterDeselect);
+	});
+
 	it('should not replay the border laps on touch', async () => {
 		const { container } = render(PillButton, {
 			props: { children: createTextSnippet('Test'), accent: true }
