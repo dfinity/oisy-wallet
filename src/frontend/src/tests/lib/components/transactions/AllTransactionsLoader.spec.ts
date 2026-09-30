@@ -660,7 +660,7 @@ describe('AllTransactionsLoader', () => {
 			certified: false
 		});
 
-		const renderWithControls = () => {
+		const renderWithControls = (transactions: AllTransactionUiWithCmp[] = mockTransactions) => {
 			let readControls: (() => LoaderControls) | undefined;
 
 			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
@@ -673,7 +673,7 @@ describe('AllTransactionsLoader', () => {
 				}
 			}));
 
-			const { rerender } = render(AllTransactionsLoader, { props: { ...props, children } });
+			const { rerender } = render(AllTransactionsLoader, { props: { transactions, children } });
 
 			return { controls: () => readControls?.(), rerender };
 		};
@@ -725,6 +725,36 @@ describe('AllTransactionsLoader', () => {
 
 			await waitFor(() => {
 				expect(controls()?.floor).toBe(normalizeTimestampToSeconds(olderTimestamp));
+			});
+		});
+
+		// Levelling waits for every store to load, and one that never did left the list with no floor
+		// at all.
+		describe('before levelling or a round sets a floor', () => {
+			// ICP's oldest row is older than Solana's, so Solana is the one that stops the list.
+			const icpRows = mockTransactions.filter(({ token: { id } }) => id === ICP_TOKEN.id);
+			const solRows = mockTransactions.filter(({ token: { id } }) => id === SOLANA_TOKEN.id);
+
+			beforeEach(() => {
+				vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+			});
+
+			it('should hand the children how far back every token with history left is loaded', async () => {
+				const { controls } = renderWithControls([...icpRows, ...solRows]);
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(timestampBuffer + 300n));
+				});
+			});
+
+			it('should switch to the floor of the first round', async () => {
+				const { controls } = renderWithControls([...icpRows, ...solRows]);
+
+				await controls()?.loadMore();
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(timestampBuffer + 100n));
+				});
 			});
 		});
 

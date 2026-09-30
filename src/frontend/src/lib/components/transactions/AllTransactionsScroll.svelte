@@ -19,8 +19,8 @@
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
 		/**
-		 * The floor every token is being paged down to, in seconds. Rows older than it are held back
-		 * until the list goes that far for every token.
+		 * How far back the list reaches, in seconds. Rows older than it are held back until the list
+		 * goes that far for every token.
 		 */
 		floor?: number;
 		children: Snippet;
@@ -61,10 +61,10 @@
 		dryAtLength = undefined;
 	});
 
-	// Only rows down to the floor. Levelling loads whole pages, so the tokens that had to reach it
-	// bring rows from beyond it, while the token whose own oldest row set it is not asked for more. Shown straight away, those rows left that token's older transactions out between
-	// them until the end of the list asked every chain again. Undated rows stay: there is nothing to
-	// hold them against.
+	// Only rows down to the floor. Tokens load whole pages, so some bring rows from beyond it while the
+	// token whose own oldest row set it has none there. Shown straight away, those rows left that
+	// token's older transactions out between them until the end of the list asked every chain again.
+	// Undated rows stay: there is nothing to hold them against.
 	let revealable = $derived.by(() => {
 		if (exhausted || isNullish(floor)) {
 			return sortedTransactions;

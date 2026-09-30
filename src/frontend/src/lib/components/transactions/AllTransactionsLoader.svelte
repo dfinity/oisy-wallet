@@ -27,9 +27,11 @@
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
 		/**
-		 * The floor every token is being levelled to, in seconds. It drops with every round, whatever a
-		 * single token does, so a token whose page failed or that reached the page cap can be short of
-		 * it until the next round. Absent until levelling first runs.
+		 * How far back the list reaches, in seconds. Until levelling or a first `loadMore` sets a floor,
+		 * it is how far back every token that still has history has loaded; from then on, the floor
+		 * every token is being levelled to, which drops with every round whatever a single token does,
+		 * so a token whose page failed or that reached the page cap can be short of it until the next
+		 * round. Absent while no token holds a dated row.
 		 */
 		floor?: number;
 	}
@@ -151,10 +153,10 @@
 	// the floor, lower it, and set every other token off again, until all of them had walked back to
 	// the start of their history.
 	//
-	// The list reveals rows down to it. It is the target rather than what every token has reached:
-	// holding the list at the token furthest behind froze it whenever one token stopped moving (pages
-	// that keep failing, or that hold only transactions the list does not show), and kept loading the
-	// others while showing nothing.
+	// Once set, the list reveals rows down to it. It is the target rather than what every token has
+	// reached: holding the list at the token furthest behind froze it whenever one token stopped moving
+	// (pages that keep failing, or that hold only transactions the list does not show), and kept
+	// loading the others while showing nothing.
 	let levelFloor = $state<number | undefined>();
 
 	// Tokens whose rows the floor already accounts for.
@@ -261,6 +263,37 @@
 		$enabledFungibleNetworkTokens.length > 0 &&
 			$enabledFungibleNetworkTokens.every(({ id }) => disableLoader[id] === true)
 	);
+
+	// Until a floor is set, how far back every token that still has history has loaded. Levelling
+	// only starts once every store has loaded, and one that never does left the list with no floor at
+	// all: tokens whose first page reached further back showed rows a token with a shorter one had not
+	// loaded yet. Each such token is complete down to its own oldest row, so the list is complete down
+	// to the newest of those. A token with nothing to page is left out: holding the list at its first
+	// page would stop it there for good. This only lasts until the first round, which starts once the
+	// end of the list is on screen, so a token that stops moving cannot hold the list after it.
+	let completeDownTo = $derived.by((): number | undefined => {
+		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
+
+		const oldestByToken = transactions.reduce<Map<TokenId, number>>(
+			(acc, { token: { id }, transaction: { timestamp } }) => {
+				if (!pagedTokenIds.has(id) || disableLoader[id] === true || isNullish(timestamp)) {
+					return acc;
+				}
+
+				const seconds = normalizeTimestampToSeconds(timestamp);
+				const oldest = acc.get(id);
+
+				if (isNullish(oldest) || seconds < oldest) {
+					acc.set(id, seconds);
+				}
+
+				return acc;
+			},
+			new Map()
+		);
+
+		return oldestByToken.size > 0 ? Math.max(...oldestByToken.values()) : undefined;
+	});
 </script>
 
-{@render children?.({ loadMore, exhausted, floor: levelFloor })}
+{@render children?.({ loadMore, exhausted, floor: levelFloor ?? completeDownTo })}
