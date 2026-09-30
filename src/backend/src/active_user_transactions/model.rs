@@ -47,21 +47,20 @@ pub fn create(
     validate_progress_step(request.progress_step.as_deref())?;
     validate_external_refs(&request.external_refs)?;
 
-    // Required here and not only in `validate_data`, which cannot see the refs:
-    // both values are derived from the signed blob before this call, so a row
-    // arriving without them describes a payment nothing could ever poll.
-    if matches!(request.data, ActiveUserTransactionData::Xrp(_)) {
+    if let Some(source_address) = xrp_payment_source(&request.data) {
+        // Required here and not only in `validate_data`, which cannot see the
+        // refs: both values are derived from the signed blob before this call, so
+        // a row arriving without them describes a payment nothing could ever poll.
         require_xrp_refs(&request.external_refs)?;
-    }
 
-    // An XRPL `Sequence` is a nonce, so at most one unresolved payment may exist
-    // per source address. The frontend refuses early too, but that check cannot
-    // be atomic with this create — between the two it reads the account, derives
-    // a signing key and takes a threshold signature, and a second tab can pass
-    // its own check inside that window. This call is the only place that sees the
-    // check and the write at once, so this is what actually holds the invariant.
-    if let ActiveUserTransactionData::Xrp(d) = &request.data {
-        if has_open_xrp_send(map, principal, &d.source_address) {
+        // An XRPL `Sequence` is a nonce, so at most one unresolved payment may
+        // exist per source address — whether a send or a swap's deposit makes it.
+        // The frontend refuses early too, but that check cannot be atomic with this
+        // create — between the two it reads the account, derives a signing key and
+        // takes a threshold signature, and a second tab can pass its own check
+        // inside that window. This call is the only place that sees the check and
+        // the write at once, so this is what actually holds the invariant.
+        if has_xrp_payment_in_flight(map, principal, source_address) {
             return Err(ActiveUserTransactionError::AlreadyInFlight);
         }
     }
@@ -108,10 +107,10 @@ pub fn update(
         validate_external_refs(refs)?;
 
         // `external_refs` is replaced wholesale, so without this an update could
-        // strip the poll keys off a row that is already refusing sends — the same
-        // unresolvable state `create` now rejects, reached one call later. Held
-        // for terminal rows too: the invariant is the record's, not a phase's.
-        if matches!(current.data, ActiveUserTransactionData::Xrp(_)) {
+        // strip the poll keys off a row that is already refusing payments — the
+        // same unresolvable state `create` now rejects, reached one call later.
+        // Held for terminal rows too: the invariant is the record's, not a phase's.
+        if xrp_payment_source(&current.data).is_some() {
             require_xrp_refs(refs)?;
         }
     }
@@ -162,26 +161,49 @@ pub fn list(
     GetActiveUserTransactionsResponse { transactions }
 }
 
-/// Whether a non-terminal XRP payment already exists for this source address.
+/// Whether an XRP payment from this source address can still apply.
 ///
 /// Per **address**, not per user: a record for a different address says nothing
-/// about this one's sequence, and refusing on it would block an unrelated send.
+/// about this one's sequence, and refusing on it would block an unrelated payment.
 /// Compared raw, like everywhere else this address travels — a classic address is
 /// base58 over a checksummed payload, so case is significant.
-fn has_open_xrp_send(
+fn has_xrp_payment_in_flight(
     map: &ActiveUserTransactionsMap,
     principal: Principal,
     source_address: &str,
 ) -> bool {
     scan_principal(map, principal).any(|(_, Candid(tx))| {
-        matches!(
+        xrp_payment_source(&tx.data) == Some(source_address) && holds_xrp_address(&tx)
+    })
+}
+
+/// The XRP address a row's payment is sent from, for the rows that make one: an
+/// XRP send, and a swap whose deposit is an XRP payment. With
+/// `holds_xrp_address`, the one place that knows which rows those are — a new
+/// kind of row that makes an XRP payment is added here and nowhere else.
+fn xrp_payment_source(data: &ActiveUserTransactionData) -> Option<&str> {
+    match data {
+        ActiveUserTransactionData::Xrp(d) => Some(&d.source_address),
+        ActiveUserTransactionData::NearIntents(d) => d.source_address.as_deref(),
+        _ => None,
+    }
+}
+
+/// Whether a row's XRP payment can still apply. A send's can until the row is
+/// terminal. A swap's deposit can only while the row is `Pending`: once the
+/// deposit validates, the frontend moves the row to `Executing`, and the swap
+/// goes on at 1Click without holding the address.
+fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
+    match tx.data {
+        ActiveUserTransactionData::Xrp(_) => matches!(
             tx.status,
             ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
-        ) && matches!(
-            tx.data,
-            ActiveUserTransactionData::Xrp(ref d) if d.source_address == source_address
-        )
-    })
+        ),
+        ActiveUserTransactionData::NearIntents(_) => {
+            matches!(tx.status, ActiveUserTransactionStatus::Pending)
+        }
+        _ => false,
+    }
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -1824,6 +1846,13 @@ mod tests {
         })
     }
 
+    fn create_xrp_send(map: &mut ActiveUserTransactionsMap, id: &str, source_address: &str) {
+        let mut req = create_req(id);
+        req.data = xrp_data(25_000_000, 12, None, source_address, XRP_DESTINATION);
+        req.external_refs = xrp_refs();
+        create(map, principal(), req, 1).expect("send");
+    }
+
     fn create_xrp_swap(
         map: &mut ActiveUserTransactionsMap,
         id: &str,
@@ -1833,6 +1862,26 @@ mod tests {
         req.data = xrp_swap_data(25_000_000, Some(source_address));
         req.external_refs = xrp_refs();
         create(map, principal(), req, 1)
+    }
+
+    fn set_status(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+    ) {
+        update(
+            map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            2,
+        )
+        .expect("status update");
     }
 
     #[test]
@@ -1911,6 +1960,133 @@ mod tests {
                 )
             );
         }
+    }
+
+    #[test]
+    fn swap_toward_xrp_needs_no_address_or_poll_keys() {
+        // The payout arrives at the user's address; nothing is paid from it.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("create");
+    }
+
+    #[test]
+    fn xrp_swap_without_poll_keys_rejected() {
+        // A `Pending` swap row refuses every later payment from its address until
+        // its deposit resolves, so, like a send row, it must be pollable.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = xrp_swap_data(25_000_000, Some(XRP_SOURCE));
+        req.external_refs = xrp_refs_without(XRP_REF_TX_HASH);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("tx_hash is required".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_swap_update_cannot_strip_the_poll_keys() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("create");
+
+        let err = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "swap-1".to_string(),
+                status: None,
+                progress_step: None,
+                external_refs: Some(xrp_refs_without(XRP_REF_LAST_LEDGER_SEQUENCE)),
+                error: None,
+            },
+            2,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("last_ledger_sequence is required".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_swap_rejected_while_a_send_is_in_flight() {
+        for status in [
+            ActiveUserTransactionStatus::Pending,
+            ActiveUserTransactionStatus::Executing,
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+            if status != ActiveUserTransactionStatus::Pending {
+                set_status(&mut map, "xrp-1", status);
+            }
+
+            let err = create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    #[test]
+    fn xrp_payment_rejected_while_a_swap_deposit_is_in_flight() {
+        // A `Pending` swap row is a deposit that has not resolved on the ledger,
+        // so it refuses a send and a second swap from the same address alike.
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+        let mut send = create_req("xrp-1");
+        send.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        send.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), send, 2).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+
+        let err = create_xrp_swap(&mut map, "swap-2", XRP_SOURCE).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_payment_allowed_once_the_swap_deposit_has_resolved() {
+        // `Executing` means the deposit validated and the swap goes on at 1Click;
+        // the address is free even though the swap row is still open.
+        for status in [
+            ActiveUserTransactionStatus::Executing,
+            ActiveUserTransactionStatus::Succeeded,
+            ActiveUserTransactionStatus::Failed,
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+            set_status(&mut map, "swap-1", status);
+
+            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+        }
+    }
+
+    #[test]
+    fn xrp_swap_deposit_does_not_block_another_address() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+        create_xrp_send(&mut map, "xrp-1", XRP_OTHER_SOURCE);
+    }
+
+    #[test]
+    fn swap_toward_xrp_does_not_block_a_payment() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("swap toward XRP");
+
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
     }
 
     #[test]
