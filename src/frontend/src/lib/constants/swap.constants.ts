@@ -9,6 +9,7 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import {
 	NEAR_INTENTS_BTC_SWAP_ENABLED,
 	NEAR_INTENTS_SWAP_ENABLED
@@ -53,7 +54,8 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
 	[ROBINHOOD_MAINNET_NETWORK_ID]: 'hood',
 	[SOLANA_MAINNET_NETWORK_ID]: 'sol',
-	[BTC_MAINNET_NETWORK_ID]: 'btc'
+	[BTC_MAINNET_NETWORK_ID]: 'btc',
+	[XRP_MAINNET_NETWORK_ID]: 'xrp'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;

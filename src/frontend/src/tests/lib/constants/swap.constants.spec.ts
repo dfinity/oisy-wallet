@@ -1,6 +1,7 @@
 import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { NEAR_INTENTS_BLOCKCHAIN_MAP } from '$lib/constants/swap.constants';
 import type { NetworkId } from '$lib/types/network';
@@ -19,6 +20,10 @@ describe('swap.constants', () => {
 		// list by — `robinhood` or `rh` would resolve to nothing and silently drop every quote.
 		it('maps Robinhood Chain to the hood blockchain code', () => {
 			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[ROBINHOOD_MAINNET_NETWORK_ID]).toBe('hood');
+		});
+
+		it('maps XRP mainnet to the xrp blockchain code', () => {
+			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[XRP_MAINNET_NETWORK_ID]).toBe('xrp');
 		});
 	});
 

@@ -6,6 +6,7 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
@@ -643,6 +644,49 @@ describe('near-intents.services', () => {
 			expect(
 				result.has(nativeSwapTokenIdentifier({ networkId: BASE_NETWORK_ID, symbol: 'ETH' }))
 			).toBeTruthy();
+		});
+
+		it('should key native XRP by network and symbol when filtering by XRP mainnet', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([
+				...mockNearIntentsTokens,
+				{
+					assetId: 'nep141:xrp.omft.near',
+					decimals: 6,
+					blockchain: 'xrp',
+					symbol: 'XRP',
+					price: 1.49,
+					priceUpdatedAt: '2026-09-29T05:55:00.730Z',
+					contractAddress: null
+				}
+			]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [XRP_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(
+				new Set([nativeSwapTokenIdentifier({ networkId: XRP_MAINNET_NETWORK_ID, symbol: 'XRP' })])
+			);
+		});
+
+		// XRP Ledger identifiers are Base58 and case-sensitive, so lowercasing one as if it were EVM
+		// hex would name an account that does not exist.
+		it('should keep the case of an xrp contract address', async () => {
+			const issuer = 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([
+				{
+					assetId: `nep141:xrp-${issuer}.omft.near`,
+					decimals: 15,
+					blockchain: 'xrp',
+					symbol: 'RLUSD',
+					price: 1.0,
+					priceUpdatedAt: '2026-09-29T05:55:00.730Z',
+					contractAddress: issuer
+				}
+			]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [XRP_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(new Set([issuer]));
 		});
 
 		it('should lowercase mixed-case EVM contract addresses', async () => {
