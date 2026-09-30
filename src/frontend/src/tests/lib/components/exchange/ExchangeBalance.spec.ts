@@ -406,5 +406,49 @@ describe('ExchangeBalance', () => {
 
 			expect(getByText('$235.00')).toBeInTheDocument();
 		});
+
+		it('should exclude the provider-held value when an asset type is selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value when all asset types are selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value outside the tokens route even if an asset type is selected', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` });
+
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
 	});
 });
