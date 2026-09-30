@@ -7,6 +7,7 @@ use sha2::{Digest, Sha256};
 
 use super::{
     BtcAddress, EthAddress, IcrcSubaccountId, Icrcv2AccountId, SolPrincipal, TokenAccountId,
+    XrpAddress,
 };
 
 #[cfg(test)]
@@ -31,6 +32,7 @@ impl FromStr for TokenAccountId {
             .or_else(|_| BtcAddress::from_str(s).map(TokenAccountId::Btc))
             .or_else(|_| EthAddress::from_str(s).map(TokenAccountId::Eth))
             .or_else(|_| Icrcv2AccountId::from_str(s).map(TokenAccountId::Icrcv2))
+            .or_else(|_| XrpAddress::from_str(s).map(TokenAccountId::Xrp))
             .map_err(|_| ParseError::UnsupportedFormat)
     }
 }
@@ -56,6 +58,12 @@ impl From<EthAddress> for TokenAccountId {
 impl From<Icrcv2AccountId> for TokenAccountId {
     fn from(value: Icrcv2AccountId) -> Self {
         TokenAccountId::Icrcv2(value)
+    }
+}
+
+impl From<XrpAddress> for TokenAccountId {
+    fn from(value: XrpAddress) -> Self {
+        TokenAccountId::Xrp(value)
     }
 }
 
@@ -108,6 +116,31 @@ impl FromStr for EthAddress {
         } else {
             Err(ParseError::InvalidPrefix)
         }
+    }
+}
+
+impl FromStr for XrpAddress {
+    type Err = ParseError;
+
+    /// Parses an XRP Ledger classic address.
+    ///
+    /// The decoded payload is a zero type byte, the 20-byte account ID and a 4-byte checksum.
+    /// The checksum is the same double SHA-256 that Bitcoin's base58check uses.
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let bytes = bs58::decode(s)
+            .with_alphabet(bs58::Alphabet::RIPPLE)
+            .into_vec()
+            .map_err(|_| ParseError::InvalidEncoding)?;
+        if bytes.len() != 25 {
+            return Err(ParseError::InvalidLength);
+        }
+        if bytes[0] != 0x00 {
+            return Err(ParseError::InvalidPrefix);
+        }
+        if bytes[21..25] != BtcAddress::address_checksum(&bytes[0..21]) {
+            return Err(ParseError::InvalidChecksum);
+        }
+        Ok(XrpAddress(s.to_string()))
     }
 }
 

@@ -372,10 +372,18 @@ describe('xrp-active-tx.utils', () => {
 	});
 
 	describe('buildXrpSendTrackingMetadata', () => {
+		// The wizard fires the same error event with the network's id, so the id it is here too —
+		// the display name would split every grouping by `network` in two.
+		it('reports the network as the send wizard does, by id', () => {
+			expect(buildXrpSendTrackingMetadata({ tx: mockXrpActiveUserTransaction }).network).toBe(
+				'XRP'
+			);
+		});
+
 		it('reports the snapshot, the fee and no error for an open row', () => {
 			expect(buildXrpSendTrackingMetadata({ tx: mockXrpActiveUserTransaction })).toEqual({
 				token: 'XRP',
-				network: 'XRP Ledger',
+				network: `${XRP_TOKEN.network.id.description}`,
 				tokenAmount: '25',
 				fee: '12'
 			});
@@ -384,7 +392,7 @@ describe('xrp-active-tx.utils', () => {
 		it("reports the row's own data when the snapshot is missing", () => {
 			expect(buildXrpSendTrackingMetadata({ tx: rowKeepingRefs({ keep: POLL_KEYS }) })).toEqual({
 				token: XRP_TOKEN.symbol,
-				network: XRP_TOKEN.network.name,
+				network: `${XRP_TOKEN.network.id.description}`,
 				tokenAmount: '1.234567',
 				fee: '12'
 			});
