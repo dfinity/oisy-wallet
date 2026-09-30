@@ -3,6 +3,7 @@ import { getActiveUserTransactions } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
+import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
@@ -89,7 +90,16 @@ const assertNoOpenXrpSend = async ({
 		);
 	}
 
-	if (nonNullish(openXrpActiveUserTransaction({ transactions, source }))) {
+	const open = openXrpActiveUserTransaction({ transactions, source });
+
+	if (nonNullish(open)) {
+		// Handed to the store before refusing. The store loads only when the identity changes, and the
+		// poller polls only what is in it, so a record opened by another tab — which may since have
+		// closed — would otherwise never be resolved here, and this refusal would repeat on every
+		// attempt. `upsert` keeps a local copy with a newer `updated_at_ns`, so a row this tab already
+		// tracks further along is not rolled back to the backend's older answer.
+		activeUserTransactionsStore.upsert({ transaction: open });
+
 		throw new XrpSendAlreadyInFlightError(
 			`XRP send refused: a payment from ${source} has not resolved yet.`
 		);
@@ -145,7 +155,11 @@ const openXrpSendRecord = async ({
 				[XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE]: `${lastLedgerSequence}`,
 				...toXrpDisplayRefs({
 					token,
-					amount: formatToken({ value: amount, unitName: token.decimals })
+					amount: formatToken({
+						value: amount,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})
 				})
 			})
 		});

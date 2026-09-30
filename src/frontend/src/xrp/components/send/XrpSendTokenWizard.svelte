@@ -302,9 +302,10 @@
 			};
 
 			// The two refusals no field can fix: a payment from this address has not resolved yet, or
-			// the wallet could not establish whether one has. Both fire before any node read and
-			// before anything is signed, so nothing left the wallet — and no override is offered for
-			// the in-flight case, because while the first payment is open there is no sequence a
+			// the wallet could not establish whether one has. Both come before the broadcast — the
+			// gate's before any node read or signature, the record's after signing, when the backend
+			// refuses it or it cannot be written — so nothing left the wallet. No override is offered
+			// for the in-flight case, because while the first payment is open there is no sequence a
 			// second one could safely take.
 			if (err instanceof XrpSendAlreadyInFlightError) {
 				toastsError({ msg: { text: $i18n.send.error.xrp_send_already_in_flight }, err });

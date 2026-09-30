@@ -145,7 +145,11 @@ const loadCustomTokensWithMetadata = async ({
 				);
 
 				const newToken: Erc4626CustomToken = {
-					id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+					id: parseCustomTokenId({
+						identifier: tokenAddress,
+						chainId: network.chainId,
+						standard: 'erc4626'
+					}),
 					name: tokenAddress,
 					address: tokenAddress,
 					network,

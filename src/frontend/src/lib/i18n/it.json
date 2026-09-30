@@ -1123,8 +1123,6 @@
 			"no_btc_network_id": "La rete attuale ($networkId) non è una rete Bitcoin.",
 			"no_solana_network_id": "La rete attuale ($networkId) non è una rete Solana.",
 			"no_xrp_network_id": "La rete attuale ($networkId) non è una rete XRP Ledger.",
-			"xrp_confirmation_failed": "Non abbiamo potuto confermare se la transazione è stata inviata. Potrebbe ancora andare a buon fine, quindi non inviarla di nuovo per ora — il tuo saldo si aggiornerà se ci riesce.",
-			"xrp_transaction_failed": "La transazione è stata elaborata dalla rete ma è fallita, quindi i tuoi fondi non sono stati inviati. La commissione di rete è stata comunque addebitata.",
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Si è verificato un errore durante il calcolo della commissione di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
@@ -1148,9 +1146,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Conia",
+			"minting": "Conio in corso...",
+			"mint_review_subtitle": "Tu conii"
 		}
 	},
 	"burn": {
@@ -1158,6 +1156,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Conia $token",
+			"description": "Il conio crea nuovi $destinationToken da $sourceToken al tasso della rete e brucia i $sourceToken.",
+			"you_mint_estimate": "Tu conii (stima)",
+			"rate": "Tasso",
+			"cycles_ledger_fee": "Commissione del Cycles Ledger",
+			"minter": "Coniato da",
+			"one_way": "Il conio non può essere annullato: i $destinationToken non possono essere riconvertiti in $sourceToken.",
+			"sending": "Invio di $token al $minter...",
+			"minting": "Conio di $token in corso...",
+			"minted": "Coniati $amount $token.",
+			"pending": "Il conio sta richiedendo più tempo del solito. Verrà completato in background: puoi seguirlo nelle transazioni attive."
+		},
+		"error": {
+			"rate_unavailable": "Impossibile caricare il tasso di $token. Riprova più tardi.",
+			"amount_too_small": "L’importo è troppo basso per coniare $token.",
+			"refunded": "Il conio è stato rimborsato. I tuoi $token sono stati restituiti, meno $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "Il conio è stato rimborsato, ma le commissioni hanno assorbito l'intero importo: non è stato restituito alcun $token. Motivo: $reason",
+			"failed": "Il conio non è riuscito. Motivo: $reason",
+			"not_started": "Impossibile avviare il conio. Non è stato inviato nulla, riprova.",
+			"transfer_failed": "Il trasferimento di $token non è riuscito. Non è stato inviato nulla.",
+			"unconfirmed": "Impossibile confermare il trasferimento di $token. Se è andato a buon fine, il conio verrà completato in background: puoi seguirlo nelle transazioni attive."
 		}
 	},
 	"active_user_transactions": {
@@ -1474,7 +1497,8 @@
 				"info": "Gli ID dei canister Ledger e Index sono di solito disponibili sul sito web del progetto.",
 				"info_ext": "",
 				"info_index": "L'ID del canister Index è opzionale, ma senza di esso, $oisy_short non può visualizzare la cronologia delle transazioni.",
-				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
+				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati.",
+				"custom_tokens_not_supported_yet": "OISY non supporta ancora i token personalizzati su questa rete."
 			},
 			"error": {
 				"loading_metadata": "L'indirizzo inserito non corrisponde ad un token valido nella rete scelta.",
@@ -1570,7 +1594,11 @@
 			"crypto": "Criptovalute",
 			"stablecoin": "Stablecoin",
 			"stock": "Azioni",
-			"commodity": "Materie prime"
+			"commodity": "Materie prime",
+			"compute": "Calcolo"
+		},
+		"category_in_sentence": {
+			"compute": "token di calcolo"
 		},
 		"risk": {
 			"low": "Rischio basso",
@@ -1733,6 +1761,7 @@
 			"unreviewed_instructions": "OISY non riesce a decodificare alcune di queste istruzioni, quindi la revisione qui sotto potrebbe essere incompleta.",
 			"unreviewed_instructions_simulated": "Questa transazione contiene operazioni provenienti da una fonte esterna che OISY non riesce a decodificare, quindi OISY ne ha eseguito una simulazione. Assicurati di fidarti dell'applicazione e controlla le variazioni di saldo simulate e le operazioni prima di firmare. Tieni presente che il risultato effettivo potrebbe differire dalla simulazione.",
 			"cannot_be_shown": "Questa transazione include azioni che non possono essere mostrate tutte in modo accurato per la revisione, quindi OISY non la firmerà. Rifiutala e chiedi all'app una richiesta più semplice.",
+			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza, OISY non la firma.",
 			"simulated_instructions": "Istruzioni simulate",
 			"multiple_operations": "Questa transazione contiene più operazioni che interessano il tuo wallet. Verifica le variazioni di saldo simulate e le istruzioni contenute, e approva questa transazione solo se ti fidi anche dell'applicazione.",
 			"simulated_review": "La revisione qui sotto è ciò che prevede la simulazione di questa transazione rispetto allo stato attuale della rete. Ciò che accade durante l'esecuzione effettiva può differire.",
@@ -1842,6 +1871,7 @@
 			"from_address_not_wallet": "L'indirizzo di origine richiesto per la transazione non è l'indirizzo di questo wallet.",
 			"unknown_destination": "Indirizzo di destinazione sconosciuto.",
 			"ambiguous_transaction": "Questa transazione sposta fondi tra più indirizzi e non può essere mostrata in modo accurato per la revisione. Per la tua sicurezza, non è stata firmata.",
+			"close_pays_others": "Questa transazione chiude uno dei tuoi conti token e versa il suo saldo a un indirizzo che non è il tuo wallet. Per la tua sicurezza non è stata firmata.",
 			"unreviewed_without_simulation": "OISY non ha potuto leggere una parte di questa transazione e la rete non ne ha restituito nemmeno una simulazione, quindi nulla descrive cosa farebbe quella parte. Per la tua sicurezza, non è stata firmata.",
 			"sol_transaction_as_message": "Questo messaggio è una transazione Solana, che può essere approvata solo tramite una revisione della transazione. Per la tua sicurezza, non è stata firmata.",
 			"request_not_defined": "Errore inaspettato: la richiesta non è definita, pertanto non può essere elaborata.",
@@ -2120,9 +2150,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Sblocca e chiudi il conto token $symbol",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Chiudi il conto token $symbol",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2134,8 +2165,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "Saldo SOL restituito al tuo wallet",
+			"instruction_balance_sent": "Saldo SOL inviato al tuo wallet",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL inviati al tuo wallet",
+			"instruction_returned_to": "$amount SOL a",
+			"instruction_balance_returned_to": "Saldo SOL a",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Stato",
@@ -2617,6 +2652,8 @@
 			"transaction_fee": "Commissione di transazione",
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire l'importo e le commissioni.",
 			"supply_prices_unavailable": "I prezzi non sono temporaneamente disponibili. La fornitura è disabilitata finché non vengono caricati.",
+			"minimum_supply": "Fornitura minima",
+			"supply_below_minimum": "L'importo è inferiore alla fornitura minima.",
 			"borrow_review": "Rivedi prestito",
 			"borrow_review_subtitle": "Prendi in prestito",
 			"borrowing": "Richiesta prestito in corso",
@@ -2630,6 +2667,7 @@
 			"funds_delivered_to": "Fondi inviati a",
 			"your_oisy_address": "Il tuo indirizzo $oisy_short",
 			"borrow_risk_info": "Prendere in prestito riduce il tuo fattore di salute. Se scende troppo, la tua garanzia può essere liquidata.",
+			"borrow_activation_fee_info": "Liquidium applica una commissione di attivazione del $fee% in aggiunta all'importo preso in prestito.",
 			"borrow_at_risk_warning": "Questo prestito riduce notevolmente il tuo fattore di salute.",
 			"borrow_exceeds_power": "L'importo supera la tua capacità di prestito.",
 			"borrow_below_minimum": "L'importo è inferiore al prestito minimo.",

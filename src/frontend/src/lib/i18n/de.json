@@ -1123,8 +1123,6 @@
 			"no_btc_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
 			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
 			"no_xrp_network_id": "Das aktuelle Netzwerk ($networkId) ist kein XRP Ledger-Netzwerk.",
-			"xrp_confirmation_failed": "Wir konnten nicht bestätigen, ob die Transaktion gesendet wurde. Sie kann noch durchgehen, senden Sie sie daher noch nicht erneut — Ihr Guthaben wird aktualisiert, falls sie durchgeht.",
-			"xrp_transaction_failed": "Die Transaktion wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
@@ -1148,9 +1146,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Minten",
+			"minting": "Wird gemintet...",
+			"mint_review_subtitle": "Du mintest"
 		}
 	},
 	"burn": {
@@ -1158,6 +1156,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token minten",
+			"description": "Beim Minten entstehen zum Kurs des Netzwerks neue $destinationToken aus $sourceToken, und die $sourceToken werden verbrannt.",
+			"you_mint_estimate": "Du mintest (geschätzt)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Cycles-Ledger-Gebühr",
+			"minter": "Gemintet von",
+			"one_way": "Minten lässt sich nicht rückgängig machen: $destinationToken können nicht zurück in $sourceToken getauscht werden.",
+			"sending": "$token wird an den $minter gesendet...",
+			"minting": "$token wird gemintet...",
+			"minted": "$amount $token gemintet.",
+			"pending": "Das Minten dauert länger als üblich. Es wird im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
+		},
+		"error": {
+			"rate_unavailable": "Der $token-Kurs konnte nicht geladen werden. Bitte versuche es später erneut.",
+			"amount_too_small": "Der Betrag ist zu klein, um $token zu minten.",
+			"refunded": "Das Minten wurde rückerstattet. Deine $token wurden abzüglich $refundFee $token zurückgezahlt. Grund: $reason",
+			"refunded_nothing": "Das Minten wurde rückerstattet, aber die Gebühren haben den ganzen Betrag aufgebraucht: Es wurden keine $token zurückgezahlt. Grund: $reason",
+			"failed": "Das Minten ist fehlgeschlagen. Grund: $reason",
+			"not_started": "Das Minten konnte nicht gestartet werden. Es wurde nichts gesendet, bitte versuche es erneut.",
+			"transfer_failed": "Die $token-Überweisung ist fehlgeschlagen. Es wurde nichts gesendet.",
+			"unconfirmed": "Die $token-Überweisung konnte nicht bestätigt werden. Falls sie durchgegangen ist, wird das Minten im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
 		}
 	},
 	"active_user_transactions": {
@@ -1474,7 +1497,8 @@
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
 				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
-				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
+				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token.",
+				"custom_tokens_not_supported_yet": "OISY unterstützt in diesem Netzwerk noch keine benutzerdefinierten Token."
 			},
 			"error": {
 				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
@@ -1570,7 +1594,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoins",
 			"stock": "Aktien",
-			"commodity": "Rohstoffe"
+			"commodity": "Rohstoffe",
+			"compute": "Rechenleistung"
+		},
+		"category_in_sentence": {
+			"compute": "Token für Rechenleistung"
 		},
 		"risk": {
 			"low": "Geringes Risiko",
@@ -1733,6 +1761,7 @@
 			"unreviewed_instructions": "OISY kann einige dieser Anweisungen nicht entschlüsseln, daher ist die Überprüfung unten möglicherweise unvollständig.",
 			"unreviewed_instructions_simulated": "Diese Transaktion enthält Operationen aus einer externen Quelle, die OISY nicht entschlüsseln kann, daher hat OISY eine Simulation davon durchgeführt. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie vor dem Signieren die simulierten Guthabenänderungen und Operationen. Beachten Sie, dass das tatsächliche Ergebnis von der Simulation abweichen kann.",
 			"cannot_be_shown": "Diese Transaktion enthält Aktionen, die sich nicht alle korrekt zur Prüfung anzeigen lassen – OISY signiert sie daher nicht. Lehnen Sie sie ab und bitten Sie die App um eine einfachere Anfrage.",
+			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit signiert OISY sie nicht.",
 			"simulated_instructions": "Simulierte Anweisungen",
 			"multiple_operations": "Diese Transaktion enthält mehrere Operationen, die Ihre Wallet betreffen. Überprüfen Sie die simulierten Guthabenänderungen und die enthaltenen Anweisungen, und genehmigen Sie diese Transaktion nur, wenn Sie auch der Anwendung vertrauen.",
 			"simulated_review": "Die Überprüfung unten zeigt, was die Simulation dieser Transaktion gegen den aktuellen Netzwerkzustand vorhersagt. Was beim tatsächlichen Ausführen passiert, kann davon abweichen.",
@@ -1842,6 +1871,7 @@
 			"from_address_not_wallet": "Die für die Transaktion angeforderte Absenderadresse ist nicht die Adresse dieser Wallet.",
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
+			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
@@ -2120,9 +2150,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Token-Konto für $symbol entpacken und schliessen",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Token-Konto für $symbol schliessen",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2134,8 +2165,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "SOL-Guthaben zurück in deine Wallet",
+			"instruction_balance_sent": "SOL-Guthaben an deine Wallet gesendet",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL an deine Wallet gesendet",
+			"instruction_returned_to": "$amount SOL an",
+			"instruction_balance_returned_to": "SOL-Guthaben an",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Status",
@@ -2617,6 +2652,8 @@
 			"transaction_fee": "Transaktionsgebühr",
 			"insufficient_funds_for_fee": "Guthaben reicht nicht aus, um Betrag und Gebühren zu decken.",
 			"supply_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Bereitstellen ist deaktiviert, bis sie geladen sind.",
+			"minimum_supply": "Mindestbetrag",
+			"supply_below_minimum": "Der Betrag liegt unter dem Mindestbetrag.",
 			"borrow_review": "Kreditaufnahme prüfen",
 			"borrow_review_subtitle": "Du leihst",
 			"borrowing": "Kreditaufnahme läuft",
@@ -2630,6 +2667,7 @@
 			"funds_delivered_to": "Gelder werden gesendet an",
 			"your_oisy_address": "Deine $oisy_short-Adresse",
 			"borrow_risk_info": "Eine Kreditaufnahme senkt deinen Gesundheitsfaktor. Fällt er zu weit, kann deine Sicherheit liquidiert werden.",
+			"borrow_activation_fee_info": "Liquidium berechnet zusätzlich zum geliehenen Betrag eine Aktivierungsgebühr von $fee %.",
 			"borrow_at_risk_warning": "Diese Kreditaufnahme senkt deinen Gesundheitsfaktor spürbar.",
 			"borrow_exceeds_power": "Der Betrag übersteigt deinen Kreditrahmen.",
 			"borrow_below_minimum": "Der Betrag liegt unter dem Mindestkreditbetrag.",

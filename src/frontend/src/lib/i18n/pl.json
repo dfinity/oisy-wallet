@@ -1123,8 +1123,6 @@
 			"no_btc_network_id": "Bieżąca sieć ($networkId) nie jest siecią Bitcoin.",
 			"no_solana_network_id": "Bieżąca sieć ($networkId) nie jest siecią Solana.",
 			"no_xrp_network_id": "Bieżąca sieć ($networkId) nie jest siecią XRP Ledger.",
-			"xrp_confirmation_failed": "Nie mogliśmy potwierdzić, czy transakcja została wysłana. Może jeszcze przejść, więc na razie nie wysyłaj jej ponownie — jeśli przejdzie, Twoje saldo zostanie zaktualizowane.",
-			"xrp_transaction_failed": "Transakcja została przetworzona przez sieć, ale nie powiodła się, więc środki nie zostały wysłane. Opłata sieciowa została jednak pobrana.",
 			"no_pending_bitcoin_transaction": "Wystąpił błąd podczas ładowania oczekujących transakcji Bitcoin. Spróbuj ponownie później.",
 			"unexpected_utxos_fee": "Podczas obliczania opłaty transakcyjnej wystąpił błąd.",
 			"unable_to_retrieve_amount": "n/d (nie można pobrać)",
@@ -1148,9 +1146,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Wybij",
+			"minting": "Wybijanie...",
+			"mint_review_subtitle": "Wybijasz"
 		}
 	},
 	"burn": {
@@ -1158,6 +1156,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Wybij $token",
+			"description": "Wybijanie tworzy nowe $destinationToken z $sourceToken po kursie sieci i spala $sourceToken.",
+			"you_mint_estimate": "Wybijasz (szacunkowo)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Opłata Cycles Ledger",
+			"minter": "Wybija",
+			"one_way": "Wybijania nie można cofnąć: $destinationToken nie da się zamienić z powrotem na $sourceToken.",
+			"sending": "Wysyłanie $token do $minter...",
+			"minting": "Wybijanie $token...",
+			"minted": "Wybito $amount $token.",
+			"pending": "Wybijanie trwa dłużej niż zwykle. Zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
+		},
+		"error": {
+			"rate_unavailable": "Nie udało się załadować kursu $token. Spróbuj ponownie później.",
+			"amount_too_small": "Kwota jest za mała, aby wybić $token.",
+			"refunded": "Wybijanie zostało zwrócone. Twoje $token wróciły, pomniejszone o $refundFee $token. Powód: $reason",
+			"refunded_nothing": "Wybijanie zostało zwrócone, ale opłaty pochłonęły całą kwotę: żadne $token nie wróciły. Powód: $reason",
+			"failed": "Wybijanie nie powiodło się. Powód: $reason",
+			"not_started": "Nie udało się rozpocząć wybijania. Nic nie zostało wysłane, spróbuj ponownie.",
+			"transfer_failed": "Przelew $token nie powiódł się. Nic nie zostało wysłane.",
+			"unconfirmed": "Nie udało się potwierdzić przelewu $token. Jeśli doszedł do skutku, wybijanie zakończy się w tle: możesz je śledzić w aktywnych transakcjach."
 		}
 	},
 	"active_user_transactions": {
@@ -1474,7 +1497,8 @@
 				"info": "Identyfikatory kanistrów rejestru i indeksu są zwykle dostępne na stronie internetowej projektu.",
 				"info_ext": "",
 				"info_index": "Identyfikator kanistra indeksu jest opcjonalny, ale bez niego $oisy_short nie może wyświetlić historii transakcji.",
-				"custom_tokens_not_supported": "Wybrana sieć nie obsługuje niestandardowych tokenów."
+				"custom_tokens_not_supported": "Wybrana sieć nie obsługuje niestandardowych tokenów.",
+				"custom_tokens_not_supported_yet": "OISY nie obsługuje jeszcze niestandardowych tokenów w tej sieci."
 			},
 			"error": {
 				"loading_metadata": "Podany adres nie jest prawidłowym tokenem w wybranej sieci.",
@@ -1570,7 +1594,11 @@
 			"crypto": "Kryptowaluty",
 			"stablecoin": "Stablecoiny",
 			"stock": "Akcje",
-			"commodity": "Surowce"
+			"commodity": "Surowce",
+			"compute": "Moc obliczeniowa"
+		},
+		"category_in_sentence": {
+			"compute": "tokenów obliczeniowych"
 		},
 		"risk": {
 			"low": "Niskie ryzyko",
@@ -1733,6 +1761,7 @@
 			"unreviewed_instructions": "OISY nie może zdekodować niektórych z tych instrukcji, więc poniższy przegląd może być niepełny.",
 			"unreviewed_instructions_simulated": "Ta transakcja zawiera operacje z zewnętrznego źródła, których OISY nie może zdekodować, dlatego OISY przeprowadził ich symulację. Upewnij się, że ufasz aplikacji, i przed podpisaniem sprawdź symulowane zmiany salda oraz operacje. Pamiętaj, że rzeczywisty wynik może różnić się od symulacji.",
 			"cannot_be_shown": "Ta transakcja zawiera działania, których nie da się w całości dokładnie pokazać do sprawdzenia, więc OISY jej nie podpisze. Odrzuć ją i poproś aplikację o prostsze żądanie.",
+			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa OISY jej nie podpisze.",
 			"simulated_instructions": "Symulowane instrukcje",
 			"multiple_operations": "Ta transakcja zawiera wiele operacji wpływających na Twój portfel. Zweryfikuj symulowane zmiany salda oraz zawarte instrukcje i zatwierdź tę transakcję tylko wtedy, gdy ufasz również aplikacji.",
 			"simulated_review": "Poniższy przegląd to przewidywanie symulacji tej transakcji względem aktualnego stanu sieci. To, co faktycznie nastąpi podczas wykonania, może się różnić.",
@@ -1842,6 +1871,7 @@
 			"from_address_not_wallet": "Adres nadawcy żądany dla transakcji nie jest adresem tego portfela.",
 			"unknown_destination": "Nieznany adres docelowy.",
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
+			"close_pays_others": "Ta transakcja zamyka jedno z Twoich kont tokenów i wypłaca jego saldo na adres, który nie jest Twoim portfelem. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"unreviewed_without_simulation": "OISY nie mogła odczytać części tej transakcji, a sieć nie zwróciła również jej symulacji, więc nic nie opisuje, co ta część by zrobiła. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"sol_transaction_as_message": "Ta wiadomość jest transakcją Solana, którą można zatwierdzić wyłącznie poprzez przegląd transakcji. Ze względów bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
@@ -2120,9 +2150,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Rozpakuj i zamknij konto tokenów $symbol",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Zamknij konto tokenów $symbol",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2134,8 +2165,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "Saldo SOL zwrócone do Twojego portfela",
+			"instruction_balance_sent": "Saldo SOL wysłane do Twojego portfela",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL wysłane do Twojego portfela",
+			"instruction_returned_to": "$amount SOL do",
+			"instruction_balance_returned_to": "Saldo SOL do",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Status",
@@ -2617,6 +2652,8 @@
 			"transaction_fee": "Opłata transakcyjna",
 			"insufficient_funds_for_fee": "Saldo jest niewystarczające, aby pokryć kwotę i opłaty.",
 			"supply_prices_unavailable": "Ceny są tymczasowo niedostępne. Dostarczanie jest wyłączone do czasu ich wczytania.",
+			"minimum_supply": "Minimalne dostarczenie",
+			"supply_below_minimum": "Kwota jest niższa od minimalnego dostarczenia.",
 			"borrow_review": "Sprawdź pożyczkę",
 			"borrow_review_subtitle": "Pożyczasz",
 			"borrowing": "Trwa zaciąganie pożyczki",
@@ -2630,6 +2667,7 @@
 			"funds_delivered_to": "Środki wysłane do",
 			"your_oisy_address": "Twój adres $oisy_short",
 			"borrow_risk_info": "Pożyczanie obniża twój wskaźnik zdrowia. Jeśli spadnie zbyt nisko, twoje zabezpieczenie może zostać zlikwidowane.",
+			"borrow_activation_fee_info": "Liquidium dolicza do pożyczonej kwoty opłatę aktywacyjną w wysokości $fee%.",
 			"borrow_at_risk_warning": "Ta pożyczka wyraźnie obniża twój wskaźnik zdrowia.",
 			"borrow_exceeds_power": "Kwota przekracza twoją zdolność pożyczkową.",
 			"borrow_below_minimum": "Kwota jest niższa niż minimalna pożyczka.",
