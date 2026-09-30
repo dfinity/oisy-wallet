@@ -73,4 +73,8 @@
 			{/if}
 		{/snippet}
 	</Input>
+
+	<p class="mt-2 mb-0 text-sm text-tertiary" data-tid="xrp-destination-tag-hint">
+		{$i18n.send.info.xrp_destination_tag_hint}
+	</p>
 </div>

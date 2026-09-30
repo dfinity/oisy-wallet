@@ -1066,6 +1066,7 @@
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"first_time_destination": "このアドレスにトークンを送金したことはないようです。アドレスを慎重に確認してください。",
 			"first_time_destination_confirm": "このアドレスにトークンを送金するのは初めてで、アドレスを慎重に確認しました。",
+			"xrp_destination_tag_hint": "ほとんどの取引所で必須です。空欄のままにすると資金を失う可能性があります。",
 			"fee_expired": "",
 			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",

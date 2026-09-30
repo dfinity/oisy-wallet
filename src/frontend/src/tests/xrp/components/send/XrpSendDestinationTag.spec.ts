@@ -1,5 +1,6 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import en from '$tests/mocks/i18n.mock';
 import XrpSendDestinationTag from '$xrp/components/send/XrpSendDestinationTag.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -27,6 +28,14 @@ describe('XrpSendDestinationTag', () => {
 	};
 
 	const error = () => lastContainer.querySelector('[data-tid="xrp-destination-tag-error"]');
+
+	it('explains the risk of leaving the tag empty', () => {
+		renderInput();
+
+		expect(lastContainer.querySelector('[data-tid="xrp-destination-tag-hint"]')).toHaveTextContent(
+			en.send.info.xrp_destination_tag_hint
+		);
+	});
 
 	it('stores a valid destination tag', async () => {
 		const input = renderInput();

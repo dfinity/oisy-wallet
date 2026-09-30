@@ -1066,6 +1066,7 @@
 			"no_available_utxos": "Non avrai UTXO disponibili per eseguire questa transazione.",
 			"first_time_destination": "Sembra che tu non abbia mai inviato token a questo indirizzo. Verifica attentamente l’indirizzo.",
 			"first_time_destination_confirm": "È la prima volta che invio token a questo indirizzo e ho verificato attentamente l’indirizzo.",
+			"xrp_destination_tag_hint": "Richiesto dalla maggior parte degli exchange. Se lo lasci vuoto, puoi perdere i tuoi fondi.",
 			"fee_expired": "",
 			"fee_info": "La fee sarà pagata in $feeSymbol. Disponibile: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Il codice scansionato conteneva solo un indirizzo di destinazione. Assicurati di selezionare il token corretto, inserire l'importo giusto e controllare attentamente l'indirizzo di destinazione!",

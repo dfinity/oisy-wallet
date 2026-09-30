@@ -1066,6 +1066,7 @@
 			"no_available_utxos": "No tendrás utxos disponibles para realizar esta transacción.",
 			"first_time_destination": "Parece que nunca has enviado tokens a esta dirección. Verifica la dirección con cuidado.",
 			"first_time_destination_confirm": "Es la primera vez que envío tokens a esta dirección y he verificado la dirección con cuidado.",
+			"xrp_destination_tag_hint": "La mayoría de los exchanges la exigen. Si la dejas vacía, puedes perder tus fondos.",
 			"fee_expired": "",
 			"fee_info": "La comisión se pagará en $feeSymbol. Disponible: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "El código escaneado solo contenía una dirección de destino. ¡Asegúrate de seleccionar el token correcto, introducir la cantidad adecuada y revisar con atención la dirección de destino!",
