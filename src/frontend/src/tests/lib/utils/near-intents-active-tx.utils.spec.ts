@@ -73,7 +73,8 @@ describe('near-intents-active-tx.utils', () => {
 				NearIntents: {
 					source_token: { Erc20: [USDC_ETHEREUM, BigInt(ETHEREUM_NETWORK.chainId)] },
 					dest_token: { SplMainnet: USDC_SOLANA },
-					amount: 1_000_000n
+					amount: 1_000_000n,
+					source_address: []
 				}
 			});
 		});
@@ -89,7 +90,8 @@ describe('near-intents-active-tx.utils', () => {
 				NearIntents: {
 					source_token: { EvmNative: BigInt(ETHEREUM_NETWORK.chainId) },
 					dest_token: { SolNativeMainnet: null },
-					amount: 5n
+					amount: 5n,
+					source_address: []
 				}
 			});
 		});
@@ -105,7 +107,8 @@ describe('near-intents-active-tx.utils', () => {
 				NearIntents: {
 					source_token: { Erc20: [USDC_ETHEREUM, ETHEREUM_NETWORK.chainId] },
 					dest_token: { Icrc: Principal.fromText(mockValidIcToken.ledgerCanisterId) },
-					amount: 1n
+					amount: 1n,
+					source_address: []
 				}
 			});
 		});
