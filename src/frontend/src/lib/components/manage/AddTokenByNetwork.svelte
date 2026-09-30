@@ -19,7 +19,8 @@
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
 		isNetworkIdICP,
-		isNetworkIdSolana
+		isNetworkIdSolana,
+		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
@@ -54,6 +55,12 @@
 	let isEvmNetwork = $derived(isNetworkIdEvm(network?.id));
 
 	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
+
+	let isXrpNetwork = $derived(isNetworkIdXrp(network?.id));
+
+	let unsupportedNetwork = $derived(
+		nonNullish(network) && !isIcpNetwork && !isEthereumNetwork && !isEvmNetwork && !isSolanaNetwork
+	);
 
 	let {
 		ledgerCanisterId,
@@ -153,9 +160,19 @@
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
-		{:else if nonNullish($selectedNetwork)}
-			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
+
+		<!-- Always in the DOM: a polite live region is announced when its content changes, not when
+		     the region itself is inserted, so a network picked in the dropdown is read out. -->
+		<div aria-live="polite" role="status">
+			{#if unsupportedNetwork}
+				<span class="mb-6"
+					>{isXrpNetwork
+						? $i18n.tokens.import.text.custom_tokens_not_supported_yet
+						: $i18n.tokens.import.text.custom_tokens_not_supported}</span
+				>
+			{/if}
+		</div>
 
 		{#snippet toolbar()}
 			<AddTokenByNetworkToolbar {invalid} {onBack} />

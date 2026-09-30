@@ -13,6 +13,7 @@ import {
 import { XrpNetworks } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
+	buildXrpSendTrackingMetadata,
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
 	openXrpActiveUserTransaction,
@@ -20,6 +21,7 @@ import {
 	toXrpDisplayRefs,
 	toXrpExternalRefs,
 	toXrpExternalRefsMap,
+	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys,
 	xrpActiveUserTransactionSourceAddress
@@ -282,6 +284,126 @@ describe('xrp-active-tx.utils', () => {
 			['AlreadyInFlight']
 		])('does not recognise %o', (err) => {
 			expect(isXrpAlreadyInFlightError(err)).toBeFalsy();
+		});
+	});
+
+	// A row written by another client may carry only the two poll refs the backend requires. Each
+	// reader of the snapshot has to fall back to what the backend does guarantee, field by field.
+	const rowKeepingRefs = ({
+		keep,
+		extra = []
+	}: {
+		keep: string[];
+		extra?: { key: string; value: string }[];
+	}) => ({
+		...mockXrpActiveUserTransaction,
+		data: { Xrp: { ...mockXrpData, amount: 1_234_567n } },
+		external_refs: [
+			...mockXrpActiveUserTransaction.external_refs.filter(({ key }) => keep.includes(key)),
+			...extra
+		]
+	});
+
+	const POLL_KEYS = [XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE];
+
+	describe('xrpActiveUserTransactionDisplay', () => {
+		// The snapshot wins where it exists: here it says 25 while the row's drops say 1.234567.
+		it('reads the display snapshot when the row carries one', () => {
+			expect(
+				xrpActiveUserTransactionDisplay({
+					...mockXrpActiveUserTransaction,
+					data: { Xrp: { ...mockXrpData, amount: 1_234_567n } }
+				})
+			).toEqual({ amount: '25', symbol: 'XRP', network: 'XRP Ledger' });
+		});
+
+		it("falls back to the row's own data when the snapshot is missing", () => {
+			expect(xrpActiveUserTransactionDisplay(rowKeepingRefs({ keep: POLL_KEYS }))).toEqual({
+				amount: '1.234567',
+				symbol: XRP_TOKEN.symbol,
+				network: XRP_TOKEN.network.name
+			});
+		});
+
+		// Field by field, not all or nothing: a snapshot value is kept even when its neighbours are
+		// missing, and each missing one is filled on its own.
+		it('fills only the fields the snapshot lacks', () => {
+			expect(
+				xrpActiveUserTransactionDisplay(
+					rowKeepingRefs({
+						keep: POLL_KEYS,
+						extra: [{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'Snapshot Ledger' }]
+					})
+				)
+			).toEqual({ amount: '1.234567', symbol: XRP_TOKEN.symbol, network: 'Snapshot Ledger' });
+		});
+
+		// The backend bounds a ref value's length, not its content, so another client can store a
+		// blank one. `??` alone would take it as present and render "Send" over a blank network line.
+		it.each(['', '   ', '\t\n'])('treats a blank snapshot value (%j) as absent', (blank) => {
+			expect(
+				xrpActiveUserTransactionDisplay(
+					rowKeepingRefs({
+						keep: POLL_KEYS,
+						extra: [
+							{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: blank },
+							{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: blank },
+							{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: blank }
+						]
+					})
+				)
+			).toEqual({ amount: '1.234567', symbol: XRP_TOKEN.symbol, network: XRP_TOKEN.network.name });
+		});
+
+		it('trims a snapshot value it keeps', () => {
+			expect(
+				xrpActiveUserTransactionDisplay(
+					rowKeepingRefs({
+						keep: POLL_KEYS,
+						extra: [{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: '  Snapshot Ledger ' }]
+					})
+				)?.network
+			).toBe('Snapshot Ledger');
+		});
+
+		it('is undefined for a row that is not an XRP payment', () => {
+			expect(xrpActiveUserTransactionDisplay(mockLiquidiumActiveUserTransaction)).toBeUndefined();
+		});
+	});
+
+	describe('buildXrpSendTrackingMetadata', () => {
+		// The wizard fires the same error event with the network's id, so the id it is here too —
+		// the display name would split every grouping by `network` in two.
+		it('reports the network as the send wizard does, by id', () => {
+			expect(buildXrpSendTrackingMetadata({ tx: mockXrpActiveUserTransaction }).network).toBe(
+				'XRP'
+			);
+		});
+
+		it('reports the snapshot, the fee and no error for an open row', () => {
+			expect(buildXrpSendTrackingMetadata({ tx: mockXrpActiveUserTransaction })).toEqual({
+				token: 'XRP',
+				network: `${XRP_TOKEN.network.id.description}`,
+				tokenAmount: '25',
+				fee: '12'
+			});
+		});
+
+		it("reports the row's own data when the snapshot is missing", () => {
+			expect(buildXrpSendTrackingMetadata({ tx: rowKeepingRefs({ keep: POLL_KEYS }) })).toEqual({
+				token: XRP_TOKEN.symbol,
+				network: `${XRP_TOKEN.network.id.description}`,
+				tokenAmount: '1.234567',
+				fee: '12'
+			});
+		});
+
+		it('carries the recorded failure text', () => {
+			expect(
+				buildXrpSendTrackingMetadata({
+					tx: { ...mockXrpActiveUserTransaction, status: { Failed: null }, error: ['boom'] }
+				})
+			).toEqual(expect.objectContaining({ error: 'boom' }));
 		});
 	});
 });

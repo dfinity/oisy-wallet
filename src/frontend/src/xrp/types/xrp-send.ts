@@ -36,10 +36,9 @@ export class XrpSelfDestinationError extends Error {}
  * An XRPL `Sequence` is a nonce, and while the first payment is open there is no safe sequence for
  * a second: reusing it answers `tefPAST_SEQ` or replaces a queued transaction, and taking the next
  * one signs into a gap that expires — which reports "nothing was sent" for a payment that can
- * still apply. There is deliberately no override; the only correct action is to wait, and the wait
- * is bounded by the signed `LastLedgerSequence`.
- *
- * Fires before any node read and before anything is signed, so nothing left the wallet.
+ * still apply. There is deliberately no override; the only correct action is to wait. The
+ * preliminary gate fires before reads or signing, while backend atomic enforcement may reject
+ * after signing; both paths reject before broadcast, so nothing left the wallet.
  */
 export class XrpSendAlreadyInFlightError extends Error {}
 

@@ -7,6 +7,7 @@
 	import type { Token } from '$lib/types/token';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
+	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 	import type { SolNetBalanceChange } from '$sol/types/sol-transaction-summary';
 	import { solAccountExplorerUrl } from '$sol/utils/sol-explorer.utils';
@@ -23,9 +24,11 @@
 		// The net changes of the same transaction, whose decimals stand in for the ones an
 		// unchecked transfer does not carry.
 		netChanges?: SolNetBalanceChange[];
+		// The user's address on this network, which decides whether a close paid them back.
+		userAddress: OptionSolAddress;
 	}
 
-	let { instructions, token, netChanges }: Props = $props();
+	let { instructions, token, netChanges, userAddress }: Props = $props();
 
 	const splToken = (tokenAddress: string) =>
 		findSplToken({
@@ -69,15 +72,25 @@
 		instruction,
 		i18n: $i18n,
 		symbolOf,
-		decimalsOf
+		decimalsOf,
+		userAddress
 	})}
 
 	<!-- The counterparty of a transfer, the delegate of an approval, the new authority of a
 	     handover, the program a route ran through: an address the user has something to check. The
 	     account a creation or a close names is a derived token account nobody recognises, and the
-	     token already identifies it. -->
-	{@const actionAddress =
-		instruction.counterparty ?? instruction.newAuthority ?? instruction.program}
+	     token already identifies it.
+
+	     A close that pays the user their own wallet back is the exception: the line already says
+	     the balance came home, and naming the wallet underneath repeats it. The address is what
+	     the line needs when it went somewhere else. -->
+	{@const closedHome =
+		(instruction.kind === 'closeTokenAccount' || instruction.kind === 'unwrap') &&
+		instruction.counterparty === userAddress}
+
+	{@const actionAddress = closedHome
+		? undefined
+		: (instruction.counterparty ?? instruction.newAuthority ?? instruction.program)}
 
 	<span class="flex flex-col gap-1" data-tid="sol-instruction">
 		<span class="flex flex-wrap items-center gap-x-1">

@@ -2,15 +2,15 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
+import { ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES } from '$lib/constants/app.constants';
 import { applyActiveUserTransactionPollUpdate } from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadXrpTransactionOutcome, loadXrpValidatedLedgerIndex } from '$xrp/rest/xrpl.rest';
-import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 import {
-	toXrpExternalRefsMap,
+	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
@@ -155,17 +155,18 @@ const pollXrpActiveUserTransaction = async ({
 /**
  * The subject of every failure message: what was being sent, and where.
  *
- * Taken from the row's own display snapshot rather than from anything live, because by the time
- * the ledger decides there may be no modal, no fee store and no selected token left to ask — and a
- * row that resolved while the tab was shut still has to say what it was.
+ * Taken from the row itself rather than from anything live, because by the time the ledger decides
+ * there may be no modal, no fee store and no selected token left to ask — and a row that resolved
+ * while the tab was shut still has to say what it was. `xrpActiveUserTransactionDisplay` fills in
+ * whatever the row's display snapshot lacks.
  */
 const xrpFailureSubject = (tx: ActiveUserTransaction): Record<string, string> => {
-	const refs = toXrpExternalRefsMap(tx.external_refs);
+	const display = xrpActiveUserTransactionDisplay(tx);
 
 	return {
-		$amount: refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ?? '',
-		$symbol: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? '',
-		$network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? ''
+		$amount: display?.amount ?? '',
+		$symbol: display?.symbol ?? '',
+		$network: display?.network ?? ''
 	};
 };
 
@@ -186,12 +187,22 @@ const applyXrpStatus = async ({
 		return;
 	}
 
+	// Past the backend's limit the whole update is rejected, status included, and
+	// `applyActiveUserTransactionPollUpdate` only logs that — so the row would stay open, be re-polled
+	// into the same rejection on every tick, and refuse every send from its address for good. The
+	// verdict matters more than its wording, so such a row closes without text and the loader falls
+	// back to generic copy. No real payment gets here: it takes a fabricated result code, or a display
+	// snapshot another client wrote.
+	const fits =
+		nonNullish(error) &&
+		new TextEncoder().encode(error).length <= ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES;
+
 	await applyActiveUserTransactionPollUpdate({
 		identity,
 		tx,
 		update: {
 			status,
-			...(nonNullish(error) ? { error } : {})
+			...(fits ? { error } : {})
 		}
 	});
 };

@@ -37,10 +37,14 @@ export const loadActiveUserTransactions = async ({
 
 	activeUserTransactionsStore.init(identity.getPrincipal());
 
+	// Marked before the read, so a row created or updated while it is in flight survives a snapshot
+	// taken before that write committed.
+	const since = activeUserTransactionsStore.beginLoad();
+
 	try {
 		const transactions = await getActiveUserTransactions({ identity });
 
-		activeUserTransactionsStore.set({ transactions });
+		activeUserTransactionsStore.set({ transactions, since });
 	} catch (err: unknown) {
 		consoleError(err);
 	}

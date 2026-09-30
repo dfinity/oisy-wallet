@@ -3,6 +3,7 @@
 	import { getMinimumBorrowAmount } from '@liquidium/client';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import LiquidiumHealthFactor from '$lib/components/liquidium/LiquidiumHealthFactor.svelte';
+	import LiquidiumActivationFeeInfo from '$lib/components/liquidium/borrow/LiquidiumActivationFeeInfo.svelte';
 	import LiquidiumBorrowSummary from '$lib/components/liquidium/borrow/LiquidiumBorrowSummary.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -183,6 +184,8 @@
 	</ModalValue>
 
 	<LiquidiumHealthFactor percent={preview.projectedHealthPercent} />
+
+	<LiquidiumActivationFeeInfo {market} />
 
 	{#if pricesUnavailable}
 		<MessageBox level="warning" styleClass="mt-3">

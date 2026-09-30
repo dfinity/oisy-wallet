@@ -55,7 +55,14 @@ describe('sol-transactions.utils', () => {
 		});
 
 		it('should map a sol transaction message', () => {
-			expect(mapSolTransactionMessage(mockSolParsedTransactionMessage)).toStrictEqual({
+			// The message's close names the signer as its destination, so it states nothing rather
+			// than failing closed. Passing anybody else here is covered in `mapSolInstruction`.
+			expect(
+				mapSolTransactionMessage({
+					transactionMessage: mockSolParsedTransactionMessage,
+					userAddress: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+				})
+			).toStrictEqual({
 				amount: 2044380n,
 				unreviewed: true,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
@@ -68,7 +75,9 @@ describe('sol-transactions.utils', () => {
 
 		it('should handle empty instructions', () => {
 			expect(
-				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions: [] })
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions: [] }
+				})
 			).toStrictEqual({ amount: undefined });
 
 			expect(spyMapSolInstruction).not.toHaveBeenCalled();
@@ -86,12 +95,17 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1]
+					}
 				})
 			).toStrictEqual(expected);
 
-			expect(spyMapSolInstruction).toHaveBeenCalledExactlyOnceWith(instruction1);
+			expect(spyMapSolInstruction).toHaveBeenCalledExactlyOnceWith({
+				instruction: instruction1,
+				userAddress: undefined
+			});
 		});
 
 		it('should sum amounts across multiple instructions', () => {
@@ -100,12 +114,23 @@ describe('sol-transactions.utils', () => {
 				.mockReturnValueOnce({ amount: 250n })
 				.mockReturnValueOnce({ amount: 50n });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: 400n });
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
+				amount: 400n
+			});
 
 			expect(spyMapSolInstruction).toHaveBeenCalledTimes(3);
-			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(1, instruction1);
-			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(2, instruction2);
-			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, instruction3);
+			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(1, {
+				instruction: instruction1,
+				userAddress: undefined
+			});
+			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(2, {
+				instruction: instruction2,
+				userAddress: undefined
+			});
+			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, {
+				instruction: instruction3,
+				userAddress: undefined
+			});
 		});
 
 		it('should propagate the tokenAddress of an SPL token instruction', () => {
@@ -118,8 +143,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1]
+					}
 				})
 			).toStrictEqual({
 				amount: 100n,
@@ -139,8 +166,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1]
+					}
 				})
 			).toStrictEqual({
 				amount: 100n,
@@ -168,8 +197,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({
 				amount: 100n,
@@ -188,8 +219,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 		});
@@ -201,8 +234,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 		});
@@ -219,8 +254,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2, instruction3]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2, instruction3]
+					}
 				})
 			).toStrictEqual({
 				amount: 5100n,
@@ -240,8 +277,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({
 				amount: 1n,
@@ -258,8 +297,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: undefined, unreviewed: true });
 		});
@@ -271,8 +312,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: 1n });
 		});
@@ -286,8 +329,10 @@ describe('sol-transactions.utils', () => {
 			// applies to both instructions
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: 1n, prioritizationFee: 400_000n, computeUnitLimit: 400_000n });
 		});
@@ -298,7 +343,7 @@ describe('sol-transactions.utils', () => {
 				.mockReturnValueOnce({ amount: undefined, computeUnitLimit: 50_000n })
 				.mockReturnValueOnce({ amount: 1n });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: 1n,
 				prioritizationFee: 50_000n,
 				computeUnitLimit: 50_000n
@@ -315,7 +360,7 @@ describe('sol-transactions.utils', () => {
 					destination: mockSolAddress2
 				});
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: 1_000n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -331,8 +376,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: 1n, ambiguous: true });
 		});
@@ -354,7 +401,9 @@ describe('sol-transactions.utils', () => {
 			// The transfer is worth 1 lamport, while the compute budget claims 1_000_000_001 lamports
 			// on top of the 5_000 lamport base fee
 			expect(
-				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions })
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions }
+				})
 			).toStrictEqual({
 				amount: 1n,
 				source: mockSolAddress,
@@ -387,8 +436,7 @@ describe('sol-transactions.utils', () => {
 			];
 
 			const mapped = mapSolTransactionMessage({
-				...mockSolParsedTransactionMessage,
-				instructions
+				transactionMessage: { ...mockSolParsedTransactionMessage, instructions }
 			});
 
 			expect(mapped).toStrictEqual({
@@ -419,7 +467,9 @@ describe('sol-transactions.utils', () => {
 			];
 
 			expect(
-				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions })
+				mapSolTransactionMessage({
+					transactionMessage: { ...mockSolParsedTransactionMessage, instructions }
+				})
 			).toStrictEqual({ amount: undefined, ambiguous: true });
 		});
 
@@ -429,7 +479,9 @@ describe('sol-transactions.utils', () => {
 				.mockReturnValueOnce({ amount: 5n })
 				.mockReturnValueOnce({});
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: 5n });
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
+				amount: 5n
+			});
 		});
 
 		it('should treat zero amounts correctly (sum remains accurate)', () => {
@@ -439,8 +491,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: 10n });
 		});
@@ -452,8 +506,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({ amount: 150n });
 		});
@@ -474,7 +530,7 @@ describe('sol-transactions.utils', () => {
 				})
 				.mockReturnValueOnce({ amount: 30n });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: 60n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -493,7 +549,7 @@ describe('sol-transactions.utils', () => {
 				})
 				.mockReturnValueOnce({ amount: bn1Bi, source: mockAtaAddress });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: bn3Bi,
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
@@ -513,7 +569,7 @@ describe('sol-transactions.utils', () => {
 				})
 				.mockReturnValueOnce({ amount: bn1Bi, destination: mockAtaAddress });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: bn3Bi,
 				source: mockSolAddress,
 				destination: mockAtaAddress,
@@ -533,7 +589,7 @@ describe('sol-transactions.utils', () => {
 				})
 				.mockReturnValueOnce({ amount: bn1Bi, payer: mockAtaAddress });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: bn3Bi,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
@@ -549,8 +605,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({
 				amount: 10n,
@@ -567,8 +625,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(
 				mapSolTransactionMessage({
-					...mockSolParsedTransactionMessage,
-					instructions: [instruction1, instruction2]
+					transactionMessage: {
+						...mockSolParsedTransactionMessage,
+						instructions: [instruction1, instruction2]
+					}
 				})
 			).toStrictEqual({
 				amount: 10n,
@@ -580,7 +640,9 @@ describe('sol-transactions.utils', () => {
 		it('should not crash if mapSolInstruction returns an object without fields', () => {
 			spyMapSolInstruction.mockReturnValue({});
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: undefined });
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
+				amount: undefined
+			});
 		});
 
 		describe('with a dust transfer hiding a takeover or a burn', () => {
@@ -618,8 +680,10 @@ describe('sol-transactions.utils', () => {
 
 				expect(
 					mapSolTransactionMessage({
-						...mockSolParsedTransactionMessage,
-						instructions: [dustTransfer, setAuthority]
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer, setAuthority]
+						}
 					})
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
@@ -634,8 +698,10 @@ describe('sol-transactions.utils', () => {
 
 				expect(
 					mapSolTransactionMessage({
-						...mockSolParsedTransactionMessage,
-						instructions: [dustTransfer, burn]
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer, burn]
+						}
 					})
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
@@ -650,8 +716,10 @@ describe('sol-transactions.utils', () => {
 
 				expect(
 					mapSolTransactionMessage({
-						...mockSolParsedTransactionMessage,
-						instructions: [token2022DustTransfer, setAuthority]
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022DustTransfer, setAuthority]
+						}
 					})
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
@@ -666,8 +734,10 @@ describe('sol-transactions.utils', () => {
 
 				expect(
 					mapSolTransactionMessage({
-						...mockSolParsedTransactionMessage,
-						instructions: [token2022DustTransfer, burn]
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [token2022DustTransfer, burn]
+						}
 					})
 				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
 			});
@@ -675,8 +745,10 @@ describe('sol-transactions.utils', () => {
 			it('should keep a lone dust transfer signable', () => {
 				expect(
 					mapSolTransactionMessage({
-						...mockSolParsedTransactionMessage,
-						instructions: [dustTransfer]
+						transactionMessage: {
+							...mockSolParsedTransactionMessage,
+							instructions: [dustTransfer]
+						}
 					})
 				).toStrictEqual({
 					amount: 1n,
@@ -693,7 +765,7 @@ describe('sol-transactions.utils', () => {
 				.mockReturnValueOnce({ amount: 42n })
 				.mockReturnValueOnce({ amount: 18n });
 
-			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+			expect(mapSolTransactionMessage({ transactionMessage: mockParams })).toStrictEqual({
 				amount: 60n
 			});
 		});

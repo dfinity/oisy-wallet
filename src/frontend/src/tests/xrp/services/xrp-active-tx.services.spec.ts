@@ -1,4 +1,6 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import { ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES } from '$lib/constants/app.constants';
+import { Languages } from '$lib/enums/languages';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -15,6 +17,7 @@ import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
 import { XrpNetworks } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
+import { DEFAULT_DEFINITIONS } from 'ripple-binary-codec';
 import { get } from 'svelte/store';
 
 describe('xrp-active-tx.services', () => {
@@ -184,29 +187,127 @@ describe('xrp-active-tx.services', () => {
 			expect(errorOf()).toContain('tecUNFUNDED_PAYMENT');
 		});
 
-		// A row whose display snapshot is missing must still produce a readable sentence rather
-		// than "undefined".
-		it('leaves no placeholder behind when the snapshot is missing', async () => {
-			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
-				state: 'validated',
-				transactionResult: 'tecUNFUNDED_PAYMENT'
+		// The backend refuses an `error` over its byte limit — and with it the whole update, status
+		// included — so a text that does not fit must not stand between a row and its verdict.
+		describe('a failure text over the backend limit', () => {
+			it('closes the row without text rather than leaving it open', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+					state: 'validated',
+					// Matches the schema's `tec[A-Z0-9_]+`, but no real code is anywhere near this long.
+					transactionResult: `tec${'X'.repeat(600)}`
+				});
+
+				await poll();
+
+				expectStatus({ status: { Failed: null } });
 			});
 
-			await poll([
-				{
-					...tx,
-					external_refs: tx.external_refs.filter(({ key }) =>
-						[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
-							key as never
-						)
-					)
-				}
-			]);
+			it('closes an expired row without text when its snapshot is oversized', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+				vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+					mockXrpLastLedgerSequence + 1
+				);
 
-			expect(errorOf()).not.toContain('$amount');
-			expect(errorOf()).not.toContain('$symbol');
-			expect(errorOf()).not.toContain('$network');
-			expect(errorOf()).not.toContain('undefined');
+				// 256 is the backend's bound per ref value, so another client can store this.
+				const oversized: ActiveUserTransaction = {
+					...tx,
+					external_refs: tx.external_refs.map((ref) =>
+						[
+							XRP_EXTERNAL_REF_KEYS.AMOUNT,
+							XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL,
+							XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL
+						].includes(ref.key as never)
+							? { ...ref, value: 'X'.repeat(256) }
+							: ref
+					)
+				};
+
+				await poll([oversized]);
+
+				expect(applySpy).toHaveBeenCalledWith({
+					identity,
+					tx: oversized,
+					update: { status: { Failed: null } }
+				});
+			});
+
+			// What keeps the guard above for malformed input only: a real payment's text fits in every
+			// shipped locale — the largest amount XRP's supply allows, at full precision, with the
+			// longest result code the protocol defines. A translation that grows past the limit fails
+			// here instead of silently degrading every such failure to generic copy.
+			const longestResult = Object.keys(DEFAULT_DEFINITIONS.transactionResult)
+				.filter((code) => /^tec[A-Z0-9_]+$/.test(code))
+				.reduce((longest, code) => (code.length > longest.length ? code : longest));
+
+			const bytes = (text: string) => new TextEncoder().encode(text).length;
+
+			const subject = { $amount: '99999999999.999999', $symbol: 'XRP', $network: 'XRP Ledger' };
+
+			it.each(Object.values(Languages))(
+				"fits a real payment's failure texts in %s",
+				async (language) => {
+					const { send } = (await import(`$lib/i18n/${language}.json`)).default;
+
+					expect(
+						bytes(
+							replacePlaceholders(send.error.xrp_active_transaction_failed, {
+								...subject,
+								$result: longestResult
+							})
+						)
+					).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+					expect(
+						bytes(replacePlaceholders(send.error.xrp_send_expired, subject))
+					).toBeLessThanOrEqual(ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES);
+				}
+			);
+		});
+
+		// The backend requires only the two poll refs, so a row written by another client can lack
+		// its display snapshot. The sentence must still be the specific one — not merely free of
+		// placeholders, which "Your send of   on  was …" is too — built from what the backend does
+		// guarantee: the amount in drops, at full precision, and a token that can only be native XRP.
+		describe('without a display snapshot', () => {
+			const withoutSnapshot: ActiveUserTransaction = {
+				...tx,
+				data: { Xrp: { ...mockXrpData, amount: 1_234_567n } },
+				external_refs: tx.external_refs.filter(({ key }) =>
+					[XRP_EXTERNAL_REF_KEYS.TX_HASH, XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE].includes(
+						key as never
+					)
+				)
+			};
+
+			const subject = { $amount: '1.234567', $symbol: 'XRP', $network: 'XRP Ledger' };
+
+			it('still names the payment on a validated failure', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+					state: 'validated',
+					transactionResult: 'tecUNFUNDED_PAYMENT'
+				});
+
+				await poll([withoutSnapshot]);
+
+				expect(errorOf()).toContain('1.234567 XRP on XRP Ledger');
+				expect(errorOf()).toBe(
+					replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+						...subject,
+						$result: 'tecUNFUNDED_PAYMENT'
+					})
+				);
+			});
+
+			it('still names the payment on expiry', async () => {
+				vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+				vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+					mockXrpLastLedgerSequence + 1
+				);
+
+				await poll([withoutSnapshot]);
+
+				expect(errorOf()).toContain('1.234567 XRP on XRP Ledger');
+				expect(errorOf()).toBe(replacePlaceholders(get(i18n).send.error.xrp_send_expired, subject));
+			});
 		});
 	});
 

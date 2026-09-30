@@ -59,6 +59,21 @@ export interface SolInstructionSummary {
 	// whole balance, so for a wrapped SOL account this is the rent-exempt reserve plus the SOL that
 	// was wrapped, not the rent alone.
 	returned?: bigint;
+	// What a closed token account held in tokens when it closed, when it was read: what it held
+	// before the message, or nothing when the message opened it, plus every transfer in and out
+	// since. For a wrapped SOL account that is the SOL wrapped inside it, which separates a close
+	// that unwraps something from one that closes an empty account.
+	wrapped?: bigint;
+	// The rent-exempt reserve of a closed account, where it is known: the part of what it hands
+	// over that is rent. A Token program account is always the same size, so its reserve is the
+	// chain's minimum for that size; a Token-2022 account's size varies with its extensions and
+	// leaves it unknown. Everything above it and the wrapped SOL is lamports paid in on top.
+	reserve?: bigint;
+	// `false` on a close of an account a run read and found somebody else holding, which reaches
+	// the list only because it pays the user's wallet. What arrives is money they did not have
+	// rather than money of theirs coming back, and its rent was never theirs to be charged or
+	// credited. Absent where no run read the account, which says nothing either way.
+	ownAccount?: boolean;
 	// The new authority of a `setAuthority`, absent when the field was cleared.
 	newAuthority?: SolAddress;
 	// The program that produced the legs of a route, when one is known by address.

@@ -3,14 +3,16 @@ import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef
 } from '$declarations/backend/backend.did';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Token } from '$lib/types/token';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import type { XrpAddress } from '$xrp/types/address';
 import { XrpNetworks, type XrpNetworkType } from '$xrp/types/network';
 import { XRP_EXTERNAL_REF_KEYS, type XrpExternalRefKey } from '$xrp/types/xrp-active-tx';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const isXrpActiveUserTransaction = (tx: ActiveUserTransaction): boolean => 'Xrp' in tx.data;
 
@@ -177,17 +179,67 @@ export const openXrpActiveUserTransaction = ({
  * Read entirely off the row's own snapshot, like the swap providers' equivalents: by the time the
  * ledger decides there may be no modal, no fee store and no selected token left to ask.
  */
+export interface XrpActiveUserTransactionDisplay {
+	amount: string;
+	symbol: string;
+	network: string;
+}
+
+/**
+ * What an XRP row says it sent, and where — for the row itself, its failure message and its
+ * analytics event.
+ *
+ * The display snapshot first, and for any field it lacks, what the backend guarantees every XRP row
+ * carries: the amount in drops, and an `XrpNativeMainnet` token, which can only be `XRP_TOKEN`. The
+ * backend does not require the snapshot, so a row written by another client may lack it, and empty
+ * strings in its place would read "Send" over a blank network line, or "Your send of   on  was …".
+ *
+ * `undefined` for a row that is not an XRP payment.
+ */
+export const xrpActiveUserTransactionDisplay = (
+	tx: ActiveUserTransaction
+): XrpActiveUserTransactionDisplay | undefined => {
+	if (!('Xrp' in tx.data)) {
+		return undefined;
+	}
+
+	const refs = toXrpExternalRefsMap(tx.external_refs);
+
+	// Blank counts as absent: the backend bounds a ref value's length but not its content, so another
+	// client can store an empty or whitespace-only one, which `??` alone would take as present.
+	const snapshot = (key: XrpExternalRefKey): string | undefined => {
+		const value = refs[key]?.trim();
+
+		return notEmptyString(value) ? value : undefined;
+	};
+
+	return {
+		amount:
+			snapshot(XRP_EXTERNAL_REF_KEYS.AMOUNT) ??
+			formatToken({
+				value: tx.data.Xrp.amount,
+				unitName: XRP_TOKEN.decimals,
+				displayDecimals: XRP_TOKEN.decimals
+			}),
+		symbol: snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ?? XRP_TOKEN.symbol,
+		network: snapshot(XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL) ?? XRP_TOKEN.network.name
+	};
+};
+
 export const buildXrpSendTrackingMetadata = ({
 	tx
 }: {
 	tx: ActiveUserTransaction;
 }): Record<string, string> => {
-	const refs = toXrpExternalRefsMap(tx.external_refs);
+	const display = xrpActiveUserTransactionDisplay(tx);
 
 	return {
-		token: refs[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL] ?? '',
-		network: refs[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL] ?? '',
-		tokenAmount: refs[XRP_EXTERNAL_REF_KEYS.AMOUNT] ?? '',
+		token: display?.symbol ?? '',
+		// The network's id, as the send wizard reports it for the same event, not the display name the
+		// row renders: one event name, one shape, so grouping by `network` in Plausible holds. Taken
+		// from the row's token, which `XrpNativeMainnet` pins to `XRP_TOKEN`.
+		network: 'Xrp' in tx.data ? `${XRP_TOKEN.network.id.description}` : '',
+		tokenAmount: display?.amount ?? '',
 		...('Xrp' in tx.data ? { fee: tx.data.Xrp.fee.toString() } : {}),
 		...(nonNullish(tx.error[0]) ? { error: tx.error[0] } : {})
 	};
