@@ -191,6 +191,7 @@ fn create_near_intents_variant_roundtrip() {
         source_token: TokenId::EvmNative(8453),
         dest_token: TokenId::SolNativeMainnet,
         amount: Nat::from(250_000u64),
+        source_address: None,
     });
 
     let created = pic
@@ -237,6 +238,7 @@ fn create_near_intents_btc_variant_roundtrip() {
                 source_token: TokenId::BtcNativeMainnet,
                 dest_token: TokenId::EvmNative(8453),
                 amount: Nat::from(250_000u64),
+                source_address: None,
             }),
         ),
         (
@@ -245,6 +247,7 @@ fn create_near_intents_btc_variant_roundtrip() {
                 source_token: TokenId::SolNativeMainnet,
                 dest_token: TokenId::BtcNativeMainnet,
                 amount: Nat::from(250_000u64),
+                source_address: None,
             }),
         ),
     ];
@@ -589,6 +592,116 @@ fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
 
     // And the first row is the only one stored.
     assert_eq!(list_active(&pic, user).len(), 1);
+}
+
+// Through the real endpoint, for the same reason as the send-only case above: a
+// swap's XRP deposit is a payment from the same address, and only the create is
+// atomic with the check. Refused while the swap row is `Pending` — its deposit
+// has not resolved on the ledger — and allowed once it is `Executing`, which only
+// the deposit's ledger result can make it.
+#[test]
+fn xrp_send_while_a_swap_deposit_is_in_flight_returns_already_in_flight() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let create = |id: &str, data: ActiveUserTransactionData| {
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data,
+                external_refs: xrp_refs(),
+                ..create_req(id)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed")
+    };
+
+    let swap = ActiveUserTransactionData::NearIntents(NearIntentsData {
+        source_token: TokenId::XrpNativeMainnet,
+        dest_token: TokenId::EvmNative(1),
+        amount: Nat::from(25_000_000u64),
+        source_address: Some("rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string()),
+    });
+
+    let send = ActiveUserTransactionData::Xrp(XrpData {
+        token: TokenId::XrpNativeMainnet,
+        source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+        destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+        destination_tag: None,
+        amount: Nat::from(25_000_000u64),
+        fee: Nat::from(12u64),
+    });
+
+    match create(TX_ID, swap) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    let send_id = "22222222-2222-4222-8222-222222222222";
+
+    match create(send_id, send.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    // What a frontend from before the swap UI sends on 1Click's `PENDING_DEPOSIT`.
+    match pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Executing),
+        )
+        .expect("update_active_user_transaction call should succeed")
+    {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result is required to leave Pending".to_string()
+                )
+            );
+        }
+    }
+
+    match create(send_id, send.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    let mut refs = xrp_refs();
+    refs.push(ActiveUserTransactionRef {
+        key: "ledger_result".to_string(),
+        value: "tesSUCCESS".to_string(),
+    });
+
+    match pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            UpdateActiveUserTransactionRequest {
+                external_refs: Some(refs),
+                ..update_status_req(TX_ID, ActiveUserTransactionStatus::Executing)
+            },
+        )
+        .expect("update_active_user_transaction call should succeed")
+    {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Executing);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    match create(send_id, send) {
+        ActiveUserTransactionResult::Ok(_) => (),
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
 }
 
 /// The two refs an XRP row is polled with, at the shapes they really have.

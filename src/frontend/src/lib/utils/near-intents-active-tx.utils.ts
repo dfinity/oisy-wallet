@@ -39,7 +39,7 @@ export const toNearIntentsData = ({
 	const dest_token = toBackendTokenId(destinationToken);
 
 	if (nonNullish(source_token) && nonNullish(dest_token)) {
-		return { NearIntents: { source_token, dest_token, amount } };
+		return { NearIntents: { source_token, dest_token, amount, source_address: [] } };
 	}
 };
 

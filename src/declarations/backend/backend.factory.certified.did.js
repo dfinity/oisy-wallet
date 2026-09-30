@@ -293,6 +293,7 @@ export const idlFactory = ({ IDL }) => {
 		dest_token: TokenId
 	});
 	const NearIntentsData = IDL.Record({
+		source_address: IDL.Opt(IDL.Text),
 		source_token: TokenId,
 		amount: IDL.Nat,
 		dest_token: TokenId

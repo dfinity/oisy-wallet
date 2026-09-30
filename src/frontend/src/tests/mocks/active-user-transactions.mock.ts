@@ -45,7 +45,8 @@ export const mockActiveUserTransactionData: ActiveUserTransactionData = {
 export const mockNearIntentsData: NearIntentsData = {
 	source_token: { Erc20: ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 1n] },
 	dest_token: { SplMainnet: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-	amount: 1_000_000n
+	amount: 1_000_000n,
+	source_address: []
 };
 
 export const mockNearIntentsActiveUserTransaction: ActiveUserTransaction = {

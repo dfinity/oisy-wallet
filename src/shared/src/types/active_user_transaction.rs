@@ -33,12 +33,22 @@ pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 /// is at most 63 characters, so anything longer can never be a valid pool id.
 pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 
-/// The two `external_refs` an XRP row is polled with. Both are derived from the
-/// signed blob before the record is created, so both are known to the caller and
-/// can be required: a row missing either cannot be resolved, and — since an open
-/// row refuses every later send from its address — could never be escaped.
+/// The two `external_refs` a row that makes an XRP payment is polled with: an
+/// XRP send, and a swap whose deposit is an XRP payment. Both are derived from
+/// the signed blob before the record is created, so both are known to the caller
+/// and can be required: a row missing either cannot be resolved, and — since an
+/// open row refuses every later payment from its address — could never be
+/// escaped.
 pub const XRP_REF_TX_HASH: &str = "tx_hash";
 pub const XRP_REF_LAST_LEDGER_SEQUENCE: &str = "last_ledger_sequence";
+
+/// The `external_ref` that lets a swap from XRP leave `Pending`: how its deposit
+/// resolved on the ledger — `tesSUCCESS`, a `tec` code, or `expired`. Only the
+/// XRP ledger resolution writes it, so a client that follows 1Click instead
+/// cannot release the address while the deposit can still apply.
+pub const XRP_REF_LEDGER_RESULT: &str = "ledger_result";
+pub const XRP_LEDGER_RESULT_SUCCESS: &str = "tesSUCCESS";
+pub const XRP_LEDGER_RESULT_EXPIRED: &str = "expired";
 
 /// Length of an XRPL transaction id in hex.
 pub const XRP_TX_HASH_LEN: usize = 64;
@@ -174,7 +184,7 @@ pub struct LiquidiumData {
 /// NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
 /// off-chain by polling the 1Click status endpoint keyed by the deposit
 /// address, so that address (and its optional memo, plus learned-mid-flow tx
-/// hashes) lives in `external_refs`; only the canonical immutable trio is
+/// hashes) lives in `external_refs`; only the values fixed at creation are
 /// captured here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct NearIntentsData {
@@ -182,6 +192,11 @@ pub struct NearIntentsData {
     pub dest_token: TokenId,
     /// Source-token amount in base units.
     pub amount: Nat,
+    /// The XRP address the deposit is sent from, set exactly when `source_token`
+    /// is native XRP. That deposit is an XRP payment, so this is the field the
+    /// one-payment-in-flight check reads, as it reads `XrpData::source_address`
+    /// for a send. Optional and last, so rows stored before it decode as `None`.
+    pub source_address: Option<String>,
 }
 
 /// Which Velora execution mode an active transaction tracks. Determines how the
@@ -461,8 +476,54 @@ mod tests {
             source_token: TokenId::EvmNative(8453),
             dest_token: TokenId::SolNativeMainnet,
             amount: Nat::from(250_000u64),
+            source_address: None,
         });
         assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn near_intents_xrp_source_variant_roundtrips() {
+        let original = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::XrpNativeMainnet,
+            dest_token: TokenId::EvmNative(1),
+            amount: Nat::from(25_000_000u64),
+            source_address: Some("rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string()),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    /// The shape every `NearIntents` row in stable memory was written with before
+    /// `source_address` existed.
+    #[derive(candid::CandidType)]
+    struct NearIntentsDataWithoutSourceAddress {
+        source_token: TokenId,
+        dest_token: TokenId,
+        amount: Nat,
+    }
+
+    #[test]
+    fn near_intents_row_stored_without_source_address_decodes_as_none() {
+        // Rows are stored as Candid, so an upgrade has to read every existing
+        // `NearIntents` row back without a migration. That holds only because the
+        // new field is optional: Candid decodes a missing `opt` field as `None`.
+        let stored = encode_one(NearIntentsDataWithoutSourceAddress {
+            source_token: TokenId::EvmNative(8453),
+            dest_token: TokenId::SolNativeMainnet,
+            amount: Nat::from(250_000u64),
+        })
+        .expect("encode");
+
+        let decoded: NearIntentsData = decode_one(&stored).expect("decode");
+
+        assert_eq!(
+            decoded,
+            NearIntentsData {
+                source_token: TokenId::EvmNative(8453),
+                dest_token: TokenId::SolNativeMainnet,
+                amount: Nat::from(250_000u64),
+                source_address: None,
+            }
+        );
     }
 
     fn erc20(address: &str, chain_id: u64) -> TokenId {
