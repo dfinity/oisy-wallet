@@ -45,7 +45,8 @@ export const mockActiveUserTransactionData: ActiveUserTransactionData = {
 export const mockNearIntentsData: NearIntentsData = {
 	source_token: { Erc20: ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 1n] },
 	dest_token: { SplMainnet: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-	amount: 1_000_000n
+	amount: 1_000_000n,
+	source_address: []
 };
 
 export const mockNearIntentsActiveUserTransaction: ActiveUserTransaction = {
@@ -231,6 +232,39 @@ export const mockXrpActiveUserTransaction: ActiveUserTransaction = {
 		{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
 		{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'XRP' },
 		{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'XRP Ledger' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockXrpSwapDepositAddress = 'rGMQ81w5aEoUeBeaCPbmLB9vmNdD41J4bN';
+
+/** A NEAR Intents swap from native XRP: its deposit is an XRP payment from the source address. */
+export const mockXrpSwapData: NearIntentsData = {
+	source_token: { XrpNativeMainnet: null },
+	dest_token: { EvmNative: 1n },
+	amount: 10_000_000n,
+	source_address: [mockXrpSourceAddress]
+};
+
+export const mockXrpSwapActiveUserTransaction: ActiveUserTransaction = {
+	id: '88888888-8888-4888-8888-888888888888',
+	status: { Pending: null },
+	data: { NearIntents: mockXrpSwapData },
+	progress_step: [],
+	external_refs: [
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: mockXrpSwapDepositAddress },
+		{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash },
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+			value: `${mockXrpLastLedgerSequence}`
+		},
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT, value: '10' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'XRP' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'XRP Ledger' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'ETH' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

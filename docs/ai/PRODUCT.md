@@ -192,7 +192,7 @@ TCYCLES is not enabled by default, so for most users Compute opens on the empty 
 
 ### First-time destination addresses
 
-A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts. For XRP a fresh load reaches back only as far as the most recent page of the account's history, and newer entries are added while the wallet stays open (see [Recently used addresses](#recently-used-addresses)).
 
 Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
 
@@ -223,6 +223,8 @@ This is distinct from a token whose issuer provides **no** Index canister at all
 ### Loading older history
 
 The Activity list and a token's own page both load older transactions as the user scrolls to the end of the list. A page that fails to load (the explorer or RPC errors, the Index canister does not answer) is not taken as the start of the history: what is on screen stays, and the list asks again the next time its end is scrolled into view. It does not retry on its own while the end sits on screen. Only a chain that actually has nothing older stops the list for that token.
+
+The Activity list only reaches as far back as it has asked every token to load. Transactions one token brings from further back stay hidden until the list goes that far for all of them, so the other tokens' older transactions are not missing in between. A token whose page failed can still be missing some until the list asks again.
 
 On Ethereum and the EVM networks the retries are spaced out per wallet address and token, so an explorer that keeps failing is not asked on every scroll: after a failed page the token waits 5 seconds before asking again, doubling with each failure in a row up to a minute, and the first page served resets the wait. It never gives up for the session. A scroll that arrives during the wait loads nothing for that token, and the next one after it asks again.
 
@@ -494,6 +496,12 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 OISY supports native XRP: balance, receive, send, and transaction history. The address is an XRPL classic address derived from the same threshold-signing setup as the other chains (Ed25519), so no key ever leaves the network.
 
+### Recently used addresses
+
+The address step's **Recently Used** tab lists the addresses the user has sent XRP to, as on the other chains, next to the **Contacts** tab (see [Contacts](#contacts)). The list is built from the loaded history. On XRP a fresh load reads only the most recent page of the account's ledger history (currently ten entries), and entries that arrive while the wallet stays open are added to it. A send older than that page is therefore missing again after the next reload, and its address is treated as first-time again (see [First-time destination addresses](#first-time-destination-addresses)).
+
+Picking an address fills in the address only, never a destination tag. An exchange gives all its customers one address and tells them apart by the tag, so the tag of an earlier send to that address may belong to someone else.
+
 ### Destination tags
 
 An XRP payment can carry a **destination tag** — a numeric routing memo that exchanges and custodians use to credit the right customer account. Sending to such a recipient **without** the tag, or with the wrong one, is a well-known and typically **unrecoverable** way to lose funds, because the funds arrive at the right address but cannot be attributed.
@@ -542,7 +550,7 @@ What this deliberately does not do:
 
 A contact can hold XRP Ledger addresses like any other network's. Only **classic** addresses (starting with `r`) are accepted. **X-addresses** are rejected, because they bundle a destination tag into the address and a contact stores no tag. Picking a contact therefore never fills in a tag: sending to an exchange still needs the tag entered by hand, and an address that demands one is still refused without it.
 
-The send flow's **Contacts** tab offers every contact with an XRP address. The **Recently Used** tab stays empty for XRP, because it is not yet built from the XRP transaction history.
+The send flow's **Contacts** tab offers every contact with an XRP address, next to the **Recently Used** tab (see [Recently used addresses](#recently-used-addresses)).
 
 ---
 
@@ -591,6 +599,18 @@ Behind `NEAR_INTENTS_BTC_SWAP_ENABLED` (`src/frontend/src/env/rest/near-intents.
 Funds cannot move before the user has acknowledged the NEAR Intents terms of service, exactly as in the EVM and Solana wizards. A BTC-source swap broadcasts the deposit transaction and becomes an **active user transaction at the moment of broadcast**, not when the flow finishes: a BTC broadcast is irreversible, so the swap is tracked even if a later step throws, and the global poller drives it to success or failure across modal close, refresh and logout, identically to the EVM and Solana NEAR Intents swaps. The spent UTXOs stay reserved while the deposit is pending, so a concurrent send cannot double-spend them.
 
 What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
+
+### NEAR Intents as an XRP swap provider (local and staging)
+
+Behind `NEAR_INTENTS_XRP_SWAP_ENABLED` (`src/frontend/src/env/rest/near-intents.env.ts`, on for local and staging builds, off in production), NEAR Intents serves native XRP, and it is XRP's only swap provider. The XRP token page then offers Swap. Native XRP appears as a pay token toward every NEAR Intents destination chain — Ethereum, Arbitrum, Base, BSC, Polygon, Robinhood Chain and Solana mainnets, and Bitcoin while NEAR Intents also serves Bitcoin — and tokens on those chains quote toward XRP. The payout goes to the user's own XRP address, including one that was never funded: 1Click keeps a payout toward XRP at 1 XRP or more, which covers the base reserve that creates the account. A pair toward XRP is not quoted while the XRP address has not loaded.
+
+Funds cannot move before the user has acknowledged the NEAR Intents terms of service. The form holds back the [account reserve](#account-reserve) and the network fee: Max leaves both, and an amount that would not leave them is refused before anything is signed. The deposit is a plain XRP payment to the address 1Click quoted, with the fee the user reviewed and no destination tag.
+
+**A swap is one transaction, so it shows as one entry.** The deposit creates no XRP send record of its own. The swap's active user transaction is created after the deposit is signed and before it is submitted — the moment an XRP send creates its record — and it carries what the ledger needs to resolve the deposit. It stays **pending** until the deposit resolves on the ledger. A deposit that validates with success moves the swap to **executing**, from where 1Click decides success or failure; a deposit that fails on the ledger or expires fails the swap, with the same message an XRP send would give. 1Click's own status never moves a swap whose deposit has not resolved.
+
+**While its deposit is pending, a swap holds the address** exactly as an unresolved XRP send does ([One unresolved payment per address](#one-unresolved-payment-per-address)): an XRP send or another swap from that address is refused until the deposit resolves, and a swap is refused while a send from that address is unresolved. The server-side refusal covers both, so a second tab is refused too. Once the swap is executing, XRP sends from the address go through while the swap still runs.
+
+What this deliberately does not do: no XRPL testnet, no issued currencies (native XRP only, the only asset 1Click lists on the XRP Ledger), no Chain Fusion route, and no production enablement. With the flag off, swaps and XRP sends behave exactly as the previous sections describe.
 
 ### 1Sec restricted to the unwrapping direction
 

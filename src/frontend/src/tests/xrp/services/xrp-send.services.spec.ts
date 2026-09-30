@@ -10,7 +10,9 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockXrpActiveUserTransaction,
-	mockXrpData
+	mockXrpData,
+	mockXrpSwapActiveUserTransaction,
+	mockXrpSwapData
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -1034,6 +1036,27 @@ describe('xrp-send.services', () => {
 			}
 		);
 
+		// A swap's deposit is an XRP payment from the same address, and `Pending` means it has not
+		// resolved on the ledger yet.
+		it('refuses a send while a swap deposit from the same address is Pending', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				mockXrpSwapActiveUserTransaction
+			]);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// `Executing` means the deposit validated; the swap goes on at 1Click without the address.
+		it('does not refuse on a swap whose deposit has validated', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }
+			]);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
+
 		it('does not refuse on an open record from another flow', async () => {
 			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
 				mockLiquidiumActiveUserTransaction
@@ -1087,6 +1110,61 @@ describe('xrp-send.services', () => {
 			await sendXrp(params);
 
 			expect(order).toEqual(['sign', 'create', 'submit']);
+		});
+
+		// A swap's deposit is part of the swap, so the payment is recorded under the swap's own row
+		// rather than an `Xrp` send row — built from the same two poll keys, at the same point.
+		describe('a caller-supplied record', () => {
+			const swapRecord = {
+				data: { NearIntents: mockXrpSwapData },
+				externalRefs: [{ key: 'near_intents_deposit_address', value: destination }]
+			};
+
+			it('is created instead of the send row, with the keys derived from the blob', async () => {
+				const txHash = await deriveXrpTransactionHash(signedBlob);
+				const record = vi.fn().mockReturnValue(swapRecord);
+
+				await sendXrp({ ...params, record });
+
+				expect(record).toHaveBeenCalledExactlyOnceWith({
+					txHash,
+					lastLedgerSequence: 1000 + XRP_LAST_LEDGER_SEQUENCE_OFFSET
+				});
+				expect(
+					activeUserTransactionsServices.createActiveUserTransaction
+				).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						identity: mockIdentity,
+						data: swapRecord.data,
+						externalRefs: swapRecord.externalRefs
+					})
+				);
+			});
+
+			// Built after signing: refusing there still leaves nothing broadcast.
+			it('refuses the payment when it cannot be built, without submitting', async () => {
+				const record = vi.fn().mockImplementation(() => {
+					throw new XrpSendNotGuardedError('not recordable');
+				});
+
+				await expect(sendXrp({ ...params, record })).rejects.toThrow(XrpSendNotGuardedError);
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+				expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			});
+
+			// The backend counts a swap's deposit in the same check, so its refusal reads the same.
+			it('reports the backend refusing it as already in flight', async () => {
+				vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue({
+					AlreadyInFlight: null
+				});
+
+				await expect(
+					sendXrp({ ...params, record: vi.fn().mockReturnValue(swapRecord) })
+				).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+				expect(xrplRest.submitXrpTransaction).not.toHaveBeenCalled();
+			});
 		});
 
 		it('carries the locally derived hash and the signed ledger window', async () => {

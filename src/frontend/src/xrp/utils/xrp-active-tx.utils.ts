@@ -4,8 +4,9 @@ import type {
 	ActiveUserTransactionRef
 } from '$declarations/backend/backend.did';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
+import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import type { Token } from '$lib/types/token';
-import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import type { XrpAddress } from '$xrp/types/address';
@@ -70,6 +71,30 @@ export const toXrpExternalRefs = (
 		.sort()
 		.map((key) => ({ key, value: refs[key] as string }));
 
+/**
+ * The refs a swap from XRP leaves `Pending` with: its own, plus how its deposit resolved on the
+ * ledger. `external_refs` is replaced wholesale, so the row's poll keys and display snapshot go
+ * along, and the result replaces any the row already holds.
+ *
+ * A real result is a short code. One longer than the backend allows can only be fabricated, and it
+ * is cut to fit rather than left to refuse the update, which would hold the row — and every payment
+ * from its address — open for good. Result codes are ASCII, so characters are bytes.
+ */
+export const toXrpLedgerResolutionRefs = ({
+	tx,
+	ledgerResult
+}: {
+	tx: ActiveUserTransaction;
+	ledgerResult: string;
+}): ActiveUserTransactionRef[] =>
+	[
+		...tx.external_refs.filter(({ key }) => key !== XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT),
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT,
+			value: ledgerResult.slice(0, ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES)
+		}
+	].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0));
+
 // Wire-format `(key, value)` array → keyed lookup.
 export const toXrpExternalRefsMap = (
 	refs: ActiveUserTransactionRef[]
@@ -99,20 +124,25 @@ export const toXrpDisplayRefs = ({
 	[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL]: token.network.name
 });
 
-export const xrpActiveUserTransactionSourceAddress = (
-	tx: ActiveUserTransaction
-): string | undefined => ('Xrp' in tx.data ? tx.data.Xrp.source_address : undefined);
-
 /**
  * The XRP network the row's payment was signed for, taken from the token the
  * backend validated rather than from a separate field that could disagree with
- * it. `undefined` for anything else, which leaves the row unpolled rather than
- * polled against a network it never named.
+ * it: a send's token, or the source token of a swap from XRP. `undefined` for
+ * anything else, which leaves the row unpolled rather than polled against a
+ * network it never named.
  */
 export const xrpActiveUserTransactionNetwork = (
 	tx: ActiveUserTransaction
-): XrpNetworkType | undefined =>
-	'Xrp' in tx.data && 'XrpNativeMainnet' in tx.data.Xrp.token ? XrpNetworks.mainnet : undefined;
+): XrpNetworkType | undefined => {
+	const token =
+		'Xrp' in tx.data
+			? tx.data.Xrp.token
+			: 'NearIntents' in tx.data
+				? tx.data.NearIntents.source_token
+				: undefined;
+
+	return nonNullish(token) && 'XrpNativeMainnet' in token ? XrpNetworks.mainnet : undefined;
+};
 
 /**
  * The values the resolver polls with, or `undefined` when the row does not carry
@@ -152,28 +182,6 @@ export const xrpActiveUserTransactionPollKeys = (
 };
 
 /**
- * The open XRP record for one address, if there is one.
- *
- * Per **address**, not per user: a record for a different address says nothing
- * about this one's sequence, and refusing on it would block an unrelated send.
- * Terminality comes from `isTerminalActiveUserTransaction` rather than being
- * re-derived here, so there is one definition of "still open".
- */
-export const openXrpActiveUserTransaction = ({
-	transactions,
-	source
-}: {
-	transactions: ActiveUserTransaction[];
-	source: XrpAddress;
-}): ActiveUserTransaction | undefined =>
-	transactions.find(
-		(tx) =>
-			isXrpActiveUserTransaction(tx) &&
-			!isTerminalActiveUserTransaction(tx) &&
-			xrpActiveUserTransactionSourceAddress(tx) === source
-	);
-
-/**
  * Analytics metadata for an XRP row that has just reached a terminal status.
  *
  * Read entirely off the row's own snapshot, like the swap providers' equivalents: by the time the
@@ -194,20 +202,45 @@ export interface XrpActiveUserTransactionDisplay {
  * backend does not require the snapshot, so a row written by another client may lack it, and empty
  * strings in its place would read "Send" over a blank network line, or "Your send of   on  was …".
  *
+ * A swap from XRP says the same about its deposit, read from the swap's own snapshot keys — the
+ * amount it swaps and its source token and network.
+ *
  * `undefined` for a row that is not an XRP payment.
  */
 export const xrpActiveUserTransactionDisplay = (
 	tx: ActiveUserTransaction
 ): XrpActiveUserTransactionDisplay | undefined => {
-	if (!('Xrp' in tx.data)) {
+	const payment =
+		'Xrp' in tx.data
+			? {
+					amount: tx.data.Xrp.amount,
+					keys: {
+						amount: XRP_EXTERNAL_REF_KEYS.AMOUNT,
+						symbol: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL,
+						network: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL
+					}
+				}
+			: 'NearIntents' in tx.data && 'XrpNativeMainnet' in tx.data.NearIntents.source_token
+				? {
+						amount: tx.data.NearIntents.amount,
+						keys: {
+							amount: NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT,
+							symbol: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL,
+							network: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL
+						}
+					}
+				: undefined;
+
+	if (isNullish(payment)) {
 		return undefined;
 	}
 
-	const refs = toXrpExternalRefsMap(tx.external_refs);
+	// Keyed by name, since a swap row's snapshot keys are the NEAR Intents ones.
+	const refs: Partial<Record<string, string>> = toXrpExternalRefsMap(tx.external_refs);
 
 	// Blank counts as absent: the backend bounds a ref value's length but not its content, so another
 	// client can store an empty or whitespace-only one, which `??` alone would take as present.
-	const snapshot = (key: XrpExternalRefKey): string | undefined => {
+	const snapshot = (key: string): string | undefined => {
 		const value = refs[key]?.trim();
 
 		return notEmptyString(value) ? value : undefined;
@@ -215,14 +248,14 @@ export const xrpActiveUserTransactionDisplay = (
 
 	return {
 		amount:
-			snapshot(XRP_EXTERNAL_REF_KEYS.AMOUNT) ??
+			snapshot(payment.keys.amount) ??
 			formatToken({
-				value: tx.data.Xrp.amount,
+				value: payment.amount,
 				unitName: XRP_TOKEN.decimals,
 				displayDecimals: XRP_TOKEN.decimals
 			}),
-		symbol: snapshot(XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL) ?? XRP_TOKEN.symbol,
-		network: snapshot(XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL) ?? XRP_TOKEN.network.name
+		symbol: snapshot(payment.keys.symbol) ?? XRP_TOKEN.symbol,
+		network: snapshot(payment.keys.network) ?? XRP_TOKEN.network.name
 	};
 };
 

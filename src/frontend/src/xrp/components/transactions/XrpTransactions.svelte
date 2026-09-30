@@ -20,6 +20,7 @@
 	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 	import XrpTokenModal from '$xrp/components/tokens/XrpTokenModal.svelte';
 	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
+	import XrpTransactionsScroll from '$xrp/components/transactions/XrpTransactionsScroll.svelte';
 	import XrpTransactionsSkeletons from '$xrp/components/transactions/XrpTransactionsSkeletons.svelte';
 	import { xrpTransactions } from '$xrp/derived/xrp-transactions.derived';
 	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
@@ -59,8 +60,11 @@
 <HiddenMicroTransactionsInfoBox />
 
 <XrpTransactionsSkeletons>
-	{#if filteredTransactions.length > 0}
-		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+	<!-- Mounted with no row to show too: the first page can map to no rows, or only to rows the
+	micro-transaction filter hides, while older payments exist. The placeholder stays outside, since
+	the scroll renders its children as a list. -->
+	<XrpTransactionsScroll {token}>
+		{#if filteredTransactions.length > 0 && nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
@@ -69,7 +73,9 @@
 				/>
 			{/each}
 		{/if}
-	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+	</XrpTransactionsScroll>
+
+	{#if filteredTransactions.length === 0 && (isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0)}
 		<TransactionsPlaceholder />
 	{/if}
 </XrpTransactionsSkeletons>
