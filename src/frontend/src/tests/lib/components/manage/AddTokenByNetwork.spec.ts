@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 import type { Network } from '$lib/types/network';
 import en from '$tests/mocks/i18n.mock';
@@ -60,5 +61,51 @@ describe('AddTokenByNetwork', () => {
 		renderComponent();
 
 		expect(screen.getByRole('status')).toBeEmptyDOMElement();
+	});
+
+	describe('with XRP Ledger tokens on', () => {
+		beforeEach(() => {
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('asks for the issuer and the currency code instead of saying "not yet"', () => {
+			const { getByPlaceholderText } = renderComponent(XRP_MAINNET_NETWORK);
+
+			expect(getByPlaceholderText(en.tokens.placeholder.enter_xrp_issuer)).toBeInTheDocument();
+			expect(
+				getByPlaceholderText(en.tokens.placeholder.enter_xrp_currency_code)
+			).toBeInTheDocument();
+			expect(screen.getByRole('status')).toBeEmptyDOMElement();
+		});
+
+		it('keeps the next step disabled until both are given', () => {
+			const { getByRole } = render(AddTokenByNetwork, {
+				props: {
+					network: XRP_MAINNET_NETWORK,
+					tokenData: { xrpIssuer: 'rIssuer' },
+					onBack: vi.fn(),
+					onNext: vi.fn()
+				}
+			});
+
+			expect(getByRole('button', { name: en.core.text.next })).toBeDisabled();
+		});
+
+		it('enables the next step once both are given', () => {
+			const { getByRole } = render(AddTokenByNetwork, {
+				props: {
+					network: XRP_MAINNET_NETWORK,
+					tokenData: { xrpIssuer: 'rIssuer', xrpCurrency: 'USD' },
+					onBack: vi.fn(),
+					onNext: vi.fn()
+				}
+			});
+
+			expect(getByRole('button', { name: en.core.text.next })).toBeEnabled();
+		});
 	});
 });
