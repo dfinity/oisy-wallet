@@ -112,19 +112,12 @@ describe('AllTransactionsList', () => {
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 
-			// Each token reaches back to yesterday: the list shows transactions only as far back as every
-			// token that still has history has loaded.
-			const timestampOf = (index: number): number =>
-				index === 0 ? yesterdayTimestamp : todayTimestamp;
-
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
-				transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map(
-					(transaction, index) => ({
-						data: { ...transaction, timestamp: BigInt(timestampOf(index)) },
-						certified: false
-					})
-				)
+				transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
+					data: { ...transaction, timestamp: BigInt(todayTimestamp) },
+					certified: false
+				}))
 			});
 
 			ethTransactionsStore.add({
@@ -140,12 +133,10 @@ describe('AllTransactionsList', () => {
 
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
-				transactions: createMockIcTransactionsUi(icTransactionsNumber).map(
-					(transaction, index) => ({
-						data: { ...transaction, timestamp: BigInt(timestampOf(index)) },
-						certified: false
-					})
-				)
+				transactions: createMockIcTransactionsUi(icTransactionsNumber).map((transaction) => ({
+					data: { ...transaction, timestamp: BigInt(todayTimestamp) },
+					certified: false
+				}))
 			});
 
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);

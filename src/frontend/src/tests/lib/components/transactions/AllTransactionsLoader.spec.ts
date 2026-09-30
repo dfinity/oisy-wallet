@@ -660,7 +660,7 @@ describe('AllTransactionsLoader', () => {
 			certified: false
 		});
 
-		const renderWithControls = (transactions: AllTransactionUiWithCmp[] = mockTransactions) => {
+		const renderWithControls = () => {
 			let readControls: (() => LoaderControls) | undefined;
 
 			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
@@ -673,7 +673,7 @@ describe('AllTransactionsLoader', () => {
 				}
 			}));
 
-			const { rerender } = render(AllTransactionsLoader, { props: { transactions, children } });
+			const { rerender } = render(AllTransactionsLoader, { props: { ...props, children } });
 
 			return { controls: () => readControls?.(), rerender };
 		};
@@ -691,77 +691,40 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
-		describe('floor', () => {
-			// ICP's oldest row is older than Solana's, so Solana is the one that stops the list.
-			const icpRows = mockTransactions.filter(({ token: { id } }) => id === ICP_TOKEN.id);
-			const solRows = mockTransactions.filter(({ token: { id } }) => id === SOLANA_TOKEN.id);
+		it('should hand the children the floor it levels every token to', async () => {
+			const { controls } = renderWithControls();
 
-			const oldestSolTimestamp = normalizeTimestampToSeconds(timestampBuffer + 300n);
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
+			});
+		});
 
-			const olderIcpRow = (timestamp: bigint): AllTransactionUiWithCmp => ({
-				transaction: { ...createMockIcTransactionsUi(1)[0], id: `older-${timestamp}`, timestamp },
-				component: 'ic' as const,
-				token: ICP_TOKEN
+		// Only Bitcoin moves here, while ICP and Solana load nothing. One token that stops moving must
+		// not hold the list, so the floor follows the oldest loaded row whichever token brought it.
+		it('should lower the floor it hands the children on every round, whichever tokens moved', async () => {
+			const { controls, rerender } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
 			});
 
-			const olderSolRow = (timestamp: bigint): AllTransactionUiWithCmp => ({
-				transaction: { ...createMockSolTransactionsUi(1)[0], id: `older-${timestamp}`, timestamp },
-				component: 'solana' as const,
-				token: SOLANA_TOKEN
-			});
+			const olderTimestamp = mockMinTimestampStart - 5n;
 
-			it('should hand the children how far back every token with history left is loaded', async () => {
-				const { controls } = renderWithControls([...icpRows, ...solRows]);
-
-				await waitFor(() => {
-					expect(controls()?.floor).toBe(oldestSolTimestamp);
-				});
-			});
-
-			// A failed page or the page cap leaves a token where it stopped, however far the others got.
-			it('should not move past a token that has not loaded as far as the others', async () => {
-				const { controls, rerender } = renderWithControls([...icpRows, ...solRows]);
-
-				await rerender({
-					transactions: [...icpRows, ...solRows, olderIcpRow(mockMinTimestampStart)]
-				});
-
-				await runResolvedPromises();
-
-				expect(controls()?.floor).toBe(oldestSolTimestamp);
-			});
-
-			it('should move down once every token has loaded further', async () => {
-				const { controls, rerender } = renderWithControls([...icpRows, ...solRows]);
-
-				await rerender({
-					transactions: [
-						...icpRows,
-						...solRows,
-						olderIcpRow(mockMinTimestampStart),
-						olderSolRow(mockMinTimestampStart + 10n)
-					]
-				});
-
-				await waitFor(() => {
-					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(mockMinTimestampStart + 10n));
-				});
-			});
-
-			it('should leave out a token that has no history left', async () => {
-				spyLoadNextSolTransactions.mockImplementation(
-					async ({ signalEnd }: { signalEnd: () => void }) => {
-						signalEnd();
-
-						return await Promise.resolve({ success: false });
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					{
+						transaction: { ...createMockBtcTransactionsUi(1)[0], timestamp: olderTimestamp },
+						component: 'bitcoin' as const,
+						token: BTC_MAINNET_TOKEN
 					}
-				);
+				]
+			});
 
-				const { controls } = renderWithControls([...icpRows, ...solRows]);
+			await controls()?.loadMore();
 
-				await waitFor(() => {
-					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(timestampBuffer + 100n));
-				});
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(normalizeTimestampToSeconds(olderTimestamp));
 			});
 		});
 

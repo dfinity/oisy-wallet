@@ -19,8 +19,8 @@
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
 		/**
-		 * How far back every token that still has history has loaded, in seconds. Rows older than it
-		 * are held back until the others have caught up with them.
+		 * The floor every token is being paged down to, in seconds. Rows older than it are held back
+		 * until the list goes that far for every token.
 		 */
 		floor?: number;
 		children: Snippet;
@@ -52,18 +52,17 @@
 		dryAtLength = undefined;
 	});
 
-	// A moved floor changes what the list can show without anything loading, and a rising one shrinks
-	// it: an empty round measured against the old boundary would then keep the scroll disabled, with
-	// the token that raised the floor never asked again.
+	// A moved floor changes what the list can show without anything loading, so an empty round measured
+	// against the old one says nothing about the new one. Kept, it disabled the scroll for good once a
+	// rising floor shrank the list below the length it recorded.
 	$effect.pre(() => {
 		[floor];
 
 		dryAtLength = undefined;
 	});
 
-	// Only what every token has loaded down to. Levelling loads whole pages, so the tokens that had to
-	// reach its target bring rows from beyond it, while the token whose own oldest row set it is not
-	// asked for more. Shown straight away, those rows left that token's older transactions out between
+	// Only rows down to the floor. Levelling loads whole pages, so the tokens that had to reach it
+	// bring rows from beyond it, while the token whose own oldest row set it is not asked for more. Shown straight away, those rows left that token's older transactions out between
 	// them until the end of the list asked every chain again. Undated rows stay: there is nothing to
 	// hold them against.
 	let revealable = $derived.by(() => {

@@ -296,8 +296,8 @@ describe('AllTransactionsScroll', () => {
 			expect(displayed(getAllByTestId)).toHaveLength(5);
 		});
 
-		// A late token with a newer oldest row raises the floor and shrinks the list. Measured against
-		// the old boundary, the empty round before it kept the scroll disabled for good.
+		// A floor that rises shrinks the list, for instance when a token's rows are cleared and loaded
+		// again. Measured against the old boundary, the empty round before it kept the scroll disabled.
 		it('should ask again after the floor rose, even when the last round loaded nothing', async () => {
 			const { rerender } = render(AllTransactionsScrollTest, {
 				props: { sortedTransactions: makeTransactions(5), floor: 0, onLoadMore }

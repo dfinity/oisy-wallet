@@ -27,8 +27,9 @@
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
 		/**
-		 * How far back the merged list is complete, in seconds: every token that still has history
-		 * has loaded down to it. Absent while no such token holds a dated row.
+		 * The floor every token is being levelled to, in seconds. It drops with every round, whatever a
+		 * single token does, so a token whose page failed or that reached the page cap can be short of
+		 * it until the next round. Absent until levelling first runs.
 		 */
 		floor?: number;
 	}
@@ -149,7 +150,12 @@
 	// Rows a token pages in while being levelled never move it: if they did, each run would overshoot
 	// the floor, lower it, and set every other token off again, until all of them had walked back to
 	// the start of their history.
-	let levelFloor: number | undefined;
+	//
+	// The list reveals rows down to it. It is the target rather than what every token has reached:
+	// holding the list at the token furthest behind froze it whenever one token stopped moving (pages
+	// that keep failing, or that hold only transactions the list does not show), and kept loading the
+	// others while showing nothing.
+	let levelFloor = $state<number | undefined>();
 
 	// Tokens whose rows the floor already accounts for.
 	const accountedTokenIds = new SvelteSet<TokenId>();
@@ -255,35 +261,6 @@
 		$enabledFungibleNetworkTokens.length > 0 &&
 			$enabledFungibleNetworkTokens.every(({ id }) => disableLoader[id] === true)
 	);
-
-	// Read from what is loaded rather than from `levelFloor`, which is only a target: a failed page or
-	// the page cap leaves a token short of it. Each token that still has history is complete down to
-	// its own oldest loaded row, so the merged list is complete down to the newest of those. A token
-	// with nothing to page is left out as well: holding the list at its first page would stop it there
-	// for good, since nothing can ever load past it.
-	let completeDownTo = $derived.by((): number | undefined => {
-		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
-
-		const oldestByToken = transactions.reduce<Map<TokenId, number>>(
-			(acc, { token: { id }, transaction: { timestamp } }) => {
-				if (!pagedTokenIds.has(id) || disableLoader[id] === true || isNullish(timestamp)) {
-					return acc;
-				}
-
-				const seconds = normalizeTimestampToSeconds(timestamp);
-				const oldest = acc.get(id);
-
-				if (isNullish(oldest) || seconds < oldest) {
-					acc.set(id, seconds);
-				}
-
-				return acc;
-			},
-			new Map()
-		);
-
-		return oldestByToken.size > 0 ? Math.max(...oldestByToken.values()) : undefined;
-	});
 </script>
 
-{@render children?.({ loadMore, exhausted, floor: completeDownTo })}
+{@render children?.({ loadMore, exhausted, floor: levelFloor })}
