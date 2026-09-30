@@ -3,10 +3,10 @@
 # Spec: Swap XRP through the NEAR Intents provider
 
 - **Type:** `feat`
-- **Area:** Frontend, swap (NEAR Intents provider, XRP wizard, active user transactions)
+- **Area:** Backend (active user transactions), frontend (swap, NEAR Intents provider, XRP send)
 - **Status:** Draft for implementation in Claude Code
-- **Base:** stacked on the XRP in-flight send guard (#14121, itself on #14109), whose `sendXrp`
-  this spec builds on
+- **Base:** stacked on the XRP in-flight send guard (#14121), whose `sendXrp` and in-flight check
+  this spec extends
 
 ---
 
@@ -21,12 +21,12 @@ NEAR Intents (the 1Click solver network) already serves EVM, Solana and Bitcoin 
 and **from any NEAR Intents source to XRP**, on the same provider machinery, behind a new feature
 flag that is on for local and staging builds and off in production.
 
-As for every NEAR Intents swap, settlement happens in the background, so the swap is tracked as an
-**Active User Transaction (AUT)**: registered once funds have left the wallet, driven to a terminal
-state by the global poller
-(`src/frontend/src/lib/components/loaders/LoaderActiveUserTransactions.svelte`), and surviving
-modal close, refresh and logout. What is specific to XRP is that the deposit is itself an XRP
-payment, and so falls under the one-unresolved-payment-per-address guard that #14121 introduces.
+A swap is one business transaction, so it creates **one** Active User Transaction (AUT): the
+`NearIntents` one, as for every other NEAR Intents swap, driven to a terminal state by the global
+poller (`src/frontend/src/lib/components/loaders/LoaderActiveUserTransactions.svelte`) and
+surviving modal close, refresh and logout. What is specific to XRP is that the deposit is an XRP
+payment: while it is unresolved, no other XRP payment from the same address may be signed. #14121
+enforces that for XRP sends only; this spec extends it to swaps.
 
 ## 2. What 1Click does with XRP (measured 2026-09-29)
 
@@ -54,30 +54,36 @@ Two consequences shape the rest of this spec:
 - The destination minimum means a swap can **activate** a never-funded OISY XRP address: the
   worst-case payout already covers the account reserve, so OISY needs no reserve check of its own
   on the destination side.
-- 1Click does not report a deposit that never arrived. If the XRP payment expires, the swap row
-  would keep waiting unless OISY closes it — see [§6](#6-settling-an-xrp-source-swap).
+- 1Click does not report a deposit that never arrived, so a deposit's outcome has to come from the
+  ledger, not from 1Click — see [§6](#6-the-swap-auts-status).
 
-## 3. What exists already (and is reused unchanged)
+## 3. What exists already
 
-- **Backend: nothing to add.** The `NearIntents` variant of `ActiveUserTransactionData` is
-  chain-agnostic (`{ source_token: TokenId; amount: nat; dest_token: TokenId }`), its validation
-  only requires a positive amount (`src/backend/src/active_user_transactions/model.rs`), and
-  `TokenId::XrpNativeMainnet` exists (#13596). On this branch `toBackendTokenId`
-  (`src/frontend/src/lib/utils/token-id.utils.ts`) already maps XRP mainnet, added by #14121.
-  Without that mapping `toNearIntentsData` returns `undefined` and the swap would run with no AUT
-  row at all, silently — one of the reasons this spec stacks on #14121.
-- **The XRP payment.** On this branch `sendXrp`
-  (`src/frontend/src/xrp/services/xrp-send.services.ts`) refuses a payment while another from the
-  same address is unresolved, bounds the amount by the account reserve, signs, records the payment
-  as an `Xrp` AUT row, submits, and returns. It does **not** wait for validation, and it throws
-  only before anything is broadcast: every submit failure is swallowed and left to the record,
-  except `XrpRpcNotConfiguredError`, which provably precedes the request. Once it has returned,
-  the payment may be on the wire, and its own row resolves it against the ledger.
-- **AUT polling and UI.** `pollNearIntentsActiveUserTransactions`
-  (`src/frontend/src/lib/services/near-intents-active-tx.services.ts`), the header dropdown row
-  (`src/frontend/src/lib/components/active-user-transactions/ActiveUserTransactionItem.svelte`)
-  and the terminal side effects in `LoaderActiveUserTransactions.svelte` are chain-agnostic for
-  NEAR Intents rows.
+- **The NEAR Intents AUT.** `NearIntentsData` (`{ source_token, amount, dest_token }`) is
+  chain-agnostic, and `TokenId::XrpNativeMainnet` exists (#13596). On this branch
+  `toBackendTokenId` (`src/frontend/src/lib/utils/token-id.utils.ts`) maps XRP mainnet, added by
+  #14121. Without that mapping `toNearIntentsData` returns `undefined` and no AUT is created at
+  all, silently.
+- **The XRP payment (#14121).** `sendXrp` (`src/frontend/src/xrp/services/xrp-send.services.ts`)
+  refuses a payment while another from the same address is in flight (`assertNoOpenXrpSend`, which
+  counts `Xrp` AUTs only), bounds the amount by the account reserve, signs, creates the `Xrp` AUT,
+  submits, and returns without waiting for validation. It throws only before anything is
+  broadcast: every submit failure is swallowed and left to the AUT, except
+  `XrpRpcNotConfiguredError`, which provably precedes the request.
+- **The backend refusal (#14109).** `create` refuses a new `Xrp` AUT with `AlreadyInFlight` when
+  the caller already has an `Xrp` AUT in `Pending` or `Executing` with the same `source_address`
+  (`has_open_xrp_send`, `src/backend/src/active_user_transactions/model.rs`). It is the only check
+  atomic with the write, which is what stops a second tab that passed the frontend check in the
+  seconds between that check and the write.
+- **The XRP ledger resolution (#14121).** `pollXrpActiveUserTransaction`
+  (`src/frontend/src/xrp/services/xrp-active-tx.services.ts`) resolves an AUT from its `tx_hash`
+  and `last_ledger_sequence` refs: validated `tesSUCCESS`, validated `tec*` (fee charged), or
+  expired past `LastLedgerSequence` after a recheck. Anything else leaves the AUT open.
+- **AUT polling and UI for NEAR Intents.** `pollNearIntentsActiveUserTransactions`
+  (`src/frontend/src/lib/services/near-intents-active-tx.services.ts`), the entry in the header
+  bell list "Active transactions"
+  (`src/frontend/src/lib/components/active-user-transactions/ActiveUserTransactionItem.svelte`) and
+  the terminal side effects in `LoaderActiveUserTransactions.svelte`.
 - **Quote plumbing.** `fetchNearIntentsSwapQuote`
   (`src/frontend/src/lib/services/near-intents.services.ts`), `buildNearIntentsQuoteRequest`
   (`EXACT_INPUT`, deposit and refund on the origin chain, `refundTo: userAddress`), the signature,
@@ -89,7 +95,7 @@ Two consequences shape the rest of this spec:
   signed with a `LastLedgerSequence` about 20 ledgers ahead — 60 to 90 seconds — so a deposit
   confirmed promptly after the quote validates or provably expires inside it, and XRP needs no long
   deadline of its own, unlike BTC. A review screen left open for longer can land any chain's
-  deposit past that deadline today, because the execution-time expiry check reads the signed quote
+  deposit past that deadline, because the execution-time expiry check reads the signed quote
   deadline, which is three days out; that gap is not XRP's and is out of scope here.
 
 ## 4. Feature flag
@@ -99,14 +105,79 @@ defined as `LOCAL || STAGING` — the idiom of `BACKEND_EXCHANGE_ENABLED` in
 `src/frontend/src/env/exchange.env.ts`, and of the BTC flag before #14007 flipped it. Production
 stays off until the flag is flipped in a deliberate follow-up.
 
-Everything XRP-scoped below is gated on it; with the flag off, production behaviour is
-byte-for-byte today's. XRP itself must also be enabled as a network, as for every XRP feature.
+Everything XRP-swap-scoped in the frontend is gated on it; with the flag off, swaps behave exactly
+as on `main` and XRP sends exactly as on #14121. XRP itself must also be enabled as a network, as
+for every XRP feature.
+The backend changes of [§7](#7-the-in-flight-check) are not flagged: without an XRP-source swap
+AUT they change nothing.
 
 `LOCAL` is also true under vitest (`MODE` comes from `DFX_NETWORK`, which defaults to `local`), so
 the flag is on in unit tests and the suite-wide swap expectations — networks, destinations, the
 swap universe — change with it.
 
-## 5. XRP as source
+## 5. One AUT per swap
+
+An XRP-source swap creates exactly one AUT, the `NearIntents` one. Its deposit creates no `Xrp`
+AUT: the send is part of the swap, not a transaction of its own, so the bell list shows one entry.
+
+- **When:** after the deposit is signed and before it is submitted — the moment at which `sendXrp`
+  creates the `Xrp` AUT for a send, and for the same reason: a submit whose response is lost must
+  still leave an AUT to resolve. This departs from the EVM and SOL swaps, whose AUT is created
+  after the send.
+- **What it carries**, beyond the usual NEAR Intents data and refs:
+  - in `data`, the XRP source address ([§7](#7-the-in-flight-check));
+  - in `external_refs`, the deposit's `tx_hash` and `last_ledger_sequence`, under the keys the
+    `Xrp` AUT uses, so the ledger resolution reads both AUT types the same way.
+- **How `sendXrp` gets there:** the AUT it creates becomes a parameter. An XRP send passes the
+  `Xrp` AUT, an XRP swap passes the `NearIntents` AUT. The in-flight check, the fail-closed
+  refusals and the submit handling stay as #14121 has them.
+
+## 6. The swap AUT's status
+
+| Status                 | XRP-source swap                                                                               | Set by                    |
+| ---------------------- | --------------------------------------------------------------------------------------------- | ------------------------- |
+| `Pending`              | The deposit has not resolved on the ledger                                                    | Creation                  |
+| `Executing`            | The deposit validated with `tesSUCCESS`, and 1Click is working                                | The XRP ledger resolution |
+| `Succeeded` / `Failed` | 1Click reported `SUCCESS`, or `REFUNDED` / `FAILED`                                           | The NEAR Intents poller   |
+| `Failed`               | The deposit validated as a `tec*` failure (fee charged), or expired (nothing left the wallet) | The XRP ledger resolution |
+
+- **While the AUT is `Pending`, only the XRP ledger resolution may change its status.** The NEAR
+  Intents poller maps 1Click's `PENDING_DEPOSIT` to `Executing` on its first tick; for an
+  XRP-source AUT that would end the in-flight check while the deposit can still apply, so it leaves
+  a `Pending` XRP-source AUT alone. 1Click's status takes over once the AUT is `Executing`.
+- **The ledger resolution is #14121's, reused unchanged:** the same lookup, the same window, the
+  same expiry recheck. A failed deposit carries the same failure message as a failed XRP send,
+  which says whether the network fee was charged.
+- EVM, SOL and BTC swap AUTs are unaffected.
+
+## 7. The in-flight check
+
+The invariant, extended from send AUTs to every AUT that makes an XRP payment: **at most one XRP
+payment in flight per XRP address.** A payment is in flight while:
+
+- a send AUT (`Xrp`) is `Pending` or `Executing`, or
+- an XRP-source swap AUT (`NearIntents`) is `Pending`,
+
+matched by the XRP source address in both cases. A swap AUT in `Executing` no longer holds the
+address: its deposit has validated, and the swap continues without blocking XRP sends.
+
+- **Frontend:** one shared check, outside both the send code and the swap code, answers "is an XRP
+  payment from this address in flight?" over the user's AUTs. It replaces the send-only match in
+  `assertNoOpenXrpSend` (`openXrpActiveUserTransaction`), and `sendXrp` calls it for sends and
+  swaps alike. A future AUT type that makes an XRP payment is added there, and nowhere else.
+- **Backend:** one function replaces `has_open_xrp_send`, and `create` runs it both for a new `Xrp`
+  AUT and for a new XRP-source `NearIntents` AUT, refusing with `AlreadyInFlight`.
+- **Source address:** `NearIntentsData` gains an optional XRP source address, the same shape as
+  `XrpData.source_address`. It is required, and validated like it, when the source token is native
+  XRP — a swap AUT without it would escape the check — and absent otherwise. This changes
+  `src/backend/backend.did`, so it is a breaking-interface change.
+
+The swap wizard shows the send flow's refusal messages — an earlier XRP payment from this address
+has not settled yet, or the wallet could not check — and steps back. Both refusals come before the
+broadcast: the frontend check before anything is read or signed, the backend refusal after
+signing. Nothing leaves the wallet in either case.
+
+## 8. XRP as source
 
 1. **Provider.** A new `xrpSwapProviders` (`src/frontend/src/lib/providers/xrp-swap.providers.ts`)
    with a single NEAR Intents entry, modelled on `sol-swap.providers.ts`: it quotes with the user's
@@ -117,19 +188,11 @@ swap universe — change with it.
 2. **Quote fan-out.** `fetchSwapAmounts` (`src/frontend/src/lib/services/swap.services.ts`) gains
    an XRP-source branch ahead of the EVM fall-through, as BTC has, and `FetchSwapAmountsParams`
    gains `userXrpAddress`, threaded from `SwapAmountsContext.svelte`.
-3. **Execution.** A `fetchNearIntentsXrpSwap` in `swap.services.ts` reuses `executeNearIntentsSwap`
-   with `sendXrp` as the transport: it pays the quote's deposit address, with the fee the user
-   reviewed and no destination tag. It keeps the **default** ordering, where the swap row is
-   created once the send has returned. BTC registers its row from a broadcast callback because
-   `sendBtc` can still throw after broadcasting; `sendXrp` cannot, so XRP needs no such hook. The
-   returned hash is derived locally from the signed blob, and is what `submitNearIntentsDepositTx`
-   reports to 1Click.
-4. **The guard applies as-is.** A swap is refused while an earlier XRP payment from the address is
-   unresolved, or while the wallet cannot establish whether one is; and a swap's deposit makes the
-   next XRP send wait until it resolves — seconds once it validates, about a minute if it expires.
-   The swap wizard shows the send flow's own refusal messages and steps back; nothing was signed in
-   either case.
-5. **Wizard.** A new `SwapXrpWizard.svelte` (`src/frontend/src/xrp/components/swap/`), modelled on
+3. **Execution.** A `fetchNearIntentsXrpSwap` in `swap.services.ts` has `sendXrp` pay the quote's
+   deposit address, with the fee the user reviewed and no destination tag, and create the swap AUT
+   ([§5](#5-one-aut-per-swap)). After it returns, `submitNearIntentsDepositTx` reports the locally
+   derived hash to 1Click, best effort as for every chain.
+4. **Wizard.** A new `SwapXrpWizard.svelte` (`src/frontend/src/xrp/components/swap/`), modelled on
    `SwapSolWizard.svelte` since NEAR Intents is XRP's only provider, and dispatched from
    `SwapTokenWizard.svelte`. It carries:
    - the NEAR Intents terms-of-service gate before any funds move
@@ -139,28 +202,7 @@ swap universe — change with it.
      (`isXrpAmountSendable`), and a Max that leaves both (`getXrpMaxAmount`, through `SwapForm`'s
      existing `maxAmount`). `sendXrp`'s own reserve refusal returns the user to the form.
 
-## 6. Settling an XRP-source swap
-
-An XRP-source swap has two AUT rows: the payment's `Xrp` row, which holds the guard and resolves
-against the ledger within about a minute, and the swap's `NearIntents` row, which follows 1Click
-until it pays out.
-
-**The swap row must not outlive a deposit that never happened.** If the payment expires, or
-validates as a `tec*` failure, nothing reached 1Click, and 1Click keeps reporting `PENDING_DEPOSIT`
-([§2](#2-what-1click-does-with-xrp-measured-2026-09-29)): the swap row would stay in progress and,
-being unresolved, could not even be dismissed. So the swap row records the deposit's transaction
-hash when it is created — the hash is known before the submit — and when the payment's row
-resolves as failed, the swap row resolves as failed too, carrying the payment row's own failure
-message, which already says whether the network fee was charged.
-
-The link must hold in either order: a `tec*` failure can validate within one ledger and be
-resolved before the swap row even exists. A deposit that did validate is left to 1Click, which
-settles it, or refunds a late one, as on every other chain.
-
-Whether the user sees one row or two is a pending decision
-([§12](#12-pending-decisions-facts-are-clear--we-just-need-to-decide)).
-
-## 7. XRP as destination
+## 9. XRP as destination
 
 - `SwapTokenCategory` (`src/frontend/src/lib/types/swap.ts`) gains `xrp`. `resolveSwapTokenLookup`
   (`src/frontend/src/lib/utils/swap-tokens-filter.utils.ts`) keys native XRP through
@@ -176,8 +218,10 @@ Whether the user sees one row or two is a pending decision
 - No reserve check: the destination minimum
   ([§2](#2-what-1click-does-with-xrp-measured-2026-09-29)) already guarantees the worst-case payout
   creates the account.
+- A swap toward XRP makes no XRP payment from the user's address, so it is outside the in-flight
+  check.
 
-## 8. Reachability
+## 10. Reachability
 
 - `SUPPORTED_CROSS_SWAP_NETWORKS` (`swap.constants.ts`) gains an XRP entry listing the NEAR
   Intents networks, and XRP joins the list of every NEAR Intents source network — EVM, Solana,
@@ -191,21 +235,21 @@ Whether the user sees one row or two is a pending decision
 XRP advertises every chain in `NEAR_INTENTS_BLOCKCHAIN_MAP` as a destination — Ethereum, Arbitrum,
 Base, BSC, Polygon, Robinhood Chain, Solana and Bitcoin — as BTC does.
 
-## 9. Non-goals
+## 11. Non-goals
 
 - No production enablement; flipping the flag is a separate one-line PR.
 - No XRPL testnet: none exists in the code.
 - No XRPL issued currencies: native XRP only, the only asset 1Click lists on `xrp`.
-- No change to the XRP send flow, the guard or its record. The swap uses `sendXrp` exactly as
-  #14121 ships it.
+- No change to what an XRP send does or shows: it creates its `Xrp` AUT and appears in the bell
+  list exactly as on #14121.
 - No Chain Fusion route: XRP has no ck twin.
 
-## 10. Acceptance criteria
+## 12. Acceptance criteria
 
 With `NEAR_INTENTS_XRP_SWAP_ENABLED` off (production):
 
-- No behaviour change anywhere: swap availability, provider lists, destinations and wizards are
-  exactly today's.
+- Swap availability, provider lists, destinations and wizards are exactly as on `main`, and XRP
+  sends exactly as on #14121.
 
 With the flag on (local, staging):
 
@@ -214,53 +258,60 @@ With the flag on (local, staging):
 2. No funds move without the NEAR Intents terms of service acknowledged.
 3. Max leaves the account reserve and the fee, and an amount that would not leave them is refused
    in the form, before anything is signed.
-4. Executing an XRP-source swap pays the quote's deposit address with no destination tag and
-   registers a swap row carrying the deposit address and the deposit's transaction hash; the row
-   survives modal close and refresh and is driven to Succeeded or Failed by the global poller.
-5. A swap is refused before anything is signed while an earlier XRP payment from the address is
-   unresolved, and while the wallet cannot establish whether one is; each refusal says which.
-6. A deposit that expires, or fails on the ledger, fails the swap row with the payment's own
-   failure message, rather than leaving the row in progress — including when the payment resolves
-   before the swap row is created.
-7. A swap toward XRP pays out to the user's own XRP address, including one that was never funded,
+4. An XRP-source swap creates exactly one AUT, the `NearIntents` one, after signing and before the
+   deposit is submitted. It carries the XRP source address, the deposit address, `tx_hash` and
+   `last_ledger_sequence`; no `Xrp` AUT is created, and the bell list shows one entry.
+5. The swap AUT is `Pending` until the deposit validates, then `Executing`, then Succeeded or
+   Failed as 1Click reports. A deposit that validates as `tec*` or expires makes it `Failed`, with
+   the XRP send failure message. 1Click's status never moves a `Pending` XRP-source AUT.
+6. While an XRP-source swap AUT is `Pending`, an XRP send and another XRP swap from the same
+   address are refused; while a send AUT is `Pending` or `Executing`, an XRP swap from that address
+   is refused. Each is refused by the frontend check and, for a second tab, by the backend `create`.
+7. Once the swap AUT is `Executing`, XRP sends from the address go through while the swap is still
+   running.
+8. The backend refuses an XRP-source `NearIntents` AUT without a valid XRP source address.
+9. A swap toward XRP pays out to the user's own XRP address, including one that was never funded,
    and a pair toward XRP is not quoted while that address is not derived.
-8. On success, swap analytics fire and balances refresh, identical to the other NEAR Intents swaps.
+10. On success, swap analytics fire and balances refresh, identical to the other NEAR Intents swaps.
 
-## 11. Open questions (facts to confirm)
+## 13. Open questions (facts to confirm)
 
 - **Does 1Click ever resolve a quote whose deposit never arrived?** Measured: still
   `PENDING_DEPOSIT` 7 minutes past the requested deadline. Whether it moves to `FAILED` once the
   signed `deadline`, three days later, has passed can be read off the probe quote's deposit address
   `rGMQ81w5aEoUeBeaCPbmLB9vmNdD41J4bN` (quoted 2026-09-29 06:13 UTC, never funded) after
-  2026-10-02 06:15 UTC. [§6](#6-settling-an-xrp-source-swap) does not depend on the answer; the
-  answer only bounds how long the swap row would otherwise have waited.
+  2026-10-02 06:15 UTC. The design does not depend on the answer: the ledger, not 1Click, fails a
+  deposit that never arrived ([§6](#6-the-swap-auts-status)).
 
-## 12. Pending decisions (facts are clear — we just need to decide)
+## 14. Pending decisions (facts are clear — we just need to decide)
 
-- **One row or two for an XRP-source swap.** The payment's row exists either way, because the
-  guard needs it. Shown as it is, the header dropdown lists "Send 10 XRP", which resolves within
-  about a minute with the "Your XRP payment went through" toast, and "Swap 10 XRP → ETH", which
-  resolves on payout; the deposit also counts as an `xrp_send_success`, and each swap takes two of
-  the user's 100 AUT slots until both are dismissed. With the link from
-  [§6](#6-settling-an-xrp-source-swap) in place, hiding the payment row means filtering it out of
-  the dropdown, skipping its toast and its send analytics, and deleting it once resolved, since
-  nobody could dismiss it. **Recommendation: two rows.** It leaves #14121 untouched, and the
-  payment row is where an expired deposit says that nothing left the wallet. Hiding it is additive
-  later, if staging QA finds the pair noisy.
+- **One AUT or two for an XRP-source swap.** **Decided: one**, the `NearIntents` AUT. The send is
+  part of the swap, not a transaction of its own, so the in-flight check moves out of the send AUT
+  and both AUT types hold it ([§7](#7-the-in-flight-check)).
+- **How the swap AUT marks its deposit as in flight.** **Decided: its status**, `Pending` until the
+  deposit resolves on the ledger ([§6](#6-the-swap-auts-status)).
+- **Whether the backend refusal covers swaps.** **Decided: yes.** It is the only check atomic with
+  the write; without it, two tabs can each sign a payment from the same address.
+- **How the backend learns a swap's XRP source address.** **Decided: a field on
+  `NearIntentsData`**, checked the way `XrpData.source_address` is, rather than by principal.
+- **Where the changes land.** **Decided: in this PR.** #14121 knows nothing about swaps and stays
+  as it is.
 - **When to flip the flag to production** (owner: product).
 
-## 13. Delivery
+## 15. Delivery
 
-One PR, this spec plus the implementation, stacked `main <- #14109 <- #14121 <- this PR`. The flag
-keeps production unchanged, so it can merge as soon as its base has. In order:
+One PR, this spec plus the implementation in backend and frontend, titled `feat(backend,frontend)!:`
+with a `BREAKING CHANGE:` note for the `NearIntentsData` field, stacked `main <- #14121 <- this PR`.
+The flag keeps production unchanged. In order:
 
-1. The flag, the `NEAR_INTENTS_BLOCKCHAIN_MAP` entry and the `NON_EVM_BLOCKCHAINS` entry.
-2. The `xrp` swap category: lookup, supported-tokens group, destinations builder.
-3. `userXrpAddress` through the quote fan-out and recipient resolution; `xrpSwapProviders`.
-4. `fetchNearIntentsXrpSwap`, with the deposit hash on the swap row.
-5. The failed-deposit link ([§6](#6-settling-an-xrp-source-swap)).
-6. `SwapXrpWizard.svelte` and its dispatch.
-7. Reachability: cross-swap networks, cross-chain networks, swap universe.
-8. A `test(backend)` pin that the `NearIntents` variant accepts `XrpNativeMainnet` in either
-   position, as #13786 did for BTC.
-9. `docs/ai/PRODUCT.md`: a "NEAR Intents as an XRP swap provider (local and staging)" section.
+1. Backend: the `NearIntentsData` source address and its validation, and the in-flight check over
+   both AUT types; `.did` and bindings.
+2. The flag, the `NEAR_INTENTS_BLOCKCHAIN_MAP` entry and the `NON_EVM_BLOCKCHAINS` entry.
+3. The `xrp` swap category: lookup, supported-tokens group, destinations builder.
+4. `userXrpAddress` through the quote fan-out and recipient resolution; `xrpSwapProviders`.
+5. The shared frontend in-flight check, replacing the send-only match.
+6. `sendXrp` taking the AUT to create as a parameter; `fetchNearIntentsXrpSwap`.
+7. The XRP-source swap AUT's status rules ([§6](#6-the-swap-auts-status)).
+8. `SwapXrpWizard.svelte` and its dispatch.
+9. Reachability: cross-swap networks, cross-chain networks, swap universe.
+10. `docs/ai/PRODUCT.md`: a "NEAR Intents as an XRP swap provider (local and staging)" section.
