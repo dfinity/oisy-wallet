@@ -2,12 +2,13 @@ import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
-import { mockXrpTrustLine } from '$tests/mocks/xrp.mock';
+import { mockXrpAddress2, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import {
 	enabledXrpTrustLineTokens,
 	xrpTrustLineTokenKeys,
-	xrpTrustLineTokens
+	xrpTrustLineTokens,
+	xrpUnsavedTrustLineTokens
 } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { xrpCustomTokensStore } from '$xrp/stores/xrp-custom-tokens.store';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
@@ -107,6 +108,45 @@ describe('xrp-trust-line-tokens.derived', () => {
 				xrpCustomTokensStore.set({ tokens: [{ ...usdToken, enabled: true }], certified: true });
 
 				expect(get(xrpTrustLineTokens)).toEqual([]);
+			});
+		});
+
+		describe('xrpUnsavedTrustLineTokens', () => {
+			beforeEach(() => {
+				xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [mockXrpTrustLine, usdLine] });
+			});
+
+			it('is empty before the backend list is loaded', () => {
+				expect(get(xrpUnsavedTrustLineTokens)).toEqual([]);
+			});
+
+			it('is empty while the backend list is not certified', () => {
+				xrpCustomTokensStore.set({ tokens: [], certified: false });
+
+				expect(get(xrpUnsavedTrustLineTokens)).toEqual([]);
+			});
+
+			it('lists the held tokens a certified list has no entry for', () => {
+				xrpCustomTokensStore.set({
+					tokens: [{ ...RLUSD_TOKEN, enabled: false }],
+					certified: true
+				});
+
+				expect(get(xrpUnsavedTrustLineTokens)).toEqual([{ ...usdToken, enabled: true }]);
+			});
+
+			it('counts an entry only for the same currency and issuer', () => {
+				const otherIssuer = toXrpTrustLineToken({
+					identity: { currency: 'USD', issuer: mockXrpAddress2 },
+					network: XRP_MAINNET_NETWORK
+				});
+
+				xrpCustomTokensStore.set({ tokens: [{ ...otherIssuer, enabled: true }], certified: true });
+
+				expect(get(xrpUnsavedTrustLineTokens).map(({ id }) => id)).toEqual([
+					RLUSD_TOKEN.id,
+					usdToken.id
+				]);
 			});
 		});
 	});
