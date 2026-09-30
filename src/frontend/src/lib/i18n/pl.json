@@ -1032,7 +1032,7 @@
 			"network": "Sieć",
 			"source_network": "Sieć źródłowa",
 			"destination_network": "Sieć docelowa",
-			"xrp_destination_tag": "Tag docelowy",
+			"xrp_destination_tag": "Tag docelowy XRP",
 			"initializing_transaction": "Inicjowanie transakcji",
 			"convert_to_native_icp": "Konwertuj na natywny ICP",
 			"open_qr_modal": "Rozpocznij skanowanie kodu QR w celu uzyskania szczegółów transakcji",
@@ -1055,7 +1055,7 @@
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
-			"xrp_destination_tag": "Wprowadź tag docelowy (opcjonalnie)",
+			"xrp_destination_tag": "Wprowadź tag docelowy XRP (opcjonalnie)",
 			"select_network": "Wybierz sieć",
 			"search_nfts": ""
 		},
@@ -1084,7 +1084,7 @@
 			"unknown_cketh": "Nie można pobrać tokena ckETH.",
 			"destination_address_invalid": "Adres docelowy jest nieprawidłowy.",
 			"amount_invalid": "Kwota jest nieprawidłowa.",
-			"xrp_destination_tag_invalid": "Tag docelowy musi być liczbą całkowitą od 0 do 4294967295.",
+			"xrp_destination_tag_invalid": "Tag docelowy XRP musi być liczbą całkowitą od 0 do 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Niewystarczające środki: kwota musi pozostawić dość na pokrycie opłaty i wymaganej rezerwy konta XRP.",
 			"insufficient_funds_for_gas": "Niewystarczające środki na gaz",
@@ -1138,7 +1138,7 @@
 			"xrp_active_transaction_failed": "Twoje wysłanie $amount $symbol w sieci $network zostało przetworzone przez sieć, ale nie powiodło się ($result), więc środki nie zostały wysłane. Opłata sieciowa została jednak pobrana.",
 			"xrp_amount_exceeds_sendable": "Ta kwota już się nie mieści. Twoje konto musi zachować rezerwę XRP oraz opłatę sieciową, a obie mogą się zmienić podczas sprawdzania. Nic nie zostało wysłane — zmniejsz kwotę lub spróbuj ponownie, gdy dane konta się odświeżą.",
 			"xrp_destination_unfunded": "Ten adres nie ma jeszcze konta XRP. Jego utworzenie wymaga pierwszej płatności co najmniej $reserve XRP. Nic nie zostało wysłane — zwiększ kwotę lub wyślij na adres, który jest już zasilony.",
-			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
+			"xrp_destination_tag_required": "Ten adres wymaga tagu docelowego XRP. Nic nie zostało wysłane — dodaj tag otrzymany od serwisu, któremu płacisz, i wyślij ponownie.",
 			"xrp_destination_is_source": "To Twój własny adres XRP. Nic nie zostało wysłane — wybierz innego odbiorcę.",
 			"xrp_account_state_unavailable": "Portfel nie mógł odczytać danych Twojego konta, więc kwota nie została sprawdzona. Nic nie zostało wysłane — spróbuj ponownie za chwilę."
 		}

@@ -1032,7 +1032,7 @@
 			"network": "ネットワーク",
 			"source_network": "送信元ネットワーク",
 			"destination_network": "宛先ネットワーク",
-			"xrp_destination_tag": "宛先タグ",
+			"xrp_destination_tag": "XRP 宛先タグ",
 			"initializing_transaction": "トランザクション初期化中",
 			"convert_to_native_icp": "ネイティブICPに変換",
 			"open_qr_modal": "トランザクション詳細のQRコードをスキャン開始",
@@ -1055,7 +1055,7 @@
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
-			"xrp_destination_tag": "宛先タグを入力（任意）",
+			"xrp_destination_tag": "XRP 宛先タグを入力（任意）",
 			"select_network": "ネットワークを選択",
 			"search_nfts": "コレクティブルを検索"
 		},
@@ -1084,7 +1084,7 @@
 			"unknown_cketh": "ckETHトークンは取得できません。",
 			"destination_address_invalid": "送信先アドレスが無効です。",
 			"amount_invalid": "金額が無効です。",
-			"xrp_destination_tag_invalid": "宛先タグは 0 から 4294967295 までの整数である必要があります。",
+			"xrp_destination_tag_invalid": "XRP 宛先タグは 0 から 4294967295 までの整数である必要があります。",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "残高が不足しています。手数料とXRPアカウントに必要な準備金を賄える分を残す金額にしてください。",
 			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています。",
@@ -1138,7 +1138,7 @@
 			"xrp_active_transaction_failed": "$network での $amount $symbol の送信はネットワークで処理されましたが失敗したため（$result）、資金は送信されていません。ネットワーク手数料は請求されました。",
 			"xrp_amount_exceeds_sendable": "この金額は収まらなくなりました。アカウントは XRP の準備金とネットワーク手数料を残す必要があり、確認中にどちらも変わることがあります。何も送信されていません。金額を減らすか、アカウント情報が更新されてからもう一度お試しください。",
 			"xrp_destination_unfunded": "このアドレスにはまだ XRP アカウントがありません。作成には少なくとも $reserve XRP の最初の送金が必要です。何も送信されていません。金額を増やすか、すでに有効化されたアドレスへ送信してください。",
-			"xrp_destination_tag_required": "このアドレスには宛先タグが必要です。何も送信されていません。支払先のサービスから受け取ったタグを入力して、もう一度送信してください。",
+			"xrp_destination_tag_required": "このアドレスには XRP 宛先タグが必要です。何も送信されていません。支払先のサービスから受け取ったタグを入力して、もう一度送信してください。",
 			"xrp_destination_is_source": "これはご自身の XRP アドレスです。何も送信されていません。別の送金先を選んでください。",
 			"xrp_account_state_unavailable": "ウォレットがアカウント情報を読み取れなかったため、金額を確認できませんでした。何も送信されていません。しばらくしてからもう一度お試しください。"
 		}

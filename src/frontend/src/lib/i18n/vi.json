@@ -1032,7 +1032,7 @@
 			"network": "Mạng",
 			"source_network": "Mạng nguồn",
 			"destination_network": "Mạng đích",
-			"xrp_destination_tag": "Thẻ đích",
+			"xrp_destination_tag": "Thẻ đích XRP",
 			"initializing_transaction": "Đang khởi tạo giao dịch",
 			"convert_to_native_icp": "Chuyển đổi sang ICP",
 			"open_qr_modal": "Bắt đầu quét mã QR để xem chi tiết giao dịch",
@@ -1055,7 +1055,7 @@
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
-			"xrp_destination_tag": "Nhập thẻ đích (không bắt buộc)",
+			"xrp_destination_tag": "Nhập thẻ đích XRP (không bắt buộc)",
 			"select_network": "Chọn mạng",
 			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
 		},
@@ -1084,7 +1084,7 @@
 			"unknown_cketh": "Không thể truy xuất token ckETH.",
 			"destination_address_invalid": "Địa chỉ ví không hợp lệ.",
 			"amount_invalid": "Số lượng không hợp lệ.",
-			"xrp_destination_tag_invalid": "Thẻ đích phải là số nguyên từ 0 đến 4294967295.",
+			"xrp_destination_tag_invalid": "Thẻ đích XRP phải là số nguyên từ 0 đến 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Không đủ tiền: số tiền phải để lại đủ để trang trải phí và khoản dự trữ tài khoản XRP bắt buộc.",
 			"insufficient_funds_for_gas": "Không đủ tiền cho gas",
@@ -1138,7 +1138,7 @@
 			"xrp_active_transaction_failed": "Việc gửi $amount $symbol trên $network đã được mạng xử lý nhưng thất bại ($result), nên tiền của bạn chưa được gửi. Phí mạng vẫn bị trừ.",
 			"xrp_amount_exceeds_sendable": "Số tiền này không còn vừa nữa. Tài khoản của bạn phải giữ lại khoản dự trữ XRP cùng phí mạng, và cả hai đều có thể thay đổi trong lúc bạn xem lại. Chưa có gì được gửi — hãy giảm số tiền, hoặc thử lại khi thông tin tài khoản được làm mới.",
 			"xrp_destination_unfunded": "Địa chỉ này chưa có tài khoản XRP. Việc tạo tài khoản cần một khoản thanh toán đầu tiên ít nhất $reserve XRP. Chưa có gì được gửi — hãy tăng số tiền, hoặc gửi tới một địa chỉ đã được kích hoạt.",
-			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",
+			"xrp_destination_tag_required": "Địa chỉ này yêu cầu thẻ đích XRP. Chưa có gì được gửi — hãy thêm thẻ do dịch vụ bạn đang thanh toán cung cấp, rồi gửi lại.",
 			"xrp_destination_is_source": "Đây là địa chỉ XRP của chính bạn. Chưa có gì được gửi — hãy chọn người nhận khác.",
 			"xrp_account_state_unavailable": "Ví không đọc được thông tin tài khoản của bạn, nên không thể kiểm tra số tiền. Chưa có gì được gửi — vui lòng thử lại sau giây lát."
 		}
