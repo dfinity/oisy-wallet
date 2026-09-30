@@ -191,6 +191,7 @@ fn create_near_intents_variant_roundtrip() {
         source_token: TokenId::EvmNative(8453),
         dest_token: TokenId::SolNativeMainnet,
         amount: Nat::from(250_000u64),
+        source_address: None,
     });
 
     let created = pic
@@ -237,6 +238,7 @@ fn create_near_intents_btc_variant_roundtrip() {
                 source_token: TokenId::BtcNativeMainnet,
                 dest_token: TokenId::EvmNative(8453),
                 amount: Nat::from(250_000u64),
+                source_address: None,
             }),
         ),
         (
@@ -245,6 +247,7 @@ fn create_near_intents_btc_variant_roundtrip() {
                 source_token: TokenId::SolNativeMainnet,
                 dest_token: TokenId::BtcNativeMainnet,
                 amount: Nat::from(250_000u64),
+                source_address: None,
             }),
         ),
     ];

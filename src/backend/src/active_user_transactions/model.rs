@@ -6,9 +6,10 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
-        XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS,
-        MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+        GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
+        UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+        MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
+        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
@@ -290,6 +291,7 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
         }
         ActiveUserTransactionData::NearIntents(d) => {
             require_valid_amount(&d.amount, "amount")?;
+            require_near_intents_source_address(d)?;
         }
         ActiveUserTransactionData::Velora(d) => {
             require_valid_amount(&d.amount, "amount")?;
@@ -495,6 +497,28 @@ fn require_xrp_address(addr: &str, field: &str) -> Result<(), ActiveUserTransact
         )));
     }
     Ok(())
+}
+
+/// A swap from native XRP pays its deposit from the user's XRP address, and the
+/// one-payment-in-flight check can only count that payment if the row names the
+/// address — without it, a second payment from the same address would pass.
+/// Any other source makes no XRP payment, so an address there has no meaning and
+/// is refused rather than stored.
+fn require_near_intents_source_address(
+    data: &NearIntentsData,
+) -> Result<(), ActiveUserTransactionError> {
+    match (&data.source_token, data.source_address.as_deref()) {
+        (TokenId::XrpNativeMainnet, Some(address)) => {
+            require_xrp_address(address, "source_address")
+        }
+        (TokenId::XrpNativeMainnet, None) => Err(ActiveUserTransactionError::InvalidData(
+            "source_address is required for a native XRP source".to_string(),
+        )),
+        (_, Some(_)) => Err(ActiveUserTransactionError::InvalidData(
+            "source_address is only allowed for a native XRP source".to_string(),
+        )),
+        (_, None) => Ok(()),
+    }
 }
 
 /// XRPL answers a payment whose destination is its sender `temREDUNDANT`, which
@@ -713,6 +737,7 @@ mod tests {
             source_token: TokenId::IcpNative,
             dest_token: TokenId::EvmNative(1),
             amount,
+            source_address: None,
         })
     }
 
@@ -816,6 +841,7 @@ mod tests {
             source_token: TokenId::EvmNative(8453),
             dest_token: TokenId::SolNativeMainnet,
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -843,6 +869,7 @@ mod tests {
             source_token: TokenId::BtcNativeMainnet,
             dest_token: TokenId::EvmNative(8453),
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -851,6 +878,7 @@ mod tests {
             source_token: TokenId::SolNativeMainnet,
             dest_token: TokenId::BtcNativeMainnet,
             amount: Nat::from(amount),
+            source_address: None,
         })
     }
 
@@ -1783,6 +1811,106 @@ mod tests {
         // every other variant still creates with none.
         let (mut map, _mm) = setup();
         create(&mut map, principal(), create_req("other-1"), 1).expect("non-xrp create");
+    }
+
+    /// A NEAR Intents swap whose source is native XRP: its deposit is an XRP
+    /// payment from `source_address`.
+    fn xrp_swap_data(amount: u64, source_address: Option<&str>) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::XrpNativeMainnet,
+            dest_token: TokenId::EvmNative(1),
+            amount: Nat::from(amount),
+            source_address: source_address.map(str::to_string),
+        })
+    }
+
+    fn create_xrp_swap(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        source_address: &str,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        let mut req = create_req(id);
+        req.data = xrp_swap_data(25_000_000, Some(source_address));
+        req.external_refs = xrp_refs();
+        create(map, principal(), req, 1)
+    }
+
+    #[test]
+    fn xrp_swap_create_roundtrip() {
+        let (mut map, _mm) = setup();
+        let tx = create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("create");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+        let listed = list(&map, principal()).transactions;
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].data, xrp_swap_data(25_000_000, Some(XRP_SOURCE)));
+    }
+
+    #[test]
+    fn xrp_swap_without_source_address_rejected() {
+        // Without the address the in-flight check cannot count the deposit, and
+        // a second payment from the same address would pass it.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("swap-1");
+        req.data = xrp_swap_data(25_000_000, None);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "source_address is required for a native XRP source".to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn xrp_swap_malformed_source_address_rejected() {
+        // The same shape check as a send's `source_address`, since the in-flight
+        // check compares the two.
+        for (source, expected) in [
+            ("r", "source_address invalid length"),
+            (
+                "xBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi",
+                "source_address must start with r",
+            ),
+            (
+                "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoM0",
+                "source_address must be base58",
+            ),
+        ] {
+            let (mut map, _mm) = setup();
+            let err = create_xrp_swap(&mut map, "swap-1", source).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(expected.to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn source_address_rejected_for_a_non_xrp_swap_source() {
+        // Only a native XRP source pays its deposit from an XRP address. A swap
+        // toward XRP makes no XRP payment either, so it carries no address.
+        for (source_token, dest_token) in [
+            (TokenId::EvmNative(1), TokenId::XrpNativeMainnet),
+            (TokenId::BtcNativeMainnet, TokenId::EvmNative(1)),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("swap-1");
+            req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token,
+                dest_token,
+                amount: Nat::from(250_000u64),
+                source_address: Some(XRP_SOURCE.to_string()),
+            });
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "source_address is only allowed for a native XRP source".to_string()
+                )
+            );
+        }
     }
 
     #[test]
