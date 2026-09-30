@@ -28,6 +28,8 @@
 		modalIcHideToken,
 		modalSolHideToken,
 		modalSolHideTokenData,
+		modalXrpHideToken,
+		modalXrpHideTokenData,
 		modalVipQrCode,
 		modalSettingsState,
 		modalReferralCode,
@@ -54,6 +56,7 @@
 	} from '$lib/derived/modal.derived';
 	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
+	import XrpHideTokenModal from '$xrp/components/tokens/XrpHideTokenModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -67,6 +70,8 @@
 		<IcHideTokenModal fromRoute={$modalIcHideTokenData} />
 	{:else if $modalSolHideToken}
 		<SolHideTokenModal fromRoute={$modalSolHideTokenData} />
+	{:else if $modalXrpHideToken}
+		<XrpHideTokenModal fromRoute={$modalXrpHideTokenData} />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
 	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}

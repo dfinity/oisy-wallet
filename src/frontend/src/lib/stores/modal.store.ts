@@ -54,6 +54,7 @@ export interface Modal<T> {
 		| 'hide-token'
 		| 'ic-hide-token'
 		| 'sol-hide-token'
+		| 'xrp-hide-token'
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
@@ -143,6 +144,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openSolHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openXrpHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
@@ -245,6 +247,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openSolHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('sol-hide-token')
+		),
+		openXrpHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('xrp-hide-token')
 		),
 		openEthToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('eth-token')
