@@ -1066,7 +1066,7 @@
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
 			"first_time_destination": "Wygląda na to, że na ten adres nie wysłano jeszcze żadnych tokenów. Dokładnie sprawdź adres.",
 			"first_time_destination_confirm": "Wysyłam tokeny na ten adres po raz pierwszy, a adres został przeze mnie dokładnie sprawdzony.",
-			"xrp_destination_tag_hint": "Wymagany przez większość giełd. Jeśli zostawisz go pustym, możesz stracić środki.",
+			"xrp_destination_tag_hint": "Wymagany przez większość giełd. Jeśli go nie wypełnisz, możesz stracić środki.",
 			"xrp_destination_tag_missing": "Brak tagu docelowego XRP. Jeśli wysyłasz na giełdę, sprawdź, czy go wymaga, w przeciwnym razie możesz stracić środki.",
 			"fee_expired": "",
 			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
