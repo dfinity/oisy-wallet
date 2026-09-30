@@ -14,6 +14,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import type { ResultSuccess } from '$lib/types/utils';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 
 	interface LoaderControls {
@@ -248,6 +249,31 @@
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));
+
+	// DEBUG, DO NOT MERGE: lists the tokens that keep `allStoresAreLoaded` false, which is what stops
+	// levelling from ever running.
+	$effect(() => {
+		if (allStoresAreLoaded) {
+			return;
+		}
+
+		const logPending = () => {
+			const pending = $transactionsStoreWithTokens.flatMap(({ transactionsStoreData, tokens }) =>
+				tokens
+					.filter(({ id }) => transactionsStoreData?.[id] === undefined)
+					.map(
+						({ symbol, name, standard, network: { name: networkName } }) =>
+							`${symbol} (${name}, ${standard}) on ${networkName}${isNullish(transactionsStoreData) ? ', whole store empty' : ''}`
+					)
+			);
+
+			consoleWarn(`[activity-debug] ${pending.length} token(s) without a first load:`, pending);
+		};
+
+		const interval = setInterval(logPending, 15_000);
+
+		return () => clearInterval(interval);
+	});
 
 	$effect(() => {
 		if (!allStoresAreLoaded) {
