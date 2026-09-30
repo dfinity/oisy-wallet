@@ -61,30 +61,20 @@ describe('PillButton', () => {
 		expect(button?.classList.contains('text-secondary')).toBeFalsy();
 	});
 
-	it('should not apply the accent tint by default', () => {
-		const { container } = render(PillButton, {
-			props: { children: createTextSnippet('Test') }
-		});
-
-		const button = container.querySelector('button');
-
-		expect(button?.classList.contains('bg-brand-subtle-20')).toBeFalsy();
-		expect(button?.classList.contains('bg-primary')).toBeTruthy();
-	});
-
-	it('should apply the accent tint when accent is true and unselected', () => {
+	it('should give an unselected accented pill the same border and fill as any other', () => {
 		const { container } = render(PillButton, {
 			props: { children: createTextSnippet('Test'), accent: true }
 		});
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('bg-brand-subtle-20')).toBeTruthy();
-		expect(button?.classList.contains('border-brand-subtle-20')).toBeTruthy();
-		expect(button?.classList.contains('bg-primary')).toBeFalsy();
+		expect(button?.classList.contains('border-primary')).toBeTruthy();
+		expect(button?.classList.contains('bg-primary')).toBeTruthy();
+		expect(button?.classList.contains('border-brand-subtle-20')).toBeFalsy();
+		expect(button?.classList.contains('bg-brand-subtle-20')).toBeFalsy();
 	});
 
-	it('should keep the regular text colour on the accent tint, for contrast', () => {
+	it('should keep the regular text colour on an accented pill', () => {
 		const { container } = render(PillButton, {
 			props: { children: createTextSnippet('Test'), accent: true }
 		});
@@ -95,15 +85,15 @@ describe('PillButton', () => {
 		expect(button?.classList.contains('text-brand-primary')).toBeFalsy();
 	});
 
-	it('should hover the accent tint darker than its rest state, not with the neutral wash', () => {
+	it('should hover an accented pill with the same wash as any other', () => {
 		const { container } = render(PillButton, {
 			props: { children: createTextSnippet('Test'), accent: true }
 		});
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('hover:bg-brand-subtle-30')).toBeTruthy();
-		expect(button?.classList.contains('hover:bg-brand-subtle-10')).toBeFalsy();
+		expect(button?.classList.contains('hover:bg-brand-subtle-10')).toBeTruthy();
+		expect(button?.classList.contains('hover:border-brand-subtle-30')).toBeFalsy();
 	});
 
 	it('should apply the regular selected styles when an accented pill is selected', () => {
@@ -117,6 +107,36 @@ describe('PillButton', () => {
 		expect(button?.classList.contains('text-primary-inverted')).toBeTruthy();
 		expect(button?.classList.contains('bg-brand-subtle-20')).toBeFalsy();
 		expect(button?.getAttribute('aria-pressed')).toBe('true');
+	});
+
+	it('should run the border lap on an unselected accented pill', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('accent-lap')).toBeTruthy();
+	});
+
+	it('should not run the border lap when an accented pill is selected', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true, selected: true }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('accent-lap')).toBeFalsy();
+	});
+
+	it('should not run the border lap without accent', () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test') }
+		});
+
+		const button = container.querySelector('button');
+
+		expect(button?.classList.contains('accent-lap')).toBeFalsy();
 	});
 
 	it('should call onclick handler when clicked', async () => {

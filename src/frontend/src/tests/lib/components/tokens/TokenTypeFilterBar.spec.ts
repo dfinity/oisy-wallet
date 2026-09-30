@@ -37,7 +37,7 @@ describe('TokenTypeFilterBar', () => {
 		const { container, getByText } = render(TokenTypeFilterBar);
 
 		const accented = [...container.querySelectorAll('button')].filter((button) =>
-			button.classList.contains('bg-brand-subtle-20')
+			button.classList.contains('accent-lap')
 		);
 
 		expect(accented).toEqual([getByText(en.token_tag.category.compute)]);
@@ -55,7 +55,7 @@ describe('TokenTypeFilterBar', () => {
 
 		expect(computeButton.classList.contains('bg-brand-primary')).toBeTruthy();
 		expect(computeButton.classList.contains('text-primary-inverted')).toBeTruthy();
-		expect(computeButton.classList.contains('bg-brand-subtle-20')).toBeFalsy();
+		expect(computeButton.classList.contains('accent-lap')).toBeFalsy();
 	});
 
 	it('should have "All asset types" selected by default', () => {
