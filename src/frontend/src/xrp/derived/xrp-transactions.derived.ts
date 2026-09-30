@@ -38,6 +38,10 @@ export const xrpKnownDestinations: Readable<KnownDestinations> = derived(
 
 			if (nonNullish(token)) {
 				($xrpTransactionsStore?.[tokenId as TokenId] ?? []).forEach(({ data }) => {
+					if (data.from === data.to) {
+						return;
+					}
+
 					mappedTransactions.push({
 						...data,
 						token

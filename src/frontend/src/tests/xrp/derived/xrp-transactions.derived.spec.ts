@@ -119,5 +119,17 @@ describe('xrp-transactions.derived', () => {
 
 			expect(get(xrpKnownDestinations)).toEqual({});
 		});
+
+		// The XRP send refuses its own address as a destination, so the list must not offer it.
+		it('ignores payments to the wallet itself', () => {
+			const { data, certified } = createSend({ id: 'tx3', value: 1_000_000n, timestamp: 1n });
+
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [{ data: { ...data, to: data.from }, certified }]
+			});
+
+			expect(get(xrpKnownDestinations)).toEqual({});
+		});
 	});
 });
