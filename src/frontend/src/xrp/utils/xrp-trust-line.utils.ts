@@ -1,14 +1,19 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
+import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { XRP_TRUST_LINE_TOKEN_DECIMALS } from '$xrp/constants/xrp.constants';
 import type {
 	XrpCurrencyCode,
+	XrpTrustLineCustomToken,
 	XrpTrustLineToken,
 	XrpTrustLineTokenIdentity
 } from '$xrp/types/xrp-trust-line-token';
 
 export const isTokenXrpTrustLine = (token: Token): token is XrpTrustLineToken =>
 	token.standard.code === 'xrp-trust-line';
+
+export const isTokenXrpTrustLineCustomToken = (token: Token): token is XrpTrustLineCustomToken =>
+	isTokenXrpTrustLine(token) && isTokenToggleable(token);
 
 /**
  * The key a trust-line token is identified by: its currency code and its issuer together, in the

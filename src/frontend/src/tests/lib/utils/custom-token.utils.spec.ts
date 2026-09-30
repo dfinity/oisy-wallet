@@ -1,3 +1,4 @@
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { parseCustomTokenId, toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockDip721TokenCanisterId } from '$tests/mocks/dip721-tokens.mock';
@@ -5,6 +6,7 @@ import { mockExtV2TokenCanisterId } from '$tests/mocks/ext-v2-token.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIcrc7CanisterId } from '$tests/mocks/icrc7-tokens.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -292,6 +294,24 @@ describe('custom-token.utils', () => {
 						token_address: 'mock-token-address',
 						decimals: [8],
 						symbol: ['mock-symbol']
+					}
+				}
+			});
+		});
+
+		it('should return correct type for XrpTrustLineMainnet network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					...RLUSD_TOKEN,
+					networkKey: 'XrpTrustLineMainnet'
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					XrpTrustLineMainnet: {
+						currency: mockRlusdCurrencyCode,
+						issuer: mockRlusdIssuer
 					}
 				}
 			});

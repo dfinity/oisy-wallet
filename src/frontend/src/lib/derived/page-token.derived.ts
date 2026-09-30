@@ -14,7 +14,11 @@ import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { getPageTokenIdentifier } from '$lib/utils/page-token.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { isTokenSpl, isTokenSplCustomToken } from '$sol/utils/spl.utils';
-import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+import { enabledXrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+import {
+	isTokenXrpTrustLine,
+	isTokenXrpTrustLineCustomToken
+} from '$xrp/utils/xrp-trust-line.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -29,7 +33,7 @@ export const pageToken: Readable<OptionToken> = derived(
 		enabledErcFungibleTokens,
 		enabledIcrcTokens,
 		enabledSplTokens,
-		xrpTrustLineTokens
+		enabledXrpTrustLineTokens
 	],
 	([
 		$routeToken,
@@ -76,7 +80,9 @@ export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pa
 				? isNotDefaultEthereumToken($pageToken)
 				: isTokenSpl($pageToken)
 					? isTokenSplCustomToken($pageToken)
-					: false;
+					: isTokenXrpTrustLine($pageToken)
+						? isTokenXrpTrustLineCustomToken($pageToken)
+						: false;
 	}
 
 	return false;

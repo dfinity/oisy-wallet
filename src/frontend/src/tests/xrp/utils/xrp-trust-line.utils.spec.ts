@@ -1,9 +1,11 @@
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { Token } from '$lib/types/token';
 import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import {
 	isTokenXrpTrustLine,
+	isTokenXrpTrustLineCustomToken,
 	parseXrpTokenValue,
 	xrpCurrencyCodeToSymbol,
 	xrpTrustLineIdentifier
@@ -14,6 +16,17 @@ describe('xrp-trust-line.utils', () => {
 		it('recognises a trust-line token and nothing else', () => {
 			expect(isTokenXrpTrustLine(RLUSD_TOKEN)).toBeTruthy();
 			expect(isTokenXrpTrustLine(XRP_TOKEN)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenXrpTrustLineCustomToken', () => {
+		it('needs a trust-line token with an enabled state', () => {
+			const hiddenRlusd: Token = { ...RLUSD_TOKEN, enabled: false } as Token;
+			const shownXrp: Token = { ...XRP_TOKEN, enabled: true } as Token;
+
+			expect(isTokenXrpTrustLineCustomToken(hiddenRlusd)).toBeTruthy();
+			expect(isTokenXrpTrustLineCustomToken(RLUSD_TOKEN)).toBeFalsy();
+			expect(isTokenXrpTrustLineCustomToken(shownXrp)).toBeFalsy();
 		});
 	});
 
