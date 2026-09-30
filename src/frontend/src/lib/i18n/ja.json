@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
 			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "",
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました。",
 			"ext_custom_tokens": "EXTカスタムトークンの読み込み中にエラーが発生しました。",
@@ -1494,7 +1495,13 @@
 				"info_ext": "キャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
 				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortはトランザクション履歴を表示できません。",
 				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。",
-				"custom_tokens_not_supported_yet": "OISY はこのネットワークでのカスタムトークンにまだ対応していません。"
+				"custom_tokens_not_supported_yet": "OISY はこのネットワークでのカスタムトークンにまだ対応していません。",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "指定されたアドレスは選択されたネットワークで有効なトークンではありません。",
@@ -1508,10 +1515,28 @@
 				"missing_canister_id": "キャニスターIDがありません。値を入力しましたか？",
 				"missing_contract_address": "コントラクトアドレスがありません。値を入力しましたか？",
 				"missing_token_address": "トークンアドレスがありません。値を入力しましたか？",
-				"no_network": "ネットワークが選択されていません。これは予期しないエラーです。"
+				"no_network": "ネットワークが選択されていません。これは予期しないエラーです。",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_nameは新しいトークンを準備して保護しています。完了するまでこのタブを閉じないでください。"
+				"do_not_close_manage": "$oisy_nameは新しいトークンを準備して保護しています。完了するまでこのタブを閉じないでください。",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1558,6 +1583,8 @@
 		"placeholder": {
 			"enter_contract_address": "ERC20コントラクトアドレスを入力",
 			"enter_token_address": "SPLトークンアドレスを入力",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "トークンを検索"
 		},
 		"warning": {

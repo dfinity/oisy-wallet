@@ -768,6 +768,7 @@
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
+			"xrp_custom_tokens": "Error while loading the XRP Ledger custom tokens.",
 			"erc20_custom_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"ext_custom_tokens": "Error while loading the EXT custom tokens.",
@@ -1495,7 +1496,13 @@
 				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
 				"custom_tokens_not_supported": "The selected network does not support custom tokens.",
-				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet."
+				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet.",
+				"xrp_issuer": "Issuer address",
+				"xrp_currency_code": "Currency code",
+				"xrp_issued_by": "Issued by",
+				"xrp_issuer_powers": "What the issuer can do",
+				"xrp_reserve": "$amount XRP of your balance stays reserved until you remove the token.",
+				"xrp_reserve_after": "Your account’s reserve after adding: $amount XRP"
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -1509,10 +1516,28 @@
 				"missing_canister_id": "The Canister ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"missing_token_address": "The token address is missing. Did you provide a value?",
-				"no_network": "No network is selected. This is unexpected."
+				"no_network": "No network is selected. This is unexpected.",
+				"xrp_invalid_currency_code": "The currency code must be 3 characters, 40 hexadecimal characters, or a name of 4 to 20 characters. XRP itself is not a token.",
+				"xrp_invalid_issuer": "The issuer must be a classic XRP Ledger address, starting with r.",
+				"xrp_issuer_is_own_address": "This is your own address. Enter the address of the token’s issuer.",
+				"xrp_issuer_not_found": "This issuer has no account on the XRP Ledger.",
+				"xrp_issuer_disallows_trust_lines": "This issuer does not accept new holders, so its token cannot be added.",
+				"xrp_account_not_found": "Your XRP account is not on the ledger yet. Receive at least $amount XRP first.",
+				"xrp_insufficient_fee": "Your XRP balance does not cover the network fee.",
+				"xrp_insufficient_reserve": "Adding this token raises your account’s reserve to $amount XRP, more than your balance. Receive more XRP first.",
+				"xrp_state_unavailable": "The wallet could not read the XRP Ledger, so the token could not be checked. Try again in a moment."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed."
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed.",
+				"xrp_not_listed_token": "This is not the $symbol that $oisy_short lists. $symbol is issued by $issuer."
+			},
+			"xrp_issuer_power": {
+				"freeze": "The issuer can freeze your balance.",
+				"global_freeze": "The issuer has frozen this token for every holder.",
+				"clawback": "The issuer can take tokens back from your balance.",
+				"approval": "The issuer must approve your account before you can receive this token.",
+				"transfer_fee": "Transfers between holders cost a $fee % fee.",
+				"no_rippling": "Holders cannot send this token to each other."
 			}
 		},
 		"manage": {
@@ -1559,6 +1584,8 @@
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
 			"enter_token_address": "Enter an SPL token address",
+			"enter_xrp_issuer": "Enter the issuer’s address, starting with r",
+			"enter_xrp_currency_code": "Enter the currency code, such as USD or RLUSD",
 			"search_token": "Search for the token"
 		},
 		"warning": {

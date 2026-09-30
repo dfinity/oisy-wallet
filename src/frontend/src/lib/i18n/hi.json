@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
 			"spl_custom_tokens": "SPL कस्टम टोकन लोड करते समय त्रुटि।",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "ERC20 ट्विन टोकन सक्षम करते समय त्रुटि।",
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
@@ -1494,7 +1495,13 @@
 				"info_ext": "",
 				"info_index": "इंडेक्स कैनिस्टर आईडी वैकल्पिक है, लेकिन इसके बिना, $oisy_short लेनदेन इतिहास प्रदर्शित नहीं कर सकता।",
 				"custom_tokens_not_supported": "चयनित नेटवर्क कस्टम टोकन का समर्थन नहीं करता है।",
-				"custom_tokens_not_supported_yet": "OISY अभी इस नेटवर्क पर कस्टम टोकन का समर्थन नहीं करता है।"
+				"custom_tokens_not_supported_yet": "OISY अभी इस नेटवर्क पर कस्टम टोकन का समर्थन नहीं करता है।",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "चयनित नेटवर्क में निर्दिष्ट पता एक वैध टोकन नहीं है।",
@@ -1508,10 +1515,28 @@
 				"missing_canister_id": "",
 				"missing_contract_address": "अनुबंध पता गायब है। क्या आपने कोई मान प्रदान किया है?",
 				"missing_token_address": "टोकन पता गायब है। क्या आपने कोई मान प्रदान किया है?",
-				"no_network": "कोई नेटवर्क नहीं चुना गया है। यह अप्रत्याशित है।"
+				"no_network": "कोई नेटवर्क नहीं चुना गया है। यह अप्रत्याशित है।",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name नए टोकन तैयार और सुरक्षित कर रहा है। कृपया इसके पूरा होने तक इस टैब को बंद न करें।"
+				"do_not_close_manage": "$oisy_name नए टोकन तैयार और सुरक्षित कर रहा है। कृपया इसके पूरा होने तक इस टैब को बंद न करें।",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1558,6 +1583,8 @@
 		"placeholder": {
 			"enter_contract_address": "एक ERC20 अनुबंध पता दर्ज करें",
 			"enter_token_address": "एक SPL टोकन पता दर्ज करें",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "टोकन खोजें"
 		},
 		"warning": {

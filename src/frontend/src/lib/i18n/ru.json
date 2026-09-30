@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-721.",
 			"erc1155_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC-1155.",
 			"spl_custom_tokens": "Ошибка при загрузке пользовательских токенов SPL.",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "Ошибка при включении токена ERC-20.",
 			"icrc_custom_token": "Ошибка при загрузке пользовательского токена ICRC.",
 			"ext_custom_tokens": "",
@@ -1494,7 +1495,13 @@
 				"info_ext": "ID контейнера обычно можно найти на веб-сайте проекта.",
 				"info_index": "ID контейнера индекса необязателен, но без него $oisy_short не может отображать историю транзакций.",
 				"custom_tokens_not_supported": "Выбранная сеть не поддерживает пользовательские токены.",
-				"custom_tokens_not_supported_yet": "OISY пока не поддерживает пользовательские токены в этой сети."
+				"custom_tokens_not_supported_yet": "OISY пока не поддерживает пользовательские токены в этой сети.",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "Указанный адрес не является действительным токеном в выбранной сети.",
@@ -1508,10 +1515,28 @@
 				"missing_canister_id": "Отсутствует ID контейнера. Вы указали значение?",
 				"missing_contract_address": "Отсутствует адрес контракта. Вы указали значение?",
 				"missing_token_address": "Отсутствует адрес токена. Вы указали значение?",
-				"no_network": "Сеть не выбрана. Это неожиданно."
+				"no_network": "Сеть не выбрана. Это неожиданно.",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name подготавливает и защищает новые токены. Пожалуйста, не закрывайте эту вкладку, пока это не будет завершено."
+				"do_not_close_manage": "$oisy_name подготавливает и защищает новые токены. Пожалуйста, не закрывайте эту вкладку, пока это не будет завершено.",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1558,6 +1583,8 @@
 		"placeholder": {
 			"enter_contract_address": "Введите адрес контракта ERC20",
 			"enter_token_address": "Введите адрес токена SPL",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "Искать токен"
 		},
 		"warning": {

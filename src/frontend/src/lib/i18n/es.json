@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "Error al cargar los tokens ERC721 personalizados.",
 			"erc1155_custom_tokens": "Error al cargar los tokens ERC1155 personalizados.",
 			"spl_custom_tokens": "Error al cargar los tokens SPL personalizados.",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "Error al habilitar el token gemelo ERC20.",
 			"icrc_custom_token": "Error al cargar el token ICRC personalizado.",
 			"ext_custom_tokens": "",
@@ -1494,7 +1495,13 @@
 				"info_ext": "",
 				"info_index": "El ID del Canister de Índice es opcional, pero sin él, $oisy_short no puede mostrar el historial de transacciones.",
 				"custom_tokens_not_supported": "La red seleccionada no admite tokens personalizados.",
-				"custom_tokens_not_supported_yet": "OISY aún no admite tokens personalizados en esta red."
+				"custom_tokens_not_supported_yet": "OISY aún no admite tokens personalizados en esta red.",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "La dirección especificada no es un token válido en la red seleccionada.",
@@ -1508,10 +1515,28 @@
 				"missing_canister_id": "",
 				"missing_contract_address": "Falta la dirección del contrato. ¿Proporcionaste un valor?",
 				"missing_token_address": "Falta la dirección del token. ¿Proporcionaste un valor?",
-				"no_network": "No se ha seleccionado ninguna red. Esto es inesperado."
+				"no_network": "No se ha seleccionado ninguna red. Esto es inesperado.",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name está preparando y asegurando los nuevos tokens. Por favor, no cierres esta pestaña hasta que se complete."
+				"do_not_close_manage": "$oisy_name está preparando y asegurando los nuevos tokens. Por favor, no cierres esta pestaña hasta que se complete.",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1558,6 +1583,8 @@
 		"placeholder": {
 			"enter_contract_address": "Introduce una dirección de contrato ERC20",
 			"enter_token_address": "Introduce una dirección de token SPL",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "Buscar el token"
 		},
 		"warning": {
