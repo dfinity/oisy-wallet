@@ -538,6 +538,12 @@ What this deliberately does not do:
 - It does **not** block sends on other chains, or XRP sends from a different address — a record for one address says nothing about another's sequence.
 - It does **not** cover a payment signed outside OISY from the same account. Nothing in the wallet can.
 
+### Contacts
+
+A contact can hold XRP Ledger addresses like any other network's. Only **classic** addresses (starting with `r`) are accepted. **X-addresses** are rejected, because they bundle a destination tag into the address and a contact stores no tag. Picking a contact therefore never fills in a tag: sending to an exchange still needs the tag entered by hand, and an address that demands one is still refused without it.
+
+The send flow's **Contacts** tab offers every contact with an XRP address. The **Recently Used** tab stays empty for XRP, because it is not yet built from the XRP transaction history.
+
 ---
 
 ## Mint TCYCLES

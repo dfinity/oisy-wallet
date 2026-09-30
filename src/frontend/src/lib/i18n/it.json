@@ -1055,7 +1055,6 @@
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
-			"enter_xrp_address": "Inserisci l’indirizzo XRP",
 			"xrp_destination_tag": "Inserisci il tag di destinazione (facoltativo)",
 			"select_network": "Seleziona rete",
 			"search_nfts": ""
@@ -2405,7 +2404,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Nuovo indirizzo",

@@ -1,6 +1,8 @@
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { contactsStore } from '$lib/stores/contacts.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import { getMockContactsUi } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import XrpSendReview from '$xrp/components/send/XrpSendReview.svelte';
 import {
@@ -61,5 +63,34 @@ describe('XrpSendReview', () => {
 		const { getByText } = render(XrpSendReview, { props, context: mockContext });
 
 		expect(getByText('12345')).toBeInTheDocument();
+	});
+
+	describe('destination contact', () => {
+		const [alice] = getMockContactsUi({
+			n: 1,
+			name: 'Alice',
+			addresses: [{ addressType: 'Xrp', address: props.destination, label: 'Cold wallet' }]
+		});
+
+		afterEach(() => {
+			contactsStore.reset();
+		});
+
+		it('shows the name and alias of a contact that holds the destination', () => {
+			contactsStore.set([alice]);
+
+			const { getByText } = render(XrpSendReview, { props, context: mockContext });
+
+			expect(getByText(/Alice/)).toHaveTextContent('Cold wallet');
+		});
+
+		it('shows the name and alias of the picked contact', () => {
+			const { getByText } = render(XrpSendReview, {
+				props: { ...props, selectedContact: alice },
+				context: mockContext
+			});
+
+			expect(getByText(/Alice/)).toHaveTextContent('Cold wallet');
+		});
 	});
 });
