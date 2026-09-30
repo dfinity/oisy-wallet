@@ -296,6 +296,48 @@ describe('AllTransactionsScroll', () => {
 			expect(displayed(getAllByTestId)).toHaveLength(5);
 		});
 
+		// The round records its empty result against the length from before it, so a floor that rose
+		// while it ran read as dry, and the scroll stopped asking for good.
+		describe('when the floor moves while an empty round is in flight', () => {
+			const { enterView } = IntersectionObserverManual;
+
+			beforeEach(() => {
+				window.IntersectionObserver = IntersectionObserverManual;
+			});
+
+			afterEach(() => {
+				window.IntersectionObserver = IntersectionObserverActive;
+			});
+
+			it('should ask again the next time the end comes into view', async () => {
+				const scroll: { rerender?: (props: { floor: number }) => Promise<void> } = {};
+
+				const loadMoreMovingTheFloor = vi.fn(async () => {
+					await scroll.rerender?.({ floor: 3 });
+
+					return { success: false };
+				});
+
+				const { rerender } = render(AllTransactionsScrollTest, {
+					props: {
+						sortedTransactions: makeTransactions(5),
+						floor: 0,
+						onLoadMore: loadMoreMovingTheFloor
+					}
+				});
+
+				scroll.rerender = rerender;
+
+				await waitFor(() => expect(loadMoreMovingTheFloor).toHaveBeenCalledOnce());
+
+				await runResolvedPromises();
+
+				enterView();
+
+				await waitFor(() => expect(loadMoreMovingTheFloor).toHaveBeenCalledTimes(2));
+			});
+		});
+
 		// A floor that rises shrinks the list, for instance when a token's rows are cleared and loaded
 		// again. Measured against the old boundary, the empty round before it kept the scroll disabled.
 		it('should ask again after the floor rose, even when the last round loaded nothing', async () => {

@@ -103,6 +103,7 @@
 		}
 
 		const lengthBeforeFetch = revealable.length;
+		const floorBeforeFetch = floor;
 
 		loading = true;
 
@@ -136,8 +137,11 @@
 		}
 
 		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
-		// firing against chains that have nothing left.
-		dryAtLength = lengthBeforeFetch;
+		// firing against chains that have nothing left. Not when the floor moved during the round: the
+		// length recorded above belongs to the old one, and a rising floor would read as dry for good.
+		if (floor === floorBeforeFetch) {
+			dryAtLength = lengthBeforeFetch;
+		}
 
 		return false;
 	};
