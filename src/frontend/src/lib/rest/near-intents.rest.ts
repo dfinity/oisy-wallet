@@ -7,7 +7,7 @@ import type {
 	NearIntentsStatusResponse,
 	NearIntentsToken
 } from '$lib/types/near-intents';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 const buildHeaders = (): HeadersInit => ({
 	'Content-Type': 'application/json'
@@ -32,6 +32,28 @@ export const fetchNearIntentsTokens = async (): Promise<NearIntentsToken[]> => {
 const AMOUNT_TOO_LOW_PATTERN = /amount is too low/i;
 const AMOUNT_TOO_LOW_MINIMUM_PATTERN = /try at least (\d+)/i;
 
+// A second, unrelated refusal: 1Click caps some chains (Polygon and BSC at the time of
+// writing, on either side of the route) below a fiat floor, with a 400 reading
+// "Temporary swap limits: minimum swap amount is $1,000". The figure is USD, not token
+// units, and the API exposes it nowhere structured, so the message is the only source.
+// Matched on the part that states the constraint rather than on "Temporary swap limits":
+// the wording of the preamble, the amount and the affected chains are all volatile.
+const MINIMUM_SWAP_AMOUNT_PATTERN = /minimum swap amount/i;
+const MINIMUM_SWAP_AMOUNT_FIGURE_PATTERN = /minimum swap amount is\s*\$\s*([\d,]+(?:\.\d+)?)/i;
+
+const parseUsdMinimum = (message: string): number | undefined => {
+	const matched = MINIMUM_SWAP_AMOUNT_FIGURE_PATTERN.exec(message)?.[1];
+
+	if (isNullish(matched)) {
+		return;
+	}
+
+	const parsed = Number(matched.replace(/,/g, ''));
+
+	// A separator-only capture parses as 0, which would advertise a minimum of nothing.
+	return !isFinite(parsed) || parsed <= 0 ? undefined : parsed;
+};
+
 // https://docs.near-intents.org/api-reference/oneclick/request-a-swap-quote
 export const fetchNearIntentsQuote = async (
 	request: NearIntentsQuoteRequest
@@ -52,7 +74,16 @@ export const fetchNearIntentsQuote = async (
 
 			throw new SwapAmountTooLowError(
 				`NEAR Intents quote failed: ${message}`,
-				nonNullish(minAmount) ? BigInt(minAmount) : undefined
+				nonNullish(minAmount) ? { type: 'token', value: BigInt(minAmount) } : undefined
+			);
+		}
+
+		if (MINIMUM_SWAP_AMOUNT_PATTERN.test(message)) {
+			const usdMinimum = parseUsdMinimum(message);
+
+			throw new SwapAmountTooLowError(
+				`NEAR Intents quote failed: ${message}`,
+				nonNullish(usdMinimum) ? { type: 'usd', value: usdMinimum } : undefined
 			);
 		}
 

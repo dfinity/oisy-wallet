@@ -202,7 +202,10 @@ describe('SwapAmountsContext.svelte', () => {
 
 	it('sets the quote error when fetchSwapAmounts throws an amount-too-low refusal', async () => {
 		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
-			new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+			new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', {
+				type: 'token',
+				value: 8300n
+			})
 		);
 
 		await renderWithContext({
@@ -219,7 +222,10 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.swaps).toEqual([]);
 		expect(value?.selectedProvider).toBeUndefined();
 		expect(value?.amountForSwap).toBe(20);
-		expect(value?.quoteError).toEqual({ type: 'amount-too-low', minAmount: 8300n });
+		expect(value?.quoteError).toEqual({
+			type: 'amount-too-low',
+			minimum: { type: 'token', value: 8300n }
+		});
 	});
 
 	it('debounces fetchSwapAmounts calls', async () => {
