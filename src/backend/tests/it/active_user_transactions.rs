@@ -597,7 +597,8 @@ fn second_open_xrp_send_from_the_same_address_returns_already_in_flight() {
 // Through the real endpoint, for the same reason as the send-only case above: a
 // swap's XRP deposit is a payment from the same address, and only the create is
 // atomic with the check. Refused while the swap row is `Pending` — its deposit
-// has not resolved on the ledger — and allowed once it is `Executing`.
+// has not resolved on the ledger — and allowed once it is `Executing`, which only
+// the deposit's ledger result can make it.
 #[test]
 fn xrp_send_while_a_swap_deposit_is_in_flight_returns_already_in_flight() {
     let pic = setup();
@@ -647,11 +648,47 @@ fn xrp_send_while_a_swap_deposit_is_in_flight_returns_already_in_flight() {
         }
     }
 
+    // What a frontend from before the swap UI sends on 1Click's `PENDING_DEPOSIT`.
     match pic
         .update::<ActiveUserTransactionResult>(
             user,
             "update_active_user_transaction",
             update_status_req(TX_ID, ActiveUserTransactionStatus::Executing),
+        )
+        .expect("update_active_user_transaction call should succeed")
+    {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result is required to leave Pending".to_string()
+                )
+            );
+        }
+    }
+
+    match create(send_id, send.clone()) {
+        ActiveUserTransactionResult::Ok(tx) => panic!("expected Err, got {tx:?}"),
+        ActiveUserTransactionResult::Err(err) => {
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        }
+    }
+
+    let mut refs = xrp_refs();
+    refs.push(ActiveUserTransactionRef {
+        key: "ledger_result".to_string(),
+        value: "tesSUCCESS".to_string(),
+    });
+
+    match pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            UpdateActiveUserTransactionRequest {
+                external_refs: Some(refs),
+                ..update_status_req(TX_ID, ActiveUserTransactionStatus::Executing)
+            },
         )
         .expect("update_active_user_transaction call should succeed")
     {

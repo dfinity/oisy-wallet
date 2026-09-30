@@ -42,6 +42,14 @@ pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 pub const XRP_REF_TX_HASH: &str = "tx_hash";
 pub const XRP_REF_LAST_LEDGER_SEQUENCE: &str = "last_ledger_sequence";
 
+/// The `external_ref` that lets a swap from XRP leave `Pending`: how its deposit
+/// resolved on the ledger — `tesSUCCESS`, a `tec` code, or `expired`. Only the
+/// XRP ledger resolution writes it, so a client that follows 1Click instead
+/// cannot release the address while the deposit can still apply.
+pub const XRP_REF_LEDGER_RESULT: &str = "ledger_result";
+pub const XRP_LEDGER_RESULT_SUCCESS: &str = "tesSUCCESS";
+pub const XRP_LEDGER_RESULT_EXPIRED: &str = "expired";
+
 /// Length of an XRPL transaction id in hex.
 pub const XRP_TX_HASH_LEN: usize = 64;
 

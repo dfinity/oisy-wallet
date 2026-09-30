@@ -63,7 +63,7 @@
 		buildXrpSendTrackingMetadata,
 		isXrpActiveUserTransaction
 	} from '$xrp/utils/xrp-active-tx.utils';
-	import { isXrpPaymentInFlight } from '$xrp/utils/xrp-in-flight.utils';
+	import { isXrpPaymentInFlight, makesXrpPayment } from '$xrp/utils/xrp-in-flight.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
 	$effect(() => {
@@ -226,7 +226,9 @@
 					metadata: buildNearIntentsSwapTrackingMetadata({ tx })
 				});
 
-				if (isSucceeded) {
+				// A swap from XRP whose deposit failed on the ledger was still charged the network fee, so
+				// its balance changed either way, as for an XRP send below.
+				if (isSucceeded || makesXrpPayment(tx)) {
 					shouldRefresh = true;
 				}
 			} else if (

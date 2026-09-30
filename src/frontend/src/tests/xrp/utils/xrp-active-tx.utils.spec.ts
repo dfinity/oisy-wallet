@@ -1,6 +1,7 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import {
 	mockLiquidiumActiveUserTransaction,
@@ -24,6 +25,7 @@ import {
 	toXrpDisplayRefs,
 	toXrpExternalRefs,
 	toXrpExternalRefsMap,
+	toXrpLedgerResolutionRefs,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys
@@ -107,6 +109,48 @@ describe('xrp-active-tx.utils', () => {
 				{ key: XRP_EXTERNAL_REF_KEYS.AMOUNT, value: '25' },
 				{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash }
 			]);
+		});
+	});
+
+	describe('toXrpLedgerResolutionRefs', () => {
+		const tx = mockXrpSwapActiveUserTransaction;
+
+		it("adds the ledger result to the row's own refs, sorted by key", () => {
+			const refs = toXrpLedgerResolutionRefs({ tx, ledgerResult: 'tesSUCCESS' });
+
+			expect(refs).toEqual(
+				[
+					...tx.external_refs,
+					{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'tesSUCCESS' }
+				].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0))
+			);
+		});
+
+		it('replaces a ledger result the row already holds', () => {
+			const refs = toXrpLedgerResolutionRefs({
+				tx: {
+					...tx,
+					external_refs: [
+						...tx.external_refs,
+						{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'tecSTALE' }
+					]
+				},
+				ledgerResult: 'expired'
+			});
+
+			expect(refs.filter(({ key }) => key === XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT)).toEqual([
+				{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'expired' }
+			]);
+		});
+
+		// Only a fabricated code gets this long; refusing it would hold the row open for good.
+		it("cuts an oversized result to the backend's limit", () => {
+			const refs = toXrpLedgerResolutionRefs({ tx, ledgerResult: `tec${'X'.repeat(600)}` });
+
+			const value = refs.find(({ key }) => key === XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT)?.value;
+
+			expect(value).toHaveLength(ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES);
+			expect(value?.startsWith('tec')).toBeTruthy();
 		});
 	});
 

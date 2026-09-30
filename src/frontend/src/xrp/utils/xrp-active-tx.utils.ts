@@ -4,6 +4,7 @@ import type {
 	ActiveUserTransactionRef
 } from '$declarations/backend/backend.did';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
@@ -69,6 +70,30 @@ export const toXrpExternalRefs = (
 		.filter((key) => refs[key] !== undefined && refs[key] !== '')
 		.sort()
 		.map((key) => ({ key, value: refs[key] as string }));
+
+/**
+ * The refs a swap from XRP leaves `Pending` with: its own, plus how its deposit resolved on the
+ * ledger. `external_refs` is replaced wholesale, so the row's poll keys and display snapshot go
+ * along, and the result replaces any the row already holds.
+ *
+ * A real result is a short code. One longer than the backend allows can only be fabricated, and it
+ * is cut to fit rather than left to refuse the update, which would hold the row — and every payment
+ * from its address — open for good. Result codes are ASCII, so characters are bytes.
+ */
+export const toXrpLedgerResolutionRefs = ({
+	tx,
+	ledgerResult
+}: {
+	tx: ActiveUserTransaction;
+	ledgerResult: string;
+}): ActiveUserTransactionRef[] =>
+	[
+		...tx.external_refs.filter(({ key }) => key !== XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT),
+		{
+			key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT,
+			value: ledgerResult.slice(0, ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES)
+		}
+	].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0));
 
 // Wire-format `(key, value)` array → keyed lookup.
 export const toXrpExternalRefsMap = (

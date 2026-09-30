@@ -677,6 +677,46 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(appliedFlags()).toEqual({ 'near-a': true });
 		});
 
+		// The deposit's network fee was charged, so the balance changed although the swap failed.
+		it('refreshes the wallet when a swap from XRP fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: mockXrpSwapActiveUserTransaction });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...mockXrpSwapActiveUserTransaction, status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+		});
+
+		it('does not refresh the wallet when a swap from another chain fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...pendingNearIntents('near-a'), status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
+		});
+
 		it('fires waitAndTriggerWallet and a swap_success event with the Velora dApp when a Velora row succeeds', async () => {
 			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
 			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });

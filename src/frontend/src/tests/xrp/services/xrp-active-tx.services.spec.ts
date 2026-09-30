@@ -17,7 +17,8 @@ import { XRP_LEDGER_SEARCH_LOOKBACK } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { pollXrpActiveUserTransactions } from '$xrp/services/xrp-active-tx.services';
 import { XrpNetworks } from '$xrp/types/network';
-import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
+import { XRP_EXTERNAL_REF_KEYS, XRP_LEDGER_RESULT_EXPIRED } from '$xrp/types/xrp-active-tx';
+import { toXrpLedgerResolutionRefs } from '$xrp/utils/xrp-active-tx.utils';
 import { DEFAULT_DEFINITIONS } from 'ripple-binary-codec';
 import { get } from 'svelte/store';
 
@@ -465,11 +466,25 @@ describe('xrp-active-tx.services', () => {
 	describe('a swap from XRP', () => {
 		const swap = mockXrpSwapActiveUserTransaction;
 
-		const expectSwapStatus = ({ status, error }: { status: object; error?: string }) =>
+		// The backend moves a swap from XRP out of `Pending` only with its deposit's result recorded,
+		// so every resolution writes it, along with the refs the row already holds.
+		const expectSwapStatus = ({
+			status,
+			error,
+			ledgerResult
+		}: {
+			status: object;
+			error?: string;
+			ledgerResult: string;
+		}) =>
 			expect(applySpy).toHaveBeenCalledWith({
 				identity,
 				tx: swap,
-				update: { status, ...(error !== undefined ? { error } : {}) }
+				update: {
+					status,
+					...(error !== undefined ? { error } : {}),
+					externalRefs: toXrpLedgerResolutionRefs({ tx: swap, ledgerResult })
+				}
 			});
 
 		it('polls the deposit over the window the row was signed against', async () => {
@@ -490,7 +505,7 @@ describe('xrp-active-tx.services', () => {
 
 			await poll([swap]);
 
-			expectSwapStatus({ status: { Executing: null } });
+			expectSwapStatus({ status: { Executing: null }, ledgerResult: 'tesSUCCESS' });
 		});
 
 		it('moves a deposit the expiry recheck finds validated to Executing', async () => {
@@ -503,7 +518,7 @@ describe('xrp-active-tx.services', () => {
 
 			await poll([swap]);
 
-			expectSwapStatus({ status: { Executing: null } });
+			expectSwapStatus({ status: { Executing: null }, ledgerResult: 'tesSUCCESS' });
 		});
 
 		// A failed deposit sent nothing to 1Click, so the swap fails with the XRP send's message,
@@ -523,7 +538,8 @@ describe('xrp-active-tx.services', () => {
 					$symbol: 'XRP',
 					$network: 'XRP Ledger',
 					$result: 'tecNO_DST_INSUF_XRP'
-				})
+				}),
+				ledgerResult: 'tecNO_DST_INSUF_XRP'
 			});
 		});
 
@@ -541,8 +557,32 @@ describe('xrp-active-tx.services', () => {
 					$amount: '10',
 					$symbol: 'XRP',
 					$network: 'XRP Ledger'
-				})
+				}),
+				ledgerResult: XRP_LEDGER_RESULT_EXPIRED
 			});
+		});
+
+		it('keeps the row refs next to the ledger result, which a send never gets', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tesSUCCESS'
+			});
+
+			await poll([swap, tx]);
+
+			const updates = (
+				applySpy.mock.calls as [{ tx: ActiveUserTransaction; update: { externalRefs?: unknown } }][]
+			).map(([{ tx: row, update }]) => ({ id: row.id, update }));
+			const swapUpdate = updates.find(({ id }) => id === swap.id)?.update;
+			const sendUpdate = updates.find(({ id }) => id === tx.id)?.update;
+
+			expect(swapUpdate?.externalRefs).toEqual(
+				expect.arrayContaining([
+					...swap.external_refs,
+					{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'tesSUCCESS' }
+				])
+			);
+			expect(sendUpdate).not.toHaveProperty('externalRefs');
 		});
 
 		it('leaves a deposit absent within the window Pending', async () => {

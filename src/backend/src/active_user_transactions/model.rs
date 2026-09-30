@@ -14,7 +14,8 @@ use shared::types::{
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
         MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
         MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
-        XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+        XRP_LEDGER_RESULT_EXPIRED, XRP_LEDGER_RESULT_SUCCESS, XRP_REF_LAST_LEDGER_SEQUENCE,
+        XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
     },
     token_id::TokenId,
 };
@@ -120,6 +121,17 @@ pub fn update(
 
     if let Some(new_status) = request.status.as_ref() {
         validate_transition(&current.status, new_status)?;
+
+        if leaves_pending_xrp_deposit(&current, new_status) {
+            require_ledger_resolution(
+                new_status,
+                request
+                    .external_refs
+                    .as_deref()
+                    .unwrap_or(&current.external_refs),
+            )?;
+        }
+
         current.status = new_status.clone();
     }
     if let Some(step) = request.progress_step {
@@ -610,6 +622,65 @@ fn require_xrp_refs(refs: &[ActiveUserTransactionRef]) -> Result<(), ActiveUserT
     Ok(())
 }
 
+/// Whether an update moves a swap from XRP out of `Pending` — the one status in
+/// which `holds_xrp_address` holds its address.
+fn leaves_pending_xrp_deposit(
+    current: &ActiveUserTransaction,
+    to: &ActiveUserTransactionStatus,
+) -> bool {
+    matches!(current.data, ActiveUserTransactionData::NearIntents(_))
+        && xrp_payment_source(&current.data).is_some()
+        && current.status == ActiveUserTransactionStatus::Pending
+        && *to != ActiveUserTransactionStatus::Pending
+}
+
+/// A swap from XRP leaves `Pending` only on its deposit's resolution on the
+/// ledger, recorded in `ledger_result`: `tesSUCCESS` moves it to `Executing`, a
+/// `tec` code or `expired` to `Failed`. Leaving `Pending` releases the address,
+/// and a client that follows 1Click instead — a frontend from before the swap
+/// UI maps 1Click's `PENDING_DEPOSIT` to `Executing` — would release it while
+/// the deposit can still apply.
+fn require_ledger_resolution(
+    to: &ActiveUserTransactionStatus,
+    refs: &[ActiveUserTransactionRef],
+) -> Result<(), ActiveUserTransactionError> {
+    let Some(result) = refs
+        .iter()
+        .find(|ActiveUserTransactionRef { key, .. }| key == XRP_REF_LEDGER_RESULT)
+        .map(|ActiveUserTransactionRef { value, .. }| value.as_str())
+    else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LEDGER_RESULT} is required to leave Pending"
+        )));
+    };
+
+    let resolves_to = if result == XRP_LEDGER_RESULT_SUCCESS {
+        ActiveUserTransactionStatus::Executing
+    } else if result == XRP_LEDGER_RESULT_EXPIRED || is_tec_code(result) {
+        ActiveUserTransactionStatus::Failed
+    } else {
+        return Err(ActiveUserTransactionError::InvalidData(format!(
+            "{XRP_REF_LEDGER_RESULT} must be {XRP_LEDGER_RESULT_SUCCESS}, a tec code or {XRP_LEDGER_RESULT_EXPIRED}"
+        )));
+    };
+
+    if *to == resolves_to {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::IllegalStatusTransition)
+    }
+}
+
+/// An XRPL `tec` result: applied, failed, fee claimed.
+fn is_tec_code(value: &str) -> bool {
+    value.strip_prefix("tec").is_some_and(|rest| {
+        !rest.is_empty()
+            && rest
+                .chars()
+                .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
+    })
+}
+
 fn validate_transition(
     from: &ActiveUserTransactionStatus,
     to: &ActiveUserTransactionStatus,
@@ -649,8 +720,8 @@ mod tests {
             LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
             OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
             VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_TX_HASH,
-            XRP_TX_HASH_LEN,
+            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT,
+            XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
         custom_token::ErcTokenId,
         token_id::TokenId,
@@ -1884,6 +1955,28 @@ mod tests {
         .expect("status update");
     }
 
+    /// The update the XRP ledger resolution makes: the new status with the row's
+    /// refs plus the deposit's `ledger_result`.
+    fn resolve_xrp_swap(
+        map: &mut ActiveUserTransactionsMap,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+        ledger_result: &str,
+    ) -> Result<ActiveUserTransaction, ActiveUserTransactionError> {
+        update(
+            map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: Some(xrp_refs_with(XRP_REF_LEDGER_RESULT, ledger_result)),
+                error: None,
+            },
+            2,
+        )
+    }
+
     #[test]
     fn xrp_swap_create_roundtrip() {
         let (mut map, _mm) = setup();
@@ -2053,6 +2146,41 @@ mod tests {
     fn xrp_payment_allowed_once_the_swap_deposit_has_resolved() {
         // `Executing` means the deposit validated and the swap goes on at 1Click;
         // the address is free even though the swap row is still open.
+        for (status, ledger_result) in [
+            (ActiveUserTransactionStatus::Executing, "tesSUCCESS"),
+            (ActiveUserTransactionStatus::Failed, "tecNO_DST_INSUF_XRP"),
+            (ActiveUserTransactionStatus::Failed, "expired"),
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+            resolve_xrp_swap(&mut map, "swap-1", status, ledger_result).expect("resolve");
+
+            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+        }
+    }
+
+    #[test]
+    fn xrp_payment_allowed_once_the_swap_succeeds() {
+        let (mut map, _mm) = setup();
+        create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+        resolve_xrp_swap(
+            &mut map,
+            "swap-1",
+            ActiveUserTransactionStatus::Executing,
+            "tesSUCCESS",
+        )
+        .expect("deposit validated");
+        // From `Executing` on, 1Click decides, without a ledger result.
+        set_status(&mut map, "swap-1", ActiveUserTransactionStatus::Succeeded);
+
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+    }
+
+    #[test]
+    fn xrp_swap_cannot_leave_pending_without_its_ledger_result() {
+        // What a frontend from before the swap UI sends: 1Click's
+        // `PENDING_DEPOSIT` mapped to `Executing`, and no ledger result. Accepted,
+        // it would release the address while the deposit can still apply.
         for status in [
             ActiveUserTransactionStatus::Executing,
             ActiveUserTransactionStatus::Succeeded,
@@ -2060,10 +2188,110 @@ mod tests {
         ] {
             let (mut map, _mm) = setup();
             create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
-            set_status(&mut map, "swap-1", status);
 
-            create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+            let err = update(
+                &mut map,
+                principal(),
+                UpdateActiveUserTransactionRequest {
+                    id: "swap-1".to_string(),
+                    status: Some(status),
+                    progress_step: None,
+                    external_refs: None,
+                    error: None,
+                },
+                2,
+            )
+            .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result is required to leave Pending".to_string()
+                )
+            );
+
+            assert_eq!(
+                list(&map, principal()).transactions[0].status,
+                ActiveUserTransactionStatus::Pending
+            );
+
+            let mut send = create_req("xrp-1");
+            send.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+            send.external_refs = xrp_refs();
+            let err = create(&mut map, principal(), send, 3).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
         }
+    }
+
+    #[test]
+    fn xrp_swap_ledger_result_must_match_the_status() {
+        for (status, ledger_result) in [
+            (ActiveUserTransactionStatus::Failed, "tesSUCCESS"),
+            (
+                ActiveUserTransactionStatus::Executing,
+                "tecUNFUNDED_PAYMENT",
+            ),
+            (ActiveUserTransactionStatus::Executing, "expired"),
+            // The ledger only ever says the deposit validated; the swap's outcome
+            // is 1Click's, from `Executing`.
+            (ActiveUserTransactionStatus::Succeeded, "tesSUCCESS"),
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+            let err = resolve_xrp_swap(&mut map, "swap-1", status, ledger_result).unwrap_err();
+            assert_eq!(err, ActiveUserTransactionError::IllegalStatusTransition);
+        }
+    }
+
+    #[test]
+    fn xrp_swap_malformed_ledger_result_rejected() {
+        for ledger_result in [
+            "",
+            "tes",
+            "tec",
+            "tecfoo",
+            "SUCCESS",
+            "EXPIRED",
+            "tefPAST_SEQ",
+        ] {
+            let (mut map, _mm) = setup();
+            create_xrp_swap(&mut map, "swap-1", XRP_SOURCE).expect("first swap");
+
+            let err = resolve_xrp_swap(
+                &mut map,
+                "swap-1",
+                ActiveUserTransactionStatus::Failed,
+                ledger_result,
+            )
+            .unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "ledger_result must be tesSUCCESS, a tec code or expired".to_string()
+                ),
+                "{ledger_result:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn ledger_result_is_required_of_xrp_source_swaps_only() {
+        let (mut map, _mm) = setup();
+
+        // A send resolves with no ledger result, as it did before swaps.
+        create_xrp_send(&mut map, "xrp-1", XRP_SOURCE);
+        set_status(&mut map, "xrp-1", ActiveUserTransactionStatus::Succeeded);
+
+        // A swap from any other chain follows 1Click from `Pending`.
+        let mut req = create_req("swap-evm");
+        req.data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::XrpNativeMainnet,
+            amount: Nat::from(250_000u64),
+            source_address: None,
+        });
+        create(&mut map, principal(), req, 1).expect("evm swap");
+        set_status(&mut map, "swap-evm", ActiveUserTransactionStatus::Executing);
     }
 
     #[test]
