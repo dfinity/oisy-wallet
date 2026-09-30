@@ -166,11 +166,16 @@ address: its deposit has validated, and the swap continues without blocking XRP 
   `assertNoOpenXrpSend` (`openXrpActiveUserTransaction`), and `sendXrp` calls it for sends and
   swaps alike. A future AUT type that makes an XRP payment is added there, and nowhere else.
 - **Backend:** one function replaces `has_open_xrp_send`, and `create` runs it both for a new `Xrp`
-  AUT and for a new XRP-source `NearIntents` AUT, refusing with `AlreadyInFlight`.
+  AUT and for a new XRP-source `NearIntents` AUT, refusing with `AlreadyInFlight`. It also requires
+  the two poll refs (`tx_hash`, `last_ledger_sequence`) on an XRP-source `NearIntents` AUT, on
+  create and on update, as it does on a send AUT: a `Pending` swap AUT holds the address, so one
+  that could not be polled would refuse every later payment from it.
 - **Source address:** `NearIntentsData` gains an optional XRP source address, the same shape as
   `XrpData.source_address`. It is required, and validated like it, when the source token is native
-  XRP — a swap AUT without it would escape the check — and absent otherwise. This changes
-  `src/backend/backend.did`, so it is a breaking-interface change.
+  XRP — a swap AUT without it would escape the check — and absent otherwise. The field itself is
+  candid-compatible (an optional field, which rows stored before it decode as `None`), but it
+  changes `src/backend/backend.did`, so the PR carries the breaking-interface marker the repo
+  requires for any `.did` change.
 
 The swap wizard shows the send flow's refusal messages — an earlier XRP payment from this address
 has not settled yet, or the wallet could not check — and steps back. Both refusals come before the
@@ -269,7 +274,8 @@ With the flag on (local, staging):
    is refused. Each is refused by the frontend check and, for a second tab, by the backend `create`.
 7. Once the swap AUT is `Executing`, XRP sends from the address go through while the swap is still
    running.
-8. The backend refuses an XRP-source `NearIntents` AUT without a valid XRP source address.
+8. The backend refuses an XRP-source `NearIntents` AUT without a valid XRP source address or
+   without its two poll refs, and a source address on any other `NearIntents` AUT.
 9. A swap toward XRP pays out to the user's own XRP address, including one that was never funded,
    and a pair toward XRP is not quoted while that address is not derived.
 10. On success, swap analytics fire and balances refresh, identical to the other NEAR Intents swaps.
