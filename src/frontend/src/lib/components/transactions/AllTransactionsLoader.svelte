@@ -258,7 +258,9 @@
 
 	// Read from what is loaded rather than from `levelFloor`, which is only a target: a failed page or
 	// the page cap leaves a token short of it. Each token that still has history is complete down to
-	// its own oldest loaded row, so the merged list is complete down to the newest of those.
+	// its own oldest loaded row, so the merged list is complete down to the newest of those. A token
+	// with nothing to page is left out as well: holding the list at its first page would stop it there
+	// for good, since nothing can ever load past it.
 	let completeDownTo = $derived.by((): number | undefined => {
 		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
 
