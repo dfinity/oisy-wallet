@@ -192,7 +192,7 @@ TCYCLES is not enabled by default, so for most users Compute opens on the empty 
 
 ### First-time destination addresses
 
-A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts.
+A transfer cannot be undone, so OISY stops the user before an asset leaves the wallet towards an address they have never sent to. The one thing that makes a destination familiar is a **previous send of a non-zero amount** to it — the same set the Recently Used tab of the address step lists, so the two always agree. Nothing else counts: not a saved contact, not a transfer received from the address, not the user's own wallet addresses. How far the history reaches is whatever the Recently Used list covers. For Ethereum and the EVM chains that means the same network only. On IC, ICP history is separate from the combined ck/ICRC history, so a previous ICP send leaves the warning standing for an ICRC send to the same address. For Bitcoin and Solana, a send on a test network also counts. For XRP a fresh load reaches back only as far as the most recent page of the account's history, and newer entries are added while the wallet stays open (see [Recently used addresses](#recently-used-addresses)).
 
 Zero-amount sends are excluded deliberately. Anyone can push a zero-value transfer into someone's history, so counting them would let an attacker make a lookalike address vouch for itself.
 
@@ -494,6 +494,12 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 OISY supports native XRP: balance, receive, send, and transaction history. The address is an XRPL classic address derived from the same threshold-signing setup as the other chains (Ed25519), so no key ever leaves the network.
 
+### Recently used addresses
+
+The address step's **Recently Used** tab lists the addresses the user has sent XRP to, as on the other chains, next to the **Contacts** tab (see [Contacts](#contacts)). The list is built from the loaded history. On XRP a fresh load reads only the most recent page of the account's ledger history (currently ten entries), and entries that arrive while the wallet stays open are added to it. A send older than that page is therefore missing again after the next reload, and its address is treated as first-time again (see [First-time destination addresses](#first-time-destination-addresses)).
+
+Picking an address fills in the address only, never a destination tag. An exchange gives all its customers one address and tells them apart by the tag, so the tag of an earlier send to that address may belong to someone else.
+
 ### Destination tags
 
 An XRP payment can carry a **destination tag** — a numeric routing memo that exchanges and custodians use to credit the right customer account. Sending to such a recipient **without** the tag, or with the wrong one, is a well-known and typically **unrecoverable** way to lose funds, because the funds arrive at the right address but cannot be attributed.
@@ -542,7 +548,7 @@ What this deliberately does not do:
 
 A contact can hold XRP Ledger addresses like any other network's. Only **classic** addresses (starting with `r`) are accepted. **X-addresses** are rejected, because they bundle a destination tag into the address and a contact stores no tag. Picking a contact therefore never fills in a tag: sending to an exchange still needs the tag entered by hand, and an address that demands one is still refused without it.
 
-The send flow's **Contacts** tab offers every contact with an XRP address. The **Recently Used** tab stays empty for XRP, because it is not yet built from the XRP transaction history.
+The send flow's **Contacts** tab offers every contact with an XRP address, next to the **Recently Used** tab (see [Recently used addresses](#recently-used-addresses)).
 
 ---
 
