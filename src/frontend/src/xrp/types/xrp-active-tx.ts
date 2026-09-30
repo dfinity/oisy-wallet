@@ -12,7 +12,15 @@ export const XRP_EXTERNAL_REF_KEYS = {
 	// swap providers already use so the row rendering stays shared.
 	AMOUNT: 'amount',
 	TOKEN_SYMBOL: 'token_symbol',
-	NETWORK_SYMBOL: 'network_symbol'
+	NETWORK_SYMBOL: 'network_symbol',
+	// How a swap's deposit resolved on the ledger: `tesSUCCESS`, a `tec` code, or
+	// `XRP_LEDGER_RESULT_EXPIRED`. The backend lets a swap from XRP leave `Pending`
+	// only with it, and only the ledger resolution writes it, so a client that
+	// follows 1Click instead cannot release the address while the deposit can
+	// still apply. A send's row does not carry it.
+	LEDGER_RESULT: 'ledger_result'
 } as const;
+
+export const XRP_LEDGER_RESULT_EXPIRED = 'expired';
 
 export type XrpExternalRefKey = (typeof XRP_EXTERNAL_REF_KEYS)[keyof typeof XRP_EXTERNAL_REF_KEYS];
