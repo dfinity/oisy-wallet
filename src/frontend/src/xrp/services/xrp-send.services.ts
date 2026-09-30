@@ -1,9 +1,6 @@
-import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
-import { getActiveUserTransactions } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
-import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
@@ -23,6 +20,7 @@ import {
 	loadXrpLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
+import { assertNoXrpPaymentInFlight } from '$xrp/services/xrp-in-flight.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
@@ -39,7 +37,6 @@ import {
 import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
 	isXrpAlreadyInFlightError,
-	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
 	toXrpExternalRefs
@@ -52,61 +49,6 @@ import {
 } from '$xrp/utils/xrp-transaction.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-
-/**
- * Refuses the send if a payment from this address has not resolved yet.
- *
- * The gate is per **address**, not per user: a record for a different address says nothing about
- * this one's sequence, and refusing on it would block an unrelated send. There is no override —
- * the whole point is that no second sequence is safe while the first payment is open.
- */
-const assertNoOpenXrpSend = async ({
-	identity,
-	source
-}: {
-	identity: NullishIdentity;
-	source: XrpAddress;
-}): Promise<Identity> => {
-	// Fails closed. Without an identity the record can neither be read nor written, so the
-	// invariant cannot be held — and an unguarded send is the failure this path exists to prevent.
-	if (isNullish(identity)) {
-		throw new XrpSendNotGuardedError(
-			'XRP send refused: the wallet could not check for an unresolved payment without an identity.'
-		);
-	}
-
-	// `loadActiveUserTransactions` swallows backend errors by design, so a failed load leaves the
-	// store as it was — which would read as "no open record". Asked directly instead: this answer
-	// decides whether a second sequence is signed, so it must come from the backend or not at all.
-	let transactions: ActiveUserTransaction[];
-
-	try {
-		transactions = await getActiveUserTransactions({ identity });
-	} catch (err: unknown) {
-		throw new XrpSendNotGuardedError(
-			`XRP send refused: the wallet could not check for an unresolved payment. ${
-				err instanceof Error ? err.message : `${err}`
-			}`
-		);
-	}
-
-	const open = openXrpActiveUserTransaction({ transactions, source });
-
-	if (nonNullish(open)) {
-		// Handed to the store before refusing. The store loads only when the identity changes, and the
-		// poller polls only what is in it, so a record opened by another tab — which may since have
-		// closed — would otherwise never be resolved here, and this refusal would repeat on every
-		// attempt. `upsert` keeps a local copy with a newer `updated_at_ns`, so a row this tab already
-		// tracks further along is not rolled back to the backend's older answer.
-		activeUserTransactionsStore.upsert({ transaction: open });
-
-		throw new XrpSendAlreadyInFlightError(
-			`XRP send refused: a payment from ${source} has not resolved yet.`
-		);
-	}
-
-	return identity;
-};
 
 /**
  * Creates the record that holds the invariant.
@@ -360,7 +302,7 @@ export const sendXrp = async ({
 	//
 	// Returns the identity narrowed, because the guard cannot run without one and the record write
 	// below needs it non-nullish.
-	const recordIdentity = await assertNoOpenXrpSend({ identity, source });
+	const recordIdentity = await assertNoXrpPaymentInFlight({ identity, source });
 
 	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure

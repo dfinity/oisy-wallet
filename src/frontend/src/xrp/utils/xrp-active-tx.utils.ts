@@ -5,7 +5,6 @@ import type {
 } from '$declarations/backend/backend.did';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Token } from '$lib/types/token';
-import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import type { XrpAddress } from '$xrp/types/address';
@@ -99,10 +98,6 @@ export const toXrpDisplayRefs = ({
 	[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL]: token.network.name
 });
 
-export const xrpActiveUserTransactionSourceAddress = (
-	tx: ActiveUserTransaction
-): string | undefined => ('Xrp' in tx.data ? tx.data.Xrp.source_address : undefined);
-
 /**
  * The XRP network the row's payment was signed for, taken from the token the
  * backend validated rather than from a separate field that could disagree with
@@ -150,28 +145,6 @@ export const xrpActiveUserTransactionPollKeys = (
 
 	return { hash, lastLedgerSequence };
 };
-
-/**
- * The open XRP record for one address, if there is one.
- *
- * Per **address**, not per user: a record for a different address says nothing
- * about this one's sequence, and refusing on it would block an unrelated send.
- * Terminality comes from `isTerminalActiveUserTransaction` rather than being
- * re-derived here, so there is one definition of "still open".
- */
-export const openXrpActiveUserTransaction = ({
-	transactions,
-	source
-}: {
-	transactions: ActiveUserTransaction[];
-	source: XrpAddress;
-}): ActiveUserTransaction | undefined =>
-	transactions.find(
-		(tx) =>
-			isXrpActiveUserTransaction(tx) &&
-			!isTerminalActiveUserTransaction(tx) &&
-			xrpActiveUserTransactionSourceAddress(tx) === source
-	);
 
 /**
  * Analytics metadata for an XRP row that has just reached a terminal status.

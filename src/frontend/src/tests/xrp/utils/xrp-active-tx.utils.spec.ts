@@ -16,15 +16,13 @@ import {
 	buildXrpSendTrackingMetadata,
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
-	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
 	toXrpExternalRefs,
 	toXrpExternalRefsMap,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
-	xrpActiveUserTransactionPollKeys,
-	xrpActiveUserTransactionSourceAddress
+	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
 
 describe('xrp-active-tx.utils', () => {
@@ -118,20 +116,6 @@ describe('xrp-active-tx.utils', () => {
 		});
 	});
 
-	describe('xrpActiveUserTransactionSourceAddress', () => {
-		it('reads the address the guard gates on', () => {
-			expect(xrpActiveUserTransactionSourceAddress(mockXrpActiveUserTransaction)).toBe(
-				mockXrpSourceAddress
-			);
-		});
-
-		it('returns undefined for another flow', () => {
-			expect(
-				xrpActiveUserTransactionSourceAddress(mockLiquidiumActiveUserTransaction)
-			).toBeUndefined();
-		});
-	});
-
 	describe('xrpActiveUserTransactionNetwork', () => {
 		it('resolves mainnet from the recorded token', () => {
 			expect(xrpActiveUserTransactionNetwork(mockXrpActiveUserTransaction)).toBe(
@@ -211,58 +195,6 @@ describe('xrp-active-tx.utils', () => {
 			]
 		])('is not pollable with %s', (...[, refs]) => {
 			expect(xrpActiveUserTransactionPollKeys(withRefs(refs))).toBeUndefined();
-		});
-	});
-
-	describe('openXrpActiveUserTransaction', () => {
-		const terminal: ActiveUserTransaction = {
-			...mockXrpActiveUserTransaction,
-			status: { Succeeded: null }
-		};
-		const otherAddress: ActiveUserTransaction = {
-			...mockXrpActiveUserTransaction,
-			data: {
-				Xrp: { ...mockXrpData, source_address: mockXrpDestinationAddress }
-			}
-		} as ActiveUserTransaction;
-
-		it('finds the open record for the address', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [mockXrpActiveUserTransaction],
-					source: mockXrpSourceAddress
-				})
-			).toBe(mockXrpActiveUserTransaction);
-		});
-
-		it('ignores a terminal record', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [terminal],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
-		});
-
-		// The invariant is per address: a record for another address says nothing
-		// about this one's sequence, and refusing on it would block an unrelated
-		// send.
-		it('ignores a record for a different address', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [otherAddress],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
-		});
-
-		it('ignores records from other flows', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [mockLiquidiumActiveUserTransaction],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
 		});
 	});
 

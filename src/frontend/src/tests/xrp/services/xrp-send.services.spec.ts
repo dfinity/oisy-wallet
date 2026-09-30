@@ -10,7 +10,8 @@ import { randomWait } from '$lib/utils/time.utils';
 import {
 	mockLiquidiumActiveUserTransaction,
 	mockXrpActiveUserTransaction,
-	mockXrpData
+	mockXrpData,
+	mockXrpSwapActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -1033,6 +1034,27 @@ describe('xrp-send.services', () => {
 				await expect(sendXrp(params)).resolves.toBeDefined();
 			}
 		);
+
+		// A swap's deposit is an XRP payment from the same address, and `Pending` means it has not
+		// resolved on the ledger yet.
+		it('refuses a send while a swap deposit from the same address is Pending', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				mockXrpSwapActiveUserTransaction
+			]);
+
+			await expect(sendXrp(params)).rejects.toThrow(XrpSendAlreadyInFlightError);
+
+			expect(xrpSignServices.signXrpTransaction).not.toHaveBeenCalled();
+		});
+
+		// `Executing` means the deposit validated; the swap goes on at 1Click without the address.
+		it('does not refuse on a swap whose deposit has validated', async () => {
+			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
+				{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }
+			]);
+
+			await expect(sendXrp(params)).resolves.toBeDefined();
+		});
 
 		it('does not refuse on an open record from another flow', async () => {
 			vi.mocked(backendApi.getActiveUserTransactions).mockResolvedValue([
