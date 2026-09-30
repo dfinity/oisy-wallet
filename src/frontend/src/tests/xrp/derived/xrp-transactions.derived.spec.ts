@@ -1,6 +1,8 @@
 import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { token } from '$lib/stores/token.store';
 import {
+	xrpKnownDestinations,
 	xrpTransactions,
 	xrpTransactionsInitialized,
 	xrpTransactionsNotInitialized
@@ -64,6 +66,70 @@ describe('xrp-transactions.derived', () => {
 
 			expect(get(xrpTransactionsInitialized)).toBeTruthy();
 			expect(get(xrpTransactionsNotInitialized)).toBeFalsy();
+		});
+	});
+
+	describe('xrpKnownDestinations', () => {
+		const destination = 'rDestination';
+
+		const createSend = ({
+			id,
+			value,
+			timestamp
+		}: {
+			id: string;
+			value: bigint;
+			timestamp: bigint;
+		}): { data: XrpTransactionUi; certified: boolean } => {
+			const { data, certified } = createTransaction({ id, timestamp });
+
+			return { data: { ...data, type: 'send', from: 'rOwn', to: destination, value }, certified };
+		};
+
+		it('returns an empty object when the store is empty', () => {
+			expect(get(xrpKnownDestinations)).toEqual({});
+		});
+
+		it('groups the sends by destination, with the latest timestamp', () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [
+					createSend({ id: 'tx3', value: 1_000_000n, timestamp: 1n }),
+					createSend({ id: 'tx4', value: 2_000_000n, timestamp: 3n })
+				]
+			});
+
+			expect(get(xrpKnownDestinations)).toEqual({
+				[destination]: {
+					address: destination,
+					amounts: [
+						{ value: 1_000_000n, token: XRP_TOKEN },
+						{ value: 2_000_000n, token: XRP_TOKEN }
+					],
+					timestamp: 3
+				}
+			});
+		});
+
+		it('ignores receives and zero-amount sends', () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [...transactions, createSend({ id: 'tx3', value: ZERO, timestamp: 1n })]
+			});
+
+			expect(get(xrpKnownDestinations)).toEqual({});
+		});
+
+		// The XRP send refuses its own address as a destination, so the list must not offer it.
+		it('ignores payments to the wallet itself', () => {
+			const { data, certified } = createSend({ id: 'tx3', value: 1_000_000n, timestamp: 1n });
+
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [{ data: { ...data, to: data.from }, certified }]
+			});
+
+			expect(get(xrpKnownDestinations)).toEqual({});
 		});
 	});
 });
