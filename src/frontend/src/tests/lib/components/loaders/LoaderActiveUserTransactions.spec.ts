@@ -36,7 +36,8 @@ import {
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
-	mockXrpActiveUserTransaction
+	mockXrpActiveUserTransaction,
+	mockXrpSwapActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -430,6 +431,58 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transactions: [tx]
+			});
+		});
+
+		// A swap from XRP goes to the XRP ledger resolution while its deposit is `Pending`: 1Click
+		// reports `PENDING_DEPOSIT` at once, which would move the row to `Executing` and release the
+		// address while the deposit can still apply. From `Executing` on, 1Click decides.
+		describe('a swap from XRP', () => {
+			const spies = () => ({
+				xrpSpy: vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue(),
+				nearSpy: vi
+					.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+					.mockResolvedValue()
+			});
+
+			it('is polled against the XRP ledger while its deposit is Pending', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = { ...mockXrpSwapActiveUserTransaction, id: 'xrp-swap-a' };
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(nearSpy).not.toHaveBeenCalled();
+				expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
+			});
+
+			it('is polled at 1Click once Executing', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = {
+					...mockXrpSwapActiveUserTransaction,
+					id: 'xrp-swap-b',
+					status: { Executing: null }
+				};
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(xrpSpy).not.toHaveBeenCalled();
+				expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
 			});
 		});
 

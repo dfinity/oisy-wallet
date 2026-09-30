@@ -9,6 +9,7 @@ import {
 	mockXrpActiveUserTransaction,
 	mockXrpData,
 	mockXrpLastLedgerSequence,
+	mockXrpSwapActiveUserTransaction,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -457,6 +458,100 @@ describe('xrp-active-tx.services', () => {
 		expect(outcome).not.toHaveBeenCalled();
 
 		expectNoUpdate();
+	});
+
+	// A swap's deposit is resolved like a send, but a validated deposit only pays 1Click: the row
+	// goes on to `Executing`, where the NEAR Intents poller decides the swap's outcome.
+	describe('a swap from XRP', () => {
+		const swap = mockXrpSwapActiveUserTransaction;
+
+		const expectSwapStatus = ({ status, error }: { status: object; error?: string }) =>
+			expect(applySpy).toHaveBeenCalledWith({
+				identity,
+				tx: swap,
+				update: { status, ...(error !== undefined ? { error } : {}) }
+			});
+
+		it('polls the deposit over the window the row was signed against', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'pending' });
+
+			await poll([swap]);
+
+			expect(xrplRest.loadXrpTransactionOutcome).toHaveBeenCalledWith(expectedWindow);
+
+			expectNoUpdate();
+		});
+
+		it('moves a validated tesSUCCESS deposit to Executing, not Succeeded', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tesSUCCESS'
+			});
+
+			await poll([swap]);
+
+			expectSwapStatus({ status: { Executing: null } });
+		});
+
+		it('moves a deposit the expiry recheck finds validated to Executing', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome')
+				.mockResolvedValueOnce({ state: 'absent' })
+				.mockResolvedValueOnce({ state: 'validated', transactionResult: 'tesSUCCESS' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				mockXrpLastLedgerSequence + 1
+			);
+
+			await poll([swap]);
+
+			expectSwapStatus({ status: { Executing: null } });
+		});
+
+		// A failed deposit sent nothing to 1Click, so the swap fails with the XRP send's message,
+		// naming the deposit from the swap's own snapshot.
+		it('fails the swap on a validated tec deposit, naming the deposit and the result', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({
+				state: 'validated',
+				transactionResult: 'tecNO_DST_INSUF_XRP'
+			});
+
+			await poll([swap]);
+
+			expectSwapStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
+					$amount: '10',
+					$symbol: 'XRP',
+					$network: 'XRP Ledger',
+					$result: 'tecNO_DST_INSUF_XRP'
+				})
+			});
+		});
+
+		it('fails the swap on an expired deposit, naming the deposit', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+			vi.spyOn(xrplRest, 'loadXrpValidatedLedgerIndex').mockResolvedValue(
+				mockXrpLastLedgerSequence + 1
+			);
+
+			await poll([swap]);
+
+			expectSwapStatus({
+				status: { Failed: null },
+				error: replacePlaceholders(get(i18n).send.error.xrp_send_expired, {
+					$amount: '10',
+					$symbol: 'XRP',
+					$network: 'XRP Ledger'
+				})
+			});
+		});
+
+		it('leaves a deposit absent within the window Pending', async () => {
+			vi.spyOn(xrplRest, 'loadXrpTransactionOutcome').mockResolvedValue({ state: 'absent' });
+
+			await poll([swap]);
+
+			expectNoUpdate();
+		});
 	});
 
 	it('reads the hash from the row rather than assuming one', async () => {

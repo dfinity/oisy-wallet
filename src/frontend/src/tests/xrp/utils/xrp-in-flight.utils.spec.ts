@@ -12,18 +12,80 @@ import {
 	mockXrpSwapActiveUserTransaction,
 	mockXrpSwapData
 } from '$tests/mocks/active-user-transactions.mock';
-import { xrpPaymentInFlight } from '$xrp/utils/xrp-in-flight.utils';
+import {
+	isXrpPaymentInFlight,
+	xrpPaymentInFlight,
+	xrpPaymentSettledStatus
+} from '$xrp/utils/xrp-in-flight.utils';
 
 describe('xrp-in-flight.utils', () => {
-	describe('xrpPaymentInFlight', () => {
-		const withStatus = ({
-			tx,
-			status
-		}: {
-			tx: ActiveUserTransaction;
-			status: ActiveUserTransactionStatus;
-		}): ActiveUserTransaction => ({ ...tx, status });
+	const withStatus = ({
+		tx,
+		status
+	}: {
+		tx: ActiveUserTransaction;
+		status: ActiveUserTransactionStatus;
+	}): ActiveUserTransaction => ({ ...tx, status });
 
+	describe('isXrpPaymentInFlight', () => {
+		it.each([{ Pending: null }, { Executing: null }] as ActiveUserTransactionStatus[])(
+			'is true for a send while %o',
+			(status) => {
+				expect(
+					isXrpPaymentInFlight(withStatus({ tx: mockXrpActiveUserTransaction, status }))
+				).toBeTruthy();
+			}
+		);
+
+		it.each([{ Succeeded: null }, { Failed: null }] as ActiveUserTransactionStatus[])(
+			'is false for a send once %o',
+			(status) => {
+				expect(
+					isXrpPaymentInFlight(withStatus({ tx: mockXrpActiveUserTransaction, status }))
+				).toBeFalsy();
+			}
+		);
+
+		it('is true for a swap from XRP while Pending', () => {
+			expect(isXrpPaymentInFlight(mockXrpSwapActiveUserTransaction)).toBeTruthy();
+		});
+
+		// From `Executing` the swap belongs to the NEAR Intents poller, not to the XRP ledger resolution.
+		it.each([
+			{ Executing: null },
+			{ Succeeded: null },
+			{ Failed: null }
+		] as ActiveUserTransactionStatus[])('is false for a swap from XRP once %o', (status) => {
+			expect(
+				isXrpPaymentInFlight(withStatus({ tx: mockXrpSwapActiveUserTransaction, status }))
+			).toBeFalsy();
+		});
+
+		it('is false for a Pending swap from another chain', () => {
+			expect(mockNearIntentsActiveUserTransaction.status).toEqual({ Pending: null });
+
+			expect(isXrpPaymentInFlight(mockNearIntentsActiveUserTransaction)).toBeFalsy();
+		});
+
+		it('is false for a record from another flow', () => {
+			expect(isXrpPaymentInFlight(mockLiquidiumActiveUserTransaction)).toBeFalsy();
+		});
+	});
+
+	describe('xrpPaymentSettledStatus', () => {
+		it('ends a send as Succeeded', () => {
+			expect(xrpPaymentSettledStatus(mockXrpActiveUserTransaction)).toEqual({ Succeeded: null });
+		});
+
+		// A validated deposit is not a swapped amount: 1Click still has to deliver it.
+		it('moves a swap from XRP to Executing', () => {
+			expect(xrpPaymentSettledStatus(mockXrpSwapActiveUserTransaction)).toEqual({
+				Executing: null
+			});
+		});
+	});
+
+	describe('xrpPaymentInFlight', () => {
 		const inFlight = (transactions: ActiveUserTransaction[]) =>
 			xrpPaymentInFlight({ transactions, source: mockXrpSourceAddress });
 

@@ -63,6 +63,7 @@
 		buildXrpSendTrackingMetadata,
 		isXrpActiveUserTransaction
 	} from '$xrp/utils/xrp-active-tx.utils';
+	import { isXrpPaymentInFlight } from '$xrp/utils/xrp-in-flight.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
 	$effect(() => {
@@ -101,7 +102,12 @@
 				await pollLiquidiumActiveUserTransactions({ identity, transactions: liquidium });
 			}
 
-			const nearIntents = $activeUserTransactionsPending.filter(isNearIntentsActiveUserTransaction);
+			// A swap from XRP whose deposit has not resolved on the ledger belongs to the XRP ledger
+			// resolution below, not to 1Click: 1Click reports `PENDING_DEPOSIT` at once, which would move
+			// the row to `Executing` and end the in-flight check while the deposit can still apply.
+			const nearIntents = $activeUserTransactionsPending.filter(
+				(tx) => isNearIntentsActiveUserTransaction(tx) && !isXrpPaymentInFlight(tx)
+			);
 
 			if (nearIntents.length > 0) {
 				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
@@ -135,7 +141,7 @@
 				await pollCyclesMintActiveUserTransactions({ identity, transactions: cyclesMint });
 			}
 
-			const xrp = $activeUserTransactionsPending.filter(isXrpActiveUserTransaction);
+			const xrp = $activeUserTransactionsPending.filter(isXrpPaymentInFlight);
 
 			if (xrp.length > 0) {
 				await pollXrpActiveUserTransactions({ identity, transactions: xrp });

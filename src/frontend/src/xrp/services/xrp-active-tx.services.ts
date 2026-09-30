@@ -14,6 +14,7 @@ import {
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
+import { xrpPaymentSettledStatus } from '$xrp/utils/xrp-in-flight.utils';
 import {
 	isXrpTransactionSuccessful,
 	xrpLedgerSearchWindow
@@ -23,7 +24,9 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 /**
- * Resolves one open XRP record against the ledger, in a single pass.
+ * Resolves one open XRP payment record against the ledger, in a single pass: a send's own row, or a
+ * swap's row while its deposit is `Pending`. A validated `tesSUCCESS` ends a send, and moves a swap
+ * to `Executing`, from where 1Click decides the swap's outcome.
  *
  * This is the **only** thing that resolves an XRP record. The send stops at
  * submit and never writes a terminal status, so there is one confirmation path
@@ -71,7 +74,7 @@ const pollXrpActiveUserTransaction = async ({
 			await applyXrpStatus({
 				identity,
 				tx,
-				candidate: succeeded ? { Succeeded: null } : { Failed: null },
+				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
@@ -117,7 +120,7 @@ const pollXrpActiveUserTransaction = async ({
 			await applyXrpStatus({
 				identity,
 				tx,
-				candidate: succeeded ? { Succeeded: null } : { Failed: null },
+				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {

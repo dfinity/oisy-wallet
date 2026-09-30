@@ -1,7 +1,10 @@
-import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionStatus
+} from '$declarations/backend/backend.did';
 import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 import type { XrpAddress } from '$xrp/types/address';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 
 /**
  * The XRP address a row's payment is sent from, for the rows that make one: an XRP send, and a
@@ -40,6 +43,21 @@ const holdsXrpAddress = (tx: ActiveUserTransaction): boolean => {
 };
 
 /**
+ * Whether a row's XRP payment can still apply: the rows the XRP ledger resolution drives, and — for
+ * a swap — the rows the NEAR Intents poller leaves alone until the deposit has resolved.
+ */
+export const isXrpPaymentInFlight = (tx: ActiveUserTransaction): boolean =>
+	nonNullish(xrpPaymentSource(tx)) && holdsXrpAddress(tx);
+
+/**
+ * The status a row moves to once its XRP payment validates with `tesSUCCESS`. A send is the whole
+ * transaction, so it has succeeded. A swap has only paid its deposit: it goes on at 1Click, which
+ * decides the swap's outcome from `Executing`.
+ */
+export const xrpPaymentSettledStatus = (tx: ActiveUserTransaction): ActiveUserTransactionStatus =>
+	'NearIntents' in tx.data ? { Executing: null } : { Succeeded: null };
+
+/**
  * The row whose XRP payment from `source` can still apply, if there is one.
  *
  * Per **address**, not per user: a payment from a different address says nothing about this one's
@@ -54,4 +72,4 @@ export const xrpPaymentInFlight = ({
 	transactions: ActiveUserTransaction[];
 	source: XrpAddress;
 }): ActiveUserTransaction | undefined =>
-	transactions.find((tx) => xrpPaymentSource(tx) === source && holdsXrpAddress(tx));
+	transactions.find((tx) => xrpPaymentSource(tx) === source && isXrpPaymentInFlight(tx));

@@ -1,13 +1,17 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import {
 	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpData,
 	mockXrpDestinationAddress,
 	mockXrpLastLedgerSequence,
 	mockXrpSourceAddress,
+	mockXrpSwapActiveUserTransaction,
+	mockXrpSwapData,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { XrpNetworks } from '$xrp/types/network';
@@ -132,6 +136,16 @@ describe('xrp-active-tx.utils', () => {
 					data: { Xrp: { ...mockXrpData, token: { IcpNative: null } } }
 				} as ActiveUserTransaction)
 			).toBeUndefined();
+		});
+
+		it('resolves mainnet from the source token of a swap from XRP', () => {
+			expect(xrpActiveUserTransactionNetwork(mockXrpSwapActiveUserTransaction)).toBe(
+				XrpNetworks.mainnet
+			);
+		});
+
+		it('returns undefined for a swap from another chain', () => {
+			expect(xrpActiveUserTransactionNetwork(mockNearIntentsActiveUserTransaction)).toBeUndefined();
 		});
 
 		it('returns undefined for another flow', () => {
@@ -300,6 +314,63 @@ describe('xrp-active-tx.utils', () => {
 
 		it('is undefined for a row that is not an XRP payment', () => {
 			expect(xrpActiveUserTransactionDisplay(mockLiquidiumActiveUserTransaction)).toBeUndefined();
+		});
+
+		// A swap's deposit is named from the swap's own snapshot keys: the amount it swaps, and its
+		// source token and network.
+		describe('a swap from XRP', () => {
+			it("reads the swap's snapshot", () => {
+				expect(xrpActiveUserTransactionDisplay(mockXrpSwapActiveUserTransaction)).toEqual({
+					amount: '10',
+					symbol: 'XRP',
+					network: 'XRP Ledger'
+				});
+			});
+
+			// The swap row carries the send's poll keys, not its display keys: a send's symbol and
+			// network keys must not be read in place of the swap's source ones.
+			it("ignores a send's symbol and network keys", () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpSwapActiveUserTransaction,
+					external_refs: [
+						...mockXrpSwapActiveUserTransaction.external_refs.filter(
+							({ key }) =>
+								![
+									NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL,
+									NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL
+								].includes(key as never)
+						),
+						{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'Send Symbol' },
+						{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'Send Ledger' }
+					]
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)).toEqual({
+					amount: '10',
+					symbol: XRP_TOKEN.symbol,
+					network: XRP_TOKEN.network.name
+				});
+			});
+
+			it("falls back to the row's own data when the snapshot is missing", () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpSwapActiveUserTransaction,
+					data: { NearIntents: { ...mockXrpSwapData, amount: 1_234_567n } },
+					external_refs: mockXrpSwapActiveUserTransaction.external_refs.filter(({ key }) =>
+						POLL_KEYS.includes(key as never)
+					)
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)).toEqual({
+					amount: '1.234567',
+					symbol: XRP_TOKEN.symbol,
+					network: XRP_TOKEN.network.name
+				});
+			});
+		});
+
+		it('is undefined for a swap from another chain', () => {
+			expect(xrpActiveUserTransactionDisplay(mockNearIntentsActiveUserTransaction)).toBeUndefined();
 		});
 	});
 
