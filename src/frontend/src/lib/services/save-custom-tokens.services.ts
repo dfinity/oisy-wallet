@@ -1,3 +1,4 @@
+import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { loadCustomErc4626Tokens } from '$eth/services/erc4626.services';
@@ -23,6 +24,7 @@ import type { SaveCustomErcVariant, SaveCustomTokenWithKey } from '$lib/types/cu
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+import { loadCustomTokens as loadCustomXrpTrustLineTokens } from '$xrp/services/xrp-custom-tokens.services';
 import { assertNever } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -90,6 +92,12 @@ const hideTokenByKey = (token: SaveCustomTokenWithKey) => {
 		return;
 	}
 
+	// Nothing to drop ahead of the reload: a held line without its entry reads as a token the user
+	// added and never hid, so dropping the entry would show the token again.
+	if (token.networkKey === 'XrpTrustLineMainnet') {
+		return;
+	}
+
 	assertNever(token.networkKey, `Unexpected networkKey: ${token.networkKey}`);
 };
 
@@ -104,7 +112,8 @@ const reloadAllCustomTokens = ({ identity }: { identity: Identity }) =>
 		// TODO: add loadCustomDip721Tokens here (and in the tests)
 		loadCustomIcPunksTokens({ identity }),
 		loadCustomIcrc7Tokens({ identity }),
-		loadCustomSplTokens({ identity })
+		loadCustomSplTokens({ identity }),
+		...(XRP_TRUST_LINE_TOKENS_ENABLED ? [loadCustomXrpTrustLineTokens({ identity })] : [])
 	]);
 
 export const saveCustomTokens = async ({

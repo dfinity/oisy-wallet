@@ -1,5 +1,6 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { loadCustomTokens as loadCustomErc1155Tokens } from '$eth/services/erc1155.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { loadCustomErc4626Tokens } from '$eth/services/erc4626.services';
@@ -46,6 +47,8 @@ import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-token
 import { mockIcPunksCanisterId } from '$tests/mocks/icpunks-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSplAddress } from '$tests/mocks/sol.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
+import { loadCustomTokens as loadCustomXrpTrustLineTokens } from '$xrp/services/xrp-custom-tokens.services';
 
 vi.mock('$lib/api/backend.api', () => ({
 	setManyCustomTokens: vi.fn()
@@ -84,6 +87,10 @@ vi.mock('$icp/services/icrc7.services', () => ({
 }));
 
 vi.mock('$sol/services/spl.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$xrp/services/xrp-custom-tokens.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
@@ -258,6 +265,61 @@ describe('save-custom-tokens.services', () => {
 			vi.mocked(loadCustomErc20Tokens).mockRejectedValueOnce(mockError);
 
 			await expect(saveCustomTokens(mockParams)).rejects.toThrow(mockError);
+		});
+
+		it('should not reload XRP Ledger tokens while they are off', async () => {
+			await saveCustomTokens(mockParams);
+
+			expect(loadCustomXrpTrustLineTokens).not.toHaveBeenCalled();
+		});
+
+		describe('with XRP Ledger tokens on', () => {
+			const mockXrpTrustLineToken: SaveCustomTokenWithKey = {
+				currency: mockRlusdCurrencyCode,
+				issuer: mockRlusdIssuer,
+				networkKey: 'XrpTrustLineMainnet',
+				enabled: false
+			};
+
+			beforeEach(() => {
+				vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
+			});
+
+			afterEach(() => {
+				vi.restoreAllMocks();
+			});
+
+			it('should reload them with the others', async () => {
+				await saveCustomTokens(mockParams);
+
+				expectAllCustomTokensReloaded();
+
+				expect(loadCustomXrpTrustLineTokens).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity
+				});
+			});
+
+			it('should hide one by saving it, leaving every store to the reload', async () => {
+				await saveCustomTokens({ ...mockParams, tokens: [mockXrpTrustLineToken] });
+
+				expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						tokens: [
+							expect.objectContaining({
+								enabled: false,
+								token: {
+									XrpTrustLineMainnet: {
+										currency: mockRlusdCurrencyCode,
+										issuer: mockRlusdIssuer
+									}
+								}
+							})
+						]
+					})
+				);
+				expect(splCustomTokensStore.resetByIdentifier).not.toHaveBeenCalled();
+				expect(loadCustomXrpTrustLineTokens).toHaveBeenCalledOnce();
+			});
 		});
 	});
 });
