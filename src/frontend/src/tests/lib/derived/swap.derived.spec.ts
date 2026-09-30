@@ -164,7 +164,8 @@ describe('swap.derived', () => {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: { coverage: 'all', supportedTokenIds: new Set(['some-other-token']) },
-						btc: { coverage: 'none', supportedTokenIds: new Set() }
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -188,7 +189,8 @@ describe('swap.derived', () => {
 								})
 							])
 						},
-						btc: { coverage: 'none', supportedTokenIds: new Set() }
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -204,7 +206,8 @@ describe('swap.derived', () => {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: { coverage: 'all', supportedTokenIds: new Set() },
-						btc: { coverage: 'none', supportedTokenIds: new Set() }
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -236,7 +239,8 @@ describe('swap.derived', () => {
 							icp: { coverage: 'none', supportedTokenIds: new Set() },
 							evm: { coverage: 'none', supportedTokenIds: new Set() },
 							sol: { coverage: 'all', supportedTokenIds: new Set(['different-address']) },
-							btc: { coverage: 'none', supportedTokenIds: new Set() }
+							btc: { coverage: 'none', supportedTokenIds: new Set() },
+							xrp: { coverage: 'none', supportedTokenIds: new Set() }
 						},
 						providers: []
 					});
@@ -256,7 +260,8 @@ describe('swap.derived', () => {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
 						sol: { coverage: 'all', supportedTokenIds: new Set(['not-sol']) },
-						btc: { coverage: 'none', supportedTokenIds: new Set() }
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -276,7 +281,8 @@ describe('swap.derived', () => {
 								})
 							])
 						},
-						btc: { coverage: 'none', supportedTokenIds: new Set() }
+						btc: { coverage: 'none', supportedTokenIds: new Set() },
+						xrp: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});

@@ -25,7 +25,7 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc';
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc' | 'xrp';
 
 export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
 
@@ -220,6 +220,14 @@ export interface EvmSwapProviderConfig {
 }
 
 export interface SolSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
+}
+
+export interface XrpSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
