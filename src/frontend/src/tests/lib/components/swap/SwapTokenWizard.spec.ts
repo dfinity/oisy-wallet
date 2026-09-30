@@ -65,18 +65,6 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
 }));
 
-// XRP is force-disabled under TEST, so `isNetworkIdXrp` would never route to the XRP wizard.
-vi.mock('$env/networks/networks.xrp.env', async () => {
-	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
-
-	return {
-		...actual,
-		XRP_MAINNET_ENABLED: true,
-		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
-		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
-	};
-});
-
 vi.mock('$sol/api/solana.api', async () => {
 	const { ZERO } = await import('$lib/constants/app.constants');
 	return {
