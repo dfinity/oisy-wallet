@@ -43,11 +43,18 @@ const holdsXrpAddress = (tx: ActiveUserTransaction): boolean => {
 };
 
 /**
+ * Whether a row makes an XRP payment, whatever its status: a send, or a swap whose deposit is one.
+ * Such a row changes the XRP balance even when it fails on the ledger, which still charges the fee.
+ */
+export const makesXrpPayment = (tx: ActiveUserTransaction): boolean =>
+	nonNullish(xrpPaymentSource(tx));
+
+/**
  * Whether a row's XRP payment can still apply: the rows the XRP ledger resolution drives, and — for
  * a swap — the rows the NEAR Intents poller leaves alone until the deposit has resolved.
  */
 export const isXrpPaymentInFlight = (tx: ActiveUserTransaction): boolean =>
-	nonNullish(xrpPaymentSource(tx)) && holdsXrpAddress(tx);
+	makesXrpPayment(tx) && holdsXrpAddress(tx);
 
 /**
  * The status a row moves to once its XRP payment validates with `tesSUCCESS`. A send is the whole

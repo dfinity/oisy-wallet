@@ -14,6 +14,7 @@ import {
 } from '$tests/mocks/active-user-transactions.mock';
 import {
 	isXrpPaymentInFlight,
+	makesXrpPayment,
 	xrpPaymentInFlight,
 	xrpPaymentSettledStatus
 } from '$xrp/utils/xrp-in-flight.utils';
@@ -26,6 +27,29 @@ describe('xrp-in-flight.utils', () => {
 		tx: ActiveUserTransaction;
 		status: ActiveUserTransactionStatus;
 	}): ActiveUserTransaction => ({ ...tx, status });
+
+	describe('makesXrpPayment', () => {
+		// Whatever the status: a failed payment was still charged the fee.
+		it.each([{ Pending: null }, { Failed: null }] as ActiveUserTransactionStatus[])(
+			'is true for a send and a swap from XRP while %o',
+			(status) => {
+				expect(
+					makesXrpPayment(withStatus({ tx: mockXrpActiveUserTransaction, status }))
+				).toBeTruthy();
+				expect(
+					makesXrpPayment(withStatus({ tx: mockXrpSwapActiveUserTransaction, status }))
+				).toBeTruthy();
+			}
+		);
+
+		it('is false for a swap from another chain', () => {
+			expect(makesXrpPayment(mockNearIntentsActiveUserTransaction)).toBeFalsy();
+		});
+
+		it('is false for a record from another flow', () => {
+			expect(makesXrpPayment(mockLiquidiumActiveUserTransaction)).toBeFalsy();
+		});
+	});
 
 	describe('isXrpPaymentInFlight', () => {
 		it.each([{ Pending: null }, { Executing: null }] as ActiveUserTransactionStatus[])(
