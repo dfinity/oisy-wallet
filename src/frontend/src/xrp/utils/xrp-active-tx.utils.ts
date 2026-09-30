@@ -235,7 +235,10 @@ export const buildXrpSendTrackingMetadata = ({
 
 	return {
 		token: display?.symbol ?? '',
-		network: display?.network ?? '',
+		// The network's id, as the send wizard reports it for the same event, not the display name the
+		// row renders: one event name, one shape, so grouping by `network` in Plausible holds. Taken
+		// from the row's token, which `XrpNativeMainnet` pins to `XRP_TOKEN`.
+		network: 'Xrp' in tx.data ? `${XRP_TOKEN.network.id.description}` : '',
 		tokenAmount: display?.amount ?? '',
 		...('Xrp' in tx.data ? { fee: tx.data.Xrp.fee.toString() } : {}),
 		...(nonNullish(tx.error[0]) ? { error: tx.error[0] } : {})
