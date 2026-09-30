@@ -32,7 +32,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
+	import { liquidiumMarketToken, liquidiumOpeningDebtFactor } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -79,7 +79,13 @@
 	// Single source of the aggregate preview; with no amount it reflects the current LTV / health.
 	let preview = $derived(
 		nonNullish($liquidiumPortfolio)
-			? computeLiquidiumBorrowPreview({ portfolio: $liquidiumPortfolio, newBorrowUsd })
+			? computeLiquidiumBorrowPreview({
+					portfolio: $liquidiumPortfolio,
+					newBorrowUsd,
+					openingDebtFactor: nonNullish(selectedMarket)
+						? liquidiumOpeningDebtFactor(selectedMarket)
+						: 1
+				})
 			: undefined
 	);
 
