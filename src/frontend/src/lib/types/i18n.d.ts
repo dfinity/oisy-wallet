@@ -799,6 +799,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		first_time_destination: string;
 		first_time_destination_confirm: string;
+		xrp_destination_tag_hint: string;
+		xrp_destination_tag_missing: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
