@@ -1067,7 +1067,7 @@
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"first_time_destination": "It appears you have never sent tokens to this address before. Verify the address carefully.",
 			"first_time_destination_confirm": "This is the first time I send tokens to this address and I have verified the address carefully.",
-			"xrp_destination_tag_hint": "Required by most exchanges. Leaving it empty can lose your funds.",
+			"xrp_destination_tag_hint": "Required by most exchanges. If you leave it empty, your funds may be lost.",
 			"xrp_destination_tag_missing": "No XRP destination tag. If you are sending to an exchange, check whether it requires one, or your funds may be lost.",
 			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
