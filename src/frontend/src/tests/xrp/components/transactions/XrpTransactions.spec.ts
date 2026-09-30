@@ -1,5 +1,8 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
-import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
+import {
+	NO_TRANSACTIONS_PLACEHOLDER,
+	TRANSACTIONS_DATE_GROUP_PREFIX
+} from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { token } from '$lib/stores/token.store';
@@ -32,6 +35,8 @@ describe('XrpTransactions', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(loadOlderXrpTransactions).mockResolvedValue({ success: false });
 
 		token.set(XRP_TOKEN);
 		mockPage.reset();
@@ -93,8 +98,11 @@ describe('XrpTransactions', () => {
 
 		xrpTransactionsStore.prepend({ tokenId: XRP_TOKEN.id, transactions: [] });
 
-		render(XrpTransactions);
+		const { getByTestId } = render(XrpTransactions);
 
 		expect(loadOlderXrpTransactions).toHaveBeenCalledOnce();
+
+		// Outside the scroll, which renders its children as list items.
+		expect(getByTestId(NO_TRANSACTIONS_PLACEHOLDER).closest('ul')).toBeNull();
 	});
 });

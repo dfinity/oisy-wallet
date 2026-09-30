@@ -60,23 +60,24 @@
 <HiddenMicroTransactionsInfoBox />
 
 <XrpTransactionsSkeletons>
-	<!-- Mounted around the placeholder too: the first page can map to no rows, or only to rows the
-	micro-transaction filter hides, while older payments exist. -->
+	<!-- Mounted with no row to show too: the first page can map to no rows, or only to rows the
+	micro-transaction filter hides, while older payments exist. The placeholder stays outside, since
+	the scroll renders its children as a list. -->
 	<XrpTransactionsScroll {token}>
-		{#if filteredTransactions.length > 0}
-			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
-				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-					<TransactionsDateGroup
-						{formattedDate}
-						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-xrp-${index}`}
-						{transactions}
-					/>
-				{/each}
-			{/if}
-		{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
-			<TransactionsPlaceholder />
+		{#if filteredTransactions.length > 0 && nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-xrp-${index}`}
+					{transactions}
+				/>
+			{/each}
 		{/if}
 	</XrpTransactionsScroll>
+
+	{#if filteredTransactions.length === 0 && (isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0)}
+		<TransactionsPlaceholder />
+	{/if}
 </XrpTransactionsSkeletons>
 
 {#if $modalXrpTransaction && nonNullish(selectedTransaction)}
