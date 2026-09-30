@@ -220,7 +220,10 @@ const XrplAccountDataSchema = z.object({
 	// no requirement, which is the one reading of it that spends a fee. A response missing it is
 	// now malformed, which the sender read fails closed on and the destination read reports as an
 	// unanswerable lookup.
-	Flags: XrpUInt32Schema
+	Flags: XrpUInt32Schema,
+	// The fee an issuer charges on transfers of its tokens between holders, as a rate scaled by 10^9.
+	// Optional because the protocol makes it so: an issuer that charges none has no such field.
+	TransferRate: XrpUInt32Schema.optional()
 });
 
 // Mutually exclusive, like `XrplAccountInfoResultSchema` and `XrplTxResultSchema`: `account_data`
