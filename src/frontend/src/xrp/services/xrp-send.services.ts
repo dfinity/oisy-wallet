@@ -32,7 +32,9 @@ import {
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
-	XrpSendNotGuardedError
+	XrpSendNotGuardedError,
+	type XrpPaymentRecord,
+	type XrpPaymentRecordBuilder
 } from '$xrp/types/xrp-send';
 import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
@@ -51,45 +53,35 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
- * Creates the record that holds the invariant.
- *
- * Refuses the send if it cannot be created — at the per-user cap, or with the backend unreachable.
- * Sending anyway would drop the guarantee at exactly the moment a retry is most likely, and would
- * leave the payment with nothing to resolve it.
+ * The record of a plain send: its own `Xrp` AUT, carrying the values fixed at signing, the two poll
+ * keys and the snapshot the row renders with in a later session.
  */
-const openXrpSendRecord = async ({
-	identity,
-	token,
-	source,
-	destination,
-	destinationTag,
-	amount,
-	fee,
-	txHash,
-	lastLedgerSequence
-}: {
-	identity: Identity;
-	token: Token;
-	source: XrpAddress;
-	destination: XrpAddress;
-	destinationTag?: number;
-	amount: XrpBalance;
-	fee: XrpBalance;
-	txHash: string;
-	lastLedgerSequence: number;
-}): Promise<void> => {
-	const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
+const xrpSendRecord =
+	({
+		token,
+		source,
+		destination,
+		destinationTag,
+		amount,
+		fee
+	}: {
+		token: Token;
+		source: XrpAddress;
+		destination: XrpAddress;
+		destinationTag?: number;
+		amount: XrpBalance;
+		fee: XrpBalance;
+	}): XrpPaymentRecordBuilder =>
+	({ txHash, lastLedgerSequence }) => {
+		const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
 
-	if (isNullish(data)) {
-		throw new XrpSendNotGuardedError(
-			`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
-		);
-	}
+		if (isNullish(data)) {
+			throw new XrpSendNotGuardedError(
+				`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
+			);
+		}
 
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: crypto.randomUUID(),
+		return {
 			data,
 			progressStep: ProgressStepsSendXrp.SEND,
 			externalRefs: toXrpExternalRefs({
@@ -104,6 +96,32 @@ const openXrpSendRecord = async ({
 					})
 				})
 			})
+		};
+	};
+
+/**
+ * Creates the record that holds the invariant.
+ *
+ * Refuses the payment if it cannot be created — at the per-user cap, or with the backend
+ * unreachable. Sending anyway would drop the guarantee at exactly the moment a retry is most
+ * likely, and would leave the payment with nothing to resolve it.
+ */
+const openXrpPaymentRecord = async ({
+	identity,
+	source,
+	record: { data, externalRefs, progressStep }
+}: {
+	identity: Identity;
+	source: XrpAddress;
+	record: XrpPaymentRecord;
+}): Promise<void> => {
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id: crypto.randomUUID(),
+			data,
+			progressStep,
+			externalRefs
 		});
 	} catch (err: unknown) {
 		// The backend refusing a second open payment is the same refusal the gate makes, so it reads
@@ -138,6 +156,10 @@ const openXrpSendRecord = async ({
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  *
+ * `record` is the AUT the payment is recorded under, built after signing and before submitting —
+ * the send's own `Xrp` AUT when it is omitted, or the swap's AUT when the payment is a swap's
+ * deposit. Either way it holds the one-payment-in-flight invariant until the ledger resolves it.
+ *
  * It stops at the submit and does **not** wait for the transaction to validate. The Active User
  * Transaction record opened just before the broadcast is what establishes the outcome, and the
  * global poller drives it — for this send and for one whose session died, on the same code. So
@@ -152,6 +174,7 @@ export const sendXrp = async ({
 	fee,
 	destinationTag,
 	token,
+	record,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -162,6 +185,7 @@ export const sendXrp = async ({
 	fee: XrpBalance;
 	destinationTag?: number;
 	token: Token;
+	record?: XrpPaymentRecordBuilder;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
@@ -460,16 +484,13 @@ export const sendXrp = async ({
 	// After signing and before submitting, which is the only correct moment. Later would miss a
 	// submit whose response is lost — precisely the case the record exists for. Earlier would be a
 	// claim about a transaction that does not exist yet.
-	await openXrpSendRecord({
+	const buildRecord =
+		record ?? xrpSendRecord({ token, source, destination, destinationTag, amount, fee });
+
+	await openXrpPaymentRecord({
 		identity: recordIdentity,
-		token,
 		source,
-		destination,
-		destinationTag,
-		amount,
-		fee,
-		txHash,
-		lastLedgerSequence: signedLastLedgerSequence
+		record: buildRecord({ txHash, lastLedgerSequence: signedLastLedgerSequence })
 	});
 
 	let submitResult: XrpSubmitResult | undefined;

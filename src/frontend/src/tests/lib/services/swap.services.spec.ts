@@ -3,7 +3,7 @@ import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.d
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
@@ -38,6 +38,7 @@ import {
 	fetchNearIntentsBtcSwap,
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
+	fetchNearIntentsXrpSwap,
 	fetchOneSecEvmToIcpSwap,
 	fetchOneSecIcpToEvmSwap,
 	fetchSwapAmounts,
@@ -90,6 +91,14 @@ import {
 	mockVeloraOptimalRate
 } from '$tests/mocks/velora.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import { sendXrp } from '$xrp/services/xrp-send.services';
+import { XrpNetworks } from '$xrp/types/network';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
+import {
+	XrpSendAlreadyInFlightError,
+	XrpSendNotGuardedError,
+	type XrpPaymentRecord
+} from '$xrp/types/xrp-send';
 import { constructSimpleSDK, type DeltaPrice, type OptimalRate } from '@velora-dex/sdk';
 import { get, readable } from 'svelte/store';
 
@@ -229,6 +238,10 @@ vi.mock('$eth/services/send.services', () => ({
 
 vi.mock('$sol/services/sol-send.services', () => ({
 	sendSol: vi.fn()
+}));
+
+vi.mock('$xrp/services/xrp-send.services', () => ({
+	sendXrp: vi.fn()
 }));
 
 vi.mock('$btc/services/btc-send.services', () => ({
@@ -3812,6 +3825,131 @@ describe('swap.services', () => {
 
 			expect(setCustomToken).toHaveBeenCalledOnce();
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('fetchNearIntentsXrpSwap', () => {
+		const sourceToken = XRP_TOKEN;
+		const destinationToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };
+		const mockProgress = vi.fn();
+		const xrpTxHash = 'AB'.repeat(32);
+		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			destinationToken,
+			swapAmount: '10',
+			swapDetails: mockNearIntentsQuoteResponse,
+			userAddress: mockXrpAddress,
+			network: XrpNetworks.mainnet,
+			fee: 12n
+		};
+
+		let builtRecord: XrpPaymentRecord | undefined;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			builtRecord = undefined;
+
+			// Like the real `sendXrp`: the record is built after signing and before the submit.
+			vi.mocked(sendXrp).mockImplementation(({ record }) => {
+				builtRecord = record?.({ txHash: xrpTxHash, lastLedgerSequence: 1020 });
+
+				return Promise.resolve({ txHash: xrpTxHash, submitResult: undefined });
+			});
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should pay the deposit address from the user XRP address', async () => {
+			await fetchNearIntentsXrpSwap(baseParams);
+
+			expect(sendXrp).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				network: XrpNetworks.mainnet,
+				source: mockXrpAddress,
+				destination: depositAddress,
+				amount: 10_000_000n,
+				fee: 12n,
+				token: sourceToken,
+				record: expect.any(Function)
+			});
+		});
+
+		// The swap is the transaction and the deposit a part of it, so the payment is recorded under
+		// the swap's own row, which names the address the in-flight check counts it against.
+		it('should record the deposit under the swap row', async () => {
+			await fetchNearIntentsXrpSwap(baseParams);
+
+			expect(builtRecord?.data).toEqual({
+				NearIntents: {
+					source_token: { XrpNativeMainnet: null },
+					dest_token: { Erc20: [destinationToken.address, BigInt(ETHEREUM_NETWORK.chainId)] },
+					amount: 10_000_000n,
+					source_address: [mockXrpAddress]
+				}
+			});
+			expect(builtRecord?.externalRefs).toEqual(
+				expect.arrayContaining([
+					{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress },
+					{
+						key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE,
+						value: mockNearIntentsQuoteResponse.signature
+					},
+					{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: xrpTxHash },
+					{ key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE, value: '1020' }
+				])
+			);
+		});
+
+		// One swap, one row: `sendXrp` creates it, so none is created after the send.
+		it('should not create a second row after the send', async () => {
+			await fetchNearIntentsXrpSwap(baseParams);
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should submit the deposit hash to 1Click', async () => {
+			await fetchNearIntentsXrpSwap(baseParams);
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: xrpTxHash
+			});
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsXrpSwap(baseParams);
+
+			expect(mockProgress).toHaveBeenCalledTimes(3);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		// A destination with no backend token id cannot be recorded, so the payment is refused
+		// before the submit rather than sent unrecorded.
+		it('should refuse the deposit when the swap cannot be recorded', async () => {
+			await expect(
+				fetchNearIntentsXrpSwap({ ...baseParams, destinationToken: BTC_REGTEST_TOKEN })
+			).rejects.toThrow(XrpSendNotGuardedError);
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+		});
+
+		// Nothing was broadcast, so nothing is registered and nothing reported to 1Click.
+		it('should propagate a refused payment without registering anything', async () => {
+			vi.mocked(sendXrp).mockRejectedValue(new XrpSendAlreadyInFlightError('open'));
+
+			await expect(fetchNearIntentsXrpSwap(baseParams)).rejects.toThrow(
+				XrpSendAlreadyInFlightError
+			);
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
 		});
 	});
 

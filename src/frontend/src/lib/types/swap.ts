@@ -17,7 +17,9 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
-import type { OptionXrpAddress } from '$xrp/types/address';
+import type { OptionXrpAddress, XrpAddress } from '$xrp/types/address';
+import type { XrpNetworkType } from '$xrp/types/network';
+import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
@@ -503,6 +505,15 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsXrpParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own XRP address: the deposit is paid from it, and 1Click refunds to it.
+	userAddress: XrpAddress;
+	network: XrpNetworkType;
+	// The transaction cost the user reviewed, in drops; `sendXrp` signs exactly this.
+	fee: XrpBalance;
 }
 
 export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {
