@@ -1,5 +1,9 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
-import { WALLET_PAGINATION, XRP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import {
+	WALLET_PAGINATION,
+	XRP_WALLET_FIRST_PAGE_SIZE,
+	XRP_WALLET_TIMER_INTERVAL_MILLIS
+} from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
 import type {
@@ -115,7 +119,9 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		const { transactions } = await loadXrpTransactions({
 			address,
 			network: xrpNetwork,
-			limit: Number(WALLET_PAGINATION)
+			// The deep page is asked for until one has reached the UI for this ref, so a first request
+			// that failed does not leave the history at a single poll's worth.
+			limit: this.#historyPublished ? Number(WALLET_PAGINATION) : XRP_WALLET_FIRST_PAGE_SIZE
 		});
 
 		return transactions

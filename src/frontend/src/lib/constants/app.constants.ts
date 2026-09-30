@@ -190,6 +190,10 @@ export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
 // XRP wallets
 export const XRP_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute in milliseconds
+// Nothing loads older XRP transactions yet, so the first history page for an address is as far back
+// as its history reaches. Only that page is this deep: the polls after it look for new transactions
+// and keep to `WALLET_PAGINATION`.
+export const XRP_WALLET_FIRST_PAGE_SIZE = 50;
 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;

@@ -1,5 +1,9 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
-import { XRP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import {
+	WALLET_PAGINATION,
+	XRP_WALLET_FIRST_PAGE_SIZE,
+	XRP_WALLET_TIMER_INTERVAL_MILLIS
+} from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequestXrp } from '$lib/types/post-message';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -185,6 +189,65 @@ describe('xrp-wallet.scheduler', () => {
 		expect(transactions[0].data.id).toBe('HASH1');
 		expect(transactions[0].data.type).toBe('receive');
 		expect(transactions[0].data.value).toBe(5_000_000n);
+
+		scheduler.stop();
+	});
+
+	// Nothing loads older XRP transactions, so the first page is all the history an account shows —
+	// at the regular page size that was its 10 most recent. The polls after it only look for new ones.
+	it('should ask for a deep first page, then poll at the regular page size', async () => {
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ limit: XRP_WALLET_FIRST_PAGE_SIZE })
+		);
+
+		await vi.advanceTimersByTimeAsync(XRP_WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
+		expect(spyLoadTransactions).toHaveBeenLastCalledWith(
+			expect.objectContaining({ limit: Number(WALLET_PAGINATION) })
+		);
+
+		scheduler.stop();
+	});
+
+	it('should ask for the deep first page again when the first one failed', async () => {
+		spyLoadTransactions.mockRejectedValueOnce(new Error('account_tx down'));
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		await scheduler.trigger(startData);
+
+		expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
+		expect(spyLoadTransactions).toHaveBeenLastCalledWith(
+			expect.objectContaining({ limit: XRP_WALLET_FIRST_PAGE_SIZE })
+		);
+
+		scheduler.stop();
+	});
+
+	// A stop clears the UI store, so the restart has the whole first page to deliver again.
+	it('should ask for the deep first page again after a stop and a restart', async () => {
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		scheduler.stop();
+
+		await scheduler.start(startData);
+
+		expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
+		expect(spyLoadTransactions).toHaveBeenLastCalledWith(
+			expect.objectContaining({ limit: XRP_WALLET_FIRST_PAGE_SIZE })
+		);
 
 		scheduler.stop();
 	});
