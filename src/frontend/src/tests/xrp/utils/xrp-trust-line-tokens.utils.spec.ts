@@ -1,6 +1,7 @@
 import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { mockRlusdCurrencyCode, mockRlusdIssuer, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 
 describe('xrp-trust-line-tokens.utils', () => {
@@ -8,7 +9,7 @@ describe('xrp-trust-line-tokens.utils', () => {
 		const network = XRP_MAINNET_NETWORK;
 
 		it('is the listed token when OISY lists the currency and the issuer', () => {
-			expect(toXrpTrustLineToken({ line: mockXrpTrustLine, network })).toEqual({
+			expect(toXrpTrustLineToken({ identity: mockXrpTrustLine, network })).toEqual({
 				...RLUSD_TOKEN,
 				enabled: true
 			});
@@ -16,7 +17,7 @@ describe('xrp-trust-line-tokens.utils', () => {
 
 		it('is named after the currency code otherwise', () => {
 			const token = toXrpTrustLineToken({
-				line: { ...mockXrpTrustLine, currency: 'USD' },
+				identity: { ...mockXrpTrustLine, currency: 'USD' },
 				network
 			});
 
@@ -38,15 +39,24 @@ describe('xrp-trust-line-tokens.utils', () => {
 
 		it('keeps one id per token across reads, so balances stay attached to it', () => {
 			const line = { ...mockXrpTrustLine, currency: 'EUR' };
+			const nextRead: XrpTrustLine = { ...line, balance: '5' };
 
-			expect(toXrpTrustLineToken({ line, network }).id).toBe(
-				toXrpTrustLineToken({ line: { ...line, balance: '5' }, network }).id
+			expect(toXrpTrustLineToken({ identity: line, network }).id).toBe(
+				toXrpTrustLineToken({ identity: nextRead, network }).id
+			);
+		});
+
+		it('gives a line and a backend entry of the same token one id, so they are matched', () => {
+			const line = { ...mockXrpTrustLine, currency: 'GBP' };
+
+			expect(toXrpTrustLineToken({ identity: line, network }).id).toBe(
+				toXrpTrustLineToken({ identity: { currency: 'GBP', issuer: line.issuer }, network }).id
 			);
 		});
 
 		it('gives the same code from another issuer its own token, not RLUSD', () => {
 			const token = toXrpTrustLineToken({
-				line: {
+				identity: {
 					...mockXrpTrustLine,
 					currency: mockRlusdCurrencyCode,
 					issuer: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe'

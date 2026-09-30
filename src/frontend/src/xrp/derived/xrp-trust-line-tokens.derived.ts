@@ -15,7 +15,9 @@ export const xrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 	([$enabledXrpTokens, $xrpTrustLinesStore]) =>
 		XRP_TRUST_LINE_TOKENS_ENABLED
 			? $enabledXrpTokens.flatMap(({ id, network }) =>
-					($xrpTrustLinesStore[id] ?? []).map((line) => toXrpTrustLineToken({ line, network }))
+					($xrpTrustLinesStore[id] ?? []).map((line) =>
+						toXrpTrustLineToken({ identity: line, network })
+					)
 				)
 			: []
 );
