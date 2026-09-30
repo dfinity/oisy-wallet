@@ -6,15 +6,22 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { loadNextEthTransactionsByOldest } from '$eth/services/eth-transactions.services';
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import { loadOlderTransactionsFor } from '$lib/services/transactions-pagination.services';
+import {
+	loadedTransactionsCount,
+	loadOlderTransactionsFor
+} from '$lib/services/transactions-pagination.services';
 import type { Token } from '$lib/types/token';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
+import { loadOlderXrpTransactions } from '$xrp/services/xrp-history-pager.services';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactionsByOldest: vi.fn()
@@ -22,6 +29,10 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 
 vi.mock('$sol/services/sol-history-pagers.services', () => ({
 	loadOlderSolTransactions: vi.fn()
+}));
+
+vi.mock('$xrp/services/xrp-history-pager.services', () => ({
+	loadOlderXrpTransactions: vi.fn()
 }));
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
@@ -40,6 +51,7 @@ describe('transactions-pagination.services', () => {
 
 		icTransactionsStore.reset(ICP_TOKEN.id);
 		solTransactionsStore.reset(SOLANA_TOKEN.id);
+		xrpTransactionsStore.reset(XRP_TOKEN.id);
 	});
 
 	describe('loadOlderTransactionsFor', () => {
@@ -49,7 +61,8 @@ describe('transactions-pagination.services', () => {
 			{ chain: 'Ethereum', token: ETHEREUM_TOKEN },
 			{ chain: 'an EVM chain', token: BASE_ETH_TOKEN },
 			{ chain: 'an ERC20 token', token: USDC_TOKEN },
-			{ chain: 'Bitcoin', token: BTC_MAINNET_TOKEN }
+			{ chain: 'Bitcoin', token: BTC_MAINNET_TOKEN },
+			{ chain: 'XRP', token: XRP_TOKEN }
 		])('should resolve a loader for $chain', ({ token }) => {
 			expect(loadOlderTransactionsFor(token as Token)).toBeDefined();
 		});
@@ -137,6 +150,43 @@ describe('transactions-pagination.services', () => {
 
 		it('should give every token of a Solana network the same pager', () => {
 			expect(loadOlderTransactionsFor(SOLANA_TOKEN)).toBe(loadOlderTransactionsFor(BONK_TOKEN));
+		});
+
+		it('should route XRP to its history pager', async () => {
+			const loadOlder = loadOlderTransactionsFor(XRP_TOKEN);
+
+			await loadOlder?.({ token: XRP_TOKEN, identity: mockIdentity, minTimestamp: 123, signalEnd });
+
+			expect(loadOlderXrpTransactions).toHaveBeenCalledExactlyOnceWith({
+				token: XRP_TOKEN,
+				identity: mockIdentity,
+				minTimestamp: 123,
+				signalEnd
+			});
+		});
+	});
+
+	describe('loadedTransactionsCount', () => {
+		it('should count the XRP rows its store holds', () => {
+			xrpTransactionsStore.prepend({
+				tokenId: XRP_TOKEN.id,
+				transactions: [
+					{
+						data: {
+							id: 'HASH1',
+							type: 'receive',
+							status: 'confirmed',
+							value: 5_000_000n,
+							from: 'rSender',
+							to: mockXrpAddress,
+							timestamp: 1n
+						},
+						certified: false
+					}
+				]
+			});
+
+			expect(loadedTransactionsCount(XRP_TOKEN)).toBe(1);
 		});
 	});
 });
