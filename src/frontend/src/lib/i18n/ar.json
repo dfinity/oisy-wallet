@@ -1053,7 +1053,6 @@
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
-			"enter_xrp_address": "",
 			"xrp_destination_tag": "",
 			"select_network": "حدد الشبكة",
 			"search_nfts": ""
@@ -2402,7 +2401,8 @@
 			"Icrcv2": "كمبيوتر الإنترنت",
 			"Btc": "بيتكوين",
 			"Eth": "إيثريوم",
-			"Sol": "سولانا"
+			"Sol": "سولانا",
+			"Xrp": ""
 		},
 		"form": {
 			"new_address": "عنوان جديد",
