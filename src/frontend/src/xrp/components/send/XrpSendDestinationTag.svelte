@@ -20,6 +20,8 @@
 
 	const { sendXrpDestinationTag } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const HINT_ID = 'xrp-destination-tag-hint';
+
 	let value = $state<string>(nonNullish($sendXrpDestinationTag) ? `${$sendXrpDestinationTag}` : '');
 
 	// An empty field means "no tag", which is valid. A non-empty one that does not parse must NOT
@@ -47,6 +49,7 @@
 <div class="mb-4">
 	<Input
 		name="xrp-destination-tag"
+		ariaDescribedBy={HINT_ID}
 		inputType="text"
 		{onInput}
 		placeholder={$i18n.send.placeholder.xrp_destination_tag}
@@ -74,7 +77,7 @@
 		{/snippet}
 	</Input>
 
-	<p class="mt-2 mb-0 text-sm text-tertiary" data-tid="xrp-destination-tag-hint">
+	<p id={HINT_ID} class="mt-2 mb-0 text-sm text-tertiary" data-tid="xrp-destination-tag-hint">
 		{$i18n.send.info.xrp_destination_tag_hint}
 	</p>
 </div>

@@ -37,6 +37,12 @@ describe('XrpSendDestinationTag', () => {
 		);
 	});
 
+	it('exposes the risk explanation as the input description for screen readers', () => {
+		const input = renderInput();
+
+		expect(input).toHaveAccessibleDescription(en.send.info.xrp_destination_tag_hint);
+	});
+
 	it('stores a valid destination tag', async () => {
 		const input = renderInput();
 
