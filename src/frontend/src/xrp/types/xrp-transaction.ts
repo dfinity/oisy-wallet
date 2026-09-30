@@ -31,6 +31,8 @@ export interface XrpAccountInfo {
 	// response omitting it is malformed rather than a snapshot with unknown flags — `0` means no
 	// flags are set, which is a positive answer and not an absent one.
 	flags: number;
+	// An issuer's fee on transfers between holders of its tokens, scaled by 10^9. Absent: no fee.
+	transferRate?: number;
 }
 
 export type XrpTransactionType = Extract<
