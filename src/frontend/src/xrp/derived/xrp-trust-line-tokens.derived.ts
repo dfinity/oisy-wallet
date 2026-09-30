@@ -6,7 +6,7 @@ import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
 import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
 import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 const xrpSavedTrustLineTokens: Readable<Map<TokenId, XrpTrustLineCustomToken>> = derived(
@@ -44,6 +44,18 @@ export const xrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 export const enabledXrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 	[xrpTrustLineTokens],
 	([$xrpTrustLineTokens]) => $xrpTrustLineTokens.filter(({ enabled }) => enabled)
+);
+
+/**
+ * The held trust-line tokens the backend has no entry for, once its list is certified: before that,
+ * a missing entry may only be missing from the query's answer.
+ */
+export const xrpUnsavedTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
+	[xrpTrustLineTokens, xrpCustomTokensStore, xrpSavedTrustLineTokens],
+	([$xrpTrustLineTokens, $xrpCustomTokensStore, $xrpSavedTrustLineTokens]) =>
+		isNullish($xrpCustomTokensStore) || !$xrpCustomTokensStore.certified
+			? []
+			: $xrpTrustLineTokens.filter(({ id }) => !$xrpSavedTrustLineTokens.has(id))
 );
 
 /**
