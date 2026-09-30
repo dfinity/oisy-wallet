@@ -1066,6 +1066,8 @@
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"first_time_destination": "",
 			"first_time_destination_confirm": "",
+			"xrp_destination_tag_hint": "",
+			"xrp_destination_tag_missing": "",
 			"fee_expired": "",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
