@@ -19,8 +19,8 @@
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
 		/**
-		 * The floor every token has been paged down to, in seconds. Rows older than it are held back
-		 * until the other tokens have caught up with them.
+		 * How far back every token that still has history has loaded, in seconds. Rows older than it
+		 * are held back until the others have caught up with them.
 		 */
 		floor?: number;
 		children: Snippet;
@@ -52,8 +52,8 @@
 		dryAtLength = undefined;
 	});
 
-	// Only what every token has been paged down to. Levelling loads whole pages, so the tokens that had
-	// to reach the floor bring rows from beyond it, while the token whose own oldest row set it is not
+	// Only what every token has loaded down to. Levelling loads whole pages, so the tokens that had to
+	// reach its target bring rows from beyond it, while the token whose own oldest row set it is not
 	// asked for more. Shown straight away, those rows left that token's older transactions out between
 	// them until the end of the list asked every chain again. Undated rows stay: there is nothing to
 	// hold them against.

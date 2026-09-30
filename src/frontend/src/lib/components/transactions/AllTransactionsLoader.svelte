@@ -27,8 +27,8 @@
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
 		/**
-		 * The floor every token is levelled to, in seconds, so the merged list is complete down to it.
-		 * Absent until levelling first runs.
+		 * How far back the merged list is complete, in seconds: every token that still has history
+		 * has loaded down to it. Absent while no such token holds a dated row.
 		 */
 		floor?: number;
 	}
@@ -149,7 +149,7 @@
 	// Rows a token pages in while being levelled never move it: if they did, each run would overshoot
 	// the floor, lower it, and set every other token off again, until all of them had walked back to
 	// the start of their history.
-	let levelFloor = $state<number | undefined>();
+	let levelFloor: number | undefined;
 
 	// Tokens whose rows the floor already accounts for.
 	const accountedTokenIds = new SvelteSet<TokenId>();
@@ -255,6 +255,33 @@
 		$enabledFungibleNetworkTokens.length > 0 &&
 			$enabledFungibleNetworkTokens.every(({ id }) => disableLoader[id] === true)
 	);
+
+	// Read from what is loaded rather than from `levelFloor`, which is only a target: a failed page or
+	// the page cap leaves a token short of it. Each token that still has history is complete down to
+	// its own oldest loaded row, so the merged list is complete down to the newest of those.
+	let completeDownTo = $derived.by((): number | undefined => {
+		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
+
+		const oldestByToken = transactions.reduce<Map<TokenId, number>>(
+			(acc, { token: { id }, transaction: { timestamp } }) => {
+				if (!pagedTokenIds.has(id) || disableLoader[id] === true || isNullish(timestamp)) {
+					return acc;
+				}
+
+				const seconds = normalizeTimestampToSeconds(timestamp);
+				const oldest = acc.get(id);
+
+				if (isNullish(oldest) || seconds < oldest) {
+					acc.set(id, seconds);
+				}
+
+				return acc;
+			},
+			new Map()
+		);
+
+		return oldestByToken.size > 0 ? Math.max(...oldestByToken.values()) : undefined;
+	});
 </script>
 
-{@render children?.({ loadMore, exhausted, floor: levelFloor })}
+{@render children?.({ loadMore, exhausted, floor: completeDownTo })}
