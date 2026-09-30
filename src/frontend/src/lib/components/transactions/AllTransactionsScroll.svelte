@@ -52,6 +52,15 @@
 		dryAtLength = undefined;
 	});
 
+	// A moved floor changes what the list can show without anything loading, and a rising one shrinks
+	// it: an empty round measured against the old boundary would then keep the scroll disabled, with
+	// the token that raised the floor never asked again.
+	$effect.pre(() => {
+		[floor];
+
+		dryAtLength = undefined;
+	});
+
 	// Only what every token has loaded down to. Levelling loads whole pages, so the tokens that had to
 	// reach its target bring rows from beyond it, while the token whose own oldest row set it is not
 	// asked for more. Shown straight away, those rows left that token's older transactions out between

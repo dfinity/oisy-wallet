@@ -295,6 +295,24 @@ describe('AllTransactionsScroll', () => {
 
 			expect(displayed(getAllByTestId)).toHaveLength(5);
 		});
+
+		// A late token with a newer oldest row raises the floor and shrinks the list. Measured against
+		// the old boundary, the empty round before it kept the scroll disabled for good.
+		it('should ask again after the floor rose, even when the last round loaded nothing', async () => {
+			const { rerender } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 0, onLoadMore }
+			});
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledOnce();
+			});
+
+			await rerender({ floor: 3 });
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledTimes(2);
+			});
+		});
 	});
 
 	it('should render without a loader above it', () => {
