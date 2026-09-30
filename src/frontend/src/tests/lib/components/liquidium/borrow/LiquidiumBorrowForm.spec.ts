@@ -111,4 +111,38 @@ describe('LiquidiumBorrowForm', () => {
 
 		expect(getByTestId('liquidium-activation-fee-info')).toBeInTheDocument();
 	});
+
+	describe('with the activation fee', () => {
+		// The input validates on a 300ms debounce.
+		const VALIDATION_DEBOUNCE_MS = 300;
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		// $100k power at $60k/BTC: 1.665 BTC principal is $99.9k, but $100.4k of debt at 0.5%.
+		const amount = 1.665;
+
+		it('accepts the principal when the pool charges no fee', async () => {
+			const { container } = render(LiquidiumBorrowForm, { props: { ...baseProps, amount } });
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).not.toHaveTextContent(en.liquidium.text.borrow_exceeds_power);
+		});
+
+		it('rejects the principal once the fee pushes the debt over the borrowing power', async () => {
+			const { container } = render(LiquidiumBorrowForm, {
+				props: { ...baseProps, amount, market: { ...market, activationFeePercent: 0.5 } }
+			});
+
+			await vi.advanceTimersByTimeAsync(VALIDATION_DEBOUNCE_MS);
+
+			expect(container).toHaveTextContent(en.liquidium.text.borrow_exceeds_power);
+		});
+	});
 });
