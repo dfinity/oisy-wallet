@@ -45,8 +45,8 @@
 			: $enabledFungibleNetworkTokensUi
 	);
 
-	// Provider-held value (trading deposits, lend/borrow) has no asset type, so it only counts
-	// towards the total when no asset type is selected.
+	// Provider-held value (trading deposits, lend/borrow) has no asset type, so exclude it
+	// from the Tokens total while that total is filtered to one asset type.
 	const heroProvidersUsdBalance = $derived(
 		categoryFilterApplied && nonNullish($tokenCategoryFilter) ? 0 : $providersUsdBalance
 	);
