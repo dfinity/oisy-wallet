@@ -294,24 +294,33 @@ With the flag on (local, staging):
   the write; without it, two tabs can each sign a payment from the same address.
 - **How the backend learns a swap's XRP source address.** **Decided: a field on
   `NearIntentsData`**, checked the way `XrpData.source_address` is, rather than by principal.
-- **Where the changes land.** **Decided: in this PR.** #14121 knows nothing about swaps and stays
-  as it is.
+- **Where the changes land.** **Decided: in the swap feature's own PRs**
+  ([§15](#15-delivery)). #14121 knows nothing about swaps and stays as it is.
+- **How the feature ships.** **Decided: two stacked PRs**, the spec with the backend change first
+  and the UI second, so the breaking-interface marker sits on a backend-only PR, as with #14109.
 - **When to flip the flag to production** (owner: product).
 
 ## 15. Delivery
 
-One PR, this spec plus the implementation in backend and frontend, titled `feat(backend,frontend)!:`
-with a `BREAKING CHANGE:` note for the `NearIntentsData` field, stacked `main <- #14121 <- this PR`.
-The flag keeps production unchanged. In order:
+Two stacked PRs, `main <- #14121 <- backend PR <- UI PR`. The flag keeps production unchanged
+throughout.
 
-1. Backend: the `NearIntentsData` source address and its validation, and the in-flight check over
-   both AUT types; `.did` and bindings.
-2. The flag, the `NEAR_INTENTS_BLOCKCHAIN_MAP` entry and the `NON_EVM_BLOCKCHAINS` entry.
-3. The `xrp` swap category: lookup, supported-tokens group, destinations builder.
-4. `userXrpAddress` through the quote fan-out and recipient resolution; `xrpSwapProviders`.
-5. The shared frontend in-flight check, replacing the send-only match.
-6. `sendXrp` taking the AUT to create as a parameter; `fetchNearIntentsXrpSwap`.
-7. The XRP-source swap AUT's status rules ([§6](#6-the-swap-auts-status)).
-8. `SwapXrpWizard.svelte` and its dispatch.
-9. Reachability: cross-swap networks, cross-chain networks, swap universe.
-10. `docs/ai/PRODUCT.md`: a "NEAR Intents as an XRP swap provider (local and staging)" section.
+1. **Backend PR** (#14161, which already carries this spec): `feat(backend)!:` with a
+   `BREAKING CHANGE:` note.
+   - The `NearIntentsData` source address and its validation, and the in-flight check over both
+     AUT types, replacing `has_open_xrp_send`; `.did` and bindings.
+   - `source_address: []` wherever the frontend builds `NearIntentsData` (`toNearIntentsData` and
+     the test literals): the regenerated bindings make the field a required property, so
+     `npm run check` fails without it.
+   - No behaviour change on its own: until the UI PR, no XRP-source swap AUT exists for the new
+     check to count.
+2. **UI PR**, stacked on the backend PR: `feat(frontend):`, in order:
+   1. The flag, the `NEAR_INTENTS_BLOCKCHAIN_MAP` entry and the `NON_EVM_BLOCKCHAINS` entry.
+   2. The `xrp` swap category: lookup, supported-tokens group, destinations builder.
+   3. `userXrpAddress` through the quote fan-out and recipient resolution; `xrpSwapProviders`.
+   4. The shared frontend in-flight check, replacing the send-only match.
+   5. `sendXrp` taking the AUT to create as a parameter; `fetchNearIntentsXrpSwap`.
+   6. The XRP-source swap AUT's status rules ([§6](#6-the-swap-auts-status)).
+   7. `SwapXrpWizard.svelte` and its dispatch.
+   8. Reachability: cross-swap networks, cross-chain networks, swap universe.
+   9. `docs/ai/PRODUCT.md`: a "NEAR Intents as an XRP swap provider (local and staging)" section.
