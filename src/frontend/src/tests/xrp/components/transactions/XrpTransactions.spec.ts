@@ -10,6 +10,7 @@ import {
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import XrpTransactions from '$xrp/components/transactions/XrpTransactions.svelte';
+import { loadOlderXrpTransactions } from '$xrp/services/xrp-history-pager.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -30,6 +31,8 @@ describe('XrpTransactions', () => {
 	});
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		token.set(XRP_TOKEN);
 		mockPage.reset();
 		modalStore.close();
@@ -82,5 +85,16 @@ describe('XrpTransactions', () => {
 		const { getByTestId } = render(XrpTransactions);
 
 		expect(getByTestId(`${TRANSACTIONS_DATE_GROUP_PREFIX}-xrp-0`)).toBeInTheDocument();
+	});
+
+	// The first page can map to no rows, or only to hidden ones, while older payments exist.
+	it('pages further back from an initialized list that shows no rows', () => {
+		mockPage.mockToken(XRP_TOKEN);
+
+		xrpTransactionsStore.prepend({ tokenId: XRP_TOKEN.id, transactions: [] });
+
+		render(XrpTransactions);
+
+		expect(loadOlderXrpTransactions).toHaveBeenCalledOnce();
 	});
 });

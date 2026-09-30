@@ -60,8 +60,10 @@
 <HiddenMicroTransactionsInfoBox />
 
 <XrpTransactionsSkeletons>
-	{#if filteredTransactions.length > 0}
-		<XrpTransactionsScroll {token}>
+	<!-- Mounted around the placeholder too: the first page can map to no rows, or only to rows the
+	micro-transaction filter hides, while older payments exist. -->
+	<XrpTransactionsScroll {token}>
+		{#if filteredTransactions.length > 0}
 			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
@@ -71,10 +73,10 @@
 					/>
 				{/each}
 			{/if}
-		</XrpTransactionsScroll>
-	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
-		<TransactionsPlaceholder />
-	{/if}
+		{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+			<TransactionsPlaceholder />
+		{/if}
+	</XrpTransactionsScroll>
 </XrpTransactionsSkeletons>
 
 {#if $modalXrpTransaction && nonNullish(selectedTransaction)}

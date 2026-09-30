@@ -12,7 +12,7 @@ import XrpTransactionsScroll from '$xrp/components/transactions/XrpTransactionsS
 import { loadOlderXrpTransactions } from '$xrp/services/xrp-history-pager.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$xrp/services/xrp-history-pager.services', () => ({
 	loadOlderXrpTransactions: vi.fn()
@@ -70,5 +70,42 @@ describe('XrpTransactionsScroll', () => {
 		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
 
 		expect(loadOlderXrpTransactions).not.toHaveBeenCalled();
+	});
+
+	// The first page can map to no rows while older payments exist.
+	it('should page an initialized list that holds no rows', () => {
+		xrpTransactionsStore.reset(XRP_TOKEN.id);
+		xrpTransactionsStore.prepend({ tokenId: XRP_TOKEN.id, transactions: [] });
+
+		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
+
+		expect(loadOlderXrpTransactions).toHaveBeenCalledOnce();
+	});
+
+	// Rows the micro-transaction filter hides do not move the end of the list, so only the reported
+	// progress asks for the next page.
+	it('should ask for the next page when the pager added rows', async () => {
+		vi.mocked(loadOlderXrpTransactions).mockImplementationOnce(() => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN.id,
+				transactions: [{ data: { ...mockTransaction, id: 'HASH2' }, certified: false }]
+			});
+
+			return Promise.resolve({ success: true });
+		});
+
+		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
+
+		await waitFor(() => expect(loadOlderXrpTransactions).toHaveBeenCalledTimes(2));
+	});
+
+	it('should not ask again when the pager added nothing', async () => {
+		vi.mocked(loadOlderXrpTransactions).mockResolvedValue({ success: true });
+
+		render(XrpTransactionsScroll, { token: XRP_TOKEN, children: mockSnippet });
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(loadOlderXrpTransactions).toHaveBeenCalledOnce();
 	});
 });
