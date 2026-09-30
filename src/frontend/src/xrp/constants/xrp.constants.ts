@@ -75,6 +75,12 @@ export const XRP_LAST_LEDGER_SEQUENCE_OFFSET = 20;
 // `searched_all: true` at 20, 100, 500, 999 and 1000.
 export const XRP_LEDGER_SEARCH_LOOKBACK = 100;
 
+// `account_tx` lists everything that touched the account, and the history shows only native XRP
+// payments, so a whole page can hold nothing to show — as can the pages the worker already
+// delivered. The history pager steps over at most this many of them in one round rather than
+// walking an arbitrarily long run of them while the user waits.
+export const XRP_MAX_SKIPPED_HISTORY_PAGES = 3;
+
 // Seconds between the Unix epoch (1970-01-01) and the XRP Ledger epoch (2000-01-01).
 // XRPL transaction `date` fields count from the ledger epoch; add this to get Unix time.
 export const XRP_RIPPLE_EPOCH_OFFSET = 946_684_800;
