@@ -445,4 +445,76 @@ describe('swap.derived', () => {
 			}
 		});
 	});
+
+	// XRP joins the swap universe only while NEAR Intents, its only provider, is enabled for it. That
+	// flag excludes TEST, so each case here sets it.
+	describe('XRP', () => {
+		const loadWithXrp = async ({ nearIntentsXrp }: { nearIntentsXrp: boolean }) => {
+			vi.resetModules();
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_XRP_SWAP_ENABLED: nearIntentsXrp
+			}));
+
+			const [
+				{ allSwapUniverseTokens: universe, isPageTokenSwappable: swappable },
+				{ setupUserNetworksStore: setupNetworks },
+				{ setupTestnetsStore: setupTestnets },
+				{ XRP_TOKEN: xrp }
+			] = await Promise.all([
+				import('$lib/derived/swap.derived'),
+				import('$tests/utils/user-networks.test-utils'),
+				import('$tests/utils/testnets.test-utils'),
+				import('$env/tokens/tokens.xrp.env')
+			]);
+
+			setupTestnets('reset');
+			setupNetworks('allEnabled');
+
+			return { universe, swappable, xrp };
+		};
+
+		// The page is set through the `mockPage` imported above, not a re-imported one: `vitest.setup`
+		// mocks `$app/stores` with that instance, and a module reloaded after `resetModules` still
+		// reads it.
+		beforeEach(() => {
+			mockPage.reset();
+		});
+
+		afterEach(() => {
+			mockPage.reset();
+
+			vi.doUnmock('$env/rest/near-intents.env');
+			vi.resetModules();
+		});
+
+		it('should include the enabled XRP token with the NEAR Intents XRP flag', async () => {
+			const { universe, xrp } = await loadWithXrp({ nearIntentsXrp: true });
+
+			expect(get(universe).find(({ id }) => id === xrp.id)).toEqual({ ...xrp, enabled: true });
+		});
+
+		it('should exclude XRP without the NEAR Intents XRP flag', async () => {
+			const { universe, xrp } = await loadWithXrp({ nearIntentsXrp: false });
+
+			expect(get(universe).find(({ id }) => id === xrp.id)).toBeUndefined();
+		});
+
+		// What shows the Swap action on the XRP token page.
+		it('should make the XRP token page swappable with the flag', async () => {
+			const { swappable, xrp } = await loadWithXrp({ nearIntentsXrp: true });
+
+			mockPage.mockToken(xrp);
+
+			expect(get(swappable)).toBeTruthy();
+		});
+
+		it('should leave the XRP token page not swappable without the flag', async () => {
+			const { swappable, xrp } = await loadWithXrp({ nearIntentsXrp: false });
+
+			mockPage.mockToken(xrp);
+
+			expect(get(swappable)).toBeFalsy();
+		});
+	});
 });

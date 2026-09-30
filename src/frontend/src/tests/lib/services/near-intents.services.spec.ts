@@ -46,6 +46,7 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
 	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
+	NEAR_INTENTS_XRP_SWAP_ENABLED: false,
 	NEAR_INTENTS_API_KEY: 'mock-api-key'
 }));
 

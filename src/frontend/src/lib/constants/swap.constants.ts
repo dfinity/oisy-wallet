@@ -12,7 +12,8 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import {
 	NEAR_INTENTS_BTC_SWAP_ENABLED,
-	NEAR_INTENTS_SWAP_ENABLED
+	NEAR_INTENTS_SWAP_ENABLED,
+	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -155,6 +156,12 @@ const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
+// NEAR Intents bridges XRP mainnet to and from every EVM, Solana and Bitcoin chain in its map, and
+// is XRP's only provider.
+const NEAR_INTENTS_XRP_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_XRP_SWAP_ENABLED
+	? [XRP_MAINNET_NETWORK_ID]
+	: [];
+
 const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	...new Set<NetworkId>([
 		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
@@ -165,7 +172,8 @@ const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 const withIcpIfPaired = (networkId: NetworkId): NetworkId[] => [
 	...(ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId) ? [ICP_NETWORK_ID] : []),
 	...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	...NEAR_INTENTS_BTC_NETWORK_IDS
+	...NEAR_INTENTS_BTC_NETWORK_IDS,
+	...NEAR_INTENTS_XRP_NETWORK_IDS
 ];
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
@@ -176,7 +184,9 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	],
 	[BTC_MAINNET_NETWORK_ID]: [
 		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
-		...(NEAR_INTENTS_BTC_SWAP_ENABLED ? SUPPORTED_CROSS_SWAP_NETWORK_IDS : [])
+		...(NEAR_INTENTS_BTC_SWAP_ENABLED
+			? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
+			: [])
 	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
@@ -186,6 +196,16 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-		...NEAR_INTENTS_BTC_NETWORK_IDS
-	]
+		...NEAR_INTENTS_BTC_NETWORK_IDS,
+		...NEAR_INTENTS_XRP_NETWORK_IDS
+	],
+	// Absent rather than empty while the flag is off, so a lookup reads as it does without XRP.
+	...(NEAR_INTENTS_XRP_SWAP_ENABLED
+		? {
+				[XRP_MAINNET_NETWORK_ID]: [
+					...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+					...NEAR_INTENTS_BTC_NETWORK_IDS
+				]
+			}
+		: {})
 };

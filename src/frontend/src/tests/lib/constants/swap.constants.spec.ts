@@ -31,18 +31,21 @@ describe('swap.constants', () => {
 		const loadMatrix = async ({
 			oneSec,
 			chainFusion,
-			nearIntentsBtc = false
+			nearIntentsBtc = false,
+			nearIntentsXrp = false
 		}: {
 			oneSec: boolean;
 			chainFusion: boolean;
 			nearIntentsBtc?: boolean;
+			nearIntentsXrp?: boolean;
 		}) => {
 			vi.resetModules();
 			vi.doMock('$env/rest/onesec.env', () => ({ ONESEC_SWAP_ENABLED: oneSec }));
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: chainFusion }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
 				...(await importOriginal<typeof nearIntentsEnv>()),
-				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc
+				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc,
+				NEAR_INTENTS_XRP_SWAP_ENABLED: nearIntentsXrp
 			}));
 
 			const [
@@ -52,7 +55,8 @@ describe('swap.constants', () => {
 				{ BASE_NETWORK_ID },
 				{ BTC_MAINNET_NETWORK_ID },
 				{ SOLANA_MAINNET_NETWORK_ID },
-				{ ROBINHOOD_MAINNET_NETWORK_ID: ROBINHOOD_ID }
+				{ ROBINHOOD_MAINNET_NETWORK_ID: ROBINHOOD_ID },
+				{ XRP_MAINNET_NETWORK_ID: XRP_ID }
 			] = await Promise.all([
 				import('$lib/constants/swap.constants'),
 				import('$env/networks/networks.eth.env'),
@@ -60,21 +64,24 @@ describe('swap.constants', () => {
 				import('$env/networks/networks-evm/networks.evm.base.env'),
 				import('$env/networks/networks.btc.env'),
 				import('$env/networks/networks.sol.env'),
-				import('$env/networks/networks-evm/networks.evm.robinhood.env')
+				import('$env/networks/networks-evm/networks.evm.robinhood.env'),
+				import('$env/networks/networks.xrp.env')
 			]);
 
 			return {
 				icpReaches: (networkId: NetworkId) =>
 					SUPPORTED_CROSS_SWAP_NETWORKS[ICP_NETWORK_ID].includes(networkId),
 				reachesIcp: (networkId: NetworkId) =>
-					SUPPORTED_CROSS_SWAP_NETWORKS[networkId].includes(ICP_NETWORK_ID),
+					SUPPORTED_CROSS_SWAP_NETWORKS[networkId]?.includes(ICP_NETWORK_ID) ?? false,
 				reaches: ({ from, to }: { from: NetworkId; to: NetworkId }) =>
-					SUPPORTED_CROSS_SWAP_NETWORKS[from].includes(to),
+					SUPPORTED_CROSS_SWAP_NETWORKS[from]?.includes(to) ?? false,
+				isSource: (networkId: NetworkId) => networkId in SUPPORTED_CROSS_SWAP_NETWORKS,
 				ETHEREUM_NETWORK_ID,
 				BASE_NETWORK_ID,
 				BTC_MAINNET_NETWORK_ID,
 				SOLANA_MAINNET_NETWORK_ID,
-				ROBINHOOD_ID
+				ROBINHOOD_ID,
+				XRP_ID
 			};
 		};
 
@@ -257,6 +264,100 @@ describe('swap.constants', () => {
 
 				expect(icpReaches(ROBINHOOD_ID)).toBeFalsy();
 				expect(reachesIcp(ROBINHOOD_ID)).toBeFalsy();
+			});
+		});
+
+		describe('XRP', () => {
+			// NEAR Intents opens XRP to its whole map (spec §10), in both directions.
+			it('pairs with every EVM chain, Solana and Bitcoin in both directions with its flag', async () => {
+				const {
+					reaches,
+					XRP_ID,
+					ETHEREUM_NETWORK_ID,
+					BASE_NETWORK_ID,
+					ROBINHOOD_ID,
+					SOLANA_MAINNET_NETWORK_ID,
+					BTC_MAINNET_NETWORK_ID
+				} = await loadMatrix({
+					oneSec: false,
+					chainFusion: false,
+					nearIntentsBtc: true,
+					nearIntentsXrp: true
+				});
+
+				for (const other of [
+					ETHEREUM_NETWORK_ID,
+					BASE_NETWORK_ID,
+					ROBINHOOD_ID,
+					SOLANA_MAINNET_NETWORK_ID,
+					BTC_MAINNET_NETWORK_ID
+				]) {
+					expect(reaches({ from: XRP_ID, to: other })).toBeTruthy();
+					expect(reaches({ from: other, to: XRP_ID })).toBeTruthy();
+				}
+			});
+
+			// Bitcoin's side of the pair is NEAR Intents too, so it needs Bitcoin's flag as well.
+			it('does not pair with Bitcoin without the NEAR Intents BTC flag', async () => {
+				const { reaches, XRP_ID, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+					oneSec: false,
+					chainFusion: true,
+					nearIntentsBtc: false,
+					nearIntentsXrp: true
+				});
+
+				expect(reaches({ from: XRP_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
+				expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: XRP_ID })).toBeFalsy();
+			});
+
+			it('never pairs with ICP, even with every flag on', async () => {
+				const { icpReaches, reachesIcp, XRP_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true,
+					nearIntentsBtc: true,
+					nearIntentsXrp: true
+				});
+
+				expect(icpReaches(XRP_ID)).toBeFalsy();
+				expect(reachesIcp(XRP_ID)).toBeFalsy();
+			});
+
+			it('never opens XRP to itself', async () => {
+				const { reaches, XRP_ID } = await loadMatrix({
+					oneSec: true,
+					chainFusion: true,
+					nearIntentsBtc: true,
+					nearIntentsXrp: true
+				});
+
+				expect(reaches({ from: XRP_ID, to: XRP_ID })).toBeFalsy();
+			});
+
+			// Without the flag the table reads as it does without XRP: no entry, and no chain lists it.
+			it('is absent without its flag', async () => {
+				const {
+					reaches,
+					isSource,
+					XRP_ID,
+					ETHEREUM_NETWORK_ID,
+					SOLANA_MAINNET_NETWORK_ID,
+					BTC_MAINNET_NETWORK_ID
+				} = await loadMatrix({
+					oneSec: true,
+					chainFusion: true,
+					nearIntentsBtc: true,
+					nearIntentsXrp: false
+				});
+
+				expect(isSource(XRP_ID)).toBeFalsy();
+
+				for (const other of [
+					ETHEREUM_NETWORK_ID,
+					SOLANA_MAINNET_NETWORK_ID,
+					BTC_MAINNET_NETWORK_ID
+				]) {
+					expect(reaches({ from: other, to: XRP_ID })).toBeFalsy();
+				}
 			});
 		});
 
