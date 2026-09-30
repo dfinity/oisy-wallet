@@ -101,9 +101,8 @@ Two consequences shape the rest of this spec:
 ## 4. Feature flag
 
 New constant `NEAR_INTENTS_XRP_SWAP_ENABLED` in `src/frontend/src/env/rest/near-intents.env.ts`,
-defined as `LOCAL || STAGING` — the idiom of `BACKEND_EXCHANGE_ENABLED` in
-`src/frontend/src/env/exchange.env.ts`, and of the BTC flag before #14007 flipped it. Production
-stays off until the flag is flipped in a deliberate follow-up.
+defined as `(LOCAL || STAGING) && !TEST`: on for local and staging builds, off in production and
+in unit tests. Production stays off until the flag is flipped in a deliberate follow-up.
 
 Everything XRP-swap-scoped in the frontend is gated on it; with the flag off, swaps behave exactly
 as on `main` and XRP sends exactly as on #14121. XRP itself must also be enabled as a network, as
@@ -111,9 +110,10 @@ for every XRP feature.
 The backend changes of [§7](#7-the-in-flight-check) are not flagged: without an XRP-source swap
 AUT they change nothing.
 
-`LOCAL` is also true under vitest (`MODE` comes from `DFX_NETWORK`, which defaults to `local`), so
-the flag is on in unit tests and the suite-wide swap expectations — networks, destinations, the
-swap universe — change with it.
+`LOCAL` is also true under vitest (`MODE` comes from `DFX_NETWORK`, which defaults to `local`),
+hence `!TEST`: with the flag off in unit tests, the suite-wide swap expectations — networks,
+destinations, the swap universe — stay as on `main`, and the tests of the feature switch the flag
+on themselves.
 
 ## 5. One AUT per swap
 
@@ -213,8 +213,10 @@ signing. Nothing leaves the wallet in either case.
      (`hasAcknowledgedNearIntentsSwap`), exactly as in the SOL, EVM and BTC wizards;
    - the XRP fee context (`XrpFeeContext`), with the network fee shown in the form and on review;
    - an amount validated against the fee **and** the account reserve, as the XRP send form does
-     (`isXrpAmountSendable`), and a Max that leaves both (`getXrpMaxAmount`, through `SwapForm`'s
-     existing `maxAmount`). `sendXrp`'s own reserve refusal returns the user to the form.
+     (`isXrpAmountSendable`), and a Max that leaves both: the balance less the fee and the reserve,
+     through `SwapForm`'s existing `maxAmount`. Not `getXrpMaxAmount`, which takes an owner count,
+     while the XRP fee context holds the reserve in drops. `sendXrp`'s own reserve refusal returns
+     the user to the form.
 
 ## 9. XRP as destination
 

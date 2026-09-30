@@ -36,7 +36,8 @@ import {
 	mockNearIntentsActiveUserTransaction,
 	mockOisyTradeActiveUserTransaction,
 	mockVeloraActiveUserTransaction,
-	mockXrpActiveUserTransaction
+	mockXrpActiveUserTransaction,
+	mockXrpSwapActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -433,6 +434,58 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		// A swap from XRP goes to the XRP ledger resolution while its deposit is `Pending`: 1Click
+		// reports `PENDING_DEPOSIT` at once, which would move the row to `Executing` and release the
+		// address while the deposit can still apply. From `Executing` on, 1Click decides.
+		describe('a swap from XRP', () => {
+			const spies = () => ({
+				xrpSpy: vi.spyOn(xrpPoller, 'pollXrpActiveUserTransactions').mockResolvedValue(),
+				nearSpy: vi
+					.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+					.mockResolvedValue()
+			});
+
+			it('is polled against the XRP ledger while its deposit is Pending', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = { ...mockXrpSwapActiveUserTransaction, id: 'xrp-swap-a' };
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(nearSpy).not.toHaveBeenCalled();
+				expect(xrpSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
+			});
+
+			it('is polled at 1Click once Executing', async () => {
+				const { xrpSpy, nearSpy } = spies();
+				const tx = {
+					...mockXrpSwapActiveUserTransaction,
+					id: 'xrp-swap-b',
+					status: { Executing: null }
+				};
+
+				activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+				activeUserTransactionsStore.upsert({ transaction: tx });
+
+				render(LoaderActiveUserTransactions);
+
+				await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+				expect(xrpSpy).not.toHaveBeenCalled();
+				expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+					identity: mockIdentity,
+					transactions: [tx]
+				});
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -622,6 +675,46 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
 			});
 			expect(appliedFlags()).toEqual({ 'near-a': true });
+		});
+
+		// The deposit's network fee was charged, so the balance changed although the swap failed.
+		it('refreshes the wallet when a swap from XRP fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: mockXrpSwapActiveUserTransaction });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...mockXrpSwapActiveUserTransaction, status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+		});
+
+		it('does not refresh the wallet when a swap from another chain fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...pendingNearIntents('near-a'), status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
 		});
 
 		it('fires waitAndTriggerWallet and a swap_success event with the Velora dApp when a Velora row succeeds', async () => {

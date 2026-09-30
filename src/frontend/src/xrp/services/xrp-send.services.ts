@@ -1,9 +1,6 @@
-import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
-import { getActiveUserTransactions } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendXrp } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
-import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
@@ -23,6 +20,7 @@ import {
 	loadXrpLedgerIndex,
 	submitXrpTransaction
 } from '$xrp/rest/xrpl.rest';
+import { assertNoXrpPaymentInFlight } from '$xrp/services/xrp-in-flight.services';
 import { getXrpSigningPublicKey, signXrpTransaction } from '$xrp/services/xrp-sign.services';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
@@ -34,12 +32,13 @@ import {
 	XrpDestinationUnfundedError,
 	XrpSelfDestinationError,
 	XrpSendAlreadyInFlightError,
-	XrpSendNotGuardedError
+	XrpSendNotGuardedError,
+	type XrpPaymentRecord,
+	type XrpPaymentRecordBuilder
 } from '$xrp/types/xrp-send';
 import type { XrpSendResult, XrpSubmitResult } from '$xrp/types/xrp-transaction';
 import {
 	isXrpAlreadyInFlightError,
-	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
 	toXrpExternalRefs
@@ -54,100 +53,35 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 
 /**
- * Refuses the send if a payment from this address has not resolved yet.
- *
- * The gate is per **address**, not per user: a record for a different address says nothing about
- * this one's sequence, and refusing on it would block an unrelated send. There is no override —
- * the whole point is that no second sequence is safe while the first payment is open.
+ * The record of a plain send: its own `Xrp` AUT, carrying the values fixed at signing, the two poll
+ * keys and the snapshot the row renders with in a later session.
  */
-const assertNoOpenXrpSend = async ({
-	identity,
-	source
-}: {
-	identity: NullishIdentity;
-	source: XrpAddress;
-}): Promise<Identity> => {
-	// Fails closed. Without an identity the record can neither be read nor written, so the
-	// invariant cannot be held — and an unguarded send is the failure this path exists to prevent.
-	if (isNullish(identity)) {
-		throw new XrpSendNotGuardedError(
-			'XRP send refused: the wallet could not check for an unresolved payment without an identity.'
-		);
-	}
+const xrpSendRecord =
+	({
+		token,
+		source,
+		destination,
+		destinationTag,
+		amount,
+		fee
+	}: {
+		token: Token;
+		source: XrpAddress;
+		destination: XrpAddress;
+		destinationTag?: number;
+		amount: XrpBalance;
+		fee: XrpBalance;
+	}): XrpPaymentRecordBuilder =>
+	({ txHash, lastLedgerSequence }) => {
+		const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
 
-	// `loadActiveUserTransactions` swallows backend errors by design, so a failed load leaves the
-	// store as it was — which would read as "no open record". Asked directly instead: this answer
-	// decides whether a second sequence is signed, so it must come from the backend or not at all.
-	let transactions: ActiveUserTransaction[];
+		if (isNullish(data)) {
+			throw new XrpSendNotGuardedError(
+				`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
+			);
+		}
 
-	try {
-		transactions = await getActiveUserTransactions({ identity });
-	} catch (err: unknown) {
-		throw new XrpSendNotGuardedError(
-			`XRP send refused: the wallet could not check for an unresolved payment. ${
-				err instanceof Error ? err.message : `${err}`
-			}`
-		);
-	}
-
-	const open = openXrpActiveUserTransaction({ transactions, source });
-
-	if (nonNullish(open)) {
-		// Handed to the store before refusing. The store loads only when the identity changes, and the
-		// poller polls only what is in it, so a record opened by another tab — which may since have
-		// closed — would otherwise never be resolved here, and this refusal would repeat on every
-		// attempt. `upsert` keeps a local copy with a newer `updated_at_ns`, so a row this tab already
-		// tracks further along is not rolled back to the backend's older answer.
-		activeUserTransactionsStore.upsert({ transaction: open });
-
-		throw new XrpSendAlreadyInFlightError(
-			`XRP send refused: a payment from ${source} has not resolved yet.`
-		);
-	}
-
-	return identity;
-};
-
-/**
- * Creates the record that holds the invariant.
- *
- * Refuses the send if it cannot be created — at the per-user cap, or with the backend unreachable.
- * Sending anyway would drop the guarantee at exactly the moment a retry is most likely, and would
- * leave the payment with nothing to resolve it.
- */
-const openXrpSendRecord = async ({
-	identity,
-	token,
-	source,
-	destination,
-	destinationTag,
-	amount,
-	fee,
-	txHash,
-	lastLedgerSequence
-}: {
-	identity: Identity;
-	token: Token;
-	source: XrpAddress;
-	destination: XrpAddress;
-	destinationTag?: number;
-	amount: XrpBalance;
-	fee: XrpBalance;
-	txHash: string;
-	lastLedgerSequence: number;
-}): Promise<void> => {
-	const data = toXrpData({ token, source, destination, destinationTag, amount, fee });
-
-	if (isNullish(data)) {
-		throw new XrpSendNotGuardedError(
-			`XRP send refused: ${token.network.name} has no backend token identity, so an unresolved payment could not be recorded.`
-		);
-	}
-
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: crypto.randomUUID(),
+		return {
 			data,
 			progressStep: ProgressStepsSendXrp.SEND,
 			externalRefs: toXrpExternalRefs({
@@ -162,6 +96,32 @@ const openXrpSendRecord = async ({
 					})
 				})
 			})
+		};
+	};
+
+/**
+ * Creates the record that holds the invariant.
+ *
+ * Refuses the payment if it cannot be created — at the per-user cap, or with the backend
+ * unreachable. Sending anyway would drop the guarantee at exactly the moment a retry is most
+ * likely, and would leave the payment with nothing to resolve it.
+ */
+const openXrpPaymentRecord = async ({
+	identity,
+	source,
+	record: { data, externalRefs, progressStep }
+}: {
+	identity: Identity;
+	source: XrpAddress;
+	record: XrpPaymentRecord;
+}): Promise<void> => {
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id: crypto.randomUUID(),
+			data,
+			progressStep,
+			externalRefs
 		});
 	} catch (err: unknown) {
 		// The backend refusing a second open payment is the same refusal the gate makes, so it reads
@@ -196,6 +156,10 @@ const openXrpSendRecord = async ({
  * `amount` is in drops. The caller is responsible for having already reserved the
  * account base and owner reserves out of the max amount (see `getXrpMaxAmount`).
  *
+ * `record` is the AUT the payment is recorded under, built after signing and before submitting —
+ * the send's own `Xrp` AUT when it is omitted, or the swap's AUT when the payment is a swap's
+ * deposit. Either way it holds the one-payment-in-flight invariant until the ledger resolves it.
+ *
  * It stops at the submit and does **not** wait for the transaction to validate. The Active User
  * Transaction record opened just before the broadcast is what establishes the outcome, and the
  * global poller drives it — for this send and for one whose session died, on the same code. So
@@ -210,6 +174,7 @@ export const sendXrp = async ({
 	fee,
 	destinationTag,
 	token,
+	record,
 	progress
 }: {
 	identity: NullishIdentity;
@@ -220,6 +185,7 @@ export const sendXrp = async ({
 	fee: XrpBalance;
 	destinationTag?: number;
 	token: Token;
+	record?: XrpPaymentRecordBuilder;
 	progress?: (step: ProgressStepsSendXrp) => void;
 }): Promise<XrpSendResult> => {
 	progress?.(ProgressStepsSendXrp.INITIALIZATION);
@@ -360,7 +326,7 @@ export const sendXrp = async ({
 	//
 	// Returns the identity narrowed, because the guard cannot run without one and the record write
 	// below needs it non-nullish.
-	const recordIdentity = await assertNoOpenXrpSend({ identity, source });
+	const recordIdentity = await assertNoXrpPaymentInFlight({ identity, source });
 
 	// The signing key is deliberately NOT in here. Three guards below depend on these reads and so
 	// cannot run before them, and `Promise.all` rejects on the first rejection — so a key failure
@@ -518,16 +484,13 @@ export const sendXrp = async ({
 	// After signing and before submitting, which is the only correct moment. Later would miss a
 	// submit whose response is lost — precisely the case the record exists for. Earlier would be a
 	// claim about a transaction that does not exist yet.
-	await openXrpSendRecord({
+	const buildRecord =
+		record ?? xrpSendRecord({ token, source, destination, destinationTag, amount, fee });
+
+	await openXrpPaymentRecord({
 		identity: recordIdentity,
-		token,
 		source,
-		destination,
-		destinationTag,
-		amount,
-		fee,
-		txHash,
-		lastLedgerSequence: signedLastLedgerSequence
+		record: buildRecord({ txHash, lastLedgerSequence: signedLastLedgerSequence })
 	});
 
 	let submitResult: XrpSubmitResult | undefined;
