@@ -43,6 +43,12 @@ describe('XrpSendDestinationTag', () => {
 		expect(input).toHaveAccessibleDescription(en.send.info.xrp_destination_tag_hint);
 	});
 
+	it('keeps the title, and only the title, as the input label', () => {
+		const input = renderInput();
+
+		expect(input).toHaveAccessibleName(en.send.text.xrp_destination_tag);
+	});
+
 	it('stores a valid destination tag', async () => {
 		const input = renderInput();
 
