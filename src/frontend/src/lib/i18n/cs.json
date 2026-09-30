@@ -1067,6 +1067,7 @@
 			"first_time_destination": "Zdá se, že na tuto adresu jste ještě nikdy neposílali tokeny. Adresu pečlivě zkontrolujte.",
 			"first_time_destination_confirm": "Na tuto adresu posílám tokeny poprvé a adresa je pečlivě zkontrolovaná.",
 			"xrp_destination_tag_hint": "Vyžaduje ho většina burz. Pokud ho nevyplníte, můžete o prostředky přijít.",
+			"xrp_destination_tag_missing": "Chybí cílový tag XRP. Pokud posíláte na burzu, ověřte si, zda ho vyžaduje, jinak můžete o prostředky přijít.",
 			"fee_expired": "",
 			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",

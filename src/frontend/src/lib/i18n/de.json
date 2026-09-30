@@ -1067,6 +1067,7 @@
 			"first_time_destination": "Es sieht so aus, als hättest du noch nie Tokens an diese Adresse gesendet. Prüfe die Adresse sorgfältig.",
 			"first_time_destination_confirm": "Ich sende zum ersten Mal Tokens an diese Adresse und habe die Adresse sorgfältig geprüft.",
 			"xrp_destination_tag_hint": "Wird von den meisten Börsen verlangt. Ohne Tag können deine Mittel verloren gehen.",
+			"xrp_destination_tag_missing": "Kein XRP-Ziel-Tag. Wenn du an eine Börse sendest, prüfe, ob sie eines verlangt, sonst können deine Mittel verloren gehen.",
 			"fee_expired": "",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",

@@ -1067,6 +1067,7 @@
 			"first_time_destination": "이 주소로 토큰을 보낸 적이 없는 것으로 보입니다. 주소를 꼼꼼히 확인하세요.",
 			"first_time_destination_confirm": "이 주소로 토큰을 보내는 것은 처음이며, 주소를 꼼꼼히 확인했습니다.",
 			"xrp_destination_tag_hint": "대부분의 거래소에서 필요합니다. 비워 두면 자금을 잃을 수 있습니다.",
+			"xrp_destination_tag_missing": "XRP 목적지 태그가 없습니다. 거래소로 보내는 경우 태그가 필요한지 확인하세요. 그렇지 않으면 자금을 잃을 수 있습니다.",
 			"fee_expired": "",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
