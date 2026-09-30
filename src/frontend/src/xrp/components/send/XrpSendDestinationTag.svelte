@@ -20,6 +20,9 @@
 
 	const { sendXrpDestinationTag } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const INPUT_NAME = 'xrp-destination-tag';
+	const HINT_ID = 'xrp-destination-tag-hint';
+
 	let value = $state<string>(nonNullish($sendXrpDestinationTag) ? `${$sendXrpDestinationTag}` : '');
 
 	// An empty field means "no tag", which is valid. A non-empty one that does not parse must NOT
@@ -45,19 +48,29 @@
 </script>
 
 <div class="mb-4">
+	<!-- Title and hint are rendered here rather than in `Input`'s label snippet so the hint sits
+	between them without becoming part of the input's accessible name. -->
+	<label class="font-bold" for={INPUT_NAME}>{$i18n.send.text.xrp_destination_tag}</label>
+
+	<p
+		id={HINT_ID}
+		class="mt-1 mb-3 text-sm font-medium text-primary"
+		data-tid="xrp-destination-tag-hint"
+	>
+		{$i18n.send.info.xrp_destination_tag_hint}
+	</p>
+
 	<Input
-		name="xrp-destination-tag"
+		name={INPUT_NAME}
+		ariaDescribedBy={HINT_ID}
 		inputType="text"
 		{onInput}
 		placeholder={$i18n.send.placeholder.xrp_destination_tag}
 		required={false}
+		showInfo={false}
 		testId="xrp-destination-tag-input"
 		bind:value
 	>
-		{#snippet label()}
-			<span>{$i18n.send.text.xrp_destination_tag}</span>
-		{/snippet}
-
 		{#snippet bottom()}
 			{#if invalidDestinationTag}
 				<!-- `role="alert"` because this appears on input and blocks the form: without a live
