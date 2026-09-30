@@ -122,7 +122,7 @@ Solana had the balance problem and solved it: since #14028 one worker per networ
 
 ### 4.1 Listed and imported tokens
 
-- **RLUSD is a curated XRPL token** (asset type Stablecoins): it appears in Manage tokens, is not enabled by default, and carries its name, icon and CoinGecko id. It cannot be enabled by default: enabling it costs a transaction and a reserve.
+- **RLUSD is a curated XRPL token** (asset type Stablecoins): it appears in Manage tokens, is not enabled by default, and carries its name and icon. It cannot be enabled by default: enabling it costs a transaction and a reserve.
 - **Any other trust-line token** is added through Import token → XRP Ledger, by issuer address and currency code.
 - **In Manage tokens, a trust-line token's switch does not join the batched Save.** Switching RLUSD on opens the review of §4.2 at once, and RLUSD counts as enabled only once its trust line exists.
 
@@ -293,7 +293,7 @@ Every PR after the first merges behind the flag of §7.3 and is tested on stagin
 | --- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | 1   | this spec + `feat(backend,frontend)!:` variants     | §7.1, and the frontend arms the new variants force; no UI, so nothing to put behind the flag                                 |
 | 2   | `feat(frontend)`: trust-line balances               | the flag, token model, RLUSD entry, `account_lines`, balances through the native XRP worker, the send guard                  |
-| 2b  | `feat(frontend)`: trust-line prices                 | CoinGecko's `xrp` platform and `ripple-usd` through the exchange worker                                                      |
+| 2b  | `feat(frontend)`: trust-line prices                 | CoinGecko's `xrp` platform by `<currency>.<issuer>`, RLUSD included, through the exchange worker                             |
 | 3   | `feat(frontend)`: add a trust-line token            | import form, review, `TrustSet` through the guard, saving tokens and lines without a backend entry, the RLUSD switch, hiding |
 | 4   | `feat(frontend)`: send a trust-line token           | token payments, `SendMax`, the checks of §4.5, max, and the DepositAuth check for token and XRP payments                     |
 | 5   | `feat(frontend)`: trust-line token history          | metadata mapping, per-token history, pagination                                                                              |
