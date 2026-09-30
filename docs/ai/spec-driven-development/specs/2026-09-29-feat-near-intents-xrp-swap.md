@@ -144,10 +144,12 @@ AUT: the send is part of the swap, not a transaction of its own, so the bell lis
 - **While the AUT is `Pending`, only the XRP ledger resolution may change its status.** The NEAR
   Intents poller maps 1Click's `PENDING_DEPOSIT` to `Executing` on its first tick; for an
   XRP-source AUT that would end the in-flight check while the deposit can still apply, so it leaves
-  a `Pending` XRP-source AUT alone. 1Click's status takes over once the AUT is `Executing`.
+  a `Pending` XRP-source AUT alone. 1Click's status takes over once the AUT is `Executing`. The
+  backend enforces this for every client ([§7](#7-the-in-flight-check)).
 - **The ledger resolution is #14121's, reused unchanged:** the same lookup, the same window, the
   same expiry recheck. A failed deposit carries the same failure message as a failed XRP send,
-  which says whether the network fee was charged.
+  which says whether the network fee was charged. For a swap AUT it also records the deposit's
+  result in a `ledger_result` ref: `tesSUCCESS`, the `tec*` code, or `expired`.
 - EVM, SOL and BTC swap AUTs are unaffected.
 
 ## 7. The in-flight check
@@ -169,7 +171,12 @@ address: its deposit has validated, and the swap continues without blocking XRP 
   AUT and for a new XRP-source `NearIntents` AUT, refusing with `AlreadyInFlight`. It also requires
   the two poll refs (`tx_hash`, `last_ledger_sequence`) on an XRP-source `NearIntents` AUT, on
   create and on update, as it does on a send AUT: a `Pending` swap AUT holds the address, so one
-  that could not be polled would refuse every later payment from it.
+  that could not be polled would refuse every later payment from it. And `update` lets an
+  XRP-source `NearIntents` AUT leave `Pending` only with its `ledger_result` — `tesSUCCESS` to
+  `Executing`, a `tec*` code or `expired` to `Failed` — which only the XRP ledger resolution
+  writes: a frontend from before the swap UI polls every `Pending` `NearIntents` AUT at 1Click and
+  would otherwise move it to `Executing` on `PENDING_DEPOSIT`, releasing the address while the
+  deposit can still apply.
 - **Source address:** `NearIntentsData` gains an optional XRP source address, the same shape as
   `XrpData.source_address`. It is required, and validated like it, when the source token is native
   XRP — a swap AUT without it would escape the check — and absent otherwise. The field itself is
