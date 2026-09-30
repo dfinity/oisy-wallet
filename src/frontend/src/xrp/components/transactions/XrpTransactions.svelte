@@ -20,6 +20,7 @@
 	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 	import XrpTokenModal from '$xrp/components/tokens/XrpTokenModal.svelte';
 	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
+	import XrpTransactionsScroll from '$xrp/components/transactions/XrpTransactionsScroll.svelte';
 	import XrpTransactionsSkeletons from '$xrp/components/transactions/XrpTransactionsSkeletons.svelte';
 	import { xrpTransactions } from '$xrp/derived/xrp-transactions.derived';
 	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
@@ -60,15 +61,17 @@
 
 <XrpTransactionsSkeletons>
 	{#if filteredTransactions.length > 0}
-		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
-			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-				<TransactionsDateGroup
-					{formattedDate}
-					testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-xrp-${index}`}
-					{transactions}
-				/>
-			{/each}
-		{/if}
+		<XrpTransactionsScroll {token}>
+			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-xrp-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
+		</XrpTransactionsScroll>
 	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
