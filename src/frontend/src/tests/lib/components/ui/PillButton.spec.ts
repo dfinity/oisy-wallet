@@ -116,7 +116,7 @@ describe('PillButton', () => {
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('accent-lap')).toBeTruthy();
+		expect(button?.querySelector('.pill-lap')).not.toBeNull();
 	});
 
 	it('should not run the border lap when an accented pill is selected', () => {
@@ -126,7 +126,7 @@ describe('PillButton', () => {
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('accent-lap')).toBeFalsy();
+		expect(button?.querySelector('.pill-lap')).toBeNull();
 	});
 
 	it('should not run the border lap without accent', () => {
@@ -136,7 +136,66 @@ describe('PillButton', () => {
 
 		const button = container.querySelector('button');
 
-		expect(button?.classList.contains('accent-lap')).toBeFalsy();
+		expect(button?.querySelector('.pill-lap')).toBeNull();
+	});
+
+	it('should replay the border laps when the pointer enters', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const firstLap = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		const replayedLap = button.querySelector('.pill-lap');
+
+		expect(replayedLap).not.toBeNull();
+		expect(replayedLap).not.toBe(firstLap);
+	});
+
+	it('should not restart the border laps while they are running', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const runningLap = button.querySelector('.pill-lap');
+
+		assertNonNullish(runningLap);
+
+		await fireEvent.animationStart(runningLap);
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).toBe(runningLap);
+
+		await fireEvent.animationEnd(runningLap);
+		await fireEvent.pointerEnter(button, { pointerType: 'mouse' });
+
+		expect(button.querySelector('.pill-lap')).not.toBe(runningLap);
+	});
+
+	it('should not replay the border laps on touch', async () => {
+		const { container } = render(PillButton, {
+			props: { children: createTextSnippet('Test'), accent: true }
+		});
+
+		const button = container.querySelector('button');
+
+		assertNonNullish(button);
+
+		const firstLap = button.querySelector('.pill-lap');
+
+		await fireEvent.pointerEnter(button, { pointerType: 'touch' });
+
+		expect(button.querySelector('.pill-lap')).toBe(firstLap);
 	});
 
 	it('should call onclick handler when clicked', async () => {
