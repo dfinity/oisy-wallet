@@ -1,8 +1,10 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { ResultSuccess } from '$lib/types/utils';
 import AllTransactionsScrollTest from '$tests/lib/components/transactions/AllTransactionsScrollTest.svelte';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverManual,
@@ -265,7 +267,11 @@ describe('AllTransactionsScroll', () => {
 		});
 
 		it('should keep rows without a timestamp', () => {
-			const undated = { transaction: { id: 'undated' } } as unknown as AllTransactionUiWithCmp;
+			const undated: AllTransactionUiWithCmp = {
+				component: 'bitcoin',
+				token: BTC_MAINNET_TOKEN,
+				transaction: { ...createMockBtcTransactionsUi(1)[0], timestamp: undefined }
+			};
 
 			const { getAllByTestId } = render(AllTransactionsScrollTest, {
 				props: { sortedTransactions: [...makeTransactions(3), undated], floor: 2, onLoadMore }
