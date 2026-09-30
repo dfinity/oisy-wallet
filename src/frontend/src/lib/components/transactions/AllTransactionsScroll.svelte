@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
@@ -17,6 +18,11 @@
 		onLoadMore?: () => Promise<ResultSuccess>;
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
+		/**
+		 * The floor every token has been paged down to, in seconds. Rows older than it are held back
+		 * until the other tokens have caught up with them.
+		 */
+		floor?: number;
 		children: Snippet;
 	}
 
@@ -25,6 +31,7 @@
 		transactionsToDisplay = $bindable([]),
 		onLoadMore,
 		exhausted = false,
+		floor,
 		children
 	}: Props = $props();
 
@@ -45,11 +52,27 @@
 		dryAtLength = undefined;
 	});
 
-	let everythingLoadedIsOnScreen = $derived(
-		transactionsToDisplay.length >= sortedTransactions.length
-	);
+	// Only what every token has been paged down to. Levelling loads whole pages, so the tokens that had
+	// to reach the floor bring rows from beyond it, while the token whose own oldest row set it is not
+	// asked for more. Shown straight away, those rows left that token's older transactions out between
+	// them until the end of the list asked every chain again. Undated rows stay: there is nothing to
+	// hold them against.
+	let revealable = $derived.by(() => {
+		if (exhausted || isNullish(floor)) {
+			return sortedTransactions;
+		}
 
-	let dry = $derived(nonNullish(dryAtLength) && sortedTransactions.length <= dryAtLength);
+		const cutOff = floor;
+
+		return sortedTransactions.filter(
+			({ transaction: { timestamp } }) =>
+				isNullish(timestamp) || normalizeTimestampToSeconds(timestamp) >= cutOff
+		);
+	});
+
+	let everythingLoadedIsOnScreen = $derived(transactionsToDisplay.length >= revealable.length);
+
+	let dry = $derived(nonNullish(dryAtLength) && revealable.length <= dryAtLength);
 
 	let canFetchMore = $derived(nonNullish(onLoadMore) && !exhausted && !dry);
 
@@ -71,7 +94,7 @@
 			return false;
 		}
 
-		const lengthBeforeFetch = sortedTransactions.length;
+		const lengthBeforeFetch = revealable.length;
 
 		loading = true;
 
@@ -112,7 +135,7 @@
 	};
 
 	$effect(() => {
-		transactionsToDisplay = sortedTransactions.slice(0, Number(WALLET_PAGINATION) * pages);
+		transactionsToDisplay = revealable.slice(0, Number(WALLET_PAGINATION) * pages);
 	});
 </script>
 

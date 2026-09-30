@@ -26,6 +26,11 @@
 		loadMore: () => Promise<ResultSuccess>;
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
+		/**
+		 * The floor every token is levelled to, in seconds, so the merged list is complete down to it.
+		 * Absent until levelling first runs.
+		 */
+		floor?: number;
 	}
 
 	interface Props {
@@ -144,7 +149,7 @@
 	// Rows a token pages in while being levelled never move it: if they did, each run would overshoot
 	// the floor, lower it, and set every other token off again, until all of them had walked back to
 	// the start of their history.
-	let levelFloor: number | undefined;
+	let levelFloor = $state<number | undefined>();
 
 	// Tokens whose rows the floor already accounts for.
 	const accountedTokenIds = new SvelteSet<TokenId>();
@@ -252,4 +257,4 @@
 	);
 </script>
 
-{@render children?.({ loadMore, exhausted })}
+{@render children?.({ loadMore, exhausted, floor: levelFloor })}

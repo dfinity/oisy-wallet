@@ -648,6 +648,7 @@ describe('AllTransactionsLoader', () => {
 		interface LoaderControls {
 			loadMore: () => Promise<ResultSuccess>;
 			exhausted: boolean;
+			floor?: number;
 		}
 
 		const olderSolRow = () => ({
@@ -659,20 +660,22 @@ describe('AllTransactionsLoader', () => {
 			certified: false
 		});
 
-		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
-			let captured: LoaderControls | undefined;
+		const renderWithControls = () => {
+			let readControls: (() => LoaderControls) | undefined;
 
 			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
 				render: () => {
-					captured = getControls();
+					// The getter rather than what it returns at mount, so that the floor levelling sets
+					// afterwards can be read.
+					readControls = getControls;
 
 					return '<span></span>';
 				}
 			}));
 
-			render(AllTransactionsLoader, { props: { ...props, children } });
+			const { rerender } = render(AllTransactionsLoader, { props: { ...props, children } });
 
-			return { controls: () => captured };
+			return { controls: () => readControls?.(), rerender };
 		};
 
 		beforeEach(() => {
@@ -685,6 +688,42 @@ describe('AllTransactionsLoader', () => {
 
 			await waitFor(() => {
 				expect(controls()?.loadMore).toBeInstanceOf(Function);
+			});
+		});
+
+		it('should hand the children the floor it levels every token to', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
+			});
+		});
+
+		// The floor is where the merged list stops being complete, so the list shows rows down to it.
+		it('should hand the children the deeper floor once more history loaded', async () => {
+			const { controls, rerender } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
+			});
+
+			const olderTimestamp = mockMinTimestampStart - 5n;
+
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					{
+						transaction: { ...createMockBtcTransactionsUi(1)[0], timestamp: olderTimestamp },
+						component: 'bitcoin' as const,
+						token: BTC_MAINNET_TOKEN
+					}
+				]
+			});
+
+			await controls()?.loadMore();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(normalizeTimestampToSeconds(olderTimestamp));
 			});
 		});
 

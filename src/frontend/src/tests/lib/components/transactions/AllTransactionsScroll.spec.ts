@@ -2,6 +2,7 @@ import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsS
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { ResultSuccess } from '$lib/types/utils';
+import AllTransactionsScrollTest from '$tests/lib/components/transactions/AllTransactionsScrollTest.svelte';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverManual,
@@ -226,6 +227,67 @@ describe('AllTransactionsScroll', () => {
 			await waitFor(() => {
 				expect(onLoadMore).toHaveBeenCalledTimes(2);
 			});
+		});
+	});
+
+	describe('with a floor', () => {
+		const onLoadMore = vi.fn().mockResolvedValue({ success: false });
+
+		const displayed = (getAllByTestId: (testId: string) => HTMLElement[]) =>
+			getAllByTestId('displayed-transaction').map(({ textContent }) => textContent);
+
+		// Levelling brings rows from beyond the floor for some tokens only. Shown, they left the older
+		// transactions of the token whose own oldest row set the floor out between them.
+		it('should hold back rows older than the floor while the chains still have history', () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['2', '3', '4']);
+		});
+
+		it('should reveal the rows a lower floor reaches', async () => {
+			const { getAllByTestId, rerender } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, onLoadMore }
+			});
+
+			await rerender({ floor: 0 });
+
+			expect(displayed(getAllByTestId)).toEqual(['0', '1', '2', '3', '4']);
+		});
+
+		it('should show every row once the chains are exhausted', () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, exhausted: true, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['0', '1', '2', '3', '4']);
+		});
+
+		it('should keep rows without a timestamp', () => {
+			const undated = { transaction: { id: 'undated' } } as unknown as AllTransactionUiWithCmp;
+
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: [...makeTransactions(3), undated], floor: 2, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['2', 'undated']);
+		});
+
+		it('should ask the chains for more once everything down to the floor is on screen', async () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: {
+					sortedTransactions: makeTransactions(pageSize * 3),
+					floor: pageSize * 3 - 5,
+					onLoadMore
+				}
+			});
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledOnce();
+			});
+
+			expect(displayed(getAllByTestId)).toHaveLength(5);
 		});
 	});
 
