@@ -10,7 +10,8 @@ import type {
 	ExtV2Token as Icrc7Token,
 	IcrcToken,
 	SplToken,
-	Token
+	Token,
+	XrpTrustLineToken
 } from '$declarations/backend/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
@@ -22,7 +23,8 @@ import type {
 	Icrc7SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
-	SplSaveCustomToken
+	SplSaveCustomToken,
+	XrpTrustLineSaveCustomToken
 } from '$lib/types/custom-token';
 import type { TokenId, TokenStandardCode } from '$lib/types/token';
 import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
@@ -74,6 +76,15 @@ const toSplCustomToken = ({
 	token_address,
 	decimals: toNullable(decimals),
 	symbol: toNullable(symbol)
+});
+
+// Only the pair: the rest of the token — name, symbol, decimals — is OISY's own and is rebuilt from it.
+const toXrpTrustLineCustomToken = ({
+	currency,
+	issuer
+}: XrpTrustLineSaveCustomToken): XrpTrustLineToken => ({
+	currency,
+	issuer
 });
 
 export const toCustomToken = ({
@@ -129,6 +140,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'SplDevnet') {
 			return { SplDevnet: toSplCustomToken(rest) };
+		}
+
+		if (networkKey === 'XrpTrustLineMainnet') {
+			return { XrpTrustLineMainnet: toXrpTrustLineCustomToken(rest) };
 		}
 
 		assertNever(networkKey, `Unsupported network key: ${networkKey}`);

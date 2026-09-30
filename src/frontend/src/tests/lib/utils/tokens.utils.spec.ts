@@ -4,6 +4,7 @@ import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import {
 	BTC_MAINNET_SYMBOL,
 	BTC_MAINNET_TOKEN,
@@ -1739,6 +1740,23 @@ describe('tokens.utils', () => {
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...token, networkKey: 'Icrc' })
 					]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveCustomTokensWithKey when XRP Ledger trust-line tokens are present', async () => {
+			const token = { ...RLUSD_TOKEN, enabled: false, version: 2n };
+
+			await saveAllCustomTokens({
+				tokens: [token],
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveCustomTokensWithKey).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: [expect.objectContaining({ ...token, networkKey: 'XrpTrustLineMainnet' })],
 					identity: mockIdentity
 				})
 			);

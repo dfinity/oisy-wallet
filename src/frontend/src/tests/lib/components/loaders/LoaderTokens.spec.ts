@@ -1,3 +1,4 @@
+import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
 import {
 	loadDefaultErc20Tokens,
@@ -52,6 +53,7 @@ import {
 } from '$tests/mocks/user-profile.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { processCustomTokens as processXrpTrustLineCustomTokens } from '$xrp/services/xrp-custom-tokens.services';
 import { toNullable } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
@@ -109,6 +111,10 @@ vi.mock('$icp/services/icrc7.services', () => ({
 
 vi.mock('$sol/services/spl.services', () => ({
 	loadDefaultSplTokens: vi.fn().mockResolvedValue(undefined),
+	processCustomTokens: vi.fn().mockResolvedValue(undefined)
+}));
+
+vi.mock('$xrp/services/xrp-custom-tokens.services', () => ({
 	processCustomTokens: vi.fn().mockResolvedValue(undefined)
 }));
 
@@ -219,6 +225,34 @@ describe('LoaderTokens', () => {
 
 			await waitFor(() => {
 				expect(loadDefaultSplTokens).toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('XRP Ledger tokens', () => {
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('should not process them while they are off', async () => {
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processIcrcCustomTokens).toHaveBeenCalled();
+			});
+
+			expect(processXrpTrustLineCustomTokens).not.toHaveBeenCalled();
+		});
+
+		it('should process them from the one fetched list when they are on', async () => {
+			vi.spyOn(trustLineTokensEnv, 'XRP_TRUST_LINE_TOKENS_ENABLED', 'get').mockReturnValue(true);
+
+			render(LoaderTokens);
+
+			await waitFor(() => {
+				expect(processXrpTrustLineCustomTokens).toHaveBeenCalledWith(
+					expect.objectContaining({ tokens: [], identity: mockIdentity })
+				);
 			});
 		});
 	});
