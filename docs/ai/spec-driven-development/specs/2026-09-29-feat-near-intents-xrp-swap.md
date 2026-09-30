@@ -180,9 +180,11 @@ address: its deposit has validated, and the swap continues without blocking XRP 
 - **Source address:** `NearIntentsData` gains an optional XRP source address, the same shape as
   `XrpData.source_address`. It is required, and validated like it, when the source token is native
   XRP — a swap AUT without it would escape the check — and absent otherwise. The field itself is
-  candid-compatible (an optional field, which rows stored before it decode as `None`), but it
-  changes `src/backend/backend.did`, so the PR carries the breaking-interface marker the repo
-  requires for any `.did` change.
+  candid-compatible with the base branch (an optional field, which rows stored before it decode as
+  `None`). The PR still carries the breaking-interface marker: CI's `breaking-interface` job checks
+  a changed `src/backend/backend.did` against the production interface, which lacks the `Xrp`
+  variant already on `main` (#14109), so the check fails for any PR that changes the `.did` until
+  that is released.
 
 The swap wizard shows the send flow's refusal messages — an earlier XRP payment from this address
 has not settled yet, or the wallet could not check — and steps back. Both refusals come before the
