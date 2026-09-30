@@ -1055,7 +1055,6 @@
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
-			"enter_xrp_address": "Zadejte adresu XRP",
 			"xrp_destination_tag": "Zadejte cílový tag (nepovinné)",
 			"select_network": "Vybrat síť",
 			"search_nfts": "Hledat sběratelské předměty"
@@ -2405,7 +2404,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Nová adresa",

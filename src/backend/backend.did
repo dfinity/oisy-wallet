@@ -1378,6 +1378,7 @@ type TokenAccountId = variant {
 	Btc : BtcAddress;
 	Eth : EthAddress;
 	Sol : text;
+	Xrp : text;
 	Icrcv2 : Icrcv2AccountId
 };
 // A unified token identifier covering both native and custom tokens for the main supported chains.
