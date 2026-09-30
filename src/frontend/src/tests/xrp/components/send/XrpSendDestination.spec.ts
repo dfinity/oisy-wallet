@@ -14,15 +14,12 @@ describe('XrpSendDestination', () => {
 		return found as HTMLInputElement;
 	};
 
-	// Nothing resolves a name on this branch — no contacts, and the recently used list matches
-	// addresses only — so prompting for one walks the user into an invalid-address error. The
-	// shared `enter_recipient_address` is correct again once XRP contacts exist.
-	it('asks for an address only, not a name or alias', () => {
+	// Contacts resolve names and aliases here, so the shared prompt applies to XRP too.
+	it('asks for an address, name or alias', () => {
 		const { container } = render(XrpSendDestination, {
 			props: { destination: '', invalidDestination: false }
 		});
 
-		expect(input(container).placeholder).toBe(en.send.placeholder.enter_xrp_address);
-		expect(input(container).placeholder).not.toBe(en.send.placeholder.enter_recipient_address);
+		expect(input(container).placeholder).toBe(en.send.placeholder.enter_recipient_address);
 	});
 });

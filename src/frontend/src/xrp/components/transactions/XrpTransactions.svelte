@@ -7,13 +7,18 @@
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_XRP_TOKEN } from '$lib/constants/tokens.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { modalXrpTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalXrpToken,
+		modalXrpTokenData,
+		modalXrpTransaction
+	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
+	import XrpTokenModal from '$xrp/components/tokens/XrpTokenModal.svelte';
 	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
 	import XrpTransactionsSkeletons from '$xrp/components/transactions/XrpTransactionsSkeletons.svelte';
 	import { xrpTransactions } from '$xrp/derived/xrp-transactions.derived';
@@ -71,4 +76,6 @@
 
 {#if $modalXrpTransaction && nonNullish(selectedTransaction)}
 	<XrpTransactionModal token={selectedToken} transaction={selectedTransaction} />
+{:else if $modalXrpToken}
+	<XrpTokenModal fromRoute={$modalXrpTokenData} />
 {/if}

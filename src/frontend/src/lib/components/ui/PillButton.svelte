@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import type { Attachment } from 'svelte/attachments';
 
 	interface Props {
 		selected?: boolean;
@@ -9,28 +11,144 @@
 	}
 
 	let { selected = false, accent = false, onClick, children }: Props = $props();
+
+	let lapping = $derived(accent && !selected);
+
+	let button = $state<HTMLButtonElement | undefined>();
+	let seen = $state(false);
+	let laps = $state(0);
+	let running = $state(false);
+
+	// The pill can mount clipped, e.g. last in a scrolling bar on a phone, where touch never
+	// replays the laps; they wait until it is in view so they are not spent off screen.
+	$effect(() => {
+		if (!lapping || seen || isNullish(button)) {
+			return;
+		}
+
+		if (typeof IntersectionObserver === 'undefined') {
+			seen = true;
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some(({ isIntersecting }) => isIntersecting)) {
+					seen = true;
+				}
+			},
+			{ threshold: 0.9 }
+		);
+
+		observer.observe(button);
+
+		return () => observer.disconnect();
+	});
+
+	// An arc removed mid-run, e.g. by selecting the pill, never reports its end; without this the
+	// pill would stay marked as running and ignore every later pointer entry.
+	const clearRunningOnRemove: Attachment = () => () => {
+		running = false;
+	};
+
+	const replayLaps = ({ pointerType }: PointerEvent) => {
+		if (pointerType === 'touch' || running) {
+			return;
+		}
+
+		laps++;
+	};
 </script>
 
 <!-- The neutral border on the unselected state keeps the pill readable on any
 	 surface: `bg-primary` alone is invisible on a `bg-primary` container (e.g. a
 	 modal). Both states carry a 1px border so toggling selection never shifts the
 	 layout. Hover darkens the selected fill and washes the unselected one.
-	 `accent` tints an unselected pill so it stands out from its neighbours, with a
-	 hover darker than its rest state; selected, it matches every other pill, so
-	 which one is on always reads the same. The tint is carried by the fill and the
-	 border only: brand-blue text on it falls below AA contrast at this size, in the
-	 light theme and further in the dark one. -->
+	 `accent` looks like its neighbours at rest; what sets it apart is a brand-blue
+	 arc that runs two laps around its border when the pill first comes into view
+	 and again when the pointer enters it, then goes away. It runs a set number of
+	 laps and not a loop because the pills sit above a list people open every day,
+	 where constant motion turns into noise. Selected, it matches every other pill, so which one
+	 is on always reads the same.
+	 The replay is driven by `pointerenter` rather than `:hover`, so leaving the
+	 pill neither restarts the laps nor cuts them short, and entering it again
+	 while they run does not start them over. -->
 <button
-	class={`shrink-0 cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
+	bind:this={button}
+	class={`relative shrink-0 cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
 		selected
 			? 'border-brand-primary bg-brand-primary text-primary-inverted hover:border-brand-secondary hover:bg-brand-secondary'
-			: accent
-				? 'border-brand-subtle-20 bg-brand-subtle-20 text-secondary hover:border-brand-subtle-30 hover:bg-brand-subtle-30'
-				: 'border-primary bg-primary text-secondary hover:bg-brand-subtle-10'
+			: 'border-primary bg-primary text-secondary hover:bg-brand-subtle-10'
 	}`}
 	aria-pressed={selected}
 	onclick={onClick}
+	onpointerenter={lapping ? replayLaps : undefined}
 	type="button"
 >
+	{#if lapping && seen}
+		{#key laps}
+			<span
+				class="pill-lap"
+				{@attach clearRunningOnRemove}
+				aria-hidden="true"
+				onanimationend={() => (running = false)}
+				onanimationstart={() => (running = true)}
+			></span>
+		{/key}
+	{/if}
+
 	{@render children()}
 </button>
+
+<style lang="scss">
+	// Registered so the angle interpolates; without @property support the arc only fades in and out.
+	@property --pill-lap-angle {
+		syntax: '<angle>';
+		inherits: false;
+		initial-value: 0deg;
+	}
+
+	// The arc is an overlay on the 1px border ring, masked to the ring, so the fill, the text and
+	// the layout box never change. Both laps are one 720deg sweep, so the arc does not fade out
+	// between them.
+	.pill-lap {
+		position: absolute;
+		inset: -1px;
+		padding: 1px;
+		border-radius: inherit;
+		background: conic-gradient(
+			from var(--pill-lap-angle),
+			transparent 0 70%,
+			var(--color-border-brand-primary) 85%,
+			transparent 100%
+		);
+		mask:
+			linear-gradient(#000 0 0) content-box,
+			linear-gradient(#000 0 0);
+		mask-composite: exclude;
+		opacity: 0;
+		pointer-events: none;
+		animation: pill-lap 4s cubic-bezier(0.4, 0, 0.2, 1) 1;
+	}
+
+	@keyframes pill-lap {
+		0% {
+			opacity: 0;
+			--pill-lap-angle: 0deg;
+		}
+		8%,
+		92% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+			--pill-lap-angle: 720deg;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.pill-lap {
+			animation: none;
+		}
+	}
+</style>

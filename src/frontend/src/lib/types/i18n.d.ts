@@ -743,6 +743,8 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		xrp_sent: string;
+		xrp_submitted: string;
 		send_token: string;
 		send_unknown_token: string;
 		destination: string;
@@ -786,7 +788,6 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
-		enter_xrp_address: string;
 		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
@@ -854,8 +855,6 @@ interface I18nSend {
 		no_btc_network_id: string;
 		no_solana_network_id: string;
 		no_xrp_network_id: string;
-		xrp_confirmation_failed: string;
-		xrp_transaction_failed: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
@@ -867,6 +866,9 @@ interface I18nSend {
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 		xrp_send_expired: string;
+		xrp_send_already_in_flight: string;
+		xrp_send_not_guarded: string;
+		xrp_active_transaction_failed: string;
 		xrp_amount_exceeds_sendable: string;
 		xrp_destination_unfunded: string;
 		xrp_destination_tag_required: string;
@@ -881,6 +883,32 @@ interface I18nMint {
 
 interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
+interface I18nCycles_mint {
+	text: {
+		title: string;
+		description: string;
+		you_mint_estimate: string;
+		rate: string;
+		cycles_ledger_fee: string;
+		minter: string;
+		one_way: string;
+		sending: string;
+		minting: string;
+		minted: string;
+		pending: string;
+	};
+	error: {
+		rate_unavailable: string;
+		amount_too_small: string;
+		refunded: string;
+		refunded_nothing: string;
+		failed: string;
+		not_started: string;
+		transfer_failed: string;
+		unconfirmed: string;
+	};
 }
 
 interface I18nActive_user_transactions {
@@ -1183,6 +1211,7 @@ interface I18nTokens {
 			info_ext: string;
 			info_index: string;
 			custom_tokens_not_supported: string;
+			custom_tokens_not_supported_yet: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -1413,6 +1442,7 @@ interface I18nWallet_connect {
 		unreviewed_instructions: string;
 		unreviewed_instructions_simulated: string;
 		cannot_be_shown: string;
+		close_pays_others: string;
 		simulated_instructions: string;
 		multiple_operations: string;
 		simulated_review: string;
@@ -1519,6 +1549,7 @@ interface I18nWallet_connect {
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
+		close_pays_others: string;
 		unreviewed_without_simulation: string;
 		sol_transaction_as_message: string;
 		request_not_defined: string;
@@ -1793,6 +1824,7 @@ interface I18nTransaction {
 		instruction_unwrap: string;
 		instruction_create_account: string;
 		instruction_close_account: string;
+		instruction_close_account_for: string;
 		instruction_approve: string;
 		instruction_revoke: string;
 		instruction_set_authority: string;
@@ -1804,8 +1836,12 @@ interface I18nTransaction {
 		instruction_unknown: string;
 		instruction_unknown_via: string;
 		instruction_rent: string;
-		instruction_rent_returned: string;
+		instruction_balance_returned: string;
+		instruction_balance_sent: string;
 		instruction_returned: string;
+		instruction_sent: string;
+		instruction_returned_to: string;
+		instruction_balance_returned_to: string;
 		instruction_own_account: string;
 		raw_value: string;
 		status: string;
@@ -1988,7 +2024,7 @@ interface I18nContact {
 }
 
 interface I18nAddress {
-	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string; Xrp: string };
 	form: {
 		new_address: string;
 		address_placeholder: string;
@@ -2171,6 +2207,7 @@ interface I18nLiquidium {
 		funds_delivered_to: string;
 		your_oisy_address: string;
 		borrow_risk_info: string;
+		borrow_activation_fee_info: string;
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
@@ -2612,6 +2649,7 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	cycles_mint: I18nCycles_mint;
 	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;

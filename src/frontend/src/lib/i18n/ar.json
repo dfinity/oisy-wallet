@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "إرسال",
+			"xrp_sent": "",
+			"xrp_submitted": "",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "الوجهة",
@@ -1053,7 +1055,6 @@
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
-			"enter_xrp_address": "",
 			"xrp_destination_tag": "",
 			"select_network": "حدد الشبكة",
 			"search_nfts": ""
@@ -1121,8 +1122,6 @@
 			"no_btc_network_id": "الشبكة الحالية ($networkId) ليست شبكة بيتكوين.",
 			"no_solana_network_id": "الشبكة الحالية ($networkId) ليست شبكة سولانا.",
 			"no_xrp_network_id": "",
-			"xrp_confirmation_failed": "",
-			"xrp_transaction_failed": "",
 			"no_pending_bitcoin_transaction": "حدث خطأ أثناء تحميل معاملات البيتكوين المعلقة. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
@@ -1134,6 +1133,9 @@
 			"solana_insufficient_funds_for_rent": "",
 			"fee_calc_unsupported_standard": "",
 			"xrp_send_expired": "",
+			"xrp_send_already_in_flight": "",
+			"xrp_send_not_guarded": "",
+			"xrp_active_transaction_failed": "",
 			"xrp_amount_exceeds_sendable": "",
 			"xrp_destination_unfunded": "",
 			"xrp_destination_tag_required": "",
@@ -1153,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "",
+			"description": "",
+			"you_mint_estimate": "",
+			"rate": "",
+			"cycles_ledger_fee": "",
+			"minter": "",
+			"one_way": "",
+			"sending": "",
+			"minting": "",
+			"minted": "",
+			"pending": ""
+		},
+		"error": {
+			"rate_unavailable": "",
+			"amount_too_small": "",
+			"refunded": "",
+			"refunded_nothing": "",
+			"failed": "",
+			"not_started": "",
+			"transfer_failed": "",
+			"unconfirmed": ""
 		}
 	},
 	"active_user_transactions": {
@@ -1469,7 +1496,8 @@
 				"info": "تتوفر معرفات حاوية السجل والفهرس عادةً على موقع المشروع.",
 				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
-				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة."
+				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة.",
+				"custom_tokens_not_supported_yet": ""
 			},
 			"error": {
 				"loading_metadata": "العنوان المحدد ليس توكنًا صالحًا في الشبكة المحددة.",
@@ -1732,6 +1760,7 @@
 			"unreviewed_instructions": "",
 			"unreviewed_instructions_simulated": "",
 			"cannot_be_shown": "",
+			"close_pays_others": "",
 			"simulated_instructions": "",
 			"multiple_operations": "",
 			"simulated_review": "",
@@ -1841,6 +1870,7 @@
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
+			"close_pays_others": "",
 			"unreviewed_without_simulation": "",
 			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
@@ -2122,6 +2152,7 @@
 			"instruction_unwrap": "",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2133,8 +2164,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "",
+			"instruction_balance_sent": "",
 			"instruction_returned": "",
+			"instruction_sent": "",
+			"instruction_returned_to": "",
+			"instruction_balance_returned_to": "",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "الحالة",
@@ -2369,7 +2404,8 @@
 			"Icrcv2": "كمبيوتر الإنترنت",
 			"Btc": "بيتكوين",
 			"Eth": "إيثريوم",
-			"Sol": "سولانا"
+			"Sol": "سولانا",
+			"Xrp": ""
 		},
 		"form": {
 			"new_address": "عنوان جديد",
@@ -2631,6 +2667,7 @@
 			"funds_delivered_to": "",
 			"your_oisy_address": "",
 			"borrow_risk_info": "",
+			"borrow_activation_fee_info": "",
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",

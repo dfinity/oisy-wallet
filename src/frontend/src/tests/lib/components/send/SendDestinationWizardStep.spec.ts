@@ -21,7 +21,11 @@ import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SendDestinationWizardStepTestHost from '$tests/lib/components/send/SendDestinationWizardStepTestHost.svelte';
-import { getMockContacts, mockBackendContactAddressEth } from '$tests/mocks/contacts.mock';
+import {
+	getMockContacts,
+	mockBackendContactAddressEth,
+	mockBackendContactAddressXrp
+} from '$tests/mocks/contacts.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
@@ -153,9 +157,31 @@ describe('SendDestinationWizardStep', () => {
 		).toBeInTheDocument();
 	});
 
-	// XRP contacts need a backend address type, so Recently Used is the only tab: a Contacts tab
-	// could only ever show its empty state.
 	describe('XRP', () => {
+		const xrpContact = mapToFrontendContact({
+			...getMockContacts({
+				n: 1,
+				names: ['XRP Contact'],
+				addresses: [[mockBackendContactAddressXrp]]
+			})[0],
+			// Distinct from the ETH contacts above, so removing it leaves them in the store
+			id: BigInt(99)
+		});
+
+		const renderHost = (selectedContact: Writable<ContactUi>) =>
+			render(SendDestinationWizardStepTestHost, {
+				props: {
+					selectedContact,
+					destination: '',
+					activeSendDestinationTab: 'recentlyUsed',
+					onBack: vi.fn(),
+					onNext: vi.fn(),
+					onClose: vi.fn(),
+					onQRCodeScan: vi.fn()
+				},
+				context: mockContext(XRP_TOKEN)
+			});
+
 		const createXrpSend = (to: string): XrpCertifiedTransaction => ({
 			data: {
 				id: `tx-${to}`,
@@ -170,7 +196,12 @@ describe('SendDestinationWizardStep', () => {
 		});
 
 		beforeEach(() => {
+			contactsStore.addContact(xrpContact);
 			xrpTransactionsStore.reset(XRP_TOKEN_ID);
+		});
+
+		afterEach(() => {
+			contactsStore.removeContact(xrpContact.id);
 		});
 
 		it('should display the XRP send destination components', () => {
@@ -184,30 +215,35 @@ describe('SendDestinationWizardStep', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should show the Recently Used tab without a Contacts tab', () => {
-			const { getByText, queryByText } = render(SendDestinationWizardStep, {
+		it('should render the destination tabs', () => {
+			const { getByText } = render(SendDestinationWizardStep, {
 				props,
 				context: mockContext(XRP_TOKEN)
 			});
 
 			expect(getByText(en.send.text.recently_used_tab)).toBeInTheDocument();
-			expect(queryByText(en.send.text.contacts_tab)).toBeNull();
+			expect(getByText(en.send.text.contacts_tab)).toBeInTheDocument();
 		});
 
-		// The modal keeps one tab state for every network, so it still says `contacts` when the user
-		// opened that tab on another network before picking XRP.
-		it('should list the recently used addresses when the modal last had the Contacts tab open', () => {
-			xrpTransactionsStore.append({
-				tokenId: XRP_TOKEN_ID,
-				transactions: [createXrpSend(mockXrpAddress2)]
-			});
+		it('should set selectedContact when an XRP contact is selected', async () => {
+			const selectedContact: Writable<ContactUi> = writable();
+			const { getByText, getByTestId } = renderHost(selectedContact);
 
-			const { getByText } = render(SendDestinationWizardStep, {
-				props: { ...props, destination: '', activeSendDestinationTab: 'contacts' as const },
-				context: mockContext(XRP_TOKEN)
-			});
+			await fireEvent.click(getByText(get(i18n).send.text.contacts_tab));
 
-			expect(getByText(shortenWithMiddleEllipsis({ text: mockXrpAddress2 }))).toBeInTheDocument();
+			await fireEvent.click(getByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${xrpContact.name}`));
+
+			expect(get(selectedContact)).toEqual(xrpContact);
+		});
+
+		it('should not offer contacts without an XRP address', async () => {
+			const { getByText, queryByTestId } = renderHost(writable());
+
+			await fireEvent.click(getByText(get(i18n).send.text.contacts_tab));
+
+			expect(
+				queryByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${mockContacts[0].name}`)
+			).not.toBeInTheDocument();
 		});
 
 		// Navigation comes from the step's toolbar, not from the tabs.

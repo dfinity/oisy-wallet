@@ -12,14 +12,12 @@
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import KnownDestinations from '$lib/components/send/KnownDestinations.svelte';
 	import SendDestinationTabs from '$lib/components/send/SendDestinationTabs.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import {
 		SEND_DESTINATION_WIZARD_STEP,
@@ -43,6 +41,7 @@
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
 	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
@@ -180,9 +179,6 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- XRP address-book contacts require a backend TokenAccountId address type, so Recently Used
-		     is the only tab. It is pinned rather than bound to `activeSendDestinationTab`, which still
-		     holds `contacts` when the user opened that tab on another network in the same modal. -->
 		<div data-tid={testId}>
 			<XrpSendDestination
 				knownDestinations={$xrpKnownDestinations}
@@ -190,18 +186,14 @@
 				bind:destination
 				bind:invalidDestination
 			/>
-			<div class="my-6">
-				<Tabs
-					activeTab="recentlyUsed"
-					tabs={[{ label: $i18n.send.text.recently_used_tab, id: 'recentlyUsed' }]}
-				>
-					<KnownDestinations
-						knownDestinations={$xrpKnownDestinations}
-						onNext={next}
-						bind:destination
-					/>
-				</Tabs>
-			</div>
+			<SendDestinationTabs
+				knownDestinations={$xrpKnownDestinations}
+				networkContacts={$xrpNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
 		</div>
 	{/if}
 

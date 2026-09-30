@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "发送",
+			"xrp_sent": "您的 XRP 付款已完成。",
+			"xrp_submitted": "付款已提交。通常几秒内即可结算——您可以关闭此窗口继续操作。",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "目标地址",
@@ -1053,7 +1055,6 @@
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
-			"enter_xrp_address": "输入 XRP 地址",
 			"xrp_destination_tag": "输入目标标签（可选）",
 			"select_network": "选择网络",
 			"search_nfts": "搜索收藏品"
@@ -1121,8 +1122,6 @@
 			"no_btc_network_id": "当前网络（$networkId）不是Bitcoin网络。",
 			"no_solana_network_id": "当前网络（$networkId）不是Solana网络。",
 			"no_xrp_network_id": "当前网络（$networkId）不是XRP Ledger网络。",
-			"xrp_confirmation_failed": "我们无法确认交易是否已发送。它仍可能完成，因此请暂时不要重新发送——如果完成，您的余额会更新。",
-			"xrp_transaction_failed": "交易已被网络处理但失败，因此您的资金未发送。网络手续费仍已扣除。",
 			"no_pending_bitcoin_transaction": "加载待处理的Bitcoin交易时出现错误。请稍后重试。",
 			"unexpected_utxos_fee": "计算交易费用时出现错误。",
 			"unable_to_retrieve_amount": "n/a（无法获取）",
@@ -1133,7 +1132,10 @@
 			"solana_insufficient_funds_for_fee": "您的SOL余额不足以支付交易费用。",
 			"solana_insufficient_funds_for_rent": "您的SOL余额不足以支付创建账户所需的租金。",
 			"fee_calc_unsupported_standard": "由于提供的代币标准不受支持，无法计算费用。",
-			"xrp_send_expired": "交易未发送：网络未及时将其纳入。您的钱包中没有任何资金流出，可以安全地创建一笔新交易。",
+			"xrp_send_expired": "您在 $network 上发送 $amount $symbol 未能完成：网络未及时收录。您的钱包中没有任何资金转出，可以安全地重新发送。",
+			"xrp_send_already_in_flight": "此地址上一笔 XRP 付款尚未结算完成。未发送任何内容——请等待其完成，大约需要一分钟，然后再次发送。",
+			"xrp_send_not_guarded": "我们无法检查上一笔 XRP 付款是否仍在结算。未发送任何内容——请稍后重试。",
+			"xrp_active_transaction_failed": "您在 $network 上发送 $amount $symbol 已被网络处理但失败（$result），因此您的资金未发送。网络手续费仍已扣除。",
 			"xrp_amount_exceeds_sendable": "该金额已经放不下了。您的账户必须保留 XRP 准备金以及网络手续费，两者都可能在您确认期间变动。尚未发送任何款项——请调低金额，或在账户信息刷新后重试。",
 			"xrp_destination_unfunded": "此地址还没有 XRP 账户。创建账户需要至少 $reserve XRP 的首笔付款。尚未发送任何款项——请提高金额，或发送到已激活的地址。",
 			"xrp_destination_tag_required": "此地址需要目标标签。尚未发送任何款项——请填入收款服务提供给您的标签，然后重新发送。",
@@ -1143,9 +1145,9 @@
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "铸造",
+			"minting": "正在铸造...",
+			"mint_review_subtitle": "你铸造"
 		}
 	},
 	"burn": {
@@ -1153,6 +1155,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "铸造 $token",
+			"description": "铸造会按网络汇率用 $sourceToken 创建新的 $destinationToken，并销毁这些 $sourceToken。",
+			"you_mint_estimate": "你铸造（预估）",
+			"rate": "汇率",
+			"cycles_ledger_fee": "Cycles Ledger 手续费",
+			"minter": "铸造方",
+			"one_way": "铸造无法撤销：$destinationToken 无法换回 $sourceToken。",
+			"sending": "正在将 $token 发送到 $minter...",
+			"minting": "正在铸造 $token...",
+			"minted": "已铸造 $amount $token。",
+			"pending": "铸造耗时比平常更久。它将在后台完成：可在活跃交易中查看进度。"
+		},
+		"error": {
+			"rate_unavailable": "无法加载 $token 汇率。请稍后再试。",
+			"amount_too_small": "金额太小，无法铸造 $token。",
+			"refunded": "铸造已退款。你的 $token 已退回，扣除了 $refundFee $token。原因：$reason",
+			"refunded_nothing": "铸造已退款，但手续费扣除了全部金额，没有退回任何 $token。原因：$reason",
+			"failed": "铸造失败。原因：$reason",
+			"not_started": "无法开始铸造。未发送任何内容，请重试。",
+			"transfer_failed": "$token 转账失败。未发送任何内容。",
+			"unconfirmed": "无法确认 $token 转账。如果转账已完成，铸造将在后台完成：可在活跃交易中查看进度。"
 		}
 	},
 	"active_user_transactions": {
@@ -1469,7 +1496,8 @@
 				"info": "Ledger 和 Index canister ID 通常可在项目官网上找到。",
 				"info_ext": "Canister ID 通常可在项目官网上找到。",
 				"info_index": "Index canister ID 是可选的，但如果缺少，$oisy_short 将无法显示交易历史。",
-				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
+				"custom_tokens_not_supported": "所选网络不支持自定义代币。",
+				"custom_tokens_not_supported_yet": "OISY 目前尚不支持此网络上的自定义代币。"
 			},
 			"error": {
 				"loading_metadata": "指定的地址在所选网络中不是有效的代币。",
@@ -1732,6 +1760,7 @@
 			"unreviewed_instructions": "OISY 无法解码其中部分指令，因此以下审查可能不完整。",
 			"unreviewed_instructions_simulated": "此交易包含来自外部来源的操作，OISY 无法解码，因此 OISY 对其运行了模拟。请确保您信任该应用程序，并在签名前查看模拟的余额变化和操作。请注意，实际结果可能与模拟不同。",
 			"cannot_be_shown": "此交易包含无法全部准确显示以供审核的操作，因此 OISY 不会签名。请拒绝，并要求该应用发送更简单的请求。",
+			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，OISY 不会签署该交易。",
 			"simulated_instructions": "模拟指令",
 			"multiple_operations": "此交易包含多个影响您钱包的操作。请核实模拟的余额变化和包含的指令，仅在您也信任该应用程序时才批准此交易。",
 			"simulated_review": "以下审查是根据网络当前状态模拟此交易所预测的结果。实际执行时的结果可能与此不同。",
@@ -1841,6 +1870,7 @@
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
+			"close_pays_others": "此交易会关闭您的一个代币账户，并将其余额支付到不属于您钱包的地址。为了您的安全，该交易未被签署。",
 			"unreviewed_without_simulation": "OISY 无法读取此交易的一部分，网络也未返回其模拟结果，因此没有任何信息说明该部分会做什么。为了您的安全，该交易未被签名。",
 			"sol_transaction_as_message": "此消息是一笔 Solana 交易，只能通过交易审查来批准。出于安全考虑，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
@@ -2119,9 +2149,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "解包并关闭 $symbol 代币账户",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "关闭 $symbol 代币账户",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2133,8 +2164,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "SOL 余额返还到您的钱包",
+			"instruction_balance_sent": "SOL 余额已发送到您的钱包",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL 已发送到您的钱包",
+			"instruction_returned_to": "$amount SOL 转至",
+			"instruction_balance_returned_to": "SOL 余额转至",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "状态",
@@ -2369,7 +2404,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "比特币",
 			"Eth": "以太坊",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "新地址",
@@ -2631,6 +2667,7 @@
 			"funds_delivered_to": "资金发送至",
 			"your_oisy_address": "您的 $oisy_short 地址",
 			"borrow_risk_info": "借款会降低您的健康系数。如果降得太低，您的抵押品可能会被清算。",
+			"borrow_activation_fee_info": "Liquidium 会在借款金额之上额外收取 $fee% 的激活费。",
 			"borrow_at_risk_warning": "此笔借款会明显降低您的健康系数。",
 			"borrow_exceeds_power": "金额超过您的可借额度。",
 			"borrow_below_minimum": "金额低于最低借款额。",

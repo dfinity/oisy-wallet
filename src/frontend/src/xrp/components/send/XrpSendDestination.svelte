@@ -21,12 +21,8 @@
 	const isInvalidDestination = (): boolean => isInvalidDestinationXrp(destination);
 </script>
 
-<!-- Address only, unlike the BTC and SOL inputs that share `enter_recipient_address`. Nothing
-	resolves a name here: XRP has no contacts yet, and the recently used list matches addresses
-	only. Prompting for a name would steer the user into an invalid-address error. Switch back to
-	the shared string once XRP contacts exist. -->
 <SendInputDestination
-	inputPlaceholder={$i18n.send.placeholder.enter_xrp_address}
+	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
 	{knownDestinations}
 	onInvalidDestination={isInvalidDestination}
 	onQRButtonClick={onQRCodeScan}
