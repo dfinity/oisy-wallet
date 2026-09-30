@@ -51,16 +51,22 @@
 		destroyed = true;
 	});
 
-	const oldestTimestamp = (rows: AllTransactionUiWithCmp[]): number =>
-		Math.min(
-			...rows.map(({ transaction: { timestamp } }) =>
-				nonNullish(timestamp) ? normalizeTimestampToSeconds(timestamp) : Infinity
-			)
-		);
+	// `undefined` when no row is dated. Pending transactions carry no timestamp, and a floor taken
+	// from them came out as `Infinity`, which hid every dated row that arrived after them.
+	const oldestTimestamp = (rows: AllTransactionUiWithCmp[]): number | undefined =>
+		rows.reduce<number | undefined>((oldest, { transaction: { timestamp } }) => {
+			if (isNullish(timestamp)) {
+				return oldest;
+			}
+
+			const seconds = normalizeTimestampToSeconds(timestamp);
+
+			return isNullish(oldest) || seconds < oldest ? seconds : oldest;
+		}, undefined);
 
 	// The oldest transaction on screen across every token. Tokens whose history stops short of it
 	// would leave gaps in the merged list, so they get paged down to it.
-	const oldestLoadedTimestamp = (): number => oldestTimestamp(transactions);
+	const oldestLoadedTimestamp = (): number | undefined => oldestTimestamp(transactions);
 
 	const pageToken = async ({
 		token,
@@ -180,16 +186,22 @@
 			return;
 		}
 
-		newcomers.forEach(({ id }) => accountedTokenIds.add(id));
-
 		const newcomerIds = new Set(newcomers.map(({ id }) => id));
 
 		const newcomersOldest = isNullish(levelFloor)
 			? oldestLoadedTimestamp()
 			: oldestTimestamp(transactions.filter(({ token: { id } }) => newcomerIds.has(id)));
 
+		// No dated row loaded yet, so there is no floor to level to. The newcomers stay unaccounted
+		// and are looked at again when more rows arrive.
+		if (isNullish(levelFloor) && isNullish(newcomersOldest)) {
+			return;
+		}
+
+		newcomers.forEach(({ id }) => accountedTokenIds.add(id));
+
 		// Older than the current floor: every token has to reach the new one, not just the newcomers.
-		if (isNullish(levelFloor) || newcomersOldest < levelFloor) {
+		if (nonNullish(newcomersOldest) && (isNullish(levelFloor) || newcomersOldest < levelFloor)) {
 			levelFloor = newcomersOldest;
 
 			levelTokens({ tokens: $enabledFungibleNetworkTokens, minTimestamp: levelFloor });
@@ -197,6 +209,11 @@
 			return;
 		}
 
+		if (isNullish(levelFloor)) {
+			return;
+		}
+
+		// Newcomers with only undated rows too: their history can still reach below the floor.
 		levelTokens({ tokens: newcomers, minTimestamp: levelFloor });
 	};
 
@@ -226,14 +243,19 @@
 			}))
 		);
 
-		levelFloor = oldestLoadedTimestamp();
+		// The previous floor stays when no row is dated, rather than one that hides every row.
+		const floor = oldestLoadedTimestamp() ?? levelFloor;
+
+		levelFloor = floor;
 
 		// A token whose page just failed waits for the next round: levelling it now would ask for the
 		// same failed cursor again straight away.
-		const levelled = await levelTokens({
-			tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
-			minTimestamp: levelFloor
-		});
+		const levelled = isNullish(floor)
+			? []
+			: await levelTokens({
+					tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
+					minTimestamp: floor
+				});
 
 		// Without it a round in which pages failed and nothing loaded would read as the chains having
 		// nothing left, and the scroll would stop asking.

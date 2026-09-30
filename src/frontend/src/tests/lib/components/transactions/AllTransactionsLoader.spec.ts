@@ -728,6 +728,40 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
+		// Pending transactions carry no timestamp. A floor taken from them alone came out as `Infinity`,
+		// which hid every dated row, and the token was not looked at again when its dated rows came.
+		describe('when every loaded row is undated', () => {
+			const undatedIcpRow: AllTransactionUiWithCmp = {
+				transaction: { ...createMockIcTransactionsUi(1)[0], id: 'undated', timestamp: undefined },
+				component: 'ic' as const,
+				token: ICP_TOKEN
+			};
+
+			it('should hand the children no floor, before or after a round', async () => {
+				const { controls } = renderWithControls([undatedIcpRow]);
+
+				await runResolvedPromises();
+
+				expect(controls()?.floor).toBeUndefined();
+
+				await controls()?.loadMore();
+
+				expect(controls()?.floor).toBeUndefined();
+			});
+
+			it('should set the floor once a dated row arrives', async () => {
+				const { controls, rerender } = renderWithControls([undatedIcpRow]);
+
+				await runResolvedPromises();
+
+				await rerender({ transactions: [undatedIcpRow, ...mockTransactions] });
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(mockMinTimestamp);
+				});
+			});
+		});
+
 		// Levelling waits for every store to load, and one that never did left the list with no floor
 		// at all.
 		describe('before levelling or a round sets a floor', () => {
