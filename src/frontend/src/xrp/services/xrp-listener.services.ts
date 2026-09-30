@@ -97,7 +97,7 @@ const syncTrustLines = ({ tokenId, lines }: { tokenId: TokenId; lines: XrpTrustL
 	const held = new Set<TokenId>();
 
 	for (const line of lines) {
-		const { id, decimals } = toXrpTrustLineToken({ line, network });
+		const { id, decimals } = toXrpTrustLineToken({ identity: line, network });
 		const value = parseXrpTokenValue({ value: line.balance, decimals });
 
 		held.add(id);
@@ -109,7 +109,7 @@ const syncTrustLines = ({ tokenId, lines }: { tokenId: TokenId; lines: XrpTrustL
 	}
 
 	for (const line of previous) {
-		const { id } = toXrpTrustLineToken({ line, network });
+		const { id } = toXrpTrustLineToken({ identity: line, network });
 
 		if (!held.has(id)) {
 			balancesStore.reset(id);
@@ -137,7 +137,7 @@ export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 
 	if (nonNullish(network)) {
 		for (const line of get(xrpTrustLinesStore)[tokenId] ?? []) {
-			balancesStore.reset(toXrpTrustLineToken({ line, network }).id);
+			balancesStore.reset(toXrpTrustLineToken({ identity: line, network }).id);
 		}
 	}
 
