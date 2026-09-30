@@ -30,6 +30,13 @@ interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
 
+// As typed: the currency code in any of its accepted spellings, the issuer unchecked. The review
+// parses both.
+interface XrpAddTokenData {
+	xrpCurrency: string;
+	xrpIssuer: string;
+}
+
 export type AddTokenData = OneOf<
 	[
 		EthAddTokenData,
@@ -38,6 +45,7 @@ export type AddTokenData = OneOf<
 		Dip721AddTokenData,
 		IcPunksAddTokenData,
 		Icrc7AddTokenData,
-		SplAddTokenData
+		SplAddTokenData,
+		XrpAddTokenData
 	]
 >;
