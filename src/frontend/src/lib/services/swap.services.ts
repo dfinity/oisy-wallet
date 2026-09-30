@@ -46,6 +46,7 @@ import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { xrpSwapProviders } from '$lib/providers/xrp-swap.providers';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
@@ -112,7 +113,9 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet,
+	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -370,10 +373,11 @@ const resolveSwapRecipientAddress = ({
 	destinationToken,
 	userEthAddress,
 	userSolAddress,
-	userBtcAddress
+	userBtcAddress,
+	userXrpAddress
 }: Pick<
 	FetchSwapAmountsParams,
-	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress'
+	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress'
 >): SwapRecipientResolution => {
 	const {
 		network: { id: networkId }
@@ -390,6 +394,13 @@ const resolveSwapRecipientAddress = ({
 	if (isNetworkIdBTCMainnet(networkId)) {
 		return nonNullish(userBtcAddress)
 			? { type: 'resolved', recipientAddress: userBtcAddress }
+			: { type: 'missing' };
+	}
+
+	// Mainnet only, for the same reason: XRP has no testnet in the wallet.
+	if (isNetworkIdXRPMainnet(networkId)) {
+		return nonNullish(userXrpAddress)
+			? { type: 'resolved', recipientAddress: userXrpAddress }
 			: { type: 'missing' };
 	}
 
@@ -412,7 +423,8 @@ export const fetchSwapAmounts = async ({
 	isSourceTokenIcrc2,
 	userEthAddress,
 	userSolAddress,
-	userBtcAddress
+	userBtcAddress,
+	userXrpAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -445,7 +457,8 @@ export const fetchSwapAmounts = async ({
 		destinationToken,
 		userEthAddress,
 		userSolAddress,
-		userBtcAddress
+		userBtcAddress,
+		userXrpAddress
 	});
 
 	if (recipientResolution.type === 'missing') {
@@ -467,6 +480,19 @@ export const fetchSwapAmounts = async ({
 			destinationToken,
 			amount: sourceAmount,
 			userBtcAddress,
+			recipientAddress,
+			slippage
+		});
+	}
+
+	// Ahead of the EVM fall-through for the same reason as Bitcoin, and of the Solana branch,
+	// which would otherwise take an XRP → SOL pair and quote it with the user's EVM address.
+	if (isNetworkIdXrp(sourceToken.network.id)) {
+		return await fetchSwapAmountsXRP({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userAddress: userXrpAddress,
 			recipientAddress,
 			slippage
 		});
@@ -512,7 +538,7 @@ const fetchSwapAmountsICP = async ({
 	isSourceTokenIcrc2
 }: Omit<
 	FetchSwapAmountsParams,
-	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'amount'
+	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'userXrpAddress' | 'amount'
 > & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
@@ -1356,6 +1382,29 @@ export const fetchSwapAmountsSOL = async ({
 	}
 
 	const enabledProviders = solSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
+		)
+	);
+
+	return reduceSettledSwapResults(settledResults);
+};
+
+export const fetchSwapAmountsXRP = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress,
+	recipientAddress,
+	slippage
+}: NearIntentsQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+
+	const enabledProviders = xrpSwapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>

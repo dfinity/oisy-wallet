@@ -17,6 +17,7 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { OptionXrpAddress } from '$xrp/types/address';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
@@ -93,6 +94,9 @@ export interface FetchSwapAmountsParams {
 	// The user's own Bitcoin address. Unlike the other two it is needed to *quote*, not
 	// only to execute: a BTC → ckBTC offer's fee comes from selecting the user's UTXOs.
 	userBtcAddress: OptionBtcAddress;
+	// The user's own XRP mainnet address: the refund address of a swap from XRP, and the
+	// payout address of a swap toward it.
+	userXrpAddress: OptionXrpAddress;
 }
 
 export type Slippage = string | number;

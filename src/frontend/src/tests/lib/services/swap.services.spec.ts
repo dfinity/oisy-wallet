@@ -4,6 +4,7 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
@@ -88,6 +89,7 @@ import {
 	mockVeloraDeltaPrice,
 	mockVeloraOptimalRate
 } from '$tests/mocks/velora.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { constructSimpleSDK, type DeltaPrice, type OptimalRate } from '@velora-dex/sdk';
 import { get, readable } from 'svelte/store';
 
@@ -142,6 +144,7 @@ const mockEvmNearIntentsGetQuote = vi.hoisted(() => vi.fn());
 const mockSolGetQuote = vi.hoisted(() => vi.fn());
 const mockIcpBridgeGetQuote = vi.hoisted(() => vi.fn());
 const mockBtcGetQuote = vi.hoisted(() => vi.fn());
+const mockXrpGetQuote = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
@@ -183,6 +186,16 @@ vi.mock('$lib/providers/btc-swap.providers', () => ({
 		{
 			key: 'chainFusion',
 			getQuote: mockBtcGetQuote,
+			isEnabled: true
+		}
+	]
+}));
+
+vi.mock('$lib/providers/xrp-swap.providers', () => ({
+	xrpSwapProviders: [
+		{
+			key: 'near_intents',
+			getQuote: mockXrpGetQuote,
 			isEnabled: true
 		}
 	]
@@ -331,7 +344,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -370,7 +384,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -402,7 +417,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
@@ -438,7 +454,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -465,7 +482,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -492,7 +510,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -520,7 +539,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -550,7 +570,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: '0xUser',
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalled();
@@ -581,7 +602,8 @@ describe('swap.services', () => {
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockIcpBridgeGetQuote).toHaveBeenCalledWith(
@@ -611,7 +633,8 @@ describe('swap.services', () => {
 					isSourceTokenIcrc2: false,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockIcpBridgeGetQuote).not.toHaveBeenCalled();
@@ -630,7 +653,8 @@ describe('swap.services', () => {
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -649,7 +673,8 @@ describe('swap.services', () => {
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -684,7 +709,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -709,7 +735,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -726,7 +753,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -745,7 +773,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockSolGetQuote).toHaveBeenCalledWith(
@@ -769,7 +798,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockSolGetQuote).toHaveBeenCalledWith(
@@ -792,7 +822,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockSolGetQuote).toHaveBeenCalledWith(
@@ -815,7 +846,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockSolGetQuote).toHaveBeenCalledWith(
@@ -839,7 +871,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -856,7 +889,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: undefined,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -873,7 +907,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -906,7 +941,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -927,7 +963,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -951,7 +988,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -973,7 +1011,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockBtcGetQuote).toHaveBeenCalledWith(
@@ -996,7 +1035,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockBtcGetQuote).toHaveBeenCalledWith(
@@ -1018,7 +1058,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -1039,7 +1080,8 @@ describe('swap.services', () => {
 					slippage: 1,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockBtcGetQuote).toHaveBeenCalledWith({
@@ -1050,6 +1092,137 @@ describe('swap.services', () => {
 					recipientAddress: undefined,
 					slippage: 1
 				});
+			});
+		});
+
+		describe('with XRP tokens', () => {
+			const evmToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+			const quote = {
+				provider: SwapProvider.NEAR_INTENTS,
+				receiveAmount: 500n,
+				swapDetails: mockNearIntentsQuoteResponse
+			};
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+			});
+
+			// The XRP address is both the quote's user address and 1Click's refund address.
+			it('should route an XRP source to the XRP fan-out with the XRP address', async () => {
+				mockXrpGetQuote.mockResolvedValueOnce(quote);
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: XRP_TOKEN,
+					destinationToken: evmToken,
+					amount: 10,
+					tokens: [XRP_TOKEN, evmToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: mockXrpAddress
+				});
+
+				expect(result).toEqual([quote]);
+				expect(mockXrpGetQuote).toHaveBeenCalledExactlyOnceWith({
+					sourceToken: XRP_TOKEN,
+					destinationToken: evmToken,
+					amount: 10_000_000n,
+					userAddress: mockXrpAddress,
+					recipientAddress: mockEthAddress,
+					slippage: 1
+				});
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+				expect(mockEvmNearIntentsGetQuote).not.toHaveBeenCalled();
+			});
+
+			// Without its own branch ahead of the Solana one, an XRP → SOL pair would be quoted by
+			// the Solana fan-out with the user's EVM address as the source.
+			it('should route an XRP → SOL pair to the XRP fan-out', async () => {
+				mockXrpGetQuote.mockResolvedValueOnce(quote);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: XRP_TOKEN,
+					destinationToken: mockValidSplToken,
+					amount: 10,
+					tokens: [XRP_TOKEN, mockValidSplToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined,
+					userXrpAddress: mockXrpAddress
+				});
+
+				expect(mockXrpGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ userAddress: mockXrpAddress, recipientAddress: mockSolAddress })
+				);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should return [] for an XRP source when the user XRP address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: XRP_TOKEN,
+					destinationToken: evmToken,
+					amount: 10,
+					tokens: [XRP_TOKEN, evmToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockXrpGetQuote).not.toHaveBeenCalled();
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should pass the user XRP address as recipient for an XRP destination', async () => {
+				mockVeloraGetQuote.mockResolvedValueOnce(undefined);
+				mockEvmNearIntentsGetQuote.mockResolvedValueOnce(quote);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmToken,
+					destinationToken: XRP_TOKEN,
+					amount: 1000,
+					tokens: [evmToken, XRP_TOKEN],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: mockXrpAddress
+				});
+
+				expect(mockEvmNearIntentsGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ userAddress: mockEthAddress, recipientAddress: mockXrpAddress })
+				);
+				expect(mockXrpGetQuote).not.toHaveBeenCalled();
+			});
+
+			// Quoting anyway would let the request fall back to the EVM source address as the XRP
+			// recipient.
+			it('should not quote an XRP destination when the user XRP address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmToken,
+					destinationToken: XRP_TOKEN,
+					amount: 1000,
+					tokens: [evmToken, XRP_TOKEN],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+				expect(mockEvmNearIntentsGetQuote).not.toHaveBeenCalled();
 			});
 		});
 
@@ -1072,7 +1245,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockVeloraGetQuote).toHaveBeenCalledWith(
@@ -1096,7 +1270,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -1118,7 +1293,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					userEthAddress: mockEthAddress,
 					userSolAddress: undefined,
-					userBtcAddress: undefined
+					userBtcAddress: undefined,
+					userXrpAddress: undefined
 				});
 
 				expect(mockVeloraGetQuote).toHaveBeenCalledWith(
@@ -1143,7 +1319,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					userEthAddress: mockEthAddress,
 					userSolAddress: mockSolAddress,
-					userBtcAddress: mockBtcAddress
+					userBtcAddress: mockBtcAddress,
+					userXrpAddress: undefined
 				});
 
 				expect(mockVeloraGetQuote).toHaveBeenCalledWith({
@@ -2700,7 +2877,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -2739,7 +2917,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -2771,7 +2950,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -2799,7 +2979,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -2837,7 +3018,8 @@ describe('swap.services', () => {
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
 				userSolAddress: undefined,
-				userBtcAddress: undefined
+				userBtcAddress: undefined,
+				userXrpAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledTimes(2);
