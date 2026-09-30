@@ -5,6 +5,7 @@ import * as trustLineTokensEnv from '$env/xrp-trust-line-tokens.env';
 import { mockXrpAddress2, mockXrpTrustLine } from '$tests/mocks/xrp.mock';
 import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import {
+	allXrpTrustLineTokens,
 	enabledXrpTrustLineTokens,
 	xrpTrustLineTokenKeys,
 	xrpTrustLineTokens,
@@ -35,6 +36,7 @@ describe('xrp-trust-line-tokens.derived', () => {
 		xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [mockXrpTrustLine] });
 
 		expect(get(xrpTrustLineTokens)).toEqual([]);
+		expect(get(allXrpTrustLineTokens)).toEqual([]);
 	});
 
 	describe('when trust-line tokens are on', () => {
@@ -108,6 +110,35 @@ describe('xrp-trust-line-tokens.derived', () => {
 				xrpCustomTokensStore.set({ tokens: [{ ...usdToken, enabled: true }], certified: true });
 
 				expect(get(xrpTrustLineTokens)).toEqual([]);
+				expect(get(allXrpTrustLineTokens).map(({ id }) => id)).not.toContain(usdToken.id);
+			});
+		});
+
+		describe('allXrpTrustLineTokens', () => {
+			it('lists RLUSD switched off while no account holds it', () => {
+				xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [usdLine] });
+
+				expect(get(allXrpTrustLineTokens)).toEqual([
+					{ ...usdToken, enabled: true },
+					{ ...RLUSD_TOKEN, enabled: false }
+				]);
+			});
+
+			it('keeps RLUSD off without a line even when its entry says enabled, with the entry version', () => {
+				xrpCustomTokensStore.set({
+					tokens: [{ ...RLUSD_TOKEN, enabled: true, version: 7n }],
+					certified: true
+				});
+
+				expect(get(allXrpTrustLineTokens)).toEqual([
+					{ ...RLUSD_TOKEN, enabled: false, version: 7n }
+				]);
+			});
+
+			it('lists a held RLUSD once, as held', () => {
+				xrpTrustLinesStore.set({ tokenId: XRP_TOKEN.id, lines: [mockXrpTrustLine] });
+
+				expect(get(allXrpTrustLineTokens)).toEqual([{ ...RLUSD_TOKEN, enabled: true }]);
 			});
 		});
 

@@ -19,6 +19,7 @@ import { tokenListEqual } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import { allXrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -62,12 +63,27 @@ export const allSwapCompatibleIcrcTokens: Readable<IcTokenToggleable[]> = derive
 );
 
 export const allTokens: Readable<CustomToken<Token>[]> = derivedMemo(
-	[nativeTokens, ercFungibleTokens, allIcrcTokens, splTokens, nonFungibleTokens],
-	([$nativeTokens, $ercFungibleTokens, $allIcrcTokens, $splTokens, $nonFungibleTokens]) => [
+	[
+		nativeTokens,
+		ercFungibleTokens,
+		allIcrcTokens,
+		splTokens,
+		allXrpTrustLineTokens,
+		nonFungibleTokens
+	],
+	([
+		$nativeTokens,
+		$ercFungibleTokens,
+		$allIcrcTokens,
+		$splTokens,
+		$allXrpTrustLineTokens,
+		$nonFungibleTokens
+	]) => [
 		...$nativeTokens.map((token) => ({ ...token, enabled: true })),
 		...$ercFungibleTokens,
 		...$allIcrcTokens,
 		...$splTokens,
+		...$allXrpTrustLineTokens,
 		...$nonFungibleTokens
 	],
 	tokenListEqual

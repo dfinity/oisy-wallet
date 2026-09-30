@@ -4,7 +4,10 @@ import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { xrpCustomTokensStore } from '$xrp/stores/xrp-custom-tokens.store';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
-import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
+import {
+	LISTED_XRP_TRUST_LINE_TOKENS,
+	toXrpTrustLineToken
+} from '$xrp/utils/xrp-trust-line-tokens.utils';
 import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -44,6 +47,33 @@ export const xrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 export const enabledXrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 	[xrpTrustLineTokens],
 	([$xrpTrustLineTokens]) => $xrpTrustLineTokens.filter(({ enabled }) => enabled)
+);
+
+/**
+ * Every trust-line token Manage tokens lists: the held ones, and each listed token no account holds
+ * yet, switched off — it counts as enabled only once its trust line exists, whatever its backend
+ * entry says. A backend entry without a line is otherwise not listed: the token is not added.
+ */
+export const allXrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
+	[xrpTrustLineTokens, enabledXrpTokens, xrpSavedTrustLineTokens],
+	([$xrpTrustLineTokens, $enabledXrpTokens, $xrpSavedTrustLineTokens]) => {
+		if (!XRP_TRUST_LINE_TOKENS_ENABLED) {
+			return [];
+		}
+
+		const heldTokenIds = new Set($xrpTrustLineTokens.map(({ id }) => id));
+		const networkIds = new Set($enabledXrpTokens.map(({ network: { id } }) => id));
+
+		const listedNotHeld = LISTED_XRP_TRUST_LINE_TOKENS.filter(
+			({ id, network }) => networkIds.has(network.id) && !heldTokenIds.has(id)
+		).map((token) => {
+			const version = $xrpSavedTrustLineTokens.get(token.id)?.version;
+
+			return { ...token, enabled: false, ...(nonNullish(version) && { version }) };
+		});
+
+		return [...$xrpTrustLineTokens, ...listedNotHeld];
+	}
 );
 
 /**

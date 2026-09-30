@@ -32,6 +32,9 @@
 	import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+	import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
+	import { isTokenXrpTrustLineCustomToken } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		network?: Network;
@@ -40,6 +43,7 @@
 		isNftsPage?: boolean;
 		onSave: (tokens: Token[]) => void;
 		onAddToken: () => void;
+		onAddXrpTrustLineToken?: (token: XrpTrustLineCustomToken) => void;
 	}
 
 	let {
@@ -48,7 +52,8 @@
 		infoElement,
 		isNftsPage,
 		onSave,
-		onAddToken
+		onAddToken,
+		onAddXrpTrustLineToken
 	}: Props = $props();
 
 	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
@@ -151,7 +156,22 @@
 
 	let userHasEdited = $state(false);
 
-	const onToggle = ({ id, ...rest }: Token) => {
+	let heldXrpTrustLineTokenIds = $derived(new Set($xrpTrustLineTokens.map(({ id }) => id)));
+
+	const onToggle = (token: Token) => {
+		// Switching on a trust-line token no account holds adds it, which takes a transaction: it opens
+		// the review at once rather than joining the batched Save.
+		if (
+			nonNullish(onAddXrpTrustLineToken) &&
+			isTokenXrpTrustLineCustomToken(token) &&
+			!heldXrpTrustLineTokenIds.has(token.id)
+		) {
+			onAddXrpTrustLineToken(token);
+			return;
+		}
+
+		const { id, ...rest } = token;
+
 		const current = modifiedTokens.get(id);
 
 		// we need to set the tokenlist for the ModalTokenListContext manually when we change the enabled prop,

@@ -17,6 +17,7 @@ import {
 	POL_MAINNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -55,6 +56,7 @@ import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.moc
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { allXrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -200,6 +202,22 @@ describe('all-tokens.derived', () => {
 				mockSplToken.id.description,
 				mockErc721Token.id.description
 			]);
+		});
+
+		it('should include the XRP Ledger trust-line tokens, switched on or off', () => {
+			const tokens = [
+				{ ...RLUSD_TOKEN, enabled: false },
+				{ ...RLUSD_TOKEN, id: parseTokenId('UnlistedTrustLineTokenId'), enabled: true }
+			];
+
+			vi.spyOn(allXrpTrustLineTokens, 'subscribe').mockImplementation((fn) => {
+				fn(tokens);
+				return () => {};
+			});
+
+			const ids = get(allTokens).map(({ id }) => id);
+
+			expect(ids).toEqual(expect.arrayContaining(tokens.map(({ id }) => id)));
 		});
 
 		it('should also include disabled tokens', () => {
