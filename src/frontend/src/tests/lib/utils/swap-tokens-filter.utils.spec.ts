@@ -6,6 +6,7 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type {
 	SwapProviderSupport,
 	SwapSupportedTokensData
@@ -36,6 +37,11 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 const btcIdentifier = nativeSwapTokenIdentifier({
 	networkId: BTC_MAINNET_TOKEN.network.id,
 	symbol: BTC_MAINNET_TOKEN.symbol
+});
+
+const xrpIdentifier = nativeSwapTokenIdentifier({
+	networkId: XRP_TOKEN.network.id,
+	symbol: XRP_TOKEN.symbol
 });
 
 describe('filterSwapTokens', () => {
@@ -101,7 +107,8 @@ describe('filterSwapTokens', () => {
 				},
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [icpTokenActive, icpTokenInactive, icpTokenInactiveUnsupported];
@@ -125,7 +132,8 @@ describe('filterSwapTokens', () => {
 				},
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({
@@ -147,7 +155,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set([erc20Inactive.address.toLowerCase()])
 				},
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [erc20Active, erc20Inactive, erc20InactiveUnsupported];
@@ -166,7 +175,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set()
 				},
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({
@@ -184,7 +194,8 @@ describe('filterSwapTokens', () => {
 				icp: { coverage: 'none', supportedTokenIds: new Set() },
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [erc20Active, erc20Inactive, splActive, splInactive];
@@ -212,7 +223,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'all',
 					supportedTokenIds: new Set([splActive.address])
 				},
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [
@@ -256,7 +268,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set(['0xabcdef1234567890'])
 				},
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -277,7 +290,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set(['0xabcdef1234567890'])
 				},
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -298,7 +312,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set(['0xsomeotheraddress'])
 				},
 				sol: { coverage: 'none', supportedTokenIds: new Set() },
-				btc: { coverage: 'none', supportedTokenIds: new Set() }
+				btc: { coverage: 'none', supportedTokenIds: new Set() },
+				xrp: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -315,7 +330,8 @@ describe('filterSwapTokens', () => {
 			icp: { coverage: 'none', supportedTokenIds: new Set() },
 			evm: { coverage: 'none', supportedTokenIds: new Set() },
 			sol: { coverage: 'none', supportedTokenIds: new Set() },
-			btc: { coverage: 'all', supportedTokenIds }
+			btc: { coverage: 'all', supportedTokenIds },
+			xrp: { coverage: 'none', supportedTokenIds: new Set() }
 		});
 
 		it('matches Bitcoin on its network-qualified native identifier', () => {
@@ -336,6 +352,48 @@ describe('filterSwapTokens', () => {
 		});
 	});
 
+	describe('XRP token identifier matching', () => {
+		const xrpActive = asToggleable({ token: XRP_TOKEN, enabled: true });
+		const xrpInactive = asToggleable({ token: XRP_TOKEN, enabled: false });
+
+		const withXrpSupport = (supportedTokenIds: Set<string>): SwapSupportedTokensData => ({
+			icp: { coverage: 'none', supportedTokenIds: new Set() },
+			evm: { coverage: 'none', supportedTokenIds: new Set() },
+			sol: { coverage: 'none', supportedTokenIds: new Set() },
+			btc: { coverage: 'none', supportedTokenIds: new Set() },
+			xrp: { coverage: 'all', supportedTokenIds }
+		});
+
+		it('matches native XRP on its network-qualified native identifier', () => {
+			const supportedData = withXrpSupport(new Set([xrpIdentifier]));
+
+			const result = filterSwapTokens({ tokens: [xrpActive, xrpInactive], supportedData });
+
+			expect(result).toContain(xrpActive);
+			expect(result).toContain(xrpInactive);
+		});
+
+		it('filters out an unsupported XRP token when coverage is all', () => {
+			const supportedData = withXrpSupport(new Set(['not-xrp']));
+
+			const result = filterSwapTokens({ tokens: [xrpActive], supportedData });
+
+			expect(result).not.toContain(xrpActive);
+		});
+
+		// XRP is its own category: a Bitcoin support set must not let it through.
+		it('does not match XRP against another category', () => {
+			const supportedData: SwapSupportedTokensData = {
+				...withXrpSupport(new Set()),
+				btc: { coverage: 'all', supportedTokenIds: new Set([xrpIdentifier]) }
+			};
+
+			const result = filterSwapTokens({ tokens: [xrpActive], supportedData });
+
+			expect(result).not.toContain(xrpActive);
+		});
+	});
+
 	describe('unknown network tokens (nullish lookup)', () => {
 		// Bitcoin is a swap category now, so the "no known category" case needs a standard
 		// none of the lookup branches claim.
@@ -348,7 +406,8 @@ describe('filterSwapTokens', () => {
 			icp: { coverage: 'all', supportedTokenIds: new Set() },
 			evm: { coverage: 'all', supportedTokenIds: new Set() },
 			sol: { coverage: 'all', supportedTokenIds: new Set() },
-			btc: { coverage: 'all', supportedTokenIds: new Set() }
+			btc: { coverage: 'all', supportedTokenIds: new Set() },
+			xrp: { coverage: 'all', supportedTokenIds: new Set() }
 		};
 
 		it('keeps active tokens that do not belong to a known swap network', () => {
@@ -390,6 +449,7 @@ describe('computeReceiveSupportedTokens', () => {
 		expect(data.evm).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 		expect(data.sol).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 		expect(data.btc).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+		expect(data.xrp).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 	});
 
 	it('Chain Fusion ICP→BTC narrows Bitcoin destinations to the native identifier', () => {
@@ -646,6 +706,86 @@ describe('computeReceiveSupportedTokens', () => {
 		expect(data.evm.supportedTokenIds).toEqual(evmTokens);
 		expect(data.sol.coverage).toBe('all');
 		expect(data.sol.supportedTokenIds).toEqual(solTokens);
+	});
+
+	it('NEAR Intents XRP source exposes the EVM, SOL and BTC destinations', () => {
+		const evmTokens = new Set([evmSourceId]);
+		const solTokens = new Set([mockValidSplToken.address]);
+		const btcTokens = new Set([btcIdentifier]);
+		const xrpTokens = new Set([xrpIdentifier]);
+
+		const providers: SwapProviderSupport[] = [
+			{
+				key: SwapProvider.NEAR_INTENTS,
+				sourceCategory: 'evm',
+				supportedSourceTokens: evmTokens,
+				getSupportedDestinations: buildNearIntentsSupportedDestinations('evm')
+			},
+			{
+				key: SwapProvider.NEAR_INTENTS,
+				sourceCategory: 'sol',
+				supportedSourceTokens: solTokens,
+				getSupportedDestinations: buildNearIntentsSupportedDestinations('sol')
+			},
+			{
+				key: SwapProvider.NEAR_INTENTS,
+				sourceCategory: 'btc',
+				supportedSourceTokens: btcTokens,
+				getSupportedDestinations: buildNearIntentsSupportedDestinations('btc')
+			},
+			{
+				key: SwapProvider.NEAR_INTENTS,
+				sourceCategory: 'xrp',
+				supportedSourceTokens: xrpTokens,
+				getSupportedDestinations: buildNearIntentsSupportedDestinations('xrp')
+			}
+		];
+
+		const data = computeReceiveSupportedTokens({ sourceToken: XRP_TOKEN, providers });
+
+		expect(data.evm.supportedTokenIds).toEqual(evmTokens);
+		expect(data.sol.supportedTokenIds).toEqual(solTokens);
+		expect(data.btc.supportedTokenIds).toEqual(btcTokens);
+		expect(data.xrp.supportedTokenIds).toEqual(xrpTokens);
+		// Only the XRP entry answers for an XRP source, so no category is counted twice.
+		expect(data.evm.coverage).toBe('all');
+	});
+
+	it('NEAR Intents EVM source exposes XRP once the XRP entry is registered', () => {
+		const evmTokens = new Set([evmSourceId]);
+		const xrpTokens = new Set([xrpIdentifier]);
+
+		const evmEntry: SwapProviderSupport = {
+			key: SwapProvider.NEAR_INTENTS,
+			sourceCategory: 'evm',
+			supportedSourceTokens: evmTokens,
+			getSupportedDestinations: buildNearIntentsSupportedDestinations('evm')
+		};
+
+		const withoutXrp = computeReceiveSupportedTokens({
+			sourceToken: evmSourceToken,
+			providers: [evmEntry]
+		});
+
+		expect(withoutXrp.xrp).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+
+		const withXrp = computeReceiveSupportedTokens({
+			sourceToken: evmSourceToken,
+			providers: [
+				evmEntry,
+				{
+					key: SwapProvider.NEAR_INTENTS,
+					sourceCategory: 'xrp',
+					supportedSourceTokens: xrpTokens,
+					getSupportedDestinations: buildNearIntentsSupportedDestinations('xrp')
+				}
+			]
+		});
+
+		expect(withXrp.xrp).toEqual({ coverage: 'all', supportedTokenIds: xrpTokens });
+		expect(
+			filterSwapTokens({ tokens: [{ ...XRP_TOKEN, enabled: true }], supportedData: withXrp })
+		).toHaveLength(1);
 	});
 
 	it('NEAR Intents skips entries when source category does not match the entry', () => {

@@ -17,6 +17,9 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { OptionXrpAddress, XrpAddress } from '$xrp/types/address';
+import type { XrpNetworkType } from '$xrp/types/network';
+import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
@@ -25,7 +28,7 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc';
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc' | 'xrp';
 
 export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
 
@@ -93,6 +96,9 @@ export interface FetchSwapAmountsParams {
 	// The user's own Bitcoin address. Unlike the other two it is needed to *quote*, not
 	// only to execute: a BTC → ckBTC offer's fee comes from selecting the user's UTXOs.
 	userBtcAddress: OptionBtcAddress;
+	// The user's own XRP mainnet address: the refund address of a swap from XRP, and the
+	// payout address of a swap toward it.
+	userXrpAddress: OptionXrpAddress;
 }
 
 export type Slippage = string | number;
@@ -220,6 +226,14 @@ export interface EvmSwapProviderConfig {
 }
 
 export interface SolSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
+}
+
+export interface XrpSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: NearIntentsQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
@@ -491,6 +505,15 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsXrpParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own XRP address: the deposit is paid from it, and 1Click refunds to it.
+	userAddress: XrpAddress;
+	network: XrpNetworkType;
+	// The transaction cost the user reviewed, in drops; `sendXrp` signs exactly this.
+	fee: XrpBalance;
 }
 
 export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {

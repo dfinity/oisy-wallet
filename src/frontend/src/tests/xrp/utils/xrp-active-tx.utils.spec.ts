@@ -1,13 +1,18 @@
 import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES } from '$lib/constants/app.constants';
+import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import {
 	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction,
 	mockXrpActiveUserTransaction,
 	mockXrpData,
 	mockXrpDestinationAddress,
 	mockXrpLastLedgerSequence,
 	mockXrpSourceAddress,
+	mockXrpSwapActiveUserTransaction,
+	mockXrpSwapData,
 	mockXrpTxHash
 } from '$tests/mocks/active-user-transactions.mock';
 import { XrpNetworks } from '$xrp/types/network';
@@ -16,15 +21,14 @@ import {
 	buildXrpSendTrackingMetadata,
 	isXrpActiveUserTransaction,
 	isXrpAlreadyInFlightError,
-	openXrpActiveUserTransaction,
 	toXrpData,
 	toXrpDisplayRefs,
 	toXrpExternalRefs,
 	toXrpExternalRefsMap,
+	toXrpLedgerResolutionRefs,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
-	xrpActiveUserTransactionPollKeys,
-	xrpActiveUserTransactionSourceAddress
+	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
 
 describe('xrp-active-tx.utils', () => {
@@ -108,6 +112,48 @@ describe('xrp-active-tx.utils', () => {
 		});
 	});
 
+	describe('toXrpLedgerResolutionRefs', () => {
+		const tx = mockXrpSwapActiveUserTransaction;
+
+		it("adds the ledger result to the row's own refs, sorted by key", () => {
+			const refs = toXrpLedgerResolutionRefs({ tx, ledgerResult: 'tesSUCCESS' });
+
+			expect(refs).toEqual(
+				[
+					...tx.external_refs,
+					{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'tesSUCCESS' }
+				].sort(({ key: a }, { key: b }) => (a < b ? -1 : a > b ? 1 : 0))
+			);
+		});
+
+		it('replaces a ledger result the row already holds', () => {
+			const refs = toXrpLedgerResolutionRefs({
+				tx: {
+					...tx,
+					external_refs: [
+						...tx.external_refs,
+						{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'tecSTALE' }
+					]
+				},
+				ledgerResult: 'expired'
+			});
+
+			expect(refs.filter(({ key }) => key === XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT)).toEqual([
+				{ key: XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT, value: 'expired' }
+			]);
+		});
+
+		// Only a fabricated code gets this long; refusing it would hold the row open for good.
+		it("cuts an oversized result to the backend's limit", () => {
+			const refs = toXrpLedgerResolutionRefs({ tx, ledgerResult: `tec${'X'.repeat(600)}` });
+
+			const value = refs.find(({ key }) => key === XRP_EXTERNAL_REF_KEYS.LEDGER_RESULT)?.value;
+
+			expect(value).toHaveLength(ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES);
+			expect(value?.startsWith('tec')).toBeTruthy();
+		});
+	});
+
 	describe('toXrpDisplayRefs', () => {
 		it('snapshots the symbol and network the row renders with', () => {
 			expect(toXrpDisplayRefs({ token: XRP_TOKEN, amount: '25' })).toEqual({
@@ -115,20 +161,6 @@ describe('xrp-active-tx.utils', () => {
 				[XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL]: XRP_TOKEN.symbol,
 				[XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL]: XRP_TOKEN.network.name
 			});
-		});
-	});
-
-	describe('xrpActiveUserTransactionSourceAddress', () => {
-		it('reads the address the guard gates on', () => {
-			expect(xrpActiveUserTransactionSourceAddress(mockXrpActiveUserTransaction)).toBe(
-				mockXrpSourceAddress
-			);
-		});
-
-		it('returns undefined for another flow', () => {
-			expect(
-				xrpActiveUserTransactionSourceAddress(mockLiquidiumActiveUserTransaction)
-			).toBeUndefined();
 		});
 	});
 
@@ -148,6 +180,16 @@ describe('xrp-active-tx.utils', () => {
 					data: { Xrp: { ...mockXrpData, token: { IcpNative: null } } }
 				} as ActiveUserTransaction)
 			).toBeUndefined();
+		});
+
+		it('resolves mainnet from the source token of a swap from XRP', () => {
+			expect(xrpActiveUserTransactionNetwork(mockXrpSwapActiveUserTransaction)).toBe(
+				XrpNetworks.mainnet
+			);
+		});
+
+		it('returns undefined for a swap from another chain', () => {
+			expect(xrpActiveUserTransactionNetwork(mockNearIntentsActiveUserTransaction)).toBeUndefined();
 		});
 
 		it('returns undefined for another flow', () => {
@@ -211,58 +253,6 @@ describe('xrp-active-tx.utils', () => {
 			]
 		])('is not pollable with %s', (...[, refs]) => {
 			expect(xrpActiveUserTransactionPollKeys(withRefs(refs))).toBeUndefined();
-		});
-	});
-
-	describe('openXrpActiveUserTransaction', () => {
-		const terminal: ActiveUserTransaction = {
-			...mockXrpActiveUserTransaction,
-			status: { Succeeded: null }
-		};
-		const otherAddress: ActiveUserTransaction = {
-			...mockXrpActiveUserTransaction,
-			data: {
-				Xrp: { ...mockXrpData, source_address: mockXrpDestinationAddress }
-			}
-		} as ActiveUserTransaction;
-
-		it('finds the open record for the address', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [mockXrpActiveUserTransaction],
-					source: mockXrpSourceAddress
-				})
-			).toBe(mockXrpActiveUserTransaction);
-		});
-
-		it('ignores a terminal record', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [terminal],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
-		});
-
-		// The invariant is per address: a record for another address says nothing
-		// about this one's sequence, and refusing on it would block an unrelated
-		// send.
-		it('ignores a record for a different address', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [otherAddress],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
-		});
-
-		it('ignores records from other flows', () => {
-			expect(
-				openXrpActiveUserTransaction({
-					transactions: [mockLiquidiumActiveUserTransaction],
-					source: mockXrpSourceAddress
-				})
-			).toBeUndefined();
 		});
 	});
 
@@ -368,6 +358,63 @@ describe('xrp-active-tx.utils', () => {
 
 		it('is undefined for a row that is not an XRP payment', () => {
 			expect(xrpActiveUserTransactionDisplay(mockLiquidiumActiveUserTransaction)).toBeUndefined();
+		});
+
+		// A swap's deposit is named from the swap's own snapshot keys: the amount it swaps, and its
+		// source token and network.
+		describe('a swap from XRP', () => {
+			it("reads the swap's snapshot", () => {
+				expect(xrpActiveUserTransactionDisplay(mockXrpSwapActiveUserTransaction)).toEqual({
+					amount: '10',
+					symbol: 'XRP',
+					network: 'XRP Ledger'
+				});
+			});
+
+			// The swap row carries the send's poll keys, not its display keys: a send's symbol and
+			// network keys must not be read in place of the swap's source ones.
+			it("ignores a send's symbol and network keys", () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpSwapActiveUserTransaction,
+					external_refs: [
+						...mockXrpSwapActiveUserTransaction.external_refs.filter(
+							({ key }) =>
+								![
+									NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL,
+									NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL
+								].includes(key as never)
+						),
+						{ key: XRP_EXTERNAL_REF_KEYS.TOKEN_SYMBOL, value: 'Send Symbol' },
+						{ key: XRP_EXTERNAL_REF_KEYS.NETWORK_SYMBOL, value: 'Send Ledger' }
+					]
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)).toEqual({
+					amount: '10',
+					symbol: XRP_TOKEN.symbol,
+					network: XRP_TOKEN.network.name
+				});
+			});
+
+			it("falls back to the row's own data when the snapshot is missing", () => {
+				const tx: ActiveUserTransaction = {
+					...mockXrpSwapActiveUserTransaction,
+					data: { NearIntents: { ...mockXrpSwapData, amount: 1_234_567n } },
+					external_refs: mockXrpSwapActiveUserTransaction.external_refs.filter(({ key }) =>
+						POLL_KEYS.includes(key as never)
+					)
+				};
+
+				expect(xrpActiveUserTransactionDisplay(tx)).toEqual({
+					amount: '1.234567',
+					symbol: XRP_TOKEN.symbol,
+					network: XRP_TOKEN.network.name
+				});
+			});
+		});
+
+		it('is undefined for a swap from another chain', () => {
+			expect(xrpActiveUserTransactionDisplay(mockNearIntentsActiveUserTransaction)).toBeUndefined();
 		});
 	});
 

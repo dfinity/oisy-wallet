@@ -155,6 +155,67 @@ describe('cross-chain-swap derived stores', () => {
 		});
 	});
 
+	// The swap flag excludes TEST, so the cases above run without XRP although its network is
+	// enabled; these switch the flag on and off.
+	describe('XRP', () => {
+		const loadWithXrp = async ({ nearIntentsXrp }: { nearIntentsXrp: boolean }) => {
+			vi.resetModules();
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof nearIntentsEnv>()),
+				NEAR_INTENTS_XRP_SWAP_ENABLED: nearIntentsXrp
+			}));
+
+			const [
+				{ crossChainSwapNetworks: networks },
+				{ setupTestnetsStore: setupTestnets },
+				{ setupUserNetworksStore: setupNetworks },
+				{ XRP_MAINNET_NETWORK: xrpMainnet },
+				{ ETHEREUM_NETWORK: ethereum }
+			] = await Promise.all([
+				import('$lib/derived/cross-chain-networks.derived'),
+				import('$tests/utils/testnets.test-utils'),
+				import('$tests/utils/user-networks.test-utils'),
+				import('$env/networks/networks.xrp.env'),
+				import('$env/networks/networks.eth.env')
+			]);
+
+			setupTestnets('reset');
+
+			return { networks, setupNetworks, xrpMainnet, ethereum };
+		};
+
+		afterEach(() => {
+			vi.doUnmock('$env/rest/near-intents.env');
+			vi.resetModules();
+		});
+
+		it('should include the enabled XRP mainnet network with the NEAR Intents XRP flag', async () => {
+			const { networks, setupNetworks, xrpMainnet } = await loadWithXrp({ nearIntentsXrp: true });
+
+			setupNetworks('allEnabled');
+
+			expect(get(networks)).toContain(xrpMainnet);
+		});
+
+		it('should not include XRP without the NEAR Intents XRP flag', async () => {
+			const { networks, setupNetworks, xrpMainnet } = await loadWithXrp({ nearIntentsXrp: false });
+
+			setupNetworks('allEnabled');
+
+			expect(get(networks)).not.toContain(xrpMainnet);
+		});
+
+		it('should not include XRP when the user disabled it', async () => {
+			const { networks, setupNetworks, xrpMainnet, ethereum } = await loadWithXrp({
+				nearIntentsXrp: true
+			});
+
+			setupNetworks([ethereum.id]);
+
+			expect(get(networks)).not.toContain(xrpMainnet);
+		});
+	});
+
 	describe('crossChainSwapNetwoksEnvs', () => {
 		it('should split networks into mainnets and testnets', () => {
 			setupTestnetsStore('enabled');

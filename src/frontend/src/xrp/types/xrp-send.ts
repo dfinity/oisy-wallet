@@ -1,3 +1,8 @@
+import type {
+	ActiveUserTransactionData,
+	ActiveUserTransactionRef
+} from '$declarations/backend/backend.did';
+
 export class XrpAmountAssertionError extends Error {}
 
 /**
@@ -52,3 +57,25 @@ export class XrpSendAlreadyInFlightError extends Error {}
  * moment a user is most likely to retry, and would leave the payment with no record to resolve it.
  */
 export class XrpSendNotGuardedError extends Error {}
+
+/**
+ * The AUT an XRP payment is recorded under — the record that holds the one-payment-in-flight
+ * invariant and that the ledger resolution closes. A send is recorded under its own `Xrp` AUT, and
+ * a swap's deposit under the swap's `NearIntents` AUT, since that payment is part of the swap and
+ * not a transaction of its own.
+ */
+export interface XrpPaymentRecord {
+	data: ActiveUserTransactionData;
+	externalRefs: ActiveUserTransactionRef[];
+	progressStep?: string;
+}
+
+/**
+ * Builds the payment's record from the two values it is polled with, both derived from the signed
+ * blob. Throws {@link XrpSendNotGuardedError} when the payment cannot be described as a record,
+ * which refuses it before anything is broadcast.
+ */
+export type XrpPaymentRecordBuilder = (pollKeys: {
+	txHash: string;
+	lastLedgerSequence: number;
+}) => XrpPaymentRecord;

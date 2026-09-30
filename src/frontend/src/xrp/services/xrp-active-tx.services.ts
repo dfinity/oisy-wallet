@@ -9,11 +9,14 @@ import { advanceStatus } from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadXrpTransactionOutcome, loadXrpValidatedLedgerIndex } from '$xrp/rest/xrpl.rest';
+import { XRP_LEDGER_RESULT_EXPIRED } from '$xrp/types/xrp-active-tx';
 import {
+	toXrpLedgerResolutionRefs,
 	xrpActiveUserTransactionDisplay,
 	xrpActiveUserTransactionNetwork,
 	xrpActiveUserTransactionPollKeys
 } from '$xrp/utils/xrp-active-tx.utils';
+import { xrpPaymentSettledStatus } from '$xrp/utils/xrp-in-flight.utils';
 import {
 	isXrpTransactionSuccessful,
 	xrpLedgerSearchWindow
@@ -23,7 +26,9 @@ import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 /**
- * Resolves one open XRP record against the ledger, in a single pass.
+ * Resolves one open XRP payment record against the ledger, in a single pass: a send's own row, or a
+ * swap's row while its deposit is `Pending`. A validated `tesSUCCESS` ends a send, and moves a swap
+ * to `Executing`, from where 1Click decides the swap's outcome.
  *
  * This is the **only** thing that resolves an XRP record. The send stops at
  * submit and never writes a terminal status, so there is one confirmation path
@@ -71,7 +76,8 @@ const pollXrpActiveUserTransaction = async ({
 			await applyXrpStatus({
 				identity,
 				tx,
-				candidate: succeeded ? { Succeeded: null } : { Failed: null },
+				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
+				ledgerResult: outcome.transactionResult,
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
@@ -117,7 +123,8 @@ const pollXrpActiveUserTransaction = async ({
 			await applyXrpStatus({
 				identity,
 				tx,
-				candidate: succeeded ? { Succeeded: null } : { Failed: null },
+				candidate: succeeded ? xrpPaymentSettledStatus(tx) : { Failed: null },
+				ledgerResult: recheck.transactionResult,
 				error: succeeded
 					? undefined
 					: replacePlaceholders(get(i18n).send.error.xrp_active_transaction_failed, {
@@ -143,6 +150,7 @@ const pollXrpActiveUserTransaction = async ({
 			identity,
 			tx,
 			candidate: { Failed: null },
+			ledgerResult: XRP_LEDGER_RESULT_EXPIRED,
 			error: replacePlaceholders(get(i18n).send.error.xrp_send_expired, xrpFailureSubject(tx))
 		});
 	} catch (err: unknown) {
@@ -174,11 +182,13 @@ const applyXrpStatus = async ({
 	identity,
 	tx,
 	candidate,
+	ledgerResult,
 	error
 }: {
 	identity: Identity;
 	tx: ActiveUserTransaction;
 	candidate: ActiveUserTransactionStatus;
+	ledgerResult: string;
 	error?: string;
 }): Promise<void> => {
 	const status = advanceStatus({ current: tx.status, candidate });
@@ -202,7 +212,11 @@ const applyXrpStatus = async ({
 		tx,
 		update: {
 			status,
-			...(fits ? { error } : {})
+			...(fits ? { error } : {}),
+			// The backend moves a swap from XRP out of `Pending` only with its deposit's result recorded.
+			...('NearIntents' in tx.data
+				? { externalRefs: toXrpLedgerResolutionRefs({ tx, ledgerResult }) }
+				: {})
 		}
 	});
 };

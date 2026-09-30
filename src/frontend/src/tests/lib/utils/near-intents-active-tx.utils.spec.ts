@@ -3,6 +3,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import en from '$lib/i18n/en.json';
 import {
@@ -31,6 +32,7 @@ import {
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
@@ -109,6 +111,25 @@ describe('near-intents-active-tx.utils', () => {
 					dest_token: { Icrc: Principal.fromText(mockValidIcToken.ledgerCanisterId) },
 					amount: 1n,
 					source_address: []
+				}
+			});
+		});
+
+		// A deposit from native XRP is an XRP payment, which the backend counts against its address.
+		it('records the source address of a swap from XRP', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: XRP_TOKEN,
+					destinationToken: ETHEREUM_TOKEN,
+					amount: 10_000_000n,
+					sourceAddress: mockXrpAddress
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { XrpNativeMainnet: null },
+					dest_token: { EvmNative: BigInt(ETHEREUM_NETWORK.chainId) },
+					amount: 10_000_000n,
+					source_address: [mockXrpAddress]
 				}
 			});
 		});

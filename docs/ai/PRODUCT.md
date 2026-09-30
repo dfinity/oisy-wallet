@@ -598,6 +598,18 @@ Funds cannot move before the user has acknowledged the NEAR Intents terms of ser
 
 What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
 
+### NEAR Intents as an XRP swap provider (local and staging)
+
+Behind `NEAR_INTENTS_XRP_SWAP_ENABLED` (`src/frontend/src/env/rest/near-intents.env.ts`, on for local and staging builds, off in production), NEAR Intents serves native XRP, and it is XRP's only swap provider. The XRP token page then offers Swap. Native XRP appears as a pay token toward every NEAR Intents destination chain — Ethereum, Arbitrum, Base, BSC, Polygon, Robinhood Chain and Solana mainnets, and Bitcoin while NEAR Intents also serves Bitcoin — and tokens on those chains quote toward XRP. The payout goes to the user's own XRP address, including one that was never funded: 1Click keeps a payout toward XRP at 1 XRP or more, which covers the base reserve that creates the account. A pair toward XRP is not quoted while the XRP address has not loaded.
+
+Funds cannot move before the user has acknowledged the NEAR Intents terms of service. The form holds back the [account reserve](#account-reserve) and the network fee: Max leaves both, and an amount that would not leave them is refused before anything is signed. The deposit is a plain XRP payment to the address 1Click quoted, with the fee the user reviewed and no destination tag.
+
+**A swap is one transaction, so it shows as one entry.** The deposit creates no XRP send record of its own. The swap's active user transaction is created after the deposit is signed and before it is submitted — the moment an XRP send creates its record — and it carries what the ledger needs to resolve the deposit. It stays **pending** until the deposit resolves on the ledger. A deposit that validates with success moves the swap to **executing**, from where 1Click decides success or failure; a deposit that fails on the ledger or expires fails the swap, with the same message an XRP send would give. 1Click's own status never moves a swap whose deposit has not resolved.
+
+**While its deposit is pending, a swap holds the address** exactly as an unresolved XRP send does ([One unresolved payment per address](#one-unresolved-payment-per-address)): an XRP send or another swap from that address is refused until the deposit resolves, and a swap is refused while a send from that address is unresolved. The server-side refusal covers both, so a second tab is refused too. Once the swap is executing, XRP sends from the address go through while the swap still runs.
+
+What this deliberately does not do: no XRPL testnet, no issued currencies (native XRP only, the only asset 1Click lists on the XRP Ledger), no Chain Fusion route, and no production enablement. With the flag off, swaps and XRP sends behave exactly as the previous sections describe.
+
 ### 1Sec restricted to the unwrapping direction
 
 1Sec (OneSec) bridges tokens between ICP and Ethereum, Base and Arbitrum. OISY offers only the way back out of a bridged position, never the way in: a user who already holds a bridged balance keeps a working exit, and nobody acquires a new one through OISY.
