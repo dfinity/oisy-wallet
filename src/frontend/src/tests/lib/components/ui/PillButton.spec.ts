@@ -1,7 +1,7 @@
 import PillButton from '$lib/components/ui/PillButton.svelte';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 
 describe('PillButton', () => {
 	const createTextSnippet = (text: string) =>
@@ -196,6 +196,50 @@ describe('PillButton', () => {
 		await fireEvent.pointerEnter(button, { pointerType: 'touch' });
 
 		expect(button.querySelector('.pill-lap')).toBe(firstLap);
+	});
+
+	describe('when the pill mounts out of view', () => {
+		let reportVisible: (isIntersecting: boolean) => void;
+		const disconnect = vi.fn();
+
+		beforeEach(() => {
+			disconnect.mockClear();
+
+			vi.stubGlobal(
+				'IntersectionObserver',
+				class {
+					constructor(callback: IntersectionObserverCallback) {
+						reportVisible = (isIntersecting) =>
+							callback(
+								[{ isIntersecting } as IntersectionObserverEntry],
+								this as unknown as IntersectionObserver
+							);
+					}
+					observe = () => reportVisible(false);
+					disconnect = disconnect;
+				}
+			);
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it('should wait until the pill is in view to run the border laps', async () => {
+			const { container } = render(PillButton, {
+				props: { children: createTextSnippet('Test'), accent: true }
+			});
+
+			const button = container.querySelector('button');
+
+			expect(button?.querySelector('.pill-lap')).toBeNull();
+
+			reportVisible(true);
+			await tick();
+
+			expect(button?.querySelector('.pill-lap')).not.toBeNull();
+			expect(disconnect).toHaveBeenCalled();
+		});
 	});
 
 	it('should call onclick handler when clicked', async () => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -12,8 +13,36 @@
 
 	let lapping = $derived(accent && !selected);
 
+	let button = $state<HTMLButtonElement | undefined>();
+	let seen = $state(false);
 	let laps = $state(0);
 	let running = $state(false);
+
+	// The pill can mount clipped, e.g. last in a scrolling bar on a phone, where touch never
+	// replays the laps; they wait until it is in view so they are not spent off screen.
+	$effect(() => {
+		if (!lapping || seen || isNullish(button)) {
+			return;
+		}
+
+		if (typeof IntersectionObserver === 'undefined') {
+			seen = true;
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some(({ isIntersecting }) => isIntersecting)) {
+					seen = true;
+				}
+			},
+			{ threshold: 0.9 }
+		);
+
+		observer.observe(button);
+
+		return () => observer.disconnect();
+	});
 
 	const replayLaps = ({ pointerType }: PointerEvent) => {
 		if (pointerType === 'touch' || running) {
@@ -29,15 +58,16 @@
 	 modal). Both states carry a 1px border so toggling selection never shifts the
 	 layout. Hover darkens the selected fill and washes the unselected one.
 	 `accent` looks like its neighbours at rest; what sets it apart is a brand-blue
-	 arc that runs two laps around its border when the pill appears and again when
-	 the pointer enters it, then goes away. It runs a set number of laps and not a
-	 loop because the pills sit above a list people open every day, where constant
-	 motion turns into noise. Selected, it matches every other pill, so which one
+	 arc that runs two laps around its border when the pill first comes into view
+	 and again when the pointer enters it, then goes away. It runs a set number of
+	 laps and not a loop because the pills sit above a list people open every day,
+	 where constant motion turns into noise. Selected, it matches every other pill, so which one
 	 is on always reads the same.
 	 The replay is driven by `pointerenter` rather than `:hover`, so leaving the
 	 pill neither restarts the laps nor cuts them short, and entering it again
 	 while they run does not start them over. -->
 <button
+	bind:this={button}
 	class={`relative shrink-0 cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
 		selected
 			? 'border-brand-primary bg-brand-primary text-primary-inverted hover:border-brand-secondary hover:bg-brand-secondary'
@@ -48,7 +78,7 @@
 	onpointerenter={lapping ? replayLaps : undefined}
 	type="button"
 >
-	{#if lapping}
+	{#if lapping && seen}
 		{#key laps}
 			<span
 				class="pill-lap"
