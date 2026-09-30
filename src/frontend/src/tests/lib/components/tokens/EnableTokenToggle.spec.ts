@@ -1,4 +1,5 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import * as tokenToggleUtils from '$icp/utils/token-toggle.utils';
@@ -28,6 +29,7 @@ describe('EnableTokenToggle', () => {
 	const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 	const mockToggleableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
 	const mockToggleableSolToken = { ...SOLANA_TOKEN, enabled: true };
+	const mockToggleableXrpTrustLineToken = { ...RLUSD_TOKEN, enabled: false };
 
 	const mockOnToggle = vi.fn();
 
@@ -99,6 +101,30 @@ describe('EnableTokenToggle', () => {
 		});
 
 		expect(getByTestId(getTestIdForToggle(mockToggleableErc4626Token))).toBeInTheDocument();
+	});
+
+	it('renders toggle XRP Ledger trust-line token', () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableXrpTrustLineToken, onToggle: mockOnToggle }
+		});
+
+		expect(getByTestId(getTestIdForToggle(mockToggleableXrpTrustLineToken))).toBeInTheDocument();
+	});
+
+	it('should call onToggle with the new state of an XRP Ledger trust-line token', async () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableXrpTrustLineToken, onToggle: mockOnToggle }
+		});
+
+		const input = getByTestId(getTestIdForToggle(mockToggleableXrpTrustLineToken)).querySelector(
+			'input'
+		) as HTMLInputElement;
+		await fireEvent.click(input);
+
+		expect(mockOnToggle).toHaveBeenCalledExactlyOnceWith({
+			...mockToggleableXrpTrustLineToken,
+			enabled: true
+		});
 	});
 
 	it('should call onToggle on clicking it', async () => {

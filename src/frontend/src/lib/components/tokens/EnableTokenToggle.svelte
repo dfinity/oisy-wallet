@@ -16,6 +16,7 @@
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isTokenSplCustomToken } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { isTokenXrpTrustLineCustomToken } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		token: Token;
@@ -27,7 +28,7 @@
 
 {#if isTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
-{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token) || isTokenIcrc7CustomToken(token) || isTokenErc4626CustomToken(token)}
+{:else if isTokenErc20CustomToken(token) || isTokenSplCustomToken(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token) || isTokenExtCustomToken(token) || isTokenDip721CustomToken(token) || isTokenIcPunksCustomToken(token) || isTokenIcrc7CustomToken(token) || isTokenErc4626CustomToken(token) || isTokenXrpTrustLineCustomToken(token)}
 	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />
