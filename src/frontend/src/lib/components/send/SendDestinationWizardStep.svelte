@@ -41,6 +41,7 @@
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
+	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
 
 	interface Props {
 		destination: string;
@@ -177,11 +178,17 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- XRP address-book contacts require a backend TokenAccountId address type (out of scope for
-		     the frontend-only integration), and transaction history (known destinations) lands in a
-		     later phase — so the destination step is address entry only for now. -->
+		<!-- No known destinations yet: nothing derives them from the XRP transaction history, so the
+		     "Recently used" tab shows its empty state. -->
 		<div data-tid={testId}>
 			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
+			<SendDestinationTabs
+				networkContacts={$xrpNetworkContacts}
+				onNext={next}
+				bind:destination
+				bind:activeSendDestinationTab
+				bind:selectedContact
+			/>
 		</div>
 	{/if}
 
