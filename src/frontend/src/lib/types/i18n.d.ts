@@ -822,6 +822,7 @@ interface I18nSend {
 		xrp_destination_tag_invalid: string;
 		insufficient_funds_verbose_btc: string;
 		insufficient_funds_for_reserve: string;
+		xrp_destination_unfunded: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;

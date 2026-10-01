@@ -1089,6 +1089,7 @@
 			"xrp_destination_tag_invalid": "Тег назначения XRP должен быть целым числом от 0 до 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Недостаточно средств: сумма должна оставить достаточно для покрытия сбора и требуемого резерва аккаунта XRP.",
+			"xrp_destination_unfunded": "У этого адреса пока нет счёта XRP. Для его создания нужен первый платёж не менее $reserve XRP.",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
 			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
