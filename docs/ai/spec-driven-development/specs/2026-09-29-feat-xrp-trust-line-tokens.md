@@ -122,7 +122,7 @@ Solana had the balance problem and solved it: since #14028 one worker per networ
 
 ### 4.1 Listed and imported tokens
 
-- **RLUSD is a curated XRPL token** (asset type Stablecoins): it appears in Manage tokens, is not enabled by default, and carries its name, icon and CoinGecko id. It cannot be enabled by default: enabling it costs a transaction and a reserve.
+- **RLUSD is a curated XRPL token** (asset type Stablecoins): it appears in Manage tokens, is not enabled by default, and carries its name and icon. It cannot be enabled by default: enabling it costs a transaction and a reserve.
 - **Any other trust-line token** is added through Import token → XRP Ledger, by issuer address and currency code.
 - **In Manage tokens, a trust-line token's switch does not join the batched Save.** Switching RLUSD on opens the review of §4.2 at once, and RLUSD counts as enabled only once its trust line exists.
 
@@ -168,7 +168,7 @@ The issuer's self-declared `Domain` is never shown: any account can set any doma
 - The balance is the line's balance as the ledger reports it.
 - **Hiding** — the token menu's Hide, or switching the token off in Manage tokens — saves it as disabled. Its trust line and its reserve stay (D3).
 - A frozen, deep-frozen or not-yet-approved line says so on the token.
-- **USD value:** RLUSD by its CoinGecko id; an imported token by `simple/token_price/xrp` under the `<hex code>.<issuer>` key, plus `<code>.<issuer>` for a 3-character code; otherwise no value, as for any unpriced token.
+- **USD value:** by `simple/token_price/xrp` under the token's `<currency>.<issuer>` key — the 40-hex code for RLUSD, the 3-character code for a standard one — for RLUSD and imported tokens alike; otherwise no value, as for any unpriced token.
 
 ### 4.4 Receiving
 
@@ -279,7 +279,7 @@ A `TrustSet` consumes the account's `Sequence` exactly as a payment does, so the
 - **Send.** `XrpSendTokenWizard` branches on the token: amount and max in the token, fee and reserve in XRP. `sendXrp` gains token amounts and `SendMax`. `toBackendTokenId` gains a trust-line branch **before** #14121's XRP-mainnet network match. The checks of §4.5 run on `account_lines` for the recipient (`peer` = issuer), `account_info` for the recipient and the issuer, and `deposit_authorized` — for XRP payments too, and only when the recipient's account has DepositAuth set.
 - **History.** `mapXrpTransaction` gains a token branch reading the metadata; the rows land in `xrpTransactionsStore` under the token's id (the store is keyed by `TokenId` already); `pageToken` searches XRP tokens; the loader fetches further `account_tx` pages until a token's page is filled or history ends.
 - **The guard's rows.** The display snapshot carries the token; the fallback formats by the row's `TokenId` instead of `XRP_TOKEN`; the messages speak of the XRP account's earlier transaction rather than of an XRP payment; adding and removing render as "Add RLUSD" and "Remove RLUSD".
-- **Prices.** `xrp` joins `CoingeckoPlatformIdSchema`; imported tokens are priced through a dedicated call in the shape of SPL's, with the keys of §4.3; RLUSD by the coin id `ripple-usd`, the way native XRP is priced by `ripple`. Its own PR (2b): the exchange worker's provider, backend and fallback paths each list every price they return, so pricing touches all of them and their tests, and nothing is priced before a token can be held.
+- **Prices.** `xrp` joins `CoingeckoPlatformIdSchema`, and every held trust-line token, RLUSD included, is priced through a dedicated call in the shape of SPL's under its `<currency>.<issuer>` key (§4.3): CoinGecko prices RLUSD under that key too (§2.7), so no coin id is needed. The backend's price mode maps the `XrpTrustLineMainnet` `TokenId` to the same key, and the providers fill keys the backend left unpriced, as they do for SPL. Its own PR (2b): the exchange worker's provider, backend and fallback paths each list every price they return, so pricing touches all of them and their tests, and nothing is priced before a token can be held.
 - **Rollout.** A feature flag, `XRP_TRUST_LINE_TOKENS_ENABLED = (LOCAL || STAGING) && !TEST`, in its own env file (`src/frontend/src/env/xrp-trust-line-tokens.env.ts`) like `src/frontend/src/env/cycles-mint.env.ts`. Off under unit tests too, so suite-wide token and balance expectations stay as they are until the flag is turned on; the feature's own tests switch it on. Until PR 4 a trust-line token is also kept out of every send path — the Send button on its page, the send modal's token list, and the XRP send wizard, which would otherwise move XRP for it. With it off, nothing of this spec runs: no RLUSD entry, no XRP import form, no `account_lines` or `deposit_authorized` call, and XRP payments behave as on `main`. Each PR of §7.4 merges with the flag off on production and beta and is tested on staging; the last PR sets it to `true as boolean`, as #14136 did for `CYCLES_MINT_ENABLED`.
 - **Analytics.** A token send emits the existing `xrp_send_success` / `xrp_send_error` (`src/frontend/src/lib/constants/analytics.constants.ts:57`), whose `token` metadata already carries the symbol; adding and removing a token get their own success and error events, documented in `docs/ai/frontend/analytics.md`.
 - **`PRODUCT.md`.** The XRP Ledger section gains a Tokens part, including the negative guarantees of §4.9, in the PR that turns the flag on: that is when users first see any of it.
@@ -293,7 +293,7 @@ Every PR after the first merges behind the flag of §7.3 and is tested on stagin
 | --- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | 1   | this spec + `feat(backend,frontend)!:` variants     | §7.1, and the frontend arms the new variants force; no UI, so nothing to put behind the flag                                 |
 | 2   | `feat(frontend)`: trust-line balances               | the flag, token model, RLUSD entry, `account_lines`, balances through the native XRP worker, the send guard                  |
-| 2b  | `feat(frontend)`: trust-line prices                 | CoinGecko's `xrp` platform and `ripple-usd` through the exchange worker                                                      |
+| 2b  | `feat(frontend)`: trust-line prices                 | CoinGecko's `xrp` platform by `<currency>.<issuer>`, RLUSD included, through the exchange worker                             |
 | 3   | `feat(frontend)`: add a trust-line token            | import form, review, `TrustSet` through the guard, saving tokens and lines without a backend entry, the RLUSD switch, hiding |
 | 4   | `feat(frontend)`: send a trust-line token           | token payments, `SendMax`, the checks of §4.5, max, and the DepositAuth check for token and XRP payments                     |
 | 5   | `feat(frontend)`: trust-line token history          | metadata mapping, per-token history, pagination                                                                              |

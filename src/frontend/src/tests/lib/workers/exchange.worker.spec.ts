@@ -239,6 +239,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: { solana: { usd: 1 } },
 						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
 						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
@@ -447,6 +448,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: undefined,
 						currentXrpPrice: undefined,
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentBnbPrice: undefined,
 						currentPolPrice: undefined,
 						currentArbitrumEthPrice: undefined,
@@ -509,6 +511,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: { solana: { usd: 1 } },
 						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentArbitrumEthPrice: undefined,
@@ -554,6 +557,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: { solana: { usd: 1 } },
 						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
@@ -915,6 +919,38 @@ describe('exchange.worker', () => {
 					});
 				});
 
+				it('should price the XRP Ledger trust-line tokens it is given on the xrp platform', async () => {
+					const xrpTrustLineKeys = [
+						'524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De'
+					];
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							data: { ...mockEventData.data, xrpTrustLineKeys },
+							msg
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'xrp',
+						vs_currencies: Currency.USD,
+						contract_addresses: xrpTrustLineKeys,
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+					expect(postMessageMock).toHaveBeenCalledWith(
+						expect.objectContaining({
+							msg: 'syncExchange',
+							data: expect.objectContaining({
+								currentXrpTrustLinePrices: { [xrpTrustLineKeys[0]]: { usd: 1 } }
+							})
+						})
+					);
+				});
+
 				it('should post a message with synced token prices', async () => {
 					const mockEvent = { ...event, data: { ...event.data, ...mockEventData, msg } };
 
@@ -946,6 +982,7 @@ describe('exchange.worker', () => {
 							currentSolPrice: { solana: { usd: 1 } },
 							currentXrpPrice: { ripple: { usd: 1 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentXrpTrustLinePrices: {},
 							currentArbitrumEthPrice: { ethereum: { usd: 1 } },
 							currentBaseEthPrice: { ethereum: { usd: 1 } }
 						}
@@ -1015,6 +1052,7 @@ describe('exchange.worker', () => {
 							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
 							currentXrpPrice: { ripple: { usd: 1, usd_24h_change: 3 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
+							currentXrpTrustLinePrices: {},
 							currentArbitrumEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
 							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
 						}
@@ -1607,6 +1645,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: undefined,
 						currentXrpPrice: undefined,
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentErc4626Prices: {},
 						currentBnbPrice: undefined,
 						currentPolPrice: undefined,
@@ -1682,6 +1721,7 @@ describe('exchange.worker', () => {
 						currentSolPrice: undefined,
 						currentXrpPrice: undefined,
 						currentSplPrices: {},
+						currentXrpTrustLinePrices: {},
 						currentErc4626Prices: {},
 						currentBnbPrice: undefined,
 						currentPolPrice: undefined
@@ -1954,6 +1994,48 @@ describe('exchange.worker', () => {
 						expect(postedData.currentErc20Prices['0xmissing']).toEqual({ usd: 1 });
 						expect(postedData.currentIcrcPrices.icrc1).toEqual({ usd: 1 });
 						expect(postedData.currentSplPrices.spl1).toEqual({ usd: 1 });
+					});
+
+					it('should fill XRP Ledger trust-line tokens the backend left unpriced', async () => {
+						const priced = 'USD.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+						const missing = 'EUR.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De';
+
+						vi.mocked(getExchangeRates).mockResolvedValue(
+							mockMyRates(...allNativesBackendRates(), [
+								{ XrpTrustLineMainnet: ['USD', 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De'] },
+								mockExchangeRate
+							])
+						);
+
+						const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+							...createEvent(msg),
+							data: {
+								msg,
+								data: {
+									currentCurrency: Currency.USD,
+									erc20Addresses: [],
+									icrcCanisterIds: [],
+									splAddresses: [],
+									xrpTrustLineKeys: [priced, missing],
+									erc4626TokensExchangeData: []
+								}
+							}
+						};
+
+						await onExchangeMessage(mockEvent);
+
+						expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith({
+							id: 'xrp',
+							vs_currencies: Currency.USD,
+							contract_addresses: [missing],
+							include_market_cap: true,
+							include_24hr_change: true
+						});
+
+						const postedData = postMessageMock.mock.calls[0][0].data;
+
+						expect(postedData.currentXrpTrustLinePrices[priced]).toBeDefined();
+						expect(postedData.currentXrpTrustLinePrices[missing]).toEqual({ usd: 1 });
 					});
 
 					it('should fill missing native prices from the providers via a single shared ETH call', async () => {

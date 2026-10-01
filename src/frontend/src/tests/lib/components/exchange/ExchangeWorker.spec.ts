@@ -69,6 +69,7 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
+			xrpTrustLineKeys: [],
 			erc4626TokensExchangeData: [],
 			backendExchangeEnabled: false
 		});
@@ -86,6 +87,7 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
+			xrpTrustLineKeys: [],
 			erc4626TokensExchangeData: [],
 			backendExchangeEnabled: false
 		});
@@ -102,6 +104,7 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
+			xrpTrustLineKeys: [],
 			erc4626TokensExchangeData: [],
 			backendExchangeEnabled: false
 		});
@@ -118,6 +121,7 @@ describe('ExchangeWorker', () => {
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: [],
+			xrpTrustLineKeys: [],
 			erc4626TokensExchangeData: [],
 			backendExchangeEnabled: false
 		});

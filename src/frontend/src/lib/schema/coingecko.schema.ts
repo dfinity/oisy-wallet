@@ -23,5 +23,6 @@ export const CoingeckoPlatformIdSchema = z.enum([
 	'binance-smart-chain',
 	'polygon-pos',
 	'arbitrum-one',
-	'robinhood'
+	'robinhood',
+	'xrp'
 ]);

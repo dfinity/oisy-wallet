@@ -3,6 +3,7 @@ import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
 import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
+import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -17,4 +18,13 @@ export const xrpTrustLineTokens: Readable<XrpTrustLineCustomToken[]> = derived(
 					($xrpTrustLinesStore[id] ?? []).map((line) => toXrpTrustLineToken({ line, network }))
 				)
 			: []
+);
+
+/**
+ * The keys the held trust-line tokens are priced under: `<currency>.<issuer>`, the form CoinGecko's
+ * `xrp` platform uses. One per token, even when two accounts hold it.
+ */
+export const xrpTrustLineTokenKeys: Readable<string[]> = derived(
+	[xrpTrustLineTokens],
+	([$xrpTrustLineTokens]) => [...new Set($xrpTrustLineTokens.map(xrpTrustLineIdentifier))]
 );
