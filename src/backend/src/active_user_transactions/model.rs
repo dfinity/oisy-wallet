@@ -30,7 +30,9 @@ use crate::{
 /// retries land here even at the cap) → `InvalidData` → `AlreadyInFlight` →
 /// `TooManyActiveTransactions`. `AlreadyInFlight` precedes the cap because it
 /// names the specific reason this create is refused and tells the caller what to
-/// wait for, where the cap only says the store is full.
+/// wait for, where the cap only says the store is full. The cap comes last for a
+/// second reason: at the cap, `make_room` deletes finished rows, and a create
+/// refused for any other reason must delete nothing.
 pub fn create(
     map: &mut ActiveUserTransactionsMap,
     principal: Principal,
@@ -66,9 +68,7 @@ pub fn create(
         }
     }
 
-    if count_records(map, principal) >= MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
-    }
+    make_room(map, principal)?;
 
     let tx = ActiveUserTransaction {
         id: request.id,
@@ -162,7 +162,8 @@ pub fn delete(
 }
 
 /// Build the response of active transactions visible to the caller. Records
-/// are never auto-pruned — the FE deletes them on user acknowledgement.
+/// stay until the FE deletes them on user acknowledgement, or until `create`
+/// needs the room and they are the oldest finished ones.
 pub fn list(
     map: &ActiveUserTransactionsMap,
     principal: Principal,
@@ -216,6 +217,51 @@ fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
         }
         _ => false,
     }
+}
+
+/// Make room for one more of the caller's records. Below the cap this does
+/// nothing. At the cap it deletes as many of the caller's finished rows —
+/// `Succeeded` or `Failed` — as the new record needs, least recently updated
+/// first, and refuses with `TooManyActiveTransactions`, deleting nothing, when
+/// there are not enough of them.
+///
+/// Finished rows otherwise stay until the user dismisses them, so without this a
+/// user who never does is locked out of every flow that needs a record.
+/// `Pending` and `Executing` rows are never deleted: they are still settling, and
+/// an open XRP row is what refuses a second payment from its address. Among
+/// finished rows, the one updated longest ago is the outcome the user is least
+/// likely still to look at.
+fn make_room(
+    map: &mut ActiveUserTransactionsMap,
+    principal: Principal,
+) -> Result<(), ActiveUserTransactionError> {
+    let count = count_records(map, principal);
+    if count < MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+        return Ok(());
+    }
+
+    // One past the cap's excess, so the new record fits. More than one only if
+    // the cap was ever lowered below what users already hold.
+    let needed = count + 1 - MAX_ACTIVE_USER_TRANSACTIONS_PER_USER;
+
+    let mut finished: Vec<(u64, ActiveUserTransactionKey)> = scan_principal(map, principal)
+        .filter(|(_, Candid(tx))| tx.status.is_terminal())
+        .map(|(key, Candid(tx))| (tx.updated_at_ns, key))
+        .collect();
+
+    if finished.len() < needed {
+        return Err(ActiveUserTransactionError::TooManyActiveTransactions);
+    }
+
+    // Stable, so rows updated at the same instant keep key order and the choice
+    // is deterministic.
+    finished.sort_by_key(|(updated_at_ns, _)| *updated_at_ns);
+
+    for (_, key) in finished.into_iter().take(needed) {
+        map.remove(&key);
+    }
+
+    Ok(())
 }
 
 fn count_records(map: &ActiveUserTransactionsMap, principal: Principal) -> usize {
@@ -704,7 +750,7 @@ fn validate_transition(
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
+    use std::{cell::RefCell, collections::BTreeSet};
 
     use candid::{Nat, Principal};
     use ic_stable_structures::{
@@ -2381,32 +2427,255 @@ mod tests {
             .expect("other principal not throttled");
     }
 
-    #[test]
-    fn cap_counts_terminal_rows() {
-        let (mut map, _mm) = setup();
+    /// Fills the caller's store to the cap with `Pending` rows `id-0`…`id-99`,
+    /// all created at time 1.
+    fn fill_to_cap(map: &mut ActiveUserTransactionsMap) {
         for i in 0..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
-            let id = format!("id-{i}");
-            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
-            update(
+            create(map, principal(), create_req(&format!("id-{i}")), 1).expect("within cap");
+        }
+    }
+
+    /// Moves a row to `status` at `now_ns`, which becomes its `updated_at_ns`.
+    fn set_status_at(
+        map: &mut ActiveUserTransactionsMap,
+        principal: Principal,
+        id: &str,
+        status: ActiveUserTransactionStatus,
+        now_ns: u64,
+    ) {
+        update(
+            map,
+            principal,
+            UpdateActiveUserTransactionRequest {
+                id: id.to_string(),
+                status: Some(status),
+                progress_step: None,
+                external_refs: None,
+                error: None,
+            },
+            now_ns,
+        )
+        .expect("status update");
+    }
+
+    fn ids(map: &ActiveUserTransactionsMap, principal: Principal) -> BTreeSet<String> {
+        list(map, principal)
+            .transactions
+            .into_iter()
+            .map(|tx| tx.id)
+            .collect()
+    }
+
+    #[test]
+    fn at_cap_the_finished_row_updated_longest_ago_makes_room() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-10",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-20",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-30",
+            ActiveUserTransactionStatus::Succeeded,
+            4,
+        );
+
+        let mut expected = ids(&map, principal());
+        create(&mut map, principal(), create_req("new-1"), 10).expect("room made");
+        expected.remove("id-20");
+        expected.insert("new-1".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+
+        create(&mut map, principal(), create_req("new-2"), 11).expect("room made");
+        expected.remove("id-30");
+        expected.insert("new-2".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn finished_rows_updated_at_the_same_time_lose_exactly_one() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-5",
+            ActiveUserTransactionStatus::Succeeded,
+            3,
+        );
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-7",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new"), 4).expect("room made");
+
+        let after = ids(&map, principal());
+        assert_eq!(after.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+        assert_eq!(
+            usize::from(after.contains("id-5")) + usize::from(after.contains("id-7")),
+            1
+        );
+    }
+
+    #[test]
+    fn at_cap_pending_and_executing_rows_are_never_removed() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        for i in 0..50 {
+            set_status_at(
                 &mut map,
                 principal(),
-                UpdateActiveUserTransactionRequest {
-                    id,
-                    status: Some(ActiveUserTransactionStatus::Succeeded),
-                    progress_step: None,
-                    external_refs: None,
-                    error: None,
-                },
+                &format!("id-{i}"),
+                ActiveUserTransactionStatus::Executing,
                 2,
-            )
-            .expect("succeed");
+            );
         }
-        let err = create(&mut map, principal(), create_req("overflow"), 3).unwrap_err();
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-99",
+            ActiveUserTransactionStatus::Failed,
+            3,
+        );
+
+        create(&mut map, principal(), create_req("new-1"), 4).expect("room made");
+        let before = ids(&map, principal());
+        assert!(!before.contains("id-99"));
+
+        // Nothing finished is left: refused, and nothing is removed.
+        let err = create(&mut map, principal(), create_req("new-2"), 5).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    // Pruning must come after every other check, or a create that is refused
+    // anyway would still cost the user a row.
+    #[test]
+    fn a_create_refused_at_cap_for_another_reason_removes_nothing() {
+        let (mut map, _mm) = setup();
+
+        let mut open = create_req("xrp-open");
+        open.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        open.external_refs = xrp_refs();
+        create(&mut map, principal(), open, 1).expect("open send");
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let before = ids(&map, principal());
+        assert_eq!(before.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+
+        let err = create(&mut map, principal(), create_req(""), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::InvalidId);
+        assert_eq!(ids(&map, principal()), before);
+
+        let err = create(&mut map, principal(), create_req("id-1"), 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyExists);
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut invalid = create_req("invalid");
+        invalid.data = xrp_data(0, 12, None, XRP_OTHER_SOURCE, XRP_DESTINATION);
+        invalid.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), invalid, 3).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(ids(&map, principal()), before);
+
+        let mut second = create_req("xrp-second");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_OTHER_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 3).unwrap_err();
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+        assert_eq!(ids(&map, principal()), before);
+    }
+
+    #[test]
+    fn below_cap_a_create_removes_nothing() {
+        let (mut map, _mm) = setup();
+        for i in 1..MAX_ACTIVE_USER_TRANSACTIONS_PER_USER {
+            let id = format!("id-{i}");
+            create(&mut map, principal(), create_req(&id), 1).expect("within cap");
+            set_status_at(
+                &mut map,
+                principal(),
+                &id,
+                ActiveUserTransactionStatus::Succeeded,
+                2,
+            );
+        }
+        let mut expected = ids(&map, principal());
+
+        create(&mut map, principal(), create_req("last"), 3).expect("within cap");
+
+        expected.insert("last".to_string());
+        assert_eq!(ids(&map, principal()), expected);
+        assert_eq!(expected.len(), MAX_ACTIVE_USER_TRANSACTIONS_PER_USER);
+    }
+
+    #[test]
+    fn making_room_never_touches_another_users_rows() {
+        let (mut map, _mm) = setup();
+        // Finished before anything of the caller's, so they would go first if
+        // the scan crossed principals.
+        for id in ["other-1", "other-2"] {
+            create(&mut map, other_principal(), create_req(id), 1).expect("other user");
+            set_status_at(
+                &mut map,
+                other_principal(),
+                id,
+                ActiveUserTransactionStatus::Succeeded,
+                1,
+            );
+        }
+        let others = ids(&map, other_principal());
+
+        fill_to_cap(&mut map);
+        set_status_at(
+            &mut map,
+            principal(),
+            "id-0",
+            ActiveUserTransactionStatus::Succeeded,
+            5,
+        );
+
+        create(&mut map, principal(), create_req("new"), 6).expect("room made");
+
+        assert!(!ids(&map, principal()).contains("id-0"));
+        assert_eq!(ids(&map, other_principal()), others);
+    }
+
+    #[test]
+    fn dismissing_a_row_frees_its_slot() {
+        let (mut map, _mm) = setup();
+        fill_to_cap(&mut map);
+        let err = create(&mut map, principal(), create_req("overflow"), 2).unwrap_err();
         assert_eq!(err, ActiveUserTransactionError::TooManyActiveTransactions);
 
-        // FE acknowledges one row, freeing a slot.
         delete(&mut map, principal(), "id-0".to_string()).expect("delete");
-        create(&mut map, principal(), create_req("after-delete"), 4)
+        create(&mut map, principal(), create_req("after-delete"), 3)
             .expect("slot freed after delete");
     }
 
