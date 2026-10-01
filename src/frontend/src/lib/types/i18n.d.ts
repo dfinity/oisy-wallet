@@ -743,6 +743,8 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
+		xrp_sent: string;
+		xrp_submitted: string;
 		send_token: string;
 		send_unknown_token: string;
 		destination: string;
@@ -786,7 +788,6 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
-		enter_xrp_address: string;
 		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
@@ -798,6 +799,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		first_time_destination: string;
 		first_time_destination_confirm: string;
+		xrp_destination_tag_hint: string;
+		xrp_destination_tag_missing: string;
 		fee_expired: string;
 		fee_info: string;
 		scanned_address_only_destination: string;
@@ -854,8 +857,6 @@ interface I18nSend {
 		no_btc_network_id: string;
 		no_solana_network_id: string;
 		no_xrp_network_id: string;
-		xrp_confirmation_failed: string;
-		xrp_transaction_failed: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
@@ -867,6 +868,9 @@ interface I18nSend {
 		solana_insufficient_funds_for_rent: string;
 		fee_calc_unsupported_standard: string;
 		xrp_send_expired: string;
+		xrp_send_already_in_flight: string;
+		xrp_send_not_guarded: string;
+		xrp_active_transaction_failed: string;
 		xrp_amount_exceeds_sendable: string;
 		xrp_destination_unfunded: string;
 		xrp_destination_tag_required: string;
@@ -2022,7 +2026,7 @@ interface I18nContact {
 }
 
 interface I18nAddress {
-	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string };
+	types: { Icrcv2: string; Btc: string; Eth: string; Sol: string; Xrp: string };
 	form: {
 		new_address: string;
 		address_placeholder: string;

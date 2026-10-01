@@ -48,6 +48,18 @@ describe('InputBase', () => {
 		expect(input(optional)?.hasAttribute('required')).toBeFalsy();
 	});
 
+	it('should link the input to its description only when one is given', () => {
+		const { container: described } = render(InputBase, {
+			props: { ...props, ariaDescribedBy: 'my-hint' }
+		});
+
+		expect(input(described)?.getAttribute('aria-describedby')).toBe('my-hint');
+
+		const { container: plain } = render(InputBase, { props });
+
+		expect(input(plain)?.hasAttribute('aria-describedby')).toBeFalsy();
+	});
+
 	it('should render a disabled input', () => {
 		const { container } = render(InputBase, { props: { ...props, disabled: true } });
 

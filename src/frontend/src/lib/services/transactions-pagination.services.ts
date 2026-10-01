@@ -12,10 +12,13 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdICP,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXrp
 } from '$lib/utils/network.utils';
 import { loadOlderSolTransactions } from '$sol/services/sol-history-pagers.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { loadOlderXrpTransactions } from '$xrp/services/xrp-history-pager.services';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -60,6 +63,10 @@ export const loadedTransactionsCount = ({
 		return (get(btcTransactionsStore)?.[tokenId] ?? []).length;
 	}
 
+	if (isNetworkIdXrp(networkId)) {
+		return (get(xrpTransactionsStore)?.[tokenId] ?? []).length;
+	}
+
 	return 0;
 };
 
@@ -84,6 +91,10 @@ export const loadOlderTransactionsFor = ({
 
 	if (isNetworkIdBitcoin(networkId)) {
 		return loadNextBtcTransactionsByOldest;
+	}
+
+	if (isNetworkIdXrp(networkId)) {
+		return loadOlderXrpTransactions;
 	}
 
 	return undefined;

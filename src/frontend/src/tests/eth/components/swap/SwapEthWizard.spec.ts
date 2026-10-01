@@ -76,7 +76,8 @@ vi.mock('$lib/services/provider-agreements.services', () => ({
 
 vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_SWAP_ENABLED: true,
-	NEAR_INTENTS_BTC_SWAP_ENABLED: true
+	NEAR_INTENTS_BTC_SWAP_ENABLED: true,
+	NEAR_INTENTS_XRP_SWAP_ENABLED: false
 }));
 
 const mockToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK, enabled: true };

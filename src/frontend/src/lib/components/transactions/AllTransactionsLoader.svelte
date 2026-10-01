@@ -26,6 +26,14 @@
 		loadMore: () => Promise<ResultSuccess>;
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
+		/**
+		 * How far back the list reaches, in seconds. Until levelling or a first `loadMore` sets a floor,
+		 * it is how far back every token that still has history has loaded; from then on, the floor
+		 * every token is being levelled to, which drops with every round whatever a single token does,
+		 * so a token whose page failed or that reached the page cap can be short of it until the next
+		 * round. Absent while no token holds a dated row.
+		 */
+		floor?: number;
 	}
 
 	interface Props {
@@ -43,16 +51,22 @@
 		destroyed = true;
 	});
 
-	const oldestTimestamp = (rows: AllTransactionUiWithCmp[]): number =>
-		Math.min(
-			...rows.map(({ transaction: { timestamp } }) =>
-				nonNullish(timestamp) ? normalizeTimestampToSeconds(timestamp) : Infinity
-			)
-		);
+	// `undefined` when no row is dated. Pending transactions carry no timestamp, and a floor taken
+	// from them came out as `Infinity`, which hid every dated row that arrived after them.
+	const oldestTimestamp = (rows: AllTransactionUiWithCmp[]): number | undefined =>
+		rows.reduce<number | undefined>((oldest, { transaction: { timestamp } }) => {
+			if (isNullish(timestamp)) {
+				return oldest;
+			}
+
+			const seconds = normalizeTimestampToSeconds(timestamp);
+
+			return isNullish(oldest) || seconds < oldest ? seconds : oldest;
+		}, undefined);
 
 	// The oldest transaction on screen across every token. Tokens whose history stops short of it
 	// would leave gaps in the merged list, so they get paged down to it.
-	const oldestLoadedTimestamp = (): number => oldestTimestamp(transactions);
+	const oldestLoadedTimestamp = (): number | undefined => oldestTimestamp(transactions);
 
 	const pageToken = async ({
 		token,
@@ -144,7 +158,12 @@
 	// Rows a token pages in while being levelled never move it: if they did, each run would overshoot
 	// the floor, lower it, and set every other token off again, until all of them had walked back to
 	// the start of their history.
-	let levelFloor: number | undefined;
+	//
+	// Once set, the list reveals rows down to it. It is the target rather than what every token has
+	// reached: holding the list at the token furthest behind froze it whenever one token stopped moving
+	// (pages that keep failing, or that hold only transactions the list does not show), and kept
+	// loading the others while showing nothing.
+	let levelFloor = $state<number | undefined>();
 
 	// Tokens whose rows the floor already accounts for.
 	const accountedTokenIds = new SvelteSet<TokenId>();
@@ -167,16 +186,22 @@
 			return;
 		}
 
-		newcomers.forEach(({ id }) => accountedTokenIds.add(id));
-
 		const newcomerIds = new Set(newcomers.map(({ id }) => id));
 
 		const newcomersOldest = isNullish(levelFloor)
 			? oldestLoadedTimestamp()
 			: oldestTimestamp(transactions.filter(({ token: { id } }) => newcomerIds.has(id)));
 
+		// No dated row loaded yet, so there is no floor to level to. The newcomers stay unaccounted
+		// and are looked at again when more rows arrive.
+		if (isNullish(levelFloor) && isNullish(newcomersOldest)) {
+			return;
+		}
+
+		newcomers.forEach(({ id }) => accountedTokenIds.add(id));
+
 		// Older than the current floor: every token has to reach the new one, not just the newcomers.
-		if (isNullish(levelFloor) || newcomersOldest < levelFloor) {
+		if (nonNullish(newcomersOldest) && (isNullish(levelFloor) || newcomersOldest < levelFloor)) {
 			levelFloor = newcomersOldest;
 
 			levelTokens({ tokens: $enabledFungibleNetworkTokens, minTimestamp: levelFloor });
@@ -184,6 +209,11 @@
 			return;
 		}
 
+		if (isNullish(levelFloor)) {
+			return;
+		}
+
+		// Newcomers with only undated rows too: their history can still reach below the floor.
 		levelTokens({ tokens: newcomers, minTimestamp: levelFloor });
 	};
 
@@ -213,14 +243,19 @@
 			}))
 		);
 
-		levelFloor = oldestLoadedTimestamp();
+		// The previous floor stays when no row is dated, rather than one that hides every row.
+		const floor = oldestLoadedTimestamp() ?? levelFloor;
+
+		levelFloor = floor;
 
 		// A token whose page just failed waits for the next round: levelling it now would ask for the
 		// same failed cursor again straight away.
-		const levelled = await levelTokens({
-			tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
-			minTimestamp: levelFloor
-		});
+		const levelled = isNullish(floor)
+			? []
+			: await levelTokens({
+					tokens: pages.filter(({ result: { err } }) => isNullish(err)).map(({ token }) => token),
+					minTimestamp: floor
+				});
 
 		// Without it a round in which pages failed and nothing loaded would read as the chains having
 		// nothing left, and the scroll would stop asking.
@@ -250,6 +285,37 @@
 		$enabledFungibleNetworkTokens.length > 0 &&
 			$enabledFungibleNetworkTokens.every(({ id }) => disableLoader[id] === true)
 	);
+
+	// Until a floor is set, how far back every token that still has history has loaded. Levelling
+	// only starts once every store has loaded, and one that never does left the list with no floor at
+	// all: tokens whose first page reached further back showed rows a token with a shorter one had not
+	// loaded yet. Each such token is complete down to its own oldest row, so the list is complete down
+	// to the newest of those. A token with nothing to page is left out: holding the list at its first
+	// page would stop it there for good. This only lasts until the first round, which starts once the
+	// end of the list is on screen, so a token that stops moving cannot hold the list after it.
+	let completeDownTo = $derived.by((): number | undefined => {
+		const pagedTokenIds = new Set($enabledFungibleNetworkTokens.map(({ id }) => id));
+
+		const oldestByToken = transactions.reduce<Map<TokenId, number>>(
+			(acc, { token: { id }, transaction: { timestamp } }) => {
+				if (!pagedTokenIds.has(id) || disableLoader[id] === true || isNullish(timestamp)) {
+					return acc;
+				}
+
+				const seconds = normalizeTimestampToSeconds(timestamp);
+				const oldest = acc.get(id);
+
+				if (isNullish(oldest) || seconds < oldest) {
+					acc.set(id, seconds);
+				}
+
+				return acc;
+			},
+			new Map()
+		);
+
+		return oldestByToken.size > 0 ? Math.max(...oldestByToken.values()) : undefined;
+	});
 </script>
 
-{@render children?.({ loadMore, exhausted })}
+{@render children?.({ loadMore, exhausted, floor: levelFloor ?? completeDownTo })}

@@ -7,15 +7,15 @@ import {
 import { resolveSwapTokenLookup } from '$lib/utils/swap-tokens-filter.utils';
 import { nonNullish } from '@dfinity/utils';
 
-// NEAR Intents bridges across EVM, SOL, and BTC but not ICP, so the builder is
+// NEAR Intents bridges across EVM, SOL, BTC, and XRP but not ICP, so the builder is
 // deliberately narrower than the full SwapTokenCategory.
-type NearIntentsCategory = Extract<SwapTokenCategory, 'evm' | 'sol' | 'btc'>;
+type NearIntentsCategory = Extract<SwapTokenCategory, 'evm' | 'sol' | 'btc' | 'xrp'>;
 
-const NEAR_INTENTS_CATEGORIES: NearIntentsCategory[] = ['evm', 'sol', 'btc'];
+const NEAR_INTENTS_CATEGORIES: NearIntentsCategory[] = ['evm', 'sol', 'btc', 'xrp'];
 
 /**
  * Builds a `getSupportedDestinations` for a NEAR Intents provider entry registered
- * under `category` ('evm', 'sol', or 'btc').
+ * under `category` ('evm', 'sol', 'btc', or 'xrp').
  *
  * NEAR Intents bridges across all its categories, but each provider entry only
  * caches its own category's source set. We use `findProviderSourceTokens` to look

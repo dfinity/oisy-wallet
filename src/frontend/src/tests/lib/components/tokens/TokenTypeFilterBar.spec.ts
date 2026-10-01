@@ -36,8 +36,8 @@ describe('TokenTypeFilterBar', () => {
 	it('should accent the Compute pill and no other', () => {
 		const { container, getByText } = render(TokenTypeFilterBar);
 
-		const accented = [...container.querySelectorAll('button')].filter((button) =>
-			button.classList.contains('bg-brand-subtle-20')
+		const accented = [...container.querySelectorAll('button')].filter(
+			(button) => button.querySelector('.pill-lap') !== null
 		);
 
 		expect(accented).toEqual([getByText(en.token_tag.category.compute)]);
@@ -55,7 +55,7 @@ describe('TokenTypeFilterBar', () => {
 
 		expect(computeButton.classList.contains('bg-brand-primary')).toBeTruthy();
 		expect(computeButton.classList.contains('text-primary-inverted')).toBeTruthy();
-		expect(computeButton.classList.contains('bg-brand-subtle-20')).toBeFalsy();
+		expect(computeButton.querySelector('.pill-lap')).toBeNull();
 	});
 
 	it('should have "All asset types" selected by default', () => {
