@@ -134,8 +134,8 @@ describe('NavigationMoreMenu', () => {
 		});
 
 		it('keeps the documentation support page where the Help page is not enabled', async () => {
-			// Production, until the page ships there. Same row, same label, same
-			// place; only where it goes differs.
+			// Only reachable by turning `HELP_ENABLED` off again, e.g. to revert the
+			// rollout. Same row, same label, same place; only where it goes differs.
 			featureFlags.helpEnabled = false;
 
 			const { getByTestId } = await open();
