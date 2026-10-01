@@ -370,6 +370,58 @@ export const XrplAccountTxResultSchema = z.object({
 	error: z.never().optional()
 });
 
+// An issued-token amount as the ledger writes it: a signed decimal, possibly in exponent
+// notation. Live `account_lines` answers carry both `-0.00204230364` and `5800000000000000e13`. The
+// exponent is bounded to three digits, which covers the ledger's range (up to 10^95) with room to
+// spare, so a hostile value cannot make the conversion to base units allocate without limit.
+const XrpTokenValueSchema = z.string().regex(/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d{1,3})?$/);
+
+// A currency code as the ledger reports it: 3 ASCII characters of the allowed set, or 40 uppercase
+// hex characters. The ledger writes hex uppercase, and a token's key depends on that spelling.
+const XrpCurrencyCodeSchema = z
+	.string()
+	.regex(/^([A-Za-z0-9?!@#$%^&*<>(){}[\]|]{3}|[0-9A-F]{40})$/);
+
+// One trust line as the holder sees it: `account` is the counterparty — the issuer, for a token the
+// wallet holds — and `balance` is positive when the holder holds the token. The ledger omits each
+// flag when it is false.
+const XrplAccountLineSchema = z.object({
+	account: z.string(),
+	balance: XrpTokenValueSchema,
+	currency: XrpCurrencyCodeSchema,
+	limit: XrpTokenValueSchema,
+	limit_peer: XrpTokenValueSchema,
+	no_ripple: z.boolean().optional(),
+	no_ripple_peer: z.boolean().optional(),
+	authorized: z.boolean().optional(),
+	peer_authorized: z.boolean().optional(),
+	freeze: z.boolean().optional(),
+	freeze_peer: z.boolean().optional(),
+	deep_freeze: z.boolean().optional(),
+	deep_freeze_peer: z.boolean().optional()
+});
+
+// The discriminated pair `account_tx` uses, for the same reason: without `lines: z.never()` a
+// payload carrying both an `actNotFound` and a list of lines parses as the absence, and the lines
+// the node supplied are dropped as "no tokens".
+export const XrplAccountLinesErrorSchema = z.object({
+	error: z.string(),
+	account: z.string().optional(),
+	request: XrplRequestEchoSchema.optional(),
+	validated: z.boolean().optional(),
+	lines: z.never().optional()
+});
+
+export const XrplAccountLinesResultSchema = z.object({
+	account: z.string(),
+	lines: z.array(XrplAccountLineSchema),
+	// Required: later pages are pinned to it, so every page describes the same ledger.
+	ledger_index: XrpUInt32Schema,
+	validated: z.boolean(),
+	marker: z.unknown().optional(),
+	error: z.never().optional()
+});
+
 export const XrplFeeResultSchema = z.object({
 	drops: z
 		.object({

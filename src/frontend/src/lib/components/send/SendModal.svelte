@@ -75,6 +75,7 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { isTokenXrpTrustLine } from '$xrp/utils/xrp-trust-line.utils';
 
 	interface Props {
 		isTransactionsPage: boolean;
@@ -157,7 +158,9 @@
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
-			tokens: $enabledTokens,
+			// Trust-line tokens are held back until the XRP send flow can move them: today it sends
+			// native XRP only.
+			tokens: $enabledTokens.filter((token) => !isTokenXrpTrustLine(token)),
 			filterZeroBalance: true,
 			// eslint-disable-next-line svelte/no-unused-svelte-ignore
 			// svelte-ignore state_referenced_locally -- the modal-tokens-list context is initialized once at mount; the reactive `lockedNetwork` (a $derived) is consumed downstream by `SendTokensList`'s view-only lock.

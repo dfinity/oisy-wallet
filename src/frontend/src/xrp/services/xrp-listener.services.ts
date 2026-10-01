@@ -1,3 +1,5 @@
+import { SUPPORTED_XRP_TOKENS } from '$env/tokens/tokens.xrp.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -5,7 +7,11 @@ import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { resetXrpHistoryPager } from '$xrp/services/xrp-history-pager.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
+import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
+import { toXrpTrustLineToken } from '$xrp/utils/xrp-trust-line-tokens.utils';
+import { parseXrpTokenValue } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -19,7 +25,8 @@ export const syncWallet = ({
 	const {
 		wallet: {
 			balance: { certified, data: balance },
-			newTransactions
+			newTransactions,
+			trustLines
 		}
 	} = data;
 
@@ -33,6 +40,10 @@ export const syncWallet = ({
 		});
 	} else {
 		balancesStore.reset(tokenId);
+	}
+
+	if (nonNullish(trustLines)) {
+		syncTrustLines({ tokenId, lines: trustLines });
 	}
 
 	// Absent means the history could not be read — `loadAndSyncBalance` awaits the request before
@@ -62,6 +73,51 @@ export const syncWallet = ({
 	});
 };
 
+const xrpNetworkOf = (tokenId: TokenId) =>
+	SUPPORTED_XRP_TOKENS.find(({ id }) => id === tokenId)?.network;
+
+/**
+ * Writes the lines the ledger reports for the account of `tokenId` and each held token's balance.
+ *
+ * A line's balance is written from the account's side: a negative one would mean the account is the
+ * party owed — an issuer's position — and holds nothing, so it is shown as zero. A line the ledger no
+ * longer reports has been removed: its token leaves the list, and its balance must not linger in the
+ * totals.
+ */
+const syncTrustLines = ({ tokenId, lines }: { tokenId: TokenId; lines: XrpTrustLine[] }) => {
+	const network = xrpNetworkOf(tokenId);
+
+	if (isNullish(network)) {
+		return;
+	}
+
+	const previous = get(xrpTrustLinesStore)[tokenId] ?? [];
+
+	xrpTrustLinesStore.set({ tokenId, lines });
+
+	const held = new Set<TokenId>();
+
+	for (const line of lines) {
+		const { id, decimals } = toXrpTrustLineToken({ line, network });
+		const value = parseXrpTokenValue({ value: line.balance, decimals });
+
+		held.add(id);
+
+		balancesStore.batchSet({
+			id,
+			data: { data: value > ZERO ? value : ZERO, certified: false }
+		});
+	}
+
+	for (const line of previous) {
+		const { id } = toXrpTrustLineToken({ line, network });
+
+		if (!held.has(id)) {
+			balancesStore.reset(id);
+		}
+	}
+};
+
 /**
  * Drops what the UI holds for a token, so the next sync starts from nothing.
  *
@@ -77,6 +133,17 @@ export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 	balancesStore.reset(tokenId);
 	xrpTransactionsStore.clear(tokenId);
 	resetXrpHistoryPager(tokenId);
+
+	// The lines belong to the address being handed over, and so do the balances written from them.
+	const network = xrpNetworkOf(tokenId);
+
+	if (nonNullish(network)) {
+		for (const line of get(xrpTrustLinesStore)[tokenId] ?? []) {
+			balancesStore.reset(toXrpTrustLineToken({ line, network }).id);
+		}
+	}
+
+	xrpTrustLinesStore.clear(tokenId);
 };
 
 export const syncWalletError = ({

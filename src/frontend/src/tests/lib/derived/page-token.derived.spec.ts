@@ -2,6 +2,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -44,6 +45,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -128,6 +130,17 @@ describe('page-token.derived', () => {
 			mockPage.mockToken(mockToken);
 
 			expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
+		});
+
+		it('should find an XRP Ledger trust-line token by its currency and issuer', () => {
+			vi.spyOn(xrpTrustLineTokens, 'subscribe').mockImplementation((fn) => {
+				fn([{ ...RLUSD_TOKEN, enabled: true }]);
+				return () => {};
+			});
+
+			mockPage.mockToken(RLUSD_TOKEN);
+
+			expect(get(pageToken)?.id).toBe(RLUSD_TOKEN.id);
 		});
 
 		it('should return undefined when token is not found in any list', () => {

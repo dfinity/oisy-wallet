@@ -1,4 +1,5 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 import { WALLET_PAGINATION, XRP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
@@ -8,10 +9,11 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { loadXrpBalance, loadXrpTransactions } from '$xrp/rest/xrpl.rest';
+import { loadXrpAccountLines, loadXrpBalance, loadXrpTransactions } from '$xrp/rest/xrpl.rest';
 import type { XrpCertifiedTransaction } from '$xrp/stores/xrp-transactions.store';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
+import type { XrpTrustLine } from '$xrp/types/xrp-trust-line';
 import { mapXrpTransaction } from '$xrp/utils/xrp-transaction.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
@@ -25,6 +27,9 @@ interface XrpWalletData {
 	balance: CertifiedData<XrpBalance | null>;
 	// `undefined` means the history could not be read this round, as distinct from an empty page.
 	transactions: XrpCertifiedTransaction[] | undefined;
+	// `undefined` means the lines were not read this round — they could not be, or trust-line tokens
+	// are off — as distinct from an account that has none.
+	trustLines: XrpTrustLine[] | undefined;
 }
 
 export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> {
@@ -35,6 +40,10 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 	// without it an account with no transactions — after a tick where `account_tx` failed — never
 	// leaves the loading state, because neither the balance nor the row count has changed.
 	#historyPublished = false;
+
+	// The trust lines last posted for the current ref, serialized. Lines are posted when they differ
+	// from it, so an unchanged account costs no message, and the first read is always news.
+	#trustLinesPublished: string | undefined;
 
 	// Moves on with every change of ref, `stop` included. A job checks it alongside the ref, which
 	// alone cannot tell a restart on the SAME address from the owner before it: the restart puts back
@@ -76,6 +85,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 				transactions: {}
 			};
 			this.#historyPublished = false;
+			this.#trustLinesPublished = undefined;
 			this.#generation++;
 		}
 
@@ -155,12 +165,14 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		data,
 		expectedRef,
 		generation,
-		transactions
+		transactions,
+		trustLines
 	}: {
 		data: PostMessageDataRequestXrp;
 		expectedRef: string;
 		generation: number;
 		transactions: Promise<XrpCertifiedTransaction[] | undefined>;
+		trustLines: Promise<XrpTrustLine[] | undefined>;
 	}) => {
 		const {
 			address: { data: address },
@@ -172,7 +184,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		// `undefined`, not `[]`, when the history could not be read: the store keeps what it holds
 		// and stays uninitialized, and the next tick tries again. An empty array claimed the account
 		// has no transactions.
-		this.syncWalletData({ balance, transactions: await transactions, expectedRef, generation });
+		this.syncWalletData({
+			balance,
+			transactions: await transactions,
+			trustLines: await trustLines,
+			expectedRef,
+			generation
+		});
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestXrp>) => {
@@ -197,10 +215,26 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			() => undefined
 		);
 
+		// Once per tick and folded into `undefined` on failure, like the history and for the same
+		// reasons: a trust-line outage must neither fail the tick nor reset the XRP balance, and a
+		// retry of the balance must not re-read the lines.
+		const trustLines = XRP_TRUST_LINE_TOKENS_ENABLED
+			? loadXrpAccountLines({ address, network: xrpNetwork }).then(
+					(loaded) => loaded,
+					() => undefined
+				)
+			: Promise.resolve(undefined);
+
 		try {
 			await retryWithDelay({
 				request: async () =>
-					await this.loadAndSyncBalance({ data, expectedRef, generation, transactions }),
+					await this.loadAndSyncBalance({
+						data,
+						expectedRef,
+						generation,
+						transactions,
+						trustLines
+					}),
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
@@ -222,6 +256,7 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 	private syncWalletData = ({
 		balance,
 		transactions,
+		trustLines,
 		expectedRef,
 		generation
 	}: XrpWalletData & { expectedRef: string; generation: number }) => {
@@ -257,12 +292,20 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		// them apart.
 		const firstHistory = nonNullish(transactions) && !this.#historyPublished;
 
-		if (!newBalance && !newTransactions && !firstHistory) {
+		const serializedTrustLines = nonNullish(trustLines) ? JSON.stringify(trustLines) : undefined;
+		const newTrustLines =
+			nonNullish(serializedTrustLines) && serializedTrustLines !== this.#trustLinesPublished;
+
+		if (!newBalance && !newTransactions && !firstHistory && !newTrustLines) {
 			return;
 		}
 
 		if (nonNullish(transactions)) {
 			this.#historyPublished = true;
+		}
+
+		if (newTrustLines) {
+			this.#trustLinesPublished = serializedTrustLines;
 		}
 
 		this.postMessageWallet({
@@ -272,7 +315,9 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 				// rather than writing an empty page over an unknown one.
 				...(nonNullish(transactions) && {
 					newTransactions: JSON.stringify(transactions, jsonReplacer)
-				})
+				}),
+				// Omitted when unchanged or not read, so the listener keeps what it holds.
+				...(newTrustLines && { trustLines })
 			}
 		});
 	};
