@@ -73,6 +73,7 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import {
 	mockValidIcCkToken,
 	mockValidIcToken,
@@ -3950,6 +3951,28 @@ describe('swap.services', () => {
 
 			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+		});
+
+		// A memo is a destination tag the payment would not carry, so the deposit would arrive
+		// uncredited; the quote is refused before anything is signed, recorded or reported.
+		it('should refuse a quote that asks for a deposit memo', async () => {
+			await expect(
+				fetchNearIntentsXrpSwap({
+					...baseParams,
+					swapDetails: {
+						...mockNearIntentsQuoteResponse,
+						quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: '12345' }
+					}
+				})
+			).rejects.toMatchObject({
+				code: SwapErrorCodes.NEAR_INTENTS_QUOTE_DEPOSIT_MEMO,
+				message: en.swap.error.near_intents_quote_deposit_memo
+			});
+
+			expect(sendXrp).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			expect(mockProgress).not.toHaveBeenCalled();
 		});
 	});
 
