@@ -1,4 +1,3 @@
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 
-// TODO: set to true once the Help page ships everywhere.
-export const HELP_ENABLED = LOCAL || STAGING;
+export const HELP_ENABLED = LOCAL || STAGING || BETA || PROD;
