@@ -2,11 +2,13 @@ import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.en
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
-import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 import {
+	DESTINATION_INPUT,
 	SEND_DESTINATION_WIZARD_CONTACT,
 	SEND_DESTINATION_WIZARD_STEP,
+	SEND_FIRST_TIME_DESTINATION_WARNING,
 	SEND_FORM_DESTINATION_NEXT_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { contactsStore } from '$lib/stores/contacts.store';
@@ -17,6 +19,7 @@ import type { NetworkContacts } from '$lib/types/contacts';
 import type { Token } from '$lib/types/token';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SendDestinationWizardStepTestHost from '$tests/lib/components/send/SendDestinationWizardStepTestHost.svelte';
 import {
 	getMockContacts,
@@ -26,6 +29,11 @@ import {
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockXrpAddress, mockXrpAddress2 } from '$tests/mocks/xrp.mock';
+import {
+	xrpTransactionsStore,
+	type XrpCertifiedTransaction
+} from '$xrp/stores/xrp-transactions.store';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
 
@@ -174,8 +182,22 @@ describe('SendDestinationWizardStep', () => {
 				context: mockContext(XRP_TOKEN)
 			});
 
+		const createXrpSend = (to: string): XrpCertifiedTransaction => ({
+			data: {
+				id: `tx-${to}`,
+				type: 'send',
+				status: 'confirmed',
+				value: 1_000_000n,
+				from: mockXrpAddress,
+				to,
+				timestamp: 1_700_000_000n
+			},
+			certified: false
+		});
+
 		beforeEach(() => {
 			contactsStore.addContact(xrpContact);
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 		});
 
 		afterEach(() => {
@@ -232,6 +254,55 @@ describe('SendDestinationWizardStep', () => {
 			});
 
 			expect(getByTestId(SEND_FORM_DESTINATION_NEXT_BUTTON)).toBeInTheDocument();
+		});
+
+		it('should show the recently used empty state when nothing was sent yet', () => {
+			const { getByText } = render(SendDestinationWizardStep, {
+				props: { ...props, destination: '' },
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(getByText(en.send.text.recently_used_empty_state_title)).toBeInTheDocument();
+		});
+
+		it('should fill in a recently used address and move on when it is selected', async () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [createXrpSend(mockXrpAddress2)]
+			});
+
+			const { getByText, getByTestId } = render(SendDestinationWizardStep, {
+				props: { ...props, destination: '' },
+				context: mockContext(XRP_TOKEN)
+			});
+
+			await fireEvent.click(getByText(shortenWithMiddleEllipsis({ text: mockXrpAddress2 })));
+
+			expect(getByTestId(DESTINATION_INPUT)).toHaveValue(mockXrpAddress2);
+			expect(props.onNext).toHaveBeenCalledOnce();
+		});
+
+		it('should warn about an address that was never sent to', () => {
+			const { getByTestId } = render(SendDestinationWizardStep, {
+				props: { ...props, destination: mockXrpAddress2 },
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(getByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeInTheDocument();
+		});
+
+		it('should not warn about a recently used address', () => {
+			xrpTransactionsStore.append({
+				tokenId: XRP_TOKEN_ID,
+				transactions: [createXrpSend(mockXrpAddress2)]
+			});
+
+			const { queryByTestId } = render(SendDestinationWizardStep, {
+				props: { ...props, destination: mockXrpAddress2 },
+				context: mockContext(XRP_TOKEN)
+			});
+
+			expect(queryByTestId(SEND_FIRST_TIME_DESTINATION_WARNING)).toBeNull();
 		});
 	});
 

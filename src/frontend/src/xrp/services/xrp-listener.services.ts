@@ -5,6 +5,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { resetXrpHistoryPager } from '$xrp/services/xrp-history-pager.services';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { xrpTrustLinesStore } from '$xrp/stores/xrp-trust-lines.store';
 import type { XrpPostMessageDataResponseWallet } from '$xrp/types/xrp-post-message';
@@ -131,6 +132,7 @@ const syncTrustLines = ({ tokenId, lines }: { tokenId: TokenId; lines: XrpTrustL
 export const resetWallet = ({ tokenId }: { tokenId: TokenId }) => {
 	balancesStore.reset(tokenId);
 	xrpTransactionsStore.clear(tokenId);
+	resetXrpHistoryPager(tokenId);
 
 	// The lines belong to the address being handed over, and so do the balances written from them.
 	const network = xrpNetworkOf(tokenId);

@@ -1336,10 +1336,17 @@ export interface MyTip {
  * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
  * off-chain by polling the 1Click status endpoint keyed by the deposit
  * address, so that address (and its optional memo, plus learned-mid-flow tx
- * hashes) lives in `external_refs`; only the canonical immutable trio is
+ * hashes) lives in `external_refs`; only the values fixed at creation are
  * captured here.
  */
 export interface NearIntentsData {
+	/**
+	 * The XRP address the deposit is sent from, set exactly when `source_token`
+	 * is native XRP. That deposit is an XRP payment, so this is the field the
+	 * one-payment-in-flight check reads, as it reads `XrpData::source_address`
+	 * for a send. Optional and last, so rows stored before it decode as `None`.
+	 */
+	source_address: [] | [string];
 	source_token: TokenId;
 	/**
 	 * Source-token amount in base units.

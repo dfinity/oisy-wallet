@@ -196,7 +196,8 @@ describe('SwapContexts', () => {
 					icp: { coverage: 'all', supportedTokenIds: new Set([icpLedgerId]) },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
 					sol: { coverage: 'none', supportedTokenIds: new Set() },
-					btc: { coverage: 'none', supportedTokenIds: new Set() }
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
@@ -241,7 +242,8 @@ describe('SwapContexts', () => {
 					},
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
 					sol: { coverage: 'none', supportedTokenIds: new Set() },
-					btc: { coverage: 'none', supportedTokenIds: new Set() }
+					btc: { coverage: 'none', supportedTokenIds: new Set() },
+					xrp: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
