@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG } from '$xrp/constants/xrp.constants';
 import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { XrpAccountNotFoundError } from '$xrp/rest/xrpl.rest';
@@ -29,7 +30,7 @@ describe('xrp-destination.services', () => {
 				return Promise.reject(new XrpAccountNotFoundError('XRPL account not found'));
 			}
 
-			return Promise.resolve({ balance: 0n, sequence: 1, ownerCount: 0, flags: answer });
+			return Promise.resolve({ balance: ZERO, sequence: 1, ownerCount: 0, flags: answer });
 		});
 
 	beforeEach(() => {
