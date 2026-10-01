@@ -330,9 +330,8 @@ describe('applyTransactionsFilter', () => {
 	});
 
 	describe('XRP transactions', () => {
-		// XRP address-book contacts are not supported yet (they need a backend address
-		// type), so the XRP branch exists to collect the plain from/to addresses — and to
-		// keep the exhaustive `assertNever` from throwing on an XRP transaction.
+		// The XRP branch collects the plain from/to addresses, and keeps the exhaustive
+		// `assertNever` from throwing on an XRP transaction.
 		const xrpSendTx = {
 			component: 'xrp',
 			token: XRP_TOKEN,
@@ -351,7 +350,7 @@ describe('applyTransactionsFilter', () => {
 			name: 'Xrp Friend',
 			id: 7n,
 			updateTimestampNs: ZERO,
-			addresses: [{ address: 'rReceiverAddress', addressType: 'Sol' }]
+			addresses: [{ address: 'rReceiverAddress', addressType: 'Xrp' }]
 		};
 
 		it('keeps an XRP transaction when filtering by type', () => {

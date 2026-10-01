@@ -1010,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Odeslat",
+			"xrp_sent": "Vaše platba XRP prošla.",
+			"xrp_submitted": "Platba odeslána. Obvykle se vypořádá během několika sekund — můžete toto zavřít a pokračovat.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Cíl",
@@ -1030,7 +1032,7 @@
 			"network": "Síť",
 			"source_network": "Zdrojová síť",
 			"destination_network": "Cílová síť",
-			"xrp_destination_tag": "Cílový tag",
+			"xrp_destination_tag": "Cílový tag XRP",
 			"initializing_transaction": "Inicializace transakce",
 			"convert_to_native_icp": "Převést na nativní ICP",
 			"open_qr_modal": "Spustit skenování QR kódu pro podrobnosti transakce",
@@ -1053,8 +1055,7 @@
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
-			"enter_xrp_address": "Zadejte adresu XRP",
-			"xrp_destination_tag": "Zadejte cílový tag (nepovinné)",
+			"xrp_destination_tag": "Zadejte cílový tag XRP (nepovinné)",
 			"select_network": "Vybrat síť",
 			"search_nfts": "Hledat sběratelské předměty"
 		},
@@ -1065,6 +1066,8 @@
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"first_time_destination": "Zdá se, že na tuto adresu jste ještě nikdy neposílali tokeny. Adresu pečlivě zkontrolujte.",
 			"first_time_destination_confirm": "Na tuto adresu posílám tokeny poprvé a adresa je pečlivě zkontrolovaná.",
+			"xrp_destination_tag_hint": "Vyžaduje ho většina burz. Pokud ho nevyplníte, můžete o prostředky přijít.",
+			"xrp_destination_tag_missing": "Chybí cílový tag XRP. Pokud posíláte na burzu, ověřte si, zda ho vyžaduje, jinak můžete o prostředky přijít.",
 			"fee_expired": "",
 			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
@@ -1083,7 +1086,7 @@
 			"unknown_cketh": "Token ckETH nelze získat.",
 			"destination_address_invalid": "Cílová adresa je neplatná.",
 			"amount_invalid": "Částka je neplatná.",
-			"xrp_destination_tag_invalid": "Cílový tag musí být celé číslo mezi 0 a 4294967295.",
+			"xrp_destination_tag_invalid": "Cílový tag XRP musí být celé číslo mezi 0 a 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Nedostatek prostředků: částka musí ponechat dost na pokrytí poplatku a požadované rezervy účtu XRP.",
 			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
@@ -1121,8 +1124,6 @@
 			"no_btc_network_id": "Aktuální síť ($networkId) není sítí Bitcoin.",
 			"no_solana_network_id": "Aktuální síť ($networkId) není sítí Solana.",
 			"no_xrp_network_id": "Aktuální síť ($networkId) není sítí XRP Ledger.",
-			"xrp_confirmation_failed": "Nepodařilo se nám potvrdit, zda byla transakce odeslána. Stále může projít, proto ji zatím neposílejte znovu — pokud projde, váš zůstatek se aktualizuje.",
-			"xrp_transaction_failed": "Transakce byla sítí zpracována, ale selhala, takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později.",
 			"unexpected_utxos_fee": "Při výpočtu poplatku za transakci došlo k chybě.",
 			"unable_to_retrieve_amount": "n/a (nelze načíst)",
@@ -1133,19 +1134,22 @@
 			"solana_insufficient_funds_for_fee": "Váš zůstatek SOL není dostatečný k pokrytí poplatků za transakci.",
 			"solana_insufficient_funds_for_rent": "Váš zůstatek SOL není dostatečný k pokrytí nájmu požadovaného pro vytvoření účtu.",
 			"fee_calc_unsupported_standard": "Poplatek nelze vypočítat, protože zadaný standard tokenu není podporován.",
-			"xrp_send_expired": "Transakce nebyla odeslána: síť ji nezahrnula včas. Z vaší peněženky nic neodešlo a je bezpečné vytvořit novou.",
+			"xrp_send_expired": "Vaše odeslání $amount $symbol na $network nebylo dokončeno: síť ji nezahrnula včas. Nic neopustilo vaši peněženku a je bezpečné odeslat znovu.",
+			"xrp_send_already_in_flight": "Předchozí platba XRP z této adresy ještě nebyla vypořádána. Nic nebylo odesláno — vyčkejte, než se dokončí, což trvá přibližně minutu, a poté odešlete znovu.",
+			"xrp_send_not_guarded": "Nepodařilo se nám zkontrolovat, zda se předchozí platba XRP stále vypořádává. Nic nebylo odesláno — zkuste to za okamžik znovu.",
+			"xrp_active_transaction_failed": "Vaše odeslání $amount $symbol na $network bylo sítí zpracováno, ale selhalo ($result), takže vaše prostředky nebyly odeslány. Síťový poplatek byl přesto účtován.",
 			"xrp_amount_exceeds_sendable": "Částka už se nevejde. Váš účet si musí ponechat rezervu XRP a navíc síťový poplatek, a obojí se může během kontroly změnit. Nic nebylo odesláno – snižte částku nebo to zkuste znovu, až se údaje o účtu obnoví.",
 			"xrp_destination_unfunded": "Tato adresa zatím nemá účet XRP. Jeho vytvoření vyžaduje první platbu alespoň $reserve XRP. Nic nebylo odesláno – zvyšte částku nebo odešlete na adresu, která už je financovaná.",
-			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu.",
+			"xrp_destination_tag_required": "Tato adresa vyžaduje cílový tag XRP. Nic nebylo odesláno – doplňte tag, který vám dala služba, jíž platíte, a odešlete znovu.",
 			"xrp_destination_is_source": "Toto je vaše vlastní adresa XRP. Nic nebylo odesláno – zvolte jiného příjemce.",
 			"xrp_account_state_unavailable": "Peněženka nedokázala načíst údaje o vašem účtu, takže částku nešlo ověřit. Nic nebylo odesláno – zkuste to prosím za chvíli znovu."
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Razit",
+			"minting": "Ražení...",
+			"mint_review_subtitle": "Razíte"
 		}
 	},
 	"burn": {
@@ -1153,6 +1157,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Razit $token",
+			"description": "Ražení vytváří nové $destinationToken z $sourceToken za kurz sítě a $sourceToken spaluje.",
+			"you_mint_estimate": "Razíte (odhad)",
+			"rate": "Kurz",
+			"cycles_ledger_fee": "Poplatek Cycles Ledgeru",
+			"minter": "Razí",
+			"one_way": "Ražení nelze vrátit: $destinationToken nelze převést zpět na $sourceToken.",
+			"sending": "Odesílání $token do $minter...",
+			"minting": "Ražení $token...",
+			"minted": "Vyraženo $amount $token.",
+			"pending": "Ražení trvá déle než obvykle. Dokončí se na pozadí: sledovat ho můžete v aktivních transakcích."
+		},
+		"error": {
+			"rate_unavailable": "Kurz $token se nepodařilo načíst. Zkuste to prosím později.",
+			"amount_too_small": "Částka je příliš malá na ražení $token.",
+			"refunded": "Ražení bylo vráceno. Vaše $token se vrátily, snížené o $refundFee $token. Důvod: $reason",
+			"refunded_nothing": "Ražení bylo vráceno, ale poplatky pohltily celou částku: žádné $token se nevrátily. Důvod: $reason",
+			"failed": "Ražení se nezdařilo. Důvod: $reason",
+			"not_started": "Ražení se nepodařilo zahájit. Nic nebylo odesláno, zkuste to prosím znovu.",
+			"transfer_failed": "Převod $token se nezdařil. Nic nebylo odesláno.",
+			"unconfirmed": "Převod $token se nepodařilo potvrdit. Pokud proběhl, ražení se dokončí na pozadí: sledovat ho můžete v aktivních transakcích."
 		}
 	},
 	"active_user_transactions": {
@@ -1469,7 +1498,8 @@
 				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
 				"info_ext": "ID kanistru je obvykle dostupné na webových stránkách projektu.",
 				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
-				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
+				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny.",
+				"custom_tokens_not_supported_yet": "OISY zatím v této síti nepodporuje vlastní tokeny."
 			},
 			"error": {
 				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",
@@ -1565,7 +1595,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoiny",
 			"stock": "Akcie",
-			"commodity": "Komodity"
+			"commodity": "Komodity",
+			"compute": "Výpočetní výkon"
+		},
+		"category_in_sentence": {
+			"compute": "výpočetní tokeny"
 		},
 		"risk": {
 			"low": "Nízké riziko",
@@ -1728,6 +1762,7 @@
 			"unreviewed_instructions": "OISY nedokáže dekódovat některé z těchto instrukcí, takže kontrola níže nemusí být úplná.",
 			"unreviewed_instructions_simulated": "Tato transakce obsahuje operace z externího zdroje, které OISY nedokáže dekódovat, proto OISY spustil jejich simulaci. Ujistěte se, že aplikaci důvěřujete, a před podpisem zkontrolujte simulované změny zůstatku a operace. Mějte na paměti, že skutečný výsledek se může od simulace lišit.",
 			"cannot_be_shown": "Tato transakce obsahuje akce, které nelze všechny přesně zobrazit ke kontrole, takže ji OISY nepodepíše. Odmítněte ji a požádejte aplikaci o jednodušší požadavek.",
+			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost ji OISY nepodepíše.",
 			"simulated_instructions": "Simulované instrukce",
 			"multiple_operations": "Tato transakce obsahuje více operací, které ovlivňují vaši peněženku. Zkontrolujte simulované změny zůstatku a obsažené instrukce a tuto transakci schvalte pouze v případě, že také důvěřujete aplikaci.",
 			"simulated_review": "Kontrola níže je predikcí toho, jak by tato transakce dopadla při simulaci proti aktuálnímu stavu sítě. Skutečný výsledek se může lišit.",
@@ -1837,6 +1872,7 @@
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
+			"close_pays_others": "Tato transakce zavírá jeden z vašich tokenových účtů a vyplácí jeho zůstatek na adresu, která není vaše peněženka. Pro vaši bezpečnost nebyla podepsána.",
 			"unreviewed_without_simulation": "OISY nedokázala přečíst část této transakce a síť k ní nevrátila ani simulaci, takže nic nepopisuje, co by tato část udělala. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"sol_transaction_as_message": "Tato zpráva je solanská transakce, kterou lze schválit pouze prostřednictvím kontroly transakce. Z bezpečnostních důvodů nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
@@ -2115,9 +2151,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Rozbalit a zavřít tokenový účet $symbol",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Zavřít tokenový účet $symbol",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2129,8 +2166,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "Zůstatek SOL vrácen do vaší peněženky",
+			"instruction_balance_sent": "Zůstatek SOL odeslán do vaší peněženky",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL odesláno do vaší peněženky",
+			"instruction_returned_to": "$amount SOL na",
+			"instruction_balance_returned_to": "Zůstatek SOL na",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Stav",
@@ -2365,7 +2406,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Nová adresa",
@@ -2612,6 +2654,8 @@
 			"transaction_fee": "Transakční poplatek",
 			"insufficient_funds_for_fee": "Zůstatek nestačí na pokrytí částky a poplatků.",
 			"supply_prices_unavailable": "Ceny jsou dočasně nedostupné. Poskytování je deaktivováno, dokud se nenačtou.",
+			"minimum_supply": "Minimální poskytnutí",
+			"supply_below_minimum": "Částka je nižší než minimální poskytnutí.",
 			"borrow_review": "Zkontrolovat půjčku",
 			"borrow_review_subtitle": "Půjčuješ si",
 			"borrowing": "Probíhá půjčka",
@@ -2625,6 +2669,7 @@
 			"funds_delivered_to": "Prostředky budou odeslány na",
 			"your_oisy_address": "Tvá adresa $oisy_short",
 			"borrow_risk_info": "Půjčka snižuje tvůj faktor zdraví. Pokud klesne příliš nízko, tvé zajištění může být zlikvidováno.",
+			"borrow_activation_fee_info": "Liquidium k vypůjčené částce připočítává aktivační poplatek ve výši $fee %.",
 			"borrow_at_risk_warning": "Tato půjčka citelně sníží tvůj faktor zdraví.",
 			"borrow_exceeds_power": "Částka přesahuje tvůj úvěrový rámec.",
 			"borrow_below_minimum": "Částka je nižší než minimální výše půjčky.",

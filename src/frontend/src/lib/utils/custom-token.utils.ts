@@ -24,7 +24,7 @@ import type {
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import type { TokenId, TokenMetadata } from '$lib/types/token';
+import type { TokenId, TokenStandardCode } from '$lib/types/token';
 import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
@@ -144,15 +144,35 @@ export const toCustomToken = ({
 	};
 };
 
+// Interned: `parseTokenId` mints a new Symbol per call, which would churn ids on every reload.
+const customTokenIdCache = new Map<string, TokenId>();
+
 export const parseCustomTokenId = ({
 	identifier,
-	chainId
+	chainId,
+	standard
 }:
 	| {
-			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			identifier: ContractAddress['address'];
 			chainId: EthereumChainId;
+			standard: TokenStandardCode;
 	  }
 	| {
-			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			identifier: SplTokenAddress;
 			chainId: SolanaChainId['chainId'];
-	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);
+			standard: TokenStandardCode;
+	  }): TokenId => {
+	// The standard splits entries sharing an address, e.g. an ERC-721 and an ERC-1155 collection.
+	const key = `custom-token#${standard}#${identifier}#${chainId}`;
+
+	const cachedId = customTokenIdCache.get(key);
+	if (nonNullish(cachedId)) {
+		return cachedId;
+	}
+
+	// The description omits the standard: it feeds the persisted Activity token-filter key.
+	const tokenId = parseTokenId(`custom-token#${identifier}#${chainId}`);
+	customTokenIdCache.set(key, tokenId);
+
+	return tokenId;
+};

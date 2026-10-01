@@ -22,6 +22,7 @@
 		inputElement = $bindable(),
 		autofocus = false,
 		autocomplete = $bindable(),
+		ariaDescribedBy,
 		showInfo = true,
 		onInput,
 		onBlur,
@@ -235,6 +236,7 @@
 				id={name}
 				{name}
 				class:inner-end={displayInnerEnd}
+				aria-describedby={ariaDescribedBy}
 				{autocomplete}
 				{autofocus}
 				data-1p-ignore={ignore1Password}

@@ -34,8 +34,10 @@
 
 	const isTokensRoute = $derived(isRouteTokens(page));
 
+	const categoryFilterApplied = $derived($showTokenCategoryFilter && isTokensRoute);
+
 	const heroTokens = $derived(
-		$showTokenCategoryFilter && isTokensRoute
+		categoryFilterApplied
 			? filterTokensUiByCategory({
 					tokens: $enabledFungibleNetworkTokensUi,
 					category: $tokenCategoryFilter
@@ -43,8 +45,14 @@
 			: $enabledFungibleNetworkTokensUi
 	);
 
+	// Provider-held value (trading deposits, lend/borrow) has no asset type, so exclude it
+	// from the Tokens total while that total is filtered to one asset type.
+	const heroProvidersUsdBalance = $derived(
+		categoryFilterApplied && nonNullish($tokenCategoryFilter) ? 0 : $providersUsdBalance
+	);
+
 	const totalUsd = $derived(
-		sumTotalUsdBalance({ tokens: heroTokens, providersUsdBalance: $providersUsdBalance })
+		sumTotalUsdBalance({ tokens: heroTokens, providersUsdBalance: heroProvidersUsdBalance })
 	);
 
 	let balance = $derived(

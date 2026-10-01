@@ -33,6 +33,33 @@ pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 /// is at most 63 characters, so anything longer can never be a valid pool id.
 pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 
+/// The two `external_refs` a row that makes an XRP payment is polled with: an
+/// XRP send, and a swap whose deposit is an XRP payment. Both are derived from
+/// the signed blob before the record is created, so both are known to the caller
+/// and can be required: a row missing either cannot be resolved, and — since an
+/// open row refuses every later payment from its address — could never be
+/// escaped.
+pub const XRP_REF_TX_HASH: &str = "tx_hash";
+pub const XRP_REF_LAST_LEDGER_SEQUENCE: &str = "last_ledger_sequence";
+
+/// The `external_ref` that lets a swap from XRP leave `Pending`: how its deposit
+/// resolved on the ledger — `tesSUCCESS`, a `tec` code, or `expired`. Only the
+/// XRP ledger resolution writes it, so a client that follows 1Click instead
+/// cannot release the address while the deposit can still apply.
+pub const XRP_REF_LEDGER_RESULT: &str = "ledger_result";
+pub const XRP_LEDGER_RESULT_SUCCESS: &str = "tesSUCCESS";
+pub const XRP_LEDGER_RESULT_EXPIRED: &str = "expired";
+
+/// Length of an XRPL transaction id in hex.
+pub const XRP_TX_HASH_LEN: usize = 64;
+
+/// Length bounds of an XRPL classic address. It is base58check over a 21-byte
+/// payload — the `0x00` version byte plus the 20-byte `AccountID` — with a
+/// 4-byte checksum appended, so 25 bytes are encoded and the result is 25 to 35
+/// characters. Anything outside that can never have come from an encoder.
+pub const MIN_XRP_ADDRESS_LEN: usize = 25;
+pub const MAX_XRP_ADDRESS_LEN: usize = 35;
+
 /// Maximum width, in bits, of an `amount`. Every chain OISY supports expresses
 /// base-unit amounts in at most 256 bits, so a wider value is never a real
 /// balance. `Nat` is variable-length on the wire, so without this bound a
@@ -102,6 +129,20 @@ pub enum ActiveUserTransactionData {
     /// later session which token to pull back out of the DEX's custody: the
     /// destination token on a fill, the source token on a kill.
     OisyTrade(OisyTradeData),
+    /// Minting TCYCLES from ICP through the NNS Cycles Minting Canister: an ICP
+    /// transfer to the CMC's deposit account for the caller, then
+    /// `notify_mint_cycles`. Only the caller's own principal can notify its
+    /// deposit, so the row, opened before the transfer, is what lets a later
+    /// session finish a mint whose tab closed between the two calls. The ICP
+    /// block index, learned once the transfer returns, rides in `external_refs`.
+    CyclesMint(CyclesMintData),
+    /// Native XRP payment. Unlike every other variant this one does not track a
+    /// provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
+    /// so a second payment from the same address while the first is unresolved
+    /// is unsafe whichever sequence it picks. The row is what refuses it, and it
+    /// has to outlive the tab to do that. The locally derived transaction id and
+    /// the signed `LastLedgerSequence` ride in `external_refs`.
+    Xrp(XrpData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -143,7 +184,7 @@ pub struct LiquidiumData {
 /// NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
 /// off-chain by polling the 1Click status endpoint keyed by the deposit
 /// address, so that address (and its optional memo, plus learned-mid-flow tx
-/// hashes) lives in `external_refs`; only the canonical immutable trio is
+/// hashes) lives in `external_refs`; only the values fixed at creation are
 /// captured here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct NearIntentsData {
@@ -151,6 +192,11 @@ pub struct NearIntentsData {
     pub dest_token: TokenId,
     /// Source-token amount in base units.
     pub amount: Nat,
+    /// The XRP address the deposit is sent from, set exactly when `source_token`
+    /// is native XRP. That deposit is an XRP payment, so this is the field the
+    /// one-payment-in-flight check reads, as it reads `XrpData::source_address`
+    /// for a send. Optional and last, so rows stored before it decode as `None`.
+    pub source_address: Option<String>,
 }
 
 /// Which Velora execution mode an active transaction tracks. Determines how the
@@ -220,6 +266,22 @@ pub struct ChainFusionData {
     pub amount: Nat,
 }
 
+/// Cycles mint payload: the values fixed when the mint starts. The row opens
+/// before the ICP transfer, so the transfer's creation timestamp is one of them;
+/// only the block index is learned later, in `external_refs`.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct CyclesMintData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units: the ICP sent to the CMC, without the
+    /// ledger fee.
+    pub amount: Nat,
+    /// `created_at_time` of the ICP transfer. Reusing it on a retry lets the
+    /// ledger deduplicate the transfer, and it is what finds the block again
+    /// when the tab died before the transfer returned.
+    pub transfer_created_at_ns: Timestamp,
+}
+
 /// Which side of the pair a swap-placed order takes. Equivalently, which leg of
 /// the pair the source token is: `Sell` spends the base token, `Buy` spends the
 /// quote token.
@@ -246,6 +308,29 @@ pub struct OisyTradeData {
     pub dest_token: TokenId,
     /// Source-token amount in base units.
     pub amount: Nat,
+}
+
+/// Native XRP payment payload — the values fixed when the transaction was
+/// signed. The transaction id and its `LastLedgerSequence` are learned from the
+/// signed blob and ride in `external_refs`, so they are not here.
+///
+/// `source_address` is the field the guard reads: the invariant is one
+/// unresolved payment per *address*, not per user, because a row for a
+/// different address says nothing about this one's sequence.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct XrpData {
+    /// Native XRP, which also fixes the network the payment was signed for.
+    pub token: TokenId,
+    pub source_address: String,
+    pub destination_address: String,
+    /// The XRPL `DestinationTag`, when the payment carries one. `0` is a real
+    /// tag rather than an absent one, which is why this is an `Option` and not
+    /// a sentinel.
+    pub destination_tag: Option<u32>,
+    /// Amount in drops.
+    pub amount: Nat,
+    /// Transaction cost in drops.
+    pub fee: Nat,
 }
 
 /// In-flight high-level user operation, persisted so the FE can resume polling
@@ -304,6 +389,10 @@ pub enum ActiveUserTransactionError {
     InvalidId,
     InvalidData(String),
     IllegalStatusTransition,
+    /// A non-terminal record already tracks the same subject, and the flow only
+    /// allows one at a time. Distinct from `AlreadyExists`, which is about the
+    /// record's own id: this one is about what the record is *for*.
+    AlreadyInFlight,
 }
 
 #[cfg(test)]
@@ -314,10 +403,10 @@ mod tests {
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
         OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
-        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode, XrpData,
     };
     use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
 
@@ -387,8 +476,54 @@ mod tests {
             source_token: TokenId::EvmNative(8453),
             dest_token: TokenId::SolNativeMainnet,
             amount: Nat::from(250_000u64),
+            source_address: None,
         });
         assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn near_intents_xrp_source_variant_roundtrips() {
+        let original = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::XrpNativeMainnet,
+            dest_token: TokenId::EvmNative(1),
+            amount: Nat::from(25_000_000u64),
+            source_address: Some("rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string()),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    /// The shape every `NearIntents` row in stable memory was written with before
+    /// `source_address` existed.
+    #[derive(candid::CandidType)]
+    struct NearIntentsDataWithoutSourceAddress {
+        source_token: TokenId,
+        dest_token: TokenId,
+        amount: Nat,
+    }
+
+    #[test]
+    fn near_intents_row_stored_without_source_address_decodes_as_none() {
+        // Rows are stored as Candid, so an upgrade has to read every existing
+        // `NearIntents` row back without a migration. That holds only because the
+        // new field is optional: Candid decodes a missing `opt` field as `None`.
+        let stored = encode_one(NearIntentsDataWithoutSourceAddress {
+            source_token: TokenId::EvmNative(8453),
+            dest_token: TokenId::SolNativeMainnet,
+            amount: Nat::from(250_000u64),
+        })
+        .expect("encode");
+
+        let decoded: NearIntentsData = decode_one(&stored).expect("decode");
+
+        assert_eq!(
+            decoded,
+            NearIntentsData {
+                source_token: TokenId::EvmNative(8453),
+                dest_token: TokenId::SolNativeMainnet,
+                amount: Nat::from(250_000u64),
+                source_address: None,
+            }
+        );
     }
 
     fn erc20(address: &str, chain_id: u64) -> TokenId {
@@ -473,6 +608,25 @@ mod tests {
         }
     }
 
+    const ICP_LEDGER: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    const CYCLES_LEDGER: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+
+    #[test]
+    fn cycles_mint_variant_roundtrips() {
+        // The wallet sends ICP as `Icrc` of its ledger, while `IcpNative`
+        // exists for the exchange-rate path, so both spellings of the source
+        // must survive.
+        for source_token in [icrc(ICP_LEDGER), TokenId::IcpNative] {
+            let original = ActiveUserTransactionData::CyclesMint(CyclesMintData {
+                source_token,
+                dest_token: icrc(CYCLES_LEDGER),
+                amount: Nat::from(100_000_000u64),
+                transfer_created_at_ns: 1_790_000_000_000_000_000,
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
     #[test]
     fn oisy_trade_variant_roundtrips() {
         // Both legs are always Internet Computer ledgers, and the ICP ledger
@@ -500,6 +654,25 @@ mod tests {
     fn oisy_trade_side_roundtrips() {
         for side in [OisyTradeSide::Buy, OisyTradeSide::Sell] {
             assert_eq!(roundtrip(&side), side);
+        }
+    }
+
+    #[test]
+    fn xrp_variant_roundtrips() {
+        // `destination_tag` is the field that has to survive both ways: `0` is a
+        // real XRPL tag and `None` is its absence, so a round-trip collapsing
+        // one into the other would change the payment. `u32::MAX` is a real tag
+        // too, and it is the value a narrower encoding would truncate.
+        for destination_tag in [None, Some(0), Some(4_294_967_295)] {
+            let original = ActiveUserTransactionData::Xrp(XrpData {
+                token: TokenId::XrpNativeMainnet,
+                source_address: "rBNLHADLTBV5WqQ8rDyLaTrGXMxrjfzoMi".to_string(),
+                destination_address: "rDsbeomae4FXwgQTJp9Rs64Qg9vDiTCdBv".to_string(),
+                destination_tag,
+                amount: Nat::from(25_000_000u64),
+                fee: Nat::from(12u64),
+            });
+            assert_eq!(roundtrip(&original), original);
         }
     }
 
