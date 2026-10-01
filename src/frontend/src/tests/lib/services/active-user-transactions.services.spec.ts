@@ -65,6 +65,38 @@ describe('active-user-transactions.services', () => {
 			expect(get(activeUserTransactionsList)).toEqual([]);
 		});
 
+		// The race the merge exists for: a record created while the load's read is in flight is in the
+		// store before the older snapshot lands, and must still be there afterwards — for an XRP send
+		// the record is the only thing that ever reports the payment's outcome.
+		it('keeps a record created while the load is in flight', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+
+			let resolveLoad: (transactions: (typeof mockActiveUserTransaction)[]) => void = () => {};
+			vi.spyOn(backendApi, 'getActiveUserTransactions').mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveLoad = resolve;
+				})
+			);
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockResolvedValueOnce(
+				mockActiveUserTransaction
+			);
+
+			const inFlight = loadActiveUserTransactions({ identity: mockIdentity });
+
+			await createActiveUserTransaction({
+				identity: mockIdentity,
+				...mockCreateActiveUserTransactionParams
+			});
+
+			// The snapshot was read before the create committed, so it does not have the row.
+			resolveLoad([]);
+			await inFlight;
+
+			expect(get(activeUserTransactionsStore)?.data[mockActiveUserTransaction.id]).toEqual(
+				mockActiveUserTransaction
+			);
+		});
+
 		it('drops a late response when the store has been reset mid-flight', async () => {
 			// Simulates: load(A) issues getActiveUserTransactions; before the
 			// response lands, the user signs out and the store is reset. A's

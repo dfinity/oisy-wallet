@@ -25,6 +25,10 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import {
+		liquidiumMaxBorrowBaseUnits,
+		liquidiumOpeningDebtFactor
+	} from '$lib/utils/liquidium.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -63,12 +67,15 @@
 		confirmChecked = false;
 	});
 
-	// Max borrowable in base units = borrowing power ÷ price (floored to token decimals).
+	let openingDebtFactor = $derived(liquidiumOpeningDebtFactor(market));
+
 	let maxBorrowBaseUnits = $derived(
-		nonNullish(borrowToken) && borrowPrice > 0 && portfolio.availableBorrowsUsd > 0
-			? parseToken({
-					value: (portfolio.availableBorrowsUsd / borrowPrice).toFixed(borrowToken.decimals),
-					unitName: borrowToken.decimals
+		nonNullish(borrowToken)
+			? liquidiumMaxBorrowBaseUnits({
+					availableBorrowsUsd: portfolio.availableBorrowsUsd,
+					price: borrowPrice,
+					openingDebtFactor,
+					decimals: borrowToken.decimals
 				})
 			: ZERO
 	);
@@ -100,9 +107,10 @@
 			return new Error($i18n.liquidium.text.borrow_below_minimum);
 		}
 
-		const usd = (Number(userAmount) / 10 ** (borrowToken?.decimals ?? 0)) * borrowPrice;
+		const debtUsd =
+			(Number(userAmount) / 10 ** (borrowToken?.decimals ?? 0)) * borrowPrice * openingDebtFactor;
 
-		if (usd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE)) {
+		if (debtUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE)) {
 			return new Error($i18n.liquidium.text.borrow_exceeds_power);
 		}
 

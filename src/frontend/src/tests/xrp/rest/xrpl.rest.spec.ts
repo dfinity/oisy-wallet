@@ -115,8 +115,8 @@ describe('xrpl.rest', () => {
 		];
 
 		// `fetch` has no deadline of its own. A connection that stalls instead of rejecting never
-		// settles, and the confirmation loop bounds ATTEMPTS rather than time — so one hung request
-		// suspends the whole send and `sendXrp` never rejects with the blob a retry needs.
+		// settles, so one hung request suspends the send it belongs to — or, in the resolver, every
+		// later tick of the active-transaction poller, which skips its ticks while one is in flight.
 		//
 		// The signal is substituted rather than waited out: vitest's fake timers do not drive
 		// `AbortSignal.timeout`, and the real one would make this an eight-second test. Aborting a
@@ -610,7 +610,7 @@ describe('xrpl.rest', () => {
 	describe('submitXrpTransaction', () => {
 		const txBlob = '1200002280000000';
 
-		it('returns an accepted result for a tesSUCCESS engine result', async () => {
+		it('returns the engine result, message and echoed hash', async () => {
 			mockFetchResponse({
 				body: {
 					result: {
@@ -627,57 +627,8 @@ describe('xrpl.rest', () => {
 			expect(result).toEqual({
 				engineResult: 'tesSUCCESS',
 				engineResultMessage: 'The transaction was applied.',
-				txHash: 'A'.repeat(64),
-				accepted: true
+				txHash: 'A'.repeat(64)
 			});
-		});
-
-		// `ter` is a retry class: a queued one was taken by the node, a non-queued one was not.
-		it('marks a queued ter response (terQUEUED) as accepted', async () => {
-			mockFetchResponse({
-				body: { result: { engine_result: 'terQUEUED', accepted: true, queued: true } }
-			});
-
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeTruthy();
-			expect(result.engineResult).toBe('terQUEUED');
-		});
-
-		it('marks a non-queued ter response (terPRE_SEQ) as not accepted', async () => {
-			mockFetchResponse({
-				body: { result: { engine_result: 'terPRE_SEQ', accepted: false } }
-			});
-
-			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
-
-			expect(result.accepted).toBeFalsy();
-			expect(result.engineResult).toBe('terPRE_SEQ');
-		});
-
-		// `accepted` decides, alongside `engine_result`, whether a `tem*` is a definitive rejection,
-		// so a malformed one must not collapse to `false` — that read a contradictory response as a
-		// rejection reported AFTER the blob was broadcast. It now fails the parse, which the send
-		// treats exactly as a lost response and answers by confirming the hash.
-		it.each(['false', 'true', 1, 0, {}, null])(
-			'refuses a non-boolean accepted value of %j',
-			async (accepted) => {
-				mockFetchResponse({
-					body: { result: { engine_result: 'terPRE_SEQ', accepted } }
-				});
-
-				await expect(
-					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
-				).rejects.toThrow('Unexpected XRPL submit response');
-			}
-		);
-
-		it('refuses a response without an accepted flag', async () => {
-			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
-
-			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
-				'Unexpected XRPL submit response'
-			);
 		});
 
 		it('throws on a non-ok HTTP response', async () => {
@@ -700,10 +651,8 @@ describe('xrpl.rest', () => {
 			);
 		});
 
-		// `engine_result` is read with `startsWith` outside the try that wraps this call, so a
-		// non-string would throw there — after the blob was broadcast — and turn an ambiguous submit
-		// into a reported failure. It must fail here instead, where the caller treats it as
-		// "go and confirm".
+		// `engine_result` is what makes the answer a submit result, so a response without a string
+		// one fails the parse — which the send treats exactly as a lost response.
 		it.each([7, true, {}, ['tesSUCCESS'], null])(
 			'throws for the non-string engine_result %j',
 			async (engine_result) => {
@@ -715,29 +664,27 @@ describe('xrpl.rest', () => {
 			}
 		);
 
-		// Cosmetic fields must not cost the send a minute of polling: the message only reaches an
-		// error string and the hash is derived locally.
-		it('tolerates malformed engine_result_message and tx_json', async () => {
-			mockFetchResponse({
-				body: {
-					result: {
-						engine_result: 'tesSUCCESS',
-						accepted: true,
-						engine_result_message: 7,
-						tx_json: 'nope'
-					}
-				}
-			});
+		// Nothing reads these — the outcome is the record's, polled by the locally derived hash — so
+		// a missing or malformed one must not fail the parse.
+		it.each([
+			{ name: 'tx_json', tx_json: 'nope' },
+			{ name: 'tx_json.hash', tx_json: { hash: 7 } }
+		])(
+			'tolerates a missing accepted flag, a malformed message and a malformed $name',
+			async ({ tx_json }) => {
+				mockFetchResponse({
+					body: { result: { engine_result: 'tesSUCCESS', engine_result_message: 7, tx_json } }
+				});
 
-			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).resolves.toEqual(
-				{
+				await expect(
+					submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })
+				).resolves.toEqual({
 					engineResult: 'tesSUCCESS',
 					engineResultMessage: undefined,
-					txHash: undefined,
-					accepted: true
-				}
-			);
-		});
+					txHash: undefined
+				});
+			}
+		);
 
 		it('throws when the response has no engine_result', async () => {
 			mockFetchResponse({ body: { result: { error: 'invalidTransaction' } } });
@@ -1712,8 +1659,8 @@ describe('xrpl.rest', () => {
 		);
 
 		// Before the three variants were mutually exclusive, every field of the pending branch was
-		// optional — so an empty or junk `result` parsed as "pending", and at the expiry recheck
-		// pending is what produces `XrpSendExpiredError` and tells the caller a resend is safe.
+		// optional — so an empty or junk `result` parsed as "pending" instead of failing as the
+		// malformed response it is.
 		it.each([{}, { anything: 1 }, { validated: false }, { hash: 'H' }])(
 			'refuses to read the shapeless result %j as pending',
 			async (result) => {
@@ -1757,8 +1704,8 @@ describe('xrpl.rest', () => {
 
 		// A `tx` result reports the transaction at the TOP LEVEL of `result`, so a payload claiming
 		// absence while carrying transaction fields used to parse as absence — which past
-		// `LastLedgerSequence` becomes `XrpSendExpiredError` and a resend the caller is told is
-		// safe. Forbidding the fields one by one only covered the ones that were named; the branch
+		// `LastLedgerSequence` closes the record as expired and tells the user a resend is safe.
+		// Forbidding the fields one by one only covered the ones that were named; the branch
 		// is strict now, so any of these leaves the outcome indeterminate.
 		it.each([
 			{ name: 'a transaction type', extra: { TransactionType: 'Payment' } },
@@ -1816,7 +1763,7 @@ describe('xrpl.rest', () => {
 		});
 
 		// Absence is the one variant with no `hash` to be bound by, and the one that ends the send:
-		// past `LastLedgerSequence` it becomes `XrpSendExpiredError` and tells the caller a fresh
+		// past `LastLedgerSequence` it closes the record as expired and tells the user a fresh
 		// payment is safe. The echoed request is the only identity it carries.
 		describe('binding an absence to the question asked', () => {
 			const ask = () =>

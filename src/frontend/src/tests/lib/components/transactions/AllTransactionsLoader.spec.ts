@@ -648,6 +648,7 @@ describe('AllTransactionsLoader', () => {
 		interface LoaderControls {
 			loadMore: () => Promise<ResultSuccess>;
 			exhausted: boolean;
+			floor?: number;
 		}
 
 		const olderSolRow = () => ({
@@ -659,20 +660,22 @@ describe('AllTransactionsLoader', () => {
 			certified: false
 		});
 
-		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
-			let captured: LoaderControls | undefined;
+		const renderWithControls = (transactions: AllTransactionUiWithCmp[] = mockTransactions) => {
+			let readControls: (() => LoaderControls) | undefined;
 
 			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
 				render: () => {
-					captured = getControls();
+					// The getter rather than what it returns at mount, so that the floor levelling sets
+					// afterwards can be read.
+					readControls = getControls;
 
 					return '<span></span>';
 				}
 			}));
 
-			render(AllTransactionsLoader, { props: { ...props, children } });
+			const { rerender } = render(AllTransactionsLoader, { props: { transactions, children } });
 
-			return { controls: () => captured };
+			return { controls: () => readControls?.(), rerender };
 		};
 
 		beforeEach(() => {
@@ -685,6 +688,107 @@ describe('AllTransactionsLoader', () => {
 
 			await waitFor(() => {
 				expect(controls()?.loadMore).toBeInstanceOf(Function);
+			});
+		});
+
+		it('should hand the children the floor it levels every token to', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
+			});
+		});
+
+		// Only Bitcoin moves here, while ICP and Solana load nothing. One token that stops moving must
+		// not hold the list, so the floor follows the oldest loaded row whichever token brought it.
+		it('should lower the floor it hands the children on every round, whichever tokens moved', async () => {
+			const { controls, rerender } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(mockMinTimestamp);
+			});
+
+			const olderTimestamp = mockMinTimestampStart - 5n;
+
+			await rerender({
+				transactions: [
+					...mockTransactions,
+					{
+						transaction: { ...createMockBtcTransactionsUi(1)[0], timestamp: olderTimestamp },
+						component: 'bitcoin' as const,
+						token: BTC_MAINNET_TOKEN
+					}
+				]
+			});
+
+			await controls()?.loadMore();
+
+			await waitFor(() => {
+				expect(controls()?.floor).toBe(normalizeTimestampToSeconds(olderTimestamp));
+			});
+		});
+
+		// Pending transactions carry no timestamp. A floor taken from them alone came out as `Infinity`,
+		// which hid every dated row, and the token was not looked at again when its dated rows came.
+		describe('when every loaded row is undated', () => {
+			const undatedIcpRow: AllTransactionUiWithCmp = {
+				transaction: { ...createMockIcTransactionsUi(1)[0], id: 'undated', timestamp: undefined },
+				component: 'ic' as const,
+				token: ICP_TOKEN
+			};
+
+			it('should hand the children no floor, before or after a round', async () => {
+				const { controls } = renderWithControls([undatedIcpRow]);
+
+				await runResolvedPromises();
+
+				expect(controls()?.floor).toBeUndefined();
+
+				await controls()?.loadMore();
+
+				expect(controls()?.floor).toBeUndefined();
+			});
+
+			it('should set the floor once a dated row arrives', async () => {
+				const { controls, rerender } = renderWithControls([undatedIcpRow]);
+
+				await runResolvedPromises();
+
+				await rerender({ transactions: [undatedIcpRow, ...mockTransactions] });
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(mockMinTimestamp);
+				});
+			});
+		});
+
+		// Levelling waits for every store to load, and one that never did left the list with no floor
+		// at all.
+		describe('before levelling or a round sets a floor', () => {
+			// ICP's oldest row is older than Solana's, so Solana is the one that stops the list.
+			const icpRows = mockTransactions.filter(({ token: { id } }) => id === ICP_TOKEN.id);
+			const solRows = mockTransactions.filter(({ token: { id } }) => id === SOLANA_TOKEN.id);
+
+			beforeEach(() => {
+				vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+			});
+
+			it('should hand the children how far back every token with history left is loaded', async () => {
+				const { controls } = renderWithControls([...icpRows, ...solRows]);
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(timestampBuffer + 300n));
+				});
+			});
+
+			it('should switch to the floor of the first round', async () => {
+				const { controls } = renderWithControls([...icpRows, ...solRows]);
+
+				await controls()?.loadMore();
+
+				await waitFor(() => {
+					expect(controls()?.floor).toBe(normalizeTimestampToSeconds(timestampBuffer + 100n));
+				});
 			});
 		});
 

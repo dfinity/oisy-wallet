@@ -193,7 +193,8 @@ export const XrplEnvelopeSchema = z.object({
 // The value that matters most is still the validated ledger index — an out-of-range one past
 // `LastLedgerSequence` makes confirmation declare expiry and tell the user a resend is safe. This
 // bounds the number system, not the ledger: `0xFFFFFFFF` is ~40x the current mainnet index, so
-// `confirmXrpTransaction` also checks the index against the transaction's own window.
+// the resolver also requires `tx` to report the payment absent from the transaction's own ledger
+// range, on the lookup and again on the recheck, before it closes a record as expired.
 export const XrpUInt32Schema = z.number().int().nonnegative().max(XRP_MAX_UINT32);
 
 // These three validate the `result` object, because `xrpJsonRpc` unwraps the envelope before
@@ -498,9 +499,9 @@ export const XrplTxResultSchema = z.union([
 		hash: z.string(),
 		// Only `tes` and `tec` results are ever APPLIED to a ledger — which is why they are the ones
 		// that claim the fee and consume the sequence — so a validated record carrying anything else
-		// is malformed. It matters because the caller turns every non-`tesSUCCESS` value into
-		// `XrpTransactionFailedError`, a definitive "your payment failed"; rejecting instead leaves
-		// the run indeterminate, which hands back the blob rather than asserting an outcome.
+		// is malformed. It matters because the resolver closes the record as failed on every
+		// non-`tesSUCCESS` value, a definitive "your payment failed"; rejecting instead leaves the
+		// record `Pending` rather than asserting an outcome.
 		//
 		// `tesSUCCESS` is the whole `tes` class, and the pattern was checked against
 		// `ripple-binary-codec`'s own `TRANSACTION_RESULTS`: it matches all 82 `tec` codes and none
@@ -523,9 +524,9 @@ export const XrplTxResultSchema = z.union([
 	// `LastLedgerSequence`, `Sequence`, `SigningPubKey`, `TransactionType`, `TxnSignature`, `ctid`,
 	// `date`, `hash`, `inLedger`, `ledger_index`, `meta`, `status` and `validated` side by side. An
 	// earlier version of this branch forbade five of those, so the rest still stripped and the
-	// payload parsed as a fully searched absence — which past `LastLedgerSequence` becomes
-	// `XrpSendExpiredError`, the one result that tells a retry to build a new transaction on a new
-	// sequence. Listing what absence MAY contain is the closed question, and the only form that
+	// payload parsed as a fully searched absence — which past `LastLedgerSequence` closes the record
+	// as expired, the one result that tells the user a new payment on a new sequence is safe.
+	// Listing what absence MAY contain is the closed question, and the only form that
 	// stays correct as the protocol grows.
 	//
 	// Strict here and NOT on the envelope, which looks like the same call and is not: the envelope
@@ -547,16 +548,15 @@ export const XrplTxResultSchema = z.union([
 		// Required and parsed, not waved through as arbitrary data: it is the ONLY identity this
 		// branch can carry. The validated and pending branches are bound by `hash`; absence has no
 		// hash to be bound by, and it is the variant that ends the send — a stale or misrouted
-		// `txnNotFound` read as this payment's absence becomes `XrpSendExpiredError` past
-		// `LastLedgerSequence`, which tells the caller a fresh payment is safe to build.
+		// `txnNotFound` read as this payment's absence closes the record as expired past
+		// `LastLedgerSequence`, which tells the user a fresh payment is safe to build.
 		request: XrplRequestEchoSchema,
 		status: z.literal('error').optional(),
 		type: z.unknown().optional()
 	}),
 	// Pending: in a ledger but not yet validated. It has to say so POSITIVELY — when the pending
-	// branch was "everything optional", `{}` and `{ anything: 1 }` both parsed as pending, and at
-	// the expiry recheck pending means "the ledger passed LastLedgerSequence without including it",
-	// which throws `XrpSendExpiredError` and tells the caller a resend is safe. `hash` is required
+	// branch was "everything optional", `{}` and `{ anything: 1 }` both parsed as pending, so a
+	// malformed response passed as a well-formed one instead of failing to parse. `hash` is required
 	// so the identity comparison cannot be skipped by omitting it.
 	z.object({
 		validated: z.literal(false),
@@ -565,41 +565,20 @@ export const XrplTxResultSchema = z.union([
 	})
 ]);
 
-// `engine_result` is the only field the send still reads, and it is read with `startsWith` outside
-// the try that wraps the submit — so a non-string would throw there, after the blob was broadcast,
-// and turn an ambiguous submit into a reported failure. Validating it here keeps that failure
-// inside the caught call, where it correctly means "go and confirm". The rest is optional because
-// none of it decides anything: the hash is derived locally and `accepted` no longer gates.
+// Nothing here decides a send's outcome: the send hands every submit answer to the record, which
+// polls the locally derived hash. `engine_result` stays required because it is what makes this a
+// submit answer at all — a response without one fails the parse, and `sendXrp` treats that exactly
+// as a lost response. The rest is cosmetic, so a malformed value is dropped rather than failing the
+// parse over a field nothing consults.
 export const XrplSubmitResultSchema = z.object({
 	engine_result: z.string(),
 	error: z.never().optional(),
-	// Strict only where the decision reads. These two are cosmetic — the message is interpolated
-	// into an error and the hash is derived locally — so a malformed one must not fail the parse:
-	// that would throw, and the send would poll for a minute over a field it never consults.
 	engine_result_message: z.string().optional().catch(undefined),
-	// `accepted` is not one of them any more. It decides, alongside `engine_result`, whether a
-	// `tem*` is a definitive rejection: only a node that did NOT claim to take the blob makes that
-	// claim credible. Left as `z.unknown().optional()` and normalised with `=== true`, every
-	// malformed value — `'true'`, `1`, `null`, or the field missing — collapsed to `false` and
-	// turned a contradictory response into a reported rejection AFTER the blob was broadcast,
-	// which is the outcome that check exists to avoid.
-	//
-	// Required, so a malformed one fails the parse instead. `submitXrpTransaction` then throws,
-	// `sendXrp` treats that exactly as a lost response, and the send falls through to confirmation
-	// where the hash decides. That is the direction this path has to fail in.
-	accepted: z.boolean(),
-	// The hash the node echoes back. Optional on purpose — the id is derived locally precisely so a
-	// lost or partial submit response stays survivable, and requiring it would turn a node that
-	// omits `tx_json` into a poll on every send. But SHAPED, because it is no longer only
-	// cosmetic: the rejection branch compares it with the locally derived id before treating a
-	// `tem*` as definitive, and a malformed value must not be able to satisfy that comparison.
+	// The hash the node echoes back. Optional because the id is derived locally precisely so a lost
+	// or partial submit response stays survivable.
 	tx_json: z
 		.object({
-			hash: z
-				.string()
-				.regex(/^[0-9a-fA-F]{64}$/)
-				.optional()
-				.catch(undefined)
+			hash: z.string().optional().catch(undefined)
 		})
 		.optional()
 		.catch(undefined)
