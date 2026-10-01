@@ -76,5 +76,16 @@ describe('AllBorrowOpportunityCardList', () => {
 
 		expect(screen.queryByText('mock.liquidium.title')).not.toBeInTheDocument();
 		expect(screen.queryByRole('button', { name: 'mock.liquidium.action' })).not.toBeInTheDocument();
+		expect(screen.getByText(get(i18n).borrow.provider_unavailable.title)).toBeInTheDocument();
+	});
+
+	it('renders the provider-unavailable empty state when no provider is registered', () => {
+		vi.spyOn(borrowRegistry, 'borrowProviders', 'get').mockReturnValue([]);
+		vi.spyOn(borrowDerived, 'borrowData', 'get').mockReturnValue(readable({}));
+
+		render(AllBorrowOpportunityCardList);
+
+		expect(screen.getByText(get(i18n).borrow.provider_unavailable.title)).toBeInTheDocument();
+		expect(screen.getByText(get(i18n).borrow.provider_unavailable.description)).toBeInTheDocument();
 	});
 });

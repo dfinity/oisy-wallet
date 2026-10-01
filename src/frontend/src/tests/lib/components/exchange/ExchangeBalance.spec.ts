@@ -1,10 +1,8 @@
-import * as lendBorrowEnv from '$env/lend-borrow';
 import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
-import * as liquidiumDerived from '$lib/derived/liquidium.derived';
 import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
@@ -386,36 +384,71 @@ describe('ExchangeBalance', () => {
 		});
 	});
 
-	describe('Liquidium net value', () => {
+	// Which providers contribute, and their feature gating, is `providersUsdBalance`' own concern
+	// (covered in balances.derived.spec). Here we only assert the hero adds it to the token total.
+	describe('provider-held value', () => {
 		beforeEach(() => {
 			mockHeroContext.loading.set(false);
 		});
 
-		it('should add supplied-minus-borrowed net value to the total when enabled', () => {
-			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
-			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+		it('should add the provider-held value to the total', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
 
 			const { getByText } = renderComponent();
 
 			expect(getByText('$835.00')).toBeInTheDocument();
 		});
 
-		it('should deduct a negative net value (net debt) from the total when enabled', () => {
-			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
-			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(-100));
+		it('should deduct a negative provider-held value (net debt) from the total', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(-100));
 
 			const { getByText } = renderComponent();
 
 			expect(getByText('$235.00')).toBeInTheDocument();
 		});
 
-		it('should ignore Liquidium net value when the feature is disabled', () => {
-			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(false);
-			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+		it('should exclude the provider-held value when an asset type is selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
 
 			const { getByText } = renderComponent();
 
-			expect(getByText('$335.00')).toBeInTheDocument();
+			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value when all asset types are selected on the tokens route', () => {
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should include the provider-held value outside the tokens route even if an asset type is selected', () => {
+			mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Earning}` });
+
+			vi.spyOn(balancesDerived, 'providersUsdBalance', 'get').mockReturnValue(staticStore(500));
+			vi.spyOn(settingsDerived, 'showTokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(true)
+			);
+			vi.spyOn(settingsDerived, 'tokenCategoryFilter', 'get').mockReturnValue(
+				staticStore(TokenCategoryTagValue.COMPUTE as TokenCategoryTagValue | undefined)
+			);
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
 		});
 	});
 });

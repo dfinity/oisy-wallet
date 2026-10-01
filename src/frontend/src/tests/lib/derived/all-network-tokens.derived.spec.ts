@@ -6,11 +6,13 @@ import { ARBITRUM_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/token
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
 import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { ROBINHOOD_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-robinhood/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -135,10 +137,12 @@ describe('all-network-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
+				ROBINHOOD_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockIcrcToken.id.description,
 				mockIcrcToken2.id.description,

@@ -1,53 +1,36 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { consoleError } from '$lib/utils/console.utils';
+import {
+	getIdbSolTransactionDetail,
+	setIdbSolTransactionDetail
+} from '$sol/api/idb-sol-transaction-details.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
+import type {
+	SolanaGetAccountInfoReturn,
+	SolanaParsedAccountsInfo,
+	SolanaSimulatedInnerInstructions
+} from '$sol/types/sol-rpc';
 import type {
 	SolRpcTransaction,
 	SolRpcTransactionRaw,
 	SolSignature
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import {
+	getBase64Encoder,
+	address as solAddress,
+	type Address,
+	type Base64EncodedWireTransaction,
+	type Lamports,
+	type ReadonlyUint8Array,
+	type Signature,
+	type TransactionError
+} from '@solana/kit';
 import { SvelteMap } from 'svelte/reactivity';
-
-//lamports are like satoshis: https://solana.com/docs/terminology#lamport
-export const loadSolLamportsBalance = async ({
-	address,
-	network
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<Lamports> => {
-	const { getBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-
-	const { value: balance } = await getBalance(wallet).send();
-
-	return balance;
-};
-
-export const loadTokenBalance = async ({
-	ataAddress,
-	network
-}: {
-	ataAddress: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<bigint | undefined> => {
-	const { getTokenAccountBalance } = solanaHttpRpc(network);
-	const wallet = solAddress(ataAddress);
-
-	const {
-		value: { amount }
-	} = await getTokenAccountBalance(wallet).send();
-
-	if (nonNullish(amount)) {
-		return BigInt(amount);
-	}
-};
 
 /**
  * Fetches signatures without an error for a given wallet address.
@@ -136,6 +119,18 @@ export const fetchTransactionDetailForSignature = async ({
 		return cachedTransaction;
 	}
 
+	// The map above is per realm and dies with the tab, so without this every reload fetches the
+	// worker's newest page again, and every record derived again for another token fetches its
+	// details again. Two realms that ask for the same signature before either has kept it still fetch
+	// it twice: this spares the repeat, not the race.
+	const storedTransaction = await getIdbSolTransactionDetail({ network, signature });
+
+	if (nonNullish(storedTransaction)) {
+		networkCache.set(signature.signature, storedTransaction);
+
+		return storedTransaction;
+	}
+
 	const { confirmationStatus } = signature;
 
 	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
@@ -151,12 +146,17 @@ export const fetchTransactionDetailForSignature = async ({
 		...rpcTransaction,
 		version: rpcTransaction.version,
 		confirmationStatus,
-		id: signature.toString(),
+		id: signature.signature,
 		signature: signature.signature
 	};
 
 	if (confirmationStatus === 'finalized') {
 		networkCache.set(signature.signature, transaction);
+
+		// Not awaited: the transaction is already loaded, and keeping it is worth nothing to this call.
+		setIdbSolTransactionDetail({ network, transaction }).catch((err: unknown) =>
+			consoleError('Caching a Solana transaction detail failed:', err)
+		);
 	}
 
 	return transaction;
@@ -227,6 +227,72 @@ export const estimatePriorityFee = async ({
 	);
 };
 
+/**
+ * Reads the current state of several accounts in one call.
+ *
+ * Deliberately uncached, unlike `getAccountInfo` below: this is the "before" side of the
+ * simulated preview's diff, and a memoised entry from earlier in the session would fabricate
+ * a delta that never existed.
+ */
+export const getMultipleAccountsInfo = async ({
+	addresses,
+	network
+}: {
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+}): Promise<SolanaParsedAccountsInfo> => {
+	const { getMultipleAccounts } = solanaHttpRpc(network);
+
+	const { value } = await getMultipleAccounts(addresses.map(solAddress), {
+		encoding: 'jsonParsed'
+	}).send();
+
+	return value;
+};
+
+/**
+ * Runs a message against current network state without signing or sending it, and returns the
+ * post-state of the requested accounts.
+ *
+ * `replaceRecentBlockhash` (which implies no signature verification) is what lets an unsigned
+ * WalletConnect message simulate at all. `jsonParsed` makes the RPC apply its own SPL token
+ * account parser, so the caller gets mint, owner, delegate, close authority and amount as JSON
+ * instead of a raw layout to decode.
+ *
+ * `innerInstructions` returns the cross-program invocations the run would make, parsed by the same
+ * server-side parser. A routed swap performs its transfers there and nowhere else, so without them
+ * a decode of the message alone sees one opaque call and no value moving at all.
+ */
+export const simulateTransactionAccounts = async ({
+	base64EncodedTransactionMessage,
+	addresses,
+	network
+}: {
+	base64EncodedTransactionMessage: string;
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+}): Promise<{
+	err: TransactionError | null;
+	accounts: SolanaParsedAccountsInfo;
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}> => {
+	const { simulateTransaction } = solanaHttpRpc(network);
+
+	const {
+		value: { err, accounts, innerInstructions }
+	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
+		encoding: 'base64',
+		innerInstructions: true,
+		replaceRecentBlockhash: true,
+		accounts: {
+			encoding: 'jsonParsed',
+			addresses: addresses.map(solAddress)
+		}
+	}).send();
+
+	return { err, accounts, innerInstructions };
+};
+
 const addressToAccountInfo = new Map<
 	SolanaNetworkType,
 	Map<SolAddress, SolanaGetAccountInfoReturn>
@@ -257,6 +323,33 @@ export const getAccountInfo = async ({
 	addressMap.set(address, info);
 
 	return info;
+};
+
+/**
+ * The raw bytes of an account, for accounts no server-side parser knows: an Anchor IDL is a
+ * program's own data, so `jsonParsed` hands back the same base64 either way.
+ *
+ * Returns `undefined` for an account that does not exist, which is the common answer here: most
+ * programs publish no IDL.
+ */
+export const getAccountData = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<ReadonlyUint8Array<ArrayBuffer> | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+
+	const { value } = await getAccountInfo(solAddress(address), { encoding: 'base64' }).send();
+
+	if (isNullish(value)) {
+		return undefined;
+	}
+
+	const [data] = value.data;
+
+	return getBase64Encoder().encode(data);
 };
 
 // https://solana.com/docs/tokens/extensions
@@ -360,4 +453,48 @@ export const checkIfAccountExists = async ({
 	const { value } = await getAccountInfo({ address, network });
 
 	return nonNullish(value);
+};
+
+/**
+ * The name and symbol each Token-2022 mint carries in its own account.
+ *
+ * Token-2022 can hold its metadata in the mint itself, through the `tokenMetadata` extension, so
+ * one account read names a token the wallet does not list. A legacy SPL mint keeps nothing of the
+ * sort and simply does not appear in the result.
+ */
+export const getSplTokenMetadata = async ({
+	addresses,
+	network
+}: {
+	addresses: SplTokenAddress[];
+	network: SolanaNetworkType;
+}): Promise<Record<SplTokenAddress, { name: string; symbol: string }>> => {
+	if (addresses.length === 0) {
+		return {};
+	}
+
+	const accounts = await getMultipleAccountsInfo({ addresses, network });
+
+	return addresses.reduce<Record<SplTokenAddress, { name: string; symbol: string }>>(
+		(acc, address, index) => {
+			const data = accounts[index]?.data;
+
+			if (isNullish(data) || !('parsed' in data)) {
+				return acc;
+			}
+
+			const { extensions } = (data.parsed?.info ?? {}) as {
+				extensions?: Token2022ExtensionResult[];
+			};
+
+			const { name, symbol } = extractTokenMetadataExtension(extensions);
+
+			if (notEmptyString(name) && notEmptyString(symbol)) {
+				acc[address] = { name, symbol };
+			}
+
+			return acc;
+		},
+		{}
+	);
 };

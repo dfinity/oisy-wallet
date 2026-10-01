@@ -131,6 +131,26 @@ describe('btc-listener', () => {
 
 			expect(balance?.[tokenId]).toBeNull();
 		});
+
+		it('should store the transactions posted along with a certified balance', () => {
+			// After the query-only warm-up the worker only runs certified syncs, so the new
+			// transactions arrive with certified balances and must not be dropped.
+			syncWallet({ data: mockPostMessage({ certified: true }), tokenId });
+
+			const transactions = get(btcTransactionsStore);
+
+			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(mockTransactions));
+		});
+
+		it('should leave btcTransactionsStore untouched when no new transactions are posted', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+
+			const before = get(btcTransactionsStore)?.[tokenId];
+
+			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toBe(before);
+		});
 	});
 
 	describe('syncWalletError', () => {

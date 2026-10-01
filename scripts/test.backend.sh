@@ -35,6 +35,14 @@ export CYCLES_LEDGER_CANISTER_WASM_FILE="../../${CYCLES_LEDGER_CANISTER_WASM}"
 scripts/download-immutable.sh "${II_CANISTER_URL}" "${II_CANISTER_WASM}"
 export II_CANISTER_WASM_FILE="../../${II_CANISTER_WASM}"
 
+# The real ICRC-1/2 token ledger, for the tips tests. Pinned to the same IC
+# commit the local ckBTC/ckETH/ckUSDC ledgers are built from, read from that
+# script so the two cannot drift apart.
+IC_LEDGER_COMMIT="$(grep -m1 '^IC_COMMIT=' scripts/download.ckbtc.sh | cut -d'"' -f2)"
+ICRC1_LEDGER_WASM="icrc1-ledger.wasm.gz"
+scripts/download-immutable.sh "https://download.dfinity.systems/ic/${IC_LEDGER_COMMIT}/canisters/ic-icrc1-ledger.wasm.gz" "${ICRC1_LEDGER_WASM}"
+export ICRC1_LEDGER_WASM_FILE="../../${ICRC1_LEDGER_WASM}"
+
 # Download PocketIC server
 
 POCKET_IC_SERVER_PATH="target/pocket-ic"

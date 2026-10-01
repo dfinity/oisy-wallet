@@ -111,6 +111,26 @@ more than ~2 related actions.
 Extend the existing enum / constants file in place — respect the closed
 structure (commandment 7). Don't create a parallel naming scheme.
 
+### `error` — the one event for things that should not happen
+
+`PLAUSIBLE_EVENTS.ERROR` is deliberately generic: **one** event name for every
+invariant we believed unreachable, so a single dashboard row answers "is anything
+impossible happening in production?". Helpers live in
+[`error-analytics.services.ts`](../../../src/frontend/src/lib/services/error-analytics.services.ts).
+
+- `event_context` / `event_subcontext` say _which_ invariant broke.
+- `result_error_severity` is **required**. The generic `error` event is the explicit
+  exception to §4's `result_error*` / `result_status` pairing because its name already
+  fixes the outcome; without severity, the volume cannot be read by impact.
+- A flow that can legitimately fail does **not** belong here. It keeps its own
+  event and reports the outcome via `result_status` (that is what `onramper_open`
+  and `rate_limited` do). Reserve `error` for "this branch should be dead code".
+
+Keep it rare. A generic name is only useful while every occurrence is worth
+reading; one chatty call site turns the whole event into noise, so dedupe at the
+source when the caller can fire repeatedly (e.g. a Svelte `derived` that
+recomputes).
+
 ---
 
 ## 4. Metadata vocabulary (reuse the enums)
@@ -159,9 +179,18 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `event_modifier`                  | "Direction" for two-way events                         | `enable` / `disable`, `deposit` / `withdraw`, `create` / `cancel` | `PLAUSIBLE_EVENT_FILTER_MODIFIERS` or feature-local union |
 | `event_key` (`event_key2`, …)     | Event-specific key                                     | `episode`, `type`                                                 | `PLAUSIBLE_EVENT_EVENTS_KEYS` / free string               |
 | `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`                                                 | free string                                               |
+| `event_severity`                  | How serious the event is, from low to high             | `info` / `warn` / `error` / `blocker`                             | `PLAUSIBLE_EVENT_SEVERITIES`                              |
 | `side`                            | Order side (trade events)                              | `buy` / `sell`                                                    | feature-local union                                       |
 | `order_type`                      | Order time-in-force (trade events)                     | `FOK` / `GTC`                                                     | feature-local union                                       |
 | `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | string (full-precision decimal string)                    |
+
+> **Two severities.** `event_severity` can rate any event, so that dashboards can
+> filter every event by it. Its scale is OpenTelemetry's level names with
+> `blocker` in place of `fatal`: `info` < `warn` < `error` < `blocker`.
+> `result_error_severity` (the Result group below) stays the impact band of an
+> `error` result, with its own values. The first event to set `event_severity` is
+> `xdr_basket_expiry`, the countdown to the end of the XDR basket that prices
+> TCYCLES.
 
 ### Source — where it came from
 
@@ -183,6 +212,7 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `result_error`                       | Our own error text              | `NFT sending failed`                       | sanitised string (§6)              |
 | `result_error_severity`              | Severity band                   | `blocker` / `critical` / `major` / `minor` | `PLAUSIBLE_EVENT_ERROR_SEVERITIES` |
 | `result_error_code`                  | Error code                      | `407`                                      | string                             |
+| `result_error_type`                  | Allow-listed failure category   | `pool_not_found` / `rate_limited`          | a per-feature `*_ERROR_TYPES` enum |
 | `result_error_text`                  | Full raw error text we received | `Error parsing …`                          | sanitised string (§6)              |
 
 > Legacy: `result_error_toast_level` / `result_error_toast_key` are
@@ -212,8 +242,7 @@ quote/second token is `token2_*` (see `trackLimitOrder`).
 
 > **Code vs. schema naming.** A few code enums use adjacent names for the same
 > idea — e.g. `result_error_message` in code maps to this doc's
-> `result_error_text`, and `result_error_type` is a code-side classifier not in
-> the tables above. When adding events, prefer the **schema** names above and
+> `result_error_text`. When adding events, prefer the **schema** names above and
 > reconcile any drift (code wins on current-state conflicts per the AGENTS.md
 > hierarchy, but the two should be made to agree).
 
@@ -296,7 +325,10 @@ These are not guidelines. A PR that violates them does not merge.
    is not — prefer bucketed or omit.
 4. **Sanitise errors.** Strip IC request IDs and any embedded identifiers from
    error strings before they become `result_error*`. Omit the field when empty
-   (`notEmptyString`).
+   (`notEmptyString`). Where the text comes from a third party — another
+   project's canister, an external API — a scrubber cannot be written against
+   payloads we do not control: emit an allow-listed `result_error_type` category
+   instead and leave the message to the toast and the console.
 5. **English, locale-independent labels.** Human-readable labels resolve against
    the bundled `en.json` (see `resolveEnglishLabel` / `replaceOisyPlaceholders`),
    never the user's locale, so dashboards stay consistent and no locale leaks.

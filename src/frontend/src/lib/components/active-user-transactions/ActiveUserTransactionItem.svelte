@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { ActiveUserTransaction } from '$declarations/backend/backend.did';
+	import { CMC_NAME } from '$icp/constants/cmc.constants';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
+	import IconPickaxe from '$lib/components/icons/IconPickaxe.svelte';
 	import IconAlertTriangle from '$lib/components/icons/lucide/IconAlertTriangle.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
@@ -15,16 +18,26 @@
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
+	import { activeUserTransactionTimestampNs } from '$lib/utils/active-user-transactions.utils';
+	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
+	import { isCyclesMintActiveUserTransaction } from '$lib/utils/cycles-mint-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
 		isLiquidiumActiveUserTransaction,
 		liquidiumActionKey,
 		toLiquidiumExternalRefsMap
 	} from '$lib/utils/liquidium-active-tx.utils';
+	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
+	import { isOisyTradeActiveUserTransaction } from '$lib/utils/oisy-trade-active-tx.utils';
 	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
+	import {
+		isXrpActiveUserTransaction,
+		xrpActiveUserTransactionDisplay
+	} from '$xrp/utils/xrp-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -36,9 +49,27 @@
 	let { tx, isUnseen, dismissing, onDismiss }: Props = $props();
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
+	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
+	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
+	const isChainFusion = $derived(isChainFusionActiveUserTransaction(tx));
+	const isOisyTrade = $derived(isOisyTradeActiveUserTransaction(tx));
+	// Every swap provider is rendered identically — they share the same
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction,
+	// Chain Fusion's conversion direction and OISY Trade's order side are internal
+	// routing and deliberately not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion || isOisyTrade);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
+	// Not a swap and not a provider flow: a native XRP payment, whose row exists
+	// to hold the one-unresolved-payment-per-address invariant. It has one token
+	// and one network, so the swap layout's "A → B" reads wrong for it.
+	const isXrp = $derived(isXrpActiveUserTransaction(tx));
+
+	// A mint writes the swap providers' display refs and keeps their layout: two tokens on
+	// one network. Only its label, provider and icon differ.
+	const isCyclesMint = $derived(isCyclesMintActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
+	const xrpDisplay = $derived(xrpActiveUserTransactionDisplay(tx));
 
 	const isFailed = $derived('Failed' in tx.status);
 	const isSucceeded = $derived('Succeeded' in tx.status);
@@ -65,9 +96,25 @@
 	const providerName = $derived(
 		isLiquidium
 			? lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
-			: isOneSec
-				? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
-				: undefined
+			: isNearIntents
+				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
+				: isOneSec
+					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
+					: isVelora
+						? (swapProvidersDetails[SwapProvider.VELORA]?.name ?? '')
+						: isChainFusion
+							? // Resolves even with `CHAIN_FUSION_SWAP_ENABLED` off: the entry is
+								// unconditional precisely so a row outliving a flag rollback keeps
+								// its provider name.
+								(swapProvidersDetails[SwapProvider.CHAIN_FUSION]?.name ?? '')
+							: isOisyTrade
+								? // Unconditional for the same reason, and it matters more here: the
+									// OISY Trade swap flag is expected to move while the real receive
+									// amount lands, and a row can outlive any of that.
+									(swapProvidersDetails[SwapProvider.OISY_TRADE]?.name ?? '')
+								: isCyclesMint
+									? CMC_NAME
+									: undefined
 	);
 
 	const titleText = $derived(
@@ -79,15 +126,19 @@
 				]
 					.filter(nonNullish)
 					.join(' ')
-			: [
-					isOneSec ? $i18n.swap.text.swap : undefined,
-					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-					'→',
-					refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
-				]
-					.filter(nonNullish)
-					.join(' ')
+			: isXrp
+				? [$i18n.send.text.send, xrpDisplay?.amount, xrpDisplay?.symbol]
+						.filter(nonNullish)
+						.join(' ')
+				: [
+						isCyclesMint ? $i18n.mint.text.mint : isSwap ? $i18n.swap.text.swap : undefined,
+						refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+						refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
+						'→',
+						refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
+					]
+						.filter(nonNullish)
+						.join(' ')
 	);
 
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
@@ -95,9 +146,22 @@
 		refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
 	);
 
-	const createdAgo = $derived(
+	// A same-chain swap — always the case for a Velora Market swap — would
+	// otherwise read "Ethereum → Ethereum". An XRP payment has a single network
+	// and carries it under its own key, since it sets none of the swap refs.
+	const networkText = $derived(
+		isXrp
+			? (xrpDisplay?.network ?? '')
+			: sourceNetwork === destinationNetwork
+				? sourceNetwork
+				: `${sourceNetwork} → ${destinationNetwork}`
+	);
+
+	// Time since the last status change, not since creation: a settled swap
+	// should read "1m ago" when it just turned green, however long it ran.
+	const timeAgo = $derived(
 		formatNanosecondsToShortRelativeTime({
-			nanoseconds: tx.created_at_ns,
+			nanoseconds: activeUserTransactionTimestampNs(tx),
 			language: $currentLanguage
 		})
 	);
@@ -140,6 +204,10 @@
 				<div class={`flex h-10 w-10 items-center justify-center rounded-full ${statusCircleClass}`}>
 					{#if isFailed}
 						<IconAlertTriangle size="20" />
+					{:else if isXrp}
+						<IconSend size="20" />
+					{:else if isCyclesMint}
+						<IconPickaxe size="20" />
 					{:else}
 						<IconCkConvert size="20" />
 					{/if}
@@ -159,14 +227,13 @@
 			{#if isLiquidium}
 				{providerName}
 			{:else}
-				{sourceNetwork} → {destinationNetwork}{#if nonNullish(providerName)}<Divider
-					/>{providerName}{/if}
+				{networkText}{#if nonNullish(providerName)}<Divider />{providerName}{/if}
 			{/if}
 		{/snippet}
 
 		{#snippet descriptionEnd()}
 			<div class="ml-2">
-				{createdAgo}
+				{timeAgo}
 			</div>
 		{/snippet}
 	</LogoButton>

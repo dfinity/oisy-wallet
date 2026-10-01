@@ -2,7 +2,7 @@ import { CKBTC_EXPLORER_URL, CKBTC_TESTNET_EXPLORER_URL } from '$env/explorers.e
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { MinterCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import type { IcCkInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NonEmptyArray } from '$lib/types/utils';
@@ -90,7 +90,7 @@ export const CKBTC_LEDGER_CANISTER_IDS: NonEmptyArray<CanisterIdText> = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS
 ];
 
-export const ICRC_CK_BTC_TOKENS: IcInterface[] = [
+export const ICRC_CK_BTC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : [])
 ];

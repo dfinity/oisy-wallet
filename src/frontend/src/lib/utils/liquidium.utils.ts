@@ -15,8 +15,9 @@ import {
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
+import { parseToken } from '$lib/utils/parse.utils';
 import { findTwinToken } from '$lib/utils/token.utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import {
 	Chain,
@@ -54,6 +55,8 @@ export const liquidiumMarketToken = ({
 				return ICP_TOKEN;
 			case 'BTC':
 				return findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens });
+			case 'ETH':
+				return findTwinToken({ tokenToPair: ETHEREUM_TOKEN, tokens });
 			case 'USDC':
 				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
 			case 'USDT':
@@ -83,6 +86,21 @@ export const liquidiumMarketToken = ({
 	return undefined;
 };
 
+// Display token for a rail the user can actually transact on, for the modal pickers.
+export const liquidiumEnabledRailToken = ({
+	chain,
+	asset,
+	enabledTokens
+}: {
+	chain: string;
+	asset: string;
+	enabledTokens: Token[];
+}): Token | undefined => {
+	const token = liquidiumMarketToken({ chain, asset, tokens: enabledTokens });
+
+	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
+};
+
 // Scaled protocol rate → percentage.
 const rateToPercent = ({ rate, rateDecimals }: { rate: bigint; rateDecimals: bigint }): number =>
 	(Number(rate) / 10 ** Number(rateDecimals)) * 100;
@@ -91,7 +109,8 @@ const scaledUsdToNumber = ({ value, decimals }: { value: bigint; decimals: bigin
 	Number(value) / 10 ** Number(decimals);
 
 // Buffer-remaining health %: (1 − LTV / liquidationThreshold) × 100, clamped. From the
-// bps fields, not the raw `healthFactor` (whose scale is unreliable across positions).
+// bps fields, not the raw `healthFactor`, which is `null` without debt and measures distance
+// to liquidation as a ratio rather than the remaining buffer this percentage shows.
 export const liquidiumHealthFactorPercent = ({
 	currentLtvBps,
 	weightedLiquidationThresholdBps
@@ -117,6 +136,32 @@ export const liquidiumHealthLevel = (healthFactorPercent: number): LiquidiumHeal
 		: healthFactorPercent >= LIQUIDIUM_HEALTH_CRITICAL_PERCENT
 			? 'at-risk'
 			: 'critical';
+
+// Opening debt per unit of borrowed principal: the protocol adds the pool's activation fee to
+// the debt (SDK `getOpeningDebt`), so every cap / LTV / health check must scale by this.
+export const liquidiumOpeningDebtFactor = ({
+	activationFeePercent
+}: Pick<LiquidiumMarket, 'activationFeePercent'>): number => 1 + (activationFeePercent ?? 0) / 100;
+
+// Largest principal whose opening debt fits the borrowing power. Rounded to the token's
+// decimals; LIQUIDIUM_BORROWING_POWER_TOLERANCE absorbs the rounding in the cap checks.
+export const liquidiumMaxBorrowBaseUnits = ({
+	availableBorrowsUsd,
+	price,
+	openingDebtFactor,
+	decimals
+}: {
+	availableBorrowsUsd: number;
+	price: number;
+	openingDebtFactor: number;
+	decimals: number;
+}): bigint =>
+	availableBorrowsUsd > 0 && price > 0 && openingDebtFactor > 0
+		? parseToken({
+				value: (availableBorrowsUsd / (price * openingDebtFactor)).toFixed(decimals),
+				unitName: decimals
+			})
+		: ZERO;
 
 // Borrow preview math (aggregate — see the FE plan "Borrow milestone").
 export const liquidiumResultingLtvPercent = ({
@@ -250,6 +295,8 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 	// pool.maxLtv is basis points (the SDK uses it directly as `maxAllowedLtvBps`), not the
 	// rate scale — convert to a 0–1 ratio.
 	maxLtv: Number(pool.maxLtv) / 10_000,
+	// Also basis points: the SDK adds `amount × activationFee / 10_000` to the opening debt.
+	activationFeePercent: Number(pool.activationFee) / 100,
 	frozen: pool.frozen,
 	available: !pool.frozen && isUnderSupplyCap(pool)
 });

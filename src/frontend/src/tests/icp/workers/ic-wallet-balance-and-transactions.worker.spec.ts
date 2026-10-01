@@ -712,6 +712,19 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				certified: true
 			});
 
+			const mockPostMessageWithoutNewTransactions = (certified: boolean) => ({
+				msg,
+				ref: startData.ledgerCanisterId,
+				data: {
+					wallet: {
+						balance: { certified, data: mockBalance },
+						oldest_tx_id: [],
+						transactionsUnavailable: true,
+						newTransactions: JSON.stringify([], jsonReplacer)
+					}
+				}
+			});
+
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
 
@@ -840,7 +853,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				});
 			});
 
-			it('should throw if the Index canister is not awake when it is out-of-sync with the balance', async () => {
+			it('should post the Ledger balance without transactions if the Index canister is not awake when it is out-of-sync with the balance', async () => {
 				vi.spyOn(indexCanisterServices, 'isIndexCanisterAwake').mockResolvedValue(false);
 
 				const currentMock = spyGetTransactions.getMockImplementation();
@@ -872,16 +885,67 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					certified: true
 				});
 
+				expect(postMessageMock).toHaveBeenCalledTimes(4);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					2,
+					mockPostMessageWithoutNewTransactions(false)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					3,
+					mockPostMessageWithoutNewTransactions(true)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			});
+
+			it('should post the Ledger balance without transactions if the Index canister fails', async () => {
+				spyGetTransactions.mockRejectedValue(new Error('Index canister unavailable'));
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				expect(postMessageMock).toHaveBeenCalledTimes(4);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					2,
+					mockPostMessageWithoutNewTransactions(false)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(
+					3,
+					mockPostMessageWithoutNewTransactions(true)
+				);
+				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			});
+
+			it('should keep reporting the unavailable Index canister on later jobs even if nothing changed', async () => {
+				spyGetTransactions.mockRejectedValue(new Error('Index canister unavailable'));
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				postMessageMock.mockClear();
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageWithoutNewTransactions(true));
+			});
+
+			it('should surface an error if the Ledger canister fails', async () => {
+				const error = new Error('Ledger canister unavailable');
+				spyGetBalance.mockRejectedValue(error);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 				expect(postMessageMock).toHaveBeenNthCalledWith(2, {
 					ref: startData.ledgerCanisterId,
 					msg: `${msg}Error`,
-					data: {
-						error: new Error(
-							`Index canister ${startData.indexCanisterId} for Ledger canister ${startData.ledgerCanisterId} is not awake`
-						)
-					}
+					data: { error }
 				});
 				expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 			});
@@ -928,6 +992,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
+			// The Ledger balance is authoritative, so only a Ledger failure is fatal for the sync. A
+			// failing Index canister is tolerated and covered in the "with transactions" scenarios.
 			describe('balance error', () => {
 				const { setup, teardown, tests } = initOtherScenarios({
 					initScheduler: initIcrcWalletScheduler,
@@ -942,22 +1008,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 							oldest_tx_id: [mockOldestTxId]
 						});
 					},
-					msg: 'syncIcrcWallet'
-				});
-
-				beforeEach(setup);
-
-				afterEach(teardown);
-
-				tests();
-			});
-
-			describe('transactions error', () => {
-				const { setup, teardown, tests } = initOtherScenarios({
-					initScheduler: initIcrcWalletScheduler,
-					startData,
-					initCleanupMock,
-					initErrorMock: (err: Error) => indexCanisterMock.getTransactions.mockRejectedValue(err),
 					msg: 'syncIcrcWallet'
 				});
 

@@ -13,7 +13,7 @@ import {
 	convertCkETHToEth,
 	convertCkErc20ToErc20
 } from '$icp/services/ck.services';
-import type { IcSendParams, IcTransferParams } from '$icp/types/ic-send';
+import type { IcCkWithdrawalResult, IcSendParams, IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcpAddress } from '$icp/utils/account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
@@ -21,6 +21,7 @@ import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { BlockHeight } from '@icp-sdk/canisters/ledger/icp';
@@ -31,22 +32,38 @@ import { get } from 'svelte/store';
 export const sendIc = async ({
 	progress,
 	sendCompleted,
+	onSent,
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId?: NetworkId;
 	sendCompleted: () => void;
-}): Promise<void> => {
-	await send({
+	// Runs the moment the transfer — for a ck withdrawal, the burn — is registered,
+	// ahead of the wallet-refresh wait below: the send is irreversible from there, so
+	// a caller that must record it (e.g. as an active user transaction) cannot sit
+	// behind a deliberate delay a refresh or tab close would cut short.
+	onSent?: (params: { result: IcCkWithdrawalResult | undefined }) => Promise<void> | void;
+}): Promise<IcCkWithdrawalResult | undefined> => {
+	const result = await send({
 		progress,
 		...rest
 	});
 
 	sendCompleted();
 
+	// Best-effort by contract, like `onBroadcast` in `sendBtc`: a failing callback
+	// must not derail the flow's own completion.
+	try {
+		await onSent?.({ result });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+
 	progress?.(ProgressStepsSendIc.RELOAD);
 
 	await waitAndTriggerWallet();
+
+	return result;
 };
 
 const send = async ({
@@ -56,29 +73,26 @@ const send = async ({
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId?: NetworkId;
-}): Promise<void> => {
+}): Promise<IcCkWithdrawalResult | undefined> => {
 	if (isNetworkIdBitcoin(targetNetworkId)) {
-		await convertCkBTCToBtc({
+		return await convertCkBTCToBtc({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	if (isConvertCkEthToEth({ token, networkId: targetNetworkId })) {
-		await convertCkETHToEth({
+		return await convertCkETHToEth({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
-		await convertCkErc20ToErc20({
+		return await convertCkErc20ToErc20({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	const { ledgerCanisterId } = token;

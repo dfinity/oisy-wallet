@@ -4,6 +4,19 @@ export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
+export const NAVIGATION_MENU_TIP_BUTTON = 'navigation-menu-tip-button';
+export const NAVIGATION_MENU_TIP_BADGE = 'navigation-menu-tip-badge';
+export const NAVIGATION_MENU_TIP_COUNT = 'navigation-menu-tip-count';
+export const TIP_INTRO_GET_STARTED_BUTTON = 'tip-intro-get-started-button';
+export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
+export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
+export const TIP_CLAIM_RETRY_BUTTON = 'tip-claim-retry-button';
+export const TIP_RECEIVED_BUTTON = 'tip-received-button';
+export const TIP_WELCOME_MODAL = 'tip-welcome-modal';
+export const TIP_WELCOME_CTA_BUTTON = 'tip-welcome-cta-button';
+export const TIP_HISTORY_CANCEL_BUTTON = 'tip-history-cancel-button';
+export const TIP_HISTORY_ERROR = 'tip-history-error';
+export const TIP_HISTORY_ROW_BUTTON = 'tip-history-row-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
@@ -81,6 +94,7 @@ export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-sectio
 export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
+export const RECEIVE_TOKENS_MODAL_XRP_MAINNET_SECTION = 'receive-tokens-modal-xrp-mainnet-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 
@@ -99,6 +113,9 @@ export const SEND_SCANNED_PLAIN_ADDRESS_NOTICE = 'send-scanned-plain-address-not
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
+export const SEND_FIRST_TIME_DESTINATION_WARNING = 'send-first-time-destination-warning';
+export const SEND_FIRST_TIME_DESTINATION_CONFIRM = 'send-first-time-destination-confirm';
+export const REVIEW_FORM_FEE_EXPIRED = 'review-form-fee-expired';
 
 export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
 
@@ -120,7 +137,36 @@ export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
 export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
+export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
+
+export const HELP_SUPPORT_CARD = 'help-support-card';
+export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_NETWORK_EXPLORERS_CARD = 'help-network-explorers-card';
+export const HELP_NETWORK_EXPLORERS_LINK = 'help-network-explorers-link';
+export const HELP_EXPLORERS_CARD = 'help-explorers-card';
+export const HELP_EXPLORERS_GROUP = 'help-explorers-group';
+export const HELP_EXPLORERS_LINK = 'help-explorers-link';
+export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
+export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
+export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';
+export const HELP_ICPSWAP_LOADING = 'help-icpswap-loading';
+export const HELP_ICPSWAP_NO_TOKENS = 'help-icpswap-no-tokens';
+export const HELP_ICPSWAP_ERROR = 'help-icpswap-error';
+export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
+export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
+export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
+export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
+export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
+export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
+export const NAVIGATION_MORE_MENU = 'navigation-more-menu';
+export const NAVIGATION_MORE_MENU_HELP = 'navigation-more-menu-help';
+export const NAVIGATION_MORE_MENU_DOCUMENTATION = 'navigation-more-menu-documentation';
+export const NAVIGATION_MORE_MENU_FAQ = 'navigation-more-menu-faq';
+export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-code';
+export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
@@ -129,6 +175,8 @@ export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
 export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+export const SIDEBAR_NAVIGATION_MENU_SCROLL = 'sidebar-navigation-menu-scroll';
+export const SIDEBAR_NAVIGATION_MENU_BOTTOM = 'sidebar-navigation-menu-bottom';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
@@ -154,6 +202,9 @@ export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
+export const TOKEN_MENU_XRP = 'token-menu-xrp';
+export const TOKEN_MENU_XRP_BUTTON = 'token-menu-xrp-button';
+export const TOKEN_MENU_XRP_EXPLORER_LINK = 'xrp-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
@@ -168,6 +219,9 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
+export const XRP_TRANSACTION_SKELETON_PREFIX = 'xrp-txn';
+
+export const TOKEN_INPUT_SELECT_TOKEN_BUTTON = 'token-input-select-token-button';
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
 export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
 export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';
@@ -242,6 +296,14 @@ export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-butto
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+
+export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
+export const CYCLES_MINT_FORM = 'cycles-mint-form';
+export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
+export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
+export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
+export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';
@@ -345,6 +407,12 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SEND_INSUFFICIENT_FEE_INFO = 'send-insufficient-fee-info';
+
+export const ETH_FEE_PRIORITY = 'eth-fee-priority';
+export const ETH_FEE_PRIORITY_OPTION = 'eth-fee-priority-option';
+export const ETH_FEE_PRIORITY_OPTION_AMOUNT = 'eth-fee-priority-option-amount';
+export const ETH_FEE_PRIORITY_TRIGGER = 'eth-fee-priority-trigger';
 export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar

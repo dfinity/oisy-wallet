@@ -4,6 +4,7 @@ import {
 	fetchNearIntentsTokens,
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import {
 	mockNearIntentsQuoteResponse,
 	mockNearIntentsStatusSuccess,
@@ -102,6 +103,48 @@ describe('near-intents.rest', () => {
 			await expect(fetchNearIntentsQuote(quoteRequest)).rejects.toThrow(
 				'NEAR Intents quote failed: Bad Request'
 			);
+		});
+
+		it('throws SwapAmountTooLowError with the parsed minimum when the amount is too low', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () => Promise.resolve({ message: 'Amount is too low for bridge, try at least 8300' })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow(SwapAmountTooLowError);
+			await expect(result).rejects.toMatchObject({
+				message: 'NEAR Intents quote failed: Amount is too low for bridge, try at least 8300',
+				minAmount: 8300n
+			});
+		});
+
+		it('throws SwapAmountTooLowError without a minimum when the message does not name one', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () => Promise.resolve({ message: 'Amount is too low' })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow(SwapAmountTooLowError);
+			await expect(result).rejects.toMatchObject({ minAmount: undefined });
+		});
+
+		it('throws a plain Error for other 400 messages', async () => {
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: false,
+				statusText: 'Bad Request',
+				json: () => Promise.resolve({ message: 'Invalid origin asset' })
+			} as unknown as Response);
+
+			const result = fetchNearIntentsQuote(quoteRequest);
+
+			await expect(result).rejects.toThrow('NEAR Intents quote failed: Invalid origin asset');
+			await expect(result).rejects.not.toBeInstanceOf(SwapAmountTooLowError);
 		});
 	});
 

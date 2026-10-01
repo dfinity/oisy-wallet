@@ -14,7 +14,9 @@
 	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 	import LoaderLiquidium from '$lib/components/loaders/LoaderLiquidium.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
+	import LoaderOisyTrade from '$lib/components/loaders/LoaderOisyTrade.svelte';
 	import LoaderSwapTokens from '$lib/components/loaders/LoaderSwapTokens.svelte';
+	import LoaderTips from '$lib/components/loaders/LoaderTips.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
@@ -51,6 +53,7 @@
 		<UserSnapshotWorker />
 
 		<LoaderContacts />
+		<LoaderTips />
 
 		<LoaderActiveUserTransactions />
 
@@ -61,6 +64,8 @@
 		<LoaderHarvest />
 
 		<LoaderLiquidium />
+
+		<LoaderOisyTrade />
 
 		<LoaderSwapTokens />
 

@@ -6,9 +6,10 @@
 
 	interface Props {
 		text: string | undefined;
+		untrusted?: boolean;
 	}
 
-	let { text }: Props = $props();
+	let { text, untrusted = false }: Props = $props();
 
 	let html = $state<string | undefined>();
 	let error = $state(false);
@@ -44,5 +45,5 @@
 {:else if html === undefined}
 	<LoaderSpinner inline />
 {:else}
-	<Html text={html} />
+	<Html text={html} {untrusted} />
 {/if}
