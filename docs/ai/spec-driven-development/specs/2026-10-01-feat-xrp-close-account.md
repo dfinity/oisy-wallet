@@ -4,7 +4,7 @@
 
 - **Type:** `feat`
 - **Area:** Frontend (`$xrp` transaction and history, the XRP token menu, a new modal, a hint on the XRP send form, the in-flight record's row); provider configuration (the QuickNode method whitelist). No backend change.
-- **Status:** Draft. Two open questions (§8), one pending decision (§9).
+- **Status:** Draft. All decisions resolved (§10); two open questions (§8).
 
 ---
 
@@ -157,7 +157,7 @@ Both are read pessimistically, as for a send: the recipient must exist in the va
 - **Hint.** Under the amount in `XrpSendAmount.svelte`. Open draft #14187 adds an error at the same place; whichever lands second adapts.
 - **History.** `mapXrpTransaction` maps a successful `AccountDelete` by its `delivered_amount`.
 - **Analytics.** `xrp_close_account_success` and `xrp_close_account_error` in `src/frontend/src/lib/constants/analytics.constants.ts`, fired where the send events are and with the same metadata.
-- **Rollout.** The entry points sit behind `XRP_CLOSE_ACCOUNT_ENABLED = (LOCAL || STAGING) && !TEST`, in its own env file, like `NEAR_INTENTS_XRP_SWAP_ENABLED`. The last PR sets it to `true as boolean` (P1).
+- **Rollout.** The entry points sit behind `XRP_CLOSE_ACCOUNT_ENABLED = (LOCAL || STAGING) && !TEST`, in its own env file, like `NEAR_INTENTS_XRP_SWAP_ENABLED`. The last PR sets it to `true as boolean` (D3).
 - **`PRODUCT.md`.** The XRP Ledger section gains "Closing an account" and an amended "Account reserve" in the PR that makes closing reachable, and the history part in PR 1.
 - **i18n.** Every new string in the locales of the `Languages` enum.
 
@@ -179,9 +179,10 @@ Each PR ships its tests. The whitelist change comes before the first staging tes
 
 ## 9. Pending decisions (facts are clear)
 
-- **P1 Rollout.** Proposed: the flag of §7.3, on locally and on staging while PRs 2 and 3 are tested, then on everywhere with PR 4, as for the NEAR Intents XRP swap. The alternative is no flag, with closing going live at the first release after PR 3.
+None.
 
 ## 10. Resolved
 
 - **D1 Its own action.** Closing is an entry in the XRP token menu that opens its own modal; the send flow keeps sending payments only (2026-10-01).
 - **D2 A hint on the send form.** The send form gets one line that opens the close modal, and no other change (2026-10-01).
+- **D3 Rollout.** Several PRs (§7.4) rather than one, so each review stays small, with the flag of §7.3 on locally and on staging while they land and are tested there; PR 4 turns it on everywhere (2026-10-01).
