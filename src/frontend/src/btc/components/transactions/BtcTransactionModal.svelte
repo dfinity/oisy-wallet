@@ -12,6 +12,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -24,6 +25,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import { isReceivedMicroTransaction } from '$lib/utils/transactions.utils';
 
 	interface Props {
 		transaction: BtcTransactionUi;
@@ -49,6 +51,11 @@
 
 	let fromExplorerUrl: string | undefined = $derived(
 		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined
+	);
+
+	// The same check that hides this transaction from lists while micro transactions are hidden.
+	let likelySpam = $derived(
+		nonNullish(token) && isReceivedMicroTransaction({ transaction, token, exchanges: $exchanges })
 	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -94,6 +101,7 @@
 				<TransactionContactCard
 					{from}
 					{fromExplorerUrl}
+					{likelySpam}
 					{onSaveAddressComplete}
 					to={address}
 					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}

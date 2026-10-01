@@ -18,6 +18,7 @@
 		solAddressLocal,
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -35,6 +36,7 @@
 		isNetworkIdSOLLocal,
 		isNetworkSolana
 	} from '$lib/utils/network.utils';
+	import { isReceivedMicroTransaction } from '$lib/utils/transactions.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -220,6 +222,11 @@
 			: undefined
 	);
 
+	// The same check that hides this transaction from lists while micro transactions are hidden.
+	let likelySpam = $derived(
+		nonNullish(token) && isReceivedMicroTransaction({ transaction, token, exchanges: $exchanges })
+	);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openSolTransaction({
 			id: Symbol(),
@@ -287,6 +294,7 @@
 					<TransactionContactCard
 						{from}
 						{fromExplorerUrl}
+						{likelySpam}
 						{onSaveAddressComplete}
 						{to}
 						{toExplorerUrl}

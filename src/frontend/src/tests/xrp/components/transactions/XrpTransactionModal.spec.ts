@@ -1,5 +1,6 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { contactsStore } from '$lib/stores/contacts.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { getMockContactsUi } from '$tests/mocks/contacts.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
@@ -97,6 +98,34 @@ describe('XrpTransactionModal', () => {
 
 			// A known contact is not offered for saving again.
 			expect(queryByRole('button', { name: get(i18n).address.save.title })).toBeNull();
+		});
+	});
+
+	describe('likely spam', () => {
+		beforeEach(() => {
+			exchangeStore.set([{ ripple: { usd: 2.5 } }]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('warns about a received transaction worth less than a cent', () => {
+			const { getByText } = render(XrpTransactionModal, {
+				transaction: { ...transaction, type: 'receive', value: 10n },
+				token: XRP_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		});
+
+		it('does not warn about a received transaction worth more than a cent', () => {
+			const { queryByText } = render(XrpTransactionModal, {
+				transaction: { ...transaction, type: 'receive', value: 5_000_000n },
+				token: XRP_TOKEN
+			});
+
+			expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
 		});
 	});
 });
