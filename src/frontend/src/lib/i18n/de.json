@@ -2238,6 +2238,9 @@
 		"error": {
 			"get_block_number": "Kann Blocknummer nicht abrufen.",
 			"failed_get_transaction": "Konnte die Transaktion mit dem angegebenen Hash ($hash) nicht abrufen. Bitte lade die Wallet-DApp neu."
+		},
+		"warning": {
+			"likely_spam": "Diese Transaktion ist wahrscheinlich Spam. Sehr kleine Beträge werden oft von Adressen gesendet, die wie von dir verwendete Adressen aussehen sollen, damit du später die falsche Adresse kopierst. Sende keine Mittel an diese Adresse."
 		}
 	},
 	"transactions": {

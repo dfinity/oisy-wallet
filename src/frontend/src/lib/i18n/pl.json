@@ -2238,6 +2238,9 @@
 		"error": {
 			"get_block_number": "Nie można uzyskać numeru bloku.",
 			"failed_get_transaction": "Nie udało się pobrać transakcji z podanego hasha ($hash). Załaduj ponownie aplikację portfela."
+		},
+		"warning": {
+			"likely_spam": "Ta transakcja to prawdopodobnie spam. Bardzo małe przelewy są często wysyłane z adresów stworzonych tak, by przypominały te, których używasz, i by później skłonić Cię do skopiowania niewłaściwego adresu. Nie wysyłaj środków na ten adres."
 		}
 	},
 	"transactions": {

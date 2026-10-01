@@ -2238,6 +2238,9 @@
 		"error": {
 			"get_block_number": "Impossible d'obtenir le numéro de bloc.",
 			"failed_get_transaction": "Échec de la récupération de la transaction à partir du hash fourni (hash : $hash). Veuillez recharger la dApp du portefeuille."
+		},
+		"warning": {
+			"likely_spam": "Cette transaction est probablement du spam. Les très petits transferts sont souvent envoyés depuis des adresses conçues pour ressembler à celles que vous utilisez, afin que vous copiiez plus tard la mauvaise adresse. N'envoyez pas de fonds à cette adresse."
 		}
 	},
 	"transactions": {
