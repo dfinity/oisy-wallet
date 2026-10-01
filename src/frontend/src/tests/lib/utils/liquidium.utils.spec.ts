@@ -14,10 +14,12 @@ import {
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
 	liquidiumMarketToken,
+	liquidiumMaxBorrowBaseUnits,
 	liquidiumMaxLtv,
 	liquidiumMaxSupplyApy,
 	liquidiumMinBorrowApy,
 	liquidiumNetInterestUsd,
+	liquidiumOpeningDebtFactor,
 	liquidiumProjectedHealthAfterRepayPercent,
 	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
@@ -466,6 +468,39 @@ describe('liquidium.utils', () => {
 			{ percent: 0, level: 'critical' }
 		])('classifies $percent% as $level', ({ percent, level }) => {
 			expect(liquidiumHealthLevel(percent)).toBe(level);
+		});
+	});
+
+	describe('liquidiumOpeningDebtFactor', () => {
+		it('is 1 when the pool charges no activation fee', () => {
+			expect(liquidiumOpeningDebtFactor({})).toBe(1);
+			expect(liquidiumOpeningDebtFactor({ activationFeePercent: 0 })).toBe(1);
+		});
+
+		it('adds the activation fee to each unit of principal', () => {
+			expect(liquidiumOpeningDebtFactor({ activationFeePercent: 0.45 })).toBeCloseTo(1.0045);
+		});
+	});
+
+	describe('liquidiumMaxBorrowBaseUnits', () => {
+		const params = { availableBorrowsUsd: 100_000, price: 50_000, decimals: 8 };
+
+		it('divides the borrowing power by the price without a fee', () => {
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, openingDebtFactor: 1 })).toBe(200_000_000n);
+		});
+
+		it('shrinks the principal so principal plus fee fits the borrowing power', () => {
+			// 2 / 1.0045 = 1.991040318566… → rounded to 8 decimals.
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, openingDebtFactor: 1.0045 })).toBe(
+				199_104_032n
+			);
+		});
+
+		it('is zero without borrowing power or price', () => {
+			expect(
+				liquidiumMaxBorrowBaseUnits({ ...params, availableBorrowsUsd: 0, openingDebtFactor: 1 })
+			).toBe(ZERO);
+			expect(liquidiumMaxBorrowBaseUnits({ ...params, price: 0, openingDebtFactor: 1 })).toBe(ZERO);
 		});
 	});
 

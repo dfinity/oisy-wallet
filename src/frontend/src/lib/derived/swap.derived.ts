@@ -1,6 +1,9 @@
 import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
-import { NEAR_INTENTS_BTC_SWAP_ENABLED } from '$env/rest/near-intents.env';
+import {
+	NEAR_INTENTS_BTC_SWAP_ENABLED,
+	NEAR_INTENTS_XRP_SWAP_ENABLED
+} from '$env/rest/near-intents.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -15,6 +18,7 @@ import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { filterSwapTokens } from '$lib/utils/swap-tokens-filter.utils';
+import { enabledXrpTokens } from '$xrp/derived/tokens.derived';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -40,27 +44,52 @@ const swapUniverseBitcoinTokens: Readable<TokenToggleable<Token>[]> = derived(
 );
 
 /**
+ * XRP's contribution to the swap universe: the enabled XRP token, while NEAR Intents, its only
+ * provider, is enabled for it. Kept out of `allCrossChainSwapTokens` for the same reason as Bitcoin.
+ */
+const swapUniverseXrpTokens: Readable<TokenToggleable<Token>[]> = derived(
+	[enabledXrpTokens],
+	([$enabledXrpTokens]) =>
+		NEAR_INTENTS_XRP_SWAP_ENABLED
+			? $enabledXrpTokens.map((token) => ({ ...token, enabled: true }))
+			: []
+);
+
+/**
  * The unfiltered universe of tokens that can appear in either side of the swap UI:
- * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens + Bitcoin.
+ * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens + Bitcoin + XRP.
  * Provider-supported filtering is applied on top via `filterSwapTokens`.
  */
 export const allSwapUniverseTokens: Readable<TokenToggleable<Token>[]> = derived(
-	[allSortedIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens],
-	([$allSortedIcrcTokens, $allCrossChainSwapTokens, $swapUniverseBitcoinTokens]) => [
+	[allSortedIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens, swapUniverseXrpTokens],
+	([
+		$allSortedIcrcTokens,
+		$allCrossChainSwapTokens,
+		$swapUniverseBitcoinTokens,
+		$swapUniverseXrpTokens
+	]) => [
 		{ ...ICP_TOKEN, enabled: true },
 		...$allSortedIcrcTokens,
 		...$allCrossChainSwapTokens,
-		...$swapUniverseBitcoinTokens
+		...$swapUniverseBitcoinTokens,
+		...$swapUniverseXrpTokens
 	]
 );
 
 const selectedSwappableToken: Readable<Token | undefined> = derived(
-	[pageToken, allSwapCompatibleIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens],
+	[
+		pageToken,
+		allSwapCompatibleIcrcTokens,
+		allCrossChainSwapTokens,
+		swapUniverseBitcoinTokens,
+		swapUniverseXrpTokens
+	],
 	([
 		$pageToken,
 		$allSwapCompatibleIcrcTokens,
 		$allCrossChainSwapTokens,
-		$swapUniverseBitcoinTokens
+		$swapUniverseBitcoinTokens,
+		$swapUniverseXrpTokens
 	]) => {
 		if (nonNullish($pageToken)) {
 			const selectedToken = $pageToken;
@@ -70,7 +99,9 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 				...$allSwapCompatibleIcrcTokens,
 				...$allCrossChainSwapTokens,
 				// Without this, opening Swap from the BTC token page would fail to preselect BTC.
-				...$swapUniverseBitcoinTokens
+				...$swapUniverseBitcoinTokens,
+				// And from the XRP token page, where it is also what shows the Swap action at all.
+				...$swapUniverseXrpTokens
 			].find((t) => t.id === selectedToken.id);
 
 			if (nonNullish(swappableToken)) {

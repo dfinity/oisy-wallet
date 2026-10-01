@@ -65,6 +65,22 @@ describe('XrpSendReview', () => {
 		expect(getByText('12345')).toBeInTheDocument();
 	});
 
+	it('warns that a destination tag may be required when none is set', () => {
+		const { getByTestId } = render(XrpSendReview, { props, context: mockContext });
+
+		expect(getByTestId('xrp-review-destination-tag-missing')).toHaveTextContent(
+			en.send.info.xrp_destination_tag_missing
+		);
+	});
+
+	it('does not warn when a destination tag is set', () => {
+		sendContext.sendXrpDestinationTag.set(0);
+
+		const { queryByTestId } = render(XrpSendReview, { props, context: mockContext });
+
+		expect(queryByTestId('xrp-review-destination-tag-missing')).toBeNull();
+	});
+
 	describe('destination contact', () => {
 		const [alice] = getMockContactsUi({
 			n: 1,

@@ -45,6 +45,14 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 	// from it, so an unchanged account costs no message, and the first read is always news.
 	#trustLinesPublished: string | undefined;
 
+	// Moves on with every change of ref, `stop` included. A job checks it alongside the ref, which
+	// alone cannot tell a restart on the SAME address from the owner before it: the restart puts back
+	// the very string the previous job captured. That job's late result then passed as current —
+	// landing while the restart awaited the identity, it filled the fresh cache while its own message
+	// was dropped by the idle timer, and the restarted job, finding nothing new, posted no balance and
+	// no history at all.
+	#generation = 0;
+
 	private timer = new SchedulerTimer('syncXrpWalletStatus');
 
 	private store: XrpWalletStore = {
@@ -78,10 +86,19 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			};
 			this.#historyPublished = false;
 			this.#trustLinesPublished = undefined;
+			this.#generation++;
 		}
 
 		this.#ref = newRef;
 	}
+
+	private isStale = ({
+		expectedRef,
+		generation
+	}: {
+		expectedRef: string;
+		generation: number;
+	}): boolean => expectedRef !== this.#ref || generation !== this.#generation;
 
 	async start(data: PostMessageDataRequestXrp | undefined) {
 		this.setRef(data);
@@ -147,11 +164,13 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 	private loadAndSyncBalance = async ({
 		data,
 		expectedRef,
+		generation,
 		transactions,
 		trustLines
 	}: {
 		data: PostMessageDataRequestXrp;
 		expectedRef: string;
+		generation: number;
 		transactions: Promise<XrpCertifiedTransaction[] | undefined>;
 		trustLines: Promise<XrpTrustLine[] | undefined>;
 	}) => {
@@ -169,16 +188,19 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 			balance,
 			transactions: await transactions,
 			trustLines: await trustLines,
-			expectedRef
+			expectedRef,
+			generation
 		});
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestXrp>) => {
 		assertNonNullish(data, 'No data provided to get XRP balance.');
 
-		// The job snapshots the address it was scheduled with; the ref it belongs to is captured
-		// alongside so a result landing after the scheduler was re-keyed can be discarded.
+		// The job snapshots the address it was scheduled with; the ref it belongs to and the generation
+		// it started in are captured alongside, so a result landing after the scheduler was re-keyed or
+		// restarted can be discarded.
 		const expectedRef = this.refFor(data);
+		const generation = this.#generation;
 
 		const {
 			address: { data: address },
@@ -206,13 +228,19 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		try {
 			await retryWithDelay({
 				request: async () =>
-					await this.loadAndSyncBalance({ data, expectedRef, transactions, trustLines }),
+					await this.loadAndSyncBalance({
+						data,
+						expectedRef,
+						generation,
+						transactions,
+						trustLines
+					}),
 				maxRetries: 10
 			});
 		} catch (error: unknown) {
-			// A failure for a superseded address must not reset the current account or report an
-			// error against it.
-			if (expectedRef !== this.#ref) {
+			// A failure for a superseded address, or from before a restart, must not reset the current
+			// account or report an error against it.
+			if (this.isStale({ expectedRef, generation })) {
 				return;
 			}
 
@@ -229,11 +257,12 @@ export class XrpWalletScheduler implements Scheduler<PostMessageDataRequestXrp> 
 		balance,
 		transactions,
 		trustLines,
-		expectedRef
-	}: XrpWalletData & { expectedRef: string }) => {
-		// Discard a result for an address the scheduler has moved on from, before it can be merged
-		// into the store that `setRef` already cleared for the new address.
-		if (expectedRef !== this.#ref) {
+		expectedRef,
+		generation
+	}: XrpWalletData & { expectedRef: string; generation: number }) => {
+		// Discard a result for an address the scheduler has moved on from, or from before a stop,
+		// before it can be merged into the store that `setRef` already cleared.
+		if (this.isStale({ expectedRef, generation })) {
 			return;
 		}
 
