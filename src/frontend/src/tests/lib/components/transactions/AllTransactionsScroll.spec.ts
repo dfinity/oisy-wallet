@@ -1,7 +1,10 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 import type { ResultSuccess } from '$lib/types/utils';
+import AllTransactionsScrollTest from '$tests/lib/components/transactions/AllTransactionsScrollTest.svelte';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverManual,
@@ -222,6 +225,131 @@ describe('AllTransactionsScroll', () => {
 			expect(onLoadMore).toHaveBeenCalledOnce();
 
 			enterView();
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledTimes(2);
+			});
+		});
+	});
+
+	describe('with a floor', () => {
+		const onLoadMore = vi.fn().mockResolvedValue({ success: false });
+
+		const displayed = (getAllByTestId: (testId: string) => HTMLElement[]) =>
+			getAllByTestId('displayed-transaction').map(({ textContent }) => textContent);
+
+		// Levelling brings rows from beyond the floor for some tokens only. Shown, they left the older
+		// transactions of the token whose own oldest row set the floor out between them.
+		it('should hold back rows older than the floor while the chains still have history', () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['2', '3', '4']);
+		});
+
+		it('should reveal the rows a lower floor reaches', async () => {
+			const { getAllByTestId, rerender } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, onLoadMore }
+			});
+
+			await rerender({ floor: 0 });
+
+			expect(displayed(getAllByTestId)).toEqual(['0', '1', '2', '3', '4']);
+		});
+
+		it('should show every row once the chains are exhausted', () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 2, exhausted: true, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['0', '1', '2', '3', '4']);
+		});
+
+		it('should keep rows without a timestamp', () => {
+			const undated: AllTransactionUiWithCmp = {
+				component: 'bitcoin',
+				token: BTC_MAINNET_TOKEN,
+				transaction: { ...createMockBtcTransactionsUi(1)[0], timestamp: undefined }
+			};
+
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: [...makeTransactions(3), undated], floor: 2, onLoadMore }
+			});
+
+			expect(displayed(getAllByTestId)).toEqual(['2', 'undated']);
+		});
+
+		it('should ask the chains for more once everything down to the floor is on screen', async () => {
+			const { getAllByTestId } = render(AllTransactionsScrollTest, {
+				props: {
+					sortedTransactions: makeTransactions(pageSize * 3),
+					floor: pageSize * 3 - 5,
+					onLoadMore
+				}
+			});
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledOnce();
+			});
+
+			expect(displayed(getAllByTestId)).toHaveLength(5);
+		});
+
+		// The round records its empty result against the length from before it, so a floor that rose
+		// while it ran read as dry, and the scroll stopped asking for good.
+		describe('when the floor moves while an empty round is in flight', () => {
+			const { enterView } = IntersectionObserverManual;
+
+			beforeEach(() => {
+				window.IntersectionObserver = IntersectionObserverManual;
+			});
+
+			afterEach(() => {
+				window.IntersectionObserver = IntersectionObserverActive;
+			});
+
+			it('should ask again the next time the end comes into view', async () => {
+				const scroll: { rerender?: (props: { floor: number }) => Promise<void> } = {};
+
+				const loadMoreMovingTheFloor = vi.fn(async () => {
+					await scroll.rerender?.({ floor: 3 });
+
+					return { success: false };
+				});
+
+				const { rerender } = render(AllTransactionsScrollTest, {
+					props: {
+						sortedTransactions: makeTransactions(5),
+						floor: 0,
+						onLoadMore: loadMoreMovingTheFloor
+					}
+				});
+
+				scroll.rerender = rerender;
+
+				await waitFor(() => expect(loadMoreMovingTheFloor).toHaveBeenCalledOnce());
+
+				await runResolvedPromises();
+
+				enterView();
+
+				await waitFor(() => expect(loadMoreMovingTheFloor).toHaveBeenCalledTimes(2));
+			});
+		});
+
+		// A floor that rises shrinks the list, for instance when a token's rows are cleared and loaded
+		// again. Measured against the old boundary, the empty round before it kept the scroll disabled.
+		it('should ask again after the floor rose, even when the last round loaded nothing', async () => {
+			const { rerender } = render(AllTransactionsScrollTest, {
+				props: { sortedTransactions: makeTransactions(5), floor: 0, onLoadMore }
+			});
+
+			await waitFor(() => {
+				expect(onLoadMore).toHaveBeenCalledOnce();
+			});
+
+			await rerender({ floor: 3 });
 
 			await waitFor(() => {
 				expect(onLoadMore).toHaveBeenCalledTimes(2);

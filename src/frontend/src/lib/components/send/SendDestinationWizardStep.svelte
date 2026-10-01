@@ -42,6 +42,7 @@
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
 	import XrpSendDestination from '$xrp/components/send/XrpSendDestination.svelte';
 	import { xrpNetworkContacts } from '$xrp/derived/xrp-contacts.derived';
+	import { xrpKnownDestinations } from '$xrp/derived/xrp-transactions.derived';
 
 	interface Props {
 		destination: string;
@@ -178,11 +179,15 @@
 			/>
 		</div>
 	{:else if isNetworkIdXrp($sendTokenNetworkId)}
-		<!-- No known destinations yet: nothing derives them from the XRP transaction history, so the
-		     "Recently used" tab shows its empty state. -->
 		<div data-tid={testId}>
-			<XrpSendDestination {onQRCodeScan} bind:destination bind:invalidDestination />
+			<XrpSendDestination
+				knownDestinations={$xrpKnownDestinations}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
+			/>
 			<SendDestinationTabs
+				knownDestinations={$xrpKnownDestinations}
 				networkContacts={$xrpNetworkContacts}
 				onNext={next}
 				bind:destination

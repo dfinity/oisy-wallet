@@ -489,7 +489,8 @@ describe('oisy-trade-swap.services', () => {
 			slippage: 0.5,
 			userEthAddress: undefined,
 			userSolAddress: undefined,
-			userBtcAddress: undefined
+			userBtcAddress: undefined,
+			userXrpAddress: undefined
 		};
 
 		beforeEach(() => {
