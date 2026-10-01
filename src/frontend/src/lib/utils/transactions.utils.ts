@@ -363,10 +363,9 @@ export const filterReceivedMicroTransactions = ({
 	transactions: AllTransactionUiWithCmp[];
 	exchanges: ExchangesData;
 }): AllTransactionUiWithCmp[] =>
-	transactions.filter((transactionUI) => {
-		const { transaction } = transactionUI;
-		return !(transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges }));
-	});
+	transactions.filter(
+		({ transaction, token }) => !isReceivedMicroTransaction({ transaction, token, exchanges })
+	);
 
 export const getReceivedMicroTransactions = ({
 	transactions,
@@ -375,19 +374,25 @@ export const getReceivedMicroTransactions = ({
 	transactions: AllTransactionUiWithCmp[];
 	exchanges: ExchangesData;
 }): AllTransactionUiWithCmp[] =>
-	transactions.filter((transactionUI) => {
-		const { transaction } = transactionUI;
-		return transaction.type === 'receive' && isMicroTransaction({ transactionUI, exchanges });
-	});
+	transactions.filter(({ transaction, token }) =>
+		isReceivedMicroTransaction({ transaction, token, exchanges })
+	);
 
-const isMicroTransaction = ({
-	transactionUI,
+// A received transaction worth less than `MICRO_TRANSACTION_USD_THRESHOLD` is likely spam. A token
+// without a USD price never qualifies, since its value is unknown.
+export const isReceivedMicroTransaction = ({
+	transaction,
+	token,
 	exchanges
 }: {
-	transactionUI: AllTransactionUiWithCmp;
+	transaction: AnyTransactionUi;
+	token: Token;
 	exchanges: ExchangesData;
-}) => {
-	const { token, transaction } = transactionUI;
+}): boolean => {
+	if (transaction.type !== 'receive') {
+		return false;
+	}
+
 	if (nonNullish(transaction.value)) {
 		const exchangeRate = exchanges?.[token.id]?.usd;
 		if (nonNullish(exchangeRate)) {
