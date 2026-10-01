@@ -43,7 +43,9 @@
 			? modalStore.openIcHideToken
 			: $networkSolana
 				? modalStore.openSolHideToken
-				: modalStore.openHideToken;
+				: $networkXrp
+					? modalStore.openXrpHideToken
+					: modalStore.openHideToken;
 		fn({
 			id: hideModalId,
 			data: fromRoute

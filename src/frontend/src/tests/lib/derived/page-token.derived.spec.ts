@@ -45,7 +45,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { xrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
+import { enabledXrpTrustLineTokens } from '$xrp/derived/xrp-trust-line-tokens.derived';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -133,7 +133,7 @@ describe('page-token.derived', () => {
 		});
 
 		it('should find an XRP Ledger trust-line token by its currency and issuer', () => {
-			vi.spyOn(xrpTrustLineTokens, 'subscribe').mockImplementation((fn) => {
+			vi.spyOn(enabledXrpTrustLineTokens, 'subscribe').mockImplementation((fn) => {
 				fn([{ ...RLUSD_TOKEN, enabled: true }]);
 				return () => {};
 			});
@@ -293,6 +293,17 @@ describe('page-token.derived', () => {
 
 		it('should return false for nullish token', () => {
 			expect(get(pageTokenToggleable)).toBeFalsy();
+		});
+
+		it('should return true for a shown XRP Ledger trust-line token', () => {
+			vi.spyOn(enabledXrpTrustLineTokens, 'subscribe').mockImplementation((fn) => {
+				fn([{ ...RLUSD_TOKEN, enabled: true }]);
+				return () => {};
+			});
+
+			mockPage.mockToken(RLUSD_TOKEN);
+
+			expect(get(pageTokenToggleable)).toBeTruthy();
 		});
 
 		it('should return true if default ERC20 token is toggleable', () => {

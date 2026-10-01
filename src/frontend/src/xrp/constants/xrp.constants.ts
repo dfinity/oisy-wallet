@@ -47,6 +47,27 @@ export const XRP_MAX_DESTINATION_TAG = XRP_MAX_UINT32;
 // destroyed and the sequence consumed — so it is refused before signing instead.
 export const XRP_ACCOUNT_FLAG_REQUIRE_DEST_TAG = 0x00020000;
 
+// The AccountRoot flags a token's issuer is judged by before the token is added (rippled's `lsf…`
+// names). Tested with `!== 0`, never compared for equality: the clawback bit is the sign bit of the
+// 32-bit value JavaScript's bitwise operators work on.
+//
+// `lsfRequireAuth`: holders need the issuer's approval before they can hold its tokens.
+export const XRP_ACCOUNT_FLAG_REQUIRE_AUTH = 0x00040000;
+// `lsfNoFreeze`: the issuer gave up freezing, for good.
+export const XRP_ACCOUNT_FLAG_NO_FREEZE = 0x00200000;
+// `lsfGlobalFreeze`: the issuer froze every holder's balance of its tokens.
+export const XRP_ACCOUNT_FLAG_GLOBAL_FREEZE = 0x00400000;
+// `lsfDefaultRipple`: holders can send its tokens to each other. Without it, they cannot.
+export const XRP_ACCOUNT_FLAG_DEFAULT_RIPPLE = 0x00800000;
+// `lsfDisallowIncomingTrustline`: the issuer accepts no new trust lines, so its tokens cannot be added.
+export const XRP_ACCOUNT_FLAG_DISALLOW_INCOMING_TRUST_LINE = 0x20000000;
+// `lsfAllowTrustLineClawback`: the issuer can take its tokens back from any holder.
+export const XRP_ACCOUNT_FLAG_ALLOW_TRUST_LINE_CLAWBACK = 0x80000000;
+
+// A `TransferRate` is scaled by 10^9: this value is a rate of 1, i.e. no transfer fee, as is an
+// absent field.
+export const XRP_TRANSFER_RATE_NO_FEE = 1_000_000_000;
+
 // Ledgers added to the current index for a transaction's LastLedgerSequence, bounding how
 // long it can be included before it definitively fails rather than lingering.
 //

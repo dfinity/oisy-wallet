@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 	import { onMount, untrack } from 'svelte';
 	import type { CustomToken } from '$declarations/backend/backend.did';
+	import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 	import { processCustomTokens as processErc1155CustomTokens } from '$eth/services/erc1155.services';
 	import {
 		loadDefaultErc20Tokens,
@@ -59,6 +60,7 @@
 		loadDefaultSplTokens,
 		processCustomTokens as processSplCustomTokens
 	} from '$sol/services/spl.services';
+	import { processCustomTokens as processXrpTrustLineCustomTokens } from '$xrp/services/xrp-custom-tokens.services';
 
 	// IC default tokens have no reactive guards, they load once when the component mounts (no tracked dependencies).
 	onMount(() => {
@@ -179,6 +181,14 @@
 		await Promise.allSettled([processSplCustomTokens(loadParams)]);
 	};
 
+	const processFetchedXrpTokens = async () => {
+		if (isNullish(loadParams) || !XRP_TRUST_LINE_TOKENS_ENABLED) {
+			return;
+		}
+
+		await processXrpTrustLineCustomTokens(loadParams);
+	};
+
 	// Single queryAndUpdate pipeline — re-runs only when identity changes.
 	$effect(() => {
 		[$authIdentity];
@@ -202,6 +212,12 @@
 		[loadParams, loadSpl];
 
 		untrack(processFetchedSolTokens);
+	});
+
+	$effect(() => {
+		[loadParams];
+
+		untrack(processFetchedXrpTokens);
 	});
 </script>
 

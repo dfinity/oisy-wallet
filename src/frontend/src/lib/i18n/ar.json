@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
 			"spl_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم SPL المخصصة.",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "خطأ أثناء تفعيل التوكن التوأم ERC20.",
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
@@ -1499,7 +1500,13 @@
 				"info_ext": "",
 				"info_index": "معرف حاوية الفهرس اختياري، ولكن بدونه، لا يمكن لـ $oisy_short عرض سجل المعاملات.",
 				"custom_tokens_not_supported": "الشبكة المحددة لا تدعم التوكنات المخصصة.",
-				"custom_tokens_not_supported_yet": ""
+				"custom_tokens_not_supported_yet": "",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "العنوان المحدد ليس توكنًا صالحًا في الشبكة المحددة.",
@@ -1513,10 +1520,28 @@
 				"missing_canister_id": "",
 				"missing_contract_address": "عنوان العقد مفقود. هل قدمت قيمة؟",
 				"missing_token_address": "عنوان التوكن مفقود. هل قدمت قيمة؟",
-				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع."
+				"no_network": "لم يتم تحديد أي شبكة. هذا غير متوقع.",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name يقوم بإعداد وتأمين التوكنات الجديدة. يرجى عدم إغلاق هذه النافذة حتى يكتمل الأمر."
+				"do_not_close_manage": "$oisy_name يقوم بإعداد وتأمين التوكنات الجديدة. يرجى عدم إغلاق هذه النافذة حتى يكتمل الأمر.",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1563,6 +1588,8 @@
 		"placeholder": {
 			"enter_contract_address": "أدخل عنوان عقد ERC20",
 			"enter_token_address": "أدخل عنوان توكن SPL",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "البحث عن التوكن"
 		},
 		"warning": {

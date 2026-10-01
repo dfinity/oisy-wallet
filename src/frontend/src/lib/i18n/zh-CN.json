@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "",
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"ext_custom_tokens": "加载 EXT 自定义代币时出错。",
@@ -1499,7 +1500,13 @@
 				"info_ext": "Canister ID 通常可在项目官网上找到。",
 				"info_index": "Index canister ID 是可选的，但如果缺少，$oisy_short 将无法显示交易历史。",
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。",
-				"custom_tokens_not_supported_yet": "OISY 目前尚不支持此网络上的自定义代币。"
+				"custom_tokens_not_supported_yet": "OISY 目前尚不支持此网络上的自定义代币。",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "指定的地址在所选网络中不是有效的代币。",
@@ -1513,10 +1520,28 @@
 				"missing_canister_id": "缺少 Canister ID。你是否提供了该值？",
 				"missing_contract_address": "缺少合约地址。你是否提供了该值？",
 				"missing_token_address": "缺少代币地址。你是否提供了该值？",
-				"no_network": "未选择网络。这是异常情况。"
+				"no_network": "未选择网络。这是异常情况。",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name 正在准备并保护新的代币。在完成之前请不要关闭此标签页。"
+				"do_not_close_manage": "$oisy_name 正在准备并保护新的代币。在完成之前请不要关闭此标签页。",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1563,6 +1588,8 @@
 		"placeholder": {
 			"enter_contract_address": "输入 ERC20 合约地址",
 			"enter_token_address": "输入 SPL 代币地址",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "搜索代币"
 		},
 		"warning": {

@@ -1,11 +1,15 @@
 import { RLUSD_TOKEN } from '$env/tokens/tokens-xrp/tokens.rlusd.env';
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { Token } from '$lib/types/token';
 import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import {
 	isTokenXrpTrustLine,
+	isTokenXrpTrustLineCustomToken,
+	parseXrpCurrencyCode,
 	parseXrpTokenValue,
 	xrpCurrencyCodeToSymbol,
+	xrpIssuerPowers,
 	xrpTrustLineIdentifier
 } from '$xrp/utils/xrp-trust-line.utils';
 
@@ -14,6 +18,17 @@ describe('xrp-trust-line.utils', () => {
 		it('recognises a trust-line token and nothing else', () => {
 			expect(isTokenXrpTrustLine(RLUSD_TOKEN)).toBeTruthy();
 			expect(isTokenXrpTrustLine(XRP_TOKEN)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenXrpTrustLineCustomToken', () => {
+		it('needs a trust-line token with an enabled state', () => {
+			const hiddenRlusd: Token = { ...RLUSD_TOKEN, enabled: false } as Token;
+			const shownXrp: Token = { ...XRP_TOKEN, enabled: true } as Token;
+
+			expect(isTokenXrpTrustLineCustomToken(hiddenRlusd)).toBeTruthy();
+			expect(isTokenXrpTrustLineCustomToken(RLUSD_TOKEN)).toBeFalsy();
+			expect(isTokenXrpTrustLineCustomToken(shownXrp)).toBeFalsy();
 		});
 	});
 
@@ -79,6 +94,92 @@ describe('xrp-trust-line.utils', () => {
 
 		it('throws for an exponent far outside the ledger range', () => {
 			expect(() => parseXrpTokenValue({ value: '1e1000' })).toThrow('out of range');
+		});
+	});
+
+	describe('parseXrpCurrencyCode', () => {
+		it.each([
+			{ name: 'a standard code', input: 'USD', expected: 'USD' },
+			{ name: 'a standard code, case kept', input: 'usd', expected: 'usd' },
+			{ name: 'a standard code with a symbol', input: '$$$', expected: '$$$' },
+			{ name: 'a 40-hex code', input: mockRlusdCurrencyCode, expected: mockRlusdCurrencyCode },
+			{
+				name: 'a 40-hex code in lowercase, as the ledger writes it: uppercase',
+				input: mockRlusdCurrencyCode.toLowerCase(),
+				expected: mockRlusdCurrencyCode
+			},
+			{
+				name: 'a name, zero-padded the way RLUSD is',
+				input: 'RLUSD',
+				expected: mockRlusdCurrencyCode
+			},
+			{ name: 'surrounding whitespace', input: '  RLUSD ', expected: mockRlusdCurrencyCode },
+			{
+				name: 'a 20-character name, which fills all 160 bits',
+				input: 'ABCDEFGHIJKLMNOPQRST',
+				expected: '4142434445464748494A4B4C4D4E4F5051525354'
+			}
+		])('reads $name', ({ input, expected }) => {
+			expect(parseXrpCurrencyCode(input)).toBe(expected);
+		});
+
+		it.each([
+			{ name: 'XRP, the ledger’s own currency', input: 'XRP' },
+			{ name: 'a standard code with an unsupported character', input: 'U-D' },
+			{ name: 'a 40-hex code with a leading zero byte', input: `00${'1'.repeat(38)}` },
+			{ name: '40 characters that are not hex', input: 'G'.repeat(40) },
+			{ name: 'a name longer than 20 characters', input: 'A'.repeat(21) },
+			{ name: 'a name with a character outside printable ASCII', input: 'RLUSÐ' },
+			{ name: 'fewer than 3 characters', input: 'US' },
+			{ name: 'nothing', input: '' }
+		])('refuses $name', ({ input }) => {
+			expect(parseXrpCurrencyCode(input)).toBeUndefined();
+		});
+	});
+
+	describe('xrpIssuerPowers', () => {
+		// RLUSD's issuer, measured: Clawback, DepositAuth, DefaultRipple, DisableMaster, DisallowXRP and
+		// RequireDestTag; not NoFreeze, not RequireAuth, no TransferRate.
+		const RLUSD_ISSUER_FLAGS = 0x819a0000;
+
+		it('lists exactly freeze and clawback for the RLUSD issuer', () => {
+			expect(xrpIssuerPowers({ flags: RLUSD_ISSUER_FLAGS })).toEqual([
+				{ type: 'freeze' },
+				{ type: 'clawback' }
+			]);
+		});
+
+		it('omits freeze once the issuer gave it up', () => {
+			expect(xrpIssuerPowers({ flags: 0x00200000 | 0x00800000 })).toEqual([]);
+		});
+
+		it('states a global freeze in place', () => {
+			expect(xrpIssuerPowers({ flags: 0x00400000 | 0x00800000 })).toEqual([
+				{ type: 'freeze' },
+				{ type: 'global_freeze' }
+			]);
+		});
+
+		it('states that the issuer must approve holders', () => {
+			expect(xrpIssuerPowers({ flags: 0x00200000 | 0x00800000 | 0x00040000 })).toEqual([
+				{ type: 'approval' }
+			]);
+		});
+
+		it('states a transfer fee as a percentage', () => {
+			expect(
+				xrpIssuerPowers({ flags: 0x00200000 | 0x00800000, transferRate: 1_005_000_000 })
+			).toEqual([{ type: 'transfer_fee', percent: 0.5 }]);
+		});
+
+		it('states no transfer fee for a rate of 1', () => {
+			expect(
+				xrpIssuerPowers({ flags: 0x00200000 | 0x00800000, transferRate: 1_000_000_000 })
+			).toEqual([]);
+		});
+
+		it('states that holders cannot send the token to each other without DefaultRipple', () => {
+			expect(xrpIssuerPowers({ flags: 0x00200000 })).toEqual([{ type: 'no_rippling' }]);
 		});
 	});
 });

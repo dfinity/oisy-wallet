@@ -207,6 +207,15 @@ export const modalSolHideTokenData: Readable<NavigationTarget | undefined> = der
 	($modalStore) =>
 		$modalStore?.type === 'sol-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
+export const modalXrpHideToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-hide-token'
+);
+export const modalXrpHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'xrp-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-transaction'

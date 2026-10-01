@@ -11,6 +11,7 @@ import type { Icrc7Token } from '$icp/types/icrc7-token';
 import type { Token } from '$lib/types/token';
 import type { CustomTokenState, TokenToggleable } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
+import type { XrpTrustLineTokenIdentity } from '$xrp/types/xrp-trust-line-token';
 import type { QueryAndUpdateRequestParams } from '@dfinity/utils';
 
 type CustomTokenNetworkKeys = BackendToken extends infer T
@@ -36,6 +37,8 @@ export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
+export type XrpTrustLineSaveCustomToken = XrpTrustLineTokenIdentity;
+
 export type SaveCustomToken = CustomTokenState &
 	(
 		| IcrcSaveCustomToken
@@ -45,6 +48,7 @@ export type SaveCustomToken = CustomTokenState &
 		| Icrc7SaveCustomToken
 		| ErcSaveCustomToken
 		| SplSaveCustomToken
+		| XrpTrustLineSaveCustomToken
 	);
 
 export type SaveCustomTokenWithKey = CustomTokenState &
@@ -56,6 +60,7 @@ export type SaveCustomTokenWithKey = CustomTokenState &
 		| TokenVariant<'Dip721', Dip721SaveCustomToken>
 		| TokenVariant<'IcPunks', IcPunksSaveCustomToken>
 		| TokenVariant<'Icrc7', Icrc7SaveCustomToken>
+		| TokenVariant<'XrpTrustLineMainnet', XrpTrustLineSaveCustomToken>
 	);
 
 export type SaveCustomErcVariant = CustomTokenState &
@@ -65,6 +70,8 @@ export type SaveCustomErc1155Variant = CustomTokenState &
 	TokenVariant<'Erc1155', ErcSaveCustomToken>;
 export type SaveCustomExtVariant = CustomTokenState & TokenVariant<'ExtV2', ExtSaveCustomToken>;
 export type SaveCustomIcrc7Variant = CustomTokenState & TokenVariant<'Icrc7', Icrc7SaveCustomToken>;
+export type SaveCustomXrpTrustLineVariant = CustomTokenState &
+	TokenVariant<'XrpTrustLineMainnet', XrpTrustLineSaveCustomToken>;
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
 

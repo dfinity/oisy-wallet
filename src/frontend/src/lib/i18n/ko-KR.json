@@ -767,6 +767,7 @@
 			"erc721_custom_tokens": "ERC721 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"erc1155_custom_tokens": "ERC1155 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"spl_custom_tokens": "SPL 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
+			"xrp_custom_tokens": "",
 			"erc20_custom_token": "ERC20 트윈 토큰을 활성화하는 중 오류가 발생했습니다.",
 			"icrc_custom_token": "ICRC 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"ext_custom_tokens": "EXT 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
@@ -1499,7 +1500,13 @@
 				"info_ext": "캐니스터 ID는 일반적으로 프로젝트 웹사이트에서 확인할 수 있습니다.",
 				"info_index": "인덱스 캐니스터 ID는 선택 사항이지만, 없으면 $oisy_short이 트랜잭션 내역을 표시할 수 없습니다.",
 				"custom_tokens_not_supported": "선택한 네트워크는 커스텀 토큰을 지원하지 않습니다.",
-				"custom_tokens_not_supported_yet": "OISY는 아직 이 네트워크에서 커스텀 토큰을 지원하지 않습니다."
+				"custom_tokens_not_supported_yet": "OISY는 아직 이 네트워크에서 커스텀 토큰을 지원하지 않습니다.",
+				"xrp_issuer": "",
+				"xrp_currency_code": "",
+				"xrp_issued_by": "",
+				"xrp_issuer_powers": "",
+				"xrp_reserve": "",
+				"xrp_reserve_after": ""
 			},
 			"error": {
 				"loading_metadata": "지정된 주소는 선택한 네트워크에서 유효한 토큰이 아닙니다.",
@@ -1513,10 +1520,28 @@
 				"missing_canister_id": "캐니스터 ID가 없습니다. 값을 입력하셨나요?",
 				"missing_contract_address": "컨트랙트 주소가 없습니다. 값을 입력하셨나요?",
 				"missing_token_address": "토큰 주소가 없습니다. 값을 입력하셨나요?",
-				"no_network": "선택된 네트워크가 없습니다. 이는 예상치 못한 상황입니다."
+				"no_network": "선택된 네트워크가 없습니다. 이는 예상치 못한 상황입니다.",
+				"xrp_invalid_currency_code": "",
+				"xrp_invalid_issuer": "",
+				"xrp_issuer_is_own_address": "",
+				"xrp_issuer_not_found": "",
+				"xrp_issuer_disallows_trust_lines": "",
+				"xrp_account_not_found": "",
+				"xrp_insufficient_fee": "",
+				"xrp_insufficient_reserve": "",
+				"xrp_state_unavailable": ""
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name이 새 토큰을 준비하고 보안을 설정하는 중입니다. 완료될 때까지 이 탭을 닫지 마세요."
+				"do_not_close_manage": "$oisy_name이 새 토큰을 준비하고 보안을 설정하는 중입니다. 완료될 때까지 이 탭을 닫지 마세요.",
+				"xrp_not_listed_token": ""
+			},
+			"xrp_issuer_power": {
+				"freeze": "",
+				"global_freeze": "",
+				"clawback": "",
+				"approval": "",
+				"transfer_fee": "",
+				"no_rippling": ""
 			}
 		},
 		"manage": {
@@ -1563,6 +1588,8 @@
 		"placeholder": {
 			"enter_contract_address": "ERC20 컨트랙트 주소 입력",
 			"enter_token_address": "SPL 토큰 주소 입력",
+			"enter_xrp_issuer": "",
+			"enter_xrp_currency_code": "",
 			"search_token": "토큰 검색"
 		},
 		"warning": {

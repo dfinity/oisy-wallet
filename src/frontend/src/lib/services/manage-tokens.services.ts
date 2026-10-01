@@ -3,6 +3,7 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { SaveErc4626CustomToken } from '$eth/types/erc4626-custom-token';
@@ -40,6 +41,7 @@ import {
 } from '$lib/utils/error.utils';
 import { findEvmNetworkByChainId } from '$lib/utils/network.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+import { xrpTrustLineIdentifier } from '$xrp/utils/xrp-trust-line.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -102,6 +104,10 @@ const mapTokenManageNetwork = <T extends SaveTokensToken>({
 		return SOLANA_DEVNET_NETWORK_ID.description;
 	}
 
+	if (token.networkKey === 'XrpTrustLineMainnet') {
+		return XRP_MAINNET_NETWORK_ID.description;
+	}
+
 	if (
 		token.networkKey !== 'Erc20' &&
 		token.networkKey !== 'Erc721' &&
@@ -130,7 +136,9 @@ const mapTokenManageToken = <T extends SaveTokensToken>({
 				? token.ledgerCanisterId
 				: 'canisterId' in token
 					? token.canisterId
-					: tokenId?.description;
+					: 'currency' in token && 'issuer' in token
+						? xrpTrustLineIdentifier(token)
+						: tokenId?.description;
 
 	const tokenNetwork = mapTokenManageNetwork({ token, network });
 

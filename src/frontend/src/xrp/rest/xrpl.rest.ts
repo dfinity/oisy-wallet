@@ -568,7 +568,7 @@ export const loadXrpAccountInfo = async ({
 		);
 	}
 
-	const { Account, Balance, Sequence, OwnerCount, Flags } = data.account_data;
+	const { Account, Balance, Sequence, OwnerCount, Flags, TransferRate } = data.account_data;
 
 	// The snapshot must be about the account we asked for. Nothing else in the response identifies
 	// it, so without this a stale or misrouted answer — a proxy's mismatched reply, a cached one for
@@ -589,7 +589,13 @@ export const loadXrpAccountInfo = async ({
 		);
 	}
 
-	return { balance: BigInt(Balance), sequence: Sequence, ownerCount: OwnerCount, flags: Flags };
+	return {
+		balance: BigInt(Balance),
+		sequence: Sequence,
+		ownerCount: OwnerCount,
+		flags: Flags,
+		...(nonNullish(TransferRate) && { transferRate: TransferRate })
+	};
 };
 
 /**

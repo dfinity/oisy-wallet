@@ -509,6 +509,7 @@ interface I18nInit {
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
 		spl_custom_tokens: string;
+		xrp_custom_tokens: string;
 		erc20_custom_token: string;
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
@@ -1214,6 +1215,12 @@ interface I18nTokens {
 			info_index: string;
 			custom_tokens_not_supported: string;
 			custom_tokens_not_supported_yet: string;
+			xrp_issuer: string;
+			xrp_currency_code: string;
+			xrp_issued_by: string;
+			xrp_issuer_powers: string;
+			xrp_reserve: string;
+			xrp_reserve_after: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -1228,8 +1235,25 @@ interface I18nTokens {
 			missing_contract_address: string;
 			missing_token_address: string;
 			no_network: string;
+			xrp_invalid_currency_code: string;
+			xrp_invalid_issuer: string;
+			xrp_issuer_is_own_address: string;
+			xrp_issuer_not_found: string;
+			xrp_issuer_disallows_trust_lines: string;
+			xrp_account_not_found: string;
+			xrp_insufficient_fee: string;
+			xrp_insufficient_reserve: string;
+			xrp_state_unavailable: string;
 		};
-		warning: { do_not_close_manage: string };
+		warning: { do_not_close_manage: string; xrp_not_listed_token: string };
+		xrp_issuer_power: {
+			freeze: string;
+			global_freeze: string;
+			clawback: string;
+			approval: string;
+			transfer_fee: string;
+			no_rippling: string;
+		};
 	};
 	manage: {
 		text: {
@@ -1262,6 +1286,8 @@ interface I18nTokens {
 	placeholder: {
 		enter_contract_address: string;
 		enter_token_address: string;
+		enter_xrp_issuer: string;
+		enter_xrp_currency_code: string;
 		search_token: string;
 	};
 	warning: { trust_token: string };

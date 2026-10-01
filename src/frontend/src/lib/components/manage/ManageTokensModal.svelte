@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
@@ -27,6 +27,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import type { XrpTrustLineCustomToken } from '$xrp/types/xrp-trust-line-token';
 
 	interface Props {
 		initialSearch?: string;
@@ -102,7 +103,10 @@
 			tokenData.icPunksCanisterId ??
 			tokenData.icrc7CanisterId ??
 			tokenData.ethContractAddress ??
-			tokenData.splTokenAddress;
+			tokenData.splTokenAddress ??
+			(nonNullish(tokenData.xrpCurrency) && nonNullish(tokenData.xrpIssuer)
+				? `${tokenData.xrpCurrency}.${tokenData.xrpIssuer}`
+				: undefined);
 
 		const tokenNetwork = network?.id.description;
 
@@ -137,6 +141,38 @@
 	let network: Network | undefined = $state(initialModalNetwork());
 	let tokenData: Partial<AddTokenData> = $state(initialModalTokenData());
 
+	// The review reached from a trust-line token's switch goes back to the list, not to a form the
+	// user never filled in.
+	let reviewFromManage = $state(false);
+
+	const onAddXrpTrustLineToken = ({
+		network: tokenNetwork,
+		currency,
+		issuer
+	}: XrpTrustLineCustomToken) => {
+		network = tokenNetwork;
+		tokenData = { xrpCurrency: currency, xrpIssuer: issuer };
+		reviewFromManage = true;
+
+		modal?.set(2);
+	};
+
+	const onReviewBack = () => {
+		if (reviewFromManage) {
+			reviewFromManage = false;
+			tokenData = {};
+			modal?.set(0);
+			return;
+		}
+
+		modal?.back();
+	};
+
+	const onAddToken = () => {
+		reviewFromManage = false;
+		modal?.next();
+	};
+
 	$effect(() => {
 		if (initializedInitialStep || isNullish(initialStep) || isNullish(modal)) {
 			return;
@@ -168,7 +204,7 @@
 				{isNftsPage}
 				modalNext={() => modal?.set(3)}
 				{network}
-				onBack={modal.back}
+				onBack={onReviewBack}
 				onError={() => modal?.set(0)}
 				onSuccess={close}
 				{progress}
@@ -193,7 +229,8 @@
 				{infoElement}
 				{initialSearch}
 				{isNftsPage}
-				onAddToken={modal.next}
+				{onAddToken}
+				{onAddXrpTrustLineToken}
 				onSave={saveTokens}
 				bind:network
 			/>

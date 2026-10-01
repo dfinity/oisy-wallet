@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { XRP_TRUST_LINE_TOKENS_ENABLED } from '$env/xrp-trust-line-tokens.env';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddIcrcTokenForm from '$icp/components/tokens/IcAddIcrcTokenForm.svelte';
 	import IcAddNftForm from '$icp/components/tokens/IcAddNftForm.svelte';
@@ -23,6 +24,7 @@
 		isNetworkIdXrp
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
+	import XrpAddTokenForm from '$xrp/components/tokens/XrpAddTokenForm.svelte';
 
 	interface Props {
 		network?: Network;
@@ -58,8 +60,15 @@
 
 	let isXrpNetwork = $derived(isNetworkIdXrp(network?.id));
 
+	let isXrpImportNetwork = $derived(XRP_TRUST_LINE_TOKENS_ENABLED && isXrpNetwork);
+
 	let unsupportedNetwork = $derived(
-		nonNullish(network) && !isIcpNetwork && !isEthereumNetwork && !isEvmNetwork && !isSolanaNetwork
+		nonNullish(network) &&
+			!isIcpNetwork &&
+			!isEthereumNetwork &&
+			!isEvmNetwork &&
+			!isSolanaNetwork &&
+			!isXrpImportNetwork
 	);
 
 	let {
@@ -70,7 +79,9 @@
 		icPunksCanisterId,
 		icrc7CanisterId,
 		ethContractAddress,
-		splTokenAddress
+		splTokenAddress,
+		xrpCurrency,
+		xrpIssuer
 	} = $derived(tokenData);
 
 	$effect(() => {
@@ -96,6 +107,8 @@
 			tokenData = { ethContractAddress };
 		} else if (isSolanaNetwork) {
 			tokenData = { splTokenAddress };
+		} else if (isXrpImportNetwork) {
+			tokenData = { xrpCurrency, xrpIssuer };
 		} else {
 			tokenData = {};
 		}
@@ -117,6 +130,8 @@
 
 	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
+	let invalidXrp = $derived(isNullishOrEmpty(xrpCurrency) || isNullishOrEmpty(xrpIssuer));
+
 	let invalid = $derived(
 		isIcpNetwork
 			? isNftsPage
@@ -126,7 +141,9 @@
 				? invalidEth
 				: isSolanaNetwork
 					? invalidSpl
-					: true
+					: isXrpImportNetwork
+						? invalidXrp
+						: true
 	);
 
 	let enabledNetworkSelector = $derived(isNullish($selectedNetwork));
@@ -160,6 +177,8 @@
 			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
+		{:else if isXrpImportNetwork}
+			<XrpAddTokenForm bind:currency={xrpCurrency} bind:issuer={xrpIssuer} />
 		{/if}
 
 		<!-- Always in the DOM: a polite live region is announced when its content changes, not when
