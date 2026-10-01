@@ -151,6 +151,22 @@ describe('btc-listener', () => {
 
 			expect(get(btcTransactionsStore)?.[tokenId]).toBe(before);
 		});
+
+		it('should record an empty history when a wallet without transactions first syncs', () => {
+			btcTransactionsStore.clear(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [] }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
+		});
+
+		it('should record an empty history when the first sync after an error has no transactions', () => {
+			btcTransactionsStore.reset(tokenId);
+
+			syncWallet({ data: mockPostMessage({ transactions: [], certified: true }), tokenId });
+
+			expect(get(btcTransactionsStore)?.[tokenId]).toEqual([]);
+		});
 	});
 
 	describe('syncWalletError', () => {
