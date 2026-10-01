@@ -228,6 +228,18 @@ describe('XrpSendAmount', () => {
 			expect(getByText(unfundedMessage)).toBeInTheDocument();
 		});
 
+		// Red Max reads as the amount being over what can be sent, the opposite of this correction.
+		it('keeps Max out of the error colour', async () => {
+			const { container, getByText } = renderAmount({ destinationUnfunded: true });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(getByText(unfundedMessage)).toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+				'text-error-primary'
+			);
+		});
+
 		it('accepts exactly the base reserve', async () => {
 			const { container, queryByText } = renderAmount({ destinationUnfunded: true });
 
@@ -272,6 +284,9 @@ describe('XrpSendAmount', () => {
 
 			expect(getByText(en.send.assertion.insufficient_funds_for_reserve)).toBeInTheDocument();
 			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
 		});
 	});
 

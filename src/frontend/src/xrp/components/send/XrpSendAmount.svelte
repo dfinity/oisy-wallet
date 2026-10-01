@@ -14,7 +14,10 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 	import { XRP_FEE_CONTEXT_KEY, type XrpFeeContext } from '$xrp/stores/xrp-fee.store';
-	import { XrpAmountAssertionError } from '$xrp/types/xrp-send';
+	import {
+		XrpAmountAssertionError,
+		XrpAmountBelowDestinationReserveError
+	} from '$xrp/types/xrp-send';
 
 	interface Props {
 		amount: OptionAmount;
@@ -104,13 +107,19 @@
 		// signing, but only once Send is pressed; this says so where the amount is typed. The send
 		// keeps its own check, because the recipient can be funded in between.
 		if (destinationUnfunded && userAmount < XRP_BASE_RESERVE_DROPS) {
-			return new XrpAmountAssertionError(
+			return new XrpAmountBelowDestinationReserveError(
 				replacePlaceholders($i18n.send.assertion.xrp_destination_unfunded, {
 					$reserve: formatToken({ value: XRP_BASE_RESERVE_DROPS, unitName: $sendTokenDecimals })
 				})
 			);
 		}
 	};
+
+	// Max turns red with an amount error, which reads as the amount being over what can be sent. For
+	// an amount too small to create the recipient that points the wrong way: it has to go up.
+	let maxError = $derived(
+		nonNullish(amountError) && !(amountError instanceof XrpAmountBelowDestinationReserveError)
+	);
 </script>
 
 <div class="mb-4">
@@ -145,7 +154,7 @@
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
-					error={nonNullish(amountError)}
+					error={maxError}
 					fee={unavailable}
 					token={$sendToken}
 					bind:amount
