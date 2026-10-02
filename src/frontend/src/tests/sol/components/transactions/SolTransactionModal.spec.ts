@@ -1,6 +1,7 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
@@ -284,5 +285,33 @@ describe('SolTransactionModal', () => {
 				`Swap ${en.transaction.text.unknown_token} 1 to ${en.transaction.text.unknown_token} 2`
 			)
 		).toBeInTheDocument();
+	});
+
+	describe('likely spam', () => {
+		beforeEach(() => {
+			exchangeStore.set([{ solana: { usd: 150 } }]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('warns about a received transaction worth less than a cent', () => {
+			const { getByText } = render(SolTransactionModal, {
+				transaction: { ...mockSolTransactionUi, type: 'receive', value: 1n },
+				token: SOLANA_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.warning.likely_spam)).toBeInTheDocument();
+		});
+
+		it('does not warn about a received transaction worth more than a cent', () => {
+			const { queryByText } = render(SolTransactionModal, {
+				transaction: { ...mockSolTransactionUi, type: 'receive', value: 1_000_000_000n },
+				token: SOLANA_TOKEN
+			});
+
+			expect(queryByText(get(i18n).transaction.warning.likely_spam)).toBeNull();
+		});
 	});
 });

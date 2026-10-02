@@ -2238,6 +2238,9 @@
 		"error": {
 			"get_block_number": "لا يمكن الحصول على رقم الكتلة.",
 			"failed_get_transaction": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم. يرجى إعادة تحميل تطبيق المحفظة."
+		},
+		"warning": {
+			"likely_spam": ""
 		}
 	},
 	"transactions": {
