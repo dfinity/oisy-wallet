@@ -13,6 +13,11 @@
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import {
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -25,7 +30,11 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkSolana
+	} from '$lib/utils/network.utils';
 	import SolInstructionsList from '$sol/components/transactions/SolInstructionsList.svelte';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { splTokenMetadataStore } from '$sol/stores/spl-token-metadata.store';
@@ -152,7 +161,18 @@
 	// The rent the transaction paid to open token accounts, net of what the ones it closed handed
 	// back, stated apart like the send form does: it is not part of the fee, and folded into a
 	// delta it reads as value lost to the transfer.
-	let ataFee = $derived(solAtaFee(instructions ?? []));
+	// Which of the user's Solana addresses this transaction belongs to. They differ per network -
+	// the derivation path is the network - so a close is only theirs when it names the address of
+	// the network the transaction ran on.
+	let userAddress = $derived(
+		isNetworkIdSOLDevnet(token?.network.id)
+			? $solAddressDevnet
+			: isNetworkIdSOLLocal(token?.network.id)
+				? $solAddressLocal
+				: $solAddressMainnet
+	);
+
+	let ataFee = $derived(solAtaFee({ instructions: instructions ?? [], userAddress }));
 
 	// The venue of a routed swap: the program its legs ran through.
 	let routeProgram = $derived(
@@ -427,7 +447,7 @@
 					<span class="text-tertiary">{$i18n.transaction.text.tab_unavailable}</span>
 				{/if}
 			{:else if nonNullish(token)}
-				<SolInstructionsList instructions={instructions ?? []} {netChanges} {token} />
+				<SolInstructionsList instructions={instructions ?? []} {netChanges} {token} {userAddress} />
 			{/if}
 		</Tabs>
 

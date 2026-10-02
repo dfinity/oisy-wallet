@@ -21,7 +21,13 @@ const STORAGE_PREFIX = 'aut:state:';
 
 export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransactionsStoreData> {
 	init: (principal: Principal) => void;
-	set: (params: { transactions: ActiveUserTransaction[] }) => void;
+	/**
+	 * Marks the start of a load, to pass to `set` as `since` once its snapshot returns. A row written
+	 * locally after this mark survives a snapshot that lacks it: the snapshot was read before the
+	 * write committed, not after the row went away.
+	 */
+	beginLoad: () => number;
+	set: (params: { transactions: ActiveUserTransaction[]; since?: number }) => void;
 	upsert: (params: { transaction: ActiveUserTransaction }) => void;
 	remove: (params: { id: string }) => void;
 	markAllSeen: () => void;
@@ -32,6 +38,11 @@ export interface ActiveUserTransactionsStore extends Readable<ActiveUserTransact
 const initStore = (): ActiveUserTransactionsStore => {
 	const store: Writable<ActiveUserTransactionsStoreData> = writable(undefined);
 	let storageKey: string | undefined;
+
+	// A local write order, so a load can tell a row written after it began from one its snapshot no
+	// longer has. Per row, the sequence number of its last accepted local write.
+	let writeSequence = 0;
+	let lastLocalWrite: Record<string, number> = {};
 
 	const persist = (state: ActiveUserTransactionsLocalState) => {
 		if (isNullish(storageKey)) {
@@ -48,6 +59,7 @@ const initStore = (): ActiveUserTransactionsStore => {
 		}
 
 		storageKey = key;
+		lastLocalWrite = {};
 
 		const persisted = storageGet<Partial<ActiveUserTransactionsLocalState>>({ key }) ?? {};
 
@@ -58,7 +70,13 @@ const initStore = (): ActiveUserTransactionsStore => {
 		});
 	};
 
-	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions }) => {
+	const beginLoad: ActiveUserTransactionsStore['beginLoad'] = () => writeSequence;
+
+	// Merges rather than replaces. A load reads its snapshot asynchronously, and a create or update
+	// that commits while the read is in flight is already in the store by the time the snapshot lands
+	// — replacing wholesale erased it, and a row gone from the store is a row the poller never
+	// resolves.
+	const setAll: ActiveUserTransactionsStore['set'] = ({ transactions, since }) => {
 		store.update((current) => {
 			if (isNullish(current)) {
 				return current;
@@ -66,9 +84,27 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 			const data: Record<string, ActiveUserTransaction> = {};
 
+			// The newer copy wins, by the rule `upsert` applies: a local row newer than the snapshot's
+			// is a write that landed after the snapshot was read.
 			for (const tx of transactions) {
-				data[tx.id] = tx;
+				const local = current.data[tx.id];
+
+				data[tx.id] = nonNullish(local) && local.updated_at_ns > tx.updated_at_ns ? local : tx;
 			}
+
+			// A row the snapshot lacks is gone — deleted elsewhere, or pruned — unless it was written
+			// locally after this load began, in which case the snapshot is simply older than it.
+			if (nonNullish(since)) {
+				for (const [id, local] of Object.entries(current.data)) {
+					if (!(id in data) && (lastLocalWrite[id] ?? 0) > since) {
+						data[id] = local;
+					}
+				}
+			}
+
+			lastLocalWrite = Object.fromEntries(
+				Object.entries(lastLocalWrite).filter(([id]) => id in data)
+			);
 
 			const lastSeenUpdatedAtNs: Record<string, string> = {};
 			const terminalSideEffectsApplied: Record<string, true> = {};
@@ -110,6 +146,9 @@ const initStore = (): ActiveUserTransactionsStore => {
 				return current;
 			}
 
+			writeSequence += 1;
+			lastLocalWrite = { ...lastLocalWrite, [transaction.id]: writeSequence };
+
 			return {
 				...current,
 				data: { ...current.data, [transaction.id]: transaction }
@@ -124,6 +163,8 @@ const initStore = (): ActiveUserTransactionsStore => {
 			}
 
 			const { [id]: _removedTx, ...data } = current.data;
+			const { [id]: _removedWrite, ...remainingWrites } = lastLocalWrite;
+			lastLocalWrite = remainingWrites;
 			const { [id]: _removedSeen, ...lastSeenUpdatedAtNs } = current.lastSeenUpdatedAtNs;
 			const { [id]: _removedApplied, ...terminalSideEffectsApplied } =
 				current.terminalSideEffectsApplied;
@@ -197,12 +238,14 @@ const initStore = (): ActiveUserTransactionsStore => {
 
 	const reset: ActiveUserTransactionsStore['reset'] = () => {
 		storageKey = undefined;
+		lastLocalWrite = {};
 		store.set(undefined);
 	};
 
 	return {
 		subscribe: store.subscribe,
 		init,
+		beginLoad,
 		set: setAll,
 		upsert,
 		remove,

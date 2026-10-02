@@ -1,5 +1,6 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
 import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
+import { TCYCLES_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
@@ -35,11 +36,15 @@ import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import {
 	buildErc20PriceParams,
+	currencyExchangeRateFromBtc,
 	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
 	findMissingSplTokenAddresses,
+	isTcyclesLedgerCanisterId,
 	mergeExchangePrices,
-	type ProviderFallbackPrices
+	type ProviderFallbackPrices,
+	xdrBasketStatus,
+	xdrUsdPrice
 } from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -255,11 +260,10 @@ const syncExchangeFromProviders = async ({
 	);
 
 	const results = await Promise.allSettled([
-		exchangeRateUsdToCurrency(currentCurrency),
 		exchangeRateETHToUsd(),
-		exchangeRateBTCToUsd(),
+		exchangeRateBTCToUsd(currentCurrency),
 		exchangeRateICPToUsd(),
-		exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+		exchangeRateICRCToUsd(icrcLedgerCanisterIds.filter((id) => !isTcyclesLedgerCanisterId(id))),
 		exchangeRateSOLToUsd(),
 		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
@@ -274,7 +278,6 @@ const syncExchangeFromProviders = async ({
 	});
 
 	const [
-		currentExchangeRateResult,
 		currentEthPriceResult,
 		currentBtcPriceResult,
 		currentIcpPriceResult,
@@ -286,12 +289,15 @@ const syncExchangeFromProviders = async ({
 		currentPolPriceResult
 	] = results;
 
-	const currentExchangeRate =
-		currentExchangeRateResult.status === 'fulfilled' ? currentExchangeRateResult.value : undefined;
 	const currentEthPrice =
 		currentEthPriceResult.status === 'fulfilled' ? currentEthPriceResult.value : undefined;
 	const currentBtcPrice =
 		currentBtcPriceResult.status === 'fulfilled' ? currentBtcPriceResult.value : undefined;
+	// The display currency's rate comes from the same BTC request as BTC's own price.
+	const currentExchangeRate = currencyExchangeRateFromBtc({
+		btcPrice: currentBtcPrice?.bitcoin,
+		currency: currentCurrency
+	});
 	const currentIcpPrice =
 		currentIcpPriceResult.status === 'fulfilled' ? currentIcpPriceResult.value : undefined;
 	const currentIcrcPrices =
@@ -312,6 +318,16 @@ const syncExchangeFromProviders = async ({
 		erc4626TokensExchangeData
 	});
 
+	// TCYCLES costs no request of its own, so it is priced whether or not it is enabled: the swap
+	// flow lists disabled tokens too. Once the basket has expired, it has no price rather than a
+	// wrong one. Only a refresh that includes TCYCLES reports on the basket's countdown.
+	const xdrBasket = xdrBasketStatus(Date.now());
+	const tcyclesPrice =
+		xdrBasket?.phase !== 'expired' ? xdrUsdPrice(currentBtcPrice?.bitcoin) : undefined;
+	const currentXdrBasketStatus = icrcLedgerCanisterIds.some(isTcyclesLedgerCanisterId)
+		? xdrBasket
+		: undefined;
+
 	return {
 		currentExchangeRate: {
 			exchangeRateToUsd: currentExchangeRate?.rate ?? null,
@@ -322,7 +338,10 @@ const syncExchangeFromProviders = async ({
 		currentBtcPrice,
 		currentErc20Prices,
 		currentIcpPrice,
-		currentIcrcPrices: currentIcrcPrices ?? {},
+		currentIcrcPrices: {
+			...currentIcrcPrices,
+			...(nonNullish(tcyclesPrice) && { [TCYCLES_LEDGER_CANISTER_ID]: tcyclesPrice })
+		},
 		currentSolPrice,
 		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
@@ -330,7 +349,8 @@ const syncExchangeFromProviders = async ({
 		currentBnbPrice,
 		currentPolPrice,
 		currentArbitrumEthPrice: currentEthPrice,
-		currentBaseEthPrice: currentEthPrice
+		currentBaseEthPrice: currentEthPrice,
+		...(nonNullish(currentXdrBasketStatus) && { currentXdrBasketStatus })
 	};
 };
 
@@ -351,7 +371,9 @@ const fetchProviderFallbackPrices = async ({
 		coingeckoResponse: backendData.currentErc20Prices
 	});
 	const missingIcrc = findMissingLedgerCanisterIds({
-		allLedgerCanisterIds: params.icrcLedgerCanisterIds,
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds.filter(
+			(id) => !isTcyclesLedgerCanisterId(id)
+		),
 		coingeckoResponse: backendData.currentIcrcPrices
 	});
 	const missingSpl = findMissingSplTokenAddresses({

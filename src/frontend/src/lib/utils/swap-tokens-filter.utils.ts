@@ -14,6 +14,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isTokenSolanaNative } from '$sol/utils/token.utils';
+import { isTokenXrpNative } from '$xrp/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const determineCoverage = ({
@@ -114,6 +115,15 @@ export const resolveSwapTokenLookup = ({
 			category: 'btc'
 		};
 	}
+
+	// Native XRP has no contract address either, so it is keyed the same way.
+	if (isTokenXrpNative(token)) {
+		return {
+			info: supportedData?.xrp,
+			identifier: nativeSwapTokenIdentifier({ networkId: token.network.id, symbol: token.symbol }),
+			category: 'xrp'
+		};
+	}
 };
 
 /**
@@ -203,7 +213,8 @@ export const computeReceiveSupportedTokens = ({
 		icp: { total: 0, withList: 0, ids: new Set() },
 		evm: { total: 0, withList: 0, ids: new Set() },
 		sol: { total: 0, withList: 0, ids: new Set() },
-		btc: { total: 0, withList: 0, ids: new Set() }
+		btc: { total: 0, withList: 0, ids: new Set() },
+		xrp: { total: 0, withList: 0, ids: new Set() }
 	};
 
 	const findProviderSourceTokens = ({
@@ -241,7 +252,8 @@ export const computeReceiveSupportedTokens = ({
 		icp: toInfo(accum.icp),
 		evm: toInfo(accum.evm),
 		sol: toInfo(accum.sol),
-		btc: toInfo(accum.btc)
+		btc: toInfo(accum.btc),
+		xrp: toInfo(accum.xrp)
 	};
 };
 

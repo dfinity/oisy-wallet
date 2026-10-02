@@ -9,6 +9,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
 import { toBackendTokenId, tokenIdKey } from '$lib/utils/token-id.utils';
@@ -144,6 +145,13 @@ describe('token-id.utils', () => {
 		it('maps native Bitcoin by network', () => {
 			expect(toBackendTokenId(BTC_MAINNET_TOKEN)).toEqual({ BtcNativeMainnet: null });
 			expect(toBackendTokenId(BTC_TESTNET_TOKEN)).toEqual({ BtcNativeTestnet: null });
+		});
+
+		// The XRP in-flight record needs this mapping: the row it opens is what
+		// refuses a second payment while the first is unresolved, and a token with
+		// no backend identity cannot be recorded at all.
+		it('maps native XRP on mainnet', () => {
+			expect(toBackendTokenId(XRP_TOKEN)).toEqual({ XrpNativeMainnet: null });
 		});
 
 		// Bitcoin regtest is a local-development network with no `TokenId` variant
