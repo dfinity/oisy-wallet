@@ -265,6 +265,14 @@ export const idlFactory = ({ IDL }) => {
 		Erc4626: IDL.Tuple(IDL.Text, IDL.Nat64),
 		Dip721: IDL.Principal
 	});
+	const XrpData = IDL.Record({
+		destination_address: IDL.Text,
+		fee: IDL.Nat,
+		token: TokenId,
+		destination_tag: IDL.Opt(IDL.Nat32),
+		source_address: IDL.Text,
+		amount: IDL.Nat
+	});
 	const OneSecEvmToIcpData = IDL.Record({
 		recipient_principal: IDL.Principal,
 		source_token: TokenId,
@@ -285,6 +293,13 @@ export const idlFactory = ({ IDL }) => {
 		dest_token: TokenId
 	});
 	const NearIntentsData = IDL.Record({
+		source_address: IDL.Opt(IDL.Text),
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
+	const CyclesMintData = IDL.Record({
+		transfer_created_at_ns: IDL.Nat64,
 		source_token: TokenId,
 		amount: IDL.Nat,
 		dest_token: TokenId
@@ -326,10 +341,12 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat
 	});
 	const ActiveUserTransactionData = IDL.Variant({
+		Xrp: XrpData,
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		OisyTrade: OisyTradeData,
 		NearIntents: NearIntentsData,
+		CyclesMint: CyclesMintData,
 		ChainFusion: ChainFusionData,
 		Velora: VeloraData,
 		Liquidium: LiquidiumData
@@ -362,6 +379,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ActiveUserTransactionError = IDL.Variant({
 		InvalidId: IDL.Null,
+		AlreadyInFlight: IDL.Null,
 		NotFound: IDL.Null,
 		TooManyActiveTransactions: IDL.Null,
 		InvalidData: IDL.Text,
@@ -405,6 +423,7 @@ export const idlFactory = ({ IDL }) => {
 		Btc: BtcAddress,
 		Eth: EthAddress,
 		Sol: IDL.Text,
+		Xrp: IDL.Text,
 		Icrcv2: Icrcv2AccountId
 	});
 	const ContactAddressData = IDL.Record({

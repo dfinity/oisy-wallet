@@ -86,7 +86,6 @@ export enum ProgressStepsSendXrp {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	SEND = 'send',
-	CONFIRM = 'confirm',
 	RELOAD = 'reload',
 	DONE = 'done'
 }
@@ -205,5 +204,13 @@ export enum ProgressStepsTip {
 	RESERVE = 'reserve',
 	CREATE = 'create',
 	SAVE = 'save',
+	DONE = 'done'
+}
+
+// Minting TCYCLES: the ICP transfer to the CMC, then the notify that mints.
+export enum ProgressStepsCyclesMint {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	MINT = 'mint',
 	DONE = 'done'
 }

@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
@@ -19,6 +20,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import * as xrplRest from '$xrp/rest/xrpl.rest';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { readable, writable } from 'svelte/store';
@@ -201,6 +203,40 @@ describe('SwapTokenWizard', () => {
 		});
 
 		expect(container.querySelector('[data-tid="swap-btc-form-send-warnings"]')).toBeInTheDocument();
+	});
+
+	// The fee context is the XRP wizard's own, so its node call is what shows the dispatch landed there
+	// rather than in the EVM wizard the XRP source would otherwise fall through to.
+	it('should render the XRP wizard when sourceToken is on the XRP network', async () => {
+		const feeSpy = vi.spyOn(xrplRest, 'loadXrpOpenLedgerFee').mockResolvedValue(12n);
+		vi.spyOn(xrplRest, 'loadXrpAccountInfo').mockResolvedValue({
+			balance: 50_000_000n,
+			sequence: 7,
+			ownerCount: 0,
+			flags: 0
+		});
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockResolvedValue([]);
+
+		const xrpToken = { ...XRP_TOKEN, enabled: true };
+
+		const xrpMockContext = new Map(mockContext);
+		xrpMockContext.set(SWAP_CONTEXT_KEY, {
+			...initSwapContext({ sourceToken: xrpToken, destinationToken: ETHEREUM_TOKEN }),
+			sourceTokenExchangeRate: readable(2),
+			destinationTokenExchangeRate: readable(2000)
+		});
+
+		render(SwapTokenWizard, {
+			props: {
+				...defaultProps,
+				currentStep: { name: WizardStepsSwap.SWAP, title: 'Swap' }
+			},
+			context: xrpMockContext
+		});
+
+		await tick();
+
+		expect(feeSpy).toHaveBeenCalled();
 	});
 
 	describe('pause during review step', () => {

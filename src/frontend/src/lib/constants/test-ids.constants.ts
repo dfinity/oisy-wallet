@@ -137,7 +137,36 @@ export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
 export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
+export const NAVIGATION_ITEM_HELP = 'navigation-item-help';
+
+export const HELP_SUPPORT_CARD = 'help-support-card';
+export const HELP_SUPPORT_LINK = 'help-support-link';
+export const HELP_NETWORK_EXPLORERS_CARD = 'help-network-explorers-card';
+export const HELP_NETWORK_EXPLORERS_LINK = 'help-network-explorers-link';
+export const HELP_EXPLORERS_CARD = 'help-explorers-card';
+export const HELP_EXPLORERS_GROUP = 'help-explorers-group';
+export const HELP_EXPLORERS_LINK = 'help-explorers-link';
+export const HELP_ICPSWAP_CARD = 'help-icpswap-card';
+export const HELP_ICPSWAP_TOKEN_A = 'help-icpswap-token-a';
+export const HELP_ICPSWAP_TOKEN_B = 'help-icpswap-token-b';
+export const HELP_ICPSWAP_LOADING = 'help-icpswap-loading';
+export const HELP_ICPSWAP_NO_TOKENS = 'help-icpswap-no-tokens';
+export const HELP_ICPSWAP_ERROR = 'help-icpswap-error';
+export const HELP_ICPSWAP_EMPTY = 'help-icpswap-empty';
+export const HELP_ICPSWAP_SCAN_BUTTON = 'help-icpswap-scan';
+export const HELP_ICPSWAP_SCAN_SUMMARY = 'help-icpswap-scan-summary';
+export const HELP_ICPSWAP_POOL_GROUP = 'help-icpswap-pool';
+export const HELP_ICPSWAP_RESULTS_SUMMARY = 'help-icpswap-results-summary';
+export const HELP_ICPSWAP_WITHDRAW_BUTTON = 'help-icpswap-withdraw';
+
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_MORE_MENU_BUTTON = 'navigation-more-menu-button';
+export const NAVIGATION_MORE_MENU = 'navigation-more-menu';
+export const NAVIGATION_MORE_MENU_HELP = 'navigation-more-menu-help';
+export const NAVIGATION_MORE_MENU_DOCUMENTATION = 'navigation-more-menu-documentation';
+export const NAVIGATION_MORE_MENU_FAQ = 'navigation-more-menu-faq';
+export const NAVIGATION_MORE_MENU_SOURCE_CODE = 'navigation-more-menu-source-code';
+export const NAVIGATION_MORE_MENU_X = 'navigation-more-menu-x';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
@@ -146,6 +175,8 @@ export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
 export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
 
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
+export const SIDEBAR_NAVIGATION_MENU_SCROLL = 'sidebar-navigation-menu-scroll';
+export const SIDEBAR_NAVIGATION_MENU_BOTTOM = 'sidebar-navigation-menu-bottom';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
@@ -171,6 +202,9 @@ export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
 export const TOKEN_MENU_SOL = 'token-menu-sol';
 export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
 export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
+export const TOKEN_MENU_XRP = 'token-menu-xrp';
+export const TOKEN_MENU_XRP_BUTTON = 'token-menu-xrp-button';
+export const TOKEN_MENU_XRP_EXPLORER_LINK = 'xrp-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
@@ -262,6 +296,14 @@ export const TRANSACTIONS_FILTER_CLEAR_BUTTON = 'transactions-filter-clear-butto
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
 export const ETH_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
+
+export const CYCLES_MINT_BUTTON = 'cycles-mint-button';
+export const CYCLES_MINT_FORM = 'cycles-mint-form';
+export const CYCLES_MINT_FORM_REVIEW_BUTTON = 'cycles-mint-form-review-button';
+export const CYCLES_MINT_REVIEW = 'cycles-mint-review';
+export const CYCLES_MINT_REVIEW_BACK_BUTTON = 'cycles-mint-review-back-button';
+export const CYCLES_MINT_REVIEW_MINT_BUTTON = 'cycles-mint-review-mint-button';
+export const CYCLES_MINT_RATE = 'cycles-mint-rate';
 
 export const HELP_AUTH_IMAGE_BANNER = 'help-auth-image-banner';
 export const HELP_AUTH_NEW_IDENTITY_VERSION_BUTTON = 'help-auth-new-identity-version-button';

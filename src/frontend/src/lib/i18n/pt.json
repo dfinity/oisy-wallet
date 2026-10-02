@@ -132,6 +132,9 @@
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "Código-fonte no GitHub",
+			"x": "",
+			"help": "Ajuda",
+			"faq": "",
 			"view_on_explorer": "Ver no explorador",
 			"source_code": "Código-fonte",
 			"documentation": "Documentação",
@@ -163,7 +166,10 @@
 			"menu": "Seu endereço de carteira, configurações, sair e links externos",
 			"documentation": "Abrir a documentação de $oisy_name",
 			"support": "Abrir a seção de Suporte da documentação de $oisy_name",
+			"help_page": "Abrir a página de ajuda",
 			"open_twitter": "Abrir o feed DFINITY X/Twitter",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "Gerar um link de convite",
 			"binance_qr_code": "Gerar um link do Binance Clubhouse",
 			"refer_a_friend": "Gerar um link de referência para um amigo",
@@ -788,6 +794,60 @@
 			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "Ajuda",
+			"support_title": "Suporte",
+			"support_description": "Encontre respostas e mais informações na página de suporte da documentação do $oisy_name, ou fale com a equipe se você travar.",
+			"support_link": "Ir para nossa página de suporte",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "Saque de tokens do ICPSwap",
+			"icpswap_description": "Em um swap no ICPSwap seus tokens passam por um pool antes de voltarem para você. Se essa última etapa falhou, os tokens continuam sendo seus e continuam no pool. O $oisy_name pode procurá-los e devolvê-los.",
+			"scan": "Verificar meus pools",
+			"scanning": "Verificando seus pools…",
+			"scan_hint": "Verifica todos os pools entre dois tokens ativos na sua wallet. Se você fez swap para um token que nunca ativou, ative-o primeiro e depois verifique novamente ou informe o par abaixo.",
+			"scan_nothing_found": "Nada ficou para trás nos $pools pools verificados.",
+			"scan_unreadable": "Não foi possível ler $unreadable dos $pools pools. Tente novamente ou informe o par abaixo.",
+			"or_pick_a_pair": "Ou informe um par",
+			"token_first": "Primeiro token",
+			"token_second": "Segundo token",
+			"select_token": "Selecionar",
+			"no_tokens": "Só é possível escolher ICP. Ative primeiro o token que falta no pool, ou os dois se o pool não incluir ICP.",
+			"checking_pool": "Verificando o pool…",
+			"nothing_to_withdraw": "Nada a sacar neste pool.",
+			"results_found": "Saldos sacáveis encontrados: $balances.",
+			"balance_unused": "Saldo não utilizado",
+			"withdraw": "Sacar"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "Selecionar o primeiro token do pool",
+			"select_token_second": "Selecionar o segundo token do pool",
+			"withdraw": "Sacar $symbol do pool",
+			"scan": "Verificar os pools entre seus tokens ativos"
+		},
+		"error": {
+			"pool_not_found": "Não foi possível encontrar um pool para este par. Confira os dois tokens ou tente novamente em instantes.",
+			"load_failed": "Não foi possível ler seus saldos neste pool.",
+			"withdraw_failed": "O saque falhou.",
+			"scan_failed": "Não foi possível obter a lista de pools do ICPSwap."
+		},
+		"success": {
+			"withdraw": "$amount $symbol sacados do pool.",
+			"withdraw_hidden": "$symbol sacado do pool."
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Configurações",
@@ -950,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Enviar",
+			"xrp_sent": "Seu pagamento XRP foi concluído.",
+			"xrp_submitted": "Pagamento enviado. Normalmente é liquidado em segundos — você pode fechar isto e continuar.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Destino",
@@ -970,7 +1032,7 @@
 			"network": "Rede",
 			"source_network": "Rede de origem",
 			"destination_network": "Rede de destino",
-			"xrp_destination_tag": "Tag de destino",
+			"xrp_destination_tag": "Tag de destino XRP",
 			"initializing_transaction": "Inicializando transação",
 			"convert_to_native_icp": "Converter para ICP nativo",
 			"open_qr_modal": "Iniciar scan de código QR para detalhes da transação",
@@ -993,8 +1055,7 @@
 			"enter_eth_address": "Insira endereço público (0x), nome ou alias",
 			"enter_recipient_address": "Insira o endereço do destinatário, nome ou alias",
 			"enter_wallet_address": "Insira o endereço da carteira, nome ou alias",
-			"enter_xrp_address": "Insira o endereço XRP",
-			"xrp_destination_tag": "Insira a tag de destino (opcional)",
+			"xrp_destination_tag": "Insira a tag de destino XRP (opcional)",
 			"select_network": "Selecionar rede",
 			"search_nfts": ""
 		},
@@ -1005,6 +1066,8 @@
 			"no_available_utxos": "Você não terá UTXOs disponíveis para realizar esta transação.",
 			"first_time_destination": "Parece que você nunca enviou tokens para este endereço. Verifique o endereço com atenção.",
 			"first_time_destination_confirm": "Esta é a primeira vez que envio tokens para este endereço e verifiquei o endereço com atenção.",
+			"xrp_destination_tag_hint": "Exigida pela maioria das exchanges. Se você a deixar vazia, pode perder seus fundos.",
+			"xrp_destination_tag_missing": "Sem tag de destino XRP. Se estiver enviando para uma exchange, verifique se ela exige uma; caso contrário, você pode perder seus fundos.",
 			"fee_expired": "",
 			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!",
@@ -1023,7 +1086,7 @@
 			"unknown_cketh": "O token ckETH não pode ser recuperado.",
 			"destination_address_invalid": "Endereço de destino inválido.",
 			"amount_invalid": "Valor inválido.",
-			"xrp_destination_tag_invalid": "A tag de destino deve ser um número inteiro entre 0 e 4294967295.",
+			"xrp_destination_tag_invalid": "A tag de destino XRP deve ser um número inteiro entre 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Fundos insuficientes: o valor deve deixar o suficiente para cobrir a taxa e a reserva de conta XRP exigida.",
 			"insufficient_funds_for_gas": "Fundos insuficientes para gás",
@@ -1061,8 +1124,6 @@
 			"no_btc_network_id": "A rede atual ($networkId) não é uma rede Bitcoin.",
 			"no_solana_network_id": "A rede atual ($networkId) não é uma rede Solana.",
 			"no_xrp_network_id": "A rede atual ($networkId) não é uma rede XRP Ledger.",
-			"xrp_confirmation_failed": "Não conseguimos confirmar se a transação foi enviada. Ela ainda pode ser concluída, portanto não a envie novamente por agora — seu saldo será atualizado se ela for concluída.",
-			"xrp_transaction_failed": "A transação foi processada pela rede, mas falhou, portanto seus fundos não foram enviados. A taxa de rede foi cobrada.",
 			"no_pending_bitcoin_transaction": "Ocorreu um erro ao carregar as transações Bitcoin pendentes. Por favor, tente novamente mais tarde.",
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
@@ -1073,19 +1134,22 @@
 			"solana_insufficient_funds_for_fee": "O seu saldo de SOL não é suficiente para cobrir as taxas de transação.",
 			"solana_insufficient_funds_for_rent": "O seu saldo de SOL não é suficiente para cobrir o aluguel necessário para a criação da conta.",
 			"fee_calc_unsupported_standard": "Não foi possível calcular a taxa pois o padrão de token fornecido não é suportado.",
-			"xrp_send_expired": "A transação não foi enviada: a rede não a incluiu em tempo. Nada saiu da sua carteira e é seguro criar uma nova.",
+			"xrp_send_expired": "Seu envio de $amount $symbol em $network não foi concluído: a rede não o incluiu em tempo. Nada saiu da sua carteira e é seguro enviar novamente.",
+			"xrp_send_already_in_flight": "Um pagamento XRP anterior deste endereço ainda não foi liquidado. Nada foi enviado — aguarde a conclusão, o que leva cerca de um minuto, e envie novamente.",
+			"xrp_send_not_guarded": "Não conseguimos verificar se um pagamento XRP anterior ainda está sendo liquidado. Nada foi enviado — tente novamente em um momento.",
+			"xrp_active_transaction_failed": "Seu envio de $amount $symbol em $network foi processado pela rede, mas falhou ($result), portanto seus fundos não foram enviados. A taxa de rede foi cobrada.",
 			"xrp_amount_exceeds_sendable": "O valor já não cabe. Sua conta precisa manter a reserva de XRP mais a taxa de rede, e ambas podem mudar enquanto você confere. Nada foi enviado — reduza o valor ou tente novamente quando os dados da conta forem atualizados.",
 			"xrp_destination_unfunded": "Este endereço ainda não tem uma conta XRP. Criá-la exige um primeiro pagamento de pelo menos $reserve XRP. Nada foi enviado — aumente o valor ou envie para um endereço que já esteja ativado.",
-			"xrp_destination_tag_required": "Este endereço exige uma tag de destino. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
+			"xrp_destination_tag_required": "Este endereço exige uma tag de destino XRP. Nada foi enviado — adicione a tag fornecida pelo serviço que você está pagando e envie novamente.",
 			"xrp_destination_is_source": "Este é o seu próprio endereço XRP. Nada foi enviado — escolha outro destinatário.",
 			"xrp_account_state_unavailable": "A carteira não conseguiu ler os dados da sua conta, portanto o valor não pôde ser verificado. Nada foi enviado — tente novamente em instantes."
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Cunhar",
+			"minting": "Cunhando...",
+			"mint_review_subtitle": "Você cunha"
 		}
 	},
 	"burn": {
@@ -1093,6 +1157,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Cunhar $token",
+			"description": "A cunhagem cria novos $destinationToken a partir de $sourceToken à taxa da rede e queima os $sourceToken.",
+			"you_mint_estimate": "Você cunha (estimativa)",
+			"rate": "Taxa",
+			"cycles_ledger_fee": "Taxa do Cycles Ledger",
+			"minter": "Cunhado por",
+			"one_way": "A cunhagem não pode ser desfeita: os $destinationToken não podem ser convertidos de volta em $sourceToken.",
+			"sending": "Enviando $token para o $minter...",
+			"minting": "Cunhando $token...",
+			"minted": "$amount $token cunhados.",
+			"pending": "A cunhagem está demorando mais do que o normal. Ela será concluída em segundo plano: acompanhe-a nas transações ativas."
+		},
+		"error": {
+			"rate_unavailable": "Não foi possível carregar a taxa de $token. Tente novamente mais tarde.",
+			"amount_too_small": "O valor é pequeno demais para cunhar $token.",
+			"refunded": "A cunhagem foi reembolsada. Seus $token foram devolvidos, menos $refundFee $token. Motivo: $reason",
+			"refunded_nothing": "A cunhagem foi reembolsada, mas as taxas consumiram todo o valor: nenhum $token foi devolvido. Motivo: $reason",
+			"failed": "A cunhagem falhou. Motivo: $reason",
+			"not_started": "Não foi possível iniciar a cunhagem. Nada foi enviado, tente novamente.",
+			"transfer_failed": "A transferência de $token falhou. Nada foi enviado.",
+			"unconfirmed": "Não foi possível confirmar a transferência de $token. Se ela foi concluída, a cunhagem terminará em segundo plano: acompanhe-a nas transações ativas."
 		}
 	},
 	"active_user_transactions": {
@@ -1409,7 +1498,8 @@
 				"info": "Os IDs dos canisters Ledger e Index geralmente estão disponíveis no site do projeto.",
 				"info_ext": "",
 				"info_index": "O ID do canister Index é opcional, mas sem ele, $oisy_short não pode exibir o histórico de transações.",
-				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
+				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados.",
+				"custom_tokens_not_supported_yet": "A OISY ainda não suporta tokens personalizados nesta rede."
 			},
 			"error": {
 				"loading_metadata": "O endereço fornecido não corresponde a um token válido na rede selecionada.",
@@ -1505,7 +1595,11 @@
 			"crypto": "Criptomoedas",
 			"stablecoin": "Stablecoins",
 			"stock": "Ações",
-			"commodity": "Commodities"
+			"commodity": "Commodities",
+			"compute": "Computação"
+		},
+		"category_in_sentence": {
+			"compute": "tokens de computação"
 		},
 		"risk": {
 			"low": "Risco baixo",
@@ -1668,6 +1762,7 @@
 			"unreviewed_instructions": "OISY não consegue decodificar algumas dessas instruções, portanto a revisão abaixo pode estar incompleta.",
 			"unreviewed_instructions_simulated": "Esta transação contém operações de uma fonte externa que OISY não consegue decodificar, portanto a OISY executou uma simulação dela. Certifique-se de confiar na aplicação e revise as alterações de saldo simuladas e as operações antes de assinar. Observe que o resultado real pode ser diferente da simulação.",
 			"cannot_be_shown": "Esta transação inclui ações que não podem ser todas mostradas com precisão para revisão, por isso a OISY não a irá assinar. Rejeite-a e peça à aplicação um pedido mais simples.",
+			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, a OISY não a assina.",
 			"simulated_instructions": "Instruções simuladas",
 			"multiple_operations": "Esta transação contém várias operações que afetam sua carteira. Verifique as alterações de saldo simuladas e as instruções contidas, e aprove esta transação somente se também confiar na aplicação.",
 			"simulated_review": "A revisão abaixo é o que a simulação desta transação prevê em relação ao estado atual da rede. O que acontece na execução real pode ser diferente.",
@@ -1777,6 +1872,7 @@
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
+			"close_pays_others": "Esta transação encerra uma das suas contas de tokens e envia o saldo dela para um endereço que não é a sua carteira. Para a sua segurança, não foi assinada.",
 			"unreviewed_without_simulation": "A OISY não conseguiu ler parte desta transação e a rede também não devolveu uma simulação, por isso nada descreve o que essa parte faria. Para a sua segurança, não foi assinada.",
 			"sol_transaction_as_message": "Esta mensagem é uma transação Solana, que só pode ser aprovada por meio de uma revisão de transação. Por sua segurança, ela não foi assinada.",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
@@ -2055,9 +2151,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Desempacotar e encerrar a conta de tokens de $symbol",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Encerrar a conta de tokens de $symbol",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2069,8 +2166,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "Saldo de SOL devolvido à sua carteira",
+			"instruction_balance_sent": "Saldo de SOL enviado para a sua carteira",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL enviados para a sua carteira",
+			"instruction_returned_to": "$amount SOL para",
+			"instruction_balance_returned_to": "Saldo de SOL para",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Status",
@@ -2305,7 +2406,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Novo endereço",
@@ -2552,6 +2654,8 @@
 			"transaction_fee": "Taxa de transação",
 			"insufficient_funds_for_fee": "Saldo insuficiente para cobrir o montante e as taxas.",
 			"supply_prices_unavailable": "Os preços estão temporariamente indisponíveis. O fornecimento está desativado até serem carregados.",
+			"minimum_supply": "Fornecimento mínimo",
+			"supply_below_minimum": "O valor está abaixo do fornecimento mínimo.",
 			"borrow_review": "Rever empréstimo",
 			"borrow_review_subtitle": "Pedes emprestado",
 			"borrowing": "A pedir empréstimo",
@@ -2565,6 +2669,7 @@
 			"funds_delivered_to": "Fundos enviados para",
 			"your_oisy_address": "O teu endereço $oisy_short",
 			"borrow_risk_info": "Pedir emprestado reduz o teu fator de saúde. Se cair demasiado, a tua garantia pode ser liquidada.",
+			"borrow_activation_fee_info": "A Liquidium acrescenta uma taxa de ativação de $fee% ao montante emprestado.",
 			"borrow_at_risk_warning": "Este empréstimo reduz notavelmente o teu fator de saúde.",
 			"borrow_exceeds_power": "O montante excede a tua capacidade de empréstimo.",
 			"borrow_below_minimum": "O montante está abaixo do empréstimo mínimo.",
