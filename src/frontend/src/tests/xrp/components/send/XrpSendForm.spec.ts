@@ -1,14 +1,22 @@
 import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import XrpSendForm from '$xrp/components/send/XrpSendForm.svelte';
+import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
+import * as xrpDestinationServices from '$xrp/services/xrp-destination.services';
 import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
 	initReserveStore,
 	initXrpFeeContext
 } from '$xrp/stores/xrp-fee.store';
+import { XrpNetworks } from '$xrp/types/network';
+import type { XrpDestinationFacts } from '$xrp/types/xrp-send';
 import { getXrpReserveDrops } from '$xrp/utils/xrp-send.utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -29,8 +37,16 @@ describe('XrpSendForm', () => {
 
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
+	const fundedDestination: XrpDestinationFacts = {
+		settled: true,
+		requiresTag: false,
+		unavailable: undefined
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.spyOn(xrpDestinationServices, 'loadXrpDestination').mockResolvedValue(fundedDestination);
 
 		feeStore.setFee(12n);
 		reserveStore.setReserve(getXrpReserveDrops({ ownerCount: 0 }));
@@ -382,6 +398,135 @@ describe('XrpSendForm', () => {
 			await fireEvent.input(tagInput(container), { target: { value: '12345' } });
 
 			expect(nextButton(container)?.disabled).toBeFalsy();
+		});
+	});
+
+	// The form reads the recipient the way `sendXrp` does, so a payment too small to create a
+	// missing account is refused where the amount is typed rather than only after Send.
+	describe('a recipient without an account', () => {
+		const unfundedDestination: XrpDestinationFacts = {
+			settled: false,
+			requiresTag: false,
+			unavailable: undefined
+		};
+
+		const unfundedMessage = replacePlaceholders(en.send.assertion.xrp_destination_unfunded, {
+			$reserve: formatToken({ value: XRP_BASE_RESERVE_DROPS, unitName: XRP_TOKEN.decimals })
+		});
+
+		const amountInput = (container: HTMLElement): HTMLInputElement =>
+			container.querySelector('input') as HTMLInputElement;
+
+		const nextBtn = (container: HTMLElement): HTMLButtonElement | null =>
+			container.querySelector<HTMLButtonElement>('button[data-tid="send-form-next-button"]');
+
+		const typeAmount = async ({ container, value }: { container: HTMLElement; value: string }) => {
+			await fireEvent.input(amountInput(container), { target: { value } });
+
+			// Past the validation debounce.
+			await vi.advanceTimersByTimeAsync(500);
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("looks the destination up on the token's network", () => {
+			render(XrpSendForm, { props, context: mockContext });
+
+			expect(xrpDestinationServices.loadXrpDestination).toHaveBeenCalledExactlyOnceWith({
+				destination: props.destination,
+				network: XrpNetworks.mainnet
+			});
+		});
+
+		it('does not look up an invalid destination', () => {
+			render(XrpSendForm, {
+				props: { ...props, destination: 'not-an-address' },
+				context: mockContext
+			});
+
+			expect(xrpDestinationServices.loadXrpDestination).not.toHaveBeenCalled();
+		});
+
+		it('rejects an amount below the base reserve and disables next', async () => {
+			vi.spyOn(xrpDestinationServices, 'loadXrpDestination').mockResolvedValue(unfundedDestination);
+
+			const { container, getByText } = render(XrpSendForm, { props, context: mockContext });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(getByText(unfundedMessage)).toBeInTheDocument();
+			expect(nextBtn(container)?.disabled).toBeTruthy();
+		});
+
+		it('enables next for the base reserve', async () => {
+			vi.spyOn(xrpDestinationServices, 'loadXrpDestination').mockResolvedValue(unfundedDestination);
+
+			const { container, queryByText } = render(XrpSendForm, { props, context: mockContext });
+
+			await typeAmount({ container, value: '1' });
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+		});
+
+		it('does not restrict the amount for a recipient with an account', async () => {
+			const { container, queryByText } = render(XrpSendForm, { props, context: mockContext });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+		});
+
+		// A failed lookup says nothing about the recipient. The form does not judge on it, and the
+		// send repeats the lookup before signing.
+		it('does not reject the amount when the lookup could not be made', async () => {
+			vi.spyOn(xrpDestinationServices, 'loadXrpDestination').mockResolvedValue({
+				...unfundedDestination,
+				unavailable: new Error('tooBusy')
+			});
+
+			const { container, queryByText } = render(XrpSendForm, { props, context: mockContext });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+			expect(nextBtn(container)?.disabled).toBeFalsy();
+		});
+
+		// The amount is a prop rather than typed, because a rerender hands the harness's props back
+		// and would clear a typed one.
+		it('keeps the answer for the current destination when an older lookup answers last', async () => {
+			let answerFirst: (facts: XrpDestinationFacts) => void = () => undefined;
+
+			vi.spyOn(xrpDestinationServices, 'loadXrpDestination')
+				.mockImplementationOnce(
+					() =>
+						new Promise((resolve) => {
+							answerFirst = resolve;
+						})
+				)
+				.mockResolvedValueOnce(fundedDestination);
+
+			const { queryByText, rerender } = render(XrpSendForm, {
+				props: { ...props, amount: 0.5 },
+				context: mockContext
+			});
+
+			await rerender({ destination: mockXrpAddress });
+
+			answerFirst(unfundedDestination);
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(xrpDestinationServices.loadXrpDestination).toHaveBeenCalledTimes(2);
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
 		});
 	});
 });

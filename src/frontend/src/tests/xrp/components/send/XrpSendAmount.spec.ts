@@ -2,7 +2,11 @@ import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import en from '$tests/mocks/i18n.mock';
 import XrpSendAmount from '$xrp/components/send/XrpSendAmount.svelte';
+import { XRP_BASE_RESERVE_DROPS } from '$xrp/constants/xrp.constants';
 import {
 	XRP_FEE_CONTEXT_KEY,
 	initFeeStore,
@@ -20,7 +24,10 @@ describe('XrpSendAmount', () => {
 	const feeStore = initFeeStore();
 	const reserveStore = initReserveStore();
 
-	const renderAmount = () => {
+	const renderAmount = ({
+		amount,
+		destinationUnfunded
+	}: { amount?: number; destinationUnfunded?: boolean } = {}) => {
 		const context = new Map();
 
 		context.set(SEND_CONTEXT_KEY, initSendContext({ token: XRP_TOKEN }));
@@ -37,7 +44,7 @@ describe('XrpSendAmount', () => {
 		);
 
 		return render(XrpSendAmount, {
-			props: { amount: undefined, onTokensList: vi.fn() },
+			props: { amount, destinationUnfunded, onTokensList: vi.fn() },
 			context
 		});
 	};
@@ -186,6 +193,100 @@ describe('XrpSendAmount', () => {
 			expect(input(container).value).not.toBe(atFirstFee);
 
 			vi.useRealTimers();
+		});
+	});
+
+	// A payment to an address with no account yet has to create it, and below the base reserve XRPL
+	// applies it as `tecNO_DST_INSUF_XRP`: the payment fails and the fee is claimed.
+	describe('a recipient without an account', () => {
+		const unfundedMessage = replacePlaceholders(en.send.assertion.xrp_destination_unfunded, {
+			$reserve: formatToken({ value: XRP_BASE_RESERVE_DROPS, unitName: XRP_TOKEN.decimals })
+		});
+
+		const typeAmount = async ({ container, value }: { container: HTMLElement; value: string }) => {
+			await fireEvent.input(container.querySelector('input') as HTMLInputElement, {
+				target: { value }
+			});
+
+			// Past the validation debounce.
+			await vi.advanceTimersByTimeAsync(500);
+		};
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('rejects an amount below the base reserve', async () => {
+			const { container, getByText } = renderAmount({ destinationUnfunded: true });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(getByText(unfundedMessage)).toBeInTheDocument();
+		});
+
+		// Red Max reads as the amount being over what can be sent, the opposite of this correction.
+		it('keeps Max out of the error colour', async () => {
+			const { container, getByText } = renderAmount({ destinationUnfunded: true });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(getByText(unfundedMessage)).toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).not.toHaveClass(
+				'text-error-primary'
+			);
+		});
+
+		it('accepts exactly the base reserve', async () => {
+			const { container, queryByText } = renderAmount({ destinationUnfunded: true });
+
+			await typeAmount({ container, value: '1' });
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+		});
+
+		it('does not restrict the amount for a recipient with an account', async () => {
+			const { container, queryByText } = renderAmount({ destinationUnfunded: false });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+		});
+
+		// The lookup usually answers after the amount was entered. Without the revalidation the error
+		// would appear only after the next edit. The amount is a prop rather than typed, because a
+		// rerender hands the harness's props back and would clear a typed one.
+		it('rejects an amount entered before the lookup answered, without an edit', async () => {
+			const { queryByText, rerender } = renderAmount({ amount: 0.5, destinationUnfunded: false });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+
+			await rerender({ destinationUnfunded: true });
+
+			await vi.advanceTimersByTimeAsync(500);
+
+			expect(queryByText(unfundedMessage)).toBeInTheDocument();
+		});
+
+		// Insufficient funds comes first: raising the amount, which the unfunded error asks for,
+		// cannot fix an amount the account cannot cover.
+		it('reports insufficient funds over the unfunded recipient', async () => {
+			balancesStore.set({ id: XRP_TOKEN.id, data: { data: 1_200_000n, certified: true } });
+
+			const { container, getByText, queryByText } = renderAmount({ destinationUnfunded: true });
+
+			await typeAmount({ container, value: '0.5' });
+
+			expect(getByText(en.send.assertion.insufficient_funds_for_reserve)).toBeInTheDocument();
+			expect(queryByText(unfundedMessage)).not.toBeInTheDocument();
+			expect(container.querySelector(`[data-tid="${MAX_BUTTON}"]`)).toHaveClass(
+				'text-error-primary'
+			);
 		});
 	});
 

@@ -1089,6 +1089,7 @@
 			"xrp_destination_tag_invalid": "Il tag di destinazione XRP deve essere un numero intero compreso tra 0 e 4294967295.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Saldo insufficiente: l’importo deve lasciare abbastanza per coprire la commissione e la riserva di conto XRP richiesta.",
+			"xrp_destination_unfunded": "Questo indirizzo non ha ancora un conto XRP. Per crearlo serve un primo pagamento di almeno $reserve XRP.",
 			"insufficient_funds_for_gas": "Saldo insufficiente per il gas",
 			"insufficient_funds_for_amount": "Saldo insufficiente",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Saldo Ethereum insufficiente per coprire le fee",
