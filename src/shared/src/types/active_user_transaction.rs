@@ -136,13 +136,20 @@ pub enum ActiveUserTransactionData {
     /// session finish a mint whose tab closed between the two calls. The ICP
     /// block index, learned once the transfer returns, rides in `external_refs`.
     CyclesMint(CyclesMintData),
-    /// Native XRP payment. Unlike every other variant this one does not track a
-    /// provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
-    /// so a second payment from the same address while the first is unresolved
-    /// is unsafe whichever sequence it picks. The row is what refuses it, and it
-    /// has to outlive the tab to do that. The locally derived transaction id and
-    /// the signed `LastLedgerSequence` ride in `external_refs`.
+    /// XRP Ledger payment, of native XRP or of a trust-line token. Unlike every
+    /// other variant this one does not track a provider — it exists to hold an
+    /// invariant: an XRPL `Sequence` is a nonce, so a second payment from the
+    /// same address while the first is unresolved is unsafe whichever sequence
+    /// it picks. The row is what refuses it, and it has to outlive the tab to do
+    /// that. The locally derived transaction id and the signed
+    /// `LastLedgerSequence` ride in `external_refs`.
     Xrp(XrpData),
+    /// XRP Ledger `TrustSet` that adds or removes a trust-line token. It consumes
+    /// the account's `Sequence` exactly as a payment does, so it is held to the
+    /// same one-unresolved-transaction-per-address invariant as `Xrp`, and its
+    /// transaction id and `LastLedgerSequence` ride in `external_refs` the same
+    /// way.
+    XrpTrustSet(XrpTrustSetData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -310,7 +317,7 @@ pub struct OisyTradeData {
     pub amount: Nat,
 }
 
-/// Native XRP payment payload — the values fixed when the transaction was
+/// XRP Ledger payment payload — the values fixed when the transaction was
 /// signed. The transaction id and its `LastLedgerSequence` are learned from the
 /// signed blob and ride in `external_refs`, so they are not here.
 ///
@@ -319,7 +326,8 @@ pub struct OisyTradeData {
 /// different address says nothing about this one's sequence.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct XrpData {
-    /// Native XRP, which also fixes the network the payment was signed for.
+    /// Native XRP or a trust-line token, which also fixes the network the
+    /// payment was signed for.
     pub token: TokenId,
     pub source_address: String,
     pub destination_address: String,
@@ -327,10 +335,34 @@ pub struct XrpData {
     /// tag rather than an absent one, which is why this is an `Option` and not
     /// a sentinel.
     pub destination_tag: Option<u32>,
-    /// Amount in drops.
+    /// Amount in drops for native XRP; for a trust-line token, in units of
+    /// 10^-18 of the token.
     pub amount: Nat,
     /// Transaction cost in drops.
     pub fee: Nat,
+}
+
+/// XRP Ledger `TrustSet` payload — the values fixed when the transaction was
+/// signed. As for `XrpData`, the transaction id and its `LastLedgerSequence`
+/// ride in `external_refs`, and `source_address` is the field the guard reads.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct XrpTrustSetData {
+    /// The trust-line token the line is for, which also fixes the network.
+    pub token: TokenId,
+    pub source_address: String,
+    pub change: XrpTrustLineChange,
+    /// Transaction cost in drops.
+    pub fee: Nat,
+}
+
+/// What an XRP Ledger `TrustSet` does to the account's trust line.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum XrpTrustLineChange {
+    /// Creates the line, so the account can hold and receive the token.
+    Add,
+    /// Sets the line's limit to zero, so the ledger deletes it and releases its
+    /// reserve.
+    Remove,
 }
 
 /// In-flight high-level user operation, persisted so the FE can resume polling

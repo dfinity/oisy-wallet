@@ -1,23 +1,27 @@
 use std::collections::HashSet;
 
 use candid::{Nat, Principal};
-use shared::types::{
-    active_user_transaction::{
-        ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
-        ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
-        GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
-        UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-        MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
-        MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
-        MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
-        XRP_LEDGER_RESULT_EXPIRED, XRP_LEDGER_RESULT_SUCCESS, XRP_REF_LAST_LEDGER_SEQUENCE,
-        XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+use shared::{
+    types::{
+        active_user_transaction::{
+            ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+            ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+            ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
+            GetActiveUserTransactionsResponse, NearIntentsData, OisyTradeData,
+            UpdateActiveUserTransactionRequest, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
+            MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+            MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
+            MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
+            MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
+            MAX_LIQUIDIUM_POOL_ID_LEN, MAX_XRP_ADDRESS_LEN, MIN_XRP_ADDRESS_LEN,
+            XRP_LEDGER_RESULT_EXPIRED, XRP_LEDGER_RESULT_SUCCESS, XRP_REF_LAST_LEDGER_SEQUENCE,
+            XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+        },
+        custom_token::XrpTrustLineToken,
+        token_id::TokenId,
     },
-    token_id::TokenId,
+    validate::Validate,
 };
 
 use crate::{
@@ -51,16 +55,18 @@ pub fn create(
     if let Some(source_address) = xrp_payment_source(&request.data) {
         // Required here and not only in `validate_data`, which cannot see the
         // refs: both values are derived from the signed blob before this call, so
-        // a row arriving without them describes a payment nothing could ever poll.
+        // a row arriving without them describes a transaction nothing could ever
+        // poll.
         require_xrp_refs(&request.external_refs)?;
 
-        // An XRPL `Sequence` is a nonce, so at most one unresolved payment may
-        // exist per source address — whether a send or a swap's deposit makes it.
-        // The frontend refuses early too, but that check cannot be atomic with this
-        // create — between the two it reads the account, derives a signing key and
-        // takes a threshold signature, and a second tab can pass its own check
-        // inside that window. This call is the only place that sees the check and
-        // the write at once, so this is what actually holds the invariant.
+        // An XRPL `Sequence` is a nonce, so at most one unresolved transaction may
+        // exist per source address — whether a send, a swap's deposit or a
+        // `TrustSet` makes it. The frontend refuses early too, but that check cannot
+        // be atomic with this create — between the two it reads the account,
+        // derives a signing key and takes a threshold signature, and a second tab
+        // can pass its own check inside that window. This call is the only place
+        // that sees the check and the write at once, so this is what actually holds
+        // the invariant.
         if has_xrp_payment_in_flight(map, principal, source_address) {
             return Err(ActiveUserTransactionError::AlreadyInFlight);
         }
@@ -173,7 +179,8 @@ pub fn list(
     GetActiveUserTransactionsResponse { transactions }
 }
 
-/// Whether an XRP payment from this source address can still apply.
+/// Whether an XRP Ledger transaction from this source address — a payment or a
+/// `TrustSet` — can still apply.
 ///
 /// Per **address**, not per user: a record for a different address says nothing
 /// about this one's sequence, and refusing on it would block an unrelated payment.
@@ -189,25 +196,33 @@ fn has_xrp_payment_in_flight(
     })
 }
 
-/// The XRP address a row's payment is sent from, for the rows that make one: an
-/// XRP send, and a swap whose deposit is an XRP payment. With
-/// `holds_xrp_address`, the one place that knows which rows those are — a new
-/// kind of row that makes an XRP payment is added here and nowhere else.
+/// The XRP address a row's transaction is signed from, for the rows that sign
+/// one: an XRP send or `TrustSet`, and a swap whose deposit is an XRP payment.
+/// With `holds_xrp_address`, the one place that knows which rows those are —
+/// every variant is listed, so a new kind of row cannot be added without
+/// deciding whether it takes the address's `Sequence`.
 fn xrp_payment_source(data: &ActiveUserTransactionData) -> Option<&str> {
     match data {
         ActiveUserTransactionData::Xrp(d) => Some(&d.source_address),
+        ActiveUserTransactionData::XrpTrustSet(d) => Some(&d.source_address),
         ActiveUserTransactionData::NearIntents(d) => d.source_address.as_deref(),
-        _ => None,
+        ActiveUserTransactionData::OneSecIcpToEvm(_)
+        | ActiveUserTransactionData::OneSecEvmToIcp(_)
+        | ActiveUserTransactionData::Liquidium(_)
+        | ActiveUserTransactionData::Velora(_)
+        | ActiveUserTransactionData::ChainFusion(_)
+        | ActiveUserTransactionData::OisyTrade(_)
+        | ActiveUserTransactionData::CyclesMint(_) => None,
     }
 }
 
-/// Whether a row's XRP payment can still apply. A send's can until the row is
-/// terminal. A swap's deposit can only while the row is `Pending`: once the
-/// deposit validates, the frontend moves the row to `Executing`, and the swap
-/// goes on at 1Click without holding the address.
+/// Whether a row's XRP transaction can still apply. A send's or a `TrustSet`'s
+/// can until the row is terminal. A swap's deposit can only while the row is
+/// `Pending`: once the deposit validates, the frontend moves the row to
+/// `Executing`, and the swap goes on at 1Click without holding the address.
 fn holds_xrp_address(tx: &ActiveUserTransaction) -> bool {
     match tx.data {
-        ActiveUserTransactionData::Xrp(_) => matches!(
+        ActiveUserTransactionData::Xrp(_) | ActiveUserTransactionData::XrpTrustSet(_) => matches!(
             tx.status,
             ActiveUserTransactionStatus::Pending | ActiveUserTransactionStatus::Executing
         ),
@@ -350,6 +365,12 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_xrp_address(&d.destination_address, "destination_address")?;
             require_distinct_xrp_accounts(d)?;
         }
+        ActiveUserTransactionData::XrpTrustSet(d) => {
+            require_valid_amount(&d.fee, "fee")?;
+            require_xrp_trust_line_token(&d.token)?;
+            require_xrp_address(&d.source_address, "source_address")?;
+            require_trust_line_to_another_account(&d.token, &d.source_address)?;
+        }
     }
     Ok(())
 }
@@ -482,20 +503,53 @@ fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
     Ok(())
 }
 
-/// The row tracks a *native XRP* payment, so a token from any other chain is
-/// unsatisfiable by construction — the FE poller would have no ledger to ask.
-/// `data` is immutable after creation, so such a row could never resolve and
-/// would occupy one of the user's slots forever. Kinds only, deliberately: an
-/// XRPL testnet token would be a new `TokenId` variant and belongs in this list
-/// when it arrives, not a reason to loosen the check now.
+/// The row tracks an *XRP Ledger mainnet* payment — native XRP or a trust-line
+/// token — so a token from any other chain is unsatisfiable by construction:
+/// the FE poller would have no ledger to ask. `data` is immutable after
+/// creation, so such a row could never resolve and would occupy one of the
+/// user's slots forever. Kinds only, deliberately: an XRPL testnet token would
+/// be a new `TokenId` variant and belongs in this list when it arrives, not a
+/// reason to loosen the check now.
 fn require_xrp_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> {
-    if matches!(token, TokenId::XrpNativeMainnet) {
-        Ok(())
-    } else {
-        Err(ActiveUserTransactionError::InvalidData(
-            "token must be a native XRP token".to_string(),
-        ))
+    match token {
+        TokenId::XrpNativeMainnet => Ok(()),
+        TokenId::XrpTrustLineMainnet(..) => require_xrp_trust_line_token(token),
+        _ => Err(ActiveUserTransactionError::InvalidData(
+            "token must be an XRP Ledger mainnet token".to_string(),
+        )),
     }
+}
+
+/// A trust line is for a token, never for native XRP, and the token's currency
+/// code and issuer are held to the rules a saved custom token is: a row for a
+/// line the ledger could never create would never resolve.
+fn require_xrp_trust_line_token(token: &TokenId) -> Result<(), ActiveUserTransactionError> {
+    let TokenId::XrpTrustLineMainnet(currency, issuer) = token else {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "token must be an XRP Ledger trust-line token".to_string(),
+        ));
+    };
+    XrpTrustLineToken {
+        currency: currency.clone(),
+        issuer: issuer.clone(),
+    }
+    .validate()
+    .map_err(|err| ActiveUserTransactionError::InvalidData(format!("token: {err}")))
+}
+
+/// XRPL answers a `TrustSet` towards the account's own address
+/// `temDST_IS_SRC`, which is never applied — the same unresolvable-row
+/// reasoning as `require_distinct_xrp_accounts`.
+fn require_trust_line_to_another_account(
+    token: &TokenId,
+    source_address: &str,
+) -> Result<(), ActiveUserTransactionError> {
+    if matches!(token, TokenId::XrpTrustLineMainnet(_, issuer) if issuer.0 == source_address) {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "token issuer must differ from source_address".to_string(),
+        ));
+    }
+    Ok(())
 }
 
 /// A bound and a shape check, not a re-validation: the FE derives
@@ -713,17 +767,18 @@ mod tests {
     };
     use pretty_assertions::assert_eq;
     use shared::types::{
+        account::XrpAddress,
         active_user_transaction::{
             ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
             ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
             ChainFusionDirection, CreateActiveUserTransactionRequest, CyclesMintData,
             LiquidiumAction, LiquidiumData, NearIntentsData, OisyTradeData, OisyTradeSide,
             OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, XrpData, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-            MAX_LIQUIDIUM_POOL_ID_LEN, XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT,
-            XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
+            VeloraSwapMode, XrpData, XrpTrustLineChange, XrpTrustSetData,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            XRP_REF_LAST_LEDGER_SEQUENCE, XRP_REF_LEDGER_RESULT, XRP_REF_TX_HASH, XRP_TX_HASH_LEN,
         },
-        custom_token::ErcTokenId,
+        custom_token::{ErcTokenId, XrpCurrencyCode},
         token_id::TokenId,
     };
 
@@ -1520,7 +1575,7 @@ mod tests {
             assert_eq!(
                 err,
                 ActiveUserTransactionError::InvalidData(
-                    "token must be a native XRP token".to_string()
+                    "token must be an XRP Ledger mainnet token".to_string()
                 )
             );
         }
@@ -1896,6 +1951,237 @@ mod tests {
         .expect("status-only update");
         assert_eq!(tx.status, ActiveUserTransactionStatus::Succeeded);
         assert_eq!(tx.external_refs, xrp_refs());
+    }
+
+    const RLUSD_CODE: &str = "524C555344000000000000000000000000000000";
+    const RLUSD_ISSUER: &str = "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De";
+
+    fn rlusd() -> TokenId {
+        TokenId::XrpTrustLineMainnet(
+            XrpCurrencyCode(RLUSD_CODE.to_string()),
+            XrpAddress(RLUSD_ISSUER.to_string()),
+        )
+    }
+
+    fn xrp_trust_set_data(
+        token: TokenId,
+        change: XrpTrustLineChange,
+        source_address: &str,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::XrpTrustSet(XrpTrustSetData {
+            token,
+            source_address: source_address.to_string(),
+            change,
+            fee: Nat::from(12u64),
+        })
+    }
+
+    #[test]
+    fn xrp_trust_line_token_payment_roundtrip() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: rlusd(),
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(25_000_000_000_000_000_000u128),
+            fee: Nat::from(12u64),
+        });
+        req.external_refs = xrp_refs();
+        let expected = req.data.clone();
+        create(&mut map, principal(), req, 1).expect("create");
+
+        assert_eq!(list(&map, principal()).transactions[0].data, expected);
+    }
+
+    #[test]
+    fn xrp_trust_line_token_with_an_invalid_issuer_rejected() {
+        // The issuer is held to the rules a saved custom token is: a full base58check parse,
+        // not the shape check the account fields get.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::Xrp(XrpData {
+            token: TokenId::XrpTrustLineMainnet(
+                XrpCurrencyCode(RLUSD_CODE.to_string()),
+                XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5Df".to_string()),
+            ),
+            source_address: XRP_SOURCE.to_string(),
+            destination_address: XRP_DESTINATION.to_string(),
+            destination_tag: None,
+            amount: Nat::from(1u64),
+            fee: Nat::from(12u64),
+        });
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(
+            matches!(err, ActiveUserTransactionError::InvalidData(ref msg) if msg.contains("issuer")),
+            "unexpected error: {err:?}"
+        );
+    }
+
+    #[test]
+    fn xrp_trust_set_create_roundtrip() {
+        for change in [XrpTrustLineChange::Add, XrpTrustLineChange::Remove] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_trust_set_data(rlusd(), change.clone(), XRP_SOURCE);
+            req.external_refs = xrp_refs();
+            create(&mut map, principal(), req, 1).expect("create");
+
+            assert_eq!(
+                list(&map, principal()).transactions[0].data,
+                xrp_trust_set_data(rlusd(), change, XRP_SOURCE)
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_trust_set_requires_a_trust_line_token() {
+        // A trust line is for an issued token; native XRP has none, and a token from another
+        // chain gives the poller no ledger to ask.
+        for token in [
+            TokenId::XrpNativeMainnet,
+            TokenId::IcpNative,
+            TokenId::EvmNative(1),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("xrp-1");
+            req.data = xrp_trust_set_data(token, XrpTrustLineChange::Add, XRP_SOURCE);
+            req.external_refs = xrp_refs();
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert_eq!(
+                err,
+                ActiveUserTransactionError::InvalidData(
+                    "token must be an XRP Ledger trust-line token".to_string()
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn xrp_trust_set_zero_fee_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = ActiveUserTransactionData::XrpTrustSet(XrpTrustSetData {
+            token: rlusd(),
+            source_address: XRP_SOURCE.to_string(),
+            change: XrpTrustLineChange::Add,
+            fee: Nat::from(0u64),
+        });
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(
+            matches!(err, ActiveUserTransactionError::InvalidData(ref msg) if msg.contains("fee"))
+        );
+    }
+
+    #[test]
+    fn xrp_trust_set_to_the_own_address_rejected() {
+        // XRPL answers `temDST_IS_SRC` and never applies it, so this row could never resolve.
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, RLUSD_ISSUER);
+        req.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "token issuer must differ from source_address".to_string()
+            )
+        );
+    }
+
+    #[test]
+    fn xrp_trust_set_without_poll_keys_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, XRP_SOURCE);
+        req.external_refs = xrp_refs_without(XRP_REF_TX_HASH);
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("tx_hash is required".to_string())
+        );
+    }
+
+    #[test]
+    fn xrp_trust_set_update_cannot_strip_the_poll_keys() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("xrp-1");
+        req.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Remove, XRP_SOURCE);
+        req.external_refs = xrp_refs();
+        create(&mut map, principal(), req, 1).expect("create");
+
+        let err = update(
+            &mut map,
+            principal(),
+            UpdateActiveUserTransactionRequest {
+                id: "xrp-1".to_string(),
+                status: None,
+                progress_step: None,
+                external_refs: Some(xrp_refs_without(XRP_REF_LAST_LEDGER_SEQUENCE)),
+                error: None,
+            },
+            2,
+        )
+        .unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData("last_ledger_sequence is required".to_string())
+        );
+    }
+
+    // A `TrustSet` takes the account's `Sequence` like a payment, so the guard holds across
+    // both kinds, in both orders.
+    #[test]
+    fn xrp_open_trust_set_blocks_a_payment_from_the_same_address() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, XRP_SOURCE);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("trust set");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_data(1, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_open_payment_blocks_a_trust_set_from_the_same_address() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_data(25_000_000, 12, None, XRP_SOURCE, XRP_DESTINATION);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("payment");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, XRP_SOURCE);
+        second.external_refs = xrp_refs();
+        let err = create(&mut map, principal(), second, 2).unwrap_err();
+
+        assert_eq!(err, ActiveUserTransactionError::AlreadyInFlight);
+    }
+
+    #[test]
+    fn xrp_open_trust_set_does_not_block_another_address() {
+        let (mut map, _mm) = setup();
+
+        let mut first = create_req("xrp-1");
+        first.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, XRP_SOURCE);
+        first.external_refs = xrp_refs();
+        create(&mut map, principal(), first, 1).expect("trust set");
+
+        let mut second = create_req("xrp-2");
+        second.data = xrp_trust_set_data(rlusd(), XrpTrustLineChange::Add, XRP_OTHER_SOURCE);
+        second.external_refs = xrp_refs();
+
+        create(&mut map, principal(), second, 2).expect("other address");
     }
 
     #[test]

@@ -617,6 +617,158 @@ mod contact_image {
             ]
         );
     }
+
+    mod xrp_trust_line {
+        //! Tests for XRP Ledger trust-line tokens.
+        use candid::{Decode, Encode};
+
+        use crate::{
+            types::{
+                account::XrpAddress,
+                custom_token::{CustomTokenId, Token, XrpCurrencyCode, XrpTrustLineToken},
+                token_id::TokenId,
+            },
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        const RLUSD_CODE: &str = "524C555344000000000000000000000000000000";
+        const RLUSD_ISSUER: &str = "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De";
+
+        fn token(currency: &str, issuer: &str) -> XrpTrustLineToken {
+            XrpTrustLineToken {
+                currency: XrpCurrencyCode(currency.to_string()),
+                issuer: XrpAddress(issuer.to_string()),
+            }
+        }
+
+        test_validate_on_deserialize!(
+            XrpTrustLineToken,
+            [
+                TestVector {
+                    input: token(RLUSD_CODE, RLUSD_ISSUER),
+                    valid: true,
+                    description: "RLUSD: a nonstandard 40-hex code",
+                },
+                TestVector {
+                    input: token("USD", RLUSD_ISSUER),
+                    valid: true,
+                    description: "A standard 3-character code",
+                },
+                TestVector {
+                    input: token("a?]", RLUSD_ISSUER),
+                    valid: true,
+                    description: "A standard code with lowercase letters and allowed symbols",
+                },
+                TestVector {
+                    input: token("xrp", RLUSD_ISSUER),
+                    valid: true,
+                    description: "Only all-uppercase XRP is reserved",
+                },
+                TestVector {
+                    input: token("XRP", RLUSD_ISSUER),
+                    valid: false,
+                    description: "XRP is the native asset",
+                },
+                TestVector {
+                    input: token("U D", RLUSD_ISSUER),
+                    valid: false,
+                    description: "A space is not an allowed character",
+                },
+                TestVector {
+                    input: token("\u{2603}", RLUSD_ISSUER),
+                    valid: false,
+                    description: "A 3-byte character is not 3 ASCII characters",
+                },
+                TestVector {
+                    input: token("USDC", RLUSD_ISSUER),
+                    valid: false,
+                    description: "Neither 3 nor 40 characters",
+                },
+                TestVector {
+                    input: token(&RLUSD_CODE.to_lowercase(), RLUSD_ISSUER),
+                    valid: false,
+                    description: "Lowercase hex, which would give the token a second spelling",
+                },
+                TestVector {
+                    input: token("G24C555344000000000000000000000000000000", RLUSD_ISSUER),
+                    valid: false,
+                    description: "Not hex",
+                },
+                TestVector {
+                    input: token("0000000000000000000000005553440000000000", RLUSD_ISSUER),
+                    valid: false,
+                    description: "A nonstandard code starting with a zero byte",
+                },
+                TestVector {
+                    input: token(RLUSD_CODE, "rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5Df"),
+                    valid: false,
+                    description: "An issuer whose checksum does not match",
+                },
+                TestVector {
+                    input: token(
+                        RLUSD_CODE,
+                        "XVPcpSm47b1CZkf5AkKM9a84dQHe3m4sBhsrA4XtnBECTAc"
+                    ),
+                    valid: false,
+                    description: "An X-address issuer",
+                },
+                TestVector {
+                    input: token(RLUSD_CODE, &"r".repeat(36)),
+                    valid: false,
+                    description: "An issuer longer than any classic address",
+                }
+            ]
+        );
+
+        #[test]
+        fn token_ids_carry_the_currency_and_the_issuer() {
+            let rlusd = Token::XrpTrustLineMainnet(token(RLUSD_CODE, RLUSD_ISSUER));
+
+            assert_eq!(
+                TokenId::from(&rlusd),
+                TokenId::XrpTrustLineMainnet(
+                    XrpCurrencyCode(RLUSD_CODE.to_string()),
+                    XrpAddress(RLUSD_ISSUER.to_string())
+                )
+            );
+            assert_eq!(
+                CustomTokenId::from(&rlusd),
+                CustomTokenId::XrpTrustLineMainnet(
+                    XrpCurrencyCode(RLUSD_CODE.to_string()),
+                    XrpAddress(RLUSD_ISSUER.to_string())
+                )
+            );
+        }
+
+        #[test]
+        fn a_custom_token_id_is_validated_like_the_token() {
+            let valid = CustomTokenId::XrpTrustLineMainnet(
+                XrpCurrencyCode("USD".to_string()),
+                XrpAddress(RLUSD_ISSUER.to_string()),
+            );
+            assert!(valid.validate().is_ok());
+            let encoded = Encode!(&valid).unwrap();
+            assert_eq!(Decode!(&encoded, CustomTokenId).unwrap(), valid);
+
+            for invalid in [
+                CustomTokenId::XrpTrustLineMainnet(
+                    XrpCurrencyCode("XRP".to_string()),
+                    XrpAddress(RLUSD_ISSUER.to_string()),
+                ),
+                CustomTokenId::XrpTrustLineMainnet(
+                    XrpCurrencyCode("USD".to_string()),
+                    XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5Df".to_string()),
+                ),
+            ] {
+                assert!(invalid.validate().is_err(), "{invalid:?} validated");
+                let encoded = Encode!(&invalid).unwrap();
+                assert!(
+                    Decode!(&encoded, CustomTokenId).is_err(),
+                    "{invalid:?} decoded"
+                );
+            }
+        }
+    }
 }
 
 mod token {

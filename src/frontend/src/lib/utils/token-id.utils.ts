@@ -60,6 +60,13 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		return 'XrpNativeMainnet';
 	}
 
+	// Case preserved: XRP Ledger addresses are base58 and so case-sensitive, and the currency code
+	// is stored in its canonical uppercase form already.
+	if ('XrpTrustLineMainnet' in id) {
+		const [currency, issuer] = id.XrpTrustLineMainnet;
+		return `XrpTrustLineMainnet:${currency}.${issuer}`;
+	}
+
 	if (
 		'ExtV2' in id ||
 		'SolNativeDevnet' in id ||

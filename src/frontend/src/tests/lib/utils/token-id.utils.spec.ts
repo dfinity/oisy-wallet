@@ -20,6 +20,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipal, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockRlusdCurrencyCode, mockRlusdIssuer } from '$tests/mocks/xrp.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
@@ -43,7 +44,12 @@ describe('token-id.utils', () => {
 			{ name: 'BtcNativeMainnet', id: { BtcNativeMainnet: null }, expected: 'BtcNativeMainnet' },
 			{ name: 'IcpNative', id: { IcpNative: null }, expected: 'IcpNative' },
 			{ name: 'SolNativeMainnet', id: { SolNativeMainnet: null }, expected: 'SolNativeMainnet' },
-			{ name: 'XrpNativeMainnet', id: { XrpNativeMainnet: null }, expected: 'XrpNativeMainnet' }
+			{ name: 'XrpNativeMainnet', id: { XrpNativeMainnet: null }, expected: 'XrpNativeMainnet' },
+			{
+				name: 'XrpTrustLineMainnet',
+				id: { XrpTrustLineMainnet: [mockRlusdCurrencyCode, mockRlusdIssuer] },
+				expected: `XrpTrustLineMainnet:${mockRlusdCurrencyCode}.${mockRlusdIssuer}`
+			}
 		])('serializes $name to a stable key', ({ id, expected }) => {
 			expect(tokenIdKey(id)).toBe(expected);
 		});

@@ -23,12 +23,13 @@ type ActiveUserTransaction = record {
 // `ActiveUserTransaction::external_refs` so we don't need to bump candid for
 // every new provider integration.
 type ActiveUserTransactionData = variant {
-	// Native XRP payment. Unlike every other variant this one does not track a
-	// provider — it exists to hold an invariant: an XRPL `Sequence` is a nonce,
-	// so a second payment from the same address while the first is unresolved
-	// is unsafe whichever sequence it picks. The row is what refuses it, and it
-	// has to outlive the tab to do that. The locally derived transaction id and
-	// the signed `LastLedgerSequence` ride in `external_refs`.
+	// XRP Ledger payment, of native XRP or of a trust-line token. Unlike every
+	// other variant this one does not track a provider — it exists to hold an
+	// invariant: an XRPL `Sequence` is a nonce, so a second payment from the
+	// same address while the first is unresolved is unsafe whichever sequence
+	// it picks. The row is what refuses it, and it has to outlive the tab to do
+	// that. The locally derived transaction id and the signed
+	// `LastLedgerSequence` ride in `external_refs`.
 	Xrp : XrpData;
 	OneSecEvmToIcp : OneSecEvmToIcpData;
 	OneSecIcpToEvm : OneSecIcpToEvmData;
@@ -54,6 +55,12 @@ type ActiveUserTransactionData = variant {
 	// address, and the Ethereum deposit tx hash and block number ride in
 	// `external_refs`.
 	ChainFusion : ChainFusionData;
+	// XRP Ledger `TrustSet` that adds or removes a trust-line token. It consumes
+	// the account's `Sequence` exactly as a payment does, so it is held to the
+	// same one-unresolved-transaction-per-address invariant as `Xrp`, and its
+	// transaction id and `LastLedgerSequence` ride in `external_refs` the same
+	// way.
+	XrpTrustSet : XrpTrustSetData;
 	// Velora (`ParaSwap`) EVM swap. A single variant covers both execution
 	// modes, discriminated by the `mode` field; the auction id, order hash,
 	// transaction hash and nonce ride in `external_refs`.
@@ -1366,6 +1373,7 @@ type Token = variant {
 	ExtV2 : ExtV2Token;
 	Icrc : IcrcToken;
 	Icrc7 : ExtV2Token;
+	XrpTrustLineMainnet : XrpTrustLineToken;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
@@ -1401,6 +1409,8 @@ type TokenId = variant {
 	EvmNative : nat64;
 	// ICRC-7 NFT collection on the Internet Computer
 	Icrc7 : principal;
+	// Trust-line token on the XRP Ledger mainnet, identified by currency code and issuer
+	XrpTrustLineMainnet : record { text; text };
 	// Native BTC on mainnet
 	BtcNativeMainnet;
 	// ERC-721 NFT on an EVM chain
@@ -1585,7 +1595,7 @@ type VeloraData = record {
 // frontend polls for settlement: `Delta` by auction id against Velora's Delta
 // API, `Market` by transaction receipt on the source chain.
 type VeloraSwapMode = variant { Delta; Market };
-// Native XRP payment payload — the values fixed when the transaction was
+// XRP Ledger payment payload — the values fixed when the transaction was
 // signed. The transaction id and its `LastLedgerSequence` are learned from the
 // signed blob and ride in `external_refs`, so they are not here.
 //
@@ -1596,15 +1606,40 @@ type XrpData = record {
 	destination_address : text;
 	// Transaction cost in drops.
 	fee : nat;
-	// Native XRP, which also fixes the network the payment was signed for.
+	// Native XRP or a trust-line token, which also fixes the network the
+	// payment was signed for.
 	token : TokenId;
 	// The XRPL `DestinationTag`, when the payment carries one. `0` is a real
 	// tag rather than an absent one, which is why this is an `Option` and not
 	// a sentinel.
 	destination_tag : opt nat32;
 	source_address : text;
-	// Amount in drops.
+	// Amount in drops for native XRP; for a trust-line token, in units of
+	// 10^-18 of the token.
 	amount : nat
+};
+// What an XRP Ledger `TrustSet` does to the account's trust line.
+type XrpTrustLineChange = variant {
+	// Creates the line, so the account can hold and receive the token.
+	Add;
+	// Sets the line's limit to zero, so the ledger deletes it and releases its
+	// reserve.
+	Remove
+};
+// A token held through a trust line on the XRP Ledger: a currency code and the account that
+// issues it. The code alone does not identify a token, since any account can issue under any
+// code.
+type XrpTrustLineToken = record { issuer : text; currency : text };
+// XRP Ledger `TrustSet` payload — the values fixed when the transaction was
+// signed. As for `XrpData`, the transaction id and its `LastLedgerSequence`
+// ride in `external_refs`, and `source_address` is the field the guard reads.
+type XrpTrustSetData = record {
+	// Transaction cost in drops.
+	fee : nat;
+	// The trust-line token the line is for, which also fixes the network.
+	token : TokenId;
+	source_address : text;
+	change : XrpTrustLineChange
 };
 service : (Arg) -> {
 	// Adds one or more dismissed notifications to the user's profile.

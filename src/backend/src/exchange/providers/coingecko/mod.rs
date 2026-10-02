@@ -121,6 +121,19 @@ fn classify_tokens<'a>(token_ids: &'a [StoredTokenId]) -> ClassifiedTokens<'a> {
                     token_id.clone(),
                 );
             }
+            TokenId::XrpTrustLineMainnet(currency, issuer) => {
+                // CoinGecko keys an XRP Ledger token by `<currency>.<issuer>`, with the currency
+                // spelled as a 3-character code or as 40 hex characters, which is exactly how the
+                // code is stored.
+                let key = format!("{}.{}", currency.as_str(), issuer.0);
+
+                contract_platforms
+                    .entry("xrp".to_string())
+                    .or_default()
+                    .push(key.clone());
+                address_to_token_id
+                    .insert(("xrp".to_string(), key.to_lowercase()), token_id.clone());
+            }
 
             // Testnet tokens, NFTs (ERC-721/1155), and ERC-4626 vaults are
             // intentionally skipped — no exchange rates are fetched for them.
@@ -244,7 +257,8 @@ mod tests {
     use candid::Principal;
     use pretty_assertions::assert_eq;
     use shared::types::{
-        custom_token::{ErcTokenId, SplTokenId},
+        account::XrpAddress,
+        custom_token::{ErcTokenId, SplTokenId, XrpCurrencyCode},
         token_id::TokenId,
     };
 
@@ -374,5 +388,47 @@ mod tests {
             Some(&spl)
         );
         assert_eq!(classified.address_to_token_id.len(), 4);
+    }
+
+    #[test]
+    fn classify_tokens_keys_xrp_trust_line_tokens_by_currency_and_issuer() {
+        // CoinGecko spells both forms of code this way: RLUSD under its 40-hex code, and a
+        // 3-character code as itself.
+        let rlusd = StoredTokenId(TokenId::XrpTrustLineMainnet(
+            XrpCurrencyCode("524C555344000000000000000000000000000000".to_string()),
+            XrpAddress("rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De".to_string()),
+        ));
+        let ctf = StoredTokenId(TokenId::XrpTrustLineMainnet(
+            XrpCurrencyCode("CTF".to_string()),
+            XrpAddress("r9Xzi4KsSF1Xtr8WHyBmUcvfP9FzTyG5wp".to_string()),
+        ));
+
+        let tokens = [rlusd.clone(), ctf.clone()];
+        let classified = classify_tokens(&tokens);
+
+        assert_eq!(
+            classified.contract_platforms.get("xrp"),
+            Some(&vec![
+                "524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De"
+                    .to_string(),
+                "CTF.r9Xzi4KsSF1Xtr8WHyBmUcvfP9FzTyG5wp".to_string(),
+            ])
+        );
+        assert_eq!(
+            classified.address_to_token_id.get(&(
+                "xrp".to_string(),
+                "524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De"
+                    .to_lowercase()
+            )),
+            Some(&rlusd)
+        );
+        assert_eq!(
+            classified.address_to_token_id.get(&(
+                "xrp".to_string(),
+                "CTF.r9Xzi4KsSF1Xtr8WHyBmUcvfP9FzTyG5wp".to_lowercase()
+            )),
+            Some(&ctf)
+        );
+        assert!(classified.native_coins.is_empty());
     }
 }

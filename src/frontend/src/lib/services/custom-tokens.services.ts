@@ -136,7 +136,8 @@ export const loadNetworkCustomTokens = async ({
 					'Erc1155' in token.token ||
 					'Erc4626' in token.token ||
 					'SplMainnet' in token.token ||
-					'SplDevnet' in token.token
+					'SplDevnet' in token.token ||
+					'XrpTrustLineMainnet' in token.token
 				) {
 					return token;
 				}
