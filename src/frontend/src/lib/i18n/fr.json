@@ -1761,6 +1761,9 @@
 			"tab_operations": "Opérations",
 			"unreviewed_instructions": "OISY ne peut pas décoder certaines de ces instructions, la vérification ci-dessous peut donc être incomplète.",
 			"unreviewed_instructions_simulated": "Cette transaction contient des opérations provenant d'une source externe qu'OISY ne peut pas décoder, c'est pourquoi OISY en a exécuté une simulation. Assurez-vous de faire confiance à l'application et vérifiez les changements de solde simulés ainsi que les opérations avant de signer. Notez que le résultat réel peut différer de la simulation.",
+			"unread_programs_one": "Cette transaction appelle un programme qu'OISY ne peut pas lire. Il peut déplacer des fonds que vous détenez dans d'autres applications, comme des SOL stakés ou des dépôts de prêt, et rien ci-dessous ne le montrerait.",
+			"unread_programs_other": "Cette transaction appelle des programmes qu'OISY ne peut pas lire. Ils peuvent déplacer des fonds que vous détenez dans d'autres applications, comme des SOL stakés ou des dépôts de prêt, et rien ci-dessous ne le montrerait.",
+			"unread_programs_acknowledge": "Je comprends qu'OISY ne peut pas montrer ce que fait cette application",
 			"cannot_be_shown": "Cette transaction comporte des actions qui ne peuvent pas toutes être affichées fidèlement pour vérification, donc OISY ne la signera pas. Rejetez-la et demandez à l'application une requête plus simple.",
 			"close_pays_others": "Cette transaction ferme l'un de vos comptes de jetons et verse son solde à une adresse qui n'est pas votre portefeuille. Pour votre sécurité, OISY ne la signe pas.",
 			"simulated_instructions": "Instructions simulées",
@@ -1874,6 +1877,7 @@
 			"ambiguous_transaction": "Cette transaction déplace des fonds entre plusieurs adresses et ne peut pas être affichée correctement pour vérification. Pour votre sécurité, elle n'a pas été signée.",
 			"close_pays_others": "Cette transaction ferme l'un de vos comptes de jetons et verse son solde à une adresse qui n'est pas votre portefeuille. Pour votre sécurité, elle n'a pas été signée.",
 			"unreviewed_without_simulation": "OISY n'a pas pu lire une partie de cette transaction et le réseau n'en a pas renvoyé de simulation, donc rien ne décrit ce que ferait cette partie. Pour votre sécurité, elle n'a pas été signée.",
+			"unread_programs_unconfirmed": "Cette transaction appelle un programme qu'OISY ne peut pas lire, et elle n'a pas été confirmée lors de la vérification. Pour votre sécurité, elle n'a pas été signée.",
 			"sol_transaction_as_message": "Ce message est une transaction Solana, qui ne peut être approuvée que via une vérification de transaction. Pour votre sécurité, elle n'a pas été signée.",
 			"request_not_defined": "Erreur inattendue : La demande n'est pas définie et ne peut donc pas être traitée.",
 			"unexpected_processing_request": "Erreur inattendue lors du traitement de la demande avec WalletConnect."

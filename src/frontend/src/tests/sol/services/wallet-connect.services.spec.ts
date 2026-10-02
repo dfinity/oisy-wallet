@@ -12,6 +12,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { STAKE_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -24,6 +25,7 @@ import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
+import { solProgramNameStore } from '$sol/stores/sol-program-name.store';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
@@ -48,6 +50,7 @@ import {
 	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
+	mockSolAddress3,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
@@ -313,7 +316,8 @@ describe('wallet-connect.services', () => {
 			it('should attach the preview to the decoded review', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					preview: mockPreview,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -332,7 +336,10 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should decode without a preview when the simulation yields none', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -340,7 +347,11 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					parties: mockParties,
+					unreadPrograms: []
+				});
 				expect(result).not.toHaveProperty('preview');
 			});
 		});
@@ -365,7 +376,8 @@ describe('wallet-connect.services', () => {
 			it('should call the list simulated when the run produced one', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: simulated,
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -382,7 +394,10 @@ describe('wallet-connect.services', () => {
 			// A run reports its parties whether or not it produced any instruction summaries, so
 			// this is the state where only the list falls back.
 			it('should read the message when the run produced no list', async () => {
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					unreadPrograms: []
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -391,7 +406,11 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).not.toHaveProperty('simulatedInstructions');
-				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
+				expect(result).toEqual({
+					...mockMappedTransaction,
+					parties: mockParties,
+					unreadPrograms: []
+				});
 			});
 
 			// An empty list is the run's answer that there is nothing to list. Rebuilt from the
@@ -400,7 +419,8 @@ describe('wallet-connect.services', () => {
 			it('should pass on an empty list from the run rather than read the message', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({
 					instructions: [],
-					parties: mockParties
+					parties: mockParties,
+					unreadPrograms: []
 				});
 
 				const result = await decode({
@@ -426,7 +446,7 @@ describe('wallet-connect.services', () => {
 					partial: false
 				};
 
-				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties });
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties, unreadPrograms: [] });
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -447,6 +467,68 @@ describe('wallet-connect.services', () => {
 				});
 
 				expect(result).toEqual(expect.objectContaining({ parties: emptyPartialParties }));
+			});
+
+			describe('unread programs', () => {
+				const parties: SolTransferParties = { sources: [], destinations: [], partial: false };
+
+				// Named from the store so nothing is read from the chain: the stake program publishes
+				// no interface, the other one does.
+				beforeEach(() => {
+					solProgramNameStore.set({
+						network: 'mainnet',
+						names: { [STAKE_PROGRAM_ADDRESS]: '', [mockSolAddress3]: 'lending_app' }
+					});
+				});
+
+				afterEach(() => {
+					solProgramNameStore.reset();
+				});
+
+				it('should pass on the programs the run calls that it does not know, with their names', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: [STAKE_PROGRAM_ADDRESS, mockSolAddress3]
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([
+						{ address: STAKE_PROGRAM_ADDRESS },
+						{ address: mockSolAddress3, name: 'lending_app' }
+					]);
+				});
+
+				it('should pass on none when the run calls only programs it knows', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue({
+						parties,
+						unreadPrograms: []
+					});
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result.unreadPrograms).toEqual([]);
+				});
+
+				it('should leave them out without a run to name them from', async () => {
+					vi.mocked(simulateSolTransaction).mockResolvedValue(undefined);
+
+					const result = await decode({
+						base64EncodedTransactionMessage,
+						networkId,
+						address: mockSolAddress
+					});
+
+					expect(result).not.toHaveProperty('unreadPrograms');
+				});
 			});
 		});
 
@@ -544,7 +626,8 @@ describe('wallet-connect.services', () => {
 			request: mockRequest,
 			listener: mockListener,
 			simulated: true,
-			closesPayOthers: false
+			closesPayOthers: false,
+			unreadProgramsAcknowledged: true
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -565,7 +648,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				unreadProgramsAcknowledged: true
 			};
 
 			const expected = {
@@ -704,7 +788,8 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener,
 				simulated: true,
-				closesPayOthers: false
+				closesPayOthers: false,
+				unreadProgramsAcknowledged: true
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1087,6 +1172,38 @@ describe('wallet-connect.services', () => {
 			// would refuse the swap.
 			it('should sign when every close pays the user', async () => {
 				const result = await sign({ ...mockParams, closesPayOthers: false });
+
+				expect(result).toEqual(expect.objectContaining({ success: true }));
+
+				expect(spyToastsError).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('with a program the run calls that OISY does not know', () => {
+			it('should refuse to sign when the review did not confirm it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: false });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.unread_programs_unconfirmed }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+
+			it('should sign once the review confirmed it', async () => {
+				const result = await sign({ ...mockParams, unreadProgramsAcknowledged: true });
 
 				expect(result).toEqual(expect.objectContaining({ success: true }));
 

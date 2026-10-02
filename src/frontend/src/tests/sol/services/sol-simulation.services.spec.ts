@@ -6,6 +6,7 @@ import {
 } from '$sol/api/solana.api';
 import {
 	SOLANA_SIMULATION_MAX_ACCOUNTS,
+	STAKE_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
@@ -454,6 +455,65 @@ describe('sol-simulation.services', () => {
 				destinations: [{ address: mockAtaAddress, owner: mockSolAddress, own: true }],
 				partial: false
 			});
+		});
+	});
+
+	describe('unread programs', () => {
+		// Calls the run makes inside a router, handed over raw: a router's own call and one to a
+		// program the wallet does not know.
+		const nested = (programs: SolAddress[]) =>
+			[
+				{
+					index: 0,
+					instructions: programs.map((programId) => ({ programId, accounts: [], data: '' }))
+				}
+			] as unknown as SolanaSimulatedInnerInstructions;
+
+		const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4';
+
+		beforeEach(() => {
+			vi.mocked(getMultipleAccountsInfo).mockResolvedValue([systemAccount(1_000_000n)]);
+		});
+
+		it('should name a program a nested call reaches that is not among the known ones', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: nested([JUPITER, STAKE_PROGRAM_ADDRESS])
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.unreadPrograms).toEqual([STAKE_PROGRAM_ADDRESS]);
+		});
+
+		it('should name none when every nested call reaches a known program', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: nested([JUPITER, SYSTEM_PROGRAM_ADDRESS])
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.unreadPrograms).toEqual([]);
+		});
+
+		it('should yield nothing when a nested call does not name its program', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({
+					accounts: [systemAccount(994_000n)],
+					innerInstructions: [
+						{ index: 0, instructions: [{ programIdIndex: 3, accounts: [], data: '' }] }
+					] as unknown as SolanaSimulatedInnerInstructions
+				})
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

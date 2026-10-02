@@ -37,6 +37,7 @@ import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.serv
 import { loadSplTokenMetadata } from '$sol/services/spl-token-metadata.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolUnreadProgram } from '$sol/types/sol-simulation';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
@@ -95,6 +96,10 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	// cannot see a close a program makes inside its own call, and handed on for the same reason
 	// the simulated flag is.
 	closesPayOthers: boolean;
+	// Whether the user confirmed on the review that OISY cannot say what the programs the run calls
+	// it does not know do. True when the run calls none. Asked there and handed on for the same
+	// reason as the two flags above.
+	unreadProgramsAcknowledged: boolean;
 };
 
 export const decode = async ({
@@ -134,14 +139,23 @@ export const decode = async ({
 		preview,
 		instructions: simulatedInstructions,
 		messageSummary,
-		parties: simulatedParties
+		parties: simulatedParties,
+		unreadPrograms
 	} = simulation ?? {};
 
 	// Name the mints and the programs the review is about to show. Best effort and awaited, since
 	// the review is synchronous and a name that landed after the modal opened would arrive too late
 	// to read.
-	const [namedInstructions] = await Promise.all([
+	const [namedInstructions, namedUnreadPrograms] = await Promise.all([
 		loadSolProgramNames({ instructions: simulatedInstructions ?? [], network: solNetwork }),
+		// Each is an instruction nothing here reads, which is what the loader names.
+		loadSolProgramNames({
+			instructions: (unreadPrograms ?? []).map((program) => ({
+				kind: 'unknown' as const,
+				program
+			})),
+			network: solNetwork
+		}),
 		loadSplTokenMetadata({
 			tokenAddresses: (preview?.tokenDeltas ?? []).map(({ tokenAddress }) => tokenAddress),
 			network: solNetwork
@@ -215,6 +229,15 @@ export const decode = async ({
 			simulatedInstructions: nonNullish(simulatedInstructions)
 		}),
 		...(nonNullish(tokenAddress) && { tokenAddress }),
+		// Only from a run: without one there are no nested calls to name, and the review already says
+		// that the lists are then partial.
+		...(nonNullish(unreadPrograms) && {
+			unreadPrograms: unreadPrograms.map((address, index): SolUnreadProgram => {
+				const name = namedUnreadPrograms[index]?.programName;
+
+				return { address, ...(nonNullish(name) && { name }) };
+			})
+		}),
 		parties
 	};
 };
@@ -458,6 +481,7 @@ export const sign = ({
 	identity,
 	simulated,
 	closesPayOthers,
+	unreadProgramsAcknowledged,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
 	execute({
@@ -549,6 +573,20 @@ export const sign = ({
 			if ((unreviewed ?? false) && !simulated) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.unreviewed_without_simulation }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// A program the run calls from inside another one can act on what the user holds in an
+			// application, which neither the balance changes nor the operations show. The review holds
+			// the button until the user confirms they understand that; this is the same condition,
+			// asked where the signature is made.
+			if (!unreadProgramsAcknowledged) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unread_programs_unconfirmed }
 				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
