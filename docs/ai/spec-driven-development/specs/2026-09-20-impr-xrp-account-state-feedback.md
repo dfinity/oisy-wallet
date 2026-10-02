@@ -4,7 +4,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 ## Problem
 
-The XRP send form blocks Next until three figures are known — the account's reserve, the network fee, and the balance. All three are `undefined` while loading **and** `undefined` when loading failed, and the form renders neither state. A user who hits an RPC failure sees a Max of zero and a Next that will not enable, with nothing on screen explaining why or suggesting that anything is being retried.
+The XRP send form blocks Next until three figures are known — the account's reserve, the network fee, and the balance. Before a source has produced a usable value, loading and failure are both represented as `undefined`; after the fee has loaded, a later fee failure retains the last good estimate. The form renders neither loading nor failure. A user who hits an RPC failure before the first successful read sees a Max of zero and a Next that will not enable, with nothing on screen explaining why or suggesting that anything is being retried.
 
 Nothing is broken and nothing is at risk: all three sources retry on their own, so the form recovers without user action. But for a failure lasting more than a few seconds it is indistinguishable from a form that is simply dead, which is the worst reading available for a screen that moves funds.
 
@@ -49,7 +49,8 @@ The distinction matters because the two states call for different things from th
 5. After a balance sync error, the form renders the failure state. It is the only user-facing signal on this path: the worker passes `hideToast: true`, so `syncWalletError` logs a warning and shows nothing.
 6. When a failed source later succeeds, the failure state clears without user action.
 7. `XrpAccountNotFoundError` is not a failure: an account that is not on-ledger owns nothing, the base reserve is the answer, and the form proceeds normally.
-8. The strings are localized across the 13 non-English locales in the `Languages` enum. `ar.json` keeps the empty values the sync writes.
+8. The reading and failure messages are exposed through a persistent polite live region so asynchronous state changes are announced to screen-reader users.
+9. The strings are localized across the 13 non-English locales in the `Languages` enum. `ar.json` keeps the empty values the sync writes.
 
 ## Non-goals
 
@@ -66,13 +67,13 @@ The distinction matters because the two states call for different things from th
 - `src/frontend/src/xrp/services/xrp-listener.services.ts` — `syncWalletError` resets `balancesStore` and, because the worker passes `hideToast: true`, only logs a warning. The error does not reach the user at all today, so this leg needs a state the form can read AND is the only place the failure becomes visible. The most design freedom and the least precedent of the three.
 - `src/frontend/src/xrp/components/send/XrpSendForm.svelte` — renders the state. The `invalid` expression stays as it is; this is presentation, not gating.
 - `src/frontend/src/lib/i18n/en.json` — new strings under `send`, then `npm run i18n` and translations for the 13 shipped locales.
-- `docs/ai/PRODUCT.md` — the XRP section exists on `main`: #13597 created it and has merged, along with the rest of the XRP stack. The workflow's requirement that the `PRODUCT.md` change land in the same PR as the behaviour change is therefore satisfied by basing on `main`, and the section this extends is already there. (Written when `main` had no XRP section and the implementation would have had to sit on top of #13597.)
+- `docs/ai/PRODUCT.md` — update the XRP section in the same implementation PR to describe the new reading and failure feedback. The section added by #13597 provides the existing XRP context, but its presence does not satisfy the workflow requirement for this new behaviour.
 
 ## Open questions (facts to confirm)
 
 1. Does `syncWalletError` fire on every balance sync failure, or only on some? `xrp-wallet.scheduler.ts:110` catches and calls `postMessageWalletError`, but confirm there is no path that resets the balance silently — the form would then show a reading state forever for a case that is really a failure.
 2. ~~Is `hideToast` used anywhere for XRP?~~ **Answered: yes, unconditionally.** `worker.xrp-wallet.services.ts:49-53` is the only caller of `syncWalletError` and always passes `hideToast: true`, so the listener logs a warning and returns. The form state is therefore the only user-facing signal for a balance failure, and criterion 5 carries the whole balance leg rather than supplementing a toast.
-3. Does any other subscriber to `feeStore` / `reserveStore` depend on the exact `bigint | undefined` shape in a way a wider type would break? `XrpFeeDisplay` and `XrpSendAmount` are the known readers; confirm there are no others.
+3. **Answered: yes.** In addition to `XrpSendAmount`, `XrpSendForm` and `XrpFeeDisplay`, `SwapXrpForm`, `SwapXrpFees`, `SwapXrpWizard` and `XrpSendTokenWizard` consume these stores as `bigint | undefined`. Prefer separate failure metadata, or update every consumer and its tests if the value type is widened.
 
 ## Pending decisions (facts are clear — we just need to decide)
 
