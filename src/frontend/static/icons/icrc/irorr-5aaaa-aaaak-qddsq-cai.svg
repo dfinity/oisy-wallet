@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with Vectornator (http://vectornator.io/) -->
+<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 1024 1024" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs/>
+<g id="Layer-1"/>
+<clipPath id="ArtboardFrame">
+<rect height="1024" width="1024" x="0" y="0"/>
+</clipPath>
+<g clip-path="url(#ArtboardFrame)" id="Bg-2">
+<path d="M0 512C0 229.23 229.23 0 512 0C794.77 0 1024 229.23 1024 512C1024 794.77 794.77 1024 512 1024C229.23 1024 0 794.77 0 512Z" fill="#000000" fill-rule="nonzero" opacity="1" stroke="none"/>
+</g>
+<g id="Foreground">
+<path d="M564.453 769.205L343.094 769.205L343.094 255.375L564.453 255.375C596.291 255.84 622.784 259.558 643.933 266.53C679.954 278.382 709.12 300.111 731.43 331.717C749.325 357.281 761.526 384.936 768.033 414.683C774.54 444.43 777.793 472.783 777.793 499.741C777.793 568.066 764.082 625.932 736.659 673.342C699.476 737.251 642.073 769.205 564.453 769.205ZM644.281 386.447C627.781 358.559 595.129 344.615 546.326 344.615L447.324 344.615L447.324 679.965L546.326 679.965C596.988 679.965 632.313 654.982 652.299 605.017C663.222 577.594 668.683 544.942 668.683 507.061C668.683 454.772 660.549 414.567 644.281 386.447Z" fill="#ffffff" opacity="1" stroke="none"/>
+</g>
+<g id="Layer-2">
+<path d="M381 160L450 160L450 256L381 256L381 160Z" fill="#ffffff" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M512 160L581 160L581 287.154L512 287.154L512 160Z" fill="#ffffff" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M381 754.904L450 754.904L450 864L381 864L381 754.904Z" fill="#ffffff" fill-rule="nonzero" opacity="1" stroke="none"/>
+<path d="M512 736.842L581 736.842L581 864L512 864L512 736.842Z" fill="#ffffff" fill-rule="nonzero" opacity="1" stroke="none"/>
+</g>
+</svg>
