@@ -15,7 +15,9 @@ pointer; the detailed step-by-step lives in [HACKING.md](../../../../HACKING.md)
 - **Tokens (catalog):** `$env/tokens/<chain>/`. Generated catalogues
   (`tokens.{sns,ckerc20,icrc,ext}.json` and `tokens-erc20/`,
   `tokens-ext/`) are produced by `build:tokens-*` scripts and the
-  `update-tokens` workflow — do not hand-edit them.
+  `update-tokens` workflow — do not hand-edit the fields they produce.
+  Curated fields no script produces (such as `tags`) are set by hand in
+  the JSON; see [Hand-set fields](#hand-set-fields-in-the-token-json).
 - **Per-chain code:** `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$icp-eth`.
   Each mirrors a subset of `$lib`'s buckets (components, services,
   derived, schedulers, workers, …).
@@ -27,6 +29,28 @@ pointer; the detailed step-by-step lives in [HACKING.md](../../../../HACKING.md)
   - Exchange rates: `$lib/services/exchange.services.ts` +
     `$lib/workers/exchange.worker.ts` + `$lib/derived/exchange.derived.ts`.
   - CSP: [`scripts/build.csp.mjs`](../../../../scripts/build.csp.mjs).
+
+## Hand-set fields in the token JSON
+
+Each `build:tokens-*` script rewrites its JSON but carries some fields
+over from the existing file. Those are the hand-set fields: no script
+produces them, so they are edited by hand in the JSON. Every other field
+is generated, and a hand edit to it is overwritten or dropped on the
+next run.
+
+| JSON                         | Entries come from                                          | Kept from the existing file (edit by hand)                                                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tokens.icrc.json`           | The file itself: a new token is added here by hand         | Every field `EnvIcTokenSchema` declares that the ledger does not report: `tags`, `groupDataId`, `metadataOnly`, and `indexCanisterId` when the ledger lacks ICRC-106. Undeclared fields are dropped. |
+| `tokens.sns.json`            | The SNS aggregator                                         | `tags` and `groupDataId`, matched by `ledgerCanisterId`. Deprecation comes from `tokens.sns.deprecated.env.ts`, not the JSON.                                                                        |
+| `tokens.ckerc20.json`        | The ckETH orchestrators (production and staging)           | `tags` and `groupDataId`, matched by environment and token symbol.                                                                                                                                   |
+| `tokens-ext/tokens.ext.json` | The Toniq collection list, plus entries it no longer lists | `tags`, matched by `canisterId`. An entry Toniq no longer lists is kept whole.                                                                                                                       |
+
+Generated, never hand-edited: the metadata a ledger or upstream list
+reports (`name`, `symbol`, `decimals`, `fee`, `icon`, `mintingAccount`,
+SNS `metadata`, EXT `standardVersion`, …). A field a script does not keep
+— e.g. `metadataOnly` on an SNS or ckERC20 entry — is lost on the next
+run; extend that script first (`scripts/build.*` is a protected path, see
+[governance](../../governance.md#boundaries)).
 
 ## Recipe (compressed)
 
@@ -82,9 +106,11 @@ A token / network add is naturally cross-cutting. To stay reviewable:
 
 - Hand-edit `src/declarations/**` after a backend variant change — run
   `npm run generate`.
-- Hand-edit any `tokens.*.json` under `$env/tokens/`. Run the matching
-  `npm run build:tokens-*` script (or let the `update-tokens` workflow
-  do it).
+- Hand-edit a generated field in `tokens.{sns,ckerc20,icrc,ext}.json`.
+  Run the matching `npm run build:tokens-*` script (or let the
+  `update-tokens` workflow do it). Only the
+  [hand-set fields](#hand-set-fields-in-the-token-json) are edited by
+  hand.
 - Add a coingecko platform to `coingecko.schema.ts` and forget the
   duplicate gate in `buildErc20PriceParams`
   (`$lib/utils/exchange.utils.ts`) — a platform missing there is dropped
