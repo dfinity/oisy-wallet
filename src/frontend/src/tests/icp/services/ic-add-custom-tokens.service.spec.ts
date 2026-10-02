@@ -161,28 +161,6 @@ describe('ic-add-custom-tokens.service', () => {
 						msg: { text: get(i18n).tokens.import.error.no_metadata }
 					});
 				});
-
-				it('should return error if token already exits', async () => {
-					spyBalance = ledgerCanisterMock.balance.mockResolvedValue(123n);
-
-					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
-						['icrc1:name', { Text: tokenName }],
-						['icrc1:symbol', { Text: tokenSymbol }],
-						['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
-						['icrc1:fee', { Nat: tokenFee }]
-					]);
-
-					const result = await loadAndAssertAddCustomToken({
-						...validParams,
-						icrcTokens: [existingToken]
-					});
-
-					expect(result).toEqual({ result: 'error' });
-
-					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-						msg: { text: get(i18n).tokens.error.duplicate_metadata }
-					});
-				});
 			});
 
 			describe('with index canister', () => {
@@ -221,37 +199,6 @@ describe('ic-add-custom-tokens.service', () => {
 
 					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
 						msg: { text: get(i18n).tokens.import.error.no_metadata }
-					});
-				});
-
-				it('should return error if token already exits', async () => {
-					spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
-						Principal.fromText(mockLedgerCanisterId)
-					);
-
-					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-						balance: 100n,
-						transactions: [],
-						oldest_tx_id: [ZERO]
-					});
-
-					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
-						['icrc1:name', { Text: tokenName }],
-						['icrc1:symbol', { Text: tokenSymbol }],
-						['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
-						['icrc1:fee', { Nat: tokenFee }]
-					]);
-
-					const result = await loadAndAssertAddCustomToken({
-						...validParams,
-						indexCanisterId: mockIndexCanisterId,
-						icrcTokens: [existingToken]
-					});
-
-					expect(result).toEqual({ result: 'error' });
-
-					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-						msg: { text: get(i18n).tokens.error.duplicate_metadata }
 					});
 				});
 			});
@@ -318,6 +265,15 @@ describe('ic-add-custom-tokens.service', () => {
 				expect(result).toBe('success');
 			};
 
+			const assertLoadTokenSameMetadata = async (params: LoadAndAssertAddCustomTokenParams) => {
+				const { result } = await loadAndAssertAddCustomToken({
+					...params,
+					icrcTokens: [existingToken]
+				});
+
+				expect(result).toBe('success');
+			};
+
 			it('should init ledger with expected canister id', async () => {
 				await loadAndAssertAddCustomToken(validParams);
 
@@ -365,6 +321,10 @@ describe('ic-add-custom-tokens.service', () => {
 
 				it('should successfully load a new token if name and symbol is different', async () => {
 					await assertLoadTokenDifferent(validParams);
+				});
+
+				it('should successfully load a new token even if another token has the same symbol', async () => {
+					await assertLoadTokenSameMetadata(validParams);
 				});
 			});
 
@@ -428,6 +388,10 @@ describe('ic-add-custom-tokens.service', () => {
 
 				it('should successfully load a new token if name and symbol is different', async () => {
 					await assertLoadTokenDifferent(validParamsWithIndex);
+				});
+
+				it('should successfully load a new token even if another token has the same symbol', async () => {
+					await assertLoadTokenSameMetadata(validParamsWithIndex);
 				});
 			});
 		});
