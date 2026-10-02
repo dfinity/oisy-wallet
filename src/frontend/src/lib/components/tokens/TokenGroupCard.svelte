@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
@@ -17,6 +16,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
+	import { compareTokensInGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
 	import { filterTokensUiByCategory } from '$lib/utils/token-tag.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
@@ -41,10 +41,6 @@
 
 	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
-	const showTokenInGroup = (token: TokenUi) => token.neverCollapseInTokenGroup;
-	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
-	const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
-
 	const categoryFilteredTokens: TokenUi[] = $derived(
 		$showTokenCategoryFilter
 			? filterTokensUiByCategory({
@@ -63,26 +59,7 @@
 
 	const totalUsdBalance: number = $derived(sumTokensUiUsdBalance(filteredTokens));
 
-	// eslint-disable-next-line local-rules/prefer-object-params -- This is a sort function.
-	const compareTokens = (a: TokenUi, b: TokenUi): number => {
-		// Highest balance first
-		const usdBalanceDiff = (b.usdBalance ?? 0) - (a.usdBalance ?? 0);
-		if (usdBalanceDiff !== 0) {
-			return usdBalanceDiff;
-		}
-
-		// If same balance, order by showTokenInGroup (neverCollapseInTokenGroup) > CK > others
-		if (showTokenInGroup(a) !== showTokenInGroup(b)) {
-			return showTokenInGroup(a) ? -1 : 1;
-		}
-		if (isCkToken(a) !== isCkToken(b)) {
-			return isCkToken(a) ? -1 : 1;
-		}
-
-		return collator.compare(a.network.name, b.network.name);
-	};
-
-	const sortedFilteredTokens: TokenUi[] = $derived([...filteredTokens].sort(compareTokens));
+	const sortedFilteredTokens: TokenUi[] = $derived([...filteredTokens].sort(compareTokensInGroup));
 
 	// list of tokens that should display with a "show more" button for not displayed ones
 	const truncatedTokens: TokenUi[] = $derived(
