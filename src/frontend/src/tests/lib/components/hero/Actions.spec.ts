@@ -1,3 +1,4 @@
+import * as cyclesMintEnv from '$env/cycles-mint.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -7,16 +8,20 @@ import Actions from '$lib/components/hero/Actions.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	BUY_TOKENS_MODAL_OPEN_BUTTON,
+	CYCLES_MINT_BUTTON,
 	NFT_HERO_CHECK_NEW_BUTTON,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
 	SWAP_TOKENS_MODAL_OPEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
+import * as pageTokenDerived from '$lib/derived/page-token.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { HERO_CONTEXT_KEY, initHeroContext } from '$lib/stores/hero.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { mockTcyclesToken } from '$tests/mocks/cycles-mint.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -283,6 +288,66 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('cycles mint button visibility', () => {
+		const cyclesMintButtonSelector = `button[data-tid="${CYCLES_MINT_BUTTON}"]`;
+
+		const setTokenPage = (token: typeof mockTcyclesToken) => {
+			setTransactionsPage();
+			mockPage.mockToken(token);
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(token));
+			vi.spyOn(swapDerived, 'isPageTokenSwappable', 'get').mockReturnValue(readable(true));
+		};
+
+		const enable = (enabled: boolean) =>
+			vi.spyOn(cyclesMintEnv, 'CYCLES_MINT_ENABLED', 'get').mockReturnValue(enabled);
+
+		it('should show Mint on the TCYCLES page as the fourth button, after Receive, Send and Swap', () => {
+			enable(true);
+			setTokenPage(mockTcyclesToken);
+
+			const { container } = renderActions();
+
+			const testIds = [...container.querySelectorAll('button[data-tid]')].map((button) =>
+				button.getAttribute('data-tid')
+			);
+
+			expect(testIds.slice(0, 4)).toEqual([
+				RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+				SEND_TOKENS_MODAL_OPEN_BUTTON,
+				SWAP_TOKENS_MODAL_OPEN_BUTTON,
+				CYCLES_MINT_BUTTON
+			]);
+		});
+
+		it('should hide Mint on any other token page', () => {
+			enable(true);
+			setTokenPage(mockValidIcrcToken);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(cyclesMintButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide Mint outside the token page', () => {
+			enable(true);
+			setTokensPage();
+			vi.spyOn(pageTokenDerived, 'pageToken', 'get').mockReturnValue(readable(mockTcyclesToken));
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(cyclesMintButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide Mint while the rollout flag is off', () => {
+			enable(false);
+			setTokenPage(mockTcyclesToken);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(cyclesMintButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 });

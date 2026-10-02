@@ -205,6 +205,13 @@ export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // Active user transactions polling
 export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 seconds
+
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN`, in UTF-8 bytes — `validate_error` compares
+// `str::len()`. An update carrying a longer `error` is rejected whole, status included.
+export const ACTIVE_USER_TRANSACTION_ERROR_MAX_BYTES = 512;
+// The backend's `MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN`, in UTF-8 bytes, compared the
+// same way. An update carrying a longer ref value is rejected whole, too.
+export const ACTIVE_USER_TRANSACTION_REF_VALUE_MAX_BYTES = 256;
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute

@@ -1,4 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import {
 	SwapProvider,
 	type FindProviderSourceTokens,
@@ -16,6 +17,10 @@ describe('buildNearIntentsSupportedDestinations', () => {
 	const btcId = nativeSwapTokenIdentifier({
 		networkId: BTC_MAINNET_TOKEN.network.id,
 		symbol: BTC_MAINNET_TOKEN.symbol
+	});
+	const xrpId = nativeSwapTokenIdentifier({
+		networkId: XRP_TOKEN.network.id,
+		symbol: XRP_TOKEN.symbol
 	});
 
 	const noLookup: FindProviderSourceTokens = () => undefined;
@@ -270,6 +275,68 @@ describe('buildNearIntentsSupportedDestinations', () => {
 			});
 
 			expect(result).toEqual({ btc: supportedSourceTokens });
+		});
+	});
+
+	describe('category = xrp', () => {
+		const xrpFn = buildNearIntentsSupportedDestinations('xrp');
+
+		it('returns undefined when source token category does not match (BTC source)', () => {
+			const result = xrpFn({
+				sourceToken: BTC_MAINNET_TOKEN,
+				supportedSourceTokens: new Set([xrpId]),
+				findProviderSourceTokens: noLookup
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('returns undefined when source identifier is not in supportedSourceTokens', () => {
+			const result = xrpFn({
+				sourceToken: XRP_TOKEN,
+				supportedSourceTokens: new Set(['not-xrp']),
+				findProviderSourceTokens: noLookup
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('returns the supported set as xrp and looks up the sibling evm, sol and btc sets', () => {
+			const supportedSourceTokens = new Set([xrpId]);
+			const sisterEvm = new Set([evmId]);
+			const sisterSol = new Set([solId]);
+			const sisterBtc = new Set([btcId]);
+
+			const siblings: SwapCategorizedTokenIds = { evm: sisterEvm, sol: sisterSol, btc: sisterBtc };
+
+			const findProviderSourceTokens: FindProviderSourceTokens = ({ key, category }) =>
+				key === SwapProvider.NEAR_INTENTS ? siblings[category] : undefined;
+
+			const result = xrpFn({
+				sourceToken: XRP_TOKEN,
+				supportedSourceTokens,
+				findProviderSourceTokens
+			});
+
+			expect(result).toEqual({
+				xrp: supportedSourceTokens,
+				evm: sisterEvm,
+				sol: sisterSol,
+				btc: sisterBtc
+			});
+		});
+
+		it('is advertised by the evm entry once a NEAR Intents xrp sibling is registered', () => {
+			const sisterXrp = new Set([xrpId]);
+
+			const result = buildNearIntentsSupportedDestinations('evm')({
+				sourceToken: mockValidErc20Token,
+				supportedSourceTokens: new Set([evmId]),
+				findProviderSourceTokens: ({ key, category }) =>
+					key === SwapProvider.NEAR_INTENTS && category === 'xrp' ? sisterXrp : undefined
+			});
+
+			expect(result).toEqual({ evm: new Set([evmId]), xrp: sisterXrp });
 		});
 	});
 });

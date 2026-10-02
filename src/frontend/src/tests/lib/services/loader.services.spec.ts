@@ -254,6 +254,7 @@ describe('loader.services', () => {
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ RobinhoodMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
 								[{ XrpMainnet: null }, { enabled: false, is_testnet: false }]
 							]

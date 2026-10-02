@@ -35,7 +35,14 @@
 		<div
 			class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
 		>
-			<div class="flex items-center gap-4">
+			<!--
+				Signed in, these two links are also rows of the More menu pinned to the
+				bottom of the sidebar, so from `md` up they would be listed twice. Below
+				`md` there is no sidebar and the mobile More sheet does not carry them,
+				so this is still their only place there. Signed out, the landing page
+				sits outside `AuthGuard` and has no menu at all.
+			-->
+			<div class="flex items-center gap-4" class:md:hidden={$authSignedIn}>
 				<ExternalLinkIcon
 					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 					href={OISY_TWITTER_URL}

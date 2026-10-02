@@ -3,6 +3,7 @@ import { SUPPORTED_BITCOIN_NETWORKS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
+import { SUPPORTED_XRP_NETWORKS } from '$env/networks/networks.xrp.env';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import {
 	areAddressesEqual,
@@ -12,6 +13,9 @@ import {
 import { parseNetworkId } from '$lib/validation/network.validation';
 
 describe('address.utils', () => {
+	// Solana and XRP Ledger addresses are base58, so both compare case-sensitively
+	const caseSensitiveNetworks = [...SUPPORTED_SOLANA_NETWORKS, ...SUPPORTED_XRP_NETWORKS];
+
 	describe('getCaseSensitiveness', () => {
 		it.each(['Btc', 'Eth', 'Icrcv2', 'unknown'])(
 			'should return false for %s address type',
@@ -22,8 +26,8 @@ describe('address.utils', () => {
 			}
 		);
 
-		it('should return true for Sol address type', () => {
-			const addressType = 'Sol' as TokenAccountIdTypes;
+		it.each(['Sol', 'Xrp'])('should return true for %s address type', (rawAddressType) => {
+			const addressType = rawAddressType as TokenAccountIdTypes;
 
 			expect(getCaseSensitiveness({ addressType })).toBeTruthy();
 		});
@@ -37,12 +41,9 @@ describe('address.utils', () => {
 			expect(getCaseSensitiveness({ networkId })).toBeFalsy();
 		});
 
-		it.each(SUPPORTED_SOLANA_NETWORKS)(
-			'should return true for network $name',
-			({ id: networkId }) => {
-				expect(getCaseSensitiveness({ networkId })).toBeTruthy();
-			}
-		);
+		it.each(caseSensitiveNetworks)('should return true for network $name', ({ id: networkId }) => {
+			expect(getCaseSensitiveness({ networkId })).toBeTruthy();
+		});
 
 		it('should return false for unknown network', () => {
 			expect(
@@ -103,8 +104,8 @@ describe('address.utils', () => {
 			});
 		});
 
-		describe('for Sol address type', () => {
-			const addressType = 'Sol' as TokenAccountIdTypes;
+		describe.each(['Sol', 'Xrp'])('for %s address type', (rawAddressType) => {
+			const addressType = rawAddressType as TokenAccountIdTypes;
 
 			it('should return true for equal addresses', () => {
 				expect(areAddressesEqual({ address1, address2: address1, addressType })).toBeTruthy();
@@ -142,7 +143,7 @@ describe('address.utils', () => {
 			});
 		});
 
-		describe.each(SUPPORTED_SOLANA_NETWORKS)('for network $name', ({ id: networkId }) => {
+		describe.each(caseSensitiveNetworks)('for network $name', ({ id: networkId }) => {
 			it('should return true for equal addresses', () => {
 				expect(areAddressesEqual({ address1, address2: address1, networkId })).toBeTruthy();
 			});
@@ -234,7 +235,7 @@ describe('address.utils', () => {
 			});
 		});
 
-		describe.each(SUPPORTED_SOLANA_NETWORKS)('for network $name', ({ id: networkId }) => {
+		describe.each(caseSensitiveNetworks)('for network $name', ({ id: networkId }) => {
 			it('should return true for equal addresses', () => {
 				expect(
 					areAddressesPartiallyEqual({ address1, address2: address1, networkId })

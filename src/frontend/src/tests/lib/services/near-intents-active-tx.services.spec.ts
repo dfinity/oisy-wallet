@@ -7,8 +7,14 @@ import {
 	type NearIntentsSwapDetails,
 	type NearIntentsSwapStatus
 } from '$lib/types/near-intents';
-import { mockNearIntentsActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import {
+	mockNearIntentsActiveUserTransaction,
+	mockXrpLastLedgerSequence,
+	mockXrpSwapActiveUserTransaction,
+	mockXrpTxHash
+} from '$tests/mocks/active-user-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { XRP_EXTERNAL_REF_KEYS } from '$xrp/types/xrp-active-tx';
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsStatus: vi.fn()
@@ -225,6 +231,41 @@ describe('near-intents-active-tx.services', () => {
 					update: expect.objectContaining({
 						externalRefs: expect.arrayContaining([
 							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.ORIGIN_TX_HASH, value: '0xorigin' }
+						])
+					})
+				})
+			);
+		});
+
+		// The backend refuses an update to a swap from XRP whose refs lack the deposit's poll keys, so
+		// rewriting the refs must carry them over — or the swap could never reach its outcome.
+		it('keeps the deposit poll keys of a swap from XRP when it persists learned refs', async () => {
+			vi.mocked(nearIntentsRest.fetchNearIntentsStatus).mockResolvedValue(
+				statusResponse({
+					status: 'SUCCESS',
+					swapDetails: {
+						originChainTxHashes: [{ hash: mockXrpTxHash, explorerUrl: 'https://e/origin' }],
+						destinationChainTxHashes: [{ hash: '0xdest', explorerUrl: 'https://e/0xdest' }]
+					}
+				})
+			);
+
+			await pollNearIntentsActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [{ ...mockXrpSwapActiveUserTransaction, status: { Executing: null } }]
+			});
+
+			expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					update: expect.objectContaining({
+						status: { Succeeded: null },
+						externalRefs: expect.arrayContaining([
+							{ key: XRP_EXTERNAL_REF_KEYS.TX_HASH, value: mockXrpTxHash },
+							{
+								key: XRP_EXTERNAL_REF_KEYS.LAST_LEDGER_SEQUENCE,
+								value: `${mockXrpLastLedgerSequence}`
+							},
+							{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_TX_HASH, value: '0xdest' }
 						])
 					})
 				})

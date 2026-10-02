@@ -132,6 +132,9 @@
 			"pay": "",
 			"wallet_connect": "",
 			"source_code_on_github": "Quellcode auf GitHub",
+			"x": "",
+			"help": "Hilfe",
+			"faq": "",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
 			"documentation": "Dokumentation",
@@ -163,7 +166,10 @@
 			"menu": "Deine Wallet-Adresse, Einstellungen, Abmelden und externe Links",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
+			"help_page": "Hilfeseite öffnen",
 			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
+			"more": "",
+			"faq": "",
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
@@ -788,6 +794,60 @@
 			"toggle_privacy_mode": "Privatsphären Modus aktivieren oder deaktivieren"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "Hilfe",
+			"support_title": "Support",
+			"support_description": "Antworten und weitere Informationen findest du auf der Support-Seite in der $oisy_name-Dokumentation. Wenn du nicht weiterkommst, melde dich beim Team.",
+			"support_link": "Zu unserer Support-Seite",
+			"network_explorers_title": "",
+			"network_explorers_description": "",
+			"explorers_title": "",
+			"explorers_description": "",
+			"explorers_velora_description": "",
+			"explorers_near_intents_description": "",
+			"explorers_onesec_description": "",
+			"explorers_chain_eth": "",
+			"explorers_chain_sol": "",
+			"explorers_chain_btc": "",
+			"explorers_chain_icp": "",
+			"icpswap_title": "ICPSwap-Token-Auszahlung",
+			"icpswap_description": "Bei einem Swap über ICPSwap wandern deine Tokens zuerst in einen Pool, bevor sie an dich zurückgehen. Ist dieser letzte Schritt fehlgeschlagen, gehören die Tokens weiterhin dir und liegen noch im Pool. $oisy_name kann danach suchen und sie zurücksenden.",
+			"scan": "Meine Pools prüfen",
+			"scanning": "Deine Pools werden geprüft…",
+			"scan_hint": "Prüft jeden Pool zwischen zwei Tokens, die in deinem Wallet aktiv sind. Hast du in ein Token getauscht, das du nie aktiviert hast, aktiviere es zuerst und prüfe dann erneut oder gib das Paar unten an.",
+			"scan_nothing_found": "In den $pools geprüften Pools ist nichts zurückgeblieben.",
+			"scan_unreadable": "$unreadable der $pools Pools konnten nicht gelesen werden. Versuche es erneut oder gib das Paar unten an.",
+			"or_pick_a_pair": "Oder Paar angeben",
+			"token_first": "Erstes Token",
+			"token_second": "Zweites Token",
+			"select_token": "Auswählen",
+			"no_tokens": "Nur ICP ist auswählbar. Aktiviere zuerst das fehlende Token des Pools – oder beide, wenn der Pool kein ICP enthält.",
+			"checking_pool": "Pool wird geprüft…",
+			"nothing_to_withdraw": "In diesem Pool gibt es nichts auszuzahlen.",
+			"results_found": "Gefundene auszahlbare Guthaben: $balances.",
+			"balance_unused": "Ungenutztes Guthaben",
+			"withdraw": "Auszahlen"
+		},
+		"alt": {
+			"network_explorer_link": "",
+			"explorer_link": "",
+			"select_token_first": "Erstes Token des Pools auswählen",
+			"select_token_second": "Zweites Token des Pools auswählen",
+			"withdraw": "$symbol aus dem Pool auszahlen",
+			"scan": "Pools zwischen deinen aktiven Tokens prüfen"
+		},
+		"error": {
+			"pool_not_found": "Für dieses Paar konnte kein Pool gefunden werden. Prüfe die beiden Tokens oder versuche es gleich noch einmal.",
+			"load_failed": "Deine Guthaben in diesem Pool konnten nicht gelesen werden.",
+			"withdraw_failed": "Die Auszahlung ist fehlgeschlagen.",
+			"scan_failed": "Die Liste der ICPSwap-Pools konnte nicht geladen werden."
+		},
+		"success": {
+			"withdraw": "$amount $symbol aus dem Pool ausgezahlt.",
+			"withdraw_hidden": "$symbol aus dem Pool ausgezahlt."
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Einrichten",
@@ -950,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Senden",
+			"xrp_sent": "Ihre XRP-Zahlung ist durchgegangen.",
+			"xrp_submitted": "Zahlung übermittelt. Sie wird meist innerhalb von Sekunden abgeschlossen — Sie können dies schließen und weitermachen.",
 			"send_token": "",
 			"send_unknown_token": "",
 			"destination": "Ziel",
@@ -970,7 +1032,7 @@
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
-			"xrp_destination_tag": "Ziel-Tag",
+			"xrp_destination_tag": "XRP-Ziel-Tag",
 			"initializing_transaction": "Transaktion initialisieren",
 			"convert_to_native_icp": "In natives ICP umwandeln",
 			"open_qr_modal": "QR-Code-Scan für Transaktionsdetails starten",
@@ -993,8 +1055,7 @@
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
-			"enter_xrp_address": "XRP-Adresse eingeben",
-			"xrp_destination_tag": "Gib Ziel-Tag ein (optional)",
+			"xrp_destination_tag": "Gib XRP-Ziel-Tag ein (optional)",
 			"select_network": "Netzwerk auswählen",
 			"search_nfts": "Sammlerstücke suchen"
 		},
@@ -1005,6 +1066,8 @@
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
 			"first_time_destination": "Es sieht so aus, als hättest du noch nie Tokens an diese Adresse gesendet. Prüfe die Adresse sorgfältig.",
 			"first_time_destination_confirm": "Ich sende zum ersten Mal Tokens an diese Adresse und habe die Adresse sorgfältig geprüft.",
+			"xrp_destination_tag_hint": "Wird von den meisten Börsen verlangt. Ohne Tag können deine Mittel verloren gehen.",
+			"xrp_destination_tag_missing": "Kein XRP-Ziel-Tag. Wenn du an eine Börse sendest, prüfe, ob sie eines verlangt, sonst können deine Mittel verloren gehen.",
 			"fee_expired": "",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",
@@ -1023,7 +1086,7 @@
 			"unknown_cketh": "Das ckETH-Token kann nicht abgerufen werden.",
 			"destination_address_invalid": "Zieladresse ist ungültig.",
 			"amount_invalid": "Betrag ist ungültig.",
-			"xrp_destination_tag_invalid": "Das Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
+			"xrp_destination_tag_invalid": "Das XRP-Ziel-Tag muss eine ganze Zahl zwischen 0 und 4294967295 sein.",
 			"insufficient_funds_verbose_btc": "",
 			"insufficient_funds_for_reserve": "Unzureichende Mittel: Der Betrag muss genug übrig lassen, um die Gebühr und die erforderliche XRP-Kontoreserve zu decken.",
 			"insufficient_funds_for_gas": "Unzureichende Mittel für Gas.",
@@ -1061,8 +1124,6 @@
 			"no_btc_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Bitcoin-Netzwerk.",
 			"no_solana_network_id": "Das aktuelle Netzwerk ($networkId) ist kein Solana-Netzwerk.",
 			"no_xrp_network_id": "Das aktuelle Netzwerk ($networkId) ist kein XRP Ledger-Netzwerk.",
-			"xrp_confirmation_failed": "Wir konnten nicht bestätigen, ob die Transaktion gesendet wurde. Sie kann noch durchgehen, senden Sie sie daher noch nicht erneut — Ihr Guthaben wird aktualisiert, falls sie durchgeht.",
-			"xrp_transaction_failed": "Die Transaktion wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"no_pending_bitcoin_transaction": "Beim Laden der ausstehenden Bitcoin-Transaktionen ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist ein Fehler aufgetreten.",
 			"unable_to_retrieve_amount": "n/v (Betrag konnte nicht abgerufen werden)",
@@ -1073,19 +1134,22 @@
 			"solana_insufficient_funds_for_fee": "Ihr SOL-Guthaben reicht nicht aus, um die Transaktionsgebühren zu decken.",
 			"solana_insufficient_funds_for_rent": "Ihr SOL-Guthaben reicht nicht aus, um die für die Kontoerstellung erforderliche Miete zu decken.",
 			"fee_calc_unsupported_standard": "Die Gebühr konnte nicht berechnet werden, da der angegebene Token-Standard nicht unterstützt wird.",
-			"xrp_send_expired": "Die Transaktion wurde nicht gesendet: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und es ist sicher, eine neue zu erstellen.",
+			"xrp_send_expired": "Ihre Sendung von $amount $symbol auf $network wurde nicht abgeschlossen: Das Netzwerk hat sie nicht rechtzeitig aufgenommen. Es hat nichts Ihre Wallet verlassen, und ein erneutes Senden ist sicher.",
+			"xrp_send_already_in_flight": "Eine frühere XRP-Zahlung von dieser Adresse ist noch nicht abgeschlossen. Es wurde nichts gesendet — warten Sie, bis sie fertig ist, das dauert etwa eine Minute, und senden Sie dann erneut.",
+			"xrp_send_not_guarded": "Wir konnten nicht prüfen, ob eine frühere XRP-Zahlung noch abgeschlossen wird. Es wurde nichts gesendet — versuchen Sie es in einem Moment erneut.",
+			"xrp_active_transaction_failed": "Ihre Sendung von $amount $symbol auf $network wurde vom Netzwerk verarbeitet, ist aber fehlgeschlagen ($result) – Ihr Guthaben wurde nicht gesendet. Die Netzwerkgebühr wurde dennoch berechnet.",
 			"xrp_amount_exceeds_sendable": "Der Betrag passt nicht mehr. Ihr Konto muss seine XRP-Reserve zuzüglich der Netzwerkgebühr behalten, und beides kann sich während der Prüfung ändern. Es wurde nichts gesendet – verringern Sie den Betrag oder versuchen Sie es erneut, sobald die Kontodaten aktualisiert sind.",
 			"xrp_destination_unfunded": "Diese Adresse hat noch kein XRP-Konto. Dessen Erstellung erfordert eine erste Zahlung von mindestens $reserve XRP. Es wurde nichts gesendet – erhöhen Sie den Betrag oder senden Sie an eine bereits finanzierte Adresse.",
-			"xrp_destination_tag_required": "Diese Adresse erfordert ein Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut.",
+			"xrp_destination_tag_required": "Diese Adresse erfordert ein XRP-Ziel-Tag. Es wurde nichts gesendet – fügen Sie das Tag hinzu, das Sie vom Dienst erhalten haben, an den Sie zahlen, und senden Sie erneut.",
 			"xrp_destination_is_source": "Das ist Ihre eigene XRP-Adresse. Es wurde nichts gesendet – wählen Sie einen anderen Empfänger.",
 			"xrp_account_state_unavailable": "Die Wallet konnte Ihre Kontodaten nicht lesen, daher ließ sich der Betrag nicht prüfen. Es wurde nichts gesendet – versuchen Sie es in einem Moment erneut."
 		}
 	},
 	"mint": {
 		"text": {
-			"mint": "",
-			"minting": "",
-			"mint_review_subtitle": ""
+			"mint": "Minten",
+			"minting": "Wird gemintet...",
+			"mint_review_subtitle": "Du mintest"
 		}
 	},
 	"burn": {
@@ -1093,6 +1157,31 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "$token minten",
+			"description": "Beim Minten entstehen zum Kurs des Netzwerks neue $destinationToken aus $sourceToken, und die $sourceToken werden verbrannt.",
+			"you_mint_estimate": "Du mintest (geschätzt)",
+			"rate": "Kurs",
+			"cycles_ledger_fee": "Cycles-Ledger-Gebühr",
+			"minter": "Gemintet von",
+			"one_way": "Minten lässt sich nicht rückgängig machen: $destinationToken können nicht zurück in $sourceToken getauscht werden.",
+			"sending": "$token wird an den $minter gesendet...",
+			"minting": "$token wird gemintet...",
+			"minted": "$amount $token gemintet.",
+			"pending": "Das Minten dauert länger als üblich. Es wird im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
+		},
+		"error": {
+			"rate_unavailable": "Der $token-Kurs konnte nicht geladen werden. Bitte versuche es später erneut.",
+			"amount_too_small": "Der Betrag ist zu klein, um $token zu minten.",
+			"refunded": "Das Minten wurde rückerstattet. Deine $token wurden abzüglich $refundFee $token zurückgezahlt. Grund: $reason",
+			"refunded_nothing": "Das Minten wurde rückerstattet, aber die Gebühren haben den ganzen Betrag aufgebraucht: Es wurden keine $token zurückgezahlt. Grund: $reason",
+			"failed": "Das Minten ist fehlgeschlagen. Grund: $reason",
+			"not_started": "Das Minten konnte nicht gestartet werden. Es wurde nichts gesendet, bitte versuche es erneut.",
+			"transfer_failed": "Die $token-Überweisung ist fehlgeschlagen. Es wurde nichts gesendet.",
+			"unconfirmed": "Die $token-Überweisung konnte nicht bestätigt werden. Falls sie durchgegangen ist, wird das Minten im Hintergrund abgeschlossen: Du kannst es in den aktiven Transaktionen verfolgen."
 		}
 	},
 	"active_user_transactions": {
@@ -1409,7 +1498,8 @@
 				"info": "Ledger- und Index-Canister-IDs sind normalerweise auf der Website des Projekts verfügbar.",
 				"info_ext": "",
 				"info_index": "Die Index-Canister-ID ist optional, aber ohne sie kann $oisy_short den Transaktionsverlauf nicht anzeigen.",
-				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
+				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token.",
+				"custom_tokens_not_supported_yet": "OISY unterstützt in diesem Netzwerk noch keine benutzerdefinierten Token."
 			},
 			"error": {
 				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
@@ -1505,7 +1595,11 @@
 			"crypto": "Krypto",
 			"stablecoin": "Stablecoins",
 			"stock": "Aktien",
-			"commodity": "Rohstoffe"
+			"commodity": "Rohstoffe",
+			"compute": "Rechenleistung"
+		},
+		"category_in_sentence": {
+			"compute": "Token für Rechenleistung"
 		},
 		"risk": {
 			"low": "Geringes Risiko",
@@ -1668,6 +1762,7 @@
 			"unreviewed_instructions": "OISY kann einige dieser Anweisungen nicht entschlüsseln, daher ist die Überprüfung unten möglicherweise unvollständig.",
 			"unreviewed_instructions_simulated": "Diese Transaktion enthält Operationen aus einer externen Quelle, die OISY nicht entschlüsseln kann, daher hat OISY eine Simulation davon durchgeführt. Vergewissern Sie sich, dass Sie der Anwendung vertrauen, und überprüfen Sie vor dem Signieren die simulierten Guthabenänderungen und Operationen. Beachten Sie, dass das tatsächliche Ergebnis von der Simulation abweichen kann.",
 			"cannot_be_shown": "Diese Transaktion enthält Aktionen, die sich nicht alle korrekt zur Prüfung anzeigen lassen – OISY signiert sie daher nicht. Lehnen Sie sie ab und bitten Sie die App um eine einfachere Anfrage.",
+			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit signiert OISY sie nicht.",
 			"simulated_instructions": "Simulierte Anweisungen",
 			"multiple_operations": "Diese Transaktion enthält mehrere Operationen, die Ihre Wallet betreffen. Überprüfen Sie die simulierten Guthabenänderungen und die enthaltenen Anweisungen, und genehmigen Sie diese Transaktion nur, wenn Sie auch der Anwendung vertrauen.",
 			"simulated_review": "Die Überprüfung unten zeigt, was die Simulation dieser Transaktion gegen den aktuellen Netzwerkzustand vorhersagt. Was beim tatsächlichen Ausführen passiert, kann davon abweichen.",
@@ -1777,6 +1872,7 @@
 			"from_address_not_wallet": "Die für die Transaktion angeforderte Absenderadresse ist nicht die Adresse dieser Wallet.",
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
+			"close_pays_others": "Diese Transaktion schliesst eines deiner Token-Konten und zahlt dessen Guthaben an eine Adresse aus, die nicht deine Wallet ist. Zu deiner Sicherheit wurde sie nicht signiert.",
 			"unreviewed_without_simulation": "OISY konnte einen Teil dieser Transaktion nicht lesen, und das Netzwerk hat dazu auch keine Simulation zurückgegeben – es beschreibt also nichts, was dieser Teil tun würde. Zu Ihrer Sicherheit wurde sie nicht signiert.",
 			"sol_transaction_as_message": "Diese Nachricht ist eine Solana-Transaktion, die nur durch eine Transaktionsüberprüfung genehmigt werden kann. Aus Sicherheitsgründen wurde sie nicht signiert.",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
@@ -2055,9 +2151,10 @@
 			"instruction_send": "",
 			"instruction_receive": "",
 			"instruction_wrap": "",
-			"instruction_unwrap": "",
+			"instruction_unwrap": "Token-Konto für $symbol entpacken und schliessen",
 			"instruction_create_account": "",
 			"instruction_close_account": "",
+			"instruction_close_account_for": "Token-Konto für $symbol schliessen",
 			"instruction_approve": "",
 			"instruction_revoke": "",
 			"instruction_set_authority": "",
@@ -2069,8 +2166,12 @@
 			"instruction_unknown": "",
 			"instruction_unknown_via": "",
 			"instruction_rent": "",
-			"instruction_rent_returned": "",
+			"instruction_balance_returned": "SOL-Guthaben zurück in deine Wallet",
+			"instruction_balance_sent": "SOL-Guthaben an deine Wallet gesendet",
 			"instruction_returned": "",
+			"instruction_sent": "$amount SOL an deine Wallet gesendet",
+			"instruction_returned_to": "$amount SOL an",
+			"instruction_balance_returned_to": "SOL-Guthaben an",
 			"instruction_own_account": "",
 			"raw_value": "",
 			"status": "Status",
@@ -2305,7 +2406,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "Neue Adresse",
@@ -2552,6 +2654,8 @@
 			"transaction_fee": "Transaktionsgebühr",
 			"insufficient_funds_for_fee": "Guthaben reicht nicht aus, um Betrag und Gebühren zu decken.",
 			"supply_prices_unavailable": "Preise sind vorübergehend nicht verfügbar. Bereitstellen ist deaktiviert, bis sie geladen sind.",
+			"minimum_supply": "Mindestbetrag",
+			"supply_below_minimum": "Der Betrag liegt unter dem Mindestbetrag.",
 			"borrow_review": "Kreditaufnahme prüfen",
 			"borrow_review_subtitle": "Du leihst",
 			"borrowing": "Kreditaufnahme läuft",
@@ -2565,6 +2669,7 @@
 			"funds_delivered_to": "Gelder werden gesendet an",
 			"your_oisy_address": "Deine $oisy_short-Adresse",
 			"borrow_risk_info": "Eine Kreditaufnahme senkt deinen Gesundheitsfaktor. Fällt er zu weit, kann deine Sicherheit liquidiert werden.",
+			"borrow_activation_fee_info": "Liquidium berechnet zusätzlich zum geliehenen Betrag eine Aktivierungsgebühr von $fee %.",
 			"borrow_at_risk_warning": "Diese Kreditaufnahme senkt deinen Gesundheitsfaktor spürbar.",
 			"borrow_exceeds_power": "Der Betrag übersteigt deinen Kreditrahmen.",
 			"borrow_below_minimum": "Der Betrag liegt unter dem Mindestkreditbetrag.",

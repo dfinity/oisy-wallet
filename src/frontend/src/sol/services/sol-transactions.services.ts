@@ -113,6 +113,41 @@ export const fetchSolTransactionsForSignature = async ({
 		...ownedTokenAccounts
 	];
 
+	// Who held each token account going in. Not the owners merged from before and after, which the
+	// counterparty lookup wants: an address closed and opened again for somebody else within the
+	// one transaction would read as theirs at a close that happened while it was still the user's.
+	const accountHolders = [...(preTokenBalances ?? [])].reduce<Record<SolAddress, SolAddress>>(
+		(acc, { accountIndex, owner }) => {
+			const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
+
+			return nonNullish(account) && nonNullish(owner) ? { ...acc, [account]: owner } : acc;
+		},
+		{}
+	);
+
+	// Which mint each token account held going in, for the same reason as its holder.
+	const accountMintsBefore = [...(preTokenBalances ?? [])].reduce<
+		Record<SolAddress, SplTokenAddress>
+	>((acc, { accountIndex, mint }) => {
+		const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
+
+		return nonNullish(account) && nonNullish(mint) ? { ...acc, [account]: mint } : acc;
+	}, {});
+
+	// What each token account held going in, from the same array the owners and mints come from.
+	// Only the pre-state: what an account holds at a close is walked forward from here, and the
+	// post-state of an account that was closed is nothing at all.
+	const accountTokenAmounts = [...(preTokenBalances ?? [])].reduce<Record<SolAddress, bigint>>(
+		(acc, { accountIndex, uiTokenAmount }) => {
+			const account = parsedAccountKeys[Number(accountIndex)]?.pubkey;
+
+			return nonNullish(account) && nonNullish(uiTokenAmount?.amount)
+				? { ...acc, [account]: BigInt(uiTokenAmount.amount) }
+				: acc;
+		},
+		{}
+	);
+
 	// What each account held going in, so a close can say what it hands back: the instruction
 	// itself states no amount, and for a wrapped SOL account it is the wrapped SOL too.
 	const balances = preBalances ?? [];
@@ -137,8 +172,12 @@ export const fetchSolTransactionsForSignature = async ({
 			instructions: [...inner]
 		})),
 		ownedAddresses,
+		userAddress: address,
 		addressToToken,
-		accountLamports
+		accountHolders,
+		accountMintsBefore,
+		accountLamports,
+		accountTokenAmounts
 	});
 
 	const netChanges = mapSolNetBalanceChanges({
@@ -167,7 +206,8 @@ export const fetchSolTransactionsForSignature = async ({
 
 	const summary = deriveSolTransactionSummary({
 		netChanges,
-		instructions: instructionSummaries
+		instructions: instructionSummaries,
+		userAddress: address
 	});
 
 	const { counterparty } = summary;

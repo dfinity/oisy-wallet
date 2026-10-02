@@ -7,14 +7,20 @@
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_XRP_TOKEN } from '$lib/constants/tokens.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { modalXrpTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalXrpToken,
+		modalXrpTokenData,
+		modalXrpTransaction
+	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
+	import XrpTokenModal from '$xrp/components/tokens/XrpTokenModal.svelte';
 	import XrpTransactionModal from '$xrp/components/transactions/XrpTransactionModal.svelte';
+	import XrpTransactionsScroll from '$xrp/components/transactions/XrpTransactionsScroll.svelte';
 	import XrpTransactionsSkeletons from '$xrp/components/transactions/XrpTransactionsSkeletons.svelte';
 	import { xrpTransactions } from '$xrp/derived/xrp-transactions.derived';
 	import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
@@ -54,8 +60,11 @@
 <HiddenMicroTransactionsInfoBox />
 
 <XrpTransactionsSkeletons>
-	{#if filteredTransactions.length > 0}
-		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+	<!-- Mounted with no row to show too: the first page can map to no rows, or only to rows the
+	micro-transaction filter hides, while older payments exist. The placeholder stays outside, since
+	the scroll renders its children as a list. -->
+	<XrpTransactionsScroll {token}>
+		{#if filteredTransactions.length > 0 && nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
@@ -64,11 +73,15 @@
 				/>
 			{/each}
 		{/if}
-	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+	</XrpTransactionsScroll>
+
+	{#if filteredTransactions.length === 0 && (isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0)}
 		<TransactionsPlaceholder />
 	{/if}
 </XrpTransactionsSkeletons>
 
 {#if $modalXrpTransaction && nonNullish(selectedTransaction)}
 	<XrpTransactionModal token={selectedToken} transaction={selectedTransaction} />
+{:else if $modalXrpToken}
+	<XrpTokenModal fromRoute={$modalXrpTokenData} />
 {/if}

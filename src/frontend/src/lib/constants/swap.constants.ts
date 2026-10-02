@@ -4,13 +4,16 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ROBINHOOD_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.robinhood.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import {
 	NEAR_INTENTS_BTC_SWAP_ENABLED,
-	NEAR_INTENTS_SWAP_ENABLED
+	NEAR_INTENTS_SWAP_ENABLED,
+	NEAR_INTENTS_XRP_SWAP_ENABLED
 } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
@@ -35,6 +38,11 @@ export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 
 export const ICP_SWAP_POOL_FEE = 3000n;
 
+// In-flight balance queries during a Help pool scan. The candidate count is the pools whose both
+// legs the user has enabled: 89 with only the tokens OISY ships, and up to the whole factory table
+// (876 pools, measured 2026-09-22) with custom ones.
+export const ICP_SWAP_SCAN_CONCURRENCY = 10;
+
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
@@ -45,8 +53,10 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[BASE_NETWORK_ID]: 'base',
 	[BSC_MAINNET_NETWORK_ID]: 'bsc',
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
+	[ROBINHOOD_MAINNET_NETWORK_ID]: 'hood',
 	[SOLANA_MAINNET_NETWORK_ID]: 'sol',
-	[BTC_MAINNET_NETWORK_ID]: 'btc'
+	[BTC_MAINNET_NETWORK_ID]: 'btc',
+	[XRP_MAINNET_NETWORK_ID]: 'xrp'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
@@ -146,6 +156,12 @@ const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
+// NEAR Intents bridges XRP mainnet to and from every EVM, Solana and Bitcoin chain in its map, and
+// is XRP's only provider.
+const NEAR_INTENTS_XRP_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_XRP_SWAP_ENABLED
+	? [XRP_MAINNET_NETWORK_ID]
+	: [];
+
 const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	...new Set<NetworkId>([
 		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
@@ -156,7 +172,8 @@ const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 const withIcpIfPaired = (networkId: NetworkId): NetworkId[] => [
 	...(ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId) ? [ICP_NETWORK_ID] : []),
 	...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	...NEAR_INTENTS_BTC_NETWORK_IDS
+	...NEAR_INTENTS_BTC_NETWORK_IDS,
+	...NEAR_INTENTS_XRP_NETWORK_IDS
 ];
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
@@ -167,15 +184,28 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	],
 	[BTC_MAINNET_NETWORK_ID]: [
 		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
-		...(NEAR_INTENTS_BTC_SWAP_ENABLED ? SUPPORTED_CROSS_SWAP_NETWORK_IDS : [])
+		...(NEAR_INTENTS_BTC_SWAP_ENABLED
+			? [...SUPPORTED_CROSS_SWAP_NETWORK_IDS, ...NEAR_INTENTS_XRP_NETWORK_IDS]
+			: [])
 	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
 	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),
 	[POLYGON_MAINNET_NETWORK_ID]: withIcpIfPaired(POLYGON_MAINNET_NETWORK_ID),
 	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
+	[ROBINHOOD_MAINNET_NETWORK_ID]: withIcpIfPaired(ROBINHOOD_MAINNET_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: [
 		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-		...NEAR_INTENTS_BTC_NETWORK_IDS
-	]
+		...NEAR_INTENTS_BTC_NETWORK_IDS,
+		...NEAR_INTENTS_XRP_NETWORK_IDS
+	],
+	// Absent rather than empty while the flag is off, so a lookup reads as it does without XRP.
+	...(NEAR_INTENTS_XRP_SWAP_ENABLED
+		? {
+				[XRP_MAINNET_NETWORK_ID]: [
+					...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+					...NEAR_INTENTS_BTC_NETWORK_IDS
+				]
+			}
+		: {})
 };

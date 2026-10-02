@@ -132,6 +132,9 @@
 			"pay": "$oisy_short PAY",
 			"wallet_connect": "WalletConnect",
 			"source_code_on_github": "Source code on GitHub",
+			"x": "X",
+			"help": "Help",
+			"faq": "FAQ",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"documentation": "Documentation",
@@ -163,7 +166,10 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"documentation": "Open the $oisy_name documentation",
 			"support": "Open the Support section of the $oisy_name documentation",
+			"help_page": "Open the help page",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"more": "Help, documentation and links outside $oisy_name",
+			"faq": "Open the frequently asked questions in the $oisy_name documentation",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
@@ -788,6 +794,60 @@
 			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
+	"help": {
+		"text": {
+			"title": "Help",
+			"support_title": "Support",
+			"support_description": "Find answers and more information on the support page in the $oisy_name documentation, or get in touch with the team if you are stuck.",
+			"support_link": "Visit our support page",
+			"network_explorers_title": "Block explorers",
+			"network_explorers_description": "$oisy_name builds its history from third-party indexers, which can lag behind the chain. A block explorer shows what the network itself records for your address.",
+			"explorers_title": "Provider transaction status",
+			"explorers_description": "$oisy_name routes swaps and bridge transfers through third-party providers. If one takes longer than expected, open the provider's own explorer: it shows where your transfer stands, already filtered to your wallet.",
+			"explorers_velora_description": "Swaps on Ethereum and other EVM networks.",
+			"explorers_near_intents_description": "Cross-chain swaps between EVM networks, Solana and Bitcoin.",
+			"explorers_onesec_description": "Bridge transfers between the Internet Computer and EVM networks.",
+			"explorers_chain_eth": "Ethereum & EVM networks",
+			"explorers_chain_sol": "Solana",
+			"explorers_chain_btc": "Bitcoin",
+			"explorers_chain_icp": "Internet Computer",
+			"icpswap_title": "ICPSwap Token Withdrawal",
+			"icpswap_description": "A swap on ICPSwap moves your tokens into a pool before sending them back to you. If that last step failed, the tokens are still yours and still in the pool. $oisy_name can look for them and send them back.",
+			"scan": "Scan my pools",
+			"scanning": "Checking your pools…",
+			"scan_hint": "Checks every pool between two tokens active in your wallet. If you swapped into a token you never enabled, enable it first, then scan again or name the pair below.",
+			"scan_nothing_found": "Nothing left behind in the $pools pools checked.",
+			"scan_unreadable": "$unreadable of the $pools pools could not be read. Try again, or name the pair below.",
+			"or_pick_a_pair": "Or name a pair",
+			"token_first": "First token",
+			"token_second": "Second token",
+			"select_token": "Select",
+			"no_tokens": "Only ICP can be picked. Enable the pool's missing token first, or both tokens if the pool doesn't include ICP.",
+			"checking_pool": "Checking the pool…",
+			"nothing_to_withdraw": "Nothing to withdraw in this pool.",
+			"results_found": "Withdrawable balances found: $balances.",
+			"balance_unused": "Unused balance",
+			"withdraw": "Withdraw"
+		},
+		"alt": {
+			"network_explorer_link": "Open the $network block explorer for your address",
+			"explorer_link": "Open the $provider explorer for your $chain address",
+			"select_token_first": "Select the first token of the pool",
+			"select_token_second": "Select the second token of the pool",
+			"withdraw": "Withdraw $symbol from the pool",
+			"scan": "Scan the pools between your active tokens"
+		},
+		"error": {
+			"pool_not_found": "Could not find a pool for this pair. Check the two tokens, or try again shortly.",
+			"load_failed": "Could not read your balances from this pool.",
+			"withdraw_failed": "The withdrawal failed.",
+			"scan_failed": "Could not fetch the list of ICPSwap pools."
+		},
+		"success": {
+			"withdraw": "Withdrew $amount $symbol from the pool.",
+			"withdraw_hidden": "Withdrew $symbol from the pool."
+		}
+	},
 	"settings": {
 		"text": {
 			"title": "Settings",
@@ -950,6 +1010,8 @@
 	"send": {
 		"text": {
 			"send": "Send",
+			"xrp_sent": "Your XRP payment went through.",
+			"xrp_submitted": "Payment submitted. It usually settles within seconds — you can close this and carry on.",
 			"send_token": "Send $token",
 			"send_unknown_token": "Send unknown token",
 			"destination": "Destination",
@@ -970,7 +1032,7 @@
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
-			"xrp_destination_tag": "Destination tag",
+			"xrp_destination_tag": "XRP destination tag",
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
@@ -993,8 +1055,7 @@
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
-			"enter_xrp_address": "Enter XRP address",
-			"xrp_destination_tag": "Enter destination tag (optional)",
+			"xrp_destination_tag": "Enter XRP destination tag (optional)",
 			"select_network": "Select network",
 			"search_nfts": "Search collectibles"
 		},
@@ -1005,6 +1066,8 @@
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"first_time_destination": "It appears you have never sent tokens to this address before. Verify the address carefully.",
 			"first_time_destination_confirm": "This is the first time I send tokens to this address and I have verified the address carefully.",
+			"xrp_destination_tag_hint": "Required by most exchanges. If you leave it empty, your funds may be lost.",
+			"xrp_destination_tag_missing": "No XRP destination tag. If you are sending to an exchange, check whether it requires one, or your funds may be lost.",
 			"fee_expired": "The fee amount calculated for this transaction has expired. Use “Back” to get an updated fee amount.",
 			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
@@ -1023,7 +1086,7 @@
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
-			"xrp_destination_tag_invalid": "Destination tag must be a whole number between 0 and 4294967295.",
+			"xrp_destination_tag_invalid": "XRP destination tag must be a whole number between 0 and 4294967295.",
 			"insufficient_funds_verbose_btc": "The specified amount is higher than the amount you have available to send. Note that amounts from unconfirmed incoming Bitcoin can't be sent until confirmed.",
 			"insufficient_funds_for_reserve": "Insufficient funds: the amount must leave enough to cover the fee and the required XRP account reserve.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
@@ -1061,8 +1124,6 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_xrp_network_id": "Current network ($networkId) is not an XRP Ledger network.",
-			"xrp_confirmation_failed": "We could not confirm whether the transaction was sent. It may still go through, so do not send it again yet — your balance will update if it does.",
-			"xrp_transaction_failed": "The transaction was processed by the network but failed, so your funds were not sent. The network fee was still charged.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
@@ -1073,10 +1134,13 @@
 			"solana_insufficient_funds_for_fee": "Your SOL balance is not sufficient to cover the transaction fees.",
 			"solana_insufficient_funds_for_rent": "Your SOL balance is not sufficient to cover the rent required for account creation.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported.",
-			"xrp_send_expired": "The transaction was not sent: the network did not include it in time. Nothing left your wallet, and it is safe to create a new one.",
+			"xrp_send_expired": "Your send of $amount $symbol on $network was not completed: the network did not include it in time. Nothing left your wallet, and it is safe to send again.",
+			"xrp_send_already_in_flight": "An earlier XRP payment from this address has not settled yet. Nothing was sent — wait for it to finish, which takes about a minute, then send again.",
+			"xrp_send_not_guarded": "The wallet could not check whether an earlier XRP payment is still settling. Nothing was sent — try again in a moment.",
+			"xrp_active_transaction_failed": "Your send of $amount $symbol on $network was processed by the network but failed ($result), so your funds were not sent. The network fee was still charged.",
 			"xrp_amount_exceeds_sendable": "The amount no longer fits. Your account must keep its XRP reserve plus the network fee, and both can change while you review. Nothing was sent — lower the amount, or try again once your account details refresh.",
 			"xrp_destination_unfunded": "This address has no XRP account yet. Creating one needs a first payment of at least $reserve XRP. Nothing was sent — raise the amount, or send to an address that is already funded.",
-			"xrp_destination_tag_required": "This address requires a destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
+			"xrp_destination_tag_required": "This address requires an XRP destination tag. Nothing was sent — add the tag given to you by the service you are paying, then send again.",
 			"xrp_destination_is_source": "This is your own XRP address. Nothing was sent — choose a different recipient.",
 			"xrp_account_state_unavailable": "The wallet could not read your account details, so the amount could not be checked. Nothing was sent — try again in a moment."
 		}
@@ -1093,6 +1157,31 @@
 			"burn": "Burn",
 			"burning": "Burning...",
 			"burn_review_subtitle": "You burn"
+		}
+	},
+	"cycles_mint": {
+		"text": {
+			"title": "Mint $token",
+			"description": "Minting creates new $destinationToken from $sourceToken at the network's rate, and burns the $sourceToken.",
+			"you_mint_estimate": "You mint (estimate)",
+			"rate": "Rate",
+			"cycles_ledger_fee": "Cycles ledger fee",
+			"minter": "Minted by",
+			"one_way": "Minting cannot be undone: $destinationToken cannot be turned back into $sourceToken.",
+			"sending": "Sending $token to the $minter...",
+			"minting": "Minting $token...",
+			"minted": "Minted $amount $token.",
+			"pending": "Your mint is taking longer than usual. It finishes in the background: follow it under Active transactions."
+		},
+		"error": {
+			"rate_unavailable": "The $token rate could not be loaded. Please try again later.",
+			"amount_too_small": "The amount is too small to mint $token.",
+			"refunded": "The mint was refunded. Your $token came back, minus $refundFee $token. Reason: $reason",
+			"refunded_nothing": "The mint was refunded, but its fees took the whole amount: no $token came back. Reason: $reason",
+			"failed": "The mint failed. Reason: $reason",
+			"not_started": "The mint could not be started. Nothing was sent, please try again.",
+			"transfer_failed": "The $token transfer failed. Nothing was sent.",
+			"unconfirmed": "The $token transfer could not be confirmed. If it went through, the mint finishes in the background: follow it under Active transactions."
 		}
 	},
 	"active_user_transactions": {
@@ -1409,7 +1498,8 @@
 				"info": "Ledger and Index canister IDs are usually available on the project’s website.",
 				"info_ext": "Canister ID is usually available on the project’s website.",
 				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
-				"custom_tokens_not_supported": "The selected network does not support custom tokens."
+				"custom_tokens_not_supported": "The selected network does not support custom tokens.",
+				"custom_tokens_not_supported_yet": "OISY does not support custom tokens on this network yet."
 			},
 			"error": {
 				"loading_metadata": "The specified address is not a valid token in the selected network.",
@@ -1505,7 +1595,11 @@
 			"crypto": "Crypto",
 			"stablecoin": "Stablecoins",
 			"stock": "Stocks",
-			"commodity": "Commodities"
+			"commodity": "Commodities",
+			"compute": "Compute"
+		},
+		"category_in_sentence": {
+			"compute": "compute tokens"
 		},
 		"risk": {
 			"low": "Low risk",
@@ -1668,6 +1762,7 @@
 			"unreviewed_instructions": "OISY can't decode some of these instructions, so the review below may be incomplete.",
 			"unreviewed_instructions_simulated": "This transaction contains operations from an external source that OISY can't decode, so OISY ran a simulation of it. Be sure you trust the application, and review the simulated balance changes and operations before signing. Note that the actual outcome can differ from the simulation.",
 			"cannot_be_shown": "This transaction includes actions that can't all be shown accurately for review, so OISY won't sign it. Reject it and ask the app to send a simpler request.",
+			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, OISY won't sign it.",
 			"simulated_instructions": "Simulated instructions",
 			"multiple_operations": "This transaction contains multiple operations that affect your wallet. Verify the simulated balance changes and the contained instructions, and only approve this transaction if you also trust the application.",
 			"simulated_review": "The review below is what simulating this transaction against the network's current state predicts. What happens when it actually runs can differ.",
@@ -1777,6 +1872,7 @@
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
+			"close_pays_others": "This transaction closes one of your token accounts and pays its balance to an address that is not your wallet. For your security, it was not signed.",
 			"unreviewed_without_simulation": "OISY couldn't read part of this transaction, and the network didn't return a simulation of it either, so nothing describes what that part would do. For your security, it was not signed.",
 			"sol_transaction_as_message": "This message is a Solana transaction, which can only be approved through a transaction review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
@@ -2055,9 +2151,10 @@
 			"instruction_send": "Send $amount $symbol to",
 			"instruction_receive": "Receive $amount $symbol from",
 			"instruction_wrap": "Wrap $amount SOL",
-			"instruction_unwrap": "Unwrap SOL",
+			"instruction_unwrap": "Unwrap and close token account for $symbol",
 			"instruction_create_account": "Create token account for $symbol",
 			"instruction_close_account": "Close token account",
+			"instruction_close_account_for": "Close token account for $symbol",
 			"instruction_approve": "Approve spender",
 			"instruction_revoke": "Revoke spender",
 			"instruction_set_authority": "Change account authority to",
@@ -2069,8 +2166,12 @@
 			"instruction_unknown": "Unrecognised instruction",
 			"instruction_unknown_via": "Unrecognised instruction via",
 			"instruction_rent": "rent $amount SOL",
-			"instruction_rent_returned": "rent returned to your wallet",
+			"instruction_balance_returned": "SOL balance returned to your wallet",
+			"instruction_balance_sent": "SOL balance sent to your wallet",
 			"instruction_returned": "$amount SOL returned to your wallet",
+			"instruction_sent": "$amount SOL sent to your wallet",
+			"instruction_returned_to": "$amount SOL to",
+			"instruction_balance_returned_to": "SOL balance to",
 			"instruction_own_account": "your account",
 			"raw_value": "Raw value",
 			"status": "Status",
@@ -2305,7 +2406,8 @@
 			"Icrcv2": "Internet Computer",
 			"Btc": "Bitcoin",
 			"Eth": "Ethereum",
-			"Sol": "Solana"
+			"Sol": "Solana",
+			"Xrp": "XRP Ledger"
 		},
 		"form": {
 			"new_address": "New address",
@@ -2552,6 +2654,8 @@
 			"transaction_fee": "Transaction fee",
 			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the fees.",
 			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
+			"minimum_supply": "Minimum supply",
+			"supply_below_minimum": "Amount is below the minimum supply.",
 			"borrow_review": "Review borrow",
 			"borrow_review_subtitle": "You borrow",
 			"borrowing": "Borrowing",
@@ -2565,6 +2669,7 @@
 			"funds_delivered_to": "Funds delivered to",
 			"your_oisy_address": "Your $oisy_short address",
 			"borrow_risk_info": "Borrowing reduces your health factor. If it falls too far your collateral can be liquidated.",
+			"borrow_activation_fee_info": "Liquidium adds an activation fee of $fee% on top of the borrowed amount.",
 			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
 			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
 			"borrow_below_minimum": "Amount is below the minimum borrow.",
