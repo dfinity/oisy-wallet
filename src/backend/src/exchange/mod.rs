@@ -7,9 +7,12 @@ use std::{cell::Cell, time::Duration};
 
 use ic_cdk::api::time;
 use ic_cdk_timers::{set_timer, set_timer_interval};
-use shared::types::{
-    exchange::{ExchangeData, ExchangeError, ExchangeRate},
-    token_id::TokenId,
+use shared::{
+    types::{
+        exchange::{ExchangeData, ExchangeError, ExchangeRate},
+        token_id::TokenId,
+    },
+    validate::Validate,
 };
 
 use crate::{
@@ -291,14 +294,23 @@ pub(crate) fn start_exchange_rate_timer() {
     });
 }
 
+/// Caches `exchange_data` as the USD rate of `token_id`.
+///
+/// Reading a cached rate decodes it, and decoding runs [`Validate`] and traps when it fails (see
+/// `validate_on_deserialize!`). A rate that fails validation is therefore logged and skipped,
+/// which keeps any rate already cached for the token.
 fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
+    let rate = ExchangeRate {
+        usd: exchange_data.clone(),
+    };
+
+    if let Err(err) = rate.validate() {
+        ic_cdk::println!("Skipping the exchange rate for {token_id:?}: {err}");
+        return;
+    }
+
     mutate_state(|s| {
-        s.exchange_rates.insert(
-            token_id.clone(),
-            Candid(ExchangeRate {
-                usd: exchange_data.clone(),
-            }),
-        );
+        s.exchange_rates.insert(token_id.clone(), Candid(rate));
     });
 }
 
@@ -727,6 +739,41 @@ mod tests {
                 market_cap: None,
             },
         }
+    }
+
+    fn stored_rate(token_id: &StoredTokenId) -> Option<ExchangeRate> {
+        read_state(|s| s.exchange_rates.get(token_id).map(|rate| rate.0))
+    }
+
+    #[test]
+    fn update_price_does_not_store_a_zero_timestamp() {
+        let token = custom_token(1);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(1_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), None);
+    }
+
+    #[test]
+    fn update_price_keeps_the_stored_rate_when_the_new_one_fails_validation() {
+        let token = custom_token(1);
+        update_price(&token, &exchange_rate(1_000).usd);
+
+        update_price(
+            &token,
+            &ExchangeData {
+                timestamp_ns: 0,
+                ..exchange_rate(2_000).usd
+            },
+        );
+
+        assert_eq!(stored_rate(&token), Some(exchange_rate(1_000)));
     }
 
     #[test]
