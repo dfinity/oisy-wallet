@@ -6,24 +6,23 @@ import type {
 } from '$declarations/icp_swap_factory/icp_swap_factory.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
-import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('icp_swap_factory.canister', () => {
-	const createFactory = ({
-		serviceOverride
-	}: Pick<CreateCanisterOptions<SwapFactoryService>, 'serviceOverride'>) =>
+	const service = mock<ActorSubclass<SwapFactoryService>>();
+	const certifiedService = mock<ActorSubclass<SwapFactoryService>>();
+
+	const createFactory = () =>
 		ICPSwapFactoryCanister.create({
 			canisterId: Principal.fromText('4mmnk-kiaaa-aaaag-qbllq-cai'),
 			identity: mockIdentity,
-			serviceOverride,
-			certifiedServiceOverride: serviceOverride
+			serviceOverride: service,
+			certifiedServiceOverride: certifiedService
 		});
 
-	const service = mock<ActorSubclass<SwapFactoryService>>();
 	const mockResponseError = new Error('Factory error');
 	const args: GetPoolArgs = {
 		token0: { address: 'aaaaa-aa', standard: 'icrc1' },
@@ -47,29 +46,46 @@ describe('icp_swap_factory.canister', () => {
 	});
 
 	describe('getPool', () => {
-		it('returns pool data successfully', async () => {
-			const response = {
-				ok: poolData
-			};
+		it('returns pool data from a certified call by default', async () => {
+			certifiedService.getPool.mockResolvedValue({ ok: poolData });
 
-			service.getPool.mockResolvedValue(response);
+			const { getPool } = await createFactory();
 
-			const { getPool } = await createFactory({ serviceOverride: service });
-
-			const result = await getPool({
-				token0: { address: 'aaaaa-aa', standard: 'icrc1' },
-				token1: { address: 'bbbbb-bb', standard: 'icrc1' },
-				fee: 3000n
-			});
+			const result = await getPool(args);
 
 			expect(result).toEqual(poolData);
-			expect(service.getPool).toHaveBeenCalledWith(args);
+			expect(certifiedService.getPool).toHaveBeenCalledExactlyOnceWith(args);
+			expect(service.getPool).not.toHaveBeenCalled();
+		});
+
+		it('returns pool data from a certified call when certified is true', async () => {
+			certifiedService.getPool.mockResolvedValue({ ok: poolData });
+
+			const { getPool } = await createFactory();
+
+			const result = await getPool({ ...args, certified: true });
+
+			expect(result).toEqual(poolData);
+			expect(certifiedService.getPool).toHaveBeenCalledExactlyOnceWith(args);
+			expect(service.getPool).not.toHaveBeenCalled();
+		});
+
+		it('returns pool data from a query when certified is false', async () => {
+			service.getPool.mockResolvedValue({ ok: poolData });
+
+			const { getPool } = await createFactory();
+
+			const result = await getPool({ ...args, certified: false });
+
+			expect(result).toEqual(poolData);
+			expect(service.getPool).toHaveBeenCalledExactlyOnceWith(args);
+			expect(certifiedService.getPool).not.toHaveBeenCalled();
 		});
 
 		it('throws CanisterInternalError if result is error variant', async () => {
-			service.getPool.mockResolvedValue(errorResponse);
+			certifiedService.getPool.mockResolvedValue(errorResponse);
 
-			const { getPool } = await createFactory({ serviceOverride: service });
+			const { getPool } = await createFactory();
 
 			const result = getPool(args);
 
@@ -79,11 +95,11 @@ describe('icp_swap_factory.canister', () => {
 		});
 
 		it('throws raw error if getPool method fails', async () => {
-			service.getPool.mockImplementation(() => {
+			certifiedService.getPool.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
-			const { getPool } = await createFactory({ serviceOverride: service });
+			const { getPool } = await createFactory();
 
 			const result = getPool(args);
 
@@ -92,9 +108,9 @@ describe('icp_swap_factory.canister', () => {
 
 		it('throws error for unexpected structure', async () => {
 			// @ts-expect-error for test purposes
-			service.getPool.mockResolvedValue({ unexpected: true });
+			certifiedService.getPool.mockResolvedValue({ unexpected: true });
 
-			const { getPool } = await createFactory({ serviceOverride: service });
+			const { getPool } = await createFactory();
 
 			const result = getPool(args);
 
@@ -113,7 +129,7 @@ describe('icp_swap_factory.canister', () => {
 
 			service.getPools.mockResolvedValue({ ok: [poolData, poolData2] });
 
-			const { getPools } = await createFactory({ serviceOverride: service });
+			const { getPools } = await createFactory();
 
 			const result = await getPools();
 
@@ -124,7 +140,7 @@ describe('icp_swap_factory.canister', () => {
 		it('returns empty array when no pools exist', async () => {
 			service.getPools.mockResolvedValue({ ok: [] });
 
-			const { getPools } = await createFactory({ serviceOverride: service });
+			const { getPools } = await createFactory();
 
 			const result = await getPools();
 
@@ -134,7 +150,7 @@ describe('icp_swap_factory.canister', () => {
 		it('throws CanisterInternalError if result is error variant', async () => {
 			service.getPools.mockResolvedValue({ err: { InternalError: 'Failed to fetch pools' } });
 
-			const { getPools } = await createFactory({ serviceOverride: service });
+			const { getPools } = await createFactory();
 
 			await expect(getPools()).rejects.toThrow(
 				new CanisterInternalError('Internal error: Failed to fetch pools')
@@ -146,7 +162,7 @@ describe('icp_swap_factory.canister', () => {
 				throw mockResponseError;
 			});
 
-			const { getPools } = await createFactory({ serviceOverride: service });
+			const { getPools } = await createFactory();
 
 			await expect(getPools()).rejects.toThrow(mockResponseError);
 		});
