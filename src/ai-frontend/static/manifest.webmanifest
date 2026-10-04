@@ -1,0 +1,36 @@
+{
+	"name": "OISY AI",
+	"short_name": "OISY AI",
+	"start_url": ".",
+	"display": "standalone",
+	"theme_color": "#FFFFFF",
+	"background_color": "#FFFFFF",
+	"description": "OISY AI — Your intelligent crypto assistant",
+	"orientation": "portrait-primary",
+	"prefer_related_applications": false,
+	"categories": ["finance", "utilities"],
+	"icons": [
+		{
+			"src": "favicons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "favicons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		},
+		{
+			"src": "favicons/maskable-icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "favicons/maskable-icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	]
+}
