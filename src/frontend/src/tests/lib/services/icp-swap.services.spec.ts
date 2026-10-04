@@ -16,6 +16,7 @@ import {
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import { icpSwapAmounts, icpSwapSupportedTokens } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
 import { SwapErrorCodes } from '$lib/types/swap';
@@ -46,6 +47,7 @@ describe('icp-swap.services', () => {
 		};
 
 		beforeEach(() => {
+			vi.clearAllMocks();
 			vi.restoreAllMocks();
 		});
 
@@ -56,6 +58,23 @@ describe('icp-swap.services', () => {
 			const result = await icpSwapAmounts(params);
 
 			expect(result.receiveAmount).toBe(999n);
+		});
+
+		it('resolves the pool with a query, since a quote moves no funds', async () => {
+			const getPoolCanisterSpy = vi
+				.spyOn(factoryApi, 'getPoolCanister')
+				.mockResolvedValue(mockPool);
+			vi.spyOn(poolApi, 'getQuote').mockResolvedValue(999n);
+
+			await icpSwapAmounts(params);
+
+			expect(getPoolCanisterSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				token0: { address: 'token0', standard: 'icrc' },
+				token1: { address: 'token1', standard: 'icrc' },
+				fee: ICP_SWAP_POOL_FEE,
+				certified: false
+			});
 		});
 
 		it('uses correct zeroForOne = true when source is token0', async () => {
