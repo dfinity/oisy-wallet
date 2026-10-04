@@ -63,14 +63,15 @@ describe('icp-swap-recovery.services', () => {
 	});
 
 	describe('loadIcpSwapRecoverableBalances', () => {
-		it('resolves the pool at the fee tier OISY swaps on', async () => {
+		it('resolves the pool through a certified call at the fee tier OISY swaps on', async () => {
 			await loadIcpSwapRecoverableBalances(loadParams);
 
 			expect(getPoolCanister).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				token0: { address: tokenA.ledgerCanisterId, standard: tokenA.standard.code },
 				token1: { address: tokenB.ledgerCanisterId, standard: tokenB.standard.code },
-				fee: ICP_SWAP_POOL_FEE
+				fee: ICP_SWAP_POOL_FEE,
+				certified: true
 			});
 		});
 
