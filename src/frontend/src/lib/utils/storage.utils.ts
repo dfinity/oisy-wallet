@@ -20,6 +20,17 @@ export const del = ({ key }: { key: string }) => {
 	}
 };
 
+export const delByPrefix = ({ prefix }: { prefix: string }) => {
+	try {
+		Object.keys(localStorage)
+			.filter((key) => key.startsWith(prefix))
+			.forEach((key) => localStorage.removeItem(key));
+	} catch (err: unknown) {
+		// We use the local storage for the operational part of the app but, not crucial
+		consoleError(err);
+	}
+};
+
 export const get = <T>({ key }: { key: string }): T | undefined => {
 	try {
 		const { [key]: value } = browser ? localStorage : ({ [key]: undefined } as unknown as Storage);
