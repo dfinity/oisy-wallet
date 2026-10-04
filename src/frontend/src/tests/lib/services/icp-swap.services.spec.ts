@@ -196,6 +196,42 @@ describe('icp-swap.services', () => {
 			expect(withdraw).toHaveBeenCalled();
 		});
 
+		it('resolves the pool through a certified call before approving it and depositing into it', async () => {
+			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+			vi.mocked(hasSufficientIcrcAllowance).mockResolvedValue(false);
+
+			vi.mocked(approve).mockResolvedValue(1n);
+			vi.mocked(depositFrom).mockResolvedValue(1n);
+			vi.mocked(swapIcp).mockResolvedValue(1n);
+			vi.mocked(withdraw).mockResolvedValue(1n);
+			vi.mocked(waitAndTriggerWallet).mockResolvedValue();
+
+			await fetchIcpSwap(swapArgs);
+
+			expect(getPoolCanister).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					token0: expect.objectContaining({ address: swapArgs.sourceToken.ledgerCanisterId }),
+					token1: expect.objectContaining({ address: swapArgs.destinationToken.ledgerCanisterId }),
+					fee: ICP_SWAP_POOL_FEE,
+					certified: true
+				})
+			);
+			expect(approve).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ spender: { owner: mockPool.canisterId } })
+			);
+			expect(depositFrom).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ canisterId: mockPool.canisterId.toText() })
+			);
+
+			const [lookupOrder] = vi.mocked(getPoolCanister).mock.invocationCallOrder;
+			const [approveOrder] = vi.mocked(approve).mock.invocationCallOrder;
+			const [depositOrder] = vi.mocked(depositFrom).mock.invocationCallOrder;
+
+			expect(lookupOrder).toBeLessThan(approveOrder);
+			expect(approveOrder).toBeLessThan(depositOrder);
+		});
+
 		it('Success swap for ICRC2 when allowance check fails', async () => {
 			vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
 			vi.mocked(hasSufficientIcrcAllowance).mockRejectedValue(new Error('Network error'));
