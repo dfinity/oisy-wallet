@@ -72,6 +72,13 @@ in the same PR — that's the
   [`types::maps`](../../../src/backend/src/types/maps.rs).
 - Custom types are made `Storable` via the generic
   [`Candid<T>`](../../../src/backend/src/types/storable.rs) wrapper.
+- **Validate before writing.** `Candid<T>` validates on decode only: a type
+  that uses `validate_on_deserialize!` runs `Validate` every time it is read
+  back and traps when that fails, but writing it checks nothing. Endpoint
+  arguments are validated when they are decoded; a value the canister builds
+  itself (HTTP outcall data, merged lists, server-set fields) must pass
+  `Validate` before it is written. See `update_price` in
+  [`exchange/mod.rs`](../../../src/backend/src/exchange/mod.rs).
 - Adding, renaming, or repurposing a `MemoryId` is a state migration. See
   [`workflows/state-and-migrations.md`](./workflows/state-and-migrations.md)
   for the contract.
