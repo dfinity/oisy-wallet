@@ -1,12 +1,15 @@
 import { EIP155_CHAINS } from '$env/eip155-chains.env';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type {
+	EthWalletConnectRefusal,
 	WalletConnectEthCall,
 	WalletConnectEthSignTypedDataV4,
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
 import {
+	decodeErc20AbiData,
+	decodeSetApprovalForAllData,
 	getCalldataSelector,
 	hasCalldata,
 	isErc20TransactionApprove,
@@ -17,6 +20,8 @@ import {
 } from '$eth/utils/transactions.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
+import type { NetworkId } from '$lib/types/network';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
@@ -98,6 +103,69 @@ export const classifyWalletConnectEthCall = (data: string | undefined): WalletCo
  * native value it carries alongside. An `unknown` call may well be one too, which is precisely why
  * it is not titled a send either.
  */
+/**
+ * Whether a call moves or authorises an ERC-20 token, which the review can only state once it has
+ * both the token and the call's decoded arguments.
+ */
+export const isWalletConnectEthErc20Call = ({ type }: WalletConnectEthCall): boolean =>
+	type === 'erc20Approve' || type === 'erc20Transfer' || type === 'erc20AllowanceDelta';
+
+const decodes = (decode: () => unknown): boolean => {
+	try {
+		decode();
+		return true;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
+/**
+ * Why OISY refuses an `eth_sendTransaction` it could sign but cannot show faithfully: an ERC-20 call
+ * or an operator grant whose arguments do not decode. Read from the call and its calldata alone, so
+ * the review and the signing service cannot disagree about what was refused.
+ *
+ * A token the wallet does not list is not among them. It is refused too, but adding the token makes
+ * the request reviewable, so the Settings switch never signs past it.
+ */
+export const walletConnectEthRefusals = ({
+	call,
+	data
+}: {
+	call: WalletConnectEthCall;
+	data: string | undefined;
+}): EthWalletConnectRefusal[] => [
+	...(isWalletConnectEthErc20Call(call) &&
+	(isNullish(data) || !decodes(() => decodeErc20AbiData({ data })))
+		? (['unverifiable_erc20'] as const)
+		: []),
+	...(call.type === 'setApprovalForAll' &&
+	(isNullish(data) || !decodes(() => decodeSetApprovalForAllData(data)))
+		? (['unverifiable_approval_for_all'] as const)
+		: [])
+];
+
+/**
+ * The ERC-20 token an `eth_sendTransaction` is addressed to, among the tokens the wallet lists: the
+ * default tokens and the user's custom ones. The review names it and the signing service refuses a
+ * call on one it does not find, so both look it up here.
+ */
+export const findWalletConnectEthErc20Token = <
+	T extends { address: string; network: { id: NetworkId } }
+>({
+	tokens,
+	destination,
+	networkId
+}: {
+	tokens: T[];
+	destination: string;
+	networkId: NetworkId;
+}): T | undefined =>
+	tokens.find(
+		({ address, network: { id } }) =>
+			areAddressesEqual({ address1: address, address2: destination, networkId: id }) &&
+			id === networkId
+	);
+
 export const isWalletConnectEthApproval = ({ type }: WalletConnectEthCall): boolean =>
 	type === 'erc20Approve' || type === 'setApprovalForAll' || type === 'erc20AllowanceDelta';
 
