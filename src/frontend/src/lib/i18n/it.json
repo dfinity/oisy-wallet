@@ -2569,7 +2569,7 @@
 		"warning": {
 			"no_index_canister": "$oisy_short non può caricare le transazioni di $token_list: l’emittente del token non offre il tracciamento delle transazioni.",
 			"unavailable_index_canister": "Al momento non è possibile caricare le ultime transazioni di $token_list, perché il loro servizio di tracciamento non risponde. Verranno caricate automaticamente non appena tornerà disponibile.",
-			"unsupported_sol_transactions": ""
+			"unsupported_sol_transactions": "Non è stato possibile caricare alcune transazioni di $token_list, perché hanno un formato non supportato. Appariranno automaticamente non appena il problema sarà risolto."
 		}
 	},
 	"earning": {

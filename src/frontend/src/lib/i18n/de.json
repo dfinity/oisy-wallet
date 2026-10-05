@@ -2569,7 +2569,7 @@
 		"warning": {
 			"no_index_canister": "$oisy_short kann keine Transaktionen für $token_list laden – der Herausgeber des Tokens bietet keine Transaktionsverfolgung an.",
 			"unavailable_index_canister": "Die neuesten Transaktionen für $token_list können im Moment nicht geladen werden, da ihr Tracking-Dienst nicht antwortet. Sie werden automatisch geladen, sobald er wieder erreichbar ist.",
-			"unsupported_sol_transactions": ""
+			"unsupported_sol_transactions": "Einige Transaktionen für $token_list konnten nicht geladen werden, da sie ein nicht unterstütztes Format haben. Sie werden automatisch angezeigt, sobald dieses Problem behoben ist."
 		}
 	},
 	"earning": {

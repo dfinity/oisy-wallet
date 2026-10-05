@@ -2569,7 +2569,7 @@
 		"warning": {
 			"no_index_canister": "$oisy_short 无法加载 $token_list 的交易——代币发行方未提供交易记录功能。",
 			"unavailable_index_canister": "目前无法加载 $token_list 的最新交易，因为其交易记录服务没有响应。服务恢复后将自动加载。",
-			"unsupported_sol_transactions": ""
+			"unsupported_sol_transactions": "$token_list 的部分交易因格式不受支持而无法加载。此问题解决后，它们将自动显示。"
 		}
 	},
 	"earning": {
