@@ -281,6 +281,10 @@ The user menu also carries the **theme/appearance** selector when signed in (unc
 
 The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.
 
+### Security card
+
+The Settings page has a **Security** card directly below General. It holds the settings that protect the user from scams: today, the filter that hides transactions with very small values, which are typically spam meant to get the user to copy the sender's address.
+
 ---
 
 ## Help
