@@ -119,7 +119,8 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_NETWORKS {
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTIONS {
-	UNCERTIFIED_REMOVED = 'uncertified_removed'
+	UNCERTIFIED_REMOVED = 'uncertified_removed',
+	UNREADABLE_SKIPPED = 'unreadable_skipped'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
