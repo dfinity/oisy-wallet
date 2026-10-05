@@ -852,6 +852,7 @@
 		"text": {
 			"title": "설정",
 			"general": "일반",
+			"security": "",
 			"preferences": "환경설정",
 			"principal": "내 프린시팔",
 			"principal_copied": "프린시팔이 클립보드에 복사되었습니다",

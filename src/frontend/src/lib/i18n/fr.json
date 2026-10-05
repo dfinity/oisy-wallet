@@ -852,6 +852,7 @@
 		"text": {
 			"title": "Paramètres",
 			"general": "Général",
+			"security": "",
 			"preferences": "Préférences",
 			"principal": "Votre Principal",
 			"principal_copied": "Principal copié dans le presse-papiers",

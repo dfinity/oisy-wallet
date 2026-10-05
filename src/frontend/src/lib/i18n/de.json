@@ -852,6 +852,7 @@
 		"text": {
 			"title": "Einrichten",
 			"general": "Allgemein",
+			"security": "",
 			"preferences": "Präferenzen",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",

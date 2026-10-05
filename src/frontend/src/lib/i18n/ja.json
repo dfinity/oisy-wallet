@@ -852,6 +852,7 @@
 		"text": {
 			"title": "設定",
 			"general": "一般",
+			"security": "",
 			"preferences": "環境設定",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました。",
