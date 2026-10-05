@@ -20,7 +20,11 @@ import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignaturesCursor } from '$sol/types/sol-api';
 import type { SolNetworkBalances } from '$sol/types/sol-balance';
-import type { SolResolvedTransaction, SolSignatureWithSources } from '$sol/types/sol-transaction';
+import type {
+	SolResolvedSignatures,
+	SolResolvedTransaction,
+	SolSignatureWithSources
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -34,6 +38,7 @@ import {
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReviver, nonNullish } from '@dfinity/utils';
+import { SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/time.utils', () => ({
@@ -116,6 +121,11 @@ describe('sol-wallet.scheduler', () => {
 			transaction: { ...createMockSolTransactionUi(signature), signature },
 			sources
 		}));
+
+	const resolvedPage = (signatures: SolSignatureWithSources[]): SolResolvedSignatures => ({
+		transactions: toResolved(signatures),
+		unreadable: []
+	});
 
 	const newestSignature = signatureAt({ slot: 101n });
 	const olderSignature = signatureAt({ slot: 100n, sources: [mockAtaAddress] });
@@ -217,7 +227,7 @@ describe('sol-wallet.scheduler', () => {
 		vi.mocked(loadSolNetworkBalances).mockResolvedValue(mockBalances);
 		mockPage(page);
 		vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
-			Promise.resolve(toResolved(signatures))
+			Promise.resolve(resolvedPage(signatures))
 		);
 		vi.mocked(mapSolSourcesToTokens).mockResolvedValue(sourceTokens);
 		vi.mocked(saveSolFinalizedTransactions).mockResolvedValue({ success: true });
@@ -1034,7 +1044,7 @@ describe('sol-wallet.scheduler', () => {
 			await scheduler.trigger(data);
 
 			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
-				Promise.resolve(toResolved(signatures))
+				Promise.resolve(resolvedPage(signatures))
 			);
 			postMessageMock.mockClear();
 
@@ -1058,6 +1068,81 @@ describe('sol-wallet.scheduler', () => {
 			expect(postMessageMock).toHaveBeenCalledWith(
 				expect.objectContaining({ msg: 'syncSolWalletError' })
 			);
+		});
+	});
+
+	describe('unreadable transactions', () => {
+		const refused = signatureAt({ slot: 102n, sources: [mockSolAddress, mockAtaAddress] });
+
+		const unreadable = {
+			signature: refused.signature,
+			sources: refused.sources,
+			errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+		};
+
+		beforeEach(() => {
+			mockPage([refused, ...page]);
+
+			vi.mocked(resolveSolSignatures).mockImplementation(({ signatures }) =>
+				Promise.resolve({
+					transactions: toResolved(
+						signatures.filter(({ signature }) => signature !== refused.signature)
+					),
+					unreadable: signatures.some(({ signature }) => signature === refused.signature)
+						? [unreadable]
+						: []
+				})
+			);
+		});
+
+		it('should post them alongside the records of the others', async () => {
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual(toResolved(page));
+			expect(posts[0].data.wallet.unreadableTransactions).toEqual([unreadable]);
+		});
+
+		it('should post a tick whose only new signature is one of them', async () => {
+			mockPage(page);
+
+			await scheduler.trigger(data);
+
+			mockPage([refused, ...page]);
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			const posts = walletPosts();
+
+			expect(posts).toHaveLength(1);
+			expect(postedTransactions(posts[0])).toEqual([]);
+			expect(posts[0].data.wallet.unreadableTransactions).toEqual([unreadable]);
+		});
+
+		// The RPC answers the same on every tick: once committed, the signature is held like any other.
+		it('should neither fetch nor post one again on the next tick', async () => {
+			await scheduler.trigger(data);
+
+			vi.mocked(resolveSolSignatures).mockClear();
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(data);
+
+			expect(resolveSolSignatures).not.toHaveBeenCalled();
+			expect(walletPosts()).toHaveLength(0);
+		});
+
+		it('should leave them out of a message that has none', async () => {
+			mockPage(page);
+
+			await scheduler.trigger(data);
+
+			const [post] = walletPosts();
+
+			expect(post.data.wallet).not.toHaveProperty('unreadableTransactions');
 		});
 	});
 

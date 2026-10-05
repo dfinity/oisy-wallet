@@ -79,7 +79,7 @@ describe('sol-resolve-signatures.services integration', () => {
 			cursor
 		});
 
-		const records = await resolveSolSignatures({
+		const { transactions: records } = await resolveSolSignatures({
 			address: wallet,
 			network,
 			tokens,

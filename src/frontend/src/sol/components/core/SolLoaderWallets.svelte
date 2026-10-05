@@ -19,6 +19,7 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 	import type { SolAddress } from '$sol/types/address';
 	import type { SplToken } from '$sol/types/spl';
 
@@ -117,6 +118,7 @@
 					new Set([...current.worker.tokenIds, token.id, ...splTokens.map(({ id }) => id)]).forEach(
 						(tokenId) => {
 							solTransactionsStore.reset(tokenId);
+							solUnreadableTransactionsStore.reset(tokenId);
 							balancesStore.reset(tokenId);
 						}
 					);
