@@ -1,12 +1,15 @@
+import { consoleError } from '$lib/utils/console.utils';
 import { SOLANA_TRANSACTION_DETAIL_CONCURRENCY } from '$sol/constants/sol.constants';
 import { findSolTokenAccounts, mergeSignatureSources } from '$sol/services/sol-signatures.services';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type {
-	SolResolvedSignatures,
-	SolSignatureWithSources,
-	SolTransactionUi
+import {
+	SolTransactionReadError,
+	type SolResolvedSignatures,
+	type SolSignatureWithSources,
+	type SolTransactionUi,
+	type SolUnreadableTransaction
 } from '$sol/types/sol-transaction';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
@@ -15,10 +18,23 @@ import {
 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 } from '@solana/kit';
 
-// The RPC's answers that retrying cannot change: only an OISY that reads the transaction can. A
-// network error or a rate limit is not one of them.
-const isUnreadableSolTransactionError = (err: unknown) =>
-	isSolanaError(err, SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION);
+type SolUnreadableOutcome = Pick<SolUnreadableTransaction, 'reason' | 'errorCode'>;
+
+// The failures that retrying cannot change: only an OISY that reads the transaction can. The RPC
+// refusing it, or OISY failing to read what the RPC returned. A network error or a rate limit is
+// neither.
+const unreadableOutcome = (err: unknown): SolUnreadableOutcome | undefined => {
+	if (isSolanaError(err, SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION)) {
+		return { reason: 'refused', errorCode: err.context.__code };
+	}
+
+	if (err instanceof SolTransactionReadError) {
+		// What went wrong is ours to fix, and the event that reports it does not carry it.
+		consoleError('Reading a Solana transaction failed:', err.cause);
+
+		return { reason: 'unparsable' };
+	}
+};
 
 /**
  * Which token each source address belongs to: the wallet maps to `null` (native SOL), the
@@ -87,10 +103,10 @@ const mapWithConcurrency = async <T, R>({
  * account lookup returns transactions that never touched anything of the user's) is left out, and
  * so is every signature in `known`.
  *
- * A transaction the RPC refuses to return is left out too, and listed in `unreadable`: retrying
- * cannot change that answer, and failing the page on it would stop the history of every token it
- * belongs to for as long as it stays on that page. Any other failed fetch rejects the call, so that
- * the caller retries rather than taking a partial page for a complete one.
+ * A transaction the RPC refuses to return, or that OISY fails to read, is left out too, and listed
+ * in `unreadable`: retrying cannot change either, and failing the page on it would stop the history
+ * of every token it belongs to for as long as it stays on that page. Any other failure rejects the
+ * call, so that the caller retries rather than taking a partial page for a complete one.
  */
 export const resolveSolSignatures = async ({
 	address,
@@ -119,7 +135,7 @@ export const resolveSolSignatures = async ({
 
 	const outcomes = await mapWithConcurrency<
 		SolSignatureWithSources,
-		{ transaction: SolTransactionUi | undefined } | { errorCode: number }
+		{ transaction: SolTransactionUi | undefined } | { unreadable: SolUnreadableOutcome }
 	>({
 		items: toResolve,
 		concurrency: SOLANA_TRANSACTION_DETAIL_CONCURRENCY,
@@ -134,8 +150,10 @@ export const resolveSolSignatures = async ({
 
 				return { transaction };
 			} catch (err: unknown) {
-				if (isUnreadableSolTransactionError(err)) {
-					return { errorCode: err.context.__code };
+				const unreadable = unreadableOutcome(err);
+
+				if (nonNullish(unreadable)) {
+					return { unreadable };
 				}
 
 				throw err;
@@ -147,10 +165,10 @@ export const resolveSolSignatures = async ({
 		(acc, { signature, sources }, index) => {
 			const outcome = outcomes[index];
 
-			if ('errorCode' in outcome) {
-				const { errorCode } = outcome;
+			if ('unreadable' in outcome) {
+				const { unreadable } = outcome;
 
-				return { ...acc, unreadable: [...acc.unreadable, { signature, sources, errorCode }] };
+				return { ...acc, unreadable: [...acc.unreadable, { signature, sources, ...unreadable }] };
 			}
 
 			const { transaction } = outcome;

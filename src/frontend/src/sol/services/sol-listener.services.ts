@@ -132,9 +132,8 @@ export const syncWallet = ({
 
 	if (unreadableTransactions.length > 0) {
 		reportUnreadableSolTransactions({
-			transactions: unreadableTransactions.map(({ signature, errorCode, sources }) => ({
-				signature,
-				errorCode,
+			transactions: unreadableTransactions.map(({ sources, ...unreadable }) => ({
+				...unreadable,
 				network,
 				tokenIds: tokenIdsOfSources(sources)
 			}))

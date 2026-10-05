@@ -1077,6 +1077,7 @@ describe('sol-wallet.scheduler', () => {
 		const unreadable = {
 			signature: refused.signature,
 			sources: refused.sources,
+			reason: 'refused' as const,
 			errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 		};
 
