@@ -1,4 +1,8 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import {
+	WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE,
+	WALLET_CONNECT_UNCHECKED_SIGNING_POINTER
+} from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -16,7 +20,9 @@ describe('SolWalletConnectSignReview', () => {
 		token: SOLANA_TOKEN,
 		feeToken: SOLANA_TOKEN,
 		onApprove: vi.fn(),
-		onReject: vi.fn()
+		onReject: vi.fn(),
+		onUncheckedSigningAcknowledge: vi.fn(),
+		onOpenSettings: vi.fn()
 	};
 
 	// The operations are a tab of their own, so what they contain is only in the DOM once it is
@@ -1077,6 +1083,122 @@ describe('SolWalletConnectSignReview', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, { props });
 
 			expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('the way past a refusal', () => {
+		const preview = {
+			solDelta: -5_000n,
+			tokenDeltas: [],
+			controlChanges: [{ account: mockSolAddress2, field: 'owner' as const, to: mockAtaAddress }]
+		};
+
+		it('should say where the Settings switch is when it is off', () => {
+			const { getByTestId, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, ambiguous: true }
+			});
+
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
+		it('should offer nothing on a request it would sign anyway', () => {
+			const { queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, uncheckedSigningOffered: true }
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
+		it('should offer nothing, not even the switch, for a site the domain check flagged', () => {
+			const { getByText, queryByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...props, ambiguous: true, domainFlagged: true }
+			});
+
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
+		it('should state the reason without refusing, and ask for the acknowledgement, with the switch on', () => {
+			const { getByRole, getByTestId, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, ambiguous: true, uncheckedSigningOffered: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(en.wallet_connect.text.cannot_be_shown_reason);
+			expect(queryByText(en.wallet_connect.text.cannot_be_shown)).not.toBeInTheDocument();
+			expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).toBeInTheDocument();
+		});
+
+		// The acknowledgement covers every refusal, so each of them is stated, not just the first.
+		it('should state every reason when several refusals apply', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					closesPayOthers: true,
+					ambiguous: true,
+					unreviewedWithoutSimulation: true,
+					uncheckedSigningOffered: true
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.close_pays_others_reason)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.cannot_be_shown_reason)).toBeInTheDocument();
+			expect(
+				getByText(en.wallet_connect.text.unreviewed_without_simulation_reason)
+			).toBeInTheDocument();
+		});
+
+		it('should show every caveat of a signable review once the request may be signed after all', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					closesPayOthers: true,
+					uncheckedSigningOffered: true,
+					parties: { sources: [], destinations: [], partial: true },
+					preview
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulation_control_change)).toBeInTheDocument();
+		});
+
+		it('should hand the tick on', async () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, ambiguous: true, uncheckedSigningOffered: true }
+			});
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unchecked_signing_acknowledge));
+
+			expect(props.onUncheckedSigningAcknowledge).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('an instruction nobody read and no run described', () => {
+		it('should be refused on the review, not warned about', () => {
+			const { getByRole, queryByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, unreviewed: true, unreviewedWithoutSimulation: true }
+			});
+
+			expect(getByRole('alert')).toHaveTextContent(
+				en.wallet_connect.text.unreviewed_without_simulation
+			);
+			expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
+		});
+
+		it('should say nothing else about it', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					unreviewed: true,
+					unreviewedWithoutSimulation: true,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
 			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 		});
 	});

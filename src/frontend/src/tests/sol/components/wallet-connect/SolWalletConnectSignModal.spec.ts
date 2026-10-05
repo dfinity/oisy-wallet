@@ -1,4 +1,11 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import {
+	WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE,
+	WALLET_CONNECT_UNCHECKED_SIGNING_OPEN_SETTINGS,
+	WALLET_CONNECT_UNCHECKED_SIGNING_POINTER
+} from '$lib/constants/test-ids.constants';
+import * as walletConnectServices from '$lib/services/wallet-connect.services';
+import { walletConnectUncheckedSigningStore } from '$lib/stores/wallet-connect-unchecked-signing.store';
 import SolWalletConnectSignMessageModal from '$sol/components/wallet-connect/SolWalletConnectSignMessageModal.svelte';
 import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
 import {
@@ -10,6 +17,11 @@ import { decode, sign } from '$sol/services/wallet-connect.services';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+const mockGoto = vi.fn();
+vi.mock('$app/navigation', () => ({
+	goto: (...args: unknown[]) => mockGoto(...args)
+}));
 
 vi.mock('$sol/services/wallet-connect.services', () => ({
 	decode: vi.fn().mockResolvedValue({
@@ -207,6 +219,192 @@ describe('SolWalletConnectSignModal', () => {
 			});
 
 			expect(args).toEqual(expect.objectContaining({ simulated: false }));
+		});
+	});
+
+	describe('the way past a refusal', () => {
+		const refused = {
+			amount: 1n,
+			ambiguous: true,
+			parties: { sources: [], destinations: [], partial: true }
+		};
+
+		const flagged = (method: string) => ({
+			...props(method),
+			request: {
+				...mockRequest(method),
+				verifyContext: {
+					verified: {
+						verifyUrl: 'https://verify.walletconnect.org',
+						validation: 'INVALID',
+						origin: 'https://dapp.example',
+						isScam: false
+					}
+				}
+			} as unknown as WalletKitTypes.SessionRequest
+		});
+
+		beforeEach(() => {
+			vi.mocked(sign).mockClear();
+			vi.mocked(sign).mockResolvedValue({ success: false });
+
+			mockGoto.mockClear();
+
+			walletConnectUncheckedSigningStore.disable();
+		});
+
+		afterEach(() => {
+			walletConnectUncheckedSigningStore.disable();
+		});
+
+		it('should hold Approve until the acknowledgement is ticked, with the switch on', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce(refused);
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.cannot_be_shown_reason)).toBeInTheDocument();
+			});
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			expect(approve).toBeDisabled();
+
+			await fireEvent.click(getByText(en.wallet_connect.text.unchecked_signing_acknowledge));
+
+			expect(approve).toBeEnabled();
+
+			await fireEvent.click(approve);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ acknowledgedRefusals: ['cannot_be_shown'] })
+				);
+			});
+		});
+
+		it('should keep Approve held and point to the switch, with the switch off', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(refused);
+
+			const { getByRole, getByTestId, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		// Decided when the review opens, so a switch turned on meanwhile does not reach it.
+		it('should not gain the offer from a switch turned on after it opened', async () => {
+			vi.mocked(decode).mockResolvedValueOnce(refused);
+
+			const { getByTestId, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			walletConnectUncheckedSigningStore.enable();
+
+			await waitFor(() => {
+				expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+		});
+
+		it('should offer no way past a refusal for a site the domain check flagged', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce(refused);
+
+			const { getByRole, getByText, queryByTestId } = render(SolWalletConnectSignModal, {
+				props: flagged(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+			});
+
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_ACKNOWLEDGE)).not.toBeInTheDocument();
+			expect(queryByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_POINTER)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should refuse on the review an instruction nobody read and no run described', async () => {
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				unreviewed: true,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByText(en.wallet_connect.text.unreviewed_without_simulation)).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
+
+		it('should reject the request and open Settings from the pointer', async () => {
+			const rejectSpy = vi
+				.spyOn(walletConnectServices, 'reject')
+				.mockResolvedValue({ success: true });
+
+			vi.mocked(decode).mockResolvedValueOnce(refused);
+
+			const { getByTestId } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			await waitFor(() => {
+				expect(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_OPEN_SETTINGS)).toBeInTheDocument();
+			});
+
+			await fireEvent.click(getByTestId(WALLET_CONNECT_UNCHECKED_SIGNING_OPEN_SETTINGS));
+
+			await waitFor(() => {
+				expect(mockGoto).toHaveBeenCalledOnce();
+			});
+
+			expect(rejectSpy).toHaveBeenCalledOnce();
+			expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/settings'));
+		});
+
+		it('should hand on no acknowledgement for a request it would sign anyway', async () => {
+			walletConnectUncheckedSigningStore.enable();
+
+			vi.mocked(decode).mockResolvedValueOnce({
+				amount: 1n,
+				parties: { sources: [], destinations: [], partial: true }
+			});
+
+			const { getByRole } = render(SolWalletConnectSignModal, {
+				props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+			});
+
+			const approve = getByRole('button', { name: en.core.text.approve });
+
+			await waitFor(() => {
+				expect(approve).toBeEnabled();
+			});
+
+			await fireEvent.click(approve);
+
+			await waitFor(() => {
+				expect(sign).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ acknowledgedRefusals: [] })
+				);
+			});
 		});
 	});
 
