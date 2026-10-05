@@ -852,7 +852,7 @@
 		"text": {
 			"title": "Настройки",
 			"general": "Общие",
-			"security": "",
+			"security": "Безопасность",
 			"preferences": "Параметры",
 			"principal": "Ваш Principal",
 			"principal_copied": "Принципал скопирован в буфер обмена",

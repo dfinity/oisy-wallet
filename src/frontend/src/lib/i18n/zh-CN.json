@@ -852,7 +852,7 @@
 		"text": {
 			"title": "设置",
 			"general": "通用",
-			"security": "",
+			"security": "安全",
 			"preferences": "偏好设置",
 			"principal": "你的 Principal",
 			"principal_copied": "Principal 已复制到剪贴板",
