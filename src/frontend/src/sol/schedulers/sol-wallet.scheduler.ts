@@ -334,10 +334,32 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		const params: LoadSolWalletParams = { address, network, tokens };
 
-		const [balances, head] = await Promise.all([
+		const [balancesResult, headResult] = await Promise.allSettled([
 			loadSolNetworkBalances(params),
 			this.loadHead(params)
 		]);
+
+		// Without the balances there is nothing worth showing: the tick fails, is retried, and in the
+		// end reports a sync error.
+		if (balancesResult.status === 'rejected') {
+			throw balancesResult.reason;
+		}
+
+		const { value: balances } = balancesResult;
+
+		// The history only feeds the transaction lists, and a single transaction the network will not
+		// return fails it for as long as it stays in the newest page. Rather than hold back every
+		// balance of the network that long, the balances are posted on their own and the history is
+		// asked for again on the next tick, not retried within this one.
+		if (headResult.status === 'rejected') {
+			consoleError('Loading the newest Solana history failed:', headResult.reason);
+
+			this.syncBalances(balances);
+
+			return;
+		}
+
+		const { value: head } = headResult;
 
 		// Committed only once both loads succeeded: a retry after a failure must see the same
 		// signatures as new again.
@@ -378,6 +400,30 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		}
 	};
 
+	private hasNewBalances = (balances: SolNetworkBalances): boolean =>
+		isNullish(this.store.balances) ||
+		!balancesEqual({ current: this.store.balances, next: balances });
+
+	// Commits the balances alone: what the head check holds stays as it was, so the next tick sees
+	// the same signatures as new.
+	private syncBalances = (balances: SolNetworkBalances) => {
+		const newBalances = this.hasNewBalances(balances);
+
+		this.store = { ...this.store, balances };
+
+		if (!newBalances) {
+			return;
+		}
+
+		this.postMessageWallet({
+			wallet: {
+				balances,
+				newTransactions: JSON.stringify([]),
+				transactionsUnavailable: true
+			}
+		});
+	};
+
 	private syncWalletData = ({
 		balances,
 		head: { signatures, transactions, catchUp }
@@ -385,9 +431,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		balances: SolNetworkBalances;
 		head: SolWalletHead;
 	}): { hasChanges: boolean } => {
-		const newBalances =
-			isNullish(this.store.balances) ||
-			!balancesEqual({ current: this.store.balances, next: balances });
+		const newBalances = this.hasNewBalances(balances);
 
 		const newestSlot = signatures.reduce<SolSignature['slot'] | undefined>(
 			(acc, { slot }) => (isNullish(acc) || slot > acc ? slot : acc),
