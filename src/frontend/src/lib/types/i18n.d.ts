@@ -2121,7 +2121,11 @@ interface I18nPrivacy_policy {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string; hidden_micro_transactions: string };
-	warning: { no_index_canister: string; unavailable_index_canister: string };
+	warning: {
+		no_index_canister: string;
+		unavailable_index_canister: string;
+		unsupported_sol_transactions: string;
+	};
 }
 
 interface I18nEarning {

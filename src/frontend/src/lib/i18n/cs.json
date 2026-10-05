@@ -2568,7 +2568,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short nemůže načíst transakce pro $token_list – vydavatel tokenu neposkytuje sledování transakcí.",
-			"unavailable_index_canister": "Nejnovější transakce pro $token_list se teď nedají načíst, protože jejich sledovací služba neodpovídá. Načtou se automaticky, jakmile bude opět dostupná."
+			"unavailable_index_canister": "Nejnovější transakce pro $token_list se teď nedají načíst, protože jejich sledovací služba neodpovídá. Načtou se automaticky, jakmile bude opět dostupná.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {

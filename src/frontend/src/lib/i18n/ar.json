@@ -2568,7 +2568,8 @@
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
-			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا."
+			"unavailable_index_canister": "لا يمكن عرض معاملات $token_list. حاوية الفهرس غير متاحة حاليًا.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {

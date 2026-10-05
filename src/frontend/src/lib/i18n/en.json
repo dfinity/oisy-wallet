@@ -2568,7 +2568,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short can’t load transactions for $token_list — the token issuer doesn’t provide transaction tracking.",
-			"unavailable_index_canister": "The latest transactions for $token_list can’t be loaded at the moment, because their tracking service isn’t responding. They will be loaded automatically once it’s back."
+			"unavailable_index_canister": "The latest transactions for $token_list can’t be loaded at the moment, because their tracking service isn’t responding. They will be loaded automatically once it’s back.",
+			"unsupported_sol_transactions": "Some transactions for $token_list could not be loaded, because they have an unsupported format. They will automatically appear once this issue is resolved."
 		}
 	},
 	"earning": {

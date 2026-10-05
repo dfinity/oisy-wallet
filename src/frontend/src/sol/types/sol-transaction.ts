@@ -1,4 +1,5 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { Token } from '$lib/types/token';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
@@ -98,6 +99,12 @@ export interface SolUnreadableTransaction {
 export interface SolResolvedSignatures {
 	transactions: SolResolvedTransaction[];
 	unreadable: SolUnreadableTransaction[];
+}
+
+export interface SolUnreadableTransactionsWarning {
+	token: Token;
+	// The transactions missing from its history whose warning the user has not dismissed.
+	signatures: SolUnreadableTransaction['signature'][];
 }
 
 export type SolSignedTransaction = Transaction &

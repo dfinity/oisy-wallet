@@ -22,12 +22,15 @@ import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/u
 import * as infoUtils from '$lib/utils/info.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import { solUnreadableTransactionsWarningStore } from '$sol/stores/sol-unreadable-transactions-warning.store';
+import { solUnreadableTransactionsStore } from '$sol/stores/sol-unreadable-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
@@ -309,6 +312,65 @@ describe('AllTransactions', () => {
 
 		unmount();
 		vi.restoreAllMocks();
+	});
+
+	describe('unsupported Solana transactions warning', () => {
+		const unsupportedText = (symbols: string[]) =>
+			replacePlaceholders(en.activity.warning.unsupported_sol_transactions, {
+				$token_list: formatList({ items: symbols, language: Languages.ENGLISH })
+			});
+
+		const { signature } = mockSolSignatureResponse();
+
+		beforeEach(() => {
+			solUnreadableTransactionsStore.reset(SOLANA_TOKEN_ID);
+			solUnreadableTransactionsWarningStore.reset();
+		});
+
+		it('renders nothing while no history misses a transaction', () => {
+			const { queryByText } = render(AllTransactions);
+
+			expect(queryByText(unsupportedText(['SOL']))).not.toBeInTheDocument();
+		});
+
+		it('names the token whose history misses a transaction', () => {
+			solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN_ID, signatures: [signature] });
+
+			const { queryByText } = render(AllTransactions);
+
+			expect(queryByText(unsupportedText(['SOL']))).toBeInTheDocument();
+		});
+
+		it('remembers the dismissal per transaction, for the session only', async () => {
+			solUnreadableTransactionsStore.add({ tokenId: SOLANA_TOKEN_ID, signatures: [signature] });
+
+			const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();
+			const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
+
+			const { container, queryByText, unmount } = render(AllTransactions);
+
+			await dismissWarning(container);
+
+			expect(spySave).toHaveBeenCalledWith({
+				key: 'oisy_sol_hide_unsupported_transactions',
+				qualifiers: [`${signature}:`]
+			});
+			expect(spyDismiss).not.toHaveBeenCalled();
+
+			await waitFor(() => expect(queryByText(unsupportedText(['SOL']))).not.toBeInTheDocument());
+
+			// Another transaction the token misses raises the box again.
+			solUnreadableTransactionsStore.add({
+				tokenId: SOLANA_TOKEN_ID,
+				signatures: [mockSolSignatureResponse().signature]
+			});
+
+			await waitFor(() => expect(queryByText(unsupportedText(['SOL']))).toBeInTheDocument());
+
+			unmount();
+			spyDismiss.mockRestore();
+			spySave.mockRestore();
+		});
 	});
 
 	it('renders the info box list', () => {

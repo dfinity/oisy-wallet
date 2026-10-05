@@ -31,6 +31,8 @@
 		isSimpleNotificationDismissed
 	} from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { solUnreadableTransactionsWarnings } from '$sol/derived/sol-unreadable-transactions.derived';
+	import { solUnreadableTransactionsWarningStore } from '$sol/stores/sol-unreadable-transactions-warning.store';
 
 	// The backend call is an update call that takes some time to complete.
 	// If the user profile is reactively refreshed before the call completes, the store would
@@ -89,6 +91,15 @@
 	const dismissUnavailableCanisterWarning = () =>
 		icTransactionsWarningStore.dismiss($tokensToWarnAboutIndexCanister);
 
+	// Shared with the token page like the warning above, and dismissed per transaction: a token that
+	// misses another one later is named again.
+	let tokensWithUnsupportedTransactions = $derived(
+		$solUnreadableTransactionsWarnings.map(({ token }) => getTokenDisplaySymbol(token))
+	);
+
+	const dismissUnsupportedTransactionsWarning = () =>
+		solUnreadableTransactionsWarningStore.dismiss($solUnreadableTransactionsWarnings);
+
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
 			kind: 'NoIndexCanister',
@@ -120,6 +131,7 @@
 	let hasBanners = $derived(
 		undismissedNoCanister.length > 0 ||
 			tokensWithUnavailableCanister.length > 0 ||
+			tokensWithUnsupportedTransactions.length > 0 ||
 			!btcBannerDismissed ||
 			$hiddenMicroTransactionsBannerVisible
 	);
@@ -164,6 +176,17 @@
 							})
 						}
 					)}
+				</MessageBox>
+			{/if}
+
+			{#if tokensWithUnsupportedTransactions.length > 0}
+				<MessageBox level="warning" onDismiss={dismissUnsupportedTransactionsWarning}>
+					{replacePlaceholders($i18n.activity.warning.unsupported_sol_transactions, {
+						$token_list: formatList({
+							items: tokensWithUnsupportedTransactions,
+							language: $currentLanguage
+						})
+					})}
 				</MessageBox>
 			{/if}
 

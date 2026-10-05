@@ -2568,7 +2568,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short nie może załadować transakcji dla $token_list – wydawca tokena nie udostępnia śledzenia transakcji.",
-			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna."
+			"unavailable_index_canister": "Najnowszych transakcji dla $token_list nie można w tej chwili załadować, ponieważ ich usługa śledzenia nie odpowiada. Zostaną załadowane automatycznie, gdy znów będzie dostępna.",
+			"unsupported_sol_transactions": ""
 		}
 	},
 	"earning": {
