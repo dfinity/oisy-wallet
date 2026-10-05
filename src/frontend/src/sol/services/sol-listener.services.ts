@@ -6,6 +6,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { reportUnreadableSolTransactions } from '$sol/services/sol-unreadable-transactions.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -63,11 +64,12 @@ const syncTokenTransactions = ({
  * Writes one tick of a Solana network worker into the per-token stores: each balance to its token,
  * and each record to every token whose source returned its signature (the wallet to native SOL, an
  * associated token account to the token of its mint). A source the routing does not know, left from
- * a token list the worker has since been restarted without, is dropped.
+ * a token list the worker has since been restarted without, is dropped. A transaction the RPC
+ * refused to return is reported for the same tokens.
  */
 export const syncWallet = ({
 	data,
-	routing: { nativeTokenId, splTokenIds, sourceTokens }
+	routing: { network, nativeTokenId, splTokenIds, sourceTokens }
 }: {
 	data: SolPostMessageDataResponseWallet;
 	routing: SolWalletRouting;
@@ -76,6 +78,7 @@ export const syncWallet = ({
 		wallet: {
 			balances: { sol, spl },
 			newTransactions,
+			unreadableTransactions = [],
 			transactionsUnavailable
 		}
 	} = data;
@@ -109,8 +112,12 @@ export const syncWallet = ({
 		return isNullish(mint) ? nativeTokenId : splTokenIds.get(mint);
 	};
 
+	const tokenIdsOfSources = (sources: SolResolvedTransaction['sources']): TokenId[] => [
+		...new Set(sources.map(tokenIdOfSource).filter(nonNullish))
+	];
+
 	const transactionsByToken = resolved.reduce((acc, { transaction, sources }) => {
-		new Set(sources.map(tokenIdOfSource).filter(nonNullish)).forEach((tokenId) =>
+		tokenIdsOfSources(sources).forEach((tokenId) =>
 			acc.set(tokenId, [...(acc.get(tokenId) ?? []), { data: transaction, certified: false }])
 		);
 
@@ -122,6 +129,17 @@ export const syncWallet = ({
 	[nativeTokenId, ...splTokenIds.values()].forEach((tokenId) =>
 		syncTokenTransactions({ tokenId, transactions: transactionsByToken.get(tokenId) ?? [] })
 	);
+
+	if (unreadableTransactions.length > 0) {
+		reportUnreadableSolTransactions({
+			transactions: unreadableTransactions.map(({ signature, errorCode, sources }) => ({
+				signature,
+				errorCode,
+				network,
+				tokenIds: tokenIdsOfSources(sources)
+			}))
+		});
+	}
 };
 
 export const syncWalletError = ({

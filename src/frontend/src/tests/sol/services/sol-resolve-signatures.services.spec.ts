@@ -24,7 +24,13 @@ import {
 	mockSolAddress
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address, type Address } from '@solana/kit';
+import {
+	address,
+	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+	SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+	SolanaError,
+	type Address
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
@@ -139,9 +145,12 @@ describe('sol-resolve-signatures.services', () => {
 				ownedTokenAccounts: [bonkSource, usdcSource, spyxSource]
 			});
 
-			expect(result).toStrictEqual([
-				{ transaction: recordFor(swap), sources: [walletSource, bonkSource, usdcSource] }
-			]);
+			expect(result).toStrictEqual({
+				transactions: [
+					{ transaction: recordFor(swap), sources: [walletSource, bonkSource, usdcSource] }
+				],
+				unreadable: []
+			});
 		});
 
 		it('should fetch a signature listed twice once, with the sources of both entries', async () => {
@@ -152,9 +161,10 @@ describe('sol-resolve-signatures.services', () => {
 
 			expect(spyFetchSolTransactionsForSignature).toHaveBeenCalledOnce();
 
-			expect(result).toStrictEqual([
-				{ transaction: recordFor(first), sources: [walletSource, bonkSource] }
-			]);
+			expect(result).toStrictEqual({
+				transactions: [{ transaction: recordFor(first), sources: [walletSource, bonkSource] }],
+				unreadable: []
+			});
 		});
 
 		it('should never fetch a signature already known', async () => {
@@ -167,7 +177,10 @@ describe('sol-resolve-signatures.services', () => {
 				expect.objectContaining({ signature: fresh })
 			);
 
-			expect(result).toStrictEqual([{ transaction: recordFor(fresh), sources: [usdcSource] }]);
+			expect(result).toStrictEqual({
+				transactions: [{ transaction: recordFor(fresh), sources: [usdcSource] }],
+				unreadable: []
+			});
 		});
 
 		it('should not derive any account when every signature is known', async () => {
@@ -175,14 +188,17 @@ describe('sol-resolve-signatures.services', () => {
 
 			await expect(
 				resolve({ signatures: [held], known: new Set([held.signature]) })
-			).resolves.toStrictEqual([]);
+			).resolves.toStrictEqual({ transactions: [], unreadable: [] });
 
 			expect(spyFetchSolTransactionsForSignature).not.toHaveBeenCalled();
 			expect(spyFindAssociatedTokenPda).not.toHaveBeenCalled();
 		});
 
 		it('should return nothing for an empty page', async () => {
-			await expect(resolve({ signatures: [] })).resolves.toStrictEqual([]);
+			await expect(resolve({ signatures: [] })).resolves.toStrictEqual({
+				transactions: [],
+				unreadable: []
+			});
 
 			expect(spyFetchSolTransactionsForSignature).not.toHaveBeenCalled();
 		});
@@ -211,12 +227,13 @@ describe('sol-resolve-signatures.services', () => {
 
 			const result = await resolve({ signatures });
 
-			expect(result).toStrictEqual(
-				signatures.map((signature) => ({
+			expect(result).toStrictEqual({
+				transactions: signatures.map((signature) => ({
 					transaction: recordFor(signature),
 					sources: signature.sources
-				}))
-			);
+				})),
+				unreadable: []
+			});
 		});
 
 		it('should leave out a signature whose derivation yields nothing', async () => {
@@ -234,7 +251,10 @@ describe('sol-resolve-signatures.services', () => {
 
 			expect(spyFetchSolTransactionsForSignature).toHaveBeenCalledTimes(2);
 
-			expect(result).toStrictEqual([{ transaction: recordFor(transfer), sources: [walletSource] }]);
+			expect(result).toStrictEqual({
+				transactions: [{ transaction: recordFor(transfer), sources: [walletSource] }],
+				unreadable: []
+			});
 		});
 
 		it('should resolve the signatures concurrently, never more than the bound at once', async () => {
@@ -269,7 +289,9 @@ describe('sol-resolve-signatures.services', () => {
 				pending.shift()?.();
 			}
 
-			await expect(result).resolves.toHaveLength(signatures.length);
+			const { transactions } = await result;
+
+			expect(transactions).toHaveLength(signatures.length);
 
 			expect(maxInFlight).toBe(SOLANA_TRANSACTION_DETAIL_CONCURRENCY);
 			expect(spyFetchSolTransactionsForSignature).toHaveBeenCalledTimes(signatures.length);
@@ -294,6 +316,89 @@ describe('sol-resolve-signatures.services', () => {
 
 			// No fetch is started once the page has failed.
 			expect(spyFetchSolTransactionsForSignature.mock.calls.length).toBeLessThan(signatures.length);
+		});
+
+		describe('a transaction the RPC refuses to return', () => {
+			const unsupportedVersion = new SolanaError(
+				SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+				{ __serverMessage: 'Transaction version (1) is not supported by the requesting client' }
+			);
+
+			const failWith = ({ failing, error }: { failing: SolSignatureWithSources; error: unknown }) =>
+				spyFetchSolTransactionsForSignature.mockImplementation(
+					({ signature }: { signature: SolSignatureWithSources }) =>
+						signature.signature === failing.signature
+							? Promise.reject(error)
+							: Promise.resolve([recordFor(signature)])
+				);
+
+			it('should leave it out and list it with its sources and the code it was refused with', async () => {
+				const before = withSources([walletSource]);
+				const refused = withSources([walletSource, usdcSource]);
+				const after = withSources([bonkSource]);
+
+				failWith({ failing: refused, error: unsupportedVersion });
+
+				const result = await resolve({ signatures: [before, refused, after] });
+
+				expect(result).toStrictEqual({
+					transactions: [
+						{ transaction: recordFor(before), sources: [walletSource] },
+						{ transaction: recordFor(after), sources: [bonkSource] }
+					],
+					unreadable: [
+						{
+							signature: refused.signature,
+							sources: [walletSource, usdcSource],
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+						}
+					]
+				});
+			});
+
+			it('should list a page of nothing but such transactions without rejecting', async () => {
+				const refused = withSources([walletSource]);
+
+				failWith({ failing: refused, error: unsupportedVersion });
+
+				await expect(resolve({ signatures: [refused] })).resolves.toStrictEqual({
+					transactions: [],
+					unreadable: [
+						{
+							signature: refused.signature,
+							sources: [walletSource],
+							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
+						}
+					]
+				});
+			});
+
+			// A rate limit clears by itself: leaving the transaction out would drop it for good.
+			it('should still reject on a rate limit', async () => {
+				const throttled = withSources([walletSource]);
+
+				const rateLimit = new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, {
+					headers: new Headers(),
+					message: 'Too Many Requests',
+					statusCode: 429
+				});
+
+				failWith({ failing: throttled, error: rateLimit });
+
+				await expect(
+					resolve({ signatures: [withSources([walletSource]), throttled] })
+				).rejects.toThrow(rateLimit);
+			});
+
+			it('should still reject on a network error', async () => {
+				const unreachable = withSources([walletSource]);
+
+				const networkError = new TypeError('Failed to fetch');
+
+				failWith({ failing: unreachable, error: networkError });
+
+				await expect(resolve({ signatures: [unreachable] })).rejects.toThrow(networkError);
+			});
 		});
 	});
 });
