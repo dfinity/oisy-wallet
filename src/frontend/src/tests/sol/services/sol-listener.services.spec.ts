@@ -196,6 +196,7 @@ describe('sol-listener.services', () => {
 						{
 							signature: refused,
 							sources,
+							reason: 'refused',
 							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION
 						}
 					]
@@ -209,6 +210,7 @@ describe('sol-listener.services', () => {
 					transactions: [
 						{
 							signature: refused,
+							reason: 'refused',
 							errorCode: SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
 							network: SOLANA_MAINNET_NETWORK,
 							tokenIds: [nativeTokenId, splTokenId2]

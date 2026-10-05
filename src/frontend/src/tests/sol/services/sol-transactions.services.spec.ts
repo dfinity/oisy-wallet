@@ -5,7 +5,11 @@ import * as solanaApi from '$sol/api/solana.api';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
+import {
+	SolTransactionReadError,
+	type SolRpcTransaction,
+	type SolSignature
+} from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
@@ -130,6 +134,42 @@ describe('sol-transactions.services', () => {
 			spyFetchTransactionDetailForSignature.mockResolvedValueOnce(null);
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([]);
+		});
+
+		describe('failures', () => {
+			// Only a failure to read what the RPC returned fails again however often it is retried, so
+			// only that one is told apart.
+			it('should throw a read error, with the cause, when it cannot read what the RPC returned', async () => {
+				spyFetchTransactionDetailForSignature.mockResolvedValueOnce(
+					detailWith({ accountKeys: [null] })
+				);
+
+				const result = fetchSolTransactionsForSignature(mockParams);
+
+				await expect(result).rejects.toBeInstanceOf(SolTransactionReadError);
+				await expect(result).rejects.toHaveProperty('cause', expect.any(TypeError));
+			});
+
+			it('should let a failed fetch through unchanged', async () => {
+				const err = new Error('Failed to fetch');
+
+				spyFetchTransactionDetailForSignature.mockRejectedValueOnce(err);
+
+				await expect(fetchSolTransactionsForSignature(mockParams)).rejects.toBe(err);
+			});
+
+			it('should let a failed lookup of the counterparty owner through unchanged', async () => {
+				const err = new Error('Failed to fetch');
+
+				spyGetAccountOwner.mockRejectedValueOnce(err);
+
+				await expect(fetchSolTransactionsForSignature(mockParams)).rejects.toBe(err);
+
+				expect(spyGetAccountOwner).toHaveBeenCalledExactlyOnceWith({
+					address: mockSolAddress2,
+					network
+				});
+			});
 		});
 
 		it('should return a single record per signature', async () => {

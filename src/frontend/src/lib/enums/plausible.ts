@@ -130,6 +130,14 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRANSACTION_LOAD {
 	SINGLE = 'single'
 }
 
+// Why a `transaction_load` failed, in `result_error_type`.
+export enum PLAUSIBLE_EVENT_TRANSACTION_LOAD_ERROR_TYPES {
+	// The RPC refused to return the transaction.
+	LOAD_REFUSED = 'load_refused',
+	// The RPC returned it, but OISY failed to read it.
+	PARSE_FAILED = 'parse_failed'
+}
+
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 	PERMISSIONS = 'permissions',
 	ACCOUNTS = 'accounts',

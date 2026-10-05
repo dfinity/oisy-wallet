@@ -334,15 +334,15 @@ const pageOnce = async ({
 	}
 
 	reportUnreadableSolTransactions({
-		transactions: unreadable.flatMap(({ signature, errorCode }) => {
-			const tokens = tokensBySignature.get(String(signature)) ?? [];
+		transactions: unreadable.flatMap(({ sources: _, ...transaction }) => {
+			const tokens = tokensBySignature.get(String(transaction.signature)) ?? [];
 
 			const [token] = tokens;
 
 			// A signature no token of this pager routes to is missing from no history it shows.
 			return isNullish(token)
 				? []
-				: [{ signature, errorCode, network: token.network, tokenIds: tokens.map(({ id }) => id) }];
+				: [{ ...transaction, network: token.network, tokenIds: tokens.map(({ id }) => id) }];
 		})
 	});
 
