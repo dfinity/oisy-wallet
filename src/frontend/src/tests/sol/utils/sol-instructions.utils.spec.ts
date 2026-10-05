@@ -49,7 +49,10 @@ import {
 } from '@solana-program/compute-budget';
 import { getAddMemoInstruction } from '@solana-program/memo';
 import {
+	getAuthorizeCheckedInstruction,
+	getAuthorizeCheckedWithSeedInstruction,
 	getAuthorizeInstruction,
+	getAuthorizeWithSeedInstruction,
 	getDelegateStakeInstruction,
 	getGetMinimumDelegationInstruction,
 	getInitializeCheckedInstruction,
@@ -1889,6 +1892,47 @@ describe('sol-instructions.utils', () => {
 					expect(console.warn).not.toHaveBeenCalled();
 				}
 			);
+
+			it.each([
+				{
+					name: 'AuthorizeChecked',
+					instruction: getAuthorizeCheckedInstruction({
+						stake: address(mockSolAddress2),
+						authority: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer
+					})
+				},
+				{
+					name: 'AuthorizeWithSeed',
+					instruction: getAuthorizeWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthorizedPubkey: address(mockSolAddress3),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				},
+				{
+					name: 'AuthorizeCheckedWithSeed',
+					instruction: getAuthorizeCheckedWithSeedInstruction({
+						stake: address(mockSolAddress2),
+						base: mockStakeAuthority,
+						newAuthority: createNoopSigner(address(mockSolAddress3)),
+						stakeAuthorize: StakeAuthorize.Withdrawer,
+						authoritySeed: 'seed',
+						authorityOwner: address(SYSTEM_PROGRAM_ADDRESS)
+					})
+				}
+			])('should fail closed on an $name instruction', ({ instruction }) => {
+				expect(mapSolInstruction({ instruction, userAddress: mockSolAddress })).toStrictEqual({
+					amount: undefined,
+					ambiguous: true
+				});
+
+				expect(console.warn).not.toHaveBeenCalled();
+			});
 
 			it('should ignore a GetMinimumDelegation instruction', () => {
 				const instruction = getGetMinimumDelegationInstruction();
