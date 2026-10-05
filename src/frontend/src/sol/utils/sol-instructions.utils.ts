@@ -981,14 +981,23 @@ const mapSolStakeInstruction = ({
 	// rather than later, so it fails closed on the same terms. Naming the user for both hands nothing
 	// to anybody, and the account then holds stake the review has no vocabulary for, like the other
 	// stake operations below.
+	//
+	// The unchecked form also sets a lockup, which holds the balance until a date or an epoch and
+	// lets only its custodian lift or extend it in the meantime. A staking flow sets none - no date
+	// and no epoch, which is never in force and leaves the custodian nothing to decide - so any
+	// other lockup fails closed whoever the custodian is: the summary cannot state when the balance
+	// becomes withdrawable. The checked form sets no lockup.
 	if (instructionType === StakeInstruction.Initialize) {
 		const {
 			data: {
-				arg0: { staker, withdrawer }
+				arg0: { staker, withdrawer },
+				arg1: { unixTimestamp, epoch }
 			}
 		} = instruction;
 
-		return staker === userAddress && withdrawer === userAddress
+		const lockedUp = unixTimestamp !== ZERO || epoch !== ZERO;
+
+		return staker === userAddress && withdrawer === userAddress && !lockedUp
 			? unreviewedInstruction()
 			: unfaithfulInstruction();
 	}

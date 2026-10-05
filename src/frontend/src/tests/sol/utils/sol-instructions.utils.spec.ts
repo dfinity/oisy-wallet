@@ -1987,6 +1987,49 @@ describe('sol-instructions.utils', () => {
 					});
 				});
 
+				// A lockup holds the balance until its date or epoch, and only the custodian can lift or
+				// extend it meanwhile. The summary cannot state when the balance becomes withdrawable.
+				it.each([
+					{
+						until: 'a date',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress3) }
+					},
+					{ until: 'an epoch', lockup: { epoch: 1_000n, custodian: address(mockSolAddress3) } },
+					{
+						until: 'a date, with the user as custodian',
+						lockup: { unixTimestamp: 1_900_000_000n, custodian: address(mockSolAddress) }
+					}
+				])(
+					'should fail closed on an Initialize instruction setting a lockup until $until',
+					({ lockup }) => {
+						expect(
+							mapSolInstruction({
+								instruction: initialize({ lockup: { ...noLockup, ...lockup } }),
+								userAddress: mockSolAddress
+							})
+						).toStrictEqual({
+							amount: undefined,
+							ambiguous: true
+						});
+					}
+				);
+
+				// A custodian decides only while a lockup is in force, and one with no date and no epoch
+				// never is.
+				it('should read a custodian with no lockup set as no lockup', () => {
+					expect(
+						mapSolInstruction({
+							instruction: initialize({
+								lockup: { ...noLockup, custodian: address(mockSolAddress3) }
+							}),
+							userAddress: mockSolAddress
+						})
+					).toStrictEqual({
+						amount: undefined,
+						unreviewed: true
+					});
+				});
+
 				const initializeChecked = ({
 					stakeAuthority = mockSolAddress,
 					withdrawAuthority = mockSolAddress
