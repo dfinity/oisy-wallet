@@ -6,7 +6,7 @@ import type { SolUnreadableTransaction } from '$sol/types/sol-transaction';
 
 export interface SolUnreadableTransactionReport extends Pick<
 	SolUnreadableTransaction,
-	'signature' | 'errorCode'
+	'signature' | 'reason' | 'errorCode'
 > {
 	network: Network;
 	// The tokens whose history is missing it.
@@ -38,13 +38,13 @@ export const reportUnreadableSolTransactions = ({
 		solUnreadableTransactionsStore.add({ tokenId, signatures })
 	);
 
-	transactions.forEach(({ signature, network, errorCode }) => {
+	transactions.forEach(({ signature, network, reason, errorCode }) => {
 		if (trackedSignatures.has(signature)) {
 			return;
 		}
 
 		trackedSignatures.add(signature);
 
-		trackSolUnreadableTransaction({ network, errorCode });
+		trackSolUnreadableTransaction({ network, reason, errorCode });
 	});
 };
