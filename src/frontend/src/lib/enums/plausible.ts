@@ -30,6 +30,7 @@ export enum PLAUSIBLE_EVENTS {
 	// The countdown to the end of the XDR basket that prices TCYCLES.
 	XDR_BASKET_EXPIRY = 'xdr_basket_expiry',
 	CYCLES_MINT = 'cycles_mint',
+	CYCLES_TOP_UP = 'cycles_top_up',
 	// An invariant we believed unreachable was reached. Not for flows that can legitimately
 	// fail — those keep their own event and report the outcome via `result_status`.
 	ERROR = 'error'
