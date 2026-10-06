@@ -30,6 +30,7 @@ import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { MappedSolTransaction, SolTransferParties } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import * as solInstructionSummaryUtils from '$sol/utils/sol-instruction-summary.utils';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
@@ -493,6 +494,27 @@ describe('wallet-connect.services', () => {
 					rentExemptMinimum: mockRentExemptMinimum,
 					parties: mockParties
 				});
+			});
+
+			// Read from the message, the list states the rent of what the message opens and of what it
+			// closes against the same reserve a run's list is given.
+			it('should hand the reserve to the list read from the message', async () => {
+				const spyMapSolInstructionSummaries = vi.spyOn(
+					solInstructionSummaryUtils,
+					'mapSolInstructionSummaries'
+				);
+
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
+
+				await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(spyMapSolInstructionSummaries).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ rentExemptMinimum: mockRentExemptMinimum })
+				);
 			});
 
 			// An empty list is the run's answer that there is nothing to list. Rebuilt from the

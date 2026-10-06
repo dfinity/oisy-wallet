@@ -223,6 +223,7 @@ export const decode = async ({
 					innerInstructions: [],
 					ownedAddresses: owned?.ownedAddresses ?? [],
 					userAddress: address,
+					rentExemptMinimum,
 					includeUnrecognised: true
 				}),
 				network: solNetwork
