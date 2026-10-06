@@ -3,7 +3,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { SolInstructionSummary } from '$sol/types/sol-instruction-summary';
 import { mapSolInstructionSummaries } from '$sol/utils/sol-instruction-summary.utils';
 import { asSolParsedRpcInstructionOrSelf } from '$sol/utils/sol-instructions.utils';
-import { solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
+import { flattenInstructions, solClosesPayOthers } from '$sol/utils/sol-transaction-summary.utils';
 import { decodeTransactionMessage } from '$sol/utils/sol-transactions.utils';
 import {
 	MOCK_SOL_INSTRUCTIONS,
@@ -67,7 +67,7 @@ describe('sol-instruction-summary.utils', () => {
 			const views = () => mapSolInstructionSummaries(MOCK_SOL_INSTRUCTIONS.DFLOW_SWAP);
 
 			it('should recognise a System transfer into a wrapped SOL account as wrapping', () => {
-				const wrap = views().find(({ kind }) => kind === 'wrap');
+				const wrap = flattenInstructions(views()).find(({ kind }) => kind === 'wrap');
 
 				expect(wrap?.amount).toBe(5_000_000n);
 			});
@@ -75,7 +75,7 @@ describe('sol-instruction-summary.utils', () => {
 			// Closing a wrapped SOL account is how the swap gives the user their SOL back. Reported
 			// as an ordinary account close it would read as housekeeping.
 			it('should recognise closing that account as unwrapping', () => {
-				const unwrap = views().find(({ kind }) => kind === 'unwrap');
+				const unwrap = flattenInstructions(views()).find(({ kind }) => kind === 'unwrap');
 
 				expect(unwrap?.tokenAddress).toBe(WSOL_TOKEN.address);
 			});
@@ -99,14 +99,22 @@ describe('sol-instruction-summary.utils', () => {
 				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
 			});
 
-			it('should gather consecutive legs under the route that produced them', () => {
-				const route = views().find(({ kind }) => kind === 'route');
+			// The router's three instructions each made their lines inside themselves: the account it
+			// opens and the SOL it wraps as much as the legs belong under the instruction that made them.
+			it('should gather every line of an instruction it cannot read under that instruction', () => {
+				const dflow = 'DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH';
 
-				expect(route?.children?.length).toBeGreaterThan(1);
-				expect(route?.program).toBe('DF1ow4tspfHX9JwWJsAb9epbkA8hmpSEAtxXy1V27QBH');
 				expect(
-					route?.children?.every(({ kind }) => kind === 'send' || kind === 'receive')
-				).toBeTruthy();
+					views().map(({ kind, program, children }) => [
+						kind,
+						program,
+						children?.map(({ kind: line }) => line)
+					])
+				).toStrictEqual([
+					['route', dflow, ['createTokenAccount', 'wrap']],
+					['route', dflow, ['send']],
+					['route', dflow, ['send', 'receive', 'unwrap', 'send', 'receive']]
+				]);
 			});
 
 			it('should keep far fewer rows than the transaction has instructions', () => {
@@ -464,7 +472,13 @@ describe('sol-instruction-summary.utils', () => {
 
 			it('should state the rent an application opening its account inside its call costs', () => {
 				expect(openedInside()).toStrictEqual([
-					{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+					{
+						kind: 'route',
+						program: application,
+						children: [
+							{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+						]
+					}
 				]);
 			});
 
@@ -553,22 +567,35 @@ describe('sol-instruction-summary.utils', () => {
 					expect(kinds(views())).not.toContain('unknown');
 				});
 
-				it('should open with the rent of the position account', () => {
-					const [first] = views();
+				// Both lb_clmm instructions are ones the wallet cannot read, so each heads what it did.
+				it('should list each instruction with what it did beneath it', () => {
+					expect(
+						views().map(({ kind, program, children }) => [
+							kind,
+							program,
+							children?.map(({ kind: line }) => line)
+						])
+					).toStrictEqual([
+						['route', application, ['createAccount']],
+						['createTokenAccount', undefined, undefined],
+						['wrap', undefined, undefined],
+						['route', application, ['send', 'send']],
+						['unwrap', undefined, undefined]
+					]);
+				});
 
-					expect(first).toStrictEqual({
-						kind: 'createAccount',
-						account: position,
-						program: application,
-						rent: positionRent
-					});
+				it('should state the rent of the position account under the instruction opening it', () => {
+					const [opening] = views();
+
+					expect(opening.children).toStrictEqual([
+						{ kind: 'createAccount', account: position, program: application, rent: positionRent }
+					]);
 				});
 
 				it('should list the deposit as the two sends it makes', () => {
-					const deposit = views().find(({ kind }) => kind === 'route');
+					const [, , , deposit] = views();
 
-					expect(deposit?.program).toBe(application);
-					expect(deposit?.children?.map(({ kind, amount }) => [kind, amount])).toStrictEqual([
+					expect(deposit.children?.map(({ kind, amount }) => [kind, amount])).toStrictEqual([
 						['send', 99_982n],
 						['send', 810_249n]
 					]);
@@ -1938,7 +1965,7 @@ describe('sol-instruction-summary.utils', () => {
 				accountLamports: { [mockSolAddress]: 10_000_000n, [x]: 2_039_280n }
 			});
 
-			const close = views.find(({ kind }) => kind === 'closeTokenAccount');
+			const close = flattenInstructions(views).find(({ kind }) => kind === 'closeTokenAccount');
 
 			expect(close).toBeDefined();
 			expect(close).not.toHaveProperty('ownAccount');

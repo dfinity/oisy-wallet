@@ -22,6 +22,16 @@ export const flattenInstructions = (
 	]);
 
 /**
+ * Whether the lines an instruction made inside itself make a swap: something leaves and something
+ * else arrives. Lines that all leave, or all arrive, are what a deposit or a withdrawal looks like
+ * too, and one opening an account trades nothing.
+ */
+export const isSolSwapRoute = ({ kind, children = [] }: SolInstructionSummary): boolean =>
+	kind === 'route' &&
+	children.some(({ kind: line }) => line === 'send') &&
+	children.some(({ kind: line }) => line === 'receive');
+
+/**
  * Whether the message closes an account of the user's and pays its balance to an address that is
  * not their wallet.
  *
@@ -328,21 +338,25 @@ const tradedTokens = (instructions: SolInstructionSummary[]): Set<SplTokenAddres
  *
  * A transaction can move an asset outside its routes too: a protocol tip in SOL beside an
  * ORCA-for-USDC swap. Both are outs, but only one of them is the trade, and the route is what
- * tells them apart.
+ * tells them apart. Only a swap is a route here: the lines of an instruction the wallet could not
+ * read hang under it whatever they do, and a tip paid by one of those is still no trade.
  */
 const routeTradedTokens = (
 	instructions: SolInstructionSummary[]
 ): Set<SplTokenAddress | undefined> =>
-	instructions.reduce<Set<SplTokenAddress | undefined>>((acc, { kind, children }) => {
-		if (kind === 'wrap') {
+	instructions.reduce<Set<SplTokenAddress | undefined>>((acc, instruction) => {
+		const { kind, children = [] } = instruction;
+
+		// A wrap counts wherever it sits, under the instruction that made it or on its own.
+		if (kind === 'wrap' || children.some(({ kind: line }) => line === 'wrap')) {
 			acc.add(undefined);
 		}
 
-		if (kind !== 'route') {
+		if (!isSolSwapRoute(instruction)) {
 			return acc;
 		}
 
-		(children ?? [])
+		children
 			.filter((child) => ['send', 'receive'].includes(child.kind))
 			.forEach((child) => acc.add(child.tokenAddress));
 
@@ -725,18 +739,12 @@ export const formatSolInstructionSummary = ({
 		};
 	}
 
-	// A swap is something leaving and something else arriving. Legs that all leave, or all arrive,
-	// are what a deposit or a withdrawal looks like too, made by a program the wallet cannot read,
-	// so the group says that instead, with the legs beneath it.
+	// The heading over the lines of an instruction the wallet could not read. It is called a swap
+	// only when it is one, and otherwise says what the line of such an instruction always says,
+	// with what it did beneath it.
 	if (kind === 'route') {
-		const legs = children ?? [];
-
-		const oneWay =
-			legs.every(({ kind: leg }) => leg === 'send') ||
-			legs.every(({ kind: leg }) => leg === 'receive');
-
 		return {
-			text: !oneWay
+			text: isSolSwapRoute({ kind, children })
 				? i18n.transaction.text.instruction_route
 				: nonNullish(program)
 					? i18n.transaction.text.instruction_unknown_via

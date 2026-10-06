@@ -120,8 +120,9 @@
 			{/if}
 		</span>
 
-		<!-- The legs sit under the route that produced them: flat, a four-leg swap reads as four
-		     unrelated transfers, which is the one thing the grouping exists to prevent. -->
+		<!-- The lines sit under the instruction that produced them: flat, a four-leg swap reads as
+		     four unrelated transfers, and a line made inside an application as one the message
+		     states itself. -->
 		{#if nonNullish(instruction.children)}
 			<span class="flex flex-col gap-1 ps-4">
 				{#each instruction.children as child, i (i)}

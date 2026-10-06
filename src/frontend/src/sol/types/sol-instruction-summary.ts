@@ -9,7 +9,8 @@ import type { SplTokenAddress } from '$sol/types/spl';
  * (`syncNative`, `initializeImmutableOwner`) names nothing a user holds or controls.
  */
 export type SolInstructionSummaryKind =
-	// Not an instruction at all: the container the legs of one routed swap hang under.
+	// Not an effect at all: the heading the lines of one instruction the wallet could not read hang
+	// under, a routed swap's legs among them.
 	| 'route'
 	| 'send'
 	| 'receive'
@@ -85,8 +86,9 @@ export interface SolInstructionSummary {
 	// The name that program publishes for itself, when it publishes one. Its own claim about
 	// itself, attested by nobody: a label for the address, never a statement about what it does.
 	programName?: string;
-	// The legs of a single routed swap. They hang under the route rather than sitting flat among
-	// the top-level effects, which is what keeps a four-leg route from reading as four unrelated
-	// transfers.
+	// The lines of a single instruction the wallet could not read, the legs of a routed swap among
+	// them. They hang under it rather than sitting flat among the top-level effects, which is what
+	// keeps a four-leg route from reading as four unrelated transfers, and a line made inside an
+	// application from reading as one the message states itself.
 	children?: SolInstructionSummary[];
 }

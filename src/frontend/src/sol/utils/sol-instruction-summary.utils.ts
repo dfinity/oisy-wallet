@@ -1259,24 +1259,24 @@ const asWrap = ({
 			}
 		: effect;
 
-/**
- * Consecutive legs of one top-level instruction, gathered under the route that produced them.
- *
- * A route is only a route when it has more than one leg: a plain send performs a single transfer
- * and would otherwise be indented under a heading that describes nothing. Runs are consecutive so
- * that an account closed midway through a swap breaks the route rather than disappearing into it.
- */
-const isLeg = ({ kind }: { kind: SolInstructionSummaryKind }): boolean =>
-	kind === 'send' || kind === 'receive';
-
 const strip = ({ parentIndex: _parentIndex, ...view }: Effect): SolInstructionSummary => view;
 
-const groupRoutes = ({
+/**
+ * Every line of a top-level instruction the wallet could not read, gathered under it.
+ *
+ * Such an instruction is described only by the calls it made inside itself, so each line found
+ * there is that instruction's doing. One line or several, they hang under a heading that names its
+ * program: flat, a line made inside an application reads like one the message states itself, and
+ * a four-leg swap like four unrelated transfers. An instruction the wallet read is its own line.
+ */
+const groupUnread = ({
 	effects,
-	programs
+	programs,
+	unread
 }: {
 	effects: Effect[];
 	programs: Record<number, SolAddress>;
+	unread: Set<number>;
 }): SolInstructionSummary[] =>
 	effects
 		.reduce<Effect[][]>((runs, effect) => {
@@ -1284,15 +1284,16 @@ const groupRoutes = ({
 
 			const continues =
 				nonNullish(run) &&
-				run[0].parentIndex === effect.parentIndex &&
-				isLeg(run[0]) === isLeg(effect);
+				unread.has(effect.parentIndex) &&
+				run[0].parentIndex === effect.parentIndex;
 
 			return continues ? [...runs.slice(0, -1), [...run, effect]] : [...runs, [effect]];
 		}, [])
 		.flatMap((run) => {
 			const [first] = run;
 
-			if (run.length < 2 || !isLeg(first)) {
+			// An instruction with nothing under it is already the line that names its program.
+			if (!unread.has(first.parentIndex) || first.kind === 'unknown') {
 				return run.map(strip);
 			}
 
@@ -1535,5 +1536,12 @@ export const mapSolInstructionSummaries = ({
 			].sort(({ parentIndex: first }, { parentIndex: second }) => first - second)
 		: effects;
 
-	return groupRoutes({ effects: listed, programs });
+	const unread = new Set(
+		instructions.reduce<number[]>(
+			(acc, instruction, index) => (isParsed(instruction) ? acc : [...acc, index]),
+			[]
+		)
+	);
+
+	return groupUnread({ effects: listed, programs, unread });
 };
