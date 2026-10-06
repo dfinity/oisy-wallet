@@ -5,7 +5,8 @@ import {
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
-import { balance as icrcBalance } from '$icp/api/icrc-ledger.api';
+import { balance as icrcBalance, transfer as icrcTransfer } from '$icp/api/icrc-ledger.api';
+import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { PLUG_BALANCE_TIMEOUT_MILLISECONDS } from '$lib/constants/plug.constants';
 import type { NullishIdentity } from '$lib/types/identity';
@@ -24,6 +25,8 @@ import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { IcrcLedgerDid } from '@icp-sdk/canisters/ledger/icrc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 interface BalanceLookup {
@@ -248,3 +251,31 @@ export const loadPlugBalances = async ({
 
 	return loaded.filter(nonNullish);
 };
+
+/**
+ * Moves one imported balance to the signed-in user's own account.
+ *
+ * Takes the already-derived identity rather than the seed phrase, so the phrase
+ * never leaves the component that holds it.
+ *
+ * The amount is the balance minus the token's fee, which the caller computes via
+ * `plugSweepableAmount` — the ledger deducts the fee on top of the transferred
+ * amount, so sending the full balance would always fail.
+ */
+export const sweepPlugBalance = async ({
+	identity,
+	token,
+	amount,
+	destination
+}: {
+	identity: Identity;
+	token: IcToken;
+	amount: bigint;
+	destination: Principal;
+}): Promise<IcrcLedgerDid.BlockIndex> =>
+	await icrcTransfer({
+		identity,
+		to: { owner: destination },
+		amount,
+		ledgerCanisterId: token.ledgerCanisterId
+	});
