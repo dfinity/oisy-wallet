@@ -7,21 +7,22 @@
 	import PlugImportForm from '$lib/components/plug-import/PlugImportForm.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { PLUG_IMPORT_ERROR, PLUG_IMPORT_NOTICES } from '$lib/constants/test-ids.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { sweepPlugEvmBalance } from '$lib/services/plug-evm.services';
+	import { sweepPlugSolBalance } from '$lib/services/plug-sol.services';
 	import { loadPlugBalances, sweepPlugBalance } from '$lib/services/plug.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import {
 		derivePlugAccounts,
 		derivePlugIdentity,
-		isPlugEvmContractToken,
+		isPlugGasToken,
 		isPlugSweepableToken,
 		plugEvmNetwork,
 		plugRowKey
@@ -90,6 +91,24 @@
 			return;
 		}
 
+		if (isNetworkIdSolana(network.id)) {
+			// The Solana destination is the user's own OISY Solana address.
+			if (isNullish($solAddressMainnet)) {
+				throw new Error('Your OISY Solana address is not loaded yet');
+			}
+
+			await sweepPlugSolBalance({
+				identity,
+				token,
+				balance: amount,
+				nativeBalance: nativeBalanceFor({ account, networkId: network.id }),
+				destination: $solAddressMainnet,
+				source: address
+			});
+
+			return;
+		}
+
 		if (!isPlugSweepableToken(token)) {
 			throw new Error(`No send path for ${token.symbol} on ${network.name}`);
 		}
@@ -105,7 +124,7 @@
 		networkId: NetworkId;
 	}): bigint =>
 		(balances.get(account.index) ?? []).find(
-			({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token)
+			({ token }) => token.network.id === networkId && !isPlugGasToken(token)
 		)?.balance ?? ZERO;
 
 	const send = async ({

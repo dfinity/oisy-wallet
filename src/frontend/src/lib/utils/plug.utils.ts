@@ -20,7 +20,9 @@ import { SIGNER_MASTER_PUB_KEYS } from '$lib/constants/signer.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
+import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdSolana } from '$lib/utils/network.utils';
 import type { SolAddress } from '$sol/types/address';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
 import { bip340secp256k1, ed25519 } from '@dfinity/ic-pub-key/schnorr';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -199,6 +201,23 @@ export const isPlugEvmContractToken = (token: Token): token is Erc20Token | Erc4
 	isTokenErc20(token) || isTokenErc4626(token);
 
 /**
+ * A token whose network fee is paid in a *separate* native coin — ERC-20/ERC-4626
+ * (gas in ETH) and SPL (fee in SOL). Moving one is impossible without that coin in
+ * the same account, which is what distinguishes it from a native coin that pays
+ * its own fee. Used to gate the send action and to find the native row.
+ */
+export const isPlugGasToken = (token: Token): boolean =>
+	isPlugEvmContractToken(token) || isTokenSpl(token);
+
+/**
+ * A chain where the fee is paid from a native balance in the account, so a token
+ * needs that coin present and a native send must reserve it. Both EVM and Solana
+ * work this way; IC ledgers charge the fee in the token itself.
+ */
+export const isPlugFeeChain = (networkId: NetworkId): boolean =>
+	isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId) || isNetworkIdSolana(networkId);
+
+/**
  * Identifies a balance row.
  *
  * Symbol alone is not unique and neither is the address: the same token can be
@@ -215,19 +234,18 @@ const plugNativeBalance = ({
 	networkId: NetworkId;
 	balances: PlugBalance[];
 }): bigint | undefined =>
-	balances.find(({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token))
-		?.balance;
+	balances.find(({ token }) => token.network.id === networkId && !isPlugGasToken(token))?.balance;
 
 /**
- * Whether an EVM row can be moved.
+ * Whether a fee-chain (EVM / Solana) row can be moved.
  *
- * Gas is paid in the network's native coin out of the imported account, so a
- * token transfer is impossible without native coin sitting there — a common state
- * for someone who only ever received tokens. The exact gas figure needs live fee
- * data, so this is the cheap gate that keeps an impossible action off the screen;
- * the send path re-checks against the real fee.
+ * The fee is paid in the network's native coin out of the imported account, so a
+ * token transfer is impossible without that coin sitting there — a common state
+ * for someone who only ever received tokens. The exact fee needs live data, so
+ * this is the cheap gate that keeps an impossible action off the screen; the send
+ * path re-checks against the real fee.
  */
-export const isPlugEvmSendable = ({
+export const isPlugFeeChainSendable = ({
 	token,
 	balance,
 	balances
@@ -240,7 +258,7 @@ export const isPlugEvmSendable = ({
 		return false;
 	}
 
-	if (!isPlugEvmContractToken(token)) {
+	if (!isPlugGasToken(token)) {
 		return true;
 	}
 

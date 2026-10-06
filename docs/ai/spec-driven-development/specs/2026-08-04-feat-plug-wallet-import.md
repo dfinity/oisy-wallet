@@ -128,9 +128,15 @@ The EVM destination is the user's **OISY EVM address**, not their principal — 
 
 **A row's identity is network plus symbol.** Symbol alone is not unique and neither is the address: the same token enabled on several EVM networks yields rows sharing both. The first cut keyed the in-flight send on symbol, which would have spun two rows at once.
 
-### BTC and SOL
+### SOL
 
-Not yet built. SOL should fit OISY's existing `TransactionPartialSigner` abstraction via `sign_sol`. BTC needs UTXOs, fee percentiles and a broadcast path — the last is an open question, since `bitcoin_send_transaction` is canister-only.
+`sign_sol` is raw Ed25519 over the message bytes, which is exactly what a `TransactionPartialSigner` produces — so the Plug signer drops into OISY's own `sendSol` in place of the default. `sendSol` gains one optional `signerOverride` parameter (backward-compatible for its three existing callers); everything else — building the transfer, creating the destination token account when the OISY side does not hold that token yet, broadcast, confirm — is reused.
+
+The fee is paid in SOL from the imported account, so it mirrors EVM: a native send moves `balance - fee`, an SPL send needs SOL present, and the gating is shared with EVM through the `isPlugFeeChain` / `isPlugGasToken` predicates rather than duplicated. SPL sufficiency beyond the base fee (the ATA rent) is left to the network to reject, rather than estimated up front.
+
+### BTC
+
+Not yet built. It needs UTXOs, fee percentiles and a broadcast path — the last is an open question, since `bitcoin_send_transaction` is canister-only.
 
 ## PRODUCT.md updates (land with the behaviour change)
 

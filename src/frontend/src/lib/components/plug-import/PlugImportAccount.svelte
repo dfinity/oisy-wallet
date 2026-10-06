@@ -14,10 +14,10 @@
 	import type { PlugBalance, PlugAccount } from '$lib/types/plug';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import {
-		isPlugEvmContractToken,
-		isPlugEvmSendable,
+		isPlugFeeChain,
+		isPlugFeeChainSendable,
+		isPlugGasToken,
 		isPlugSweepableToken,
 		plugRowKey,
 		plugSweepableAmount
@@ -32,17 +32,18 @@
 
 	let { account, balances, sending, onsend }: Props = $props();
 
-	const isEvm = ({ token: { network } }: PlugBalance): boolean =>
-		isNetworkIdEthereum(network.id) || isNetworkIdEvm(network.id);
+	const isFeeChain = ({ token: { network } }: PlugBalance): boolean => isPlugFeeChain(network.id);
 
-	// How much a row can move, or undefined when it cannot move at all. EVM amounts
-	// are settled at send time against live fee data — gas is not knowable here — so
-	// the row reports the full balance and the service trims the reserve.
+	// How much a row can move, or undefined when it cannot move at all. On fee chains
+	// (EVM / Solana) the exact fee is settled at send time, so the row reports the
+	// full balance and the service trims the reserve.
 	const sendableAmount = (row: PlugBalance): bigint | undefined => {
 		const { token, balance } = row;
 
-		if (isEvm(row)) {
-			return isPlugEvmSendable({ token, balance, balances: balances ?? [] }) ? balance : undefined;
+		if (isFeeChain(row)) {
+			return isPlugFeeChainSendable({ token, balance, balances: balances ?? [] })
+				? balance
+				: undefined;
 		}
 
 		return plugSweepableAmount({ token, balance });
@@ -55,10 +56,14 @@
 	const blockedReason = (row: PlugBalance): string | undefined => {
 		const { token, balance } = row;
 
-		if (isEvm(row)) {
-			return replacePlaceholders($i18n.plug_import.text.send_needs_gas, {
-				$symbol: nativeSymbol(token.network.id) ?? token.symbol
-			});
+		if (isFeeChain(row)) {
+			// A native coin pays its own fee, so if it is blocked here the balance is
+			// simply unavailable — only a token missing its gas coin has advice to give.
+			return isPlugGasToken(token)
+				? replacePlaceholders($i18n.plug_import.text.send_needs_gas, {
+						$symbol: nativeSymbol(token.network.id) ?? token.symbol
+					})
+				: undefined;
 		}
 
 		if (!isPlugSweepableToken(token)) {
@@ -73,9 +78,8 @@
 	};
 
 	const nativeSymbol = (networkId: NetworkId): string | undefined =>
-		(balances ?? []).find(
-			({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token)
-		)?.token.symbol;
+		(balances ?? []).find(({ token }) => token.network.id === networkId && !isPlugGasToken(token))
+			?.token.symbol;
 
 	let loaded = $derived(nonNullish(balances));
 
@@ -158,7 +162,7 @@
 								{/snippet}
 
 								<p>
-									{#if isPlugEvmContractToken(token)}
+									{#if isPlugGasToken(token)}
 										{replacePlaceholders($i18n.plug_import.text.send_confirm_description_gas, {
 											$amount: formatToken({ value: amount, unitName: token.decimals }),
 											$symbol: token.symbol,
