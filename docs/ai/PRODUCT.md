@@ -159,6 +159,17 @@ The same invariant keeps the destination URL out of both `explorer` subcontexts,
 
 `result_error_code` says why a mint ended in `error`: `refunded` (the CMC returned the ICP, minus its fees), `failed` (another final CMC answer), and, for mints where nothing moved, `transfer_failed`, `not_trackable`, `timed_out` and `not_sent`. A mint that ends in the modal before any ICP moves reports from there, once its row is deleted (the modal tries the delete up to three times, since a delete also succeeds for a row an earlier, unanswered one already removed); a row the modal could not delete reports the ending itself, as `not_sent`, so the modal and the row never both report it. Every other ending, `not_sent` included, fires from the mint's active user transaction, whichever session closes it, under the loader's rule for every flow it tracks: once in every tab open when the mint ends, never in a tab or session started after one of them has recorded it, and once in any other browser or device that later loads the finished row. The event never carries a principal, and never the CMC's own reason text, which can name the caller's account.
 
+### Cycles top-up tracking
+
+[Topping up a canister](#top-up-a-canister) emits one structured event, **`cycles_top_up`**, under `event_context: compute` and `source_location: token_details`, with the TCYCLES symbol as `token_symbol`. It carries no amount, no amount range and no canister ID: any of them, with the event's time, would pick out the one burn on the public cycles ledger, and with it the user's account. Almost every burn there is below $1, so even a range would single out a larger top-up.
+
+| `event_modifier` | Fires when                   | `result_status`                 | Properties                                     |
+| ---------------- | ---------------------------- | ------------------------------- | ---------------------------------------------- |
+| `open`           | the Top up modal opens       | none                            | none                                           |
+| `top_up`         | a top-up starts and finishes | `executing` → `success`/`error` | `token_symbol`; `result_error_code` on failure |
+
+`result_error_code` says why a top-up ended in `error`: `refused` (the ledger refused before burning anything, so nothing moved), `refunded` (the canister could not receive the cycles, which came back minus the ledger's fees) or `unknown` (no answer, so the top-up may or may not have gone through).
+
 ---
 
 ## Tokens
@@ -198,11 +209,17 @@ Zero-amount sends are excluded deliberately. Anyone can push a zero-value transf
 
 One account is taken out of that set altogether: the NNS Cycles Minting Canister's deposit account for the user, which minting TCYCLES pays its ICP into. It is never listed as recently used and never counts as familiar, because ICP sent there by an ordinary transfer, without the mint memo, is never minted and cannot be recovered through OISY.
 
+Burns never enter that set either, on any ledger: a burn has no recipient the user picked. That includes a TCYCLES top-up, which names its canister in Activity (see [Top up a canister](#top-up-a-canister)) but is never listed as recently used and never makes the canister familiar.
+
 The send flow says so twice. On the address step, entering such an address raises a warning that it appears to be the first send to it and asks the user to verify the address; the hedge is deliberate, since the claim rests on the history that happens to be loaded. It does not block moving on. On the review step the same box returns, its copy reworded in the first person as the statement the user is agreeing to, with a **confirmation checkbox, and the send button stays disabled until it is ticked** — the same layout as the confirmation for a swap that would lose significant value, kept at warning level rather than error: a first send to a new recipient is routine, and red spent on the routine case stops being read. The confirmation belongs to that address and that visit: going back, changing the destination and returning asks again. It is never remembered — there is no "don't warn me about this address", and the only thing that retires the warning is a real send.
 
 Because the set of used destinations is read from the history OISY has loaded, a user whose history is long or still loading can be asked to confirm an address they have sent to before. That is deliberate: a false warning costs one tick, while staying quiet about an address the user has never used is the error that loses funds.
 
 Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
+
+### TCYCLES sent to a canister
+
+Sending TCYCLES to an account a canister owns, with or without a subaccount, does not top the canister up: the TCYCLES land in the canister's account on the cycles ledger, and they become cycles only if the canister's own code withdraws them. The send flow says so on the address step and again on Review, and points to [Top up](#top-up-a-canister) while that flow's flag is on. It does not block the send, since a canister can own TCYCLES on purpose. No other token shows the warning.
 
 ---
 
@@ -571,9 +588,23 @@ The TCYCLES token page has a fourth hero button, **Mint**, after Receive, Send a
 
 Recovery never sends ICP; it only finishes a deposit that exists.
 
-What this deliberately does not do: TCYCLES → ICP (the CMC cannot), topping up or sending cycles to a canister, minting into a subaccount or for another principal, a Mint entry on the ICP page, labelling the ICP deposit as a mint in Activity, and enabling TCYCLES by default.
+What this deliberately does not do: TCYCLES → ICP (the CMC cannot), minting into a subaccount or for another principal, a Mint entry on the ICP page, labelling the ICP deposit as a mint in Activity, and enabling TCYCLES by default. Putting cycles into a canister is [Top up a canister](#top-up-a-canister).
 
 ---
+
+## Top up a canister
+
+The TCYCLES token page has a fifth hero button, **Top up**, after Mint, with a fuel pump icon. It puts cycles from the user's TCYCLES balance into any canister on the Internet Computer through the cycles ledger's `withdraw`, which burns the TCYCLES and deposits the same number of cycles into the canister in one call. Only the mainnet cycles ledger's token has it, and it is disabled whenever Send is, since it spends TCYCLES. `CYCLES_TOP_UP_ENABLED` (`src/frontend/src/env/cycles-top-up.env.ts`) turns it on for local and staging builds only, until a real top-up on staging has been verified.
+
+**Canister.** The first step takes a canister ID and nothing else: a user principal, the anonymous principal, an account with a subaccount, an ICP account identifier, an address on another network or text that is not a principal gets a request for a canister ID, and the principal's checksum catches typos. Before going on, OISY reads the canister's public state, which needs no controller rights. Every canister lists its controllers there, with or without code, so a canister without code is accepted. An ID with no canister behind it is refused: the subnet that hosts the ID's range proves there is none, or the boundary node answers that no subnet hosts the ID. A check that could not be made can be retried, and the step does not go on without it. **Recently topped up** lists the canisters the loaded TCYCLES history shows top-ups to, newest first, each with its last top-up, and picking one fills in the ID. It is read from history alone, so nothing is stored.
+
+**Amount and Review.** The amount has Max (the balance minus the 0.0001 TCYCLES fee), the fiat value and the fee, and must be more than the fee: a failed deposit is refunded minus the fee, so at or below it nothing would come back. Review shows the canister ID in full, the amount, the fee, the total and a notice that a top-up cannot be undone.
+
+**Outcome.** A top-up that went through closes the modal with a confirmation, and the balance refreshes. A refusal before anything was burned (not enough TCYCLES, the ledger busy, or a device clock the ledger rejects) says that nothing left the wallet and returns to Review, with the clock as the next step where it applies. A deposit the canister could not take is refunded by the ledger minus its fees, 0.0002 TCYCLES in all, and the error says so. A call without an answer is reported as neither: Review says OISY cannot tell yet, and Top up sends the identical request again, creation time included, which the ledger runs at most once. Any other next attempt is a new request. One case is reported wrongly: an unanswered top-up that in fact ended refunded is reported as topped up when it is sent again, because the ledger answers the resend as a duplicate of the refunded burn.
+
+**Activity.** TCYCLES Activity shows a top-up as **Top up**, with the canister as its destination, in the list and in the details. The ledger records the canister in the burn's memo, so this covers top-ups made outside OISY too. The refund of a failed top-up shows as **Top-up refund**, and every other burn on the cycles ledger stays **Burn**.
+
+What this deliberately does not do: show a canister's cycle balance (only its controllers can read it), save or name canisters, pick a canister from Contacts, top up straight from ICP through the CMC, create canisters, top up from a subaccount or for another account through an ICRC-2 approval, ask to confirm a first top-up to a canister the way the send flow confirms a first-time destination, or carry an amount in analytics.
 
 ## Swap
 
