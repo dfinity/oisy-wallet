@@ -3,7 +3,7 @@
 # Spec: Top up a canister with TCYCLES
 
 - **Type:** `feat`
-- **Area:** Frontend (TCYCLES token page, Top up modal, cycles-ledger calls, TCYCLES activity labels, recently used destinations)
+- **Area:** Frontend (TCYCLES token page, Top up modal, cycles-ledger calls, TCYCLES activity labels, recently used destinations, a send-flow warning)
 - **Status:** Draft. All decisions and Q1 are resolved; Q2 is open (§12).
 
 ---
@@ -76,9 +76,16 @@ The modal follows the Send flow's shape: canister, amount, review. The title is 
 
 ### 5.5 Activity
 
-1. TCYCLES Activity shows a top-up as **Top up**, naming the canister where an outgoing row names its recipient. The details show the canister ID in full. This applies to every burn whose memo names a canister (§3.3), so it also covers top-ups made before this feature or by an ICRC-2 spender.
+1. TCYCLES Activity shows a top-up as **Top up**, naming the canister where an outgoing row names its recipient. The details are titled **Top up** too, and show the canister ID in full. This applies to every burn whose memo names a canister (§3.3), so it also covers top-ups made before this feature or by an ICRC-2 spender.
 2. The refund of a failed top-up (§3.4) shows as **Top-up refund**. The ledger does not link it to its burn, so neither does OISY.
 3. Every other burn on the cycles ledger keeps showing as **Burn**, including a burn whose memo OISY cannot read.
+
+### 5.6 Sending TCYCLES to a canister
+
+1. When the user sends TCYCLES to an account whose owner is a canister ID, the send flow warns that this does not top up the canister: the TCYCLES land in the canister's account on the cycles ledger, and the canister only gets cycles if its own code withdraws them. The warning says that Top up is the way to add cycles to a canister.
+2. It appears on the address step and again on Review. It does not block the send: a canister can own TCYCLES on purpose.
+3. It applies to TCYCLES only, the same token Top up appears for (§4.2), and to an account with a subaccount as well, since what counts is the account's owner.
+4. While the Top up flag is off, the warning leaves out the pointer to Top up, which the user could not find.
 
 ## 6. Burns are never recently used
 
@@ -116,11 +123,12 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 - **AC7** Top up makes one `withdraw` call from the user's default account, with the entered canister and amount and a creation timestamp. Success, or `Duplicate`, closes the modal with the confirmation and refreshes the balance.
 - **AC8** A refusal before anything moved says nothing left the wallet. `FailedToWithdraw` says the amount came back minus 0.0002 TCYCLES. Neither shows the Internet Computer's own reason text.
 - **AC9** A call without an answer is reported as neither done nor failed, and trying again resends the identical request.
-- **AC10** TCYCLES Activity shows a burn whose memo names a canister as Top up with that canister, the refund of a failed top-up as Top-up refund, and every other burn as Burn.
+- **AC10** TCYCLES Activity shows a burn whose memo names a canister as Top up with that canister, in the list and in the details, the refund of a failed top-up as Top-up refund, and every other burn as Burn.
 - **AC11** No ICP, ICRC (top-ups included), ckBTC or ckETH burn appears in a send flow's Recently used list or suppresses the first-time destination warning, and tests pin it. The CMC deposit account stays excluded.
 - **AC12** The analytics fire as in §8 and never carry an amount, a canister ID or a principal.
 - **AC13** All new copy is translated in every shipped locale (`Languages` enum).
-- **AC14** PRODUCT.md documents Top up, its analytics and its non-goals. The Mint section no longer lists topping up a canister among what it does not do, and Send → First-time destination addresses states that burns never count.
+- **AC14** PRODUCT.md documents Top up, its analytics, its non-goals and the send warning. The Mint section no longer lists topping up a canister among what it does not do, and Send → First-time destination addresses states that burns never count.
+- **AC15** Sending TCYCLES to an account owned by a canister, with or without a subaccount, shows the warning of §5.6 on the address step and on Review, without blocking the send. It points to Top up only while the Top up flag is on. No other token and no other destination shows it.
 
 ## 10. Non-goals
 
@@ -132,17 +140,19 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 - Topping up from a subaccount, or on another account's behalf through an ICRC-2 approval (`withdraw_from`).
 - A first-time-canister confirmation like the send flow's first-time destination warning.
 - Topping up from other cycles tokens (XTC).
+- Blocking a send of TCYCLES to a canister (§5.6).
 - Labels for the cycles ledger's other burns (canister creation, penalty fees): they stay Burn.
 
 ## 11. Implementation plan
 
-Five PRs (§12, D7), each in granular commits:
+Six PRs (§12, D7), each in granular commits:
 
 1. **#14217, `docs(ai): add spec for topping up a canister with TCYCLES`**: this spec.
-2. **Cycles-ledger client**: the bindings (§7.1, approved in D3), the `withdraw` wrapper, the top-up service mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
+2. **#14229, cycles-ledger client**: the bindings (§7.1, approved in D3), the `withdraw` wrapper, the top-up service mapping each `withdraw` answer to §5.4, and the canister existence check (§5.1.2, §7.3), with unit tests.
 3. **Activity labels and burns**: the Top up and Top-up refund labels in TCYCLES Activity (§5.5), and the tests pinning burns out of Recently used (§6).
 4. **UI**: the flag, the fuel pump icon, the button, the modal, Recently topped up and analytics, in English, with component tests.
-5. **Translations and PRODUCT.md**: every shipped locale, and the PRODUCT.md entries for Top up, its Activity labels and the rule that burns never count.
+5. **Send warning**: the warning for TCYCLES sent to a canister (§5.6), in English, with tests. It comes after PR4 because it points to the Top up flow.
+6. **Translations and PRODUCT.md**: every shipped locale, and the PRODUCT.md entries for Top up, its Activity labels, the send warning and the rule that burns never count.
 
 The modal is mostly translated copy, so expect pressure on `compare-sizes`; the precedent is a maintainer override. Every new component and derived store ships with tests (`test-coverage` gate). Staging talks to the mainnet cycles ledger, so verifying a top-up there spends real TCYCLES; a small amount suffices.
 
@@ -164,7 +174,7 @@ None.
 - **D4 Rollout:** as for Mint, a flag that is on for local and staging builds until a real top-up on staging is verified, then on everywhere and kept as a kill switch (§4.4).
 - **D5 Icon:** a fuel pump (§4.1), decided on 2026-10-06 from three candidates drawn in the hero row at phone width, in both themes. Cycles are what a canister runs on, and a top-up refuels it. The pump has the same visual weight as its neighbours (Receive's QR code, Send's paper plane, Swap's arrows, Mint's pickaxe) and looks like none of them. The rejected candidates were a charging battery, which is wide and short and so reads smaller than its neighbours, and a bolt in a circle, which in a multi-chain wallet can suggest an instant payment or Bitcoin's Lightning Network.
 - **D6 No amounts in analytics, not even as a range:** decided on 2026-10-06 (§8). Amount ranges stay a separate change, introduced together with an event that can use them without singling out a transaction.
-- **D7 Five PRs:** decided on 2026-10-06 (§11). PR1, #14217, is this spec on its own; the implementation follows in four PRs.
+- **D7 Six PRs:** decided on 2026-10-06 (§11). PR1, #14217, is this spec on its own; the implementation follows in five PRs. The send warning (§5.6) was added the same day as its own PR, after the UI.
 - **Q1 Existence check:** verified on 2026-10-06 on mainnet, with the agent version OISY pins (§5.1.2, §7.3).
   - The cycles ledger (`um5iw-rqaaa-aaaaq-qaaba-cai`, with code): `controllers` and `module_hash` are both found.
   - Two canisters without code (`2223e-iaaaa-aaaac-awyra-cai`, `2223u-yaaaa-aaaal-qutrq-cai`): `controllers` is found and `module_hash` is absent, so `module_hash` cannot tell whether a canister exists.
