@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isTokenCyclesLedger } from '$icp/utils/cycles-mint.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -38,10 +40,14 @@
 		fee,
 		incoming,
 		approveSpender,
-		approveExpiresAt
+		approveExpiresAt,
+		typeLabel
 	} = $derived(transaction);
 
 	let isIncoming = $derived(type === 'receive' || type === 'mint');
+
+	// A TCYCLES top-up and its refund read as such here too, as they do in the list.
+	let showTypeLabel = $derived(nonNullish(typeLabel) && isTokenCyclesLedger(token));
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -62,7 +68,11 @@
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
-				<span class="capitalize">{type}</span>
+				{#if showTypeLabel}
+					<IcTransactionLabel label={typeLabel} {token} {type} />
+				{:else}
+					<span class="capitalize">{type}</span>
+				{/if}
 			{/snippet}
 			{#snippet title()}
 				{#if nonNullish(token) && nonNullish(value)}
