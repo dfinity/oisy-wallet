@@ -1,5 +1,9 @@
 import type { BtcAddress } from '$btc/types/address';
 import type { EthAddress } from '$eth/types/address';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 import {
@@ -177,3 +181,14 @@ export const plugSweepableAmount = ({
 
 	return balance > fee ? balance - fee : undefined;
 };
+
+/**
+ * An EVM token moved by a contract call rather than as the chain's native coin.
+ *
+ * ERC-4626 vault shares are a superset of ERC-20 — they implement `balanceOf` and
+ * `transfer` — so a vault is read and sent exactly like any ERC-20, on its own
+ * contract address. Treating them together is what stops a vault row from falling
+ * through to the native-balance branch and reporting the account's ETH instead.
+ */
+export const isPlugEvmContractToken = (token: Token): token is Erc20Token | Erc4626Token =>
+	isTokenErc20(token) || isTokenErc4626(token);
