@@ -1,3 +1,5 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import PlugImportAccount from '$lib/components/plug-import/PlugImportAccount.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import type { PlugAccount, PlugBalance } from '$lib/types/plug';
@@ -47,6 +49,20 @@ describe('PlugImportAccount', () => {
 
 		expect(queryByText(mockValidToken.symbol)).toBeNull();
 		expect(getByText(en.plug_import.text.empty_account)).toBeInTheDocument();
+	});
+
+	it('renders rows that share a symbol and an address across networks', () => {
+		const eth = { ...mockValidToken, symbol: 'ETH', network: ETHEREUM_NETWORK };
+
+		const { getAllByText } = render(PlugImportAccount, {
+			account: mockAccount,
+			balances: [
+				balance({ token: eth, address: mockAccount.evmAddress }),
+				balance({ token: { ...eth, network: BASE_NETWORK }, address: mockAccount.evmAddress })
+			]
+		});
+
+		expect(getAllByText('ETH')).toHaveLength(2);
 	});
 
 	it('keeps a failed lookup visible and distinct from an empty account', () => {

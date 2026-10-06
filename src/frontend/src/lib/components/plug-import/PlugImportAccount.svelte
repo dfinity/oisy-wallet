@@ -47,7 +47,7 @@
 		<span class="text-tertiary">{$i18n.plug_import.text.empty_account}</span>
 	{:else}
 		<ul class="flex w-full flex-col gap-2">
-			{#each visible as { token, address, balance } (`${token.symbol}-${address}`)}
+			{#each visible as { token, address, balance } (`${token.network.id.toString()}-${token.symbol}`)}
 				<li class="flex w-full flex-row items-center justify-between gap-3">
 					<span class="flex flex-col">
 						<span class="font-bold">{token.symbol}</span>
