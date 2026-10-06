@@ -97,13 +97,19 @@
 	const formatAmount = (value: bigint): string =>
 		formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals });
 
-	const failureText = (
-		result: Extract<CyclesTopUpResult, { status: 'refused' | 'refunded' }>
-	): string => {
+	const failureText = ({
+		result,
+		amount
+	}: {
+		result: Extract<CyclesTopUpResult, { status: 'refused' | 'refunded' }>;
+		amount: bigint;
+	}): string => {
 		if (result.status === 'refunded') {
-			// The burn and the refund each cost the ledger fee.
+			// The ledger refunds the amount minus its fee, so with the fee the burn took, the
+			// attempt costs the fee twice.
 			return nonNullish(result.refundBlockIndex)
 				? replacePlaceholders($i18n.cycles_top_up.error.refunded, {
+						$refund: formatAmount(amount - token.fee),
 						$token: token.symbol,
 						$fees: formatAmount(token.fee * 2n)
 					})
@@ -194,7 +200,7 @@
 
 		// Review shows the warning for a top-up without an answer.
 		if (result.status === 'refused' || result.status === 'refunded') {
-			toastsError({ msg: { text: failureText(result) } });
+			toastsError({ msg: { text: failureText({ result, amount: request.amount }) } });
 		}
 
 		if (result.status === 'refunded') {
