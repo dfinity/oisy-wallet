@@ -1,5 +1,9 @@
 import type { BtcAddress } from '$btc/types/address';
 import type { EthAddress } from '$eth/types/address';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import {
 	PLUG_EVM_PATH_DISCRIMINATOR,
 	PLUG_HELPER_CANISTER_ID,
@@ -8,6 +12,7 @@ import {
 } from '$lib/constants/plug.constants';
 import { SIGNER_MASTER_PUB_KEYS } from '$lib/constants/signer.constants';
 import type { PlugAccount } from '$lib/types/plug';
+import type { Token } from '$lib/types/token';
 import type { SolAddress } from '$sol/types/address';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
 import { bip340secp256k1, ed25519 } from '@dfinity/ic-pub-key/schnorr';
@@ -143,3 +148,14 @@ export const derivePlugAccounts = ({
 	depth: number;
 }): PlugAccount[] =>
 	Array.from({ length: depth }, (_, index) => derivePlugAccount({ phrase, index }));
+
+/**
+ * An EVM token moved by a contract call rather than as the chain's native coin.
+ *
+ * ERC-4626 vault shares are a superset of ERC-20 — they implement `balanceOf` and
+ * `transfer` — so a vault is read and sent exactly like any ERC-20, on its own
+ * contract address. Treating them together is what stops a vault row from falling
+ * through to the native-balance branch and reporting the account's ETH instead.
+ */
+export const isPlugEvmContractToken = (token: Token): token is Erc20Token | Erc4626Token =>
+	isTokenErc20(token) || isTokenErc4626(token);

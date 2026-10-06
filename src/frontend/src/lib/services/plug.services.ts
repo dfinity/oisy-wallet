@@ -4,7 +4,6 @@ import {
 } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { balance as icrcBalance } from '$icp/api/icrc-ledger.api';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -19,6 +18,7 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import { isPlugEvmContractToken } from '$lib/utils/plug.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { loadSolNetworkBalances } from '$sol/services/sol-balances.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -110,7 +110,10 @@ const balanceLookup = ({
 		};
 	}
 
-	if (isTokenErc20(token)) {
+	// ERC-20 and ERC-4626 both expose `balanceOf` on their own contract, so a vault
+	// share is read exactly like a plain token. Without this an ERC-4626 row would
+	// fall through to the native branch below and report the account's ETH balance.
+	if (isPlugEvmContractToken(token)) {
 		const { address: contractAddress } = token;
 
 		return {
