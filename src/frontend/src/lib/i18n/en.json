@@ -1210,7 +1210,7 @@
 			"refused": "The top-up didn't go through. Nothing left your wallet. Try again in a moment.",
 			"insufficient_funds": "Not enough $token for this top-up and the fee. Nothing left your wallet. Lower the amount.",
 			"clock": "The top-up didn't go through because your device's clock is off. Nothing left your wallet. Set the correct time and try again.",
-			"refunded": "The canister couldn't receive the cycles. Your $token came back, minus $fees $token in fees. Check the canister ID.",
+			"refunded": "The canister couldn't receive the cycles. $refund $token came back to your wallet, and the attempt cost $fees $token in fees. Check the canister ID.",
 			"refunded_nothing": "The canister couldn't receive the cycles, and the fees took the whole amount. Check the canister ID."
 		}
 	},
