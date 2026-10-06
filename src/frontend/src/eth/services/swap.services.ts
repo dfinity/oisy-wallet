@@ -92,6 +92,7 @@ export const swap = async ({
 	Omit<RequiredTransactionFeeData, 'gas'> &
 	SwapParams & { transaction: TransactionParams }): Promise<{
 	hash: string;
+	nonce: number;
 }> => {
 	progress(ProgressStepsSwap.SWAP);
 
@@ -112,5 +113,7 @@ export const swap = async ({
 
 	processTransactionSent({ identity, token, transaction: transactionSent });
 
-	return { hash: transactionSent.hash };
+	// The nonce is returned so callers can persist it: it is what later tells a
+	// transaction that is merely unmined from one that was replaced or dropped.
+	return { hash: transactionSent.hash, nonce };
 };

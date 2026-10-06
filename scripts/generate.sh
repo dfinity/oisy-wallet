@@ -69,6 +69,10 @@ DFX_NETWORK=ic ./scripts/build.icpunks.sh
 DFX_NETWORK=ic ./scripts/build.icrc7.sh
 # .. creates candid for icrc3
 DFX_NETWORK=ic ./scripts/build.icrc3.sh
+# .. downloads candid for the icp_index and icp_ledger, at the release the local replica runs.
+#    With `-e`: the script itself carries on past a failed download, after which
+#    install_did_files would only warn and those bindings would be skipped.
+bash -e ./scripts/download.icp.sh
 # .. fetches candid for the plug_helper from the canister itself
 DFX_NETWORK=ic ./scripts/build.plug_helper.sh
 # Download .did files listed in dfx.json

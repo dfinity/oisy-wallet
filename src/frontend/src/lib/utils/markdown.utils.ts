@@ -1,7 +1,7 @@
 import type { MarkdownBlockType } from '$lib/types/markdown';
 import { isNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import type { marked as markedTypes, Renderer } from 'marked';
+import type { marked as markedTypes, Renderer, Tokens } from 'marked';
 
 type Marked = typeof markedTypes;
 
@@ -126,14 +126,20 @@ export const htmlRenderer = (html: string): string =>
  * - imageToLinkRenderer
  * - htmlRenderer
  *
+ * Marked hands each renderer a single token instead of positional arguments, and the link text is
+ * not on the token: it has to be produced by parsing the link's inline tokens. The adapters below
+ * keep that token shape out of the renderers themselves, which stay plain HTML builders.
+ *
  * @param marked
  */
 const proposalSummaryRenderer = (marked: Marked): Renderer => {
 	const renderer = new marked.Renderer();
 
-	renderer.link = targetBlankLinkRenderer;
-	renderer.image = imageToLinkRenderer;
-	renderer.html = htmlRenderer;
+	renderer.link = ({ href, title, tokens }: Tokens.Link): string =>
+		targetBlankLinkRenderer(href, title, renderer.parser.parseInline(tokens));
+	renderer.image = ({ href, title, text }: Tokens.Image): string =>
+		imageToLinkRenderer(href, title, text);
+	renderer.html = ({ text }: Tokens.HTML | Tokens.Tag): string => htmlRenderer(text);
 
 	return renderer;
 };

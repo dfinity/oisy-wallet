@@ -14,7 +14,32 @@ Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-tra
 
 ### Solana (RPC signatures and details)
 
-`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+Solana history is loaded from the chain only, per network: `getSolSignatures` pages through one merged list of the signatures of every source (the wallet and the associated token account of each enabled token), and `resolveSolSignatures` fetches and derives each signature once, however many sources returned it; the sources that returned a signature decide which tokens its record belongs to. `SolWalletScheduler` runs one worker per network; each tick, its head check asks every source for its newest page and resolves only the signatures newer than the newest one it has already resolved, so when no source has anything newer a tick costs one `getSignaturesForAddress` call per source and no `getTransaction`. Older history comes from the pagers in `sol-history-pagers.services.ts`: one per network for the Activity list, one per token for the token's own page, each keeping its own cursor. The backend user-transaction cache is written per token but never read for Solana, because its copy cannot carry what a row is shown from (see "Solana history" in `docs/ai/PRODUCT.md`). `fetchTransactionDetailForSignature` caches finalized details per network, so a signature already derived is not fetched again once finalized.
+
+## Token identity — key by `TokenId`
+
+Whenever a `TokenId` is in scope, identify, compare and key tokens by it.
+Do not invent a second key next to one that already exists.
+
+- `TokenId` is a `Symbol`, so it is unique per token
+  ([`$lib/validation/token.validation.ts`](../../../src/frontend/src/lib/validation/token.validation.ts)),
+  and the token stores deliberately reuse the existing Symbol when re-setting
+  an entry with the same identifier
+  ([`$lib/stores/custom-tokens.store.ts`](../../../src/frontend/src/lib/stores/custom-tokens.store.ts),
+  [`$icp/stores/certified-icrc.store.ts`](../../../src/frontend/src/icp/stores/certified-icrc.store.ts)).
+  It therefore survives a store reload, and is re-created only on a full reset
+  — `resetAll()` after a failed certified update, or the page reload on
+  sign-out.
+- **Compare the object, never its description.** `TokenId.description` _is_ the
+  ticker — it comes from `parseTokenId(symbol)`
+  ([`$eth/utils/erc20.utils.ts`](../../../src/frontend/src/eth/utils/erc20.utils.ts),
+  [`$icp/utils/icrc.utils.ts`](../../../src/frontend/src/icp/utils/icrc.utils.ts)).
+  Two distinct contracts on the same network can share a ticker, so a ticker is
+  not unique and is not a key.
+- No `TokenId` reachable? Key on the stable asset identifier — contract address
+  / ledger canister ID / canister ID, e.g. `getTokenIdentifier` from
+  [`$lib/utils/identifier.utils.ts`](../../../src/frontend/src/lib/utils/identifier.utils.ts)
+  — combined with the network. Never the ticker.
 
 ## Svelte — runes for new code
 
@@ -212,6 +237,10 @@ component uses. Never re-implement an icon that already exists.
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
   `{@html …}`.
+- Text authored by a third party — e.g. a consent message built from data a
+  relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
+  on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
+  Never render it inside a `<form>` that drives a sensitive action.
 - External links: `target="_blank"` requires `rel="noopener noreferrer"`.
 - Threshold-signature operations are routed through the chain-fusion
   signer canister — not implemented here. See
@@ -241,5 +270,7 @@ component uses. Never re-implement an icon that already exists.
 - Adding a wrapper component that only re-exports another component.
 - `target="_blank"` without `rel="noopener noreferrer"`.
 - `{@html …}` without sanitisation.
+- Keying or matching a token by its ticker (including `TokenId.description`)
+  when the `TokenId` object itself is in scope.
 - `console.log` left in committed code (and `console.error` / `.warn` are
   ESLint errors — use `consoleError` / `consoleWarn`).

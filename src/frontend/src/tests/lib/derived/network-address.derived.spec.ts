@@ -11,6 +11,7 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK } from '$env/networks/networks.xrp.env';
 import { networkAddress, networkAddressStore } from '$lib/derived/network-address.derived';
 import {
 	btcAddressMainnetStore,
@@ -19,7 +20,8 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore
+	solAddressMainnetStore,
+	xrpAddressMainnetStore
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -27,10 +29,25 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
+
+// XRP is force-disabled under TEST, so it is absent from the supported-network
+// catalog that `networkId` resolves against. Enable it for this spec so the XRP
+// store-selection branch can be exercised.
+vi.mock('$env/networks/networks.xrp.env', async () => {
+	const actual = await vi.importActual<Record<string, unknown>>('$env/networks/networks.xrp.env');
+
+	return {
+		...actual,
+		XRP_MAINNET_ENABLED: true,
+		SUPPORTED_XRP_NETWORKS: [actual.XRP_MAINNET_NETWORK],
+		SUPPORTED_XRP_NETWORK_IDS: [actual.XRP_MAINNET_NETWORK_ID]
+	};
+});
 
 describe('network-address.derived', () => {
 	const mockEthAddressWithCertified = {
@@ -64,6 +81,11 @@ describe('network-address.derived', () => {
 		certified: true
 	};
 
+	const mockXrpMainnetAddressWithCertified = {
+		data: mockXrpAddress,
+		certified: true
+	};
+
 	const expectedIcrcAddress = encodeIcrcAccount(mockIcrcAccount);
 
 	beforeEach(() => {
@@ -85,6 +107,9 @@ describe('network-address.derived', () => {
 		solAddressMainnetStore.set(mockSolMainnetAddressWithCertified);
 		solAddressDevnetStore.set(mockSolDevnetAddressWithCertified);
 		solAddressLocalnetStore.set(mockSolLocalnetAddressWithCertified);
+
+		xrpAddressMainnetStore.reset();
+		xrpAddressMainnetStore.set(mockXrpMainnetAddressWithCertified);
 
 		mockPage.reset();
 
@@ -135,6 +160,10 @@ describe('network-address.derived', () => {
 			{
 				network: SOLANA_LOCAL_NETWORK,
 				expectedStore: mockSolLocalnetAddressWithCertified
+			},
+			{
+				network: XRP_MAINNET_NETWORK,
+				expectedStore: mockXrpMainnetAddressWithCertified
 			}
 		])(
 			'should return $network.id.description address store when network is $network.name',

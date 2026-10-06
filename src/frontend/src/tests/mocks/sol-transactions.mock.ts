@@ -1,10 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	SYSTEM_PROGRAM_ADDRESS,
-	TOKEN_PROGRAM_ADDRESS
-} from '$sol/constants/sol.constants';
-import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
+import { SYSTEM_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	SolRpcTransaction,
@@ -14,9 +9,17 @@ import type {
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import {
+	AccountRole,
 	address,
+	appendTransactionMessageInstruction,
 	blockhash,
+	compileTransactionMessage,
+	createTransactionMessage,
+	getCompiledTransactionMessageEncoder,
 	lamports,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash,
 	signature,
 	stringifiedBigInt,
 	stringifiedNumber,
@@ -29,15 +32,26 @@ import {
 
 export const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
-export const mockSignature2 =
-	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
+
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+// Two transactions cannot share a signature on Solana, so neither may two mocks: code that groups
+// by signature would see one transaction where the test means several. Derived from the id so it
+// stays deterministic, and varying only the last two characters keeps the value valid base58.
+const mockSignatureFor = (id: string): string => {
+	const seed = [...id].reduce((acc, character) => acc + character.charCodeAt(0), 0);
+
+	return `${mockSignature.slice(0, -2)}${BASE58_ALPHABET[seed % 58]}${
+		BASE58_ALPHABET[Math.floor(seed / 58) % 58]
+	}`;
+};
 
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 	Array.from({ length: n }, (_, i) => createMockSolTransactionUi(`txn-${i + 1}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
-	signature: signature(mockSignature),
+	signature: signature(mockSignatureFor(id)),
 	timestamp: ZERO,
 	type: 'send',
 	value: 100n,
@@ -45,180 +59,6 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	to: 'receiver',
 	status: 'finalized'
 });
-
-export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
-	blockTime: 1736257946n as UnixTimestamp,
-	confirmationStatus: 'finalized',
-	id: mockSignature,
-	signature: signature(mockSignature),
-	meta: {
-		computeUnitsConsumed: 150n,
-		err: null,
-		fee: lamports(5000n),
-		innerInstructions: [],
-		logMessages: [
-			'Program 11111111111111111111111111111111 invoke [1]',
-			'Program 11111111111111111111111111111111 success'
-		],
-		postBalances: [lamports(14808188293851n), lamports(5849985100n), lamports(1n)],
-		postTokenBalances: [],
-		preBalances: [lamports(14813188298851n), lamports(849985100n), lamports(1n)],
-		preTokenBalances: [],
-		rewards: [],
-		status: {
-			Ok: null
-		}
-	},
-	slot: 352454651n,
-	transaction: {
-		message: {
-			accountKeys: [
-				{
-					pubkey: address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
-					signer: false,
-					source: 'lookupTable',
-					writable: false
-				},
-				{
-					pubkey: address(mockSolAddress),
-					signer: true,
-					source: 'lookupTable',
-					writable: true
-				},
-				{
-					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
-					signer: false,
-					source: 'lookupTable',
-					writable: false
-				}
-			],
-			addressTableLookups: [
-				{
-					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
-					readonlyIndexes: [146],
-					writableIndexes: [148, 149, 156, 152]
-				},
-				{
-					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
-					readonlyIndexes: [69, 67, 10, 70, 68, 73],
-					writableIndexes: [66, 63, 71, 72]
-				}
-			],
-			instructions: [
-				{
-					accounts: [
-						address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
-						address(mockSolAddress)
-					],
-					data: '3Bxs411qCLLRMUsZ' as Base58EncodedBytes,
-					programId: address(SYSTEM_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				}
-			],
-			recentBlockhash: blockhash('ARU13JbajMAevpuyAdaUEg2Fx4eb7H46wMqga2w5F6me')
-		},
-		signatures: [mockSignature] as Base58EncodedBytes[]
-	},
-	version: 'legacy'
-};
-
-export const mockSolRpcSendTransaction: SolRpcTransaction = {
-	blockTime: 1736256974n as UnixTimestamp,
-	confirmationStatus: 'finalized',
-	id: mockSignature2,
-	signature: signature(mockSignature2),
-	meta: {
-		computeUnitsConsumed: 450n,
-		err: null,
-		fee: lamports(14900n),
-		innerInstructions: [],
-		logMessages: [
-			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
-			'Program ComputeBudget111111111111111111111111111111 success',
-			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
-			'Program ComputeBudget111111111111111111111111111111 success',
-			'Program 11111111111111111111111111111111 invoke [1]',
-			'Program 11111111111111111111111111111111 success'
-		],
-		postBalances: [lamports(849985100n), lamports(150000000n), lamports(1n), lamports(1n)],
-		postTokenBalances: [],
-		preBalances: [lamports(1000000000n), lamports(ZERO), lamports(1n), lamports(1n)],
-		preTokenBalances: [],
-		rewards: [],
-		status: {
-			Ok: null
-		}
-	},
-	slot: 352452048n,
-	transaction: {
-		message: {
-			accountKeys: [
-				{
-					pubkey: address(mockSolAddress),
-					signer: true,
-					source: 'lookupTable',
-					writable: true
-				},
-				{
-					pubkey: address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ'),
-					signer: false,
-					source: 'lookupTable',
-					writable: true
-				},
-				{
-					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
-					signer: false,
-					source: 'lookupTable',
-					writable: false
-				},
-				{
-					pubkey: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					signer: false,
-					source: 'lookupTable',
-					writable: false
-				}
-			],
-			addressTableLookups: [
-				{
-					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
-					readonlyIndexes: [146],
-					writableIndexes: [148, 149, 156, 152]
-				},
-				{
-					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
-					readonlyIndexes: [69, 67, 10, 70, 68, 73],
-					writableIndexes: [66, 63, 71, 72]
-				}
-			],
-			instructions: [
-				{
-					accounts: [],
-					data: '3DVGviTXKAPH' as Base58EncodedBytes,
-					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				},
-				{
-					accounts: [],
-					data: 'LCQ37u' as Base58EncodedBytes,
-					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				},
-				{
-					accounts: [
-						address(mockSolAddress),
-						address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ')
-					],
-					data: '3Bxs4NQNnDSisSzK' as Base58EncodedBytes,
-					programId: address(SYSTEM_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				}
-			],
-			recentBlockhash: blockhash('Hz2ewskR9apeDBd9i38tYLATZgHujbjnp9AuRDSQuZB7')
-		},
-		signatures: [mockSignature2] as Base58EncodedBytes[]
-	},
-	version: 'legacy'
-};
 
 export const mockSolTransactionDetail: SolRpcTransaction = {
 	blockTime: 1740654097n as UnixTimestamp,
@@ -1215,17 +1055,6 @@ export const mockSolTransactionDetail: SolRpcTransaction = {
 	)
 };
 
-export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
-	{
-		data: createMockSolTransactionUi(mockSolRpcReceiveTransaction.id),
-		certified: false
-	},
-	{
-		data: createMockSolTransactionUi(mockSolRpcSendTransaction.id),
-		certified: false
-	}
-];
-
 export const mockSolTransactionMessage: SolTransactionMessage = {
 	lifetimeConstraint: {
 		blockhash: 'mock-blockhash' as Blockhash,
@@ -1262,6 +1091,44 @@ export const mockSolSignedTransaction: SolSignedTransaction = {
 		])
 	} as SignaturesMap
 } as unknown as SolSignedTransaction;
+
+/**
+ * A genuine compiled transaction message, i.e. the exact byte string a `solana_signTransaction`
+ * signature is taken over. Specs use it to submit a transaction through paths that are not the
+ * transaction flow.
+ */
+export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' | 0): Uint8Array => {
+	const feePayer = address(mockSolAddress);
+
+	const transactionMessage = pipe(
+		createTransactionMessage({ version }),
+		(tx) => setTransactionMessageFeePayer(feePayer, tx),
+		(tx) =>
+			setTransactionMessageLifetimeUsingBlockhash(
+				{
+					blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+					lastValidBlockHeight: 100n
+				},
+				tx
+			),
+		(tx) =>
+			appendTransactionMessageInstruction(
+				{
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					accounts: [
+						{ address: feePayer, role: AccountRole.WRITABLE_SIGNER },
+						{ address: address(mockSolAddress2), role: AccountRole.WRITABLE }
+					],
+					data: Uint8Array.from([2, 0, 0, 0, 0, 202, 154, 59, 0, 0, 0, 0])
+				},
+				tx
+			)
+	);
+
+	return Uint8Array.from(
+		getCompiledTransactionMessageEncoder().encode(compileTransactionMessage(transactionMessage))
+	);
+};
 
 export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {
 	feePayer: {

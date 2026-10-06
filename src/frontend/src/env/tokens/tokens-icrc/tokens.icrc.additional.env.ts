@@ -31,6 +31,9 @@ export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.TICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
 
+export const TCYCLES_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.TCYCLES?.ledgerCanisterId ?? 'um5iw-rqaaa-aaaaq-qaaba-cai';
+
 // Suggested non-Chain-Fusion ICRC tokens to be enabled by default if the user set no preference
 export const ICRC_SUGGESTED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [];
 

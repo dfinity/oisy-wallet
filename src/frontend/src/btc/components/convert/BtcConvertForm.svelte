@@ -3,6 +3,7 @@
 	import { getContext, type Snippet } from 'svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
+	import { initBtcMaxSendAmount } from '$btc/derived/btc-max-send-amount.derived';
 	import {
 		BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
@@ -45,6 +46,8 @@
 		amountError = $insufficientFunds || $insufficientFundsForFee;
 	});
 
+	let maxSendAmountStore = $derived(initBtcMaxSendAmount(source));
+
 	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 
 	// When BTC extension is enabled, parallel transactions are allowed, so we
@@ -74,6 +77,7 @@
 <ConvertForm
 	{cancel}
 	disabled={invalid}
+	maxAmount={$maxSendAmountStore}
 	{onNext}
 	testId={BTC_CONVERT_FORM_TEST_ID}
 	{totalFee}

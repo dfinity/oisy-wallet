@@ -1,4 +1,5 @@
 import { goto } from '$app/navigation';
+import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_ADVERTISED_TOKENS } from '$lib/constants/liquidium.constants';
@@ -33,6 +34,11 @@ export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
 export const liquidiumPortfolio: Readable<LiquidiumPortfolio | null> = derived(
 	liquidiumStore,
 	({ portfolio }) => portfolio
+);
+
+export const liquidiumPortfolioLoading: Readable<boolean> = derived(
+	liquidiumStore,
+	({ loaded }) => anyLendBorrowProviderEnabled && !loaded
 );
 
 export const liquidiumSupplyMarkets: Readable<LiquidiumMarket[]> = derived(

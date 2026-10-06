@@ -2,6 +2,7 @@ import * as addressEnv from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import * as api from '$lib/api/backend.api';
 import { allowSigning } from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -231,7 +232,8 @@ describe('loader.services', () => {
 			expect(loadAddresses).toHaveBeenNthCalledWith(1, [
 				BTC_MAINNET_NETWORK_ID,
 				ETHEREUM_NETWORK_ID,
-				SOLANA_MAINNET_NETWORK_ID
+				SOLANA_MAINNET_NETWORK_ID,
+				XRP_MAINNET_NETWORK_ID
 			]);
 		});
 
@@ -252,7 +254,9 @@ describe('loader.services', () => {
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
-								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								[{ RobinhoodMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+								[{ XrpMainnet: null }, { enabled: false, is_testnet: false }]
 							]
 						}
 					})
@@ -286,7 +290,8 @@ describe('loader.services', () => {
 								[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 								[{ BaseMainnet: null }, { enabled: true, is_testnet: false }],
 								[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
-								[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }]
+								[{ SolanaMainnet: null }, { enabled: false, is_testnet: false }],
+								[{ XrpMainnet: null }, { enabled: false, is_testnet: false }]
 							]
 						}
 					})

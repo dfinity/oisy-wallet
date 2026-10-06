@@ -27,6 +27,7 @@
 		autofocus?: boolean;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
+		revalidateKey?: unknown;
 		showTokenNetwork?: boolean;
 		onClick?: () => void;
 		title?: Snippet;
@@ -51,6 +52,7 @@
 		autofocus = false,
 		onCustomValidate = () => undefined,
 		onCustomErrorValidate = () => undefined,
+		revalidateKey = undefined,
 		showTokenNetwork = false,
 		onClick,
 		title,
@@ -83,6 +85,7 @@
 		{onCustomValidate}
 		{placeholder}
 		{readOnlyAmount}
+		{revalidateKey}
 		{showTokenNetwork}
 		{title}
 		{token}

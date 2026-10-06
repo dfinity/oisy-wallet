@@ -30,6 +30,7 @@ const buildOrder = (over: Partial<OisyTradeOrderView> = {}): OisyTradeOrderView 
 	price: 2.5,
 	filledQuantity: 0,
 	status: 'Open' as OisyTradeOrderStatus,
+	timeInForce: 'GoodTilCanceled',
 	createdAt: ZERO,
 	...over
 });
@@ -42,6 +43,24 @@ describe('TradingOrderDetailModal', () => {
 		expect(container).toHaveTextContent(en.trading.orders.status_open);
 		expect(container).toHaveTextContent('ICP');
 		expect(container).toHaveTextContent('ckUSDC');
+	});
+
+	it('labels the order type as good-til-canceled for a resting order', () => {
+		const { container } = render(TradingOrderDetailModal, { props: { order: buildOrder() } });
+
+		expect(container).toHaveTextContent(en.trading.limit_order.order_type_gtc);
+		expect(container).toHaveTextContent(en.trading.limit_order.fee_maker_taker);
+	});
+
+	it('labels the order type as fill-or-kill for a fill-or-kill order', () => {
+		const { container } = render(TradingOrderDetailModal, {
+			props: { order: buildOrder({ timeInForce: 'FillOrKill', status: 'Expired' }) }
+		});
+
+		expect(container).toHaveTextContent(en.trading.limit_order.order_type_fok);
+		// Fill-or-kill always executes as a taker, so only that rate is shown.
+		expect(container).toHaveTextContent(en.trading.limit_order.fee_taker);
+		expect(container).not.toHaveTextContent(en.trading.limit_order.order_type_gtc);
 	});
 
 	it('shows the cancel action for an active order', () => {

@@ -20,12 +20,25 @@ export const isTerminalActiveUserTransactionStatus = (
 export const isTerminalActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	isTerminalActiveUserTransactionStatus(tx.status);
 
-export const sortActiveUserTransactionsByCreatedAtDesc = (
+// The timestamp a row is presented (and ordered) by: the moment it reached its
+// last status, not the moment it was opened. A terminal row is never written
+// again (the pollers only touch pending rows, and every flow persists learned
+// refs *before* the terminal write), so `updated_at_ns` is exactly when it
+// succeeded or failed. A still-running row keeps `created_at_ns`: its
+// `updated_at_ns` also moves on ref / progress-step writes, which are not
+// status changes, and "started x ago" is what we want to show there anyway.
+export const activeUserTransactionTimestampNs = (tx: ActiveUserTransaction): bigint =>
+	isTerminalActiveUserTransaction(tx) ? tx.updated_at_ns : tx.created_at_ns;
+
+export const sortActiveUserTransactionsByTimestampDesc = (
 	transactions: ActiveUserTransaction[]
 ): ActiveUserTransaction[] =>
-	[...transactions].sort((a, b) =>
-		a.created_at_ns < b.created_at_ns ? 1 : a.created_at_ns > b.created_at_ns ? -1 : 0
-	);
+	[...transactions].sort((a, b) => {
+		const timestampA = activeUserTransactionTimestampNs(a);
+		const timestampB = activeUserTransactionTimestampNs(b);
+
+		return timestampA < timestampB ? 1 : timestampA > timestampB ? -1 : 0;
+	});
 
 export const activeUserTransactionsStateToList = (
 	state: ActiveUserTransactionsStoreData
@@ -34,7 +47,7 @@ export const activeUserTransactionsStateToList = (
 		return [];
 	}
 
-	return sortActiveUserTransactionsByCreatedAtDesc(Object.values(state.data));
+	return sortActiveUserTransactionsByTimestampDesc(Object.values(state.data));
 };
 
 export const isActiveUserTransactionUnseen = ({

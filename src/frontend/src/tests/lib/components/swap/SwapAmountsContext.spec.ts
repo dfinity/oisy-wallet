@@ -7,6 +7,7 @@ import * as tokensStore from '$lib/derived/tokens.derived';
 import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import type { OptionAmount } from '$lib/types/send';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 import {
@@ -16,6 +17,7 @@ import {
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { mockXrpAddress } from '$tests/mocks/xrp.mock';
 import { act, render } from '@testing-library/svelte';
 import { tick, type Snippet } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -179,6 +181,31 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.amountForSwap).toBe(10);
 	});
 
+	// The XRP address is the refund address of a swap from XRP and the payout address of a
+	// swap toward it; without it the fan-out quotes neither.
+	it('passes the user XRP mainnet address to fetchSwapAmounts', async () => {
+		vi.spyOn(addressDerived, 'xrpAddressMainnet', 'get').mockImplementation(() =>
+			readable(mockXrpAddress)
+		);
+
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3'
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			expect.objectContaining({ userXrpAddress: mockXrpAddress })
+		);
+	});
+
 	it('sets empty swaps if fetchSwapAmounts throws', async () => {
 		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(new Error('fail'));
 
@@ -196,6 +223,29 @@ describe('SwapAmountsContext.svelte', () => {
 		expect(value?.swaps).toEqual([]);
 		expect(value?.selectedProvider).toBeUndefined();
 		expect(value?.amountForSwap).toBe(20);
+		expect(value?.quoteError).toBeUndefined();
+	});
+
+	it('sets the quote error when fetchSwapAmounts throws an amount-too-low refusal', async () => {
+		vi.spyOn(swapService, 'fetchSwapAmounts').mockRejectedValue(
+			new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+		);
+
+		await renderWithContext({
+			amount: '20',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.2'
+		});
+
+		await waitForDebounce();
+
+		const value = get(store);
+
+		expect(value?.swaps).toEqual([]);
+		expect(value?.selectedProvider).toBeUndefined();
+		expect(value?.amountForSwap).toBe(20);
+		expect(value?.quoteError).toEqual({ type: 'amount-too-low', minAmount: 8300n });
 	});
 
 	it('debounces fetchSwapAmounts calls', async () => {

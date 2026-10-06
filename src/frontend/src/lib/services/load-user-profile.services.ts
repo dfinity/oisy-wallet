@@ -2,7 +2,7 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { userProfileStore } from '$lib/stores/user-profile.store';
+import { userProfileCreated, userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -102,6 +102,7 @@ export const loadUserProfile = async ({
 			}
 			profile = response.Ok;
 			profileCreated = true;
+			userProfileCreated.set(true);
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.
