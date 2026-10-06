@@ -211,6 +211,35 @@ describe('SolWalletConnectSignModal', () => {
 		});
 	});
 
+	// An account the run opens inside another program's instruction with more than its size costs is
+	// refused by signing like an ambiguous message, so the review holds the button the same way.
+	it('should hold approval when the run opens an account above its rent', async () => {
+		vi.mocked(decode).mockResolvedValueOnce({
+			amount: 1n,
+			opensAccountBeyondRent: true,
+			parties: { sources: [], destinations: [], partial: false }
+		});
+
+		const { getByRole, getByText } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		await waitFor(() => {
+			expect(getByText(en.wallet_connect.text.cannot_be_shown)).toBeInTheDocument();
+		});
+
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+	});
+
+	it('should hand signing no over-funded opening when the run found none', async () => {
+		const args = await approve({
+			amount: 1n,
+			parties: { sources: [], destinations: [], partial: true }
+		});
+
+		expect(args).toEqual(expect.objectContaining({ opensAccountBeyondRent: false }));
+	});
+
 	// Signing holds the message's account creations to the reserve the review was computed with, so
 	// what the review allowed is what gets signed.
 	describe('the rent reserve it hands the signing service', () => {

@@ -456,6 +456,21 @@ describe('wallet-connect.services', () => {
 				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
 			});
 
+			it('should pass on that the run opens an account above its rent', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					parties: mockParties,
+					opensAccountBeyondRent: true
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(expect.objectContaining({ opensAccountBeyondRent: true }));
+			});
+
 			it('should decode without a preview when the simulation yields none', async () => {
 				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
 
@@ -699,7 +714,8 @@ describe('wallet-connect.services', () => {
 			listener: mockListener,
 			simulated: true,
 			closesPayOthers: false,
-			rentExemptMinimum: mockRentExemptMinimum
+			rentExemptMinimum: mockRentExemptMinimum,
+			opensAccountBeyondRent: false
 		};
 
 		describe(`with method ${SESSION_REQUEST_SOL_SIGN_TRANSACTION}`, () => {
@@ -721,7 +737,8 @@ describe('wallet-connect.services', () => {
 				listener: mockListener,
 				simulated: true,
 				closesPayOthers: false,
-				rentExemptMinimum: mockRentExemptMinimum
+				rentExemptMinimum: mockRentExemptMinimum,
+				opensAccountBeyondRent: false
 			};
 
 			const expected = {
@@ -866,7 +883,8 @@ describe('wallet-connect.services', () => {
 				listener: mockListener,
 				simulated: true,
 				closesPayOthers: false,
-				rentExemptMinimum: mockRentExemptMinimum
+				rentExemptMinimum: mockRentExemptMinimum,
+				opensAccountBeyondRent: false
 			};
 
 			it('should show an error if the address is nullish', async () => {
@@ -1268,6 +1286,30 @@ describe('wallet-connect.services', () => {
 
 				expect(spyToastsError).not.toHaveBeenCalled();
 				expect(mockListener.approveRequest).toHaveBeenCalledOnce();
+			});
+		});
+
+		// Only the run shows an account a program opens inside its own instruction, so the decode's
+		// verdict on it is handed in rather than read from the message.
+		describe('with an account opened above its rent inside an instruction', () => {
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign({ ...mockParams, opensAccountBeyondRent: true });
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
 			});
 		});
 

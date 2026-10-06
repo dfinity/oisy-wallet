@@ -251,6 +251,53 @@ describe('sol-simulation.services', () => {
 	// message made of nothing else has nothing to list. That is its answer rather than a gap: left
 	// out, the review rebuilt the list from the message alone, which cannot tell that the account
 	// was there and listed the creation as one.
+	// An account a program opens inside its own instruction reaches the review through the run alone,
+	// so it is the run that says whether one was funded above its rent.
+	describe('accounts opened inside an instruction', () => {
+		const innerOpening = (lamports: number): SolanaSimulatedInnerInstructions =>
+			[
+				{
+					index: 0,
+					instructions: [
+						{
+							program: 'system',
+							programId: SYSTEM_PROGRAM_ADDRESS,
+							parsed: {
+								type: 'createAccount',
+								info: {
+									source: mockSolAddress,
+									newAccount: mockSolAddress2,
+									lamports,
+									space: 165,
+									owner: TOKEN_PROGRAM_ADDRESS
+								}
+							}
+						}
+					]
+				}
+			] as unknown as SolanaSimulatedInnerInstructions;
+
+		it('should say so when one is funded above its rent', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: innerOpening(2_039_281) })
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result?.opensAccountBeyondRent).toBeTruthy();
+		});
+
+		it('should say nothing when one is funded with exactly its rent', async () => {
+			vi.mocked(simulateTransactionAccounts).mockResolvedValue(
+				simulated({ accounts: [], innerInstructions: innerOpening(2_039_280) })
+			);
+
+			const result = await simulateSolTransaction(params(message([])));
+
+			expect(result).not.toHaveProperty('opensAccountBeyondRent');
+		});
+	});
+
 	it('should keep an empty list for a run with nothing to list', async () => {
 		const accountAt = ({ addresses }: { addresses: SolAddress[] }) =>
 			addresses.map((account) =>

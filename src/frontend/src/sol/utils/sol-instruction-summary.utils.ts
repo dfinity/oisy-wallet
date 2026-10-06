@@ -1299,6 +1299,54 @@ const groupUnread = ({
 		});
 
 /**
+ * Whether a simulated run opens an account inside another program's instruction with more than its
+ * size costs.
+ *
+ * The message's own openings are held to the rent when the message is mapped, which reads the top
+ * level only. One a program makes inside its own call reaches the review through the run alone, and
+ * the list leaves an over-funded one out rather than call it rent - which refuses the request only
+ * while nothing else in that instruction has a line. Anything above the rent is a balance in an
+ * account the program controls, a payment with no destination, wherever the account is opened.
+ * Without the chain's reserve there is no line to hold the run to, and it is not judged on this.
+ */
+export const solOpensAccountBeyondRent = ({
+	innerInstructions,
+	rentExemptMinimum
+}: {
+	innerInstructions: SolInstructionGroup[];
+	rentExemptMinimum: bigint | undefined;
+}): boolean =>
+	nonNullish(rentExemptMinimum) &&
+	innerInstructions.some(({ instructions }) =>
+		instructions.some((instruction) => {
+			if (!isParsed(instruction)) {
+				return false;
+			}
+
+			const {
+				program,
+				parsed: { type, info }
+			} = instruction;
+
+			if (program !== 'system' || !['createAccount', 'createAccountWithSeed'].includes(type)) {
+				return false;
+			}
+
+			const owner = address({ info, key: 'owner' });
+			const lamports = amount({ info, key: 'lamports' });
+			const space = amount({ info, key: 'space' });
+
+			return (
+				nonNullish(owner) &&
+				owner !== SYSTEM_PROGRAM_ADDRESS &&
+				nonNullish(lamports) &&
+				nonNullish(space) &&
+				lamports > rentExemptMinimumFor({ space, rentExemptMinimum })
+			);
+		})
+	);
+
+/**
  * The instruction list the review shows, from a transaction's own instructions and the ones a
  * simulation says it would make inside them.
  *
