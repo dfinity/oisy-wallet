@@ -529,6 +529,35 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
 		});
 
+		// The rent of an application's account is a cost the fee section states, like the base fee,
+		// so the run taking it is no disagreement with the message. Grouped the way the Meteora
+		// position request lists it: under the instruction that opens the account.
+		it('should allow for the rent of an application’s account the run pays', () => {
+			const { getByTestId } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					messageSummary,
+					instructions: [
+						{
+							kind: 'route' as const,
+							program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+							children: [
+								{
+									kind: 'createAccount' as const,
+									account: 'BNzxjYNsUyyUyJgds2qYqtpThcd6FPnucFKXfWGzweDK',
+									program: 'LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo',
+									rent: 41_899_840n
+								}
+							]
+						}
+					],
+					preview: { solDelta: -42_904_840n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			expect(getByTestId('message-summary')).toHaveTextContent(en.send.text.send);
+		});
+
 		// A sentence the user would check the figures against, over a transaction that does
 		// something else, is worse than no sentence at all.
 		it('should say nothing when the run moves more than the message states', () => {

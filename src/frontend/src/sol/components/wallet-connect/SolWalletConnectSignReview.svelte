@@ -122,9 +122,12 @@
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// What the transaction costs beyond what it moves. The simulated SOL balance carries all of it
-	// and the message states none of it, so it is the room the comparison of the two allows.
-	let costs = $derived(SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee);
+	// What the transaction costs beyond what it moves: every line of the fee section. The simulated
+	// SOL balance carries all of it and the message states none of it, so it is the room the
+	// comparison of the two allows.
+	let costs = $derived(
+		SOLANA_TRANSACTION_FEE_IN_LAMPORTS + (prioritizationFee ?? ZERO) + ataFee + appAccountCost
+	);
 
 	// The message read on its own says a plain send, receive or swap, and the run agrees that this
 	// is all it does. Anything less than agreement is left unsaid: a confident sentence over a
