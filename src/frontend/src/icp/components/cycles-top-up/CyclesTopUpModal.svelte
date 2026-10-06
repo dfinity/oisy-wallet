@@ -241,7 +241,11 @@
 					onBack={() => modal?.back()}
 					onTopUp={topUp}
 					{sendAmount}
-					unknownOutcome={resendsUnanswered}
+					unknownOutcome={nonNullish(unanswered)
+						? resendsUnanswered
+							? 'resend'
+							: 'fresh'
+						: undefined}
 				/>
 			{:else if currentStep?.name === WizardStepsCyclesTopUp.TOPPING_UP && nonNullish(canisterId)}
 				<CyclesTopUpProgress {canisterId} {progressStep} />
