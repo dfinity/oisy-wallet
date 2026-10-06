@@ -2568,7 +2568,8 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short は $token_list の取引を読み込めません。トークンの発行者が取引の追跡機能を提供していません。",
-			"unavailable_index_canister": "$token_list の最新の取引は現在読み込めません。取引の追跡サービスが応答していないためです。サービスが復旧しだい自動的に読み込まれます。"
+			"unavailable_index_canister": "$token_list の最新の取引は現在読み込めません。取引の追跡サービスが応答していないためです。サービスが復旧しだい自動的に読み込まれます。",
+			"unsupported_sol_transactions": "$token_list の一部の取引は、サポートされていない形式のため読み込めませんでした。この問題が解決しだい、自動的に表示されます。"
 		}
 	},
 	"earning": {
