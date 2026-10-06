@@ -64,6 +64,66 @@ describe('active-user-transactions.store', () => {
 		expect(Object.keys(get(activeUserTransactionsStore)?.data ?? {}).sort()).toEqual(['a', 'b']);
 	});
 
+	// A load reads its snapshot asynchronously, so a create or update can commit while it is in
+	// flight. Replacing the rows wholesale erased that write, and a row gone from the store is one the
+	// poller never resolves.
+	describe('set against local writes made while its load was in flight', () => {
+		const ids = () => Object.keys(get(activeUserTransactionsStore)?.data ?? {}).sort();
+
+		it('keeps a row created after the load began that its snapshot lacks', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.set({ transactions: [pending({ id: 'a', updatedAtNs: 1n })] });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'new', updatedAtNs: 5n }) });
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 1n })],
+				since
+			});
+
+			expect(ids()).toEqual(['a', 'new']);
+		});
+
+		// Absent from the snapshot and not written since the load began: deleted elsewhere, or pruned.
+		it('still drops a row its snapshot lacks when nothing wrote it since the load began', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'gone', updatedAtNs: 1n }) });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			activeUserTransactionsStore.set({ transactions: [], since });
+
+			expect(ids()).toEqual([]);
+		});
+
+		it('keeps the newer local copy of a row its snapshot also has', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'a', updatedAtNs: 1n }) });
+
+			const since = activeUserTransactionsStore.beginLoad();
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.upsert({ transaction: settled });
+			activeUserTransactionsStore.set({
+				transactions: [pending({ id: 'a', updatedAtNs: 1n })],
+				since
+			});
+
+			expect(get(activeUserTransactionsStore)?.data.a).toEqual(settled);
+		});
+
+		it('takes the snapshot copy when it is the newer one', () => {
+			activeUserTransactionsStore.init(mockPrincipal);
+			activeUserTransactionsStore.upsert({ transaction: pending({ id: 'a', updatedAtNs: 1n }) });
+
+			const settled = buildTx({ id: 'a', status: { Succeeded: null }, updated_at_ns: 2n });
+			activeUserTransactionsStore.set({
+				transactions: [settled],
+				since: activeUserTransactionsStore.beginLoad()
+			});
+
+			expect(get(activeUserTransactionsStore)?.data.a).toEqual(settled);
+		});
+	});
+
 	it('upsert adds a new row and updates an existing one', () => {
 		activeUserTransactionsStore.init(mockPrincipal);
 		activeUserTransactionsStore.upsert({

@@ -36,27 +36,31 @@ export interface LiquidiumBorrowPreview {
 
 // Aggregate preview: borrowing is backed by the whole portfolio, so the cap and
 // projected health come from the summary, not a single pool. Min-borrow lives in the form.
+// The protocol books principal × `openingDebtFactor` (activation fee included) as new debt.
 export const computeLiquidiumBorrowPreview = ({
 	portfolio,
-	newBorrowUsd
+	newBorrowUsd,
+	openingDebtFactor
 }: {
 	portfolio: LiquidiumPortfolio;
 	newBorrowUsd: number;
+	openingDebtFactor: number;
 }): LiquidiumBorrowPreview => {
+	const newDebtUsd = newBorrowUsd * openingDebtFactor;
 	const projectedHealthPercent = liquidiumProjectedHealthPercent({
 		currentHealthPercent: portfolio.healthFactorPercent,
-		newBorrowUsd,
+		newBorrowUsd: newDebtUsd,
 		totalCollateralUsd: portfolio.totalSuppliedUsd,
 		weightedLiquidationThresholdBps: portfolio.weightedLiquidationThresholdBps
 	});
 	const healthLevel = liquidiumHealthLevel(projectedHealthPercent);
 	const exceedsBorrowingPower =
-		newBorrowUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE);
+		newDebtUsd > portfolio.availableBorrowsUsd * (1 + LIQUIDIUM_BORROWING_POWER_TOLERANCE);
 
 	return {
 		resultingLtvPercent: liquidiumResultingLtvPercent({
 			totalDebtUsd: portfolio.totalBorrowedUsd,
-			newBorrowUsd,
+			newBorrowUsd: newDebtUsd,
 			totalCollateralUsd: portfolio.totalSuppliedUsd
 		}),
 		projectedHealthPercent,
