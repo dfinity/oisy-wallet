@@ -76,7 +76,7 @@ The modal follows the Send flow's shape: canister, amount, review. The title is 
 
 ### 5.5 Activity
 
-1. TCYCLES Activity shows a top-up as **Top up**, naming the canister where an outgoing row names its recipient. The details show the canister ID in full. This applies to every burn whose memo names a canister (§3.3), so it also covers top-ups made before this feature or by an ICRC-2 spender.
+1. TCYCLES Activity shows a top-up as **Top up**, naming the canister where an outgoing row names its recipient. The details are titled **Top up** too, and show the canister ID in full. This applies to every burn whose memo names a canister (§3.3), so it also covers top-ups made before this feature or by an ICRC-2 spender.
 2. The refund of a failed top-up (§3.4) shows as **Top-up refund**. The ledger does not link it to its burn, so neither does OISY.
 3. Every other burn on the cycles ledger keeps showing as **Burn**, including a burn whose memo OISY cannot read.
 
@@ -123,7 +123,7 @@ That includes an amount range (a bucket, as `docs/ai/frontend/analytics.md` §6 
 - **AC7** Top up makes one `withdraw` call from the user's default account, with the entered canister and amount and a creation timestamp. Success, or `Duplicate`, closes the modal with the confirmation and refreshes the balance.
 - **AC8** A refusal before anything moved says nothing left the wallet. `FailedToWithdraw` says the amount came back minus 0.0002 TCYCLES. Neither shows the Internet Computer's own reason text.
 - **AC9** A call without an answer is reported as neither done nor failed, and trying again resends the identical request.
-- **AC10** TCYCLES Activity shows a burn whose memo names a canister as Top up with that canister, the refund of a failed top-up as Top-up refund, and every other burn as Burn.
+- **AC10** TCYCLES Activity shows a burn whose memo names a canister as Top up with that canister, in the list and in the details, the refund of a failed top-up as Top-up refund, and every other burn as Burn.
 - **AC11** No ICP, ICRC (top-ups included), ckBTC or ckETH burn appears in a send flow's Recently used list or suppresses the first-time destination warning, and tests pin it. The CMC deposit account stays excluded.
 - **AC12** The analytics fire as in §8 and never carry an amount, a canister ID or a principal.
 - **AC13** All new copy is translated in every shipped locale (`Languages` enum).
