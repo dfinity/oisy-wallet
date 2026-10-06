@@ -217,6 +217,10 @@ Because the set of used destinations is read from the history OISY has loaded, a
 
 Burning is deliberately **not** exempt. Sending assets to a minter account by mistake destroys them, which is the worst outcome the confirmation exists to prevent, so a first-time minter address is warned about and gated like any other. Minting skips the confirmation on the review step: there the user is the minter and the destination is an ordinary recipient, so a history of previous sends says nothing about it. The address step still warns, which is accepted rather than intended - minting is a rare path and the warning does no harm there. The warning is part of the standard send flow for tokens and collectibles on every chain; the conversion flows, the WalletConnect send review and the AI assistant's send review have their own screens and are untouched.
 
+### TCYCLES sent to a canister
+
+Sending TCYCLES to an account a canister owns, with or without a subaccount, does not top the canister up: the TCYCLES land in the canister's account on the cycles ledger, and they become cycles only if the canister's own code withdraws them. The send flow says so on the address step and again on Review, and points to [Top up](#top-up-a-canister) while that flow's flag is on. It does not block the send, since a canister can own TCYCLES on purpose. No other token shows the warning.
+
 ---
 
 ## Activity
