@@ -62,6 +62,21 @@ describe('PlugImportAccount', () => {
 		expect(getByText(en.plug_import.text.empty_account)).toBeInTheDocument();
 	});
 
+	it('renders rows that share a symbol and an address across networks', () => {
+		const eth = { ...mockValidToken, symbol: 'ETH', network: ETHEREUM_NETWORK };
+
+		const { getAllByText } = render(PlugImportAccount, {
+			onsend: vi.fn(),
+			account: mockAccount,
+			balances: [
+				balance({ token: eth, address: mockAccount.evmAddress }),
+				balance({ token: { ...eth, network: BASE_NETWORK }, address: mockAccount.evmAddress })
+			]
+		});
+
+		expect(getAllByText('ETH')).toHaveLength(2);
+	});
+
 	it('keeps a failed lookup visible and distinct from an empty account', () => {
 		const { getByText, queryByText } = render(PlugImportAccount, {
 			onsend: vi.fn(),
