@@ -1198,8 +1198,8 @@
 			"one_way": "Une recharge est irréversible : les cycles restent dans le canister.",
 			"topping_up": "Recharge de $canister...",
 			"topped_up": "$canister rechargé avec $amount $token.",
-			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour envoyer la même recharge : elle ne peut aboutir qu'une seule fois.",
-			"unknown_fresh": "",
+			"unknown": "OISY ne peut pas encore dire si la recharge a abouti. Si c'est le cas, votre activité $token l'affichera. Rechargez à nouveau pour renvoyer la même recharge : elle ne peut aboutir qu'une seule fois. Une recharge nouvelle ou modifiée ajouterait à nouveau des cycles si celle-ci a abouti.",
+			"unknown_fresh": "OISY ne peut pas encore dire si votre dernière recharge a abouti. Si c'est le cas, cette recharge ajoute à nouveau des cycles. Vérifiez d'abord votre activité $token.",
 			"sent_to_canister": "Envoyer des $token à un canister ne le recharge pas. Les $token arrivent sur le compte du canister, et le canister ne reçoit des cycles que si son propre code les retire.",
 			"sent_to_canister_top_up": "Pour ajouter des cycles à un canister, utilisez « Recharger » sur la page $token."
 		},
